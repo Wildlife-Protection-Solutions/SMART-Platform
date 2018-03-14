@@ -51,23 +51,23 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 			case WAYPOINT_DIRECTION: return Messages.FixedQueryColumn_DirectionColumnName;
 			case WAYPOINT_DISTANCE: return Messages.FixedQueryColumn_DistanceColumnName;
 			case WAYPOINT_COMMENT: return Messages.FixedQueryColumn_CommentColumnName;
-			case ASSET: return "Assets";
-			case LOCATION: return "Station Locations";
-			case STATION: return "Station";
+			case ASSET: return Messages.AssetQueryLabelProvider_AssetsColumnName;
+			case LOCATION: return Messages.AssetQueryLabelProvider_LocationsColumnName;
+			case STATION: return Messages.AssetQueryLabelProvider_StationColumnName;
 			}
 		}
 		if (item instanceof AssetValueOption){
 			switch((AssetValueOption)item){
-			case ASSET_HOURS: return "Total Asset Hours";
+			case ASSET_HOURS: return Messages.AssetQueryLabelProvider_TotalHoursColumnName;
 			}
 		}
 		if (item instanceof AssetFilterOption){
 			switch((AssetFilterOption)item){
 				case STATION: return Messages.AssetQueryOptions_QueryOpStation;
 				case CONSERVATION_AREA: return Messages.AssetQueryOptions_CaGroupByOptionName;
-			case ASSET: return "Asset";
-			case ASSETTYPE: return "Asset Type";
-			case STATIONLOCATION: return "Station Location";
+			case ASSET: return Messages.AssetQueryLabelProvider_AssetFilterOption;
+			case ASSETTYPE: return Messages.AssetQueryLabelProvider_AssetTypeFilterOption;
+			case STATIONLOCATION: return Messages.AssetQueryLabelProvider_StationLocationFilterOptoin;
 			}
 		}
 		

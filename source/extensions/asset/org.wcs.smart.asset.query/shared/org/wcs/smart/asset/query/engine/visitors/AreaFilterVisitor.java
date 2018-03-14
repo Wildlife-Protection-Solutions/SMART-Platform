@@ -42,7 +42,6 @@ public class AreaFilterVisitor implements IFilterVisitor{
 	private HashSet<String> addedTableNames = new HashSet<String>();
 	private StringBuilder sql;
 	private IQueryEngine engine;
-	private HashSet<Class<?>> usedTables;
 	private ConservationArea queryCa;
 	
 	/**
@@ -52,11 +51,9 @@ public class AreaFilterVisitor implements IFilterVisitor{
 	 * @param usedTables list of tables already added to sql (Track.class)
 	 * only needs to be added once
 	 */
-	public AreaFilterVisitor(StringBuilder sql, IQueryEngine engine,
-			HashSet<Class<?>> usedTables, ConservationArea queryCa){
+	public AreaFilterVisitor(StringBuilder sql, IQueryEngine engine, ConservationArea queryCa){
 		this.sql = sql;
 		this.engine = engine;
-		this.usedTables = usedTables;
 		this.queryCa = queryCa;
 	}
 	

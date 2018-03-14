@@ -54,7 +54,7 @@ public class QueryResultItemFeature {
 	public static SimpleFeature createObservationFeature(AssetQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType ftype){
 		List<Object> data = new ArrayList<Object>();
 		data.add(it.asGeometry(AssetQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY));
-		data.add(it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
+		data.add(it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$
 		int i = 0;
 		for (QueryColumn c : columns){
 			if (c.isVisible()){

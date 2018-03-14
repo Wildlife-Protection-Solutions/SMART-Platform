@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
+import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
@@ -96,17 +97,17 @@ public class SummaryMapPagePart extends QueryMapPageEditor{
 					
 					e.gc.setForeground(parent.getDisplay().getSystemColor(SWT.COLOR_BLACK));
 					
-					String str = "Map is not valid for this summary query";
+					String str = Messages.SummaryMapPagePart_MapNotValid1;
 					int w = e.gc.textExtent(str).x;
 					w = (notValidCanvas.getBounds().width - w) / 2;
 					e.gc.drawText(str,w, notValidCanvas.getBounds().height / 2);
 					
-					str = "Maps are only valid for summary queries that have a single row group by";
+					str = Messages.SummaryMapPagePart_MapNotValid2;
 					Point size = e.gc.textExtent(str);
 					w = (notValidCanvas.getBounds().width - size.x) / 2;
 					e.gc.drawText(str,w, notValidCanvas.getBounds().height / 2 + (size.y + 5));
 					
-					str = "of either station or station location";
+					str = Messages.SummaryMapPagePart_MapNotValid3;
 					size = e.gc.textExtent(str);
 					w = (notValidCanvas.getBounds().width - size.x) / 2;
 					e.gc.drawText(str,w, notValidCanvas.getBounds().height / 2 + size.y * 2 + 5);

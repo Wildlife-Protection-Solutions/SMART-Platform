@@ -106,6 +106,7 @@ public class AssetStationCsvImporter {
 		this.projection =  projection;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public boolean processFile() throws Exception {
 		warnings = new ArrayList<>();
 		stationIds = new HashSet<>();

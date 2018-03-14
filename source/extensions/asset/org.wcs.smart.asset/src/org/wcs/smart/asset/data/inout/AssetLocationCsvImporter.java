@@ -110,6 +110,7 @@ public class AssetLocationCsvImporter {
 		this.stationIdField = stationField;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public boolean processFile() throws Exception {
 		warnings = new ArrayList<>();
 		locationIds = new HashSet<>();

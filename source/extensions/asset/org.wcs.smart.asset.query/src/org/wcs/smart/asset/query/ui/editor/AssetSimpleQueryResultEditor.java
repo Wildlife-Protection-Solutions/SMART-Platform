@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.locationtech.udig.project.render.IViewportModel;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
+import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetQueryFactory;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
@@ -192,7 +193,7 @@ public class AssetSimpleQueryResultEditor extends QueryResultsEditor{
 						for (List<AssetQueryResultItem> wpItems: mergedByWp.values()) {
 							if (sb.length() != 0) sb.append("\n"); //$NON-NLS-1$
 							AssetQueryResultItem firstItem = wpItems.get(0);
-							sb.append( firstItem.getWaypointId() ); //$NON-NLS-1$ //$NON-NLS-2$
+							sb.append( firstItem.getWaypointId() ); 
 							sb.append("\n"); //$NON-NLS-1$
 							sb.append(DateFormat.getDateTimeInstance().format(firstItem.getWaypointDate()));
 							sb.append("\n"); //$NON-NLS-1$
@@ -207,8 +208,8 @@ public class AssetSimpleQueryResultEditor extends QueryResultsEditor{
 							if (i >= 3) break;
 						}
 						if (mergedByWp.size() >= 3 ) {
-							sb.append("\n");
-							sb.append(MessageFormat.format("{0} more ...", mergedByWp.size() - 3));
+							sb.append("\n"); //$NON-NLS-1$
+							sb.append(MessageFormat.format(Messages.AssetSimpleQueryResultEditor_MoreMessage, mergedByWp.size() - 3));
 						}
 						createMenu(page2.getMapViewer().getControl(), first);
 						return new InfoPoint(vm.worldToPixel(px), null, sb.toString());	

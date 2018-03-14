@@ -76,7 +76,6 @@ import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.AssetTypeLabelProvider;
 import org.wcs.smart.asset.ui.handler.OpenAssetHandler;
-import org.wcs.smart.asset.ui.handler.OpenStationHandler;
 import org.wcs.smart.asset.ui.map.StationLocationDrawCommand;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;

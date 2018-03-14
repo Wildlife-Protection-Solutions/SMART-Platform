@@ -109,25 +109,25 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 			items = createOtherDropItem((Operator)source);
 		}else if (source instanceof AssetType) {
 			if (!((AssetType) source).getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
-				items = new DropItem[] {new ErrorDropItem(MessageFormat.format("Asset type {0} not found.", ((AssetType)source).getKeyId()))};
+				items = new DropItem[] {new ErrorDropItem(MessageFormat.format(Messages.AssetDropItemFactory_AssetTypeNotFound, ((AssetType)source).getKeyId()))};
 			}else {
 				items = new DropItem[] {new AssetFillterDropItem((AssetType)source) };
 			}
 		}else if (source instanceof Asset) {
 			if (!((Asset) source).getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
-				items = new DropItem[] {new ErrorDropItem(MessageFormat.format("Asset {0} not found.", ((Asset)source).getId()))};
+				items = new DropItem[] {new ErrorDropItem(MessageFormat.format(Messages.AssetDropItemFactory_AssetNotFound, ((Asset)source).getId()))};
 			}else {
 				items = new DropItem[] {new AssetFillterDropItem((Asset)source) };
 			}
 		}else if (source instanceof AssetStation) {
 			if (!((AssetStation) source).getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
-				items = new DropItem[] {new ErrorDropItem(MessageFormat.format("Asset {0} not found.", ((AssetStation)source).getId()))};
+				items = new DropItem[] {new ErrorDropItem(MessageFormat.format(Messages.AssetDropItemFactory_AssetNotFound, ((AssetStation)source).getId()))};
 			}else {
 				items = new DropItem[] {new AssetFillterDropItem((AssetStation)source) };
 			}
 		}else if (source instanceof AssetStationLocation) {
 			if (!((AssetStationLocation) source).getStation().getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
-				items = new DropItem[] {new ErrorDropItem(MessageFormat.format("Asset {0} not found.", ((AssetStationLocation)source).getId()))};
+				items = new DropItem[] {new ErrorDropItem(MessageFormat.format(Messages.AssetDropItemFactory_AssetNotFound, ((AssetStationLocation)source).getId()))};
 			}else {
 				items = new DropItem[] {new AssetFillterDropItem((AssetStationLocation)source) };
 			}
@@ -537,28 +537,28 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 		if (option == AssetFilterOption.ASSET) {
 			Asset asset = session.get(Asset.class, uuid);
 			if (asset == null || !asset.getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
-				it = new ErrorDropItem("Asset not found");
+				it = new ErrorDropItem(Messages.AssetDropItemFactory_AssetNotFound2);
 			}else {
 				it = new AssetFillterDropItem(asset);
 			}
 		}else if (option == AssetFilterOption.ASSETTYPE) {
 			AssetType asset = session.get(AssetType.class, uuid);
 			if (asset == null || !asset.getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
-				it = new ErrorDropItem("Asset type not found");
+				it = new ErrorDropItem(Messages.AssetDropItemFactory_AssetTypeNotFound2);
 			}else {
 				it = new AssetFillterDropItem(asset);
 			}
 		}else if (option == AssetFilterOption.STATION) {
 			AssetStation asset = session.get(AssetStation.class, uuid);
 			if (asset == null || !asset.getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
-				it = new ErrorDropItem("Asset Station type not found");
+				it = new ErrorDropItem(Messages.AssetDropItemFactory_AssetStationNotFound);
 			}else {
 				it = new AssetFillterDropItem(asset);
 			}
 		}else if (option == AssetFilterOption.STATIONLOCATION) {
 			AssetStationLocation asset = session.get(AssetStationLocation.class, uuid);
 			if (asset == null || !asset.getStation().getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
-				it = new ErrorDropItem("Asset Station Location type not found");
+				it = new ErrorDropItem(Messages.AssetDropItemFactory_AssetLocationNotFound);
 			}else {
 				it = new AssetFillterDropItem(asset);
 			}

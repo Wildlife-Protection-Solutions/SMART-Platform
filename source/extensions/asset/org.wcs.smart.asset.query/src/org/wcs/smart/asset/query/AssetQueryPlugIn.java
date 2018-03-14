@@ -193,7 +193,7 @@ public class AssetQueryPlugIn extends AbstractUIPlugin {
 	}
 	
 	public static String asString(Set<String> strings) {
-		if (strings.size() == 0) return "";
+		if (strings.size() == 0) return ""; //$NON-NLS-1$
 		if (strings.size() == 1) return strings.iterator().next();
 		
 		ArrayList<String> sorted = new ArrayList<>();
@@ -202,7 +202,7 @@ public class AssetQueryPlugIn extends AbstractUIPlugin {
 		StringBuilder s = new StringBuilder();
 		s.append(sorted.get(0));
 		for (int i = 1; i < sorted.size(); i ++) {
-			s.append(", ");
+			s.append(", "); //$NON-NLS-1$
 			s.append(sorted.get(i));
 		}
 		return s.toString();

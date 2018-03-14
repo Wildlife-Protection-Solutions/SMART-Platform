@@ -11,6 +11,7 @@ import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetType;
+import org.wcs.smart.asset.query.internal.Messages;
 
 /**
  * Input for this content provider should be an array of two elements
@@ -23,8 +24,8 @@ import org.wcs.smart.asset.model.AssetType;
  */
 public class AssetFilterContentProvider implements ITreeContentProvider {
 
-	public static final String ASSET_ROOT = "Assets";
-	public static final String STATION_ROOT = "Stations & Locations";
+	public static final String ASSET_ROOT = Messages.AssetFilterContentProvider_AssetFilterTreeNodeName;
+	public static final String STATION_ROOT = Messages.AssetFilterContentProvider_StationsLocationFilterTreeNodeName;
 	
 	private List<AssetStation>  stations = null;
 	private List<Asset> assets = null;
@@ -34,6 +35,7 @@ public class AssetFilterContentProvider implements ITreeContentProvider {
 	public void dispose() {
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (newInput == null) {

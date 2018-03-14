@@ -29,7 +29,6 @@ import javax.inject.Named;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -51,9 +50,7 @@ public class OpenStationHandler {
 	
 	public static final String STATION_PARAM = "stationinput"; //$NON-NLS-1$
 	public static final String INIT_SELECTION_WP_UUID = "waypointuuid"; //$NON-NLS-1$
-	
 
-	
 	@Execute
 	public void openStation(@Named(STATION_PARAM) StationEditorInput input,
 			@Optional @Named(INIT_SELECTION_WP_UUID) UUID waypointUuid,

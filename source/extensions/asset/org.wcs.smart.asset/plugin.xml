@@ -151,10 +151,10 @@
             locationURI="menu:org.wcs.smart.fielddata">
          <menu
                icon="images/icons/obj16/asset.png"
-               label="Assets">
+               label="%assets.menu.label">
             <command
                   commandId="org.wcs.smart.asset.command.data.import"
-                  label="Import Asset Data..."
+                  label="%import.assetdata.command.label"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -180,7 +180,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.asset.command.assettype.show"
-                  label="Asset Types..."
+                  label="%assettypes.command.label."
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -199,7 +199,7 @@
             <command
                   commandId="org.wcs.smart.asset.command.attributelist.show"
                   icon="platform:/plugin/org.wcs.smart/images/icons/obj16/attribute_text.png"
-                  label="Asset Attributes..."
+                  label="%assetattributes.command.label"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -217,7 +217,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.asset.command.stationproperties.show"
-                  label="Station &amp;&amp; Location Attributes..."
+                  label="%stationlocationattributes.command.label"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -235,7 +235,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.asset.command.metadata.mapping.open"
-                  label="File Metadata Mappings..."
+                  label="%mappings.command.label"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -254,7 +254,7 @@
             <command
                   commandId="org.wcs.smart.asset.command.settings.open"
                   icon="images/icons/obj16/configure.png"
-                  label="Asset Module Settings..."
+                  label="%settings.command.label"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -271,10 +271,10 @@
                </visibleWhen>
             </command>
             <menu
-                  label="Import/Export Data">
+                  label="%importexport.menu.label">
                <command
                      commandId="org.wcs.smart.asset.command.model.xml.export"
-                     label="Export Model Data..."
+                     label="%exportmodel.command.label"
                      style="push">
                   <visibleWhen
                         checkEnabled="false">
@@ -292,7 +292,7 @@
                </command>
                <command
                      commandId="org.wcs.smart.asset.command.model.xml.import"
-                     label="Import Model Data..."
+                     label="%importmodel.command.label"
                      style="push">
                   <visibleWhen
                         checkEnabled="false">
@@ -315,12 +315,12 @@
             </separator>
             <command
                   commandId="org.wcs.smart.asset.command.overviewmap.show"
-                  label="View Asset Overview Map..."
+                  label="%viewmap.command.label"
                   style="push">
             </command>
             <command
                   commandId="org.wcs.smart.observation.perspective.show"
-                  label="View Assets"
+                  label="%viewassets.command.label"
                   style="push">
                <parameter
                      name="org.wcs.smart.observation.perspective.show.focusview"
@@ -424,7 +424,7 @@
                commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/obj16/asset.png"
                style="push"
-               tooltip="open the asset perspective">
+               tooltip="%openperspective.command.tooltip">
             <parameter
                   name="org.wcs.smart.observation.perspective.show.focusview"
                   value="org.wcs.smart.asset.view.assets">
@@ -467,39 +467,39 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.asset.command.attributelist.show"
-            name="Asset Attributes">
+            name="%assetattributes.command.name">
       </command>
       <command
             id="org.wcs.smart.asset.command.assettype.show"
-            name="Asset Types">
+            name="%assettypes.command.name">
       </command>
       <command
             id="org.wcs.smart.asset.command.stationproperties.show"
-            name="Station Properties">
+            name="%stationproperties.command.name">
       </command>
       <command
             id="org.wcs.smart.asset.command.metadata.mapping.open"
-            name="Metadata Mapping">
+            name="%mappings.command.name">
       </command>
       <command
             id="org.wcs.smart.asset.command.settings.open"
-            name="Show Asset Settings">
+            name="%settings.command.name">
       </command>
       <command
             id="org.wcs.smart.asset.command.model.xml.export"
-            name="Export Model Data...">
+            name="%exportmodel.command.name">
       </command>
       <command
             id="org.wcs.smart.asset.command.model.xml.import"
-            name="Import Model Data...">
+            name="%importmodel.command.name">
       </command>
       <command
             id="org.wcs.smart.asset.command.data.import"
-            name="Import Asset Data">
+            name="%importasset.command.name">
       </command>
       <command
             id="org.wcs.smart.asset.command.overviewmap.show"
-            name="View Asset Overview Map">
+            name="%viewmap.command.name">
       </command>
    </extension>
    <extension
@@ -576,7 +576,7 @@
             class="org.wcs.smart.asset.ui.views.asset.AssetListView$AssetListViewWrapper"
             icon="images/icons/obj16/asset.png"
             id="org.wcs.smart.asset.view.assets"
-            name="Assets"
+            name="%assets.view.name"
             restorable="true">
       </view>
    </extension>
@@ -586,35 +586,35 @@
             class="org.wcs.smart.asset.ui.views.asset.AssetEditor"
             default="false"
             id="org.wcs.smart.asset.ui.views.asset"
-            name="Asset Editor">
+            name="%asset.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.asset.ui.views.station.StationEditor"
             default="false"
             icon="images/icons/obj16/station.png"
             id="org.wcs.smart.asset.ui.views.station"
-            name="Station Editor">
+            name="%station.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.asset.ui.views.stationlocation.StationLocationEditor"
             default="false"
             icon="images/icons/obj16/location.png"
             id="org.wcs.smart.asset.ui.views.stationlocation"
-            name="Station Location Editor">
+            name="%location.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.asset.ui.views.data.DataImporterView"
             default="false"
             icon="images/icons/obj16/import.png"
             id="org.wcs.smart.asset.ui.views.data.importer"
-            name="Data Importer View">
+            name="%import.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.asset.ui.views.map.AssetOverviewMap"
             default="false"
             icon="platform:/plugin/org.wcs.smart/images/icons/obj16/map.png"
             id="org.wcs.smart.asset.overviewmap"
-            name="Asset Overview Map">
+            name="%map.editor.name">
       </editor>
    </extension>
    <extension

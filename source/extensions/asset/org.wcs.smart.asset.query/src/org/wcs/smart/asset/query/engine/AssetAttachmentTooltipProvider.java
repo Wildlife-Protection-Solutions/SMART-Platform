@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
+import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -103,7 +104,7 @@ public class AssetAttachmentTooltipProvider extends Job {
 				}
 			}
 			
-			List<AssetWaypoint> pw = QueryFactory.buildQuery(s, AssetWaypoint.class, new Object[] {"waypoint", wp}).list();
+			List<AssetWaypoint> pw = QueryFactory.buildQuery(s, AssetWaypoint.class, new Object[] {"waypoint", wp}).list(); //$NON-NLS-1$
 			for (AssetWaypoint as : pw) {
 				assets.add(as.getAssetDeployment().getAsset().getId());
 				stations.add(as.getAssetDeployment().getStationLocation().getStation().getId());
@@ -133,7 +134,7 @@ public class AssetAttachmentTooltipProvider extends Job {
 			scroll.setExpandVertical(true);
 			
 			Label l = new Label(main, SWT.NONE);
-			l.setText("Station:");
+			l.setText(Messages.AssetAttachmentTooltipProvider_StationLabel);
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);
@@ -142,7 +143,7 @@ public class AssetAttachmentTooltipProvider extends Job {
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);
-			l.setText("Locations:");
+			l.setText(Messages.AssetAttachmentTooltipProvider_LocationsLabel);
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);
@@ -151,7 +152,7 @@ public class AssetAttachmentTooltipProvider extends Job {
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);
-			l.setText("Assets:");
+			l.setText(Messages.AssetAttachmentTooltipProvider_AssetsLabel);
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);
@@ -160,7 +161,7 @@ public class AssetAttachmentTooltipProvider extends Job {
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);
-			l.setText("Waypoint ID:");
+			l.setText(Messages.AssetAttachmentTooltipProvider_WpIDLabel);
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);
@@ -168,7 +169,7 @@ public class AssetAttachmentTooltipProvider extends Job {
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);
-			l.setText("Date/Time:");
+			l.setText(Messages.AssetAttachmentTooltipProvider_DateTimeLabel);
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);
@@ -177,7 +178,7 @@ public class AssetAttachmentTooltipProvider extends Job {
 			
 			if (fo != null) {
 				l = new Label(main, SWT.NONE);
-				l.setText("Observation:");
+				l.setText(Messages.AssetAttachmentTooltipProvider_ObservationLabel);
 				l.setBackground(details.getBackground());
 				
 				l = new Label(main, SWT.NONE);
@@ -209,7 +210,7 @@ public class AssetAttachmentTooltipProvider extends Job {
 				}
 			}else if (fwp.getObservations() != null) {
 				l = new Label(main, SWT.NONE);
-				l.setText("Observations:");
+				l.setText(Messages.AssetAttachmentTooltipProvider_ObservationsLabel);
 				l.setBackground(details.getBackground());
 				l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 				((GridData)l.getLayoutData()).verticalIndent = 5;

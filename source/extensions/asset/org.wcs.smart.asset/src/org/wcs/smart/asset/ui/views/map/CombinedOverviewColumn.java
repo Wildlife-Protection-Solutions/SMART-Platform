@@ -105,6 +105,7 @@ public class CombinedOverviewColumn implements IOverviewTableColumn{
 		return key;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public JSONObject serialize() {
 		JSONObject json = new JSONObject();

@@ -194,34 +194,34 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 			return;
 		}
 		
-		progress.subTask("Populate Station, Location, and Asset Fields");
+		progress.subTask("Populate Station, Location, and Asset Fields"); //$NON-NLS-1$
 		progress.split(3);
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT DISTINCT tmp.wp_uuid, ");
-		sb.append(tablePrefix(Asset.class) + ".id, ");
-		sb.append(tablePrefix(AssetStation.class) + ".id, ");
-		sb.append(tablePrefix(AssetStationLocation.class) + ".id ");
-		sb.append(" FROM " + queryDataTable + " tmp ");
-		sb.append(" JOIN ");
+		sb.append("SELECT DISTINCT tmp.wp_uuid, "); //$NON-NLS-1$
+		sb.append(tablePrefix(Asset.class) + ".id, "); //$NON-NLS-1$
+		sb.append(tablePrefix(AssetStation.class) + ".id, "); //$NON-NLS-1$
+		sb.append(tablePrefix(AssetStationLocation.class) + ".id "); //$NON-NLS-1$
+		sb.append(" FROM " + queryDataTable + " tmp "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(" JOIN "); //$NON-NLS-1$
 		sb.append(tableNamePrefix(AssetWaypoint.class));
-		sb.append(" ON " + tablePrefix(AssetWaypoint.class) + ".wp_uuid = tmp.wp_uuid ");
-		sb.append(" JOIN ");
+		sb.append(" ON " + tablePrefix(AssetWaypoint.class) + ".wp_uuid = tmp.wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(" JOIN "); //$NON-NLS-1$
 		sb.append(tableNamePrefix(AssetDeployment.class));
-		sb.append(" ON " + tablePrefix(AssetWaypoint.class) + ".asset_deployment_uuid = " + tablePrefix(AssetDeployment.class) + ".uuid ");
-		sb.append(" JOIN ");
+		sb.append(" ON " + tablePrefix(AssetWaypoint.class) + ".asset_deployment_uuid = " + tablePrefix(AssetDeployment.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append(" JOIN "); //$NON-NLS-1$
 		sb.append(tableNamePrefix(AssetStationLocation.class));
-		sb.append(" ON " + tablePrefix(AssetStationLocation.class) + ".uuid = " + tablePrefix(AssetDeployment.class) + ".station_location_uuid ");
-		sb.append(" JOIN ");
+		sb.append(" ON " + tablePrefix(AssetStationLocation.class) + ".uuid = " + tablePrefix(AssetDeployment.class) + ".station_location_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append(" JOIN "); //$NON-NLS-1$
 		sb.append(tableNamePrefix(AssetStation.class));
-		sb.append(" ON " + tablePrefix(AssetStation.class) + ".uuid = " + tablePrefix(AssetStationLocation.class) + ".station_uuid ");
-		sb.append(" JOIN ");
+		sb.append(" ON " + tablePrefix(AssetStation.class) + ".uuid = " + tablePrefix(AssetStationLocation.class) + ".station_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append(" JOIN "); //$NON-NLS-1$
 		sb.append(tableNamePrefix(Asset.class));
-		sb.append(" ON " + tablePrefix(Asset.class) + ".uuid = " + tablePrefix(AssetDeployment.class) + ".asset_uuid");
-		sb.append(" ORDER BY tmp.wp_uuid ");
+		sb.append(" ON " + tablePrefix(Asset.class) + ".uuid = " + tablePrefix(AssetDeployment.class) + ".asset_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append(" ORDER BY tmp.wp_uuid "); //$NON-NLS-1$
 		
 		QueryPlugIn.logSql(sb.toString());
-		PreparedStatement updatePs = c.prepareStatement("UPDATE " + queryDataTable + " SET asset_station = ?, asset_location = ?, asset_asset = ? WHERE wp_uuid = ?");
+		PreparedStatement updatePs = c.prepareStatement("UPDATE " + queryDataTable + " SET asset_station = ?, asset_location = ?, asset_asset = ? WHERE wp_uuid = ?"); //$NON-NLS-1$ //$NON-NLS-2$
 		try(Statement s = c.createStatement()){
 			byte[] lastWp = null;
 			Set<String> asset = new HashSet<>();

@@ -159,7 +159,7 @@ public class FixedQueryColumn extends QueryColumn {
 	}
 	
 	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
-			{"waypoint_time", "waypoint_date"},
+			{"waypoint_time", "waypoint_date"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"waypoint", "wp"} //$NON-NLS-1$ //$NON-NLS-2$
 		};
 }

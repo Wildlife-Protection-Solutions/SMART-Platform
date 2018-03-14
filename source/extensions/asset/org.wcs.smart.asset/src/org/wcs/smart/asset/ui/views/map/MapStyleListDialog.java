@@ -95,6 +95,7 @@ public class MapStyleListDialog extends TitleAreaDialog {
 		super.okPressed();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void delete() {
 		List<AssetMapStyle> toDelete = new ArrayList<>();
 		for (Iterator<Object> iterator = cmbStyles.getStructuredSelection().iterator(); iterator.hasNext();) {
@@ -110,6 +111,7 @@ public class MapStyleListDialog extends TitleAreaDialog {
 		enableOk(true);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void rename() {
 		AssetMapStyle toEdit = null;
 		for (Iterator<Object> iterator = cmbStyles.getStructuredSelection().iterator(); iterator.hasNext();) {

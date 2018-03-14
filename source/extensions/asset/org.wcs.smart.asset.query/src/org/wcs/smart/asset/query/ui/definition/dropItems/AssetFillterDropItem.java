@@ -89,7 +89,7 @@ public class AssetFillterDropItem extends DropItem implements IFilterDropItem{
 	 */
 	@Override
 	public String asQueryPart() {
-		return "asset:" + filter.getKey() + " " + Operator.EQUALS.asSmartValue() + " \"" + UuidUtils.uuidToString(itemUuid) + "\"";
+		return "asset:" + filter.getKey() + " " + Operator.EQUALS.asSmartValue() + " \"" + UuidUtils.uuidToString(itemUuid) + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 	/**

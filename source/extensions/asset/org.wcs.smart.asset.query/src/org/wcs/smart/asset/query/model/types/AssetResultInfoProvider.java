@@ -92,16 +92,12 @@ public class AssetResultInfoProvider implements IQueryResultInfoProvider {
 			}
 			if (wpUuid == null) return;
 			
-			List<AssetWaypoint> wps = QueryFactory.buildQuery(s, AssetWaypoint.class, new Object[] {"waypoint.uuid", wpUuid}).list();
+			List<AssetWaypoint> wps = QueryFactory.buildQuery(s, AssetWaypoint.class, new Object[] {"waypoint.uuid", wpUuid}).list(); //$NON-NLS-1$
 			if (wps.isEmpty()) return;
 			stationUuid = wps.get(0).getAssetDeployment().getStationLocation().getStation().getUuid();
 			stationId = wps.get(0).getAssetDeployment().getStationLocation().getStation().getId();
 		}
 		showItem(new StationEditorInput(stationUuid, stationId), wpUuid);
-//		(new OpenStationHandler()).openStation(new StationEditorInput(stationUuid, stationId));	
-			
-//		MessageDialog.openError(Display.getDefault().getActiveShell(),ERROR_STR,
-//						MessageFormat .format(OP_NOT_SUPPORTED_STR, resultItem.getClass().getName()));
 	}
 
 	@Override

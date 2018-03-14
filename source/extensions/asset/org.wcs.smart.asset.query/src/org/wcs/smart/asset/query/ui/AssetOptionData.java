@@ -86,32 +86,36 @@ public class AssetOptionData implements IAssetGroupByOptionData{
 		
 		switch(option) {
 		case ASSET:
-			List<Asset> assets = QueryFactory.buildQuery(session, Asset.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+			List<Asset> assets = QueryFactory.buildQuery(session, Asset.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 			assets.sort((a,b)->a.getId().compareTo(b.getId()));
 			for (Asset a : assets) {
 				results.add(new ListItem(a.getUuid(), a.getId()));
 			}
 			break;
 		case ASSETTYPE:
-			List<AssetType> assetTypes = QueryFactory.buildQuery(session, AssetType.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+			List<AssetType> assetTypes = QueryFactory.buildQuery(session, AssetType.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 			assetTypes.sort((a,b)->a.getKeyId().compareTo(b.getKeyId()));
 			for (AssetType a : assetTypes) {
 				results.add(new ListItem(a.getUuid(), a.getName()));
 			}
 			break;
 		case STATION:
-			List<AssetStation> stations = QueryFactory.buildQuery(session, AssetStation.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+			List<AssetStation> stations = QueryFactory.buildQuery(session, AssetStation.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 			stations.sort((a,b)->a.getId().compareTo(b.getId()));
 			for (AssetStation a : stations) {
 				results.add(new ListItem(a.getUuid(), a.getId()));
 			}
 			break;
 		case STATIONLOCATION:
-			List<AssetStationLocation> locations = QueryFactory.buildQuery(session, AssetStationLocation.class, new Object[] {"station.conservationArea", SmartDB.getCurrentConservationArea()}).list();
+			List<AssetStationLocation> locations = QueryFactory.buildQuery(session, AssetStationLocation.class, new Object[] {"station.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 			locations.sort((a,b)->a.getId().compareTo(b.getId()));
 			for (AssetStationLocation a : locations) {
 				results.add(new ListItem(a.getUuid(), a.getId()));
 			}
+			break;
+		case CONSERVATION_AREA:
+			throw new IllegalStateException("Conservation Area option not supported."); //$NON-NLS-1$
+		default:
 			break;
 		}
 		return results;

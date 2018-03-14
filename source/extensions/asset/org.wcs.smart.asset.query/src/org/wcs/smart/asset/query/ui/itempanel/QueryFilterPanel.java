@@ -180,12 +180,12 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 				List<AssetStation> stations = null;
 				try(Session session = HibernateManager.openSession()){
 					assets = QueryFactory.buildQuery(session, Asset.class, 
-							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-							new Object[] {"isRetired", false}).list();
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+							new Object[] {"isRetired", false}).list(); //$NON-NLS-1$
 					
 					assets.forEach(a->a.getAssetType().getName());
 					
-					stations = QueryFactory.buildQuery(session, AssetStation.class, "conservationArea", SmartDB.getCurrentConservationArea()).list();
+					stations = QueryFactory.buildQuery(session, AssetStation.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
 					stations.forEach(s->s.getLocations().forEach(l->l.getId()));
 				}
 				input.put(AssetFilterTreeItem.KEY, new Object[] {assets, stations});

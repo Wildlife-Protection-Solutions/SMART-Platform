@@ -227,9 +227,9 @@ public class FilterProcessor implements IFilterProcessor {
 		sql.append(namePrefix(Waypoint.class));
 		
 		for (String t : assetFilterTables.values()) {
-			sql.append(" left join ");
+			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(t);
-			sql.append(" on " + t + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid ");
+			sql.append(" on " + t + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		
 		engine.filterTables.clear();
@@ -269,11 +269,11 @@ public class FilterProcessor implements IFilterProcessor {
 		}
 
 		// area filters
-		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, usedTables, query.getConservationArea());
+		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, query.getConservationArea());
 		queryFilter.accept(areaVisitor);
 		
-		sql.append(" WHERE ");
-		sql.append(prefix(Waypoint.class) + ".source = '" + AssetWaypointSource.KEY + "' ");
+		sql.append(" WHERE "); //$NON-NLS-1$
+		sql.append(prefix(Waypoint.class) + ".source = '" + AssetWaypointSource.KEY + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		if (caFilter != null) {
 			String filter = AssetFilterSqlGenerator.INSTANCE.toSql(caFilter, engine);
@@ -297,7 +297,7 @@ public class FilterProcessor implements IFilterProcessor {
 			if (filter != null && filter.length() > 0) {
 				sql.append(" and ( "); //$NON-NLS-1$
 			    sql.append(filter);
-			    sql.append( " ) ");
+			    sql.append( " ) "); //$NON-NLS-1$
 			}
 		}
 		QueryPlugIn.logSql(sql.toString());
@@ -321,7 +321,7 @@ public class FilterProcessor implements IFilterProcessor {
 			DateFilter dateFilter, ConservationAreaFilter caFilter, IProgressMonitor monitor)
 			throws SQLException {
 		SubMonitor progress = SubMonitor.convert(monitor, 1);
-		progress.subTask("Processing data model attribute filters");
+		progress.subTask(Messages.FilterProcessor_DmAttributeFilterTaskName);
 		
 		AttributeFilterCollectorVisitor collector = new AttributeFilterCollectorVisitor();
 		filter.accept(collector);
@@ -349,7 +349,7 @@ public class FilterProcessor implements IFilterProcessor {
 		progress.setWorkRemaining(keys.size());
 		for (AttributeInfo key : keys){
 			progress.split(1);
-			progress.subTask(MessageFormat.format("Processing data model attribute: {0}", key.getKey()));
+			progress.subTask(MessageFormat.format(Messages.FilterProcessor_DmAttributeTaskName, key.getKey()));
 			
 			//create temporary table for attribute observations
 			sql = new StringBuilder();
@@ -413,7 +413,7 @@ public class FilterProcessor implements IFilterProcessor {
 				}
 				sql.append("WHERE "); //$NON-NLS-1$
 				
-				sql.append(prefix(Waypoint.class) + ".source = '" + AssetWaypointSource.KEY + "' ");
+				sql.append(prefix(Waypoint.class) + ".source = '" + AssetWaypointSource.KEY + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				if (caFilter != null) {
 					String cfilter = AssetFilterSqlGenerator.INSTANCE.toSql(caFilter, engine);
@@ -432,7 +432,7 @@ public class FilterProcessor implements IFilterProcessor {
 				}
 				
 				String p = engine.addParameterValue(key.getKey());
-				sql.append(" AND (" + prefix(Attribute.class) + ".keyid = " + p + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(" AND (" + prefix(Attribute.class) + ".keyid = " + p + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
 				QueryPlugIn.logSql(sql.toString());
 				try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
@@ -509,7 +509,7 @@ public class FilterProcessor implements IFilterProcessor {
 			throws SQLException {
 		
 		SubMonitor progress = SubMonitor.convert(monitor, 1);
-		progress.subTask("Processing asset filters");
+		progress.subTask(Messages.FilterProcessor_FiltersTaskName);
 		
 		AssetFilterCollector collector = new AssetFilterCollector();
 		filter.accept(collector);
@@ -541,14 +541,14 @@ public class FilterProcessor implements IFilterProcessor {
 			sql = new StringBuilder();
 			sql.append("INSERT INTO  "); //$NON-NLS-1$
 			sql.append(assetTable); 
-			sql.append(" SELECT ");
-			sql.append(prefix(Waypoint.class) + ".uuid ");
-			sql.append(" FROM ");
+			sql.append(" SELECT "); //$NON-NLS-1$
+			sql.append(prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$
+			sql.append(" FROM "); //$NON-NLS-1$
 			sql.append(namePrefix(Waypoint.class));
-			sql.append(" JOIN ");
+			sql.append(" JOIN "); //$NON-NLS-1$
 			sql.append(namePrefix(AssetWaypoint.class));
-			sql.append(" ON ");
-			sql.append(prefix(Waypoint.class) + ".uuid = " + prefix(AssetWaypoint.class) + ".wp_uuid");
+			sql.append(" ON "); //$NON-NLS-1$
+			sql.append(prefix(Waypoint.class) + ".uuid = " + prefix(AssetWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			if (caFilter != null) {
 				String cfilter = AssetFilterSqlGenerator.INSTANCE.toSql(caFilter, engine);
@@ -566,41 +566,41 @@ public class FilterProcessor implements IFilterProcessor {
 				}
 			}
 			
-			sql.append(" LEFT JOIN ");
+			sql.append(" LEFT JOIN "); //$NON-NLS-1$
 			sql.append(namePrefix(AssetDeployment.class));
-			sql.append(" ON " );
-			sql.append(prefix(AssetDeployment.class) + ".uuid = " + prefix(AssetWaypoint.class) + ".asset_deployment_uuid ");
+			sql.append(" ON " ); //$NON-NLS-1$
+			sql.append(prefix(AssetDeployment.class) + ".uuid = " + prefix(AssetWaypoint.class) + ".asset_deployment_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			StringBuilder where = new StringBuilder();
 			
 			if (assetFilter.getAssetOption() == AssetFilterOption.ASSETTYPE) {
-				sql.append(" LEFT JOIN ");
+				sql.append(" LEFT JOIN "); //$NON-NLS-1$
 				sql.append(namePrefix(Asset.class));
-				sql.append(" ON " );
-				sql.append(prefix(AssetDeployment.class) + ".asset_uuid = " + prefix(Asset.class) + ".uuid ");
+				sql.append(" ON " ); //$NON-NLS-1$
+				sql.append(prefix(AssetDeployment.class) + ".asset_uuid = " + prefix(Asset.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 			
 				String key = engine.addParameterValue(assetFilter.getValue());
-				where.append(prefix(Asset.class) + ".asset_type_uuid = " + key);
+				where.append(prefix(Asset.class) + ".asset_type_uuid = " + key); //$NON-NLS-1$
 			}
 			if (assetFilter.getAssetOption() == AssetFilterOption.ASSET) {
 				String key = engine.addParameterValue(assetFilter.getValue());
-				where.append(prefix(AssetDeployment.class) + ".asset_uuid = " + key);
+				where.append(prefix(AssetDeployment.class) + ".asset_uuid = " + key); //$NON-NLS-1$
 			}
 			
 			if (assetFilter.getAssetOption() == AssetFilterOption.STATIONLOCATION) {
 				String key = engine.addParameterValue(assetFilter.getValue());
-				where.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + key);
+				where.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + key); //$NON-NLS-1$
 			}
 			if (assetFilter.getAssetOption() == AssetFilterOption.STATION) {
-				sql.append(" LEFT JOIN ");
+				sql.append(" LEFT JOIN "); //$NON-NLS-1$
 				sql.append(namePrefix(AssetStationLocation.class));
-				sql.append(" ON " );
-				sql.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + prefix(AssetStationLocation.class) + ".uuid ");
+				sql.append(" ON " ); //$NON-NLS-1$
+				sql.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + prefix(AssetStationLocation.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				String key = engine.addParameterValue(assetFilter.getValue());
-				where.append(prefix(AssetStationLocation.class) + ".station_uuid = " + key);
+				where.append(prefix(AssetStationLocation.class) + ".station_uuid = " + key); //$NON-NLS-1$
 			}
-			sql.append (" WHERE ");
+			sql.append (" WHERE "); //$NON-NLS-1$
 			sql.append(where);
 			
 			QueryPlugIn.logSql(sql.toString());

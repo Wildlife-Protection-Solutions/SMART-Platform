@@ -52,8 +52,8 @@ public class StationLocationTableMapLayer implements IBirtMapLayerManager {
 		}
 		OdaDataSetHandle odaHandle = (OdaDataSetHandle)handle;
 		if (odaHandle.getExtensionID().equals(SmartTableQuery.SMART_DATASET_TYPE)) {
-			if (odaHandle.getQueryText().startsWith("asset:assetstationlocation") ||
-					odaHandle.getQueryText().startsWith("asset:assetstation") ){
+			if (odaHandle.getQueryText().startsWith("asset:assetstationlocation") || //$NON-NLS-1$
+					odaHandle.getQueryText().startsWith("asset:assetstation") ){ //$NON-NLS-1$
 				return true;
 			}
 		}
@@ -67,9 +67,9 @@ public class StationLocationTableMapLayer implements IBirtMapLayerManager {
 			throws Exception {
 		if (handle instanceof OdaDataSetHandle){
 			String geomColumn = null;
-			if (((OdaDataSetHandle)handle).getQueryText().startsWith("asset:assetstationlocation")){
+			if (((OdaDataSetHandle)handle).getQueryText().startsWith("asset:assetstationlocation")){ //$NON-NLS-1$
 				geomColumn = LocationTable.COLUMN_PREFIX + LocationTable.Column.POSITION.name().toLowerCase();				
-			}else if (((OdaDataSetHandle)handle).getQueryText().startsWith("asset:assetstation")){
+			}else if (((OdaDataSetHandle)handle).getQueryText().startsWith("asset:assetstation")){ //$NON-NLS-1$
 				geomColumn = StationTable.COLUMN_PREFIX + StationTable.Column.POSITION.name().toLowerCase();
 			}
 			if (geomColumn == null) return null;

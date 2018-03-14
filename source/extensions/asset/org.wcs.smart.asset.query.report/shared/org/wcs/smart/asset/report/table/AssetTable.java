@@ -65,7 +65,7 @@ public class AssetTable extends SmartBirtTable {
 			case TYPE:
 				return SmartContext.INSTANCE.getClass(IAssetLabelProvider.class).getLabel(IAssetLabelProvider.ASSET_TYPE_COL_NAME, l);
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		
 		public Object getValue(Asset a, Locale l) {
@@ -81,17 +81,17 @@ public class AssetTable extends SmartBirtTable {
 	}
 	
 	public AssetTable() {
-		super("asset:asset");
+		super("asset:asset"); //$NON-NLS-1$
 	}
 
 	private synchronized void getAttributeColumn(SmartConnection connection) {
 		if (attributeColumns != null) return;
 		
-		String sql = "SELECT distinct a.id.attribute FROM AssetTypeAttribute a join a.id.assetType b on b.conservationArea in (:cas)";
+		String sql = "SELECT distinct a.id.attribute FROM AssetTypeAttribute a join a.id.assetType b on b.conservationArea in (:cas)"; //$NON-NLS-1$
 
 		List<AssetAttribute> assetAttributes = connection.getSession()
 				.createQuery(sql, AssetAttribute.class)
-				.setParameterList("cas", connection.getConservationAreas())
+				.setParameterList("cas", connection.getConservationAreas()) //$NON-NLS-1$
 				.list();
 		attributeColumns = assetAttributes;
 		attributeColumns.sort((a,b)->a.getKeyId().compareTo(b.getKeyId()));
@@ -103,10 +103,10 @@ public class AssetTable extends SmartBirtTable {
 		getAttributeColumn(connection);
 		List<String> names = new ArrayList<>();
 		for (Column c : Column.values()) {
-			names.add("asset:" + c.name().toLowerCase());
+			names.add("asset:" + c.name().toLowerCase()); //$NON-NLS-1$
 		}
 		for (AssetAttribute a : attributeColumns) {
-			names.add("asset:" + a.getKeyId());
+			names.add("asset:" + a.getKeyId()); //$NON-NLS-1$
 		}
 		return names.toArray(new String[names.size()]);
 	}
@@ -174,8 +174,8 @@ public class AssetTable extends SmartBirtTable {
 	@Override
 	public List<? extends Object> getValues(SmartConnection connection) {
 		List<Asset> assets = connection.getSession()
-				.createQuery("FROM Asset WHERE conservationArea in (:cas)", Asset.class)
-				.setParameterList("cas", connection.getConservationAreas())
+				.createQuery("FROM Asset WHERE conservationArea in (:cas)", Asset.class) //$NON-NLS-1$
+				.setParameterList("cas", connection.getConservationAreas()) //$NON-NLS-1$
 				.getResultList();
 		assets.forEach(a->a.computeStatus(connection.getSession()));
 		return assets;

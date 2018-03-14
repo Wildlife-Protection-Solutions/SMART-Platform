@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.util.HashSet;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -200,8 +199,6 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		// ---- SELECT CLAUSE -----
 		sql.append(engine.getTemporaryTableSelectClause(populateObservation));
 
-		HashSet<Class<?>> usedTables = new HashSet<Class<?>>();
-		
 		// ---- FROM CLAUSE -----
 		sql.append(" FROM "); //$NON-NLS-1$				
 		sql.append(namePrefix(Waypoint.class));
@@ -228,7 +225,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			sql.append(prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$
 		}
 			
-		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine, usedTables, query.getConservationArea());
+		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine, query.getConservationArea());
 		queryFilter.accept(av);
 
 		// ---- WHERE CLAUSE -----
@@ -251,7 +248,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			throws SQLException {
 
 		SubMonitor progress = SubMonitor.convert(monitor, 1);
-		progress.subTask("Creating temporary waypoint table");
+		progress.subTask(Messages.WaypointFilterProcessor_TableTaskName);
 		
 		// -- build temporary table
 		StringBuilder sql = new StringBuilder();
@@ -275,8 +272,8 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		sql.append(".uuid "); //$NON-NLS-1$
 		sql.append("FROM "); //$NON-NLS-1$
 		sql.append(namePrefix(Waypoint.class));
-		sql.append(" WHERE ");
-		sql.append(prefix(Waypoint.class) + ".source = '" + AssetWaypointSource.KEY + "' ");
+		sql.append(" WHERE "); //$NON-NLS-1$
+		sql.append(prefix(Waypoint.class) + ".source = '" + AssetWaypointSource.KEY + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		if (caFilter != null) {
 			String cfilter = AssetFilterSqlGenerator.INSTANCE.toSql(caFilter, engine);
@@ -318,7 +315,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			IFilter lfilter = cols.getKey();
 			String colName = cols.getValue();
 			
-			progress.subTask(MessageFormat.format("Processing filter: {0}", lfilter.asString()));
+			progress.subTask(MessageFormat.format(Messages.WaypointFilterProcessor_FilterTaskName, lfilter.asString()));
 			progress.split(1);
 			engine.clearParameters();
 			
@@ -363,50 +360,50 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO  "); //$NON-NLS-1$
 		sql.append(tableName); 
-		sql.append(" SELECT ");
-		sql.append("a.wp_uuid ");
-		sql.append(" FROM ");
-		sql.append(waypointTable + " a");
-		sql.append(" JOIN ");
+		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append("a.wp_uuid "); //$NON-NLS-1$
+		sql.append(" FROM "); //$NON-NLS-1$
+		sql.append(waypointTable + " a"); //$NON-NLS-1$
+		sql.append(" JOIN "); //$NON-NLS-1$
 		sql.append(namePrefix(AssetWaypoint.class));
-		sql.append(" ON ");
-		sql.append("a.wp_uuid = " + prefix(AssetWaypoint.class) + ".wp_uuid");
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append("a.wp_uuid = " + prefix(AssetWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		sql.append(" LEFT JOIN ");
+		sql.append(" LEFT JOIN "); //$NON-NLS-1$
 		sql.append(namePrefix(AssetDeployment.class));
-		sql.append(" ON " );
-		sql.append(prefix(AssetDeployment.class) + ".uuid = " + prefix(AssetWaypoint.class) + ".asset_deployment_uuid ");
+		sql.append(" ON " ); //$NON-NLS-1$
+		sql.append(prefix(AssetDeployment.class) + ".uuid = " + prefix(AssetWaypoint.class) + ".asset_deployment_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		StringBuilder where = new StringBuilder();
 		
 		if (assetFilter.getAssetOption() == AssetFilterOption.ASSETTYPE) {
-			sql.append(" LEFT JOIN ");
+			sql.append(" LEFT JOIN "); //$NON-NLS-1$
 			sql.append(namePrefix(Asset.class));
-			sql.append(" ON " );
-			sql.append(prefix(AssetDeployment.class) + ".asset_uuid = " + prefix(Asset.class) + ".uuid ");
+			sql.append(" ON " ); //$NON-NLS-1$
+			sql.append(prefix(AssetDeployment.class) + ".asset_uuid = " + prefix(Asset.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 		
 			String key = engine.addParameterValue(assetFilter.getValue());
-			where.append(prefix(Asset.class) + ".asset_type_uuid = " + key);
+			where.append(prefix(Asset.class) + ".asset_type_uuid = " + key); //$NON-NLS-1$
 		}
 		if (assetFilter.getAssetOption() == AssetFilterOption.ASSET) {
 			String key = engine.addParameterValue(assetFilter.getValue());
-			where.append(prefix(AssetDeployment.class) + ".asset_uuid = " + key);
+			where.append(prefix(AssetDeployment.class) + ".asset_uuid = " + key); //$NON-NLS-1$
 		}
 		
 		if (assetFilter.getAssetOption() == AssetFilterOption.STATIONLOCATION) {
 			String key = engine.addParameterValue(assetFilter.getValue());
-			where.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + key);
+			where.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + key); //$NON-NLS-1$
 		}
 		if (assetFilter.getAssetOption() == AssetFilterOption.STATION) {
-			sql.append(" LEFT JOIN ");
+			sql.append(" LEFT JOIN "); //$NON-NLS-1$
 			sql.append(namePrefix(AssetStationLocation.class));
-			sql.append(" ON " );
-			sql.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + prefix(AssetStationLocation.class) + ".uuid ");
+			sql.append(" ON " ); //$NON-NLS-1$
+			sql.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + prefix(AssetStationLocation.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			String key = engine.addParameterValue(assetFilter.getValue());
-			where.append(prefix(AssetStationLocation.class) + ".station_uuid = " + key);
+			where.append(prefix(AssetStationLocation.class) + ".station_uuid = " + key); //$NON-NLS-1$
 		}
-		sql.append (" WHERE ");
+		sql.append (" WHERE "); //$NON-NLS-1$
 		sql.append(where);
 		
 		QueryPlugIn.logSql(sql.toString());

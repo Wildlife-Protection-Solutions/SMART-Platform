@@ -92,6 +92,8 @@ public class AssetGroupByTreeItem implements IItemTreeNode{
 					return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATION);
 				case STATIONLOCATION:
 					return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATION_LOCATION);
+				default:
+					break;
 				}
 			}
 			return super.getImage(element);

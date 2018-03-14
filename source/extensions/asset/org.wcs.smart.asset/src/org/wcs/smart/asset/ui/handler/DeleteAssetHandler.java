@@ -24,7 +24,6 @@ package org.wcs.smart.asset.ui.handler;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,7 +50,6 @@ import org.wcs.smart.hibernate.HibernateManager;
  * @author Emily
  *
  */
-//@SuppressWarnings("restriction")
 public class DeleteAssetHandler {
 
 	@Inject

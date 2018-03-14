@@ -407,7 +407,7 @@ public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implem
 				wp = wo;
 				
 				//delete asset waypoints 
-				List<AssetWaypoint> assetWaypoints =  QueryFactory.buildQuery(s, AssetWaypoint.class, new Object[] {"waypoint", wo}).list();
+				List<AssetWaypoint> assetWaypoints =  QueryFactory.buildQuery(s, AssetWaypoint.class, new Object[] {"waypoint", wo}).list(); //$NON-NLS-1$
 				for (AssetWaypoint aw : assetWaypoints) {
 					for (AssetWaypointAttachment attlink : aw.getAttachments()) {
 						s.delete(attlink);

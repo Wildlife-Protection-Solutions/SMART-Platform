@@ -67,7 +67,7 @@ public class AssetFilter implements IFilter {
 		try {
 			this.value = UuidUtils.stringToUuid( SharedUtils.stripQuotes(value) );
 		}catch (Throwable t) {
-			throw new RuntimeException("Not a valid UUID: " + value );
+			throw new RuntimeException("Not a valid UUID: " + value ); //$NON-NLS-1$
 		}
 		
 		String assetItem = assetFieldKey.split(":")[1]; //$NON-NLS-1$
@@ -86,7 +86,7 @@ public class AssetFilter implements IFilter {
 	 */
 	@Override
 	public String asString(){
-		return "asset:" + option.getKey() + " " + op.asSmartValue() + " \"" + UuidUtils.uuidToString(value) + "\"";  //$NON-NLS-1$  //$NON-NLS-2$	
+		return "asset:" + option.getKey() + " " + op.asSmartValue() + " \"" + UuidUtils.uuidToString(value) + "\"";  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$	
 	}
 	
 	/**

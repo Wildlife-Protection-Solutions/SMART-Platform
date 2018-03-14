@@ -12,6 +12,7 @@ import org.geotools.feature.SchemaException;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -39,7 +40,7 @@ public class QueryFeatureSource extends ContentFeatureSource {
 				return createWaypointSchema();
 			} 
 		}catch(SchemaException ex){
-			throw new IOException("Error generating query schema " + ex.getLocalizedMessage(), ex);
+			throw new IOException(Messages.QueryFeatureSource_SchemaError + ex.getLocalizedMessage(), ex);
 		}
 		return null;
 	}

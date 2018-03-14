@@ -106,7 +106,7 @@ public class SummaryQueryFeatureReader implements FeatureReader<SimpleFeatureTyp
 		
 		List<Object> data = new ArrayList<Object>();
 		data.add(GeometryFactoryProvider.getFactory().createPoint(results.getCoordinate(uuid)));
-		data.add(id.trim().toLowerCase() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
+		data.add(id.trim().toLowerCase() + "." + System.nanoTime()); //$NON-NLS-1$
 		data.add(id);
 		
 		for (int i = 0; i < columns.size() - 1; i ++) {

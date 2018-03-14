@@ -71,7 +71,7 @@ public class QueryMapLayer extends AbstractQueryMapLayer {
 			
 			if (queryTypeKey.equals(AssetSummaryQuery.KEY)) {
 				try(Session session = HibernateManager.openSession()){
-					UUID uuid = UuidUtils.stringToUuid(queryText.split(":")[1]);
+					UUID uuid = UuidUtils.stringToUuid(queryText.split(":")[1]); //$NON-NLS-1$
 					AssetSummaryQuery q = session.get(AssetSummaryQuery.class, uuid);
 					if (q != null) {
 						return AssetSummaryQuery.canAddGeometry(q.getQueryDefinition());

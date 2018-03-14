@@ -34,6 +34,7 @@ import org.locationtech.udig.project.internal.command.navigation.SetViewportBBox
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.map.udig.QueryService;
 import org.wcs.smart.asset.query.model.AssetQueryFactory;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
@@ -64,10 +65,10 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 	private SummaryEditor page1 = null;
 	private SummaryMapPagePart page2 = null;
 
-	private Job runQueryJob = new Job("Run asset summary query") {
+	private Job runQueryJob = new Job(Messages.AssetSummaryEditor_runjobname) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			setName("Running Query:" + page1.getQuery().getName());
+			setName(Messages.AssetSummaryEditor_RunTaskName + page1.getQuery().getName());
 			try {
 				IProgressMonitor mymonitor = page1.getResultArea().createProgressMonitor();
 				IQueryResult results = QueryExecutor.INSTANCE.executeQuery(page1.getQuery(), null, mymonitor);
@@ -79,7 +80,7 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 				page1.getResultArea().updateAndShowTable((SummaryQueryResult)results);
 				page2.refresh();
 			} catch (Exception ex) {
-				QueryPlugIn.displayLog("Error running asset summary query", ex);
+				QueryPlugIn.displayLog(Messages.AssetSummaryEditor_ErrorLogMsg, ex);
 			}
 			return Status.OK_STATUS;
 		}
@@ -137,13 +138,13 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 			
 			int pageIndex = 0;
 			addPage(pageIndex, page1, input);
-			setPageText(pageIndex, "Summary Results");
+			setPageText(pageIndex, Messages.AssetSummaryEditor_SummaryResultsTabName);
 			setPageImage(pageIndex, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.TABLE_ICON));
 			
 			pageIndex++;
 			page2 = new SummaryMapPagePart(this);
 			addPage(pageIndex, page2, input);
-			setPageText(pageIndex, "Map");
+			setPageText(pageIndex, Messages.AssetSummaryEditor_MapTabName);
 			setPageImage(pageIndex, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 		}catch (Exception ex) {
 			QueryPlugIn.log("Could not open query editor", ex); //$NON-NLS-1$

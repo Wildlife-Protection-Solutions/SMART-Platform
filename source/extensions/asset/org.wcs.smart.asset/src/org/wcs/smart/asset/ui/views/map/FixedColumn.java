@@ -101,6 +101,7 @@ public class FixedColumn implements IOverviewTableColumn{
 	/**
 	 * Serializes the column to a json object
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public JSONObject serialize() {
 		JSONObject json = new JSONObject();

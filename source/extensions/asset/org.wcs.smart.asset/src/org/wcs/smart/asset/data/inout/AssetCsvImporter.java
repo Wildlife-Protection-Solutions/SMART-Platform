@@ -95,6 +95,7 @@ public class AssetCsvImporter {
 		this.dateTimeFormat = DateTimeFormatter.ofPattern(dateTimeFormat);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public boolean processFile() throws Exception {
 		warnings = new ArrayList<>();
 		assetIds = new HashSet<>();

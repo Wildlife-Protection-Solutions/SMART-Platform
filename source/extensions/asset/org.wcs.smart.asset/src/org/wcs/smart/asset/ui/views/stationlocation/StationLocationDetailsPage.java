@@ -48,7 +48,6 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetStationLocationAttribute;
 import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.asset.ui.AttributeFieldEditor;
-import org.wcs.smart.asset.ui.handler.OpenStationHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 

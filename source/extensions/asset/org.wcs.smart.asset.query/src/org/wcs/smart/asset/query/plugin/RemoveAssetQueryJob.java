@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
+import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -45,7 +46,7 @@ public class RemoveAssetQueryJob extends Job {
 	};
 	
 	public RemoveAssetQueryJob() {
-		super("Uninstall asset query plugin");
+		super(Messages.RemoveAssetQueryJob_JobName);
 	}
 
 	@Override
@@ -75,7 +76,7 @@ public class RemoveAssetQueryJob extends Job {
 				}catch (Exception ex){
 					AssetQueryPlugIn.log(ex.getMessage(), ex);	
 				}
-				AssetQueryPlugIn.displayLog("Error installing asset query plugin", e);
+				AssetQueryPlugIn.displayLog(Messages.RemoveAssetQueryJob_ErrorMsg, e);
 				return new Status(Status.ERROR,AssetQueryPlugIn.PLUGIN_ID,e.getMessage());
 			}
 		}

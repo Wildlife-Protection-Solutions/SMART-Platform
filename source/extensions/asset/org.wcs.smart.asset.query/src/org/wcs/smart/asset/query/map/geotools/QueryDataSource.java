@@ -33,6 +33,7 @@ import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.feature.NameImpl;
 import org.opengis.feature.type.Name;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
@@ -45,8 +46,6 @@ import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
-import org.wcs.smart.query.model.summary.GroupByPart;
-import org.wcs.smart.query.model.summary.IGroupBy;
 
 /**
  * Geotools data source for waypoint query.
@@ -158,15 +157,15 @@ public class QueryDataSource extends ContentDataStore {
 		
 		//add a row for the station id or station location id
 		if (!AssetSummaryQuery.canAddGeometry(query.getQueryDefinition())) {
-			throw new Exception("Cannot create map layer for asset summary query that does not have a single column group by that is station or location");
+			throw new Exception(Messages.QueryDataSource_CannotCreateMapLayer);
 		}
 		AssetGroupBy assetGp = (AssetGroupBy)query.getQueryDefinition().getRowGroupByPart().getGroupBys().get(0);
 		if (assetGp.getOption() == AssetFilterOption.STATION) {
-			columns.add(new EmptyQueryColumn("Station ID", "assetstationid", ColumnType.STRING));
+			columns.add(new EmptyQueryColumn(Messages.QueryDataSource_StationIDColumnName, "assetstationid", ColumnType.STRING));  //$NON-NLS-1$
 		}else if (assetGp.getOption() == AssetFilterOption.STATIONLOCATION) {
-			columns.add(new EmptyQueryColumn("Location ID", "assetlocationid", ColumnType.STRING));
+			columns.add(new EmptyQueryColumn(Messages.QueryDataSource_LocationIdTableName, "assetlocationid", ColumnType.STRING));  //$NON-NLS-1$
 		}else {
-			throw new Exception("Cannot create map layer for asset summary query that does not have a single column group by that is station or location");
+			throw new Exception(Messages.QueryDataSource_CannotCreateMapLayer);
 		}
 		
 		// [ [TEAM_1, TEAM_1, TEAM_1, TEAM_2, TEAM_2, TEAM_2].
@@ -180,9 +179,9 @@ public class QueryDataSource extends ContentDataStore {
 			StringBuilder sbkey = new StringBuilder();
 			for (SummaryHeader[] items : headers) {
 				sb.append(items[i].getFullName());
-				sb.append("_");
+				sb.append("_"); //$NON-NLS-1$
 				sbkey.append(items[i].getKey());
-				sbkey.append("_");
+				sbkey.append("_"); //$NON-NLS-1$
 			}
 			
 			columns.add(new EmptyQueryColumn(sb.toString(), sbkey.toString(), ColumnType.NUMBER ));

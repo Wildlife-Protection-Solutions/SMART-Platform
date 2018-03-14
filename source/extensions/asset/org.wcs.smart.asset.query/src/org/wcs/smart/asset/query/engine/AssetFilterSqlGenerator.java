@@ -23,6 +23,7 @@ package org.wcs.smart.asset.query.engine;
 
 import java.sql.SQLException;
 
+import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
@@ -134,7 +135,7 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		if (col != null){
 			return col + ".wp_uuid is not null "; //$NON-NLS-1$
 		}
-		throw new SQLException("Cannot process asset filter, no table data found.");	
+		throw new SQLException(Messages.AssetFilterSqlGenerator_AssetFilterError);	
 	}
 	
 	
@@ -143,7 +144,7 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	@Override
 	protected String asSql(DateFilter filter, IQueryEngine engine) throws SQLException{
-		String table = engine.tablePrefix(Waypoint.class); //$NON-NLS-1$
+		String table = engine.tablePrefix(Waypoint.class);
 		String field = "datetime"; //$NON-NLS-1$
 		
 		field = table + "." + field; //$NON-NLS-1$

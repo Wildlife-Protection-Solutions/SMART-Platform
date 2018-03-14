@@ -243,12 +243,12 @@ public class AssetQueryTemplateCloner implements
 								pFilter.setValue(newItem.getUuid());
 							}else {
 								//throw exception
-								throw new Exception ("Asset type not found.");
+								throw new Exception (Messages.AssetQueryTemplateCloner_AssetTypeNotFound);
 							}
 						}else {
 							//we don't clone asset id, stations, or locations so 
 							//this is no point in cloning this query.
-							throw new Exception("Query contains asset id, asset station or asset station location filters.  These items are not copied, therefore this query will not be copied");							
+							throw new Exception(Messages.AssetQueryTemplateCloner_QueryNotCloned);							
 						}
 					}catch (Exception ex){
 						errorex[0] = ex;

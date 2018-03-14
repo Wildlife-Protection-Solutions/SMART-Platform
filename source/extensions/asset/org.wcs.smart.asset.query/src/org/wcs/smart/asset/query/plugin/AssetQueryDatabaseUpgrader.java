@@ -26,6 +26,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
+import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
@@ -40,14 +41,14 @@ public class AssetQueryDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask("upgrading/installing asset query plugin", 1);
+		monitor.beginTask(Messages.AssetQueryDatabaseUpgrader_UpgradeTaskName, 1);
 		try(Session session = HibernateManager.openSession()){
 		
 			session.beginTransaction();
 			try {
 				Map<String, String> versions = UpgradeEngine.getVersions(session);
 				if (versions == null)
-					throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+					throw new IllegalStateException("Database versions not found."); //shouldn't happen //$NON-NLS-1$
 				String currentPluginVersion = versions.get(AssetQueryPlugIn.PLUGIN_ID);
 	
 				if (currentPluginVersion == null) {

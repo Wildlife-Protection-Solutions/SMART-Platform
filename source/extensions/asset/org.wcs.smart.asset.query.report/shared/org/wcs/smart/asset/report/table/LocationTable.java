@@ -46,8 +46,8 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class LocationTable extends SmartBirtTable {
 
-	private static final String ATTRIBUTE_COLUMN_PREFIX = "assetloc:";
-	public static final String COLUMN_PREFIX = "c:" + ATTRIBUTE_COLUMN_PREFIX;
+	private static final String ATTRIBUTE_COLUMN_PREFIX = "assetloc:"; //$NON-NLS-1$
+	public static final String COLUMN_PREFIX = "c:" + ATTRIBUTE_COLUMN_PREFIX; //$NON-NLS-1$
 	
 	private List<AssetAttribute> attributeColumns = null;
 	
@@ -68,7 +68,7 @@ public class LocationTable extends SmartBirtTable {
 			case POSITION:
 				return SmartContext.INSTANCE.getClass(IAssetLabelProvider.class).getLabel(IAssetLabelProvider.POSITION_COL_NAME, l);
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		
 		public Object getValue(AssetStationLocation a, Locale l) {
@@ -83,17 +83,17 @@ public class LocationTable extends SmartBirtTable {
 	}
 	
 	public LocationTable() {
-		super("asset:assetstationlocation");
+		super("asset:assetstationlocation"); //$NON-NLS-1$
 	}
 
 	private synchronized void getAttributeColumn(SmartConnection connection) {
 		if (attributeColumns != null) return;
 		
-		String sql = "SELECT distinct a.attribute FROM AssetStationLocationAttribute a join a.attribute b on b.conservationArea in (:cas)";
+		String sql = "SELECT distinct a.attribute FROM AssetStationLocationAttribute a join a.attribute b on b.conservationArea in (:cas)"; //$NON-NLS-1$
 
 		List<AssetAttribute> assetAttributes = connection.getSession()
 				.createQuery(sql, AssetAttribute.class)
-				.setParameterList("cas", connection.getConservationAreas())
+				.setParameterList("cas", connection.getConservationAreas()) //$NON-NLS-1$
 				.list();
 		attributeColumns = assetAttributes;
 		attributeColumns.sort((a,b)->a.getKeyId().compareTo(b.getKeyId()));
@@ -180,8 +180,8 @@ public class LocationTable extends SmartBirtTable {
 	@Override
 	public List<? extends Object> getValues(SmartConnection connection) {
 		List<AssetStationLocation> assets = connection.getSession()
-				.createQuery("SELECT a FROM AssetStationLocation a join a.station b WHERE b.conservationArea in (:cas)", AssetStationLocation.class)
-				.setParameterList("cas", connection.getConservationAreas())
+				.createQuery("SELECT a FROM AssetStationLocation a join a.station b WHERE b.conservationArea in (:cas)", AssetStationLocation.class) //$NON-NLS-1$
+				.setParameterList("cas", connection.getConservationAreas()) //$NON-NLS-1$
 				.getResultList();
 		assets.forEach(a->a.computeStatus(connection.getSession()));
 		return assets;

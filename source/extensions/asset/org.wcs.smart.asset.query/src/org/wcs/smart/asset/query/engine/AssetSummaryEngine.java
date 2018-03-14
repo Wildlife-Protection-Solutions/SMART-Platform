@@ -286,8 +286,8 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 		AssetGroupBy gb = (AssetGroupBy)ldef.getRowGroupByPart().getGroupBys().get(0);
 		if (gb.getOption() == AssetFilterOption.STATION) {
 			try {
-				List<AssetStation> stations = session.createQuery("FROM AssetStation WHERE conservationArea.uuid IN (:cas)", AssetStation.class)
-						.setParameterList("cas", caFilter.getConservationAreaFilterIds())
+				List<AssetStation> stations = session.createQuery("FROM AssetStation WHERE conservationArea.uuid IN (:cas)", AssetStation.class) //$NON-NLS-1$
+						.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
 						.list();
 				for (AssetStation s : stations) {
 					results.addCoordinateDetails(s.getUuid(), new Coordinate(s.getX(), s.getY()));
@@ -298,8 +298,8 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 			
 		}else if (gb.getOption() == AssetFilterOption.STATIONLOCATION) {
 			try {
-				List<AssetStationLocation> locations = session.createQuery("SELECT l FROM AssetStationLocation l join l.station s WHERE s.conservationArea.uuid IN (:cas)", AssetStationLocation.class)
-						.setParameterList("cas", caFilter.getConservationAreaFilterIds())
+				List<AssetStationLocation> locations = session.createQuery("SELECT l FROM AssetStationLocation l join l.station s WHERE s.conservationArea.uuid IN (:cas)", AssetStationLocation.class) //$NON-NLS-1$
+						.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
 						.list();
 				for (AssetStationLocation s : locations) {
 					results.addCoordinateDetails(s.getUuid(), new Coordinate(s.getX(), s.getY()));
@@ -904,26 +904,26 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 		for(IGroupBy gb : groupBy.getGroupBys()) {
 			if (gb instanceof AssetGroupBy) {
 				if (!core) {
-					fromSql.append(" join ");
+					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNamePrefix(AssetWaypoint.class));
-					fromSql.append(" ON temp.wp_uuid = " + tablePrefix(AssetWaypoint.class) + ".wp_uuid ");
+					fromSql.append(" ON temp.wp_uuid = " + tablePrefix(AssetWaypoint.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 					
-					fromSql.append(" join ");
+					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNamePrefix(AssetDeployment.class));
-					fromSql.append(" ON " + tablePrefix(AssetWaypoint.class) + ".asset_deployment_uuid = " + tablePrefix(AssetDeployment.class) + ".uuid");
+					fromSql.append(" ON " + tablePrefix(AssetWaypoint.class) + ".asset_deployment_uuid = " + tablePrefix(AssetDeployment.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					
 					core = true;
 				}					
 				if (((AssetGroupBy) gb).getOption() == AssetFilterOption.ASSETTYPE && !addedAsset) {
-					fromSql.append(" join ");
+					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNamePrefix(Asset.class));
-					fromSql.append(" ON " + tablePrefix(AssetDeployment.class) + ".asset_uuid = " + tablePrefix(Asset.class) + ".uuid");	
+					fromSql.append(" ON " + tablePrefix(AssetDeployment.class) + ".asset_uuid = " + tablePrefix(Asset.class) + ".uuid");	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					addedAsset = true;
 				}
 				if (((AssetGroupBy) gb).getOption() == AssetFilterOption.STATION && !addedStation) {
-					fromSql.append(" join ");
+					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNamePrefix(AssetStationLocation.class));
-					fromSql.append(" ON " + tablePrefix(AssetDeployment.class) + ".station_location_uuid = " + tablePrefix(AssetStationLocation.class) + ".uuid");
+					fromSql.append(" ON " + tablePrefix(AssetDeployment.class) + ".station_location_uuid = " + tablePrefix(AssetStationLocation.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					addedStation = true;
 				}
 			}
@@ -971,13 +971,13 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 				
 			}else if (gb instanceof AssetGroupBy){
 				if (((AssetGroupBy) gb).getOption() == AssetFilterOption.ASSET) {
-					groupByInnerSql.append(tablePrefix(AssetDeployment.class) + ".asset_uuid as gp_" + itemcnt);
+					groupByInnerSql.append(tablePrefix(AssetDeployment.class) + ".asset_uuid as gp_" + itemcnt); //$NON-NLS-1$
 				}else if (((AssetGroupBy) gb).getOption() == AssetFilterOption.ASSETTYPE) {
-					groupByInnerSql.append(tablePrefix(Asset.class) + ".asset_type_uuid as gp_" + itemcnt);
+					groupByInnerSql.append(tablePrefix(Asset.class) + ".asset_type_uuid as gp_" + itemcnt); //$NON-NLS-1$
 				}else if (((AssetGroupBy) gb).getOption() == AssetFilterOption.STATION) {
-					groupByInnerSql.append(tablePrefix(AssetStationLocation.class) + ".station_uuid as gp_" + itemcnt);
+					groupByInnerSql.append(tablePrefix(AssetStationLocation.class) + ".station_uuid as gp_" + itemcnt); //$NON-NLS-1$
 				}else if (((AssetGroupBy) gb).getOption() == AssetFilterOption.STATIONLOCATION) {
-					groupByInnerSql.append(tablePrefix(AssetDeployment.class) + ".station_location_uuid as gp_" + itemcnt);
+					groupByInnerSql.append(tablePrefix(AssetDeployment.class) + ".station_location_uuid as gp_" + itemcnt); //$NON-NLS-1$
 				}
 				groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
 				

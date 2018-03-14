@@ -32,6 +32,7 @@ import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetType;
+import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
 import org.wcs.smart.ca.ConservationArea;
@@ -161,10 +162,10 @@ public class AssetQueryValidator extends QueryDefinitionValidator {
 		}else {
 			//not this ca; lets look for something with the same id in this ca
 			String id = uuidLookup.get(UuidUtils.uuidToString(uuid)).getId();
-			a = (AssetType)QueryFactory.buildQuery(session, AssetType.class, new Object[] {"keyId", id}, new Object[]{"conservationArea", importCa}).uniqueResult();
+			a = (AssetType)QueryFactory.buildQuery(session, AssetType.class, new Object[] {"keyId", id}, new Object[]{"conservationArea", importCa}).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
 			if (a == null) {
 				throw new Exception(
-						MessageFormat.format("Could not parse query.  No asset type with key {0} found in import conservation area", id)
+						MessageFormat.format(Messages.AssetQueryValidator_AssetTypeNotFound, id)
 				);
 			}
 		}
@@ -189,11 +190,11 @@ public class AssetQueryValidator extends QueryDefinitionValidator {
 		}else {
 			//not this ca; lets look for something with the same id in this ca
 			String id = uuidLookup.get(UuidUtils.uuidToString(uuid)).getId();
-			a = (T)QueryFactory.buildQuery(session, clazz, new Object[] {"id", id}, new Object[]{"conservationArea", importCa}).uniqueResult();
+			a = (T)QueryFactory.buildQuery(session, clazz, new Object[] {"id", id}, new Object[]{"conservationArea", importCa}).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
 			if (a != null) return a;
 			
 			throw new Exception(
-					MessageFormat.format("Could not parse query.  No asset station with id {0} found in import conservation area", id)
+					MessageFormat.format(Messages.AssetQueryValidator_StationNotFound, id)
 			);
 		}
 	}
