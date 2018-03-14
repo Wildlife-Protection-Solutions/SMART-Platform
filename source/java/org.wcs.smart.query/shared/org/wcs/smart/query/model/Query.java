@@ -158,6 +158,12 @@ public abstract class Query extends NamedItem {
 	@Transient
 	public abstract String getTypeKey();
 	
+		
+	@Transient
+	public String getIconName() { 
+		return getTypeKey() + ".png";
+	}
+
 	/**
 	 * 
 	 * Compares query definitions.
