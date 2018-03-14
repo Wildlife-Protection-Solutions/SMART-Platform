@@ -30,19 +30,21 @@ public class QueryProxy {
 	private String name;
 	private String type;
 	private String typeKey;
+	private String iconName;
 	private String conservationAreaName;
 	private String id;
 	private Boolean isShared;
 	private Boolean isCcaa;
 	
 	public QueryProxy(UUID uuid, String name, String type, String caName, String id, 
-			Boolean isShared, UUID caUuid, Boolean isCcaa, String typeKey){
+			Boolean isShared, UUID caUuid, Boolean isCcaa, String typeKey, String iconName){
 		this.uuid = uuid;
 		this.name = name;
 		this.type = type;
 		this.conservationAreaName = caName;
 		this.id = id;
 		this.typeKey = typeKey;
+		this.iconName = iconName;
 		this.setCaUuid(caUuid);
 		setIsCcaa(isCcaa);
 	}

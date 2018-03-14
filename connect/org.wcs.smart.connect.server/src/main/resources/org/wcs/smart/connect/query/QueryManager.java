@@ -284,7 +284,7 @@ public enum QueryManager {
 			Query q = (Query) session.get(table, uuid);
 			if (q != null){
 				return new QueryProxy(q.getUuid(),q.getName(), table.getClass().toString(),q.getConservationArea().getNameLabel(),q.getId(),
-						q.getIsShared(), q.getConservationArea().getUuid(), false, q.getTypeKey());
+						q.getIsShared(), q.getConservationArea().getUuid(), false, q.getTypeKey(), q.getIconName());
 			}
 		}
 		return null;
@@ -307,7 +307,7 @@ public enum QueryManager {
 						qq.getConservationArea().getId(), qq.getId(), qq.getIsShared(), 
 						qq.getConservationArea().getUuid(),
 						qq.getConservationArea().getIsCcaa(),
-						qq.getTypeKey());
+						qq.getTypeKey(), qq.getIconName());
 				if(qq.getIsShared() || includeMyQueries){
 					proxies.add(proxy);
 				}
@@ -356,7 +356,8 @@ public enum QueryManager {
 						true,
 						q.getConservationArea().getUuid(),
 						q.getConservationArea().getIsCcaa(),
-						IntelRecordObservationQuery.KEY.toLowerCase());
+						IntelRecordObservationQuery.KEY.toLowerCase(),
+						q.getIconName());
 			queries.add(qp);
 		}
 		
@@ -368,7 +369,8 @@ public enum QueryManager {
 						true,
 						q.getConservationArea().getUuid(),
 						q.getConservationArea().getIsCcaa(),
-						IntelEntitySummaryQuery.KEY.toLowerCase());
+						IntelEntitySummaryQuery.KEY.toLowerCase(),
+						q.getIconName());
 			queries.add(qp);
 		}
 		

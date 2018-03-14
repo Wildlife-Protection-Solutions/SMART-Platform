@@ -663,7 +663,7 @@ public class QueryApi extends HttpServlet{
 					}
 				}
 			}
-			allowed.addAll(getAdvancedIntelQueries(s,request.getLocale()));
+//			allowed.addAll(getAdvancedIntelQueries(s,request.getLocale()));
 			
 		}catch (Exception ex) {
 			ex.printStackTrace();
@@ -674,7 +674,7 @@ public class QueryApi extends HttpServlet{
 		return filteredQueries(typeFilter, caFilter, isCcaaFilter, allowed); 
 	}
 	
-
+/*
 	private List<QueryProxy> getAdvancedIntelQueries(Session s, Locale l) {
 		List<QueryProxy> queries = QueryManager.INSTANCE.getAdvanedIntelligenceQueries(s,  request.getLocale());
 		if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdvIntelAction.RUNQUERY_KEY, null)){
@@ -694,7 +694,7 @@ public class QueryApi extends HttpServlet{
 		}
 		return allowed;
 	}
-	
+	*/
 	
 	private List<QueryProxy> filteredQueries(String typeFilter, String caFilter, Boolean isCcaaFilter,
 			List<QueryProxy> list) {
