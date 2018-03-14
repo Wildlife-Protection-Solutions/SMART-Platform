@@ -44,7 +44,7 @@ public class QueryProxy {
 		this.conservationAreaName = caName;
 		this.id = id;
 		this.typeKey = typeKey;
-		this.iconName = iconName;
+		this.setIconName(iconName);
 		this.setCaUuid(caUuid);
 		setIsCcaa(isCcaa);
 	}
@@ -110,5 +110,15 @@ public class QueryProxy {
 	}
 	public void setIsCcaa(boolean isCcaa){
 		this.isCcaa = isCcaa;
+	}
+
+
+
+	public String getIconName() {
+		return iconName;
+	}
+
+	public void setIconName(String iconName) {
+		this.iconName = iconName;
 	}
 }
