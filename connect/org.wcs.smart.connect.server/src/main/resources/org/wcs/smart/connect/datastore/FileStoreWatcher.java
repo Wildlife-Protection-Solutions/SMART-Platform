@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -49,8 +50,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.model.ChangeLogItem;
-import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ChangeLogItem.Source;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 import org.wcs.smart.util.UuidUtils;
 
@@ -247,6 +248,15 @@ public class FileStoreWatcher implements Runnable {
 						}
 					} catch (IOException x) {
 						// ignore to keep sample readbale
+					}
+				}
+				if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+					//delete folders; find and remove key as we don't want these registered anymore
+					for (Entry<WatchKey,Path> keyset : keys.entrySet()) {
+						if (keyset.getValue().equals(child)) {
+							keyset.getKey().cancel();
+							break;
+						}
 					}
 				}
 				try {

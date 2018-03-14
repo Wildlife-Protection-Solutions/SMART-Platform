@@ -36,7 +36,6 @@ import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -334,33 +333,7 @@ public class ObservationFilterProcessor {
 			return;
 			
 		}
-		//category and perhaps an attribute filter
-
-//		Attribute attribute = QueryFactory.buildQuery(s,Attribute.class,
-//						new Object[] {"keyId", filter.getAttributeKey()}, //$NON-NLS-1$
-//						new Object[] {"conservationArea", ca}).uniqueResult(); //$NON-NLS-1$
-//				
-//		if (attribute == null){
-//			throw new Exception(MessageFormat.format(Messages.getString("ObservationFilterProcessor.AttributeKeyNotFound", l) , filter.getAttributeKey())); //$NON-NLS-1$
-//		}
-//		AttributeListItem li = null;
-//		AttributeTreeNode treenode = null;
-//		if (filter.getAttributeType() == Attribute.AttributeType.LIST){
-//			if (!filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
-//				
-//				li = QueryFactory.buildQuery(s,AttributeListItem.class,
-//						new Object[] {"keyId", filter.getKeyValue()}, //$NON-NLS-1$
-//						new Object[] {"attribute", attribute}).uniqueResult(); //$NON-NLS-1$
-//				if (li == null) throw new Exception(MessageFormat.format(Messages.getString("ObservationFilterProcessor.AttributeListItemNotFound", l), filter.getKeyValue(), attribute.getName())) ; //$NON-NLS-1$
-//			}
-//		}else if (filter.getAttributeType() == Attribute.AttributeType.TREE){
-//			treenode = QueryFactory.buildQuery(s,AttributeTreeNode.class,
-//					new Object[] {"hkey", filter.getKeyValue()}, //$NON-NLS-1$
-//					new Object[] {"attribute", attribute}).uniqueResult(); //$NON-NLS-1$
-//			
-//			if (treenode == null) throw new Exception(MessageFormat.format(Messages.getString("ObservationFilterProcessor.AttributeTreeItemNotFound", l), filter.getKeyValue(), attribute.getName())); //$NON-NLS-1$
-//		}
-		
+		//category and perhaps an attribute filter	
 		sql = new StringBuilder();
 		sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
 		sql.append(" SELECT distinct o.uuid "); //$NON-NLS-1$
@@ -377,11 +350,14 @@ public class ObservationFilterProcessor {
 		if (filter.getAttributeType() == Attribute.AttributeType.LIST ){
 			sql.append(" JOIN smart.dm_attribute_list tl ON ia.list_element_uuid = tl.uuid "); //$NON-NLS-1$
 		}
-		sql.append(" WHERE dma.keyId = :attributeKey "); //$NON-NLS-1$
+		//EG: this case statement forces the database to filter on the attribute key first.  If we don't do then 
+		//then in the case of date filters it filters on the date before the attribute and fails because
+		//some of the string values cannot be cast to date
+		sql.append(" WHERE case when dma.keyId = :attributeKey "); //$NON-NLS-1$
 		if (filter.getCategoryKey() != null){
 			sql.append(" AND (c.hkey like :hkey1 ) "); //$NON-NLS-1$
 		}
-		sql.append(" AND "); //$NON-NLS-1$
+		sql.append(" THEN "); //$NON-NLS-1$
 		
 		switch(filter.getAttributeType()){
 		case BOOLEAN:
@@ -409,6 +385,8 @@ public class ObservationFilterProcessor {
 		default:
 			break;
 		}
+		sql.append(" ELSE FALSE END "); //$NON-NLS-1$
+		
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
 		query.setParameter("attributeKey", filter.getAttributeKey()); //$NON-NLS-1$
 		logString(filter.getAttributeKey());
@@ -601,17 +579,25 @@ public class ObservationFilterProcessor {
 		sql.append (" SELECT distinct l.location_uuid "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a JOIN smart.i_entity_location l on a.location_uuid = l.location_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(" JOIN smart.i_entity_attribute_value v on v.entity_uuid = l.entity_uuid "); //$NON-NLS-1$
-		if (filter.getEntityTypeKey() != null){
-			sql.append("LEFT JOIN smart.i_entity e on l.entity_uuid = e.uuid"); //$NON-NLS-1$
+		sql.append(" JOIN smart.i_attribute ia on ia.uuid = v.attribute_uuid "); //$NON-NLS-1$
+		if (listItem != null) {
+			sql.append(" LEFT JOIN smart.i_attribute_list_item ali on ali.uuid = v.list_item_uuid "); //$NON-NLS-1$	
 		}
-		sql.append(" WHERE "); //$NON-NLS-1$
-		sql.append(" v.attribute_uuid = :attributeUuid "); //$NON-NLS-1$
 		if (filter.getEntityTypeKey() != null){
 			sql.append("LEFT JOIN smart.i_entity e on l.entity_uuid = e.uuid "); //$NON-NLS-1$
 			sql.append(" LEFT JOIN smart.i_entity_type et on et.uuid = e.entity_type_uuid "); //$NON-NLS-1$
 		}
+		sql.append(" WHERE "); //$NON-NLS-1$
+		//EG: this case statement forces the database to filter on the attribute key first.  If we don't do then 
+		//then in the case of date filters it filters on the date before the attribute and fails because
+		//some of the string values cannot be cast to date
+
+		sql.append(" CASE WHEN ia.keyId = :attributeKey "); //$NON-NLS-1$
+		if (filter.getEntityTypeKey() != null){
+			sql.append(" AND et.keyId = :entityTypeKey "); //$NON-NLS-1$
+		}
 		
-		sql.append(" AND "); //$NON-NLS-1$
+		sql.append(" THEN "); //$NON-NLS-1$
 		switch(filter.getAttributeType()){
 		case BOOLEAN:
 			sql.append(" v.double_value " + SqlGenerator.operatorToSql(Operator.GREATERTHAN) + " 0.5"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -624,7 +610,7 @@ public class ObservationFilterProcessor {
 				//any option
 				sql.append(" v.list_item_uuid is not null "); //$NON-NLS-1$
 			}else{
-				sql.append(" v.list_item_uuid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(" ali.keyid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			break;
 		case EMPLOYEE:
@@ -644,11 +630,11 @@ public class ObservationFilterProcessor {
 		default:
 			break;
 		}
-		
+		sql.append(" ELSE FALSE END "); //$NON-NLS-1$
 		logString(sql.toString());
 		
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.setParameter("attributeUuid", attribute.getUuid()); //$NON-NLS-1$
+		query.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
 		if (filter.getEntityTypeKey() != null){
 			logString(filter.getEntityTypeKey());
 			query.setParameter("entityTypeKey", filter.getEntityTypeKey()); //$NON-NLS-1$
@@ -664,8 +650,8 @@ public class ObservationFilterProcessor {
 			break;
 		case LIST:
 			if (listItem != null){
-				logString(UuidUtils.uuidToString(listItem.getUuid()));
-				query.setParameter("value", listItem.getUuid()); //$NON-NLS-1$
+				logString(listItem.getKeyId());
+				query.setParameter("value", listItem.getKeyId()); //$NON-NLS-1$
 			}
 			break;
 		case EMPLOYEE:
