@@ -193,8 +193,6 @@ public class AssetWaypointFilterProcessor implements IFilterProcessor{
 		// ---- SELECT CLAUSE -----
 		sql.append(engine.getTemporaryTableSelectClause(populateObservation));
 
-		HashSet<Class<?>> usedTables = new HashSet<Class<?>>();
-		
 		// ---- FROM CLAUSE -----
 		sql.append(" FROM "); //$NON-NLS-1$				
 		sql.append(namePrefix(Waypoint.class));
@@ -221,7 +219,7 @@ public class AssetWaypointFilterProcessor implements IFilterProcessor{
 			sql.append(prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$
 		}
 			
-		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine, usedTables, query.getConservationArea());
+		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine, query.getConservationArea());
 		queryFilter.accept(av);
 
 		// ---- WHERE CLAUSE -----

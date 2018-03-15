@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -209,13 +208,10 @@ public class AssetFilterProcessor implements IFilterProcessor {
 		sql.append("INSERT INTO " + tableName ); //$NON-NLS-1$
 		// ---- SELECT CLAUSE -----
 		sql.append(engine.getTemporaryTableSelectClause(populateObservation));
-
-		HashSet<Class<?>> usedTables = new HashSet<Class<?>>();
 		
 		// ---- FROM CLAUSE -----
 		sql.append(" FROM "); //$NON-NLS-1$
 
-		usedTables.add(Waypoint.class);
 		sql.append(namePrefix(Waypoint.class));
 		
 		for (String t : assetFilterTables.values()) {
@@ -233,7 +229,6 @@ public class AssetFilterProcessor implements IFilterProcessor {
 		
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(namePrefix(WaypointObservation.class));
-			usedTables.add(WaypointObservation.class);
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(prefix(Waypoint.class));
 			sql.append(".uuid = "); //$NON-NLS-1$
@@ -245,7 +240,6 @@ public class AssetFilterProcessor implements IFilterProcessor {
 				observationFilterVisitor.hasCategoryFilter()){
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(name(Category.class));
-			usedTables.add(Category.class);
 			sql.append(" "); //$NON-NLS-1$
 			sql.append(prefix(Category.class));
 			
@@ -261,7 +255,7 @@ public class AssetFilterProcessor implements IFilterProcessor {
 		}
 
 		// area filters
-		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, usedTables, query.getConservationArea());
+		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, query.getConservationArea());
 		queryFilter.accept(areaVisitor);
 		
 		sql.append(" WHERE "); //$NON-NLS-1$
