@@ -285,7 +285,7 @@ function createQueryTable(){
  			 
  					drawnRowCount++;
  					var row = tableCreateRow(parent, 
- 							[queries[i].conservationArea, "<span title='" + queries[i].id + "'> " + queries[i].name , "<img src='../css/images/query_icons/" + queries[i].iconName +"' title=" + queries[i].type + ">" ,  null], 
+ 							[queries[i].conservationArea, "<img src='../css/images/query_icons/" + queries[i].iconName +"' title=" + queries[i].type + ">" ,  "<span title='" + queries[i].id + "'> " + queries[i].name , null], 
  							"queryrow " + (drawnRowCount % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 
  					
