@@ -106,9 +106,11 @@
 	
 	
 	<div id="filter-controls">
-		<p style="text-align:center;font-weight:bold;"><a id="filter-link" onClick="hideShowFilters()"  class="filterIcon"></a></p>
+		<p style="text-align:center;font-weight:bold;height:10px"><a id="filter-link" onClick="hideShowFilters()"  class="filterIcon"></a></p>
 
 		<form id="filter-form" name="filter-form" action="" onsubmit="return false;">
+			<fieldset>
+			<legend><fmt:message key="alert.dates" /></legend>
 			<input id="sortBy" type="hidden" name="sortBy" value="date"/>
 			<input id="sortAscending" type="hidden" name="sortAscending"  value="false"/>
 			
@@ -128,13 +130,16 @@
 			</select>
 			</p>
 			
-			<p>
-			<br><input type="text" id="datePickerFrom" class="date-input">
+			<p class="map_date_picker">
+			<input type="text" id="datePickerFrom" class="date-input">
 			<font class="date-text">&nbsp &nbsp&nbsp<fmt:message key="alert.dateto"/>&nbsp &nbsp&nbsp</font><input type="text" id="datePickerTo" class="date-input">
 			</p>
+			</fieldset>
 			
-			<p style="clear:both;">
-			<fmt:message key="alert.filters.types" /><br>
+						
+		    <fieldset>
+			
+			<legend><fmt:message key="alert.filters.types" /></legend>
 			<c:forEach var="type" items="${alertTypes}" varStatus="count">
 				<div style="min-height: 25px;">
 				
@@ -149,28 +154,39 @@
      			</div> 
 			</c:forEach> 
 			</p>
+			</fieldset>
 			
-			<p><fmt:message key="alert.filters.status" /><br>
+			<fieldset>
+			<legend><fmt:message key="alert.filters.status" /></legend>
 			<c:forEach var="s" items="${status}" varStatus="count">
 				<label><input class='filterStatus updateChange' value="${s[0]}" type="checkbox" checked/>${s[1]}</label><br>
 			</c:forEach>
+			</fieldset>
 			
-			<p><fmt:message key="alert.filters.importance" /><br>
+			<fieldset>
+			<legend><fmt:message key="alert.filters.importance" /></legend>
 			<label><input class='filterImportance updateChange' type="checkbox" value=1 checked/><fmt:message key="alert.eventimportance1" /></label><br>
 			<label><input class='filterImportance updateChange' type="checkbox" value=2 checked/><fmt:message key="alert.eventimportance2" /></label><br>
 			<label><input class='filterImportance updateChange' type="checkbox" value=3 checked/><fmt:message key="alert.eventimportance3" /></label><br>
 			<label><input class='filterImportance updateChange' type="checkbox" value=4 checked/><fmt:message key="alert.eventimportance4" /></label><br>
 			<label><input class='filterImportance updateChange' type="checkbox" value=5 checked/><fmt:message key="alert.eventimportance5" /></label><br>
 			</p>
-			<p><fmt:message key="alert.filters.ca" /><br>
+			</fieldset>
+			
+			
+			<fieldset>
+			<legend><fmt:message key="alert.filters.ca" /></legend>
 			<c:forEach var="ca" items="${cas}" varStatus="count">
 				<input class='filterCa updateChange' name="${ca.getUuid()}" value="${ca.getUuid()}" type="checkbox">${ca.getLabel()}</input><br>
 			</c:forEach>
 			</p>
-			<p>
-			<fmt:message key="alert.filters.text" /><br>
+			</fieldset>
+			
+			<fieldset style="margin-bottom:4px;">
+			<legend><fmt:message key="alert.filters.text" /></legend>
 			<input id='filterText' class='updateChange' name="textFilter" type="text" style="margin-bottom:3px"></input>
-			</p> 
+			</fieldset>
+
 		</form>
 
 	 </div>
@@ -215,7 +231,7 @@
 	     			<option value="${type.getUuid()}"> ${type.getLabel()} </option> 
 				</c:forEach> 
      		</select>
-
+			
 			<label class="top-spacer block"><fmt:message key="alert.eventimportancelabel" /></label>
 			<select name="level" class="block formtext alert-select">
 				<option value=1><fmt:message key="alert.eventimportance1" /></option>

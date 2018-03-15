@@ -557,10 +557,19 @@ div.caSelector {
 	padding-top: 4px;
 	margin: 0px;
 }
-#runqueryform fieldset{
+fieldset{
 	border: 1px solid #CCCCCC;
 	border-radius: 3px; 
 }
+
+#filter-form fieldset{
+	margin-top: 2px;
+}
+
+.map_date_picker{
+	margin-bottom: 25px;
+}
+
 #runqueryform legend{
 	font-weight:bold;
 }
