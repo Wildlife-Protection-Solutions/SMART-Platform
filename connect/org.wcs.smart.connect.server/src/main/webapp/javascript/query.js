@@ -299,7 +299,7 @@ function createQueryTable(){
  						runicon.className="run-icon";
  						runicon.title= i18n("query.runquery");
  						runicon.onclick = showQueryOptions;
- 						row.childNodes[4].appendChild(runicon);
+ 						row.childNodes[3].appendChild(runicon);
  					}
 	 		
 //	 		var filter = qdatefilter[queries[i].typeKey][0];
