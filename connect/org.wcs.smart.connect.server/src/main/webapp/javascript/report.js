@@ -528,8 +528,11 @@ function setHomeCa(){
 	var parent = document.getElementById('caselect')
 	
 	var users = JSON.parse(this.responseText);
-	parent.value = users.homeCaUuid;
+	users.homeCaUuid
 	
+	if(users.homeCaUuid != null){
+		parent.value = users.homeCaUuid;
+	}
 	
 	getReportList();
 }
