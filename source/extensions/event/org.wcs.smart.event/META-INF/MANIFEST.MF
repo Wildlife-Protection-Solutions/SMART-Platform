@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SMART Event Action Plugin
+Bundle-SymbolicName: org.wcs.smart.event;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.wcs.smart.event.EventPlugIn
+Bundle-Vendor: org.wcs.smart
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.wcs.smart,
+ org.wcs.smart.observation
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Export-Package: org.wcs.smart.event.model

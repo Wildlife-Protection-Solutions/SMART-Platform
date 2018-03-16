@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="org.wcs.smart.event.actiontype" name="Event Action Type" schema="schema/org.wcs.smart.event.actiontype.exsd"/>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.event.configure.show"
+            name="Configure SMART Database Triggers">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.event.ui.handler.ShowConfigureDialogHandler$ShowConfigureDialogHandlerWrapper"
+            commandId="org.wcs.smart.event.configure.show">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.fielddata?before=org.wcs.smart.observation.options">
+         <menu
+               label="Trigger System Configure">
+            <command
+                  commandId="org.wcs.smart.event.configure.show"
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.wcs.smart.event.actiontype">
+      <actiontype
+            class="org.wcs.smart.event.test.NotifyUserActionType"
+            parameter_collector="org.wcs.smart.event.test.NotifyUserActionTypeParameterCollector">
+      </actiontype>
+   </extension>
+   <extension
+         point="org.wcs.smart.hibernate.libs.mapping">
+      <class
+            class="org.wcs.smart.event.model.EAction"
+            supportsCcaa="false">
+      </class>
+      <class
+            class="org.wcs.smart.event.model.EEventFilter"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".action.conservationArea"
+            class="org.wcs.smart.event.model.EActionEvent"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property="id.action.conservationArea"
+            class="org.wcs.smart.event.model.EActionParameterValue"
+            supportsCcaa="false">
+      </class>
+   </extension>
+
+</plugin>
