@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,28 +19,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.event.ui.model;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Listener;
-import org.wcs.smart.event.model.EAction;
+package org.wcs.smart.event.filter;
 
 /**
- * User interface for collection parameters associated 
- * with an action.
+ * A not filter expression of the form:
+ * <p>
+ * NOT <Filter>
+ * </p>
  * 
  * @author Emily
- *
+ * @since 1.0.0
  */
-public interface IActionParameterCollector {
+public class NotFilter implements IFilter {
 
-	public Composite createComposite(Composite parent);
 	
-	public void initParameters(EAction action);
+	/**
+	 * Creates a new not expression 
+	 * @param filter the not filter
+	 * @return
+	 */
+	public static NotFilter createNotExpression(IFilter filter){
+		return new NotFilter(filter);
+	}
 	
-	public void updateParameters(EAction action);
+	private IFilter filter;
 	
-	public String validate();
+	/**
+	 * @param filter the not expression
+	 */
+	public NotFilter(IFilter filter){
+		this.filter = filter;
+	}
+
 	
-	public void addModifyListener(Listener listener);
+	/**
+	 * @see org.wcs.smart.query.parser.filter.IFilter#asString()
+	 */
+	@Override
+	public String asString() {
+		return Operator.NOT.asSmartValue() + " " + filter.asString(); //$NON-NLS-1$
+	}
+	
+	public IFilter getFilter(){
+		return this.filter;
+	}
+
 }

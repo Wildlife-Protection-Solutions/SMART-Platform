@@ -8,7 +8,8 @@ Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.wcs.smart,
- org.wcs.smart.observation
+ org.wcs.smart.observation,
+ org.eclipse.swt
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.event.model

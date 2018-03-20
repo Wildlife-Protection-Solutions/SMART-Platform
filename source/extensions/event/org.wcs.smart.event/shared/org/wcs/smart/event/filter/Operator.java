@@ -23,8 +23,6 @@ package org.wcs.smart.event.filter;
 
 import java.util.Locale;
 
-import org.wcs.smart.SmartContext;
-
 
 /**
  * Filter expression operator
@@ -167,8 +165,23 @@ public enum Operator {
 	 * @return gui representation of operator
 	 */
 	public String getGuiValue(Locale l){
-		//TODO:
-//		return SmartContext.INSTANCE.getClass(IOperatorLabelProvider.class).getLabel(this, l);
+		switch(this) {
+		case AND: return "AND";
+		case BETWEEN: return "between";
+		case BRACKETS: return "()";
+		case EQUALS: return "=";
+		case GREATERTHAN: return ">";
+		case GREATERTHANEQUALS: return ">=";
+		case LESSTHAN: return "<";
+		case LESSTHANEQUALS: return "<=";
+		case NOT: return "NOT";
+		case NOTEQUALS: return "!=";
+		case NOT_BETWEEN: return "not between";
+		case OR: return "OR";
+		case STR_CONTAINS: return "contains";
+		case STR_EQUALS: return "equals";
+		case STR_NOTCONTAINS: return "not contains";
+		}
 		return name();
 	}
 	

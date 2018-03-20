@@ -1,5 +1,27 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.event.ui;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,8 +54,9 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.filter.Operator;
+import org.wcs.smart.event.filter.ParsedFilter;
 import org.wcs.smart.event.model.EAction;
-import org.wcs.smart.event.model.EEventFilter;
+import org.wcs.smart.event.model.EFilter;
 import org.wcs.smart.event.ui.filter.DefinitionPanel;
 import org.wcs.smart.event.ui.filter.DropItem;
 import org.wcs.smart.event.ui.filter.DropItemFactory;
@@ -45,10 +68,15 @@ import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
-
+/**
+ * Dialog for creating a new filter or updating an existing filter
+ * 
+ * @author Emily
+ *
+ */
 public class NewFilterDialog extends TitleAreaDialog {
 	
-	private EEventFilter toUpdate;
+	private EFilter toUpdate;
 	private Text txtId;
 	private OptionCheckBoxDropDown chSourceFilter;
 	private DefinitionPanel definitionPanel;
@@ -76,7 +104,7 @@ public class NewFilterDialog extends TitleAreaDialog {
 		this(parentShell, null);
 	}
 
-	public NewFilterDialog(Shell parentShell, EEventFilter toUpdate) {
+	public NewFilterDialog(Shell parentShell, EFilter toUpdate) {
 		super(parentShell);
 		this.toUpdate = toUpdate;
 	}
@@ -91,10 +119,11 @@ public class NewFilterDialog extends TitleAreaDialog {
 				break;
 			}else if (x instanceof IWaypointSource){
 				IWaypointSource sss = (IWaypointSource) x;
-				sb.append(sss.getKey() + ":");
+				sb.append(sss.getKey());
+				sb.append(ParsedFilter.SOURCE_SPACER);
 			}
 		}
-		sb.append("|");
+		sb.append(ParsedFilter.SECTION_SPACER);
 		sb.append(definitionPanel.getQueryPart());
 		return sb.toString();
 		
@@ -104,7 +133,7 @@ public class NewFilterDialog extends TitleAreaDialog {
 	@Override
 	protected void okPressed() {
 		if (toUpdate == null) {
-			toUpdate = new EEventFilter();
+			toUpdate = new EFilter();
 			toUpdate.setConservationArea(SmartDB.getCurrentConservationArea());
 		}
 		
@@ -172,16 +201,37 @@ public class NewFilterDialog extends TitleAreaDialog {
 		chSourceFilter.setOptionValue(ALL_SOURCES);
 		chSourceFilter.addSelectionChangedListener(e->validate());
 		
-		if (toUpdate != null) {
-			txtId.setText(toUpdate.getId());
-		}else {
-			chSourceFilter.setValue(Collections.singletonList(ALL_SOURCES));
-		}
-		
 		l = new Label(main, SWT.NONE);
 		l.setText("Filter:");
 		
 		createDataModelFilter(main);
+		
+		if (toUpdate != null) {
+			txtId.setText(toUpdate.getId());
+			
+			ParsedFilter filter = null;
+			try {
+				filter = toUpdate.getParsedFilter();
+			}catch (Exception ex) {
+				EventPlugIn.displayLog("Unable to parse query filter:" + ex.getMessage(), ex);
+			}
+			
+			if (filter != null) {
+				chSourceFilter.setValue(filter.getSources());
+				
+				List<DropItem> dropItems = new ArrayList<>();
+				try(Session session = HibernateManager.openSession()){
+					DropItemFactory.INSTANCE.createDropItem(filter.getFilters(), dropItems, session);
+				}catch (Exception ex) {
+					EventPlugIn.displayLog(MessageFormat.format("Unable to parse filter: {0}",ex.getMessage()), ex);
+				}
+				definitionPanel.addItems(dropItems);
+			}
+		}else {
+			chSourceFilter.setValue(Collections.singletonList(ALL_SOURCES));
+		}
+		
+		validate();
 		
 		setTitle("New Filter");
 		getShell().setText("New Filter");
@@ -229,8 +279,13 @@ public class NewFilterDialog extends TitleAreaDialog {
 		leftPart.setLayout(new GridLayout());
 		leftPart.setBackground(outer.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
-		definitionPanel = new DefinitionPanel();
+		definitionPanel = new DefinitionPanel() {
+			public void fireQueryChangedListeners(){
+				NewFilterDialog.this.validate();
+			}
+		};
 		Composite cc = definitionPanel.createComposite(leftPart);
+		
 		
 		cc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		cc.setBackground(leftPart.getBackground());

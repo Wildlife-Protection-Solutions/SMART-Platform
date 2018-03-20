@@ -19,28 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.event.ui.model;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Listener;
-import org.wcs.smart.event.model.EAction;
+package org.wcs.smart.event.filter;
 
 /**
- * User interface for collection parameters associated 
- * with an action.
- * 
+ * Event filter interface
+ *  
  * @author Emily
  *
  */
-public interface IActionParameterCollector {
+public interface IFilter {
 
-	public Composite createComposite(Composite parent);
-	
-	public void initParameters(EAction action);
-	
-	public void updateParameters(EAction action);
-	
-	public String validate();
-	
-	public void addModifyListener(Listener listener);
+	public String asString();
 }

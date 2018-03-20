@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,28 +19,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.event.ui.model;
-
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Listener;
-import org.wcs.smart.event.model.EAction;
+package org.wcs.smart.event.filter;
 
 /**
- * User interface for collection parameters associated 
- * with an action.
+ * A data model category filter. Of the form<br>
+ * category:<category_hkey>
  * 
  * @author Emily
- *
+ * @since 1.0.0
  */
-public interface IActionParameterCollector {
+public class CategoryFilter implements IFilter {
 
-	public Composite createComposite(Composite parent);
+	private String categoryIdentifier;  //category:category_hkey
 	
-	public void initParameters(EAction action);
+	/**
+	 * Creates new category filter
+	 * @param categoryIdentifier the category key part of the form "category:<categoryhkey>"
+	 * @return
+	 */
+	public static CategoryFilter createFilter(String categoryIdentifier){
+		return new CategoryFilter(categoryIdentifier);
+	}
 	
-	public void updateParameters(EAction action);
+	/**
+	 * Creates new category filter
+	 * @param categoryIdentifier the category key part of the form "category:<categoryhkey>"
+	 */
+	public CategoryFilter(String categoryIdentifier){
+		this.categoryIdentifier = categoryIdentifier;
+	}
 	
-	public String validate();
+	/**
+	 * @see org.wcs.smart.query.parser.filter.IFilter#asString()
+	 */
+	@Override
+	public String asString(){
+		return categoryIdentifier;
+	}
 	
-	public void addModifyListener(Listener listener);
+	public String getCategoryKey(){
+		return categoryIdentifier.split(":")[1]; //$NON-NLS-1$
+	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,28 +19,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.event.ui.model;
+package org.wcs.smart.event.filter;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Listener;
-import org.wcs.smart.event.model.EAction;
+
 
 /**
- * User interface for collection parameters associated 
- * with an action.
+ * A bracketed expression.  Of the form:
+ * ( Filter )
  * 
  * @author Emily
- *
+ * @since 1.0.0
  */
-public interface IActionParameterCollector {
+public class BracketFilter implements IFilter{
 
-	public Composite createComposite(Composite parent);
+	private IFilter filter;
 	
-	public void initParameters(EAction action);
+	/**
+	 * Creates new bracket filter expression
+	 * 
+	 * @param f bracketed expression 
+	 * @return
+	 */
+	public static BracketFilter createFilter(IFilter f){
+		return new BracketFilter(f);
+	}
 	
-	public void updateParameters(EAction action);
 	
-	public String validate();
+	/**
+	 * Creates new bracket filter expression
+	 * 
+	 * @param f bracketed expression
+	 */
+	private BracketFilter(IFilter filter){
+		this.filter = filter;
+	}
 	
-	public void addModifyListener(Listener listener);
+	/**
+	 * @see org.wcs.smart.query.parser.filter.IFilter#asString()
+	 */
+	@Override
+	public String asString(){
+		return "( " + filter.asString() + " )"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+
+	public IFilter getFilter(){
+		return this.filter;
+	}
+	
 }

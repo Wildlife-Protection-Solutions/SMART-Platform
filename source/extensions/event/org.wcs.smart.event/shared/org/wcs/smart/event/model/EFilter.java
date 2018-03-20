@@ -21,52 +21,81 @@
  */
 package org.wcs.smart.event.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.event.filter.ParsedFilter;
 
 /**
- * Action events to perform on new waypoint observations
- * 
+ * Event filters, specified by the user
  * @author Emily
  *
  */
 @Entity
-@Table(name = "smart.e_event_action")
-public class EActionEvent extends UuidItem {
+@Table(name = "smart.e_event_filter")
+public class EFilter extends UuidItem{
+	
+	public static final int MAX_ID_LENGTH = 128;
+	
+	private String id;
+	private String filterString;
+	private ConservationArea ca;
+	
+	private ParsedFilter cachedFilter;
+	
+	/**
+	 * 
+	 * @return the conservation area
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	public ConservationArea getConservationArea() {
+		return this.ca;
+	}
+	
+	public void setConservationArea(ConservationArea ca){
+		this.ca = ca;
+	}
+	
+	/**
+	 * the filter identifier
+	 * @return
+	 */
+	@Column(name="id")
+	public String getId() {
+		return this.id;
+	}
+	
+	public void setId(String id) {
+		this.id = id;
+	}
+	
+	/**
+	 * Filter string
+	 * @return
+	 */
+	@Column(name="filter_string")
+	public String getFilterString() {
+		return this.filterString;
+	}
+	
+	public void setFilterString(String filterString) {
+		this.filterString = filterString;
+		this.cachedFilter = null;
+	}
 
-	private EAction action;
-	private EFilter filter;
-	
-	/**
-	 * 
-	 * @return the associated action
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="action_uuid", referencedColumnName="uuid")
-	public EAction getAction() {
-		return this.action;
+	@Transient
+	public synchronized ParsedFilter getParsedFilter() throws Exception{
+		if (cachedFilter != null) return cachedFilter; 
+		cachedFilter = ParsedFilter.parse(getFilterString());
+		return cachedFilter;
 	}
 	
-	public void setAction(EAction action) {
-		this.action = action;
-	}
-	
-	/**
-	 * 
-	 * @return the associated filter
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="filter_uuid", referencedColumnName="uuid")
-	public EFilter getFilter() {
-		return this.filter;
-	}
-	
-	public void setFilter(EFilter filter) {
-		this.filter = filter;
-	}
 }

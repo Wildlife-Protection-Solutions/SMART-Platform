@@ -22,6 +22,7 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.fielddata?before=org.wcs.smart.observation.options">
          <menu
+               icon="images/icons/action_event.png"
                label="Trigger System Configure">
             <command
                   commandId="org.wcs.smart.event.configure.show"
@@ -44,7 +45,7 @@
             supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.event.model.EEventFilter"
+            class="org.wcs.smart.event.model.EFilter"
             supportsCcaa="false">
       </class>
       <class
@@ -57,6 +58,12 @@
             class="org.wcs.smart.event.model.EActionParameterValue"
             supportsCcaa="false">
       </class>
+   </extension>
+   <extension
+         point="org.wcs.smart.hibernate.libs.interceptor">
+      <integrator
+            class="org.wcs.smart.event.EventHibernateIntegrator">
+      </integrator>
    </extension>
 
 </plugin>

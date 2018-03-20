@@ -1,9 +1,31 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.event.ui;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -20,6 +42,7 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -33,13 +56,20 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.event.EventPlugIn;
+import org.wcs.smart.event.filter.ParsedFilter;
 import org.wcs.smart.event.model.EActionEvent;
-import org.wcs.smart.event.model.EEventFilter;
+import org.wcs.smart.event.model.EFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Configure events dialog, filters panel
+ * 
+ * @author Emily
+ *
+ */
 public class FiltersPanel extends Composite {
 
 	private TableViewer lstFilters;
@@ -75,8 +105,12 @@ public class FiltersPanel extends Composite {
 		
 		column1.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
-				if (element instanceof EEventFilter) return ((EEventFilter) element).getId();
+				if (element instanceof EFilter) return ((EFilter) element).getId();
 				return super.getText(element);
+			}
+			public Image getImage(Object element) {
+				if (element instanceof EFilter) return EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_FILTER);
+				return super.getImage(element);
 			}
 		});
 		
@@ -107,7 +141,7 @@ public class FiltersPanel extends Composite {
 		
 		lstFilters.addSelectionChangedListener(e->{
 			Object x = lstFilters.getStructuredSelection().getFirstElement();
-			boolean isSelected = (x != null && x instanceof EEventFilter);
+			boolean isSelected = (x != null && x instanceof EFilter);
 			editMnu.setEnabled(isSelected);
 			deleteMnu.setEnabled(isSelected);
 			updateDetails();
@@ -140,8 +174,8 @@ public class FiltersPanel extends Composite {
 	
 	public void editFilter() {
 		Object x = lstFilters.getStructuredSelection().getFirstElement();
-		if (!(x instanceof EEventFilter)) return;
-		EEventFilter toUpdate = (EEventFilter)x;
+		if (!(x instanceof EFilter)) return;
+		EFilter toUpdate = (EFilter)x;
 		
 		NewFilterDialog dialog = new NewFilterDialog(getShell(), toUpdate);
 		dialog.open();
@@ -149,10 +183,10 @@ public class FiltersPanel extends Composite {
 	}
 	
 	public void deleteFilter() {
-		List<EEventFilter> toDelete = new ArrayList<>();
+		List<EFilter> toDelete = new ArrayList<>();
 		for (Iterator<?> iterator = lstFilters.getStructuredSelection().iterator(); iterator.hasNext();) {
 			Object efilter = (Object) iterator.next();
-			if (efilter instanceof EEventFilter) toDelete.add((EEventFilter)efilter);
+			if (efilter instanceof EFilter) toDelete.add((EFilter)efilter);
 		}
 		if (toDelete.isEmpty()) return;
 		
@@ -162,8 +196,8 @@ public class FiltersPanel extends Composite {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				for (EEventFilter e : toDelete) {
-					List<EActionEvent> events = QueryFactory.buildQuery(session, EActionEvent.class, new Object[] {"event", e}).list();
+				for (EFilter e : toDelete) {
+					List<EActionEvent> events = QueryFactory.buildQuery(session, EActionEvent.class, new Object[] {"filter", e}).list();
 					events.forEach(ae->session.delete(ae));
 					session.delete(e);
 				}
@@ -204,7 +238,7 @@ public class FiltersPanel extends Composite {
 	private void updateDetails() {
 		for (Control k : rightPart.getChildren()) k.dispose();
 		Object element = lstFilters.getStructuredSelection().getFirstElement();
-		if (!(element instanceof EEventFilter)) {
+		if (!(element instanceof EFilter)) {
 			
 			Composite headerPart = new Composite(rightPart, SWT.NONE);
 			headerPart.setLayout(new GridLayout(2, false));
@@ -230,7 +264,7 @@ public class FiltersPanel extends Composite {
 			rightPart.layout(true);
 			return;
 		}
-		EEventFilter filter = (EEventFilter) element;
+		EFilter filter = (EFilter) element;
 		
 		Composite headerPart = new Composite(rightPart, SWT.NONE);
 		headerPart.setLayout(new GridLayout(2, false));
@@ -268,18 +302,61 @@ public class FiltersPanel extends Composite {
 
 		scroll.setContent(content);
 		
-		l = new Label(content, SWT.NONE);
-		l.setText("Filter");
-		l.setBackground(rightPart.getBackground());
-		fd = l.getFont().getFontData()[0];
+		fd = content.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
 		Font boldFont2 = new Font(l.getDisplay(), fd);
-		l.addListener(SWT.Dispose, e->boldFont2.dispose());
-		l.setFont(boldFont2);
+		content.addListener(SWT.Dispose, e->boldFont2.dispose());
 		
-		l = new Label(content, SWT.NONE);
-		l.setText(filter.getFilterString());
-		l.setBackground(rightPart.getBackground());
+		try {
+			ParsedFilter parsed = filter.getParsedFilter();
+			
+			l = new Label(content, SWT.NONE);
+			l.setText("Waypoint Source:");
+			l.setBackground(rightPart.getBackground());
+			l.setFont(boldFont2);
+			
+			if (parsed.getSources() == null) {
+				l = new Label(content, SWT.NONE);
+				l.setText("ALL");
+				l.setBackground(rightPart.getBackground());
+			}else {
+				l = new Label(content, SWT.WRAP);
+				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				l.setBackground(rightPart.getBackground());
+				StringBuilder sb = new StringBuilder();
+				parsed.getSources().forEach(s->{
+					sb.append(s.getName(Locale.getDefault()));
+					sb.append("\n");
+				});
+				l.setText(sb.toString());
+			}
+			
+			l = new Label(content, SWT.NONE);
+			
+			l = new Label(content, SWT.NONE);
+			l.setText("Filter:");
+			l.setBackground(rightPart.getBackground());
+			l.setFont(boldFont2);
+			
+			l = new Label(content, SWT.WRAP);
+			l.setText(parsed.getFilters().asString());
+			l.setBackground(rightPart.getBackground());
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		}catch (Throwable ex) {
+			EventPlugIn.log(ex.getMessage(), ex);
+			
+			l = new Label(content, SWT.WRAP);
+			l.setText("Parse Error: Unable to pase filter string");
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			l.setBackground(rightPart.getBackground());
+			l.setToolTipText(filter.getFilterString());
+			
+			l = new Label(content, SWT.WRAP);
+			l.setText(ex.getMessage());
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			l.setBackground(rightPart.getBackground());
+		}
 		
 		rightPart.layout(true);
 		content.setSize(content.computeSize(scroll.getSize().x-20, SWT.DEFAULT));
@@ -301,9 +378,9 @@ public class FiltersPanel extends Composite {
 				}
 			});
 			
-			List<EEventFilter> filters = new ArrayList<>();
+			List<EFilter> filters = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				filters.addAll(QueryFactory.buildQuery(session, EEventFilter.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				filters.addAll(QueryFactory.buildQuery(session, EFilter.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
 			}
 			Display.getDefault().syncExec(()->{
 				if (lstFilters.getControl().isDisposed()) return;
