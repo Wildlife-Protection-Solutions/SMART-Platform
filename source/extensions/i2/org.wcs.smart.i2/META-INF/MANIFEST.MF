@@ -26,6 +26,7 @@ Require-Bundle: org.eclipse.ui.workbench,
  org.wcs.smart.p2,
  org.wcs.smart.hibernate.libs
 Export-Package: org.wcs.smart.i2,
+ org.wcs.smart.i2.event,
  org.wcs.smart.i2.model,
  org.wcs.smart.i2.search,
  org.wcs.smart.i2.security,
