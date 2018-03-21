@@ -164,21 +164,21 @@ public class ActionTypesPanel extends Composite {
 		
 		for (IActionParameter p : type.getActionParameters()) {
 			l = new Label(content, SWT.NONE);
-			l.setText(MessageFormat.format("{0} ({1})", p.getName(Locale.getDefault()), p.getKey()));
+			l.setText(p.getName(Locale.getDefault()));
 			l.setBackground(rightPart.getBackground());
 		}
 		
 		l = new Label(content, SWT.NONE);
 		
 		
-		l = new Label(content, SWT.NONE);
-		l.setText("Key");
-		l.setBackground(rightPart.getBackground());
-		l.setFont(boldFont2);
-		
-		l = new Label(content, SWT.NONE);
-		l.setText(key);
-		l.setBackground(rightPart.getBackground());
+//		l = new Label(content, SWT.NONE);
+//		l.setText("Key");
+//		l.setBackground(rightPart.getBackground());
+//		l.setFont(boldFont2);
+//		
+//		l = new Label(content, SWT.NONE);
+//		l.setText(key);
+//		l.setBackground(rightPart.getBackground());
 		
 		rightPart.layout(true);
 		content.setSize(content.computeSize(scroll.getSize().x-20, SWT.DEFAULT));

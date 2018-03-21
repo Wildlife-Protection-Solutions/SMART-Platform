@@ -25,6 +25,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+import org.wcs.smart.observation.model.WaypointObservation;
+
 /**
  * Action type represents the type of action to perform.  These can have a variety
  * of parameters as required.
@@ -66,6 +68,6 @@ public interface IActionType {
 	 */
 	public List<IActionParameter> getActionParameters();
 	
-	public void performAction(Collection<EActionParameterValue> parameters, ActionData data);
+	public void performAction(EAction action, EFilter filter, WaypointObservation data);
 	
 }

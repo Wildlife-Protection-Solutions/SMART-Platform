@@ -28,8 +28,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import org.wcs.smart.observation.events.WaypointEventManager;
-import org.wcs.smart.observation.events.WaypointEventManager.EventType;
+import org.wcs.smart.ca.ConservationAreaManager;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -48,6 +47,9 @@ public class EventPlugIn extends AbstractUIPlugin {
 	public static final String ICON_FILTER = "org.wcs.smart.event.icon.filter"; //$NON-NLS-1$
 	public static final String ICON_DELETE_MINI = "org.wcs.smart.event.icon.deletemini"; //$NON-NLS-1$
 	
+	public static final String DB_VERSION_1 = "1.0.0"; //$NON-NLS-1$
+	
+	public static final String DB_VERSION = DB_VERSION_1;
 	/**
 	 * The constructor
 	 */
@@ -61,6 +63,8 @@ public class EventPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		ConservationAreaManager.getInstance().addDeleteHandler(new ConservationAreaDeleteHandler(), ConservationAreaDeleteHandler.EXECUTE_ORDER);
 	}
 
 	/*

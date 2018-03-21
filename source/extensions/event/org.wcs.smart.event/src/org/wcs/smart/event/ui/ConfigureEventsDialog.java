@@ -71,6 +71,9 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		ActionsPanel actionPanel = new ActionsPanel(tabs, SWT.NONE);
 		ActionTypesPanel typesPanel = new ActionTypesPanel(tabs, SWT.NONE);
 		
+		filtersPanel.addListener(e->eventPanel.refresh());
+		actionPanel.addListener(e->eventPanel.refresh());
+		
 		TabItem eventTab = new TabItem(tabs, SWT.NONE);
 		eventTab.setText("Events");
 		eventTab.setControl(eventPanel);

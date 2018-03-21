@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.wcs.smart.event.actiontype">
+      <actiontype
+            class="org.wcs.smart.event.i2.CreateRecordActionType"
+            parameter_collector="org.wcs.smart.event.i2.CreateRecordParameterCollector">
+      </actiontype>
+   </extension>
+
+</plugin>

@@ -71,7 +71,7 @@ public enum DropItemFactory {
 	 * @param session
 	 */
 	public void createDropItem(IFilter filter, List<DropItem> items, Session session) throws Exception{
-		
+		if (filter == null) return;
 		if (filter instanceof AttributeFilter) {
 			AttributeFilter ff = (AttributeFilter)filter;
 

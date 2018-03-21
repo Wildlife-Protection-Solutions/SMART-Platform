@@ -21,9 +21,13 @@
  */
 package org.wcs.smart.event;
 
+import java.util.Locale;
+
 import org.hibernate.event.spi.PostInsertEvent;
 import org.hibernate.event.spi.PostInsertEventListener;
 import org.hibernate.persister.entity.EntityPersister;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
 /**
  * Hibernate listener for audit items to update
@@ -41,6 +45,16 @@ public class EventHibernateListener implements PostInsertEventListener{
 
 	@Override
 	public void onPostInsert(PostInsertEvent event) {	
+		if (event.getEntity() instanceof WaypointObservation) {
+			WaypointObservation wo = (WaypointObservation)event.getEntity();
+			StringBuilder sb = new StringBuilder();
+			sb.append("NEW OBSERVATION: " + wo.getCategory().getHkey());
+			for (WaypointObservationAttribute aa : wo.getAttributes()) {
+				sb.append( " : " + aa.getAttribute().getKeyId() + " : " + aa.getAttributeValueAsString(Locale.getDefault()));
+			}
+			System.out.println(sb.toString());
+			EventProcessingJob.getInstance().addObservation(wo);
+		}
 	}
 
 	@Override
@@ -48,60 +62,5 @@ public class EventHibernateListener implements PostInsertEventListener{
 		return false;
 	}
 
-//	@Override
-//	public boolean onPreUpdate(PreUpdateEvent event) {
-//		if (event.getEntity() instanceof IIntelAuditItem){
-//			IIntelAuditItem item = (IIntelAuditItem) event.getEntity();
-//			
-//			Date now = new Date();
-//			
-//			if (item.getCreatedBy() == null){
-//    			item.setCreatedBy(SmartDB.getCurrentEmployee());
-//    			item.setDateCreated(now);
-//    			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
-//                setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateCreated", item.getDateCreated(), item); //$NON-NLS-1$
-//            }
-//			
-//			item.setLastModifiedBy(SmartDB.getCurrentEmployee());
-//			item.setDateModified(now);
-//			
-//			 setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
-//             setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateModified", item.getDateModified(), item); //$NON-NLS-1$
-//		}
-//		return false;
-//	}
-//
-//	@Override
-//	public boolean onPreInsert(PreInsertEvent event) {
-//		if (event.getEntity() instanceof IIntelAuditItem){
-//			IIntelAuditItem item = (IIntelAuditItem) event.getEntity();
-//			
-//			Date now = new Date();
-//			
-//			if (item.getCreatedBy() == null){
-//    			item.setCreatedBy(SmartDB.getCurrentEmployee());
-//    			item.setDateCreated(now);
-//    			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
-//                setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateCreated", item.getDateCreated(), item); //$NON-NLS-1$
-//            }
-//			
-//			item.setLastModifiedBy(SmartDB.getCurrentEmployee());
-//			item.setDateModified(now);
-//			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
-//            setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateModified", item.getDateModified(), item); //$NON-NLS-1$
-//
-//            
-//			 
-//		}
-//		return false;
-//	}
-//
-//	private void setValue(Object[] currentState, String[] propertyNames, String propertyToSet, Object value, Object entity) {
-//		int index = ArrayUtils.indexOf(propertyNames, propertyToSet);
-//		if (index >= 0) {
-//			currentState[index] = value;
-//		} else {
-//			Logger.getLogger(EventHibernateListener.class.getName()).log(Level.INFO, "Field '" + propertyToSet+ "' not found on entity '" + entity.getClass().getName() + "'."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-//		}
-//	}
+	
 }

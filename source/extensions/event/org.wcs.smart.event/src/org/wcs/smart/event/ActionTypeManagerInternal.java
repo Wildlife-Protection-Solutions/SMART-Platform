@@ -39,15 +39,15 @@ public enum ActionTypeManagerInternal {
 	
 	INSTANCE;
 	
-	private volatile Map<String, String> collectors = null;
+	private volatile Map<String, IConfigurationElement> collectors = null;
 	
 	public IActionParameterCollector createParameterCollector(IActionType type) {
 		initActionParameterCollectors();
 		if (collectors == null) return null;
-		String className = collectors.get(type.getKey());
-		if (className == null) return null;
+		IConfigurationElement config = collectors.get(type.getKey());
+		if (config == null) return null;
 		try {
-			return (IActionParameterCollector) Class.forName(className).newInstance();
+			return (IActionParameterCollector) config.createExecutableExtension("parameter_collector");
 		}catch (Exception ex) {
 			EventPlugIn.log(ex.getMessage(), ex);
 		}
@@ -60,13 +60,12 @@ public enum ActionTypeManagerInternal {
 		synchronized (INSTANCE) {
 			if (collectors != null) return ;
 
-			Map<String, String> localTypes = new HashMap<>();
+			Map<String, IConfigurationElement> localTypes = new HashMap<>();
 			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IActionType.EXTENSION_ID);
 			for (IConfigurationElement e : config) {	
 				try {
 					IActionType type = (IActionType) e.createExecutableExtension("class"); //$NON-NLS-1$
-					String className = e.getAttribute("parameter_collector"); //$NON-NLS-1$
-					localTypes.put(type.getKey(), className);
+					localTypes.put(type.getKey(), e);
 				}catch (Exception ex) {
 					EventPlugIn.log(ex.getMessage(), ex);
 				}

@@ -2,14 +2,14 @@
 package org.wcs.smart.event.test;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-import org.wcs.smart.event.model.ActionData;
-import org.wcs.smart.event.model.EActionParameterValue;
+import org.wcs.smart.event.model.EAction;
+import org.wcs.smart.event.model.EFilter;
 import org.wcs.smart.event.model.IActionParameter;
 import org.wcs.smart.event.model.IActionType;
+import org.wcs.smart.observation.model.WaypointObservation;
 
 public class NotifyUserActionType implements IActionType {
 
@@ -45,8 +45,9 @@ public class NotifyUserActionType implements IActionType {
 	}
 
 	@Override
-	public void performAction(Collection<EActionParameterValue> parameters, ActionData data) {
+	public void performAction(EAction action, EFilter filter, WaypointObservation data) {
 		System.out.println("PERFORMATION ACTION: " + getKey() + " : " + getName(Locale.getDefault()));
+		System.out.println(data.getCategory().getHkey().toString());
 
 	}
 

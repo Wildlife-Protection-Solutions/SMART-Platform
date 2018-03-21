@@ -1,4 +1,5 @@
 /*
+
  * Copyright (C) 2016 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -111,21 +112,6 @@ public class EventsPanel extends Composite {
 		tblEvents.getTable().setHeaderVisible(true);
 		tblEvents.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		TableViewerColumn actionColumn = new TableViewerColumn(tblEvents, SWT.NONE);
-		actionColumn.getColumn().setText("Action");
-		actionColumn.getColumn().setWidth(150);
-		actionColumn.setLabelProvider(new ColumnLabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof EActionEvent) return ((EActionEvent) element).getAction().getId();
-				return super.getText(element);
-			}
-			public Image getImage(Object element) {
-				if (element instanceof EActionEvent) return EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ACTION);
-				return super.getImage(element);
-			}
-		});
-		
 		TableViewerColumn filterColumn = new TableViewerColumn(tblEvents, SWT.NONE);
 		filterColumn.getColumn().setText("Filter");
 		filterColumn.getColumn().setWidth(150);
@@ -137,6 +123,20 @@ public class EventsPanel extends Composite {
 			}
 			public Image getImage(Object element) {
 				if (element instanceof EActionEvent) return EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_FILTER);
+				return super.getImage(element);
+			}
+		});
+		TableViewerColumn actionColumn = new TableViewerColumn(tblEvents, SWT.NONE);
+		actionColumn.getColumn().setText("Action");
+		actionColumn.getColumn().setWidth(150);
+		actionColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof EActionEvent) return ((EActionEvent) element).getAction().getId();
+				return super.getText(element);
+			}
+			public Image getImage(Object element) {
+				if (element instanceof EActionEvent) return EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ACTION);
 				return super.getImage(element);
 			}
 		});
@@ -170,6 +170,10 @@ public class EventsPanel extends Composite {
 		
 		updateDetails();
 		
+		loadDataJob.schedule();
+	}
+	
+	public void refresh() {
 		loadDataJob.schedule();
 	}
 	
@@ -259,7 +263,7 @@ public class EventsPanel extends Composite {
 			l.setBackground(detailsSection.getBackground());
 			
 			l = new Label(content, SWT.WRAP);
-			l.setText(MessageFormat.format("Filter: {0}", pFilter.getFilters().asString()));
+			l.setText(MessageFormat.format("Filter: {0}", pFilter.getFilter().asString()));
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			l.setBackground(detailsSection.getBackground());
 		}catch(Exception ex) {
@@ -322,7 +326,7 @@ public class EventsPanel extends Composite {
 					session.delete(event);
 				}
 				session.getTransaction().commit();
-				((List)tblEvents.getInput()).removeAll(toDelete);
+				((List<?>)tblEvents.getInput()).removeAll(toDelete);
 				
 			}catch (Exception ex) {
 				session.getTransaction().rollback();

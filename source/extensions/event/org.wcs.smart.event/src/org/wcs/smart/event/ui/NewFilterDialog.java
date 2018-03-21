@@ -217,11 +217,15 @@ public class NewFilterDialog extends TitleAreaDialog {
 			}
 			
 			if (filter != null) {
-				chSourceFilter.setValue(filter.getSources());
+				if (filter.getSources() != null) {
+					chSourceFilter.setValue(filter.getSources());
+				}else {
+					chSourceFilter.setValue(Collections.singletonList(ALL_SOURCES));
+				}
 				
 				List<DropItem> dropItems = new ArrayList<>();
 				try(Session session = HibernateManager.openSession()){
-					DropItemFactory.INSTANCE.createDropItem(filter.getFilters(), dropItems, session);
+					DropItemFactory.INSTANCE.createDropItem(filter.getFilter(), dropItems, session);
 				}catch (Exception ex) {
 					EventPlugIn.displayLog(MessageFormat.format("Unable to parse filter: {0}",ex.getMessage()), ex);
 				}

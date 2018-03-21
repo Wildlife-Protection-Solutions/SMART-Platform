@@ -7,9 +7,12 @@ Bundle-Activator: org.wcs.smart.event.EventPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart,
- org.wcs.smart.observation,
- org.eclipse.swt
+ org.eclipse.swt,
+ org.wcs.smart;visibility:=reexport,
+ org.wcs.smart.observation;visibility:=reexport,
+ org.wcs.smart.p2
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: org.wcs.smart.event.model
+Export-Package: org.wcs.smart.event,
+ org.wcs.smart.event.model,
+ org.wcs.smart.event.ui.model

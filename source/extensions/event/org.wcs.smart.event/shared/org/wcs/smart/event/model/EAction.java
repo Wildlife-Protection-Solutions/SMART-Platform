@@ -31,6 +31,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
@@ -104,5 +105,19 @@ public class EAction extends UuidItem{
 	
 	public void setParameters(List<EActionParameterValue> values) {
 		this.parameterValues = values;
+	}
+	
+	/**
+	 * Searches the parameter value for the given parameter.  Will return null
+	 * if value not found.
+	 * @param parameterKey
+	 * @return
+	 */
+	@Transient
+	public EActionParameterValue findParameter(String parameterKey) {
+		for (EActionParameterValue v : getParameters()) {
+			if (v.getId().getParameterKey().equals(parameterKey))  return v;
+		}
+		return null;
 	}
 }

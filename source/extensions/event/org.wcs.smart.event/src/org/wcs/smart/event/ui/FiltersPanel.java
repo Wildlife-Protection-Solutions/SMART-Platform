@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
@@ -74,6 +75,7 @@ public class FiltersPanel extends Composite {
 
 	private TableViewer lstFilters;
 	private Composite rightPart;
+	private List<Listener> modifiedListeners = new ArrayList<>();
 	
 	public FiltersPanel(Composite parent, int style) {
 		super(parent, style);
@@ -147,7 +149,6 @@ public class FiltersPanel extends Composite {
 			updateDetails();
 		});
 		
-		
 		Composite rightPartOuter = new Composite(parts, SWT.BORDER);
 		rightPartOuter.setLayout(new GridLayout());
 		((GridLayout)rightPartOuter.getLayout()).marginWidth = 0;
@@ -166,10 +167,22 @@ public class FiltersPanel extends Composite {
 		loadEventsJob.schedule();
 	}
 	
+	public void addListener(Listener listener) {
+		modifiedListeners.add(listener);
+	}
+	
+	private void fireEvents() {
+		for (Listener l : modifiedListeners) {
+			l.handleEvent(null);
+		}
+	}
+	
 	private void addFilter() {
 		NewFilterDialog dialog = new NewFilterDialog(getShell());
-		dialog.open();
-		loadEventsJob.schedule();
+		if (dialog.open() == NewFilterDialog.OK) {
+			loadEventsJob.schedule();
+			fireEvents();
+		}
 	}
 	
 	public void editFilter() {
@@ -178,8 +191,10 @@ public class FiltersPanel extends Composite {
 		EFilter toUpdate = (EFilter)x;
 		
 		NewFilterDialog dialog = new NewFilterDialog(getShell(), toUpdate);
-		dialog.open();
-		loadEventsJob.schedule();
+		if (dialog.open() == NewFilterDialog.OK) {
+			loadEventsJob.schedule();
+			fireEvents();
+		}
 	}
 	
 	public void deleteFilter() {
@@ -208,9 +223,10 @@ public class FiltersPanel extends Composite {
 				toDelete.clear();
 			}
 		}
-		((List)lstFilters.getInput()).removeAll(toDelete);
+		((List<?>)lstFilters.getInput()).removeAll(toDelete);
 		lstFilters.refresh();
 		lstFilters.setSelection(null);
+		fireEvents();
 	}
 	
 	private void createToolbar(Composite parent, boolean hasSelection) {
@@ -338,10 +354,12 @@ public class FiltersPanel extends Composite {
 			l.setBackground(rightPart.getBackground());
 			l.setFont(boldFont2);
 			
-			l = new Label(content, SWT.WRAP);
-			l.setText(parsed.getFilters().asString());
-			l.setBackground(rightPart.getBackground());
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			if (parsed.getFilter() != null) {
+				l = new Label(content, SWT.WRAP);
+				l.setText(parsed.getFilter().asString());
+				l.setBackground(rightPart.getBackground());
+				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			}
 
 		}catch (Throwable ex) {
 			EventPlugIn.log(ex.getMessage(), ex);

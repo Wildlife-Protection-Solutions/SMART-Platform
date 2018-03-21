@@ -1,0 +1,61 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.event;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.DeleteConservationAreaHandler;
+import org.wcs.smart.ca.ICaDeleteHandler;
+
+/**
+ * Conservation area delete handle for Event plugin 
+ * @author Emily
+ *
+ */
+public class ConservationAreaDeleteHandler implements ICaDeleteHandler {
+
+	public static final int EXECUTE_ORDER = DeleteConservationAreaHandler.EXECUTE_ORDER + 1;
+
+	@Override
+	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
+		monitor.subTask("Removing event system data");
+		
+		Query<?> q = session.createQuery("delete from EActionEvent av where av in (SELECT av FROM EActionEvent av WHERE av.action.conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("delete from EActionParameterValue av where av in (SELECT av FROM EActionParameterValue av WHERE av.id.action.conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("delete from EAction WHERE conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("delete from EActionFilter WHERE conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+	}
+
+}

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.wcs.smart.event.actiontype" name="Event Action Type" schema="schema/org.wcs.smart.event.actiontype.exsd"/>
+   <extension-point id="actiontype" name="Event Action Type Extension Point" schema="schema/org.wcs.smart.event.actiontype.exsd"/>
    <extension
          point="org.eclipse.ui.commands">
       <command
@@ -64,6 +64,37 @@
       <integrator
             class="org.wcs.smart.event.EventHibernateIntegrator">
       </integrator>
+   </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrade">
+      <dbUpgrader
+            upgrader="org.wcs.smart.event.plugin.EventDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.event.plugin.OnInstallAction"
+            name="onInstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="1.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.event.plugin.OnUninstallAction"
+            name="onUninstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="1.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.wcs.smart.caTemplateCloner">
+      <templateCloner
+            class="org.wcs.smart.event.ConservationAreaCloner"
+            id="org.wcs.smart.event.ca.clone">
+      </templateCloner>
    </extension>
 
 </plugin>

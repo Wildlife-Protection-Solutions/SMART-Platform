@@ -47,7 +47,7 @@ public class ParsedFilter {
 		
 		String[] parts = filterString.split("\\|"); //$NON-NLS-1$
 		
-		if (!parts[0].trim().isEmpty()) {
+		if (parts.length > 0 && !parts[0].trim().isEmpty()) {
 			sources = new ArrayList<>();
 			String[] srcs = parts[0].split(SOURCE_SPACER);
 			for (String src : srcs) {
@@ -63,7 +63,7 @@ public class ParsedFilter {
 			}
 		}
 		
-		if (!parts[1].trim().isEmpty()) {
+		if (parts.length > 1 && !parts[1].trim().isEmpty()) {
 			try(InputStream is = new ByteArrayInputStream(parts[1].trim().getBytes())){
 				wpFilter = (new Parser(is)).EventFilter();
 			}catch (Throwable ex) {
@@ -97,7 +97,7 @@ public class ParsedFilter {
 	 * filter
 	 * @return
 	 */
-	public IFilter getFilters() {
+	public IFilter getFilter() {
 		return this.waypointFilter;
 	}
 }
