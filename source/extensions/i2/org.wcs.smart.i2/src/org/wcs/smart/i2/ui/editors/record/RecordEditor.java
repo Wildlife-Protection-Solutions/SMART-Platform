@@ -628,6 +628,11 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			newLocation.setObservations(new ArrayList<IntelObservation>());
 		
 			record.getLocations().add(newLocation);
+			
+			//automatically link locations to entities
+			for (IntelEntityRecord rr : record.getEntities()) {
+				linkEntityToLocation(newLocation, rr.getEntity());
+			}
 		}
 		
 		mapPage.refresh();

@@ -60,6 +60,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
+import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
@@ -246,13 +247,14 @@ public class EntityListComposite extends Composite{
 							
 							final String idText = toadd.getIdAttributeAsText();
 							Display.getDefault().syncExec(() -> {
+								//automatically link all existing locations to editor
+								for (IntelLocation location : editor.getRecord().getLocations()) {
+									editor.linkEntityToLocation(location, entity);
+								}
 								init();
-								
 								String message = MessageFormat.format(Messages.EntityListComposite_EntityLinkAdded, idText, getEditor().getRecord().getTitle());
 								TransparentInfoDialog ti = new TransparentInfoDialog(getShell(), message);
 								ti.open();
-								
-//								MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Entity Added", );
 							});
 						}
 						
