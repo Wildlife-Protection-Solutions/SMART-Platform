@@ -198,6 +198,8 @@ public class PatrolSummaryEditor extends EditorPart {
 		}
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, modifyListener);
 		super.dispose();
+		this.editor = null;
+		this.modifyListener = null;
 	}
 	
 	private Composite outline;
@@ -531,7 +533,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				}
 			}
 		});
-		
+//		
 		lblStats = toolkit.createLabel(statsCmp, ""); //$NON-NLS-1$
 		lblStats.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
 		

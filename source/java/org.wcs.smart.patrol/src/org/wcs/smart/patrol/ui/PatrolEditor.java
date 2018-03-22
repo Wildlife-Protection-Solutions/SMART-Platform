@@ -209,7 +209,12 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	public void dispose() {
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_SAVED, saveListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolDeleteListener);
+		this.saveListener = null;
+		this.patrolDeleteListener = null;
 		super.dispose();
+		
+		this.mapPage = null;
+		this.summaryEditor = null;
 	}
 
 	public ObservationOptions getOptions(){

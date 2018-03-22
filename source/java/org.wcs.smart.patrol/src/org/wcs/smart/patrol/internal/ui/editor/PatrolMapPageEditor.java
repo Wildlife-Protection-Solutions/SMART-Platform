@@ -220,14 +220,12 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
         }
 	}
 
-    
-
     @Override
     public void dispose() {
     	JobUtil.stopJobs(loadDefaultLayers, addLayerJob, refreshJob);
-    	loadDefaultLayers = null;
-        refreshJob = null;
-
+    	this.loadDefaultLayers = null;
+        this.refreshJob = null;
+        this.addLayerJob = null;
         super.dispose();
         
         PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, patrolUpdatedListeners);
@@ -236,6 +234,8 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
         CatalogPlugin.getDefault().getLocalCatalog().remove(patrolService);
         patrolService.dispose(null);
         patrolService = null;
+        parentEditor = null;
+        patrolUpdatedListeners = null;
     }
 
 
