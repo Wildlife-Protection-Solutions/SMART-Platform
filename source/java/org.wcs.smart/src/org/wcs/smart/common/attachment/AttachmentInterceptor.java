@@ -22,7 +22,9 @@
 package org.wcs.smart.common.attachment;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -55,6 +57,25 @@ public class AttachmentInterceptor extends SessionInterceptor {
 	//track files to delete; only delete
 	//after transaction has been committed
 	protected List<File> toDelete = new ArrayList<File>();
+	
+	//if attachment files are encrypted when they are copied from
+	//the source
+	protected boolean encryptFiles = true;
+	
+	public AttachmentInterceptor() {
+		this(true);
+	}
+	
+	/**
+	 * 
+	 * In most cases users should use AttachmentInterceptor().  There are only a few special cases
+	 * when copying files within the filestore that this option should be used.
+	 * 
+	 * @param encryptFiles if the files are encrypted when they are copied from the source location
+	 */
+	public AttachmentInterceptor(boolean encryptFiles) {
+		this.encryptFiles = encryptFiles;
+	}
 	
 	protected boolean shouldIntercept(Object entity) {
 		return (entity instanceof ISmartAttachment);
@@ -150,10 +171,20 @@ public class AttachmentInterceptor extends SessionInterceptor {
     				}
     				to = new File(to.getParentFile(), basename + extension);
     			}
-    			try {
-    				EncryptUtils.encryptFile(attachment.getCopyFromLocation().toPath(), to.toPath(), attachment);
-    			}catch (Exception ex) {
-    				throw new RuntimeException(getExceptionErrorMessage() + ": " + ex.getMessage()); //$NON-NLS-1$
+    			if (encryptFiles) {
+	    			try {
+	    				EncryptUtils.encryptFile(attachment.getCopyFromLocation().toPath(), to.toPath(), attachment);
+	    			}catch (Exception ex) {
+	    				throw new RuntimeException(getExceptionErrorMessage() + ": " + ex.getMessage(), ex); //$NON-NLS-1$
+	    			}
+    			}else {
+    				//just copy files
+    				try {
+						Files.copy(attachment.getCopyFromLocation().toPath(), to.toPath());
+					} catch (IOException e) {
+	    				throw new RuntimeException(getExceptionErrorMessage() + ": " + e.getMessage(), e); //$NON-NLS-1$
+
+					}
     			}
     			
     			//state is what is written to db and should be updated

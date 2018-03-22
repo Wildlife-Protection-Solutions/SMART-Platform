@@ -21,35 +21,22 @@
  */
 package org.wcs.smart.ui;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
-import org.wcs.smart.util.SmartUtils;
 
 
 /**
@@ -69,18 +56,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class Thumbnail {
 
-	private static final ISchedulingRule LOAD_MUTEX = new ISchedulingRule() {
-		
-		@Override
-		public boolean isConflicting(ISchedulingRule rule) {
-			return (rule == this);
-		}
-		
-		@Override
-		public boolean contains(ISchedulingRule rule) {
-			return (rule == this);
-		}
-	};
+	private final CountDownLatch latch = new CountDownLatch(1);
+
 	private Image image;
 	private ISmartAttachment attachment;
 	
@@ -159,20 +136,23 @@ public class Thumbnail {
 			image.dispose();
 			image = null;
 		}
-		loadImageDataJob.cancel();
+//		loadImageDataJob.cancel();
+		LoadThumbnailImageJob.getInstance().removeThumbnail(this);
 	}
 	
 	/**
 	 * Waits until loading the image is complete and then returns
-	 * the loaded iamage
+	 * the loaded image
 	 * @return
+	 * @throws InterruptedException 
 	 */
 	public Image getImage() {
-		try {
-			loadImageDataJob.join();
-		}catch (Exception ex){
-			//eat me
-			ex.printStackTrace();
+		if(image == null) {
+			try {
+				latch.await();
+			} catch (InterruptedException e) {
+				SmartPlugIn.log(e.getMessage(), e);
+			}
 		}
 		return this.image;
 	}
@@ -180,93 +160,9 @@ public class Thumbnail {
 	 * generate the thumbnail in memory 
 	 */
 	private void loadImageData() throws Exception{
-		
-		loadImageDataJob.setRule(LOAD_MUTEX);
-		loadImageDataJob.schedule();
-		
+		LoadThumbnailImageJob.getInstance().addThumbnail(this);
 	}
 	
-	//load image data in background
-	private Job loadImageDataJob = new Job("loading image data") { //$NON-NLS-1$
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			if (attachment == null)
-				return Status.OK_STATUS;
-			try {
-				File file = null;
-				boolean deleteMe = false;
-				try {
-					if (attachment.getCopyFromLocation() != null) {
-						file = attachment.getCopyFromLocation();
-					} else {
-						deleteMe = true;
-						try {
-							Path p = EncryptUtils.decryptAttachment(attachment);
-							if (p != null) file = p.toFile();		
-						}catch (Exception ex) {
-							file = null;
-						}
-						
-					}
-					
-					if (file == null || file.length() > 200 * Math.pow(10, 6)) {
-						// skip images > 200MB
-						return Status.OK_STATUS;
-					}
-	
-					Image rawImage = new Image(Display.getDefault(), file.getAbsolutePath());
-	
-					// scale image
-					Rectangle bounds = rawImage.getBounds();
-					int x = 0, y = 0, width = 0, height = 0;
-					if (bounds.width > bounds.height) {
-						width = thumbnailSize;
-						height = bounds.height * thumbnailSize / bounds.width;
-						y = (thumbnailSize - height) / 2;
-					} else {
-						height = thumbnailSize;
-						width = bounds.width * thumbnailSize / bounds.height;
-						x = (thumbnailSize - width) / 2;
-					}
-					// resize image
-					Image image2 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
-					GC gc = new GC(image2);
-					gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);
-					rawImage.dispose();
-	
-					// transform based on exif orientation data
-					Transform imageTransform = SmartUtils.getExifImageTransform(file, thumbnailSize, thumbnailSize);
-					if (imageTransform != null) {
-						Image image3 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
-						GC gc3 = new GC(image3);
-						gc3.setTransform(imageTransform);
-						gc3.drawImage(image2, 0, 0);
-						image2.dispose();
-						image = image3;
-					} else {
-						image = image2;
-					}
-					if (thumbnailComposite != null) {
-						Display.getDefault().syncExec(() -> {
-							if (!thumbnailComposite.isDisposed())
-								thumbnailComposite.redraw();
-						});
-					}
-				}finally {
-					if (deleteMe && file != null) {
-						try {
-							Files.delete(file.toPath());
-						}catch (Exception ex) {}
-					}
-				}
-			} catch (SWTException ex) {
-				// eatme
-				ex.printStackTrace();
-			}
-			return Status.OK_STATUS;
-		}
-	};
 	/**
 	 * Creates a thumbnail with a border.
 	 * @param parent
@@ -284,6 +180,28 @@ public class Thumbnail {
 		return createThumbnail(parent, 0, style);
 	}
 	
+	ISmartAttachment getAttachment() {
+		return this.attachment;
+	}
+	
+	int getThumbnailSize() {
+		return this.thumbnailSize;
+	}
+	
+	void setImage(Image image) {
+		this.image = image;
+		latch.countDown();
+		if (thumbnailComposite != null) {
+			Display.getDefault().asyncExec(() -> {
+				if (!thumbnailComposite.isDisposed())
+					thumbnailComposite.redraw();
+			});
+		}
+	}
+	boolean isDisposed() {
+		if (thumbnailComposite != null) return thumbnailComposite.isDisposed();
+		return false;
+	}
 	/**
 	 * Creates the thumbnail widget with given style using the given offset.  The 
 	 * offset is the number of pixel to offset the image from the edge 

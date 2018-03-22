@@ -347,6 +347,7 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 		});
         
         final Map thisMap = map;
+        
         map.getViewportModelInternal().eAdapters().add(new AdapterImpl(){
         	public void notifyChanged(Notification notification) {
         		if (notification.getEventType() == Notification.SET &&
@@ -356,9 +357,7 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
         	}
         	
         });
-        
       
-        
         mapViewer.getViewport().addMouseMotionListener(new MapMouseMotionListener() {
 			@Override
 			public void mouseMoved(MapMouseEvent event) {
@@ -438,21 +437,32 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
         
         this.partlistener = null;
         this.selectFeatureListener = null;
+        this.initialZoomListener = null;
         
-        if (mapViewer != null && mapViewer.getViewport() != null && getMap() != null) {
+        Map map = getMap();
+        if (mapViewer != null && mapViewer.getViewport() != null && map != null) {
         	mapViewer.getViewport().removePaneListener(getMap().getViewportModelInternal());
         }
         
-        getMap().getViewportModelInternal().setInitialized(false);
-        mapViewer.getRenderManager().disableRendering();
-        mapViewer.getRenderManager().stopRendering();
-        try{
-        	mapViewer.getRenderManager().dispose();
-        }catch (Exception ex){
-        	//eat me as we don't want to log these
+        if (mapViewer != null) {
+        	mapViewer.getRenderManager().disableRendering();
+        	mapViewer.getRenderManager().stopRendering();
+        	try{
+        		mapViewer.getRenderManager().dispose();
+        	}catch (Throwable ex){
+        		//eat me as we don't want to log these
+        	}
+        	mapViewer.dispose();
+        	this.mapViewer = null;
         }
-
-        mapViewer.dispose();
+        
+        if (map != null) {
+        	map.getViewportModelInternal().eAdapters().clear();
+        	map.getViewportModelInternal().setInitialized(false);
+        	map.setBlackBoardInternal(null);
+        }
+        
+		ApplicationGIS.getToolManager().setCurrentEditor(null);
     }
 
     public void openContextMenu() {
@@ -469,10 +479,7 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
         }
     	selectionProvider.setActiveMap(mapViewer.getMap(), mapViewer);
     	mapViewer.setSelectionProvider(selectionProvider);
-        
     }
-
-	
 
 	/**
 	 * @see org.eclipse.ui.part.WorkbenchPart#setFocus()

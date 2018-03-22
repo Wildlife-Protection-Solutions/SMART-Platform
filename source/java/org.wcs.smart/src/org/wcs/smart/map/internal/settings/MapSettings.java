@@ -65,6 +65,7 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IResolve;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
+import org.locationtech.udig.project.IBlackboard;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.StyleContent;
 import org.locationtech.udig.project.internal.Layer;
@@ -450,8 +451,10 @@ public class MapSettings {
 
 			// update basemap layer settings
 			ArrayList<ILayer> basemapCopy = new ArrayList<ILayer>(basemapLayers);
-			currentMap.getBlackboard().put(BASEMAP_BLACKBOARD_KEY, basemapCopy);
-			currentMap.getBlackboard().put(BASEMAP_BLACKBOARD_UUID_KEY, baseMap.getUuid());
+			IBlackboard bb = currentMap.getBlackboard();
+			if (bb == null) return;
+			bb.put(BASEMAP_BLACKBOARD_KEY, basemapCopy);
+			bb.put(BASEMAP_BLACKBOARD_UUID_KEY, baseMap.getUuid());
 			// updates the map with the user settings
 			updateMap(currentMap, userMap);
 
