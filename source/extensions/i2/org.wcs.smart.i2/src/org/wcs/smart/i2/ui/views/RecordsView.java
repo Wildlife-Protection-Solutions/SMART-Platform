@@ -208,7 +208,7 @@ public class RecordsView {
 		newRecords.setLayout(new GridLayout());
 		RecordLabelProvider provider = new RecordLabelProvider();
 		labelProviders.add(provider);
-		lstNewRecords = new TableViewer(newRecords, SWT.V_SCROLL | SWT.H_SCROLL| SWT.MULTI | SWT.BORDER);
+		lstNewRecords = new TableViewer(newRecords, SWT.V_SCROLL | SWT.H_SCROLL| SWT.MULTI | SWT.BORDER | SWT.VIRTUAL);
 		lstNewRecords.setContentProvider(new RecordsViewContentProvider());
 		lstNewRecords.setLabelProvider(new RecordsViewLabelProvider());
 		lstNewRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
@@ -221,7 +221,7 @@ public class RecordsView {
 		provider = new RecordLabelProvider();
 		labelProviders.add(provider);
 		inProgress.setLayout(new GridLayout());
-		lstInProgress = new TableViewer(inProgress, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER);
+		lstInProgress = new TableViewer(inProgress, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.VIRTUAL);
 	
 		lstInProgress.setContentProvider(new RecordsViewContentProvider());
 		lstInProgress.setLabelProvider(new RecordsViewLabelProvider());
@@ -262,7 +262,7 @@ public class RecordsView {
 			}
 		});
 		
-		lstAllRecords = new TreeViewer(allRecordsSection, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);		
+		lstAllRecords = new TreeViewer(allRecordsSection, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION | SWT.VIRTUAL);		
 		lstAllRecords.setContentProvider(new RecordsViewContentProvider());
 		lstAllRecords.setLabelProvider(new LabelProvider() {
 			@Override
@@ -689,7 +689,13 @@ public class RecordsView {
 	@Inject
 	@Optional
 	private void recordModified(@UIEventTopic(IntelEvents.RECORD_ALL) Object records){
-		loadRecordsJob.schedule();
+		System.out.println("modified");
+		lstAllRecords.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		lstInProgress.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		lstNewRecords.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		
+		lstNewRecords.refresh();
+		loadRecordsJob.schedule(1000);
 	}
 
 	@Inject

@@ -58,13 +58,14 @@ public class IntelEvents {
 	public static final String RELATION_TYPE_DELETE = "INTEL_RELATION_TYPE/DELETE"; //$NON-NLS-1$
 	public static final String RELATION_TYPE_MODIFIED = "INTEL_RELATION_TYPE/UPDATED"; //$NON-NLS-1$
 	
+	//payload can be single record or collection or records
 	public static final String RECORD_ALL = "INTEL_RECORD/*"; //$NON-NLS-1$
-	//payload can be single record or collection or records
 	public static final String RECORD_NEW = "INTEL_RECORD/NEW"; //$NON-NLS-1$
-	public static final String RECORD_SAVED = "INTEL_RECORD/SAVED"; //$NON-NLS-1$
-	//payload can be single record or collection or records
 	public static final String RECORD_DELETE = "INTEL_RECORD/DELETE"; //$NON-NLS-1$
 	public static final String RECORD_MODIFIED = "INTEL_RECORD/UPDATED"; //$NON-NLS-1$
+	
+	//payload can be single record or collection or records
+	public static final String RECORD_SAVED = "INTEL_RECORD_ACTION/SAVED"; //$NON-NLS-1$
 	
 	public static final String WS_ALL = "INTEL_WS/*"; //$NON-NLS-1$
 	public static final String WS_NEW = "INTEL_WS/NEW"; //$NON-NLS-1$
