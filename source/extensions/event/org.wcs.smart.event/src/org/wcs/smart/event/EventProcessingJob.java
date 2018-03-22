@@ -85,6 +85,7 @@ public class EventProcessingJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		while(!observations.isEmpty()) {
+			monitor.setTaskName("remaining: " + observations.size());
 			WaypointObservation o = observations.remove(0);
 			for(EActionEvent event : getEventActions()) {
 				try {

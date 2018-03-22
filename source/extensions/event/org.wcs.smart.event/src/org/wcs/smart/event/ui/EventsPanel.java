@@ -262,10 +262,12 @@ public class EventsPanel extends Composite {
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			l.setBackground(detailsSection.getBackground());
 			
+			
 			l = new Label(content, SWT.WRAP);
-			l.setText(MessageFormat.format("Filter: {0}", pFilter.getFilter().asString()));
+			l.setText(MessageFormat.format("Filter: {0}", pFilter.getFilter() != null ? pFilter.getFilter().asString() : ""));
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			l.setBackground(detailsSection.getBackground());
+			
 		}catch(Exception ex) {
 			EventPlugIn.log(ex.getMessage(), ex);
 			
