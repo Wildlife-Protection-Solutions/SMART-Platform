@@ -270,7 +270,7 @@ public class StationCurrentPage {
 				IStatus s = super.run(monitor);
 				
 				SetViewportBBoxCommand cmd = new SetViewportBBoxCommand(drawCommand.getBounds());
-				getMapViewer().getMap().executeSyncWithoutUndo(cmd);
+				if (getMapViewer().getMap() != null) getMapViewer().getMap().executeSyncWithoutUndo(cmd);
 				return s;
 			}
 		};

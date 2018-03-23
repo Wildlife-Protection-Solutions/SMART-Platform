@@ -509,7 +509,17 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		if (handlers != null){
 			handlers.forEach((h)->event.unsubscribe(h));
 		}
+		this.handlers = null;
 		super.dispose();
+		
+		this.currentPage.getMapViewer().dispose();
+		
+		ApplicationGIS.getToolManager().setCurrentEditor(null);
+		
+		this.currentPage = null;
+		this.dataPage = null;
+		this.detailsPage = null;
+		this.historyPage = null;
 	}
 
 

@@ -784,13 +784,24 @@ public class AssetEditor extends EditorPart implements MapPart {
 		if (handlers != null){
 			handlers.forEach((h)->event.unsubscribe(h));
 		}
+		handlers = null;
+		
 		super.dispose();
+		
+		this.currentPage.getMapViewer().dispose();
+		
+		ApplicationGIS.getToolManager().setCurrentEditor(null);
+		
+		this.currentPage = null;
+		this.dataPage = null;
+		this.deploymentPanel = null;
+		this.detailsPage = null;
 	}
 
 
 	@Override
 	public org.locationtech.udig.project.internal.Map getMap() {
-		if (currentPage == null || currentPage.getMapViewer() == null) return ApplicationGIS.NO_MAP;
+		if (currentPage == null || currentPage.getMapViewer() == null) return null; //ApplicationGIS.NO_MAP;
 		return currentPage.getMapViewer().getMap();
 	}
 

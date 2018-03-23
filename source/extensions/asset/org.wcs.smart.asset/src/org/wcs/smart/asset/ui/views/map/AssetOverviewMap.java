@@ -378,16 +378,22 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 
 	@Override
 	public void dispose() {
-		super.dispose();
+		
 		if (service != null) {
 			service.dispose(new NullProgressMonitor());
-			CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+			try {
+				CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+			}catch (Throwable t) {
+				
+			}
 		}
+		super.dispose();
 		if (handlers != null) {
 			for(EventHandler h : handlers) {
 				parentContext.get(IEventBroker.class).unsubscribe(h);
 			}
 		}
+		this.handlers = null;
 	}
 	
 	private void createTablePart() {
