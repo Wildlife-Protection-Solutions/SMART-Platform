@@ -72,6 +72,7 @@ public class IntelQueryDataSource extends AbstractDataStore{
 	@Override
 	public void dispose(){
 		super.dispose();
+		this.cachedColumns = null;
 	}
 
 	/**

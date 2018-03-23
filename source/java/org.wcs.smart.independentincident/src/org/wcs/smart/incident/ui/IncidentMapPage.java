@@ -29,6 +29,7 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
@@ -42,6 +43,7 @@ import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
@@ -108,6 +110,30 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	@Override
 	public MultiPageEditorPart getParentEditor() {
 		return parent;
+	}
+	
+	@Override
+	public void dispose() {
+		getMap().getBlackboard().put(IMapEditManager.BLACKBOARD_KEY, null);
+		
+		super.dispose();
+		
+		if (pointResource != null) {
+			pointResource.dispose(new NullProgressMonitor());
+			
+			try {
+				IService service = pointResource.service(new NullProgressMonitor());
+				if (service != null) CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		featureCollection = null;
+		store = null;
+		this.pointResource = null;
+		this.parent = null;
 	}
 	
 	/** Creates the map

@@ -232,6 +232,16 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 		PatrolEventManager.getInstance().removeListener(org.wcs.smart.patrol.PatrolEventManager.EventType.PATROL_MODIFIED, patrolListener);
 		
 		super.dispose();
+		
+		this.summaryPage = null;
+		this.mapPage = null;
+		this.computeStatus = null;
+		this.prjProvider = null;
+		this.refreshSubPlanTargets = null;
+		this.planListener = null;
+		this.deleteListener = null;
+		this.patrolListener = null;
+		
 	}
 	
 	@Override

@@ -130,7 +130,14 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	public void dispose() {
 		IncidentEventManager.getInstance().removeListener(listener);
 		WaypointEventManager.getInstance().removeListener(EventType.WAYPOINT_MODIFIED, wlistener);
+		getSite().setSelectionProvider(null);
+		this.listener = null;
+		this.wlistener = null;
+		
 		super.dispose();
+		
+		this.mapPage = null;
+		this.summaryEditor = null;
 	}
 
 	

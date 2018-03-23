@@ -89,6 +89,8 @@ public class QueryDataSource extends AbstractDataStore{
 	 */
 	@Override
 	public void dispose(){
+		this.prjProvider = null;
+		this.columns = null;
 		super.dispose();
 	}
 

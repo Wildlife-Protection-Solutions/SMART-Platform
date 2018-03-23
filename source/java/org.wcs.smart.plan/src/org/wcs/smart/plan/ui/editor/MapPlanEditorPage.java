@@ -215,8 +215,6 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 								}
 							};
 				    		getMap().sendCommandASync(command);
-				    		
-				    		
 						}else{
 							patrolLayer = null;
 						}
@@ -361,8 +359,6 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 		isDisposing = true;
 		JobUtil.stopJobs(refreshSubPlanLayer, loadDefaultLayers, addLayerJob, refreshJob, refreshPatrolsJob);
 		
-		super.dispose();
-
 		synchronized (lockObj) {
 			//dispose of patrol service
 			if (planTargetService != null) {
@@ -388,6 +384,8 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 				}
 			}
 		}
+		
+		super.dispose();
 	}
 
     private String generateQueryString(){

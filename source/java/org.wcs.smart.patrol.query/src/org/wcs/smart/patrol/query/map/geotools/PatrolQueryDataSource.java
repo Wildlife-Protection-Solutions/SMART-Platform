@@ -73,6 +73,8 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 	 */
 	@Override
 	public void dispose(){
+		this.prjProvider = null;
+		this.queryColumns = null;
 		super.dispose();
 	}
 

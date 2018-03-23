@@ -64,6 +64,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.udig.internal.ui.IDropTargetProvider;
+import org.locationtech.udig.project.command.CommandManager;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
@@ -457,9 +458,11 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
         }
         
         if (map != null) {
+        	((CommandManager)map.getCommandStack()).dispose();
         	map.getViewportModelInternal().eAdapters().clear();
         	map.getViewportModelInternal().setInitialized(false);
         	map.setBlackBoardInternal(null);
+        	map.eAdapters().clear();
         }
         
 		ApplicationGIS.getToolManager().setCurrentEditor(null);

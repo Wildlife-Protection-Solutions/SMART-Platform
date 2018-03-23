@@ -70,6 +70,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 	private IService queryService = null;
 	private LoadDefaultLayersJob loadDefaultLayers = null;
 	
+	private List<ILayer> styleLayers = new ArrayList<>();
 	private ILayerListener styleListener = new ILayerListener() {
 		
 		@Override
@@ -139,6 +140,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 							//add style listeners
 							for (final ILayer layer : getLayers()){
 								layer.addListener(styleListener);
+								styleLayers.add(layer);
 							}
 						}
 					}
@@ -256,6 +258,9 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
      */
     @Override
     public void dispose() {
+    	styleLayers.forEach(l->l.removeListener(styleListener));
+    	styleLayers.clear();
+    	
     	JobUtil.stopJobs(loadDefaultLayers, addLayerJob, refreshJob);
     	loadDefaultLayers = null;
         refreshJob = null;
@@ -267,6 +272,9 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
         	queryService.dispose(null);
             queryService = null;
         }
+        this.addLayerJob = null;
+        this.parentEditor = null;
+        
     }
     
     /**

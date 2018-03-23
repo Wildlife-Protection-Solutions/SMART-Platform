@@ -175,6 +175,8 @@ public class QueryResultsImagePage extends EditorPart  implements AttachmentTabl
 		btnDown.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		btnDown.setToolTipText(Messages.QueryResultsImagePage_changeSizeTooltip);
 		Menu mnuIconSize = new Menu(btnDown);
+		btnDown.addDisposeListener(e->mnuIconSize.dispose());
+		
 		MenuItem small = new MenuItem(mnuIconSize, SWT.RADIO);
 		MenuItem medium = new MenuItem(mnuIconSize, SWT.RADIO);
 		MenuItem large = new MenuItem(mnuIconSize, SWT.RADIO);

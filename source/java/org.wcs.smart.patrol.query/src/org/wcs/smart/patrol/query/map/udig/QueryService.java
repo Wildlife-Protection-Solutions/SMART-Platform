@@ -189,6 +189,7 @@ public class QueryService extends IService implements IQueryService {
 	 */
 	@Override
 	public void dispose( IProgressMonitor monitor ) {
+		this.prjProvider = null;
         if (members == null)
             return;
         SubMonitor progress = SubMonitor.convert(monitor);
@@ -204,7 +205,6 @@ public class QueryService extends IService implements IQueryService {
         	this.ds.dispose();
         }
     }
-	
 	
 	/**
 	 * Gets the query data source.
