@@ -64,6 +64,7 @@ import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
@@ -271,15 +272,23 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		if (handlers != null){
 			handlers.forEach((h)->event.unsubscribe(h));
 		}
+		handlers = null;
 		getSite().getWorkbenchWindow().removePerspectiveListener(prespectiveListener);
+		this.prespectiveListener = null;
+		
 		super.dispose();
+		
+		ApplicationGIS.getToolManager().setCurrentEditor(null);
+		
+		this.mapPage = null;
+		this.descPage = null;
+		this.summaryPage = null;
+		this.loadRecordJob = null;
 	}
 	
 	public RecordMapPage getMapPage(){
 		return this.mapPage;
 	}
-	
-
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {

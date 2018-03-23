@@ -322,6 +322,8 @@ public class RecordMapPage extends SmartMapEditorPart {
 		fromGps.setText(Messages.RecordMapPage_ImportGpsMenuItem);
 		fromGps.addListener(SWT.Selection, e->locationPanel.importLocationsFromGps());
 		
+		bar.addDisposeListener(e->dd.dispose());
+				
 		importItem.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent event){
@@ -369,7 +371,7 @@ public class RecordMapPage extends SmartMapEditorPart {
         	toolkit.dispose();
         	toolkit = null;
         }
-        super.dispose();
+        
         
         //dispose of services
         try {
@@ -378,6 +380,14 @@ public class RecordMapPage extends SmartMapEditorPart {
 		} catch (Exception e) {
 			Intelligence2PlugIn.log(e.getMessage(), e);
 		}
+        
+        this.pointResource = null;
+        this.polygonResource = null;
+        this.locationPanel = null;
+        this.recordEditor = null;
+        
+        super.dispose();
+        
     }
 
     

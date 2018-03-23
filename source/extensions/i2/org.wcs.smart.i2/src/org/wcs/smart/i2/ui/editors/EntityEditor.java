@@ -114,6 +114,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IPerspectiveListener;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
@@ -257,6 +258,19 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private List<EventHandler> eventHandles = null;
 	
 	private AttributeValueLabelProvider attributeLabelProvider = new AttributeValueLabelProvider();
+	
+	private IPerspectiveListener perspectiveListener = new PerspectiveAdapter() {
+		@Override
+		public void perspectiveActivated(IWorkbenchPage page,
+				IPerspectiveDescriptor perspective) {
+			if (isDirty && perspective.getId().equals(IntelDataAnalysisPerspective.ID)){
+				//save and be done with it
+				setEditMode(false);
+			}else if (perspective.getId().equals(IntelDataAssessmentPerspective.ID)){
+				setEditMode(true);
+			}
+		}
+	};
 	
 	private Job loadEntity = new Job("load entity"){ //$NON-NLS-1$
 		@Override
@@ -661,18 +675,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
 		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
 		
-		getSite().getWorkbenchWindow().addPerspectiveListener(new PerspectiveAdapter() {
-			@Override
-			public void perspectiveActivated(IWorkbenchPage page,
-					IPerspectiveDescriptor perspective) {
-				if (isDirty && perspective.getId().equals(IntelDataAnalysisPerspective.ID)){
-					//save and be done with it
-					setEditMode(false);
-				}else if (perspective.getId().equals(IntelDataAssessmentPerspective.ID)){
-					setEditMode(true);
-				}
-			}
-		});
+		getSite().getWorkbenchWindow().addPerspectiveListener(perspectiveListener);
 		
 		
 		toolkit = new FormToolkit(parent.getDisplay());
@@ -708,13 +711,18 @@ public class EntityEditor extends EditorPart implements MapPart{
 	@Override
 	public void dispose(){
 		if (headerFont != null){ headerFont.dispose(); headerFont = null;}
-		
+		getSite().getWorkbenchWindow().removePerspectiveListener(perspectiveListener);
 		//remove all event subscriptions
 		if (eventHandles != null) eventHandles.forEach((h)->eventBroker.unsubscribe(h));
+		eventHandles = null;
 		
 		attributeLabelProvider.dispose();
 		if (mapPart != null) mapPart.dispose();
+		
 		super.dispose();
+		
+		this.mapPart = null;
+
 	}
 	
 	

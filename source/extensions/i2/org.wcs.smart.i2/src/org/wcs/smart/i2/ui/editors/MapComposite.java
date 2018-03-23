@@ -58,6 +58,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.part.EditorPart;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.udig.project.command.CommandManager;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
@@ -340,10 +341,13 @@ public class MapComposite extends Composite implements MapPart{
         this.partlistener = null;
         this.selectFeatureListener = null;
         
-        if (mapViewer != null && mapViewer.getViewport() != null && getMap() != null){
+        Map map = getMap();
+        if (mapViewer != null && mapViewer.getViewport() != null && map != null) {
         	mapViewer.getViewport().removePaneListener(getMap().getViewportModelInternal());
         }
-        if (getMap() != null)  getMap().getViewportModelInternal().setInitialized(false);
+        if (getMap() != null) {
+        	map.getViewportModelInternal().setInitialized(false);
+        }
         if (mapViewer != null){
         	if (mapViewer.getRenderManager() != null){
         		mapViewer.getRenderManager().disableRendering();
@@ -351,7 +355,17 @@ public class MapComposite extends Composite implements MapPart{
                	mapViewer.getRenderManager().dispose();		
         	}
             mapViewer.dispose();
+            this.mapViewer = null;
         }
+        if (map != null) {
+        	((CommandManager)map.getCommandStack()).dispose();
+        	map.getViewportModelInternal().eAdapters().clear();
+        	map.getViewportModelInternal().setInitialized(false);
+        	map.setBlackBoardInternal(null);
+        	map.eAdapters().clear();
+        }
+        
+		ApplicationGIS.getToolManager().setCurrentEditor(null);
     }
 
     public void openContextMenu() {

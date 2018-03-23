@@ -130,8 +130,6 @@ public class LocationListComposite extends Composite{
 		tblObservations.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblObservations.setContentProvider(ArrayContentProvider.getInstance());
 		
-		
-		
 		TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(tblObservations, new FocusCellHighlighter(tblObservations){});
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(tblObservations) {
 			protected boolean isEditorActivationEvent(
@@ -282,47 +280,48 @@ public class LocationListComposite extends Composite{
 		
 		Menu linkEntities = new Menu(tblObservations.getTable());
 		tblObservations.getTable().setMenu(linkEntities);
-		
-		SelectionListener addEntityLinkListener = new SelectionAdapter() {
+
+		MenuListener ml = new MenuListener() {
 			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
-				if (!(selection instanceof IntelLocation)) return;
+			SelectionListener addEntityLinkListener = new SelectionAdapter() {
 				
-				IntelLocation location = (IntelLocation)selection;
-				Object data = ((MenuItem)e.widget).getData();
-				List<IntelEntity> toLink = new ArrayList<IntelEntity>();
-				if (data == null){
-					for (IntelEntityRecord r : editor.getRecord().getEntities()){
-						toLink.add(r.getEntity());
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
+					if (!(selection instanceof IntelLocation)) return;
+					
+					IntelLocation location = (IntelLocation)selection;
+					Object data = ((MenuItem)e.widget).getData();
+					List<IntelEntity> toLink = new ArrayList<IntelEntity>();
+					if (data == null){
+						for (IntelEntityRecord r : editor.getRecord().getEntities()){
+							toLink.add(r.getEntity());
+						}
+					}else if (data instanceof IntelEntity){
+						toLink.add((IntelEntity) data);
 					}
-				}else if (data instanceof IntelEntity){
-					toLink.add((IntelEntity) data);
+					for (IntelEntity entity : toLink){
+						editor.linkEntityToLocation(location, entity);
+					}
 				}
-				for (IntelEntity entity : toLink){
-					editor.linkEntityToLocation(location, entity);
-				}
-			}
-		};
-		SelectionListener dropEntityLinkListener = new SelectionAdapter() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
-				if (!(selection instanceof IntelLocation)) return;
+			};
+			SelectionListener dropEntityLinkListener = new SelectionAdapter() {
 				
-				IntelLocation location = (IntelLocation)selection;
-				Object data = ((MenuItem)e.widget).getData();
-				IntelEntity toDrop = null;
-				if (data != null){
-					toDrop = (IntelEntity)data;
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
+					if (!(selection instanceof IntelLocation)) return;
+					
+					IntelLocation location = (IntelLocation)selection;
+					Object data = ((MenuItem)e.widget).getData();
+					IntelEntity toDrop = null;
+					if (data != null){
+						toDrop = (IntelEntity)data;
+					}
+					editor.unlinkEntityFromLocation(location, toDrop);
 				}
-				editor.unlinkEntityFromLocation(location, toDrop);
-			}
-		};
-		
-		linkEntities.addMenuListener(new MenuListener() {
+			};
+			
 			@Override
 			public void menuShown(MenuEvent e) {
 				for (MenuItem mi : linkEntities.getItems()){
@@ -496,7 +495,9 @@ public class LocationListComposite extends Composite{
 			@Override
 			public void menuHidden(MenuEvent e) {
 			}
-		});
+		};
+		linkEntities.addMenuListener(ml);
+		linkEntities.addDisposeListener(e->linkEntities.removeMenuListener(ml));
 		
 		
 		Listener tableListener = new Listener(){
