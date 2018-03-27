@@ -126,7 +126,7 @@ public enum SurveyPackageExporter {
 				
 				sub.split(1);
 				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
-				profileToJson(session.get(CyberTrackerPropertiesProfile.class, profile.getUuid()), profileFile);
+				profileToJson(session.get(CyberTrackerPropertiesProfile.class, profile.getUuid()), modelToExport, session, profileFile);
 				toIncludeInZip.add(profileFile.toFile());
 				
 				sub.split(1);
@@ -154,9 +154,9 @@ public enum SurveyPackageExporter {
 		}
 	}
 	
-	private void profileToJson(CyberTrackerPropertiesProfile profile, Path outputFile) throws IOException {
+	private void profileToJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, Session session, Path outputFile) throws IOException {
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
-			fw.write(CtJsonExportUtils.toJson(profile));
+			fw.write(CtJsonExportUtils.toJson(profile, cm, session));
 		}
 	}
 	

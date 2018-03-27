@@ -39,10 +39,13 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.cybertracker.export.alert.ConfigurationDataProvider;
+import org.wcs.smart.cybertracker.export.alert.IDataTargetProvider.DataTarget;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.ProfileOptionID;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.ScreenOptionUuid;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -94,6 +97,13 @@ public class CtJsonExportUtils {
 	 */
 	public static final String JSON_OPTION_GENERATED_KEY = "generated"; //$NON-NLS-1$
 	
+	public static final String JSON_SERVER_DATA_KEY = "DATA_SERVER"; //$NON-NLS-1$
+	public static final String JSON_SERVER_URL_KEY= "URL"; //$NON-NLS-1$
+	public static final String JSON_SERVER_PASSWORD_KEY= "PASSWORD"; //$NON-NLS-1$
+	public static final String JSON_SERVER_USERNAME_KEY= "USERNAME"; //$NON-NLS-1$
+	public static final String JSON_SERVER_FREQUENCY_KEY= "FREQUENCY_MIN"; //$NON-NLS-1$
+	public static final String JSON_SERVER_PROTOCOL_KEY= "PROTOCOL"; //$NON-NLS-1$
+	
 	/**
 	 * JSON options property key that identifies the type
 	 */
@@ -127,7 +137,7 @@ public class CtJsonExportUtils {
 	 * @param profile
 	 * @return
 	 */
-	public static String toJson(CyberTrackerPropertiesProfile profile) {
+	public static String toJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, Session session) {
 		JSONObject profileObj = new JSONObject();
 		
 		for (ProfileOptionID option : ProfileOptionID.values()) {
@@ -142,6 +152,22 @@ public class CtJsonExportUtils {
 			}else if (opValue.getStringValue() != null) {
 				profileObj.put(option.name(), opValue.getStringValue());
 			}
+		}
+		ConfigurationDataProvider connectProvider = new ConfigurationDataProvider(cm, session);
+		try {
+			DataTarget target = connectProvider.getDataTarget();
+			if (target != null) {
+				JSONObject serverDetails = new JSONObject();
+				serverDetails.put(JSON_SERVER_URL_KEY, target.getUrl());
+				serverDetails.put(JSON_SERVER_PROTOCOL_KEY, target.getProtocol().name());
+				serverDetails.put(JSON_SERVER_USERNAME_KEY, target.getUsername());
+				serverDetails.put(JSON_SERVER_PASSWORD_KEY, target.getPassword());
+				serverDetails.put(JSON_SERVER_FREQUENCY_KEY, target.getFrequency());
+				
+				profileObj.put(JSON_SERVER_DATA_KEY, serverDetails);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return profileObj.toJSONString();
 	}
