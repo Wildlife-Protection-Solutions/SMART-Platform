@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -134,6 +135,11 @@ public class ObservationDialog extends Dialog {
 		}
 	}
 
+	public ObservationDialog(Shell parentShell, IntelObservation observation) {
+		this(parentShell, observation.getLocation());
+		this.editObs = observation;
+	}
+	
 	private void loadDataModel(){
 		Job j = new Job(Messages.ObservationDialog_LoadDmJobName) {
 			
@@ -158,6 +164,11 @@ public class ObservationDialog extends Dialog {
 					dmTreeViewer.setInput(fdm);
 					dmTreeViewer.expandToLevel(3);
 					observationTable.setInput(observations);
+					
+					if (editObs != null) {
+						observationTable.setSelection(new StructuredSelection(editObs));
+						editObservation();
+					}
 				});
 				return Status.OK_STATUS;
 			}
@@ -317,7 +328,6 @@ public class ObservationDialog extends Dialog {
 		});
 		
 		main.setWeights(new int[]{70,30});
-		
 		
 		loadDataModel();
 		return main;

@@ -65,7 +65,6 @@ public class LocationDetailsShell extends SmartShellDialog{
 	private int xPos, yPos;
 	private Label lblId;
 	
-//	private TreeViewer observationTree;
 	private ScrolledComposite sc;
 	private Composite main;
 	

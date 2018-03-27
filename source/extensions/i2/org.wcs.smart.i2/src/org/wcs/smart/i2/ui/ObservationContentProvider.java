@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelRecord;
 
 /**
  * Content provider for displaying relationship data in a tree by group.
@@ -39,7 +40,7 @@ import org.wcs.smart.i2.model.IntelObservationAttribute;
  */
 public class ObservationContentProvider implements ITreeContentProvider {
 
-	private IntelLocation location;
+	private List<IntelObservation> observations;
 	
 	public ObservationContentProvider(){
 	}
@@ -50,18 +51,29 @@ public class ObservationContentProvider implements ITreeContentProvider {
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		location = null;
+		this.observations = null;
 		if (newInput instanceof IntelLocation){
-			location = (IntelLocation) newInput;
+			IntelLocation location = (IntelLocation) newInput;
+			observations = new ArrayList<>();
+			observations.addAll(location.getObservations());
+		}else if (newInput instanceof IntelRecord) {
+			observations = new ArrayList<>();
+			IntelRecord rr = (IntelRecord)newInput;
+			for (IntelLocation ll : rr.getLocations()) {
+				observations.addAll(ll.getObservations());
+			}
+		}
+		
+		if (observations != null) {
+			observations.sort((a,b)-> a.getCategory().getFullCategoryName().compareTo(b.getCategory().getFullCategoryName()));
 		}
 	}
 	
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (location.getObservations() == null) return new Object[0];
-		List<IntelObservation> obs = new ArrayList<IntelObservation>(location.getObservations());
-		obs.sort((a,b)-> a.getCategory().getFullCategoryName().compareTo(b.getCategory().getFullCategoryName()));
-		return obs.toArray();
+		if (observations == null) return new Object[0];
+		if (observations.size() == 0) return new Object[0];
+		return observations.toArray();
 	}
 
 	@Override

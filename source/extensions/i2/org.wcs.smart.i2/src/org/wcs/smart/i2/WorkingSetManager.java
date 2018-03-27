@@ -209,7 +209,7 @@ public enum WorkingSetManager {
 				}
 			}
 		}
-		if (wset != null && !modified) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
+		if (wset != null && modified) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
 	
 	public void addQueryUuidToActiveWorkingSet(Collection<UUID> queryUuids, IEclipseContext context){

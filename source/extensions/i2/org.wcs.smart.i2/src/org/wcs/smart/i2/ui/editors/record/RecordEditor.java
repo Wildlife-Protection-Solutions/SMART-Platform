@@ -557,10 +557,9 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		return this.record;
 	}
 	
-	
 	public void locationsUpdated(){
 		setDirty(true);
-//		summaryPage.getLocationPanel().refreshTable();
+		summaryPage.refresh();
 		mapPage.refresh();
 	}
 	
@@ -588,7 +587,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		}
 		
 		summaryPage.getEntityPanel().init();
-//		summaryPage.getLocationPanel().refreshTable();
+		summaryPage.refresh();
 		mapPage.refresh();
 		setDirty(true);
 	}
@@ -604,7 +603,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			newEntityLocationLinks.add(newitem);
 		}
 		summaryPage.getEntityPanel().init();
-//		summaryPage.getLocationPanel().refreshTable();
+		summaryPage.refresh();
 		mapPage.refresh();
 		setDirty(true);
 	}
@@ -645,6 +644,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		}
 		
 		mapPage.refresh();
+		summaryPage.refresh();
 		setDirty(true);
 	}
 	
@@ -671,6 +671,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		summaryPage.getEntityPanel().init();
 //		summaryPage.getLocationPanel().refreshTable();
 		mapPage.refresh();
+		summaryPage.refresh();
 		setDirty(true);
 	}
 	

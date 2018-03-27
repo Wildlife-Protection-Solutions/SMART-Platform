@@ -1134,6 +1134,9 @@ public class Messages extends NLS {
 	public static String RecordLabelProvider_0Name1DateCreated;
 	public static String RecordLabelProvider_0Title1DateCreated;
 	public static String RecordLocationObservationCellEditor_CellLabel;
+	public static String RecordLocationSummaryComposite_CollapseAll;
+	public static String RecordLocationSummaryComposite_ExpandAll;
+	public static String RecordLocationSummaryComposite_ShowOnMap;
 	public static String RecordManager_DeleteError;
 	public static String RecordManager_ErrorTitle;
 	public static String RecordManager_InsufficientPrivileges;
@@ -1210,6 +1213,7 @@ public class Messages extends NLS {
 	public static String RecordSummaryPage_ModifiedLabel;
 	public static String RecordSummaryPage_NarrativeLabel;
 	public static String RecordSummaryPage_narrativetooltip;
+	public static String RecordSummaryPage_ObservationsTabName;
 	public static String RecordSummaryPage_PrimaryDateLabel;
 	public static String RecordSummaryPage_ScratchpadLink;
 	public static String RecordSummaryPage_scratchpadtooltip;

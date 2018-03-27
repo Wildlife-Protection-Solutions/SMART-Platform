@@ -138,6 +138,7 @@ public class RecordSummaryPage extends EditorPart{
 	
 	private EntityListComposite entityPanel;
 	private AttachmentListComposite attachmentPanel;
+	private RecordLocationSummaryComposite observationPanel;
 	
 	private RecordEditor recordEditor;
 	
@@ -342,11 +343,11 @@ public class RecordSummaryPage extends EditorPart{
 		attachmentPanel = new AttachmentListComposite(expAttachments, toolkit, recordEditor);
 		attachmentPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-//		SmartSection expLocation = createSectionHeader(sashForm, toolkit, "Locations");
-//		locationPanel = new LocationListComposite(expLocation, toolkit, recordEditor);
-//		locationPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true)); 
+		SmartSection expLocation = createSectionHeader(sashForm, toolkit, Messages.RecordSummaryPage_ObservationsTabName);
+		observationPanel = new RecordLocationSummaryComposite(expLocation,toolkit, recordEditor);
+		observationPanel .setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 //		
-		sashForm.setWeights(new int[]{3,1,1});
+		sashForm.setWeights(new int[]{2,1,1,1});
 		sashForm.addListener(SWT.Resize, (e)->{
 			List<SmartSection> sections = (List<SmartSection>) sashForm.getData(SmartSection.KIDS_KEY);
 			int max = (Integer)sashForm.getData(SmartSection.MAX_KEY);
@@ -371,6 +372,9 @@ public class RecordSummaryPage extends EditorPart{
 		buttonToolBar.setEditMode(editMode);
 	}
 
+	public void refresh() {
+		observationPanel.init();
+	}
 	public void initPage(){
 		if (summaryPart != null){
 			if (summaryPart.isDisposed()) return;
@@ -548,7 +552,7 @@ public class RecordSummaryPage extends EditorPart{
 		summaryPart.layout();
 		
 		entityPanel.init();
-//		locationPanel.init();
+		observationPanel.init();
 		
 		attachmentPanel.refreshAttachmentTable();
 		attachmentPanel.updateEditMode();
@@ -587,7 +591,7 @@ public class RecordSummaryPage extends EditorPart{
 		
 
 		
-		sashForm.setWeights(new int[]{3,1,1});
+		sashForm.setWeights(new int[]{2,1,1,1});
 	}
 	
 	/*

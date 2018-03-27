@@ -390,6 +390,12 @@ public class RecordMapPage extends SmartMapEditorPart {
         
     }
 
+    public void selectLocation(IntelLocation location) {
+    	locationPanel.setSelection(location);
+    }
     
+    public void refreshLocationTable() {
+    	locationPanel.refreshTable();
+    }
 
 }

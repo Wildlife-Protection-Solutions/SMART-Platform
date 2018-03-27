@@ -46,6 +46,7 @@ import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.ICellEditorValidator;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
@@ -639,6 +640,10 @@ public class LocationListComposite extends Composite{
 	
 	public void refreshTable(){
 		tblObservations.refresh();
+	}
+	
+	public void setSelection(IntelLocation location) {
+		tblObservations.setSelection(new StructuredSelection(location));
 	}
 	
 	private class LocationTableEditor extends EditingSupport {
