@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.event.EventPlugIn;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -38,7 +39,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class RemoveEventJob extends Job {
 
 	public RemoveEventJob() {
-		super("Uninstalling event plugin");
+		super(Messages.RemoveEventJob_JobName);
 	}
 
 	@Override
@@ -54,7 +55,7 @@ public class RemoveEventJob extends Job {
 				}catch (Exception ex){
 					EventPlugIn.log(ex.getMessage(), ex);	
 				}
-				EventPlugIn.displayLog("Error uninstalling event plugin: " + e.getMessage(), e);
+				EventPlugIn.displayLog(Messages.RemoveEventJob_UninstallError + e.getMessage(), e);
 				return new Status(Status.ERROR, EventPlugIn.PLUGIN_ID, e.getMessage());
 			}
 		}	
@@ -63,19 +64,16 @@ public class RemoveEventJob extends Job {
 
 	private void uninstall(Session session){
 		
-		@SuppressWarnings("nls")
 		String[] TABLES = new String[]{
-				"smart.e_event_action",
-				"smart.e_action_parameter_value",
-				"smart.e_action",
-				"smart.e_event_filter"
+				"smart.e_event_action", //$NON-NLS-1$
+				"smart.e_action_parameter_value", //$NON-NLS-1$
+				"smart.e_action", //$NON-NLS-1$
+				"smart.e_event_filter" //$NON-NLS-1$
 		};
 		
 		String[] LABELTABLES = new String[]{
-				
 		};
 		
-
 		//drop tables
 		for (String table : LABELTABLES){
 			if (DerbyHibernateExtensions.tableExists(session, table)){

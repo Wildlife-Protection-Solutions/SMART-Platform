@@ -55,6 +55,7 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.filter.Operator;
 import org.wcs.smart.event.filter.ParsedFilter;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.model.EAction;
 import org.wcs.smart.event.model.EFilter;
 import org.wcs.smart.event.ui.filter.DefinitionPanel;
@@ -85,12 +86,12 @@ public class NewFilterDialog extends TitleAreaDialog {
 
 		@Override
 		public String getKey() {
-			return "all";
+			return "all"; //$NON-NLS-1$
 		}
 
 		@Override
 		public String getName(Locale l) {
-			return "All Sources";
+			return Messages.NewFilterDialog_AllName;
 		}
 
 		@Override
@@ -177,7 +178,7 @@ public class NewFilterDialog extends TitleAreaDialog {
 		((GridLayout)header.getLayout()).marginHeight = 0;
 		
 		Label l = new Label(header, SWT.NONE);
-		l.setText("Filter ID:");
+		l.setText(Messages.NewFilterDialog_FilterIDLabel);
 		
 		txtId = new Text(header, SWT.BORDER);
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -185,7 +186,7 @@ public class NewFilterDialog extends TitleAreaDialog {
 		txtId.addModifyListener(e->validate());
 		
 		l = new Label(header, SWT.NONE);
-		l.setText("Observation Source:");
+		l.setText(Messages.NewFilterDialog_SourceLabel);
 		
 		chSourceFilter = new OptionCheckBoxDropDown(header);
 		chSourceFilter.setLabelProvider(new LabelProvider() {
@@ -202,7 +203,7 @@ public class NewFilterDialog extends TitleAreaDialog {
 		chSourceFilter.addSelectionChangedListener(e->validate());
 		
 		l = new Label(main, SWT.NONE);
-		l.setText("Filter:");
+		l.setText(Messages.NewFilterDialog_FilterLabel);
 		
 		createDataModelFilter(main);
 		
@@ -213,7 +214,7 @@ public class NewFilterDialog extends TitleAreaDialog {
 			try {
 				filter = toUpdate.getParsedFilter();
 			}catch (Exception ex) {
-				EventPlugIn.displayLog("Unable to parse query filter:" + ex.getMessage(), ex);
+				EventPlugIn.displayLog(Messages.NewFilterDialog_ParseError1 + ex.getMessage(), ex);
 			}
 			
 			if (filter != null) {
@@ -227,7 +228,7 @@ public class NewFilterDialog extends TitleAreaDialog {
 				try(Session session = HibernateManager.openSession()){
 					DropItemFactory.INSTANCE.createDropItem(filter.getFilter(), dropItems, session);
 				}catch (Exception ex) {
-					EventPlugIn.displayLog(MessageFormat.format("Unable to parse filter: {0}",ex.getMessage()), ex);
+					EventPlugIn.displayLog(MessageFormat.format(Messages.NewFilterDialog_ParseError2,ex.getMessage()), ex);
 				}
 				definitionPanel.addItems(dropItems);
 			}
@@ -237,9 +238,9 @@ public class NewFilterDialog extends TitleAreaDialog {
 		
 		validate();
 		
-		setTitle("New Filter");
-		getShell().setText("New Filter");
-		setMessage("Create a new action filter from waypoint source and observation");
+		setTitle(Messages.NewFilterDialog_Title);
+		getShell().setText(Messages.NewFilterDialog_Title);
+		setMessage(Messages.NewFilterDialog_Message);
 		return parent;
 	}
 	
@@ -251,16 +252,23 @@ public class NewFilterDialog extends TitleAreaDialog {
 	private void validate() {
 		String id = txtId.getText().trim();
 		if (id.isEmpty()) {
-			setError("An ID must be validated.");
+			setError(Messages.NewFilterDialog_ValidateIdRequire);
 			return;
 		}
 		
 		if (chSourceFilter.getCheckObjects().isEmpty()) {
-			setError("At least one waypoint source must be selected");
+			setError(Messages.NewFilterDialog_SourceRequired);
 			return;
 		}
 
-		//TODO: validate query string
+		//validate query string
+		String filterString = getFilterString();
+		try {
+			ParsedFilter.parse(filterString);
+		}catch (Exception ex) {
+			setError(Messages.NewFilterDialog_ParseError + ex.getMessage());
+			return;
+		}
 		
 		setErrorMessage(null);
 		Button btn = getButton(IDialogConstants.OK_ID);
@@ -306,9 +314,9 @@ public class NewFilterDialog extends TitleAreaDialog {
 		dmTree.setLabelProvider(new DataModelLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element == TreeContentProvider.ATTRIBUTE_NODE) return "Attributes";
-				if (element == TreeContentProvider.CATEGORY_NODE) return "Categories";
-				if (element == TreeContentProvider.OPERATOR_NODE) return "Operators";
+				if (element == TreeContentProvider.ATTRIBUTE_NODE) return Messages.NewFilterDialog_AttributesTreeLabel;
+				if (element == TreeContentProvider.CATEGORY_NODE) return Messages.NewFilterDialog_categoriesTreeLabel;
+				if (element == TreeContentProvider.OPERATOR_NODE) return Messages.NewFilterDialog_OperatorsTreeLabel;
 				if (element instanceof Operator) return ((Operator)element).getGuiValue();
 				return super.getText(element);
 			}
@@ -344,9 +352,9 @@ public class NewFilterDialog extends TitleAreaDialog {
 	}
 	
 	private class TreeContentProvider implements ITreeContentProvider{
-		public static final String CATEGORY_NODE = "Categories";
-		public static final String ATTRIBUTE_NODE = "Attributes";
-		public static final String OPERATOR_NODE = "Operators";
+		public static final String CATEGORY_NODE = "Categories"; //$NON-NLS-1$
+		public static final String ATTRIBUTE_NODE = "Attributes"; //$NON-NLS-1$
+		public static final String OPERATOR_NODE = "Operators"; //$NON-NLS-1$
 		
 		private List<Attribute> dmAttributes = null;
 		private DataModelContentProvider dmProvider = new DataModelContentProvider(false, false, true) {

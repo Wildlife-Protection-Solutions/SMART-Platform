@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.event.EventPlugIn;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -89,7 +90,6 @@ public abstract class DropItem {
 	 * @param newPanel new drop item panel
 	 */
 	public void moveParent(DefinitionPanel newPanel){
-		//TODO: not necessarily supported on all os's
 		widget.setParent(newPanel.getDropTargetComposite());
 		targetPanel = newPanel;
 	}
@@ -169,7 +169,7 @@ public abstract class DropItem {
 		createComposite(inner);
 		
 		Label lblX = new Label(inner, SWT.NONE);
-		lblX.setToolTipText("remove");
+		lblX.setToolTipText(Messages.DropItem_removetooltip);
 		lblX.setLayoutData(new GridData(SWT.TOP, SWT.RIGHT, false, true));
 		lblX.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_DELETE_MINI));
 		lblX.addMouseListener(new MouseAdapter() {

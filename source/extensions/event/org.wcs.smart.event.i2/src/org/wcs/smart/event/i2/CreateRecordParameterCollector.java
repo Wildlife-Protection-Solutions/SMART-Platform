@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.event.i2;
 
 import java.util.ArrayList;
@@ -20,6 +41,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.event.i2.internal.Messages;
 import org.wcs.smart.event.model.EAction;
 import org.wcs.smart.event.model.EActionParameterValue;
 import org.wcs.smart.event.ui.model.IActionParameterCollector;
@@ -29,6 +51,12 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Parameter collector for create record action type parameters
+ * 
+ * @author Emily
+ *
+ */
 public class CreateRecordParameterCollector implements IActionParameterCollector {
 
 	private Text txtTitle;
@@ -110,7 +138,7 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 		main.setLayout(new GridLayout(2, false));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Record Source:");
+		l.setText(Messages.CreateRecordParameterCollector_SourceLabel);
 		
 		cmbSource = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbSource.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -126,7 +154,7 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 		});
 		cmbSource.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		l = new Label(main, SWT.NONE);
-		l.setText("Record Title:");
+		l.setText(Messages.CreateRecordParameterCollector_TitleLabel);
 		
 		txtTitle = new Text(main, SWT.BORDER);
 		txtTitle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -140,16 +168,17 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 	
 	}
 
-	private Job loadSources = new Job("loading record sources") {
+	private Job loadSources = new Job(Messages.CreateRecordParameterCollector_JobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Object> srcs = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				srcs.addAll(QueryFactory.buildQuery(session, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).list());
+				srcs.addAll(QueryFactory.buildQuery(session, IntelRecordSource.class, 
+						"conservationArea", SmartDB.getCurrentConservationArea()).list()); //$NON-NLS-1$
 			}
 			
-			srcs.add(0, "");
+			srcs.add(0, ""); //$NON-NLS-1$
 			Display.getDefault().syncExec(()->{
 				if (cmbSource.getControl().isDisposed()) return;
 				cmbSource.setInput(srcs);

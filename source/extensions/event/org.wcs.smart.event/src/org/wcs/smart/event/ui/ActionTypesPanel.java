@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.event.ui;
 
-import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -38,6 +37,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.event.ActionTypeManager;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.model.IActionParameter;
 import org.wcs.smart.event.model.IActionType;
 
@@ -63,7 +63,7 @@ public class ActionTypesPanel extends Composite {
 		setLayout(new GridLayout());
 		
 		Label l = new Label(this, SWT.NONE);
-		l.setText("Lists all the action types supported by the system.");
+		l.setText(Messages.ActionTypesPanel_PanelMsg);
 		
 		l = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -82,7 +82,7 @@ public class ActionTypesPanel extends Composite {
 		lstTypes.getTable().setHeaderVisible(true);
 		
 		TableViewerColumn column1 = new TableViewerColumn(lstTypes, SWT.NONE);
-		column1.getColumn().setText("Action Types");
+		column1.getColumn().setText(Messages.ActionTypesPanel_ColumnTypeName);
 		column1.getColumn().setWidth(200);
 		column1.setLabelProvider(new AssetTypeLabelProvider());
 		
@@ -112,7 +112,6 @@ public class ActionTypesPanel extends Composite {
 		for (Control k : rightPart.getChildren()) k.dispose();
 		
 		String name = type.getName(Locale.getDefault());
-		String key = type.getKey();
 		
 		Label l = new Label(rightPart, SWT.NONE);
 		l.setText(name);
@@ -141,7 +140,7 @@ public class ActionTypesPanel extends Composite {
 		scroll.setContent(content);
 		
 		l = new Label(content, SWT.NONE);
-		l.setText("Description");
+		l.setText(Messages.ActionTypesPanel_ColumnDescription);
 		l.setBackground(rightPart.getBackground());
 		
 		fd = l.getFont().getFontData()[0];
@@ -158,7 +157,7 @@ public class ActionTypesPanel extends Composite {
 		l = new Label(content, SWT.NONE);
 
 		l = new Label(content, SWT.NONE);
-		l.setText("Parameters");
+		l.setText(Messages.ActionTypesPanel_ParametersLabel);
 		l.setBackground(rightPart.getBackground());
 		l.setFont(boldFont2);
 		

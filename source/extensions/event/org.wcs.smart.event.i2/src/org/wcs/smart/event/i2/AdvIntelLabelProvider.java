@@ -23,32 +23,33 @@ package org.wcs.smart.event.i2;
 
 import java.util.Locale;
 
-import org.wcs.smart.SmartContext;
-import org.wcs.smart.event.model.IActionParameter;
+import org.wcs.smart.event.i2.internal.Messages;
 
 /**
- * Record source parameter
+ * Shared label provider for advanced intel actions
  * 
  * @author Emily
  *
  */
-public class SourceParameter implements IActionParameter{
-
-	public final static SourceParameter INSTANCE = new SourceParameter();
-	
-	@Override
-	public String getKey() {
-		return CreateRecordActionType.KEY + ".source"; //$NON-NLS-1$
-	}
+public class AdvIntelLabelProvider implements IAdvIntelLabelProvider {
 
 	@Override
-	public String getName(Locale l) {
-		return SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(SourceParameter.class, l);
+	public String getLabel(Object item, Locale l) {
+		if (item == SourceParameter.class) return Messages.AdvIntelLabelProvider_SourceParameterName;
+		if (item == TitleParameter.class) return Messages.AdvIntelLabelProvider_TitleParameterName;
+		
+		if (item == CreateRecordActionType.NAME) return Messages.AdvIntelLabelProvider_CreateActionTypeName;
+		if (item == CreateRecordActionType.DESCRIPTION) return Messages.AdvIntelLabelProvider_CreateActionTypeDesc;
+		
+		if (item == CreateRecordActionType.MESSAGE) return Messages.AdvIntelLabelProvider_CreateActionTypeMsg1;
+		if (item == CreateRecordActionType.WP_SOURCE) return Messages.AdvIntelLabelProvider_CreateActionTypeMsg2;
+		if (item == CreateRecordActionType.WP_DATE) return Messages.AdvIntelLabelProvider_CreateActionTypeMsg3;
+		if (item == CreateRecordActionType.WP_CMT) return Messages.AdvIntelLabelProvider_CreateActionTypeMsg4;
+		if (item == CreateRecordActionType.WP_OBS) return Messages.AdvIntelLabelProvider_CreateActionTypeMsg5;
+
+		
+		return null;
 	}
 
-	@Override
-	public boolean isRequired() {
-		return false;
-	}
 
 }

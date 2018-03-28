@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.model.EAction;
 import org.wcs.smart.event.model.EActionEvent;
 import org.wcs.smart.event.model.EActionParameterValue;
@@ -51,11 +52,12 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner {
 		SubMonitor progress = SubMonitor.convert(monitor, 3);
 		
 		//clone filters
-		progress.beginTask("Cloning event data",  3);
+		progress.beginTask(Messages.ConservationAreaCloner_TaskName,  3);
 		
 		HashMap<UUID, EFilter> oldToCloneFilter = new HashMap<>();
-		progress.subTask("cloning filters");
-		List<EFilter> filters = QueryFactory.buildQuery(engine.getSession(), EFilter.class, new Object[] {"conservationArea", engine.getTemplateCa()}).list();
+		progress.subTask(Messages.ConservationAreaCloner_SubTask1);
+		List<EFilter> filters = QueryFactory.buildQuery(engine.getSession(), EFilter.class, 
+				new Object[] {"conservationArea", engine.getTemplateCa()}).list(); //$NON-NLS-1$
 		for (EFilter filter : filters) {
 			EFilter clone = new EFilter();
 			clone.setConservationArea(engine.getTemplateCa());
@@ -68,9 +70,10 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner {
 		progress.worked(1);
 		
 		//clone actions
-		progress.subTask("cloning actions");
+		progress.subTask(Messages.ConservationAreaCloner_SubTask2);
 		HashMap<UUID, EAction> oldToCloneAction = new HashMap<>();
-		List<EAction> actions = QueryFactory.buildQuery(engine.getSession(), EAction.class, new Object[] {"conservationArea", engine.getTemplateCa()}).list();
+		List<EAction> actions = QueryFactory.buildQuery(engine.getSession(), EAction.class, 
+				new Object[] {"conservationArea", engine.getTemplateCa()}).list(); //$NON-NLS-1$
 		for (EAction action : actions) {
 			EAction clone = new EAction();
 			clone.setConservationArea(engine.getTemplateCa());
@@ -93,8 +96,9 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner {
 		progress.worked(1);
 		
 		//clone events
-		progress.subTask("cloning events");
-		List<EActionEvent> events = QueryFactory.buildQuery(engine.getSession(), EActionEvent.class, new Object[] {"action.conservationArea", engine.getTemplateCa()}).list();
+		progress.subTask(Messages.ConservationAreaCloner_SubTask3);
+		List<EActionEvent> events = QueryFactory.buildQuery(engine.getSession(), EActionEvent.class, 
+				new Object[] {"action.conservationArea", engine.getTemplateCa()}).list(); //$NON-NLS-1$
 		for (EActionEvent event : events) {
 			EActionEvent clone = new EActionEvent();
 			clone.setAction(oldToCloneAction.get(event.getAction().getUuid()));

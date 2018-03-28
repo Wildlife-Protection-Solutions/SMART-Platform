@@ -71,7 +71,7 @@ public class AttributeListDropItem extends DropItem {
 	/*
 	 * Job to load the attribute list options
 	 */
-	protected Job loadItemsJobs = new Job("Loading datamodel list items"){
+	protected Job loadItemsJobs = new Job("loading datamodel list items"){ //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

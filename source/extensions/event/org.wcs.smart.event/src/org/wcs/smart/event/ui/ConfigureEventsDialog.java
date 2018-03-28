@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.EventProcessingJob;
+import org.wcs.smart.event.internal.Messages;
 
 /**
  * Dialog for configuring events.
@@ -82,28 +83,28 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		actionPanel.addListener(e->eventPanel.refresh());
 		
 		TabItem eventTab = new TabItem(tabs, SWT.NONE);
-		eventTab.setText("Events");
+		eventTab.setText(Messages.ConfigureEventsDialog_EventsTab);
 		eventTab.setControl(eventPanel);
 		eventTab.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ACTION_EVENT));
 		
 		TabItem filtersTab = new TabItem(tabs, SWT.NONE);
-		filtersTab.setText("Filters");
+		filtersTab.setText(Messages.ConfigureEventsDialog_FiltersTab);
 		filtersTab.setControl(filtersPanel);
 		filtersTab.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_FILTER));
 		
 		TabItem actionsTab = new TabItem(tabs, SWT.NONE);
-		actionsTab.setText("Actions");
+		actionsTab.setText(Messages.ConfigureEventsDialog_ActionsTab);
 		actionsTab.setControl(actionPanel);
 		actionsTab.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ACTION));
 		
 		TabItem typesTab = new TabItem(tabs, SWT.NONE);
-		typesTab.setText("Action Types");
+		typesTab.setText(Messages.ConfigureEventsDialog_TypesTab);
 		typesTab.setControl(typesPanel);
 		typesTab.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ACTION_TYPE));
 		
-		setTitle("System Triggers");
-		getShell().setText("System Triggers");
-		setMessage("Configure the events that are fired when new observations are created.");
+		setTitle(Messages.ConfigureEventsDialog_Title);
+		getShell().setText(Messages.ConfigureEventsDialog_Title);
+		setMessage(Messages.ConfigureEventsDialog_Message);
 		
 		return parent;
 	}

@@ -47,7 +47,7 @@ public enum ActionTypeManagerInternal {
 		IConfigurationElement config = collectors.get(type.getKey());
 		if (config == null) return null;
 		try {
-			return (IActionParameterCollector) config.createExecutableExtension("parameter_collector");
+			return (IActionParameterCollector) config.createExecutableExtension("parameter_collector"); //$NON-NLS-1$
 		}catch (Exception ex) {
 			EventPlugIn.log(ex.getMessage(), ex);
 		}

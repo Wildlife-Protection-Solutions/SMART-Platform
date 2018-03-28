@@ -33,6 +33,7 @@ import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.event.EventPlugIn;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -44,7 +45,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class AddEventJob extends Job {
 
 	public AddEventJob() {
-		super("Install/update event plugin");
+		super(Messages.AddEventJob_JobName);
 	}
 
 	@Override
@@ -62,10 +63,10 @@ public class AddEventJob extends Job {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						EventPlugIn.displayLog("Error installing plugin: " + ex.getMessage(), ex);
+						EventPlugIn.displayLog(Messages.AddEventJob_InstallError + ex.getMessage(), ex);
 					}
 				});
-				return new Status(IStatus.ERROR, EventPlugIn.PLUGIN_ID, 1, "Error installing plugin: " + ex.getMessage(), ex);
+				return new Status(IStatus.ERROR, EventPlugIn.PLUGIN_ID, 1, Messages.AddEventJob_InstallError + ex.getMessage(), ex);
 			}
 		}
 		monitor.done();
@@ -82,35 +83,34 @@ public class AddEventJob extends Job {
 		EventDatabaseUpgrader.upgrade(EventPlugIn.DB_VERSION_1, session);
 	}
 	
-	@SuppressWarnings("nls")
 	private void createTables(Session session){
 		String[] sql = new String[]{
-			"CREATE TABLE smart.e_event_filter(uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, id varchar(128) not null, filter_string varchar(32000) not null, PRIMARY KEY(uuid))",
-			"ALTER TABLE smart.e_event_filter ADD CONSTRAINT eeventfilter_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) DEFERRABLE INITIALLY IMMEDIATE", 
-			"GRANT SELECT ON smart.e_event_filter TO ANALYST", 
-			"GRANT SELECT ON smart.e_event_filter TO DATA_ENTRY", 
-			"GRANT ALL PRIVILEGES ON smart.e_event_filter TO MANAGER",
+			"CREATE TABLE smart.e_event_filter(uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, id varchar(128) not null, filter_string varchar(32000) not null, PRIMARY KEY(uuid))", //$NON-NLS-1$
+			"ALTER TABLE smart.e_event_filter ADD CONSTRAINT eeventfilter_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) DEFERRABLE INITIALLY IMMEDIATE",  //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_event_filter TO ANALYST",  //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_event_filter TO DATA_ENTRY",  //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.e_event_filter TO MANAGER", //$NON-NLS-1$
 
-			"CREATE TABLE smart.e_action( uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, id varchar(128) not null, type_key varchar(128) not null, PRIMARY KEY (uuid))",
-			"ALTER TABLE smart.e_action ADD CONSTRAINT eaction_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) DEFERRABLE INITIALLY IMMEDIATE",
-			"GRANT SELECT ON smart.e_action TO ANALYST",
-			"GRANT SELECT ON smart.e_action TO DATA_ENTRY",
-			"GRANT ALL PRIVILEGES ON smart.e_action TO MANAGER",
-
-
-			"CREATE TABLE smart.e_action_parameter_value( action_uuid char(16) for bit data not null, parameter_key varchar(128)  not null, parameter_value varchar(4096) not null, PRIMARY KEY (action_uuid, parameter_key) )",
-			"ALTER TABLE smart.e_action_parameter_value ADD CONSTRAINT eactionparametervalue_actionuuid_fk FOREIGN KEY (action_uuid) REFERENCES smart.e_action(uuid) DEFERRABLE INITIALLY IMMEDIATE",
-			"GRANT SELECT ON smart.e_action_parameter_value TO ANALYST",
-			"GRANT SELECT ON smart.e_action_parameter_value TO DATA_ENTRY",
-			"GRANT ALL PRIVILEGES ON smart.e_action_parameter_value TO MANAGER",
+			"CREATE TABLE smart.e_action( uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, id varchar(128) not null, type_key varchar(128) not null, PRIMARY KEY (uuid))", //$NON-NLS-1$
+			"ALTER TABLE smart.e_action ADD CONSTRAINT eaction_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_action TO ANALYST", //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_action TO DATA_ENTRY", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.e_action TO MANAGER", //$NON-NLS-1$
 
 
-			"CREATE TABLE smart.e_event_action(uuid char(16) for bit data not null, filter_uuid char(16) for bit data not null, action_uuid char(16) for bit data not null, is_enabled boolean not null default true, PRIMARY KEY (uuid) )",
-			"ALTER TABLE smart.e_event_action ADD CONSTRAINT eeventaction_actionuuid_fk FOREIGN KEY (action_uuid) REFERENCES smart.e_action(uuid) DEFERRABLE INITIALLY IMMEDIATE",
-			"ALTER TABLE smart.e_event_action ADD CONSTRAINT eeventaction_filteruuid_fk FOREIGN KEY (filter_uuid) REFERENCES smart.e_event_filter(uuid) DEFERRABLE INITIALLY IMMEDIATE",
-			"GRANT SELECT ON smart.e_event_action TO ANALYST",
-			"GRANT SELECT ON smart.e_event_action TO DATA_ENTRY",
-			"GRANT ALL PRIVILEGES ON smart.e_event_action TO MANAGER",
+			"CREATE TABLE smart.e_action_parameter_value( action_uuid char(16) for bit data not null, parameter_key varchar(128)  not null, parameter_value varchar(4096) not null, PRIMARY KEY (action_uuid, parameter_key) )", //$NON-NLS-1$
+			"ALTER TABLE smart.e_action_parameter_value ADD CONSTRAINT eactionparametervalue_actionuuid_fk FOREIGN KEY (action_uuid) REFERENCES smart.e_action(uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_action_parameter_value TO ANALYST", //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_action_parameter_value TO DATA_ENTRY", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.e_action_parameter_value TO MANAGER", //$NON-NLS-1$
+
+
+			"CREATE TABLE smart.e_event_action(uuid char(16) for bit data not null, filter_uuid char(16) for bit data not null, action_uuid char(16) for bit data not null, is_enabled boolean not null default true, PRIMARY KEY (uuid) )", //$NON-NLS-1$
+			"ALTER TABLE smart.e_event_action ADD CONSTRAINT eeventaction_actionuuid_fk FOREIGN KEY (action_uuid) REFERENCES smart.e_action(uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.e_event_action ADD CONSTRAINT eeventaction_filteruuid_fk FOREIGN KEY (filter_uuid) REFERENCES smart.e_event_filter(uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_event_action TO ANALYST", //$NON-NLS-1$
+			"GRANT SELECT ON smart.e_event_action TO DATA_ENTRY", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.e_event_action TO MANAGER", //$NON-NLS-1$
 
 		};
 		

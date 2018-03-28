@@ -30,13 +30,6 @@
       </menuContribution>
    </extension>
    <extension
-         point="org.wcs.smart.event.actiontype">
-      <actiontype
-            class="org.wcs.smart.event.test.NotifyUserActionType"
-            parameter_collector="org.wcs.smart.event.test.NotifyUserActionTypeParameterCollector">
-      </actiontype>
-   </extension>
-   <extension
          point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.event.model.EAction"

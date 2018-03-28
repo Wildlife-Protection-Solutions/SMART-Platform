@@ -66,6 +66,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.event.ActionTypeManager;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.filter.ParsedFilter;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.model.EAction;
 import org.wcs.smart.event.model.EActionEvent;
 import org.wcs.smart.event.model.EActionParameterValue;
@@ -97,7 +98,7 @@ public class EventsPanel extends Composite {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Links filters with actions to create events.");
+		l.setText(Messages.EventsPanel_PanelMsg);
 		
 		SashForm sashForm = new SashForm(main, SWT.NONE);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -114,7 +115,7 @@ public class EventsPanel extends Composite {
 		tblEvents.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		TableViewerColumn stateColumn = new TableViewerColumn(tblEvents, SWT.NONE);
-		stateColumn.getColumn().setText("State");
+		stateColumn.getColumn().setText(Messages.EventsPanel_StateColumn);
 		stateColumn.getColumn().setWidth(32);
 		stateColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -144,7 +145,7 @@ public class EventsPanel extends Composite {
 		});
 		
 		TableViewerColumn filterColumn = new TableViewerColumn(tblEvents, SWT.NONE);
-		filterColumn.getColumn().setText("Filter");
+		filterColumn.getColumn().setText(Messages.EventsPanel_FilterColumn);
 		filterColumn.getColumn().setWidth(150);
 		filterColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -166,7 +167,7 @@ public class EventsPanel extends Composite {
 			}
 		});
 		TableViewerColumn actionColumn = new TableViewerColumn(tblEvents, SWT.NONE);
-		actionColumn.getColumn().setText("Action");
+		actionColumn.getColumn().setText(Messages.EventsPanel_ActionColumn);
 		actionColumn.getColumn().setWidth(150);
 		actionColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -199,7 +200,7 @@ public class EventsPanel extends Composite {
 		new MenuItem(mnu, SWT.SEPARATOR);
 
 		MenuItem enableItem = new MenuItem(mnu, SWT.PUSH);
-		enableItem.setText("Enable");
+		enableItem.setText(Messages.EventsPanel_EnableBtn);
 		enableItem.addListener(SWT.Selection, e->changeEventState());
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
@@ -215,9 +216,9 @@ public class EventsPanel extends Composite {
 			Object x = tblEvents.getStructuredSelection().getFirstElement();
 			if (x instanceof EActionEvent) {
 				if (((EActionEvent) x).isEnabled()) {
-					enableItem.setText("Disable");
+					enableItem.setText(Messages.EventsPanel_DisableBtn);
 				}else {
-					enableItem.setText("Enable");
+					enableItem.setText(Messages.EventsPanel_EnableBtn);
 				}
 				enableItem.setEnabled(true);
 			}else {
@@ -258,7 +259,7 @@ public class EventsPanel extends Composite {
 					session.getTransaction().commit();
 				}catch (Exception ex) {
 					session.getTransaction().rollback();
-					EventPlugIn.displayLog("Unable to update action state:" + ex.getMessage(), ex);
+					EventPlugIn.displayLog(Messages.EventsPanel_UpdateStateError + ex.getMessage(), ex);
 				}
 			}
 			tblEvents.refresh();
@@ -284,9 +285,9 @@ public class EventsPanel extends Composite {
 		
 		Label ll = new Label(toolbarComp, SWT.NONE);
 		if (actionEvent.isEnabled()) {
-			ll.setText("Enabled");
+			ll.setText(Messages.EventsPanel_EnabledLabel);
 		}else {
-			ll.setText("Disabled");
+			ll.setText(Messages.EventsPanel_DisabledLabel);
 		}
 		ll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		ll.setBackground(toolbarComp.getBackground());
@@ -317,14 +318,14 @@ public class EventsPanel extends Composite {
 		IActionType actionType = ActionTypeManager.INSTANCE.getActionType( actionEvent.getAction().getActionTypeKey() );
 		
 		l = new Label(content, SWT.WRAP);
-		l.setText(MessageFormat.format("Action Type: {0}", actionType.getName(Locale.getDefault())));
+		l.setText(MessageFormat.format(Messages.EventsPanel_ActionTypeLabel, actionType.getName(Locale.getDefault())));
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		l.setBackground(detailsSection.getBackground());
 		
 		for (IActionParameter parameter: actionType.getActionParameters()) {
 			StringBuilder sb = new StringBuilder();
 			sb.append(parameter.getName(Locale.getDefault()));
-			sb.append(": ");
+			sb.append(": "); //$NON-NLS-1$
 			
 			for (EActionParameterValue vv : actionEvent.getAction().getParameters()) {
 				if (vv.getId().getParameterKey().equals(parameter.getKey())) {
@@ -352,24 +353,24 @@ public class EventsPanel extends Composite {
 			
 			StringBuilder sb = new StringBuilder();
 			if (pFilter.getSources() == null) {
-				sb.append("ALL");
+				sb.append(Messages.EventsPanel_AllLabel);
 			}else {
 				pFilter.getSources().forEach(s->{
 					sb.append(s.getName(Locale.getDefault()));
-					sb.append(", ");
+					sb.append(", "); //$NON-NLS-1$
 				});
 				sb.deleteCharAt(sb.length() - 1);
 				sb.deleteCharAt(sb.length() - 1);
 			}
 			
 			l = new Label(content, SWT.WRAP);
-			l.setText(MessageFormat.format("Waypoint Sources: {0}", sb.toString()));
+			l.setText(MessageFormat.format(Messages.EventsPanel_SourcesLabel, sb.toString()));
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			l.setBackground(detailsSection.getBackground());
 			
 			
 			l = new Label(content, SWT.WRAP);
-			l.setText(MessageFormat.format("Filter: {0}", pFilter.getFilter() != null ? pFilter.getFilter().asString() : ""));
+			l.setText(MessageFormat.format(Messages.EventsPanel_FilterLabel, pFilter.getFilter() != null ? pFilter.getFilter().asString() : "")); //$NON-NLS-1$
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			l.setBackground(detailsSection.getBackground());
 			
@@ -377,7 +378,7 @@ public class EventsPanel extends Composite {
 			EventPlugIn.log(ex.getMessage(), ex);
 			
 			l = new Label(content, SWT.WRAP);
-			l.setText(MessageFormat.format("Parse Error: {0}", ex.getMessage()));
+			l.setText(MessageFormat.format(Messages.EventsPanel_ParseError, ex.getMessage()));
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			l.setBackground(detailsSection.getBackground());
 		}
@@ -397,10 +398,10 @@ public class EventsPanel extends Composite {
 		ToolItem adddiableItem = new ToolItem(tb, SWT.PUSH);
 		
 		if (action == null || action.isEnabled()) {
-			adddiableItem.setToolTipText("disable event");
+			adddiableItem.setToolTipText(Messages.EventsPanel_disableTooltip);
 			adddiableItem.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_DISABLED));
 		}else {
-			adddiableItem.setToolTipText("enable event");
+			adddiableItem.setToolTipText(Messages.EventsPanel_enableTooltip);
 			adddiableItem.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ENABLED));
 		}
 		
@@ -408,12 +409,12 @@ public class EventsPanel extends Composite {
 		adddiableItem.setEnabled(action != null);
 		
 		ToolItem addItem = new ToolItem(tb, SWT.PUSH);
-		addItem.setToolTipText("create a event");
+		addItem.setToolTipText(Messages.EventsPanel_createTooltip);
 		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		addItem.addListener(SWT.Selection, e->addEvent());
 		
 		ToolItem deleteItem = new ToolItem(tb, SWT.PUSH);
-		deleteItem.setToolTipText("delete the selected event");
+		deleteItem.setToolTipText(Messages.EventsPanel_deleteTooltip);
 		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		deleteItem.addListener(SWT.Selection, e->deleteEvent());
 		deleteItem.setEnabled(action != null);
@@ -436,7 +437,7 @@ public class EventsPanel extends Composite {
 		}
 		if (toDelete.isEmpty()) return;
 		
-		if (!MessageDialog.openQuestion(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected events. This cannot be undone.", toDelete.size()))) {
+		if (!MessageDialog.openQuestion(getShell(), Messages.EventsPanel_DeleteTitle, MessageFormat.format(Messages.EventsPanel_DeleteMsg, toDelete.size()))) {
 			return;
 		}
 		try(Session session = HibernateManager.openSession()){
@@ -450,21 +451,21 @@ public class EventsPanel extends Composite {
 				
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				EventPlugIn.log("Unable to delete selected events.", ex);
+				EventPlugIn.log(Messages.EventsPanel_DeleteError, ex);
 			}
 		}
 		tblEvents.refresh();
 	}
 	
 	
-	private Job loadDataJob = new Job("Loading action events") {
+	private Job loadDataJob = new Job(Messages.EventsPanel_LoadingJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<EActionEvent> events = new ArrayList<>();
 			
 			try(Session session = HibernateManager.openSession()){
-				events.addAll(QueryFactory.buildQuery(session, EActionEvent.class, new Object[] {"action.conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				events.addAll(QueryFactory.buildQuery(session, EActionEvent.class, new Object[] {"action.conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 				events.forEach(e->{
 					e.getAction().getId();
 					e.getFilter().getId();
@@ -512,7 +513,7 @@ public class EventsPanel extends Composite {
 					session.getTransaction().commit();
 				}catch (Exception ex) {
 					session.getTransaction().rollback();
-					EventPlugIn.log("Unable to create new event: " + ex.getMessage(), ex);
+					EventPlugIn.log(Messages.EventsPanel_CreateError + ex.getMessage(), ex);
 					return;
 				}
 			}
@@ -542,7 +543,7 @@ public class EventsPanel extends Composite {
 			((GridLayout)header.getLayout()).marginHeight = 0;
 			
 			Label l = new Label(header, SWT.NONE);
-			l.setText("Filter:");
+			l.setText(Messages.EventsPanel_FilterLabel2);
 			
 			cmbFilter = new ComboViewer(header, SWT.DROP_DOWN | SWT.READ_ONLY);
 			cmbFilter.setContentProvider(ArrayContentProvider.getInstance());
@@ -556,7 +557,7 @@ public class EventsPanel extends Composite {
 			cmbFilter.addSelectionChangedListener(e->validate());
 			
 			l = new Label(header, SWT.NONE);
-			l.setText("Action:");
+			l.setText(Messages.EventsPanel_ActionLabel2);
 			
 			cmbAction = new ComboViewer(header, SWT.DROP_DOWN | SWT.READ_ONLY);
 			cmbAction.setContentProvider(ArrayContentProvider.getInstance());
@@ -571,9 +572,9 @@ public class EventsPanel extends Composite {
 			
 			loadItems.schedule();
 			
-			setTitle("New Event");
-			getShell().setText("New Event ");
-			setMessage("Create a new event from a filter and action");
+			setTitle(Messages.EventsPanel_PanelTitle);
+			getShell().setText(Messages.EventsPanel_PanelTitle);
+			setMessage(Messages.EventsPanel_Message);
 			return parent;
 		}
 		
@@ -587,15 +588,15 @@ public class EventsPanel extends Composite {
 			Object filter = cmbFilter.getStructuredSelection().getFirstElement();
 			
 			if (action == null || filter == null) {
-				setError("Must select an action and filter");
+				setError(Messages.EventsPanel_actionfilterrequired);
 				return;
 			}
 			if (!(action instanceof EAction )) {
-				setError("Must select a valid action");
+				setError(Messages.EventsPanel_actionrequired);
 				return;
 			}
 			if (!(filter instanceof EFilter )) {
-				setError("Must select a valid filter");
+				setError(Messages.EventsPanel_filterrequired);
 				return;
 			}
 			setErrorMessage(null);
@@ -609,7 +610,7 @@ public class EventsPanel extends Composite {
 			if (btn != null) btn.setEnabled(false);
 		}
 		
-		private Job loadItems = new Job("Loading actions and filters") {
+		private Job loadItems = new Job(Messages.EventsPanel_loadingjobname) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -617,8 +618,8 @@ public class EventsPanel extends Composite {
 				List<EAction> actions = new ArrayList<>();
 				
 				try(Session session = HibernateManager.openSession()){
-					actions.addAll(QueryFactory.buildQuery(session, EAction.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
-					filters.addAll(QueryFactory.buildQuery(session, EFilter.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+					actions.addAll(QueryFactory.buildQuery(session, EAction.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
+					filters.addAll(QueryFactory.buildQuery(session, EFilter.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 					
 					actions.forEach(a->a.getId());
 					filters.forEach(f->{

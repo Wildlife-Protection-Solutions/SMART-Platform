@@ -1,8 +1,26 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.event.i2;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,17 +28,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
-import org.wcs.smart.cipher.EncryptUtils;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
-import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.model.EAction;
 import org.wcs.smart.event.model.EActionParameterValue;
@@ -46,10 +61,27 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
+/**
+ * Create new profile record action type
+ * 
+ * @author Emily
+ *
+ */
 public class CreateRecordActionType implements IActionType {
 
-	public static final String KEY = "org.wcs.smart.profile.newrecord";
+	public static final String KEY = "org.wcs.smart.profile.newrecord"; //$NON-NLS-1$
+
+	public static final String NAME = CreateRecordActionType.class.getName() + ".name"; //$NON-NLS-1$
+	public static final String DESCRIPTION = CreateRecordActionType.class.getName() + ".description"; //$NON-NLS-1$
+	public static final String MESSAGE = CreateRecordActionType.class.getName() + ".msg"; //$NON-NLS-1$
+	public static final String WP_SOURCE = CreateRecordActionType.class.getName() + ".msg"; //$NON-NLS-1$
+	public static final String WP_DATE = CreateRecordActionType.class.getName() + ".msg"; //$NON-NLS-1$
+	public static final String WP_CMT = CreateRecordActionType.class.getName() + ".msg"; //$NON-NLS-1$
+	public static final String WP_OBS = CreateRecordActionType.class.getName() + ".msg"; //$NON-NLS-1$
 	
+	
+	private static Logger logger = Logger.getLogger(CreateRecordActionType.class.getCanonicalName());
+
 	private List<IActionParameter> parameters;
 	
 	public CreateRecordActionType() {
@@ -65,12 +97,12 @@ public class CreateRecordActionType implements IActionType {
 
 	@Override
 	public String getName(Locale l) {
-		return "Create Profile Record";
+		return SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(NAME, l);
 	}
 
 	@Override
 	public String getDescription(Locale l) {
-		return "Creates a new record in the profiles module with the provided observation details";
+		return SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(DESCRIPTION, l);
 	}
 
 	@Override
@@ -79,30 +111,30 @@ public class CreateRecordActionType implements IActionType {
 	}
 
 	@Override
-	public void performAction(EAction action, EFilter filter, WaypointObservation data) {
+	public void performAction(EAction action, EFilter filter, WaypointObservation data, Locale l) {
 		//create a new intelligence record
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append(MessageFormat.format("Record automatically created by event system (Action: {0}; Filter: {1})", action.getId(), filter.getId()));
-		sb.append("\n\n");
-		sb.append(MessageFormat.format("Waypoint Source: {0}", data.getWaypoint().getSourceId()));
-		sb.append("\n");
-		sb.append(MessageFormat.format("Waypoint Date: {0}", (new SimpleDateFormat("MMM dd, yyyy HH:mm:ss")).format(data.getWaypoint().getDateTime())));
-		sb.append("\n");
-		sb.append(MessageFormat.format("Waypoint Comment: {0}", data.getWaypoint().getComment()));
-		sb.append("\n");
-		sb.append(MessageFormat.format("Observation: {0}", data.getCategory().getName()));
-		sb.append("\n");
+		sb.append(MessageFormat.format( SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(MESSAGE, l), action.getId(), filter.getId()));
+		sb.append("\n\n"); //$NON-NLS-1$
+		sb.append(MessageFormat.format(SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(WP_SOURCE, l), data.getWaypoint().getSourceId()));
+		sb.append("\n"); //$NON-NLS-1$
+		sb.append(MessageFormat.format(SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(WP_DATE, l), (new SimpleDateFormat("MMM dd, yyyy HH:mm:ss")).format(data.getWaypoint().getDateTime()))); //$NON-NLS-1$
+		sb.append("\n"); //$NON-NLS-1$
+		sb.append(MessageFormat.format(SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(WP_CMT, l), data.getWaypoint().getComment()));
+		sb.append("\n"); //$NON-NLS-1$
+		sb.append(MessageFormat.format(SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(WP_OBS, l), data.getCategory().getName()));
+		sb.append("\n"); //$NON-NLS-1$
 		for (WaypointObservationAttribute a : data.getAttributes()) {
-			sb.append(MessageFormat.format("{0}: {1}", a.getAttribute().getName(), a.getAttributeValueAsString(Locale.getDefault())));
-			sb.append("\n");
+			sb.append(MessageFormat.format("{0}: {1}", a.getAttribute().getName(), a.getAttributeValueAsString(Locale.getDefault()))); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
 		}
 		
 		IntelRecord newRecord = new IntelRecord();
 		newRecord.setConservationArea(data.getWaypoint().getConservationArea());
 		newRecord.setAttributes(new ArrayList<>());
 		newRecord.setDescription(sb.toString());
-		newRecord.setComment("");
+		newRecord.setComment(""); //$NON-NLS-1$
 		newRecord.setLocations(new ArrayList<>());
 		newRecord.setPrimaryDate(data.getWaypoint().getDateTime());
 		newRecord.setStatus(IntelRecord.Status.NEW);
@@ -147,7 +179,7 @@ public class CreateRecordActionType implements IActionType {
 					try {
 						a.computeFileLocation(session);
 					} catch (Exception e) {
-						EventPlugIn.log("Unable to compute file location for attachment, file will no be imported into new intelligence record: " + e.getMessage(), e);
+						logger.log(Level.WARNING, "Unable to compute file location for attachment, file will no be imported into new intelligence record: " + e.getMessage(), e); //$NON-NLS-1$
 						continue;
 					}
 	
@@ -171,7 +203,7 @@ public class CreateRecordActionType implements IActionType {
 					try {
 						a.computeFileLocation(session);
 					} catch (Exception e) {
-						EventPlugIn.log("Unable to compute file location for attachment, file will no be imported into new intelligence record: " + e.getMessage(), e);
+						logger.log(Level.WARNING, "Unable to compute file location for attachment, file will no be imported into new intelligence record: " + e.getMessage(), e); //$NON-NLS-1$
 						continue;
 					}
 	
@@ -194,17 +226,18 @@ public class CreateRecordActionType implements IActionType {
 			try {
 				if (sourceParam != null) {
 					IntelRecordSource source = QueryFactory.buildQuery(session, IntelRecordSource.class, 
-						new Object[] {"conservationArea", newRecord.getConservationArea()},
-						new Object[] {"keyId", sourceParam.getParameterValue()}).uniqueResult();
+						new Object[] {"conservationArea", newRecord.getConservationArea()}, //$NON-NLS-1$
+						new Object[] {"keyId", sourceParam.getParameterValue()}).uniqueResult(); //$NON-NLS-1$
 					newRecord.setRecordSource(source);
 				}
 				//create a unquie title
 				int uniqueNumber = 0;
 				while(true) {
 					String title = newRecord.getTitle();
-					if (uniqueNumber > 0) title = title + " " + uniqueNumber;
-					Long cnt = QueryFactory.buildCountQuery(session, IntelRecord.class, new Object[] {"conservationArea", newRecord.getConservationArea()},
-							new Object[] {"title", title});
+					if (uniqueNumber > 0) title = title + " " + uniqueNumber; //$NON-NLS-1$
+					Long cnt = QueryFactory.buildCountQuery(session, IntelRecord.class,
+							new Object[] {"conservationArea", newRecord.getConservationArea()}, //$NON-NLS-1$
+							new Object[] {"title", title}); //$NON-NLS-1$
 				
 					if (cnt == 0) {
 						break;
@@ -212,7 +245,7 @@ public class CreateRecordActionType implements IActionType {
 					uniqueNumber++;
 				}
 				if (uniqueNumber > 0) {
-					newRecord.setTitle(newRecord.getTitle() + " " + uniqueNumber);
+					newRecord.setTitle(newRecord.getTitle() + " " + uniqueNumber); //$NON-NLS-1$
 				}
 				
 				newRecord.getAttachments().forEach(aa->{

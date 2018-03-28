@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -43,6 +44,7 @@ import org.hibernate.Session;
 import org.wcs.smart.event.ActionTypeManager;
 import org.wcs.smart.event.ActionTypeManagerInternal;
 import org.wcs.smart.event.EventPlugIn;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.model.EAction;
 import org.wcs.smart.event.model.IActionType;
 import org.wcs.smart.event.ui.model.IActionParameterCollector;
@@ -58,6 +60,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class NewActionDialog extends TitleAreaDialog {
 
+	private static final String COLLECTOR_KEY = "COLLECTOR"; //$NON-NLS-1$
+	
 	private ComboViewer cmbActionType;
 	private EAction toUpdate;
 	private Composite parameterPanel;
@@ -83,11 +87,11 @@ public class NewActionDialog extends TitleAreaDialog {
 		toUpdate.setId(txtId.getText());
 		Object x = cmbActionType.getStructuredSelection().getFirstElement();
 		if (!(x instanceof IActionType))  {
-			//TODO: msg
+			MessageDialog.openError(getParentShell(), Messages.NewActionDialog_ActionTypeRequiredTitle, Messages.NewActionDialog_ActionTypeRequiredMsg);
 			return;
 		}
 		toUpdate.setActionTypeKey( ((IActionType)x).getKey() );
-		IActionParameterCollector paramCollector = (IActionParameterCollector) parameterPanel.getData("COLLECTOR");
+		IActionParameterCollector paramCollector = (IActionParameterCollector) parameterPanel.getData(COLLECTOR_KEY); 
 		if (paramCollector != null) {
 			paramCollector.updateParameters(toUpdate);
 		}else {
@@ -128,7 +132,7 @@ public class NewActionDialog extends TitleAreaDialog {
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(header, SWT.NONE);
-		l.setText("ID:");
+		l.setText(Messages.NewActionDialog_IDLabel);
 		
 		txtId = new Text(header, SWT.BORDER);
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -137,7 +141,7 @@ public class NewActionDialog extends TitleAreaDialog {
 		txtId.addModifyListener(e->validate());
 		
 		l = new Label(header, SWT.NONE);
-		l.setText("Action Type:");
+		l.setText(Messages.NewActionDialog_TypeLabel);
 		
 		cmbActionType = new ComboViewer(header, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbActionType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -147,7 +151,7 @@ public class NewActionDialog extends TitleAreaDialog {
 		cmbActionType.setInput(types);
 		
 		Group g = new Group(main, SWT.NONE);
-		g.setText("Action Parameters");
+		g.setText(Messages.NewActionDialog_ParameterLabel);
 		g.setLayout(new GridLayout());
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	
@@ -170,9 +174,9 @@ public class NewActionDialog extends TitleAreaDialog {
 			cmbActionType.addSelectionChangedListener(e->changeActionPanelType());
 		}
 		
-		setTitle("New Action");
-		getShell().setText("New Action");
-		setMessage("Create a new action");
+		setTitle(Messages.NewActionDialog_Title);
+		getShell().setText(Messages.NewActionDialog_Title);
+		setMessage(Messages.NewActionDialog_Message);
 		return parent;
 	}
 	
@@ -184,16 +188,16 @@ public class NewActionDialog extends TitleAreaDialog {
 	private void validate() {
 		String id = txtId.getText().trim();
 		if (id.isEmpty()) {
-			setError("An ID must be validated.");
+			setError(Messages.NewActionDialog_IdRequired);
 			return;
 		}
 		Object x = cmbActionType.getStructuredSelection().getFirstElement();
 		if (!(x instanceof IActionType)) {
-			setError("A valid action type must be specified.");
+			setError(Messages.NewActionDialog_ActionRequired);
 			return;
 		}
 		
-		IActionParameterCollector paramCollector = (IActionParameterCollector) parameterPanel.getData("COLLECTOR");
+		IActionParameterCollector paramCollector = (IActionParameterCollector) parameterPanel.getData(COLLECTOR_KEY); 
 		if (paramCollector != null) {
 			String error = paramCollector.validate();
 			if (error != null) {
@@ -219,19 +223,19 @@ public class NewActionDialog extends TitleAreaDialog {
 		Object x = cmbActionType.getStructuredSelection().getFirstElement();
 		if (!(x instanceof IActionType)) {
 			Label l = new Label(parameterPanel, SWT.NONE);
-			l.setText("Select a valid action type.");
-			parameterPanel.setData("COLLECTOR", null);
+			l.setText(Messages.NewActionDialog_ValidActionRequired);
+			parameterPanel.setData(COLLECTOR_KEY, null); 
 		}else {
 			IActionParameterCollector paramCollector = ActionTypeManagerInternal.INSTANCE.createParameterCollector((IActionType)x);
 			if (paramCollector == null) {
-				parameterPanel.setData("COLLECTOR", null);
+				parameterPanel.setData(COLLECTOR_KEY, null); 
 				Label l = new Label(parameterPanel, SWT.NONE);
-				l.setText("No parameters specified for this action type.");
+				l.setText(Messages.NewActionDialog_NoParameters);
 			}else {
 				paramCollector.addModifyListener(e->validate());
 				Composite inner = paramCollector.createComposite(parameterPanel);
 				inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-				parameterPanel.setData("COLLECTOR", paramCollector);
+				parameterPanel.setData(COLLECTOR_KEY, paramCollector); 
 				if (toUpdate != null) paramCollector.initParameters(toUpdate);
 			}
 		}

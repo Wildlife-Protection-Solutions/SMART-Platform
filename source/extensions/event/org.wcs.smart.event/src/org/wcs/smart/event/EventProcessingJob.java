@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Stack;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,6 +43,7 @@ import org.wcs.smart.event.filter.IFilter;
 import org.wcs.smart.event.filter.NotFilter;
 import org.wcs.smart.event.filter.Operator;
 import org.wcs.smart.event.filter.ParsedFilter;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.model.EActionEvent;
 import org.wcs.smart.event.model.IActionType;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -69,11 +71,11 @@ public class EventProcessingJob extends Job {
 	}
 	
 	private List<WaypointObservation> observations = Collections.synchronizedList(new ArrayList<>());
-	private static final String OPEN_BRACKET = "(";
-	private static final String CLOSE_BRACKET = ")";
+	private static final String OPEN_BRACKET = "("; //$NON-NLS-1$
+	private static final String CLOSE_BRACKET = ")"; //$NON-NLS-1$
 	
 	private EventProcessingJob() {
-		super("event processor");
+		super(Messages.EventProcessingJob_JobName);
 	}
 
 	public synchronized void addObservation(WaypointObservation observation) {
@@ -85,7 +87,7 @@ public class EventProcessingJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		while(!observations.isEmpty()) {
-			monitor.setTaskName("remaining: " + observations.size());
+			monitor.setTaskName(Messages.EventProcessingJob_RemainingTaskLabel + observations.size());
 			WaypointObservation o = observations.remove(0);
 			for(EActionEvent event : getEventActions()) {
 				if (!event.isEnabled()) continue;
@@ -122,18 +124,17 @@ public class EventProcessingJob extends Job {
 			processFilter(filter.getFilter(), equation, o);
 			StringBuilder sb = new StringBuilder();
 			for (Object x : equation) {
-				sb.append(" ");
+				sb.append(" "); //$NON-NLS-1$
 				sb.append( x.toString() );
-				sb.append(" ");
+				sb.append(" "); //$NON-NLS-1$
 			}
-//			System.out.println(sb.toString());
 			ok = evaluate(equation);
 		}
 		
 		if (ok) {
 			//execute action
 			IActionType actionType = ActionTypeManager.INSTANCE.getActionType(event.getAction().getActionTypeKey());
-			actionType.performAction(event.getAction(),event.getFilter(), o);
+			actionType.performAction(event.getAction(),event.getFilter(), o, Locale.getDefault());
 		}
 		
 	}
@@ -155,7 +156,7 @@ public class EventProcessingJob extends Job {
 					}else if (operator == Operator.OR) {
 						valueStack.push(v1 || v2);
 					}else {
-						throw new Exception("Invalid operator: " + operator.toString());
+						throw new Exception(Messages.EventProcessingJob_InvalidOpException + operator.toString());
 					}
 				}
 				opStack.pop();
@@ -172,10 +173,10 @@ public class EventProcessingJob extends Job {
 			}else if (operator == Operator.OR) {
 				valueStack.push(v1 || v2);
 			}else {
-				throw new Exception("Invalid operator: " + operator.toString());
+				throw new Exception(Messages.EventProcessingJob_InvalidOpException + operator.toString());
 			}
 		}
-		if (valueStack.size() != 1) throw new Exception("Evaluation error");
+		if (valueStack.size() != 1) throw new Exception(Messages.EventProcessingJob_FilterEvalError);
 		Boolean isok = (Boolean)valueStack.pop();
 		return isok;
 	}
@@ -213,7 +214,7 @@ public class EventProcessingJob extends Job {
 					break;
 					
 				case DATE:
-					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd"); //$NON-NLS-1$
 					Date date1 = format.parse( afilter.getValue().toString() );
 					Date date2 = format.parse( afilter.getValue2().toString() );
 					Date dvalue = attributeValue.getDateValue();
@@ -259,9 +260,9 @@ public class EventProcessingJob extends Job {
 					if (afilter.getOperator() == Operator.STR_EQUALS) {
 						value = strvalue.equalsIgnoreCase(attributeValue.getStringValue().trim());
 					}else if (afilter.getOperator() == Operator.STR_CONTAINS) {
-						value = attributeValue.getStringValue().trim().toUpperCase().matches(".*"+ strvalue.toUpperCase() + ".*");
+						value = attributeValue.getStringValue().trim().toUpperCase().matches(".*"+ strvalue.toUpperCase() + ".*"); //$NON-NLS-1$ //$NON-NLS-2$
 					}else if (afilter.getOperator() == Operator.STR_NOTCONTAINS) {
-						value = !attributeValue.getStringValue().trim().toUpperCase().matches(".*"+ strvalue.toUpperCase() + ".*");
+						value = !attributeValue.getStringValue().trim().toUpperCase().matches(".*"+ strvalue.toUpperCase() + ".*");  //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					equation.add(value);
 					break;
@@ -290,7 +291,7 @@ public class EventProcessingJob extends Job {
 		}else if (filter instanceof CategoryFilter) {
 			String filterCategory = ((CategoryFilter) filter).getCategoryKey().toLowerCase();
 			String obsCategory = obs.getCategory().getHkey().toLowerCase();
-			if (obsCategory.matches(filterCategory + ".*")) {
+			if (obsCategory.matches(filterCategory + ".*")) { //$NON-NLS-1$
 				equation.add(Boolean.TRUE);
 			}else {
 				equation.add(Boolean.FALSE);
@@ -313,7 +314,8 @@ public class EventProcessingJob extends Job {
 		
 		cachedEvents = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			cachedEvents.addAll( QueryFactory.buildQuery(session, EActionEvent.class, new Object[] {"action.conservationArea", SmartDB.getCurrentConservationArea()}).list() );
+			cachedEvents.addAll( QueryFactory.buildQuery(session, EActionEvent.class, 
+					new Object[] {"action.conservationArea", SmartDB.getCurrentConservationArea()}).list() ); //$NON-NLS-1$
 			cachedEvents.forEach(evt->{
 				evt.getAction().getParameters().forEach(p->p.getId().getParameterKey());
 				evt.getFilter().getFilterString();

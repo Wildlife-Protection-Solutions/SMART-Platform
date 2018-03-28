@@ -26,6 +26,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.event.EventPlugIn;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
@@ -39,7 +40,7 @@ public class EventDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask("Upgrading event plugin", 1);
+		monitor.beginTask(Messages.EventDatabaseUpgrader_TaskName, 1);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
@@ -48,7 +49,7 @@ public class EventDatabaseUpgrader implements IDatabaseUpgrader {
 				String currentPluginVersion = versions.get(EventPlugIn.PLUGIN_ID);
 				
 				if (currentPluginVersion == null) {
-					monitor.subTask("Installing event plugin");
+					monitor.subTask(Messages.EventDatabaseUpgrader_SubTaskName);
 					(new AddEventJob()).installPlugin(session);
 				}else{
 					upgrade(currentPluginVersion, session);

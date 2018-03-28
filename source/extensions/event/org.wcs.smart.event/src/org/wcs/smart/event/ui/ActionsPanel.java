@@ -58,6 +58,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.event.ActionTypeManager;
 import org.wcs.smart.event.EventPlugIn;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.model.EAction;
 import org.wcs.smart.event.model.EActionEvent;
 import org.wcs.smart.event.model.EActionParameterValue;
@@ -89,7 +90,7 @@ public class ActionsPanel extends Composite {
 		setLayout(new GridLayout());
 		
 		Label l = new Label(this, SWT.NONE);
-		l.setText("Lists all the actions configured by the users.");
+		l.setText(Messages.ActionsPanel_Info);
 		
 		SashForm parts = new SashForm(this,  SWT.NONE);
 		parts.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -105,7 +106,7 @@ public class ActionsPanel extends Composite {
 		lstActions.getTable().setHeaderVisible(true);
 
 		TableViewerColumn column1 = new TableViewerColumn(lstActions, SWT.NONE);
-		column1.getColumn().setText("Action");
+		column1.getColumn().setText(Messages.ActionsPanel_ActionColumnName);
 		column1.getColumn().setWidth(200);
 		
 		column1.setLabelProvider(new ColumnLabelProvider() {
@@ -120,7 +121,7 @@ public class ActionsPanel extends Composite {
 		});
 		
 		TableViewerColumn column2 = new TableViewerColumn(lstActions, SWT.NONE);
-		column2.getColumn().setText("Type");
+		column2.getColumn().setText(Messages.ActionsPanel_TypeColumName);
 		column2.getColumn().setWidth(200);
 		
 		column2.setLabelProvider(new ColumnLabelProvider() {
@@ -128,7 +129,7 @@ public class ActionsPanel extends Composite {
 				if (element instanceof EAction) {
 					EAction action = (EAction)element;
 					IActionType type = ActionTypeManager.INSTANCE.getActionType(action.getActionTypeKey());
-					if (type == null) return "UNKNOWN";
+					if (type == null) return Messages.ActionsPanel_UnknownType;
 					return type.getName(Locale.getDefault());
 				}
 				return super.getText(element);
@@ -224,21 +225,21 @@ public class ActionsPanel extends Composite {
 		}
 		if (toDelete.isEmpty()) return;
 		
-		if (!MessageDialog.openQuestion(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected actions? This action cannot be undone.", toDelete.size() ))){
+		if (!MessageDialog.openQuestion(getShell(), Messages.ActionsPanel_DeleteTitle, MessageFormat.format(Messages.ActionsPanel_DeleteMst, toDelete.size() ))){
 			return;
 		}
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
 				for (EAction e : toDelete) {
-					List<EActionEvent> events = QueryFactory.buildQuery(session, EActionEvent.class, new Object[] {"action", e}).list();
+					List<EActionEvent> events = QueryFactory.buildQuery(session, EActionEvent.class, new Object[] {"action", e}).list(); //$NON-NLS-1$
 					events.forEach(ae->session.delete(ae));
 					session.delete(e);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				EventPlugIn.displayLog("Unable to delete selected actions: " + ex.getMessage(), ex);
+				EventPlugIn.displayLog(Messages.ActionsPanel_DeleteError + ex.getMessage(), ex);
 				toDelete.clear();
 			}
 		}
@@ -253,18 +254,18 @@ public class ActionsPanel extends Composite {
 		tb.setBackground(parent.getBackground());
 		
 		ToolItem addItem = new ToolItem(tb, SWT.PUSH);
-		addItem.setToolTipText("create a new action");
+		addItem.setToolTipText(Messages.ActionsPanel_addTooltip);
 		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		addItem.addListener(SWT.Selection, e->addAction());
 		
 		ToolItem editItem = new ToolItem(tb, SWT.PUSH);
-		editItem.setToolTipText("edit selected action");
+		editItem.setToolTipText(Messages.ActionsPanel_editTooltip);
 		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		editItem.addListener(SWT.Selection, e->editAction());
 		editItem.setEnabled(hasSelection);
 		
 		ToolItem deleteItem = new ToolItem(tb, SWT.PUSH);
-		deleteItem.setToolTipText("delete the selected action");
+		deleteItem.setToolTipText(Messages.ActionsPanel_deleteTooltip);
 		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		deleteItem.addListener(SWT.Selection, e->deleteAction());
 		deleteItem.setEnabled(hasSelection);
@@ -340,7 +341,7 @@ public class ActionsPanel extends Composite {
 		scroll.setContent(content);
 		
 		l = new Label(content, SWT.NONE);
-		l.setText("Action Type");
+		l.setText(Messages.ActionsPanel_TypeLabel);
 		l.setBackground(rightPart.getBackground());
 		fd = l.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -351,7 +352,7 @@ public class ActionsPanel extends Composite {
 		l = new Label(content, SWT.NONE);
 		l.setBackground(rightPart.getBackground());
 		if (actionType == null) {
-			l.setText("ERROR: Action Type Not Found");
+			l.setText(Messages.ActionsPanel_TypeNotFoundError);
 		}else {
 			l.setText(actionType.getName(Locale.getDefault()));
 		}
@@ -359,22 +360,24 @@ public class ActionsPanel extends Composite {
 		l = new Label(content, SWT.NONE);
 		
 		l = new Label(content, SWT.NONE);
-		l.setText("Parameters:");
+		l.setText(Messages.ActionsPanel_ParameterLabel);
 		l.setBackground(rightPart.getBackground());
 		l.setFont(boldFont2);
 		
-		for (IActionParameter p : actionType.getActionParameters()) {
-			String paramValue = "";
-			for (EActionParameterValue pvalue : action.getParameters()) {
-				if (pvalue.getId().getParameterKey().equalsIgnoreCase(p.getKey())) {
-					paramValue = pvalue.getParameterValue();
-					break;
+		if (actionType != null) {
+			for (IActionParameter p : actionType.getActionParameters()) {
+				String paramValue = ""; //$NON-NLS-1$
+				for (EActionParameterValue pvalue : action.getParameters()) {
+					if (pvalue.getId().getParameterKey().equalsIgnoreCase(p.getKey())) {
+						paramValue = pvalue.getParameterValue();
+						break;
+					}
 				}
+				l = new Label(content, SWT.WRAP);
+				l.setText(MessageFormat.format("{0}: {1}", p.getName(Locale.getDefault()), paramValue)); //$NON-NLS-1$
+				l.setBackground(rightPart.getBackground());
+				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			}
-			l = new Label(content, SWT.WRAP);
-			l.setText(MessageFormat.format("{0}: {1}", p.getName(Locale.getDefault()), paramValue));
-			l.setBackground(rightPart.getBackground());
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		}
 		rightPart.layout(true);
 		content.setSize(content.computeSize(scroll.getSize().x-20, SWT.DEFAULT));
@@ -384,7 +387,7 @@ public class ActionsPanel extends Composite {
 		
 	}
 
-	private Job loadActionsJob = new Job("loading actions") {
+	private Job loadActionsJob = new Job(Messages.ActionsPanel_LoadingJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -398,7 +401,7 @@ public class ActionsPanel extends Composite {
 			
 			List<EAction> actions = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				actions.addAll(QueryFactory.buildQuery(session, EAction.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				actions.addAll(QueryFactory.buildQuery(session, EAction.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 				actions.forEach(e->e.getParameters().forEach(pp->pp.getParameterValue()));
 			}
 			Display.getDefault().syncExec(()->{

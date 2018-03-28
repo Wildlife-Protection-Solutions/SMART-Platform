@@ -27,6 +27,7 @@ import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.ca.ICaDeleteHandler;
+import org.wcs.smart.event.internal.Messages;
 
 /**
  * Conservation area delete handle for Event plugin 
@@ -39,7 +40,7 @@ public class ConservationAreaDeleteHandler implements ICaDeleteHandler {
 
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
-		monitor.subTask("Removing event system data");
+		monitor.subTask(Messages.ConservationAreaDeleteHandler_TaskName);
 		
 		Query<?> q = session.createQuery("delete from EActionEvent av where av in (SELECT av FROM EActionEvent av WHERE av.action.conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$

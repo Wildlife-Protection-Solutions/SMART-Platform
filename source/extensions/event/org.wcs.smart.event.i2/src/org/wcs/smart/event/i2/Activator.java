@@ -19,50 +19,58 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.event.ui.model;
+package org.wcs.smart.event.i2;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Listener;
-import org.wcs.smart.event.model.EAction;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 
 /**
- * User interface for collection parameters associated 
- * with an action.
+ * Activator for this plugin
  * 
  * @author Emily
  *
  */
-public interface IActionParameterCollector {
+public class Activator extends AbstractUIPlugin {
+
+	// The plug-in ID
+	public static final String PLUGIN_ID = "org.wcs.smart.event.i2"; //$NON-NLS-1$
+
+	// The shared instance
+	private static Activator plugin;
 
 	/**
-	 * Creates the composite for collecting the parameters 
-	 * 
-	 * @param parent
-	 * @return
+	 * The constructor
 	 */
-	public Composite createComposite(Composite parent);
-	
+	public Activator() {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
+	 */
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+		plugin = this;
+		SmartContext.INSTANCE.setClass(IAdvIntelLabelProvider.class, new AdvIntelLabelProvider());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
+	 */
+	public void stop(BundleContext context) throws Exception {
+		plugin = null;
+		super.stop(context);
+	}
+
 	/**
-	 * Initialize ui elements with value from the action
-	 * @param action
+	 * Returns the shared instance
+	 *
+	 * @return the shared instance
 	 */
-	public void initParameters(EAction action);
+	public static Activator getDefault() {
+		return plugin;
+	}
 	
-	/**
-	 * Update action parameters
-	 * @param action
-	 */
-	public void updateParameters(EAction action);
-	
-	/**
-	 * Validate the ui elements 
-	 * @return error message if string is not valid, null if ui is valid
-	 */
-	public String validate();
-	
-	/**
-	 * Adds a listener that is called when ui elements are modified
-	 * @param listener
-	 */
-	public void addModifyListener(Listener listener);
 }

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.event.model;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -68,6 +67,13 @@ public interface IActionType {
 	 */
 	public List<IActionParameter> getActionParameters();
 	
-	public void performAction(EAction action, EFilter filter, WaypointObservation data);
+	/**
+	 * Perform the action
+	 * @param action the action to perform
+	 * @param filter the action file
+	 * @param data the observation data
+	 * @param l the locale
+	 */
+	public void performAction(EAction action, EFilter filter, WaypointObservation data, Locale l);
 	
 }

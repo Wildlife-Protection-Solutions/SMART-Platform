@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 
 /**
@@ -89,7 +90,7 @@ public class DefinitionPanel {
 	 * Return the gui name
 	 */
 	public String getGuiName(){
-		return "event filter panel";
+		return Messages.DefinitionPanel_PanelName;
 	}
 	
 	/**

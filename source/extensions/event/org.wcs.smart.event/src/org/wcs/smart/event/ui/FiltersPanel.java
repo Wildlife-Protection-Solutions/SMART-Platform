@@ -58,6 +58,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.filter.ParsedFilter;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.model.EActionEvent;
 import org.wcs.smart.event.model.EFilter;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -86,7 +87,7 @@ public class FiltersPanel extends Composite {
 		setLayout(new GridLayout());
 		
 		Label l = new Label(this, SWT.NONE);
-		l.setText("Lists all the filters configured by the users.");
+		l.setText(Messages.FiltersPanel_panelLabel);
 		
 		SashForm parts = new SashForm(this,  SWT.NONE);
 		parts.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -102,7 +103,7 @@ public class FiltersPanel extends Composite {
 		lstFilters.getTable().setHeaderVisible(true);
 		
 		TableViewerColumn column1 = new TableViewerColumn(lstFilters, SWT.NONE);
-		column1.getColumn().setText("Filter");
+		column1.getColumn().setText(Messages.FiltersPanel_FilterColumn);
 		column1.getColumn().setWidth(200);
 		
 		column1.setLabelProvider(new ColumnLabelProvider() {
@@ -204,21 +205,21 @@ public class FiltersPanel extends Composite {
 		}
 		if (toDelete.isEmpty()) return;
 		
-		if (!MessageDialog.openQuestion(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected filters? This action cannot be undone.", toDelete.size() ))){
+		if (!MessageDialog.openQuestion(getShell(), Messages.FiltersPanel_DeleteTitle, MessageFormat.format(Messages.FiltersPanel_DeleteMsg, toDelete.size() ))){
 			return;
 		}
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
 				for (EFilter e : toDelete) {
-					List<EActionEvent> events = QueryFactory.buildQuery(session, EActionEvent.class, new Object[] {"filter", e}).list();
+					List<EActionEvent> events = QueryFactory.buildQuery(session, EActionEvent.class, new Object[] {"filter", e}).list(); //$NON-NLS-1$
 					events.forEach(ae->session.delete(ae));
 					session.delete(e);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				EventPlugIn.displayLog("Unable to delete selected filters: " + ex.getMessage(), ex);
+				EventPlugIn.displayLog(Messages.FiltersPanel_DeleteError + ex.getMessage(), ex);
 				toDelete.clear();
 			}
 		}
@@ -233,18 +234,18 @@ public class FiltersPanel extends Composite {
 		tb.setBackground(parent.getBackground());
 		
 		ToolItem addItem = new ToolItem(tb, SWT.PUSH);
-		addItem.setToolTipText("create a new filter");
+		addItem.setToolTipText(Messages.FiltersPanel_createTooltip);
 		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		addItem.addListener(SWT.Selection, e->addFilter());
 		
 		ToolItem editItem = new ToolItem(tb, SWT.PUSH);
-		editItem.setToolTipText("edit selected filter");
+		editItem.setToolTipText(Messages.FiltersPanel_editTooltip);
 		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		editItem.addListener(SWT.Selection, e->editFilter());
 		editItem.setEnabled(hasSelection);
 		
 		ToolItem deleteItem = new ToolItem(tb, SWT.PUSH);
-		deleteItem.setToolTipText("delete the selected filter");
+		deleteItem.setToolTipText(Messages.FiltersPanel_deleteTooltip);
 		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		deleteItem.addListener(SWT.Selection, e->deleteFilter());
 		deleteItem.setEnabled(hasSelection);
@@ -326,13 +327,13 @@ public class FiltersPanel extends Composite {
 			ParsedFilter parsed = filter.getParsedFilter();
 			
 			l = new Label(content, SWT.NONE);
-			l.setText("Waypoint Source:");
+			l.setText(Messages.FiltersPanel_SourceLabel);
 			l.setBackground(rightPart.getBackground());
 			l.setFont(boldFont2);
 			
 			if (parsed.getSources() == null) {
 				l = new Label(content, SWT.NONE);
-				l.setText("ALL");
+				l.setText(Messages.FiltersPanel_AllLabel);
 				l.setBackground(rightPart.getBackground());
 			}else {
 				l = new Label(content, SWT.WRAP);
@@ -341,7 +342,7 @@ public class FiltersPanel extends Composite {
 				StringBuilder sb = new StringBuilder();
 				parsed.getSources().forEach(s->{
 					sb.append(s.getName(Locale.getDefault()));
-					sb.append("\n");
+					sb.append("\n"); //$NON-NLS-1$
 				});
 				l.setText(sb.toString());
 			}
@@ -349,7 +350,7 @@ public class FiltersPanel extends Composite {
 			l = new Label(content, SWT.NONE);
 			
 			l = new Label(content, SWT.NONE);
-			l.setText("Filter:");
+			l.setText(Messages.FiltersPanel_FilterLabel);
 			l.setBackground(rightPart.getBackground());
 			l.setFont(boldFont2);
 			
@@ -364,7 +365,7 @@ public class FiltersPanel extends Composite {
 			EventPlugIn.log(ex.getMessage(), ex);
 			
 			l = new Label(content, SWT.WRAP);
-			l.setText("Parse Error: Unable to pase filter string");
+			l.setText(Messages.FiltersPanel_ParseError);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			l.setBackground(rightPart.getBackground());
 			l.setToolTipText(filter.getFilterString());
@@ -383,7 +384,7 @@ public class FiltersPanel extends Composite {
 		
 	}
 
-	private Job loadEventsJob = new Job("loading filters") {
+	private Job loadEventsJob = new Job(Messages.FiltersPanel_LoadingJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -397,7 +398,7 @@ public class FiltersPanel extends Composite {
 			
 			List<EFilter> filters = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				filters.addAll(QueryFactory.buildQuery(session, EFilter.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				filters.addAll(QueryFactory.buildQuery(session, EFilter.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 			}
 			Display.getDefault().syncExec(()->{
 				if (lstFilters.getControl().isDisposed()) return;

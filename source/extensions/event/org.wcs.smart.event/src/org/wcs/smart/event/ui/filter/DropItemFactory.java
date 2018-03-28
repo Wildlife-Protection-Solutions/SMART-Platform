@@ -39,6 +39,7 @@ import org.wcs.smart.event.filter.CategoryFilter;
 import org.wcs.smart.event.filter.IFilter;
 import org.wcs.smart.event.filter.NotFilter;
 import org.wcs.smart.event.filter.Operator;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.ui.filter.BracketDropItem.BracketType;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -60,7 +61,7 @@ public enum DropItemFactory {
 		
 		@Override
 		public String getName() {
-			return "Any";
+			return Messages.DropItemFactory_AnyOptionLabel;
 		}
 	};
 	
@@ -76,9 +77,9 @@ public enum DropItemFactory {
 			AttributeFilter ff = (AttributeFilter)filter;
 
 			Attribute aa = QueryFactory.buildQuery(session,  Attribute.class, 
-					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-					new Object[] {"keyId", ff.getAttributeKey()}).uniqueResult();
-			if (aa == null) throw new Exception(MessageFormat.format("Could not find attribute with key {0}", ff.getAttributeKey()));
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+					new Object[] {"keyId", ff.getAttributeKey()}).uniqueResult(); //$NON-NLS-1$
+			if (aa == null) throw new Exception(MessageFormat.format(Messages.DropItemFactory_attributeNotFound, ff.getAttributeKey()));
 			DropItem di = createDropItem(aa)[0];
 			
 			if (aa.getType() == AttributeType.DATE) {
@@ -94,16 +95,16 @@ public enum DropItemFactory {
 					}
 				}
 				if (found == null) {
-					throw new Exception(MessageFormat.format("Could not find attribute list item with key {0} for attribute {1}.", ff.getValue().toString(), aa.getName())) ;
+					throw new Exception(MessageFormat.format(Messages.DropItemFactory_ListItemNotFound, ff.getValue().toString(), aa.getName())) ;
 				}
 				di.initializeData(found);
 			}else if (aa.getType() == AttributeType.TREE) {
 				AttributeTreeNode treenode = QueryFactory.buildQuery(session,  AttributeTreeNode.class, 
-						new Object[] {"hkey", ff.getValue().toString()},
-						new Object[] {"attribute", aa}
+						new Object[] {"hkey", ff.getValue().toString()}, //$NON-NLS-1$
+						new Object[] {"attribute", aa} //$NON-NLS-1$
 						).uniqueResult();
 				if (treenode == null) {
-					throw new Exception(MessageFormat.format("Could not find attribute tree node with key {0} for attribute {1}.", ff.getValue().toString(), aa.getName())) ;
+					throw new Exception(MessageFormat.format(Messages.DropItemFactory_TreeNodeNotFound, ff.getValue().toString(), aa.getName())) ;
 				}
 				di.initializeData(treenode);
 			}else if (aa.getType() == AttributeType.BOOLEAN) {
@@ -130,14 +131,14 @@ public enum DropItemFactory {
 			CategoryAttributeFilter ff = (CategoryAttributeFilter)filter;
 			
 			Category cc = QueryFactory.buildQuery(session,  Category.class, 
-					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-					new Object[] {"hkey", ff.getCategoryFilter().getCategoryKey()}).uniqueResult();
-			if (cc == null) throw new Exception(MessageFormat.format("Could not find category with key {0}", ff.getCategoryFilter().getCategoryKey()));
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+					new Object[] {"hkey", ff.getCategoryFilter().getCategoryKey()}).uniqueResult(); //$NON-NLS-1$
+			if (cc == null) throw new Exception(MessageFormat.format(Messages.DropItemFactory_CategoryNotFound, ff.getCategoryFilter().getCategoryKey()));
 			
 			Attribute aa = QueryFactory.buildQuery(session,  Attribute.class, 
-					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-					new Object[] {"keyId", ff.getAttributeFilter().getAttributeKey()}).uniqueResult();
-			if (aa == null) throw new Exception(MessageFormat.format("Could not find attribute with key {0}", ff.getAttributeFilter().getAttributeKey()));
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+					new Object[] {"keyId", ff.getAttributeFilter().getAttributeKey()}).uniqueResult(); //$NON-NLS-1$
+			if (aa == null) throw new Exception(MessageFormat.format(Messages.DropItemFactory_AttributeNotFound, ff.getAttributeFilter().getAttributeKey()));
 			
 			CategoryAttribute ca = new CategoryAttribute();
 			ca.setCategory(cc);
@@ -162,16 +163,16 @@ public enum DropItemFactory {
 					}
 				}
 				if (found == null) {
-					throw new Exception(MessageFormat.format("Could not find attribute list item with key {0} for attribute {1}.", ff.getAttributeFilter().getAttributeKey(), aa.getName())) ;
+					throw new Exception(MessageFormat.format(Messages.DropItemFactory_AttributeListItemNotFound, ff.getAttributeFilter().getAttributeKey(), aa.getName())) ;
 				}
 				di.initializeData(found);
 			}else if (aa.getType() == AttributeType.TREE) {
 				AttributeTreeNode treenode = QueryFactory.buildQuery(session,  AttributeTreeNode.class, 
-						new Object[] {"hkey", ff.getAttributeFilter().getValue().toString()},
-						new Object[] {"attribute", aa}
+						new Object[] {"hkey", ff.getAttributeFilter().getValue().toString()}, //$NON-NLS-1$
+						new Object[] {"attribute", aa} //$NON-NLS-1$
 						).uniqueResult();
 				if (treenode == null) {
-					throw new Exception(MessageFormat.format("Could not find attribute tree node with key {0} for attribute {1}.", ff.getAttributeFilter().getValue().toString(), aa.getName())) ;
+					throw new Exception(MessageFormat.format(Messages.DropItemFactory_AttributeTreeNodeNotFound, ff.getAttributeFilter().getValue().toString(), aa.getName())) ;
 				}
 				di.initializeData(treenode);
 			}else if (aa.getType() == AttributeType.BOOLEAN) {
@@ -185,9 +186,9 @@ public enum DropItemFactory {
 			CategoryFilter ff = (CategoryFilter)filter;
 			
 			Category cc = QueryFactory.buildQuery(session,  Category.class, 
-					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-					new Object[] {"hkey", ff.getCategoryKey()}).uniqueResult();
-			if (cc == null) throw new Exception(MessageFormat.format("Could not find category with key {0}", ff.getCategoryKey()));
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+					new Object[] {"hkey", ff.getCategoryKey()}).uniqueResult(); //$NON-NLS-1$
+			if (cc == null) throw new Exception(MessageFormat.format(Messages.DropItemFactory_CategoryNotFound, ff.getCategoryKey()));
 			DropItem[] dis = createDropItem(cc);
 			for (DropItem di : dis) items.add(di);
 			
@@ -198,7 +199,7 @@ public enum DropItemFactory {
 			for (DropItem di : dis) items.add(di);
 			createDropItem(ff.getFilter(), items, session);
 		}else {
-			throw new Exception("Filter expression not supported: " + filter.getClass().toString());
+			throw new Exception(Messages.DropItemFactory_FilterExpressionSupported + filter.getClass().toString());
 		}
 	}
 	
