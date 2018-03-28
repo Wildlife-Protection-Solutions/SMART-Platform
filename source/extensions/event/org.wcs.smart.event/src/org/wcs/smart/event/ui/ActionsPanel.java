@@ -182,8 +182,7 @@ public class ActionsPanel extends Composite {
 		parts.setWeights(new int[] {4, 4});
 		
 		updateDetails();
-		//TODO: only schedule once tab is activated
-		System.out.println("HERE");
+
 		loadActionsJob.schedule();
 	}
 	

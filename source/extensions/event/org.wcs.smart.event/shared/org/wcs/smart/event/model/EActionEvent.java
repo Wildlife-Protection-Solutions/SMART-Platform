@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.event.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -41,6 +42,8 @@ public class EActionEvent extends UuidItem {
 
 	private EAction action;
 	private EFilter filter;
+	
+	private boolean isEnabled;
 	
 	/**
 	 * 
@@ -68,5 +71,14 @@ public class EActionEvent extends UuidItem {
 	
 	public void setFilter(EFilter filter) {
 		this.filter = filter;
+	}
+	
+	@Column(name="is_enabled")
+	public boolean isEnabled() {
+		return this.isEnabled;
+	}
+	
+	public void setEnabled(boolean isEnabled) {
+		this.isEnabled = isEnabled;
 	}
 }

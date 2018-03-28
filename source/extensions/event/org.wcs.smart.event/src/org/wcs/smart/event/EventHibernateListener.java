@@ -21,13 +21,10 @@
  */
 package org.wcs.smart.event;
 
-import java.util.Locale;
-
 import org.hibernate.event.spi.PostInsertEvent;
 import org.hibernate.event.spi.PostInsertEventListener;
 import org.hibernate.persister.entity.EntityPersister;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
 /**
  * Hibernate listener for audit items to update
@@ -47,12 +44,6 @@ public class EventHibernateListener implements PostInsertEventListener{
 	public void onPostInsert(PostInsertEvent event) {	
 		if (event.getEntity() instanceof WaypointObservation) {
 			WaypointObservation wo = (WaypointObservation)event.getEntity();
-			StringBuilder sb = new StringBuilder();
-			sb.append("NEW OBSERVATION: " + wo.getCategory().getHkey());
-			for (WaypointObservationAttribute aa : wo.getAttributes()) {
-				sb.append( " : " + aa.getAttribute().getKeyId() + " : " + aa.getAttributeValueAsString(Locale.getDefault()));
-			}
-			System.out.println(sb.toString());
 			EventProcessingJob.getInstance().addObservation(wo);
 		}
 	}

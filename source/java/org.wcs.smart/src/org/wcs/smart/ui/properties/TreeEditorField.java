@@ -210,6 +210,7 @@ public class TreeEditorField<T>  {
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {
+						if (txtText.isDisposed()) return;
 						txtText.selectAll();
 					}
 				});

@@ -56,7 +56,7 @@ public class ObservationAttachment extends ISmartAttachment {
 		return this.observation;
 	}
 	
-	public void setObservation(WaypointObservation observation) throws Exception{
+	public void setObservation(WaypointObservation observation) {
 		this.observation = observation;
 		super.attachmentFile = null;
 	}

@@ -162,7 +162,10 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			"ALTER TABLE smart.i_working_set_query DROP CONSTRAINT iworkingsetquery_query_fk", //$NON-NLS-1$
 			"ALTER TABLE smart.I_WORKING_SET_QUERY add column query_type varchar(32)", //$NON-NLS-1$
 			"UPDATE smart.i_working_set_query set query_type = '" +IntelRecordObservationQuery.KEY + "'",  //$NON-NLS-1$//$NON-NLS-2$
-			"ALTER TABLE smart.i_working_set_query alter column query_type set not null" //$NON-NLS-1$
+			"ALTER TABLE smart.i_working_set_query alter column query_type set not null", //$NON-NLS-1$
+			
+			//index on record title
+			"create index i_record_titel on smart.i_record (title)" //$NON-NLS-1$
 		};
 		
 		for (String s : sql) {

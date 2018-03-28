@@ -88,6 +88,7 @@ public class EventProcessingJob extends Job {
 			monitor.setTaskName("remaining: " + observations.size());
 			WaypointObservation o = observations.remove(0);
 			for(EActionEvent event : getEventActions()) {
+				if (!event.isEnabled()) continue;
 				try {
 					processEvent(event, o);
 				}catch (Exception ex) {
@@ -125,7 +126,7 @@ public class EventProcessingJob extends Job {
 				sb.append( x.toString() );
 				sb.append(" ");
 			}
-			System.out.println(sb.toString());
+//			System.out.println(sb.toString());
 			ok = evaluate(equation);
 		}
 		
@@ -299,7 +300,15 @@ public class EventProcessingJob extends Job {
 	
 	//TODO: clear event cache
 	private List<EActionEvent> cachedEvents = null;
-	private List<EActionEvent> getEventActions(){
+	
+	/**
+	 * Clears the trigger cache
+	 */
+	public synchronized void reset(){
+		cachedEvents = null;
+	}
+	
+	private synchronized List<EActionEvent> getEventActions(){
 		if (cachedEvents != null) return cachedEvents;
 		
 		cachedEvents = new ArrayList<>();

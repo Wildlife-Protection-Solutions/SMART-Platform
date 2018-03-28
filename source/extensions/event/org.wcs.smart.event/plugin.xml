@@ -21,14 +21,12 @@
       <menuContribution
             allPopups="false"
             locationURI="menu:org.wcs.smart.fielddata?before=org.wcs.smart.observation.options">
-         <menu
+         <command
+               commandId="org.wcs.smart.event.configure.show"
                icon="images/icons/action_event.png"
-               label="Trigger System Configure">
-            <command
-                  commandId="org.wcs.smart.event.configure.show"
-                  style="push">
-            </command>
-         </menu>
+               label="Configure System Triggers"
+               style="push">
+         </command>
       </menuContribution>
    </extension>
    <extension

@@ -45,6 +45,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
@@ -112,6 +113,36 @@ public class EventsPanel extends Composite {
 		tblEvents.getTable().setHeaderVisible(true);
 		tblEvents.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		TableViewerColumn stateColumn = new TableViewerColumn(tblEvents, SWT.NONE);
+		stateColumn.getColumn().setText("State");
+		stateColumn.getColumn().setWidth(32);
+		stateColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				return null;
+			}
+			public Image getImage(Object element) {
+				if (element instanceof EActionEvent) {
+					boolean isEnabled = ((EActionEvent) element).isEnabled();
+					if (!isEnabled) {
+						return EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_DISABLED);
+					}else {
+						return EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ENABLED);
+					}
+				}
+				return super.getImage(element);
+			}
+			
+			@Override
+			public Color getForeground(Object element) {
+				if (element instanceof EActionEvent) {
+					boolean isEnabled = ((EActionEvent) element).isEnabled();
+					if (!isEnabled) return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+				}
+				return null;
+			}
+		});
+		
 		TableViewerColumn filterColumn = new TableViewerColumn(tblEvents, SWT.NONE);
 		filterColumn.getColumn().setText("Filter");
 		filterColumn.getColumn().setWidth(150);
@@ -124,6 +155,14 @@ public class EventsPanel extends Composite {
 			public Image getImage(Object element) {
 				if (element instanceof EActionEvent) return EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_FILTER);
 				return super.getImage(element);
+			}
+			@Override
+			public Color getForeground(Object element) {
+				if (element instanceof EActionEvent) {
+					boolean isEnabled = ((EActionEvent) element).isEnabled();
+					if (!isEnabled) return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+				}
+				return null;
 			}
 		});
 		TableViewerColumn actionColumn = new TableViewerColumn(tblEvents, SWT.NONE);
@@ -139,14 +178,31 @@ public class EventsPanel extends Composite {
 				if (element instanceof EActionEvent) return EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ACTION);
 				return super.getImage(element);
 			}
+			@Override
+			public Color getForeground(Object element) {
+				if (element instanceof EActionEvent) {
+					boolean isEnabled = ((EActionEvent) element).isEnabled();
+					if (!isEnabled) return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+				}
+				return null;
+			}
 		});
 		tblEvents.addSelectionChangedListener(e->updateDetails());
 		
 		Menu mnu = new Menu(tblEvents.getControl());
+		
 		MenuItem addItem = new MenuItem(mnu, SWT.PUSH);
 		addItem.setText(DialogConstants.ADD_BUTTON_TEXT);
 		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		addItem.addListener(SWT.Selection, e->addEvent());
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+
+		MenuItem enableItem = new MenuItem(mnu, SWT.PUSH);
+		enableItem.setText("Enable");
+		enableItem.addListener(SWT.Selection, e->changeEventState());
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
 		
 		MenuItem deleteItem = new MenuItem(mnu, SWT.PUSH);
 		deleteItem.setText(DialogConstants.DELETE_BUTTON_TEXT);
@@ -155,6 +211,18 @@ public class EventsPanel extends Composite {
 		deleteItem.setEnabled(false);
 		tblEvents.addSelectionChangedListener(e->{
 			deleteItem.setEnabled(!tblEvents.getSelection().isEmpty());
+			
+			Object x = tblEvents.getStructuredSelection().getFirstElement();
+			if (x instanceof EActionEvent) {
+				if (((EActionEvent) x).isEnabled()) {
+					enableItem.setText("Disable");
+				}else {
+					enableItem.setText("Enable");
+				}
+				enableItem.setEnabled(true);
+			}else {
+				enableItem.setEnabled(false);
+			}
 		});
 		tblEvents.getControl().setMenu(mnu);
 		
@@ -177,16 +245,53 @@ public class EventsPanel extends Composite {
 		loadDataJob.schedule();
 	}
 	
+	private void changeEventState() {
+		Object x = tblEvents.getStructuredSelection().getFirstElement();
+		if (x instanceof EActionEvent) {
+			EActionEvent evt = (EActionEvent)x;
+			evt.setEnabled(!evt.isEnabled());
+			
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try {
+					session.saveOrUpdate(evt);
+					session.getTransaction().commit();
+				}catch (Exception ex) {
+					session.getTransaction().rollback();
+					EventPlugIn.displayLog("Unable to update action state:" + ex.getMessage(), ex);
+				}
+			}
+			tblEvents.refresh();
+			tblEvents.setSelection(tblEvents.getSelection());
+		}
+	}
 	private void updateDetails() {
 		for (Control kid : detailsSection.getChildren()) kid.dispose();
 		
 		Object x = tblEvents.getStructuredSelection().getFirstElement();
 		if (x == null || !(x instanceof EActionEvent)) {
-			createToolbar(detailsSection, false);
+			createToolbar(detailsSection, null);
 			return;
 		}
 		EActionEvent actionEvent = (EActionEvent)x;
-		createToolbar(detailsSection, true);
+		
+		Composite toolbarComp = new Composite(detailsSection, SWT.NONE);
+		toolbarComp.setLayout(new GridLayout(2, false));
+		toolbarComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		toolbarComp.setBackground(detailsSection.getBackground());
+		((GridLayout)toolbarComp.getLayout()).marginWidth = 0;
+		((GridLayout)toolbarComp.getLayout()).marginHeight = 0;
+		
+		Label ll = new Label(toolbarComp, SWT.NONE);
+		if (actionEvent.isEnabled()) {
+			ll.setText("Enabled");
+		}else {
+			ll.setText("Disabled");
+		}
+		ll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		ll.setBackground(toolbarComp.getBackground());
+		
+		createToolbar(toolbarComp, actionEvent);
 		
 		ScrolledComposite scroll = new ScrolledComposite(detailsSection, SWT.V_SCROLL );
 		scroll.setBackground(detailsSection.getBackground());
@@ -285,9 +390,22 @@ public class EventsPanel extends Composite {
 		
 	}
 	
-	private void createToolbar(Composite parent, boolean hasSelection) {
+	private void createToolbar(Composite parent, EActionEvent action) {
 		ToolBar tb = new ToolBar(parent,  SWT.FLAT);
 		tb.setBackground(parent.getBackground());
+		
+		ToolItem adddiableItem = new ToolItem(tb, SWT.PUSH);
+		
+		if (action == null || action.isEnabled()) {
+			adddiableItem.setToolTipText("disable event");
+			adddiableItem.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_DISABLED));
+		}else {
+			adddiableItem.setToolTipText("enable event");
+			adddiableItem.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ENABLED));
+		}
+		
+		adddiableItem.addListener(SWT.Selection, e->changeEventState());
+		adddiableItem.setEnabled(action != null);
 		
 		ToolItem addItem = new ToolItem(tb, SWT.PUSH);
 		addItem.setToolTipText("create a event");
@@ -298,7 +416,7 @@ public class EventsPanel extends Composite {
 		deleteItem.setToolTipText("delete the selected event");
 		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		deleteItem.addListener(SWT.Selection, e->deleteEvent());
-		deleteItem.setEnabled(hasSelection);
+		deleteItem.setEnabled(action != null);
 		
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 	}

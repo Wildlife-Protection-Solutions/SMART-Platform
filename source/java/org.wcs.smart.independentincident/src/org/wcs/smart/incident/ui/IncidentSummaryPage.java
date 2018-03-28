@@ -53,6 +53,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -71,6 +73,7 @@ import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.attachment.AttachmentUtil;
@@ -249,7 +252,10 @@ public class IncidentSummaryPage extends EditorPart {
 				}
 			});
 			this.attachments.setInput(allAtts);
-			this.dataViewer.setInput(incident.getObservations());
+			List<WaypointObservation> obs = new ArrayList<>();
+			obs.addAll(incident.getObservations());
+			obs.sort((a,b)->Collator.getInstance().compare(a.getCategory().getName(), b.getCategory().getName()));
+			this.dataViewer.setInput(obs);
 			this.dataViewer.expandAll();
 		}
 		
@@ -387,7 +393,6 @@ public class IncidentSummaryPage extends EditorPart {
 		dataTree.setLinesVisible(true);
 		
 		dataViewer = new TreeViewer(dataTree);
-	
 		dataViewer.setContentProvider(new ITreeContentProvider(){
 			private List<WaypointObservation> elements;
 			
@@ -528,24 +533,46 @@ public class IncidentSummaryPage extends EditorPart {
 			btnEdit.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					editIncident();
+					editIncident(null);
 				}
 			});
 			
 			dataViewer.addDoubleClickListener(new IDoubleClickListener() {
 				@Override
 				public void doubleClick(DoubleClickEvent event) {
-					editIncident();
+					editIncident(null);
 				}
 			});
 			
 		}
+		
+		Menu observationMenu = new Menu(dataViewer.getControl());
+		
+		MenuItem editItem = new MenuItem(observationMenu, SWT.PUSH);
+		editItem.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		editItem.addListener(SWT.Selection, e->{
+			Object x = dataViewer.getStructuredSelection().getFirstElement();
+			WaypointObservation wo = null;
+			if (x instanceof WaypointObservation) {
+				wo = (WaypointObservation)x;
+			}else if (x instanceof WaypointObservationAttribute) {
+				wo = ((WaypointObservationAttribute)x).getObservation();
+			}
+			editIncident(wo);
+			
+		});
+		dataViewer.getControl().setMenu(observationMenu);
+		
 		initData(editor.getIncident());
 	}
 	
-	private void editIncident(){
-		ObservationWizardDialog wd = new ObservationWizardDialog(getEditorSite().getShell(),
-				new ObservationWizard(editor.getIncident(), getEmployees()));
+	
+	private void editIncident(WaypointObservation initObs){
+		ObservationWizard wizard = new ObservationWizard(editor.getIncident(), getEmployees());
+		if (initObs != null) wizard.setToEdit(initObs);
+		
+		ObservationWizardDialog wd = new ObservationWizardDialog(getEditorSite().getShell(), wizard);
 		wd.open();
 	}
 	

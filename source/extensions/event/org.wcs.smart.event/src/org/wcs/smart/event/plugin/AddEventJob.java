@@ -105,7 +105,7 @@ public class AddEventJob extends Job {
 			"GRANT ALL PRIVILEGES ON smart.e_action_parameter_value TO MANAGER",
 
 
-			"CREATE TABLE smart.e_event_action(uuid char(16) for bit data not null, filter_uuid char(16) for bit data not null, action_uuid char(16) for bit data not null, PRIMARY KEY (uuid) )",
+			"CREATE TABLE smart.e_event_action(uuid char(16) for bit data not null, filter_uuid char(16) for bit data not null, action_uuid char(16) for bit data not null, is_enabled boolean not null default true, PRIMARY KEY (uuid) )",
 			"ALTER TABLE smart.e_event_action ADD CONSTRAINT eeventaction_actionuuid_fk FOREIGN KEY (action_uuid) REFERENCES smart.e_action(uuid) DEFERRABLE INITIALLY IMMEDIATE",
 			"ALTER TABLE smart.e_event_action ADD CONSTRAINT eeventaction_filteruuid_fk FOREIGN KEY (filter_uuid) REFERENCES smart.e_event_filter(uuid) DEFERRABLE INITIALLY IMMEDIATE",
 			"GRANT SELECT ON smart.e_event_action TO ANALYST",

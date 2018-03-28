@@ -22,28 +22,17 @@
 package org.wcs.smart.observation.ui.input;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.jface.viewers.ITableColorProvider;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -58,6 +47,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class AttributeTable {
 
+	public static final String EDITING_OBS_KEY = "EDITING_OBS_KEY"; //$NON-NLS-1$
 	/**
 	 * Maximum width of table column
 	 */
@@ -65,7 +55,6 @@ public class AttributeTable {
 
 	private static final String ATTACHMENT_COLUMN_NAME=Messages.AttributeTable_AttachmentsColumnName;
 
-	private static Color darkRed = null;
 	/**
 	 * Creates a new attribute table.
 	 * 
@@ -75,62 +64,25 @@ public class AttributeTable {
 	 */
 	public static TableViewer createAttributeTable( 
 			Composite parent, 
-			Category currentCategory){
-		
-		darkRed = parent.getDisplay().getSystemColor(SWT.COLOR_DARK_RED);
-		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
-		currentCategory.getAllAttribute(attributes, true);
+			List<Attribute> attributes){
 		
 		final TableViewer attributeTable = new TableViewer(parent, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.BORDER);
-		attributeTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		attributeTable.getTable().setLinesVisible(true);
+//		attributeTable.getTable().setLinesVisible(true);
 		attributeTable.getTable().setHeaderVisible(true);
-		attributeTable.setLabelProvider(new AttributeTableLabelProvider(attributes));
-		//TableViewerColumn column  = null;
-		GC gc = new GC(parent.getShell());
-		try{
-			gc.setFont(attributeTable.getTable().getFont());
-			for (int i = 0; i < attributes.size(); i ++){
-				TableColumn column = new TableColumn(attributeTable.getTable(),SWT.NONE);
-				column.setText(SmartUtils.formatStringForLabel(attributes.get(i).getName()));
-				column.setResizable(true);
-				column.setMoveable(false);
-				String name = attributes.get(i).getName();
-				int width = gc.textExtent(name == null? "" : name ).x + 20;  //$NON-NLS-1$
-				if (width < 60){
-					width = 60;
-				}
-				column.setWidth( width );
-			}
-			TableColumn column = new TableColumn(attributeTable.getTable(),SWT.NONE);
-			column.setText(ATTACHMENT_COLUMN_NAME);
-			column.setResizable(true);
-			column.setMoveable(false);
-			
-			int width = gc.textExtent(ATTACHMENT_COLUMN_NAME ).x + 20;
-			if (width < 60){
-				width = 60;
-			}
-			column.setWidth( width );
-		}finally{
-			gc.dispose();
-		}
 		
-		attributeTable.getTable().addListener(SWT.PaintItem, new Listener(){
-
-			@Override
-			public void handleEvent(Event event) {
-				TableItem item = (TableItem) event.item;
-				Color c = ((ITableColorProvider)attributeTable.getLabelProvider()).getForeground(item.getData(), event.index);
-				if (c != null){
-					event.gc.setForeground(((ITableColorProvider)attributeTable.getLabelProvider()).getForeground(item.getData(), event.index));
-					Rectangle rect = item.getTextBounds(event.index);
-					event.gc.drawString(item.getText(event.index), rect.x-1, rect.y); // Out-by-one x pixel!
-				}
-				
-			}
+		for (int i = 0; i < attributes.size(); i ++) {
+			TableViewerColumn column = new TableViewerColumn(attributeTable, SWT.NONE);
+			column.getColumn().setText(SmartUtils.formatStringForLabel(attributes.get(i).getName()));
+			column.getColumn().setResizable(true);
+			column.getColumn().setMoveable(false);
+			column.setLabelProvider(new AttributeTableLabelProvider(attributes.get(i), attributeTable));
 			
-		});
+		}
+		TableViewerColumn attachments = new TableViewerColumn(attributeTable, SWT.NONE);
+		attachments.getColumn().setText(ATTACHMENT_COLUMN_NAME);
+		attachments.getColumn().setResizable(true);
+		attachments.getColumn().setMoveable(false);
+		attachments.setLabelProvider(new AttributeTableLabelProvider(null, attributeTable));
 		return attributeTable;
 	}
 	
@@ -142,102 +94,68 @@ public class AttributeTable {
 	 * @param table
 	 */
 	public static void resizeColumns(TableViewer table){
-		if (table.getTable().getShell().isDisposed()){
-			return;
-		}
-		
-		GC gc = new GC(table.getTable().getShell());
-		try {
-			gc.setFont(table.getTable().getFont());
-
-			/* compute width based on text size */
-			HashMap<Integer, Integer> columnWidth = new HashMap<Integer, Integer>();
-			for (int i = 0; i < table.getTable().getColumnCount(); i++) {
-				columnWidth.put(i, 0);
-			}
-			for (int j = 0; j < table.getTable().getItemCount(); j++) {
-				for (int i = 0; i < table.getTable().getColumnCount(); i++) {
-					String string = ((ITableLabelProvider) table
-							.getLabelProvider()).getColumnText(table.getTable()
-							.getItem(j).getData(), i);
-					int width = gc.textExtent(string).x + 20;
-					if (columnWidth.get(i) < width) {
-						columnWidth.put(i, width);
-					}
-				}
-			}
-			//update column widths
-			//not smaller than current width; not greater than 200
-			for (int i = 0; i < table.getTable().getColumnCount(); i++) {
-				int width = table.getTable().getColumn(i).getWidth();
-				int newWidth = columnWidth.get(i);
-
-				if (newWidth > width) {
-					if (newWidth > MAX_COLUMN_WIDTH) {
-						newWidth = MAX_COLUMN_WIDTH;
-					}
-					table.getTable().getColumn(i).setWidth(newWidth);
-				}
-			}
-		} finally {
-			gc.dispose();
+		for (TableColumn c : table.getTable().getColumns()) {
+			c.pack();
+			if (c.getWidth() > MAX_COLUMN_WIDTH) c.setWidth(MAX_COLUMN_WIDTH);
 		}
 	}
 	
 	
-	static class AttributeTableLabelProvider extends LabelProvider implements ITableLabelProvider, ITableColorProvider{
+	static class AttributeTableLabelProvider extends ColumnLabelProvider{
 
-		private WaypointObservation editingObservation = null;
-		public List<Attribute> columns;
+		private Attribute attribute;
+		private TableViewer viewer;
 		
-		public AttributeTableLabelProvider(List<Attribute> columns){
-			this.columns = columns;
+		private Color yellow;
+//		private Color grey1;
+//		private Color grey2;
+		
+		public AttributeTableLabelProvider(Attribute attribute, TableViewer viewer){
+			this.attribute = attribute;
+			this.viewer = viewer;
+			yellow = new Color(viewer.getControl().getDisplay(), 255, 255, 212);
+//			grey1 = new Color(viewer.getControl().getDisplay(), 245, 245, 245);
+//			grey2 = new Color(viewer.getControl().getDisplay(), 230, 230, 230);
+			viewer.getControl().addDisposeListener(e->{
+				yellow.dispose();
+//				grey1.dispose();
+//				grey2.dispose();
+			});
 		}
 
-		public void setEditingObservation(WaypointObservation ob) {
-			this.editingObservation = ob;
+		public WaypointObservation getEditingObservation() {
+			return (WaypointObservation) viewer.getControl().getData(EDITING_OBS_KEY);
 		}
 		
-
-
 		@Override
-		public Color getForeground(Object element, int columnIndex) {
-			if (this.editingObservation != null && this.editingObservation == element){
-				return darkRed;
-			}
+		public Color getForeground(Object element) {
+			if (element.equals(getEditingObservation())) return viewer.getTable().getDisplay().getSystemColor(SWT.COLOR_DARK_RED);
 			return null;
 		}
 
 		@Override
-		public Color getBackground(Object element, int columnIndex) {
-
+		public Color getBackground(Object element) {
+			if (element.equals(getEditingObservation())) return yellow;			
+//			int index = ((List)viewer.getInput()).indexOf(element);
+//			if (index %2 == 0) return grey1;
+//			return grey2;
 			return null;
 		}
 
 		@Override
-		public Image getColumnImage(Object element, int columnIndex) {
-			return null;
-		}
-
-		@Override
-		public String getColumnText(Object element, int columnIndex) {
+		public String getText(Object element) {
 			if (element instanceof WaypointObservation) {
 				WaypointObservation observation = (WaypointObservation) element;
-				if (columnIndex >= columns.size() ){
-					//assume this is the attachments column
+				if (attribute != null) {
+					WaypointObservationAttribute att = observation.findAttribute(attribute);
+					if (att != null) return att.getAttributeValueAsString(Locale.getDefault());
+					return ""; //$NON-NLS-1$
+				}else {
 					if (observation.getAttachments() != null && observation.getAttachments().size() > 0){
 						return MessageFormat.format(Messages.AttributeTable_AttachmentsFileCountLabel, new Object[]{String.valueOf(observation.getAttachments().size())});
 					}
 					return ""; //$NON-NLS-1$
-				}else{
-					Attribute attribute = columns.get(columnIndex);
-					WaypointObservationAttribute att = observation.findAttribute(attribute);
-				
-					if (att != null) {
-						return att.getAttributeValueAsString(Locale.getDefault());
-					}
 				}
-				
 			}
 			return ""; //$NON-NLS-1$
 		}

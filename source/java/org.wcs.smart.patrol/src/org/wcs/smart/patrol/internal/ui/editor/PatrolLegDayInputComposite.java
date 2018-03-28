@@ -51,6 +51,7 @@ import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
+import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -62,12 +63,15 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -84,6 +88,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -92,6 +98,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
@@ -117,6 +124,7 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolTrackEditDialog;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
@@ -148,6 +156,11 @@ public class PatrolLegDayInputComposite {
 	private Button btnAddWaypoint;
 	private Button btnDeleteWaypoint;
 	private Button btnMoveWaypoint;
+	
+	private MenuItem mnuDelete;
+	private MenuItem mnuAdd;
+	private MenuItem mnuMove;
+	private MenuItem mnuEdit;
 	
 	private DoubleCellEditor doubleCellEditor;
 	private DoubleCellEditor nullableDoubleCellEditor;
@@ -284,11 +297,16 @@ public class PatrolLegDayInputComposite {
 				if (editor.getPatrolEditor().canEdit() == null){
 					boolean enabled = !((IStructuredSelection)observationTable.getSelection()).isEmpty();
 					btnDeleteWaypoint.setEnabled(enabled);
+					mnuDelete.setEnabled(enabled);
 					
 					if (patrolLegDate.getPatrolLeg().getPatrol().getLegs().size() > 1 || patrolLegDate.getPatrolLeg().getPatrolLegDays().size() > 1){
-						btnMoveWaypoint.setEnabled(enabled);	
+						btnMoveWaypoint.setEnabled(enabled);
+						mnuMove.setEnabled(enabled);
+						mnuEdit.setEnabled(enabled);
 					}else{
 						btnMoveWaypoint.setEnabled(false);
+						mnuMove.setEnabled(false);
+						mnuEdit.setEnabled(false);
 					}
 				}
 			}
@@ -301,7 +319,9 @@ public class PatrolLegDayInputComposite {
 		
 		btnMoveWaypoint.setEnabled(false);
 		btnDeleteWaypoint.setEnabled(false);
-		
+		mnuDelete.setEnabled(false);
+		mnuMove.setEnabled(false);
+		mnuEdit.setEnabled(false);
 		if (editor.getPatrolEditor().canEdit() != null){
 			dtEndTime.setEnabled(false);
 			dtStartTime.setEnabled(false);
@@ -311,7 +331,9 @@ public class PatrolLegDayInputComposite {
 			btnAddWaypoint.setVisible(false);
 			btnDeleteWaypoint.setVisible(false);
 			btnMoveWaypoint.setVisible(false);
-			
+			mnuDelete.setEnabled(false);
+			mnuMove.setEnabled(false);
+			mnuEdit.setEnabled(false);
 			importTrack.setVisible(false);
 			lblImportWaypoints.setVisible(false);
 			
@@ -561,6 +583,44 @@ public class PatrolLegDayInputComposite {
 			}
 		});
 		
+		Menu mnu = new Menu(observationTable.getControl());
+		
+		mnuAdd = new MenuItem(mnu, SWT.PUSH);
+		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		mnuAdd.setText(Messages.PatrolLegDayInputComposite_AddWaypoint_Button);
+		mnuAdd.addListener(SWT.Selection, e-> addWaypoint());
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		mnuEdit = new MenuItem(mnu, SWT.PUSH);
+		mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		mnuEdit.addListener(SWT.Selection, e->{
+			ViewerCell cell = (ViewerCell) observationTable.getControl().getData("ITEM");
+			if (cell == null) return;
+			observationTable.editElement(cell.getElement(), cell.getColumnIndex());
+		});
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		mnuMove = new MenuItem(mnu, SWT.PUSH);
+		mnuMove.setText(Messages.PatrolLegDayInputComposite_MoveWaypoint_Button);
+		mnuMove.addListener(SWT.Selection, e-> moveSelectedWaypoints());
+		
+		mnuDelete = new MenuItem(mnu, SWT.PUSH);
+		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		mnuDelete.setText(Messages.PatrolLegDayInputComposite_DeleteWaypoint_Button);
+		mnuDelete.addListener(SWT.Selection, e-> deleteSelectedWaypoints());
+		
+		observationTable.getControl().addListener(SWT.MenuDetect, e->{
+			Point pnt = observationTable.getControl().toControl(e.x, e.y);
+			ViewerCell cell = observationTable.getCell(pnt);
+			
+			observationTable.getControl().setData("ITEM", cell);
+			
+			mnu.setVisible(true);
+		});
+		
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, trackListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, waypointListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, timeListener);
@@ -638,7 +698,7 @@ public class PatrolLegDayInputComposite {
 		
 		final PatrolLegDay moveTo = dialog.getMoveToPosition();
 		try(Session session = HibernateManager.openSession()){
-			IStructuredSelection selection = ((IStructuredSelection) observationTable.getSelection());
+			IStructuredSelection selection = observationTable.getStructuredSelection();
 			for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 				PatrolWaypoint w = (PatrolWaypoint) iterator.next();
 				

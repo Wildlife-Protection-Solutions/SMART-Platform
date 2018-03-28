@@ -162,8 +162,7 @@ public class FiltersPanel extends Composite {
 		parts.setWeights(new int[] {4, 4});
 		
 		updateDetails();
-		//TODO: only schedule once tab is activated
-		System.out.println("HERE");
+
 		loadEventsJob.schedule();
 	}
 	

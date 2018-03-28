@@ -67,7 +67,7 @@ import org.wcs.smart.ui.properties.TreeDropDown;
 
 /**
  * Editor for editing the patrol observation table cell.
- * <p>Opens the patrol observation entry wizard.</p>
+ * <p>Opens the observation entry wizard.</p>
  * 
  * @author Emily
  * @since 1.0.0
@@ -83,12 +83,12 @@ public class ObservationCellEditor extends DialogCellEditor {
 	
 	private boolean fireModify = true;	//if txtFilter change events to be fired
 	private boolean isEditable = false;	//if txtFilter is editable
-	private boolean dialogOpen = false;	//if dialog is being opend
+	private boolean dialogOpen = false;	//if dialog is being opened
 	
 	private Listener focusListener;		//focus listener for determining when cell looses focus
 	private Display focusDisplay;
 	
-	private List<Category> currentSelection = null;	//current catetory selected from tree drop down
+	private List<Category> currentSelection = null;	//current category selected from tree drop down
 	private List<Employee> observers = null;
 	private ConfigurableModel cmModel = null;
 	
@@ -447,7 +447,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 
 		final ObservationWizard wizard = new ObservationWizard(wp, this.observers, this.cmModel);
 		if (currentSelection != null){
-			wizard.setInitialCategories(currentSelection);
+			wizard.setCategoriesToProcess(currentSelection);
 		}
 		dialog = new ObservationWizardDialog(getControl().getShell(), wizard);
 		wizard.setWizardDialog(dialog);

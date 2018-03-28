@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.observation.ui.input;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.TreeViewer;
@@ -34,7 +32,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.dialogs.PatternFilter;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider;
@@ -94,9 +91,7 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 			cmTreeViewer.setInput(  ((ObservationWizard)getWizard()).getConfigurableModel() );
 		}
 		
-		for (int i = 0; i <  ((ObservationWizard)getWizard()).getCategoryCount(); i ++){
-			searchTree.selectedList.add(((ObservationWizard)getWizard()).getCategoryToProcess(i));
-		}
+		searchTree.selectedList.addAll( ((ObservationWizard)getWizard()).getCategoriesToProcess() );
 		searchTree.listViewer.refresh(true);
 		searchTree.addChangeListener(new SearchTree.IChangeListener() {
 			
@@ -139,19 +134,6 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 	 * @return
 	 */
 	private boolean canFinish(){
-		List<Category> categories = searchTree.getSelectedItems();
-		if (categories.size() > 0){
-			for (Iterator<Category> iterator = categories.iterator(); iterator.hasNext();) {
-				Category category = (Category) iterator.next();
-				if (findAttributes(category).size() == 0){
-					iterator.remove();
-				}
-			}
-			if (categories.size() == 0){
-				return true;
-				
-			}
-		}
 		return false;
 	}
 	
@@ -164,7 +146,6 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 			setPageComplete(searchTree.selectedList.size() > 0);
 			((ObservationWizard)getWizard()).setCanFinish(canFinish());
 		}
-		((ObservationWizard)getWizard()).clearWorkingObservations();
 	}
 	
 	/**
@@ -177,28 +158,12 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		moveNext = true;
 		List<Category> categories = searchTree.getSelectedItems();
 		if (categories.size() > 0){
-//			for (Iterator<Category> iterator = categories.iterator(); iterator.hasNext();) {
-//				Category category = (Category) iterator.next();
-//				if (findAttributes(category).size() > 0){
-//					//at least one category with attribute exists
-					return new AttributeWizardPage((Wizard)getWizard(), 0);
-//				}
-//			}
-//			return new ObservationSummaryWizardPage((Wizard)getWizard());
+			((ObservationWizard)getWizard()).setCategoriesToProcess(categories);
+			Category first = ((ObservationWizard)getWizard()).getNextCategory();
+			return new AttributeWizardPage( (Wizard)getWizard(), first);
 		}
 		return null;
     }
-	
-	/*
-	 * finds all attributes associated with the given category
-	 */
-	private List<Attribute> findAttributes(Category category){
-		List<Attribute> catAttributes = new ArrayList<Attribute>();
-		category.getAllAttribute(catAttributes, true);
-		return catAttributes;
-	}
-	
-	
 	
 	/**
 	 * Update the wizard current observation before moving to the next page.
@@ -214,14 +179,7 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		
 		if (searchTree.getSelectedItems().size() == 0){
 			return false;
-		}
-		
-		//add categories for observations without attributes
-		List<Category> categories = searchTree.getSelectedItems();
-		if (categories.size() > 0){
-			((ObservationWizard)getWizard()).setCategoriesToProcess(categories);
-		}
-		
+		}		
 		return true;
 	}
 	

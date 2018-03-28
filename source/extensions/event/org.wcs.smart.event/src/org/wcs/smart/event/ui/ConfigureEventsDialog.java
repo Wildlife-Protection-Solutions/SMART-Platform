@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.wcs.smart.event.EventPlugIn;
+import org.wcs.smart.event.EventProcessingJob;
 
 /**
  * Dialog for configuring events.
@@ -53,6 +54,12 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+	}
+	
+	@Override
+	protected void okPressed() {
+		EventProcessingJob.getInstance().reset();
+		super.okPressed();
 	}
 	
 	@Override
