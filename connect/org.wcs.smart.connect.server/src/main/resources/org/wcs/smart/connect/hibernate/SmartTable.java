@@ -124,6 +124,10 @@ import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
+import org.wcs.smart.event.model.EAction;
+import org.wcs.smart.event.model.EActionEvent;
+import org.wcs.smart.event.model.EActionParameterValue;
+import org.wcs.smart.event.model.EFilter;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -420,7 +424,12 @@ public enum SmartTable {
 	
 	ASSET_OBSERVATION_QUERY(AssetObservationQuery.class, null),
 	ASSET_WAYPOINT_QUERY(AssetWaypointQuery.class, null),
-	ASSET_SUMMARY_QUERY(AssetSummaryQuery.class, null)
+	ASSET_SUMMARY_QUERY(AssetSummaryQuery.class, null),
+	
+	EVENT_ACTION(EAction.class, null),
+	EVENT_FILTER(EFilter.class, null),
+	EVENT_ACTIONEVENT(EActionEvent.class, ".action.conservationArea"),
+	EVENT_ACTIONPARAMETERVALUE(EActionParameterValue.class, ".id.action.conservationArea")
 	;
 	
 	public Class<?> hibernateClass;

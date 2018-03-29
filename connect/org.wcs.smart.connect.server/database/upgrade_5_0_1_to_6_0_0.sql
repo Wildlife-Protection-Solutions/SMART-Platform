@@ -191,6 +191,48 @@ create table smart.i_config_option (
 ALTER TABLE SMART.i_config_option ADD FOREIGN KEY (ca_uuid) REFERENCES SMART.conservation_area(UUID)  ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
 
  
+-- EVENTS
+CREATE TABLE smart.e_event_filter(
+  uuid UUID not null, 
+  ca_uuid UUID not null, 
+  id varchar(128) not null, 
+  filter_string varchar(32000) not null, 
+PRIMARY KEY(uuid));
+
+ALTER TABLE smart.e_event_filter ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
+
+CREATE TABLE smart.e_action( 
+  uuid UUID not null, 
+  ca_uuid UUID not null, 
+  id varchar(128) not null, 
+  type_key varchar(128) not null, 
+  PRIMARY KEY (uuid));
+
+ALTER TABLE smart.e_action ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
+
+CREATE TABLE smart.e_action_parameter_value( 
+  action_uuid UUID not null, 
+  parameter_key varchar(128)  not null, 
+  parameter_value varchar(4096) not null, 
+  PRIMARY KEY (action_uuid, parameter_key));
+  
+ALTER TABLE smart.e_action_parameter_value ADD FOREIGN KEY (action_uuid) REFERENCES smart.e_action(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
+
+
+CREATE TABLE smart.e_event_action(
+  uuid UUID not null, 
+  filter_uuid UUID not null, 
+  action_uuid UUID not null, 
+  is_enabled boolean not null default true, 
+  PRIMARY KEY (uuid) );
+  
+ALTER TABLE smart.e_event_action ADD FOREIGN KEY (action_uuid) REFERENCES smart.e_action(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
+ALTER TABLE smart.e_event_action ADD FOREIGN KEY (filter_uuid) REFERENCES smart.e_event_filter(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
+
+INSERT INTO connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.event', '1.0.');
+
+
+
  -- TRIGGERS FOR CHANGELOG
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -339,6 +381,10 @@ DROP TRIGGER IF EXISTS trg_qa_routine ON smart.qa_routine;
 DROP TRIGGER IF EXISTS trg_qa_error ON smart.qa_error;                                                                                          
 DROP TRIGGER IF EXISTS trg_qa_routine_parameter ON smart.qa_routine_parameter;                                                                  
 DROP TRIGGER IF EXISTS trg_observation_attachment on smart.observation_attachment;
+DROP TRIGGER IF EXISTS trg_e_event_filter on smart.e_event_filter;
+DROP TRIGGER IF EXISTS trg_e_action on smart.e_action;
+DROP TRIGGER IF EXISTS trg_e_action_parameter_value on smart.e_action_parameter_value;
+DROP TRIGGER IF EXISTS trg_e_event_action on smart.e_event_action;
 
 DROP FUNCTION IF EXISTS connect.trg_changelog_common();
 DROP FUNCTION IF EXISTS connect.trg_cm_attribute();
@@ -418,6 +464,8 @@ DROP FUNCTION IF EXISTS connect.trg_wp_observation();
 DROP FUNCTION IF EXISTS connect.trg_wp_observation_attributes();
 DROP FUNCTION IF EXISTS connect.trg_conservation_area();
 DROP FUNCTION IF EXISTS connect.trg_observation_options();
+DROP FUNCTION IF EXISTS connect.trg_e_action_parameter_value();
+DROP FUNCTION IF EXISTS connect.trg_e_event_action();
 
 CREATE OR REPLACE FUNCTION connect.trg_changelog_common() RETURNS trigger AS $$
 	DECLARE
@@ -1409,6 +1457,52 @@ CREATE TRIGGER trg_screen_option_uuid AFTER INSERT OR UPDATE OR DELETE ON smart.
 CREATE TRIGGER trg_cm_attribute_config AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute_config FOR EACH ROW execute procedure connect.trg_cm_attribute_config();
 CREATE TRIGGER trg_compound_query_layer AFTER INSERT OR UPDATE OR DELETE ON smart.compound_query_layer FOR EACH ROW execute procedure connect.trg_compound_query_layer();
 
+
+-- EVENTS TRIGGERS
+CREATE TRIGGER trg_e_event_filter AFTER INSERT OR UPDATE OR DELETE ON smart.e_event_filter FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_e_action AFTER INSERT OR UPDATE OR DELETE ON smart.e_action FOR EACH ROW execute procedure connect.trg_changelog_common();
+
+
+CREATE OR REPLACE FUNCTION connect.trg_e_action_parameter_value() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'action_uuid', ROW.action_uuid, 'parameter_key', null, ROW.parameter_key, a.CA_UUID 
+ 		FROM smart.e_action a
+ 		WHERE a.uuid = ROW.action_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_e_action_parameter_value AFTER INSERT OR UPDATE OR DELETE ON smart.e_action_parameter_value FOR EACH ROW execute procedure connect.trg_e_action_parameter_value();
+
+
+CREATE OR REPLACE FUNCTION connect.trg_e_event_action() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID 
+ 		FROM smart.e_action a
+ 		WHERE a.uuid = ROW.action_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_e_event_action AFTER INSERT OR UPDATE OR DELETE ON smart.e_event_action FOR EACH ROW execute procedure connect.trg_e_event_action();
 
 -- Lock the change log table so cannot apply chnages at the same time as sync or packaging conservation area
 DROP TRIGGER IF EXISTS trg_connect_account_before ON connect.change_log;

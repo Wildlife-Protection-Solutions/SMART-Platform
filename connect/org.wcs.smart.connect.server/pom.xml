@@ -400,6 +400,13 @@
     			<artifactId>org.wcs.smart.asset.query.report</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
+		
+				<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.event</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		
 		<!-- JTS -->
 		<dependency>
     			<groupId>com.vividsolutions</groupId>
