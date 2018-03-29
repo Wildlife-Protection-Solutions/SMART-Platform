@@ -54,9 +54,11 @@ public enum InternalExtensionManager {
 	
 	INSTANCE;
 	
-	private HashMap<String, List<QaActionInfo>> providerActions = null;
+	private volatile HashMap<String, List<QaActionInfo>> providerActions = null;
 
 	private List<QaRoutine> autoRoutines = null;
+	
+	private final Object lock = new Object();
 	
 	private Boolean isAutoCleaned = Boolean.FALSE;
 	
@@ -169,7 +171,7 @@ public enum InternalExtensionManager {
 			synchronized (INSTANCE) {
 				if (providerActions == null){
 			
-					providerActions = new HashMap<>();
+					HashMap<String, List<QaActionInfo>> temp = new HashMap<>();
 					
 					IExtensionRegistry registry = RegistryFactory.getRegistry();
 					IExtensionPoint pnt = registry.getExtensionPoint(RoutineExtensionManager.QA_ROUTINE_TYPE_EXTENSION_ID);
@@ -191,12 +193,13 @@ public enum InternalExtensionManager {
 									actions.add(new QaActionInfo(action, descriptor));
 									ContextInjectionFactory.inject(action, context);
 								}
-								providerActions.put(id, actions);
+								temp.put(id, actions);
 							}catch (Exception ex){
 								QaPlugIn.log(ex.getMessage(), ex);
 							}
 						}
 					}
+					this.providerActions = temp;
 				}
 			}
 		}
@@ -209,7 +212,7 @@ public enum InternalExtensionManager {
 	 * 
 	 */
 	public void cleanAutoResults(){
-		synchronized (isAutoCleaned) {
+		synchronized (lock) {
 			if (isAutoCleaned) return;
 			isAutoCleaned = true;
 		}

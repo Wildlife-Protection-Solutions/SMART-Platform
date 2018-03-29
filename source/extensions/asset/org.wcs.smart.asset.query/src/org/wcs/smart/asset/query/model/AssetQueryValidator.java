@@ -184,6 +184,7 @@ public class AssetQueryValidator extends QueryDefinitionValidator {
 		}else if (a instanceof AssetType) {
 			ca = ((AssetType)a).getConservationArea();
 		}
+		if (ca == null) throw new IllegalStateException(MessageFormat.format("Conservation area field not found for class {0}", clazz.getName())); //$NON-NLS-1$
 		if (ca.equals(importCa)) {
 			//this is fine
 			return a;

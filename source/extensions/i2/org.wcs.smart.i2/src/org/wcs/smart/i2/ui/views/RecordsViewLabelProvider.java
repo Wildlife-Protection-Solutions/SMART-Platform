@@ -55,7 +55,6 @@ import com.ibm.icu.text.MessageFormat;
  */
 public class RecordsViewLabelProvider extends ColumnLabelProvider {
 	
-	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MMMM, YYYY"); //$NON-NLS-1$
 	private Font boldFont;
 	
 	private RecordLabelProvider labelProvider;
@@ -179,7 +178,7 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 		}else if (element instanceof IntelRecord.Status) {
 			return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(element, Locale.getDefault());
 		}else if (element instanceof Date) {
-			return DATE_FORMAT.format((Date)element);
+			return  (new SimpleDateFormat("MMMM, YYYY")).format((Date)element); //$NON-NLS-1$
 		}else if (element instanceof IntelRecordSearchResultItem) {
 			return ((IntelRecordSearchResultItem)element).getTitle();
 		}

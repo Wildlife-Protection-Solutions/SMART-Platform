@@ -134,7 +134,7 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 				queries = new ArrayList<IntelWorkingSetQuery>();
 				for (IntelRecordObservationQuery q : queriesToUpdate){
 					for (IntelWorkingSetQuery wq : workingset.getQueries()){
-						if (wq.getQuery().equals(q)){
+						if (wq.getQuery().equals(q.getUuid())){
 							queries.add(wq);
 						}
 					}

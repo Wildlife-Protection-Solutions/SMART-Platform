@@ -115,7 +115,7 @@ public class EntitySearchShell extends SmartShellDialog {
 			
 			@Override
 			public Image getImage(Object element){
-				if (element instanceof IntelSearchResultItem){
+				if (element instanceof InternalSearchResult){
 					return super.getImage(((InternalSearchResult) element).entity.getEntityType());
 				}
 				return null;

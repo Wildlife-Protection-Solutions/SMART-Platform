@@ -61,8 +61,8 @@ public class IntelEntitySummaryDatasetResultSet implements IResultSet {
 	 * Creates a new summary results set
 	 */
 	public IntelEntitySummaryDatasetResultSet(IntelQueryDataset dataset, HashMap<Integer, Object> parameters) throws OdaException {
-
 		
+		metadata = (IntelEntitySummaryDatasetResultSetMetadata) dataset.getMetaData();
 		IntelEntitySummaryQuery query = dataset.getConnection().getSession().get(IntelEntitySummaryQuery.class, dataset.getQuery());
 		if (query == null) {
 			throw new OdaException("Entity Summary Query not found"); //$NON-NLS-1$

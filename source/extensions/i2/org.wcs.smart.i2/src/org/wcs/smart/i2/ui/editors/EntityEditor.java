@@ -617,7 +617,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			@Override
 			public void handleEvent(org.osgi.service.event.Event event) {
 				Object data = event.getProperty(IEventBroker.DATA);
-				
+				if (data == null) return;
 				boolean equalsEntity = false;
 				boolean equalsEntityType = false;
 				boolean hasRelation = false;

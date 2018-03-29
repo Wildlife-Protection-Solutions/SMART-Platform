@@ -199,7 +199,9 @@ public class QueryDataSource extends ContentDataStore {
 		}
 		
 		@Override
-		public QueryColumn clone() { return null; }
+		public QueryColumn clone() {
+			return new EmptyQueryColumn(getName(), getKey(), getType());
+		}
 		
 	}
 }

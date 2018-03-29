@@ -131,7 +131,7 @@ public class FilterProcessor implements IFilterProcessor {
 		}
 		qFilter.accept(observationFilterVisitor);	
 		
-		Map<AssetFilter, String> assetFilterToTableName = processAssetTables(c, queryFilter, dateFilter, caFilter, progress.split(1));
+		Map<AssetFilter, String> assetFilterToTableName = processAssetTables(c, qFilter, dateFilter, caFilter, progress.split(1));
 		
 		SubMonitor sub = progress.split(1);
 		if (observationFilterVisitor.hasAttributeFilter()){

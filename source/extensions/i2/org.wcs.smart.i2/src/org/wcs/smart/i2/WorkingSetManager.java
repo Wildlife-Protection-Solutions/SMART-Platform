@@ -229,7 +229,7 @@ public enum WorkingSetManager {
 					if (wset != null){
 						boolean found = false;				
 						for (IntelWorkingSetQuery r : wset.getQueries()){
-							if (r.getQuery().equals(query)){
+							if (r.getQuery().equals(query.getUuid())){
 								found = true;
 								break;
 							}

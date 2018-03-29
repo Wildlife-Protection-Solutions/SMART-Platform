@@ -112,13 +112,11 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 			end.set(Calendar.SECOND, end.getActualMaximum(Calendar.SECOND));
 			end.set(Calendar.MILLISECOND, end.getActualMaximum(Calendar.MILLISECOND));
 			
-			if (startDate != null && endDate != null){
-				q1 += " AND l.id.location.dateTime >= :start and l.id.location.dateTime <= :end "; //$NON-NLS-1$
-				q2 += " AND l.id.location.dateTime >= :start and l.id.location.dateTime <= :end "; //$NON-NLS-1$
+			q1 += " AND l.id.location.dateTime >= :start and l.id.location.dateTime <= :end "; //$NON-NLS-1$
+			q2 += " AND l.id.location.dateTime >= :start and l.id.location.dateTime <= :end "; //$NON-NLS-1$
 				
-				values.put("start", start.getTime()); //$NON-NLS-1$
-				values.put("end", end.getTime()); //$NON-NLS-1$
-			}
+			values.put("start", start.getTime()); //$NON-NLS-1$
+			values.put("end", end.getTime()); //$NON-NLS-1$
 		}
 		
 		Query<?> query1 = connection.getSession().createQuery(q1);

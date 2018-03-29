@@ -64,7 +64,7 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	
 	@Transient
 	public String getIconName() {
-		return getTypeKey() + ".png";
+		return getTypeKey() + ".png"; //$NON-NLS-1$
 	}
 	
 	/**
