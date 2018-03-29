@@ -51,7 +51,6 @@ import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
-import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -70,8 +69,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.MenuEvent;
-import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -596,7 +593,7 @@ public class PatrolLegDayInputComposite {
 		mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		mnuEdit.addListener(SWT.Selection, e->{
-			ViewerCell cell = (ViewerCell) observationTable.getControl().getData("ITEM");
+			ViewerCell cell = (ViewerCell) observationTable.getControl().getData("ITEM"); //$NON-NLS-1$
 			if (cell == null) return;
 			observationTable.editElement(cell.getElement(), cell.getColumnIndex());
 		});
@@ -615,9 +612,7 @@ public class PatrolLegDayInputComposite {
 		observationTable.getControl().addListener(SWT.MenuDetect, e->{
 			Point pnt = observationTable.getControl().toControl(e.x, e.y);
 			ViewerCell cell = observationTable.getCell(pnt);
-			
-			observationTable.getControl().setData("ITEM", cell);
-			
+			observationTable.getControl().setData("ITEM", cell); //$NON-NLS-1$
 			mnu.setVisible(true);
 		});
 		
