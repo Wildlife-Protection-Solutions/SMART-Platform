@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.importer.FileProxy;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.ui.DataDisplaySettings;
 import org.wcs.smart.asset.ui.DataDisplaySettings.IconSize;
 import org.wcs.smart.asset.ui.ImageGallery;
@@ -95,7 +96,7 @@ public class ImagesTablePanel {
 				ContextMenu mnu = new ContextMenu();
 				
 				MenuItem mnuRemoveFile = new MenuItem();
-				mnuRemoveFile.setText("Remove File");
+				mnuRemoveFile.setText(Messages.ImagesTablePanel_RemoveFile);
 //				mnuRemoveFile.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 				mnuRemoveFile.setOnAction(e->{view.removeFiles(); e.consume();});
 				mnu.getItems().add(mnuRemoveFile);
@@ -103,12 +104,12 @@ public class ImagesTablePanel {
 				mnu.getItems().add(new SeparatorMenuItem());
 								
 				MenuItem mnuGroup = new MenuItem();
-				mnuGroup.setText("Create Custom Incident Group...");
+				mnuGroup.setText(Messages.ImagesTablePanel_CustomGroup);
 				mnuGroup.setOnAction(e->{view.groupSelected(); e.consume();});
 				mnu.getItems().add(mnuGroup);
 				
 				MenuItem mnuRemoveGroup = new MenuItem();
-				mnuRemoveGroup.setText("Remove Custom Incident Group...");
+				mnuRemoveGroup.setText(Messages.ImagesTablePanel_RemoveGroup);
 				mnuRemoveGroup.setOnAction(e->{view.ungroupSelected(); e.consume();});
 				mnu.getItems().add(mnuRemoveGroup);
 				

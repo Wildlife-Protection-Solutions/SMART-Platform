@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.inout.AssetStationCsvImporter;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetStationAttribute;
 import org.wcs.smart.asset.model.AssetType;
@@ -71,6 +72,8 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public class StationMappingPage extends WizardPage{
 	
+	private static final String ATTRIBUTE2 = "ATTRIBUTE"; //$NON-NLS-1$
+
 	private ComboViewer cmbStationId;
 	
 	private ComboViewer cmbPositionX;
@@ -92,7 +95,7 @@ public class StationMappingPage extends WizardPage{
 	};
 	
 	protected StationMappingPage() {
-		super("STATION_MAPPING");
+		super("STATION_MAPPING"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -102,7 +105,7 @@ public class StationMappingPage extends WizardPage{
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Station ID*:");
+		l.setText(Messages.StationMappingPage_StationLabel);
 		
 		cmbStationId = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbStationId.setContentProvider(ArrayContentProvider.getInstance());
@@ -116,7 +119,7 @@ public class StationMappingPage extends WizardPage{
 		});
 		
 		l = new Label(main, SWT.NONE);
-		l.setText("Station Position*:");
+		l.setText(Messages.StationMappingPage_PositionLabel);
 		
 		Composite locComp = new Composite(main, SWT.NONE);
 		locComp.setLayout(new GridLayout(2, true));
@@ -131,7 +134,7 @@ public class StationMappingPage extends WizardPage{
 		((GridLayout)xComp.getLayout()).marginHeight= 0;
 		
 		l = new Label(xComp, SWT.NONE);
-		l.setText("X:");
+		l.setText(Messages.StationMappingPage_xLabel);
 
 		cmbPositionX = new ComboViewer(xComp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbPositionX.setContentProvider(ArrayContentProvider.getInstance());
@@ -150,7 +153,7 @@ public class StationMappingPage extends WizardPage{
 		((GridLayout)yComp.getLayout()).marginWidth = 0;
 		((GridLayout)yComp.getLayout()).marginHeight= 0;
 		l = new Label(yComp, SWT.NONE);
-		l.setText("Y:");
+		l.setText(Messages.StationMappingPage_yLabel);
 		
 		cmbPositionY = new ComboViewer(yComp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbPositionY.setContentProvider(ArrayContentProvider.getInstance());
@@ -191,7 +194,7 @@ public class StationMappingPage extends WizardPage{
 		
 		if (headers == null) {
 			cmbStationId.setInput(new String[] {});
-			setErrorMessage(MessageFormat.format("Unable to read file: {0}", fileName));
+			setErrorMessage(MessageFormat.format(Messages.StationMappingPage_ReadError, fileName));
 			return;
 		}
 		
@@ -199,7 +202,7 @@ public class StationMappingPage extends WizardPage{
 		
 		List<AssetAttribute> attributes = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			List<AssetStationAttribute> stnAttributes = QueryFactory.buildQuery(session, AssetStationAttribute.class, new Object[] {"attribute.conservationArea", SmartDB.getCurrentConservationArea()}).list();
+			List<AssetStationAttribute> stnAttributes = QueryFactory.buildQuery(session, AssetStationAttribute.class, new Object[] {"attribute.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 			for (AssetStationAttribute a : stnAttributes) {
 				attributes.add(a.getAttribute());
 				a.getAttribute().getName();
@@ -214,7 +217,7 @@ public class StationMappingPage extends WizardPage{
 		
 		cmbStationId.setInput(headers);
 		for (HeaderIndex x : headers) {
-			if (x.header.trim().toLowerCase().equals("asset id".trim().toLowerCase())) {
+			if (x.header.trim().toLowerCase().equals("asset id".trim().toLowerCase())) { //$NON-NLS-1$
 				cmbStationId.setSelection(new StructuredSelection(x));
 			}
 		}
@@ -226,7 +229,7 @@ public class StationMappingPage extends WizardPage{
 		attributeMappings = new ArrayList<>();
 		
 		List<HeaderIndex> options = new ArrayList<>();
-		options.add(new HeaderIndex("", -1));
+		options.add(new HeaderIndex("", -1)); //$NON-NLS-1$
 		options.addAll(headers);
 		
 		ScrolledComposite scroll = new ScrolledComposite(fields, SWT.V_SCROLL);
@@ -255,7 +258,7 @@ public class StationMappingPage extends WizardPage{
 				}
 			}
 			attributeMappings.add(cmbViewer);
-			cmbViewer.setData("ATTRIBUTE", attribute);
+			cmbViewer.setData(ATTRIBUTE2, attribute);
 		}
 		fields.layout(true);
 		fields.getParent().layout(true);
@@ -264,8 +267,8 @@ public class StationMappingPage extends WizardPage{
 		
 		validate();
 		
-		setTitle("Import Stations From CSV");
-		setMessage("Map station attribute to csv file columns");
+		setTitle(Messages.StationMappingPage_Title);
+		setMessage(Messages.StationMappingPage_Message);
 	}
 
 	public Integer getStationIdMapping() {
@@ -285,7 +288,7 @@ public class StationMappingPage extends WizardPage{
 		for (ComboViewer cmb : attributeMappings) {
 			HeaderIndex x = (HeaderIndex)cmb.getStructuredSelection().getFirstElement();
 			if (x != null && x.index >= 0) {
-				mappings.put((AssetAttribute)cmb.getData("ATTRIBUTE"), x.index);
+				mappings.put((AssetAttribute)cmb.getData(ATTRIBUTE2), x.index);
 			}
 		}
 		return mappings;
@@ -295,13 +298,13 @@ public class StationMappingPage extends WizardPage{
 		String error = null;
 		
 		Object x = cmbStationId.getStructuredSelection().getFirstElement();
-		if (x == null) error = "A mapping for station id field is required.";
+		if (x == null) error = Messages.StationMappingPage_StationRequired;
 		
 		x = cmbPositionX.getStructuredSelection().getFirstElement();
-		if (x == null) error = "A mapping for the station position x field is required.";
+		if (x == null) error = Messages.StationMappingPage_xRequired;
 		
 		x = cmbPositionY.getStructuredSelection().getFirstElement();
-		if (x == null) error = "A mapping for the station position y field is required.";
+		if (x == null) error = Messages.StationMappingPage_yRequired;
 		
 		setErrorMessage(error);
 	}
@@ -314,7 +317,7 @@ public class StationMappingPage extends WizardPage{
 		Projection proj = ((AssetDataImportWizard)getWizard()).filePage.getProjection();
 		
 		if (!Files.exists(file)) {
-			MessageDialog.openError(getContainer().getShell(), "Error", MessageFormat.format("This file {0} does not exist.", file.toString()));
+			MessageDialog.openError(getContainer().getShell(), Messages.StationMappingPage_Errortitle, MessageFormat.format(Messages.StationMappingPage_ErrorMessage, file.toString()));
 			return false;
 		}
 		
@@ -323,7 +326,7 @@ public class StationMappingPage extends WizardPage{
 		try {
 			return importer.processFile();
 		}catch (Exception ex) {
-			AssetPlugIn.displayLog("Unable to import station data from file: " +ex.getMessage(),  ex);
+			AssetPlugIn.displayLog(Messages.StationMappingPage_ImportError +ex.getMessage(),  ex);
 			return false;
 		}
 		

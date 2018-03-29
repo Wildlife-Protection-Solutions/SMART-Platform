@@ -22,6 +22,7 @@
 package org.wcs.smart.asset;
 
 import org.hibernate.Session;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.ca.advisors.DeleteManager;
 
@@ -41,7 +42,7 @@ public enum AttributeManager {
 
 	public void canDelete(AssetAttribute type, Session session) throws Exception{
 		if (!DeleteManager.canDelete(type, session)){
-			throw new Exception("Unknown error occurred while deleting asset attribute.");
+			throw new Exception(Messages.AttributeManager_unknownError);
 		}
 	}
 	

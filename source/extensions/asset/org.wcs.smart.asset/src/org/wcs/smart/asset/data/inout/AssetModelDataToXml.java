@@ -131,7 +131,7 @@ public class AssetModelDataToXml {
 	}
 	
 	private void exportStationAttributes(AssetData xmlData, Session session) {
-		List<AssetStationAttribute> attributes = QueryFactory.buildQuery(session, AssetStationAttribute.class, new Object[] {"attribute.conservationArea", SmartDB.getCurrentConservationArea()}).list();
+		List<AssetStationAttribute> attributes = QueryFactory.buildQuery(session, AssetStationAttribute.class, new Object[] {"attribute.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 		
 		if (attributes.isEmpty()) return;
 		
@@ -149,7 +149,7 @@ public class AssetModelDataToXml {
 	}
 	
 	private void exportStationLocationAttributes(AssetData xmlData, Session session) {
-		List<AssetStationLocationAttribute> attributes = QueryFactory.buildQuery(session, AssetStationLocationAttribute.class, new Object[] {"attribute.conservationArea", SmartDB.getCurrentConservationArea()}).list();
+		List<AssetStationLocationAttribute> attributes = QueryFactory.buildQuery(session, AssetStationLocationAttribute.class, new Object[] {"attribute.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 		
 		if (attributes.isEmpty()) return;
 		
@@ -167,7 +167,7 @@ public class AssetModelDataToXml {
 	}
 	
 	private void exportModuleSettings(AssetData xmlData, Session session) {
-		List<AssetModuleSettings> settings = QueryFactory.buildQuery(session, AssetModuleSettings.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+		List<AssetModuleSettings> settings = QueryFactory.buildQuery(session, AssetModuleSettings.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 		
 		for (AssetModuleSettings setting : settings) {
 			org.wcs.smart.asset.data.inout.xml.AssetModuleSettings xmlSetting = new org.wcs.smart.asset.data.inout.xml.AssetModuleSettings();

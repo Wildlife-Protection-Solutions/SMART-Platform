@@ -65,8 +65,8 @@ public interface IOverviewTableColumn {
 		}
 		
 		public String asString(Object value) {
-			if (value == null) return "";
-			if (value instanceof Exception) return "ERROR: " + ((Exception)value).getMessage();
+			if (value == null) return ""; //$NON-NLS-1$
+			if (value instanceof Exception) return "ERROR: " + ((Exception)value).getMessage(); //$NON-NLS-1$
 			switch(this) {
 			case BOOLEAN:
 				if ((Boolean)value) {

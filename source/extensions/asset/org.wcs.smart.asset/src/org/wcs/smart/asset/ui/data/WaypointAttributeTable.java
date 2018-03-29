@@ -46,11 +46,13 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.ui.ObservationDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Manages a collection of waypoint observations, displaying them
@@ -185,7 +187,7 @@ public class WaypointAttributeTable {
 					session.getTransaction().commit();
 				}catch (Exception ex) {
 					session.getTransaction().rollback();
-					AssetPlugIn.displayLog("Unable to save changes to waypoint: " + ex.getMessage(), ex);
+					AssetPlugIn.displayLog(Messages.WaypointAttributeTable_SaveError + ex.getMessage(), ex);
 				}
 			}
 			refresh();
@@ -203,7 +205,7 @@ public class WaypointAttributeTable {
 					session.getTransaction().commit();
 				}catch (Exception ex) {
 					session.getTransaction().rollback();
-					AssetPlugIn.displayLog("Unable to save changes to waypoint: " + ex.getMessage(), ex);
+					AssetPlugIn.displayLog(Messages.WaypointAttributeTable_SaveError + ex.getMessage(), ex);
 				}
 			}
 			refresh();
@@ -220,7 +222,7 @@ public class WaypointAttributeTable {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.displayLog("Unable to save changes to waypoint: " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.WaypointAttributeTable_SaveError + ex.getMessage(), ex);
 			}
 		}
 		refresh();
@@ -236,18 +238,18 @@ public class WaypointAttributeTable {
 		Menu mnu = new Menu(control);
 		
 		MenuItem mnuAdd = new MenuItem(mnu, SWT.PUSH);
-		mnuAdd.setText("New...");
+		mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		mnuAdd.addListener(SWT.Selection, e->addObservation());
 		
 		MenuItem mnuEdit = new MenuItem(mnu, SWT.PUSH);
-		mnuEdit.setText("Edit...");
+		mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		mnuEdit.addListener(SWT.Selection, e->modifyObservation(selected.get(0)));
 		if (selected.size() != 1) mnuEdit.setEnabled(false);
 		
 		MenuItem mnuDelete = new MenuItem(mnu, SWT.PUSH);
-		mnuDelete.setText("Delete");
+		mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		mnuDelete.addListener(SWT.Selection, e->deleteObservation(selected));
 		mnuDelete.setEnabled(!selected.isEmpty());
@@ -283,7 +285,7 @@ public class WaypointAttributeTable {
 		
 		public void createControl(Composite parent) {
 			if (rows.isEmpty()) {
-				Label l = toolkit.createLabel(parent, "", SWT.SEPARATOR | SWT.HORIZONTAL);
+				Label l = toolkit.createLabel(parent, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			}
 			Listener clickListener = e->{
@@ -329,7 +331,7 @@ public class WaypointAttributeTable {
 			if (observation.getAttributes() != null) {
 				for (WaypointObservationAttribute a : observation.getAttributes()) {
 					
-					ll = toolkit.createLabel(c, a.getAttribute().getName() + ":");
+					ll = toolkit.createLabel(c, a.getAttribute().getName() + ":"); //$NON-NLS-1$
 					ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 					((GridData)ll.getLayoutData()).horizontalIndent = 20;
 					
@@ -339,7 +341,7 @@ public class WaypointAttributeTable {
 				}
 			}
 			
-			Label l = toolkit.createLabel(parent, "", SWT.SEPARATOR | SWT.HORIZONTAL);
+			Label l = toolkit.createLabel(parent, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			if (page.isEdit()) {
@@ -361,12 +363,12 @@ public class WaypointAttributeTable {
 				toolbar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 				
 				ToolItem btnEdit = new ToolItem(toolbar, SWT.PUSH);
-				btnEdit.setToolTipText("modify observations");
+				btnEdit.setToolTipText(Messages.WaypointAttributeTable_edittooltip);
 				btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 				btnEdit.addListener(SWT.Selection, e->modifyObservation(observation));
 				
 				ToolItem btnDelete = new ToolItem(toolbar, SWT.PUSH);
-				btnDelete.setToolTipText("delete observation");
+				btnDelete.setToolTipText(Messages.WaypointAttributeTable_deletetooltip);
 				btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 				btnDelete.addListener(SWT.Selection, e->deleteObservation(Collections.singleton(observation)));
 				

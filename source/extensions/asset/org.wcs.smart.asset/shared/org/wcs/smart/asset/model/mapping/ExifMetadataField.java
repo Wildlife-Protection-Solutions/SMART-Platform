@@ -22,7 +22,10 @@
 package org.wcs.smart.asset.model.mapping;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.asset.IAssetLabelProvider;
 import org.wcs.smart.asset.data.importer.FileMetadataReader;
 import org.wcs.smart.asset.data.importer.MetadataUtils;
 import org.wcs.smart.asset.model.AssetMetadataMapping.MetadataType;
@@ -38,6 +41,10 @@ import com.drew.metadata.Tag;
  */
 public class ExifMetadataField implements IMetadataField{
 
+	private static final String SEPERATOR = "|"; //$NON-NLS-1$
+	
+	public static final String TAG_FORMAT_1 = ExifMetadataField.class.getName() + ".tag1"; //$NON-NLS-1$
+	public static final String TAG_FORMAT_2 = ExifMetadataField.class.getName() + ".tag2"; //$NON-NLS-1$
 	/*
 	 * Metadata tag, only valid 
 	 */
@@ -107,25 +114,25 @@ public class ExifMetadataField implements IMetadataField{
 	}
 	
 	@Override
-	public String keyAsString() {
+	public String keyAsString(Locale l) {
 		if (tag == null) {
 			tag = MetadataUtils.findTagName(tagType);
 		}
 		if (tag == null) {
-			return MessageFormat.format("Tag: {0}", String.format("0x%04x", tagType));
+			return MessageFormat.format(SmartContext.INSTANCE.getClass(IAssetLabelProvider.class).getLabel(TAG_FORMAT_1, l), String.format("0x%04x", tagType)); //$NON-NLS-1$
 		}
-		return MessageFormat.format("Tag: {0} ({1})", tag.getTagName(), tag.getTagTypeHex());
+		return MessageFormat.format(SmartContext.INSTANCE.getClass(IAssetLabelProvider.class).getLabel(TAG_FORMAT_2, l), tag.getTagName(), tag.getTagTypeHex());
 	}
 	
 	@Override
 	public String valueAsString() {
-		if (tagValue == null) return "";
+		if (tagValue == null) return ""; //$NON-NLS-1$
 		return tagValue;
 	}
 
 	@Override
 	public String asString() {
-		return String.valueOf(tagType) + "|" +  (tagValue == null? "" : tagValue);
+		return String.valueOf(tagType) + SEPERATOR +  (tagValue == null? "" : tagValue); //$NON-NLS-1$
 	}
 
 	/**
@@ -162,7 +169,7 @@ public class ExifMetadataField implements IMetadataField{
 	 */
 	public static ExifMetadataField parseMapping(String mappingString) {
 		if (mappingString == null) return null; 
-		String[] bits = mappingString.split("\\|");
+		String[] bits = mappingString.split("\\" + SEPERATOR); //$NON-NLS-1$
 		if (bits.length == 1) return new ExifMetadataField(Integer.valueOf(bits[0]));
 		if (bits.length == 2) return new ExifMetadataField(Integer.valueOf(bits[0]), bits[1]);
 		return null; 

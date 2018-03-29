@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
 import org.wcs.smart.asset.model.AssetMetadataMapping.MetadataType;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -97,12 +98,12 @@ public class NewMappingDialog extends TitleAreaDialog {
 					
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						monitor.beginTask("Loading Data Model", 2);
+						monitor.beginTask(Messages.NewMappingDialog_LoadingTaskName, 2);
 						
 						try(Session session = HibernateManager.openSession()){
 							List<Category> cats = QueryFactory.buildQuery(session, Category.class, 
-									new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-									new Object[] {"parent", null}).list();
+									new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+									new Object[] {"parent", null}).list(); //$NON-NLS-1$
 							
 							List<Category> toVisit = new ArrayList<>();
 							toVisit.addAll(cats);
@@ -115,7 +116,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 							monitor.worked(1);
 							
 							List<Attribute> atts = QueryFactory.buildQuery(session, Attribute.class,
-									new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+									new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 							List<AttributeTreeNode> toVisit2 = new ArrayList<>();
 							for (Attribute a : atts) {
 								a.getName();
@@ -174,14 +175,14 @@ public class NewMappingDialog extends TitleAreaDialog {
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(header, SWT.NONE);
-		l.setText("Metadata Type:");
+		l.setText(Messages.NewMappingDialog_TypeLabel);
 		
 		btnExif = new Button(header, SWT.RADIO);
-		btnExif.setText("EXIF");
+		btnExif.setText(Messages.NewMappingDialog_exifOp);
 		btnExif.setSelection(true);
 		
 		btnXmp = new Button(header, SWT.RADIO);
-		btnXmp.setText("XMP");
+		btnXmp.setText(Messages.NewMappingDialog_xmlOp);
 			
 		Composite stackPanel = new Composite(main, SWT.BORDER);
 		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -224,9 +225,9 @@ public class NewMappingDialog extends TitleAreaDialog {
 		
 		modified();
 		
-		setTitle("Asset Metadata Mapping");
-		getShell().setText("Asset Metadata Mapping");
-		setMessage("Configure file metadata mappings.");
+		setTitle(Messages.NewMappingDialog_Title);
+		getShell().setText(Messages.NewMappingDialog_Title);
+		setMessage(Messages.NewMappingDialog_Message);
 		return parent;
 	}
 	

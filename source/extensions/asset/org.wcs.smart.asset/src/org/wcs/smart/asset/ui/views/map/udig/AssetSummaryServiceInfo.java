@@ -22,6 +22,7 @@
 package org.wcs.smart.asset.ui.views.map.udig;
 
 import org.locationtech.udig.catalog.IServiceInfo;
+import org.wcs.smart.asset.internal.Messages;
 
 /**
  * @author Emily
@@ -29,9 +30,9 @@ import org.locationtech.udig.catalog.IServiceInfo;
 public class AssetSummaryServiceInfo extends IServiceInfo{
 
 	public AssetSummaryServiceInfo(AssetStationSummaryService service){
-		this.description = "Summary of statistics by station or location";
-		this.keywords = new String[]{"Asset", "Station", "Location", "Statistics"};
-		this.title = "Asset Summary Statistic Layers";
+		this.description = Messages.AssetSummaryServiceInfo_SummaryStatsDescription;
+		this.keywords = new String[]{Messages.AssetSummaryServiceInfo_Keyword1, Messages.AssetSummaryServiceInfo_Keyword2, Messages.AssetSummaryServiceInfo_Keyword3, Messages.AssetSummaryServiceInfo_Keyword4};
+		this.title = Messages.AssetSummaryServiceInfo_SummaryStatsTitle;
 	}
 	
 }

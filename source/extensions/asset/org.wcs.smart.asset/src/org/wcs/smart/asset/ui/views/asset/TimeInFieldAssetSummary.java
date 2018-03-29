@@ -26,6 +26,7 @@ import java.util.Date;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetUtils;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -47,14 +48,14 @@ public class TimeInFieldAssetSummary implements IAssetSummary {
 	
 	@Override
 	public String getSummaryName() {
-		return "Total Time In Field:";
+		return Messages.TimeInFieldAssetSummary_TimeInField;
 	}
 
 	@Override
 	public String getSummaryValue(Asset asset, Session session) {
 		double totalHours = 0;
 		if (asset.getUuid() != null) {
-			try(ScrollableResults results = QueryFactory.buildQuery(session, AssetDeployment.class, "asset", asset).scroll()){
+			try(ScrollableResults results = QueryFactory.buildQuery(session, AssetDeployment.class, "asset", asset).scroll()){ //$NON-NLS-1$
 				while(results.next()) {
 					AssetDeployment as = (AssetDeployment) results.get(0);
 					Date end = new Date();

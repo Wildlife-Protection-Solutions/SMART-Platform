@@ -30,6 +30,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.ui.handler.OpenStationHandler;
@@ -57,18 +58,18 @@ public class AssetWaypointSourceUiProvider implements
 			if (pw == null){
 				MessageDialog.openError(Display.getDefault().getActiveShell(),
 						ERROR_STR, 
-						"Asset waypoint waypoint not found.");
+						Messages.AssetWaypointSourceUiProvider_WpNotfound);
 				return;
 			}
-			
 			station = pw.getAssetDeployment().getStationLocation().getStation();
+			//lazy load station uuid/id
 			station.getUuid().equals(null);
 			station.getId();
 		}
 		
-		//TODO: go to correct page
 		IEclipseContext ctx = ((IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class)).getActiveLeaf();
 		ctx.set(OpenStationHandler.STATION_PARAM, new StationEditorInput(station.getUuid(), station.getId()));
+		ctx.set(OpenStationHandler.INIT_SELECTION_WP_UUID, pw.getWaypoint().getUuid());
 		ContextInjectionFactory.invoke(new OpenStationHandler(), Execute.class, ctx);
 
 	}

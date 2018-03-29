@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
@@ -41,13 +42,13 @@ import org.wcs.smart.hibernate.HibernateManager;
 /**
  * Job removes all plan related tabled from the database
  * 
- * @author elitvin
+ * @author Emily
  * @since 3.0.0
  */
 public class RemoveAssetJob extends Job {
 
 	public RemoveAssetJob() {
-		super("Uninstalling asset plugin");
+		super(Messages.RemoveAssetJob_JobName);
 	}
 
 	@Override
@@ -63,7 +64,7 @@ public class RemoveAssetJob extends Job {
 				}catch (Exception ex){
 					AssetPlugIn.log(ex.getMessage(), ex);	
 				}
-				AssetPlugIn.displayLog("Error uninstalling asset plugin: " + e.getMessage(), e);
+				AssetPlugIn.displayLog(Messages.RemoveAssetJob_Error + e.getMessage(), e);
 				return new Status(Status.ERROR,AssetPlugIn.PLUGIN_ID,e.getMessage());
 			}
 		}	
@@ -97,6 +98,7 @@ public class RemoveAssetJob extends Job {
 				"smart.asset_type"
 		};
 		
+		@SuppressWarnings("nls")
 		String[] LABELTABLES = new String[]{
 				"smart.asset_attribute_list_item",
 				"smart.asset_attribute",

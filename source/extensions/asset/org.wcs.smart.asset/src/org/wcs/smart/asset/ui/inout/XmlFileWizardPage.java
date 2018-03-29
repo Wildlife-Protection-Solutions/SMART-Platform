@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.inout.AssetXmlToAssetData;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -60,7 +61,7 @@ public class XmlFileWizardPage extends WizardPage {
 	private Text txtFile;
 	
 	protected XmlFileWizardPage() {
-		super("XML_FILE_PAGE");
+		super("XML_FILE_PAGE"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -76,7 +77,7 @@ public class XmlFileWizardPage extends WizardPage {
 		Path xmlFile = getFile();
 		AssetPlugIn.getDefault().getPreferenceStore().putValue(PREFERENCE_DIR_KEY, xmlFile.toString());
 		if (!Files.exists(xmlFile)) {
-			MessageDialog.openWarning(getShell(), "Not Found", MessageFormat.format("File {0} not found", xmlFile.toString()));
+			MessageDialog.openWarning(getShell(), Messages.XmlFileWizardPage_NotFoundTitle, MessageFormat.format(Messages.XmlFileWizardPage_NotFoundMessage, xmlFile.toString()));
 		}
 		final boolean[] ok = new boolean[] {true};
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
@@ -89,15 +90,15 @@ public class XmlFileWizardPage extends WizardPage {
 					try {
 						dd.importXmlData(xmlFile, monitor);
 					}catch(OperationCanceledException ex) {
-						Display.getDefault().syncExec(()-> MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Canceled", "Operation canceled by user"));
+						Display.getDefault().syncExec(()-> MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.XmlFileWizardPage_CanceledTitle, Messages.XmlFileWizardPage_CanceledMsg));
 					}catch (Exception ex) {
-						AssetPlugIn.displayLog("Error importing asset model data: "  + ex.getMessage(), ex);
+						AssetPlugIn.displayLog(Messages.XmlFileWizardPage_ImportError  + ex.getMessage(), ex);
 						ok[0] = false;
 					}
 				}
 			});
 		}catch (Exception ex) {
-			AssetPlugIn.displayLog("Error importing  asset model data: "  + ex.getMessage(), ex);
+			AssetPlugIn.displayLog(Messages.XmlFileWizardPage_ImportError  + ex.getMessage(), ex);
 			ok[0] = false;
 		}
 		return ok[0];
@@ -115,29 +116,29 @@ public class XmlFileWizardPage extends WizardPage {
 		fileComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(fileComp, SWT.NONE);
-		l.setText("File:");
+		l.setText(Messages.XmlFileWizardPage_FileLabel);
 		
 		txtFile = new Text(fileComp, SWT.BORDER);
-		txtFile.setText("");
+		txtFile.setText(""); //$NON-NLS-1$
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		String initDir = AssetPlugIn.getDefault().getPreferenceStore().getString(PREFERENCE_DIR_KEY);
 		if (initDir != null) txtFile.setText(initDir);
 		
 		Button btnBrowse = new Button(fileComp, SWT.PUSH);
-		btnBrowse.setText("...");
+		btnBrowse.setText("..."); //$NON-NLS-1$
 		btnBrowse.addListener(SWT.Selection,e->{
 			FileDialog fd = new FileDialog(parent.getShell());
-			fd.setFilterExtensions(new String[] {"*.xml", "*.*"});
-			fd.setFilterNames(new String[] {"XML File (*.xml)", "All Files (*.*)"});
+			fd.setFilterExtensions(new String[] {"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+			fd.setFilterNames(new String[] {Messages.XmlFileWizardPage_xmlFile, Messages.XmlFileWizardPage_AllFiles});
 			
 			if (!txtFile.getText().trim().isEmpty()) fd.setFilterPath(txtFile.getText());
 			String file = fd.open();
 			if (file != null) txtFile.setText(file);
 		});
 		
-		setTitle("Import Asset Data");
-		setMessage("Select xml file to import");
+		setTitle(Messages.XmlFileWizardPage_Title);
+		setMessage(Messages.XmlFileWizardPage_Message);
 		
 		setControl(main);
 	}

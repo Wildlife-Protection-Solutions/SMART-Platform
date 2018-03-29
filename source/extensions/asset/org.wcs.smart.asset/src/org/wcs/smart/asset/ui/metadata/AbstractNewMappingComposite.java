@@ -60,6 +60,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
 import org.wcs.smart.asset.model.mapping.ExifMetadataField;
 import org.wcs.smart.asset.model.mapping.XmpMetadataField;
@@ -107,15 +108,15 @@ public abstract class AbstractNewMappingComposite {
 		if (btnExifSingle.getSelection()) {
 			Object mappedTo = cmbExifMappingField.getStructuredSelection().getFirstElement();
 			if (!(mappedTo instanceof AssetMetadataMapping.AssetProperty)) {
-				message = "EXIF mapping to value must be selected";
+				message = Messages.AbstractNewMappingComposite_ExifMappingRequired;
 			}
 		}else if (btnExifMulti.getSelection()) {
 			if (exifTagValueMappings.isEmpty()) {
-				message = "At least one data model element must be mapped.";
+				message = Messages.AbstractNewMappingComposite_ElementRequired;
 			}
 			for (MetadataValueMapping mapping : exifTagValueMappings) {
 				if (mapping.category == null && mapping.attribute == null && mapping.listItem == null && mapping.treeNode == null) 
-					message = "Mapped data model element must be selected";
+					message = Messages.AbstractNewMappingComposite_DataModelElementRequired;
 			}
 		}
 		return message;
@@ -134,8 +135,8 @@ public abstract class AbstractNewMappingComposite {
 		
 		btnExifSingle = new Button(panel, SWT.RADIO);
 		btnExifSingle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		btnExifSingle.setText("Single Mapping");
-		btnExifSingle.setText("Map tag to field");
+		btnExifSingle.setText(Messages.AbstractNewMappingComposite_SingleMapOp);
+		btnExifSingle.setText(Messages.AbstractNewMappingComposite_FieldTooltip);
 		btnExifSingle.addListener(SWT.Selection, e->dialog.modified());
 		
 		cmbExifMappingField = new ComboViewer(panel, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -155,8 +156,8 @@ public abstract class AbstractNewMappingComposite {
 		
 		btnExifMulti = new Button(panel, SWT.RADIO);
 		btnExifMulti.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		btnExifMulti.setText("Map to data model");
-		btnExifMulti.setToolTipText("Map individual tag values to specific data model elements");
+		btnExifMulti.setText(Messages.AbstractNewMappingComposite_MapToDataModelOp);
+		btnExifMulti.setToolTipText(Messages.AbstractNewMappingComposite_dataModelToooltip);
 		btnExifMulti.addListener(SWT.Selection, e->dialog.modified());
 		
 		Composite valuePart = new Composite(panel, SWT.NONE);
@@ -164,7 +165,7 @@ public abstract class AbstractNewMappingComposite {
 		valuePart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
 		Label l = new Label(valuePart, SWT.WRAP);
-		l.setText("For numeric, text, boolean, and date attributes leave the tag value blank, the value will be interpretted as the observation value.");
+		l.setText(Messages.AbstractNewMappingComposite_AttributeMessage);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		((GridData)l.getLayoutData()).horizontalIndent = 30;
 		((GridData)l.getLayoutData()).widthHint = 200;
@@ -188,7 +189,7 @@ public abstract class AbstractNewMappingComposite {
 		tblExifValueMapping.getTable().setHeaderVisible(true);
 		
 		TableViewerColumn colTag = new TableViewerColumn(tblExifValueMapping, SWT.NONE);
-		colTag.getColumn().setText("Tag Value");
+		colTag.getColumn().setText(Messages.AbstractNewMappingComposite_TagValueColumn);
 		colTag.getColumn().setWidth(150);
 		colTag.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -229,7 +230,7 @@ public abstract class AbstractNewMappingComposite {
 		});
 		
 		TableViewerColumn colMapping = new TableViewerColumn(tblExifValueMapping, SWT.NONE);
-		colMapping.getColumn().setText("Data Model Mapping");
+		colMapping.getColumn().setText(Messages.AbstractNewMappingComposite_DataModelColumn);
 		colMapping.getColumn().setWidth(400);
 		colMapping.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -362,18 +363,18 @@ public abstract class AbstractNewMappingComposite {
 		AttributeTreeNode treeNode;
 		
 		public String toString() {
-			if (attribute == null && category == null) return "Select Data Model Element";
+			if (attribute == null && category == null) return Messages.AbstractNewMappingComposite_SelectElement;
 			
 			StringBuilder sb = new StringBuilder();
 			if (treeNode != null) sb.append(treeNode.getName());
 			if (listItem != null) sb.append(listItem.getName());
 			if (attribute != null) {
-				if (sb.length() != 0) sb.append( " (" + attribute.getName() + ")");
+				if (sb.length() != 0) sb.append( " (" + attribute.getName() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				else sb.append(attribute.getName());
 				
 			}
 			if (category != null) {
-				if (sb.length() != 0) sb.append( " [" + category.getFullCategoryName() + "]");
+				if (sb.length() != 0) sb.append( " [" + category.getFullCategoryName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 				else sb.append(category.getFullCategoryName());
 			}
 			return sb.toString();
@@ -381,10 +382,9 @@ public abstract class AbstractNewMappingComposite {
 	}
 	
 	private void runEventLoop(Shell loopShell) {
-
 		//Use the display provided by the shell if possible
 		Display display = loopShell.getDisplay();
-		while (loopShell != null && !loopShell.isDisposed()) {
+		while (!loopShell.isDisposed()) {
 			try {
 				if (!display.readAndDispatch()) {
 					display.sleep();
@@ -559,7 +559,7 @@ public abstract class AbstractNewMappingComposite {
 					return ((Attribute)parentElement).getTree().toArray();
 				}
 			}else if (parentElement instanceof AttributeTreeNode) {
-				((AttributeTreeNode)parentElement).getChildren().toArray();
+				return ((AttributeTreeNode)parentElement).getChildren().toArray();
 			}else if (parentElement instanceof TreeNodeWrapper) {
 				TreeNodeWrapper w = (TreeNodeWrapper)parentElement;
 				List<AttributeTreeNode> items = w.node.getChildren();

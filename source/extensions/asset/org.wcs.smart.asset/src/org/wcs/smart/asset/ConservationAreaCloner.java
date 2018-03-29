@@ -27,6 +27,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.query.Query;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
 import org.wcs.smart.asset.model.AssetMapStyle;
@@ -58,30 +59,30 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
 		
-		SubMonitor progress = SubMonitor.convert(monitor, "Copying Asset module data", 7);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConservationAreaCloner_TaskName, 7);
 		
-		progress.subTask("copying asset attributes");
+		progress.subTask(Messages.ConservationAreaCloner_AttributeSubTask);
 		cloneAttributes(engine);
 		progress.worked(1);
 		
-		progress.subTask("Clone asset types");
+		progress.subTask(Messages.ConservationAreaCloner_TypesSubTask);
 		cloneAssetType(engine);
 		progress.worked(1);
 		
-		progress.subTask("Clone metadata mappings");
+		progress.subTask(Messages.ConservationAreaCloner_MappingsSubTask);
 		cloneMetadataMappings(engine);
 		progress.worked(1);
 		
-		progress.subTask("Clone asset module settings");
+		progress.subTask(Messages.ConservationAreaCloner_SettingsSubTask);
 		cloneModuleSettings(engine);
 		progress.worked(1);
 		
-		progress.subTask("Clone station and location attributes");
+		progress.subTask(Messages.ConservationAreaCloner_StationLocationAttributesSubTask);
 		cloneStationAttributeSettings(engine);
 		cloneStationLocationAttributeSettings(engine);
 		progress.worked(1);		
 		
-		progress.subTask("Clone map styles");
+		progress.subTask(Messages.ConservationAreaCloner_StyleSubTask);
 		cloneAssetMapStyles(engine);
 		progress.worked(1);		
 	}
@@ -95,13 +96,13 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			clone.setMappedAssetProperty(mapping.getMappedAssetProperty());
 			if (mapping.getMappedAttribute() != null) {
 				Attribute a = findNewAttribute(mapping.getMappedAttribute(), engine);
-				if (a == null) throw new Exception("Cloned datamodel attribute not found");
+				if (a == null) throw new Exception(Messages.ConservationAreaCloner_AttributeNotFound);
 				clone.setMappedAttribute(a);
 			}
 			
 			if (mapping.getMappedCategory() != null) {
 				Category a = findNewCategory(mapping.getMappedCategory(), engine);
-				if (a == null) throw new Exception("Cloned datamodel category not found");
+				if (a == null) throw new Exception(Messages.ConservationAreaCloner_CategryNotFound);
 				clone.setMappedCategory(a);
 			}
 			
@@ -116,7 +117,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			
 			if (mapping.getMappedTreeNode() != null) {
 				AttributeTreeNode a = findNewAttributeTreeNode(mapping.getMappedTreeNode(), engine);
-				if (a == null) throw new Exception("Cloned datamodel attribute tree node not found");
+				if (a == null) throw new Exception(Messages.ConservationAreaCloner_TreeNodeNotfound);
 				clone.setMappedTreeNode(a);
 			}
 			
@@ -138,7 +139,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			
 			
 			AssetAttribute a = (AssetAttribute) engine.getNewConservationItem(setting.getAttribute());
-			if (a == null) throw new Exception("Station attribute not found");
+			if (a == null) throw new Exception(Messages.ConservationAreaCloner_StationAttributeNotFound);
 			clone.setAttribute(a);
 			clone.setOrder(setting.getOrder());
 			engine.getSession().save(clone);
@@ -155,7 +156,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			
 			
 			AssetAttribute a = (AssetAttribute) engine.getNewConservationItem(setting.getAttribute());
-			if (a == null) throw new Exception("Station location attribute not found");
+			if (a == null) throw new Exception(Messages.ConservationAreaCloner_StationLocationAttributeNotFound);
 			clone.setAttribute(a);
 			clone.setOrder(setting.getOrder());
 			engine.getSession().save(clone);
@@ -238,7 +239,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 				cloneAttribute.setOrder(attribute.getOrder());
 				
 				AssetAttribute a = (AssetAttribute) engine.getNewConservationItem(attribute.getAttribute());
-				if (a == null) throw new Exception("Asset type attribute not found");
+				if (a == null) throw new Exception(Messages.ConservationAreaCloner_AssetTypeAttributeNotFound);
 				cloneAttribute.setAttribute(a);
 				clone.getAssetAttributes().add(cloneAttribute);
 			}
@@ -249,7 +250,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 				cloneAttribute.setOrder(attribute.getOrder());
 				
 				AssetAttribute a = (AssetAttribute) engine.getNewConservationItem(attribute.getAttribute());
-				if (a == null) throw new Exception("Asset type deployment attribute not found");
+				if (a == null) throw new Exception(Messages.ConservationAreaCloner_AttributeTypeDepAttnotFound);
 				cloneAttribute.setAttribute(a);
 				clone.getAssetDeploymentAttributes().add(cloneAttribute);
 			}

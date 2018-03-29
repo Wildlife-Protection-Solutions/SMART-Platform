@@ -27,6 +27,7 @@ import java.util.UUID;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.ui.views.asset.AssetEditor;
 import org.wcs.smart.asset.ui.views.asset.AssetEditorInput;
@@ -42,7 +43,7 @@ public class OpenAssetHandler {
 		try {			
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, AssetEditor.ID);
 		} catch (PartInitException e) {
-			AssetPlugIn.displayLog(MessageFormat.format("Error opening asset editor: {0}", e.getMessage()), e);
+			AssetPlugIn.displayLog(MessageFormat.format(Messages.OpenAssetHandler_OpenError, e.getMessage()), e);
 		}
 	}
 	

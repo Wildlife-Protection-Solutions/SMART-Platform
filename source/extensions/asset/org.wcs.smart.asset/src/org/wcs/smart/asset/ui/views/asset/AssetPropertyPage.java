@@ -44,6 +44,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetSecurityManager;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeValue;
@@ -80,13 +81,13 @@ public class AssetPropertyPage {
 		String action;
 		String msg;
 		if (!asset.getIsRetired()) {
-			action = "Asset Retired - ";
-			msg = "Enter a comment related to the retirement";
+			action = Messages.AssetPropertyPage_RetireAction;
+			msg = Messages.AssetPropertyPage_retireAssetComment;
 		}else {
-			action = "Asset Unretired - ";
-			msg = "Enter a comment related to unretirement of asset";
+			action = Messages.AssetPropertyPage_UnretireAction;
+			msg = Messages.AssetPropertyPage_unRetireAssetComment;
 		}
-		CommentDialog dialog = new CommentDialog(parentEditor.getSite().getShell(), "Asset History Comment", msg);
+		CommentDialog dialog = new CommentDialog(parentEditor.getSite().getShell(), Messages.AssetPropertyPage_HistoryCommentdialog, msg);
 		
 		if (dialog.open() != CommentDialog.OK) return;
 		
@@ -105,7 +106,7 @@ public class AssetPropertyPage {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.log("Unable to update asset state.  Please close editor and try again. " + ex.getMessage(),ex);
+				AssetPlugIn.log(Messages.AssetPropertyPage_UpdateStateError + ex.getMessage(),ex);
 				return;
 			}
 			parentEditor.activeHistoryRecords.add(historyRecord);
@@ -127,14 +128,14 @@ public class AssetPropertyPage {
 		toppanel.setLayout(new GridLayout(3, false));
 		toppanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label l = toolkit.createLabel(toppanel, "State: ");
+		Label l = toolkit.createLabel(toppanel, Messages.AssetPropertyPage_StatuLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		lblRetiredState = toolkit.createLabel(toppanel, "");
+		lblRetiredState = toolkit.createLabel(toppanel, ""); //$NON-NLS-1$
 		lblRetiredState.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		if (AssetSecurityManager.INSTANCE.canRetireAsset()) {
-			changeRetiredState = toolkit.createHyperlink(toppanel, "", SWT.NONE);
+			changeRetiredState = toolkit.createHyperlink(toppanel, "", SWT.NONE); //$NON-NLS-1$
 			changeRetiredState.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			changeRetiredState.addHyperlinkListener(new HyperlinkAdapter() {			
 				@Override
@@ -148,7 +149,7 @@ public class AssetPropertyPage {
 		attributeComp.setLayout(new GridLayout());
 		attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		l = toolkit.createLabel(attributeComp, "Attributes");
+		l = toolkit.createLabel(attributeComp, Messages.AssetPropertyPage_AttributesLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		FontData fd = l.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -176,9 +177,9 @@ public class AssetPropertyPage {
 		}
 		if (changeRetiredState != null) {
 			if (asset.getIsRetired()) {
-				changeRetiredState.setText("unretire asset");
+				changeRetiredState.setText(Messages.AssetPropertyPage_unretireLabel);
 			}else {
-				changeRetiredState.setText("retire asset");
+				changeRetiredState.setText(Messages.AssetPropertyPage_retiredLabel);
 			}
 			changeRetiredState.getParent().layout(true);
 		}
@@ -195,8 +196,8 @@ public class AssetPropertyPage {
 		
 		List<AssetAttribute> assetAttributes = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			List<AssetTypeAttribute> aa = session.createQuery("FROM AssetTypeAttribute WHERE id.assetType = :type", AssetTypeAttribute.class)
-						.setParameter("type", asset.getAssetType())
+			List<AssetTypeAttribute> aa = session.createQuery("FROM AssetTypeAttribute WHERE id.assetType = :type", AssetTypeAttribute.class) //$NON-NLS-1$
+						.setParameter("type", asset.getAssetType()) //$NON-NLS-1$
 						.list();
 			for (AssetTypeAttribute a : aa) {
 				a.getAttribute().getName();

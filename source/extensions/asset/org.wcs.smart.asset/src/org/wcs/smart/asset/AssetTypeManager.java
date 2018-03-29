@@ -30,6 +30,7 @@ import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -73,7 +74,7 @@ public enum AssetTypeManager {
 	 */
 	public void canDelete(AssetType type, Session session) throws Exception{
 		if (!DeleteManager.canDelete(type, session)){
-			throw new Exception("Unknown error occurs while deleting asset type.");
+			throw new Exception(Messages.AssetTypeManager_DeleteError);
 		}
 	}
 	

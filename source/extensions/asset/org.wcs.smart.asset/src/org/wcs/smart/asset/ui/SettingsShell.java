@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.asset.internal.Messages;
 
 /**
  * Shell that allows users to select display settings
@@ -78,7 +79,7 @@ public class SettingsShell  {
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label ll = new Label(c, SWT.NONE);
-		ll.setText("Icon Size");
+		ll.setText(Messages.SettingsShell_IconSizeOp);
 		
 		int indent = 10;
 		
@@ -99,7 +100,7 @@ public class SettingsShell  {
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		ll = new Label(c, SWT.NONE);
-		ll.setText("Page Size");
+		ll.setText(Messages.SettingsShell_PageSizeOp);
 		
 		for (DataDisplaySettings.PageSize pageSize : DataDisplaySettings.PageSize.values()) {
 			Button opSmall = new Button(c, SWT.RADIO);

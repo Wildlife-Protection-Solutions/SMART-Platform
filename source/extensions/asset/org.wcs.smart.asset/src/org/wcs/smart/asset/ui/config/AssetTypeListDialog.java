@@ -70,6 +70,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetTypeManager;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.ui.AssetTypeLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -255,9 +256,9 @@ public class AssetTypeListDialog extends TitleAreaDialog {
 		mnuDelete.setEnabled(false);
 		
 		
-		setTitle("Asset Type");
-		getShell().setText("Asset Type");
-		setMessage("Manage the asset types in the system.");
+		setTitle(Messages.AssetTypeListDialog_Title);
+		getShell().setText(Messages.AssetTypeListDialog_Title);
+		setMessage(Messages.AssetTypeListDialog_Message);
 		
 		loadTypes.setSystem(true);
 		loadTypes.schedule();
@@ -312,7 +313,7 @@ public class AssetTypeListDialog extends TitleAreaDialog {
 		sb.deleteCharAt(sb.length() - 1);
 		sb.deleteCharAt(sb.length() - 1);
 		
-		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the following asset types?  All assets, deployments and other references will also be removed.  This action cannot be undone.\n\n {0}", sb.toString()))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.AssetTypeListDialog_DeleteTitle, MessageFormat.format(Messages.AssetTypeListDialog_DeleteMessage, sb.toString()))){
 			return;
 		}
 		
@@ -323,7 +324,7 @@ public class AssetTypeListDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 
-					monitor.beginTask("Deleting asset types", toDelete.size());
+					monitor.beginTask(Messages.AssetTypeListDialog_TaskName, toDelete.size());
 					List<AssetType> deleted = new ArrayList<AssetType>();
 					try(Session s = HibernateManager.openSession()){
 
@@ -338,7 +339,7 @@ public class AssetTypeListDialog extends TitleAreaDialog {
 								deleted.add(t);
 							}catch(Exception ex){
 								s.getTransaction().rollback();
-								AssetPlugIn.displayLog(MessageFormat.format("Unable to delete Asset Type {0}. {1}", t.getName(), ex.getMessage()), ex);
+								AssetPlugIn.displayLog(MessageFormat.format(Messages.AssetTypeListDialog_DeleteTypeError, t.getName(), ex.getMessage()), ex);
 							}
 							monitor.worked(1);
 						}
@@ -351,7 +352,7 @@ public class AssetTypeListDialog extends TitleAreaDialog {
 				}
 			});
 		} catch (Exception e) {
-			AssetPlugIn.displayLog("Error deleting asset types: " +e.getMessage(), e);
+			AssetPlugIn.displayLog(Messages.AssetTypeListDialog_DeleteError +e.getMessage(), e);
 		}
 		
 		refresh();

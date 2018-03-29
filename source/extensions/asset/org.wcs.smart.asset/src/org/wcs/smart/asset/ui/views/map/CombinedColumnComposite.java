@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.map.engine.parser.Parser;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.ColumnType;
 
@@ -115,10 +116,10 @@ public class CombinedColumnComposite extends Composite {
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("Definition:");
+		l.setText(Messages.CombinedColumnComposite_DefinitionLabel);
 		
 		l = new Label(parent, SWT.NONE);
-		l.setText("Columns:");
+		l.setText(Messages.CombinedColumnComposite_ColumnsLabel);
 		
 		txtAttributeFilters = new Text(parent, SWT.BORDER | SWT.MULTI | SWT.WRAP);
 		txtAttributeFilters.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -162,13 +163,13 @@ public class CombinedColumnComposite extends Composite {
 		
 		if (option instanceof IOverviewTableColumn) {
 			IOverviewTableColumn item = (IOverviewTableColumn) option;
-			part = "[" + item.getKey() + "]";
+			part = "[" + item.getKey() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (part != null) {
 			if (txtAttributeFilters.getText().isEmpty()) {
 				txtAttributeFilters.setText(part);
 			}else {
-				txtAttributeFilters.setText(txtAttributeFilters.getText() + " < + | - | * | / > " + part);
+				txtAttributeFilters.setText(txtAttributeFilters.getText() + " < + | - | * | / > " + part); //$NON-NLS-1$
 			}
 		}
 	}

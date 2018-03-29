@@ -122,18 +122,18 @@ public class FixedColumnEngine implements IColumnEngine {
 		LocalDate filterStart = null;
 		LocalDate filterEnd = null;
 		if (dFilter != null) {
-			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca and startDate <= :endDate and (endDate is null or endDate >= :startDate)";
+			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca and startDate <= :endDate and (endDate is null or endDate >= :startDate)"; //$NON-NLS-1$
 			query = session.createQuery(hql, AssetDeployment.class)
-				.setParameter("ca", ca)
-				.setParameter("endDate", dFilter[1])
-				.setParameter("startDate", dFilter[0]);
+				.setParameter("ca", ca) //$NON-NLS-1$
+				.setParameter("endDate", dFilter[1]) //$NON-NLS-1$
+				.setParameter("startDate", dFilter[0]); //$NON-NLS-1$
 			
 			filterStart = new java.sql.Date(dFilter[0].getTime()).toLocalDate();
 			filterEnd= new java.sql.Date(dFilter[1].getTime()).toLocalDate();
 		}else {
-			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca ";
+			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca "; //$NON-NLS-1$
 			query = session.createQuery(hql, AssetDeployment.class)
-					.setParameter("ca",  ca);	
+					.setParameter("ca",  ca);	 //$NON-NLS-1$
 		}
 		
 		HashMap<AssetStation, HashSet<Long>> daysPerStation = new HashMap<>();
@@ -194,18 +194,18 @@ public class FixedColumnEngine implements IColumnEngine {
 		LocalDate filterStart = null;
 		LocalDate filterEnd = null;
 		if (dFilter != null) {
-			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca  AND startDate <= :endDate and (endDate is null or endDate >= :startDate)";
+			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca  AND startDate <= :endDate and (endDate is null or endDate >= :startDate)"; //$NON-NLS-1$
 			query = session.createQuery(hql, AssetDeployment.class)
-				.setParameter("ca", ca)
-				.setParameter("endDate", dFilter[1])
-				.setParameter("startDate", dFilter[0]);
+				.setParameter("ca", ca) //$NON-NLS-1$
+				.setParameter("endDate", dFilter[1]) //$NON-NLS-1$
+				.setParameter("startDate", dFilter[0]); //$NON-NLS-1$
 			
 			filterStart = new java.sql.Date(dFilter[0].getTime()).toLocalDate();
 			filterEnd= new java.sql.Date(dFilter[1].getTime()).toLocalDate();
 		}else {
-			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca ";
+			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca "; //$NON-NLS-1$
 			query = session.createQuery(hql, AssetDeployment.class)
-					.setParameter("ca", ca);	
+					.setParameter("ca", ca);	 //$NON-NLS-1$
 		}
 		
 		HashMap<AssetStationLocation, HashSet<Long>> daysPerStation = new HashMap<>();
@@ -265,26 +265,26 @@ public class FixedColumnEngine implements IColumnEngine {
 		HashMap<UUID, Object> results = new HashMap<>();
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT uuid, count(wp_uuid) FROM ");
-		sb.append("(");
-		sb.append("SELECT DISTINCT s.uuid as uuid, wp.uuid as wp_uuid ");
-		sb.append("FROM smart.asset_waypoint a JOIN smart.waypoint wp ON a.wp_uuid = wp.uuid ");
-		sb.append(" JOIN smart.asset_deployment d on a.asset_deployment_uuid = d.uuid ");
-		sb.append(" JOIN smart.asset_station_location l on d.station_location_uuid = l.uuid ");
-		sb.append(" JOIN smart.asset_station s on l.station_uuid = s.uuid ");
-		sb.append(" WHERE s.ca_uuid = :ca ");
+		sb.append("SELECT uuid, count(wp_uuid) FROM "); //$NON-NLS-1$
+		sb.append("("); //$NON-NLS-1$
+		sb.append("SELECT DISTINCT s.uuid as uuid, wp.uuid as wp_uuid "); //$NON-NLS-1$
+		sb.append("FROM smart.asset_waypoint a JOIN smart.waypoint wp ON a.wp_uuid = wp.uuid "); //$NON-NLS-1$
+		sb.append(" JOIN smart.asset_deployment d on a.asset_deployment_uuid = d.uuid "); //$NON-NLS-1$
+		sb.append(" JOIN smart.asset_station_location l on d.station_location_uuid = l.uuid "); //$NON-NLS-1$
+		sb.append(" JOIN smart.asset_station s on l.station_uuid = s.uuid "); //$NON-NLS-1$
+		sb.append(" WHERE s.ca_uuid = :ca "); //$NON-NLS-1$
 		if (dFilter != null) {
-			sb.append(" AND ");
-			sb.append(" wp.dateTime >= :startDate and wp.dateTime <= :endDate " );
+			sb.append(" AND "); //$NON-NLS-1$
+			sb.append(" wp.dateTime >= :startDate and wp.dateTime <= :endDate " ); //$NON-NLS-1$
 		}
-		sb.append(") as foo ");
-		sb.append(" GROUP BY uuid");
+		sb.append(") as foo "); //$NON-NLS-1$
+		sb.append(" GROUP BY uuid"); //$NON-NLS-1$
 		
 		Query<?> query = session.createNativeQuery(sb.toString());
-		query.setParameter("ca", ca);
+		query.setParameter("ca", ca); //$NON-NLS-1$
 		if (dFilter != null) {
-				query.setParameter("startDate", dFilter[0])
-				.setParameter("endDate", dFilter[1]);
+				query.setParameter("startDate", dFilter[0]) //$NON-NLS-1$
+				.setParameter("endDate", dFilter[1]); //$NON-NLS-1$
 		}
 		List<?> qresults = query.list();
 		for (Object result : qresults) {
@@ -303,25 +303,25 @@ public class FixedColumnEngine implements IColumnEngine {
 		HashMap<UUID, Object> results = new HashMap<>();
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT uuid, count(wp_uuid) FROM ");
-		sb.append("(");
-		sb.append("SELECT DISTINCT l.uuid as uuid, wp.uuid as wp_uuid ");
-		sb.append("FROM smart.asset_waypoint a JOIN smart.waypoint wp ON a.wp_uuid = wp.uuid ");
-		sb.append(" JOIN smart.asset_deployment d on a.asset_deployment_uuid = d.uuid ");
-		sb.append(" JOIN smart.asset_station_location l on d.station_location_uuid = l.uuid ");
-		sb.append(" JOIN smart.asset_station s on l.station_uuid = s.uuid ");
-		sb.append(" WHERE s.ca_uuid = :ca ");
+		sb.append("SELECT uuid, count(wp_uuid) FROM "); //$NON-NLS-1$
+		sb.append("("); //$NON-NLS-1$
+		sb.append("SELECT DISTINCT l.uuid as uuid, wp.uuid as wp_uuid "); //$NON-NLS-1$
+		sb.append("FROM smart.asset_waypoint a JOIN smart.waypoint wp ON a.wp_uuid = wp.uuid "); //$NON-NLS-1$
+		sb.append(" JOIN smart.asset_deployment d on a.asset_deployment_uuid = d.uuid "); //$NON-NLS-1$
+		sb.append(" JOIN smart.asset_station_location l on d.station_location_uuid = l.uuid "); //$NON-NLS-1$
+		sb.append(" JOIN smart.asset_station s on l.station_uuid = s.uuid "); //$NON-NLS-1$
+		sb.append(" WHERE s.ca_uuid = :ca "); //$NON-NLS-1$
 		if (dFilter != null) {		
-			sb.append(" AND wp.dateTime >= :startDate and wp.dateTime <= :endDate " );
+			sb.append(" AND wp.dateTime >= :startDate and wp.dateTime <= :endDate " ); //$NON-NLS-1$
 		}
-		sb.append(") as foo ");
-		sb.append(" GROUP BY uuid");
+		sb.append(") as foo "); //$NON-NLS-1$
+		sb.append(" GROUP BY uuid"); //$NON-NLS-1$
 		
 		Query<?> query = session.createNativeQuery(sb.toString());
-		query.setParameter("ca", ca);
+		query.setParameter("ca", ca); //$NON-NLS-1$
 		if (dFilter != null) {
-				query.setParameter("startDate", dFilter[0])
-				.setParameter("endDate", dFilter[1]);
+				query.setParameter("startDate", dFilter[0]) //$NON-NLS-1$
+				.setParameter("endDate", dFilter[1]); //$NON-NLS-1$
 		}
 		List<?> qresults = query.list();
 		for (Object result : qresults) {

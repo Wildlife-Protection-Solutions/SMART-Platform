@@ -33,6 +33,7 @@ import org.wcs.smart.asset.data.importer.ActionableWarning;
 import org.wcs.smart.asset.data.importer.FileProcessor;
 import org.wcs.smart.asset.data.importer.FileProxy;
 import org.wcs.smart.asset.data.importer.NewAssetWarning;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.ui.handler.NewAssetHandler;
 
@@ -76,7 +77,7 @@ public class NewAssetAction implements ImportAction {
 	}
 	
 	public String getMenuLabel() {
-		return MessageFormat.format("Create Asset {0}", warning.getAssetId());
+		return MessageFormat.format(Messages.NewAssetAction_ActionName, warning.getAssetId());
 	}
 	
 	@Override

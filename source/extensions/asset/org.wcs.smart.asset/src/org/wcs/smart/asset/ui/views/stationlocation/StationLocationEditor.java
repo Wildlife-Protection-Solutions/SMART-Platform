@@ -76,6 +76,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
@@ -131,20 +132,20 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		boolean isNew = stationlocation.getUuid() == null;
 		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 			try {
-				String query =  "SELECT count(*) FROM AssetStationLocation l where LOWER(l.id) = :id AND l.station.conservationArea = :ca ";
+				String query =  "SELECT count(*) FROM AssetStationLocation l where LOWER(l.id) = :id AND l.station.conservationArea = :ca "; //$NON-NLS-1$
 				if (!isNew) {
-					query += " AND uuid != :uuid";
+					query += " AND uuid != :uuid"; //$NON-NLS-1$
 				}
 				Query<?> q = s.createQuery(query)
-				.setParameter("id", stationlocation.getId().toLowerCase())
-				.setParameter("ca", stationlocation.getStation().getConservationArea());
+				.setParameter("id", stationlocation.getId().toLowerCase()) //$NON-NLS-1$
+				.setParameter("ca", stationlocation.getStation().getConservationArea()); //$NON-NLS-1$
 				if (!isNew) {
-					q.setParameter("uuid", stationlocation.getUuid());
+					q.setParameter("uuid", stationlocation.getUuid()); //$NON-NLS-1$
 				}
 				Long cnt = (Long) q.uniqueResult();
 				if (cnt > 0) {
-					MessageDialog.openError(getSite().getShell(), "Save Station Location", 
-						MessageFormat.format("The id ''{0}'' is already used by another station location in the system. You cannot duplicate Station Location IDs.  Change the station location id and try again.", stationlocation.getId())
+					MessageDialog.openError(getSite().getShell(), Messages.StationLocationEditor_SaveDialogTtiel, 
+						MessageFormat.format(Messages.StationLocationEditor_DuplicateIdError, stationlocation.getId())
 							);
 					return;
 				}
@@ -159,7 +160,7 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 			}catch (Exception ex) {
 				s.getTransaction().rollback();
 				AssetPlugIn.displayLog(
-						MessageFormat.format("Unable to save changes to station location: {0}. {1}", stationlocation.getId(), ex.getMessage()), ex);
+						MessageFormat.format(Messages.StationLocationEditor_SaveError, stationlocation.getId(), ex.getMessage()), ex);
 				return;
 			}
 		}
@@ -201,7 +202,7 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 	
 	private void initData() {
 		if (isDirty()) {
-			if (!MessageDialog.openQuestion(getSite().getShell(), "Refresh", "This location has unsaved changes.  By refreshing this page, these changes will be lost.  Are you sure you want to continue?")) return;
+			if (!MessageDialog.openQuestion(getSite().getShell(), Messages.StationLocationEditor_RefreshDialogTitle, Messages.StationLocationEditor_RefreshConfirmMsg)) return;
 		}
 		refreshJob.setSystem(true);
 		refreshJob.schedule();
@@ -310,8 +311,8 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 	
 	private void validateAndRefresh() {
 		if (isDirty) {
-			if (!MessageDialog.openQuestion(getSite().getShell(), "Station Location Modified", 
-					"This station location was modified by another part of the system.  Do you want to reload the page and loose any local changes?  By not reloading your risk overwriting other changes made outside this page." )) {
+			if (!MessageDialog.openQuestion(getSite().getShell(), Messages.StationLocationEditor_StationModifiedDialogTitle, 
+					Messages.StationLocationEditor_StationModifiedConfirm )) {
 				return;
 			}
 		}
@@ -349,7 +350,7 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		((GridLayout)headerComp.getLayout()).marginWidth = 0;
 		((GridLayout)headerComp.getLayout()).marginHeight = 0;
 		
-		Label icon = toolkit.createLabel(headerComp, "");
+		Label icon = toolkit.createLabel(headerComp, ""); //$NON-NLS-1$
 		icon.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATION_LOCATION));
 		
 		lblId = new IdFieldHeader(headerComp, toolkit, pageForm.getFont(), pageForm.getForeground());
@@ -368,7 +369,7 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		lblId.addListener(SWT.Selection, e->{
 			String text = e.text.trim();
 			if (text.isEmpty() || text.length() > Asset.ID_MAX_LENGTH) {
-				MessageDialog.openWarning(getSite().getShell(), "Station Location ID", MessageFormat.format("Invalid station location id.  ID must be between {0} and {1} charaters", 1, Asset.ID_MAX_LENGTH));
+				MessageDialog.openWarning(getSite().getShell(), Messages.StationLocationEditor_InvalidLocationTitle, MessageFormat.format(Messages.StationLocationEditor_InvalidLocationMsg, 1, Asset.ID_MAX_LENGTH));
 				lblId.setText(stationlocation.getId());
 				return;
 			}
@@ -377,18 +378,18 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 			setDirty(true);
 		});
 
-		lblStatusImage = toolkit.createLabel(headerComp, "");
-		lblStatus = toolkit.createLabel(headerComp, "");
+		lblStatusImage = toolkit.createLabel(headerComp, ""); //$NON-NLS-1$
+		lblStatus = toolkit.createLabel(headerComp, ""); //$NON-NLS-1$
 		
 		ToolBar tbRefresh = new ToolBar(headerComp, SWT.FLAT);
 		new ToolItem(tbRefresh, SWT.SEPARATOR);
 		ToolItem refreshItem = new ToolItem(tbRefresh,SWT.PUSH);
-		refreshItem.setToolTipText("Refresh station location");
+		refreshItem.setToolTipText(Messages.StationLocationEditor_refreshTooltip);
 		refreshItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		refreshItem.addListener(SWT.Selection, e->initData());
 		
 		ToolItem saveItem = new ToolItem(tbRefresh, SWT.PUSH);
-		saveItem.setToolTipText("Save changes");
+		saveItem.setToolTipText(Messages.StationLocationEditor_saveTooltip);
 		saveItem.setImage(getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
 		saveItem.setEnabled(false);
 		saveItem.addListener(SWT.Selection, e->getSite().getPage().saveEditor(this, false));
@@ -403,7 +404,7 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		});
 		
 		
-		String headers[] = new String[] {"Current Status", "Data", "Properties", "History"};
+		String headers[] = new String[] {Messages.StationLocationEditor_StatusSectionHeader, Messages.StationLocationEditor_DataSectionHeader, Messages.StationLocationEditor_PropertiesSectionHeader, Messages.StationLocationEditor_HistorySectionHeader};
 		Listener[] actions = new Listener[] {
 			event->{
 				if (currentPanel == null) currentPanel = createCurrentSection(sectionBody);
@@ -552,7 +553,7 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 	}
 
 	
-	Job refreshJob = new Job("refresh location data") {
+	Job refreshJob = new Job(Messages.StationLocationEditor_refreshJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -561,14 +562,14 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 				//load station location data from database
 				if (in.getStationLocationUuid() == null) {
 					//this should never happen
-					throw new IllegalStateException("Station location does not exist");
+					throw new IllegalStateException(Messages.StationLocationEditor_StationLocationNotFound);
 				}else {
 					stationlocation = session.get(AssetStationLocation.class, in.getStationLocationUuid());
 					if (stationlocation != null) stationlocation.equals(null);
 				}
 				
 				if (stationlocation == null) {
-					throw new Exception("Station Location not found; could not initialize element controls");
+					throw new Exception(Messages.StationLocationEditor_StationLocationNotFound);
 				}
 				if (stationlocation.getAttributeValues() == null) stationlocation.setAttributeValues(new ArrayList<>());
 				

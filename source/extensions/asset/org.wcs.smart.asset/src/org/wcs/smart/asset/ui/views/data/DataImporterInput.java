@@ -24,6 +24,7 @@ package org.wcs.smart.asset.ui.views.data;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
+import org.wcs.smart.asset.internal.Messages;
 
 /**
  * Data importer editor 
@@ -52,7 +53,7 @@ public class DataImporterInput implements IEditorInput{
 
 	@Override
 	public String getName() {
-		return "Import Asset Files";
+		return Messages.DataImporterInput_Name;
 	}
 
 	@Override
@@ -67,8 +68,13 @@ public class DataImporterInput implements IEditorInput{
 	
 	@Override
 	public boolean equals(Object other) {
+		if (other == null) return false;
 		if (other.getClass() == getClass()) return true;
 		return false;
 	}
 
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
 }

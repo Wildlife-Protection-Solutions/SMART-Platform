@@ -28,6 +28,7 @@ import java.util.Date;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetWaypointAttachment;
@@ -64,7 +65,7 @@ public enum AssetManager {
 				deleteAsset(asset, session);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
-				AssetPlugIn.displayLog("Unable to delete asset: " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetManager_DeleteError + ex.getMessage(), ex);
 				session.getTransaction().rollback();
 				return;
 			}
@@ -91,7 +92,7 @@ public enum AssetManager {
 		//due to circular links in database this 
 		//has been implemented by deleting one attachment at a time - I can forsee this being really slow
 		//TODO: investigate performance
-		try(ScrollableResults scroll = session.createQuery("FROM AssetWaypointAttachment a WHERE a.id.assetWaypoint.assetDeployment.asset = :asset", AssetWaypointAttachment.class).setParameter("asset",  asset).scroll()){
+		try(ScrollableResults scroll = session.createQuery("FROM AssetWaypointAttachment a WHERE a.id.assetWaypoint.assetDeployment.asset = :asset", AssetWaypointAttachment.class).setParameter("asset",  asset).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
 			while(scroll.next()) {
 				AssetWaypointAttachment attachment = (AssetWaypointAttachment)scroll.get(0);
 				
@@ -103,12 +104,12 @@ public enum AssetManager {
 		}
 		
 		
-		String hql = "DELETE FROM AssetWaypoint WHERE assetDeployment in (FROM AssetDeployment WHERE asset = :asset ) ";
-		session.createQuery(hql).setParameter("asset",  asset).executeUpdate();
+		String hql = "DELETE FROM AssetWaypoint WHERE assetDeployment in (FROM AssetDeployment WHERE asset = :asset ) "; //$NON-NLS-1$
+		session.createQuery(hql).setParameter("asset",  asset).executeUpdate(); //$NON-NLS-1$
 		session.flush();
 		
 		//delete any waypoints not associated with asset waypoint
-		try (ScrollableResults scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)").setParameter("source", AssetWaypointSource.KEY).scroll()){
+		try (ScrollableResults scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)").setParameter("source", AssetWaypointSource.KEY).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
 			while(scroll.next()) {
 				Waypoint wp = (Waypoint)scroll.get(0);
 				session.delete(wp);
@@ -117,13 +118,13 @@ public enum AssetManager {
 		session.flush();
 		
 		
-		hql = "DELETE FROM AssetDeployment WHERE asset = :asset";
-		session.createQuery(hql).setParameter("asset",  asset).executeUpdate();
+		hql = "DELETE FROM AssetDeployment WHERE asset = :asset"; //$NON-NLS-1$
+		session.createQuery(hql).setParameter("asset",  asset).executeUpdate(); //$NON-NLS-1$
 		session.flush();
 		
 		//delete history records
-		hql = "DELETE FROM AssetHistoryRecord WHERE asset = :asset";
-		session.createQuery(hql).setParameter("asset", asset).executeUpdate();
+		hql = "DELETE FROM AssetHistoryRecord WHERE asset = :asset"; //$NON-NLS-1$
+		session.createQuery(hql).setParameter("asset", asset).executeUpdate(); //$NON-NLS-1$
 		session.flush();
 		
 		//delete the asset

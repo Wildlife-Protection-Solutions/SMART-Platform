@@ -93,6 +93,7 @@ import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetSecurityManager;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetHistoryRecord;
@@ -157,20 +158,20 @@ public class AssetEditor extends EditorPart implements MapPart {
 		boolean isNew = asset.getUuid() == null;
 		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 			try {
-				String query =  "SELECT count(*) FROM Asset WHERE LOWER(id) = :id AND conservationArea = :ca ";
+				String query =  "SELECT count(*) FROM Asset WHERE LOWER(id) = :id AND conservationArea = :ca "; //$NON-NLS-1$
 				if (!isNew) {
-					query += " AND uuid != :uuid";
+					query += " AND uuid != :uuid"; //$NON-NLS-1$
 				}
 				Query<?> q = s.createQuery(query)
-				.setParameter("id", asset.getId().toLowerCase())
-				.setParameter("ca", asset.getConservationArea());
+				.setParameter("id", asset.getId().toLowerCase()) //$NON-NLS-1$
+				.setParameter("ca", asset.getConservationArea()); //$NON-NLS-1$
 				if (!isNew) {
-					q.setParameter("uuid", asset.getUuid());
+					q.setParameter("uuid", asset.getUuid()); //$NON-NLS-1$
 				}
 				Long cnt = (Long) q.uniqueResult();
 				if (cnt > 0) {
-					MessageDialog.openError(getSite().getShell(), "Save Asset", 
-						MessageFormat.format("The id ''{0}'' is already used by another asset in the system. You cannot duplicate Asset IDs.  Change the asset id and try again.", asset.getId())
+					MessageDialog.openError(getSite().getShell(), Messages.AssetEditor_SaveTitle, 
+						MessageFormat.format(Messages.AssetEditor_DuplicateIdError, asset.getId())
 							);
 					return;
 				}
@@ -184,7 +185,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 			}catch (Exception ex) {
 				s.getTransaction().rollback();
 				AssetPlugIn.displayLog(
-						MessageFormat.format("Unable to save changes to asset: {0}. {1}", asset.getId(), ex.getMessage()), ex);
+						MessageFormat.format(Messages.AssetEditor_SaveError, asset.getId(), ex.getMessage()), ex);
 				return;
 			}
 		}
@@ -236,8 +237,8 @@ public class AssetEditor extends EditorPart implements MapPart {
 			if (asset.getUuid() != null) {
 				try(Session session = HibernateManager.openSession()){
 					activeDeployment = QueryFactory.buildQuery(session, AssetDeployment.class, 
-						new Object[] {"asset.uuid", asset.getUuid()},
-						new Object[] {"endDate", null}).uniqueResult();
+						new Object[] {"asset.uuid", asset.getUuid()}, //$NON-NLS-1$
+						new Object[] {"endDate", null}).uniqueResult(); //$NON-NLS-1$
 				}
 			}
 			currentPage.initializePanel(activeDeployment);
@@ -246,7 +247,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 	
 	private void initData() {
 		if (isDirty()) {
-			if (!MessageDialog.openQuestion(getSite().getShell(), "Refresh", "This station has unsaved changes.  By refreshing this page, these changes will be lost.  Are you sure you want to continue?")) return;
+			if (!MessageDialog.openQuestion(getSite().getShell(), Messages.AssetEditor_RefreshTitle, Messages.AssetEditor_StationModifiedMsg)) return;
 		}
 		
 		refreshJob.schedule();
@@ -318,8 +319,8 @@ public class AssetEditor extends EditorPart implements MapPart {
 	
 	private void validateAndRefresh() {
 		if (isDirty) {
-			if (!MessageDialog.openQuestion(getSite().getShell(), "Asset Modified", 
-					"This asset was modified by another part of the system.  Do you want to reload the page and loose any local changes?  By not reloading your risk overwriting other changes made outside this page." )) {
+			if (!MessageDialog.openQuestion(getSite().getShell(), Messages.AssetEditor_AssetModifiedTitle, 
+					Messages.AssetEditor_AssetModifiedMessage )) {
 				return;
 			}
 		}
@@ -360,7 +361,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)headerComp.getLayout()).marginWidth = 0;
 		((GridLayout)headerComp.getLayout()).marginHeight = 0;
-		lblAssetTypeImage = toolkit.createLabel(headerComp,"");
+		lblAssetTypeImage = toolkit.createLabel(headerComp,""); //$NON-NLS-1$
 		
 		lblId = new IdFieldHeader(headerComp, toolkit, pageForm.getFont(), pageForm.getForeground());
 		lblId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -378,7 +379,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 		lblId.addListener(SWT.Selection, e->{
 			String text = e.text.trim();
 			if (text.isEmpty() || text.length() > Asset.ID_MAX_LENGTH) {
-				MessageDialog.openWarning(getSite().getShell(), "Asset ID", MessageFormat.format("Invalid asset id.  ID must be between {0} and {1} charaters", 1, Asset.ID_MAX_LENGTH));
+				MessageDialog.openWarning(getSite().getShell(), Messages.AssetEditor_AssetIdErrorTitle, MessageFormat.format(Messages.AssetEditor_InvalidIdError, 1, Asset.ID_MAX_LENGTH));
 				lblId.setText(asset.getId());
 				return;
 			}
@@ -387,21 +388,21 @@ public class AssetEditor extends EditorPart implements MapPart {
 			setDirty(true);
 		});
 
-		lblStatusImage = toolkit.createLabel(headerComp, "");
-		lblStatus = toolkit.createLabel(headerComp, "");
-		toolkit.createLabel(headerComp, "-");
-		lblAssetType = toolkit.createLabel(headerComp, "");
+		lblStatusImage = toolkit.createLabel(headerComp, ""); //$NON-NLS-1$
+		lblStatus = toolkit.createLabel(headerComp, ""); //$NON-NLS-1$
+		toolkit.createLabel(headerComp, "-"); //$NON-NLS-1$
+		lblAssetType = toolkit.createLabel(headerComp, ""); //$NON-NLS-1$
 				
 		ToolBar tbRefresh = new ToolBar(headerComp, SWT.FLAT);
 		new ToolItem(tbRefresh, SWT.SEPARATOR);
 		
 		ToolItem refreshItem = new ToolItem(tbRefresh,SWT.PUSH);
-		refreshItem.setToolTipText("Refresh station location");
+		refreshItem.setToolTipText(Messages.AssetEditor_refreshtooltip);
 		refreshItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		refreshItem.addListener(SWT.Selection, e->initData());
 		
 		ToolItem saveItem = new ToolItem(tbRefresh, SWT.PUSH);
-		saveItem.setToolTipText("Save changes");
+		saveItem.setToolTipText(Messages.AssetEditor_saveTooltip);
 		saveItem.setImage(getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
 		saveItem.setEnabled(false);
 		saveItem.addListener(SWT.Selection, e->getSite().getPage().saveEditor(this, false));
@@ -415,7 +416,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 		});
 		
 		
-		String headers[] = new String[] {"Current Status", "Data", "Properties", "Deployments", "History"};
+		String headers[] = new String[] {Messages.AssetEditor_CurrentSection, Messages.AssetEditor_DataSection, Messages.AssetEditor_PropertiesSection, Messages.AssetEditor_DeployementsSection, Messages.AssetEditor_HistorySection};
 		Listener[] actions = new Listener[] {
 			event->{
 				if (currentPanel == null) currentPanel = createCurrentSection(sectionBody);
@@ -535,7 +536,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 		tblEvents.getTable().setLinesVisible(true);
 		
 		TableViewerColumn col = new TableViewerColumn(tblEvents, SWT.NONE);
-		col.getColumn().setText("Date");
+		col.getColumn().setText(Messages.AssetEditor_DateColumn);
 		col.getColumn().setWidth(150);
 		col.getColumn().setResizable(true);
 		col.setLabelProvider(new ColumnLabelProvider() {
@@ -556,7 +557,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 		});
 		
 		TableViewerColumn col2 = new TableViewerColumn(tblEvents, SWT.NONE);
-		col2.getColumn().setText("Comment");
+		col2.getColumn().setText(Messages.AssetEditor_CommentColumn);
 		col2.getColumn().setWidth(150);
 		col2.getColumn().setResizable(true);
 		col2.setLabelProvider(new ColumnLabelProvider() {
@@ -599,19 +600,19 @@ public class AssetEditor extends EditorPart implements MapPart {
 			
 			ToolItem deleteItem = new ToolItem(historyToolbar,SWT.PUSH);
 			deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-			deleteItem.setToolTipText("delete selected history records");
+			deleteItem.setToolTipText(Messages.AssetEditor_deletehistorytooltip);
 			deleteItem.addListener(SWT.Selection, e->deleteHistoryRecords());
 			deleteItem.setEnabled(false);
 				
 			ToolItem editItem = new ToolItem(historyToolbar,SWT.PUSH);
 			editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-			editItem.setToolTipText("edit selected history record");
+			editItem.setToolTipText(Messages.AssetEditor_edithistorytooltip);
 			editItem.addListener(SWT.Selection, e->editHistoryRecord());
 			editItem.setEnabled(false);
 		
 			ToolItem addItem = new ToolItem(historyToolbar,SWT.PUSH);
 			addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-			addItem.setToolTipText("create a new history record");
+			addItem.setToolTipText(Messages.AssetEditor_createhistorytooltip);
 			addItem.addListener(SWT.Selection, e->addHistoryRecord());
 			
 			tblEvents.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -625,17 +626,17 @@ public class AssetEditor extends EditorPart implements MapPart {
 			Menu mnu = new Menu(tblEvents.getControl());
 			
 			MenuItem mnuAdd = new MenuItem(mnu, SWT.PUSH);
-			mnuAdd.setText("New ...");
+			mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 			mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			mnuAdd.addListener(SWT.Selection, e->addHistoryRecord());
 			
 			MenuItem mnuEdit = new MenuItem(mnu, SWT.PUSH);
-			mnuEdit.setText("Edit ...");
+			mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT); 
 			mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			mnuEdit.addListener(SWT.Selection, e->editHistoryRecord());
 			
 			MenuItem mnuDelete = new MenuItem(mnu, SWT.PUSH);
-			mnuDelete.setText("Delete ...");
+			mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT); 
 			mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			mnuDelete.addListener(SWT.Selection, e->deleteHistoryRecords());
 			
@@ -659,8 +660,8 @@ public class AssetEditor extends EditorPart implements MapPart {
 	
 	
 	private void addHistoryRecord() {
-		DateCommentDialog dialog = new DateCommentDialog(getSite().getShell(), "New Asset History Record",
-				"Enter the details for the new asset history record");
+		DateCommentDialog dialog = new DateCommentDialog(getSite().getShell(), Messages.AssetEditor_NewHistoryTitle,
+				Messages.AssetEditor_NewHistoryMsg);
 		if (dialog.open() != CommentDialog.OK) return;
 		
 		AssetHistoryRecord record = new AssetHistoryRecord();
@@ -675,7 +676,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.displayLog("Cannot add new history record to asset. Close and re-open editor and try again. " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetEditor_NewHistoryError + ex.getMessage(), ex);
 				return;
 			}
 		}
@@ -692,8 +693,8 @@ public class AssetEditor extends EditorPart implements MapPart {
 		if (!(x instanceof AssetHistoryRecord)) return;
 		AssetHistoryRecord toEdit = (AssetHistoryRecord)x;
 		
-		DateCommentDialog dialog = new DateCommentDialog(getSite().getShell(), "New Asset History Record",
-				"Enter the details for the new asset history record");
+		DateCommentDialog dialog = new DateCommentDialog(getSite().getShell(), Messages.AssetEditor_NewHistoryTitle,
+				Messages.AssetEditor_NewHistoryMsg);
 		dialog.setValues(toEdit.getDate(), toEdit.getComment());
 		
 		if (dialog.open() != CommentDialog.OK) return;
@@ -708,7 +709,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.displayLog("Cannot save changes to asset record.  Close and re-open editor and try again. " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetEditor_EditHistoryError + ex.getMessage(), ex);
 				return;
 			}
 		}
@@ -726,8 +727,8 @@ public class AssetEditor extends EditorPart implements MapPart {
 		}
 		if (toDelete.isEmpty()) return;
 		
-		if (!MessageDialog.openQuestion(getSite().getShell(), "Delete Records", 
-				MessageFormat.format("Are you sure you want to delete the {0} selected asset history records?", toDelete.size()))){
+		if (!MessageDialog.openQuestion(getSite().getShell(), Messages.AssetEditor_DeleteHistoryTitle, 
+				MessageFormat.format(Messages.AssetEditor_DeleteHistoryMessage, toDelete.size()))){
 			return;
 		}
 		
@@ -738,7 +739,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 				s.getTransaction().commit();
 			}catch (Exception ex) {
 				s.getTransaction().rollback();
-				AssetPlugIn.displayLog("Cannot save changes to asset record.  Close and re-open editor and try again. " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetEditor_DeleteHistoryError + ex.getMessage(), ex);
 				return;
 			}
 		}
@@ -750,13 +751,13 @@ public class AssetEditor extends EditorPart implements MapPart {
 	
 	private void initializeEventsPanel(Asset asset) {
 		if (tblEvents == null) return;
-		Job j = new Job("load history records") {
+		Job j = new Job(Messages.AssetEditor_loadHistoryJobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				if (asset.getUuid() != null) {
 					try(Session s = HibernateManager.openSession()){
-						List<AssetHistoryRecord> records = QueryFactory.buildQuery(s, AssetHistoryRecord.class, "asset", asset).list();
+						List<AssetHistoryRecord> records = QueryFactory.buildQuery(s, AssetHistoryRecord.class, "asset", asset).list(); //$NON-NLS-1$
 						records.forEach(r->{
 							if (!activeHistoryRecords.contains(r)) activeHistoryRecords.add(r);
 						});
@@ -829,7 +830,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 	}
 	
 	
-	private Job refreshJob = new Job("refresh asset data") {
+	private Job refreshJob = new Job(Messages.AssetEditor_refreshJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -841,13 +842,13 @@ public class AssetEditor extends EditorPart implements MapPart {
 			try(Session session = HibernateManager.openSession()){
 				//load asset data
 				if (in.getAssetUuid() == null) {
-					throw new Exception("No asset.  Asset does not exist in system.");
+					throw new Exception(Messages.AssetEditor_AssetNotFound);
 				}else {
 					asset = session.get(Asset.class, in.getAssetUuid());
 				}
 				
 				if (asset == null) {
-					throw new Exception("Asset not found; could not initialize element controls");
+					throw new Exception(Messages.AssetEditor_AssetNotFound);
 				}
 				if (asset.getAttributeValues() == null) asset.setAttributeValues(new ArrayList<>());
 				

@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -53,8 +54,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class CategoryColumnDialog extends TitleAreaDialog {
 
 	private enum Type{
-		CATEGORY("Category Column"),
-		COMBINED("Combined Column");
+		CATEGORY(Messages.CategoryColumnDialog_CategoryColumnType),
+		COMBINED(Messages.CategoryColumnDialog_CombinedColumnType);
 		
 		String name;
 		Type(String name){
@@ -114,7 +115,7 @@ public class CategoryColumnDialog extends TitleAreaDialog {
 	
 	public boolean validate() {
 		if (txtName.getText().trim().isEmpty()) {
-			setErrorMessage("A column name must be provided");
+			setErrorMessage(Messages.CategoryColumnDialog_NameRequired);
 			enableOk(false);
 			return false;
 		}
@@ -181,7 +182,7 @@ public class CategoryColumnDialog extends TitleAreaDialog {
 		
 	
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("Name:");
+		l.setText(Messages.CategoryColumnDialog_NameLabel);
 		
 		txtName = new Text(parent, SWT.BORDER);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -190,7 +191,7 @@ public class CategoryColumnDialog extends TitleAreaDialog {
 		txtName.addListener(SWT.Modify, e->validate());
 		
 		l = new Label(parent, SWT.NONE);
-		l.setText("Type:");
+		l.setText(Messages.CategoryColumnDialog_TypeLabel);
 		
 		ComboViewer cmbViewer = null;
 		if (toUpdate == null) {
@@ -253,9 +254,9 @@ public class CategoryColumnDialog extends TitleAreaDialog {
 			stackPanel.layout();
 		}
 				
-		setTitle("New Summary Column");
-		getShell().setText("Asset Overview Map");
-		setMessage("Create a new summary column ");
+		setTitle(Messages.CategoryColumnDialog_Title);
+		getShell().setText(Messages.CategoryColumnDialog_Title2);
+		setMessage(Messages.CategoryColumnDialog_Message);
 		return parent;
 	}
 	

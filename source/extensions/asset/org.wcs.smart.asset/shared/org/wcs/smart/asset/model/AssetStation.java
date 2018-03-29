@@ -208,7 +208,7 @@ public class AssetStation extends UuidItem {
 	@Transient
 	public Status getCachedStatus() {
 		if (this.status == null) {
-			throw new IllegalStateException("Status not yet computed.  You must call computeStatus(session) before you can retreive the status.");
+			throw new IllegalStateException("Status not yet computed.  You must call computeStatus(session) before you can retreive the status."); //$NON-NLS-1$
 		}
 		return this.status;
 	}

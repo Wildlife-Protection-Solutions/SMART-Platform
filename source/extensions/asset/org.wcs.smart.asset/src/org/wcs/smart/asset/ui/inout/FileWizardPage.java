@@ -55,6 +55,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -78,7 +79,7 @@ public class FileWizardPage extends WizardPage {
 	private boolean isValid = true;
 	
 	protected FileWizardPage() {
-		super("FILE_PAGE");
+		super("FILE_PAGE"); //$NON-NLS-1$
 	}
 
 	public Path getFile() {
@@ -90,8 +91,7 @@ public class FileWizardPage extends WizardPage {
 		try {
 			return cmbDelimeter.getDelimiter();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			AssetPlugIn.log(e.getMessage(), e);
 		}
 		return ',';
 	}
@@ -137,12 +137,12 @@ public class FileWizardPage extends WizardPage {
 		setErrorMessage(null);
 		isValid = true;
 		if (txtFile.getText().trim().isEmpty()) {
-			setErrorMessage("Must select a file to import");
+			setErrorMessage(Messages.FileWizardPage_FileRequired);
 			isValid = false;
 		}else {
 			Path p = Paths.get(txtFile.getText());
 			if (!Files.isExecutable(p)) {
-				setErrorMessage("Selected file does not exist");
+				setErrorMessage(Messages.FileWizardPage_FileNotFound);
 				isValid = false;
 			}
 			AssetPlugIn.getDefault().getPreferenceStore().setValue(PREFERENCE_DIR_KEY, p.toString());
@@ -151,13 +151,13 @@ public class FileWizardPage extends WizardPage {
     	try{
     		DateTimeFormatter.ofPattern(cmbDateFormat.getCombo().getText());
     	}catch (Exception ex){
-    		setErrorMessage("A valid date/time format must be selected");
+    		setErrorMessage(Messages.FileWizardPage_DateTimeRequired);
     		isValid = false;
     	}
     	 
     	Object x= cmbProjection.getStructuredSelection().getFirstElement();
     	if ( x == null || !(x instanceof Projection)){
-    		setErrorMessage("valid projection not selected");
+    		setErrorMessage(Messages.FileWizardPage_ProjectionRequired);
     		isValid = false;
     	}
     	
@@ -175,10 +175,10 @@ public class FileWizardPage extends WizardPage {
 		fileComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(fileComp, SWT.NONE);
-		l.setText("File:");
+		l.setText(Messages.FileWizardPage_FileLabel);
 		
 		txtFile = new Text(fileComp, SWT.BORDER);
-		txtFile.setText("");
+		txtFile.setText(""); //$NON-NLS-1$
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		String initDir = AssetPlugIn.getDefault().getPreferenceStore().getString(PREFERENCE_DIR_KEY);
 		if (initDir != null) txtFile.setText(initDir);
@@ -186,11 +186,11 @@ public class FileWizardPage extends WizardPage {
 
 		
 		Button btnBrowse = new Button(fileComp, SWT.PUSH);
-		btnBrowse.setText("...");
+		btnBrowse.setText("..."); //$NON-NLS-1$
 		btnBrowse.addListener(SWT.Selection,e->{
 			FileDialog fd = new FileDialog(parent.getShell());
-			fd.setFilterExtensions(new String[] {"*.csv", "*.*"});
-			fd.setFilterNames(new String[] {"Comma Seperated Values (*.csv)", "All Files (*.*)"});
+			fd.setFilterExtensions(new String[] {"*.csv", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+			fd.setFilterNames(new String[] {Messages.FileWizardPage_CsvFile, Messages.FileWizardPage_AllFiles});
 			
 			if (!txtFile.getText().trim().isEmpty()) fd.setFilterPath(txtFile.getText());
 			String file = fd.open();
@@ -198,15 +198,15 @@ public class FileWizardPage extends WizardPage {
 		});
 		
 		l = new Label(fileComp, SWT.NONE);
-		l.setText("Delimiter:");
+		l.setText(Messages.FileWizardPage_DelimiterLabel);
 		
 		cmbDelimeter = new DelimiterCombo(fileComp, SWT.NONE);
 		cmbDelimeter.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		cmbDelimeter.getControl().addListener(SWT.Selection, e->{validate();getContainer().updateButtons();});
 		
 		l = new Label(fileComp, SWT.NONE);
-		l.setText("Skip First Line:");
-		l.setToolTipText("If the first line of the the file be skipped");
+		l.setText(Messages.FileWizardPage_SkipLabel);
+		l.setToolTipText(Messages.FileWizardPage_SkipTooltip);
 		
 		btnSkipFirst = new Button(fileComp, SWT.CHECK);
 		btnSkipFirst.setSelection(true);
@@ -214,8 +214,8 @@ public class FileWizardPage extends WizardPage {
 		
 		
 		l = new Label(fileComp, SWT.NONE);
-		l.setText("Date Format:");
-		l.setToolTipText("select a format or enter a custom format for date attributes; you can ignore this field if there is no data data to import");
+		l.setText(Messages.FileWizardPage_DateFormatLabel);
+		l.setToolTipText(Messages.FileWizardPage_DateFormatTooltip);
 		
 		cmbDateFormat = new ComboViewer(fileComp, SWT.DROP_DOWN);
 		cmbDateFormat.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -236,8 +236,8 @@ public class FileWizardPage extends WizardPage {
 		cmbDateFormat.getCombo().addListener(SWT.Modify, e-> {validate(); getWizard().getContainer().updateButtons();});
 		
 		l = new Label(fileComp, SWT.NONE);
-		l.setText("Projection:");
-		l.setToolTipText("for position attributes select the projection of the import data; can ignore if no position attribute to import");
+		l.setText(Messages.FileWizardPage_ProjectionLabel);
+		l.setToolTipText(Messages.FileWizardPage_ProjectionTooltip);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		cmbProjection = new ComboViewer(fileComp, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -255,8 +255,8 @@ public class FileWizardPage extends WizardPage {
 		cmbProjection.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbProjection.getCombo().addListener(SWT.Modify, e-> {validate(); getWizard().getContainer().updateButtons();});
 		
-		setTitle("Import Assets From CSV");
-		setMessage("Select file for importing data");
+		setTitle(Messages.FileWizardPage_Title);
+		setMessage(Messages.FileWizardPage_Message);
 		
 		setControl(main);
 		validate();
@@ -266,7 +266,7 @@ public class FileWizardPage extends WizardPage {
 	}
 
 	
-	private Job loadProjections = new Job("loading projections"){
+	private Job loadProjections = new Job(Messages.FileWizardPage_loadingProjectionJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<Projection> projections = new ArrayList<>();

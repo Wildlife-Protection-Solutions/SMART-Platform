@@ -47,7 +47,7 @@ public class BracketExpression implements IExpression{
 	
 	@Override
 	public String toString() {
-		return " ( " + filter1.toString() + " ) ";
+		return " ( " + filter1.toString() + " ) "; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	@Override

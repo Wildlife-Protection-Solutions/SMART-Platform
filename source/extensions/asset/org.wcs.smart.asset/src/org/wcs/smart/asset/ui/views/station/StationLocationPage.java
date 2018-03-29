@@ -64,6 +64,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.AssetSecurityManager;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetDeployment;
@@ -160,7 +161,7 @@ public class StationLocationPage {
 		
 		MenuItem openItem = new MenuItem(mnu, SWT.PUSH);
 		openItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
-		openItem.setText("Goto Location");
+		openItem.setText(Messages.StationLocationPage_GotoLabel);
 		openItem.addListener(SWT.Selection, e->openLocation());
 
 
@@ -298,7 +299,7 @@ public class StationLocationPage {
 		l.setFont(f);
 		
 		for (int i = 0; i < tblLocations.getTable().getColumnCount(); i ++) {
-			l = toolkit.createLabel(infoPanel,  tblLocations.getTable().getColumn(i).getText() + ":");
+			l = toolkit.createLabel(infoPanel,  tblLocations.getTable().getColumn(i).getText() + ":"); //$NON-NLS-1$
 			l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 			l = toolkit.createLabel(infoPanel,  ((ColumnLabelProvider)tblLocations.getLabelProvider(i)).getText(proxy));
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -310,7 +311,7 @@ public class StationLocationPage {
 	}
 	
 	public void initialize(AssetStation station) {
-		Job j = new Job("initialize locations page") {
+		Job j = new Job(Messages.StationLocationPage_initJobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -320,7 +321,7 @@ public class StationLocationPage {
 				try(Session session = HibernateManager.openSession()){
 					initializeTableColumns(session);
 					
-					List<AssetStationLocation> data = QueryFactory.buildQuery(session, AssetStationLocation.class, new Object[] {"station", station}).list();
+					List<AssetStationLocation> data = QueryFactory.buildQuery(session, AssetStationLocation.class, new Object[] {"station", station}).list(); //$NON-NLS-1$
 					
 					for (AssetStationLocation l : data) {
 						AssetStationLocationProxy proxy = new AssetStationLocationProxy();
@@ -330,8 +331,8 @@ public class StationLocationPage {
 						l.getId();
 						
 						Long activeCnt = QueryFactory.buildCountQuery(session, AssetDeployment.class, 
-								new Object[] {"stationLocation", l},
-								new Object[] {"endDate", null});
+								new Object[] {"stationLocation", l}, //$NON-NLS-1$
+								new Object[] {"endDate", null}); //$NON-NLS-1$
 						proxy.status = activeCnt == 0 ? Asset.Status.INACTIVE : Asset.Status.ACTIVE; 
 						
 						for (AssetStationLocationAttributeValue value : l.getAttributeValues()) {
@@ -380,12 +381,11 @@ public class StationLocationPage {
 		columns.add(new StatusTableColumn());
 		columns.add(new IdTableColumn());
 		
-		String hql = "FROM AssetStationLocationAttribute a WHERE a.attribute.conservationArea = :ca";
-		locationAttributes = session.createQuery(hql, AssetStationLocationAttribute.class).setParameter("ca",  SmartDB.getCurrentConservationArea()).list();
+		String hql = "FROM AssetStationLocationAttribute a WHERE a.attribute.conservationArea = :ca"; //$NON-NLS-1$
+		locationAttributes = session.createQuery(hql, AssetStationLocationAttribute.class).setParameter("ca",  SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
 		for (AssetStationLocationAttribute a : locationAttributes) {
 			a.getAttribute().getName();
 			a.getAttribute().getUuid().equals(null);
-			
 			AttributeTableColumn c = new AttributeTableColumn(a.getAttribute());
 			columns.add(c);
 		}
@@ -417,7 +417,7 @@ public class StationLocationPage {
 	private class IdTableColumn implements ITableColumn{
 		@Override
 		public String getColumnName() {
-			return "Location";
+			return Messages.StationLocationPage_LocationColumnName;
 		}
 
 		@Override
@@ -430,7 +430,7 @@ public class StationLocationPage {
 	private class StatusTableColumn implements ITableColumn{
 		@Override
 		public String getColumnName() {
-			return "Status";
+			return Messages.StationLocationPage_StatusColumnName;
 		}
 
 		@Override
@@ -464,7 +464,7 @@ public class StationLocationPage {
 				for (AssetStationLocationAttributeValue value : l.getAttributeValues()) {
 					if (value.getAttribute().equals(attribute)) return value.getAttributeValueAsString(Locale.getDefault(), parentEditor.viewCrs); 
 				}
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			return element.toString();
 		}

@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.inout.AssetLocationCsvImporter;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetStationAttribute;
 import org.wcs.smart.asset.model.AssetType;
@@ -71,6 +72,7 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public class LocationMappingPage extends WizardPage{
 	
+	private static final String ATTRIBUTE2 = "ATTRIBUTE"; //$NON-NLS-1$
 	private ComboViewer cmbLocationId;
 	private ComboViewer cmbStationId;
 	private ComboViewer cmbPositionX;
@@ -92,7 +94,7 @@ public class LocationMappingPage extends WizardPage{
 	};
 	
 	protected LocationMappingPage() {
-		super("LOCATION_MAPPING");
+		super("LOCATION_MAPPING"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -102,7 +104,7 @@ public class LocationMappingPage extends WizardPage{
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Location ID*:");
+		l.setText(Messages.LocationMappingPage_LocationIdlabel);
 		
 		cmbLocationId = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbLocationId.setContentProvider(ArrayContentProvider.getInstance());
@@ -116,7 +118,7 @@ public class LocationMappingPage extends WizardPage{
 		});
 		
 		l = new Label(main, SWT.NONE);
-		l.setText("Station ID*:");
+		l.setText(Messages.LocationMappingPage_StationIdLabel);
 		
 		cmbStationId = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbStationId.setContentProvider(ArrayContentProvider.getInstance());
@@ -130,7 +132,7 @@ public class LocationMappingPage extends WizardPage{
 		});
 		
 		l = new Label(main, SWT.NONE);
-		l.setText("Location Position*:");
+		l.setText(Messages.LocationMappingPage_PositionLabel);
 		
 		Composite locComp = new Composite(main, SWT.NONE);
 		locComp.setLayout(new GridLayout(2, true));
@@ -145,7 +147,7 @@ public class LocationMappingPage extends WizardPage{
 		((GridLayout)xComp.getLayout()).marginHeight= 0;
 		
 		l = new Label(xComp, SWT.NONE);
-		l.setText("X:");
+		l.setText(Messages.LocationMappingPage_XLabel);
 
 		cmbPositionX = new ComboViewer(xComp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbPositionX.setContentProvider(ArrayContentProvider.getInstance());
@@ -164,7 +166,7 @@ public class LocationMappingPage extends WizardPage{
 		((GridLayout)yComp.getLayout()).marginWidth = 0;
 		((GridLayout)yComp.getLayout()).marginHeight= 0;
 		l = new Label(yComp, SWT.NONE);
-		l.setText("Y:");
+		l.setText(Messages.LocationMappingPage_YLabel);
 		
 		cmbPositionY = new ComboViewer(yComp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbPositionY.setContentProvider(ArrayContentProvider.getInstance());
@@ -212,7 +214,7 @@ public class LocationMappingPage extends WizardPage{
 			cmbPositionX.setInput(new String[] {});
 			cmbPositionY.setInput(new String[] {});
 			
-			setErrorMessage(MessageFormat.format("Unable to read file: {0}", fileName));
+			setErrorMessage(MessageFormat.format(Messages.LocationMappingPage_ReadError, fileName));
 			return;
 		}
 		
@@ -220,7 +222,7 @@ public class LocationMappingPage extends WizardPage{
 		
 		List<AssetAttribute> attributes = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			List<AssetStationAttribute> stnAttributes = QueryFactory.buildQuery(session, AssetStationAttribute.class, new Object[] {"attribute.conservationArea", SmartDB.getCurrentConservationArea()}).list();
+			List<AssetStationAttribute> stnAttributes = QueryFactory.buildQuery(session, AssetStationAttribute.class, new Object[] {"attribute.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 			for (AssetStationAttribute a : stnAttributes) {
 				attributes.add(a.getAttribute());
 				a.getAttribute().getName();
@@ -243,7 +245,7 @@ public class LocationMappingPage extends WizardPage{
 		attributeMappings = new ArrayList<>();
 		
 		List<HeaderIndex> options = new ArrayList<>();
-		options.add(new HeaderIndex("", -1));
+		options.add(new HeaderIndex("", -1)); //$NON-NLS-1$
 		options.addAll(headers);
 		
 		ScrolledComposite scroll = new ScrolledComposite(fields, SWT.V_SCROLL);
@@ -272,7 +274,7 @@ public class LocationMappingPage extends WizardPage{
 				}
 			}
 			attributeMappings.add(cmbViewer);
-			cmbViewer.setData("ATTRIBUTE", attribute);
+			cmbViewer.setData(ATTRIBUTE2, attribute);
 		}
 		fields.layout(true);
 		fields.getParent().layout(true);
@@ -281,8 +283,8 @@ public class LocationMappingPage extends WizardPage{
 		
 		validate();
 		
-		setTitle("Import Locations From CSV");
-		setMessage("Map station location attributes to csv file columns");
+		setTitle(Messages.LocationMappingPage_Title);
+		setMessage(Messages.LocationMappingPage_Message);
 	}
 
 	public Integer getStationIdMapping() {
@@ -306,7 +308,7 @@ public class LocationMappingPage extends WizardPage{
 		for (ComboViewer cmb : attributeMappings) {
 			HeaderIndex x = (HeaderIndex)cmb.getStructuredSelection().getFirstElement();
 			if (x != null && x.index >= 0) {
-				mappings.put((AssetAttribute)cmb.getData("ATTRIBUTE"), x.index);
+				mappings.put((AssetAttribute)cmb.getData(ATTRIBUTE2), x.index);
 			}
 		}
 		return mappings;
@@ -316,17 +318,17 @@ public class LocationMappingPage extends WizardPage{
 		String error = null;
 		
 		Object x = cmbLocationId.getStructuredSelection().getFirstElement();
-		if (x == null) error = "A mapping for location id field is required.";
+		if (x == null) error = Messages.LocationMappingPage_LocationRequired;
 		
 		x = cmbStationId.getStructuredSelection().getFirstElement();
-		if (x == null) error = "A mapping for station id field is required.";
+		if (x == null) error = Messages.LocationMappingPage_StationRequired;
 		
 		
 		x = cmbPositionX.getStructuredSelection().getFirstElement();
-		if (x == null) error = "A mapping for this location position x field is required.";
+		if (x == null) error = Messages.LocationMappingPage_XRequired;
 		
 		x = cmbPositionY.getStructuredSelection().getFirstElement();
-		if (x == null) error = "A mapping for this location position y field is required.";
+		if (x == null) error = Messages.LocationMappingPage_YRequired;
 		
 		setErrorMessage(error);
 	}
@@ -339,7 +341,7 @@ public class LocationMappingPage extends WizardPage{
 		Projection proj = ((AssetDataImportWizard)getWizard()).filePage.getProjection();
 		
 		if (!Files.exists(file)) {
-			MessageDialog.openError(getContainer().getShell(), "Error", MessageFormat.format("This file {0} does not exist.", file.toString()));
+			MessageDialog.openError(getContainer().getShell(), Messages.LocationMappingPage_ErrorMessage, MessageFormat.format(Messages.LocationMappingPage_FileNotFound, file.toString()));
 			return false;
 		}
 		
@@ -348,7 +350,7 @@ public class LocationMappingPage extends WizardPage{
 		try {
 			return importer.processFile();
 		}catch (Exception ex) {
-			AssetPlugIn.displayLog("Unable to import station location data from file: " +ex.getMessage(),  ex);
+			AssetPlugIn.displayLog(Messages.LocationMappingPage_ImportError +ex.getMessage(),  ex);
 			return false;
 		}
 		

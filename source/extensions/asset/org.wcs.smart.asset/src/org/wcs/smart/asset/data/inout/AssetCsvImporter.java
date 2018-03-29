@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
@@ -102,7 +103,7 @@ public class AssetCsvImporter {
 		
 		try(Session session = HibernateManager.openSession()){
 			if (typeField instanceof Integer) {
-				assetTypes = QueryFactory.buildQuery(session, AssetType.class, "conservationArea", ca).list();
+				assetTypes = QueryFactory.buildQuery(session, AssetType.class, "conservationArea", ca).list(); //$NON-NLS-1$
 				assetTypes.forEach(a->{
 					a.getNames().size();
 					a.getAssetAttributes().forEach(aa->{
@@ -126,7 +127,7 @@ public class AssetCsvImporter {
 				});
 				typeField = t;	
 			}
-			assetIds.addAll(session.createQuery("SELECT LOWER(id) FROM Asset WHERE conservationArea = :ca").setParameter("ca", ca).list());
+			assetIds.addAll(session.createQuery("SELECT LOWER(id) FROM Asset WHERE conservationArea = :ca").setParameter("ca", ca).list()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		//read and parse asset data
@@ -148,14 +149,14 @@ public class AssetCsvImporter {
 		
 		//process warnings from user
 		if (!warnings.isEmpty()) {
-			WarningDialog warn = new WarningDialog(Display.getDefault().getActiveShell(), "Importing Assets", "The following warnings were generated while processing asset data.  Do you want to continue?", warnings, 
+			WarningDialog warn = new WarningDialog(Display.getDefault().getActiveShell(), Messages.AssetCsvImporter_ImportingTitle, Messages.AssetCsvImporter_WarningsMsg, warnings, 
 					new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 			if (warn.open() != 0) {
 				return false;
 			}
 		}
 		if (newAssets.isEmpty()) {
-			MessageDialog.openWarning(Display.getDefault().getActiveShell(),"Importing Assets", "Nothing to import - no assets found.");
+			MessageDialog.openWarning(Display.getDefault().getActiveShell(),Messages.AssetCsvImporter_ImportingTitle, Messages.AssetCsvImporter_NoDataMsg);
 			return true;
 		}
 		
@@ -168,12 +169,12 @@ public class AssetCsvImporter {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.displayLog("Unable to save imported assets to database: " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetCsvImporter_7 + ex.getMessage(), ex);
 				return false;
 			}
 		}
 		
-		MessageDialog.openInformation(Display.getDefault().getActiveShell(),  "Importing Assets", MessageFormat.format("{0} assets successfully imported", newAssets.size()));
+		MessageDialog.openInformation(Display.getDefault().getActiveShell(),  Messages.AssetCsvImporter_ImportingTitle, MessageFormat.format(Messages.AssetCsvImporter_SuccessMsg, newAssets.size()));
 		broker.post(AssetEvents.ASSET_NEW, newAssets);
 		
 		return true;
@@ -187,7 +188,7 @@ public class AssetCsvImporter {
 		}else {
 			String value = data[(Integer)typeField].trim().toLowerCase();
 			if (value.isEmpty()) {
-				warnings.add(MessageFormat.format("ROW NOT IMPORTED - Could not determine asset type at row {0}. Asset Type field is blank", row));
+				warnings.add(MessageFormat.format(Messages.AssetCsvImporter_TypeRequired, row));
 				return null;
 			}
 			for (AssetType t : assetTypes) {
@@ -203,18 +204,18 @@ public class AssetCsvImporter {
 				}
 			}
 			if (type == null) {
-				warnings.add(MessageFormat.format("ROW NOT IMPORTED - Could not match the value ''{0}'' to an asset type at row {1}", value, row));
+				warnings.add(MessageFormat.format(Messages.AssetCsvImporter_TypeNotFound, value, row));
 				return null;
 			}
 		}
 		
 		String id = data[idField].trim();
 		if (id.isEmpty()) {
-			warnings.add(MessageFormat.format("ROW NOT IMPORTED - Asset id cannot be empty at row {0}.", row));
+			warnings.add(MessageFormat.format(Messages.AssetCsvImporter_IdRequired, row));
 			return  null;
 		}
 		if (assetIds.contains(id.toLowerCase())){
-			warnings.add(MessageFormat.format("ROW NOT IMPORTED - Asset id already exists at row {0}. Cannot duplicate asset ids.", row));
+			warnings.add(MessageFormat.format(Messages.AssetCsvImporter_IdDuplicated, row));
 			return null;
 		}
 		
@@ -260,7 +261,7 @@ public class AssetCsvImporter {
 				x = null;
 			}
 			if (x == null) {
-				warnings.add(MessageFormat.format("Could not parse boolean value from value ''{0}'' for attribute {1} at row {2}.  Asset attribute value will not be imported.", data, attributeValue.getAttribute().getName(), rowIndex));
+				warnings.add(MessageFormat.format(Messages.AssetCsvImporter_BooleanParseError, data, attributeValue.getAttribute().getName(), rowIndex));
 				return null;
 			}
 			attributeValue.setNumberValue(x ? 1.0 : 0);
@@ -274,7 +275,7 @@ public class AssetCsvImporter {
 				d = null;
 			}
 			if (d == null) {
-				warnings.add(MessageFormat.format("Could not parse date from value ''{0}'' for attribute {1} at row {2}.  Asset attribute value will not be imported.", data, attributeValue.getAttribute().getName(), rowIndex));
+				warnings.add(MessageFormat.format(Messages.AssetCsvImporter_dateParseError, data, attributeValue.getAttribute().getName(), rowIndex));
 				return null;
 			}
 			attributeValue.setDateValue(d);
@@ -294,7 +295,7 @@ public class AssetCsvImporter {
 				}
 			}
 			if (av == null) {
-				warnings.add(MessageFormat.format("Could not parse list value from value ''{0}'' for attribute {1} at row {2}.  Asset attribute value will not be imported.", data, attributeValue.getAttribute().getName(), rowIndex));
+				warnings.add(MessageFormat.format(Messages.AssetCsvImporter_ListParseError, data, attributeValue.getAttribute().getName(), rowIndex));
 				return null;
 			}
 			attributeValue.setAttributeListItem(av);
@@ -308,14 +309,14 @@ public class AssetCsvImporter {
 				v = null;
 			}
 			if (v == null) {
-				warnings.add(MessageFormat.format("Could not parse boolean value from value ''{0}'' for attribute {1} at row {2}.  Asset attribute value will not be imported.", data, attributeValue.getAttribute().getName(), rowIndex));
+				warnings.add(MessageFormat.format(Messages.AssetCsvImporter_NumericParseError, data, attributeValue.getAttribute().getName(), rowIndex));
 				return null;
 			}
 			attributeValue.setNumberValue(v);
 			break;
 		case POSITION:
 			//TODO: add support for position attributes
-			warnings.add(MessageFormat.format("Positiong attributes are not supported in csv importer at row {0}.  Asset attribute value will not be imported.", rowIndex));
+			warnings.add(MessageFormat.format(Messages.AssetCsvImporter_PositionNotSupported, rowIndex));
 			return null;
 		case TEXT:
 			attributeValue.setStringValue(data);

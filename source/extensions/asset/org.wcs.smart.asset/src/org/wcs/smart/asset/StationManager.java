@@ -26,6 +26,7 @@ import java.util.Collections;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypointSource;
@@ -60,7 +61,7 @@ public enum StationManager {
 				deleteStation(station, session);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
-				AssetPlugIn.displayLog("Unable to delete station: " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.StationManager_DeleteStationError + ex.getMessage(), ex);
 				session.getTransaction().rollback();
 				return;
 			}
@@ -84,7 +85,7 @@ public enum StationManager {
 				deleteStationLocation(location, session);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
-				AssetPlugIn.displayLog("Unable to delete station location: " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.StationManager_DeleteLocationError + ex.getMessage(), ex);
 				session.getTransaction().rollback();
 				return;
 			}
@@ -113,8 +114,8 @@ public enum StationManager {
 			}
 		}
 		
-		session.createQuery("DELETE FROM AssetStationLocationHistoryRecord WHERE stationLocation in (FROM AssetStationLocation where station = :station)")
-		.setParameter("station", station)
+		session.createQuery("DELETE FROM AssetStationLocationHistoryRecord WHERE stationLocation in (FROM AssetStationLocation where station = :station)") //$NON-NLS-1$
+		.setParameter("station", station) //$NON-NLS-1$
 		.executeUpdate();
 		
 		session.delete(station);
@@ -136,8 +137,8 @@ public enum StationManager {
 		
 		deleteLocationWaypoints(session, location);
 		
-		session.createQuery("DELETE FROM AssetStationLocationHistoryRecord WHERE stationLocation = :location")
-			.setParameter("location", location)
+		session.createQuery("DELETE FROM AssetStationLocationHistoryRecord WHERE stationLocation = :location") //$NON-NLS-1$
+			.setParameter("location", location) //$NON-NLS-1$
 			.executeUpdate();
 		session.flush();
 		session.delete(location);
@@ -145,16 +146,16 @@ public enum StationManager {
 	
 	private void deleteLocationWaypoints(Session session, AssetStationLocation location) {
 		
-		String hql = "DELETE FROM AssetWaypointAttachment a where a.id.assetWaypoint in (FROM AssetWaypoint WHERE assetDeployment.stationLocation = :location) ";
-		session.createQuery(hql).setParameter("location",  location).executeUpdate();
+		String hql = "DELETE FROM AssetWaypointAttachment a where a.id.assetWaypoint in (FROM AssetWaypoint WHERE assetDeployment.stationLocation = :location) "; //$NON-NLS-1$
+		session.createQuery(hql).setParameter("location",  location).executeUpdate(); //$NON-NLS-1$
 		session.flush();
 		
-		hql = "DELETE FROM AssetWaypoint WHERE assetDeployment in (FROM AssetDeployment WHERE stationLocation = :location ) ";
-		session.createQuery(hql).setParameter("location",  location).executeUpdate();
+		hql = "DELETE FROM AssetWaypoint WHERE assetDeployment in (FROM AssetDeployment WHERE stationLocation = :location ) "; //$NON-NLS-1$
+		session.createQuery(hql).setParameter("location",  location).executeUpdate(); //$NON-NLS-1$
 		session.flush();
 		
 		//delete any waypoints not associated with asset waypoint
-		try (ScrollableResults scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)").setParameter("source", AssetWaypointSource.KEY).scroll()){
+		try (ScrollableResults scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)").setParameter("source", AssetWaypointSource.KEY).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
 			while(scroll.next()) {
 				Waypoint wp = (Waypoint)scroll.get(0);
 				session.delete(wp);
@@ -162,12 +163,12 @@ public enum StationManager {
 		}
 		session.flush();
 		
-		hql = "DELETE FROM AssetDeploymentAttributeValue WHERE id.assetDeployment IN (FROM AssetDeployment WHERE stationLocation = :location)";
-		session.createQuery(hql).setParameter("location",  location).executeUpdate();
+		hql = "DELETE FROM AssetDeploymentAttributeValue WHERE id.assetDeployment IN (FROM AssetDeployment WHERE stationLocation = :location)"; //$NON-NLS-1$
+		session.createQuery(hql).setParameter("location",  location).executeUpdate(); //$NON-NLS-1$
 		session.flush();	
 		
-		hql = "DELETE FROM AssetDeployment WHERE stationLocation = :location ";
-		session.createQuery(hql).setParameter("location",  location).executeUpdate();
+		hql = "DELETE FROM AssetDeployment WHERE stationLocation = :location "; //$NON-NLS-1$
+		session.createQuery(hql).setParameter("location",  location).executeUpdate(); //$NON-NLS-1$
 		session.flush();
 
 	}

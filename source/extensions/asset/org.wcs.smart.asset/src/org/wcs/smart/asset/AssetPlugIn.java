@@ -47,27 +47,27 @@ public class AssetPlugIn extends AbstractUIPlugin {
 	// The shared instance
 	private static AssetPlugIn plugin;
 	
-	public static final String ICON_STATUS_ACTIVE = "org.wcs.smart.asset.status.active";
-	public static final String ICON_STATUS_INACTIVE = "org.wcs.smart.asset.status.inactive";
-	public static final String ICON_STATUS_RETIRED = "org.wcs.smart.asset.status.retired";
-	public static final String ICON_VALIDATE = "org.wcs.smart.asset.validate";
-	public static final String ICON_VALIDATE_ALL = "org.wcs.smart.asset.validateall";
+	public static final String ICON_STATUS_ACTIVE = "org.wcs.smart.asset.status.active"; //$NON-NLS-1$
+	public static final String ICON_STATUS_INACTIVE = "org.wcs.smart.asset.status.inactive"; //$NON-NLS-1$
+	public static final String ICON_STATUS_RETIRED = "org.wcs.smart.asset.status.retired"; //$NON-NLS-1$
+	public static final String ICON_VALIDATE = "org.wcs.smart.asset.validate"; //$NON-NLS-1$
+	public static final String ICON_VALIDATE_ALL = "org.wcs.smart.asset.validateall"; //$NON-NLS-1$
 	
-	public static final String ICON_IMPORT_COMPLETE = "org.wcs.smart.asset.import.complete";
-	public static final String ICON_IMPORT_INCOMPLETE = "org.wcs.smart.asset.import.incomplete";
-	public static final String ICON_IMPORT = "org.wcs.smart.asset.import";
+	public static final String ICON_IMPORT_COMPLETE = "org.wcs.smart.asset.import.complete"; //$NON-NLS-1$
+	public static final String ICON_IMPORT_INCOMPLETE = "org.wcs.smart.asset.import.incomplete"; //$NON-NLS-1$
+	public static final String ICON_IMPORT = "org.wcs.smart.asset.import"; //$NON-NLS-1$
 	
-	public static final String ICON_SETTINGS = "org.wcs.smart.asset.settings";
+	public static final String ICON_SETTINGS = "org.wcs.smart.asset.settings"; //$NON-NLS-1$
 	
-	public static final String ICON_STATION = "org.wcs.smart.asset.station";
-	public static final String ICON_STATION_LOCATION = "org.wcs.smart.asset.station.location";
+	public static final String ICON_STATION = "org.wcs.smart.asset.station"; //$NON-NLS-1$
+	public static final String ICON_STATION_LOCATION = "org.wcs.smart.asset.station.location"; //$NON-NLS-1$
 	
-	public static final String ICON_MERGE = "org.wcs.smart.asset.merge";
-	public static final String ICON_IMPORT_FILE = "org.wcs.smart.asset.import.file";
+	public static final String ICON_MERGE = "org.wcs.smart.asset.merge"; //$NON-NLS-1$
+	public static final String ICON_IMPORT_FILE = "org.wcs.smart.asset.import.file"; //$NON-NLS-1$
 	
-	public static final String ICON_STYLE_DEFAULT = "org.wcs.smart.asset.style.default";
+	public static final String ICON_STYLE_DEFAULT = "org.wcs.smart.asset.style.default"; //$NON-NLS-1$
 	
-	public static final String ICON_ASSET = "org.wcs.smart.asset.asset";
+	public static final String ICON_ASSET = "org.wcs.smart.asset.asset"; //$NON-NLS-1$
 	
 	/**
 	 * The constructor

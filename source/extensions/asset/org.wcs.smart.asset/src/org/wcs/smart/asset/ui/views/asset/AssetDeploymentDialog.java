@@ -57,6 +57,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
@@ -80,9 +81,9 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class AssetDeploymentDialog extends TitleAreaDialog{
 
-	private static final String NEW_STATION = "<Create New Station...>";
-	private static final String NEW_LOCATION = "<Create New Station Location...>";
-	private static final String NO_OP = "";
+	private static final String NEW_STATION = Messages.AssetDeploymentDialog_CreateNewStation;
+	private static final String NEW_LOCATION = Messages.AssetDeploymentDialog_CreateNewLocation;
+	private static final String NO_OP = ""; //$NON-NLS-1$
 	
 	private AssetDeployment toUpdate;
 	
@@ -176,13 +177,13 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 		
 		Object station = ((IStructuredSelection)cmbStation.getSelection()).getFirstElement();
 		if (station == null || !(station instanceof AssetStation)) {
-			setErrorMessage("A valid station must be selected");
+			setErrorMessage(Messages.AssetDeploymentDialog_StationRequired);
 			return;
 		}
 		
 		Object location = ((IStructuredSelection)cmbLocation.getSelection()).getFirstElement();
 		if (!cmbLocation.getControl().isEnabled() || location == null || !(location instanceof AssetStationLocation)) {
-			setErrorMessage("A valid location must be selected");
+			setErrorMessage(Messages.AssetDeploymentDialog_LocaitonRequired);
 			return;
 		}
 		
@@ -194,7 +195,7 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 			}
 		}
 		if (!found) {
-			setErrorMessage("The selected location is not associated with the selected station.");
+			setErrorMessage(Messages.AssetDeploymentDialog_InvalidLocation);
 			return;
 		}
 		
@@ -206,7 +207,7 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 		if (chEndDate.getSelection()) {
 			end = new java.sql.Timestamp(SmartUtils.combineDateTime(SmartUtils.getDate(dtEndDate), SmartUtils.getTime(dtEndTime)).getTime()).toLocalDateTime();
 			if (start.isAfter(end)) {
-				setErrorMessage("Start date cannot be after the end date");
+				setErrorMessage(Messages.AssetDeploymentDialog_StartBeforeEnd);
 				return;
 			}
 		}
@@ -232,13 +233,13 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 		
 		}
 		if (overlaps) {
-			setErrorMessage("These dates overlap with an existing deployment for this asset.");
+			setErrorMessage(Messages.AssetDeploymentDialog_OverlappingDates);
 			return;
 		}
 		
 		//check waypoint are all within deployment date/time
 		if ((minWaypointDate != null && minWaypointDate.isBefore(start)) || (maxWaypointDate != null && chEndDate.getSelection() && maxWaypointDate.isAfter(end))) {
-			setErrorMessage("At least one waypoint exists outside the start and end date.  Deployment date range must include all incidents associated with the deployment");
+			setErrorMessage(Messages.AssetDeploymentDialog_invalidDateRange);
 			return;
 		}
 		btnOk.setEnabled(true);
@@ -252,7 +253,7 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(form, SWT.NONE);
-		l.setText(AssetDeploymentTableColumn.FixedColumn.STATION.guiName + ":");
+		l.setText(AssetDeploymentTableColumn.FixedColumn.STATION.guiName + ":"); //$NON-NLS-1$
 		
 		cmbStation = new ComboViewer(form, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbStation.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -278,7 +279,7 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 			}
 		});
 		l = new Label(form, SWT.NONE);
-		l.setText(AssetDeploymentTableColumn.FixedColumn.LOCATION.guiName + ":");
+		l.setText(AssetDeploymentTableColumn.FixedColumn.LOCATION.guiName + ":"); //$NON-NLS-1$
 		
 		cmbLocation = new ComboViewer(form, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbLocation.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -303,7 +304,7 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 		});
 		
 		l = new Label(form, SWT.NONE);
-		l.setText(AssetDeploymentTableColumn.FixedColumn.START_DATE.guiName + ":");
+		l.setText(AssetDeploymentTableColumn.FixedColumn.START_DATE.guiName + ":"); //$NON-NLS-1$
 		
 		Composite compstart = new Composite(form, SWT.NONE);
 		compstart.setLayout(new GridLayout(2, false));
@@ -320,7 +321,7 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 		}
 		
 		l = new Label(form, SWT.NONE);
-		l.setText(AssetDeploymentTableColumn.FixedColumn.END_DATE.guiName + ":");
+		l.setText(AssetDeploymentTableColumn.FixedColumn.END_DATE.guiName + ":"); //$NON-NLS-1$
 		
 		Composite compEndDate = new Composite(form, SWT.NONE);
 		compEndDate.setLayout(new GridLayout(3, false));
@@ -362,7 +363,7 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 			if (asset.getUuid() != null) {
 				asset = session.get(Asset.class,toUpdate.getAsset().getUuid());
 			}
-			attributes = QueryFactory.buildQuery(session, AssetTypeDeploymentAttribute.class, "id.assetType", asset.getAssetType()).list();
+			attributes = QueryFactory.buildQuery(session, AssetTypeDeploymentAttribute.class, "id.assetType", asset.getAssetType()).list(); //$NON-NLS-1$
 			attributes.forEach(a->{
 				a.getAttribute().getName();
 				if (a.getAttribute().getAttributeList() != null) a.getAttribute().getAttributeList().forEach(li -> li.getName());
@@ -412,9 +413,9 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 		
 		loadStations(toUpdate.getStationLocation() != null ? toUpdate.getStationLocation().getStation() : null, toUpdate.getStationLocation());
 		
-		setTitle("Asset Deployment Record");
-		setMessage("Configure asset deployment record properties");
-		getShell().setText("Asset Deployment Record");
+		setTitle(Messages.AssetDeploymentDialog_Title);
+		setMessage(Messages.AssetDeploymentDialog_Message);
+		getShell().setText(Messages.AssetDeploymentDialog_Title);
 		
 		return parent;
 	}
@@ -470,7 +471,7 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 	}
 	
 	private void loadStations(AssetStation toSelect, AssetStationLocation locationToSelection) {
-		Job j = new Job("loading stations") {
+		Job j = new Job(Messages.AssetDeploymentDialog_loadingJobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -479,7 +480,7 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 				stations.add(NEW_STATION);
 				try(Session session = HibernateManager.openSession()){
 					List<AssetStation> assetStations = (QueryFactory.buildQuery(session, AssetStation.class,
-							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 				
 					for (AssetStation s : assetStations) {
 						if (s.getLocations() != null) {

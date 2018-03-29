@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetMapStyle;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -88,7 +89,7 @@ public class MapStyleListDialog extends TitleAreaDialog {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.displayLog("Unable to save changes to styles.  Close and reopen dialog and try again." + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.MapStyleListDialog_SaveError + ex.getMessage(), ex);
 				return;
 			}
 		}
@@ -123,11 +124,11 @@ public class MapStyleListDialog extends TitleAreaDialog {
 		}
 		if (toEdit == null) return;
 		
-		InputDialog nameDialog = new InputDialog(getShell(), "Map Style Name", "Enter new name for the map style", toEdit.getName(), new IInputValidator() {
+		InputDialog nameDialog = new InputDialog(getShell(), Messages.MapStyleListDialog_NameDialogTitle, Messages.MapStyleListDialog_NameDialogMsg, toEdit.getName(), new IInputValidator() {
 			@Override
 			public String isValid(String newText) {
-				if (newText == null || newText.trim().isEmpty()) return "A name must be provided.";
-				if (newText.trim().length() > AssetMapStyle.MAX_NAME_LENGTH) return MessageFormat.format("Name must be fewer than {0} characters.", AssetMapStyle.MAX_NAME_LENGTH);
+				if (newText == null || newText.trim().isEmpty()) return Messages.MapStyleListDialog_NameRequired;
+				if (newText.trim().length() > AssetMapStyle.MAX_NAME_LENGTH) return MessageFormat.format(Messages.MapStyleListDialog_NameTooLong, AssetMapStyle.MAX_NAME_LENGTH);
 				return null;
 			}
 		});
@@ -177,7 +178,7 @@ public class MapStyleListDialog extends TitleAreaDialog {
 		btnDelete.addListener(SWT.Selection, e->delete());
 		
 		Button btnRename = new Button(btnPanel, SWT.NONE);
-		btnRename.setText("Rename");
+		btnRename.setText(Messages.MapStyleListDialog_RenameButton);
 		btnRename.setEnabled(false);
 		btnRename.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnRename.addListener(SWT.Selection, e->rename());
@@ -205,9 +206,9 @@ public class MapStyleListDialog extends TitleAreaDialog {
 			miRename.setEnabled(!cmbStyles.getSelection().isEmpty());
 		});
 		
-		setMessage("Managed map styles");
-		setTitle("Asset Overview Map Styles");
-		getShell().setText("Asset Overview Map Styles");
+		setMessage(Messages.MapStyleListDialog_Message);
+		setTitle(Messages.MapStyleListDialog_Title);
+		getShell().setText(Messages.MapStyleListDialog_Title);
 		
 		loadStyleJob.setSystem(true);
 		loadStyleJob.schedule();
@@ -229,14 +230,14 @@ public class MapStyleListDialog extends TitleAreaDialog {
 		return true;
 	}
 	
-	private Job loadStyleJob = new Job("loading asset styles") {
+	private Job loadStyleJob = new Job(Messages.MapStyleListDialog_loadJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			deletedStyles = new ArrayList<>();
 			mapStyles = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
 				mapStyles.addAll(QueryFactory.buildQuery(session, AssetMapStyle.class,
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList());
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList()); //$NON-NLS-1$
 			}
 			Display.getDefault().syncExec(()->{
 				cmbStyles.setInput(mapStyles);

@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.asset.data.importer.FileProxy;
+import org.wcs.smart.asset.internal.Messages;
 
 /**
  * Displays a table for files names
@@ -90,7 +91,7 @@ public class DeletedFilesPanel {
 		
 		Menu mnu = new Menu(tblResults.getControl());
 		MenuItem restore = new MenuItem(mnu, SWT.PUSH);
-		restore.setText("Restore");
+		restore.setText(Messages.DeletedFilesPanel_RestoreMenuOption);
 		restore.addListener(SWT.Selection, e->{
 			List<FileProxy> filesToAdd = new ArrayList<>();
 			for (Iterator<?> iterator = tblResults.getStructuredSelection().iterator(); iterator.hasNext();) {

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.asset.model.mapping;
 
+import java.util.Locale;
+
 import org.wcs.smart.asset.model.AssetMetadataMapping;
 
 /**
@@ -36,7 +38,7 @@ public interface IMetadataField {
 	 * Converts the metadata mapping to a user friendly description
 	 * @return
 	 */
-	public String keyAsString();
+	public String keyAsString(Locale l);
 	
 	/**
 	 * Converts the metadata mapping to a user friendly description

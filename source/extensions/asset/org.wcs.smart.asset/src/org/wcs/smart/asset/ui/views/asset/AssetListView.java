@@ -83,6 +83,7 @@ import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.StationManager;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
@@ -155,7 +156,7 @@ public class AssetListView {
 		((GridLayout)headerMain.getLayout()).marginHeight = 0;
 		
 		SectionHeader header = new SectionHeader(headerMain, SWT.NONE,
-				new String[] {"Assets", "Stations"},
+				new String[] {Messages.AssetListView_AssetsHeader, Messages.AssetListView_StationsHeader},
 				new Listener[] {
 						e->{
 							if (assetComposite == null) assetComposite = createAssetsPanel(content);
@@ -222,13 +223,13 @@ public class AssetListView {
 		ToolBar toolbar =new ToolBar(parent, SWT.FLAT);
 		
 		ToolItem overviewMap = new ToolItem(toolbar, SWT.PUSH);
-		overviewMap.setToolTipText("view overview map");
+		overviewMap.setToolTipText(Messages.AssetListView_maptooltip);
 		overviewMap.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 		overviewMap.addListener(SWT.Selection, e->showOverviewMap());
 		
 		if (AssetSecurityManager.INSTANCE.canImportData()) {
 			ToolItem importData = new ToolItem(toolbar, SWT.PUSH);
-			importData.setToolTipText("import asset data");
+			importData.setToolTipText(Messages.AssetListView_importtooltip);
 			importData.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT));
 			importData.addListener(SWT.Selection, e->importData());
 		}
@@ -239,7 +240,7 @@ public class AssetListView {
 		
 		if (AssetSecurityManager.INSTANCE.canDeleteAsset() ) {
 			ToolItem deleteAsset = new ToolItem(toolbar, SWT.PUSH);
-			deleteAsset.setToolTipText("delete selected assets");
+			deleteAsset.setToolTipText(Messages.AssetListView_deletetooltip);
 			deleteAsset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			deleteAsset.addListener(SWT.Selection, e->deleteAssets());
 			
@@ -254,7 +255,7 @@ public class AssetListView {
 		
 		if (AssetSecurityManager.INSTANCE.canCreateAsset()) {
 			ToolItem addAsset = new ToolItem(toolbar, SWT.PUSH);
-			addAsset.setToolTipText("create a new asset");
+			addAsset.setToolTipText(Messages.AssetListView_createtooltip);
 			addAsset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			addAsset.addListener(SWT.Selection, e->createNewAsset(null));
 		}
@@ -270,13 +271,13 @@ public class AssetListView {
 		ToolBar toolbar =new ToolBar(parent, SWT.FLAT);
 		
 		ToolItem overviewMap = new ToolItem(toolbar, SWT.PUSH);
-		overviewMap.setToolTipText("view overview map");
+		overviewMap.setToolTipText(Messages.AssetListView_maptooltip);
 		overviewMap.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 		overviewMap.addListener(SWT.Selection, e->showOverviewMap());
 		
 		if (AssetSecurityManager.INSTANCE.canImportData()) {
 			ToolItem importData = new ToolItem(toolbar, SWT.PUSH);
-			importData.setToolTipText("import asset data");
+			importData.setToolTipText(Messages.AssetListView_importtooltip);
 			importData.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT));
 			importData.addListener(SWT.Selection, e->importData());
 		}
@@ -288,7 +289,7 @@ public class AssetListView {
 		
 		if (AssetSecurityManager.INSTANCE.canDeleteStationLocation()) {
 			ToolItem deleteStation = new ToolItem(toolbar, SWT.PUSH);
-			deleteStation.setToolTipText("delete the selected station and all related data");
+			deleteStation.setToolTipText(Messages.AssetListView_deletestationtooltip);
 			deleteStation.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			deleteStation.addListener(SWT.Selection, e->deleteStations());
 			
@@ -303,7 +304,7 @@ public class AssetListView {
 		
 		if (AssetSecurityManager.INSTANCE.canCreateStationLocation()) {
 			ToolItem addStation = new ToolItem(toolbar, SWT.PUSH);
-			addStation.setToolTipText("create a new station");
+			addStation.setToolTipText(Messages.AssetListView_newstationtooltip);
 			addStation.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			addStation.addListener(SWT.Selection, e->createNewStation());
 		}
@@ -344,7 +345,7 @@ public class AssetListView {
 		
 		if (AssetSecurityManager.INSTANCE.canCreateAsset()) {
 			MenuItem addAsset = new MenuItem(mnu, SWT.CASCADE);
-			addAsset.setText("New Asset...");
+			addAsset.setText(Messages.AssetListView_NewAssetMenu);
 			addAsset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		
 			new MenuItem(mnu, SWT.SEPARATOR);
@@ -354,7 +355,7 @@ public class AssetListView {
 			new MenuItem(addAssetMenu, SWT.SEPARATOR);
 			
 			MenuItem otherAssetType = new MenuItem(addAssetMenu, SWT.PUSH);
-			otherAssetType.setText("Other...");
+			otherAssetType.setText(Messages.AssetListView_OtherAssetOption);
 			otherAssetType.addListener(SWT.Selection, evt->(new NewAssetHandler()).execute(context));
 			
 			addAssetMenu.addMenuListener(new MenuListener() {
@@ -371,7 +372,7 @@ public class AssetListView {
 							try {
 								UUID assetTypeUuid = UuidUtils.stringToUuid(uuid);
 								if (assetTypeUuid != null) {
-									AssetType assetType = QueryFactory.buildQuery(session, AssetType.class, new Object[] {"uuid", assetTypeUuid}, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult();
+									AssetType assetType = QueryFactory.buildQuery(session, AssetType.class, new Object[] {"uuid", assetTypeUuid}, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
 									if (assetType != null) {
 										assetType.getName();
 										if (!menuItems.contains(assetType)) menuItems.add(assetType);
@@ -401,18 +402,18 @@ public class AssetListView {
 		}
 		
 		MenuItem openAsset = new MenuItem(mnu, SWT.PUSH);
-		openAsset.setText("Open");
+		openAsset.setText(Messages.AssetListView_OpenMenu);
 		openAsset.addListener(SWT.Selection, e->openAsset());
 		
 		MenuItem refresh = new MenuItem(mnu, SWT.PUSH);
-		refresh.setText("Refresh");
+		refresh.setText(Messages.AssetListView_RefreshMenu);
 		refresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		refresh.addListener(SWT.Selection, e->loadAssets());
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
 		
 		MenuItem inactive = new MenuItem(mnu, SWT.CHECK);
-		inactive.setText("Show Inactive Assets");	
+		inactive.setText(Messages.AssetListView_ShowInactiveAssetsMenuOp);	
 		inactive.setSelection(this.includeInactiveAssets);
 		inactive.addListener(SWT.Selection, e->{
 			this.includeInactiveAssets = inactive.getSelection();
@@ -420,7 +421,7 @@ public class AssetListView {
 		});
 		
 		MenuItem retired = new MenuItem(mnu, SWT.CHECK);
-		retired.setText("Show Retired Assets");	
+		retired.setText(Messages.AssetListView_ShowRetiredAssetsMenuOp);	
 		retired.addListener(SWT.Selection, e->{
 			this.includeRetired = retired.getSelection();
 			loadAssets();
@@ -446,18 +447,18 @@ public class AssetListView {
 		
 		if (AssetSecurityManager.INSTANCE.canCreateStationLocation()) {
 			MenuItem newItem = new MenuItem(mnu, SWT.CASCADE);
-			newItem.setText("New ...");
+			newItem.setText(Messages.AssetListView_NewStationMenu);
 			newItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			
 			Menu addMenu = new Menu(newItem);
 			newItem.setMenu(addMenu);
 		
 			MenuItem newStation= new MenuItem(addMenu, SWT.PUSH);
-			newStation.setText("Station");
+			newStation.setText(Messages.AssetListView_StationMenuOp);
 			newStation.addListener(SWT.Selection, e->createNewStation());
 			
 			MenuItem newLocation= new MenuItem(addMenu, SWT.PUSH);
-			newLocation.setText("Station Location");
+			newLocation.setText(Messages.AssetListView_LocationMnuOp);
 			newLocation.addListener(SWT.Selection, e->createNewStationLocation());
 		
 		
@@ -465,18 +466,18 @@ public class AssetListView {
 		}
 		
 		MenuItem openAsset = new MenuItem(mnu, SWT.PUSH);
-		openAsset.setText("Open");
+		openAsset.setText(Messages.AssetListView_OpenMenu);
 		openAsset.addListener(SWT.Selection, e->openStation());
 		
 		MenuItem refresh = new MenuItem(mnu, SWT.PUSH);
-		refresh.setText("Refresh");
+		refresh.setText(Messages.AssetListView_RefreshMenu);
 		refresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		refresh.addListener(SWT.Selection, e->loadStations());
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
 		
 		MenuItem inactive = new MenuItem(mnu, SWT.CHECK);
-		inactive.setText("Show Inactive Stations");	
+		inactive.setText(Messages.AssetListView_ShowInactiveStationMenu);	
 		inactive.setSelection(this.includeInactiveStations);
 		inactive.addListener(SWT.Selection, e->{
 			this.includeInactiveStations = inactive.getSelection();
@@ -570,20 +571,20 @@ public class AssetListView {
 		Object s = ((IStructuredSelection)lstStations.getSelection()).getFirstElement();
 		if (s instanceof AssetStation) {
 		
-			if (!MessageDialog.openQuestion(context.get(Shell.class), "Delete Station", 
-					MessageFormat.format("Are you sure you want to delete the station {0}?  All data (images, waypoints, observations) will also be deleted", ((AssetStation)s).getId()))){
+			if (!MessageDialog.openQuestion(context.get(Shell.class), Messages.AssetListView_DeleteStationTitle, 
+					MessageFormat.format(Messages.AssetListView_DeleteStationMessage, ((AssetStation)s).getId()))){
 				return;
 			}
 		}else if (s instanceof AssetStationLocation) {
-			if (!MessageDialog.openQuestion(context.get(Shell.class), "Delete Station Location", 
-					MessageFormat.format("Are you sure you want to delete the station location {0}?  All data (images, waypoints, observations) will also be deleted", ((AssetStationLocation)s).getId()))){
+			if (!MessageDialog.openQuestion(context.get(Shell.class), Messages.AssetListView_DeleteLocationTitle, 
+					MessageFormat.format(Messages.AssetListView_DeleteLocationMessage, ((AssetStationLocation)s).getId()))){
 				return;
 			}
 		}else {
 			return;
 		}
 		
-		if (!AssetUtils.confirmPassword(context.get(Shell.class), "Delete", "Confirm your password to delete the station or location and associated data.")) {
+		if (!AssetUtils.confirmPassword(context.get(Shell.class), Messages.AssetListView_DeletePasswordTitle, Messages.AssetListView_DeletePasswordMessage)) {
 			return;
 		}
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(context.get(Shell.class));
@@ -592,7 +593,7 @@ public class AssetListView {
 	
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Deleting selected items.", IProgressMonitor.UNKNOWN);
+					monitor.beginTask(Messages.AssetListView_DeleteTaskName, IProgressMonitor.UNKNOWN);
 					if (s instanceof AssetStation) {
 						StationManager.INSTANCE.deleteStation((AssetStation)s, context.get(IEventBroker.class));
 					}else if (s instanceof AssetStationLocation) {
@@ -603,7 +604,7 @@ public class AssetListView {
 				
 			});
 		}catch (Exception ex) {
-			AssetPlugIn.displayLog("Error deleting selected item.  Refresh and try again: " + ex.getMessage(), ex);
+			AssetPlugIn.displayLog(Messages.AssetListView_DeleteErrorMsg + ex.getMessage(), ex);
 		}
 	}
 	
@@ -680,7 +681,7 @@ public class AssetListView {
 	}
 
 	
-	private Job loadAssetsJob = new Job("loading assets") {
+	private Job loadAssetsJob = new Job(Messages.AssetListView_loadingAssetsJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -689,12 +690,12 @@ public class AssetListView {
 				Object[][] filters = null;
 				if (includeRetired){
 					filters = new Object[][] {
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()} //$NON-NLS-1$
 					};
 				}else {
 					filters = new Object[][] {
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"isRetired", false}
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"isRetired", false} //$NON-NLS-1$
 					};
 				}
 				assets.addAll(QueryFactory.buildQuery(session, Asset.class, filters).list()); 
@@ -732,13 +733,13 @@ public class AssetListView {
 		
 	};
 	
-	private Job loadStationsJob = new Job("loading stations") {
+	private Job loadStationsJob = new Job(Messages.AssetListView_loadingstationsJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<AssetStation> stations = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				stations.addAll(QueryFactory.buildQuery(session, AssetStation.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				stations.addAll(QueryFactory.buildQuery(session, AssetStation.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 				stations.forEach(a->{a.getUuid().equals(null); a.getId(); a.computeStatus(session);});
 				stations.forEach(a->a.getLocations().forEach(l-> { l.getId(); l.computeStatus(session); }));
 				

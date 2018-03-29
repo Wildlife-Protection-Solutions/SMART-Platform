@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.views.stationlocation.StationLocationEditor;
 import org.wcs.smart.asset.ui.views.stationlocation.StationLocationEditorInput;
@@ -42,7 +43,7 @@ public class OpenStationLocationHandler {
 		try {			
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, StationLocationEditor.ID);
 		} catch (PartInitException e) {
-			AssetPlugIn.displayLog(MessageFormat.format("Error opening station location editor: {0}", e.getMessage()), e);
+			AssetPlugIn.displayLog(MessageFormat.format(Messages.OpenStationLocationHandler_OpenError, e.getMessage()), e);
 		}	
 	}
 	

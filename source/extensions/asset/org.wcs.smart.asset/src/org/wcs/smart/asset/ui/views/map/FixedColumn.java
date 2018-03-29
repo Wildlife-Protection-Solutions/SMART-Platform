@@ -24,6 +24,7 @@ package org.wcs.smart.asset.ui.views.map;
 import java.util.Locale;
 
 import org.json.simple.JSONObject;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -35,13 +36,13 @@ import org.wcs.smart.util.UuidUtils;
 public class FixedColumn implements IOverviewTableColumn{
 
 	public enum Column{
-		ID("ID", IOverviewTableColumn.ColumnType.STRING, true),
-		UUID("UUID", IOverviewTableColumn.ColumnType.STRING, false),
-		STATUS("Current Status", IOverviewTableColumn.ColumnType.STRING, true),
-		STATUS_KEY("Current Status Key", IOverviewTableColumn.ColumnType.STRING, false),
-		ACTIVE_DAYS("Total Active Days", IOverviewTableColumn.ColumnType.INTEGER, true),
-		ASSET_DAYS("Total Asset Days", IOverviewTableColumn.ColumnType.INTEGER, true),
-		INCIDENTS("Total Incidents", IOverviewTableColumn.ColumnType.INTEGER, true);
+		ID(Messages.FixedColumn_IdColumnName, IOverviewTableColumn.ColumnType.STRING, true),
+		UUID(Messages.FixedColumn_UuidColumnName, IOverviewTableColumn.ColumnType.STRING, false),
+		STATUS(Messages.FixedColumn_StatusColumnName, IOverviewTableColumn.ColumnType.STRING, true),
+		STATUS_KEY(Messages.FixedColumn_StatusKeyColumnName, IOverviewTableColumn.ColumnType.STRING, false),
+		ACTIVE_DAYS(Messages.FixedColumn_ActiveDaysColumnName, IOverviewTableColumn.ColumnType.INTEGER, true),
+		ASSET_DAYS(Messages.FixedColumn_AssetDaysColumnName, IOverviewTableColumn.ColumnType.INTEGER, true),
+		INCIDENTS(Messages.FixedColumn_IncidentCntColumnName, IOverviewTableColumn.ColumnType.INTEGER, true);
 		
 		private String guiName;
 		private IOverviewTableColumn.ColumnType type;
@@ -83,11 +84,11 @@ public class FixedColumn implements IOverviewTableColumn{
 		if (this.column == Column.STATUS) {
 			if (data.getStation() != null) return data.getStation().getCachedStatus().getGuiName(Locale.getDefault());
 			if (data.getStationLocation() != null) return data.getStationLocation().getCachedStatus().getGuiName(Locale.getDefault());
-			return "unknown";
+			return Messages.FixedColumn_UnknownValue;
 		}else if (this.column == Column.STATUS_KEY) {
 			if (data.getStation() != null) return data.getStation().getCachedStatus().name();
 			if (data.getStationLocation() != null) return data.getStationLocation().getCachedStatus().name();
-			return "UNKNOWN";
+			return "UNKNOWN"; //$NON-NLS-1$
 		}else if (this.column == Column.ID) {
 			return data.getIdField();
 		}else if (this.column == Column.UUID) {
@@ -105,8 +106,8 @@ public class FixedColumn implements IOverviewTableColumn{
 	@Override
 	public JSONObject serialize() {
 		JSONObject json = new JSONObject();
-		json.put("type", "fixed");
-		json.put("key", getKey());
+		json.put("type", "fixed"); //$NON-NLS-1$ //$NON-NLS-2$
+		json.put("key", getKey()); //$NON-NLS-1$
 		return json;
 	}
 	
@@ -116,9 +117,9 @@ public class FixedColumn implements IOverviewTableColumn{
 	 * @return the FixedColumn or null if could not parse the object
 	 */
 	public static FixedColumn deserialize(JSONObject json) {
-		if (json.containsKey("type") && json.containsKey("key")) {
-			if (json.get("type").equals("fixed")) {
-				String key = (String)json.get("key");
+		if (json.containsKey("type") && json.containsKey("key")) { //$NON-NLS-1$ //$NON-NLS-2$
+			if (json.get("type").equals("fixed")) { //$NON-NLS-1$ //$NON-NLS-2$
+				String key = (String)json.get("key"); //$NON-NLS-1$
 				for (Column c : Column.values()) {
 					if (c.name().equalsIgnoreCase(key)) {
 						return new FixedColumn(c);

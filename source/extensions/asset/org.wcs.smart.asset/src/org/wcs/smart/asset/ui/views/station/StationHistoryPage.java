@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetUtils;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.ui.handler.OpenAssetHandler;
@@ -67,7 +68,7 @@ public class StationHistoryPage {
 	}
 	
 	public void createControl(Composite parent, FormToolkit toolkit) {
-		toolkit.createLabel(parent, "All Asset Deployments at this Station");
+		toolkit.createLabel(parent, Messages.StationHistoryPage_PageMessage);
 		tblDeployments = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION);
 		tblDeployments.getTable().setHeaderVisible(true);
 		tblDeployments.getTable().setLinesVisible(true);
@@ -84,7 +85,7 @@ public class StationHistoryPage {
 		Menu mnu = new Menu(tblDeployments.getTable());
 		
 		MenuItem mnuOpenAsset = new MenuItem(mnu, SWT.PUSH);
-		mnuOpenAsset.setText("Goto Asset...");
+		mnuOpenAsset.setText(Messages.StationHistoryPage_Goto); 
 		mnuOpenAsset.addListener(SWT.Selection, e->gotoAsset());
 		
 		mnu.addMenuListener(new MenuListener() {
@@ -121,7 +122,7 @@ public class StationHistoryPage {
 	}
 		
 	public void initialize(AssetStation station) {
-		Job j = new Job("load history records") {
+		Job j = new Job(Messages.StationHistoryPage_loadJobName) { 
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -131,8 +132,8 @@ public class StationHistoryPage {
 				
 				try(Session s = HibernateManager.openSession()){
 					deployments.addAll(
-							s.createQuery("SELECT a FROM AssetDeployment a join a.stationLocation b WHERE b.station = :station", AssetDeployment.class)
-							.setParameter("station", thisStation)
+							s.createQuery("SELECT a FROM AssetDeployment a join a.stationLocation b WHERE b.station = :station", AssetDeployment.class)  //$NON-NLS-1$
+							.setParameter("station", thisStation)  //$NON-NLS-1$
 							.list());
 					deployments.forEach(d->{
 						d.getAsset().getAssetType().getName();
@@ -155,12 +156,12 @@ public class StationHistoryPage {
 	}
 	
 	private enum Column{
-		ASSET_TYPE("Asset Type"),
-		ASSET_ID("Asset ID"),
-		LOCATION("Location"),
-		START_DATE("Start Date"),
-		END_DATE("End Date"),
-		TOTAL_TIME("Total Time");
+		ASSET_TYPE(Messages.StationHistoryPage_TypeColumnName), 
+		ASSET_ID(Messages.StationHistoryPage_IDColumnName), 
+		LOCATION(Messages.StationHistoryPage_LocationColumnName), 
+		START_DATE(Messages.StationHistoryPage_StartColumnName), 
+		END_DATE(Messages.StationHistoryPage_EndColumnName), 
+		TOTAL_TIME(Messages.StationHistoryPage_TotalTimeColumnName); 
 		
 		public String guiName;
 		
@@ -174,14 +175,14 @@ public class StationHistoryPage {
 			case ASSET_ID: return record.getAsset().getId();
 			case LOCATION: return record.getStationLocation().getId();
 			case START_DATE: return DateFormat.getDateTimeInstance().format(record.getStartDate());
-			case END_DATE: return record.getEndDate() == null ? "Current" : DateFormat.getDateTimeInstance().format(record.getEndDate());
+			case END_DATE: return record.getEndDate() == null ? Messages.StationHistoryPage_CurrentLabel : DateFormat.getDateTimeInstance().format(record.getEndDate()); 
 			case TOTAL_TIME:
 				long start = record.getStartDate().getTime();
 				long end = (new Date()).getTime();
 				if (record.getEndDate() != null) end = record.getEndDate().getTime();
 				return AssetUtils.formatTime( (end-start)/1000.0);
 			}
-			return "";
+			return "";  //$NON-NLS-1$
 		}
 	}
 }

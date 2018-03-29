@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.asset.data.importer.FileMetadataReader;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
 import org.wcs.smart.asset.model.AssetMetadataMapping.MetadataType;
 import org.wcs.smart.asset.model.mapping.ExifMetadataField;
@@ -67,12 +68,12 @@ public class NewMappingExif extends AbstractNewMappingComposite{
 	public String validate() {
 		String tag = txtExifTag.getText().trim();
 		if (tag.isEmpty()) {
-			return "EXIF tag field cannot be empty";
+			return Messages.NewMappingExif_TagRequired;
 		}
 		try {
 			Integer.parseInt(tag);
 		}catch (Exception ex) {
-			return "EXIF tag is not valid (must be a number)";
+			return Messages.NewMappingExif_InvalidTag;
 		}
 		
 		return super.validate();
@@ -118,21 +119,21 @@ public class NewMappingExif extends AbstractNewMappingComposite{
 		panel.setLayout(new GridLayout(2, false));
 		
 		Label l = new Label(panel, SWT.NONE);
-		l.setText("EXIF Tag (Hex):");
+		l.setText(Messages.NewMappingExif_HexLabel);
 		
 		txtExifTag = new Text(panel, SWT.BORDER);
 		txtExifTag.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtExifTag.addListener(SWT.Modify, e->modified());
 		
 		l = new Label(panel, SWT.NONE);
-		l.setText("EXIF Tag (Name):");
+		l.setText(Messages.NewMappingExif_NameLabel);
 		
 		txtExifTagTxt = new Text(panel, SWT.BORDER);
 		txtExifTagTxt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtExifTagTxt.setEnabled(false);
 		
 		Link linkSelectFromFile = new Link(panel, SWT.NONE);
-		linkSelectFromFile.setText("<a>" + "Select Tag From File ..." + "</a>");
+		linkSelectFromFile.setText("<a>" + Messages.NewMappingExif_SelectFromFile + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		linkSelectFromFile.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
 		linkSelectFromFile.addListener(SWT.Selection, e -> selectExifTagFromFile());
 		
@@ -157,13 +158,13 @@ public class NewMappingExif extends AbstractNewMappingComposite{
 		
 		Path p = Paths.get(f);
 		if (!Files.exists(p)) {
-			MessageDialog.openError(dialog.getShell(), "Not Found", MessageFormat.format("File {0} not found.", p.toString()));
+			MessageDialog.openError(dialog.getShell(), Messages.NewMappingExif_NotFoundTitle, MessageFormat.format(Messages.NewMappingExif_NotfoundMessage, p.toString()));
 			return;
 		}
 		
 		HashMap<Directory, List<Tag>> tags = FileMetadataReader.readExifMetadata(p);
 		if (tags == null ||  tags.isEmpty()) {
-			MessageDialog.openError(dialog.getShell(), "Metadata Error", MessageFormat.format("Could not read exif metadata from file {0}.", p.toString()));
+			MessageDialog.openError(dialog.getShell(), Messages.NewMappingExif_Errortitle, MessageFormat.format(Messages.NewMappingExif_ErrorMessage, p.toString()));
 			return;
 		}
 				
@@ -172,7 +173,7 @@ public class NewMappingExif extends AbstractNewMappingComposite{
 		
 		txtExifTag.setData(selectorDialog.getDirectoryTag());
 		txtExifTag.setText(String.valueOf(selectorDialog.getDirectoryTag().getTagType()));
-		txtExifTagTxt.setText(selectorDialog.getDirectoryTag().getTagName() + " [" + selectorDialog.getDirectory().getName() + "]");
+		txtExifTagTxt.setText(selectorDialog.getDirectoryTag().getTagName() + " [" + selectorDialog.getDirectory().getName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		modified();
 	}

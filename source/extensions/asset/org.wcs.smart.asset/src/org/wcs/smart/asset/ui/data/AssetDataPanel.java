@@ -85,6 +85,7 @@ import org.wcs.smart.asset.AssetManager;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.data.importer.FileProcessor;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
@@ -118,6 +119,8 @@ import org.wcs.smart.util.SmartUtils;
  *
  */
 public abstract class AssetDataPanel {
+
+	private static final String COLOR = "COLOR"; //$NON-NLS-1$
 
 	public static final String ICON_SIZE_PREF = DataImporterView.ID + "org.wcs.smart.asset.ui.data.AssetDataPanel.iconsize"; //$NON-NLS-1$
 
@@ -226,7 +229,7 @@ public abstract class AssetDataPanel {
 		MenuItem mnuOk = null; 
 		if (canValidate) {
 			mnuOk = new MenuItem(mnuHeader, SWT.PUSH);
-			mnuOk.setText("Validate Selection");
+			mnuOk.setText(Messages.AssetDataPanel_ValidateSelectionMnu);
 			mnuOk.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_VALIDATE));
 			mnuOk.addListener(SWT.Selection, e->{
 				List<AssetWaypointMapping> toClear = rows.stream().filter(i->i.isSelected).map(i->i.waypoint).collect(Collectors.toList());
@@ -236,7 +239,7 @@ public abstract class AssetDataPanel {
 			new MenuItem(mnuHeader, SWT.SEPARATOR);
 	
 			MenuItem mnuOkAll = new MenuItem(mnuHeader, SWT.PUSH);
-			mnuOkAll.setText("Validate All");
+			mnuOkAll.setText(Messages.AssetDataPanel_ValidateAllMnu);
 			mnuOkAll.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_VALIDATE_ALL));
 			mnuOkAll.addListener(SWT.Selection, e->{
 				List<AssetWaypointMapping> toClear = rows.stream().map(i->i.waypoint).collect(Collectors.toList());
@@ -248,7 +251,7 @@ public abstract class AssetDataPanel {
 		}
 		
 		MenuItem mnuMerge = new MenuItem(mnuHeader, SWT.PUSH);
-		mnuMerge.setText("Merge Incidents ");
+		mnuMerge.setText(Messages.AssetDataPanel_MergeMnu);
 		mnuMerge.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_MERGE));
 		mnuMerge.addListener(SWT.Selection, e->{
 			List<AssetWaypointMapping> toMerge = rows.stream().filter(i->i.isSelected).map(i->i.waypoint).collect(Collectors.toList());
@@ -256,7 +259,7 @@ public abstract class AssetDataPanel {
 		});
 		
 		MenuItem mnuDelete = new MenuItem(mnuHeader, SWT.PUSH);
-		mnuDelete.setText("Delete Incidents");
+		mnuDelete.setText(Messages.AssetDataPanel_DeleteMnu);
 		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		mnuDelete.addListener(SWT.Selection, e->{
 			List<AssetWaypointMapping> toClear = rows.stream().filter(i->i.isSelected).map(i->i.waypoint).collect(Collectors.toList());
@@ -289,7 +292,7 @@ public abstract class AssetDataPanel {
 		rows = new ArrayList<>();
 		
 		if (waypointsToDisplay.size() == 0) {
-			toolkit.createLabel(details, "No data.");
+			toolkit.createLabel(details, Messages.AssetDataPanel_NoDataLabel);
 			details.layout();
 			return;
 		}
@@ -336,7 +339,7 @@ public abstract class AssetDataPanel {
 		if (!isEdit) return null;
 		if (attachments.size() == 0) return null;
 		
-		if (!MessageDialog.openQuestion(details.getShell(), "Create New Incident", MessageFormat.format("Are you sure you want to move the {0} selected files to a new incident? ", attachments.size()))) return null;
+		if (!MessageDialog.openQuestion(details.getShell(), Messages.AssetDataPanel_NewIncidentTitle, MessageFormat.format(Messages.AssetDataPanel_NewIncidentMsg, attachments.size()))) return null;
 	
 		Waypoint dtWaypoint = new Waypoint();
 		dtWaypoint.setDateTime(aw.getWaypoint().getDateTime());
@@ -401,7 +404,7 @@ public abstract class AssetDataPanel {
 				
 				session.save(cloneWp);
 				if (newDeployments.isEmpty()) {
-					throw new Exception("New waypoint would not have any links to assets. Every asset related waypoint must link to at least one asset.");
+					throw new Exception(Messages.AssetDataPanel_NoAssetsMsg);
 				}
 				for (AssetWaypoint newWp : newDeployments.values()) session.save(newWp);
 				
@@ -414,7 +417,7 @@ public abstract class AssetDataPanel {
 				}
 				aw.getAssetLinks().removeAll(toDelete);
 				if (aw.getAssetLinks().isEmpty()) {
-					throw new Exception("Original waypoint would no longer have any links to assets. Every asset related waypoint must link to at least one asset.");
+					throw new Exception(Messages.AssetDataPanel_NoAssetsMsg2);
 				}
 
 				clonedMapping = new AssetWaypointMapping(cloneWp, newDeployments.values());
@@ -424,7 +427,7 @@ public abstract class AssetDataPanel {
 				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
-				AssetPlugIn.displayLog("Error saving changes.  You should close and reopen the window before continuing: " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetDataPanel_SaveError + ex.getMessage(), ex);
 				session.getTransaction().rollback();
 				return null;
 			}
@@ -453,9 +456,9 @@ public abstract class AssetDataPanel {
 		((GridLayout)part.getLayout()).marginWidth = 0;
 		((GridLayout)part.getLayout()).marginHeight = 0;
 		
-		toolkit.createLabel(part, MessageFormat.format("Displaying {0} to {1} of {2}", (from + 1), to, waypointsToDisplay.size()));
+		toolkit.createLabel(part, MessageFormat.format(Messages.AssetDataPanel_DisplayingLabel, (from + 1), to, waypointsToDisplay.size()));
 		if (!(from <= 0 && to == waypointsToDisplay.size())) {
-			Hyperlink prev = toolkit.createHyperlink(part, "<", SWT.NONE);
+			Hyperlink prev = toolkit.createHyperlink(part, "<", SWT.NONE); //$NON-NLS-1$
 			if(from == 0) prev.setEnabled(false);
 			prev.addHyperlinkListener(new HyperlinkAdapter() {
 				@Override
@@ -465,7 +468,7 @@ public abstract class AssetDataPanel {
 					loadPage.schedule();
 				}
 			});
-			Hyperlink more = toolkit.createHyperlink(part, "...",  SWT.NONE);
+			Hyperlink more = toolkit.createHyperlink(part, "...",  SWT.NONE); //$NON-NLS-1$
 			more.addListener(SWT.MouseDown, e->{
 				Shell shell = new Shell(more.getShell(), SWT.NO_TRIM | SWT.ON_TOP );
 				shell.setLayout(new GridLayout());
@@ -481,7 +484,7 @@ public abstract class AssetDataPanel {
 				((GridLayout)c.getLayout()).verticalSpacing = 1;
 				
 				Label l = new Label(c, SWT.NONE);
-				l.setText("First");
+				l.setText(Messages.AssetDataPanel_FirstLabel);
 				l.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 				l.addListener(SWT.MouseEnter, evt->l.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION)));
 				l.addListener(SWT.MouseExit, evt->l.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND)));
@@ -490,7 +493,7 @@ public abstract class AssetDataPanel {
 				
 				Label l2 = new Label(c, SWT.NONE);
 				l2.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-				l2.setText("Last");
+				l2.setText(Messages.AssetDataPanel_LastLabel);
 				l2.addListener(SWT.MouseEnter, evt->l2.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION)));
 				l2.addListener(SWT.MouseExit, evt->l2.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND)));
 				l2.addListener(SWT.MouseUp, evt->{
@@ -537,7 +540,7 @@ public abstract class AssetDataPanel {
 				
 			});
 			
-			Hyperlink next = toolkit.createHyperlink(part, ">", SWT.NONE);
+			Hyperlink next = toolkit.createHyperlink(part, ">", SWT.NONE); //$NON-NLS-1$
 			if (to == waypointsToDisplay.size()) next.setEnabled(false);
 			next.addHyperlinkListener(new HyperlinkAdapter() {
 				@Override
@@ -558,7 +561,7 @@ public abstract class AssetDataPanel {
 				//enable/disable editing button based on user permission
 				ToolItem itemEdit = new ToolItem(tb, SWT.CHECK);
 				itemEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-				itemEdit.setToolTipText("enable edit mode");
+				itemEdit.setToolTipText(Messages.AssetDataPanel_editmodetooltip);
 				itemEdit.setSelection(isEdit());
 				itemEdit.addListener(SWT.Selection, e->setEditable(itemEdit.getSelection()));
 				
@@ -566,13 +569,13 @@ public abstract class AssetDataPanel {
 			if (includeRefresh) {	
 				ToolItem itemRefresh = new ToolItem(tb, SWT.PUSH);
 				itemRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
-				itemRefresh.setToolTipText("reload table");
+				itemRefresh.setToolTipText(Messages.AssetDataPanel_reloadtooltip);
 				itemRefresh.addListener(SWT.Selection, e->refresh());		
 			}
 			if (includeSettings) {
 				ToolItem itemSettings = new ToolItem(tb, SWT.PUSH);
 				itemSettings.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_SETTINGS));
-				itemSettings.setToolTipText("Configure data table settings");
+				itemSettings.setToolTipText(Messages.AssetDataPanel_configuretooltip);
 				itemSettings.addListener(SWT.Selection, e->{
 					SettingsShell settingDialog = new SettingsShell(tb.getDisplay());
 					settingDialog.show(tb);
@@ -601,7 +604,7 @@ public abstract class AssetDataPanel {
 		}
 	}
 	
-	private Job loadPage = new Job("load waypoint page") {
+	private Job loadPage = new Job(Messages.AssetDataPanel_loadwpJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<AssetWaypointMapping> waypoints = new ArrayList<>();
@@ -612,8 +615,8 @@ public abstract class AssetDataPanel {
 					Waypoint wp = session.get(Waypoint.class, waypointsToDisplay.get(i));
 					if (wp == null) continue;
 					
-					List<AssetWaypoint> aws = session.createQuery("FROM AssetWaypoint WHERE id.waypoint.uuid = :uuid", AssetWaypoint.class)
-							.setParameter("uuid", waypointsToDisplay.get(i))
+					List<AssetWaypoint> aws = session.createQuery("FROM AssetWaypoint WHERE id.waypoint.uuid = :uuid", AssetWaypoint.class) //$NON-NLS-1$
+							.setParameter("uuid", waypointsToDisplay.get(i)) //$NON-NLS-1$
 							.list();
 							
 					
@@ -695,7 +698,7 @@ public abstract class AssetDataPanel {
 		int pageSize = displaySettings.getPageSize().getPageSize();
 		startIndex = index / pageSize;
 		
-		Job j = new Job("background zoom") {
+		Job j = new Job("background zoom") { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
@@ -730,14 +733,14 @@ public abstract class AssetDataPanel {
 				}
 				session.getTransaction().commit();
 			}catch(Exception ex){
-				AssetPlugIn.displayLog("Error saving changes.  You should reload the page before continuing: " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetDataPanel_saveerror + ex.getMessage(), ex);
 				session.getTransaction().rollback();
 				return;
 			}
 		}
 		for (RowItem i : rows) {
 			if (tovalidate.contains(i.waypoint)) {
-				if (hideOnValidate) i.hideAndDisable("**VALIDATED**");
+				if (hideOnValidate) i.hideAndDisable(Messages.AssetDataPanel_ValidatedLabel);
 			}
 		}
 		resizeScroll();
@@ -756,7 +759,7 @@ public abstract class AssetDataPanel {
 					s.saveOrUpdate(toedit.getWaypoint());
 					s.getTransaction().commit();
 				}catch(Exception ex) {
-					AssetPlugIn.displayLog("Unable to save changes to waypoint.  Page should be reloaded before continuing. " + ex.getMessage(), ex);
+					AssetPlugIn.displayLog(Messages.AssetDataPanel_WpSaveError + ex.getMessage(), ex);
 					s.getTransaction().rollback();
 					return;
 				}
@@ -776,9 +779,9 @@ public abstract class AssetDataPanel {
 		if (!isEdit) return;
 		if (todelete.isEmpty()) return;
 		if (todelete.size() == 1) {
-			if (!MessageDialog.openQuestion(details.getShell(), "Delete", "Are you sure you want to delete this waypoint?  This action cannot be undone.")) return;
+			if (!MessageDialog.openQuestion(details.getShell(), Messages.AssetDataPanel_DeleteTitle, Messages.AssetDataPanel_DeleteMsg1)) return;
 		}else {
-			if (!MessageDialog.openQuestion(details.getShell(), "Delete", MessageFormat.format("Are you sure you want to delete {0} selected waypoints?  This action cannot be undone.", todelete.size()))) return;
+			if (!MessageDialog.openQuestion(details.getShell(), Messages.AssetDataPanel_28, MessageFormat.format(Messages.AssetDataPanel_DeleteMsg2, todelete.size()))) return;
 		}
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
@@ -813,7 +816,7 @@ public abstract class AssetDataPanel {
 				}
 				session.getTransaction().commit();
 			}catch(Exception ex){
-				AssetPlugIn.displayLog("Error occurred saving changes. You should reload the page before continuing: " +ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetDataPanel_WpDeleteError2 +ex.getMessage(), ex);
 				session.getTransaction().rollback();
 				return;
 			}
@@ -821,7 +824,7 @@ public abstract class AssetDataPanel {
 		
 		for (RowItem i : rows) {
 			if (todelete.contains(i.waypoint)) {
-				i.hideAndDisable("**DELETED**");
+				i.hideAndDisable(Messages.AssetDataPanel_DeletedLabel);
 			}
 		}
 		resizeScroll();
@@ -863,9 +866,9 @@ public abstract class AssetDataPanel {
 			if (check) {
 				//get all deployments for the asset and make sure they don't override
 				//if we cannot extend the asset deployment we need to throw an exception
-				List<AssetDeployment> allDeployments = QueryFactory.buildQuery(session, AssetDeployment.class, new Object[] {"asset", fromaw.getAssetDeployment().getAsset()}).list();
+				List<AssetDeployment> allDeployments = QueryFactory.buildQuery(session, AssetDeployment.class, new Object[] {"asset", fromaw.getAssetDeployment().getAsset()}).list(); //$NON-NLS-1$
 				if (AssetManager.INSTANCE.overlaps(fromaw.getAssetDeployment(), allDeployments)) {
-					throw new Exception(MessageFormat.format("Incidents cannot be merged.  Merging would create duplicate asset deployments for asset {0}", fromaw.getAssetDeployment().getAsset().getId()));
+					throw new Exception(MessageFormat.format(Messages.AssetDataPanel_MergeError, fromaw.getAssetDeployment().getAsset().getId()));
 				}
 			}
 		}
@@ -882,19 +885,19 @@ public abstract class AssetDataPanel {
 			}	
 		}
 		if (stns.size() != 1) {
-			MessageDialog.openError(details.getShell(), "Merge", "The selected incidents are associated with different stations and cannot be merged.");
+			MessageDialog.openError(details.getShell(), Messages.AssetDataPanel_MergeTitle, Messages.AssetDataPanel_MergeMsg);
 			return false;
 		}
 		
 			
-		if (!MessageDialog.openQuestion(details.getShell(), "Merge", MessageFormat.format("Are you sure you want to merge the {0} selected waypoints into a single incident?  This action cannot be undone.", tomerge.size()))) return false;
+		if (!MessageDialog.openQuestion(details.getShell(), Messages.AssetDataPanel_MergeTitle, MessageFormat.format(Messages.AssetDataPanel_MergeConfigrm, tomerge.size()))) return false;
 		
 		Waypoint dtWaypoint = new Waypoint();
 		dtWaypoint.setDateTime(tomerge.get(0).getWaypoint().getDateTime());
 		StringBuilder sb= new StringBuilder();
 		tomerge.forEach(e->{
 			if (e.getWaypoint().getComment() !=  null) {
-				if (sb.length() > 0) sb.append("\n");
+				if (sb.length() > 0) sb.append("\n"); //$NON-NLS-1$
 				sb.append(e.getWaypoint().getComment());
 			}
 		});
@@ -992,7 +995,7 @@ public abstract class AssetDataPanel {
 				session.getTransaction().commit();
 			}catch(Exception ex){
 				session.getTransaction().rollback();
-				AssetPlugIn.displayLog("Error occurred saving changes. You should reload the page before continuing: " +ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetDataPanel_MergeSaveError +ex.getMessage(), ex);
 			}
 		}
 		return true;
@@ -1043,7 +1046,7 @@ public abstract class AssetDataPanel {
 	static void colorControl(Control control, Color color) {
 		forEachChild(control, e->{
 			if (e.isDisposed()) return false;
-			Boolean c = (Boolean) e.getData("COLOR");
+			Boolean c = (Boolean) e.getData(COLOR);
 			if (c == null || c) {
 				e.setBackground(color);
 				e.redraw();
@@ -1072,7 +1075,7 @@ public abstract class AssetDataPanel {
 	private boolean removeAttachments(AssetWaypointMapping waypoint, List<ISmartAttachment> toRemove) {
 		if (!isEdit) return false;
 		if (toRemove.isEmpty()) return false;
-		if (!MessageDialog.openQuestion(details.getShell(), "Remove Attachments", MessageFormat.format("Are you sure you want to remove the {0} selected attachments?  This action cannot be undone.", toRemove.size()))) return false;
+		if (!MessageDialog.openQuestion(details.getShell(), Messages.AssetDataPanel_RemoveAttachmentsTitle, MessageFormat.format(Messages.AssetDataPanel_RemoveAttachmentsMessage, toRemove.size()))) return false;
 		
 		boolean fireEvents = false;
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
@@ -1120,12 +1123,12 @@ public abstract class AssetDataPanel {
 					}
 				}
 				waypoint.getAssetLinks().removeAll(assetLinksToRemove);
-				if (waypoint.getAssetLinks().isEmpty()) throw new IllegalStateException("Removing the selected files will remove all links between waypoint and asset. This is not a valid.  You must have at least one file associated with the waypoint.");
+				if (waypoint.getAssetLinks().isEmpty()) throw new IllegalStateException(Messages.AssetDataPanel_RemoveAttachmentsError1);
 				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.displayLog("Error saving changes.  You should reload the page before continuing. " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetDataPanel_RemoveAttachmentsError2 + ex.getMessage(), ex);
 			}
 			if (fireEvents) fireEvent();
 		}
@@ -1158,7 +1161,7 @@ public abstract class AssetDataPanel {
 			// find deployment at location and create new asset link
 			Set<AssetStation> options = waypoint.getAssetLinks().stream().map(aw->aw.getAssetDeployment().getStationLocation().getStation()).collect(Collectors.toSet());
 			if (options.size() != 1) {
-				throw new IllegalStateException("This incident is associated with no or multiple stations. This is not a valid state");
+				throw new IllegalStateException(Messages.AssetDataPanel_TooManyStations);
 			}
 			AssetStation station = options.iterator().next();
 			try(Session session = HibernateManager.openSession()){
@@ -1178,7 +1181,7 @@ public abstract class AssetDataPanel {
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try {
-					AssetDeployment d = FileProcessor.findAssetDeployment(waypoint.getWaypoint(), asset, location, session);
+					AssetDeployment d = FileProcessor.findAssetDeployment(waypoint.getWaypoint(), asset, location, session, Locale.getDefault());
 					assetWaypointLink = new AssetWaypoint();
 					assetWaypointLink.setAssetDeployment(d);
 					assetWaypointLink.setWaypoint(waypoint.getWaypoint());
@@ -1188,7 +1191,7 @@ public abstract class AssetDataPanel {
 				}catch (Exception ex) {
 					assetWaypointLink = null;
 					session.getTransaction().rollback();
-					AssetPlugIn.displayLog("Error saving changes.  You should reload the page before continuing. " + ex.getMessage(), ex);
+					AssetPlugIn.displayLog(Messages.AssetDataPanel_ImportAttachmentSaveError + ex.getMessage(), ex);
 				}
 			}
 		}
@@ -1235,7 +1238,7 @@ public abstract class AssetDataPanel {
 				session.getTransaction().commit();
 			} catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.displayLog("Error saving changes.  You should reload the page before continuing. " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetDataPanel_ImportAttachmentSaveError + ex.getMessage(), ex);
 			}
 		}
 		
@@ -1268,7 +1271,7 @@ public abstract class AssetDataPanel {
 		}
 		
 		public void refreshComment() {
-			waypointComment.setText(MessageFormat.format("Waypoint Comment: {0}", waypoint.getWaypoint().getComment() == null ? "" : waypoint.getWaypoint().getComment()));
+			waypointComment.setText(MessageFormat.format(Messages.AssetDataPanel_WpCommentLabel, waypoint.getWaypoint().getComment() == null ? "" : waypoint.getWaypoint().getComment())); //$NON-NLS-1$
 			waypointComment.setVisible(waypoint.getWaypoint().getComment() != null);
 		}
 		
@@ -1283,9 +1286,9 @@ public abstract class AssetDataPanel {
 			header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
 			header.setBackground(validatedColor);
 			
-			headerLabel = toolkit.createLabel(header, "");
+			headerLabel = toolkit.createLabel(header, ""); //$NON-NLS-1$
 			populateHeaderLabel();
-			headerLabel.setText(msg + " " + headerLabel.getText());
+			headerLabel.setText(msg + " " + headerLabel.getText()); //$NON-NLS-1$
 			headerLabel.setBackground(header.getBackground());
 			headerLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			
@@ -1316,24 +1319,24 @@ public abstract class AssetDataPanel {
 			
 			Optional<AssetStation> station = waypoint.getAssetLinks().stream().map(e->e.getAssetDeployment().getStationLocation().getStation()).findFirst();
 			if (station.isPresent()) {
-				sb.append("      ");
+				sb.append("      "); //$NON-NLS-1$
 				sb.append(station.get().getId());
 			}
 			
 			Set<AssetStationLocation> locations= waypoint.getAssetLinks().stream().map(e->e.getAssetDeployment().getStationLocation()).collect(Collectors.toSet());
-			sb.append("      ");
+			sb.append("      "); //$NON-NLS-1$
 			for (AssetStationLocation l : locations) {
 				sb.append(l.getId());
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
 			
 			Set<Asset> assets = waypoint.getAssetLinks().stream().map(e->e.getAssetDeployment().getAsset()).collect(Collectors.toSet());
-			sb.append("      ");
+			sb.append("      "); //$NON-NLS-1$
 			for (Asset a : assets) {
 				sb.append(a.getId());
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
@@ -1350,7 +1353,7 @@ public abstract class AssetDataPanel {
 			bgColor = item.getBackground();
 			
 			if (!waypoint.hasDirty() && hideOnValidate) {
-				hideAndDisable("**VALIDATED**");
+				hideAndDisable(Messages.AssetDataPanel_ValidatedLabel);
 				return item;
 			}
 			header = toolkit.createComposite(item, SWT.NONE);
@@ -1358,7 +1361,7 @@ public abstract class AssetDataPanel {
 			header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
 			header.setBackground(headerColor);
 			
-			headerLabel = toolkit.createLabel(header, "");
+			headerLabel = toolkit.createLabel(header, ""); //$NON-NLS-1$
 			populateHeaderLabel();
 			
 			headerLabel.setBackground(header.getBackground());
@@ -1370,14 +1373,14 @@ public abstract class AssetDataPanel {
 				
 				ToolItem itemEdit = new ToolItem(tb, SWT.PUSH);
 				itemEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-				itemEdit.setToolTipText("modify waypoint date/time or id");
+				itemEdit.setToolTipText(Messages.AssetDataPanel_editwptooltip);
 				itemEdit.addListener(SWT.Selection, e->{
 					editWaypoint(waypoint);
 				});
 				
 				ToolItem itemDelete = new ToolItem(tb, SWT.PUSH);
 				itemDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-				itemDelete.setToolTipText("delete incident");
+				itemDelete.setToolTipText(Messages.AssetDataPanel_deletewptooltip);
 				itemDelete.addListener(SWT.Selection, e->{
 					deleteWaypoints(Collections.singleton(waypoint));
 					
@@ -1386,7 +1389,7 @@ public abstract class AssetDataPanel {
 				if (waypoint.hasDirty() && canValidate) {
 					ToolItem itemCh = new ToolItem(tb, SWT.PUSH);
 					itemCh.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_VALIDATE));
-					itemCh.setToolTipText("mark as verified");
+					itemCh.setToolTipText(Messages.AssetDataPanel_verfitywptooltip);
 					itemCh.addListener(SWT.Selection, e->{
 						markValidated(Collections.singleton(waypoint));
 					});
@@ -1482,7 +1485,7 @@ public abstract class AssetDataPanel {
 			((GridLayout)detailsPart.getLayout()).verticalSpacing = 1;
 			((GridLayout)detailsPart.getLayout()).marginWidth = 1;
 			((GridLayout)detailsPart.getLayout()).marginHeight = 1;
-			detailsPart.setData("COLOR", false);
+			detailsPart.setData(COLOR, false);
 			
 			Composite attributes = toolkit.createComposite(detailsPart);
 			attributes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
@@ -1493,7 +1496,7 @@ public abstract class AssetDataPanel {
 
 			new WaypointAttributeTable(attributes, toolkit, waypoint.getWaypoint(), AssetDataPanel.this);
 			
-			waypointComment = toolkit.createLabel(detailsPart, "", SWT.WRAP);
+			waypointComment = toolkit.createLabel(detailsPart, "", SWT.WRAP); //$NON-NLS-1$
 			refreshComment();
 			waypointComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)waypointComment.getLayoutData()).widthHint = detailsPart.getBounds().width;
@@ -1586,7 +1589,7 @@ public abstract class AssetDataPanel {
 					
 					if (isEdit) {
 						createIncident = new MenuItem(mnu, SWT.PUSH);
-						createIncident.setText("Extract as New Incident...");
+						createIncident.setText(Messages.AssetDataPanel_ExtractNewIncidentMenu);
 						createIncident.addListener(SWT.Selection, e->{
 							if (!isEdit) return;
 							IStructuredSelection items = tt.getSelection();
@@ -1605,7 +1608,7 @@ public abstract class AssetDataPanel {
 						
 						removeImg = new MenuItem(mnu, SWT.PUSH);
 						removeImg.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-						removeImg.setText("Remove Attachment...");
+						removeImg.setText(Messages.AssetDataPanel_RemoveAttachmentMenu);
 						removeImg.addListener(SWT.Selection, e->{
 							if (!isEdit) return;
 							IStructuredSelection items = tt.getSelection();
@@ -1625,7 +1628,7 @@ public abstract class AssetDataPanel {
 						});					
 						MenuItem addAttachment = new MenuItem(mnu, SWT.PUSH);
 						addAttachment.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-						addAttachment.setText("Import Attachment...");
+						addAttachment.setText(Messages.AssetDataPanel_ImportAttachmentMenu);
 						addAttachment.addListener(SWT.Selection, e->{
 							List<ISmartAttachment> addedItems = importAttachment(RowItem.this.waypoint);
 							if (addedItems != null) {
@@ -1640,7 +1643,7 @@ public abstract class AssetDataPanel {
 					}
 					
 					MenuItem properties = new MenuItem(mnu, SWT.PUSH);
-					properties.setText("Properties");
+					properties.setText(Messages.AssetDataPanel_PropertiesMenu);
 					properties.addListener(SWT.Selection, e->{
 						Object x = tt.getSelection().getFirstElement();
 						if (x instanceof WaypointAttachment) {
@@ -1650,9 +1653,9 @@ public abstract class AssetDataPanel {
 										for (AssetWaypointAttachment attach: aw.getAttachments()) {
 											if (attach.getWaypointAttachment().equals(x)) {
 												List<AttachmentPropertiesDialog.Entry> addedItems = new ArrayList<>();
-												addedItems.add(new AttachmentPropertiesDialog.Entry("Asset", aw.getAssetDeployment().getAsset().getId()));
-												addedItems.add(new AttachmentPropertiesDialog.Entry("Station", aw.getAssetDeployment().getStationLocation().getStation().getId()));
-												addedItems.add(new AttachmentPropertiesDialog.Entry("Station Location", aw.getAssetDeployment().getStationLocation().getId()));
+												addedItems.add(new AttachmentPropertiesDialog.Entry(Messages.AssetDataPanel_AssetsOption, aw.getAssetDeployment().getAsset().getId()));
+												addedItems.add(new AttachmentPropertiesDialog.Entry(Messages.AssetDataPanel_StationsOption, aw.getAssetDeployment().getStationLocation().getStation().getId()));
+												addedItems.add(new AttachmentPropertiesDialog.Entry(Messages.AssetDataPanel_LocationsOption, aw.getAssetDeployment().getStationLocation().getId()));
 												return addedItems;
 											}
 										}

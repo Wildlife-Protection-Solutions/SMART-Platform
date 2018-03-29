@@ -69,6 +69,7 @@ import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.engine.StatisticsEngine;
 import org.wcs.smart.asset.engine.StatisticsEngine.Statistic;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AbstractAssetAttributeValue;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
@@ -92,7 +93,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class AssetCurrentPage {
 
-	private static final String HL_UUID_KEY = "uuid";
+	private static final String HL_UUID_KEY = "uuid"; //$NON-NLS-1$
 
 	private AssetEditor parentEditor;
 	
@@ -172,7 +173,7 @@ public class AssetCurrentPage {
 		Composite summaryPart = toolkit.createComposite(topPart, SWT.BORDER);
 		summaryPart.setLayout(new GridLayout(2, false));
 
-		Label l = toolkit.createLabel(summaryPart, "Summary");
+		Label l = toolkit.createLabel(summaryPart, Messages.AssetCurrentPage_SummaryLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		FontData fd = l.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -205,16 +206,16 @@ public class AssetCurrentPage {
 					StringBuilder sb = new StringBuilder();
 					sb.append(c.getName());
 					if (c.getParent() != null) {
-						sb.append(" (");
+						sb.append(" ("); //$NON-NLS-1$
 						sb.append(c.getParent().getFullCategoryName());
-						sb.append(")");
+						sb.append(")"); //$NON-NLS-1$
 					}
 					return sb.toString();
 				}
 				return super.getText(element);
 			}
 		});
-		categoryColumn.getColumn().setText("Category");
+		categoryColumn.getColumn().setText(Messages.AssetCurrentPage_CategoryColumn);
 		categoryColumn.getColumn().setResizable(true);
 		categoryColumn.getColumn().setWidth(200);
 		
@@ -228,15 +229,15 @@ public class AssetCurrentPage {
 				return super.getText(element);
 			}
 		});
-		cntColumn.getColumn().setText("Number of Incidents");
+		cntColumn.getColumn().setText(Messages.AssetCurrentPage_IncidentCntcolumn);
 		cntColumn.getColumn().setResizable(true);
 		cntColumn.getColumn().setWidth(200);
 		tblCnts.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		
 		mapPart.setLayout(new GridLayout(2, false));
 		
-		toolkit.createLabel(mapPart, "Station:");
-		lblStatStation = toolkit.createHyperlink(mapPart, "", SWT.NONE);
+		toolkit.createLabel(mapPart, Messages.AssetCurrentPage_StationLabel);
+		lblStatStation = toolkit.createHyperlink(mapPart, Messages.AssetCurrentPage_7, SWT.NONE);
 		lblStatStation.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -252,8 +253,8 @@ public class AssetCurrentPage {
 			}
 		});
 		
-		toolkit.createLabel(mapPart, "Location:");
-		lblStatLocation = toolkit.createHyperlink(mapPart, "", SWT.NONE);
+		toolkit.createLabel(mapPart, "Location:"); //$NON-NLS-1$
+		lblStatLocation = toolkit.createHyperlink(mapPart, "", SWT.NONE); //$NON-NLS-1$
 		lblStatLocation.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -323,11 +324,11 @@ public class AssetCurrentPage {
 	private void createNotActivePanel() {
 		if (mainControl == null) return;
 		for (Control c : mainControl.getChildren()) c.dispose();
-		toolkit.createLabel(mainControl, "This asset is not currently active");
+		toolkit.createLabel(mainControl, Messages.AssetCurrentPage_AssetNotActive);
 		mainControl.layout(true);
 	}
 
-	private Job computeSummaryStatisticsJob = new Job("compute statistics for current deployment") {
+	private Job computeSummaryStatisticsJob = new Job(Messages.AssetCurrentPage_statusJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -378,7 +379,7 @@ public class AssetCurrentPage {
 			Display.getDefault().syncExec(()->{
 				
 				Object v = stats.get(StatisticsEngine.Statistic.NUMBER_INCIDENTS);
-				String numIncidents = "";
+				String numIncidents = ""; //$NON-NLS-1$
 				if (v != null) {
 					if (v instanceof Long) {
 						numIncidents = String.valueOf((Long)v);
@@ -388,7 +389,7 @@ public class AssetCurrentPage {
 				}
 				
 				v = stats.get(StatisticsEngine.Statistic.NUMBER_UNTAGGED);
-				String untagged = "";
+				String untagged = ""; //$NON-NLS-1$
 				if (v != null) {
 					if (v instanceof Long) {
 						untagged = String.valueOf((Long)v);
@@ -398,7 +399,7 @@ public class AssetCurrentPage {
 				}
 				
 				v = stats.get(StatisticsEngine.Statistic.NUMBER_NOT_VLIDATED);
-				String notvalidated = "";
+				String notvalidated = ""; //$NON-NLS-1$
 				if (v != null) {
 					if (v instanceof Long) {
 						notvalidated = String.valueOf((Long)v);
@@ -423,32 +424,32 @@ public class AssetCurrentPage {
 				lblStatLocation.getParent().layout(true);
 				lblStatLocation.setData(HL_UUID_KEY, thisdeploy.getStationLocation().getUuid());
 				
-				Label ll = toolkit.createLabel(statDetailsSection, "Start Date:");
+				Label ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_StartDateLabel);
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 				toolkit.createLabel(statDetailsSection, DateFormat.getDateTimeInstance().format(thisdeploy.getStartDate()));
 				
-				ll = toolkit.createLabel(statDetailsSection, "Time Deployed:");
+				ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_TimeDeployedLabel);
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 				toolkit.createLabel(statDetailsSection, (AssetUtils.formatTime( ((new Date()).getTime() - thisdeploy.getStartDate().getTime()) / 1000.0 )));
 				
-				ll = toolkit.createLabel(statDetailsSection, "", SWT.SEPARATOR | SWT.HORIZONTAL);
+				ll = toolkit.createLabel(statDetailsSection, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 				ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 				
-				ll = toolkit.createLabel(statDetailsSection, "Incidents:");
+				ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_IncidentsLabel);
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 				toolkit.createLabel(statDetailsSection, numIncidents);
 				
-				ll = toolkit.createLabel(statDetailsSection, "Untagged Incidents:");
+				ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_UntaggedLabel);
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-				ll.setToolTipText("Number of incidents with no observations");
+				ll.setToolTipText(Messages.AssetCurrentPage_unTaggedTooltip);
 				toolkit.createLabel(statDetailsSection, untagged);
 				
-				ll = toolkit.createLabel(statDetailsSection, "Not Validated:");
+				ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_NotValidatedLabel);
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-				ll.setToolTipText("Number of incidents that have not been validated");
+				ll.setToolTipText(Messages.AssetCurrentPage_NotValidatedTooltip);
 				toolkit.createLabel(statDetailsSection, notvalidated);
 				
-				Label sl = toolkit.createLabel(statDetailsSection, "", SWT.SEPARATOR | SWT.HORIZONTAL);
+				Label sl = toolkit.createLabel(statDetailsSection, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 				sl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 				
 				Composite attributesComposite = toolkit.createComposite(bottomPart, SWT.NONE);
@@ -457,7 +458,7 @@ public class AssetCurrentPage {
 				((GridLayout)attributesComposite.getLayout()).marginWidth = 0;
 				((GridLayout)attributesComposite.getLayout()).marginHeight = 0;
 				
-				Label l = toolkit.createLabel(attributesComposite, "Deployment Attributes");
+				Label l = toolkit.createLabel(attributesComposite, Messages.AssetCurrentPage_DeploymentAttributesLabel);
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				FontData fd = l.getFont().getFontData()[0];
 				fd.setStyle(SWT.BOLD);
@@ -465,11 +466,11 @@ public class AssetCurrentPage {
 				l.addListener(SWT.Dispose, e->boldFont.dispose());
 				l.setFont(boldFont);
 				
-				l = toolkit.createLabel(attributesComposite, "Location Attributes");
+				l = toolkit.createLabel(attributesComposite, Messages.AssetCurrentPage_LocationAttributesLabel);
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				l.setFont(boldFont);
 				
-				l = toolkit.createLabel(attributesComposite, "Station Attributes");
+				l = toolkit.createLabel(attributesComposite, Messages.AssetCurrentPage_StationAttributesLabel);
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				l.setFont(boldFont);
 
@@ -496,7 +497,7 @@ public class AssetCurrentPage {
 					scrollDeployment.setContent(deployAtt);
 					deployAtt.setLayout(new GridLayout(2, false));
 					for (AbstractAssetAttributeValue value : attributes) {
-						ll = toolkit.createLabel(deployAtt, value.getAttribute().getName() + ":");
+						ll = toolkit.createLabel(deployAtt, value.getAttribute().getName() + ":"); //$NON-NLS-1$
 						ll.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 						toolkit.createLabel(deployAtt, value.getAttributeValueAsString(Locale.getDefault(), parentEditor.currentCrs));
 					}

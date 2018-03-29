@@ -58,6 +58,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetSecurityManager;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetStationLocationHistoryRecord;
 import org.wcs.smart.asset.ui.CommentDialog;
@@ -104,7 +105,7 @@ public class StationLocationEventPage {
 		tblEvents.getTable().setLinesVisible(true);
 		
 		TableViewerColumn col = new TableViewerColumn(tblEvents, SWT.NONE);
-		col.getColumn().setText("Date");
+		col.getColumn().setText(Messages.StationLocationEventPage_DateColumnName);
 		col.getColumn().setWidth(150);
 		col.getColumn().setResizable(true);
 		col.setLabelProvider(new ColumnLabelProvider() {
@@ -125,7 +126,7 @@ public class StationLocationEventPage {
 		});
 		
 		TableViewerColumn col2 = new TableViewerColumn(tblEvents, SWT.NONE);
-		col2.getColumn().setText("Comment");
+		col2.getColumn().setText(Messages.StationLocationEventPage_CommentColumnName);
 		col2.getColumn().setWidth(150);
 		col2.getColumn().setResizable(true);
 		col2.setLabelProvider(new ColumnLabelProvider() {
@@ -167,19 +168,19 @@ public class StationLocationEventPage {
 		if (historyToolbar != null) {
 			ToolItem deleteItem = new ToolItem(historyToolbar,SWT.PUSH);
 			deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-			deleteItem.setToolTipText("delete selected history records");
+			deleteItem.setToolTipText(Messages.StationLocationEventPage_deletetooltip);
 			deleteItem.addListener(SWT.Selection, e->deleteHistoryRecords());
 			deleteItem.setEnabled(false);
 			
 			ToolItem editItem = new ToolItem(historyToolbar,SWT.PUSH);
 			editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-			editItem.setToolTipText("edit selected history record");
+			editItem.setToolTipText(Messages.StationLocationEventPage_edittooltip);
 			editItem.addListener(SWT.Selection, e->editHistoryRecord());
 			editItem.setEnabled(false);
 	
 			ToolItem addItem = new ToolItem(historyToolbar,SWT.PUSH);
 			addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-			addItem.setToolTipText("create a new history record");
+			addItem.setToolTipText(Messages.StationLocationEventPage_createtooltip);
 			addItem.addListener(SWT.Selection, e->addHistoryRecord());
 			
 			tblEvents.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -194,17 +195,17 @@ public class StationLocationEventPage {
 			Menu mnu = new Menu(tblEvents.getControl());
 			
 			MenuItem mnuAdd = new MenuItem(mnu, SWT.PUSH);
-			mnuAdd.setText("New ...");
+			mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 			mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			mnuAdd.addListener(SWT.Selection, e->addHistoryRecord());
 			
 			MenuItem mnuEdit = new MenuItem(mnu, SWT.PUSH);
-			mnuEdit.setText("Edit ...");
+			mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 			mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			mnuEdit.addListener(SWT.Selection, e->editHistoryRecord());
 			
 			MenuItem mnuDelete = new MenuItem(mnu, SWT.PUSH);
-			mnuDelete.setText("Delete ...");
+			mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 			mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			mnuDelete.addListener(SWT.Selection, e->deleteHistoryRecords());
 			
@@ -225,8 +226,8 @@ public class StationLocationEventPage {
 		
 	
 	private void addHistoryRecord() {
-		DateCommentDialog dialog = new DateCommentDialog(parentEditor.getSite().getShell(), "New Station Location History Record",
-				"Enter the details for the new station location history record");
+		DateCommentDialog dialog = new DateCommentDialog(parentEditor.getSite().getShell(), Messages.StationLocationEventPage_NewHistoryTitle,
+				Messages.StationLocationEventPage_NewHistoryMsg);
 		if (dialog.open() != CommentDialog.OK) return;
 		
 		AssetStationLocationHistoryRecord record = new AssetStationLocationHistoryRecord();
@@ -241,7 +242,7 @@ public class StationLocationEventPage {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.log("Unable to save history record changes.  Close page and retry. " + ex.getMessage(), ex);
+				AssetPlugIn.log(Messages.StationLocationEventPage_NewHistorySaveError + ex.getMessage(), ex);
 				return;
 			}
 		}
@@ -254,8 +255,8 @@ public class StationLocationEventPage {
 		if (!(x instanceof AssetStationLocationHistoryRecord)) return;
 		AssetStationLocationHistoryRecord toEdit = (AssetStationLocationHistoryRecord)x;
 		
-		DateCommentDialog dialog = new DateCommentDialog(parentEditor.getSite().getShell(), "New Station Location History Record",
-				"Enter the details for the new station location history record");
+		DateCommentDialog dialog = new DateCommentDialog(parentEditor.getSite().getShell(), Messages.StationLocationEventPage_NewLocationHistoryTitle,
+				Messages.StationLocationEventPage_NewLocationHistoryMsg);
 		dialog.setValues(toEdit.getDate(), toEdit.getComment());
 		
 		if (dialog.open() != CommentDialog.OK) return;
@@ -269,7 +270,7 @@ public class StationLocationEventPage {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.log("Unable to save history record changes.  Close page and retry. " + ex.getMessage(), ex);
+				AssetPlugIn.log(Messages.StationLocationEventPage_NewLocationHistoryError + ex.getMessage(), ex);
 				return;
 			}
 		}
@@ -287,8 +288,8 @@ public class StationLocationEventPage {
 		}
 		if (toDelete.isEmpty()) return;
 		
-		if (!MessageDialog.openQuestion(parentEditor.getSite().getShell(), "Delete Records", 
-				MessageFormat.format("Are you sure you want to delete the {0} selected station location history records?", toDelete.size()))){
+		if (!MessageDialog.openQuestion(parentEditor.getSite().getShell(), Messages.StationLocationEventPage_DeleteTitle, 
+				MessageFormat.format(Messages.StationLocationEventPage_DeleteMsg, toDelete.size()))){
 			return;
 		}
 		try (Session session = HibernateManager.openSession()){
@@ -300,7 +301,7 @@ public class StationLocationEventPage {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.log("Unable to save history record changes.  Close page and retry. " + ex.getMessage(), ex);
+				AssetPlugIn.log(Messages.StationLocationEventPage_DeleteError + ex.getMessage(), ex);
 				return;
 			}
 		}
@@ -310,7 +311,7 @@ public class StationLocationEventPage {
 	
 	public void initialize(AssetStationLocation location) {
 		activeHistoryRecords = new ArrayList<>();
-		Job j = new Job("load history records") {
+		Job j = new Job(Messages.StationLocationEventPage_loadJobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

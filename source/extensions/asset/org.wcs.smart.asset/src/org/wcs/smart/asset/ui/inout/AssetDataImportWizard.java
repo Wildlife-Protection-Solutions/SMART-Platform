@@ -26,6 +26,7 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.wizard.Wizard;
+import org.wcs.smart.asset.internal.Messages;
 
 /**
  * Wizard for importing asset data from various file formats.
@@ -40,10 +41,10 @@ public class AssetDataImportWizard extends Wizard{
 	
 	public enum Type{
 		
-		XML("Model Elements From XML File "),
-		ASSET_CSV("Assets From CSV File"),
-		STATION_CSV("Stations From CSV File"),
-		LOCATION_CSV("Locations From CSV File");
+		XML(Messages.AssetDataImportWizard_XmlOption),
+		ASSET_CSV(Messages.AssetDataImportWizard_AssetsOp),
+		STATION_CSV(Messages.AssetDataImportWizard_StationsOp),
+		LOCATION_CSV(Messages.AssetDataImportWizard_LocationsOp);
 		
 		String guiName;
 		
@@ -61,7 +62,7 @@ public class AssetDataImportWizard extends Wizard{
 	
 	public AssetDataImportWizard() {
 		super();
-		setWindowTitle("Import Asset Data");
+		setWindowTitle(Messages.AssetDataImportWizard_Title);
 		
 	}
 	

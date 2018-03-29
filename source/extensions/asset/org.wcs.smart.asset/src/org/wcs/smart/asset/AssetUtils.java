@@ -29,6 +29,7 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -53,8 +54,8 @@ public class AssetUtils {
 		double remainder = timeInSeconds - days * 86_400.0;
 		double hours = remainder / 3_600.0;
 		
-		if (timeInSeconds == 0) return "0 days";
-		return MessageFormat.format("{0} days {1,number,#.##} hours", days, hours);
+		if (timeInSeconds == 0) return Messages.AssetUtils_noDays;
+		return MessageFormat.format(Messages.AssetUtils_DayHourLabel, days, hours);
 	}
 	
 	
@@ -71,7 +72,7 @@ public class AssetUtils {
 			@Override
 			protected void okPressed() {
 				if (!HibernateManager.validatePassword(getText().getText(), SmartDB.getCurrentEmployee())){
-					setErrorMessage("Invalid Password");
+					setErrorMessage(Messages.AssetUtils_InvalidPasswordError);
 				}else{
 					setReturnCode(OK);
 					close();

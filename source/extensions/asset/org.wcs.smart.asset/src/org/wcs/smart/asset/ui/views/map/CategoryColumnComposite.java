@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.map.engine.AttributeExpression;
 import org.wcs.smart.asset.map.engine.parser.Parser;
 import org.wcs.smart.ca.NamedItem;
@@ -107,7 +108,7 @@ public class CategoryColumnComposite extends Composite {
 
 	public boolean validate() {
 		if (field.getValue() == null) {
-			dialog.setErrorMessage("A category must be selected");
+			dialog.setErrorMessage(Messages.CategoryColumnComposite_categoryRequired);
 			return false;
 		}
 		
@@ -147,7 +148,7 @@ public class CategoryColumnComposite extends Composite {
 		
 	
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("Category:");
+		l.setText(Messages.CategoryColumnComposite_CategoryLabel);
 		
 		//simple content provider to show loading text
 		IContentProvider provider = new ITreeContentProvider() {
@@ -183,7 +184,7 @@ public class CategoryColumnComposite extends Composite {
 		parent.addListener(SWT.Dispose, e->field.dispose());
 		
 		l = new Label(parent, SWT.NONE);
-		l.setText("Attribute Filters:");
+		l.setText(Messages.CategoryColumnComposite_FiltersLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite attributeFilters = new Composite(parent, SWT.NONE);
@@ -288,38 +289,38 @@ public class CategoryColumnComposite extends Composite {
 		
 		if (option instanceof AttributeListItem) {
 			AttributeListItem item = (AttributeListItem) option;
-			part = "[" + item.getAttribute().getKeyId() + " = " + item.getKeyId() + "]";
+			part = "[" + item.getAttribute().getKeyId() + " = " + item.getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		}else if (option instanceof AttributeTreeNode) {
 			AttributeTreeNode item = (AttributeTreeNode) option;
-			part = "[" + item.getAttribute().getKeyId() + " = " + item.getHkey() + "]";
+			part = "[" + item.getAttribute().getKeyId() + " = " + item.getHkey() + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (option instanceof Attribute) {
 			Attribute a = (Attribute)option;
 			if (a.getType() == AttributeType.LIST) return;
 			if (a.getType() == AttributeType.TREE) return;
 			
 			if (a.getType() == AttributeType.BOOLEAN) {
-				part = "[" + a.getKeyId() + " = <TRUE|FALSE>]";
+				part = "[" + a.getKeyId() + " = <TRUE|FALSE>]"; //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (a.getType() == AttributeType.TEXT) {
-				part = "[" + a.getKeyId() + " <equals|contains> \"<VALUE>\"]";
+				part = "[" + a.getKeyId() + " <equals|contains> \"<VALUE>\"]"; //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (a.getType() == AttributeType.NUMERIC) {
-				part = "[" + a.getKeyId() + " < =|<>|<|>|<=|>= > <VALUE>]";
+				part = "[" + a.getKeyId() + " < =|<>|<|>|<=|>= > <VALUE>]"; //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (a.getType() == AttributeType.DATE) {
-				part = "[" + a.getKeyId() + " <equals|before|after> <" + AttributeExpression.UI_DATE_FORMAT + ">]";
+				part = "[" + a.getKeyId() + " <equals|before|after> <" + AttributeExpression.UI_DATE_FORMAT + ">]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 		if (part != null) {
 			if (txtAttributeFilters.getText().isEmpty()) {
 				txtAttributeFilters.setText(part);
 			}else {
-				txtAttributeFilters.setText(txtAttributeFilters.getText() + " <AND|OR> " + part);
+				txtAttributeFilters.setText(txtAttributeFilters.getText() + " <AND|OR> " + part); //$NON-NLS-1$
 			}
 		}
 	}
 	private void configureAttributePanel() {
 		Object x = field.getValue();
 		if (x == null) {
-			txtAttributeFilters.setText("");
+			txtAttributeFilters.setText(""); //$NON-NLS-1$
 			attributeOptions.setInput(null);
 			return;
 		}
@@ -347,7 +348,7 @@ public class CategoryColumnComposite extends Composite {
 		attributeOptions.setInput(allAttributes);		
 	}
 	
-	private Job loadDataModel = new Job("load data model") {
+	private Job loadDataModel = new Job(Messages.CategoryColumnComposite_loadDataModelJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -356,8 +357,8 @@ public class CategoryColumnComposite extends Composite {
 			
 			try(Session session = HibernateManager.openSession()){
 				List<Category> rootCategories = QueryFactory.buildQuery(session, Category.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"parent", null}).list();
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"parent", null}).list(); //$NON-NLS-1$
 				List<Category> all = new ArrayList<>(rootCategories);
 				while(all.size() > 0) {
 					Category c = all.remove(0);

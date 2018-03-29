@@ -35,6 +35,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.asset.IAssetLabelProvider;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -56,15 +58,7 @@ public class Asset extends UuidItem {
 		RETIRED;
 		
 		public String getGuiName(Locale l) {
-			switch(this) {
-			case ACTIVE:
-				return "Active";
-			case INACTIVE:
-				return "Inactive";
-			case RETIRED:
-				return "Retired";
-			}
-			return "";
+			return SmartContext.INSTANCE.getClass(IAssetLabelProvider.class).getLabel(this, l);
 		}
 	}
 	
@@ -187,7 +181,7 @@ public class Asset extends UuidItem {
 	@Transient
 	public Status getCachedStatus() {
 		if (this.status == null) {
-			throw new IllegalStateException("Status not yet computed.  You must call computeStatus(session) before you can retreive the status.");
+			throw new IllegalStateException("Status not yet computed.  You must call computeStatus(session) before you can retreive the status."); //$NON-NLS-1$
 		}
 		return this.status;
 	}

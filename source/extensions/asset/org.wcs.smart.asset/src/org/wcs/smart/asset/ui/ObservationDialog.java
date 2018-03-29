@@ -66,6 +66,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -147,7 +148,7 @@ public class ObservationDialog extends Dialog {
 	}
 
 	private void loadDataModel(){
-		Job j = new Job("loading data model") {
+		Job j = new Job(Messages.ObservationDialog_loadingdatamodeljob) {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -162,7 +163,7 @@ public class ObservationDialog extends Dialog {
 						toVisit.addAll(c.getActiveChildren());
 					}
 				}catch (Exception ex){
-					AssetPlugIn.displayLog("Error loading data model: " + ex.getMessage(), ex);
+					AssetPlugIn.displayLog(Messages.ObservationDialog_DmLoadError + ex.getMessage(), ex);
 					return Status.OK_STATUS;
 				}
 				final DataModel fdm = dm;
@@ -188,7 +189,7 @@ public class ObservationDialog extends Dialog {
 	}
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		getShell().setText("Waypoint Observations");
+		getShell().setText(Messages.ObservationDialog_Title);
 		
 		SashForm main = new SashForm(parent, SWT.VERTICAL);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -226,7 +227,7 @@ public class ObservationDialog extends Dialog {
 		attributeComposite.setBackground(attributeComposite.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		Label l = new Label(attributeComposite, SWT.WRAP);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		l.setText("To create a new observation select a category on the left.  To edit an existing observation select the observation then the edit button.");
+		l.setText(Messages.ObservationDialog_NewMessage);
 		((GridData)l.getLayoutData()).widthHint = 150;
 		l.setBackground(attributeComposite.getBackground());
 		
@@ -243,7 +244,7 @@ public class ObservationDialog extends Dialog {
 		observationTable.addDoubleClickListener(event->editObservation());
 		
 		TableViewerColumn categoryColumn = new TableViewerColumn(observationTable, SWT.NONE);
-		categoryColumn.getColumn().setText("Category");
+		categoryColumn.getColumn().setText(Messages.ObservationDialog_CategoryColumn);
 		categoryColumn.getColumn().setWidth(250);
 		categoryColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -256,7 +257,7 @@ public class ObservationDialog extends Dialog {
 		});
 		
 		TableViewerColumn attributeColumn = new TableViewerColumn(observationTable, SWT.NONE);
-		attributeColumn.getColumn().setText("Attributes");
+		attributeColumn.getColumn().setText(Messages.ObservationDialog_AttributesColumn);
 		attributeColumn.getColumn().setWidth(800);
 		attributeColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -316,7 +317,7 @@ public class ObservationDialog extends Dialog {
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
 		Button btnEdit = new Button(buttonPanel, SWT.PUSH);
-		btnEdit.setToolTipText("modify selected observation");
+		btnEdit.setToolTipText(Messages.ObservationDialog_edittooltip);
 		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		btnEdit.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -326,7 +327,7 @@ public class ObservationDialog extends Dialog {
 		});
 		
 		Button btnDelete = new Button(buttonPanel, SWT.PUSH);
-		btnDelete.setToolTipText("delete selected observation");
+		btnDelete.setToolTipText(Messages.ObservationDialog_deletetooltip);
 		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnDelete.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -355,7 +356,7 @@ public class ObservationDialog extends Dialog {
 				}
 			}
 			if (ismodified){
-				int ret = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, getShell(), "Save Changes", "Do you want to save changes to the observation before continuing", SWT.NONE, IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL);
+				int ret = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, getShell(), Messages.ObservationDialog_SaveTitle, Messages.ObservationDialog_SaveMessage, SWT.NONE, IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL);
 				if (ret == 2) return false;
 				if (ret == 0) createObservation();
 			}
@@ -381,7 +382,7 @@ public class ObservationDialog extends Dialog {
 				 }
 			 }
 			 
-			 btnAdd.setText("Update Observation");
+			 btnAdd.setText(Messages.ObservationDialog_UpdateBtn);
 			 observationTable.refresh();
 		 }
 	}
@@ -439,7 +440,7 @@ public class ObservationDialog extends Dialog {
 			((GridData)l.getLayoutData()).widthHint = 100;
 			
 			l = new Label(top, SWT.WRAP);
-			l.setText(editObs == null ? "NEW" : "EDIT");
+			l.setText(editObs == null ? Messages.ObservationDialog_NewObsLabel : Messages.ObservationDialog_EditObsLabel);
 			l.addDisposeListener(e -> boldFont.dispose());
 			l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 			
@@ -496,7 +497,7 @@ public class ObservationDialog extends Dialog {
 		
 		btnAdd = new Button(attributeComposite, SWT.NONE);
 		btnAdd.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-		btnAdd.setText("Create Observation");
+		btnAdd.setText(Messages.ObservationDialog_CreateButton);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -520,7 +521,7 @@ public class ObservationDialog extends Dialog {
 		for (IAttributeField<?> f : fields){
 			String err = f.validate();
 			if (err != null){
-				MessageDialog.openWarning(getShell(), "Error", MessageFormat.format("Cannot create observation.  Invalid value for attribute ''{0}''. {1}", f.getAttribute().getName(), err));
+				MessageDialog.openWarning(getShell(), Messages.ObservationDialog_ErrorTitle, MessageFormat.format(Messages.ObservationDialog_ErrorMessage, f.getAttribute().getName(), err));
 				return;
 			}
 		}
@@ -573,7 +574,7 @@ public class ObservationDialog extends Dialog {
 	@Override
 	public void cancelPressed(){
 		if (hasChanges){
-			if (MessageDialog.openQuestion(getShell(), "Save", "Observations have been modified.  Do you want to save the changes?")){
+			if (MessageDialog.openQuestion(getShell(), Messages.ObservationDialog_Save, Messages.ObservationDialog_ConfirmSave)){
 				okPressed();
 				return;
 			}

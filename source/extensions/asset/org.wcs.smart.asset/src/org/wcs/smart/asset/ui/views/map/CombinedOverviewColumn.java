@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.json.simple.JSONObject;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.map.engine.IExpression;
 import org.wcs.smart.asset.map.engine.parser.Parser;
 
@@ -39,7 +40,7 @@ import org.wcs.smart.asset.map.engine.parser.Parser;
 public class CombinedOverviewColumn implements IOverviewTableColumn{
 
 	public static CombinedOverviewColumn ratio(String name, String key, IOverviewTableColumn column1, IOverviewTableColumn column2) {
-		String formula = "[" + column1.getKey() + "] / [" + column2.getKey() + "]";
+		String formula = "[" + column1.getKey() + "] / [" + column2.getKey() + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		CombinedOverviewColumn c = new CombinedOverviewColumn(name, formula);
 		c.key = key;
 		return c;
@@ -109,10 +110,10 @@ public class CombinedOverviewColumn implements IOverviewTableColumn{
 	@Override
 	public JSONObject serialize() {
 		JSONObject json = new JSONObject();
-		json.put("type", "combined");
-		json.put("name", getName());
-		json.put("key", getKey());
-		json.put("definition", definition);
+		json.put("type", "combined"); //$NON-NLS-1$ //$NON-NLS-2$
+		json.put("name", getName()); //$NON-NLS-1$
+		json.put("key", getKey()); //$NON-NLS-1$
+		json.put("definition", definition); //$NON-NLS-1$
 		return json;
 	}
 	
@@ -124,9 +125,9 @@ public class CombinedOverviewColumn implements IOverviewTableColumn{
 	 * @return
 	 */
 	public static CombinedOverviewColumn deserialize(JSONObject json) {
-		if (json.containsKey("type") && json.get("type").equals("combined")) {
-			CombinedOverviewColumn cc = new CombinedOverviewColumn((String)json.get("name"), (String)json.get("definition"));
-			cc.key = (String) json.get("key");
+		if (json.containsKey("type") && json.get("type").equals("combined")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			CombinedOverviewColumn cc = new CombinedOverviewColumn((String)json.get("name"), (String)json.get("definition")); //$NON-NLS-1$ //$NON-NLS-2$
+			cc.key = (String) json.get("key"); //$NON-NLS-1$
 			return cc;
 		}
 		return null;
@@ -150,7 +151,7 @@ public class CombinedOverviewColumn implements IOverviewTableColumn{
 		}
 		if (c1 == null || c2 == null) return Collections.emptyList();
 		
-		CombinedOverviewColumn i = CombinedOverviewColumn.ratio("Total Incidents per Asset Day", "incidentsperday", c1, c2);
+		CombinedOverviewColumn i = CombinedOverviewColumn.ratio(Messages.CombinedOverviewColumn_IncidentsPerDayName, "incidentsperday", c1, c2); //$NON-NLS-1$
 		return Collections.singletonList(i);
 		
 		

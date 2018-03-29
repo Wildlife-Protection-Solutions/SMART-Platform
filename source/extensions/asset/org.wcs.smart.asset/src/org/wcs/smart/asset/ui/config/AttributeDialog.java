@@ -58,6 +58,7 @@ import org.hibernate.query.Query;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
@@ -159,7 +160,7 @@ public class AttributeDialog extends TitleAreaDialog {
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				if (s.getTransaction().isActive())s.getTransaction().rollback();
-				AssetPlugIn.displayLog("Error saving attribute modifications: " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AttributeDialog_SaveError + ex.getMessage(), ex);
 				return;
 			}
 		}
@@ -206,7 +207,7 @@ public class AttributeDialog extends TitleAreaDialog {
 		});
 		
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("Attribute Type:");
+		l.setText(Messages.AttributeDialog_TypeLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		cmbType = new ComboViewer(parent);
 		cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -246,9 +247,9 @@ public class AttributeDialog extends TitleAreaDialog {
 			}
 		});
 		
-		setTitle("Asset Attribute");
-		getShell().setText("Asset Attribute");
-		setMessage("Create or edit asset attributes.");
+		setTitle(Messages.AttributeDialog_Title);
+		getShell().setText(Messages.AttributeDialog_Title);
+		setMessage(Messages.AttributeDialog_Message);
 		
 		return parent;
 	}
@@ -299,7 +300,7 @@ public class AttributeDialog extends TitleAreaDialog {
 			}
 		});
 		}catch (Exception ex){
-			AssetPlugIn.displayLog(MessageFormat.format("Unable to load attribute: {0}", ex.getMessage()), ex);
+			AssetPlugIn.displayLog(MessageFormat.format(Messages.AttributeDialog_LoadError, ex.getMessage()), ex);
 		}
 		
 		

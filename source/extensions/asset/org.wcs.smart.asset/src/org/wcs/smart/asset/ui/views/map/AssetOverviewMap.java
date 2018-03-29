@@ -85,6 +85,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetSecurityManager;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.map.engine.OverviewmapColumnEngine;
 import org.wcs.smart.asset.map.engine.StatusEngine;
 import org.wcs.smart.asset.model.AssetMapStyle;
@@ -112,8 +113,8 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 
 	public static final String ID = "org.wcs.smart.asset.overviewmap"; //$NON-NLS-1$
 
-	private static final String SAVE_STYLES = "Save current map style...";
-	private static final String MANAGE_STYLES = "Manage map styles...";
+	private static final String SAVE_STYLES = Messages.AssetOverviewMap_SaveStyle;
+	private static final String MANAGE_STYLES = Messages.AssetOverviewMap_ManageStyle;
 	
 	public static IEditorInput OVERVIEW_MAP_INPUT = new IEditorInput() {		
 		@Override
@@ -123,7 +124,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		@Override
 		public IPersistableElement getPersistable() { return null; }
 		@Override
-		public String getName() { return "Asset Overview Map"; }
+		public String getName() { return Messages.AssetOverviewMap_Title; }
 		@Override
 		public ImageDescriptor getImageDescriptor() { return null; }
 		@Override
@@ -198,7 +199,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		CCombo combo = new CCombo(headerPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 		combo.setBackground(combo.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		ComboViewer cmbSummarizeBy = new ComboViewer(combo);
-		cmbSummarizeBy.getControl().setToolTipText("Option for grouping results");
+		cmbSummarizeBy.getControl().setToolTipText(Messages.AssetOverviewMap_GroupingTooltip);
 		cmbSummarizeBy.setContentProvider(ArrayContentProvider.getInstance());
 		cmbSummarizeBy.setInput(IOverviewTableColumn.GroupByOption.values());
 		cmbSummarizeBy.setLabelProvider(new LabelProvider() {
@@ -234,7 +235,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		cmbStyles = new TableComboViewer(headerPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 		cmbStyles.getControl().setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		((GridData)(cmbStyles.getControl().getLayoutData())).widthHint = cmbSummarizeBy.getControl().getBounds().width;
-		cmbStyles.getControl().setToolTipText("Select to change map styles for asset data");
+		cmbStyles.getControl().setToolTipText(Messages.AssetOverviewMap_editStyleTooltip);
 		cmbStyles.setContentProvider(ArrayContentProvider.getInstance());
 		cmbStyles.setInput(IOverviewTableColumn.GroupByOption.values());
 		cmbStyles.setLabelProvider(new LabelProvider() {
@@ -307,7 +308,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		((GridLayout)bottomLinks.getLayout()).marginWidth = 0;
 		((GridLayout)bottomLinks.getLayout()).marginHeight = 0;
 		
-		Hyperlink lnkSummary = toolkit.createHyperlink(bottomLinks, "Summary Table", SWT.NONE);
+		Hyperlink lnkSummary = toolkit.createHyperlink(bottomLinks, Messages.AssetOverviewMap_SummaryTableSectionName, SWT.NONE);
 		lnkSummary.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		lnkSummary.addHyperlinkListener(new HyperlinkAdapter() {			
 			public void linkActivated(HyperlinkEvent e) {
@@ -316,7 +317,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			}
 		});
 		
-		Hyperlink lnkStatus = toolkit.createHyperlink(bottomLinks, "Status Table", SWT.NONE);
+		Hyperlink lnkStatus = toolkit.createHyperlink(bottomLinks, Messages.AssetOverviewMap_StatTableSectionName, SWT.NONE);
 		lnkStatus.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER,true, false));
 		lnkStatus.addHyperlinkListener(new HyperlinkAdapter() {			
 			public void linkActivated(HyperlinkEvent e) {
@@ -326,7 +327,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		});
 		
 		if (AssetSecurityManager.INSTANCE.canConfigureAssetOverviewMap()) {
-			Hyperlink hlConfigure = toolkit.createHyperlink(bottomLinks, "configure...", SWT.NONE);
+			Hyperlink hlConfigure = toolkit.createHyperlink(bottomLinks, Messages.AssetOverviewMap_configureLink, SWT.NONE);
 			hlConfigure.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER,true, false));
 			hlConfigure.addHyperlinkListener(new IHyperlinkListener() {			
 				@Override
@@ -416,7 +417,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 						
 							return column.getColumn().getType().asString(value);
 						}
-						return "Error";
+						return Messages.AssetOverviewMap_ErrorValue;
 					}else {
 						return DialogConstants.LOADING_TEXT;
 					}
@@ -489,7 +490,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 					layer.refresh(null);
 				});
 			}catch (Exception ex) {
-				AssetPlugIn.displayLog("Unable to parse saved style. " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetOverviewMap_StyleParseError + ex.getMessage(), ex);
 			}
 		}
 	}
@@ -513,7 +514,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 
 	private List<DefaultAssetMapStyle> getDefaultMapStyles(){
 		DefaultAssetMapStyle statusStyle = new DefaultAssetMapStyle();
-		statusStyle.setName("Status*");
+		statusStyle.setName(Messages.AssetOverviewMap_StatusStyleName + "*"); //$NON-NLS-1$
 		statusStyle.setConservationArea(SmartDB.getCurrentConservationArea());
 		statusStyle.setStyleString(null);
 		statusStyle.setStyle(AssetStationSummaryGeoResource.getDefaultLayerStyle());
@@ -521,7 +522,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		return Collections.singletonList(statusStyle);
 	}
 	
-	private Job loadStylesJob = new Job("loading asest overview map styles") {
+	private Job loadStylesJob = new Job(Messages.AssetOverviewMap_loadingstyleJobName) {
 		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -530,10 +531,10 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			if (lastStyle == null) lastStyle = (AssetMapStyle) styles.get(0);
 			try(Session session = HibernateManager.openSession()){
 				styles.addAll(QueryFactory.buildQuery(session, AssetMapStyle.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 			}
 			if (AssetSecurityManager.INSTANCE.canConfigureAssetOverviewMap()) {
-				styles.add("--- Actions ---");
+				styles.add(Messages.AssetOverviewMap_ActionsSection);
 				styles.add(SAVE_STYLES);
 				styles.add(MANAGE_STYLES);
 			}
@@ -551,7 +552,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		
 	};
 	
-	Job loadTableJob = new Job("configure table and compute statistics") {
+	Job loadTableJob = new Job(Messages.AssetOverviewMap_configureTableJobName) {
 		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -572,7 +573,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	};
 	
 	
-	Job computeStatisticsJob = new Job("compute statistics") {
+	Job computeStatisticsJob = new Job(Messages.AssetOverviewMap_computeStatusJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -610,7 +611,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 					getMap().sendCommandASync(addCmd);
 					service.setData(statEngine.getData());
 				}catch (Exception ex) {
-					AssetPlugIn.displayLog("Unable to add summary layer to map." + ex.getMessage(), ex);
+					AssetPlugIn.displayLog(Messages.AssetOverviewMap_SummaryMapLayerError + ex.getMessage(), ex);
 				}
 			}
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
@@ -634,7 +635,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	};
 	
 	
-	Job configureStatusTableJob = new Job("configure status table") {
+	Job configureStatusTableJob = new Job(Messages.AssetOverviewMap_configureStatsTableJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

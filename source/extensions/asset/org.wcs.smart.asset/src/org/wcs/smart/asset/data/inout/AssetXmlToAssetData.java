@@ -49,6 +49,7 @@ import org.wcs.smart.asset.data.inout.xml.AttributeMapping;
 import org.wcs.smart.asset.data.inout.xml.MetadataMapping;
 import org.wcs.smart.asset.data.inout.xml.NamedItem;
 import org.wcs.smart.asset.data.inout.xml.ObjectFactory;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
@@ -85,13 +86,13 @@ public class AssetXmlToAssetData {
 	}
 	
 	public void importXmlData(Path xmlFile, IProgressMonitor monitor) throws IOException {
-		SubMonitor progress = SubMonitor.convert(monitor, "Importing asset model data from xml file", 10);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.AssetXmlToAssetData_ImportTaskName, 10);
 		warnings = new ArrayList<>();
 		
 		AssetData data = null;
 		try {
 			progress.split(1);
-			progress.subTask("reading xml file");
+			progress.subTask(Messages.AssetXmlToAssetData_ReadingSubTaskName);
 			data = readXmlFile(xmlFile);
 		}catch (Exception ex) {
 			throw new IOException(ex);
@@ -118,7 +119,7 @@ public class AssetXmlToAssetData {
 
 		//process attributes
 		progress.split(1);
-		progress.subTask("Importing asset attributes");
+		progress.subTask(Messages.AssetXmlToAssetData_ImportAttributesSubTask);
 		List<AssetAttribute> attributes = processAttributes(data.getAttributes());
 		
 		//attribute mappings include newly imported and existing
@@ -129,31 +130,31 @@ public class AssetXmlToAssetData {
 		
 		//process asset types
 		progress.split(1);
-		progress.subTask("Importing asset types");
+		progress.subTask(Messages.AssetXmlToAssetData_ImporttypesSubTask);
 		List<AssetType> assetTypes = processAssetTypes(data, attributeMapping);
 
 		//process metadata mappings
 		progress.split(1);
-		progress.subTask("Importing file metadata mappings ");
+		progress.subTask(Messages.AssetXmlToAssetData_ImportMappingsSubTask);
 		List<AssetMetadataMapping> metadataMappings = processMetadataMappings(data, session);
 		
 		progress.split(1);
-		progress.subTask("Importing asset module settings");
+		progress.subTask(Messages.AssetXmlToAssetData_ImportSettingsSubTask);
 		List<AssetModuleSettings> settings = processModuleSettings(data, session);
 		
 		progress.split(1);
-		progress.subTask("Importing asset station attributes");
+		progress.subTask(Messages.AssetXmlToAssetData_ImportStationAttributeSubTask);
 		List<AssetStationAttribute> stations = processStationAttributes(data, attributeMapping, session);
 
 		progress.split(1);
-		progress.subTask("Importing asset location attributes");
+		progress.subTask(Messages.AssetXmlToAssetData_ImportStationLocationAttributeSubTask);
 		List<AssetStationLocationAttribute> locations = processStationLocationAttributes(data, attributeMapping, session);
 
 		//validate warnings with user
 		if (!warnings.isEmpty()) {
 			boolean[] ret = new boolean[] {false};
 			Display.getDefault().syncExec(()->{
-				WarningDialog warningDialog = new WarningDialog(Display.getDefault().getActiveShell(), "Import Warnings", "The following warnings were generated while importing and validating asset xml model data.  Do you want to continue?", warnings, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
+				WarningDialog warningDialog = new WarningDialog(Display.getDefault().getActiveShell(), Messages.AssetXmlToAssetData_WarningsTitle, Messages.AssetXmlToAssetData_WarningsMessage, warnings, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 				if (warningDialog.open() == 0) {
 					ret[0] = true;
 				}
@@ -164,7 +165,7 @@ public class AssetXmlToAssetData {
 		
 		//save changes
 		progress.split(1);
-		progress.subTask("Saving asset data");
+		progress.subTask(Messages.AssetXmlToAssetData_SavingTask);
 		session.beginTransaction();
 		try {
 			attributes.forEach(a->session.saveOrUpdate(a));
@@ -185,38 +186,38 @@ public class AssetXmlToAssetData {
 		
 		StringBuilder sb = new StringBuilder();
 		if (attributes.size() > 0) {
-			sb.append(MessageFormat.format("{0} attributes", attributes.size()));
+			sb.append(MessageFormat.format(Messages.AssetXmlToAssetData_numattributes, attributes.size()));
 			sb.append("\n"); //$NON-NLS-1$
 		}
 		if (assetTypes.size() > 0) {
-			sb.append(MessageFormat.format("{0} asset types", assetTypes.size()));
+			sb.append(MessageFormat.format(Messages.AssetXmlToAssetData_numtypes, assetTypes.size()));
 			sb.append("\n"); //$NON-NLS-1$
 		}
 		if (metadataMappings.size() > 0) {
-			sb.append(MessageFormat.format("{0} file metadata mappings", metadataMappings.size()));
+			sb.append(MessageFormat.format(Messages.AssetXmlToAssetData_nummappings, metadataMappings.size()));
 			sb.append("\n"); //$NON-NLS-1$
 		}
 		if (settings.size() > 0) {
-			sb.append(MessageFormat.format("{0} module settings", settings.size()));
+			sb.append(MessageFormat.format(Messages.AssetXmlToAssetData_numsettings, settings.size()));
 			sb.append("\n"); //$NON-NLS-1$
 		}
 		if (stations.size() > 0) {
-			sb.append(MessageFormat.format("{0} station attributes", stations.size()));
+			sb.append(MessageFormat.format(Messages.AssetXmlToAssetData_numstationattributes, stations.size()));
 			sb.append("\n"); //$NON-NLS-1$
 		}
 		if (locations.size() > 0) {
-			sb.append(MessageFormat.format("{0} location attributes", locations.size()));
+			sb.append(MessageFormat.format(Messages.AssetXmlToAssetData_numlocationattribute, locations.size()));
 			sb.append("\n"); //$NON-NLS-1$
 		}
 		
 		if (sb.length() == 0) {
-			sb.append("No data imported");
+			sb.append(Messages.AssetXmlToAssetData_NoData);
 		}else {
-			sb.insert(0, "The following data has been imported:\n");
+			sb.insert(0, Messages.AssetXmlToAssetData_ImportedMsg);
 		}
 		
 		Display.getDefault().syncExec(()->{
-			MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Data Imported", sb.toString());
+			MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.AssetXmlToAssetData_ImportedTitls, sb.toString());
 		});
 
 	}
@@ -230,10 +231,10 @@ public class AssetXmlToAssetData {
 			
 			AssetAttribute assetAttribute = attributeMappings.get(xmlMapping.getAttributeKey().toLowerCase());
 			if (assetAttribute == null) {
-				warnings.add(MessageFormat.format("Asset Location Attribute: Asset attribute with key id {0} not found. Asset location attribute will not be configured.", xmlMapping.getAttributeKey()));
+				warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AttributeNotFound, xmlMapping.getAttributeKey()));
 				continue;
 			}else if (!assetAttribute.getType().name().equalsIgnoreCase(xmlMapping.getAttributeType())) {
-				warnings.add(MessageFormat.format("Asset Location Attribute: XML asset type {0} does not match system asset type {1} for attribute key {2}.  Asset location attribute will not be configured.", xmlMapping.getAttributeType(), assetAttribute.getType().name(), assetAttribute.getName()));
+				warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AssettypeDoesNotMatch, xmlMapping.getAttributeType(), assetAttribute.getType().name(), assetAttribute.getName()));
 				continue;
 			}
 			newAttribute.setAttribute(assetAttribute);
@@ -254,7 +255,7 @@ public class AssetXmlToAssetData {
 			if (found == null) {
 				toAdd.add(newAttribute);
 			}else {
-				warnings.add(MessageFormat.format("The attribute {0} is already collected for locations.  This attribute will not be duplciated.", found.getAttribute().getName())); 
+				warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AttributeAlreadyExists, found.getAttribute().getName())); 
 			}
 		}
 		return toAdd;
@@ -270,10 +271,10 @@ public class AssetXmlToAssetData {
 			
 			AssetAttribute assetAttribute = attributeMappings.get(xmlMapping.getAttributeKey().toLowerCase());
 			if (assetAttribute == null) {
-				warnings.add(MessageFormat.format("Asset Station Attribute: Asset attribute with key id {0} not found. Asset station attribute will not be configured.", xmlMapping.getAttributeKey()));
+				warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AttributeNotFoundStation, xmlMapping.getAttributeKey()));
 				continue;
 			}else if (!assetAttribute.getType().name().equalsIgnoreCase(xmlMapping.getAttributeType())) {
-				warnings.add(MessageFormat.format("Asset Station Attribute: XML asset type {0} does not match system asset type {1} for attribute key {2}.  Asset station attribute will not be configured.", xmlMapping.getAttributeType(), assetAttribute.getType().name(), assetAttribute.getName()));
+				warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_TypeDoesNotMatchStation, xmlMapping.getAttributeType(), assetAttribute.getType().name(), assetAttribute.getName()));
 				continue;
 			}
 			newAttribute.setAttribute(assetAttribute);
@@ -294,7 +295,7 @@ public class AssetXmlToAssetData {
 			if (found == null) {
 				toAdd.add(newAttribute);
 			}else {
-				warnings.add(MessageFormat.format("The attribute {0} is already collected for stations.  This attribute will not be duplciated.", found.getAttribute().getName())); 
+				warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AttributeExistsStation, found.getAttribute().getName())); 
 			}
 		}
 		return toAdd;
@@ -325,7 +326,7 @@ public class AssetXmlToAssetData {
 			if (found == null) {
 				toAdd.add(newSetting);
 			}else {
-				warnings.add(MessageFormat.format("Asset module setting {0} already exists in the system. This setting will not be imported.", found.getKeyId())); 
+				warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_SettingsExist, found.getKeyId())); 
 			}
 		}
 		return toAdd;
@@ -348,7 +349,7 @@ public class AssetXmlToAssetData {
 					AssetMetadataMapping.MetadataType prop = AssetMetadataMapping.MetadataType.valueOf(xmlMapping.getType().toUpperCase());
 					newMapping.setMetadataType(prop);
 				}catch (Exception ex) {
-					warnings.add(MessageFormat.format("Asset Metadata Mapping: Mapping type of {0} is not a valid.  Mapping will not be imported.", xmlMapping.getAssetProperty()));
+					warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_MappingNoValid, xmlMapping.getAssetProperty()));
 					continue;
 				}
 			}
@@ -358,7 +359,7 @@ public class AssetXmlToAssetData {
 					AssetMetadataMapping.AssetProperty prop = AssetMetadataMapping.AssetProperty.valueOf(xmlMapping.getAssetProperty().toUpperCase());
 					newMapping.setMappedAssetProperty(prop);
 				}catch (Exception ex) {
-					warnings.add(MessageFormat.format("Asset Metadata Mapping: Mapped asset property of {0} is not a valid property.  Mapping will not be imported.", xmlMapping.getAssetProperty()));
+					warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_InvalidMappingAssetProperty, xmlMapping.getAssetProperty()));
 					continue;
 				}
 			}
@@ -366,13 +367,13 @@ public class AssetXmlToAssetData {
 			if (xmlMapping.getCategoryKey() != null && !xmlMapping.getCategoryKey().isEmpty()) {
 				String hkey = xmlMapping.getCategoryKey();
 				List<Category> categories = QueryFactory.buildQuery(session, Category.class, 
-						new Object[] {"conservationArea", ca},
-						new Object[] {"hkey", hkey}).list();
+						new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+						new Object[] {"hkey", hkey}).list(); //$NON-NLS-1$
 				if (categories.isEmpty()) {
-					warnings.add(MessageFormat.format("Asset Metadata Mapping: Category with hierarchial key {0} not found. Mapping will not be imported.", xmlMapping.getCategoryKey()));
+					warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_CategoryNotFound, xmlMapping.getCategoryKey()));
 					continue;
 				}else if (categories.size() > 1) {
-					warnings.add(MessageFormat.format("Asset Metadata Mapping: Hierarchial key {0} maps to multiple categories - this is not valid. Mapping will not be imported.", xmlMapping.getCategoryKey()));
+					warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_MultipleMappingsFound, xmlMapping.getCategoryKey()));
 					continue;
 				}else {
 					newMapping.setMappedCategory(categories.get(0));
@@ -382,13 +383,13 @@ public class AssetXmlToAssetData {
 			if (xmlMapping.getAttributeKey() != null && !xmlMapping.getAttributeKey().isEmpty()) {
 				String key = xmlMapping.getAttributeKey();
 				List<org.wcs.smart.ca.datamodel.Attribute> attributes = QueryFactory.buildQuery(session, org.wcs.smart.ca.datamodel.Attribute.class, 
-						new Object[] {"conservationArea", ca},
-						new Object[] {"keyId", key}).list();
+						new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+						new Object[] {"keyId", key}).list(); //$NON-NLS-1$
 				if (attributes.isEmpty()) {
-					warnings.add(MessageFormat.format("Asset Metadata Mapping: Attribute with key {0} not found. Mapping will not be imported.", xmlMapping.getAttributeKey()));
+					warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_MappingAttributeNotFound, xmlMapping.getAttributeKey()));
 					continue;
 				}else if (attributes.size() > 1) {
-					warnings.add(MessageFormat.format("Asset Metadata Mapping: Attribute key {0} maps to multiple attributes - this is not valid. Mapping will not be imported.", xmlMapping.getAttributeKey()));
+					warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_MappingMultipleAttributesFound, xmlMapping.getAttributeKey()));
 					continue;
 				}else {
 					newMapping.setMappedAttribute(attributes.get(0));
@@ -403,7 +404,7 @@ public class AssetXmlToAssetData {
 						}
 					}
 					if (newMapping.getMappedListItem() == null) {
-						warnings.add(MessageFormat.format("Asset Metadata Mapping: Attribute list item with key {0} not found for attribute {1}. Mapping will not be imported.", xmlMapping.getAttributeListItemKey(), newMapping.getMappedAttribute().getName()));
+						warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_MappingListItemNotFound, xmlMapping.getAttributeListItemKey(), newMapping.getMappedAttribute().getName()));
 						continue;
 					}
 				}
@@ -421,18 +422,18 @@ public class AssetXmlToAssetData {
 					}
 					
 					if (newMapping.getMappedTreeNode() == null) {
-						warnings.add(MessageFormat.format("Asset Metadata Mapping: Attribute tree node with hierarchical key {0} not found for attribute {1}. Mapping will not be imported.", xmlMapping.getAttributeTreeNodeKey(), newMapping.getMappedAttribute().getName()));
+						warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_MappingTreeNodeNotFound, xmlMapping.getAttributeTreeNodeKey(), newMapping.getMappedAttribute().getName()));
 						continue;
 					}
 				}
 			}
 			
 			if (newMapping.getMetadataType() == null) {
-				warnings.add("Asset Metadata Mapping: Mapping type is not provided.  Mapping will not be imported.");
+				warnings.add(Messages.AssetXmlToAssetData_MappingTypeNotProvided);
 				continue;
 			}
 			if (newMapping.getMappedAssetProperty() == null && newMapping.getMappedCategory() == null && newMapping.getMappedAttribute() == null) {
-				warnings.add("Asset Metadata Mapping: Mapping type is invalid - there is not mapping to asset property or category or attribute.  Mapping will not be imported.");
+				warnings.add(Messages.AssetXmlToAssetData_MappingInvalidType);
 				continue;
 			}
 			newMappings.add(newMapping);
@@ -454,7 +455,7 @@ public class AssetXmlToAssetData {
 				//we need to add this attribute
 				toAdd.add(newMapping);
 			}else {
-				warnings.add(MessageFormat.format("Asset Metadata Mapping: Mapping already exists in file: {0}.  Mapping will not be imported", found.getMetadataKey())); 
+				warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_MappingExists, found.getMetadataKey())); 
 			}
 		}
 		return toAdd;
@@ -495,17 +496,17 @@ public class AssetXmlToAssetData {
 					
 					AssetAttribute targetAttribute = attributes.get(m.getAttributeKey());
 					if (targetAttribute == null) {
-						warnings.add(MessageFormat.format("Asset Type {0} Error: No attribute of type {1} with the key {2} found.  This attribute will not be configured for the asset type", assetType.getName(), m.getAttributeType(), m.getAttributeKey()));
+						warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AssetTypeAttributeNotFound, assetType.getName(), m.getAttributeType(), m.getAttributeKey()));
 						
 					}else {
 						try {
 							AssetAttribute.AttributeType type = AssetAttribute.AttributeType.valueOf(m.getAttributeType());
 							if (!type.equals(targetAttribute.getType())) {
-								warnings.add(MessageFormat.format("Asset Type {0} Error: The attribute with key {1} and type {2} in the xml file has a different type from the databaes attribute {3}. This attribute will not be configured for the asset type. ", assetType.getName(), m.getAttributeKey(), m.getAttributeType(), targetAttribute.getType().name()));
+								warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AssetTypeAssetTypeDoesnotMatch, assetType.getName(), m.getAttributeKey(), m.getAttributeType(), targetAttribute.getType().name()));
 								targetAttribute = null;
 							}
 						}catch (Exception ex) {
-							warnings.add(MessageFormat.format("Asset Type {0} Error: Unable to parse the asset type {1}. Attribute with key {2} will not be configured for the asset type", assetType.getName(), m.getAttributeType(), m.getAttributeKey()));
+							warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AssetTypeTypeNotFound, assetType.getName(), m.getAttributeType(), m.getAttributeKey()));
 							targetAttribute = null;	
 						}
 					}
@@ -525,17 +526,17 @@ public class AssetXmlToAssetData {
 						
 						AssetAttribute targetAttribute = attributes.get(m.getAttributeKey());
 						if (targetAttribute == null) {
-							warnings.add(MessageFormat.format("Asset Type {0} Error: No attribute of type {1} with the key {2} found.  This asset deployment attribute will not be configured for the asset type", assetType.getName(), m.getAttributeType(), m.getAttributeKey()));
+							warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AssetTypeDeployAttributeNotFound, assetType.getName(), m.getAttributeType(), m.getAttributeKey()));
 							
 						}else {
 							try {
 								AssetAttribute.AttributeType type = AssetAttribute.AttributeType.valueOf(m.getAttributeType());
 								if (!type.equals(targetAttribute.getType())) {
-									warnings.add(MessageFormat.format("Asset Type {0} Error: The attribute with key {1} and type {2} in the xml file has a different type from the databaes attribute {3}. This asset deployment attribute will not be configured for the asset type. ", assetType.getName(), m.getAttributeKey(), m.getAttributeType(), targetAttribute.getType().name()));
+									warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_WarningsTitleDeployAssetTypeDoesntMatch, assetType.getName(), m.getAttributeKey(), m.getAttributeType(), targetAttribute.getType().name()));
 									targetAttribute = null;
 								}
 							}catch (Exception ex) {
-								warnings.add(MessageFormat.format("Asset Type {0} Error: Unable to parse the asset type {1}. Asset deployment attribute with key {2} will not be configured for the asset type", assetType.getName(), m.getAttributeType(), m.getAttributeKey()));
+								warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_WarningsTitleAssettypeNotFound, assetType.getName(), m.getAttributeType(), m.getAttributeKey()));
 								targetAttribute = null;	
 							}
 						}
@@ -565,7 +566,7 @@ public class AssetXmlToAssetData {
 				//we need to add this attribute
 				toAdd.add(newSource);
 			}else {
-				warnings.add(MessageFormat.format("Asset type {0} with key {1} already exists in the system.  This type will not be imported from the xml file.", found.getName(), found.getKeyId())); 
+				warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_WarningsTitleMultipleAssetTypes, found.getName(), found.getKeyId())); 
 			}
 		}
 		return toAdd;
@@ -614,7 +615,7 @@ public class AssetXmlToAssetData {
 			}else {
 				if (!found.getType().equals(newAttribute.getType())){
 					//different attribute types; this is a warning but not an error
-					warnings.add(MessageFormat.format("The attribute {0} ({1}) of type {2} already exists in the database but has a different type in the xml file {3}", found.getName(), found.getKeyId(), found.getType().getGuiName(Locale.getDefault()), newAttribute.getType().getGuiName(Locale.getDefault()))); 
+					warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AttributetypeNotMatching, found.getName(), found.getKeyId(), found.getType().getGuiName(Locale.getDefault()), newAttribute.getType().getGuiName(Locale.getDefault()))); 
 				}
 			}
 		}
@@ -624,7 +625,7 @@ public class AssetXmlToAssetData {
 	
 	private void updateNames(org.wcs.smart.ca.NamedItem item, Collection<NamedItem> names) {
 		String defaultValue = null;
-		String blankName = "no name";
+		String blankName = Messages.AssetXmlToAssetData_NoNameLabel;
 		if (!names.isEmpty()) blankName = names.iterator().next().getValue();
 		
 		for (NamedItem ni : names) {

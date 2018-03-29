@@ -65,6 +65,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AttributeManager;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
 import org.wcs.smart.asset.ui.AttributeLabelProvider;
@@ -242,9 +243,9 @@ public class AttributeListDialog extends TitleAreaDialog {
 		mnuDelete.setEnabled(false);
 		mnuNew.setEnabled(true);
 		
-		setTitle("Asset Attributes");
-		getShell().setText("Asset Attributes");
-		setMessage("Manage attributes used by the asset system");
+		setTitle(Messages.AttributeListDialog_Title);
+		getShell().setText(Messages.AttributeListDialog_Title);
+		setMessage(Messages.AttributeListDialog_Message);
 		
 		loadTypes.setSystem(true);
 		loadTypes.schedule();
@@ -305,7 +306,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 		sb.deleteCharAt(sb.length()-1);
 		sb.deleteCharAt(sb.length()-1);
 		
-		if (!MessageDialog.openConfirm(getShell(), "Delete Attributes", MessageFormat.format("Are you sure you want to delete the following {0} attributes? This action cannot be undone. {1}", toDelete.size(), sb.toString()))) return;
+		if (!MessageDialog.openConfirm(getShell(), Messages.AttributeListDialog_DeleteTitle, MessageFormat.format(Messages.AttributeListDialog_DeleteMessage, toDelete.size(), sb.toString()))) return;
 	
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
@@ -331,7 +332,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 								Display.getDefault().syncExec(new Runnable(){
 									@Override
 									public void run() {
-										WarningDialog wd = new WarningDialog(getShell(), "Delete Attributes", "The following attributes could not be removed: ", warnings);
+										WarningDialog wd = new WarningDialog(getShell(), Messages.AttributeListDialog_DeleteTitle, Messages.AttributeListDialog_DeleteErrorWarnings, warnings);
 										wd.open();		
 									}
 									
@@ -340,13 +341,13 @@ public class AttributeListDialog extends TitleAreaDialog {
 							}
 						}catch (Exception ex){
 							s.getTransaction().rollback();
-							AssetPlugIn.displayLog("Could not delete attributes. " + ex.getMessage(), ex);
+							AssetPlugIn.displayLog(Messages.AttributeListDialog_DeleteError + ex.getMessage(), ex);
 						}
 					}			
 				}
 			});
 		}catch(Exception ex){
-			AssetPlugIn.displayLog("Could not delete attributes. "  + ex.getMessage(), ex);
+			AssetPlugIn.displayLog(Messages.AttributeListDialog_DeleteError  + ex.getMessage(), ex);
 			
 		}
 		refresh();

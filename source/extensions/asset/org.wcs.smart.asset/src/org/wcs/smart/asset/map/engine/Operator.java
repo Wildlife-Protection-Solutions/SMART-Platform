@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.asset.map.engine;
 
+import org.wcs.smart.asset.internal.Messages;
+
 /**
  * Various supported operators for asset overview map
  * query expressions.
@@ -31,23 +33,23 @@ package org.wcs.smart.asset.map.engine;
 public class Operator {
 
 	enum Op{
-		AND("AND", "AND"),
-		OR("OR", "OR"),
-		LG("<", "<"),
-		GT(">", ">"),
-		LGE("<=", "<="),
-		GTE(">=", ">="),
-		EQ("=", "="),
-		NOTEQ("<>", "!="),
-		STR_EQUAL("equals", "="),
-		STR_CONTAINS("contains", "like"),
-		BEFORE("before", "<"),
-		AFTER("after", ">"),
+		AND(Messages.Operator_And, "AND"), //$NON-NLS-1$
+		OR(Messages.Operator_Or, "OR"), //$NON-NLS-1$
+		LG("<", "<"), //$NON-NLS-1$ //$NON-NLS-2$
+		GT(">", ">"), //$NON-NLS-1$ //$NON-NLS-2$
+		LGE("<=", "<="), //$NON-NLS-1$ //$NON-NLS-2$
+		GTE(">=", ">="), //$NON-NLS-1$ //$NON-NLS-2$
+		EQ("=", "="), //$NON-NLS-1$ //$NON-NLS-2$
+		NOTEQ("<>", "!="), //$NON-NLS-1$ //$NON-NLS-2$
+		STR_EQUAL(Messages.Operator_StrEquals, "="), //$NON-NLS-1$
+		STR_CONTAINS(Messages.Operator_strContains, "like"), //$NON-NLS-1$
+		BEFORE(Messages.Operator_Before, "<"), //$NON-NLS-1$
+		AFTER(Messages.Operator_After, ">"), //$NON-NLS-1$
 		
-		PLUS("+", "+"),
-		MINUS("-", "-"),
-		TIMES("*", "*"),
-		DIVIDE("/", "/");
+		PLUS("+", "+"), //$NON-NLS-1$ //$NON-NLS-2$
+		MINUS("-", "-"), //$NON-NLS-1$ //$NON-NLS-2$
+		TIMES("*", "*"), //$NON-NLS-1$ //$NON-NLS-2$
+		DIVIDE("/", "/"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		String key;
 		String sql;

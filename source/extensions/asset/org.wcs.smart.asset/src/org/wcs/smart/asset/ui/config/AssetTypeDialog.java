@@ -81,6 +81,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetTypeManager;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AbstractAssetTypeAttributeMapping;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetType;
@@ -148,7 +149,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 	@Override
 	public void cancelPressed(){
 		if (getButton(IDialogConstants.OK_ID).isEnabled()){
-			if (MessageDialog.openQuestion(getShell(), "Close", "Would you like to save changes before closing?")){
+			if (MessageDialog.openQuestion(getShell(), Messages.AssetTypeDialog_CloseTitle, Messages.AssetTypeDialog_CloseMessage)){
 				okPressed();
 			}
 		}
@@ -206,7 +207,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				if (s.getTransaction().isActive())s.getTransaction().rollback();
-				AssetPlugIn.displayLog("Unable to save changes:" + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetTypeDialog_SaveError + ex.getMessage(), ex);
 				return;
 			}
 		}
@@ -276,7 +277,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 		});
 		
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("Icon:");
+		l.setText(Messages.AssetTypeDialog_IconLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		icon = new IconComposite(parent);
@@ -290,18 +291,18 @@ public class AssetTypeDialog extends TitleAreaDialog {
 		});
 	
 		l = new Label(parent, SWT.NONE);
-		l.setText("Incident Cutoff:");
+		l.setText(Messages.AssetTypeDialog_CutoffLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-		l.setToolTipText("Used to group files into single incidents. All data imported within the time frame will be grouped into a single incident.");
+		l.setToolTipText(Messages.AssetTypeDialog_CutoffTooltip);
 		
 		txtCutoffTime = new Text(parent, SWT.BORDER);
 		txtCutoffTime.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtCutoffTime.setText("60");
+		txtCutoffTime.setText(Messages.AssetTypeDialog_DefaultCutOff);
 		txtCutoffTime.addListener(SWT.Modify, e->{
 			try {
 				int value = Integer.parseInt(txtCutoffTime.getText());
 				if (value < 0) {
-					throw new Exception("cutoff time must be greater than 0 seconds");
+					throw new Exception(Messages.AssetTypeDialog_InvalidCutoff);
 				}
 				type.setIncidentCutoff(value);
 				cutoffcd.hide();
@@ -316,13 +317,13 @@ public class AssetTypeDialog extends TitleAreaDialog {
 		cutoffcd.hide();
 		
 		l = new Label(parent, SWT.NONE);
-		l.setText("seconds");
+		l.setText(Messages.AssetTypeDialog_secondsLabel);
 		
 		
 		l = new Label(parent, SWT.NONE);
-		l.setText("Asset Attributes:");
+		l.setText(Messages.AssetTypeDialog_attributeLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-		l.setToolTipText("These attributes will be collected for each Asset of this type");
+		l.setToolTipText(Messages.AssetTypeDialog_AttributesTooltip);
 		
 		Composite attributeComp = new Composite(parent, SWT.NONE);
 		attributeComp.setLayout(new GridLayout(2, false));
@@ -331,9 +332,9 @@ public class AssetTypeDialog extends TitleAreaDialog {
 		treeAttributes = createAttributesComposite(attributeComp, assetAttributeList);
 		
 		l = new Label(parent, SWT.NONE);
-		l.setText("Deployment Attributes:");
+		l.setText(Messages.AssetTypeDialog_DeploymentAttributesLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-		l.setToolTipText("These attributes will be collected for each Asset Deployment of this type");
+		l.setToolTipText(Messages.AssetTypeDialog_DeploymentAttributestooltip);
 		
 		Composite attributedDeployComp = new Composite(parent, SWT.NONE);
 		attributedDeployComp.setLayout(new GridLayout(2, false));
@@ -341,9 +342,9 @@ public class AssetTypeDialog extends TitleAreaDialog {
 		
 		treeDeployAttributes = createAttributesComposite(attributedDeployComp, assetDeploymentList);
 		
-		setTitle("Asset Type");
-		getShell().setText("Asset Type");
-		setMessage("Configure asset types");
+		setTitle(Messages.AssetTypeDialog_Title);
+		getShell().setText(Messages.AssetTypeDialog_Title);
+		setMessage(Messages.AssetTypeDialog_Message);
 		
 		return parent;
 	}
@@ -439,7 +440,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 		treeAttributes.getControl().setMenu(listMenu);
 		
 		MenuItem addItem = new MenuItem(listMenu, SWT.DEFAULT);
-		addItem.setText("Add Attribute");
+		addItem.setText(Messages.AssetTypeDialog_AddAttributeMenuItem);
 		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		addItem.setEnabled(true);
 		addItem.addSelectionListener(new SelectionAdapter() {
@@ -478,7 +479,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 		((GridLayout)buttonComp.getLayout()).marginHeight = 0;
 		
 		Button btnAdd = new Button(buttonComp, SWT.NONE);
-		btnAdd.setText("Add Attribute");
+		btnAdd.setText(Messages.AssetTypeDialog_AddAttributeMenuItem);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -513,7 +514,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 		s.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Button btnMoveUp = new Button(buttonComp, SWT.NONE);
-		btnMoveUp.setText("Move Down");
+		btnMoveUp.setText(Messages.AssetTypeDialog_MoveDown);
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveUp.setEnabled(false);
 		btnMoveUp.addSelectionListener(new SelectionAdapter() {
@@ -524,7 +525,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 		});
 		
 		Button btnMoveDown = new Button(buttonComp, SWT.NONE);
-		btnMoveDown.setText("Move Up");
+		btnMoveDown.setText(Messages.AssetTypeDialog_MoveUp);
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveDown.setEnabled(false);
 		btnMoveDown.addSelectionListener(new SelectionAdapter() {
@@ -566,7 +567,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 	}
 	
 	private void addAttribute( TableViewer viewer, List<AbstractAssetTypeAttributeMapping> attributes){
-		SelectAttributeDialog dialog = new SelectAttributeDialog(getShell(), MessageFormat.format("Add attributes for asset type {0}", type.getName()));
+		SelectAttributeDialog dialog = new SelectAttributeDialog(getShell(), MessageFormat.format(Messages.AssetTypeDialog_AddTitle, type.getName()));
 		ContextInjectionFactory.inject(dialog, context);
 		if (dialog.open() == Window.OK){
 			if (attributes == assetAttributeList) {
@@ -628,7 +629,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 								DeleteManager.canDelete(x, session);
 								aToDelete.add(x);
 							}catch (Exception ex){
-								warnings.add(MessageFormat.format("The attribute {0} cannot be removed. {1}", x.getAttribute().getName(), ex.getMessage()));
+								warnings.add(MessageFormat.format(Messages.AssetTypeDialog_RemoveWarning, x.getAttribute().getName(), ex.getMessage()));
 							}
 						}
 					}
@@ -640,7 +641,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 			warnings.add(ex.getMessage());
 		}
 		if(!warnings.isEmpty()){
-			WarningDialog wd = new WarningDialog(getShell(), "Warnings", "Cannot remove selected attributes.", warnings);
+			WarningDialog wd = new WarningDialog(getShell(), Messages.AssetTypeDialog_WarningsTitle, Messages.AssetTypeDialog_WarningsMessage, warnings);
 			wd.open();
 		}
 		
@@ -652,7 +653,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 			}
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
-			if (MessageDialog.openConfirm(getShell(), "Remove Attributes", MessageFormat.format("Are you sure you want to delete the attributes {0}? All attribute information associated with assets & deployments will also be removed.", sb.toString()))){
+			if (MessageDialog.openConfirm(getShell(), Messages.AssetTypeDialog_RemoveTitle, MessageFormat.format(Messages.AssetTypeDialog_RemoveMessage, sb.toString()))){
 				attributes.removeAll(aToDelete);
 				
 			}
@@ -672,7 +673,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 			public void run(IProgressMonitor smonitor) throws InvocationTargetException,
 					InterruptedException {
 				SubMonitor monitor = SubMonitor.convert(smonitor);
-				monitor.beginTask("Loading Asset Type Details", 3);
+				monitor.beginTask(Messages.AssetTypeDialog_LoadTaskName, 3);
 				
 				monitor.worked(1);
 				try(Session s = HibernateManager.openSession()){
@@ -682,21 +683,21 @@ public class AssetTypeDialog extends TitleAreaDialog {
 						type.getNames().size();
 						
 						SubMonitor kid1 = monitor.newChild(1);
-						kid1.beginTask("Loading Attributes...", type.getAssetAttributes().size() + type.getAssetDeploymentAttributes().size());
+						kid1.beginTask(Messages.AssetTypeDialog_LoadSubTask, type.getAssetAttributes().size() + type.getAssetDeploymentAttributes().size());
 						for (AssetTypeAttribute a : type.getAssetAttributes()){
 							a.getAttribute().getNames().size();
-							monitor.subTask(MessageFormat.format("Loading {0}", a.getAttribute().getName()));
+							monitor.subTask(MessageFormat.format(Messages.AssetTypeDialog_LoadingSubTask, a.getAttribute().getName()));
 							kid1.worked(1);
 						}
 						for (AssetTypeDeploymentAttribute a : type.getAssetDeploymentAttributes()){
 							a.getAttribute().getNames().size();
-							monitor.subTask(MessageFormat.format("Loading {0}", a.getAttribute().getName()));
+							monitor.subTask(MessageFormat.format(Messages.AssetTypeDialog_LoadingSubTask, a.getAttribute().getName()));
 							kid1.worked(1);
 						}
 						
 						
 					}
-					monitor.subTask("Loading Asset Type");
+					monitor.subTask(Messages.AssetTypeDialog_LoadingTypesSubTask);
 					assetTypeSiblings = AssetTypeManager.INSTANCE.getAssetTypes(s, SmartDB.getCurrentConservationArea());
 					assetTypeSiblings.remove(type);
 					monitor.worked(1);
@@ -728,7 +729,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 			}
 		});
 		}catch (Exception ex){
-			AssetPlugIn.displayLog(MessageFormat.format("Unable to load asset type: {0}", ex.getMessage()), ex);
+			AssetPlugIn.displayLog(MessageFormat.format(Messages.AssetTypeDialog_LoadingError, ex.getMessage()), ex);
 		}
 	}
 	

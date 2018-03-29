@@ -45,7 +45,8 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
  */
 public class SectionHeader extends Composite{
 
-	private static final String EVENT_KEY = "EVENT";
+	private static final String EVENT_KEY = "EVENT"; //$NON-NLS-1$
+	
 	private FormToolkit toolkit;
 	private List<Hyperlink> links;
 	
@@ -79,7 +80,7 @@ public class SectionHeader extends Composite{
 	}
 	
 	public void selectPanel(int index) {
-		((IHyperlinkListener)links.get(index).getData(EVENT_KEY)).linkActivated(new HyperlinkEvent(links.get(index), null, "", 0));
+		((IHyperlinkListener)links.get(index).getData(EVENT_KEY)).linkActivated(new HyperlinkEvent(links.get(index), null, "", 0)); //$NON-NLS-1$
 	}
 
 	private Hyperlink createHyperlink(String text, Listener action) {

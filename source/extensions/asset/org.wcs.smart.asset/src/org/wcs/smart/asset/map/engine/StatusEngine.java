@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.map.engine;
 
 import java.time.LocalDate;
@@ -18,9 +39,25 @@ import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.QueryFactory;
 
+/**
+ * Engine for computing various status values for stations and locations
+ * 
+ * @author Emily
+ *
+ */
 public class StatusEngine {
 
 	
+	/**
+	 * Depending  on the group by option this will return a map of the station or location
+	 * to the epoch dates that contain active deployments for the station/location
+	 *  
+	 * @param session
+	 * @param dFilter
+	 * @param ca
+	 * @param groupBy
+	 * @return
+	 */
 	public HashMap<Object, Set<Long>> computeStatus(Session session, Date[] dFilter, ConservationArea ca, GroupByOption groupBy){
 		if (groupBy == GroupByOption.LOCATION) {
 			return computeStationLocationStatus(session, ca, dFilter);
@@ -32,7 +69,7 @@ public class StatusEngine {
 	private HashMap<Object, Set<Long>> computeStationStatus(Session session, ConservationArea ca, Date[] dFilter){
 		HashMap<Object, Set<Long>> data = computeStatus(session, dFilter, true, ca);
 		List<AssetStation> stations = QueryFactory.buildQuery(session,  AssetStation.class, 
-				new Object[] {"conservationArea", ca}).list();
+				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 		
 		for (AssetStation ss : stations) {
 			if (data.containsKey(ss)) continue;
@@ -44,7 +81,7 @@ public class StatusEngine {
 	private HashMap<Object, Set<Long>> computeStationLocationStatus(Session session, ConservationArea ca, Date[] dFilter){
 		HashMap<Object, Set<Long>> data = computeStatus(session, dFilter, false, ca);
 		List<AssetStation> stations = QueryFactory.buildQuery(session,  AssetStation.class, 
-				new Object[] {"conservationArea", ca}).list();
+				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 		
 		for (AssetStation ss : stations) {
 			ss.computeStatus(session);
@@ -61,15 +98,15 @@ public class StatusEngine {
 		
 		Query<AssetDeployment> query = null;
 		if (dFilter != null) {
-			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca and startDate <= :endDate and (endDate is null or endDate >= :startDate)";
+			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca and startDate <= :endDate and (endDate is null or endDate >= :startDate)"; //$NON-NLS-1$
 			query = session.createQuery(hql, AssetDeployment.class)
-				.setParameter("ca", ca)
-				.setParameter("endDate", dFilter[1])
-				.setParameter("startDate", dFilter[0]);
+				.setParameter("ca", ca) //$NON-NLS-1$
+				.setParameter("endDate", dFilter[1]) //$NON-NLS-1$
+				.setParameter("startDate", dFilter[0]); //$NON-NLS-1$
 		}else {
-			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca";
+			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca"; //$NON-NLS-1$
 			query = session.createQuery(hql, AssetDeployment.class)
-					.setParameter("ca", ca);
+					.setParameter("ca", ca); //$NON-NLS-1$
 		}
 		
 		HashMap<T, Set<Long>> data = new HashMap<>();

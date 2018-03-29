@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
 import org.wcs.smart.asset.ui.AttributeListItemLabelProvider;
@@ -226,8 +227,8 @@ public class AttributeListPanel extends Composite {
 		sb.deleteCharAt(sb.length()-1);
 		sb.deleteCharAt(sb.length()-1);
 		
-		if (!MessageDialog.openConfirm(getShell(), "Delete List Items",
-				MessageFormat.format("Are you sure you want to delete the following {0} list items? {1}", toDelete.size(), sb.toString()))) return;
+		if (!MessageDialog.openConfirm(getShell(), Messages.AttributeListPanel_DeleteTitle,
+				MessageFormat.format(Messages.AttributeListPanel_DeleteMsg, toDelete.size(), sb.toString()))) return;
 
 		attribute.getAttributeList().removeAll(toDelete);
 		this.items.refresh();

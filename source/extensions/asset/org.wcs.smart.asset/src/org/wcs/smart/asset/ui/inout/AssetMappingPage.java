@@ -54,6 +54,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.inout.AssetCsvImporter;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -71,13 +72,15 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public class AssetMappingPage extends WizardPage{
 
-	private static final String SINGLE_TYPE_OP = "-- SINGLE TYPE --";
+	private static final String ATTRIBUTE2 = "ATTRIBUTE"; //$NON-NLS-1$
+	
+	private static final String SINGLE_TYPE_OP = Messages.AssetMappingPage_SingleOp;
+	
 	private ComboViewer cmbAssetType;
 	private ComboViewer cmbAssetId;
+	private Composite fields;
 	
 	private List<ComboViewer> attributeMappings;
-	
-	private Composite fields;
 	
 	@Inject
 	IEclipseContext context;
@@ -91,7 +94,7 @@ public class AssetMappingPage extends WizardPage{
 	};
 	
 	protected AssetMappingPage() {
-		super("ASSET_MAPPING");
+		super("ASSET_MAPPING"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -101,7 +104,7 @@ public class AssetMappingPage extends WizardPage{
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Asset Type*:");
+		l.setText(Messages.AssetMappingPage_Type);
 		
 		cmbAssetType = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbAssetType.setContentProvider(ArrayContentProvider.getInstance());
@@ -115,7 +118,7 @@ public class AssetMappingPage extends WizardPage{
 		});
 		
 		l = new Label(main, SWT.NONE);
-		l.setText("Asset ID*:");
+		l.setText(Messages.AssetMappingPage_ID);
 		
 		cmbAssetId = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbAssetId.setContentProvider(ArrayContentProvider.getInstance());
@@ -159,7 +162,7 @@ public class AssetMappingPage extends WizardPage{
 		if (headers == null) {
 			cmbAssetType.setInput(new String[] {});
 			cmbAssetId.setInput(new String[] {});
-			setErrorMessage(MessageFormat.format("Unable to read file: {0}", fileName));
+			setErrorMessage(MessageFormat.format(Messages.AssetMappingPage_FileReadError, fileName));
 			return;
 		}
 		
@@ -168,7 +171,7 @@ public class AssetMappingPage extends WizardPage{
 		List<AssetType> types = new ArrayList<>();
 		Set<AssetAttribute> attributes = new HashSet<>();
 		try(Session session = HibernateManager.openSession()){
-			types = QueryFactory.buildQuery(session, AssetType.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+			types = QueryFactory.buildQuery(session, AssetType.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 			for (AssetType type : types) {
 				type.getAssetAttributes().forEach(a->attributes.add(a.getAttribute()));
 			}
@@ -180,7 +183,7 @@ public class AssetMappingPage extends WizardPage{
 		
 		cmbAssetId.setInput(headers);
 		for (HeaderIndex x : headers) {
-			if (x.header.trim().toLowerCase().equals("asset id".trim().toLowerCase())) {
+			if (x.header.trim().toLowerCase().equals("asset id".trim().toLowerCase())) { //$NON-NLS-1$
 				cmbAssetId.setSelection(new StructuredSelection(x));
 			}
 		}
@@ -194,7 +197,7 @@ public class AssetMappingPage extends WizardPage{
 		attributeMappings = new ArrayList<>();
 		
 		List<HeaderIndex> options = new ArrayList<>();
-		options.add(new HeaderIndex("", -1));
+		options.add(new HeaderIndex("", -1)); //$NON-NLS-1$
 		options.addAll(headers);
 		
 		ScrolledComposite scroll = new ScrolledComposite(fields, SWT.V_SCROLL);
@@ -223,7 +226,7 @@ public class AssetMappingPage extends WizardPage{
 				}
 			}
 			attributeMappings.add(cmbViewer);
-			cmbViewer.setData("ATTRIBUTE", attribute);
+			cmbViewer.setData(ATTRIBUTE2, attribute);
 		}
 		fields.layout(true);
 		fields.getParent().layout(true);
@@ -232,8 +235,8 @@ public class AssetMappingPage extends WizardPage{
 		
 		validate();
 		
-		setTitle("Import Assets From CSV");
-		setMessage("Map asset attributes to csv file");
+		setTitle(Messages.AssetMappingPage_Title);
+		setMessage(Messages.AssetMappingPage_Message);
 	}
 
 	public Integer getAssetIdMapping() {
@@ -252,7 +255,7 @@ public class AssetMappingPage extends WizardPage{
 		for (ComboViewer cmb : attributeMappings) {
 			HeaderIndex x = (HeaderIndex)cmb.getStructuredSelection().getFirstElement();
 			if (x != null && x.index >= 0) {
-				mappings.put((AssetAttribute)cmb.getData("ATTRIBUTE"), x.index);
+				mappings.put((AssetAttribute)cmb.getData(ATTRIBUTE2), x.index);
 			}
 		}
 		return mappings;
@@ -262,10 +265,10 @@ public class AssetMappingPage extends WizardPage{
 		String error = null;
 		
 		Object x = cmbAssetId.getStructuredSelection().getFirstElement();
-		if (x == null) error = "A mapping for asset id field is required.";
+		if (x == null) error = Messages.AssetMappingPage_AssetIdRequired;
 		
 		x = cmbAssetType.getStructuredSelection().getFirstElement();
-		if (x == null || x == SINGLE_TYPE_OP) error = "A mapping for asset type field is required.";
+		if (x == null || x == SINGLE_TYPE_OP) error = Messages.AssetMappingPage_ASsetTypeRequired;
 		
 		setErrorMessage(error);
 	}
@@ -277,7 +280,7 @@ public class AssetMappingPage extends WizardPage{
 		String dateFormat = ((AssetDataImportWizard)getWizard()).filePage.getDateTimeFormat();
 		
 		if (!Files.exists(file)) {
-			MessageDialog.openError(getContainer().getShell(), "Error", MessageFormat.format("This file {0} does not exist.", file.toString()));
+			MessageDialog.openError(getContainer().getShell(), Messages.AssetMappingPage_ErrorTitle, MessageFormat.format(Messages.AssetMappingPage_ErrorMessage, file.toString()));
 			return false;
 		}
 		
@@ -286,7 +289,7 @@ public class AssetMappingPage extends WizardPage{
 		try {
 			return importer.processFile();
 		}catch (Exception ex) {
-			AssetPlugIn.displayLog("Unable to import asset data from file: " +ex.getMessage(),  ex);
+			AssetPlugIn.displayLog(Messages.AssetMappingPage_ImportError +ex.getMessage(),  ex);
 			return false;
 		}
 		

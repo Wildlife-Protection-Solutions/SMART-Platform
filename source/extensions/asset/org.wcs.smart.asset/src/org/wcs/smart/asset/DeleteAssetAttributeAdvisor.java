@@ -24,6 +24,7 @@ package org.wcs.smart.asset;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetStationAttribute;
 import org.wcs.smart.asset.model.AssetTypeAttribute;
@@ -46,14 +47,14 @@ public class DeleteAssetAttributeAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof AssetAttribute)){
-			return "Object not an AssetAttribute object.  Cannot delete.";
+			return Messages.DeleteAssetAttributeAdvisor_InvalidObject;
 		}
 		AssetAttribute attribute = (AssetAttribute) object;
 		
 		List<AssetTypeAttribute> links = QueryFactory.buildQuery(session, AssetTypeAttribute.class, "id.attribute", attribute).list(); //$NON-NLS-1$
 		if (!links.isEmpty()){
 			StringBuilder sb = new StringBuilder();
-			sb.append("The following asset types reference this asset attribute and must be removed before the attribute can be deleted.");
+			sb.append(Messages.DeleteAssetAttributeAdvisor_TypeRef);
 			for (AssetTypeAttribute a : links){
 				sb.append(a.getAssetType().getName());
 				sb.append(", "); //$NON-NLS-1$
@@ -67,7 +68,7 @@ public class DeleteAssetAttributeAdvisor implements IDeleteAdvisor {
 		List<AssetTypeDeploymentAttribute> deployments = QueryFactory.buildQuery(session, AssetTypeDeploymentAttribute.class, "id.attribute", attribute).list(); //$NON-NLS-1$
 		if (!deployments.isEmpty()){
 			StringBuilder sb = new StringBuilder();
-			sb.append("The following asset type (deployments) reference this asset attribute and must be removed before the attribute can be deleted.");
+			sb.append(Messages.DeleteAssetAttributeAdvisor_DeploymentRef);
 			for (AssetTypeDeploymentAttribute a : deployments){
 				sb.append(a.getAssetType().getName());
 				sb.append(", "); //$NON-NLS-1$
@@ -81,7 +82,7 @@ public class DeleteAssetAttributeAdvisor implements IDeleteAdvisor {
 		List<AssetStationAttribute> stations = QueryFactory.buildQuery(session, AssetStationAttribute.class, "attribute", attribute).list(); //$NON-NLS-1$
 		if (!stations.isEmpty()){
 			StringBuilder sb = new StringBuilder();
-			sb.append("This asset is referenced by asset stations and must be removed before the attribute can be deleted.");
+			sb.append(Messages.DeleteAssetAttributeAdvisor_StationRef);
 			return sb.toString();
 		}
 		

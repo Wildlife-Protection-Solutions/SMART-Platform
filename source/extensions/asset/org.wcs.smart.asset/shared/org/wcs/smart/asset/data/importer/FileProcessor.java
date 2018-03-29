@@ -32,6 +32,8 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.asset.IAssetLabelProvider;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
@@ -70,10 +72,42 @@ public class FileProcessor {
 	
 	private List<FileProxy> files;	
 	private ConservationArea ca;
+	private Locale locale;
 	
-	public FileProcessor(ConservationArea ca) {
+	public enum ErrorMessages{
+		METADATA_PARSE,
+		CATEGORY_NOT_FOUND,
+		BOOLEAN_PARSE_ERROR,
+		DATE_PARSE_ERROR,
+		LIST_ITEM_PARSE_ERROR,
+		TREE_NODE_PARSE_ERROR,
+		NUMBER_PARSE_ERROR,
+		
+		BOOLEAN_TAG_PARSE_ERROR,
+		DATE_TAG_PARSE_ERROR,
+		LIST_ITEM_TAG_PARSE_ERROR,
+		TREE_NODE_TAG_PARSE_ERROR,
+		NUMBER_TAG_PARSE_ERROR,
+		
+		ASSET_NOT_FOUND,
+		STATION_OVERWRITE,
+		STATION_LOCATION_NOT_FOUND,
+		STATION_NOT_FOUND,
+		MULTIPLE_DEPLOYMENTS;
+
+		public String getMessage(Locale l){
+			return SmartContext.INSTANCE.getClass(IAssetLabelProvider.class).getLabel(this, l);
+		}
+	}
+	
+	public FileProcessor(ConservationArea ca, Locale l) {
 		this.ca = ca;
+		this.locale = l;
 		this.files = new ArrayList<>();
+	}
+	
+	public Locale getLocale() {
+		return this.locale;
 	}
 	
 	public void addFile(Path file, IConnectionProvider provider) {
@@ -94,7 +128,7 @@ public class FileProcessor {
 			ex.printStackTrace();
 			FileProxy p = new FileProxy(file, ca);
 			files.add(p);
-			p.addWarning(new ActionableWarning("Could not parse metadata from file: " + ex.getMessage()));
+			p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.METADATA_PARSE.getMessage(locale), ex.getMessage())));
 		}
 		addedProxies.forEach(p->computeRelations(p));
 		computeWaypoints();
@@ -249,7 +283,7 @@ public class FileProcessor {
 				if (waypointObservation.getAttributes().isEmpty()) {
 					iterator.remove();
 				}else {
-					p.addWarning(new ActionableWarning(MessageFormat.format("No data model category found for mapping of attribute {0} with value: {1}.", waypointObservation.getAttributes().get(0).getAttribute().getName(), waypointObservation.getAttributes().get(0).getAttributeValueAsString(Locale.getDefault()))));
+					p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.CATEGORY_NOT_FOUND.getMessage(locale), waypointObservation.getAttributes().get(0).getAttribute().getName(), waypointObservation.getAttributes().get(0).getAttributeValueAsString(Locale.getDefault()))));
 				}
 				iterator.remove();
 			}
@@ -352,7 +386,7 @@ public class FileProcessor {
 			case WAYPOINT_COMMENT:
 				//merge comments
 				String comment = pathValue;
-				if (p.getWaypointComment() != null) comment += "\n" + comment;
+				if (p.getWaypointComment() != null) comment += "\n" + comment; //$NON-NLS-1$
 				p.setWaypointComment(comment);
 			}
 		} else {
@@ -392,7 +426,7 @@ public class FileProcessor {
 					try {
 						value = Boolean.valueOf(pathValue);
 					}catch (Exception ex) {
-						p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse boolean value from {0} for mapping to boolean attribute {1}", pathValue, mapping.getMappedAttribute().getName())));
+						p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.BOOLEAN_PARSE_ERROR.getMessage(locale), pathValue, mapping.getMappedAttribute().getName())));
 						return;
 					}
 					woa.setNumberValue(value == true ? 1.0 : 0);
@@ -414,7 +448,7 @@ public class FileProcessor {
 						d = null;
 					}
 					if (d == null) {
-						p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse date from the value {0} for mapping to date attribute {1}.  Date format unsupported.", pathValue, mapping.getMappedAttribute().getName())));
+						p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.DATE_PARSE_ERROR.getMessage(locale), pathValue, mapping.getMappedAttribute().getName())));
 						return;
 					}
 					woa.setDateValue(d);
@@ -441,7 +475,7 @@ public class FileProcessor {
 							if (item != null) break;
 						}
 						if (item == null) {
-							p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse attribute list item from the value {0} for mapping to attribute {1}.  No list item with this value found.", pathValue, mapping.getMappedAttribute().getName())));
+							p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.LIST_ITEM_PARSE_ERROR.getMessage(locale), pathValue, mapping.getMappedAttribute().getName())));
 							return;
 						}
 						woa.setAttributeListItem(item);
@@ -473,7 +507,7 @@ public class FileProcessor {
 							if (n.getChildren() != null) toSearch.addAll(n.getChildren());	
 						}
 						if (item == null) {
-							p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse attribute tree node from the value {0} for mapping to attribute {1}.  No tree node with this value found.", pathValue, mapping.getMappedAttribute().getName())));
+							p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.TREE_NODE_PARSE_ERROR.getMessage(locale), pathValue, mapping.getMappedAttribute().getName())));
 							return;
 						}
 						
@@ -484,7 +518,7 @@ public class FileProcessor {
 					try {
 						numberValue = Double.parseDouble(pathValue);
 					}catch (Exception ex) {
-						p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse number from the value {0} for mapping to attribute {1}",pathValue, mapping.getMappedAttribute().getName())));
+						p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.NUMBER_PARSE_ERROR.getMessage(locale), pathValue, mapping.getMappedAttribute().getName())));
 						return;	
 					}
 					
@@ -564,14 +598,14 @@ public class FileProcessor {
 				if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.BOOLEAN) {
 					Boolean value = tag.getBooleanObject(field.getTagType());
 					if (value == null) {
-						p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse boolean value from the tag {0} for mapping to boolean attribute",tag.getStringValue(field.getTagType()))));
+						p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.BOOLEAN_TAG_PARSE_ERROR.getMessage(locale), tag.getStringValue(field.getTagType()), mapping.getMappedAttribute().getName())) );
 						return;
 					}
 					woa.setNumberValue(value == true ? 1.0 : 0);
 				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.DATE) {
 					Date value = tag.getDate(field.getTagType());
 					if (value == null) {
-						p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse date from the tag {0} for mapping to date attribute",tag.getStringValue(field.getTagType()))));
+						p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.DATE_TAG_PARSE_ERROR.getMessage(locale), tag.getStringValue(field.getTagType()), mapping.getMappedAttribute().getName())));
 						return;
 					}
 					woa.setDateValue(value);
@@ -599,7 +633,7 @@ public class FileProcessor {
 							if (item != null) break;
 						}
 						if (item == null) {
-							p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse the tag {0} for mapping to list attribute.  No list item with this value found.", tag.getStringValue(field.getTagType()))));
+							p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.LIST_ITEM_TAG_PARSE_ERROR.getMessage(locale), tag.getStringValue(field.getTagType()), mapping.getMappedAttribute().getName())));
 							return;
 						}
 						woa.setAttributeListItem(item);
@@ -632,7 +666,7 @@ public class FileProcessor {
 							if (n.getChildren() != null) toSearch.addAll(n.getChildren());	
 						}
 						if (item == null) {
-							p.addWarning(new ActionableWarning(MessageFormat.format("Could parse the tag {0} for mapping to tree attribute.  No tree not found that matches the value.", tag.getStringValue(field.getTagType()))));
+							p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.TREE_NODE_TAG_PARSE_ERROR.getMessage(locale), tag.getStringValue(field.getTagType()), mapping.getMappedAttribute().getName())));
 							return;
 						}
 						
@@ -653,7 +687,7 @@ public class FileProcessor {
 						if (x != null) value = x.doubleValue();
 					}
 					if (value == null) {
-						p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse number from the tag {0} for mapping to number attribute",tag.getStringValue(field.getTagType()))));
+						p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.NUMBER_TAG_PARSE_ERROR.getMessage(locale), tag.getStringValue(field.getTagType()), mapping.getMappedAttribute().getName())));
 						return;
 					}
 					woa.setNumberValue(value);	
@@ -678,7 +712,7 @@ public class FileProcessor {
 			p.setAsset(asset);
 			return;
 		}else {
-			p.addWarning(new NewAssetWarning(MessageFormat.format("No asset found with id ''{0}''", id), id));
+			p.addWarning(new NewAssetWarning(MessageFormat.format(ErrorMessages.ASSET_NOT_FOUND.getMessage(locale), id), id));
 		}
 	}
 	
@@ -691,12 +725,12 @@ public class FileProcessor {
 				.uniqueResult();
 		if (location != null) {
 			if (p.getStation() != null && p.getStation() != location.getStation()) {
-				p.addWarning(new ActionableWarning(MessageFormat.format("Station location {1} is not associated with the station {0} found for the file.  The station location will take precidence and the station overwritten.", p.getStation().getId(), location.getId())) );
+				p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.STATION_OVERWRITE.getMessage(locale), p.getStation().getId(), location.getId())) );
 			}
 			p.setStationLocation(location);
 			return;
 		}else {
-			p.addWarning(new NewLocationWarning(MessageFormat.format("No station location found with id ''{0}''", id), id));
+			p.addWarning(new NewLocationWarning(MessageFormat.format(ErrorMessages.STATION_LOCATION_NOT_FOUND.getMessage(locale), id), id));
 		}
 	}
 	
@@ -715,7 +749,7 @@ public class FileProcessor {
 			p.setStation(station);
 			return;
 		}else {
-			p.addWarning(new ActionableWarning(MessageFormat.format("No station found for id ''{0}''", id)));
+			p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.STATION_NOT_FOUND.getMessage(locale), id)));
 		}
 	}
 		
@@ -723,7 +757,7 @@ public class FileProcessor {
 	//TODO: if track is set we probably don't want to be merge deployments; each
 	//time out should probably be a deployments but we can deal with that when we
 	//get to processing videos
-	public static AssetDeployment findAssetDeployment(Waypoint wp, Asset asset, AssetStationLocation location, Session session) {
+	public static AssetDeployment findAssetDeployment(Waypoint wp, Asset asset, AssetStationLocation location, Session session, Locale l) {
 		
 		//1.  Find a deployment for the asset that is between the start and end date of the waypoint
 		String hql = "FROM AssetDeployment WHERE asset = :asset and startDate <= :date1 and (endDate is null or endDate>=:date2)"; //$NON-NLS-1$
@@ -734,7 +768,7 @@ public class FileProcessor {
 			.list();
 		
 		if (matchingDeployment.size() > 1) {
-			throw new IllegalStateException(MessageFormat.format("Multiple deployments at the same time for asset {0}. This state is not valid", asset.getId() ));
+			throw new IllegalStateException(MessageFormat.format(ErrorMessages.MULTIPLE_DEPLOYMENTS.getMessage(l), asset.getId() ));
 		}
 		
 		if (matchingDeployment.size() == 1) {
@@ -760,7 +794,7 @@ public class FileProcessor {
 				return createNewDeployment(asset, wp.getDateTime(), location);
 			
 			}else {
-				throw new IllegalStateException(MessageFormat.format("Multiple deployments at the same time for asset {0}. This state is not valid - we cannot continue", asset.getId() ));
+				throw new IllegalStateException(MessageFormat.format(ErrorMessages.MULTIPLE_DEPLOYMENTS.getMessage(l), asset.getId() ));
 			}
 			
 		} else {

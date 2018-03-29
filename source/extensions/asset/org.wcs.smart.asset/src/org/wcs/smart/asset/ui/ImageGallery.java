@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.util.SmartUtils;
 
@@ -97,7 +98,7 @@ public class ImageGallery extends Composite{
 	private AtomicBoolean needsRefresh = new AtomicBoolean(false);
 	private AtomicBoolean isLoading = new AtomicBoolean(false);
 	
-	private Job loadImages = new Job("previewing images") {
+	private Job loadImages = new Job(Messages.ImageGallery_jobname) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			isLoading.set(true);
@@ -205,9 +206,9 @@ public class ImageGallery extends Composite{
 
 		String hex = Integer.toHexString(code & 0xffffff);
 		while (hex.length() < 6) {
-			hex = "0" + hex;
+			hex = "0" + hex; //$NON-NLS-1$
 		}
-		hex = "#" + hex;
+		hex = "#" + hex; //$NON-NLS-1$
 		return hex;
 	}
 
@@ -276,7 +277,7 @@ public class ImageGallery extends Composite{
         toolkit.adapt(fxCanvas);
         
         ScrollPane root = new ScrollPane();
-        root.setStyle("-fx-background: white");// + toHex(toolkit.getColors().getBackground()));
+        root.setStyle("-fx-background: white");// + toHex(toolkit.getColors().getBackground())); //$NON-NLS-1$
         root.setOnMouseClicked(e->{
         	clearSelection();
         });
@@ -290,7 +291,7 @@ public class ImageGallery extends Composite{
         tile.setVgap(marginSize);
         tile.setPrefTileHeight(thumbSize+4);	//4=max border width
         tile.setPrefTileWidth(thumbSize+4);
-        tile.setStyle("-fx-background-color: white");// + toHex(toolkit.getColors().getBackground()));
+        tile.setStyle("-fx-background-color: white");// + toHex(toolkit.getColors().getBackground())); //$NON-NLS-1$
         tile.setOnMouseClicked(e->{
         	clearSelection();
         });
@@ -367,7 +368,7 @@ public class ImageGallery extends Composite{
 			}else if (mouseOver) {
 				backgroundColor = getMouseOverBackground(file);
 			}
-			imageNode.setStyle("-fx-border-color: " + borderColor + "; -fx-border-width: " +width + "px; -fx-background-color: " + backgroundColor + ";");
+			imageNode.setStyle("-fx-border-color: " + borderColor + "; -fx-border-width: " +width + "px; -fx-background-color: " + backgroundColor + ";"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 		
 		private void createNode() {

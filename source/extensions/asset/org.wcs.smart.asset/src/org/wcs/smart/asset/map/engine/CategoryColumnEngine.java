@@ -28,6 +28,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.NamedPreparedStatement;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.map.engine.parser.Parser;
 import org.wcs.smart.asset.ui.views.map.CategoryOverviewColumn;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn;
@@ -103,7 +105,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 	public void dispose(Session session) {
 		if (waypointFilterTable == null) return;
 		try {
-			session.createNativeQuery("DROP TABLE " + waypointFilterTable).executeUpdate();
+			session.createNativeQuery("DROP TABLE " + waypointFilterTable).executeUpdate(); //$NON-NLS-1$
 		}catch (Exception ex) {
 			AssetPlugIn.log(ex.getMessage(), ex);
 		}
@@ -124,33 +126,33 @@ public class CategoryColumnEngine implements IColumnEngine {
 				createWaypointTable(connection);
 				
 				String c1 = toCompute.getCategoryKey();
-				String c2 = c1.substring(0,  c1.length() -1) + "/";
+				String c2 = c1.substring(0,  c1.length() -1) + "/"; //$NON-NLS-1$
 				
 				StringBuilder sb = new StringBuilder();
-				sb.append("SELECT uuid, count(*) FROM ( ");
-				sb.append("SELECT distinct a.wp_uuid as wp_uuid,");
+				sb.append("SELECT uuid, count(*) FROM ( "); //$NON-NLS-1$
+				sb.append("SELECT distinct a.wp_uuid as wp_uuid,"); //$NON-NLS-1$
 				if (groupBy == GroupByOption.LOCATION) {
-					sb.append("c.station_location_uuid as uuid");
+					sb.append("c.station_location_uuid as uuid"); //$NON-NLS-1$
 				}else if (groupBy == GroupByOption.STATION) {
-					sb.append("d.station_uuid as uuid");
+					sb.append("d.station_uuid as uuid"); //$NON-NLS-1$
 				}
-				sb.append(" FROM ");
-				sb.append("smart.asset_waypoint a JOIN ");
+				sb.append(" FROM "); //$NON-NLS-1$
+				sb.append("smart.asset_waypoint a JOIN "); //$NON-NLS-1$
 				sb.append( waypointFilterTable );
-				sb.append(" b on a.wp_uuid = b.wp_uuid JOIN ");
-				sb.append(" smart.asset_deployment c on a.asset_deployment_uuid = c.uuid ");
+				sb.append(" b on a.wp_uuid = b.wp_uuid JOIN "); //$NON-NLS-1$
+				sb.append(" smart.asset_deployment c on a.asset_deployment_uuid = c.uuid "); //$NON-NLS-1$
 				if (groupBy == GroupByOption.STATION) {
-					sb.append(" JOIN smart.asset_station_location d on d.uuid = c.station_location_uuid ");
+					sb.append(" JOIN smart.asset_station_location d on d.uuid = c.station_location_uuid "); //$NON-NLS-1$
 				}
-				sb.append(" WHERE ");
-				sb.append(" c_hkey >= :ckey1 AND c_hkey < :ckey2 ");
+				sb.append(" WHERE "); //$NON-NLS-1$
+				sb.append(" c_hkey >= :ckey1 AND c_hkey < :ckey2 "); //$NON-NLS-1$
 				
 				HashMap<String, Object> namesToValues = new HashMap<>();
-				namesToValues.put(":ckey1", c1);
-				namesToValues.put(":ckey2", c2);
+				namesToValues.put(":ckey1", c1); //$NON-NLS-1$
+				namesToValues.put(":ckey2", c2); //$NON-NLS-1$
 				
 				Category category = findCategory(toCompute.getCategoryKey());
-				if (category == null) throw new SQLException("No category with key " + toCompute.getCategoryKey() + "found.");
+				if (category == null) throw new SQLException(MessageFormat.format(Messages.CategoryColumnEngine_CategoryNotFound, toCompute.getCategoryKey()));
 				
 				
 				if (toCompute.getAttributeFilter() != null && !toCompute.getAttributeFilter().trim().isEmpty()) {
@@ -160,7 +162,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 						Parser parser = new Parser(is);
 						attributeFilter = parser.AttributeExpression();
 					} catch (Exception e) {
-						throw new SQLException("Could not parse attribute filter.", e);
+						throw new SQLException(Messages.CategoryColumnEngine_AttributeParseError, e);
 					}
 					
 					Set<String> attributeKeys = new HashSet<>();
@@ -176,26 +178,26 @@ public class CategoryColumnEngine implements IColumnEngine {
 					
 					for (String attributeKey : attributeKeys) {
 						Attribute attribute = findAttribute(attributeKey);
-						if (attribute == null) throw new SQLException("Could not find a data model attribute with the key " + attributeKey);
+						if (attribute == null) throw new SQLException(MessageFormat.format(Messages.CategoryColumnEngine_AttributeNotFound, attributeKey));
 						addAttributeColumn(attribute, connection);
 						attributeKeyToAttribute.put(attribute.getKeyId(), attribute);
 					}
 					try {
 						String where = asSql(attributeFilter, namesToValues);
-						sb.append(" AND ( ");
+						sb.append(" AND ( "); //$NON-NLS-1$
 						sb.append(where);
-						sb.append(" ) ");
+						sb.append(" ) "); //$NON-NLS-1$
 					}catch (Exception ex) {
 						throw new SQLException(ex);
 					}
 					
 				}
-				sb.append(" ) foo GROUP BY uuid");
+				sb.append(" ) foo GROUP BY uuid"); //$NON-NLS-1$
 				
 				try(NamedPreparedStatement ps = new NamedPreparedStatement(connection, sb.toString())){
 					log ( sb.toString() );
 					for (Entry<String,Object> parameter : namesToValues.entrySet()) {
-						log( parameter.getKey() + ":" + parameter.getValue().toString() );
+						log( parameter.getKey() + ":" + parameter.getValue().toString() ); //$NON-NLS-1$
 						ps.setObject(parameter.getKey(), parameter.getValue());
 					}
 					try(ResultSet rs = ps.executeQuery()){
@@ -215,39 +217,39 @@ public class CategoryColumnEngine implements IColumnEngine {
 	
 	private Category findCategory(String hkey) {
 		Category a = QueryFactory.buildQuery(session,  Category.class, 
-				new Object[] {"conservationArea", ca},
-				new Object[] {"hkey", hkey}).uniqueResult();
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"hkey", hkey}).uniqueResult(); //$NON-NLS-1$
 		return a;
 	}
 	
 	private Attribute findAttribute(String key) {
 		
 		Attribute a = QueryFactory.buildQuery(session,  Attribute.class, 
-				new Object[] {"conservationArea", ca},
-				new Object[] {"keyId", key}).uniqueResult();
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"keyId", key}).uniqueResult(); //$NON-NLS-1$
 		return a;
 	}
 		
 	private synchronized void addAttributeColumn(Attribute attribute, Connection connection) throws SQLException {
 		if(attributeToColumn.containsKey(attribute.getKeyId())) return; //already exists
 		
-		String column = "attribute_" + attributeToColumn.keySet().size();
+		String column = "attribute_" + attributeToColumn.keySet().size(); //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("ALTER TABLE ");
+		sb.append("ALTER TABLE "); //$NON-NLS-1$
 		sb.append(waypointFilterTable);
-		sb.append(" ADD COLUMN ");
+		sb.append(" ADD COLUMN "); //$NON-NLS-1$
 		sb.append(column);
 		switch(attribute.getType()) {
 			case BOOLEAN:
 			case NUMERIC:
-				sb.append(" double ");
+				sb.append(" double "); //$NON-NLS-1$
 				break;
 			case DATE:
 			case LIST:
 			case TEXT:
 			case TREE:
-				sb.append(" varchar(32672) ");
+				sb.append(" varchar(32672) "); //$NON-NLS-1$
 				break;
 		}
 		log(sb.toString());
@@ -255,38 +257,38 @@ public class CategoryColumnEngine implements IColumnEngine {
 		
 		
 		sb = new StringBuilder();
-		sb.append("UPDATE ");
+		sb.append("UPDATE "); //$NON-NLS-1$
 		sb.append(waypointFilterTable);
-		sb.append(" SET ");
+		sb.append(" SET "); //$NON-NLS-1$
 		sb.append(column);
-		sb.append(" = ");
+		sb.append(" = "); //$NON-NLS-1$
 		
 		switch(attribute.getType()) {
 		case BOOLEAN:
 		case NUMERIC:
-			sb.append(" (SELECT a.number_value FROM smart.wp_observation_attributes a WHERE a.observation_uuid = ");
+			sb.append(" (SELECT a.number_value FROM smart.wp_observation_attributes a WHERE a.observation_uuid = "); //$NON-NLS-1$
 			sb.append(waypointFilterTable);
-			sb.append(".ob_uuid AND a.attribute_uuid = ?");
+			sb.append(".ob_uuid AND a.attribute_uuid = ?"); //$NON-NLS-1$
 			break;
 		case DATE:
 		case TEXT:
-			sb.append(" (SELECT a.string_value FROM smart.wp_observation_attributes a WHERE a.observation_uuid = ");
+			sb.append(" (SELECT a.string_value FROM smart.wp_observation_attributes a WHERE a.observation_uuid = "); //$NON-NLS-1$
 			sb.append(waypointFilterTable);
-			sb.append(".ob_uuid AND a.attribute_uuid = ?");
+			sb.append(".ob_uuid AND a.attribute_uuid = ?"); //$NON-NLS-1$
 			break;
 			
 		case LIST:
-			sb.append(" (SELECT c.keyid FROM smart.dm_attribute_list c join smart.wp_observation_attributes a on a.attribute_uuid = ? and a.list_element_uuid = c.uuid WHERE a.observation_uuid = ");
+			sb.append(" (SELECT c.keyid FROM smart.dm_attribute_list c join smart.wp_observation_attributes a on a.attribute_uuid = ? and a.list_element_uuid = c.uuid WHERE a.observation_uuid = "); //$NON-NLS-1$
 			sb.append(waypointFilterTable);
-			sb.append(".ob_uuid");
+			sb.append(".ob_uuid"); //$NON-NLS-1$
 			break;
 		case TREE:
-			sb.append(" (SELECT c.hkey FROM smart.dm_attribute_tree c join smart.wp_observation_attributes a on a.attribute_uuid = ? and a.tree_node_uuid = c.uuid WHERE a.observation_uuid = ");
+			sb.append(" (SELECT c.hkey FROM smart.dm_attribute_tree c join smart.wp_observation_attributes a on a.attribute_uuid = ? and a.tree_node_uuid = c.uuid WHERE a.observation_uuid = "); //$NON-NLS-1$
 			sb.append(waypointFilterTable);
-			sb.append(".ob_uuid");
+			sb.append(".ob_uuid"); //$NON-NLS-1$
 			break;
 		}
-		sb.append(")");
+		sb.append(")"); //$NON-NLS-1$
 		
 		log(sb.toString());
 		log(attribute.getUuid().toString());
@@ -306,38 +308,38 @@ public class CategoryColumnEngine implements IColumnEngine {
 		waypointFilterTable = createTempTableName();
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("CREATE TABLE ");
+		sb.append("CREATE TABLE "); //$NON-NLS-1$
 		sb.append(waypointFilterTable);
-		sb.append(" ( wp_uuid char(16) for bit data, ");
-		sb.append(" ob_uuid char(16) for bit data, ");
-		sb.append(" c_hkey varchar(32672)) ");
+		sb.append(" ( wp_uuid char(16) for bit data, "); //$NON-NLS-1$
+		sb.append(" ob_uuid char(16) for bit data, "); //$NON-NLS-1$
+		sb.append(" c_hkey varchar(32672)) "); //$NON-NLS-1$
 		
 		log(sb.toString());
 		connection.createStatement().executeUpdate(sb.toString());
 		
 		sb = new StringBuilder();
-		sb.append(" INSERT INTO ");
+		sb.append(" INSERT INTO "); //$NON-NLS-1$
 		sb.append(waypointFilterTable);
-		sb.append(" (wp_uuid, ob_uuid, c_hkey) ");
-		sb.append(" SELECT a.uuid as wp_uuid, b.uuid as obs_uuid, c.hkey ");
-		sb.append(" FROM smart.waypoint a JOIN smart.WP_OBSERVATION b ON a.uuid = b.wp_uuid ");
-		sb.append(" JOIN smart.dm_category c ON c.uuid = b.category_uuid ");
-		sb.append(" WHERE ");
-		sb.append(" a.ca_uuid = ? ");
+		sb.append(" (wp_uuid, ob_uuid, c_hkey) "); //$NON-NLS-1$
+		sb.append(" SELECT a.uuid as wp_uuid, b.uuid as obs_uuid, c.hkey "); //$NON-NLS-1$
+		sb.append(" FROM smart.waypoint a JOIN smart.WP_OBSERVATION b ON a.uuid = b.wp_uuid "); //$NON-NLS-1$
+		sb.append(" JOIN smart.dm_category c ON c.uuid = b.category_uuid "); //$NON-NLS-1$
+		sb.append(" WHERE "); //$NON-NLS-1$
+		sb.append(" a.ca_uuid = ? "); //$NON-NLS-1$
 		Date date1 = null;
 		Date date2 = null;
 		if (this.dFilter != null) {
 			if (this.dFilter[0] != null) {
 				date1 = dFilter[0];
-				sb.append(" AND a.datetime >= ? ");
+				sb.append(" AND a.datetime >= ? "); //$NON-NLS-1$
 			}
 			if (this.dFilter[1] != null) {
 				date2 = dFilter[1];
-				sb.append(" AND a.datetime <= ? ");
+				sb.append(" AND a.datetime <= ? "); //$NON-NLS-1$
 			}
 		}
 		log(sb.toString());
-		log((date1 == null ? "" : date1.getTime()) + ":" + (date2== null ? "" : date2.getTime()));
+		log((date1 == null ? "" : date1.getTime()) + ":" + (date2== null ? "" : date2.getTime())); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		PreparedStatement ps = connection.prepareStatement(sb.toString());
 		int index = 1;
@@ -354,13 +356,13 @@ public class CategoryColumnEngine implements IColumnEngine {
 	
 	private String asSql(BracketExpression filter, HashMap<String, Object> namesToValues) throws Exception{
 		String part1 = asSql(filter.getFilter(), namesToValues);
-		return "( " + part1 + " )";
+		return "( " + part1 + " )"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private String asSql(BooleanExpression filter, HashMap<String, Object> namesToValues) throws Exception{
 		String part1 = asSql(filter.getFilter1(), namesToValues);
 		String part2 = asSql(filter.getFilter2(), namesToValues);
-		return part1 + " " + filter.getOperator().operator.sql + " " + part2;
+		return part1 + " " + filter.getOperator().operator.sql + " " + part2; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private String asSql(AttributeExpression filter, HashMap<String, Object> namesToValues) throws Exception{
@@ -368,51 +370,52 @@ public class CategoryColumnEngine implements IColumnEngine {
 		Attribute attribute = attributeKeyToAttribute.get( filter.getAttributeKey() );
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append(" ( ");
+		sb.append(" ( "); //$NON-NLS-1$
 		
 		switch(attribute.getType()) {
 		case BOOLEAN:
 			Boolean bool = null;
 			try{
 				bool = Boolean.valueOf(filter.getStringValue().toUpperCase());
-			}catch (Exception ex) {}
-			if (bool == null) throw new Exception("Could not parse boolean from '" + filter.getStringValue() + "'.");
+			}catch (Exception ex) {
+			}
+			if (bool == null) throw new Exception(MessageFormat.format(Messages.CategoryColumnEngine_BooleanParseItem, filter.getStringValue()));
 			
 			sb.append(columnName);
 			if (bool) {
-				sb.append(" > 0.5 ");
+				sb.append(" > 0.5 "); //$NON-NLS-1$
 			}else {
-				sb.append(" < 0.5 ");
+				sb.append(" < 0.5 "); //$NON-NLS-1$
 			}
 			
 			break;
 		case DATE:
 			if (filter.getOperator().operator != Operator.Op.BEFORE && filter.getOperator().operator != Operator.Op.AFTER
 					&& filter.getOperator().operator != Operator.Op.STR_EQUAL) {
-				throw new Exception("Operator " + filter.getOperator().operator.key + " is not supported for date filters.");
+				throw new Exception(MessageFormat.format(Messages.CategoryColumnEngine_OpNotSupported3, filter.getOperator().operator.key));
 			}
 			Date d = null;
 			try {
 				d = new SimpleDateFormat(AttributeExpression.JAVA_DATE_FORMAT).parse(filter.getStringValue());
 			}catch (Exception ex) {}
-			if (d == null) throw new Exception("Could not parse date '" + filter.getStringValue() + "' - ensure date is in the format YYYY-MM-DD");
+			if (d == null) throw new Exception(MessageFormat.format(Messages.CategoryColumnEngine_DateParseError, filter.getStringValue()));
 			
-			sb.append("cast(" );
+			sb.append("cast(" ); //$NON-NLS-1$
 			sb.append(columnName);
-			sb.append(" as date ) ");
+			sb.append(" as date ) "); //$NON-NLS-1$
 			sb.append(filter.getOperator().operator.sql);
-			sb.append(" ");
+			sb.append(" "); //$NON-NLS-1$
 			
-			String key = ":a" + namesToValues.size();
+			String key = ":a" + namesToValues.size(); //$NON-NLS-1$
 			sb.append(key);
 			namesToValues.put(key, filter.getStringValue());
 					
 			break;
 		case LIST:
-			key = ":a" + namesToValues.size();
+			key = ":a" + namesToValues.size(); //$NON-NLS-1$
 			namesToValues.put(key, filter.getStringValue());
 			sb.append(columnName);
-			sb.append(" = ");
+			sb.append(" = "); //$NON-NLS-1$
 			sb.append(key);
 			break;
 		case NUMERIC:
@@ -423,49 +426,49 @@ public class CategoryColumnEngine implements IColumnEngine {
 				&& filter.getOperator().operator != Operator.Op.NOTEQ
 				&& filter.getOperator().operator != Operator.Op.EQ) {
 			
-				throw new Exception("Operator " + filter.getOperator().operator.key + " is not supported for number filters.");
+				throw new Exception(MessageFormat.format(Messages.CategoryColumnEngine_OpNotSupported1, filter.getOperator().operator.key));
 			}
 			
-			key = ":a" + namesToValues.size();
+			key = ":a" + namesToValues.size(); //$NON-NLS-1$
 			
 			sb.append(columnName);
-			sb.append(" ");
+			sb.append(" "); //$NON-NLS-1$
 			sb.append(filter.getOperator().operator.sql);
-			sb.append(" ");
+			sb.append(" "); //$NON-NLS-1$
 			sb.append(key);
 			namesToValues.put(key, filter.getNumberValue());
 			break;
 		case TEXT:
-			key = ":a" + namesToValues.size();
+			key = ":a" + namesToValues.size(); //$NON-NLS-1$
 			sb.append(columnName);
-			sb.append(" ");
+			sb.append(" "); //$NON-NLS-1$
 			if (filter.getOperator().operator == Operator.Op.STR_EQUAL) {
-				sb.append(" = ");
+				sb.append(" = "); //$NON-NLS-1$
 				sb.append(key);
 				namesToValues.put(key, filter.getStringValue());
 				break;
 			}else if (filter.getOperator().operator == Operator.Op.STR_CONTAINS) {
-				sb.append(" like ");
+				sb.append(" like "); //$NON-NLS-1$
 				sb.append(key);
-				namesToValues.put(key, "%" + filter.getStringValue() + "%");
+				namesToValues.put(key, "%" + filter.getStringValue() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
 				break;
 			}
-			throw new Exception("Operator " + filter.getOperator().operator.key + " not supported for string attributes. ");
+			throw new Exception(MessageFormat.format(Messages.CategoryColumnEngine_OpNotSupported2, filter.getOperator().operator.key));
 		case TREE:
-			String key1 = ":a" + namesToValues.size();
-			String key2 = ":a" + (namesToValues.size()+1);
+			String key1 = ":a" + namesToValues.size(); //$NON-NLS-1$
+			String key2 = ":a" + (namesToValues.size()+1); //$NON-NLS-1$
 			String hkey = filter.getStringValue();
-			if (hkey == null) throw new Exception("No tree item provided for attribute tree filter " + attribute.getKeyId());
+			if (hkey == null) throw new Exception(MessageFormat.format(Messages.CategoryColumnEngine_TreeNodeNotFound, attribute.getKeyId()));
 			
 			String c1 = hkey;
-			String c2 = c1.substring(0,  c1.length() -1) + "/";
+			String c2 = c1.substring(0,  c1.length() -1) + "/"; //$NON-NLS-1$
 			sb.append(columnName);
-			sb.append(" ");
-			sb.append(" >= ");
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(" >= "); //$NON-NLS-1$
 			sb.append(key1);
-			sb.append(" AND ");
+			sb.append(" AND "); //$NON-NLS-1$
 			sb.append(columnName);
-			sb.append(" <= ");
+			sb.append(" <= "); //$NON-NLS-1$
 			sb.append(key2);
 			
 			namesToValues.put(key1, c1);
@@ -474,7 +477,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 		
 		}
 		
-		sb.append(" ) ");
+		sb.append(" ) "); //$NON-NLS-1$
 		return sb.toString();
 	}
 	
@@ -486,6 +489,6 @@ public class CategoryColumnEngine implements IColumnEngine {
 		}else if (filter instanceof BooleanExpression) {
 			return asSql((BooleanExpression)filter, namesToValues);
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 }

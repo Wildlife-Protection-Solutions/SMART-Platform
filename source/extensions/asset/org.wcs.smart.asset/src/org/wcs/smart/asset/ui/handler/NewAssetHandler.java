@@ -63,6 +63,7 @@ import org.hibernate.query.Query;
 import org.osgi.service.prefs.BackingStoreException;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.ui.AssetTypeLabelProvider;
@@ -169,7 +170,7 @@ public class NewAssetHandler {
 			try {
 				//ensure asset id doesn't already exist
 				if (checkDuplicate(session, assetId)) {
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Duplicate Asset ID", MessageFormat.format("Asset with id {0} already exists in the system.  Cannot duplicate asset id", assetId));
+					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.NewAssetHandler_DuplicateIdTitle, MessageFormat.format(Messages.NewAssetHandler_DuplicateIdMsg, assetId));
 					return null;
 				}
 				
@@ -184,7 +185,7 @@ public class NewAssetHandler {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.displayLog("Unable to create new asset: " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.NewAssetHandler_CreateError + ex.getMessage(), ex);
 				return null;
 			}
 		}
@@ -192,10 +193,10 @@ public class NewAssetHandler {
 	}
 	
 	private boolean checkDuplicate(Session session, String assetId) {
-		String query =  "SELECT count(*) FROM Asset WHERE LOWER(id) = :id AND conservationArea = :ca ";
+		String query =  "SELECT count(*) FROM Asset WHERE LOWER(id) = :id AND conservationArea = :ca "; //$NON-NLS-1$
 		Query<?> q = session.createQuery(query)
-		.setParameter("id", assetId.toLowerCase())
-		.setParameter("ca", SmartDB.getCurrentConservationArea());
+		.setParameter("id", assetId.toLowerCase()) //$NON-NLS-1$
+		.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		Long cnt = (Long)q.uniqueResult();
 		if (cnt == 0) return false;
 		return true;
@@ -248,7 +249,7 @@ public class NewAssetHandler {
 			
 			assetId = txtId.getText().trim();
 			if (assetId.isEmpty()) {
-				MessageDialog.openError(getShell(), "Error", "An asset Id must be provided.");
+				MessageDialog.openError(getShell(), Messages.NewAssetHandler_ErrorTitle, Messages.NewAssetHandler_IdRequired);
 				return;
 			}
 			boolean dup = false;
@@ -256,7 +257,7 @@ public class NewAssetHandler {
 				dup = checkDuplicate(s, assetId);
 			}
 			if (dup) {
-				MessageDialog.openError(getShell(), "Error", MessageFormat.format("The asset Id {0} is already used in the system.  The Asset Id must be unique.", assetId));
+				MessageDialog.openError(getShell(), Messages.NewAssetHandler_ErrorTitle, MessageFormat.format(Messages.NewAssetHandler_DuplicateAssetId, assetId));
 				return;
 			}
 			super.okPressed();
@@ -264,7 +265,7 @@ public class NewAssetHandler {
 		
 		private void validate() {
 			if (txtId.getText().trim().isEmpty()) {
-				setErrorMessage("An asset id is required.");
+				setErrorMessage(Messages.NewAssetHandler_AssetRequired);
 			}else {
 				setErrorMessage(null);
 			}
@@ -279,10 +280,10 @@ public class NewAssetHandler {
 			main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			Label l = new Label(main, SWT.NONE);
-			l.setText("Asset ID:");
+			l.setText(Messages.NewAssetHandler_AssetIdLabel);
 			
 			txtId = new Text(main, SWT.BORDER);
-			txtId.setText("");
+			txtId.setText(""); //$NON-NLS-1$
 			txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			if (defaultId != null) {
 				txtId.setText(defaultId);
@@ -292,7 +293,7 @@ public class NewAssetHandler {
 			});
 			
 			l = new Label(main, SWT.NONE);
-			l.setText("Asset Type:");
+			l.setText(Messages.NewAssetHandler_TypeLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 			
 			lstAssets = new TableViewer(main, SWT.READ_ONLY | SWT.BORDER);
@@ -319,9 +320,9 @@ public class NewAssetHandler {
 				}
 			});
 						
-			setMessage("Select values for the asset Id type.  The Id must be unique for all attributes across the Conservation Area");
-			setTitle("New Asset");
-			getShell().setText("New Asset");
+			setMessage(Messages.NewAssetHandler_Message);
+			setTitle(Messages.NewAssetHandler_Title);
+			getShell().setText(Messages.NewAssetHandler_Title);
 			
 			loadTypes.setSystem(true);
 			loadTypes.schedule();
@@ -337,14 +338,14 @@ public class NewAssetHandler {
 			btnOk.setEnabled(false);
 		}
 		
-		Job loadTypes = new Job("loading asset types") {
+		Job loadTypes = new Job(Messages.NewAssetHandler_loadingTypeJobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				List<AssetType> types = new ArrayList<>();
 				try(Session session = HibernateManager.openSession()){
 					types.addAll(QueryFactory.buildQuery(session, AssetType.class,
-							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList());
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList()); //$NON-NLS-1$
 					
 				}
 				

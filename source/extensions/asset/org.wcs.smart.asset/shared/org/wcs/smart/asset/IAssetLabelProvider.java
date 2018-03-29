@@ -31,15 +31,15 @@ import org.wcs.smart.ISharedLabelProvider;
  */
 public interface IAssetLabelProvider extends ISharedLabelProvider {
 	
-	public static final String ASSET_TABLE_NAME = "asset_table_name";
-	public static final String STATION_TABLE_NAME = "asset_station_name";
-	public static final String STATIONLOCATION_TABLE_NAME = "asset_stationlocation_name";
+	public static final String ASSET_TABLE_NAME = "asset_table_name"; //$NON-NLS-1$
+	public static final String STATION_TABLE_NAME = "asset_station_name"; //$NON-NLS-1$
+	public static final String STATIONLOCATION_TABLE_NAME = "asset_stationlocation_name"; //$NON-NLS-1$
 	
-	public static final String ID_COL_NAME = "asset_id_col_name";
-	public static final String ASSET_TYPE_COL_NAME = "asset_type_col_name";
-	public static final String ASSET_TYPEKEY_COL_NAME = "asset_type_key_name";
-	public static final String STATUS_COL_NAME = "asset_status_col_name";
-	public static final String STATUSKEY_COL_NAME = "asset_status_key_col_name";
-	public static final String POSITION_COL_NAME = "asset_position";
+	public static final String ID_COL_NAME = "asset_id_col_name"; //$NON-NLS-1$
+	public static final String ASSET_TYPE_COL_NAME = "asset_type_col_name"; //$NON-NLS-1$
+	public static final String ASSET_TYPEKEY_COL_NAME = "asset_type_key_name"; //$NON-NLS-1$
+	public static final String STATUS_COL_NAME = "asset_status_col_name"; //$NON-NLS-1$
+	public static final String STATUSKEY_COL_NAME = "asset_status_key_col_name"; //$NON-NLS-1$
+	public static final String POSITION_COL_NAME = "asset_position"; //$NON-NLS-1$
 
 }

@@ -113,15 +113,15 @@ public class AssetStationSummaryFeatureSource extends ContentFeatureSource {
 	
 	public static String getFeatureSchemaString(List<IOverviewTableColumn> columns){
 		StringBuilder sb = new StringBuilder();
-		sb.append("the_geom:");
-		sb.append("Point:srid=4326,");
-		sb.append("fid:String,");
+		sb.append("the_geom:"); //$NON-NLS-1$
+		sb.append("Point:srid=4326,"); //$NON-NLS-1$
+		sb.append("fid:String,"); //$NON-NLS-1$
 		for (IOverviewTableColumn c : columns) {
 			//key is used so it is the same through all languages or if the user changes the name
 			sb.append(c.getKey());
-			sb.append(":");
+			sb.append(":"); //$NON-NLS-1$
 			sb.append(c.getType().geotoolsType);
-			sb.append(",");
+			sb.append(","); //$NON-NLS-1$
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		

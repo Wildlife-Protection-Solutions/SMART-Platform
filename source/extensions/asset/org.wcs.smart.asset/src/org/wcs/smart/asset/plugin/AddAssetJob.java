@@ -33,6 +33,7 @@ import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -44,7 +45,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class AddAssetJob extends Job {
 
 	public AddAssetJob() {
-		super("Install/update asset plugin");
+		super(Messages.AddAssetJob_JobName);
 	}
 
 	@Override
@@ -62,10 +63,10 @@ public class AddAssetJob extends Job {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						AssetPlugIn.displayLog("Error installing plugin: " + ex.getMessage(), ex);
+						AssetPlugIn.displayLog(Messages.AddAssetJob_InstallError + ex.getMessage(), ex);
 					}
 				});
-				return new Status(IStatus.ERROR, AssetPlugIn.PLUGIN_ID, 1, "Error installing plugin: " + ex.getMessage(), ex);
+				return new Status(IStatus.ERROR, AssetPlugIn.PLUGIN_ID, 1, Messages.AddAssetJob_InstallError + ex.getMessage(), ex);
 			}
 		}
 		monitor.done();

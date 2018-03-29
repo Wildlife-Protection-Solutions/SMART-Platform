@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 import com.drew.metadata.Directory;
@@ -131,13 +132,13 @@ public class ExifTagSelector extends Dialog {
 		metadata.getControl().addListener(SWT.Dispose, e->bgColor.dispose());
 
 		TableViewerColumn colTag = new TableViewerColumn(metadata, SWT.NONE);
-		colTag.getColumn().setText("Tag");
+		colTag.getColumn().setText(Messages.ExifTagSelector_Tag);
 		colTag.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof Object[]) return (String) ((Object[])element)[0];
 				if (element instanceof String) return (String)element;
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			@Override
 			public Color getBackground(Object element) {
@@ -148,12 +149,12 @@ public class ExifTagSelector extends Dialog {
 		
 		
 		TableViewerColumn colTagValue = new TableViewerColumn(metadata, SWT.NONE);
-		colTagValue.getColumn().setText("Value");
+		colTagValue.getColumn().setText(Messages.ExifTagSelector_Value);
 		colTagValue.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof Object[]) return ((Tag) ((Object[])element)[1]).getDescription();
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			@Override
 			public Color getBackground(Object element) {

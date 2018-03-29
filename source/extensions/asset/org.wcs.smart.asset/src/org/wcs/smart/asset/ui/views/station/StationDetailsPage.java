@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetSecurityManager;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.asset.model.AssetStation;
@@ -55,7 +56,7 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class StationDetailsPage {
 
-	private static final String STATION_KEY = "STATION";
+	private static final String STATION_KEY = "STATION"; //$NON-NLS-1$
 
 	private StationEditor parentEditor;
 	
@@ -74,7 +75,7 @@ public class StationDetailsPage {
 		
 		AssetAttribute tmp = new AssetAttribute();
 		tmp.setType(AttributeType.POSITION);
-		tmp.setName("Position");
+		tmp.setName(Messages.StationDetailsPage_PositionLabel);
 		tmpLocationAttribute = new AssetStationAttributeValue();
 		tmpLocationAttribute.setAttribute(tmp);
 	}
@@ -116,7 +117,7 @@ public class StationDetailsPage {
 		attributeComp.setLayout(new GridLayout());
 		attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Label l = toolkit.createLabel(attributeComp, "Attributes");
+		Label l = toolkit.createLabel(attributeComp, Messages.StationDetailsPage_AttributesLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		FontData fd = l.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -161,8 +162,8 @@ public class StationDetailsPage {
 		List<AssetStationAttribute> stationAttributes = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
 			stationAttributes.addAll(
-					session.createQuery("FROM AssetStationAttribute WHERE attribute.conservationArea = :ca", AssetStationAttribute.class)
-					.setParameter("ca",  SmartDB.getCurrentConservationArea())
+					session.createQuery("FROM AssetStationAttribute WHERE attribute.conservationArea = :ca", AssetStationAttribute.class) //$NON-NLS-1$
+					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.list());
 			stationAttributes.forEach(ss->{
 				ss.getAttribute().getName();

@@ -41,6 +41,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetSecurityManager;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.asset.model.AssetStation;
@@ -81,7 +82,7 @@ public class StationLocationDetailsPage {
 		
 		AssetAttribute tmp = new AssetAttribute();
 		tmp.setType(AttributeType.POSITION);
-		tmp.setName("Position");
+		tmp.setName(Messages.StationLocationDetailsPage_PositionFieldName);
 		tmpLocationAttribute = new AssetStationLocationAttributeValue();
 		tmpLocationAttribute.setAttribute(tmp);
 	}
@@ -99,7 +100,7 @@ public class StationLocationDetailsPage {
 		toppanel.setLayout(new GridLayout(3, false));
 		toppanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		toolkit.createLabel(toppanel, "Station:");
+		toolkit.createLabel(toppanel, Messages.StationLocationDetailsPage_StationFieldName);
 		linkStn = toolkit.createHyperlink(toppanel, "", SWT.NONE);	 //$NON-NLS-1$
 		linkStn.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -134,7 +135,7 @@ public class StationLocationDetailsPage {
 		attributeComp.setLayout(new GridLayout());
 		attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Label l = toolkit.createLabel(attributeComp, "Attributes");
+		Label l = toolkit.createLabel(attributeComp, Messages.StationLocationDetailsPage_AttributesFieldName);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		FontData fd = l.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);

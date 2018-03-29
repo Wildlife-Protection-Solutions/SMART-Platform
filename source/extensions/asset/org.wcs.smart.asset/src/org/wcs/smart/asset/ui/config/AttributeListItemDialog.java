@@ -32,6 +32,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
@@ -88,9 +89,9 @@ public class AttributeListItemDialog extends TitleAreaDialog {
 			}
 		});
 		
-		setTitle("Asset Attribute List Items");
-		getShell().setText("Asset Attribute List Items");
-		setMessage("Create or edit asset attribute list item.");
+		setTitle(Messages.AttributeListItemDialog_Title);
+		getShell().setText(Messages.AttributeListItemDialog_Title);
+		setMessage(Messages.AttributeListItemDialog_Message);
 		
 		return parent;
 	}

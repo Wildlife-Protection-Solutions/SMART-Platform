@@ -34,6 +34,7 @@ import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
+import org.wcs.smart.asset.internal.Messages;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -47,7 +48,7 @@ public class AssetStationSummaryGeoResourceInfo extends IGeoResourceInfo {
 	private Logger logger = Logger.getLogger(AssetStationSummaryGeoResourceInfo.class.getName());
 	
 	public AssetStationSummaryGeoResourceInfo( AssetStationSummaryGeoResource resource, IProgressMonitor monitor){
-		this.title = "Asset Statistic Summary Layer Resource" ;
+		this.title = Messages.AssetStationSummaryGeoResourceInfo_LayerTitle ;
 		computeBounds(resource, monitor);
 	}
 	

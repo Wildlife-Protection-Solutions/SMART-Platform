@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetModuleSettings;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -112,8 +113,8 @@ public class AssetSettingsDialog extends TitleAreaDialog {
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("Station Buffer (m):");
-		l.setToolTipText("The maximum distance between an station and the incident for the incident to be automatically associated with the station.");
+		l.setText(Messages.AssetSettingsDialog_BufferLabel);
+		l.setToolTipText(Messages.AssetSettingsDialog_BufferTooltip);
 		
 		txtStationBuffer = new Text(parent, SWT.BORDER);
 		txtStationBuffer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -121,17 +122,17 @@ public class AssetSettingsDialog extends TitleAreaDialog {
 		txtStationBuffer.addListener(SWT.Modify,e->validate());
 		
 		l = new Label(parent, SWT.NONE);
-		l.setText("Location Buffer (m):");
-		l.setToolTipText("The maximum distance between an location and the incident for the incident to be automatically associated with the location.");
+		l.setText(Messages.AssetSettingsDialog_LocationBufferLabel);
+		l.setToolTipText(Messages.AssetSettingsDialog_LocationBufferTooltip);
 		
 		txtLocationBuffer = new Text(parent, SWT.BORDER);
 		txtLocationBuffer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtLocationBuffer.setText(DialogConstants.LOADING_TEXT);
 		txtLocationBuffer.addListener(SWT.Modify,e->validate());
 		
-		setTitle("Asset Settings");
-		getShell().setText("Asset Settings");
-		setMessage("Manage the asset settings in the system");
+		setTitle(Messages.AssetSettingsDialog_Title);
+		getShell().setText(Messages.AssetSettingsDialog_Title);
+		setMessage(Messages.AssetSettingsDialog_Message);
 		
 		loadSettings.schedule();
 		return parent;
@@ -143,21 +144,21 @@ public class AssetSettingsDialog extends TitleAreaDialog {
 		try {
 			value = Double.parseDouble(txtStationBuffer.getText());
 		}catch (Exception ex) {
-			setErrorMessage("Invalid station buffer value.  Value must be valid number greater than zero.");
+			setErrorMessage(Messages.AssetSettingsDialog_InvalidBufferValue);
 			return false;
 		}
 		if (value < 0) {
-			setErrorMessage("Invalid station buffer value.  Value must be valid number greater than zero.");
+			setErrorMessage(Messages.AssetSettingsDialog_InvalidBufferValue);
 			return false;
 		}
 		try {
 			value = Double.parseDouble(txtLocationBuffer.getText());
 		}catch (Exception ex) {
-			setErrorMessage("Invalid location buffer value.  Value must be valid number greater than zero.");
+			setErrorMessage(Messages.AssetSettingsDialog_InvalidBufferValueLocation);
 			return false;
 		}
 		if (value < 0) {
-			setErrorMessage("Invalid location buffer value.  Value must be valid number greater than zero.");
+			setErrorMessage(Messages.AssetSettingsDialog_InvalidBufferValueLocation);
 			return false;
 		}
 		getButton(IDialogConstants.OK_ID).setEnabled(true);
@@ -177,7 +178,7 @@ public class AssetSettingsDialog extends TitleAreaDialog {
 		return true;
 	}
 	
-	private Job loadSettings = new Job("load settings") {
+	private Job loadSettings = new Job(Messages.AssetSettingsDialog_loadingJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

@@ -29,11 +29,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.geotools.geometry.jts.JTS;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.asset.AssetHibernateManager;
+import org.wcs.smart.asset.IAssetLabelProvider;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
@@ -53,6 +56,20 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class FileProxy extends ISmartAttachment{
 
+	public static enum ErrorMessage{
+		ASSET_NOT_FOUND,
+		DATE_NOT_FOUND,
+		STATION_NOT_FOUND,
+		LOCATION_NOT_FOUND,
+		POSITION_NOT_FOUND,
+		NEW_STATION,
+		NEW_STATION_LOCATION;
+		
+		public String getMessage(Locale l) {
+			return SmartContext.INSTANCE.getClass(IAssetLabelProvider.class).getLabel(this, l);
+		}
+	}
+	
 	private Path file;
 	
 	private Date imageDate;
@@ -79,7 +96,6 @@ public class FileProxy extends ISmartAttachment{
 	private Set<FileProxy> fixedRelations = null;
 	//all relations will have the same group - this is number for displaying to the user
 	private Integer incidentGroup;
-	
 	//waypoint comment
 	private String wpComment;
 	
@@ -429,13 +445,13 @@ public class FileProxy extends ISmartAttachment{
 	 * If not valid, returns a message identifying the missing data
 	 * @return
 	 */
-	public String validMessage() {
-		if (getAsset() == null) return "No Assest found";
-		if (getImageDate() == null) return "No date found";
-		if (getStation() == null) return "No station found";
-		if (getStationLocation() == null) return "No station location found";
-		if (getX() == null || getY() == null) return "No position found";
-		return "";
+	public String validMessage(Locale l) {
+		if (getAsset() == null) return ErrorMessage.ASSET_NOT_FOUND.getMessage(l);
+		if (getImageDate() == null) return ErrorMessage.DATE_NOT_FOUND.getMessage(l);
+		if (getStation() == null) return ErrorMessage.STATION_NOT_FOUND.getMessage(l);
+		if (getStationLocation() == null) return ErrorMessage.LOCATION_NOT_FOUND.getMessage(l);
+		if (getX() == null || getY() == null) return ErrorMessage.POSITION_NOT_FOUND.getMessage(l);
+		return ""; //$NON-NLS-1$
 	}
 	
 	/**
@@ -530,7 +546,7 @@ public class FileProxy extends ISmartAttachment{
 				matching.setY(y);
 				matching.setConservationArea(ca);
 				//when we save we need to generate valid station ids
-				matching.setId(MessageFormat.format("** NEW STATION {0} **", processor.NewObjectCounter.getAndIncrement())); 
+				matching.setId(MessageFormat.format(ErrorMessage.NEW_STATION.getMessage(processor.getLocale()), processor.NewObjectCounter.getAndIncrement())); 
 				matching.setLocations(new ArrayList<>());
 			}
 			this.station = matching;
@@ -566,7 +582,7 @@ public class FileProxy extends ISmartAttachment{
 			matching.setStation(station);
 			matching.setAttributeValues(new ArrayList<>());
 			//when we save we set a valid id
-			matching.setId(MessageFormat.format("** NEW LOCATION {0} **", processor.NewObjectCounter.getAndIncrement())); 
+			matching.setId(MessageFormat.format(ErrorMessage.NEW_STATION_LOCATION.getMessage(processor.getLocale()), processor.NewObjectCounter.getAndIncrement())); 
 			matching.setX(x);
 			matching.setY(y);
 			station.getLocations().add(matching);

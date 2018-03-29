@@ -83,6 +83,7 @@ import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.engine.StatisticsEngine;
 import org.wcs.smart.asset.engine.StatisticsEngine.Statistic;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
@@ -139,7 +140,7 @@ public class AssetDeploymentPage {
 		summaryPanel.setLayout(new GridLayout(2, false));
 		summaryPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label l = toolkit.createLabel(summaryPanel, "Summary");
+		Label l = toolkit.createLabel(summaryPanel, Messages.AssetDeploymentPage_SummarySectionName);
 		FontData fd = l.getFont().getFontData()[0];
 		fd.setHeight(fd.getHeight() + 1);
 		fd.setStyle(SWT.BOLD);
@@ -153,7 +154,7 @@ public class AssetDeploymentPage {
 		for (IAssetSummary s : summaryValues) {
 			toolkit.createLabel(summaryPanel, s.getSummaryName());
 			
-			Label sv = toolkit.createLabel(summaryPanel, "");
+			Label sv = toolkit.createLabel(summaryPanel, ""); //$NON-NLS-1$
 			sv.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			sv.setData(s);
 			
@@ -173,7 +174,7 @@ public class AssetDeploymentPage {
 		((GridLayout)headerPanel.getLayout()).marginTop = 5;
 
 		
-		l = toolkit.createLabel(headerPanel, "Asset Deployments");
+		l = toolkit.createLabel(headerPanel, Messages.AssetDeploymentPage_SecitonName);
 		fd = l.getFont().getFontData()[0];
 		fd.setHeight(fd.getHeight() + 1);
 		fd.setStyle(SWT.BOLD);
@@ -190,19 +191,19 @@ public class AssetDeploymentPage {
 			
 			itemDelete = new ToolItem(toolbar, SWT.PUSH);
 			itemDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-			itemDelete.setToolTipText("delete selected deployments");
+			itemDelete.setToolTipText(Messages.AssetDeploymentPage_deleteTooltip);
 			itemDelete.addListener(SWT.Selection, e->deleteSelectedDeployments());
 			itemDelete.setEnabled(false);
 			
 			itemEdit = new ToolItem(toolbar, SWT.PUSH);
 			itemEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-			itemEdit.setToolTipText("edit selected deployments");
+			itemEdit.setToolTipText(Messages.AssetDeploymentPage_edittooltip);
 			itemEdit.addListener(SWT.Selection, e->editSelectedDeployments());
 			itemEdit.setEnabled(false);
 			
 			ToolItem itemAdd = new ToolItem(toolbar, SWT.PUSH);
 			itemAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-			itemAdd.setToolTipText("create a new asset deployment");
+			itemAdd.setToolTipText(Messages.AssetDeploymentPage_createTooltip);
 			itemAdd.addListener(SWT.Selection, e->addDeployment());
 			
 		}
@@ -253,7 +254,7 @@ public class AssetDeploymentPage {
 			Menu mnuDeployments = new Menu(tblDeployments.getControl());
 			
 			MenuItem mnuAdd = new MenuItem(mnuDeployments, SWT.PUSH);
-			mnuAdd.setText("New");
+			mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 			mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			mnuAdd.addListener(SWT.Selection, e-> addDeployment());
 					
@@ -319,27 +320,27 @@ public class AssetDeploymentPage {
 		
 		detailsPane.setLayout(new GridLayout(2, false));
 		
-		Label l = toolkit.createLabel(detailsPane, MessageFormat.format("{0} ({1})", deployment.getStationLocation().getId(), deployment.getStationLocation().getStation().getId()));
+		Label l = toolkit.createLabel(detailsPane, MessageFormat.format("{0} ({1})", deployment.getStationLocation().getId(), deployment.getStationLocation().getStation().getId())); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite dateDetails = toolkit.createComposite(detailsPane);
 		dateDetails.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		dateDetails.setLayout(new GridLayout(3, false));
 		
-		l = toolkit.createLabel(dateDetails, DateFormat.getDateInstance().format(deployment.getStartDate()) + "\n" + DateFormat.getTimeInstance().format(deployment.getStartDate()));
-		l = toolkit.createLabel(dateDetails, "   -   ");
+		l = toolkit.createLabel(dateDetails, DateFormat.getDateInstance().format(deployment.getStartDate()) + "\n" + DateFormat.getTimeInstance().format(deployment.getStartDate())); //$NON-NLS-1$
+		l = toolkit.createLabel(dateDetails, "   -   "); //$NON-NLS-1$
 		if (deployment.getEndDate() == null) {
-			l = toolkit.createLabel(dateDetails, "Current");
+			l = toolkit.createLabel(dateDetails, Messages.AssetDeploymentPage_CurrentDateLabel);
 		}else {
-			l = toolkit.createLabel(dateDetails, DateFormat.getDateInstance().format(deployment.getEndDate()) + "\n" + DateFormat.getTimeInstance().format(deployment.getEndDate()));
+			l = toolkit.createLabel(dateDetails, DateFormat.getDateInstance().format(deployment.getEndDate()) + "\n" + DateFormat.getTimeInstance().format(deployment.getEndDate())); //$NON-NLS-1$
 		}
 
-		l = toolkit.createLabel(detailsPane, "", SWT.SEPARATOR | SWT.HORIZONTAL);
+		l = toolkit.createLabel(detailsPane, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		if (allDeploymentAttributes != null) {
 			for (AssetTypeDeploymentAttribute a : allDeploymentAttributes) {
-				l = toolkit.createLabel(detailsPane, a.getAttribute().getName() + ":");
+				l = toolkit.createLabel(detailsPane, a.getAttribute().getName() + ":"); //$NON-NLS-1$
 				l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 				AssetDeploymentAttributeValue value = null;
 				for (AssetDeploymentAttributeValue v : deployment.getAttributeValues()) {
@@ -351,7 +352,7 @@ public class AssetDeploymentPage {
 				if (value != null) {
 					toolkit.createLabel(detailsPane, value.getAttributeValueAsString(Locale.getDefault(), SmartDB.DATABASE_CRS));
 				}else {
-					toolkit.createLabel(detailsPane, "");
+					toolkit.createLabel(detailsPane, ""); //$NON-NLS-1$
 				}
 			}
 		}
@@ -390,7 +391,7 @@ public class AssetDeploymentPage {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.displayLog("Unable to save changes to asset deployments.  Close editor and try again. " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetDeploymentPage_SaveError + ex.getMessage(), ex);
 			}
 		}
 		
@@ -412,13 +413,13 @@ public class AssetDeploymentPage {
 		}
 		if (toDelete.isEmpty()) return;
 		
-		if (!MessageDialog.openQuestion(parentEditor.getSite().getShell(), "Delete Deployment Records", 
-				MessageFormat.format("Are you sure you want to delete the {0} selected asset deployments? This will delete all data associated with these deployments including all images and observations.", toDelete.size()))){
+		if (!MessageDialog.openQuestion(parentEditor.getSite().getShell(), Messages.AssetDeploymentPage_DeleteTitle, 
+				MessageFormat.format(Messages.AssetDeploymentPage_DeleteConfirm, toDelete.size()))){
 			return;
 		}
 		
 		//confirm password
-		if (!AssetUtils.confirmPassword(parentEditor.getSite().getShell(), "Delete Asset Deployment", "Confirm your password to delete the selected deployment records.")) {
+		if (!AssetUtils.confirmPassword(parentEditor.getSite().getShell(), Messages.AssetDeploymentPage_ConfirmPasswordTitle, Messages.AssetDeploymentPage_ConfirmPasswordMsg)) {
 			return;
 		}
 		
@@ -437,7 +438,7 @@ public class AssetDeploymentPage {
 					session.flush();
 					
 					//delete any waypoints not associated with asset waypoint
-					try (ScrollableResults scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)").setParameter("source", AssetWaypointSource.KEY).scroll()){
+					try (ScrollableResults scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)").setParameter("source", AssetWaypointSource.KEY).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
 						while(scroll.next()) {
 							Waypoint wp = (Waypoint)scroll.get(0);
 							session.delete(wp);
@@ -451,7 +452,7 @@ public class AssetDeploymentPage {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.displayLog("Unable to save changes to asset deployments.  Close editor and try again. " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetDeploymentPage_SaveError + ex.getMessage(), ex);
 			}
 		}
 		allDeployments.removeAll(toDelete);
@@ -478,7 +479,7 @@ public class AssetDeploymentPage {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.displayLog("Unable to save changes to asset deployments.  Close editor and try again. " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetDeploymentPage_SaveError + ex.getMessage(), ex);
 			}
 			parentEditor.getAsset().computeStatus(session);
 		}
@@ -496,7 +497,7 @@ public class AssetDeploymentPage {
 		});
 	}
 	
-	private Job refreshSummaryStatsJob = new Job("loading asset history data") {
+	private Job refreshSummaryStatsJob = new Job(Messages.AssetDeploymentPage_loadinghistoryJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (assetSummaryValues == null) return org.eclipse.core.runtime.Status.OK_STATUS; 
@@ -516,8 +517,8 @@ public class AssetDeploymentPage {
 					String text = value.getValue();
 					String tooltip = null;
 					if (parentEditor.isDirty()) {
-						text = text + "**";
-						tooltip = "save changes to refresh statistics";
+						text = text + "**"; //$NON-NLS-1$
+						tooltip = Messages.AssetDeploymentPage_refreshTooltip;
 					}
 					value.getKey().setText(text);
 					value.getKey().setToolTipText(tooltip);
@@ -528,7 +529,7 @@ public class AssetDeploymentPage {
 		}
 	};
 	
-	Job loadHistoryDataJob = new Job("loading asset deployment data") {
+	Job loadHistoryDataJob = new Job(Messages.AssetDeploymentPage_loadingdataJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
@@ -542,7 +543,6 @@ public class AssetDeploymentPage {
 				//compute table columns
 				tableColumns.addAll(AssetDeploymentTableColumn.getTableColumns(asset, parentEditor.currentCrs, s));
 				
-				//TODO: add a date filter to list
 				//get deployment data
 				if (asset.getUuid() != null) {
 					List<AssetDeployment> temp = QueryFactory.buildQuery(s,AssetDeployment.class, 
@@ -558,7 +558,7 @@ public class AssetDeploymentPage {
 				});
 				
 				if (asset.getUuid() != null) {
-					allDeploymentAttributes.addAll(QueryFactory.buildQuery(s, AssetTypeDeploymentAttribute.class, "id.assetType", asset.getAssetType()).list());
+					allDeploymentAttributes.addAll(QueryFactory.buildQuery(s, AssetTypeDeploymentAttribute.class, "id.assetType", asset.getAssetType()).list()); //$NON-NLS-1$
 				}
 				allDeploymentAttributes.forEach(e->e.getAttribute().getUuid());
 			}
@@ -586,7 +586,7 @@ public class AssetDeploymentPage {
 	};
 	
 	
-	Job computeDeploymentStats = new Job("compute deployment stats") {
+	Job computeDeploymentStats = new Job(Messages.AssetDeploymentPage_statsJobName) {
 		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

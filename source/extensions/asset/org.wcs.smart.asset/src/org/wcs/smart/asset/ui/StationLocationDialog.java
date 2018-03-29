@@ -48,6 +48,7 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.asset.model.AssetStation;
@@ -94,7 +95,7 @@ public class StationLocationDialog extends TitleAreaDialog{
 	@Override
 	public void okPressed() {
 		if (!validate()) {
-			MessageDialog.openWarning(getShell(), "Error", "Cannot save changes until all attributes are valid.");
+			MessageDialog.openWarning(getShell(), Messages.StationLocationDialog_ErrorTitle, Messages.StationLocationDialog_InvalidAttributes);
 			return;
 		}
 		
@@ -136,7 +137,7 @@ public class StationLocationDialog extends TitleAreaDialog{
 				s.getTransaction().commit();
 				
 			}catch(Exception ex) {
-				AssetPlugIn.displayLog("Unable to save changes to station: " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.StationLocationDialog_SaveError + ex.getMessage(), ex);
 				s.getTransaction().rollback();
 				return;
 			}
@@ -154,7 +155,7 @@ public class StationLocationDialog extends TitleAreaDialog{
 		setErrorMessage(null);
 		
 		if (txtStationLocation.getText().isEmpty()) {
-			setErrorMessage("Station ID required");
+			setErrorMessage(Messages.StationLocationDialog_IdRequired);
 			return false;
 		}
 		
@@ -183,7 +184,7 @@ public class StationLocationDialog extends TitleAreaDialog{
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(form, SWT.NONE);
-		l.setText("Station:");
+		l.setText(Messages.StationLocationDialog_StationLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
 		l = new Label(form, SWT.NONE);
@@ -191,7 +192,7 @@ public class StationLocationDialog extends TitleAreaDialog{
 		
 		
 		l = new Label(form, SWT.NONE);
-		l.setText("ID:");
+		l.setText(Messages.StationLocationDialog_IdLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
 		txtStationLocation = new Text(form, SWT.BORDER);
@@ -199,13 +200,13 @@ public class StationLocationDialog extends TitleAreaDialog{
 		if (toUpdate.getId() != null) {
 			txtStationLocation.setText(toUpdate.getId());
 		}else if (toUpdate.getStation() != null){
-			txtStationLocation.setText(toUpdate.getStation().getId() + " - " + "Location " + (toUpdate.getStation().getLocations().size() + 1));
+			txtStationLocation.setText(toUpdate.getStation().getId() + " - " + Messages.StationLocationDialog_LocationLabel + (toUpdate.getStation().getLocations().size() + 1)); //$NON-NLS-1$
 		}
 		txtStationLocation.addListener(SWT.Modify, e->validate());
 		txtStationLocation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		AssetAttribute tmp = new AssetAttribute();
-		tmp.setName("Position");
+		tmp.setName(Messages.StationLocationDialog_PositionAttributeName);
 		tmp.setType(AttributeType.POSITION);
 		
 		locationEditor = new AttributeFieldEditor(form, tmp);
@@ -237,9 +238,9 @@ public class StationLocationDialog extends TitleAreaDialog{
 		
 		List<AssetStationLocationAttribute> attributes = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			String hql = "FROM AssetStationLocationAttribute a WHERE a.attribute.conservationArea = :ca ORDER BY a.order";
+			String hql = "FROM AssetStationLocationAttribute a WHERE a.attribute.conservationArea = :ca ORDER BY a.order"; //$NON-NLS-1$
 			Query<AssetStationLocationAttribute> query = session.createQuery(hql, AssetStationLocationAttribute.class);
-			query.setParameter("ca",  SmartDB.getCurrentConservationArea());
+			query.setParameter("ca",  SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 			attributes.addAll(query.getResultList());
 			attributes.forEach(a->{
 				a.getAttribute().getName();
@@ -271,9 +272,9 @@ public class StationLocationDialog extends TitleAreaDialog{
 		}
 		scroll.setMinSize(attributeComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
-		setTitle("Station Location Attributes");
-		setMessage("Configure the station location and associated attributes");
-		getShell().setText("Station Location Attributes");
+		setTitle(Messages.StationLocationDialog_Title);
+		setMessage(Messages.StationLocationDialog_Message);
+		getShell().setText(Messages.StationLocationDialog_Title);
 		
 		
 		return parent;

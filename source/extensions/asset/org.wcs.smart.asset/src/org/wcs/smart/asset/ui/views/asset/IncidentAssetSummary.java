@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import javax.persistence.Query;
 
 import org.hibernate.Session;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 
 /**
@@ -45,20 +46,20 @@ public class IncidentAssetSummary implements IAssetSummary {
 	
 	@Override
 	public String getSummaryName() {
-		return "Total Incidents:";
+		return Messages.IncidentAssetSummary_Name;
 	}
 
 	@Override
 	public String getSummaryValue(Asset asset, Session session) {
 		Long cnt = 0l;
 		if (asset.getUuid() != null) {
-			String queryString = "SELECT count(*) FROM AssetWaypoint WHERE id.assetDeployment.asset = :asset";
+			String queryString = "SELECT count(*) FROM AssetWaypoint WHERE id.assetDeployment.asset = :asset"; //$NON-NLS-1$
 			Query query = session.createQuery(queryString);
-			query.setParameter("asset", asset);
+			query.setParameter("asset", asset); //$NON-NLS-1$
 			cnt = (Long) query.getSingleResult();
 		}
 		
-		return MessageFormat.format("{0} incidents", cnt);
+		return MessageFormat.format(Messages.IncidentAssetSummary_CntFormat, cnt);
 	}
 
 }

@@ -44,6 +44,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.asset.AssetSecurityManager;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.ui.data.AssetDataPanel;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
@@ -92,7 +93,7 @@ public class AssetDataPage {
 		filterSection.setLayout(new GridLayout(3, false));
 		//((GridLayout)filterSection.getLayout()).marginWidth = 0;
 		filterSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		toolkit.createLabel(filterSection, "Date Filter:");
+		toolkit.createLabel(filterSection, Messages.AssetDataPage_DateFilter);
 		
 		 DateFilterComposite.DateFilter[] filters = new  DateFilterComposite.DateFilter[] {
 				 DateFilterComposite.DateFilter.LAST_30_DAYS,
@@ -126,7 +127,7 @@ public class AssetDataPage {
 		final Date startDate = dateFilter.getDateFilter().getStartDate();
 		final Date endDate = dateFilter.getDateFilter().getEndDate();
 
-		Job loadData = new Job("load data") {
+		Job loadData = new Job(Messages.AssetDataPage_loadDataJobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				if (parentEditor.getAsset().getUuid() == null) {
@@ -136,18 +137,18 @@ public class AssetDataPage {
 				
 				List<UUID> waypointUuids = new ArrayList<>();
 				try(Session session = HibernateManager.openSession()){
-					String query = "SELECT distinct id.waypoint.uuid, id.waypoint.dateTime FROM AssetWaypoint WHERE id.assetDeployment.asset = :asset ";
+					String query = "SELECT distinct id.waypoint.uuid, id.waypoint.dateTime FROM AssetWaypoint WHERE id.assetDeployment.asset = :asset "; //$NON-NLS-1$
 					if (startDate != null) {
-						query += " and id.waypoint.dateTime >= :startDate ";
+						query += " and id.waypoint.dateTime >= :startDate "; //$NON-NLS-1$
 					}
 					if (endDate != null) {
-						query += " and id.waypoint.dateTime <= :endDate ";
+						query += " and id.waypoint.dateTime <= :endDate "; //$NON-NLS-1$
 					}
-					query += " ORDER BY id.waypoint.dateTime desc ";
+					query += " ORDER BY id.waypoint.dateTime desc "; //$NON-NLS-1$
 					Query<?> q = session.createQuery(query);
-					if (startDate != null) q.setParameter("startDate",  startDate);
-					if (endDate != null) q.setParameter("endDate", endDate);
-					q.setParameter("asset", parentEditor.getAsset());
+					if (startDate != null) q.setParameter("startDate",  startDate); //$NON-NLS-1$
+					if (endDate != null) q.setParameter("endDate", endDate); //$NON-NLS-1$
+					q.setParameter("asset", parentEditor.getAsset()); //$NON-NLS-1$
 					for (Object x : q.list()) {
 						waypointUuids.add( (UUID)((Object[])x)[0]);  
 					}

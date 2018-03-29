@@ -41,6 +41,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
+import org.wcs.smart.asset.internal.Messages;
 
 /**
  * Asset data importer view
@@ -139,11 +140,11 @@ public class DataImporterView extends EditorPart{
 		
 		topPanel.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG) );
 		
-		Hyperlink lnkImport = toolkit.createHyperlink(topPanel, "Import Data Files", SWT.NONE);
+		Hyperlink lnkImport = toolkit.createHyperlink(topPanel, Messages.DataImporterView_ImportSectionName, SWT.NONE);
 		lnkImport.setFont(normalFont);
 		lnkImport.setBackground(topPanel.getBackground());
 		
-		Hyperlink lnkReview = toolkit.createHyperlink(topPanel, "Review Imported Files", SWT.NONE);
+		Hyperlink lnkReview = toolkit.createHyperlink(topPanel, Messages.DataImporterView_ReviewSectionName, SWT.NONE);
 		lnkReview.setFont(normalFont);
 		lnkReview.setBackground(topPanel.getBackground());
 		

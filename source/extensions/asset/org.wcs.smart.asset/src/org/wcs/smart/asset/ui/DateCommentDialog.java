@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -71,7 +72,7 @@ public class DateCommentDialog extends CommentDialog {
 	
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Record Date:");
+		l.setText(Messages.DateCommentDialog_DateLabel);
 	
 		dtDate = new DateTime(main, SWT.DATE | SWT.DROP_DOWN);
 		dtTime = new DateTime(main, SWT.TIME | SWT.DROP_DOWN);
@@ -80,7 +81,7 @@ public class DateCommentDialog extends CommentDialog {
 		SmartUtils.initDateDateTimeWidget(dtTime, selectedDateTime);
 		
 		l = new Label(main, SWT.NONE);
-		l.setText("Comment:");
+		l.setText(Messages.DateCommentDialog_CommentLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		txtComment = new Text(main, SWT.MULTI | SWT.V_SCROLL | SWT.WRAP | SWT.BORDER);

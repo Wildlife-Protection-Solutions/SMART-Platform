@@ -32,6 +32,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetModuleSettings;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -114,17 +115,17 @@ public class AssetMapColumnConfiguration {
 		if (newColumn.getKey() == null) {
 			//generate key
 			Set<String> existingKeys = allColumns.stream().map(e->e.getColumn().getKey()).collect(Collectors.toSet());
-			String key = newColumn.getName().toLowerCase().trim().replaceAll("[^a-z0-9]", "");
+			String key = newColumn.getName().toLowerCase().trim().replaceAll("[^a-z0-9]", ""); //$NON-NLS-1$ //$NON-NLS-2$
 			int cnt=1;
 			String newKey = key;
 			while(existingKeys.contains(newKey)) {
-				newKey = key + "" + cnt;
+				newKey = key + "" + cnt; //$NON-NLS-1$
 				cnt++;
 			}
 			newColumn.setKey(newKey);
 			if (newColumn.getKey() == null || newColumn.getKey().isEmpty()) {
 				//should never happen
-				throw new IllegalStateException("An asset overview map column requires a key value.");
+				throw new IllegalStateException(Messages.AssetMapColumnConfiguration_keyRequired);
 			}
 		}
 		OverviewTableColumnWrapper wrapper = new OverviewTableColumnWrapper(newColumn, false);
@@ -143,8 +144,8 @@ public class AssetMapColumnConfiguration {
 	public boolean saveConfiguration() {
 		try(Session session = HibernateManager.openSession()){ 
 			AssetModuleSettings savedMap = QueryFactory.buildQuery(session, AssetModuleSettings.class,
-					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-					new Object[] {"keyId", AssetModuleSettings.OVERVIEW_MAP_COLUMN_KEY} ).uniqueResult();
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+					new Object[] {"keyId", AssetModuleSettings.OVERVIEW_MAP_COLUMN_KEY} ).uniqueResult(); //$NON-NLS-1$
 			if (savedMap == null) {
 				savedMap = new AssetModuleSettings();
 				savedMap.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -156,10 +157,10 @@ public class AssetMapColumnConfiguration {
 				OverviewTableColumnWrapper column = allColumns.get(i);
 				
 				JSONObject jsoncolumn = new JSONObject();
-				jsoncolumn.put("isvisible", column.isVisible());
-				jsoncolumn.put("isfixed", column.isFixed());
-				jsoncolumn.put("order", i);
-				jsoncolumn.put("definition", column.getColumn().serialize());
+				jsoncolumn.put("isvisible", column.isVisible()); //$NON-NLS-1$
+				jsoncolumn.put("isfixed", column.isFixed()); //$NON-NLS-1$
+				jsoncolumn.put("order", i); //$NON-NLS-1$
+				jsoncolumn.put("definition", column.getColumn().serialize()); //$NON-NLS-1$
 				
 				columns.add(jsoncolumn);
 			}
@@ -169,7 +170,7 @@ public class AssetMapColumnConfiguration {
 				session.saveOrUpdate(savedMap);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
-				AssetPlugIn.displayLog("Unable to save changes to the asset overview map columns. " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetMapColumnConfiguration_SaveError + ex.getMessage(), ex);
 				session.getTransaction().rollback();
 				return false;
 			}
@@ -185,8 +186,8 @@ public class AssetMapColumnConfiguration {
 	 */
 	public void loadColumnConfiguration(Session session) {
 		AssetModuleSettings savedMap = QueryFactory.buildQuery(session, AssetModuleSettings.class, 
-				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-				new Object[] {"keyId", AssetModuleSettings.OVERVIEW_MAP_COLUMN_KEY} ).uniqueResult();
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"keyId", AssetModuleSettings.OVERVIEW_MAP_COLUMN_KEY} ).uniqueResult(); //$NON-NLS-1$
 		allColumns = new ArrayList<>();
 		
 		if (savedMap != null) {
@@ -199,9 +200,9 @@ public class AssetMapColumnConfiguration {
 				List<OverviewTableColumnWrapper> columns = new ArrayList<>();
 				for (int i = 0; i < json.size(); i ++) {
 					JSONObject obj = (JSONObject) json.get(i);
-					if (!obj.containsKey("definition")) continue;
+					if (!obj.containsKey("definition")) continue; //$NON-NLS-1$
 					
-					JSONObject definition = (JSONObject) obj.get("definition");
+					JSONObject definition = (JSONObject) obj.get("definition"); //$NON-NLS-1$
 					
 					IOverviewTableColumn column = FixedColumn.deserialize(definition);
 					if (column == null) column = CategoryOverviewColumn.deserialize(definition);
@@ -221,7 +222,7 @@ public class AssetMapColumnConfiguration {
 				columns.sort((a,b)->Integer.compare(a.getOrder(), b.getOrder()));
 				allColumns.addAll(columns);
 			}catch (Exception ex) {
-				AssetPlugIn.displayLog("Unable to load asset overview map settings from database. Default columns will be used. " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetMapColumnConfiguration_LoadError + ex.getMessage(), ex);
 			}
 				
 		}
@@ -246,13 +247,13 @@ public class AssetMapColumnConfiguration {
 	private static OverviewTableColumnWrapper createWrapper(JSONObject outerField, IOverviewTableColumn column) {
 		boolean isVisible = true;
 		boolean isFixed = true;
-		if (outerField.containsKey("isvisible")) {
-			isVisible = (Boolean)outerField.get("isvisible");
+		if (outerField.containsKey("isvisible")) { //$NON-NLS-1$
+			isVisible = (Boolean)outerField.get("isvisible"); //$NON-NLS-1$
 		}
-		if (outerField.containsKey("isfixed")) {
-			isFixed= (Boolean)outerField.get("isfixed");
+		if (outerField.containsKey("isfixed")) { //$NON-NLS-1$
+			isFixed= (Boolean)outerField.get("isfixed"); //$NON-NLS-1$
 		}
-		int order = ((Long) outerField.get("order")).intValue();
+		int order = ((Long) outerField.get("order")).intValue(); //$NON-NLS-1$
 		OverviewTableColumnWrapper c = new OverviewTableColumnWrapper(column, isFixed);
 		c.setVisible(isVisible);
 		c.setOrder(order);

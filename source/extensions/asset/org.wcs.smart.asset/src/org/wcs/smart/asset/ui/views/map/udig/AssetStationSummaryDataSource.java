@@ -73,7 +73,7 @@ public class AssetStationSummaryDataSource extends ContentDataStore{
 	}
 	
 	public static Name generateName(){
-		return new NameImpl("org.wcs.smart.asset.summary", "statistics"); //$NON-NLS-1$
+		return new NameImpl("org.wcs.smart.asset.summary", "statistics"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public static Filter createDateFilter(Date startDate, Date endDate){

@@ -24,6 +24,7 @@ package org.wcs.smart.asset;
 import java.text.MessageFormat;
 
 import org.hibernate.Session;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
 import org.wcs.smart.asset.model.AssetAttributeValue;
 import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
@@ -45,23 +46,23 @@ public class DeleteIntelAttributeListItemAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof AssetAttributeListItem)){
-			return "Object not an AssetAttributeListItem object.  Cannot delete.";
+			return Messages.DeleteIntelAttributeListItemAdvisor_InvalidObject;
 		}
 		AssetAttributeListItem attribute = (AssetAttributeListItem) object;
 		
 		Long linkCnt =  QueryFactory.buildCountQuery(session, AssetAttributeValue.class, new Object[] {"attributeListItem", attribute}); //$NON-NLS-1$
 		if (linkCnt > 0){
-			return MessageFormat.format("This attribute list item is referenced by {0} asset attributes.  These references must be removed before you can delete this item.", linkCnt);
+			return MessageFormat.format(Messages.DeleteIntelAttributeListItemAdvisor_AttributeRef, linkCnt);
 		}
 		
 		linkCnt =  QueryFactory.buildCountQuery(session, AssetStationAttributeValue.class, new Object[] {"attributeListItem", attribute}); //$NON-NLS-1$
 		if (linkCnt > 0){
-			return MessageFormat.format("This attribute list item is referenced by {0} station attributes.  These references must be removed before you can delete this item.", linkCnt);
+			return MessageFormat.format(Messages.DeleteIntelAttributeListItemAdvisor_StationRef, linkCnt);
 		}
 		
 		linkCnt =  QueryFactory.buildCountQuery(session, AssetDeploymentAttributeValue.class, new Object[] {"attributeListItem", attribute}); //$NON-NLS-1$
 		if (linkCnt > 0){
-			return MessageFormat.format("This attribute list item is referenced by {0} asset deployment attributes.  These references must be removed before you can delete this item.", linkCnt);
+			return MessageFormat.format(Messages.DeleteIntelAttributeListItemAdvisor_DeploymentRef, linkCnt);
 		}
 		
 		return null;

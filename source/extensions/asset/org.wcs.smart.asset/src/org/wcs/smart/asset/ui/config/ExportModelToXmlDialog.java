@@ -72,6 +72,7 @@ import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.inout.AssetModelDataToXml;
 import org.wcs.smart.asset.data.inout.AssetXmlToAssetData;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
 import org.wcs.smart.asset.model.AssetType;
@@ -95,7 +96,7 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 
 	public static final String PREFERENCE_DIR_KEY = ExportModelToXmlDialog.class.getCanonicalName() + ".dir"; //$NON-NLS-1$
 
-	public static final String EXPORT_DIALOG_TITLE = "Export Asset Configuration Data";
+	public static final String EXPORT_DIALOG_TITLE = Messages.ExportModelToXmlDialog_DialogTitle;
 
 	private Font boldFont;
 
@@ -136,7 +137,7 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 		if (attributes.isEmpty() && assetTypes.isEmpty() && metadataMappings.isEmpty()  
 				&& !includeModuleSettings && !includeStationAttributes && !includeStationLocationAttributes) {
 			MessageDialog.openInformation(getShell(), EXPORT_DIALOG_TITLE,
-					"Nothing to export");
+					Messages.ExportModelToXmlDialog_NothingToExportMsg);
 			return;
 		}
 
@@ -147,7 +148,7 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 			if (btnOpFile.getSelection()) {
 				String name = txtOutputFile.getText();
 				if (name.isEmpty()) {
-					MessageDialog.openInformation(getShell(), EXPORT_DIALOG_TITLE, "An export file must be selected");
+					MessageDialog.openInformation(getShell(), EXPORT_DIALOG_TITLE, Messages.ExportModelToXmlDialog_FileRequired);
 					return;
 				}
 				if (!name.endsWith(".xml")) { //$NON-NLS-1$
@@ -155,7 +156,7 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 				}
 				outputFile = Paths.get(name).toAbsolutePath();
 				if (Files.isDirectory(outputFile)) {
-					MessageDialog.openInformation(getShell(), EXPORT_DIALOG_TITLE,"Invalid output file selected");
+					MessageDialog.openInformation(getShell(), EXPORT_DIALOG_TITLE,Messages.ExportModelToXmlDialog_InvalidFile);
 					return;
 				}
 				AssetPlugIn.getDefault().getPreferenceStore().setValue(PREFERENCE_DIR_KEY, outputFile.toString());
@@ -166,7 +167,7 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 
 				if (Files.exists(outputFile)) {
 					if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOG_TITLE, MessageFormat
-							.format("The output file {0} exists?  Do you want to overwrite?", outputFile.toString()))) {
+							.format(Messages.ExportModelToXmlDialog_Overwrite, outputFile.toString()))) {
 						return;
 					}
 				}
@@ -176,12 +177,14 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 					toCa = (ConservationArea) x;
 				}
 				if (toCa == null) {
-					MessageDialog.openInformation(getShell(), EXPORT_DIALOG_TITLE, "Not conservation area selected");
+					MessageDialog.openInformation(getShell(), EXPORT_DIALOG_TITLE, Messages.ExportModelToXmlDialog_CaRequired);
 					return;
 				}
-				//TODO: delete file after export
 				outputFile = Files.createTempFile("smartasset." + System.nanoTime(), ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
 				
+			}else {
+				//not output option selected
+				return;
 			}
 
 			final String filename = outputFile.toString();
@@ -197,7 +200,7 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					SubMonitor progress = SubMonitor
 							.convert(monitor,
-									MessageFormat.format("Exporting asset configuration data to {0}.", exportCa == null ? outFile.getFileName().toString() : exportCa.getNameLabel()),
+									MessageFormat.format(Messages.ExportModelToXmlDialog_SubTaskName, exportCa == null ? outFile.getFileName().toString() : exportCa.getNameLabel()),
 									exportCa == null ? 1 : 2);
 					
 					
@@ -209,7 +212,7 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 							// export to file complete
 							getShell().getDisplay().syncExec(() -> MessageDialog.openInformation(getShell(),
 									EXPORT_DIALOG_TITLE,
-									MessageFormat.format("Export to {0} complete.", filename)));
+									MessageFormat.format(Messages.ExportModelToXmlDialog_Exportcomplete, filename)));
 						
 						} else {
 							// import data
@@ -227,16 +230,16 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 					
 					} catch (OperationCanceledException ex) {
 						getShell().getDisplay().syncExec(() -> MessageDialog.openInformation(getShell(),
-								EXPORT_DIALOG_TITLE, "Export canceled by user"));
+								EXPORT_DIALOG_TITLE, Messages.ExportModelToXmlDialog_ExportCanceled));
 					} catch (Exception e) {
-						AssetPlugIn.displayLog("Error exporting asset model data: " + e.getMessage(),
+						AssetPlugIn.displayLog(Messages.ExportModelToXmlDialog_ExportAssetError + e.getMessage(),
 								e);
 					}
 				}
 			});
 			if (error[0]) return;
 		} catch (Exception e) {
-			AssetPlugIn.displayLog("Error exporting model elements to xml file: " + e.getMessage(), e);
+			AssetPlugIn.displayLog(Messages.ExportModelToXmlDialog_ExportModelError + e.getMessage(), e);
 			return;
 		}
 		
@@ -266,14 +269,14 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 		outer.setLayout(new GridLayout());
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		createHeader(outer, "Export To");
+		createHeader(outer, Messages.ExportModelToXmlDialog_ExportToLabel);
 
 		Composite fileSection = new Composite(outer, SWT.NONE);
 		fileSection.setLayout(new GridLayout(3, false));
 		fileSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		btnOpFile = new Button(fileSection, SWT.RADIO);
-		btnOpFile.setText("File:");
+		btnOpFile.setText(Messages.ExportModelToXmlDialog_FileLabel);
 
 		txtOutputFile = new Text(fileSection, SWT.BORDER);
 		txtOutputFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -291,19 +294,19 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 		btnBrowse.addListener(SWT.Selection, e -> {
 			FileDialog dialog = new FileDialog(getShell(), SWT.SAVE);
 			dialog.setFilterExtensions(new String[] { "*.xml", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$
-			dialog.setFilterNames(new String[] { "XML Files (*.xml)", "All Files (*.*)"});
+			dialog.setFilterNames(new String[] { Messages.ExportModelToXmlDialog_XMLFile, Messages.ExportModelToXmlDialog_AllFiles});
 			String t = txtOutputFile.getText();
 			if (t.length() > 0) {
 				dialog.setFileName(t);
 			}
-			dialog.setText("Select export file");
+			dialog.setText(Messages.ExportModelToXmlDialog_FileExportTitle);
 			String file = dialog.open();
 			if (file != null)
 				txtOutputFile.setText(file);
 		});
 
 		btnOpCa = new Button(fileSection, SWT.RADIO);
-		btnOpCa.setText("Conservation Area:");
+		btnOpCa.setText(Messages.ExportModelToXmlDialog_CaOption);
 
 		cmbCa = new ComboViewer(fileSection, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.DROP_DOWN);
 		cmbCa.setContentProvider(ArrayContentProvider.getInstance());
@@ -335,7 +338,7 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 		((GridLayout) attributeSection.getLayout()).marginWidth = 0;
 		((GridLayout) attributeSection.getLayout()).marginHeight = 0;
 		attributeSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		createHeader(attributeSection, "Attributes");
+		createHeader(attributeSection, Messages.ExportModelToXmlDialog_AttributesLabel);
 		lstAttributes = createTableViewer(attributeSection, new AttributeLabelProvider(), null);
 				
 		// asset types
@@ -344,7 +347,7 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 		((GridLayout) assetTypeSection.getLayout()).marginWidth = 0;
 		((GridLayout) assetTypeSection.getLayout()).marginHeight = 0;
 		assetTypeSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		createHeader(assetTypeSection, "Asset Types");
+		createHeader(assetTypeSection, Messages.ExportModelToXmlDialog_AssetTypesLabel);
 		lstAssetTypes = createTableViewer(assetTypeSection, new AssetTypeLabelProvider(), null);
 
 		// metadata mappings
@@ -353,7 +356,7 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 		((GridLayout) metadataSection.getLayout()).marginWidth = 0;
 		((GridLayout) metadataSection.getLayout()).marginHeight = 0;
 		metadataSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		createHeader(metadataSection, "File Metadata Mappings");
+		createHeader(metadataSection, Messages.ExportModelToXmlDialog_MetadataMappingsLabel);
 		lstMetadataMappings = createTableViewer(metadataSection, new LabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -361,25 +364,25 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 					AssetMetadataMapping mm = (AssetMetadataMapping)element;
 					StringBuilder sb = new StringBuilder();
 					sb.append(mm.getMetadataType().name());
-					sb.append(" (");
+					sb.append(" ("); //$NON-NLS-1$
 					sb.append(mm.getMetadataKey());
-					sb.append(" ) ");
+					sb.append(" ) "); //$NON-NLS-1$
 					if (mm.getMappedAssetProperty() != null) sb.append(mm.getMappedAssetProperty().name());
 					if (mm.getMappedCategory() != null) {
 						sb.append(mm.getMappedCategory().getName());
-						sb.append(" ");
+						sb.append(" "); //$NON-NLS-1$
 					}
 					if (mm.getMappedAttribute() != null) {
 						sb.append(mm.getMappedAttribute().getName());
-						sb.append(" ");
+						sb.append(" "); //$NON-NLS-1$
 					}
 					if (mm.getMappedListItem() != null) {
 						sb.append(mm.getMappedListItem().getName());
-						sb.append(" ");
+						sb.append(" "); //$NON-NLS-1$
 					}
 					if (mm.getMappedTreeNode() != null) {
 						sb.append(mm.getMappedTreeNode().getName());
-						sb.append(" ");
+						sb.append(" "); //$NON-NLS-1$
 					}
 					return sb.toString();
 				}
@@ -393,29 +396,29 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 		((GridLayout) configSection.getLayout()).marginWidth = 0;
 		((GridLayout) configSection.getLayout()).marginHeight = 0;
 		configSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		createHeader(configSection, "Configuration");
+		createHeader(configSection, Messages.ExportModelToXmlDialog_ConfigurationLabel);
 		
 		btnIncludeModuleSettings= new Button(configSection, SWT.CHECK);
-		btnIncludeModuleSettings.setText("Include Asset Module Settings");
-		btnIncludeModuleSettings.setToolTipText("includes items such as station and location buffer distances");
+		btnIncludeModuleSettings.setText(Messages.ExportModelToXmlDialog_IncludeSettiongsOp);
+		btnIncludeModuleSettings.setToolTipText(Messages.ExportModelToXmlDialog_IncludeSettingstooltip);
 		btnIncludeModuleSettings.setSelection(true);
 		
 		btnIncludeStationAttributes= new Button(configSection, SWT.CHECK);
-		btnIncludeStationAttributes.setText("Include Station Attributes");
-		btnIncludeStationAttributes.setToolTipText("includes list of attributes collected for stations");
+		btnIncludeStationAttributes.setText(Messages.ExportModelToXmlDialog_IncludeStationsOption);
+		btnIncludeStationAttributes.setToolTipText(Messages.ExportModelToXmlDialog_IncludeStationsTooltips);
 		btnIncludeStationAttributes.setSelection(true);
 		
 		btnIncludeLocationAttributes= new Button(configSection, SWT.CHECK);
-		btnIncludeLocationAttributes.setText("Include Location Attributes");
-		btnIncludeLocationAttributes.setToolTipText("includes list of attributes collected for locations");
+		btnIncludeLocationAttributes.setText(Messages.ExportModelToXmlDialog_IncludeLocations);
+		btnIncludeLocationAttributes.setToolTipText(Messages.ExportModelToXmlDialog_IncludeLocationsTooltip);
 		btnIncludeLocationAttributes.setSelection(true);
 		
 		// load data
 		initializeLists.schedule();
 
-		setTitle("Export Asset Model");
-		setMessage("Export Asset model configuration");
-		getShell().setText("Export Asset Model");
+		setTitle(Messages.ExportModelToXmlDialog_Title);
+		setMessage(Messages.ExportModelToXmlDialog_Message);
+		getShell().setText(Messages.ExportModelToXmlDialog_Title);
 
 		return parent;
 	}
@@ -429,10 +432,10 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 		((GridLayout) action.getLayout()).marginHeight = 0;
 
 		Link selectAll = new Link(action, SWT.NONE);
-		selectAll.setText("<a>" + "All" + "</a>"); 
+		selectAll.setText("<a>" + Messages.ExportModelToXmlDialog_AllOption + "</a>");  //$NON-NLS-1$ //$NON-NLS-2$
 
 		Link selectNone = new Link(action, SWT.NONE);
-		selectNone.setText("<a>" + "None" + "</a>"); 
+		selectNone.setText("<a>" + Messages.ExportModelToXmlDialog_NoneOption + "</a>");  //$NON-NLS-1$ //$NON-NLS-2$
 		selectNone.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 
 		CheckboxTableViewer viewer = CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
@@ -481,7 +484,7 @@ public class ExportModelToXmlDialog extends TitleAreaDialog {
 		return true;
 	}
 
-	Job initializeLists = new Job("initializing data") {
+	Job initializeLists = new Job(Messages.ExportModelToXmlDialog_initJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

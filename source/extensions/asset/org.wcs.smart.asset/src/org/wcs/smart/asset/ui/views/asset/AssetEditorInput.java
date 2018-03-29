@@ -69,7 +69,7 @@ public class AssetEditorInput implements IEditorInput {
 
 	@Override
 	public String getName() {
-		if (assetId == null) return "";
+		if (assetId == null) return ""; //$NON-NLS-1$
 		return assetId;
 	}
 

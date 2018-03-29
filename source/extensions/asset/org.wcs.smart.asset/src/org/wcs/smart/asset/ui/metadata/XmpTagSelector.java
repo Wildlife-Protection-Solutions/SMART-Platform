@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -124,24 +125,24 @@ public class XmpTagSelector extends Dialog {
 		metadata.getControl().addListener(SWT.Dispose, e->bgColor.dispose());
 
 		TableViewerColumn colTag = new TableViewerColumn(metadata, SWT.NONE);
-		colTag.getColumn().setText("Tag");
+		colTag.getColumn().setText(Messages.XmpTagSelector_Tag);
 		colTag.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof String[]) return (String) ((String[])element)[0];
 				if (element instanceof String) return (String)element;
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 		});
 		
 		
 		TableViewerColumn colTagValue = new TableViewerColumn(metadata, SWT.NONE);
-		colTagValue.getColumn().setText("Value");
+		colTagValue.getColumn().setText(Messages.XmpTagSelector_Value);
 		colTagValue.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof String[]) return (String) ((String[])element)[1];
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			@Override
 			public Color getBackground(Object element) {

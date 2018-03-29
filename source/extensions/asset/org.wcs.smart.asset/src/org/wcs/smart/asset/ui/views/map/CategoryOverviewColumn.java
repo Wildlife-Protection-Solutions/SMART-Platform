@@ -111,21 +111,21 @@ public class CategoryOverviewColumn implements IOverviewTableColumn{
 	@Override
 	public JSONObject serialize() {
 		JSONObject json = new JSONObject();
-		json.put("type", "category");
-		json.put("key", key);
-		json.put("name", name);
-		json.put("category", categoryKey);
-		json.put("attribute",  attributeFilter);
+		json.put("type", "category"); //$NON-NLS-1$ //$NON-NLS-2$
+		json.put("key", key); //$NON-NLS-1$
+		json.put("name", name); //$NON-NLS-1$
+		json.put("category", categoryKey); //$NON-NLS-1$
+		json.put("attribute",  attributeFilter); //$NON-NLS-1$
 		return json;
 	}
 	
 	public static CategoryOverviewColumn deserialize(JSONObject json) {
-		if (json.containsKey("type")) {
-			if (json.get("type").equals("category")) {
-				String key = (String)json.get("key");
-				String name = (String)json.get("name");
-				String category = (String)json.get("category");
-				String attribute = (String)json.get("attribute");
+		if (json.containsKey("type")) { //$NON-NLS-1$
+			if (json.get("type").equals("category")) { //$NON-NLS-1$ //$NON-NLS-2$
+				String key = (String)json.get("key"); //$NON-NLS-1$
+				String name = (String)json.get("name"); //$NON-NLS-1$
+				String category = (String)json.get("category"); //$NON-NLS-1$
+				String attribute = (String)json.get("attribute"); //$NON-NLS-1$
 				if (key != null && name != null && category != null && attribute != null) {
 					CategoryOverviewColumn c = new CategoryOverviewColumn(name, category, attribute);
 					c.setKey(key);

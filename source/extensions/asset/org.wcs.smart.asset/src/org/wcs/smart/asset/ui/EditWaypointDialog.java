@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
@@ -92,13 +93,13 @@ public class EditWaypointDialog extends TitleAreaDialog{
 	@Override
 	public void okPressed() {
 		if (!validate()) {
-			MessageDialog.openWarning(getShell(), "Error", "Cannot save changes until all attributes are valid.");
+			MessageDialog.openWarning(getShell(), Messages.EditWaypointDialog_ErrorTitle, Messages.EditWaypointDialog_ErrorMessage);
 			return;
 		}
 		
 		Date newDateTime =  SmartUtils.combineDateTime(SmartUtils.getDate(dDate), SmartUtils.getTime(dTime));
 		if (Math.abs(toUpdate.getDateTime().getTime() - newDateTime.getTime()) > 1000 * 60 * 60 * 24) {
-			if (!MessageDialog.openQuestion(getShell(), "Edit", "The new date/time is more than 1 day away from the existing date/time.  Are you sure you want to continue?")) return;
+			if (!MessageDialog.openQuestion(getShell(), Messages.EditWaypointDialog_EditTitle, Messages.EditWaypointDialog_EditMessage)) return;
 		}
 		toUpdate.setDateTime(newDateTime);
 		
@@ -127,11 +128,11 @@ public class EditWaypointDialog extends TitleAreaDialog{
 			try {
 				int wpid = Integer.parseInt(txtId.getText().trim());
 				if (wpid < 0) {
-					setErrorMessage("Waypoint Id must be numeric greater than 0");
+					setErrorMessage(Messages.EditWaypointDialog_InvalidWpId);
 					return false;
 				}
 			}catch (Exception ex) {
-				setErrorMessage("Waypoint Id must be numeric greater than 0");
+				setErrorMessage(Messages.EditWaypointDialog_InvalidWpId);
 				return false;
 			}
 		}
@@ -148,7 +149,7 @@ public class EditWaypointDialog extends TitleAreaDialog{
 		
 		if (showId) {
 			Label l = new Label(form, SWT.NONE);
-			l.setText("ID:");
+			l.setText(Messages.EditWaypointDialog_IdLabel);
 			l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 			
 			txtId = new Text(form, SWT.BORDER);
@@ -159,7 +160,7 @@ public class EditWaypointDialog extends TitleAreaDialog{
 		}
 		
 		Label l = new Label(form, SWT.NONE);
-		l.setText("Date/Time:");
+		l.setText(Messages.EditWaypointDialog_DateTimeLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dDate = new DateTime(form, SWT.DROP_DOWN | SWT.MEDIUM | SWT.DATE);
@@ -172,11 +173,11 @@ public class EditWaypointDialog extends TitleAreaDialog{
 		
 		if (showComment) {
 			l = new Label(form, SWT.NONE);
-			l.setText("Comment:");
+			l.setText(Messages.EditWaypointDialog_CommentLabel);
 			l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			
 			txtComment = new Text(form, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI | SWT.WRAP);
-			txtComment.setText(toUpdate.getComment() == null ? "" : toUpdate.getComment());
+			txtComment.setText(toUpdate.getComment() == null ? "" : toUpdate.getComment()); //$NON-NLS-1$
 			txtComment.addListener(SWT.Modify,  e->validate());
 			txtComment.setTextLimit(Waypoint.COMMENT_MAX_LENGTH);
 			txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
@@ -184,9 +185,9 @@ public class EditWaypointDialog extends TitleAreaDialog{
 			((GridData)txtComment.getLayoutData()).heightHint = 300;
 			
 		}
-		setTitle("Waypoint Attributes");
-		setMessage("Select the waypoint date/time");
-		getShell().setText("Waypoints Attributes");
+		setTitle(Messages.EditWaypointDialog_Title);
+		setMessage(Messages.EditWaypointDialog_Message);
+		getShell().setText(Messages.EditWaypointDialog_Title);
 		
 		return parent;
 	}

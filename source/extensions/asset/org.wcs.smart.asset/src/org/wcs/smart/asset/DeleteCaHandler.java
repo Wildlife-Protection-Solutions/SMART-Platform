@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
 
@@ -40,14 +41,14 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 	//execute before waypoints are removed 
 	public static final int EXECUTE_ORDER =  org.wcs.smart.observation.CaDeleteHandler.DELETE_ORDER + 1;
 	
-	private static final String SUB_TASK_MSG = "Deleting Asset Data ({0}) ...";
+	private static final String SUB_TASK_MSG = Messages.DeleteCaHandler_TaskName;
 	
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session,
 			IProgressMonitor monitor) throws Exception {
 		//labels are dealt with by core Conservation Area delete engine 
 		
-		monitor.subTask("Delete asset data");
+		monitor.subTask(Messages.DeleteCaHandler_SubTask);
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "Asset Attribute Value")); //$NON-NLS-1$
 		Query<?>  q = session.createQuery("delete from  AssetAttributeValue sa where sa.id.attribute in (select a from AssetAttribute a where conservationArea = :ca)"); //$NON-NLS-1$

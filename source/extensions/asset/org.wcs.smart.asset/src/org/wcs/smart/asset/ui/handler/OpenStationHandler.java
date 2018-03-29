@@ -35,6 +35,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.ui.views.asset.AssetListView;
 import org.wcs.smart.asset.ui.views.station.StationEditor;
 import org.wcs.smart.asset.ui.views.station.StationEditorInput;
@@ -67,7 +68,7 @@ public class OpenStationHandler {
 			}
 			
 		} catch (PartInitException e) {
-			AssetPlugIn.displayLog(MessageFormat.format("Error opening station editor: {0}", e.getMessage()), e);
+			AssetPlugIn.displayLog(MessageFormat.format(Messages.OpenStationHandler_OpenError, e.getMessage()), e);
 		}
 	}
 	

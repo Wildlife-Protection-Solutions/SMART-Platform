@@ -49,6 +49,7 @@ import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.asset.model.AssetStation;
@@ -94,7 +95,7 @@ public class StationDialog extends TitleAreaDialog{
 	@Override
 	public void okPressed() {
 		if (!validate()) {
-			MessageDialog.openWarning(getShell(), "Error", "Cannot save changes until all attributes are valid.");
+			MessageDialog.openWarning(getShell(), Messages.StationDialog_ErrorTitle, Messages.StationDialog_InvalidAttributes);
 			return;
 		}
 		
@@ -134,12 +135,12 @@ public class StationDialog extends TitleAreaDialog{
 			try {
 				
 				List<AssetStation> items = QueryFactory.buildQuery(s, AssetStation.class, 
-						new Object[] {"conservationArea", toUpdate.getConservationArea()},
-						new Object[] {"id", toUpdate.getId()}).list();
+						new Object[] {"conservationArea", toUpdate.getConservationArea()}, //$NON-NLS-1$
+						new Object[] {"id", toUpdate.getId()}).list(); //$NON-NLS-1$
 				for (AssetStation i : items) {
 					if (!i.equals(toUpdate)) {
-						MessageDialog.openError(getShell(), "Duplicate ID", 
-								MessageFormat.format("A station with the id ''{0}'' already exists.  You cannot duplicate Station IDs.  Please use a different ID and try again.", toUpdate.getId()));
+						MessageDialog.openError(getShell(), Messages.StationDialog_DuplicateIdTitle, 
+								MessageFormat.format(Messages.StationDialog_DuplicateIdMessage, toUpdate.getId()));
 						return;
 					}
 				}
@@ -148,7 +149,7 @@ public class StationDialog extends TitleAreaDialog{
 				s.getTransaction().commit();
 				
 			}catch(Exception ex) {
-				AssetPlugIn.displayLog("Unable to save changes to station: " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.StationDialog_SaveError + ex.getMessage(), ex);
 				s.getTransaction().rollback();
 				if (isNew) toUpdate.setUuid(null);
 				return;
@@ -165,18 +166,18 @@ public class StationDialog extends TitleAreaDialog{
 		setErrorMessage(null);
 		
 		if (txtStation.getText().isEmpty()) {
-			setErrorMessage("Station ID required");
+			setErrorMessage(Messages.StationDialog_IdRequired);
 			return false;
 		}
 		
 		if (!locationEditor.isValid()) {
-			setErrorMessage("A valid location for the station is required");
+			setErrorMessage(Messages.StationDialog_LocationRequired);
 			return false;
 		}
 		AssetStationAttributeValue tmp = new AssetStationAttributeValue();
 		locationEditor.updateValue(tmp);
 		if (tmp.getNumberValue() == null || tmp.getNumberValue2() == null) {
-			setErrorMessage("A location for the station is required");
+			setErrorMessage(Messages.StationDialog_LocationRequired);
 			return false;
 		}
 		
@@ -203,7 +204,7 @@ public class StationDialog extends TitleAreaDialog{
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(form, SWT.NONE);
-		l.setText("ID:");
+		l.setText(Messages.StationDialog_IdLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		txtStation = new Text(form, SWT.BORDER);
@@ -213,7 +214,7 @@ public class StationDialog extends TitleAreaDialog{
 		txtStation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		AssetAttribute tmp = new AssetAttribute();
-		tmp.setName("Position");
+		tmp.setName(Messages.StationDialog_PositionLabel);
 		tmp.setType(AttributeType.POSITION);
 		
 		SelectionListener validateListener = new SelectionListener() {
@@ -249,9 +250,9 @@ public class StationDialog extends TitleAreaDialog{
 		
 		List<AssetStationAttribute> attributes = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			String hql = "FROM AssetStationAttribute a WHERE a.attribute.conservationArea = :ca ORDER BY a.order";
+			String hql = "FROM AssetStationAttribute a WHERE a.attribute.conservationArea = :ca ORDER BY a.order"; //$NON-NLS-1$
 			Query<AssetStationAttribute> query = session.createQuery(hql, AssetStationAttribute.class);
-			query.setParameter("ca",  SmartDB.getCurrentConservationArea());
+			query.setParameter("ca",  SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 			attributes.addAll(query.getResultList());
 			attributes.forEach(a->{
 				a.getAttribute().getName();
@@ -277,9 +278,9 @@ public class StationDialog extends TitleAreaDialog{
 		}
 		scroll.setMinSize(attributeComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
-		setTitle("New Station");
-		setMessage("Configure the station and associated attributes");
-		getShell().setText("Station Attributes");
+		setTitle(Messages.StationDialog_Title);
+		setMessage(Messages.StationDialog_Message);
+		getShell().setText(Messages.StationDialog_Title);
 		
 		return parent;
 	}

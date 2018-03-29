@@ -36,6 +36,7 @@ import org.wcs.smart.asset.data.importer.ActionableWarning;
 import org.wcs.smart.asset.data.importer.FileProcessor;
 import org.wcs.smart.asset.data.importer.FileProxy;
 import org.wcs.smart.asset.data.importer.NewLocationWarning;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.StationLocationDialog;
@@ -97,7 +98,7 @@ public class NewLocationAction implements ImportAction {
 	}
 	
 	public String getMenuLabel() {
-		return MessageFormat.format("Create Location {0}", warning.getLocationId());
+		return MessageFormat.format(Messages.NewLocationAction_ActionName, warning.getLocationId());
 	}
 	
 	@Override

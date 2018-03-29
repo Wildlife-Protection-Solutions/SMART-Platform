@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.asset.internal.Messages;
 
 /**
  * A header composite a label that can be edited by clicking on it
@@ -171,8 +172,8 @@ public class IdFieldHeader extends Composite {
 	
 	private boolean validateName(String name){
 		if (name.length() > MAX_NAME_LENGTH){
-			MessageDialog.openError(getShell(), "Invalid Identifier",
-					MessageFormat.format("Identifier must be fewer then {0} characters.", new Object[]{MAX_NAME_LENGTH}));
+			MessageDialog.openError(getShell(), Messages.IdFieldHeader_InvalidIdTitle,
+					MessageFormat.format(Messages.IdFieldHeader_InvalidIdMessage, new Object[]{MAX_NAME_LENGTH}));
 			return false;
 		}
 		return true;

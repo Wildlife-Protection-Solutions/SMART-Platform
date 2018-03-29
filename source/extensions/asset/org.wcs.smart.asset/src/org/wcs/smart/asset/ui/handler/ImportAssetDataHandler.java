@@ -30,6 +30,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.ui.views.data.DataImporterInput;
 import org.wcs.smart.asset.ui.views.data.DataImporterView;
 import org.wcs.smart.observation.ui.FieldDataPerspective;
@@ -51,7 +52,7 @@ public class ImportAssetDataHandler {
 		try {			
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, DataImporterView.ID);
 		} catch (PartInitException e) {
-			AssetPlugIn.displayLog(MessageFormat.format("Error opening station editor: {0}", e.getMessage()), e);
+			AssetPlugIn.displayLog(MessageFormat.format(Messages.ImportAssetDataHandler_OpenError, e.getMessage()), e);
 		}	
 	}
 	

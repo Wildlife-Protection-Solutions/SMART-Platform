@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.asset.map.engine;
 
+import java.text.MessageFormat;
+
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.ui.views.map.CombinedOverviewColumn;
 import org.wcs.smart.asset.ui.views.map.StationData;
 
@@ -53,7 +56,7 @@ public class CombinedColumnEngine {
 		}else if (filter instanceof BracketExpression) {
 			return asSql((BracketExpression)filter, data);
 		}
-		throw new Exception("expression of type " + filter.getClass().getName() + " is not supported.");
+		throw new Exception(MessageFormat.format(Messages.CombinedColumnEngine_expressionNotSupported, filter.getClass().getName()));
 	}
 	
 	
@@ -68,7 +71,8 @@ public class CombinedColumnEngine {
 			case TIMES: return part1 * part2;
 			default: 
 		}
-		throw new Exception("operator of type " + filter.getOperator().operator.key + " is not supported fo combined columns");
+		throw new Exception(MessageFormat.format(Messages.CombinedColumnEngine_OpNotSupported, filter.getOperator().operator.key));
+		
 	}
 	
 	private static Double asSql(ColumnExpression filter, StationData data) throws Exception {
@@ -82,7 +86,7 @@ public class CombinedColumnEngine {
 		if (value instanceof Long) return ((Long)value).doubleValue();
 		if (value instanceof Float) return ((Float)value).doubleValue();
 		
-		throw new Exception("value of type " + value.getClass().toString() + " cannot be converted to a Double value");
+		throw new Exception(MessageFormat.format(Messages.CombinedColumnEngine_ValueCannotBeConverted, value.getClass().toString()));
 	}
 	
 	private static Double asSql(BracketExpression filter, StationData data) throws Exception{

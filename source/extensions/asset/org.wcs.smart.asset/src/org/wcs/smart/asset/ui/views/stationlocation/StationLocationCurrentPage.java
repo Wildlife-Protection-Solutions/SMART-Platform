@@ -70,6 +70,7 @@ import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.engine.StatisticsEngine;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
@@ -131,15 +132,15 @@ public class StationLocationCurrentPage {
 		initializePanelJob.schedule();
 	}
 	
-	private Job initializePanelJob = new Job("initialize current panel") {
+	private Job initializePanelJob = new Job(Messages.StationLocationCurrentPage_intiJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			drawCommand = new StationLocationDrawCommand();
 			final List<AssetDeployment> currentDeployments = new ArrayList<>();
 			try(Session s = HibernateManager.openSession()){
-				String hql = "SELECT d FROM AssetDeployment d WHERE d.stationLocation = :location and d.endDate is null";
-				currentDeployments.addAll( s.createQuery(hql, AssetDeployment.class).setParameter("location",  parentEditor.getAssetStationLocation()).list() );
+				String hql = "SELECT d FROM AssetDeployment d WHERE d.stationLocation = :location and d.endDate is null"; //$NON-NLS-1$
+				currentDeployments.addAll( s.createQuery(hql, AssetDeployment.class).setParameter("location",  parentEditor.getAssetStationLocation()).list() ); //$NON-NLS-1$
 				currentDeployments.forEach(d->{
 					d.getAsset().getId();
 					d.getAsset().getAssetType().getName();
@@ -183,7 +184,7 @@ public class StationLocationCurrentPage {
 		Composite topLeft = toolkit.createComposite(topLeftRight, SWT.BORDER);
 		topLeft.setLayout(new GridLayout(2, false));
 
-		Label l = toolkit.createLabel(topLeft, "Summary");
+		Label l = toolkit.createLabel(topLeft, Messages.StationLocationCurrentPage_SummaryLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		FontData fd = l.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -192,7 +193,7 @@ public class StationLocationCurrentPage {
 		l.addListener(SWT.Dispose, e->boldFont.dispose());
 		l.setFont(boldFont);
 		
-		l = toolkit.createLabel(topLeft, MessageFormat.format("Number of Assets Currently Deployed: {0}",currentDeployments.size()));
+		l = toolkit.createLabel(topLeft, MessageFormat.format(Messages.StationLocationCurrentPage_NumAssetsLbl,currentDeployments.size()));
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		lblNumIncidents = toolkit.createLabel(topLeft, DialogConstants.LOADING_TEXT);
@@ -218,7 +219,7 @@ public class StationLocationCurrentPage {
 				return super.getText(element);
 			}
 		});
-		categoryColumn.getColumn().setText("Category");
+		categoryColumn.getColumn().setText(Messages.StationLocationCurrentPage_CategoryColumn);
 		categoryColumn.getColumn().setResizable(true);
 		categoryColumn.getColumn().setWidth(200);
 		
@@ -232,7 +233,7 @@ public class StationLocationCurrentPage {
 				return super.getText(element);
 			}
 		});
-		cntColumn.getColumn().setText("Number of Incidents");
+		cntColumn.getColumn().setText(Messages.StationLocationCurrentPage_IncidentCntColumn);
 		cntColumn.getColumn().setResizable(true);
 		cntColumn.getColumn().setWidth(200);
 		tblCnts.setInput(new String[] {DialogConstants.LOADING_TEXT});
@@ -379,14 +380,14 @@ public class StationLocationCurrentPage {
 				
 				AssetDeployment d = (AssetDeployment)x;
 				MenuItem miAdd = new MenuItem(mnu, SWT.PUSH);
-				miAdd.setText(MessageFormat.format("Goto {0}", d.getAsset().getId()));
+				miAdd.setText(MessageFormat.format(Messages.StationLocationCurrentPage_GotoToLabel, d.getAsset().getId()));
 				miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
 				miAdd.addListener(SWT.Selection, e1->{
 					(new OpenAssetHandler()).openAsset(d.getAsset());
 				});
 				
 				MenuItem miAdd2 = new MenuItem(mnu, SWT.PUSH);
-				miAdd2.setText(MessageFormat.format("Goto {0}", d.getStationLocation().getStation().getId()));
+				miAdd2.setText(MessageFormat.format(Messages.StationLocationCurrentPage_GotoToLabel, d.getStationLocation().getStation().getId()));
 				miAdd2.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
 				miAdd2.addListener(SWT.Selection, e2->{
 					parentEditor.openStation(d.getStationLocation().getStation());
@@ -411,7 +412,7 @@ public class StationLocationCurrentPage {
 						for (AssetDeploymentAttributeValue v : ((AssetDeployment) element).getAttributeValues()) {
 							if (v.getAttribute().equals(a)) return v.getAttributeValueAsString(Locale.getDefault(), parentEditor.viewCrs);
 						}
-						return "";
+						return ""; //$NON-NLS-1$
 					}
 					return super.getText(element);
 				}
@@ -442,14 +443,14 @@ public class StationLocationCurrentPage {
 	private void createNotActivePanel() {
 		if (mainControl == null) return;
 		for (Control c : mainControl.getChildren()) c.dispose();
-		toolkit.createLabel(mainControl, "This station location has no active assets deployed to it at this time.");
+		toolkit.createLabel(mainControl, Messages.StationLocationCurrentPage_NoActiveAssets);
 		mainControl.layout(true);
 		
 		ApplicationGIS.getToolManager().setCurrentEditor(null);
 	}
 	
 
-	private Job computeSummaryStatisticsJob = new Job("compute statistics for current deployment") {
+	private Job computeSummaryStatisticsJob = new Job(Messages.StationLocationCurrentPage_StatsJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -471,7 +472,7 @@ public class StationLocationCurrentPage {
 				}
 						
 				v = stats.get(StatisticsEngine.Statistic.NUMBER_INCIDENTS);
-				String numIncidents = "";
+				String numIncidents = ""; //$NON-NLS-1$
 				if (v != null) {
 					if (v instanceof Long) {
 						numIncidents = String.valueOf((Long)v);
@@ -481,7 +482,7 @@ public class StationLocationCurrentPage {
 				}
 				
 				v = stats.get(StatisticsEngine.Statistic.NUMBER_UNTAGGED);
-				String untagged = "";
+				String untagged = ""; //$NON-NLS-1$
 				if (v != null) {
 					if (v instanceof Long) {
 						untagged = String.valueOf((Long)v);
@@ -489,8 +490,8 @@ public class StationLocationCurrentPage {
 						untagged = (String)v;
 					}
 				}
-				lblNumIncidents.setText(MessageFormat.format("Number of Incidents: {0}", numIncidents));
-				lblNumUnTagged.setText(MessageFormat.format("Number of Untagged Incidents: {0}", untagged));
+				lblNumIncidents.setText(MessageFormat.format(Messages.StationLocationCurrentPage_NumIncidentsLabel, numIncidents));
+				lblNumUnTagged.setText(MessageFormat.format(Messages.StationLocationCurrentPage_NumUntaggedLabel, untagged));
 			});
 			return Status.OK_STATUS;
 		}
@@ -498,11 +499,11 @@ public class StationLocationCurrentPage {
 	};
 
 	private enum Column{
-		ASSET_TYPE ("Asset Type"),
-		ASSET_ID ("Asset ID"),
-		STATION ("Station"),
-		LOCATION ("Location"),
-		START_DATE("Start Date");
+		ASSET_TYPE (Messages.StationLocationCurrentPage_TypeColumn),
+		ASSET_ID (Messages.StationLocationCurrentPage_IDColumn),
+		STATION (Messages.StationLocationCurrentPage_StationColumn),
+		LOCATION (Messages.StationLocationCurrentPage_LocationColumn),
+		START_DATE(Messages.StationLocationCurrentPage_DateColumn);
 		
 		public String guiName;
 		

@@ -26,6 +26,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
@@ -33,14 +34,14 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 /**
  * Asset upgrade operations while upgrade/restore backup.
  * 
- * @author elitvin
+ * @author Emily
  * @since 3.0.0
  */
 public class AssetDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask("Upgrading asset plugin", 1);
+		monitor.beginTask(Messages.AssetDatabaseUpgrader_TaskName, 1);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
@@ -49,7 +50,7 @@ public class AssetDatabaseUpgrader implements IDatabaseUpgrader {
 				String currentPluginVersion = versions.get(AssetPlugIn.PLUGIN_ID);
 				
 				if (currentPluginVersion == null) {
-					monitor.subTask("Installing asset plugin");
+					monitor.subTask(Messages.AssetDatabaseUpgrader_SubTaskName);
 					(new AddAssetJob()).installPlugin(session);
 				}else{
 					upgrade(currentPluginVersion, session);

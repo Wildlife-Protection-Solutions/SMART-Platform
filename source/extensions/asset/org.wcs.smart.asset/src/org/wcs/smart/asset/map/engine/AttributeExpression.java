@@ -29,8 +29,8 @@ package org.wcs.smart.asset.map.engine;
  */
 public class AttributeExpression implements IExpression{
 
-	public static final String UI_DATE_FORMAT = "YYYY-MM-DD";
-	public static final String JAVA_DATE_FORMAT = "yyyy-MM-dd";
+	public static final String UI_DATE_FORMAT = "YYYY-MM-DD"; //$NON-NLS-1$
+	public static final String JAVA_DATE_FORMAT = "yyyy-MM-dd"; //$NON-NLS-1$
 	
 	public static AttributeExpression parse(String attributeKey, Operator op, String strValue) {
 		return new AttributeExpression(attributeKey, op, strValue);
@@ -78,9 +78,9 @@ public class AttributeExpression implements IExpression{
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(attributeKey);
-		sb.append(" ");
+		sb.append(" "); //$NON-NLS-1$
 		sb.append(op.operator.sql);
-		sb.append(" " );
+		sb.append(" " ); //$NON-NLS-1$
 		if (strValue != null) {
 			sb.append(strValue);
 		}else if (numberValue != null) {

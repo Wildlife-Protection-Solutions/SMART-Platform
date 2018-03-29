@@ -31,6 +31,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.ca.ISmartPoint;
 import org.wcs.smart.ui.map.location.LocationSelectComposite;
 
@@ -89,7 +90,7 @@ public class SelectPointMapDialog extends Dialog {
 		if (initPoint != null){
 			locationComp.setPoints(Collections.singletonList(initPoint));
 		}
-		getShell().setText("Select Location Point");
+		getShell().setText(Messages.SelectPointMapDialog_Title);
 		return parent;
 	}
 	

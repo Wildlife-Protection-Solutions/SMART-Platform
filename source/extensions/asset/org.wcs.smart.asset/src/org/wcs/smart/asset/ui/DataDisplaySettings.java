@@ -1,6 +1,7 @@
 package org.wcs.smart.asset.ui;
 
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 
 public class DataDisplaySettings {
 
@@ -8,9 +9,9 @@ public class DataDisplaySettings {
 	private static final String ICON_SIZE_KEY = "IconSize"; //$NON-NLS-1$
 
 	public enum IconSize{
-		SMALL(150, "Small"),
-		MEDIUM(250, "Medium"),
-		LARGE(350, "Large");
+		SMALL(150, Messages.DataDisplaySettings_IconSmall),
+		MEDIUM(250, Messages.DataDisplaySettings_IconMedium),
+		LARGE(350, Messages.DataDisplaySettings_IconLarge);
 		
 		int size;
 		String optionName;
@@ -30,9 +31,9 @@ public class DataDisplaySettings {
 	}
 	
 	public enum PageSize{
-		TEN(10, "10"),
-		TWENTYFIVE(25, "25"),
-		FIFTY(50, "50");
+		TEN(10, Messages.DataDisplaySettings_PageSize10),
+		TWENTYFIVE(25, Messages.DataDisplaySettings_PageSize25),
+		FIFTY(50, Messages.DataDisplaySettings_PageSize50);
 		
 		int size;
 		String optionName;

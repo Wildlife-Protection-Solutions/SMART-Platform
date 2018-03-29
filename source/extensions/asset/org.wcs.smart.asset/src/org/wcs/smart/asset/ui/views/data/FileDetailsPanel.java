@@ -65,6 +65,7 @@ import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.importer.ActionableWarning;
 import org.wcs.smart.asset.data.importer.FileMetadataReader;
 import org.wcs.smart.asset.data.importer.FileProxy;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -83,7 +84,8 @@ import com.drew.metadata.xmp.XmpDirectory;
  */
 public class FileDetailsPanel {
 
-	private static final String LAST_INDEX_KEY = "LAST_INDEX";
+	private static final String LAST_SELECTION = "LAST_SELECTION"; //$NON-NLS-1$
+	private static final String LAST_INDEX_KEY = "LAST_INDEX"; //$NON-NLS-1$
 	private static final String IMAGE_DATAKEY = "IMAGE"; //$NON-NLS-1$
 	private static final String IMAGE_PROXY_DATAKEY = "IMAGE_PROXY"; //$NON-NLS-1$
 	
@@ -125,8 +127,8 @@ public class FileDetailsPanel {
 		((GridLayout)top.getLayout()).marginWidth = 0;
 		((GridLayout)top.getLayout()).marginHeight = 0;
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		lblDetailsStatus = toolkit.createLabel(top, "");
-		lblDetailsFileName = toolkit.createLabel(top, "");
+		lblDetailsStatus = toolkit.createLabel(top, ""); //$NON-NLS-1$
+		lblDetailsFileName = toolkit.createLabel(top, ""); //$NON-NLS-1$
 		lblDetailsFileName .setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		SashForm detailsSash = new SashForm(singleSelectDetails, SWT.VERTICAL);
@@ -144,8 +146,8 @@ public class FileDetailsPanel {
 		((GridLayout)header.getLayout()).marginHeight = 0;
 		
 		
-		Hyperlink lnkDetails = toolkit.createHyperlink(header, "Details", SWT.NONE);
-		Hyperlink lnkExif = toolkit.createHyperlink(header, "Metadata", SWT.NONE);
+		Hyperlink lnkDetails = toolkit.createHyperlink(header, Messages.FileDetailsPanel_DetailsSection, SWT.NONE);
+		Hyperlink lnkExif = toolkit.createHyperlink(header, Messages.FileDetailsPanel_MetadataSection, SWT.NONE);
 		
 		Composite stackComposite = toolkit.createComposite(infoComposite, SWT.BORDER);
 		stackComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -171,13 +173,13 @@ public class FileDetailsPanel {
 		tblExif.getControl().addListener(SWT.Dispose, e->bgColor.dispose());
 		
 		TableViewerColumn colTag = new TableViewerColumn(tblExif, SWT.NONE);
-		colTag.getColumn().setText("Tag");
+		colTag.getColumn().setText(Messages.FileDetailsPanel_TagColumn);
 		colTag.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof String[]) return ((String[])element)[0];
 				if (element instanceof String) return (String)element;
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			@Override
 			public Color getBackground(Object element) {
@@ -188,12 +190,12 @@ public class FileDetailsPanel {
 		
 		
 		TableViewerColumn colTagValue = new TableViewerColumn(tblExif, SWT.NONE);
-		colTagValue.getColumn().setText("Value");
+		colTagValue.getColumn().setText(Messages.FileDetailsPanel_ValueColumn);
 		colTagValue.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof String[]) return ((String[])element)[1];
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			@Override
 			public Color getBackground(Object element) {
@@ -277,12 +279,12 @@ public class FileDetailsPanel {
 		
 		if (selection != null && selection.size() == 1) {
 			Object selected = selection.getFirstElement();
-			Object last = proxyDetailsComp.getData("LAST_SELECTION");
+			Object last = proxyDetailsComp.getData(LAST_SELECTION);
 			if (selected.equals(last)) return;
 			
-			proxyDetailsComp.setData("LAST_SELECTION", selected);
+			proxyDetailsComp.setData(LAST_SELECTION, selected);
 		}else {
-			proxyDetailsComp.setData("LAST_SELECTION", null);
+			proxyDetailsComp.setData(LAST_SELECTION, null);
 		}
 		
 		if (proxyDetailsComp.isDisposed()) return;
@@ -296,7 +298,7 @@ public class FileDetailsPanel {
 		for (Control c : multiSelectDetails.getChildren()) c.dispose();
 		
 		if (selection == null || selection.isEmpty()) {
-			lblDetailsFileName.setText( "" );
+			lblDetailsFileName.setText( "" ); //$NON-NLS-1$
 			lblDetailsStatus.setImage( null );
 			return;
 		}
@@ -349,7 +351,7 @@ public class FileDetailsPanel {
 				});
 				String tooltip = proxy.getFile().getFileName().toString();
 				if (proxy.getIncidentGroup() != null) {
-					tooltip += "\n" + "Incident Group: " + proxy.getIncidentGroup();
+					tooltip += "\n" + Messages.FileDetailsPanel_GroupTooltip + proxy.getIncidentGroup(); //$NON-NLS-1$
 				}
 				canvas.setToolTipText(tooltip);
 				canvas.addListener(SWT.Dispose, e->{
@@ -370,7 +372,7 @@ public class FileDetailsPanel {
 			//only load and display images
 			//in the viewing range so we don't run
 			//out of memory 
-			Job refreshimage = new Job("refresh images") {
+			Job refreshimage = new Job(Messages.FileDetailsPanel_refreshJobName) {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -429,7 +431,7 @@ public class FileDetailsPanel {
 		fileDetailsComposite.layout();
 		Object first = selection.getFirstElement();
 		if (!(first instanceof FileProxy)) {
-			lblDetailsFileName.setText( "" );
+			lblDetailsFileName.setText( "" ); //$NON-NLS-1$
 			lblDetailsStatus.setImage( null );
 			return;
 		}
@@ -438,7 +440,7 @@ public class FileDetailsPanel {
 		
 		lblDetailsFileName.setText(proxy.getFile().getFileName().toString());
 		lblDetailsStatus.setImage( AssetPlugIn.getDefault().getImageRegistry().get(  proxy.isValid() ? AssetPlugIn.ICON_IMPORT_COMPLETE : AssetPlugIn.ICON_IMPORT_INCOMPLETE));
-		if (!proxy.isValid()) lblDetailsStatus.setToolTipText(proxy.validMessage());
+		if (!proxy.isValid()) lblDetailsStatus.setToolTipText(proxy.validMessage(Locale.getDefault()));
 		lblDetailsStatus.getParent().layout();
 		
 		ScrolledComposite scroll = new ScrolledComposite(proxyDetailsComp, SWT.V_SCROLL | SWT.H_SCROLL);
@@ -461,42 +463,42 @@ public class FileDetailsPanel {
 		fileSection.setLayout(new GridLayout(2, false));
 		fileSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label l = toolkit.createLabel(fileSection, "Summary");
+		Label l = toolkit.createLabel(fileSection, Messages.FileDetailsPanel_SummarySection);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		l.setFont(boldFont);
 		
 		if (!proxy.isValid()) {
-			l = toolkit.createLabel(fileSection, "Status Details:");
-			l = toolkit.createLabel(fileSection, proxy.validMessage());
+			l = toolkit.createLabel(fileSection, Messages.FileDetailsPanel_StatusLabel);
+			l = toolkit.createLabel(fileSection, proxy.validMessage(Locale.getDefault()));
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		}
 		
-		l = toolkit.createLabel(fileSection, "Date/Time:");
-		l = toolkit.createLabel(fileSection, proxy.getImageDate() == null ? "" : DateFormat.getDateTimeInstance().format(proxy.getImageDate()) );
+		l = toolkit.createLabel(fileSection, Messages.FileDetailsPanel_DateTimeLabel);
+		l = toolkit.createLabel(fileSection, proxy.getImageDate() == null ? "" : DateFormat.getDateTimeInstance().format(proxy.getImageDate()) ); //$NON-NLS-1$
 		
-		l = toolkit.createLabel(fileSection, "Asset:");
-		l = toolkit.createLabel(fileSection, proxy.getAsset() == null ? "" : proxy.getAsset().getId() );
+		l = toolkit.createLabel(fileSection, Messages.FileDetailsPanel_AssetLabel);
+		l = toolkit.createLabel(fileSection, proxy.getAsset() == null ? "" : proxy.getAsset().getId() ); //$NON-NLS-1$
 		
-		l = toolkit.createLabel(fileSection, "Station:");
-		l = toolkit.createLabel(fileSection, proxy.getStation() == null ? "" : proxy.getStation().getId() );
+		l = toolkit.createLabel(fileSection, Messages.FileDetailsPanel_StationLabel);
+		l = toolkit.createLabel(fileSection, proxy.getStation() == null ? "" : proxy.getStation().getId() ); //$NON-NLS-1$
 		
-		l = toolkit.createLabel(fileSection, "Station Location:");
-		l = toolkit.createLabel(fileSection, proxy.getStationLocation() == null ? "" : proxy.getStationLocation().getId() );
+		l = toolkit.createLabel(fileSection, Messages.FileDetailsPanel_LocationLabel);
+		l = toolkit.createLabel(fileSection, proxy.getStationLocation() == null ? "" : proxy.getStationLocation().getId() ); //$NON-NLS-1$
 		
-		l = toolkit.createLabel(fileSection, "Longitude:");
-		l = toolkit.createLabel(fileSection, proxy.getX() == null ? "" : String.valueOf(proxy.getX()) );
+		l = toolkit.createLabel(fileSection, Messages.FileDetailsPanel_LongLabel);
+		l = toolkit.createLabel(fileSection, proxy.getX() == null ? "" : String.valueOf(proxy.getX()) ); //$NON-NLS-1$
 		
-		l = toolkit.createLabel(fileSection, "Latitude:");
-		l = toolkit.createLabel(fileSection, proxy.getY() == null ? "" : String.valueOf(proxy.getY()) );
+		l = toolkit.createLabel(fileSection, Messages.FileDetailsPanel_LatLabel);
+		l = toolkit.createLabel(fileSection, proxy.getY() == null ? "" : String.valueOf(proxy.getY()) ); //$NON-NLS-1$
 		
-		l = toolkit.createLabel(fileSection, "Comment:");
-		l = toolkit.createLabel(fileSection, proxy.getWaypointComment() == null ? "" : String.valueOf(proxy.getWaypointComment()) );
+		l = toolkit.createLabel(fileSection, Messages.FileDetailsPanel_CommentLabel);
+		l = toolkit.createLabel(fileSection, proxy.getWaypointComment() == null ? "" : String.valueOf(proxy.getWaypointComment()) ); //$NON-NLS-1$
 		
 		Composite obsSection = toolkit.createComposite(bits);
 		obsSection.setLayout(new GridLayout(2, false));
 		obsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		l = toolkit.createLabel(obsSection, "Observations");
+		l = toolkit.createLabel(obsSection, Messages.FileDetailsPanel_ObsLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		l.setFont(boldFont);
 		
@@ -505,7 +507,7 @@ public class FileDetailsPanel {
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
 			for (WaypointObservationAttribute a : wo.getAttributes()) {
-				l = toolkit.createLabel(obsSection, a.getAttribute().getName() + ":");
+				l = toolkit.createLabel(obsSection, a.getAttribute().getName() + ":"); //$NON-NLS-1$
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				((GridData)l.getLayoutData()).horizontalIndent = 10;
 				
@@ -518,7 +520,7 @@ public class FileDetailsPanel {
 		warnSection.setLayout(new GridLayout());
 		warnSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		l = toolkit.createLabel(warnSection, "Processing Warnings");
+		l = toolkit.createLabel(warnSection, Messages.FileDetailsPanel_WarningsLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		l.setFont(boldFont);
 		
@@ -534,7 +536,7 @@ public class FileDetailsPanel {
 		
 		
 
-		Job j2 = new Job("read image metadata") {
+		Job j2 = new Job(Messages.FileDetailsPanel_readmetadatajobname) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -561,7 +563,7 @@ public class FileDetailsPanel {
 				Display.getDefault().syncExec(()->{
 					
 					if (exif == null) {
-						tblExif.setInput(new String[] {"Error Reading EXIF Metadata"});
+						tblExif.setInput(new String[] {Messages.FileDetailsPanel_ReadError});
 					}else {
 						int scroll = (int)tblExif.getData(LAST_INDEX_KEY);
 						tblExif.setInput(values);
@@ -593,7 +595,7 @@ public class FileDetailsPanel {
 		FileProxy proxy = null;
 		
 		public LoadImageJob(Canvas toUpdate) {
-			super("loading image job");
+			super(Messages.FileDetailsPanel_loadJobName);
 			this.toUpdate = toUpdate;
 		}
 
@@ -619,6 +621,7 @@ public class FileDetailsPanel {
 					GC gc3 = new GC(image3);
 					gc3.setTransform(imageTransform);
 					gc3.drawImage(img, 0, 0);
+					img.dispose();
 					img = image3;
 				}
 				final Image ii = img;

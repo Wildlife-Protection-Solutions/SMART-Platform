@@ -140,7 +140,7 @@ public class AttributeValueLabelProvider extends LabelProvider {
 					Coordinate c = ReprojectUtils.reproject(((Point) value).getX(), ((Point) value).getY(), GeometryUtils.SMART_CRS, getCrs());
 					return "POINT (" + c.x + " " + c.y + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}catch (Exception ex){
-					return "Error: " + ex.getMessage();
+					return "Error: " + ex.getMessage(); //$NON-NLS-1$
 				}
 			}
 		}else{

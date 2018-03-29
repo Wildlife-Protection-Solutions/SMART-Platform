@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -71,6 +72,7 @@ import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.data.importer.FileProcessor;
 import org.wcs.smart.asset.data.importer.FileProxy;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
@@ -97,9 +99,9 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class DataImportPage {
 
-	private static final String SEP_CHAR = ",";
-	private static final String STATIONLOCATION_LIST_KEY = "org.wcs.smart.asset.ui.views.data.stations";
-	private static final String ASSET_LIST_KEY = "org.wcs.smart.asset.ui.views.data.assets";
+	private static final String SEP_CHAR = ","; //$NON-NLS-1$
+	private static final String STATIONLOCATION_LIST_KEY = "org.wcs.smart.asset.ui.views.data.stations"; //$NON-NLS-1$
+	private static final String ASSET_LIST_KEY = "org.wcs.smart.asset.ui.views.data.assets"; //$NON-NLS-1$
 	
 	private DataImporterView view;
 	
@@ -131,7 +133,7 @@ public class DataImportPage {
 		this.view = view;
 		this.toolkit = toolkit;
 		
-		processor = new FileProcessor(SmartDB.getCurrentConservationArea());
+		processor = new FileProcessor(SmartDB.getCurrentConservationArea(), Locale.getDefault());
 		deletedItems = new ArrayList<>();
 		
 		loadLists(0);
@@ -180,7 +182,7 @@ public class DataImportPage {
 		
 		ToolItem itemAdd = new ToolItem(tb, SWT.PUSH);
 		itemAdd.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_FILE));
-		itemAdd.setToolTipText("select files to import");
+		itemAdd.setToolTipText(Messages.DataImportPage_addTooltip);
 		itemAdd.addListener(SWT.Selection, e->{
 			FileDialog fd = new FileDialog(Display.getDefault().getActiveShell(), SWT.MULTI | SWT.OPEN);
 			if (fd.open() == null) return;
@@ -195,7 +197,7 @@ public class DataImportPage {
 		itemDelete = new ToolItem(tb, SWT.PUSH);
 		itemDelete.setEnabled(false);
 		itemDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		itemDelete.setToolTipText("Remove file from import list");
+		itemDelete.setToolTipText(Messages.DataImportPage_removeTooltip);
 		itemDelete.addListener(SWT.Selection,e->{
 			removeFiles();
 		});
@@ -204,19 +206,19 @@ public class DataImportPage {
 		
 		itemSaveAll = new ToolItem(tb, SWT.PUSH);
 		itemSaveAll.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEALL_EDIT));
-		itemSaveAll.setToolTipText("Save all files to the database");
+		itemSaveAll.setToolTipText(Messages.DataImportPage_saveAllTooltip);
 		itemSaveAll.setEnabled(false);
 		itemSaveAll.addListener(SWT.Selection, e->save(processor.getFiles()));
 		
 		itemSave = new ToolItem(tb, SWT.PUSH);
 		itemSave.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
-		itemSave.setToolTipText("Save selected files to the database");
+		itemSave.setToolTipText(Messages.DataImportPage_saveTooltip);
 		itemSave.setEnabled(false);
 		itemSave.addListener(SWT.Selection, e->save(getSelection()));
 		
 		new ToolItem(tb,  SWT.SEPARATOR);
 		
-		fileCnt = toolkit.createLabel(topPart, "");
+		fileCnt = toolkit.createLabel(topPart, ""); //$NON-NLS-1$
 		fileCnt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		details = toolkit.createComposite(main);
@@ -241,7 +243,7 @@ public class DataImportPage {
 			
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				monitor.beginTask("Importing files", toSave.size() + 1);
+				monitor.beginTask(Messages.DataImportPage_ImportTaskName, toSave.size() + 1);
 				List<FileProxy> items = new ArrayList<FileProxy>(toSave);
 				List<FileProxy> toProcess = new ArrayList<FileProxy>(items);
 				try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
@@ -362,7 +364,7 @@ public class DataImportPage {
 							session.flush();
 							
 							for (Asset asset : assets) {
-								AssetDeployment d = FileProcessor.findAssetDeployment(wp, asset, p.getStationLocation(), session);
+								AssetDeployment d = FileProcessor.findAssetDeployment(wp, asset, p.getStationLocation(), session, Locale.getDefault());
 								if (d.getUuid() == null) {
 									session.save(d);
 									session.flush();
@@ -393,16 +395,16 @@ public class DataImportPage {
 							}
 							monitor.worked(1);
 						}
-						monitor.subTask("Saving to database...");
+						monitor.subTask(Messages.DataImportPage_SaveSubTask);
 						session.getTransaction().commit();
 					}catch (Exception ex){
 						session.getTransaction().rollback();
-						AssetPlugIn.displayLog(MessageFormat.format("Error saving asset files: {0}", ex.getMessage()), ex);
+						AssetPlugIn.displayLog(MessageFormat.format(Messages.DataImportPage_SaveError, ex.getMessage()), ex);
 						return;
 					}
 				}
 				
-				monitor.subTask("Updating UI...");
+				monitor.subTask(Messages.DataImportPage_RefreshUiSubTask);
 				
 				items.forEach(e->processor.removeFile(e));				
 				Display.getDefault().syncExec(()->{
@@ -416,7 +418,7 @@ public class DataImportPage {
 			}
 		});
 		}catch (Exception ex) {
-			AssetPlugIn.displayLog("Error importing asset files: " + ex.getMessage(), ex);
+			AssetPlugIn.displayLog(Messages.DataImportPage_ImportError + ex.getMessage(), ex);
 		}
 	
 	}
@@ -424,11 +426,11 @@ public class DataImportPage {
 	private String generateStationId(Session session) {
 		int cnt = 1;
 		while(true) {
-			String id = "Station " + cnt;
-			String query =  "SELECT count(*) FROM AssetStation where LOWER(id) = :id AND conservationArea = :ca ";
+			String id = Messages.DataImportPage_StationIdPrefix + cnt;
+			String query =  "SELECT count(*) FROM AssetStation where LOWER(id) = :id AND conservationArea = :ca "; //$NON-NLS-1$
 			Long stncnt = (Long) session.createQuery(query)
-				.setParameter("id",  id.toLowerCase())
-				.setParameter("ca", SmartDB.getCurrentConservationArea())
+				.setParameter("id",  id.toLowerCase()) //$NON-NLS-1$
+				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 				.uniqueResult();
 			
 			if (stncnt == 0) return id;
@@ -439,11 +441,11 @@ public class DataImportPage {
 	private String generateLocationId(AssetStation station, Session session) {
 		int cnt = 1;
 		while(true) {
-			String id = station.getId() + " - " + cnt;
-			String query =  "SELECT count(*) FROM AssetStationLocation where LOWER(id) = :id AND station.conservationArea = :ca ";
+			String id = station.getId() + " - " + cnt; //$NON-NLS-1$
+			String query =  "SELECT count(*) FROM AssetStationLocation where LOWER(id) = :id AND station.conservationArea = :ca "; //$NON-NLS-1$
 			Long stncnt = (Long) session.createQuery(query)
-				.setParameter("id",  id.toLowerCase())
-				.setParameter("ca", SmartDB.getCurrentConservationArea())
+				.setParameter("id",  id.toLowerCase()) //$NON-NLS-1$
+				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 				.uniqueResult();
 			
 			if (stncnt == 0) return id;
@@ -452,17 +454,17 @@ public class DataImportPage {
 	}
 	
 	private void updateFileCount() {
-		fileCnt.setText(MessageFormat.format("Number of Files: {0}",processor.getFiles().size()));
+		fileCnt.setText(MessageFormat.format(Messages.DataImportPage_FileCntMsg,processor.getFiles().size()));
 	}
 
 	private void updateStatus() {
 		boolean isValid = processor.isValid();
 		if (isValid && !processor.getFiles().isEmpty()) {
 			itemSaveAll.setEnabled(true);
-			itemSaveAll.setToolTipText("Save all files to database");
+			itemSaveAll.setToolTipText(Messages.DataImportPage_saveAllTooltip);
 		}else {
 			itemSaveAll.setEnabled(false);
-			itemSaveAll.setToolTipText("Data processing not complete.  You must ensure all rows in the table below are complete before you can save all");
+			itemSaveAll.setToolTipText(Messages.DataImportPage_processingNotCompleteTooltip);
 		}
 	}
 	
@@ -470,8 +472,8 @@ public class DataImportPage {
 		for (Control c : details.getChildren()) c.dispose();
 		Composite c = toolkit.createComposite(details);
 		c.setLayout(new GridLayout());
-		toolkit.createLabel(c, "Processing cancelled by user");
-		Button btn = toolkit.createButton(c, "Restart", SWT.NONE);
+		toolkit.createLabel(c, Messages.DataImportPage_cancelledMsg);
+		Button btn = toolkit.createButton(c, Messages.DataImportPage_RestartButton, SWT.NONE);
 		btn.addListener(SWT.Selection, e->processFiles(files));
 		details.layout();
 	}
@@ -552,8 +554,8 @@ public class DataImportPage {
 			if (p.getAsset() != null)cnt ++;
 		}
 		if (cnt > 0) {
-			boolean n = MessageDialog.openQuestion(view.getSite().getShell(), "Warning", 
-				MessageFormat.format("{0} of the {1} selected files already have assets associated with them.  These will be overwritten.  Are you sure you want to continue?", cnt, proxies.size()));
+			boolean n = MessageDialog.openQuestion(view.getSite().getShell(), Messages.DataImportPage_WarningTitle, 
+				MessageFormat.format(Messages.DataImportPage_FilesOverwrittenMsg, cnt, proxies.size()));
 			if (!n) return;
 		}
 		
@@ -598,8 +600,8 @@ public class DataImportPage {
 			if (p.getStationLocation() != null) cnt++;
 		}
 		if (cnt > 0) {
-			boolean n = MessageDialog.openQuestion(view.getSite().getShell(), "Warning", 
-				MessageFormat.format("{0} of the {1} selected files already have station locations associated with them.  These will be replaced overwritten if you process.  Are you sure you want to continue?", cnt, proxies.size()));
+			boolean n = MessageDialog.openQuestion(view.getSite().getShell(), Messages.DataImportPage_WarningTitle, 
+				MessageFormat.format(Messages.DataImportPage_FilesOverwrittenMsg3, cnt, proxies.size()));
 			if (!n) return;
 		}
 		if (location == null) {
@@ -657,8 +659,8 @@ public class DataImportPage {
 			}
 		}
 		if (cnt > 0) {
-			boolean n = MessageDialog.openQuestion(view.getSite().getShell(), "Warning", 
-				MessageFormat.format("{0} of the {1} selected files already have dates associated with them.  These dates will be replaced with new selected date.  Are you sure you want to continue?", cnt, proxies.size()));
+			boolean n = MessageDialog.openQuestion(view.getSite().getShell(), Messages.DataImportPage_WarningTitle, 
+				MessageFormat.format(Messages.DataImportPage_FilesOverwrittenMsg4, cnt, proxies.size()));
 			if (!n) return;
 		}
 		
@@ -710,11 +712,11 @@ public class DataImportPage {
 		final IProgressMonitor pmonitor = progressComp.createProgressMonitor();
 		details.layout(true);
 		
-		Job processingJob = new Job("processing asset files") {
+		Job processingJob = new Job(Messages.DataImportPage_processingJobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				pmonitor.beginTask("Processing new files", files.size());
+				pmonitor.beginTask(Messages.DataImportPage_ProcessingTaskName, files.size());
 				for (Path f : files) {
 					pmonitor.subTask(f.toString());
 					processor.addFile(f, new FileProcessor.IConnectionProvider() {
@@ -746,7 +748,7 @@ public class DataImportPage {
 		loadListsJob.schedule(delay);
 	}
 	
-	private Job loadListsJob = new Job("initialize history") {
+	private Job loadListsJob = new Job(Messages.DataImportPage_initializingJobName) {
 		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.engine.StatisticsEngine.Statistic;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetDeployment;
@@ -50,12 +51,12 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class AssetDeploymentTableColumn extends ColumnLabelProvider{
 
 	public enum FixedColumn{
-		STATION("Station"),
-		LOCATION("Location"),
-		START_DATE("Start Date"),
-		END_DATE("End Date"),
-		TOTAL_TIME("Total Time"),
-		NUM_INCIDENTS("Number Incidents");
+		STATION(Messages.AssetDeploymentTableColumn_StationColumnName),
+		LOCATION(Messages.AssetDeploymentTableColumn_LocationColumnName),
+		START_DATE(Messages.AssetDeploymentTableColumn_StartDateColumnName),
+		END_DATE(Messages.AssetDeploymentTableColumn_EndDateColumnName),
+		TOTAL_TIME(Messages.AssetDeploymentTableColumn_TimeColumnName),
+		NUM_INCIDENTS(Messages.AssetDeploymentTableColumn_IncCntColumnName);
 		
 		String guiName;
 		
@@ -82,7 +83,7 @@ public class AssetDeploymentTableColumn extends ColumnLabelProvider{
 	public String getColumnName() {
 		if (column != null) return column.guiName;
 		if (attribute != null) return attribute.getName();
-		return "";
+		return ""; //$NON-NLS-1$
 		
 	}
 	
@@ -93,7 +94,7 @@ public class AssetDeploymentTableColumn extends ColumnLabelProvider{
 		if (column != null) {
 			switch(column) {
 			case END_DATE:
-				if (deployment.getEndDate() == null) return "Current";
+				if (deployment.getEndDate() == null) return Messages.AssetDeploymentTableColumn_CurrentLabel;
 				return DateFormat.getDateTimeInstance().format(deployment.getEndDate());
 			case LOCATION:
 				return deployment.getStationLocation().getId();
@@ -119,10 +120,10 @@ public class AssetDeploymentTableColumn extends ColumnLabelProvider{
 					}
 				}
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		//should never get here
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 		
 	public static List<AssetDeploymentTableColumn> getTableColumns(Asset asset, CoordinateReferenceSystem crs, Session session){

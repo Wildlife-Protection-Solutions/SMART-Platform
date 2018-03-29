@@ -30,8 +30,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IPartListener2;
@@ -40,6 +38,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.asset.AssetEvents;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.ui.data.AssetDataPanel;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -79,8 +78,8 @@ public class DataReviewPage {
 		panel.createControl(parent);
 		
 		EventHandler refreshHandler = event->{
-			//TODO: this doesn't work
-			if (view.getContext().get(MPart.class) == event.getProperty(UIEvents.EventTags.ELEMENT)) return;
+			//this doesn't work
+			//if (view.getContext().get(MPart.class) == event.getProperty(UIEvents.EventTags.ELEMENT)) return;
 			requiresRefresh = true;
 		};
 		view.getContext().get(IEventBroker.class).subscribe(AssetEvents.ASSETDATA, refreshHandler);
@@ -128,14 +127,14 @@ public class DataReviewPage {
 
 	}
 	
-	private Job loadWaypointsJob = new Job("load waypoints") {
+	private Job loadWaypointsJob = new Job(Messages.DataReviewPage_loadwaypointsjobname) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<UUID> waypointUuids  = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				List<?> aw = session.createQuery("SELECT distinct id.waypoint.uuid, id.waypoint.dateTime FROM AssetWaypoint WHERE state = :state AND id.waypoint.conservationArea = :ca ORDER BY id.waypoint.dateTime")
-				.setParameter("state", AssetWaypoint.State.DIRTY)
-				.setParameter("ca", SmartDB.getCurrentConservationArea())
+				List<?> aw = session.createQuery("SELECT distinct id.waypoint.uuid, id.waypoint.dateTime FROM AssetWaypoint WHERE state = :state AND id.waypoint.conservationArea = :ca ORDER BY id.waypoint.dateTime") //$NON-NLS-1$
+				.setParameter("state", AssetWaypoint.State.DIRTY) //$NON-NLS-1$
+				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 				.list();
 				
 				for (Object o : aw) {

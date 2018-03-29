@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -162,13 +163,13 @@ public class ColumnListDialog extends TitleAreaDialog {
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Button btnMoveUp = new Button(btnPanel, SWT.PUSH);
-		btnMoveUp.setText("Move Up");
+		btnMoveUp.setText(Messages.ColumnListDialog_MoveUpLabel);
 		btnMoveUp.addListener(SWT.Selection, e->move(-1));
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnMoveUp.setEnabled(false);
 		
 		Button btnMoveDown = new Button(btnPanel, SWT.PUSH);
-		btnMoveDown.setText("Move Down");
+		btnMoveDown.setText(Messages.ColumnListDialog_MovedownLabel);
 		btnMoveDown.addListener(SWT.Selection, e->move(1));
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnMoveDown.setEnabled(false);
@@ -233,9 +234,9 @@ public class ColumnListDialog extends TitleAreaDialog {
 		});
 		
 		
-		setTitle("Asset Overview Map");
-		getShell().setText("Asset Overview Map");
-		setMessage("Configure columns in the asset overview map.  Checked items will be visible in table.  All columns will be avaliable in the map for styling.");
+		setTitle(Messages.ColumnListDialog_Title);
+		getShell().setText(Messages.ColumnListDialog_Title);
+		setMessage(Messages.ColumnListDialog_Message);
 		return parent;
 	}
 	

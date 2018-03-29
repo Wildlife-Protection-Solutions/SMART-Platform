@@ -57,9 +57,11 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.importer.ActionableWarning;
 import org.wcs.smart.asset.data.importer.FileProxy;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.DataDisplaySettings;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Part of the data import page that displays the various parts 
@@ -119,9 +121,9 @@ public class ResultsPanel {
 		((GridLayout) bottom.getLayout()).marginWidth = 0;
 		((GridLayout) bottom.getLayout()).marginHeight = 0;
 		
-		Hyperlink tblLink = toolkit.createHyperlink(bottom, "Table", SWT.NONE);
-		Hyperlink imgsLink = toolkit.createHyperlink(bottom, "Images", SWT.NONE);
-		Hyperlink deletedLink = toolkit.createHyperlink(bottom, "Deleted Files", SWT.NONE);
+		Hyperlink tblLink = toolkit.createHyperlink(bottom, Messages.ResultsPanel_TableSection, SWT.NONE);
+		Hyperlink imgsLink = toolkit.createHyperlink(bottom, Messages.ResultsPanel_ImagesSection, SWT.NONE);
+		Hyperlink deletedLink = toolkit.createHyperlink(bottom, Messages.ResultsPanel_DeletedFilesSection, SWT.NONE);
 		deletedLink.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		// icon size for images table
@@ -130,7 +132,7 @@ public class ResultsPanel {
 		((GridLayout)iconSizeComp.getLayout()).marginWidth = 0;
 		((GridLayout)iconSizeComp.getLayout()).marginHeight = 0;
 		iconSizeComp.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-		toolkit.createLabel(iconSizeComp, "Icon Size:");
+		toolkit.createLabel(iconSizeComp, Messages.ResultsPanel_IconSizeOp);
 		
 		DataDisplaySettings.IconSize defaultSize = DataDisplaySettings.IconSize.MEDIUM;
 		try {
@@ -170,7 +172,7 @@ public class ResultsPanel {
 			column.getColumn().setText(c.guiName);
 			column.getColumn().setWidth(c.getWidth());
 			if (c == ResultsColumn.WAYPOINT) {
-				column.getColumn().setToolTipText("* indicates user defined group");
+				column.getColumn().setToolTipText("*" + Messages.ResultsPanel_userDefinedGrp); //$NON-NLS-1$
 			}
 			column.setLabelProvider(c.getLabelProvider(view.getRowColors()));
 		}
@@ -187,7 +189,7 @@ public class ResultsPanel {
 		tblResults.getControl().setMenu(mnu);
 
 		MenuItem mnuSetAsset = new MenuItem(mnu, SWT.CASCADE);
-		mnuSetAsset.setText("Set Asset ...");
+		mnuSetAsset.setText(Messages.ResultsPanel_SetAssetMnu);
 		Menu assetMenu = new Menu(mnuSetAsset);
 		mnuSetAsset.setMenu(assetMenu);
 		assetMenu.addMenuListener(new MenuListener() {
@@ -205,7 +207,7 @@ public class ResultsPanel {
 					new MenuItem(assetMenu, SWT.SEPARATOR);
 
 				MenuItem otherAsset = new MenuItem(assetMenu, SWT.PUSH);
-				otherAsset.setText("Other Asset....");
+				otherAsset.setText(Messages.ResultsPanel_OtherAssetOp);
 				otherAsset.addListener(SWT.Selection, evt -> view.setAsset(null));
 			}
 
@@ -215,7 +217,7 @@ public class ResultsPanel {
 		});
 
 		MenuItem mnuSetLocation = new MenuItem(mnu, SWT.CASCADE);
-		mnuSetLocation.setText("Set Station/Location ...");
+		mnuSetLocation.setText(Messages.ResultsPanel_SetLocationMnu);
 		Menu locationMenu = new Menu(mnuSetAsset);
 		mnuSetLocation.setMenu(locationMenu);
 		locationMenu.addMenuListener(new MenuListener() {
@@ -226,14 +228,14 @@ public class ResultsPanel {
 					mi.dispose();
 				for (AssetStationLocation a : view.getSelectedLocations()) {
 					MenuItem otherAsset = new MenuItem(locationMenu, SWT.PUSH);
-					otherAsset.setText(MessageFormat.format("{0} [{1}]", a.getId(), a.getStation().getId()));
+					otherAsset.setText(MessageFormat.format("{0} [{1}]", a.getId(), a.getStation().getId())); //$NON-NLS-1$
 					otherAsset.addListener(SWT.Selection, evt -> view.setLocation(a));
 				}
 				if (!view.getSelectedLocations().isEmpty())
 					new MenuItem(locationMenu, SWT.SEPARATOR);
 
 				MenuItem otherAsset = new MenuItem(locationMenu, SWT.PUSH);
-				otherAsset.setText("Other Location....");
+				otherAsset.setText(Messages.ResultsPanel_OtherLocationOp);
 				otherAsset.addListener(SWT.Selection, evt -> view.setLocation(null));
 			}
 
@@ -243,23 +245,23 @@ public class ResultsPanel {
 		});
 
 		MenuItem mnuSetDate = new MenuItem(mnu, SWT.PUSH);
-		mnuSetDate.setText("Set Date/Time...");
+		mnuSetDate.setText(Messages.ResultsPanel_SetDateTimeMnu);
 		mnuSetDate.addListener(SWT.Selection, e -> view.setDateTime());
 
 		new MenuItem(mnu, SWT.SEPARATOR);
 
 		MenuItem mnuGroup = new MenuItem(mnu, SWT.PUSH);
-		mnuGroup.setText("Create Custom Incident Group...");
+		mnuGroup.setText(Messages.ResultsPanel_CreateCustomGroup);
 		mnuGroup.addListener(SWT.Selection, e -> view.groupSelected());
 
 		MenuItem mnuRemoveGroup = new MenuItem(mnu, SWT.PUSH);
-		mnuRemoveGroup.setText("Remove Custom Incident Group...");
+		mnuRemoveGroup.setText(Messages.ResultsPanel_RemoveCustomGroup);
 		mnuRemoveGroup.addListener(SWT.Selection, e -> view.ungroupSelected());
 
 		new MenuItem(mnu, SWT.SEPARATOR);
 
 		MenuItem mnuSaveFile = new MenuItem(mnu, SWT.PUSH);
-		mnuSaveFile.setText("Save");
+		mnuSaveFile.setText(DialogConstants.SAVE_TEXT);
 		mnuSaveFile.addListener(SWT.Selection, e -> {
 			List<FileProxy> toSave = new ArrayList<>();
 			for (Iterator<?> iterator = tblResults.getStructuredSelection().iterator(); iterator.hasNext();) {
@@ -274,7 +276,7 @@ public class ResultsPanel {
 		new MenuItem(mnu, SWT.SEPARATOR);
 
 		MenuItem mnuRemoveFile = new MenuItem(mnu, SWT.PUSH);
-		mnuRemoveFile.setText("Remove File");
+		mnuRemoveFile.setText(Messages.ResultsPanel_RemoveFileMnu);
 		mnuRemoveFile.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		mnuRemoveFile.addListener(SWT.Selection, e -> view.removeFiles());
 
@@ -409,13 +411,13 @@ public class ResultsPanel {
 	}
 	
 	private enum ResultsColumn{
-		STATUS("Status"),
-		FILE("File"),
-		DATE("Date"),
-		ASSET("Asset"),
-		LOCATION("Station Location"),
-		STATION("Station"),
-		WAYPOINT("Incident Group");
+		STATUS(Messages.ResultsPanel_StatusColumnName),
+		FILE(Messages.ResultsPanel_FileColumnName),
+		DATE(Messages.ResultsPanel_DateColumnName),
+		ASSET(Messages.ResultsPanel_AssetColumnName),
+		LOCATION(Messages.ResultsPanel_LocationColumnName),
+		STATION(Messages.ResultsPanel_StationColumnName),
+		WAYPOINT(Messages.ResultsPanel_GroupColumnName);
 		
 		public String guiName;
 		
@@ -426,22 +428,22 @@ public class ResultsPanel {
 		public String getValue(FileProxy proxy) {
 			switch(this) {
 			case ASSET:
-				return proxy.getAsset() == null ? "" : proxy.getAsset().getId();
+				return proxy.getAsset() == null ? "" : proxy.getAsset().getId(); //$NON-NLS-1$
 			case DATE:
-				return proxy.getImageDate() == null ? "" : DateFormat.getDateTimeInstance().format(proxy.getImageDate());
+				return proxy.getImageDate() == null ? "" : DateFormat.getDateTimeInstance().format(proxy.getImageDate()); //$NON-NLS-1$
 			case FILE:
 				return proxy.getFile().getFileName().toString();
 			case LOCATION:
-				return proxy.getStationLocation() == null ? "" : proxy.getStationLocation().getId();
+				return proxy.getStationLocation() == null ? "" : proxy.getStationLocation().getId(); //$NON-NLS-1$
 			case WAYPOINT:
-				if (proxy.getIncidentGroup() == null) return "";
-				return proxy.getIncidentGroup().toString() + (proxy.isFixed() ? "*" : "");
+				if (proxy.getIncidentGroup() == null) return ""; //$NON-NLS-1$
+				return proxy.getIncidentGroup().toString() + (proxy.isFixed() ? "*" : ""); //$NON-NLS-1$ //$NON-NLS-2$
 			case STATION:
-				return proxy.getStation() == null ? "" : proxy.getStation().getId();
+				return proxy.getStation() == null ? "" : proxy.getStation().getId(); //$NON-NLS-1$
 			case STATUS:
-				return proxy.isValid() ? "COMPLETE" : "INCOMPLETE";			
+				return proxy.isValid() ? Messages.ResultsPanel_CompleteLabel : Messages.ResultsPanel_InCompleteLabel;			
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		
 		public ColumnLabelProvider getLabelProvider(Color[] rowColors) {

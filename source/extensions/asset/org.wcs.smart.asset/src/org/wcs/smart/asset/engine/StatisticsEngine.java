@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.asset.engine;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ import java.util.UUID;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
@@ -60,21 +62,21 @@ public enum StatisticsEngine {
 		/**
 		 * Returns a long representing the number of incidents 
 		 */
-		NUMBER_INCIDENTS ("Number of Incidents"),
+		NUMBER_INCIDENTS (Messages.StatisticsEngine_NumIncStatName),
 		/**
 		 * Returns a long representing the number of incidents with no observations 
 		 */
-		NUMBER_UNTAGGED ("Number of Untagged Incidents"),
+		NUMBER_UNTAGGED (Messages.StatisticsEngine_NumUntaggedStatName),
 		/**
 		 * Returns  along representing the number of incidents that have not been validated
 		 */
-		NUMBER_NOT_VLIDATED("Number of Incidents Not Validated"),
+		NUMBER_NOT_VLIDATED(Messages.StatisticsEngine_NotValidateStatName),
 		
 		/**
 		 * Returns a map of category to long that represents the number of incidents per category for
 		 * all categories that have at least one observation 
 		 */
-		INCIDENTS_PER_CAT ("Incidents per Category");
+		INCIDENTS_PER_CAT (Messages.StatisticsEngine_IncPerCatStatName);
 		
 		public String guiName;
 		
@@ -112,36 +114,36 @@ public enum StatisticsEngine {
 			case NUMBER_NOT_VLIDATED:
 				return computeNumberNotValidated(session, deployment);
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}catch (Throwable ex) {
-			AssetPlugIn.log("Error computing statistic value: " + item.name(), ex);
-			return "Error computing statistic";
+			AssetPlugIn.log("Error computing statistic value: " + item.name(), ex); //$NON-NLS-1$
+			return MessageFormat.format(Messages.StatisticsEngine_ComputeError, item.name());
 		}
 	}
 	
 	private Long computeNumberOfIncidents(Session session, AssetDeployment deployment) {
-		return QueryFactory.buildCountQuery(session, AssetWaypoint.class, new Object[] {"assetDeployment", deployment});
+		return QueryFactory.buildCountQuery(session, AssetWaypoint.class, new Object[] {"assetDeployment", deployment}); //$NON-NLS-1$
 	}
 	
 	private Long computeNumberNotValidated(Session session, AssetDeployment deployment) {
-		String hql = "SELECT count(distinct aw) FROM AssetWaypoint aw WHERE state = :state";
-		Query<?> query = session.createQuery(hql).setParameter("state",  AssetWaypoint.State.DIRTY);
+		String hql = "SELECT count(distinct aw) FROM AssetWaypoint aw WHERE state = :state"; //$NON-NLS-1$
+		Query<?> query = session.createQuery(hql).setParameter("state",  AssetWaypoint.State.DIRTY); //$NON-NLS-1$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
 	}
 	
 	private Long computeNumberOfUnTagged(Session session, AssetDeployment deployment) {
-		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.waypoint w WHERE aw.assetDeployment=:deployment AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservation)";
-		Query<?> query = session.createQuery(hql).setParameter("deployment",  deployment);
+		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.waypoint w WHERE aw.assetDeployment=:deployment AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservation)"; //$NON-NLS-1$
+		Query<?> query = session.createQuery(hql).setParameter("deployment",  deployment); //$NON-NLS-1$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
 	}
 	
 	@SuppressWarnings("unchecked")
 	private List<Object[]> computeStatsPerCategory(Session session, AssetDeployment deployment) {
-		String sql = "SELECT c.category_uuid, count(*) FROM  (SELECT distinct a.uuid, c.CATEGORY_UUID FROM smart.asset_waypoint aw join smart.waypoint a on aw.wp_uuid = a.uuid join smart.WP_OBSERVATION c on a.uuid = c.WP_UUID and aw.asset_deployment_uuid = :uuid) c group by c.category_uuid";
+		String sql = "SELECT c.category_uuid, count(*) FROM  (SELECT distinct a.uuid, c.CATEGORY_UUID FROM smart.asset_waypoint aw join smart.waypoint a on aw.wp_uuid = a.uuid join smart.WP_OBSERVATION c on a.uuid = c.WP_UUID and aw.asset_deployment_uuid = :uuid) c group by c.category_uuid"; //$NON-NLS-1$
 		
-		List<Object> data = session.createNativeQuery(sql).setParameter("uuid", deployment.getUuid()).list();
+		List<Object> data = session.createNativeQuery(sql).setParameter("uuid", deployment.getUuid()).list(); //$NON-NLS-1$
 		
 		List<Object[]> categoryCnts = new ArrayList<>();
 		HashMap<Category, Long> cnts = new HashMap<>();
@@ -219,30 +221,30 @@ public enum StatisticsEngine {
 				return computeNumberNotValidated(session, station);
 			}
 			
-			return "";
+			return ""; //$NON-NLS-1$
 		}catch (Throwable ex) {
-			AssetPlugIn.log("Error computing statistic value: " + item.name(), ex);
-			return "Error computing statistic";
+			AssetPlugIn.log("Error computing statistic value: " + item.name(), ex); //$NON-NLS-1$
+			return MessageFormat.format(Messages.StatisticsEngine_ComputeError, item.name());
 		}
 	}
 	
 	private Long computeNumberOfIncidents(Session session, AssetStation station) {
-		String hql = "SELECT count(a) FROM AssetWaypoint a join a.id.assetDeployment b WHERE b.stationLocation.station = :station";
-		return (Long)session.createQuery(hql).setParameter("station", station).uniqueResult();
+		String hql = "SELECT count(a) FROM AssetWaypoint a join a.id.assetDeployment b WHERE b.stationLocation.station = :station"; //$NON-NLS-1$
+		return (Long)session.createQuery(hql).setParameter("station", station).uniqueResult(); //$NON-NLS-1$
 		
 	}
 	
 	private Long computeNumberNotValidated(Session session, AssetStation station) {
-		String hql = "SELECT count(distinct a) FROM AssetWaypoint a join a.id.assetDeployment b WHERE a.state = :state and b.stationLocation.station = :station";
-		Query<?> query = session.createQuery(hql).setParameter("state",  AssetWaypoint.State.DIRTY).setParameter("station", station);
+		String hql = "SELECT count(distinct a) FROM AssetWaypoint a join a.id.assetDeployment b WHERE a.state = :state and b.stationLocation.station = :station"; //$NON-NLS-1$
+		Query<?> query = session.createQuery(hql).setParameter("state",  AssetWaypoint.State.DIRTY).setParameter("station", station); //$NON-NLS-1$ //$NON-NLS-2$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
 	}
 	
 	
 	private Long computeNumberOfUnTagged(Session session, AssetStation station) {
-		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.assetDeployment d JOIN aw.id.waypoint w WHERE d.stationLocation.station=:station AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservation)";
-		Query<?> query = session.createQuery(hql).setParameter("station",  station);
+		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.assetDeployment d JOIN aw.id.waypoint w WHERE d.stationLocation.station=:station AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservation)"; //$NON-NLS-1$
+		Query<?> query = session.createQuery(hql).setParameter("station",  station); //$NON-NLS-1$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
 	}
@@ -250,13 +252,13 @@ public enum StatisticsEngine {
 	@SuppressWarnings("unchecked")
 	private List<Object[]> computeStatsPerCategory(Session session, AssetStation station) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT c.category_uuid, count(*) FROM  (");
-		sb.append("SELECT distinct a.uuid, c.CATEGORY_UUID "); 
-		sb.append(" FROM smart.asset_waypoint aw join smart.ASSET_DEPLOYMENT d on aw.asset_deployment_uuid = d.uuid "); 
-		sb.append(" join smart.asset_station_location l on l.uuid = d.station_location_uuid and l.station_uuid = :station "); 
-		sb.append(" join smart.waypoint a on aw.wp_uuid = a.uuid join smart.WP_OBSERVATION c on a.uuid = c.WP_UUID ) c group by c.category_uuid");
+		sb.append("SELECT c.category_uuid, count(*) FROM  ("); //$NON-NLS-1$
+		sb.append("SELECT distinct a.uuid, c.CATEGORY_UUID ");  //$NON-NLS-1$
+		sb.append(" FROM smart.asset_waypoint aw join smart.ASSET_DEPLOYMENT d on aw.asset_deployment_uuid = d.uuid ");  //$NON-NLS-1$
+		sb.append(" join smart.asset_station_location l on l.uuid = d.station_location_uuid and l.station_uuid = :station ");  //$NON-NLS-1$
+		sb.append(" join smart.waypoint a on aw.wp_uuid = a.uuid join smart.WP_OBSERVATION c on a.uuid = c.WP_UUID ) c group by c.category_uuid"); //$NON-NLS-1$
 		
-		List<Object> data = session.createNativeQuery(sb.toString()).setParameter("station", station.getUuid()).list();
+		List<Object> data = session.createNativeQuery(sb.toString()).setParameter("station", station.getUuid()).list(); //$NON-NLS-1$
 		
 		List<Object[]> categoryCnts = new ArrayList<>();
 		HashMap<Category, Long> cnts = new HashMap<>();
@@ -332,28 +334,28 @@ public enum StatisticsEngine {
 			case NUMBER_NOT_VLIDATED:
 				return computeNumberNotValidated(session, location);
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}catch (Throwable ex) {
-			AssetPlugIn.log("Error computing statistic value: " + item.name(), ex);
-			return "Error computing statistic";
+			AssetPlugIn.log("Error computing statistic value: " + item.name(), ex); //$NON-NLS-1$
+			return MessageFormat.format(Messages.StatisticsEngine_ComputeError, item.name());
 		}
 	}
 	
 	private Long computeNumberOfIncidents(Session session, AssetStationLocation location) {
-		String hql = "SELECT count(a) FROM AssetWaypoint a join a.id.assetDeployment b WHERE b.stationLocation = :location";
-		return (Long)session.createQuery(hql).setParameter("location", location).uniqueResult();
+		String hql = "SELECT count(a) FROM AssetWaypoint a join a.id.assetDeployment b WHERE b.stationLocation = :location"; //$NON-NLS-1$
+		return (Long)session.createQuery(hql).setParameter("location", location).uniqueResult(); //$NON-NLS-1$
 		
 	}
 	private Long computeNumberNotValidated(Session session, AssetStationLocation location) {
-		String hql = "SELECT count(distinct a) FROM AssetWaypoint a join a.id.assetDeployment b WHERE a.state = :state and b.stationLocation = :location";
-		Query<?> query = session.createQuery(hql).setParameter("state",  AssetWaypoint.State.DIRTY).setParameter("location", location);
+		String hql = "SELECT count(distinct a) FROM AssetWaypoint a join a.id.assetDeployment b WHERE a.state = :state and b.stationLocation = :location"; //$NON-NLS-1$
+		Query<?> query = session.createQuery(hql).setParameter("state",  AssetWaypoint.State.DIRTY).setParameter("location", location); //$NON-NLS-1$ //$NON-NLS-2$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
 	}
 	
 	private Long computeNumberOfUnTagged(Session session, AssetStationLocation location) {
-		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.assetDeployment d JOIN aw.id.waypoint w WHERE d.stationLocation=:location AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservation)";
-		Query<?> query = session.createQuery(hql).setParameter("location",  location);
+		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.assetDeployment d JOIN aw.id.waypoint w WHERE d.stationLocation=:location AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservation)"; //$NON-NLS-1$
+		Query<?> query = session.createQuery(hql).setParameter("location",  location); //$NON-NLS-1$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
 	}
@@ -361,13 +363,13 @@ public enum StatisticsEngine {
 	@SuppressWarnings("unchecked")
 	private List<Object[]> computeStatsPerCategory(Session session, AssetStationLocation location) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT c.category_uuid, count(*) FROM  (");
-		sb.append("SELECT distinct a.uuid, c.CATEGORY_UUID "); 
-		sb.append(" FROM smart.asset_waypoint aw join smart.ASSET_DEPLOYMENT d on aw.asset_deployment_uuid = d.uuid "); 
-		sb.append(" AND d.station_location_uuid = :location "); 
-		sb.append(" join smart.waypoint a on aw.wp_uuid = a.uuid join smart.WP_OBSERVATION c on a.uuid = c.WP_UUID ) c group by c.category_uuid");
+		sb.append("SELECT c.category_uuid, count(*) FROM  ("); //$NON-NLS-1$
+		sb.append("SELECT distinct a.uuid, c.CATEGORY_UUID ");  //$NON-NLS-1$
+		sb.append(" FROM smart.asset_waypoint aw join smart.ASSET_DEPLOYMENT d on aw.asset_deployment_uuid = d.uuid ");  //$NON-NLS-1$
+		sb.append(" AND d.station_location_uuid = :location ");  //$NON-NLS-1$
+		sb.append(" join smart.waypoint a on aw.wp_uuid = a.uuid join smart.WP_OBSERVATION c on a.uuid = c.WP_UUID ) c group by c.category_uuid"); //$NON-NLS-1$
 		
-		List<Object> data = session.createNativeQuery(sb.toString()).setParameter("location", location.getUuid()).list();
+		List<Object> data = session.createNativeQuery(sb.toString()).setParameter("location", location.getUuid()).list(); //$NON-NLS-1$
 		
 		List<Object[]> categoryCnts = new ArrayList<>();
 		HashMap<Category, Long> cnts = new HashMap<>();

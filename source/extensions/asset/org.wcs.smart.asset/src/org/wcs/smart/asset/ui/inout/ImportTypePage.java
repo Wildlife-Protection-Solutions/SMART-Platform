@@ -31,6 +31,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.asset.internal.Messages;
 
 /**
  * Wizard page for determining which type of data to import. 
@@ -40,11 +41,11 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class ImportTypePage extends WizardPage{
 
-	private static final String OPTION_KEY = "OPTION";
+	private static final String OPTION_KEY = "OPTION"; //$NON-NLS-1$
 	private List<Button> buttons;
 	
 	protected ImportTypePage() {
-		super("IMPORT_TYPE");
+		super("IMPORT_TYPE"); //$NON-NLS-1$
 	}
 
 	
@@ -83,8 +84,8 @@ public class ImportTypePage extends WizardPage{
 		}
 		buttons.get(0).setSelection(true);
 		
-		setTitle("Import Asset Data");
-		setMessage("Select the type of data to import");
+		setTitle(Messages.ImportTypePage_Title);
+		setMessage(Messages.ImportTypePage_Message);
 		setControl(panel);
 	}
 	

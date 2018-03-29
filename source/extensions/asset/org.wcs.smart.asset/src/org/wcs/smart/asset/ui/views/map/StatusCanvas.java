@@ -114,7 +114,7 @@ public class StatusCanvas extends Composite{
 			int id =  (int)Math.floor( ( e.y - origin.y ) / ((double)cellHeight) );
 			Object x = headerData.get(id);
 			statusTooltip.setVisible(false);
-			statusTooltip.setMessage(getId(x) + "\n" + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(currentDate));
+			statusTooltip.setMessage(getId(x) + "\n" + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(currentDate)); //$NON-NLS-1$
 			statusTooltip.setLocation(cMain.toDisplay(e.x,e.y + 20));
 			statusTooltip.setVisible(true);
 			
@@ -292,7 +292,7 @@ public class StatusCanvas extends Composite{
 	public String getId(Object o) {
 		if (o instanceof AssetStation) return ((AssetStation) o).getId();
 		if (o instanceof AssetStationLocation) return ((AssetStationLocation) o).getId();
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 }

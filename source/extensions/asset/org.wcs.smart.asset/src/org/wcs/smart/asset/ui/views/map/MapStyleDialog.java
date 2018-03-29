@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetMapStyle;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -106,7 +107,7 @@ public class MapStyleDialog extends TitleAreaDialog {
 				throw ex;
 			}	
 		}catch (Exception ex) {
-			AssetPlugIn.log("Unable to save map style to database: " +ex.getMessage(), ex);
+			AssetPlugIn.log("Unable to save map style to database: " +ex.getMessage(), ex); //$NON-NLS-1$
 			return;
 		}
 		super.okPressed();
@@ -124,13 +125,13 @@ public class MapStyleDialog extends TitleAreaDialog {
 		setErrorMessage(null);
 		if (btnOverride.getSelection()) {
 			if (cmbExisting.getStructuredSelection().getFirstElement() == null || !(cmbExisting.getStructuredSelection().getFirstElement() instanceof AssetMapStyle)) {
-				setErrorMessage("An existing map style must be selected.");
+				setErrorMessage(Messages.MapStyleDialog_MapStyleRequired);
 				enableOk(false);
 				return false;
 			}
 		}else if (btnSaveNew.getSelection()) {
 			if (txtName.getText().trim().isEmpty()) {
-				setErrorMessage("An style name required.");
+				setErrorMessage(Messages.MapStyleDialog_NameRequired);
 				enableOk(false);
 				return false;
 			}
@@ -153,11 +154,11 @@ public class MapStyleDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Save As:");
+		l.setText(Messages.MapStyleDialog_SaveAsOp);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		btnSaveNew = new Button(main, SWT.RADIO);
-		btnSaveNew.setText("New Style:");
+		btnSaveNew.setText(Messages.MapStyleDialog_NewStyleOp);
 		btnSaveNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)btnSaveNew.getLayoutData()).horizontalIndent = 20;
 		
@@ -167,7 +168,7 @@ public class MapStyleDialog extends TitleAreaDialog {
 		txtName.setTextLimit(AssetMapStyle.MAX_NAME_LENGTH);
 		
 		btnOverride= new Button(main, SWT.RADIO);
-		btnOverride.setText("Override:");
+		btnOverride.setText(Messages.MapStyleDialog_OverrideOp);
 		btnOverride.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)btnOverride.getLayoutData()).horizontalIndent = 20;
 		
@@ -208,9 +209,9 @@ public class MapStyleDialog extends TitleAreaDialog {
 			cmbExisting.getControl().setEnabled(btnOverride.getSelection());
 			txtName.setEnabled(btnSaveNew.getSelection());
 		});
-		setMessage("Save current map style");
-		setTitle("Save Map Style");
-		getShell().setText("Save Map Style");
+		setMessage(Messages.MapStyleDialog_Message);
+		setTitle(Messages.MapStyleDialog_Title);
+		getShell().setText(Messages.MapStyleDialog_Title);
 		
 		loadStylesJob.setSystem(true);
 		loadStylesJob.schedule();
@@ -231,13 +232,13 @@ public class MapStyleDialog extends TitleAreaDialog {
 		return true;
 	}
 	
-	private Job loadStylesJob = new Job("loading asset styles") {
+	private Job loadStylesJob = new Job(Messages.MapStyleDialog_loadJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<AssetMapStyle> types = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
 				types.addAll(QueryFactory.buildQuery(session, AssetMapStyle.class,
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList());
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList()); //$NON-NLS-1$
 				
 			}
 			

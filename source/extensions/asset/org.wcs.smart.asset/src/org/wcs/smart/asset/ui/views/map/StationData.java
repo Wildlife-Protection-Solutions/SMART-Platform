@@ -72,7 +72,7 @@ public class StationData {
 	public String getIdField() {
 		if (station != null) return station.getId();
 		if (location != null) return location.getId();
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	public AssetStation getStation() {

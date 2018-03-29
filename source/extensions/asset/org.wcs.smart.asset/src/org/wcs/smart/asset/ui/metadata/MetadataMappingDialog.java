@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Callable;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -57,6 +58,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -95,7 +97,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 				session.getTransaction().commit();
 				
 			}catch (Exception ex) {
-				AssetPlugIn.displayLog("Unable to save changes to asset mappings: " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.MetadataMappingDialog_SaveError + ex.getMessage(), ex);
 				session.getTransaction().rollback();
 				return;
 			}
@@ -135,7 +137,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		tblMappings.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)tblMappings.getTable().getLayoutData()).heightHint = 300;
 		TableViewerColumn colType = new TableViewerColumn(tblMappings, SWT.NONE);
-		colType.getColumn().setText("Type");
+		colType.getColumn().setText(Messages.MetadataMappingDialog_TypeColumn);
 		colType.getColumn().setWidth(50);
 		colType.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -148,7 +150,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		});
 		
 		TableViewerColumn colMetadata = new TableViewerColumn(tblMappings, SWT.NONE);
-		colMetadata.getColumn().setText("File Metadata Key");
+		colMetadata.getColumn().setText(Messages.MetadataMappingDialog_MetadataColumn);
 		colMetadata.getColumn().setWidth(250);
 		colMetadata.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -156,16 +158,16 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 				if (element instanceof AssetMetadataMapping) {
 					AssetMetadataMapping mm = (AssetMetadataMapping)element;
 					if (mm.getMetadataField() == null) {
-						return "**Parse Error**";
+						return Messages.MetadataMappingDialog_ParseError;
 					}
-					return mm.getMetadataField().keyAsString();
+					return mm.getMetadataField().keyAsString(Locale.getDefault());
 				}
 				return super.getText(element);
 			}
 		});
 		
 		TableViewerColumn colValue = new TableViewerColumn(tblMappings, SWT.NONE);
-		colValue.getColumn().setText("File Metadata Value");
+		colValue.getColumn().setText(Messages.MetadataMappingDialog_MetadataValueColumn);
 		colValue.getColumn().setWidth(250);
 		colValue.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -173,7 +175,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 				if (element instanceof AssetMetadataMapping) {
 					AssetMetadataMapping mm = (AssetMetadataMapping)element;
 					if (mm.getMetadataField() == null) {
-						return "**Parse Error**";
+						return Messages.MetadataMappingDialog_ParseError;
 					}
 					return mm.getMetadataField().valueAsString();
 				}
@@ -182,7 +184,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		});
 		
 		TableViewerColumn colMapTo = new TableViewerColumn(tblMappings, SWT.NONE);
-		colMapTo.getColumn().setText("SMART Data Model");
+		colMapTo.getColumn().setText(Messages.MetadataMappingDialog_DataModelColumn);
 		colMapTo.getColumn().setWidth(250);
 		colMapTo.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -196,12 +198,12 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 					if (mm.getMappedTreeNode() != null) sb.append(mm.getMappedTreeNode().getName());
 					
 					if (mm.getMappedAttribute() != null) {
-						if (sb.length() != 0) sb.append(" (" + mm.getMappedAttribute().getName() + ")");
+						if (sb.length() != 0) sb.append(" (" + mm.getMappedAttribute().getName() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 						else sb.append(mm.getMappedAttribute().getName());
 					}
 					
 					if (mm.getMappedCategory() != null) {
-						if (sb.length() != 0) sb.append(" [" + mm.getMappedCategory().getFullCategoryName() + "]");
+						if (sb.length() != 0) sb.append(" [" + mm.getMappedCategory().getFullCategoryName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 						else sb.append(mm.getMappedCategory().getFullCategoryName());
 					}
 					
@@ -224,8 +226,8 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		Button btnDelete = createButton(buttonPanel, DialogConstants.DELETE_BUTTON_TEXT, ()->deleteMappings());
 		Label l = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		Button btnMoveUp = createButton(buttonPanel, "Move Up", ()->moveUp());
-		Button btnMoveDown = createButton(buttonPanel, "Move Down", ()->moveDown());
+		Button btnMoveUp = createButton(buttonPanel, Messages.MetadataMappingDialog_MoveUp, ()->moveUp());
+		Button btnMoveDown = createButton(buttonPanel, Messages.MetadataMappingDialog_MoveDown, ()->moveDown());
 		
 		btnNew.setEnabled(true);
 		tblMappings.getControl().addListener(SWT.Selection, e->{
@@ -242,8 +244,8 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		MenuItem editItem = createMenuItem(tblMenu, DialogConstants.EDIT_BUTTON_TEXT, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON), ()->editMapping());
 		MenuItem deleteItem = createMenuItem(tblMenu, DialogConstants.DELETE_BUTTON_TEXT, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON), ()->deleteMappings());
 		new MenuItem(tblMenu, SWT.SEPARATOR);
-		MenuItem moveUpItem = createMenuItem(tblMenu, "Move Up", null, ()->moveUp());
-		MenuItem moveDownItem = createMenuItem(tblMenu, "Move Down", null, ()->moveDown());
+		MenuItem moveUpItem = createMenuItem(tblMenu, Messages.MetadataMappingDialog_MoveUp, null, ()->moveUp());
+		MenuItem moveDownItem = createMenuItem(tblMenu, Messages.MetadataMappingDialog_MoveDown, null, ()->moveDown());
 		addItem.setEnabled(true);
 		tblMenu.addMenuListener(new MenuListener() {
 			@Override
@@ -261,9 +263,9 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		});
 		tblMappings.getControl().setMenu(tblMenu);
 		
-		setTitle("File Metadata Mappings");
-		setMessage("Configure file metadata mappings");
-		getShell().setText("File Metadata Mappings");
+		setTitle(Messages.MetadataMappingDialog_Title);
+		setMessage(Messages.MetadataMappingDialog_Message);
+		getShell().setText(Messages.MetadataMappingDialog_Title);
 		
 		int width = cmp.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 		width = width / tblMappings.getTable().getColumnCount();
@@ -339,7 +341,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 	private Void deleteMappings() {
 		List<AssetMetadataMapping> toDelete = getSelection();
 		if (toDelete.isEmpty()) return null;
-		if (!MessageDialog.openQuestion(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected mappings?", toDelete.size()))) return null;
+		if (!MessageDialog.openQuestion(getShell(), Messages.MetadataMappingDialog_DeleteTitle, MessageFormat.format(Messages.MetadataMappingDialog_DeleteMessage, toDelete.size()))) return null;
 
 		mappings.removeAll(toDelete);
 		mappingsToDelete.addAll(toDelete);
@@ -398,13 +400,13 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		return true;
 	}	
 	
-	private Job loadMappings = new Job("load metadata mappings") {
+	private Job loadMappings = new Job(Messages.MetadataMappingDialog_loadingJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<AssetMetadataMapping> items = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				items.addAll(QueryFactory.buildQuery(session, AssetMetadataMapping.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				items.addAll(QueryFactory.buildQuery(session, AssetMetadataMapping.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 				
 				items.forEach(i->{
 					if (i.getMappedAttribute() != null) i.getMappedAttribute().getName();

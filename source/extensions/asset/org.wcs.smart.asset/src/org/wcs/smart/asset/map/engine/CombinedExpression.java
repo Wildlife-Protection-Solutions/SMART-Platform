@@ -57,7 +57,7 @@ public class CombinedExpression implements IExpression{
 	
 	@Override
 	public String toString() {
-		return filter1.toString() + " " + op.operator.sql + " " + filter2.toString();
+		return filter1.toString() + " " + op.operator.sql + " " + filter2.toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	@Override

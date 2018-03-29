@@ -47,6 +47,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
 import org.wcs.smart.asset.model.AssetStation;
@@ -112,7 +113,7 @@ public class AssetStationCsvImporter {
 		stationIds = new HashSet<>();
 		
 		try(Session session = HibernateManager.openSession()){
-			stationIds.addAll(session.createQuery("SELECT LOWER(id) FROM AssetStation WHERE conservationArea = :ca").setParameter("ca", ca).list());
+			stationIds.addAll(session.createQuery("SELECT LOWER(id) FROM AssetStation WHERE conservationArea = :ca").setParameter("ca", ca).list()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		CoordinateReferenceSystem fromCrs = ReprojectUtils.stringToCrs(projection.getDefinition());
@@ -138,14 +139,14 @@ public class AssetStationCsvImporter {
 		
 		//process warnings from user
 		if (!warnings.isEmpty()) {
-			WarningDialog warn = new WarningDialog(Display.getDefault().getActiveShell(), "Importing Stations", "The following warnings were generated while processing station data.  Do you want to continue?", warnings, 
+			WarningDialog warn = new WarningDialog(Display.getDefault().getActiveShell(), Messages.AssetStationCsvImporter_ImportTitle, Messages.AssetStationCsvImporter_WarningsMsg, warnings, 
 					new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 			if (warn.open() != 0) {
 				return false;
 			}
 		}
 		if (newStations.isEmpty()) {
-			MessageDialog.openWarning(Display.getDefault().getActiveShell(),"Importing Stations", "Nothing to import - no stations found.");
+			MessageDialog.openWarning(Display.getDefault().getActiveShell(),Messages.AssetStationCsvImporter_ImportTitle, Messages.AssetStationCsvImporter_NoDataMsg);
 			return true;
 		}
 		
@@ -158,12 +159,12 @@ public class AssetStationCsvImporter {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				AssetPlugIn.displayLog("Unable to save imported stations to database: " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog(Messages.AssetStationCsvImporter_SaveError + ex.getMessage(), ex);
 				return false;
 			}
 		}
 		
-		MessageDialog.openInformation(Display.getDefault().getActiveShell(),  "Importing Stations", MessageFormat.format("{0} stations successfully imported", newStations.size()));
+		MessageDialog.openInformation(Display.getDefault().getActiveShell(),  Messages.AssetStationCsvImporter_ImportTitle, MessageFormat.format(Messages.AssetStationCsvImporter_SuccessMsg, newStations.size()));
 		broker.post(AssetEvents.ASSETSTATION_NEW, newStations);
 		
 		return true;
@@ -173,11 +174,11 @@ public class AssetStationCsvImporter {
 	private AssetStation processRow(int row, String[] data, MathTransform transform) {
 		String id = data[idField].trim();
 		if (id.isEmpty()) {
-			warnings.add(MessageFormat.format("ROW NOT IMPORTED - Station id cannot be empty at row {0}.", row));
+			warnings.add(MessageFormat.format(Messages.AssetStationCsvImporter_StationIdREquired, row));
 			return  null;
 		}
 		if (stationIds.contains(id.toLowerCase())){
-			warnings.add(MessageFormat.format("ROW NOT IMPORTED - Station id already exists at row {0}. Cannot duplicate station ids.", row));
+			warnings.add(MessageFormat.format(Messages.AssetStationCsvImporter_duplicateIds, row));
 			return null;
 		}
 		
@@ -185,7 +186,7 @@ public class AssetStationCsvImporter {
 		try {
 			x = Double.parseDouble(data[xField]);
 		}catch (Exception ex) {
-			warnings.add(MessageFormat.format("ROW NOT IMPORTED - Could not parse value from ''{0}'' for x position of station at row {1}", data[xField], row));
+			warnings.add(MessageFormat.format(Messages.AssetStationCsvImporter_XNotFound, data[xField], row));
 			return null;
 		}
 		
@@ -193,7 +194,7 @@ public class AssetStationCsvImporter {
 		try {
 			y = Double.parseDouble(data[yField]);
 		}catch (Exception ex) {
-			warnings.add(MessageFormat.format("ROW NOT IMPORTED - Could not parse value from ''{0}'' for y position of station at row {1}", data[yField], row));
+			warnings.add(MessageFormat.format(Messages.AssetStationCsvImporter_YNotFound, data[yField], row));
 			return null;
 		}
 		
@@ -202,7 +203,7 @@ public class AssetStationCsvImporter {
 			p = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x,y));
 			p = (Point) JTS.transform(p, transform);
 		}catch (Exception ex) {
-			warnings.add(MessageFormat.format("ROW NOT IMPORTED - Could not parse position for the station at row {0}", row));
+			warnings.add(MessageFormat.format(Messages.AssetStationCsvImporter_PositiongNotfound, row));
 			return null;
 		}
 		
@@ -247,7 +248,7 @@ public class AssetStationCsvImporter {
 				x = null;
 			}
 			if (x == null) {
-				warnings.add(MessageFormat.format("Could not parse boolean value from value ''{0}'' for attribute {1} at row {2}.  Station attribute value will not be imported.", data, attributeValue.getAttribute().getName(), rowIndex));
+				warnings.add(MessageFormat.format(Messages.AssetStationCsvImporter_BooleanParseError, data, attributeValue.getAttribute().getName(), rowIndex));
 				return null;
 			}
 			attributeValue.setNumberValue(x ? 1.0 : 0);
@@ -261,7 +262,7 @@ public class AssetStationCsvImporter {
 				d = null;
 			}
 			if (d == null) {
-				warnings.add(MessageFormat.format("Could not parse date from value ''{0}'' for attribute {1} at row {2}.  Station attribute value will not be imported.", data, attributeValue.getAttribute().getName(), rowIndex));
+				warnings.add(MessageFormat.format(Messages.AssetStationCsvImporter_DateParseError, data, attributeValue.getAttribute().getName(), rowIndex));
 				return null;
 			}
 			attributeValue.setDateValue(d);
@@ -281,7 +282,7 @@ public class AssetStationCsvImporter {
 				}
 			}
 			if (av == null) {
-				warnings.add(MessageFormat.format("Could not parse list value from value ''{0}'' for attribute {1} at row {2}.  Station attribute value will not be imported.", data, attributeValue.getAttribute().getName(), rowIndex));
+				warnings.add(MessageFormat.format(Messages.AssetStationCsvImporter_ListParseError, data, attributeValue.getAttribute().getName(), rowIndex));
 				return null;
 			}
 			attributeValue.setAttributeListItem(av);
@@ -295,14 +296,14 @@ public class AssetStationCsvImporter {
 				v = null;
 			}
 			if (v == null) {
-				warnings.add(MessageFormat.format("Could not parse boolean value from value ''{0}'' for attribute {1} at row {2}.  Station attribute value will not be imported.", data, attributeValue.getAttribute().getName(), rowIndex));
+				warnings.add(MessageFormat.format(Messages.AssetStationCsvImporter_NumericParseError, data, attributeValue.getAttribute().getName(), rowIndex));
 				return null;
 			}
 			attributeValue.setNumberValue(v);
 			break;
 		case POSITION:
 			//TODO: add support for position attributes
-			warnings.add(MessageFormat.format("Positiong attributes are not supported in csv importer at row {0}.  Station attribute value will not be imported.", rowIndex));
+			warnings.add(MessageFormat.format(Messages.AssetStationCsvImporter_PositionAttributeNotSupported, rowIndex));
 			return null;
 		case TEXT:
 			attributeValue.setStringValue(data);

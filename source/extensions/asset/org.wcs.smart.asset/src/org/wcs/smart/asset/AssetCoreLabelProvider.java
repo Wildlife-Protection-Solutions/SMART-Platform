@@ -24,9 +24,13 @@ package org.wcs.smart.asset;
 import java.util.Locale;
 
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.asset.data.importer.FileProcessor;
+import org.wcs.smart.asset.data.importer.FileProxy;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetWaypointSource;
+import org.wcs.smart.asset.model.mapping.ExifMetadataField;
 
 /**
  * Label provider for core asset items.
@@ -56,29 +60,74 @@ public class AssetCoreLabelProvider implements IAssetLabelProvider {
 	public String getLabel(Object item, Locale l) {
 		if (item instanceof AssetAttribute.AttributeType) {
 			switch( ((AssetAttribute.AttributeType)item) ) {
-			case BOOLEAN: return "BOOLEAN";
-			case DATE: return "DATE";
-			case LIST: return "LIST";
-			case NUMERIC: return "NUMERIC";
-			case POSITION: return "POSITION";
-			case TEXT: return "TEXT";			
+			case BOOLEAN: return Messages.AssetCoreLabelProvider_BooleanAttributeType;
+			case DATE: return Messages.AssetCoreLabelProvider_DateAttributeType;
+			case LIST: return Messages.AssetCoreLabelProvider_ListAttributeType;
+			case NUMERIC: return Messages.AssetCoreLabelProvider_NumberAttributeType;
+			case POSITION: return Messages.AssetCoreLabelProvider_PositionAttributeType;
+			case TEXT: return Messages.AssetCoreLabelProvider_TextAttributeType;			
 			}
 		}
 		if (item instanceof AssetWaypointSource) {
-			return "Asset";
+			return Messages.AssetCoreLabelProvider_AssetSource;
 		}
-		if (item == ASSET_TABLE_NAME) return "Assets";
-		if (item == STATION_TABLE_NAME) return "Stations";
-		if (item == STATIONLOCATION_TABLE_NAME) return "Station Locations";
+		if (item == ASSET_TABLE_NAME) return Messages.AssetCoreLabelProvider_AssetsTable;
+		if (item == STATION_TABLE_NAME) return Messages.AssetCoreLabelProvider_StationsTable;
+		if (item == STATIONLOCATION_TABLE_NAME) return Messages.AssetCoreLabelProvider_StationLocationTable;
 		
 		
-		if (item == ID_COL_NAME) return "ID";
-		if (item == ASSET_TYPE_COL_NAME) return "Type";
-		if (item == STATUS_COL_NAME) return "Status";
-		if (item == STATUSKEY_COL_NAME) return "Status Key";
-		if (item == ASSET_TYPEKEY_COL_NAME) return "Type Key";
-		if (item == POSITION_COL_NAME) return "Position";
+		if (item == ID_COL_NAME) return Messages.AssetCoreLabelProvider_IdColumnName;
+		if (item == ASSET_TYPE_COL_NAME) return Messages.AssetCoreLabelProvider_TypeColumnName;
+		if (item == STATUS_COL_NAME) return Messages.AssetCoreLabelProvider_StatusColumnName;
+		if (item == STATUSKEY_COL_NAME) return Messages.AssetCoreLabelProvider_StatusKeyColumnName;
+		if (item == ASSET_TYPEKEY_COL_NAME) return Messages.AssetCoreLabelProvider_TypeKeyColumnName;
+		if (item == POSITION_COL_NAME) return Messages.AssetCoreLabelProvider_PositionColumnName;
 		
+		if (item instanceof FileProcessor.ErrorMessages) {
+			switch((FileProcessor.ErrorMessages)item) {
+				case ASSET_NOT_FOUND: return Messages.AssetCoreLabelProvider_AssetNotFound;
+				case BOOLEAN_PARSE_ERROR: return Messages.AssetCoreLabelProvider_BooleanParseError1;
+				case BOOLEAN_TAG_PARSE_ERROR: return Messages.AssetCoreLabelProvider_BooleanParseError2;
+				case CATEGORY_NOT_FOUND: return Messages.AssetCoreLabelProvider_CategoryNotFound;
+				case DATE_PARSE_ERROR: return Messages.AssetCoreLabelProvider_DateParseError1;
+				case DATE_TAG_PARSE_ERROR: return Messages.AssetCoreLabelProvider_DateParseError2;
+				case LIST_ITEM_PARSE_ERROR: return Messages.AssetCoreLabelProvider_ListItemParseError1;
+				case LIST_ITEM_TAG_PARSE_ERROR: return Messages.AssetCoreLabelProvider_ListItemParseError2;
+				case METADATA_PARSE: return Messages.AssetCoreLabelProvider_MetadataParseError;
+				case MULTIPLE_DEPLOYMENTS: return Messages.AssetCoreLabelProvider_MultiDeployments;
+				case NUMBER_PARSE_ERROR: return Messages.AssetCoreLabelProvider_NumberParseError1;
+				case NUMBER_TAG_PARSE_ERROR: return Messages.AssetCoreLabelProvider_NumberParseError2;
+				case STATION_LOCATION_NOT_FOUND: return Messages.AssetCoreLabelProvider_LocationNotFound;
+				case STATION_NOT_FOUND: return Messages.AssetCoreLabelProvider_StationNotFound;
+				case STATION_OVERWRITE: return Messages.AssetCoreLabelProvider_LocationDoesNotMatchStation;
+				case TREE_NODE_PARSE_ERROR: return Messages.AssetCoreLabelProvider_TreeNodeParseError;				
+				case TREE_NODE_TAG_PARSE_ERROR: return Messages.AssetCoreLabelProvider_TreeNodeParseError2;
+			}
+		}
+		
+		if (item instanceof FileProxy.ErrorMessage) {
+			switch((FileProxy.ErrorMessage)item) {
+				case ASSET_NOT_FOUND: return Messages.AssetCoreLabelProvider_NoAsset;
+				case DATE_NOT_FOUND: return Messages.AssetCoreLabelProvider_NoDate;
+				case LOCATION_NOT_FOUND: return Messages.AssetCoreLabelProvider_NoStationLocation;
+				case POSITION_NOT_FOUND: return Messages.AssetCoreLabelProvider_NoPosition;
+				case STATION_NOT_FOUND: return Messages.AssetCoreLabelProvider_NoStation;
+				case NEW_STATION: return Messages.AssetCoreLabelProvider_NewStation;
+				case NEW_STATION_LOCATION: return Messages.AssetCoreLabelProvider_NewLocation;
+				
+			}
+		}
+		
+		if (item instanceof Asset.Status) {
+			switch((Asset.Status)item) {
+				case ACTIVE: return Messages.AssetCoreLabelProvider_AssetActive;
+				case INACTIVE: return Messages.AssetCoreLabelProvider_AssetInActive;
+				case RETIRED: return Messages.AssetCoreLabelProvider_AssetRetired;
+			}
+		}
+		
+		if (item == ExifMetadataField.TAG_FORMAT_1) return Messages.AssetCoreLabelProvider_TagFormat0;
+		if (item == ExifMetadataField.TAG_FORMAT_2) return Messages.AssetCoreLabelProvider_TagFormat1;
 		return null;
 	}
 }

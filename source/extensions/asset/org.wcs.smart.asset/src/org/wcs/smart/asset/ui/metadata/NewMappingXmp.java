@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.importer.FileMetadataReader;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
 import org.wcs.smart.asset.model.AssetMetadataMapping.MetadataType;
 import org.wcs.smart.asset.model.mapping.XmpMetadataField;
@@ -66,7 +67,7 @@ public class NewMappingXmp extends AbstractNewMappingComposite{
 	public String validate() {
 		String tag = txtXmpPath.getText().trim();
 		if (tag.isEmpty()) {
-			return "Xmp Path field cannot be empty";
+			return Messages.NewMappingXmp_Pathrequired;
 		}
 		return super.validate();
 	}
@@ -113,15 +114,15 @@ public class NewMappingXmp extends AbstractNewMappingComposite{
 		panel.setLayout(new GridLayout(2, false));
 		
 		Label l = new Label(panel, SWT.NONE);
-		l.setText("XMP Path:");
-		l.setToolTipText("path seperator is colon (:)");
+		l.setText(Messages.NewMappingXmp_PathLabel);
+		l.setToolTipText(Messages.NewMappingXmp_Pathtooltip);
 		
 		txtXmpPath = new Text(panel, SWT.BORDER);
 		txtXmpPath.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtXmpPath.addListener(SWT.Modify, e->modified());
 		
 		Link linkSelectFromFile = new Link(panel, SWT.NONE);
-		linkSelectFromFile.setText("<a>" + "Select Path From File ..." + "</a>");
+		linkSelectFromFile.setText("<a>" + Messages.NewMappingXmp_SelectfromFile + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		linkSelectFromFile.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
 		linkSelectFromFile.addListener(SWT.Selection, e -> selectXmpPathFromFile());
 		
@@ -130,7 +131,7 @@ public class NewMappingXmp extends AbstractNewMappingComposite{
 		
 		
 		Link linkaddFromFile = new Link(panel, SWT.NONE);
-		linkaddFromFile.setText("<a>" + "Add All Values found in Files ..." + "</a>");
+		linkaddFromFile.setText("<a>" + Messages.NewMappingXmp_AllValuesOption + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		linkaddFromFile.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
 		linkaddFromFile.addListener(SWT.Selection, e -> selectValuesFromFiles());
 		
@@ -183,7 +184,7 @@ public class NewMappingXmp extends AbstractNewMappingComposite{
 		
 		Path p = Paths.get(f);
 		if (!Files.exists(p)) {
-			MessageDialog.openError(dialog.getShell(), "Not Found", MessageFormat.format("File {0} not found.", p.toString()));
+			MessageDialog.openError(dialog.getShell(), Messages.NewMappingXmp_NotFoundTitle, MessageFormat.format(Messages.NewMappingXmp_NotFoundMsg, p.toString()));
 			return;
 		}
 		
@@ -191,7 +192,7 @@ public class NewMappingXmp extends AbstractNewMappingComposite{
 		try {
 			data = FileMetadataReader.readXmpMetadata(p);
 		}catch (Exception ex) {
-			MessageDialog.openError(dialog.getShell(), "Metadata Error", MessageFormat.format("Could not read xmp metadata from file {0}.", p.toString()));
+			MessageDialog.openError(dialog.getShell(), Messages.NewMappingXmp_ErrorTitle, MessageFormat.format(Messages.NewMappingXmp_ErrorMsg, p.toString()));
 			return;	
 		}
 		

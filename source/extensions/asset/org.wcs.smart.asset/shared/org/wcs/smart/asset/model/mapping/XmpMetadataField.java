@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.asset.model.mapping;
 
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,6 +40,8 @@ import com.drew.metadata.xmp.XmpDirectory;
 public class XmpMetadataField implements IMetadataField{
 
 	private static Logger logger = Logger.getLogger(XmpMetadataField.class.getCanonicalName());
+	
+	private static final String SEPERATOR = "|"; //$NON-NLS-1$
 	
 	/*
 	 * Metadata path (eg. ns:item) 
@@ -93,19 +96,19 @@ public class XmpMetadataField implements IMetadataField{
 	}
 	
 	@Override
-	public String keyAsString() {
+	public String keyAsString(Locale l) {
 		return path;
 	}
 	
 	@Override
 	public String valueAsString() {
-		if (value == null) return "";
+		if (value == null) return ""; //$NON-NLS-1$
 		return value;
 	}
 
 	@Override
 	public String asString() {
-		return String.valueOf(path) + "|" +  (value == null? "" : value);
+		return String.valueOf(path) + SEPERATOR +  (value == null? "" : value); //$NON-NLS-1$ 
 	}
 
 	/**
@@ -150,7 +153,7 @@ public class XmpMetadataField implements IMetadataField{
 	 */
 	public static XmpMetadataField parseMapping(String mappingString) {
 		if (mappingString == null) return null;
-		String[] bits = mappingString.split("\\|");
+		String[] bits = mappingString.split("\\" + SEPERATOR); //$NON-NLS-1$
 		if (bits.length == 1) return new XmpMetadataField(bits[0]);
 		if (bits.length == 2) return new XmpMetadataField(bits[0], bits[1]);
 		return null;

@@ -40,6 +40,7 @@ import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetManager;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetUtils;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -71,8 +72,8 @@ public class DeleteAssetHandler {
 					DeleteManager.canDelete(Asset.class, session);
 					toDelete.add(a);
 				}catch (Exception ex) {
-					MessageDialog.openWarning(shell, "Delete Asset", 
-							MessageFormat.format("Unable to delete asset ''{0}'': {1}", a.getId(), ex.getMessage()));
+					MessageDialog.openWarning(shell, Messages.DeleteAssetHandler_DeleteTitle, 
+							MessageFormat.format(Messages.DeleteAssetHandler_DeleteErrorMsg, a.getId(), ex.getMessage()));
 				}
 				
 			}
@@ -80,14 +81,14 @@ public class DeleteAssetHandler {
 		if (toDelete.isEmpty()) return;
 		
 		StringBuilder ids = new StringBuilder();
-		for(Asset s : toDelete) ids.append(s.getId() +"\n");
-		if (!MessageDialog.openQuestion(shell, "Delete Asset",
-				MessageFormat.format("The following assets and all associated data will be removed." + "\n{0}" + "Are you sure you want to delete the following assets?", ids.toString())
+		for(Asset s : toDelete) ids.append(s.getId() +"\n"); //$NON-NLS-1$
+		if (!MessageDialog.openQuestion(shell, Messages.DeleteAssetHandler_DeleteTitle,
+				MessageFormat.format(Messages.DeleteAssetHandler_DeleteConfirm, ids.toString())
 				)) {
 			return;
 		}
 		
-		if (!AssetUtils.confirmPassword(shell, "Confirm User", "Enter you password to continue with delete operation")) {
+		if (!AssetUtils.confirmPassword(shell, Messages.DeleteAssetHandler_ConfirmPasswordTitle, Messages.DeleteAssetHandler_ConfirmPasswordMsg)) {
 			return;
 		}
 			
@@ -97,7 +98,7 @@ public class DeleteAssetHandler {
 				
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Deleting Assets", toDelete.size());
+					monitor.beginTask(Messages.DeleteAssetHandler_DeleteTaskName, toDelete.size());
 					for (Asset asset : toDelete) {
 						AssetManager.INSTANCE.deleteAsset(asset, eventBroker);
 						monitor.worked(1);
@@ -105,7 +106,7 @@ public class DeleteAssetHandler {
 				}
 			});
 		}catch (Exception ex) {
-			AssetPlugIn.displayLog("Error deleting assets. Refresh and try again." + ex.getMessage(),  ex);
+			AssetPlugIn.displayLog(Messages.DeleteAssetHandler_DeleteError + ex.getMessage(),  ex);
 		}
 		eventBroker.post(AssetEvents.ASSETDATA, null);
 

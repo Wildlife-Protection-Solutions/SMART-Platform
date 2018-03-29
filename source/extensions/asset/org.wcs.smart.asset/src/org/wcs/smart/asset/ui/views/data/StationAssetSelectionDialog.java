@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
@@ -72,8 +73,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class StationAssetSelectionDialog extends Dialog{
 
-	public static final String CREATE_STATION = "<Create New Station...>";
-	public static final String CREATE_LOCATION = "<Create New Station Location...>";
+	public static final String CREATE_STATION = Messages.StationAssetSelectionDialog_NewStationAction;
+	public static final String CREATE_LOCATION = Messages.StationAssetSelectionDialog_NewLocationAction;
 			
 	@Inject
 	private IEclipseContext context;
@@ -204,11 +205,11 @@ public class StationAssetSelectionDialog extends Dialog{
 			loadAssets.setSystem(true);
 			loadAssets.schedule();
 			
-			getShell().setText("Select Asset");
+			getShell().setText(Messages.StationAssetSelectionDialog_AssetTitle);
 		}
 		if (type == Type.LOCATION || type == Type.STATION) {
 			Label l = new Label(main, SWT.NONE);
-			l.setText("Station:");
+			l.setText(Messages.StationAssetSelectionDialog_StationLabel);
 			
 			cmbStation = new ComboViewer(main, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 			cmbStation.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -243,7 +244,7 @@ public class StationAssetSelectionDialog extends Dialog{
 			
 			if (type == Type.LOCATION) {
 				l = new Label(main, SWT.NONE);
-				l.setText("Station Location:");
+				l.setText(Messages.StationAssetSelectionDialog_StationLocationLabel);
 				
 				cmbLocation = new ComboViewer(main, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 				cmbLocation.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -276,12 +277,12 @@ public class StationAssetSelectionDialog extends Dialog{
 			loadStations.setSystem(true);
 			loadStations.schedule();
 			
-			getShell().setText("Select Location");
+			getShell().setText(Messages.StationAssetSelectionDialog_LocationTitle);
 		}
 		
 		if (type == Type.DATE) {
 			Label l = new Label(main, SWT.NONE);
-			l.setText("Date/Time:");
+			l.setText(Messages.StationAssetSelectionDialog_DateTimeLabel);
 			
 			Composite c = new Composite(main,  SWT.NONE);
 			c.setLayout(new GridLayout(2, false));
@@ -291,7 +292,7 @@ public class StationAssetSelectionDialog extends Dialog{
 			dtDate = new DateTime(c, SWT.DATE | SWT.DROP_DOWN | SWT.CALENDAR | SWT.LONG);
 			dtTime = new DateTime(c, SWT.TIME);
 			
-			getShell().setText("Select Date");
+			getShell().setText(Messages.StationAssetSelectionDialog_DateTitle);
 		}
 		return parent;
 	}
@@ -301,15 +302,15 @@ public class StationAssetSelectionDialog extends Dialog{
 		return true;
 	}
 	
-	private Job loadAssets = new Job("loading assets") {
+	private Job loadAssets = new Job(Messages.StationAssetSelectionDialog_assetsJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Asset> assets = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
 				assets.addAll(QueryFactory.buildQuery(session, Asset.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"isRetired", false}
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"isRetired", false} //$NON-NLS-1$
 				).list());
 				assets.forEach(a->a.getAssetType().getName());
 			}
@@ -323,14 +324,14 @@ public class StationAssetSelectionDialog extends Dialog{
 		
 	};
 	
-	Job loadStations = new Job("loading stations") {
+	Job loadStations = new Job(Messages.StationAssetSelectionDialog_stationsJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<AssetStation> stations = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
 				stations.addAll(QueryFactory.buildQuery(session, AssetStation.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}				
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}				 //$NON-NLS-1$
 				).list());
 				stations.forEach(s->s.getId());
 				stations.forEach(a->a.getLocations().forEach(l->l.getId()));

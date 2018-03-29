@@ -67,6 +67,7 @@ import org.locationtech.udig.project.ui.internal.tool.display.ToolManager;
 import org.locationtech.udig.project.ui.render.displayAdapter.ViewportPane;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AbstractAssetAttributeValue;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
@@ -203,7 +204,7 @@ public class AttributeFieldEditor {
 					Double.parseDouble(txtValue.getText());
 				}
 			}catch(Exception ex){
-				msg = "Invalid numeric value";
+				msg = Messages.AttributeFieldEditor_InvalidNumberValue;
 			}
 		}
 		if (attribute.getType() == AttributeType.POSITION){
@@ -217,7 +218,7 @@ public class AttributeFieldEditor {
 					y = Double.parseDouble(txtValue2.getText());
 				}
 			}catch(Exception ex){
-				msg ="Invalid numeric value for position location";
+				msg =Messages.AttributeFieldEditor_InvalidNumberValue;
 			}
 			//try to reproject to database crs
 			if (x != null && y != null){
@@ -226,7 +227,7 @@ public class AttributeFieldEditor {
 					try{
 						ReprojectUtils.reproject(x, y, crs, GeometryUtils.SMART_CRS);
 					}catch (Exception ex){
-						msg = "Projection error - invalid position coordinates";
+						msg = Messages.AttributeFieldEditor_InvalidCoordinate;
 					}
 				}
 			}
@@ -370,7 +371,7 @@ public class AttributeFieldEditor {
 		if (attribute.getType() == AttributeType.TEXT){
 			txtMulti.setText(value.getStringValue());
 		}else if (attribute.getType() == AttributeType.NUMERIC){
-			DecimalFormat dm = new DecimalFormat("#.##");
+			DecimalFormat dm = new DecimalFormat("#.##"); //$NON-NLS-1$
 			txtValue.setText(dm.format(value.getNumberValue()));
 		}else if (attribute.getType() == AttributeType.POSITION){
 			initPositionValues(value.getNumberValue(), value.getNumberValue2());
@@ -447,7 +448,7 @@ public class AttributeFieldEditor {
 				txtValue.setText(String.valueOf(viewCoordinate.x));
 				txtValue2.setText(String.valueOf(viewCoordinate.y));
 			} catch (Exception e) {
-				AssetPlugIn.displayLog("Error reprojecting positiong attribute", e);
+				AssetPlugIn.displayLog(Messages.AttributeFieldEditor_ReprojectionError, e);
 				txtValue.setText(String.valueOf(value1));
 				txtValue2.setText(String.valueOf(value2));
 			}
@@ -482,7 +483,7 @@ public class AttributeFieldEditor {
 				Coordinate c = ReprojectUtils.reproject(x, y, crs, GeometryUtils.SMART_CRS);
 				return new Double[]{c.x, c.y};
 			}catch (Exception ex){
-				AssetPlugIn.displayLog("Error reprojecting position attribute", ex);
+				AssetPlugIn.displayLog(Messages.AttributeFieldEditor_ReprojectionError, ex);
 				return new Double[]{x,y};
 			}
 		}
@@ -636,7 +637,7 @@ public class AttributeFieldEditor {
 			
 			
 			mapLink = new Hyperlink(c, SWT.NONE);
-			mapLink.setText("map...");
+			mapLink.setText(Messages.AttributeFieldEditor_OpenMap);
 			mapLink.setUnderlined(true);
 			mapLink.setForeground(mapLink.getDisplay().getSystemColor(SWT.COLOR_LINK_FOREGROUND));
 			mapLink.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));

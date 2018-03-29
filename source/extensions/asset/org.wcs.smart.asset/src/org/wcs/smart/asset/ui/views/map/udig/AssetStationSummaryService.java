@@ -50,7 +50,6 @@ public class AssetStationSummaryService extends IService {
 	
 	private volatile List<AssetStationSummaryGeoResource> members;
 	
-	private Exception error;
 	private List<IOverviewTableColumn> columns = Collections.emptyList();
 	private List<StationData> data = Collections.emptyList();
 	
@@ -79,7 +78,6 @@ public class AssetStationSummaryService extends IService {
 	 */
 	@Override
 	public Status getStatus() {
-		if (error != null) return Status.BROKEN;
 		return Status.CONNECTED;
 	}
 
@@ -90,7 +88,7 @@ public class AssetStationSummaryService extends IService {
 	 */
 	@Override
 	public Throwable getMessage() {
-		return error;
+		return null;
 	}
 
 	/**

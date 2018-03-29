@@ -47,8 +47,7 @@ public class AssetStationSummaryServiceExtension implements ServiceExtension {
 	public IService createService(URL id, Map<String, Serializable> params) {
         if (params == null)
             return null;
-        throw new UnsupportedOperationException("Not supported");
-//       	return  new AssetStationSummaryService(params);
+        throw new UnsupportedOperationException("Not supported"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -68,7 +67,7 @@ public class AssetStationSummaryServiceExtension implements ServiceExtension {
 	 * @return url generated from connection parameters
 	 */
 	public static URL createURL(Map<String, Serializable> params){
-		String url = "smart://smartdb/asset/summary";
+		String url = "smart://smartdb/asset/summary"; //$NON-NLS-1$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){
