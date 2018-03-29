@@ -311,11 +311,11 @@
 				<module>../extensions/asset/org.wcs.smart.asset.core.feature</module>
 				
 				
-				<module>../extensions/asset/org.wcs.smart.event</module>
-				<module>../extensions/asset/org.wcs.smart.event.core.feature</module>
-				<module>../extensions/asset/org.wcs.smart.event.feature</module>
-				<module>../extensions/asset/org.wcs.smart.event.i2</module>
-				<module>../extensions/asset/org.wcs.smart.event.i2.feature</module>
+				<module>../extensions/event/org.wcs.smart.event</module>
+				<module>../extensions/event/org.wcs.smart.event.core.feature</module>
+				<module>../extensions/event/org.wcs.smart.event.feature</module>
+				<module>../extensions/event/org.wcs.smart.event.i2</module>
+				<module>../extensions/event/org.wcs.smart.event.i2.feature</module>
 				
 			</modules>
 		</profile>

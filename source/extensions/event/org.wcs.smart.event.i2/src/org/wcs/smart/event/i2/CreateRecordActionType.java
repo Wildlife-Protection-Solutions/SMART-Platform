@@ -34,9 +34,9 @@ import java.util.logging.Logger;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.event.EventPlugIn;
+import org.wcs.smart.event.i2.internal.Messages;
 import org.wcs.smart.event.model.EAction;
 import org.wcs.smart.event.model.EActionParameterValue;
 import org.wcs.smart.event.model.EFilter;
@@ -71,14 +71,6 @@ public class CreateRecordActionType implements IActionType {
 
 	public static final String KEY = "org.wcs.smart.profile.newrecord"; //$NON-NLS-1$
 
-	public static final String NAME = CreateRecordActionType.class.getName() + ".name"; //$NON-NLS-1$
-	public static final String DESCRIPTION = CreateRecordActionType.class.getName() + ".description"; //$NON-NLS-1$
-	public static final String MESSAGE = CreateRecordActionType.class.getName() + ".msg"; //$NON-NLS-1$
-	public static final String WP_SOURCE = CreateRecordActionType.class.getName() + ".msg"; //$NON-NLS-1$
-	public static final String WP_DATE = CreateRecordActionType.class.getName() + ".msg"; //$NON-NLS-1$
-	public static final String WP_CMT = CreateRecordActionType.class.getName() + ".msg"; //$NON-NLS-1$
-	public static final String WP_OBS = CreateRecordActionType.class.getName() + ".msg"; //$NON-NLS-1$
-	
 	
 	private static Logger logger = Logger.getLogger(CreateRecordActionType.class.getCanonicalName());
 
@@ -97,12 +89,12 @@ public class CreateRecordActionType implements IActionType {
 
 	@Override
 	public String getName(Locale l) {
-		return SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(NAME, l);
+		return Messages.AdvIntelLabelProvider_CreateActionTypeName;
 	}
 
 	@Override
 	public String getDescription(Locale l) {
-		return SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(DESCRIPTION, l);
+		return Messages.AdvIntelLabelProvider_CreateActionTypeDesc;
 	}
 
 	@Override
@@ -115,15 +107,15 @@ public class CreateRecordActionType implements IActionType {
 		//create a new intelligence record
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append(MessageFormat.format( SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(MESSAGE, l), action.getId(), filter.getId()));
+		sb.append(MessageFormat.format( Messages.AdvIntelLabelProvider_CreateActionTypeMsg1, action.getId(), filter.getId()));
 		sb.append("\n\n"); //$NON-NLS-1$
-		sb.append(MessageFormat.format(SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(WP_SOURCE, l), data.getWaypoint().getSourceId()));
+		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg2, data.getWaypoint().getSourceId()));
 		sb.append("\n"); //$NON-NLS-1$
-		sb.append(MessageFormat.format(SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(WP_DATE, l), (new SimpleDateFormat("MMM dd, yyyy HH:mm:ss")).format(data.getWaypoint().getDateTime()))); //$NON-NLS-1$
+		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg3, (new SimpleDateFormat("MMM dd, yyyy HH:mm:ss")).format(data.getWaypoint().getDateTime()))); //$NON-NLS-1$
 		sb.append("\n"); //$NON-NLS-1$
-		sb.append(MessageFormat.format(SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(WP_CMT, l), data.getWaypoint().getComment()));
+		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg4, data.getWaypoint().getComment()));
 		sb.append("\n"); //$NON-NLS-1$
-		sb.append(MessageFormat.format(SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(WP_OBS, l), data.getCategory().getName()));
+		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg5, data.getCategory().getName()));
 		sb.append("\n"); //$NON-NLS-1$
 		for (WaypointObservationAttribute a : data.getAttributes()) {
 			sb.append(MessageFormat.format("{0}: {1}", a.getAttribute().getName(), a.getAttributeValueAsString(Locale.getDefault()))); //$NON-NLS-1$

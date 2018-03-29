@@ -23,6 +23,8 @@ package org.wcs.smart.event;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -35,9 +37,10 @@ import org.wcs.smart.event.model.IActionType;
  *
  */
 public enum ActionTypeManager {
-	
+
 	INSTANCE;
 	
+	private static Logger logger = Logger.getLogger( ActionTypeManager.class.getCanonicalName());
 	private volatile List<IActionType> types = null;
 	
 	public List<IActionType> getActionTypes(){
@@ -63,7 +66,7 @@ public enum ActionTypeManager {
 					IActionType type = (IActionType) e.createExecutableExtension("class"); //$NON-NLS-1$
 					localTypes.add(type);
 				}catch (Exception ex) {
-					EventPlugIn.log(ex.getMessage(), ex);
+					logger.log(Level.WARNING,ex.getMessage(),ex);
 				}
 			}
 			this.types = localTypes;

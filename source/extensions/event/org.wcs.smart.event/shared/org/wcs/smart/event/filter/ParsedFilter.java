@@ -29,9 +29,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.event.filter.parse.Parser;
-import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.IWaypointSource;
+import org.wcs.smart.observation.model.IWaypointSourceEngine;
 
 /**
  * Parsed action fitler.
@@ -56,7 +57,7 @@ public class ParsedFilter {
 			sources = new ArrayList<>();
 			String[] srcs = parts[0].split(SOURCE_SPACER);
 			for (String src : srcs) {
-				IWaypointSource wpSource = WaypointSourceEngine.INSTANCE.getSource(src);
+				IWaypointSource wpSource = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class).getSource(src);
 				if (wpSource != null) {
 					sources.add(wpSource);
 				}else {

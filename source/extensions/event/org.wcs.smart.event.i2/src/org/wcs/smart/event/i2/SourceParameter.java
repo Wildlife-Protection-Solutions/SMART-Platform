@@ -23,7 +23,7 @@ package org.wcs.smart.event.i2;
 
 import java.util.Locale;
 
-import org.wcs.smart.SmartContext;
+import org.wcs.smart.event.i2.internal.Messages;
 import org.wcs.smart.event.model.IActionParameter;
 
 /**
@@ -43,7 +43,7 @@ public class SourceParameter implements IActionParameter{
 
 	@Override
 	public String getName(Locale l) {
-		return SmartContext.INSTANCE.getClass(IAdvIntelLabelProvider.class).getLabel(SourceParameter.class, l);
+		return Messages.AdvIntelLabelProvider_SourceParameterName;
 	}
 
 	@Override
