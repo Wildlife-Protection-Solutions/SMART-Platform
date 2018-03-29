@@ -51,6 +51,12 @@
    <feature url="features/org.wcs.smart.asset.feature_6.0.0.qualifier.jar" id="org.wcs.smart.asset.feature" version="6.0.0.qualifier">
       <category name="asset"/>
    </feature>
+   <feature url="features/org.wcs.smart.event.feature_1.0.0.qualifier.jar" id="org.wcs.smart.event.feature" version="1.0.0.qualifier">
+      <category name="events"/>
+   </feature>
+   <feature url="features/org.wcs.smart.event.i2.feature_1.0.0.qualifier.jar" id="org.wcs.smart.event.i2.feature" version="1.0.0.qualifier">
+      <category name="events"/>
+   </feature>
    <category-def name="intelligence" label="SMART Intelligence Plug-in">
       <description>
          The SMART Intelligence plug-in contains the choice of two intelligence modules that allows users to organize, maintain and query intelligence information. Intelligence information may have been gathered by earlier patrols, or may have been received from external sources. Intelligence information may be useful to Conservation Area managers when they plan future patrols.
@@ -102,4 +108,5 @@
       </description>
    </category-def>
    <category-def name="profiles" label="SMART Profiles Plugin"/>
+   <category-def name="events" label="SMART Event Module"/>
 </site>
