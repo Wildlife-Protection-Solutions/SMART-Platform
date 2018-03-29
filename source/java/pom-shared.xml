@@ -70,6 +70,9 @@
 		<module>../extensions/asset/org.wcs.smart.asset/pom-shared.xml</module>
 		<module>../extensions/asset/org.wcs.smart.asset.query/pom-shared.xml</module>
 		<module>../extensions/asset/org.wcs.smart.asset.query.report/pom-shared.xml</module>
+		
+		<module>../extensions/asset/org.wcs.smart.event/pom-shared.xml</module>
+		<module>../extensions/asset/org.wcs.smart.event.i2/pom-shared.xml</module>
 
 	</modules>
  
