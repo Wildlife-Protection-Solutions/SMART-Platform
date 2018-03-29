@@ -4,6 +4,14 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.event.internal.messages"; //$NON-NLS-1$
+	public static String ActionLabelProviderImpl_AndOperator;
+	public static String ActionLabelProviderImpl_BetweenOperator;
+	public static String ActionLabelProviderImpl_NotBetweenOperator;
+	public static String ActionLabelProviderImpl_NotOperator;
+	public static String ActionLabelProviderImpl_OrOperator;
+	public static String ActionLabelProviderImpl_StrContainsOperator;
+	public static String ActionLabelProviderImpl_StrEqualsOperator;
+	public static String ActionLabelProviderImpl_StrNotContainsOperator;
 	public static String ActionsPanel_ActionColumnName;
 	public static String ActionsPanel_addTooltip;
 	public static String ActionsPanel_DeleteError;

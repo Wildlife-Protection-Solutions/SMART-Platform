@@ -54,7 +54,7 @@ import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
  */
 public class DefinitionPanel {
 
-	public static final String ID = "org.wcs.smart.query.common.definition.filter"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.event.filter"; //$NON-NLS-1$
 	final static Transfer[] types = new Transfer[] { LocalSelectionTransfer.getTransfer() };
 	
 	private Composite mainComposite;
@@ -91,14 +91,6 @@ public class DefinitionPanel {
 	 */
 	public String getGuiName(){
 		return Messages.DefinitionPanel_PanelName;
-	}
-	
-	/**
-	 * adds addition panels as possible drop targets
-	 * @param panel
-	 */
-	public void addDropTargetPanel(DefinitionPanel panel){
-		this.targetPanels.add(panel);
 	}
 	
 	/**
@@ -458,8 +450,10 @@ public class DefinitionPanel {
 		return mainComposite;
 	}
 
+	/**
+	 * Fired when the query is modified; implementations can overwrite
+	 */
 	public void fireQueryChangedListeners() {
-		//TODO:
 	}
 
 	public Composite getDropTargetComposite() {

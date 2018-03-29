@@ -23,8 +23,11 @@ package org.wcs.smart.event.filter;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.wcs.smart.event.filter.parse.Parser;
 import org.wcs.smart.observation.WaypointSourceEngine;
@@ -37,6 +40,8 @@ import org.wcs.smart.observation.model.IWaypointSource;
  *
  */
 public class ParsedFilter {
+
+	private static Logger logger = Logger.getLogger( ParsedFilter.class.getCanonicalName());
 
 	public static final String SECTION_SPACER = "|"; //$NON-NLS-1$
 	public static final String SOURCE_SPACER = ":"; //$NON-NLS-1$
@@ -55,10 +60,9 @@ public class ParsedFilter {
 				if (wpSource != null) {
 					sources.add(wpSource);
 				}else {
-					//TODO log me
 					//we don't need to throw an exception here
-					//i think its still ok to continue; perhaps they uninstalled a module
-					System.out.println("Waypoint Source not found: " + src);
+					//its still ok to continue; perhaps they uninstalled a module
+					logger.log(Level.WARNING, MessageFormat.format("Waypoint source not found {0} for action filter.  Module likely uninstalled.", src)); //$NON-NLS-1$
 				}
 			}
 		}

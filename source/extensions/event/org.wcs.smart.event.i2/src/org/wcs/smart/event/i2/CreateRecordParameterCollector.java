@@ -37,6 +37,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
@@ -62,10 +63,11 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 	private Text txtTitle;
 	private ComboViewer cmbSource;
 	
-	private String defaultKey = null;
-	private List<IntelRecordSource> sources = null;
+	private String initSourceKey = null;
+	private List<Listener> modifyListeners;
 	
 	public CreateRecordParameterCollector() {
+		modifyListeners = new ArrayList<>();
 	}
 
 	@Override
@@ -73,22 +75,18 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 
 		EActionParameterValue sourceParam = action.findParameter(SourceParameter.INSTANCE.getKey());
 		if (sourceParam != null) {
-			if(sources != null) {
-				for (IntelRecordSource r : sources) {
-					if (r.getKeyId().equals(sourceParam.getParameterValue())) {
-						cmbSource.setSelection(new StructuredSelection(r));
-						break;
-					}
-				}
-			}else {
-				defaultKey = sourceParam.getParameterValue();
-			}
+			initSourceKey = sourceParam.getParameterValue();
+			initSourceCombo(sourceParam.getParameterValue());
+			
 		}
 		
 		EActionParameterValue titleParam = action.findParameter(TitleParameter.INSTANCE.getKey());
 		if (titleParam != null) {
-			txtTitle.setText(sourceParam.getParameterValue());
+			txtTitle.setText(titleParam.getParameterValue());
 		}
+		
+		
+		txtTitle.addListener(SWT.Modify, evt->fireListeners());
 	}
 
 	
@@ -109,7 +107,6 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 				action.getParameters().remove(sourceParam);
 			}
 		}
-		
 		
 		EActionParameterValue titleParam = action.findParameter(TitleParameter.INSTANCE.getKey());
 		if (txtTitle.getText().trim().isEmpty()) {
@@ -153,6 +150,7 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 			}
 		});
 		cmbSource.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		
 		l = new Label(main, SWT.NONE);
 		l.setText(Messages.CreateRecordParameterCollector_TitleLabel);
 		
@@ -165,9 +163,31 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 
 	@Override
 	public void addModifyListener(Listener listener) {
+		modifyListeners.add(listener);
+	}
 	
+	private void fireListeners() {
+		modifyListeners.forEach(e->e.handleEvent(new Event()));
 	}
 
+	private void initSourceCombo(String key) {
+		if (key == null) return;
+		
+		Object x = cmbSource.getInput();
+		if (!(x instanceof List)) return;
+		
+		try {
+			List<?> items = (List<?>)x;
+			for (Object item : items) {
+				if ((item instanceof IntelRecordSource) && (((IntelRecordSource)item).getKeyId()).equals(key)){
+					cmbSource.setSelection(new StructuredSelection(item));
+					return;
+				}
+			}
+		}finally {
+			cmbSource.addSelectionChangedListener(evt->fireListeners());
+		}
+	}
 	private Job loadSources = new Job(Messages.CreateRecordParameterCollector_JobName) {
 
 		@Override
@@ -176,20 +196,14 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 			try(Session session = HibernateManager.openSession()){
 				srcs.addAll(QueryFactory.buildQuery(session, IntelRecordSource.class, 
 						"conservationArea", SmartDB.getCurrentConservationArea()).list()); //$NON-NLS-1$
+				
 			}
-			
 			srcs.add(0, ""); //$NON-NLS-1$
+			
 			Display.getDefault().syncExec(()->{
 				if (cmbSource.getControl().isDisposed()) return;
 				cmbSource.setInput(srcs);
-				if (defaultKey != null) {
-					for (IntelRecordSource r : sources) {
-						if (r.getKeyId().equals(defaultKey)) {
-							cmbSource.setSelection(new StructuredSelection(r));
-							break;
-						}
-					}
-				}
+				initSourceCombo(initSourceKey);
 			});
 			
 			return Status.OK_STATUS;

@@ -73,10 +73,11 @@ public class EActionParameterValue {
 	 */
 	@Override
 	public boolean equals(Object o){
-		if (o.getClass().equals(EActionParameterValue.class)) {
-			return this.id.equals(((EActionParameterValue)o).id);
-		}
-		return false;
+		if (o == this) return true;
+		if (o == null) return false;
+		if (o.getClass() != getClass()) return false;
+		return this.id.equals(((EActionParameterValue)o).id);
+		
 	}
 	
 	/**

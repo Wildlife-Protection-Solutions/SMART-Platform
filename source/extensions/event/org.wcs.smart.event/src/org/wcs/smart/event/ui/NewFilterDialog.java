@@ -292,6 +292,7 @@ public class NewFilterDialog extends TitleAreaDialog {
 		leftPart.setBackground(outer.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
 		definitionPanel = new DefinitionPanel() {
+			@Override
 			public void fireQueryChangedListeners(){
 				NewFilterDialog.this.validate();
 			}

@@ -70,9 +70,11 @@ public class EventProcessingJob extends Job {
 		return INSTANCE;
 	}
 	
-	private List<WaypointObservation> observations = Collections.synchronizedList(new ArrayList<>());
 	private static final String OPEN_BRACKET = "("; //$NON-NLS-1$
 	private static final String CLOSE_BRACKET = ")"; //$NON-NLS-1$
+	
+	private List<EActionEvent> cachedEvents = null;
+	private List<WaypointObservation> observations = Collections.synchronizedList(new ArrayList<>());
 	
 	private EventProcessingJob() {
 		super(Messages.EventProcessingJob_JobName);
@@ -236,8 +238,8 @@ public class EventProcessingJob extends Job {
 					
 				case NUMERIC:
 					boolean nvalue = false;
-					Double filterValue = (Double) afilter.getValue();
-					Double observationValue = attributeValue.getNumberValue();
+					double filterValue = (Double) afilter.getValue();
+					double observationValue = attributeValue.getNumberValue();
 					if (afilter.getOperator() == Operator.EQUALS) {
 						nvalue = observationValue == filterValue;
 					}else if (afilter.getOperator() == Operator.NOTEQUALS) {
@@ -298,9 +300,6 @@ public class EventProcessingJob extends Job {
 			}		
 		}
 	}
-	
-	//TODO: clear event cache
-	private List<EActionEvent> cachedEvents = null;
 	
 	/**
 	 * Clears the trigger cache

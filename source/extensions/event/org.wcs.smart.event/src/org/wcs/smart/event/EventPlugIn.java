@@ -28,7 +28,9 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.event.internal.ActionLabelProviderImpl;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -68,6 +70,7 @@ public class EventPlugIn extends AbstractUIPlugin {
 		plugin = this;
 		
 		ConservationAreaManager.getInstance().addDeleteHandler(new ConservationAreaDeleteHandler(), ConservationAreaDeleteHandler.EXECUTE_ORDER);
+		SmartContext.INSTANCE.setClass(IActionLabelProvider.class, new ActionLabelProviderImpl());
 	}
 
 	/*
