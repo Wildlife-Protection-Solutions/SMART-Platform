@@ -40,7 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
+import org.hibernate.jdbc.ReturningWork;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectStatusManager;
 import org.wcs.smart.connect.ConnectStatusManager.ServerStatus;
@@ -200,7 +200,6 @@ public class ReplicationStatusContribution implements
 		private int iso;
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			
 			String message = null;
 			ServerStatus status = ServerStatus.ERROR;
 			if (!DerbyReplicationManager.INSTANCE.getCachedReplicationState()) return Status.OK_STATUS;
@@ -209,30 +208,24 @@ public class ReplicationStatusContribution implements
 					
 					//set the transaction level so it doesn't interfere with other actions
 					//we don't care if other action changes; this is just a status
-					session.doWork(new Work(){
+					Boolean hasChanges = session.doReturningWork(new ReturningWork<Boolean>(){
 						@Override
-						public void execute(Connection connection)
+						public Boolean execute(Connection connection)
 								throws SQLException {
 							iso = connection.getTransactionIsolation();
 							connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+							try{
+								return DerbyReplicationManager.INSTANCE.hasLocalChanges(session);
+							}catch (Exception ex){
+								return false;
+							}finally {
+								//reset transaction level
+								connection.setTransactionIsolation(iso);
+								connection.commit();
+							}
 						}
 					});
-					Boolean hasChanges = null;
-					try{
-						hasChanges = DerbyReplicationManager.INSTANCE.hasLocalChanges(session);
-					}catch (Exception ex){
-						
-					}
-					//reset transaction level
-					session.doWork(new Work(){
-						@Override
-						public void execute(Connection connection)
-								throws SQLException {
-							connection.setTransactionIsolation(iso);
-							connection.commit();
-						}
-					});
-					
+
 					if (hasChanges != null){
 						if (hasChanges){
 							status = ServerStatus.CHANGES;
@@ -248,7 +241,7 @@ public class ReplicationStatusContribution implements
 			}
 			updateLocalStatus(status, message);
 
-			//schedule every 30 seconds
+			//schedule 
 			schedule(ConnectStatusManager.CHECK_LOCAL_STATUS);
 			return Status.OK_STATUS;
 		}	
