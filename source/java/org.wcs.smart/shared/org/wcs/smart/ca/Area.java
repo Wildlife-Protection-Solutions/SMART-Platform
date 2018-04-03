@@ -22,6 +22,7 @@
 package org.wcs.smart.ca;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,6 +37,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -72,6 +75,10 @@ public class Area extends NamedItem{
 		ADMIN,
 		MNGT,
 		PATRL;
+		
+		public String getGuiName(Locale l) {
+			return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(this, l);
+		}
 	}
 	
 	private String key;
