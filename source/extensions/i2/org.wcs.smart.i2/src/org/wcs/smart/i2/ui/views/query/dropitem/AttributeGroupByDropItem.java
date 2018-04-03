@@ -202,7 +202,7 @@ public class AttributeGroupByDropItem extends DropItem implements IGroupByDropIt
 			cmbOptions.setLabelProvider(new LabelProvider() {
 				@Override
 				public String getText(Object element) {
-					if (element instanceof Area.AreaType) return ((Area.AreaType) element).name();
+					if (element instanceof Area.AreaType) return ((Area.AreaType) element).getGuiName(Locale.getDefault());
 					return super.getText(element);
 				}
 			});

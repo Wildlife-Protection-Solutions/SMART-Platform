@@ -81,7 +81,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 	/* 
 	 * tree root nodes
 	 */
-	private enum RootNode{
+	public enum RootNode{
 		GROUP_BY_OPTION (Messages.EntitySummaryContentProvider_GroupByTreeNode),
 		VALUE_OPTION (Messages.EntitySummaryContentProvider_ValuesTreeNode),
 		FILTER_OPTION(Messages.EntitySummaryContentProvider_FiltersTreeNode);

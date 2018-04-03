@@ -24,11 +24,17 @@ package org.wcs.smart.i2.ui.views.query;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 
 /**
@@ -36,7 +42,7 @@ import org.wcs.smart.i2.ui.AttributeLabelProvider;
  * @author Emily
  *
  */
-public class FilterTreeLabelProvider extends LabelProvider {
+public class FilterTreeLabelProvider extends LabelProvider implements IColorProvider{
 
 	private AttributeLabelProvider attributeInstance = new AttributeLabelProvider();
 	private Map<Object, Image> toDispose = new HashMap<Object, Image>();
@@ -98,5 +104,30 @@ public class FilterTreeLabelProvider extends LabelProvider {
 	public void dispose(){
 		attributeInstance.dispose();
 		toDispose.values().forEach(e->e.dispose());
+	}
+
+	@Override
+	public Color getForeground(Object element) {
+		if (element instanceof AttributeTreeFilterItem){
+			AttributeTreeFilterItem i = (AttributeTreeFilterItem)element;
+			if (i.getType() == AttributeType.POSITION) {
+				return Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
+			}
+		}
+		if (element instanceof EntitySummaryContentProvider.TreeNode) {
+			EntitySummaryContentProvider.TreeNode i = (EntitySummaryContentProvider.TreeNode)element;
+			if (i.getItem() instanceof IntelAttribute 
+					&& ((IntelAttribute)i.getItem()).getType() == IntelAttribute.AttributeType.POSITION
+					&& i.getSource() == EntitySummaryContentProvider.RootNode.FILTER_OPTION) {
+				return Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public Color getBackground(Object element) {
+		
+		return null;
 	}
 }
