@@ -665,7 +665,7 @@
          point="org.eclipse.equinox.p2.engine.actions">
       <action
             class="org.wcs.smart.asset.plugin.OnUninstallAction"
-            name="org.wcs.smart.i2.onUninstall"
+            name="org.wcs.smart.asset.onUninstall"
             touchpointType="org.eclipse.equinox.p2.osgi"
             version="1.0.0">
       </action>
