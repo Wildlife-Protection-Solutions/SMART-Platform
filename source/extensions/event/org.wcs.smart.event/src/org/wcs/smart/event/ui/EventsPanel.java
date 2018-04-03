@@ -505,6 +505,7 @@ public class EventsPanel extends Composite {
 			
 			newEvent.setFilter((EFilter)filter);
 			newEvent.setAction((EAction)action);
+			newEvent.setEnabled(true);
 			
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();

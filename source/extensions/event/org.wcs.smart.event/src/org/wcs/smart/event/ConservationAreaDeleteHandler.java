@@ -46,7 +46,7 @@ public class ConservationAreaDeleteHandler implements ICaDeleteHandler {
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		q = session.createQuery("delete from EActionParameterValue av where av in (SELECT av FROM EActionParameterValue av WHERE av.id.action.conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createQuery("delete from EActionParameterValue av where av.id.action in (FROM EAction WHERE conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
@@ -54,7 +54,7 @@ public class ConservationAreaDeleteHandler implements ICaDeleteHandler {
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		q = session.createQuery("delete from EActionFilter WHERE conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createQuery("delete from EFilter WHERE conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}

@@ -45,7 +45,7 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property="id.action.conservationArea"
+            ca_property=".id.action.conservationArea"
             class="org.wcs.smart.event.model.EActionParameterValue"
             supportsCcaa="false">
       </class>
