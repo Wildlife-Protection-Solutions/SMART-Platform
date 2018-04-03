@@ -208,7 +208,7 @@ public class DataImportPage {
 		itemSaveAll.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEALL_EDIT));
 		itemSaveAll.setToolTipText(Messages.DataImportPage_saveAllTooltip);
 		itemSaveAll.setEnabled(false);
-		itemSaveAll.addListener(SWT.Selection, e->save(processor.getFiles()));
+		itemSaveAll.addListener(SWT.Selection, e->saveAll());
 		
 		itemSave = new ToolItem(tb, SWT.PUSH);
 		itemSave.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
@@ -230,6 +230,9 @@ public class DataImportPage {
 		createFileSummary();
 	}
 	
+	void saveAll() {
+		save(processor.getFiles());
+	}
 	void save(Collection<FileProxy> toSave) {
 		
 		//cannot save if not valid

@@ -49,6 +49,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -262,6 +264,7 @@ public class ResultsPanel {
 
 		MenuItem mnuSaveFile = new MenuItem(mnu, SWT.PUSH);
 		mnuSaveFile.setText(DialogConstants.SAVE_TEXT);
+		mnuSaveFile.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
 		mnuSaveFile.addListener(SWT.Selection, e -> {
 			List<FileProxy> toSave = new ArrayList<>();
 			for (Iterator<?> iterator = tblResults.getStructuredSelection().iterator(); iterator.hasNext();) {
@@ -273,6 +276,13 @@ public class ResultsPanel {
 			view.save(toSave);
 		});
 
+		MenuItem mnuSaveFileAll = new MenuItem(mnu, SWT.PUSH);
+		mnuSaveFileAll.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEALL_EDIT));
+		mnuSaveFileAll.setText(Messages.ResultsPanel_SaveAll);
+		mnuSaveFileAll.addListener(SWT.Selection, e -> {
+			view.saveAll();
+		});
+		
 		new MenuItem(mnu, SWT.SEPARATOR);
 
 		MenuItem mnuRemoveFile = new MenuItem(mnu, SWT.PUSH);
@@ -289,6 +299,8 @@ public class ResultsPanel {
 				mnuRemoveFile.setEnabled(!tblResults.getSelection().isEmpty());
 				mnuGroup.setEnabled(!tblResults.getSelection().isEmpty());
 				mnuSaveFile.setEnabled(!tblResults.getSelection().isEmpty());
+				mnuSaveFileAll.setEnabled(!tblResults.getSelection().isEmpty());
+				
 				// only save if all items are valid
 				boolean ok = true;
 				boolean canUngroup = false;
@@ -302,6 +314,7 @@ public class ResultsPanel {
 					}
 				}
 				if (mnuSaveFile.isEnabled()) mnuSaveFile.setEnabled(ok);
+				if (mnuSaveFileAll.isEnabled()) mnuSaveFileAll.setEnabled(ok);
 				if (mnuGroup.isEnabled()) mnuGroup.setEnabled(ok);
 				mnuRemoveGroup.setEnabled(ok && canUngroup);
 

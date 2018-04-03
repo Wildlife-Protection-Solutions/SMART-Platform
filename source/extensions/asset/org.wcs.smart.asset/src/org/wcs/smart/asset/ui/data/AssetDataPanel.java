@@ -350,7 +350,7 @@ public abstract class AssetDataPanel {
 		
 		
 		AssetWaypointMapping clonedMapping = null;
-		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
+		try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
 			session.beginTransaction();
 			try {
 				//clone waypoint
@@ -907,7 +907,7 @@ public abstract class AssetDataPanel {
 		if (dialog.open() != Window.OK) return false;
 		
 		AssetWaypointMapping core = tomerge.get(0);
-		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
+		try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
 			session.beginTransaction();
 			try {
 				List<AssetWaypointAttachment> toSave = new ArrayList<>();

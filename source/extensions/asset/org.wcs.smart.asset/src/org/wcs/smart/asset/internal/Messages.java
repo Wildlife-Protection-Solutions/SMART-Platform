@@ -763,6 +763,7 @@ public class Messages extends NLS {
 	public static String ResultsPanel_OtherLocationOp;
 	public static String ResultsPanel_RemoveCustomGroup;
 	public static String ResultsPanel_RemoveFileMnu;
+	public static String ResultsPanel_SaveAll;
 	public static String ResultsPanel_SetAssetMnu;
 	public static String ResultsPanel_SetDateTimeMnu;
 	public static String ResultsPanel_SetLocationMnu;

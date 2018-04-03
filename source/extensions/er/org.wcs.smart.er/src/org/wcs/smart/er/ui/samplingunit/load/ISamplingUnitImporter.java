@@ -107,7 +107,7 @@ public abstract class ISamplingUnitImporter {
 			cnt++;
 			id = AUTO_GENERATE_KEY_PREFIX + " " + cnt;  //$NON-NLS-1$
 		}
-		System.out.println(id);
+		//System.out.println(id);
 		existingIds.add(id);
 		return id;
 	}

@@ -689,7 +689,6 @@ public class RecordsView {
 	@Inject
 	@Optional
 	private void recordModified(@UIEventTopic(IntelEvents.RECORD_ALL) Object records){
-		System.out.println("modified");
 		lstAllRecords.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		lstInProgress.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		lstNewRecords.setInput(new String[] {DialogConstants.LOADING_TEXT});
