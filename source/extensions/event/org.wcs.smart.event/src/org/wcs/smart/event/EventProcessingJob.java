@@ -80,10 +80,12 @@ public class EventProcessingJob extends Job {
 		super(Messages.EventProcessingJob_JobName);
 	}
 
-	public synchronized void addObservation(WaypointObservation observation) {
-		boolean schedule = observations.isEmpty();
-		observations.add(observation);
-		if (schedule) schedule();
+	public void addObservation(WaypointObservation observation) {
+		synchronized(observations) {
+			boolean schedule = observations.isEmpty();
+			observations.add(observation);
+			if (schedule) schedule();
+		}
 	}
 		
 	@Override
