@@ -264,8 +264,10 @@
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.core.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.patrol</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.patrol.feature</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.patrol.core.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey.feature</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey.core.feature</module>
 				
 				<module>../extensions/er/org.wcs.smart.er</module>
 				<module>../extensions/er/org.wcs.smart.er.feature</module>
@@ -291,10 +293,7 @@
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.core.feature</module>
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker</module>
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker.feature</module>
-				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker.patrol</module>
-				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker.survey</module>
-				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker.survey.core.feature</module>
-				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker.survey.feature</module>
+
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.er</module>
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.er.feature</module>
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.feature</module>

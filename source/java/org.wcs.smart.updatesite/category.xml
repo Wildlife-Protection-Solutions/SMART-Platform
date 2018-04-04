@@ -39,9 +39,6 @@
    <feature url="features/org.wcs.smart.connect.cybertracker.feature_6.0.0.qualifier.jar" id="org.wcs.smart.connect.cybertracker.feature" version="6.0.0.qualifier">
       <category name="connect"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.survey.feature_6.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.survey.feature" version="6.0.0.qualifier">
-      <category name="connectdq"/>
-   </feature>
    <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.feature_6.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.feature" version="6.0.0.qualifier">
       <category name="connectdq"/>
    </feature>

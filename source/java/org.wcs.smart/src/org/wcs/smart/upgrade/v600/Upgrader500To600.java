@@ -104,6 +104,9 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 				"ALTER TABLE smart.employee ADD CONSTRAINT smartuseridunq UNIQUE(ca_uuid, smartuserid)", //$NON-NLS-1$
 				
 				"ALTER TABLE smart.agency ADD COLUMN keyid varchar(128)", //$NON-NLS-1$
+				
+				"UPDATE smart.db_version set plugin_id = 'org.wcs.smart.cybertracker.patrol' where plugin_id = 'org.wcs.smart.connect.dataqueue.cybertracker.patrol", //$NON-NLS-1$
+				"UPDATE smart.db_version set plugin_id = 'org.wcs.smart.cybertracker.survey' where plugin_id = 'org.wcs.smart.connect.dataqueue.cybertracker.survey" //$NON-NLS-1$
 		};
 
 		for (String s : sql) {
