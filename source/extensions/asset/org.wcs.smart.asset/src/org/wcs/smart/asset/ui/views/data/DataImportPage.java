@@ -239,14 +239,25 @@ public class DataImportPage {
 		for (FileProxy p : toSave) {
 			if (!p.isValid()) return;
 		}
-				
+		
+		List<FileProxy> counts = new ArrayList<>();
+		counts.addAll(toSave);
+		int number = 0;
+		while(!counts.isEmpty()) {
+			FileProxy c = counts.remove(0);
+			number++;
+			counts.removeAll(c.getRelations());
+			if (c.getFixedRelations() != null) counts.removeAll(c.getFixedRelations());
+		}
+		final int totalItems = number;
+		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(view.getSite().getShell());
 		try {
 		pmd.run(true, false,  new IRunnableWithProgress() {
 			
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				monitor.beginTask(Messages.DataImportPage_ImportTaskName, toSave.size() + 1);
+				monitor.beginTask(Messages.DataImportPage_ImportTaskName, totalItems + 1);
 				List<FileProxy> items = new ArrayList<FileProxy>(toSave);
 				List<FileProxy> toProcess = new ArrayList<FileProxy>(items);
 				try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
