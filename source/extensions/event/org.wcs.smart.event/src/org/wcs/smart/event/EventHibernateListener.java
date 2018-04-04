@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.event;
 
+import org.hibernate.event.spi.PostCommitInsertEventListener;
 import org.hibernate.event.spi.PostInsertEvent;
-import org.hibernate.event.spi.PostInsertEventListener;
 import org.hibernate.persister.entity.EntityPersister;
 import org.wcs.smart.observation.model.WaypointObservation;
 
@@ -33,7 +33,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
  * @author Emily
  *
  */
-public class EventHibernateListener implements PostInsertEventListener{
+public class EventHibernateListener implements PostCommitInsertEventListener{
 
 	/**
 	 * 
@@ -50,7 +50,12 @@ public class EventHibernateListener implements PostInsertEventListener{
 
 	@Override
 	public boolean requiresPostCommitHanding(EntityPersister persister) {
-		return false;
+		return true;
+	}
+
+	@Override
+	public void onPostInsertCommitFailed(PostInsertEvent event) {
+		
 	}
 
 	

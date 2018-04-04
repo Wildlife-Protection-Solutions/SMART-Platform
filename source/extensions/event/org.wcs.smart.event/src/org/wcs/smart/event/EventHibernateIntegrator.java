@@ -46,7 +46,7 @@ public class EventHibernateIntegrator implements Integrator {
 
         //2) This form adds the specified listener(s) to the beginning of the listener chain
         EventHibernateListener listener = new EventHibernateListener();
-        eventListenerRegistry.appendListeners( EventType.POST_INSERT, listener );
+        eventListenerRegistry.appendListeners( EventType.POST_COMMIT_INSERT, listener );
 	}
 	
 	@Override
