@@ -268,7 +268,7 @@ function createReportTable(){
 	 		runicon.className="run-icon";
 	 		runicon.title= i18n("reports.runreport");
 	 		runicon.onclick = showReportOptions;
-	 		row.childNodes[3].appendChild(runicon);
+	 		row.childNodes[2].appendChild(runicon);
 	 		
  		 }
  		}
