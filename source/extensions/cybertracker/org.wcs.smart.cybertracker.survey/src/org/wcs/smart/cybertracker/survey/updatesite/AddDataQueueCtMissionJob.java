@@ -102,7 +102,7 @@ public class AddDataQueueCtMissionJob extends Job {
 	}
 	
 	private void createTables(Session session){
-		if (DerbyHibernateExtensions.tableExists(session, "smart.ct_mission_link")){ //$NON-NLS-1$
+		if (DerbyHibernateExtensions.tableExists(session, "ct_mission_link")){ //$NON-NLS-1$
 			return;
 		}
 		final String[] sql = new String[]{

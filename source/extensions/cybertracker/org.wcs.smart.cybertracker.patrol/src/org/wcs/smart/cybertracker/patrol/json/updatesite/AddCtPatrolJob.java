@@ -100,7 +100,7 @@ public class AddCtPatrolJob extends Job {
 	}
 	
 	private void createTables(Session session){
-		if (DerbyHibernateExtensions.tableExists(session, "smart.ct_patrol_link")){ //$NON-NLS-1$
+		if (DerbyHibernateExtensions.tableExists(session, "ct_patrol_link")){ //$NON-NLS-1$
 			return;
 		}
 		
