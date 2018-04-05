@@ -53,8 +53,7 @@ public class AddCtPatrolJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		//required if run during restore to ensure Display.syncexec calls don't block
-		DisplayAccess.accessDisplayDuringStartup();
-						
+		DisplayAccess.accessDisplayDuringStartup();		
 		try(Session session = HibernateManager.openSession()){
 			monitor.beginTask(Messages.AddDataQueueCtPatrolJob_CreateTablesTask, 10);
 			session.beginTransaction();
