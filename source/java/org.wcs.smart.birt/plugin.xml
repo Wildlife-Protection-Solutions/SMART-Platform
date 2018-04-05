@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="reportEditorManager" name="ReportEditorManager" schema="schema/org.wcs.smart.birt.reportEditorManager.exsd"/>
+   <extension-point id="org.wcs.smart.birt.reportEditorManager" name="ReportEditorManager" schema="schema/org.wcs.smart.birt.reportEditorManager.exsd"/>
    <extension
          point="org.eclipse.ui.editors">
       <editor

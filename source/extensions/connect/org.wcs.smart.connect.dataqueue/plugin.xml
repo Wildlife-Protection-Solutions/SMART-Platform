@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="processor" name="Data Queue Item Processor" schema="schema/org.wcs.smart.connect.dataqueue.processor.exsd"/>
-   <extension-point id="processorOption" name="Data Queue Processor Option Panel" schema="schema/org.wcs.smart.connect.dataqueue.processor.option.exsd"/>
+   <extension-point id="org.wcs.smart.connect.dataqueue.processor" name="Data Queue Item Processor" schema="schema/org.wcs.smart.connect.dataqueue.processor.exsd"/>
+   <extension-point id="org.wcs.smart.connect.dataqueue.processorOption" name="Data Queue Processor Option Panel" schema="schema/org.wcs.smart.connect.dataqueue.processor.option.exsd"/>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="extradata" name="Additional Data associated with Configurable Model" schema="schema/org.wcs.smart.dataentry.extradata.exsd"/>
-   <extension-point id="xml" name="Dataentry XML Export/Import Contribution" schema="schema/org.wcs.smart.dataentry.xml.exsd"/>
+   <extension-point id="org.wcs.smart.dataentry.extradata" name="Additional Data associated with Configurable Model" schema="schema/org.wcs.smart.dataentry.extradata.exsd"/>
+   <extension-point id="org.wcs.smart.dataentry.xml" name="Dataentry XML Export/Import Contribution" schema="schema/org.wcs.smart.dataentry.xml.exsd"/>
    <extension
          point="org.wcs.smart.hibernate.libs.mapping">
       <class

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="wizardpage" name="New Patrol Wizard Page " schema="schema/org.wcs.smart.patrol.wizardpage.exsd"/>
-   <extension-point id="contribution" name="Patrol Contribution" schema="schema/org.wcs.smart.patrol.contribution.exsd"/>
-   <extension-point id="xml" name="XML Export/Import Contribution" schema="schema/org.wcs.smart.patrol.xml.exsd"/>
+   <extension-point id="org.wcs.smart.patrol.wizardpage" name="New Patrol Wizard Page " schema="schema/org.wcs.smart.patrol.wizardpage.exsd"/>
+   <extension-point id="org.wcs.smart.patrol.contribution" name="Patrol Contribution" schema="schema/org.wcs.smart.patrol.contribution.exsd"/>
+   <extension-point id="org.wcs.smart.patrol.xml" name="XML Export/Import Contribution" schema="schema/org.wcs.smart.patrol.xml.exsd"/>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution

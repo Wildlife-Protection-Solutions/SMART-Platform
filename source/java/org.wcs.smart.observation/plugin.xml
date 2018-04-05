@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="ObservationSource" name="Observation Source" schema="schema/org.wcs.smart.observation.ObservationSource.exsd"/>
+   <extension-point id="org.wcs.smart.observation.ObservationSource" name="Observation Source" schema="schema/org.wcs.smart.observation.ObservationSource.exsd"/>
    <extension
          point="org.wcs.smart.caDeleteAdvisor">
       <DeleteAdvisor

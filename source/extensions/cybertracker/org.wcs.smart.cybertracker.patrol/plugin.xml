@@ -122,7 +122,7 @@
    <extension
          point="org.eclipse.equinox.p2.engine.actions">
       <action
-            class="org.wcs.smart.cybertracker.patrol.json.updatesite.OnInstallAction"
+            class="org.wcs.smart.cybertracker.patrol.json.updatesite.OnUninstallAction"
             name="onUninstall"
             touchpointType="org.eclipse.equinox.p2.osgi"
             version="4.0.0">

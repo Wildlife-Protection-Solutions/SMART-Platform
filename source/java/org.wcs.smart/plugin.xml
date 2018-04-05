@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
- <extension-point id="caExport" name="Conservation Area Data Exporter" schema="schema/org.wcs.smart.ca.export.exsd"/>
- <extension-point id="caDeleteAdvisor" name="Delete Advisor for Deleting Database Objects" schema="schema/org.wcs.smart.ca.deleteAdvisor.exsd"/>
- <extension-point id="caTemplateCloner" name="SMART Conservation Area Template Cloner" schema="schema/org.wcs.smart.ca.templateCloner.exsd"/>
- <extension-point id="caFilestoreDir" name="Filestore Contribution" schema="schema/org.wcs.smart.ca.filestoredir.exsd"/>
- <extension-point id="caImport" name="Conservation Area Data Importer" schema="schema/org.wcs.smart.ca.import.exsd"/>
- <extension-point id="caDataModelAdvisor" name="DataModel Edit Advisor" schema="schema/org.wcs.smart.ca.datamodel.editAdvisor.exsd"/>
- <extension-point id="dbUpgrade" name="Database Upgrade Extension Point" schema="schema/org.wcs.smart.dbUpgrage.exsd"/>
- <extension-point id="caCreate" name="Conservation Area Create Handler" schema="schema/org.wcs.smart.ca.create.exsd"/>
- <extension-point id="backup" name="System Backup" schema="schema/org.wcs.smart.backup.exsd"/>
- <extension-point id="caLogin" name="org.wcs.smart.ca.login" schema="schema/org.wcs.smart.ca.login.exsd"/>
- <extension-point id="startUpOption" name="Advanced Start Up Option" schema="schema/org.wcs.smart.startupoption.exsd"/>
- <extension-point id="changeLogInstaller" name="ChangeLog Tracker" schema="schema/org.wcs.smart.changelog.installer.exsd"/>
- <extension-point id="dbStartUp" name="org.wcs.smart.startup.db" schema="schema/org.wcs.smart.startup.db.exsd"/>
- <extension-point id="changeLogEventHandler" name="Replication Event Handler" schema="schema/org.wcs.smart.changelog.handler.exsd"/>
- <extension-point id="userlevel" name="SMART User Level" schema="schema/org.wcs.smart.userlevel.exsd"/>
+ <extension-point id="org.wcs.smart.caExport" name="Conservation Area Data Exporter" schema="schema/org.wcs.smart.ca.export.exsd"/>
+ <extension-point id="org.wcs.smart.caDeleteAdvisor" name="Delete Advisor for Deleting Database Objects" schema="schema/org.wcs.smart.ca.deleteAdvisor.exsd"/>
+ <extension-point id="org.wcs.smart.caTemplateCloner" name="SMART Conservation Area Template Cloner" schema="schema/org.wcs.smart.ca.templateCloner.exsd"/>
+ <extension-point id="org.wcs.smart.caFilestoreDir" name="Filestore Contribution" schema="schema/org.wcs.smart.ca.filestoredir.exsd"/>
+ <extension-point id="org.wcs.smart.caImport" name="Conservation Area Data Importer" schema="schema/org.wcs.smart.ca.import.exsd"/>
+ <extension-point id="org.wcs.smart.caDataModelAdvisor" name="DataModel Edit Advisor" schema="schema/org.wcs.smart.ca.datamodel.editAdvisor.exsd"/>
+ <extension-point id="org.wcs.smart.dbUpgrade" name="Database Upgrade Extension Point" schema="schema/org.wcs.smart.dbUpgrage.exsd"/>
+ <extension-point id="org.wcs.smart.caCreate" name="Conservation Area Create Handler" schema="schema/org.wcs.smart.ca.create.exsd"/>
+ <extension-point id="org.wcs.smart.backup" name="System Backup" schema="schema/org.wcs.smart.backup.exsd"/>
+ <extension-point id="org.wcs.smart.caLogin" name="org.wcs.smart.ca.login" schema="schema/org.wcs.smart.ca.login.exsd"/>
+ <extension-point id="org.wcs.smart.startUpOption" name="Advanced Start Up Option" schema="schema/org.wcs.smart.startupoption.exsd"/>
+ <extension-point id="org.wcs.smart.changeLogInstaller" name="ChangeLog Tracker" schema="schema/org.wcs.smart.changelog.installer.exsd"/>
+ <extension-point id="org.wcs.smart.dbStartUp" name="org.wcs.smart.startup.db" schema="schema/org.wcs.smart.startup.db.exsd"/>
+ <extension-point id="org.wcs.smart.changeLogEventHandler" name="Replication Event Handler" schema="schema/org.wcs.smart.changelog.handler.exsd"/>
+ <extension-point id="org.wcs.smart.userlevel" name="SMART User Level" schema="schema/org.wcs.smart.userlevel.exsd"/>
    <extension
          id="product"
          name="Smart Application"

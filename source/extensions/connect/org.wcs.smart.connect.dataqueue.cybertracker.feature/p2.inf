@@ -1,8 +1,0 @@
-metaRequirements.0.namespace=org.wcs.smart.connect.dataqueue.cybertracker.patrol
-metaRequirements.0.name=onInstall
-
-metaRequirements.1.namespace=org.wcs.smart.connect.dataqueue.cybertracker.patrol
-metaRequirements.1.name=onUninstall
-
-instructions.install=org.wcs.smart.connect.dataqueue.cybertracker.patrol.onInstall();
-instructions.uninstall=org.wcs.smart.connect.dataqueue.cybertracker.patrol.onUninstall();

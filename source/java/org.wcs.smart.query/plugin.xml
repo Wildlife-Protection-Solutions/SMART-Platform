@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="queryType" name="Query Type" schema="schema/org.wcs.smart.query.queryType.exsd"/>
-   <extension-point id="queryItemPanel" name="Query Item Panel" schema="schema/org.wcs.smart.query.queryItemPanel.exsd"/>
-   <extension-point id="queryDefinitionPanel" name="Query Definition Panel" schema="schema/org.wcs.smart.query.queryDefinitionPanel.exsd"/>
-   <extension-point id="exportFormat" name="Query Export Format" schema="schema/org.wcs.smart.query.export.format.exsd"/>
-   <extension-point id="property" name="Query Property" schema="schema/org.wcs.smart.query.property.exsd"/>
-   <extension-point id="import" name="Query Definition Importer" schema="schema/org.wcs.smart.query.import.exsd"/>
+   <extension-point id="org.wcs.smart.query.queryType" name="Query Type" schema="schema/org.wcs.smart.query.queryType.exsd"/>
+   <extension-point id="org.wcs.smart.query.queryItemPanel" name="Query Item Panel" schema="schema/org.wcs.smart.query.queryItemPanel.exsd"/>
+   <extension-point id="org.wcs.smart.query.queryDefinitionPanel" name="Query Definition Panel" schema="schema/org.wcs.smart.query.queryDefinitionPanel.exsd"/>
+   <extension-point id="org.wcs.smart.query.exportFormat" name="Query Export Format" schema="schema/org.wcs.smart.query.export.format.exsd"/>
+   <extension-point id="org.wcs.smart.query.property" name="Query Property" schema="schema/org.wcs.smart.query.property.exsd"/>
+   <extension-point id="org.wcs.smart.query.import" name="Query Definition Importer" schema="schema/org.wcs.smart.query.import.exsd"/>
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
