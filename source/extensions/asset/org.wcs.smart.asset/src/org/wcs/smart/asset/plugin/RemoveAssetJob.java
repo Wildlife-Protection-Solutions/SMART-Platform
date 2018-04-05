@@ -75,34 +75,35 @@ public class RemoveAssetJob extends Job {
 		
 		@SuppressWarnings("nls")
 		String[] TABLES = new String[]{
-				"smart.asset_attribute_value",
-				"smart.asset_deployment_attribute_value",
-				"smart.asset_station_attribute_value",
-				"smart.asset_history_record",
-				"smart.asset_module_settings",
-				"smart.asset_type_attribute",
-				"smart.asset_type_deployment_attribute",
-				"smart.asset_waypoint_attachment",
-				"smart.asset_waypoint",
-				"smart.asset_deployment",
-				"smart.asset_metadata_mapping",
-				"smart.asset_station_location_history",
-				"smart.asset_station_location_attribute_value",
-				"smart.asset_station_location_attribute",
-				"smart.asset_station_location",
-				"smart.asset_station_attribute",
-				"smart.asset_station",
-				"smart.asset_attribute_list_item",
-				"smart.asset_attribute",
-				"smart.asset",
-				"smart.asset_type"
+				"asset_attribute_value",
+				"asset_deployment_attribute_value",
+				"asset_station_attribute_value",
+				"asset_history_record",
+				"asset_module_settings",
+				"asset_type_attribute",
+				"asset_type_deployment_attribute",
+				"asset_waypoint_attachment",
+				"asset_waypoint",
+				"asset_deployment",
+				"asset_metadata_mapping",
+				"asset_station_location_history",
+				"asset_station_location_attribute_value",
+				"asset_station_location_attribute",
+				"asset_station_location",
+				"asset_station_attribute",
+				"asset_station",
+				"asset_attribute_list_item",
+				"asset_attribute",
+				"asset",
+				"asset_type",
+				"asset_map_style"
 		};
 		
 		@SuppressWarnings("nls")
 		String[] LABELTABLES = new String[]{
-				"smart.asset_attribute_list_item",
-				"smart.asset_attribute",
-				"smart.asset_type"
+				"asset_attribute_list_item",
+				"asset_attribute",
+				"asset_type"
 		};
 		
 		List<ConservationArea> cas = null;
