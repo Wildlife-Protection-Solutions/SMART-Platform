@@ -2,7 +2,7 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	
 	<parent>
-		<groupId>org.wcs.smart</groupId>
+		<groupId>org.wcs.smart.core</groupId>
 		<artifactId>smart</artifactId>
 		<version>6.0.0-SNAPSHOT</version>
 		<relativePath>../../../java/pom-shared.xml</relativePath>
@@ -10,39 +10,39 @@
 	
 	<modelVersion>4.0.0</modelVersion>
 	
-	<artifactId>org.wcs.smart.entity.query.report</artifactId>
+	<artifactId>org.wcs.smart.core.entity.query.report</artifactId>
 	<name>SMART Entity Report Query Module</name>	
 	<packaging>bundle</packaging>
 	
 	<dependencies>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.core</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.core</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.query</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.report</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.report</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.report.birt.query</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.report.birt.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.birt.map</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.birt.map</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.entity.query</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.entity.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		

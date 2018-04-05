@@ -178,232 +178,232 @@
 		
 		<!-- SMART -->
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.core</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.core</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.observation</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.observation</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 			<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.qa</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.qa</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 			<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.qa.er</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.qa.er</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 			<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.qa.incident</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.qa.incident</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 			<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.qa.patrol</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.qa.patrol</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.hibernate</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.hibernate</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.query</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.report</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.report</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.observation.query</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.observation.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.dataentry</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.dataentry</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.patrol</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.patrol</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.patrol.query</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.patrol.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>	
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.plan</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.plan</artifactId>
     			<version>${smart.version}</version>
 		</dependency>		
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.intelligence</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.intelligence</artifactId>
     			<version>${smart.version}</version>
 		</dependency>			
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.intelligence.query</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.intelligence.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>	
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.er</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.er</artifactId>
     			<version>${smart.version}</version>
 		</dependency>		
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.er.query</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.er.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>			
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.entity</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.entity</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.entity.query</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.entity.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>	
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.incident</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.incident</artifactId>
     			<version>${smart.version}</version>
 		</dependency>	
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.connect</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.connect</artifactId>
     			<version>${smart.version}</version>
 		</dependency>	
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.connect.dataqueue</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.connect.dataqueue</artifactId>
     			<version>${smart.version}</version>
 		</dependency>	
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.cybertracker</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.cybertracker</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.connect.cybertracker</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.connect.cybertracker</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.report.birt.query</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.report.birt.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.observation.query.report</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.observation.query.report</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.patrol.query.report</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.patrol.query.report</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.intelligence.query.report</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.intelligence.query.report</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.entity.query.report</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.entity.query.report</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.er.query.report</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.er.query.report</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.reporttable</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.reporttable</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.birt.map</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.birt.map</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.cybertracker.patrol</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.cybertracker.patrol</artifactId>
     			<version>${smart.version}</version>
 		</dependency>		
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.cybertracker.survey</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.cybertracker.survey</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.connect.dataqueue.cybertracker</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.connect.dataqueue.cybertracker</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.connect.dataqueue.er</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.connect.dataqueue.er</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.connect.dataqueue.independentincident</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.connect.dataqueue.independentincident</artifactId>
     			<version>${smart.version}</version>
 		</dependency>		
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.connect.dataqueue.patrol</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.connect.dataqueue.patrol</artifactId>
     			<version>${smart.version}</version>
 		</dependency>		
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.connect.dataqueue.i2</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.connect.dataqueue.i2</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.i2</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.i2</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.asset</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.asset</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 				
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.asset.query</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.asset.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 				
 		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.asset.query.report</artifactId>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.asset.query.report</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		
-				<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.event</artifactId>
+		<dependency>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.event</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		
