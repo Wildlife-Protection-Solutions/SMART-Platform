@@ -3,6 +3,7 @@
 <plugin>
    <extension-point id="org.wcs.smart.cybertracker.datasource" name="%extension-point.name" schema="schema/org.wcs.smart.cybertracker.datasource.exsd"/>
    <extension-point id="org.wcs.smart.cybertracker.alert" name="%extension-point.name.0" schema="schema/org.wcs.smart.cybertracker.alert.exsd"/>
+   <extension-point id="org.wcs.smart.cybertracker.json.processor" name="Cybertracker JSON Processor" schema="schema/org.wcs.smart.cybertracker.json.processor.exsd"/>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
@@ -91,6 +92,20 @@
                </and>
             </visibleWhen>
          </menu>
+         <menu
+               icon="images/etool16/cybertracker16.png"
+               id="org.wcs.smart.cybertracker2.menu"
+               label="Cybertracker II">
+            <command
+                  commandId="org.wcs.smart.cybertracker.json.import"
+                  label="%cybertracker.import.command.label"
+                  style="push">
+            </command>
+            <separator
+                  name="org.wcs.smart.cybertracker2.separator.import"
+                  visible="true">
+            </separator>
+         </menu>
       </menuContribution>
       <menuContribution
             allPopups="false"
@@ -136,6 +151,10 @@
             id="org.wcs.smart.cybertracker.imageprocessingop"
             name="%imageops.command">
       </command>
+      <command
+            id="org.wcs.smart.cybertracker.json.import"
+            name="JSON Importer">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -150,6 +169,10 @@
       <handler
             class="org.wcs.smart.cybertracker.handler.CyberTrackerImgProcessingOpHandler$CyberTrackerImgProcessingOpHandlerWrapper"
             commandId="org.wcs.smart.cybertracker.imageprocessingop">
+      </handler>
+      <handler
+            class="org.wcs.smart.cybertracker.importer.json.CyberTrackerJsonImportHandler$CyberTrackerJsonImportHandlerWrapper"
+            commandId="org.wcs.smart.cybertracker.json.import">
       </handler>
    </extension>
    <extension
@@ -181,6 +204,13 @@
             icon="images/etool16/cybertracker16.png"
             id="org.wcs.smart.cybertracker.CyberTrackerImportEditor"
             name="%cybertracker.editor.name">
+      </editor>
+      <editor
+            class="org.wcs.smart.cybertracker.importer.json.JsonImportEditor"
+            default="false"
+            icon="images/etool16/cybertracker16.png"
+            id="org.wcs.smart.cybertracker.importer.json.ImportEditor"
+            name="CyberTracker JSON Importer">
       </editor>
    </extension>
    <extension

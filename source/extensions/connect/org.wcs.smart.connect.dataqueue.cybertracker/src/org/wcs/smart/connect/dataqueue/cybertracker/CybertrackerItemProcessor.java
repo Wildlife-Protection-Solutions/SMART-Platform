@@ -53,6 +53,9 @@ import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem.Status;
 import org.wcs.smart.connect.dataqueue.process.IItemProcessor;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.importer.json.IJsonProcessor;
+import org.wcs.smart.cybertracker.importer.json.JsonCtParser;
+import org.wcs.smart.cybertracker.importer.json.UserCancelledException;
 import org.wcs.smart.cybertracker.util.ZLibUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 

@@ -15,4 +15,5 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: org.wcs.smart
 Export-Package: org.wcs.smart.cybertracker.survey.export,
+ org.wcs.smart.cybertracker.survey.json,
  org.wcs.smart.cybertracker.survey.model

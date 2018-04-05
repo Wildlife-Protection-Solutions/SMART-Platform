@@ -14,7 +14,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.cybertracker.menu?before=org.wcs.smart.cybertracker.patrolpackagesep">
+            locationURI="menu:org.wcs.smart.cybertracker2.menu?after=org.wcs.smart.cybertracker2.separator.import">
          <command
                commandId="org.wcs.smart.cybertracker.patrol.export.package"
                label="Export Patrol Package"
@@ -98,6 +98,53 @@
             importEditorContent="org.wcs.smart.cybertracker.patrol.importer.PatrolCTImportEditorContent"
             name="null">
       </datasource>
+      
+      
+   </extension>
+   
+   <extension
+         point="org.wcs.smart.hibernate.libs.mapping">
+      <class
+            ca_property=".patrolLeg.patrol.conservationArea"
+            class="org.wcs.smart.cybertracker.patrol.model.CtPatrolLink"
+            supportsCcaa="false">
+      </class>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.cybertracker.patrol.json.updatesite.OnInstallAction"
+            name="onInstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.cybertracker.patrol.json.updatesite.OnInstallAction"
+            name="onUninstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.wcs.smart.changeLogInstaller">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.cybertracker.patrol.json.updatesite.CtPatrolChangeTrackerInstaller">
+      </ChangeLogTracker>
+   </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrade">
+      <dbUpgrader
+            upgrader="org.wcs.smart.cybertracker.patrol.json.updatesite.CtPatrolDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
+   <extension
+         point="org.wcs.smart.cybertracker.json.processor">
+      <JsonProcessor
+            class="org.wcs.smart.cybertracker.patrol.json.PatrolJsonProcessor">
+      </JsonProcessor>
    </extension>
 
 </plugin>

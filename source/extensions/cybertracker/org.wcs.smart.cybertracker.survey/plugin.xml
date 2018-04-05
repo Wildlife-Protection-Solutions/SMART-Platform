@@ -14,7 +14,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.cybertracker.menu?before=org.wcs.smart.cybertracker.surveypackagesep">
+            locationURI="menu:org.wcs.smart.cybertracker2.menu?after=org.wcs.smart.cybertracker2.separator.import">
          <command
                commandId="org.wcs.smart.cybertracker.survey.export.package"
                label="Export Survey Package"
@@ -95,4 +95,48 @@
       </datasource>
    </extension>
 
+ <extension
+         point="org.wcs.smart.hibernate.libs.mapping">
+      <class
+            ca_property=".mission.survey.surveyDesign.conservationArea"
+            class="org.wcs.smart.cybertracker.survey.model.CtMissionLink"
+            supportsCcaa="false">
+      </class>
+   </extension>
+   <extension
+         point="org.wcs.smart.cybertracker.json.processor">
+      <JsonProcessor
+            class="org.wcs.smart.cybertracker.survey.json.MissionJsonProcessor">
+      </JsonProcessor>
+   </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrade">
+      <dbUpgrader
+            upgrader="org.wcs.smart.cybertracker.survey.updatesite.DataQueueCtMissionDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
+   <extension
+         point="org.wcs.smart.changeLogInstaller">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.cybertracker.survey.updatesite.DataQueueCtMissionChangeTrackerInstaller">
+      </ChangeLogTracker>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.cybertracker.survey.updatesite.OnInstallAction"
+            name="onUninstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.cybertracker.survey.updatesite.OnInstallAction"
+            name="onInstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
 </plugin>
