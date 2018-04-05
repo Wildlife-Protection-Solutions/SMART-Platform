@@ -2045,6 +2045,11 @@ ALTER TABLE connect.connect_version ADD COLUMN filestore_version varchar(5) defa
 UPDATE connect.connect_plugin_version SET version = '6.0.0' WHERE plugin_id = 'org.wcs.smart';
 UPDATE connect.ca_plugin_version SET version = '6.0.0' WHERE plugin_id = 'org.wcs.smart';
 
+update connect.ca_plugin_version set plugin_id = 'org.wcs.smart.cybertracker.survey' where plugin_id = 'org.wcs.smart.connect.dataqueue.cybertracker.survey';
+update connect.ca_plugin_version set plugin_id = 'org.wcs.smart.cybertracker.patrol' where plugin_id = 'org.wcs.smart.connect.dataqueue.cybertracker.patrol';
+update connect.connect_plugin_version set plugin_id = 'org.wcs.smart.cybertracker.survey' where plugin_id = 'org.wcs.smart.connect.dataqueue.cybertracker.survey';
+update connect.connect_plugin_version set plugin_id = 'org.wcs.smart.cybertracker.patrol' where plugin_id = 'org.wcs.smart.connect.dataqueue.cybertracker.patrol';
+
 --database version
 update connect.connect_version set version = '6.0.0';
 --flag the filestore as not upgraded; this will require administrator to upgrade before you can login

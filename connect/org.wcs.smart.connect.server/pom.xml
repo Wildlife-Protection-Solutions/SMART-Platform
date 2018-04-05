@@ -341,15 +341,15 @@
     			<groupId>org.wcs.smart</groupId>
     			<artifactId>org.wcs.smart.birt.map</artifactId>
     			<version>${smart.version}</version>
-		</dependency>		
-		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.connect.dataqueue.cybertracker.patrol</artifactId>
-    			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
     			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.connect.dataqueue.cybertracker.survey</artifactId>
+    			<artifactId>org.wcs.smart.cybertracker.patrol</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>		
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.cybertracker.survey</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
