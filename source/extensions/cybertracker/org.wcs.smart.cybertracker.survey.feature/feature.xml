@@ -26,7 +26,7 @@ on Cybertracker.
          version="0.0.0"/>
 
    <includes
-         id="org.wcs.smart.cybertracker.core.feature"
+         id="org.wcs.smart.cybertracker.survey.core.feature"
          version="0.0.0"/>
 
 </feature>
