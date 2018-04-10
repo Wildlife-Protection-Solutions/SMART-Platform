@@ -99,11 +99,11 @@
          SMART Application Language Packs
       </description>
    </category-def>
-   <category-def name="asset" label="SMART Technical Asset (Camers, Sensors etc) Plug-in">
+   <category-def name="asset" label="SMART Field Sensors (Cameras etc) Plug-in">
       <description>
-         The SMART Asset plug-in extends the SMART capability to asset specific data collection (including camera trap and sound detector).
+         The SMART Field Sensors plug-in extends the SMART capability to field sensor specific data collection (including camera trap and sound detector).
       </description>
    </category-def>
    <category-def name="profiles" label="SMART Profiles Plugin"/>
-   <category-def name="events" label="SMART Event Module"/>
+   <category-def name="events" label="SMART Triggers Module"/>
 </site>
