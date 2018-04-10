@@ -6,7 +6,7 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.event.configure.show"
-            name="Configure SMART Database Triggers">
+            name="%show.command.name">
       </command>
    </extension>
    <extension
@@ -24,7 +24,7 @@
          <command
                commandId="org.wcs.smart.event.configure.show"
                icon="images/icons/action_event.png"
-               label="Configure System Triggers"
+               label="%configure.menu.label"
                style="push">
          </command>
       </menuContribution>
