@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
 /**
@@ -51,9 +52,9 @@ public class CyberTrackerJsonImportHandler {
 				"org.wcs.smart.patrol.ui.PatrolListView", activeWindow); //$NON-NLS-1$
 		
 		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
-		fd.setText("Import Cybertracker JSON Data");
-		fd.setFilterExtensions(new String[] {"*.json", "*.*"});
-		fd.setFilterNames(new String[] {"JSON Files (*.json)", "All Files (*.*)"});
+		fd.setText(Messages.CyberTrackerJsonImportHandler_FileDialogTitle);
+		fd.setFilterExtensions(new String[] {"*.json", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setFilterNames(new String[] {Messages.CyberTrackerJsonImportHandler_JsonFiles, Messages.CyberTrackerJsonImportHandler_AllFiles});
 		
 		List<Path> toProcess = new ArrayList<>();
 		if (fd.open() != null) {

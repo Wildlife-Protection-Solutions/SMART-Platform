@@ -110,7 +110,7 @@ public class JsonCtParser {
 		}
 		
 		JSONArray jsFeatures = (JSONArray) jsonData.get("features"); //$NON-NLS-1$
-		if (jsFeatures == null) throw new Exception("No JSON object with key 'features' found");
+		if (jsFeatures == null) throw new Exception("No JSON object with key 'features' found"); //$NON-NLS-1$
 		List<JSONObject> features = new ArrayList<JSONObject>();
 		for (int i = 0; i < jsFeatures.size(); i ++){
 			JSONObject feature = (JSONObject) jsFeatures.get(i);

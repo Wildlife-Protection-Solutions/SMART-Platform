@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.cybertracker.importer.json;
 
 import java.io.ByteArrayOutputStream;
@@ -37,8 +58,16 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.importer.json.JsonFileProcessor.FileState;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Editor for displaying and managing 
+ * JSON files imported locally.
+ * 
+ * @author Emily
+ *
+ */
 public class JsonImportEditor extends EditorPart {
 
 	public static final String ID = "org.wcs.smart.cybertracker.importer.json.ImportEditor"; //$NON-NLS-1$
@@ -62,7 +91,7 @@ public class JsonImportEditor extends EditorPart {
 		toolkit = new FormToolkit(parent.getDisplay());
 		
 		Form form = toolkit.createForm(parent);
-		form.setText("Import CyberTracker Json Data");
+		form.setText(Messages.JsonImportEditor_FormText);
 		GridLayout layout = new GridLayout();
 		form.getBody().setLayout(layout);
 		
@@ -76,12 +105,12 @@ public class JsonImportEditor extends EditorPart {
 		((GridLayout)btnComp.getLayout()).marginWidth = 0;
 		((GridLayout)btnComp.getLayout()).marginHeight = 0;
 		
-		Button btnAddFiles = toolkit.createButton(btnComp, "Import From File...", SWT.PUSH);
+		Button btnAddFiles = toolkit.createButton(btnComp, Messages.JsonImportEditor_ImportButton, SWT.PUSH);
 		btnAddFiles.addListener(SWT.Selection, e->{
 			FileDialog fd = new FileDialog(getSite().getShell(), SWT.OPEN | SWT.MULTI);
-			fd.setText("Import Cybertracker JSON Data");
-			fd.setFilterExtensions(new String[] {"*.json", "*.*"});
-			fd.setFilterNames(new String[] {"JSON Files (*.json)", "All Files (*.*)"});
+			fd.setText(Messages.JsonImportEditor_Importtitle);
+			fd.setFilterExtensions(new String[] {"*.json", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+			fd.setFilterNames(new String[] {Messages.JsonImportEditor_JsonFile, Messages.JsonImportEditor_AllFiles});
 			if (fd.open() == null) return;
 			String path = fd.getFilterPath();
 			String[] files = fd.getFileNames();
@@ -98,20 +127,19 @@ public class JsonImportEditor extends EditorPart {
 		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		filesTable = new TableViewer(sash, SWT.FULL_SELECTION | SWT.BORDER);
-//		filesTable.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		filesTable.setContentProvider(ArrayContentProvider.getInstance());
 		filesTable.getTable().setHeaderVisible(true);
 		filesTable.getTable().setLinesVisible(true);
 		
 		TableViewerColumn stateCol = new TableViewerColumn(filesTable,  SWT.NONE);
-		stateCol.getColumn().setText("State");
+		stateCol.getColumn().setText(Messages.JsonImportEditor_StateColumn);
 		stateCol.getColumn().setWidth(50);
 		stateCol.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof FileWrapper) {
 					FileWrapper fw = (FileWrapper)element;
-					if (fw.status == null) return "PROCESSING";
+					if (fw.status == null) return Messages.JsonImportEditor_ProcessingStatus;
 					return fw.status.getStatus().name();
 				}
 				return super.getText(element);
@@ -119,7 +147,7 @@ public class JsonImportEditor extends EditorPart {
 		});
 		
 		TableViewerColumn fileCol = new TableViewerColumn(filesTable,  SWT.NONE);
-		fileCol.getColumn().setText("File");
+		fileCol.getColumn().setText(Messages.JsonImportEditor_FileColumn);
 		fileCol.getColumn().setWidth(200);
 		fileCol.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -132,15 +160,15 @@ public class JsonImportEditor extends EditorPart {
 		
 		
 		TableViewerColumn messageCol = new TableViewerColumn(filesTable,  SWT.NONE);
-		messageCol.getColumn().setText("Message");
+		messageCol.getColumn().setText(Messages.JsonImportEditor_MessageColumn);
 		messageCol.getColumn().setWidth(200);
 		messageCol.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof FileWrapper) {
 					FileWrapper fw = (FileWrapper)element;
-					if (fw.status == null) return "";
-					if (fw.status.getMessage() == null) return "";
+					if (fw.status == null) return ""; //$NON-NLS-1$
+					if (fw.status.getMessage() == null) return ""; //$NON-NLS-1$
 					return fw.status.getMessage();
 				}
 				return super.getText(element);
@@ -148,15 +176,15 @@ public class JsonImportEditor extends EditorPart {
 		});
 		
 		TableViewerColumn errorCol = new TableViewerColumn(filesTable,  SWT.NONE);
-		errorCol.getColumn().setText("Error");
+		errorCol.getColumn().setText(Messages.JsonImportEditor_ErrorColumn);
 		errorCol.getColumn().setWidth(200);
 		errorCol.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof FileWrapper) {
 					FileWrapper fw = (FileWrapper)element;
-					if (fw.status == null) return "";
-					if (fw.status.getException() == null) return "";
+					if (fw.status == null) return ""; //$NON-NLS-1$
+					if (fw.status.getException() == null) return ""; //$NON-NLS-1$
 					return fw.status.getException().getMessage();
 				}
 				return super.getText(element);
@@ -166,7 +194,7 @@ public class JsonImportEditor extends EditorPart {
 		Menu tableMenu = new Menu(filesTable.getControl());
 		
 		MenuItem reProcessItem = new MenuItem(tableMenu, SWT.PUSH);
-		reProcessItem.setText("Reprocess File");
+		reProcessItem.setText(Messages.JsonImportEditor_ReprocessOp);
 		reProcessItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		reProcessItem.addListener(SWT.Selection, e->{
 			List<Path> toProcess = new ArrayList<>();
@@ -190,7 +218,7 @@ public class JsonImportEditor extends EditorPart {
 			filesTable.refresh();
 		});
 		MenuItem clearItem = new MenuItem(tableMenu, SWT.PUSH);
-		clearItem.setText("Clear Table");
+		clearItem.setText(Messages.JsonImportEditor_ClearOp);
 		clearItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		clearItem.addListener(SWT.Selection, e->{
 			allFiles.clear();
@@ -215,7 +243,7 @@ public class JsonImportEditor extends EditorPart {
 		((GridLayout)detailsSection.getLayout()).marginWidth = 0;
 		((GridLayout)detailsSection.getLayout()).marginHeight = 0;
 		
-		txtDetails = toolkit.createText(detailsSection, "", SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+		txtDetails = toolkit.createText(detailsSection, "", SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		txtDetails.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		sash.setWeights(new int[] {3,1});
@@ -226,31 +254,33 @@ public class JsonImportEditor extends EditorPart {
 	private void updateDetails() {
 		Object x= filesTable.getStructuredSelection().getFirstElement();
 		if ( x == null ) {
-			txtDetails.setText("");
+			txtDetails.setText(""); //$NON-NLS-1$
 		}else {
 			StringBuilder sb = new StringBuilder();
 			FileWrapper fw = (FileWrapper)x;
 			sb.append(fw.file.getFileName().toString());
-			sb.append("\n\n");
+			sb.append("\n\n"); //$NON-NLS-1$
 			if (fw.status != null) {
-				sb.append("STATUS: ");
+				sb.append(Messages.JsonImportEditor_StatusMessage);
 				sb.append(fw.status.status.name());
-				sb.append("\n\n");
-				sb.append("MESSAGE:\n");
+				sb.append("\n\n"); //$NON-NLS-1$
+				sb.append(Messages.JsonImportEditor_MessageLabel);
+				sb.append("\n"); //$NON-NLS-1$
 				if (fw.status.message != null) {
 					sb.append(fw.status.message);
 				}
-				sb.append("\n\n");
+				sb.append("\n\n"); //$NON-NLS-1$
 			
-				sb.append("ERROR:\n");
+				sb.append(Messages.JsonImportEditor_ErrorLabel);
+				sb.append("\n"); //$NON-NLS-1$
 				if (fw.status.ex != null) {
 					sb.append(fw.status.ex.getMessage());				
-					sb.append("\n");
+					sb.append("\n"); //$NON-NLS-1$
 					try(ByteArrayOutputStream stream = new ByteArrayOutputStream()){
-						PrintStream ps = new PrintStream(stream, true, "utf-8");
+						PrintStream ps = new PrintStream(stream, true, "utf-8"); //$NON-NLS-1$
 						fw.status.ex.printStackTrace(ps);
 						sb.append(new String(stream.toByteArray(), StandardCharsets.UTF_8));
-						sb.append("\n");
+						sb.append("\n"); //$NON-NLS-1$
 					}catch (Exception ex) {
 						
 					}
@@ -261,7 +291,7 @@ public class JsonImportEditor extends EditorPart {
 	}
 	public void processFiles(List<Path> toProcess) {
 		for (FileWrapper w : allFiles) {
-			if (toProcess.contains(w)) {
+			if (toProcess.contains(w.file)) {
 				w.status = null;
 			}
 		}
@@ -342,6 +372,9 @@ public class JsonImportEditor extends EditorPart {
 		}
 	}
 	
+	/**
+	 * static editor input - we only have one input
+	 */
 	public final static IEditorInput INPUT = new IEditorInput() {
 
 		@Override
@@ -361,7 +394,7 @@ public class JsonImportEditor extends EditorPart {
 
 		@Override
 		public String getName() {
-			return "Import CyberTracker JSON Data";
+			return Messages.JsonImportEditor_Name;
 		}
 
 		@Override
@@ -371,7 +404,7 @@ public class JsonImportEditor extends EditorPart {
 
 		@Override
 		public String getToolTipText() {
-			return "Import JSON Data from files";
+			return Messages.JsonImportEditor_Tooltip;
 		}
 		
 		@Override
