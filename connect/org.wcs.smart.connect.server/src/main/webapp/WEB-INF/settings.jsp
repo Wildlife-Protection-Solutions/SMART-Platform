@@ -219,15 +219,39 @@ font-size: 40px;</textarea>
     <label class="block top-spacer"><fmt:message key="settings.style.bodystyle" /></label>
     <textarea id="body_style" name="body_style" class="formtext block" rows=5>
     </textarea>
-   
+    
+    <!--  header image -->
     <label class="block top-spacer"><fmt:message key="settings.style.titlebackgroundimage" /></label>
-    <input id="header_image" type="file" name="header_image" class="formtext block" />
+    <div class="formtext">
+    	<input id="header_image" type="file" name="header_image" class="block" />
+    	<div id="header_image_preview" style="padding-top: 5px">
+    		<img id="header_image_tag"></img>
+    		<input type="button" id="btn_clear_header_image" value="<fmt:message key="settings.style.clearbutton" />"/>
+    		<input type="hidden" id="clear_header_image" name="clear_header_image" value="false"/>
+    	</div>
+    </div>
     
+    <!--  background image -->
     <label class="block top-spacer"><fmt:message key="settings.style.maincontentimage" /></label>
-    <input id="bg_image" type="file" name="bg_image" class="formtext block" />
+    <div class="formtext">
+    	<input id="bg_image" type="file" name="bg_image" class="block" />
+    	<div id="bg_image_preview" style="padding-top: 5px">
+    		<img id="bg_image_tag"></img>
+    		<input type="button" id="btn_clear_background_image" value="<fmt:message key="settings.style.clearbutton" />"/>
+    		<input type="hidden" id="clear_background_image" name="clear_background_image" value="false"/>
+    	</div>
+    </div>
     
+    <!--  login image -->
     <label class="block top-spacer"><fmt:message key="settings.style.loginpageimage" /></label>
-    <input id="login_image" type="file" name="login_image" class="formtext block" />
+     <div class="formtext">
+    	<input id="login_image" type="file" name="login_image" class="block" />
+    	<div id="login_image_preview" style="padding-top: 5px">
+    		<img id="login_image_tag"></img>
+    		<input type="button" id="btn_clear_login_image" value="<fmt:message key="settings.style.clearbutton" />"/>
+    		<input type="hidden" id="clear_login_image" name="clear_login_image" value="false"/>
+    	</div>
+    </div>
     
      <input class="button top-spacer" type="submit" id="btnUpdateStyle" value="<fmt:message key="settings.style.updatestyle" />" />
      <input class="button top-spacer" type="button" id="cancelUpdateStyle" value="<fmt:message key="settings.style.cancel" />" />

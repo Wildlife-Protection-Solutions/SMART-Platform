@@ -84,14 +84,16 @@ public class GetImage extends HttpServlet {
 		response.reset();
 		response.setContentType("image/jpg"); //$NON-NLS-1$
 		
-		InputStream in = new ByteArrayInputStream(img);
-		BufferedImage bImageFromConvert = ImageIO.read(in);
-		if(img == null || bImageFromConvert == null){
+		
+		if(img == null) {
 			response.reset();
 			response.getOutputStream().flush();
 			return;
 		}
-		ImageIO.write(bImageFromConvert, "jpg", response.getOutputStream()); //$NON-NLS-1$
-		response.getOutputStream().flush();
+		try(InputStream in = new ByteArrayInputStream(img)){
+			BufferedImage bImageFromConvert = ImageIO.read(in);
+			ImageIO.write(bImageFromConvert, "jpg", response.getOutputStream()); //$NON-NLS-1$
+			response.getOutputStream().flush();
+		}
 	}
 }

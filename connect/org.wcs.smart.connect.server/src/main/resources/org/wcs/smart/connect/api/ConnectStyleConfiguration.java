@@ -250,6 +250,9 @@ public class ConnectStyleConfiguration extends HttpServlet {
 			s.getTransaction().commit();
 		}
 		
+		String strClearBackground;
+		String strClearLogin;
+		String strClearHeader;
 		try{
 			InputStream in = input.getFormDataMap().get("bg_image").get(0).getBody(InputStream.class,null); //$NON-NLS-1$
 			bg_image = IOUtils.toByteArray(in);
@@ -259,6 +262,10 @@ public class ConnectStyleConfiguration extends HttpServlet {
 			
 			InputStream in3 = input.getFormDataMap().get("login_image").get(0).getBody(InputStream.class,null); //$NON-NLS-1$
 			login_image = IOUtils.toByteArray(in3);
+			
+			strClearBackground = input.getFormDataMap().get("clear_background_image").get(0).getBodyAsString(); //$NON-NLS-1$
+			strClearLogin = input.getFormDataMap().get("clear_login_image").get(0).getBodyAsString(); //$NON-NLS-1$
+			strClearHeader = input.getFormDataMap().get("clear_header_image").get(0).getBodyAsString(); //$NON-NLS-1$
 			
 			header_style = input.getFormDataMap().get("header_style").get(0).getBodyAsString(); //$NON-NLS-1$
 			body_style = input.getFormDataMap().get("body_style").get(0).getBodyAsString(); //$NON-NLS-1$
@@ -271,12 +278,18 @@ public class ConnectStyleConfiguration extends HttpServlet {
 
 		if(header_image.length > 0){
 			style.setHeaderImage(header_image);
+		}else if (strClearHeader.toUpperCase().equals("TRUE")) { //$NON-NLS-1$
+			style.setHeaderImage(null);
 		}
 		if(bg_image.length > 0){
 			style.setBackgroundImage(bg_image);
+		}else if (strClearBackground.toUpperCase().equals("TRUE")) { //$NON-NLS-1$
+			style.setBackgroundImage(null);
 		}
 		if(login_image.length > 0){
 			style.setLoginImage(login_image);
+		}else if (strClearLogin.toUpperCase().equals("TRUE")) { //$NON-NLS-1$
+			style.setLoginImage(null);
 		}
 
 		style.setBodyStyle(body_style);

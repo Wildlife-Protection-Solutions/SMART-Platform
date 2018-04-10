@@ -43,6 +43,43 @@ window.onload = function(){
 	document.getElementById("updatestyleform").onsubmit = submitUpdateStyle;
 	
 	
+	//update style background image
+	document.getElementById("btn_clear_background_image").onclick=function(){
+		var bgElement = document.getElementById("bg_image_preview");
+		bgElement.style.display="none"
+		document.getElementById("updatestyleform").clear_background_image.value = true;
+	}
+	
+	var form = document.getElementById("updatestyleform");
+	form.bg_image.onchange=function(){
+		var bgElement = document.getElementById("bg_image_preview");
+		bgElement.style.display="none"
+		document.getElementById("updatestyleform").clear_background_image.value = false;
+	}
+	//update style login image
+	document.getElementById("btn_clear_login_image").onclick=function(){
+		var bgElement = document.getElementById("login_image_preview");
+		bgElement.style.display="none"
+		document.getElementById("updatestyleform").clear_login_image.value = true;
+	}
+	
+	form.login_image.onchange=function(){
+		var bgElement = document.getElementById("login_image_preview");
+		bgElement.style.display="none"
+		document.getElementById("updatestyleform").clear_login_image.value = false;
+	}
+	//update style header image
+	document.getElementById("btn_clear_header_image").onclick=function(){
+		var bgElement = document.getElementById("header_image_preview");
+		bgElement.style.display="none"
+		document.getElementById("updatestyleform").clear_header_image.value = true;
+	}
+	
+	form.header_image.onchange=function(){
+		var bgElement = document.getElementById("header_image_preview");
+		bgElement.style.display="none"
+		document.getElementById("updatestyleform").clear_header_image.value = false;
+	}
 	
 	//new Layers dialog
 	document.getElementById("btnNewLayer").onclick = function(){
@@ -936,7 +973,34 @@ function showCurrentStyle() {
 	form.body_style.value = r.bodyStyle;
 	form.footer_text.value = r.footerText;
 	form.server_name.value = r.serverName;
-
+	
+	var bgElement = document.getElementById("bg_image_preview");
+	if (r.backgroundImage == null){
+		bgElement.style.display = "none";
+	}else{
+		bgElement.style.display = "block";
+		form.bg_image_tag.src ="../getImage?locationId=2";//"data:image/png;base64," + r.backgroundImage;
+		form.bg_image_tag.style.width = "100px";
+	}
+	
+	var loginElement = document.getElementById("login_image_preview");
+	if (r.loginImage == null){
+		loginElement.style.display = "none";
+	}else{
+		loginElement.style.display = "block";
+		form.login_image_tag.src ="../getImage?locationId=3";//"data:image/png;base64," + r.backgroundImage;
+		form.login_image_tag.style.width = "100px";
+	}
+	
+	var headerElement = document.getElementById("header_image_preview");
+	if (r.headerImage == null){
+		headerElement.style.display = "none";
+	}else{
+		headerElement.style.display = "block";
+		form.header_image_tag.src ="../getImage?locationId=1";//"data:image/png;base64," + r.backgroundImage;
+		form.header_image_tag.style.width = "100px";
+	}
+	
 	displayDialogCenter('updateStyleDialog');//'btnNewType');
 }
 
@@ -946,6 +1010,17 @@ function submitUpdateStyle(){
 	document.querySelector("#message").style.display = "none";
 
 	var form = document.getElementById("updatestyleform");
+	
+	if (form.bg_image.value != "" ){
+		form.clear_background_image.value = false;
+	}
+	if (form.login_image.value != ""){
+		form.clear_login_image.value = false;
+	}
+	if (form.header_image.value != ""){
+		form.clear_header_image.value = false;
+	}
+	
 	var oData = new FormData(form);
 	
 	closeDialog('updateStyleDialog');
