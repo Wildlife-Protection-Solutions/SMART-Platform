@@ -147,6 +147,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	
 	private IEclipseContext parentContext;
 	private List<EventHandler> handlers = null;
+	private boolean fireStyleChange = true;
 	
 	private OverviewmapColumnEngine statEngine = new OverviewmapColumnEngine(SmartDB.getCurrentConservationArea()) {
 		
@@ -258,6 +259,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			boolean doSelection = false;
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				if (!fireStyleChange) return;
 				if (doSelection) return;
 				doSelection = true;
 				try {
@@ -273,6 +275,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		innerPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		super.createPartControl(innerPart);
+		
 		
 		Composite bottomPart = toolkit.createComposite(sash);
 		bottomPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -367,7 +370,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		handlers = new ArrayList<>();
 		EventHandler refreshHandler =  event->{
 			refresh();
-			loadStylesJob.schedule(500);
+			if (event.getTopic().equals(SmartPlugIn.E4_DATABASE_CHANGED_EVENT)) loadStylesJob.schedule(500);
 		};
 		handlers.add(refreshHandler);
 		parentContext.get(IEventBroker.class).subscribe(SmartPlugIn.E4_DATABASE_CHANGED_EVENT, refreshHandler);
@@ -405,7 +408,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		summaryTable.getTable().setLinesVisible(true);
 		summaryTable.setContentProvider(ArrayContentProvider.getInstance());
 		summaryTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		for (OverviewTableColumnWrapper column : tableConfiguration.getColumns()) {
 			TableViewerColumn tColumn = new TableViewerColumn(summaryTable, SWT.NONE);
 			tColumn.getColumn().setText(column.getColumn().getName());
@@ -524,6 +527,8 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	
 	private Job loadStylesJob = new Job(Messages.AssetOverviewMap_loadingstyleJobName) {
 		
+		private boolean first = true;
+		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Object> styles = new ArrayList<>();
@@ -540,12 +545,17 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			}
 			Display.getDefault().syncExec(()->{
 				cmbStyles.setInput(styles);
-				if (lastStyle != null && styles.contains(lastStyle)) {
-					cmbStyles.setSelection(new StructuredSelection(lastStyle));
-				}else {
-					cmbStyles.setSelection(new StructuredSelection(styles.get(0)));
+				try {
+					fireStyleChange = first == true;			
+					if (lastStyle != null && styles.contains(lastStyle)) {
+						cmbStyles.setSelection(new StructuredSelection(lastStyle));
+					}else {
+						cmbStyles.setSelection(new StructuredSelection(styles.get(0)));
+					}
+				}finally {
+					first = false;
+					fireStyleChange = true;
 				}
-				
 			});
 			return Status.OK_STATUS;
 		}
