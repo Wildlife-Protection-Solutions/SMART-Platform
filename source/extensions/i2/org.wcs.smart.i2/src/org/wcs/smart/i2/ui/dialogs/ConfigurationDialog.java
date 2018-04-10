@@ -201,7 +201,12 @@ public class ConfigurationDialog extends TitleAreaDialog{
 		final String[] langs = new String[Locale.getISOLanguages().length+1];
 		langs[0] = ""; //$NON-NLS-1$
 		for (int i = 0; i < Locale.getISOLanguages().length; i ++) {
-			langs[i+1] = Locale.getISOLanguages()[i];
+			Locale tmp = Locale.forLanguageTag(Locale.getISOLanguages()[i]);
+			StringBuilder sb = new StringBuilder();
+			sb.append(Locale.getISOLanguages()[i]);
+			if (tmp != null) sb.append(" (" + tmp.getDisplayName() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			langs[i+1] = sb.toString();
+			
 		}
 		colLanguage.setEditingSupport(new EditingSupport(colLanguage.getViewer()) {
 			@Override
@@ -229,6 +234,7 @@ public class ConfigurationDialog extends TitleAreaDialog{
 					if (value.toString().isEmpty()) {
 						((Name)element).op.setKey(IntelConfigurationOption.MENU_NAME_KEY);
 					}else {
+						value = value.toString().subSequence(0, 2);
 						((Name)element).op.setKey(IntelConfigurationOption.MENU_NAME_KEY + "." + value.toString()); //$NON-NLS-1$
 					}
 					viewer.refresh();
