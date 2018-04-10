@@ -229,7 +229,7 @@ CREATE TABLE smart.e_event_action(
 ALTER TABLE smart.e_event_action ADD FOREIGN KEY (action_uuid) REFERENCES smart.e_action(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
 ALTER TABLE smart.e_event_action ADD FOREIGN KEY (filter_uuid) REFERENCES smart.e_event_filter(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
 
-INSERT INTO connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.event', '1.0.');
+INSERT INTO connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.event', '1.0');
 
 
 
