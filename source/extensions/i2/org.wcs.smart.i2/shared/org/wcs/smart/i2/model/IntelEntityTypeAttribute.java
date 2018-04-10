@@ -23,7 +23,6 @@ package org.wcs.smart.i2.model;
 
 import java.io.Serializable;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
@@ -88,7 +87,7 @@ public class IntelEntityTypeAttribute {
 		this.order = order;
 	}
 	
-	@ManyToOne(cascade={CascadeType.ALL})
+	@ManyToOne
 	@JoinColumn(name="attribute_group_uuid", referencedColumnName="uuid")
 	public IntelEntityTypeAttributeGroup getAttributeGroup(){
 		return this.group;

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.model;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -46,7 +45,7 @@ public class IntelEntityTypeAttributeGroup extends NamedItem {
 		this.order = order;
 	}
 	
-	@ManyToOne(cascade={CascadeType.ALL})
+	@ManyToOne
 	@JoinColumn(name="entity_type_uuid", referencedColumnName="uuid")
 	public IntelEntityType getEntityType(){
 		return this.type;
