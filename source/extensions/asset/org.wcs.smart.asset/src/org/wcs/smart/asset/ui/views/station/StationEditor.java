@@ -573,7 +573,7 @@ public class StationEditor extends EditorPart implements MapPart {
 		this.handlers = null;
 		super.dispose();
 		
-		this.currentPage.getMapViewer().dispose();
+		if (this.currentPage.getMapViewer() != null) this.currentPage.getMapViewer().dispose();
 		ApplicationGIS.getToolManager().setCurrentEditor(null);
 		
 		this.currentPage = null;

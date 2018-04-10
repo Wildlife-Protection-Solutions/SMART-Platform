@@ -686,6 +686,7 @@ public class AttributeFieldEditor {
 					!((ViewportPane)currentPart.getMap().getRenderManager().getMapDisplay()).isDisposed()) {
 				nextPart = currentPart;
 			}
+			
 			ApplicationGIS.getToolManager().setCurrentEditor(nextPart);
 			if (nextPart != null) lastToolAction.run();
 		}

@@ -789,7 +789,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 		
 		super.dispose();
 		
-		this.currentPage.getMapViewer().dispose();
+		if (this.currentPage.getMapViewer() != null) this.currentPage.getMapViewer().dispose();
 		
 		ApplicationGIS.getToolManager().setCurrentEditor(null);
 		
