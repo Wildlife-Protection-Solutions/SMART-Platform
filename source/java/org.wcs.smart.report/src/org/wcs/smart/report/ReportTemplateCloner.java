@@ -163,15 +163,17 @@ public class ReportTemplateCloner implements
 			File src = new File(new File(engine.getTemplateCa().getFileDataStoreLocation(), Report.REPORT_DIR), r.getFilename());
 			File dest = new File(new File(engine.getNewCa().getFileDataStoreLocation(), Report.REPORT_DIR), clone.getFilename());
 			
-			FileUtils.copyFile(src, dest);
-	
-			boolean save = true;
-			try{
-				updateReportFile(clone, dest,  engine);	
-			}catch (Exception ex){
-				save = false;
-				ReportPlugIn.log(ex.getMessage(), ex);
-				dest.delete();
+			boolean save = false;
+			if (src.exists()) {
+				FileUtils.copyFile(src, dest);
+				save = true;
+				try{
+					updateReportFile(clone, dest,  engine);	
+				}catch (Exception ex){
+					save = false;
+					ReportPlugIn.log(ex.getMessage(), ex);
+					dest.delete();
+				}
 			}
 			
 			if (save){
