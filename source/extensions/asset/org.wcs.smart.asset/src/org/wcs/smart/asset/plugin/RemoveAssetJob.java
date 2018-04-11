@@ -111,23 +111,24 @@ public class RemoveAssetJob extends Job {
 		
 		
 		cas = HibernateManager.getConservationAreas(session);
-		//delete all waypoints associated with type SURVEY
-		Query<?> q = session.createQuery("DELETE Waypoint WHERE source = :src"); //$NON-NLS-1$
-		q.setParameter("src", AssetWaypointSource.KEY); //$NON-NLS-1$
-		q.executeUpdate();
-		
+
+		//drop labels and tables
 		for (String table : LABELTABLES){
 			if (DerbyHibernateExtensions.tableExists(session, table)){
 				session.createNativeQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
-			
 		for (String table : TABLES){
 			if (DerbyHibernateExtensions.tableExists(session, table)){
 				session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
 			}
 		}		
 
+		//delete all waypoints associated with type SURVEY
+		Query<?> q = session.createQuery("DELETE Waypoint WHERE source = :src"); //$NON-NLS-1$
+		q.setParameter("src", AssetWaypointSource.KEY); //$NON-NLS-1$
+		q.executeUpdate();
+		
 		//remove from plugin table
 		HibernateManager.setPlugInVersion(AssetPlugIn.PLUGIN_ID, null, session);
 		
