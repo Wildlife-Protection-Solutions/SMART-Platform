@@ -248,6 +248,7 @@ public class EntityListComposite extends Composite{
 							final String idText = toadd.getIdAttributeAsText();
 							Display.getDefault().syncExec(() -> {
 								//automatically link all existing locations to editor
+								if (editor.getRecord().getLocations() == null) editor.getRecord().setLocations(new ArrayList<>());
 								for (IntelLocation location : editor.getRecord().getLocations()) {
 									editor.linkEntityToLocation(location, entity);
 								}

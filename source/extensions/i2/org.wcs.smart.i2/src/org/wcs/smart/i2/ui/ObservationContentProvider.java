@@ -59,6 +59,7 @@ public class ObservationContentProvider implements ITreeContentProvider {
 		}else if (newInput instanceof IntelRecord) {
 			observations = new ArrayList<>();
 			IntelRecord rr = (IntelRecord)newInput;
+			if (rr.getLocations() == null) rr.setLocations(new ArrayList<>());
 			for (IntelLocation ll : rr.getLocations()) {
 				observations.addAll(ll.getObservations());
 			}

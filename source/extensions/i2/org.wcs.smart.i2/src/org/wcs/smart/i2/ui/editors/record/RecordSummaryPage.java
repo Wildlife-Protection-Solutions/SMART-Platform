@@ -206,7 +206,11 @@ public class RecordSummaryPage extends EditorPart{
 	public void doAfterSave(){
 		headerLabel.setText(recordEditor.getRecord().getTitle());
 		entityPanel.refreshEntities();
-		lblLastModified.setText(DateFormat.getDateInstance().format(recordEditor.getRecord().getDateModified()));
+		if (recordEditor.getRecord().getDateModified() == null) {
+			lblLastModified.setText(""); //$NON-NLS-1$
+		}else {
+			lblLastModified.setText(DateFormat.getDateInstance().format(recordEditor.getRecord().getDateModified()));
+		}
 		lblLastModifiedBy.setText(recordEditor.getRecord().getLastModifiedBy() == null ? "" : SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy())); //$NON-NLS-1$
 	}
 	
