@@ -24,8 +24,11 @@ package org.wcs.smart.connect.uploader.sync;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
@@ -39,7 +42,6 @@ import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
 import org.wcs.smart.connect.uploader.ca.CaProcessorUtils;
 
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * A postgresql specific processor for processing a change
@@ -50,6 +52,8 @@ import com.ibm.icu.text.MessageFormat;
  *
  */
 public class PostgresqlSyncProcessor {
+	
+	private final Logger logger = Logger.getLogger(PostgresqlSyncProcessor.class.getName());
 	
 	private Path zipFile;
 	private Session session;
@@ -152,9 +156,18 @@ public class PostgresqlSyncProcessor {
 			ChangeLogManager.INSTANCE.disableChangeTracking(info, session);
 			//apply change log
 			processor.processFile(session);
-		}finally {
 			ChangeLogManager.INSTANCE.enableChangeTracking(info, session);
+		}catch (Exception ex) {
+			session.getTransaction().rollback();
+			session.beginTransaction();
+			try {
+				ChangeLogManager.INSTANCE.enableChangeTracking(info, session);	
+			}catch (Exception ex2) {
+				logger.log(Level.SEVERE, ex2.getMessage(), ex2);	
+			}
+			throw ex;
 		}
+		
 		//write all change log 
 		processor.writeToChangeLog(session);
 	}
