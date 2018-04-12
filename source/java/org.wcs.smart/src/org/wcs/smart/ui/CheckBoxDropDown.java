@@ -50,7 +50,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 /**
- * Drop down check box viewer for selecting mutliple items from a list
+ * Drop down check box viewer for selecting multiple items from a list
  * 
  * @author Emily
  *
