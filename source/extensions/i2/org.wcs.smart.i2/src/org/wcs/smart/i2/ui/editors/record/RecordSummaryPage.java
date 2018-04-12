@@ -129,6 +129,8 @@ import org.wcs.smart.util.SmartUtils;
 @SuppressWarnings("restriction")
 public class RecordSummaryPage extends EditorPart{
 
+	private static int[] LAST_WEIGHTS = null;
+	
 	private FormToolkit  toolkit;
 
 	private Composite summaryPart;
@@ -181,13 +183,10 @@ public class RecordSummaryPage extends EditorPart{
 		entityPanel.getEntityLinksToDelete().clear();
 	}
 
-
-//	public LocationListComposite getLocationPanel(){
-//		return this.locationPanel;
-//	}
 	public List<IntelEntityAttachment> getNewAttachments(){
 		return attachmentPanel.getNewEntityAttachments();
 	}
+	
 	public List<IntelEntityAttachment> getRemovedEntityAttachments(){
 		return attachmentPanel.getRemovedEntityAttachments();
 	}
@@ -199,6 +198,7 @@ public class RecordSummaryPage extends EditorPart{
 	public List<IntelEntityRecord> getNewEntityLinks(){
 		return entityPanel.getEntityLinksAdded();
 	}
+	
 	public List<IntelEntityRecord> getDeleteEntityLinks(){
 		return entityPanel.getEntityLinksToDelete();
 	}
@@ -350,8 +350,8 @@ public class RecordSummaryPage extends EditorPart{
 		SmartSection expLocation = createSectionHeader(sashForm, toolkit, Messages.RecordSummaryPage_ObservationsTabName);
 		observationPanel = new RecordLocationSummaryComposite(expLocation,toolkit, recordEditor);
 		observationPanel .setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//		
-		sashForm.setWeights(new int[]{2,1,1,1});
+
+		initWeights();
 		sashForm.addListener(SWT.Resize, (e)->{
 			List<SmartSection> sections = (List<SmartSection>) sashForm.getData(SmartSection.KIDS_KEY);
 			int max = (Integer)sashForm.getData(SmartSection.MAX_KEY);
@@ -361,10 +361,23 @@ public class RecordSummaryPage extends EditorPart{
 				sections.get(0).resizeMinSize();
 				//resize all so that the minimum size is respected
 			}
+			
 		});
+		for (Control kid : sashForm.getChildren()) {
+			kid.addListener(SWT.Resize, e->{
+				LAST_WEIGHTS = sashForm.getWeights();	
+			});
+		}
 	}
 	
-	
+	private void initWeights() {
+		int[] weights = LAST_WEIGHTS;
+		if (weights != null) {
+			sashForm.setWeights(weights);
+		}else {
+			sashForm.setWeights(new int[]{2,1,1,1});
+		}
+	}
 
 	private SmartSection createSectionHeader(SashForm parent, FormToolkit toolkit, String text){
 		SmartSection sec = new SmartSection(parent, toolkit, text);
@@ -593,9 +606,7 @@ public class RecordSummaryPage extends EditorPart{
 		lblLastModifiedBy.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		historyPart.layout();
 		
-
-		
-		sashForm.setWeights(new int[]{2,1,1,1});
+		initWeights();
 	}
 	
 	/*

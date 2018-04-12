@@ -40,6 +40,7 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.model.IntelEntityType;
 
 
@@ -65,11 +66,11 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	}
 	
 	public static BasicEntitySearch parse(String queryString, Collection<ConservationArea> cas){
-		String[] bits = queryString.split(SEPARATOR);
-		if (queryString.endsWith(SEPARATOR)) {
+		String[] bits = queryString.split(IntelEntitySearch.SEPARATOR);
+		if (queryString.endsWith(IntelEntitySearch.SEPARATOR)) {
 			bits = Arrays.copyOf(bits, bits.length+1);
 		}
-		if (!bits[0].equals(Type.BASIC.key)) return null; //not a basic search
+		if (!bits[0].equals(IntelEntitySearch.Type.BASIC.key)) return null; //not a basic search
 		
 		
 		//the old form included the search cnt in the second position
@@ -177,10 +178,10 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	@Override
 	public String serialize(){
 		StringBuilder sb = new StringBuilder();
-		sb.append(Type.BASIC.key);
-		sb.append(SEPARATOR);
+		sb.append(IntelEntitySearch.Type.BASIC.key);
+		sb.append(IntelEntitySearch.SEPARATOR);
 		if (searchString != null) sb.append(searchString);
-		sb.append(SEPARATOR);
+		sb.append(IntelEntitySearch.SEPARATOR);
 		if (entityTypes != null){
 			entityTypes.forEach(a -> sb.append(a + ENTITY_TYPE_SEP)); 
 		}

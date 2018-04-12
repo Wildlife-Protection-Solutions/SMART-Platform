@@ -35,6 +35,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntitySearch;
+import org.wcs.smart.i2.model.IntelEntitySearch.Type;
 
 import com.ibm.icu.text.Collator;
 
@@ -56,7 +57,7 @@ public abstract class LoadSavedSearches extends Job{
 		List<SearchProxy> searches = new ArrayList<SearchProxy>();
 		try(Session session = HibernateManager.openSession()){
 			List<IntelEntitySearch> objects = QueryFactory.buildQuery(session,IntelEntitySearch.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList();  //$NON-NLS-1$
-			objects.forEach(o -> searches.add(new SearchProxy(o.getUuid(), o.getName())));
+			objects.stream().filter(e->e.getType() != Type.RECORD).forEach(o -> searches.add(new SearchProxy(o.getUuid(), o.getName())));
 			
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog(Messages.LoadSavedSearches_errorMsg + ex.getMessage() , ex);

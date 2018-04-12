@@ -60,6 +60,7 @@ public class SmartSection extends Composite{
 	private SashForm sashForm;
 	private FormToolkit toolkit;
 	
+	
 	@SuppressWarnings("unchecked")
 	public SmartSection(SashForm parent, FormToolkit toolkit, String text) {
 		super(parent, SWT.NONE);
@@ -84,7 +85,7 @@ public class SmartSection extends Composite{
 		
 		
 	}
-	
+
 	private void setMinimized(boolean min){
 		if (processingEvent) return;
 		isMinimized = min;
@@ -214,11 +215,12 @@ public class SmartSection extends Composite{
 					start ++;
 					if (start >= items.size()) start = 0;
 				}
-				processingEvent = true;
+				List<SmartSection> sections = (List<SmartSection>) sashForm.getData(KIDS_KEY);
+				for (SmartSection s : sections) s.processingEvent = true;
 				try{
 					sash.setWeights(weights);	
 				}finally{
-					processingEvent = false;
+					for (SmartSection s : sections) s.processingEvent = false;
 				}
 				
 			}
@@ -243,36 +245,20 @@ public class SmartSection extends Composite{
 		Arrays.fill(newweights, -1);
 		
 		int off = 0;
-		
-		double[] percentage = new double[sections.size()];
-		Arrays.fill(percentage, -1);
-		double total = 0;
+		int currentMaxIndex = -1;
 		for (int i = 0; i < sections.size(); i ++){
-			if (sections.get(i).isMinimized || sections.get(i).getBounds().height < sections.get(i).getMinSize()){
+			if (sections.get(i).isMinimized ) {
 				newweights[i] = sections.get(i).getMinSize();
 				off += newweights[i];
-			}else{
-				total += sashForm.getWeights()[i];
-				percentage[i] = sashForm.getWeights()[i];
+			}else {
+				currentMaxIndex = i;
 			}
 		}
-		if (total == 0){
-			//everything is minimized; stick with initial weights
-			Arrays.fill(newweights, -1);
-		}else{
-			for (int i = 0; i < percentage.length; i ++){
-				percentage[i] = percentage[i] / total;
-			}
-		}
-		
-		int totalHeight = sashForm.getClientArea().height - off;
-		for (int i = 0; i < sections.size(); i ++){
-			if (newweights[i] == -1){
-				newweights[i] = (int)(totalHeight * percentage[i]);
-			}
-		}		
-		for (SmartSection s : sections) s.processingEvent = true;
+		int max = sashForm.getClientArea().height;
+		newweights[currentMaxIndex] = max - off;
 		for (int i : newweights) if (i <= 0){ return;}
+		
+		for (SmartSection s : sections) s.processingEvent = true;
 		try{
 			sashForm.setWeights(newweights);
 		}catch (Throwable ex){

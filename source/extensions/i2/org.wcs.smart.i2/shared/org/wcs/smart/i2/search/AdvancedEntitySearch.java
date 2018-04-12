@@ -47,6 +47,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.util.SharedUtils;
@@ -81,8 +82,8 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	}
 	
 	public static AdvancedEntitySearch parse(String searchString, Collection<ConservationArea> cas){
-		String[] bits = searchString.split(SEPARATOR);
-		if (!bits[0].equals(Type.ADVANCED.key)) return null;
+		String[] bits = searchString.split(IntelEntitySearch.SEPARATOR);
+		if (!bits[0].equals(IntelEntitySearch.Type.ADVANCED.key)) return null;
 		
 		//old form included max search result
 		//new form does not include this
@@ -170,8 +171,8 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	@Override
 	public String serialize() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(Type.ADVANCED.key);
-		sb.append(SEPARATOR);
+		sb.append(IntelEntitySearch.Type.ADVANCED.key);
+		sb.append(IntelEntitySearch.SEPARATOR);
 		sb.append(searchString);
 		
 		return sb.toString();

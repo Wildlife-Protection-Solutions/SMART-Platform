@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.i2.model;
 
+import java.text.MessageFormat;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
@@ -41,6 +44,21 @@ import org.wcs.smart.ca.NamedItem;
 @Table(name="smart.i_entity_search")
 public class IntelEntitySearch extends NamedItem {
 
+
+	public enum Type{
+		BASIC("basic"), //$NON-NLS-1$
+		ADVANCED("adv"), //$NON-NLS-1$
+		RECORD("record"); //$NON-NLS-1$
+		
+		public String key;
+		
+		Type(String key){
+			this.key = key;
+		}
+	}
+	
+	public static final String SEPARATOR = ";"; //$NON-NLS-1$
+	
 	/** conservation_area. */
 	private ConservationArea ca;
 	private String searchString;
@@ -51,18 +69,39 @@ public class IntelEntitySearch extends NamedItem {
 	public IntelEntitySearch() {
 	}
 
+	@Transient
+	public Type getType() {
+		String typePart = getSearchString().split(SEPARATOR)[0];
+		for (Type t : Type.values()) {
+			if (t.key.equals(typePart)) return t;
+		}
+		throw new IllegalStateException(MessageFormat.format("The search string type {0} is not supported", typePart)); 
+	}
+	
 	/**
-	 * Set the search_string.
+	 * Set the search_string.  The search string should
+	 * be of the form <Type.key>;<String format> 
 	 * 
 	 * @param searchString
 	 *            search_string
 	 */
 	public void setSearchString(String searchString) {
+		String type = searchString.split(SEPARATOR)[0];
+		boolean found = false;
+		for (Type t : Type.values()) {
+			if (t.key.equals(type)) {
+				found = true; break;
+			}
+		}
+		if (!found) throw new IllegalStateException(MessageFormat.format("The search string type {0} is not supported", type));
 		this.searchString = searchString;
 	}
 
 	/**
 	 * Get the search_string.
+	 * 
+	 * Get the search_string.  The search string should
+	 * be of the form <Type.key>;<String format> 
 	 * 
 	 * @return search_string
 	 */

@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -99,14 +100,18 @@ import org.wcs.smart.i2.search.IIntelEntitySearch;
 import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.search.LoadSavedSearches;
 import org.wcs.smart.i2.search.SearchProxy;
+import org.wcs.smart.i2.search.SpatialEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntitySearchJob;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.SaveSearchDialog;
 import org.wcs.smart.i2.ui.views.entity.search.AdvancedEntitySearchPanel;
+import org.wcs.smart.i2.ui.views.entity.search.SpatialSearchPanel;
 import org.wcs.smart.ui.TranslateNamesHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * View for entity search and results
@@ -144,6 +149,7 @@ public class EntitySearchView {
 	private Hyperlink basicSearch;
 	private Hyperlink advancedSearch;
 	private Hyperlink savedSearch;
+	private Hyperlink spatialSearch;
 	
 	private StackLayout searchStack;
 	private Composite searchArea;
@@ -151,6 +157,7 @@ public class EntitySearchView {
 	
 	private IntelEntitySearch lastSearch = null;
 	private AdvancedEntitySearchPanel advancedSearchPanel;
+	private SpatialSearchPanel spatialPanel;
 	
 	private HashMap<Control, int[]> weightMap = new HashMap<>();
 	
@@ -255,6 +262,7 @@ public class EntitySearchView {
 		createBasicSearch(searchArea);
 		createAdvancedSearch(searchArea);
 		createSavedSearch(searchArea);
+		createSpatialSearch(searchArea);
 		
 		searchStack.topControl = searchArea.getChildren()[0];
 	
@@ -298,7 +306,7 @@ public class EntitySearchView {
 		basicSearch.setFont(hlFont);
 		advancedSearch.setFont(hlFont);
 		savedSearch.setFont(hlFont);
-		
+		spatialSearch.setFont(hlFont);
 		((Hyperlink)e.widget).setFont(boldFont);
 	
 		weightMap.put(searchStack.topControl, sashForm.getWeights());
@@ -308,6 +316,8 @@ public class EntitySearchView {
 			searchStack.topControl = searchArea.getChildren()[1];
 		}else if (e.widget == savedSearch){
 			searchStack.topControl = searchArea.getChildren()[2];
+		}else if (e.widget == spatialSearch) {
+			searchStack.topControl = searchArea.getChildren()[3];
 		}
 		int[] weights = weightMap.get(searchStack.topControl);
 		if (weights == null) weights = new int[]{20,80};
@@ -317,9 +327,13 @@ public class EntitySearchView {
 		basicSearch.getParent().layout();
 	}
 	
+	public boolean isSpatialActive() {
+		return searchStack.topControl == searchArea.getChildren()[3];
+	}
+	
 	private void createHeaderOptions(Composite parent){
 		Composite header = toolkit.createComposite(parent, SWT.NONE);
-		header.setLayout(new GridLayout(3, false));
+		header.setLayout(new GridLayout(4, false));
 		((GridLayout)header.getLayout()).marginWidth = 0;
 		((GridLayout)header.getLayout()).marginHeight = 0;
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -328,6 +342,9 @@ public class EntitySearchView {
 		basicSearch.setToolTipText(Messages.EntitySearchView_BasicSearchTooltip);
 		advancedSearch = toolkit.createHyperlink(header, Messages.EntitySearchView_AdvSearchTab, SWT.NONE);
 		savedSearch = toolkit.createHyperlink(header, Messages.EntitySearchView_SavedSearchTab, SWT.NONE);
+		spatialSearch = toolkit.createHyperlink(header, Messages.EntitySearchView_SpatialSearchLabel, SWT.NONE);
+		spatialSearch.setToolTipText(Messages.EntitySearchView_SpatialSearchTooltip);
+		
 		IHyperlinkListener hlistener = new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -337,10 +354,12 @@ public class EntitySearchView {
 		basicSearch.addHyperlinkListener(hlistener);
 		advancedSearch.addHyperlinkListener(hlistener);
 		savedSearch.addHyperlinkListener(hlistener);
+		spatialSearch.addHyperlinkListener(hlistener);
 		
 		basicSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		advancedSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		savedSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		spatialSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		
 		hlFont = basicSearch.getFont();
 		FontData fd = basicSearch.getFont().getFontData()[0];
@@ -422,6 +441,17 @@ public class EntitySearchView {
 		btnLoad.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 	}
 	
+	
+	private void createSpatialSearch(Composite parent){
+		Composite core = toolkit.createComposite(parent, SWT.NONE);
+		core.setLayout(new GridLayout());
+		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		spatialPanel = new SpatialSearchPanel(core, context, toolkit, this);
+		spatialPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	}
+	
+	
 	private void createAdvancedSearch(Composite parent){
 		Composite core = toolkit.createComposite(parent, SWT.NONE);
 		core.setLayout(new GridLayout(2, false));
@@ -429,6 +459,44 @@ public class EntitySearchView {
 		
 		advancedSearchPanel = new AdvancedEntitySearchPanel(core, this, toolkit);
 		advancedSearchPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	}
+	
+	/**
+	 * Performs a spatial search based on the location in the provided record
+	 * 
+	 * @param recordUuid
+	 */
+	public void doSpatialSearch(UUID recordUuid){
+		spatialPanel.selectRecord(recordUuid);
+		doSpatialSearch(recordUuid, null);
+	}
+	
+	/**
+	 * Performs a spatial search based on the provided geometry
+	 * @param geometry
+	 */
+	public void doSpatialSearch(Geometry geometry){
+		doSpatialSearch(null, geometry);
+	}
+	
+	private void doSpatialSearch(UUID recordUuid, Geometry geometry){
+		StringBuilder sb = new StringBuilder();
+		sb.append(IntelEntitySearch.Type.RECORD.key);
+		sb.append(IntelEntitySearch.SEPARATOR);
+		sb.append(spatialPanel.getDistance());
+		sb.append(IntelEntitySearch.SEPARATOR);
+		sb.append(spatialPanel.getEntityTypeFilters());
+		IntelEntitySearch search = new IntelEntitySearch();
+		search.setSearchString(sb.toString());
+		
+		IIntelEntitySearch iSearch = null;
+		if (recordUuid != null) {
+			iSearch = new SpatialEntitySearch(search, recordUuid);
+		}else if (geometry != null) {
+			iSearch = new SpatialEntitySearch(search, geometry, SmartDB.getCurrentConservationArea());
+		}
+		updateHyperlink(new HyperlinkEvent(spatialSearch, null, null, -1));
+		doSearch(iSearch, searchDelay);
 	}
 	
 	private void loadSearch(){

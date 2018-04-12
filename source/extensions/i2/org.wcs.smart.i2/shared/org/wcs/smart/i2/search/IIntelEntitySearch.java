@@ -28,6 +28,7 @@ import java.util.Locale;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.i2.model.IntelEntitySearch;
 
 /**
  * Intelligence search interface 
@@ -37,18 +38,6 @@ import org.wcs.smart.ca.ConservationArea;
  */
 public interface IIntelEntitySearch {
 
-	public enum Type{
-		BASIC("basic"), //$NON-NLS-1$
-		ADVANCED("adv"); //$NON-NLS-1$
-		
-		public String key;
-		
-		Type(String key){
-			this.key = key;
-		}
-	}
-	
-	public static final String SEPARATOR = ";"; //$NON-NLS-1$
 	
 	/**
 	 * Maximum number of results returned in an entity search.
@@ -81,10 +70,10 @@ public interface IIntelEntitySearch {
 	 * @return
 	 */
 	public static IIntelEntitySearch parseSearchString(String searchString, Collection<ConservationArea> cas) {
-		if (searchString.startsWith(IIntelEntitySearch.Type.BASIC.key + IIntelEntitySearch.SEPARATOR)){
+		if (searchString.startsWith(IntelEntitySearch.Type.BASIC.key + IntelEntitySearch.SEPARATOR)){
 			//basic search
 			return BasicEntitySearch.parse(searchString, cas);
-		}else if (searchString.startsWith(IIntelEntitySearch.Type.ADVANCED.key + IIntelEntitySearch.SEPARATOR)){
+		}else if (searchString.startsWith(IntelEntitySearch.Type.ADVANCED.key + IntelEntitySearch.SEPARATOR)){
 			//advanced search
 			return AdvancedEntitySearch.parse(searchString, cas);
 		}

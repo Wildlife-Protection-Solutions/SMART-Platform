@@ -57,7 +57,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.BasicEntitySearch;
-import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.ui.SmartShellDialog;
 import org.wcs.smart.ui.properties.DialogConstants;

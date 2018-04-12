@@ -68,9 +68,10 @@ public class SelectPointMapDialog extends Dialog {
 		super.okPressed();
 	}
 	
-	public TmpPoint getPoint(){
+	public ISmartPoint getPoint(){
 		return point;
 	}
+	
 	@Override
 	protected Point getInitialSize() {
 		return new Point(450, 400);

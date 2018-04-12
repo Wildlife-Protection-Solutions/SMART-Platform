@@ -62,7 +62,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner {
 			EFilter clone = new EFilter();
 			clone.setConservationArea(engine.getTemplateCa());
 			clone.setId(filter.getId());
-			clone.setFilterString(clone.getFilterString());
+			clone.setFilterString(filter.getFilterString());
 		
 			oldToCloneFilter.put(filter.getUuid(), clone);
 			engine.getSession().save(clone);

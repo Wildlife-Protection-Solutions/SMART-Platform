@@ -32,6 +32,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
@@ -42,8 +44,6 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -51,8 +51,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
@@ -63,8 +66,10 @@ import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.TransparentInfoDialog;
+import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Entity composite component for the record editor
@@ -95,35 +100,31 @@ public class EntityListComposite extends Composite{
 		setLayout(gl);
 				
 		compEntityEdit = toolkit.createComposite(this, SWT.NONE);
-		compEntityEdit.setLayout(new GridLayout());
+		compEntityEdit.setLayout(new GridLayout(2, false));
 		compEntityEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)compEntityEdit.getLayout()).marginHeight = 0 ;
 		((GridLayout)compEntityEdit.getLayout()).marginWidth = 0 ;
 		
 		if (IntelSecurityManager.INSTANCE.canViewEntities()) {
-			Button btnAdd = new Button(compEntityEdit, SWT.PUSH);
-			btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-			btnAdd.addSelectionListener(new SelectionAdapter(){
-	
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					EntityListShell shell = new EntityListShell(EntityListComposite.this.getShell(), editor);
-					ContextInjectionFactory.inject(shell, editor.getContext());
-					int x = btnAdd.getLocation().x + btnAdd.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-					int y =  btnAdd.getLocation().y;
-					shell.addListener(SWT.Close, new Listener() {
-						@Override
-						public void handleEvent(Event event) {
-							IntelEntity target = shell.getTargetEntity();
-							if (target != null){
-								linkEntity(target);
-							}
-						}
-					});
-					shell.open(btnAdd.toDisplay(x,y));
-				}
-				
-			});
+			Button btnAdd = toolkit.createButton(compEntityEdit, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
+			btnAdd.addListener(SWT.Selection, e->addEntity(btnAdd));
+			
+			Button btnSearch = toolkit.createButton(compEntityEdit, Messages.EntityListComposite_SearchButton, SWT.PUSH);
+			btnSearch.addListener(SWT.Selection, e->searchEntity());
+			btnSearch.setToolTipText(Messages.EntityListComposite_SearchTooltip);
+			Menu mnuTemp = new Menu(compEntityEdit);
+			
+			MenuItem mnuAdd = new MenuItem(mnuTemp, SWT.PUSH);
+			mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+			mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			mnuAdd.addListener(SWT.Selection, e->addEntity(btnAdd));
+			
+			MenuItem mnuSearch = new MenuItem(mnuTemp, SWT.PUSH);
+			mnuSearch.setText(Messages.EntityListComposite_SearchMenu);
+			mnuSearch.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY_QUERY));
+			mnuSearch.addListener(SWT.Selection, e->searchEntity());
+			
+			compEntityEdit.setMenu(mnuTemp);
 		}
 		updateEditMode();
 		
@@ -182,6 +183,32 @@ public class EntityListComposite extends Composite{
 			}
 		});
 		
+	}
+	
+	private void addEntity(Button btnAdd) {
+		EntityListShell shell = new EntityListShell(EntityListComposite.this.getShell(), editor);
+		ContextInjectionFactory.inject(shell, editor.getContext());
+		int x = btnAdd.getLocation().x + btnAdd.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		int y =  btnAdd.getLocation().y;
+		shell.addListener(SWT.Close, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				IntelEntity target = shell.getTargetEntity();
+				if (target != null){
+					linkEntity(target);
+				}
+			}
+		});
+		shell.open(btnAdd.toDisplay(x,y));
+	}
+	
+	private void searchEntity() {
+		EPartService partService = getEditor().getContext().get(EPartService.class);
+		MPart viewPart = partService.findPart(EntitySearchView.ID);
+		Object x = E3Utils.getSourceObject(viewPart);
+		if (x instanceof EntitySearchView) {
+			((EntitySearchView)x).doSpatialSearch(getEditor().getRecord().getUuid());
+		}
 	}
 	
 	public void setType(Type type){

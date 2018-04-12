@@ -153,7 +153,7 @@
       </class>
       <class
             class="org.wcs.smart.i2.model.IntelEntitySummaryQuery"
-            supportsCcaa="true">
+            supportsCcaa="false">
       </class>
    </extension>
    <extension
@@ -1215,6 +1215,12 @@
       <handler
             class="org.wcs.smart.i2.ui.handler.ShowConfigurationDialogHandler$ShowConfigurationDialogHandlerWrapper"
             commandId="org.wcs.smart.i2.command.config.show">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.i2.permission"
+                  value="configure">
+            </test>
+         </enabledWhen>
       </handler>
    </extension>
    <extension

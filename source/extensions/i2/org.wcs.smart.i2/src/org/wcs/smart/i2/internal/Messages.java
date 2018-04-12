@@ -147,6 +147,7 @@ public class Messages extends NLS {
 	public static String ConfigureRecordAttributesHandler_SaveRequired;
 	public static String ConfigureRecordAttributesHandler_Title;
 	public static String ConservationAreaCloner_AttributeSubTask;
+	public static String ConservationAreaCloner_EntityRecordSearchSubTask;
 	public static String ConservationAreaCloner_EntityTypeSubTask;
 	public static String ConservationAreaCloner_GroupsSubTask;
 	public static String ConservationAreaCloner_RelationshiptypesSubTask;
@@ -314,6 +315,9 @@ public class Messages extends NLS {
 	public static String EntityList_OpenItem;
 	public static String EntityList_RemoveItem;
 	public static String EntityListComposite_EntityLinkAdded;
+	public static String EntityListComposite_SearchButton;
+	public static String EntityListComposite_SearchMenu;
+	public static String EntityListComposite_SearchTooltip;
 	public static String EntityListShell_AllEntitiesLabel;
 	public static String EntityListShell_NewEntityLabel;
 	public static String EntityRelationshipDetailsShell_EntityLabel;
@@ -428,6 +432,8 @@ public class Messages extends NLS {
 	public static String EntitySearchView_SaveSearchButton;
 	public static String EntitySearchView_SearchLabel;
 	public static String EntitySearchView_SerachButton;
+	public static String EntitySearchView_SpatialSearchLabel;
+	public static String EntitySearchView_SpatialSearchTooltip;
 	public static String EntitySearchView_unauthorized;
 	public static String EntitySummaryContentProvider_AttributeTreeNode;
 	public static String EntitySummaryContentProvider_EntityTypesTreeNode;
@@ -1376,6 +1382,17 @@ public class Messages extends NLS {
 	public static String SelectPointMapDialog_Title;
 	public static String ShowAttributeListDialogHandler_ConfirmMsg;
 	public static String ShowAttributeListDialogHandler_ConfirmTitle;
+	public static String SpatialSearchPanel_CustomLabel;
+	public static String SpatialSearchPanel_DistanceLabel;
+	public static String SpatialSearchPanel_DistanceTooltip;
+	public static String SpatialSearchPanel_EditLabel;
+	public static String SpatialSearchPanel_FiltersLabel;
+	public static String SpatialSearchPanel_InvalidDistance;
+	public static String SpatialSearchPanel_InvalidDistance1;
+	public static String SpatialSearchPanel_loadingtypesjobname;
+	public static String SpatialSearchPanel_LocationsLabel;
+	public static String SpatialSearchPanel_LocationsRequired;
+	public static String SpatialSearchPanel_SearchLabel;
 	public static String SqlGenerator_OpNotSupported;
 	public static String SummaryDefinitionPanel_CleanFiltertooltip;
 	public static String SummaryDefinitionPanel_ClearPanelTooltip;
