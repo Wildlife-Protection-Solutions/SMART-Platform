@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.ui.views.QueryProxy;
@@ -57,6 +58,8 @@ public class IntelQueryLabelProvider extends LabelProvider {
 			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_RECORDOBS);
 		}else if (queryType.equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) {
 			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYSUM);
+		}else if (queryType.equalsIgnoreCase(IntelEntityRecordQuery.KEY)) {
+			//	TODO:
 		}
 		return null;
 	}

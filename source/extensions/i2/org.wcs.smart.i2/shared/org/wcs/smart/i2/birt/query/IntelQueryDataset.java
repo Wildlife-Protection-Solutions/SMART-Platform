@@ -37,6 +37,7 @@ import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.util.UuidUtils;
@@ -125,6 +126,8 @@ public class IntelQueryDataset implements IQuery {
 				r_metadata = new IntelQueryDatasetResultSetMetadata(this);
 			}else if (queryType.equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) {
 				r_metadata = new IntelEntitySummaryDatasetResultSetMetadata(this);
+			}else if (queryType.equalsIgnoreCase(IntelEntityRecordQuery.KEY)) {
+				//TODO:
 			}
 		}
 		return r_metadata;
@@ -136,6 +139,9 @@ public class IntelQueryDataset implements IQuery {
 			return new IntelQueryDatasetResultSet(this, parameters);
 		}else if (queryType.equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) {
 			return new IntelEntitySummaryDatasetResultSet(this, parameters);
+		}else if (queryType.equalsIgnoreCase(IntelEntityRecordQuery.KEY)) {
+//			return new IntelEntitySummaryDatasetResultSet(this, parameters);
+			//TODO:
 		}
 		return null;
 	}
@@ -293,6 +299,8 @@ public class IntelQueryDataset implements IQuery {
 				pMetadata = new IntelQueryDatasetParameterMetadata();
 			}else if (queryType.equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) {
 				pMetadata = new IntelEntitySummaryDatasetParameterMetadata();
+			}else if (queryType.equalsIgnoreCase(IntelEntityRecordQuery.KEY)) {
+				//TODO:
 			}
 		}
 		return pMetadata;

@@ -19,28 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.query.engine;
+package org.wcs.smart.i2.query.observation.filter;
 
-import org.wcs.smart.i2.IIntelQueryEngine;
-import org.wcs.smart.i2.IQueryEngineFactory;
-import org.wcs.smart.i2.model.IntelEntityRecordQuery;
-import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+
 
 /**
- * Desktop query engine factory for intelligence queries
+ * Filter for a specific entity type 
  * @author Emily
  *
  */
-public class QueryEngineFactory implements IQueryEngineFactory {
+public class RecordSourceFilter implements IQueryFilter, IColumnIdentifierProvider {
 
-	@Override
-	public IIntelQueryEngine findQueryEngine(String queryType) {
-		if (queryType.equals(IntelEntitySummaryQuery.KEY)) return new IntelEntitySummaryQueryEngine();
-		if (queryType.equals(IntelRecordObservationQuery.KEY)) return new IntelObservationQueryEngine();
-		if (queryType.equals(IntelEntityRecordQuery.KEY)) return new IntelEntityRecordQueryEngine();
-
-		return null;
+	public static RecordSourceFilter create(String key){
+		return new RecordSourceFilter(key.split(":")[1]); //$NON-NLS-1$
+	}
+	
+	private String typeKey;
+	
+	public RecordSourceFilter(String typeKey){
+		this.typeKey = typeKey;
+	}
+	
+	public String getTypeKey(){
+		return this.typeKey;
 	}
 
+	@Override
+	public String getUniqueColumnIdentifier(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("rs_"); //$NON-NLS-1$
+		sb.append(typeKey);
+		return sb.toString();
+	}
 }

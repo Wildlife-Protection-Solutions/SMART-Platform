@@ -152,6 +152,16 @@ TOKEN :
  | < ENTITY_TYPE_KEY : "entitytype:" <DM_KEY> >
  | < ENTITY_KEY : "entity:" (< DIGIT> | < UUIDLETTER >)+>
 
+| < RECORDSOURCE_KEY : "recordsource:" <DM_KEY> >
+
+ | < RATTRIBUTE_KEY_NUMERIC : "r_attribute:n:"< DM_KEY >":"(< DM_KEY >)?>
+ | < RATTRIBUTE_KEY_STRING : "r_attribute:s:"< DM_KEY >":"(< DM_KEY >)?>
+ | < RATTRIBUTE_KEY_BOOLEAN : "r_attribute:b:"< DM_KEY >":"(< DM_KEY >)?>
+ | < RATTRIBUTE_KEY_DATE: "r_attribute:d:"< DM_KEY >":"(< DM_KEY >)?>
+ | < RATTRIBUTE_KEY_LIST: "r_attribute:l:"< DM_KEY >":"(< DM_KEY >)?>
+ | < RATTRIBUTE_KEY_EMPLOYEE: "r_attribute:e:"< DM_KEY >":"(< DM_KEY >)?>
+ | < RATTRIBUTE_KEY_ENTITY: "r_attribute:entity:"< DM_KEY >":"(< DM_KEY >)?>
+ 
  | < QUERY_SPLITTER : "|" >
  | < DATE_GB_KEY : ( "day" | "month" | "year" ) >
  | < ENTITYTYPE_GB: "entitytype_gb:" (< DM_KEY > ":")*>
@@ -355,6 +365,8 @@ IQueryFilter BooleanPart() :
 		|	 
 		filter = EntityTypeFilter()
 		|	 
+		filter = RecourdSourceFilter()
+		|	 
 		filter = EntityFilter()
 		|
 		(< OPENPAREN >filter = ExpressionPart()< CLOSEPAREN >)
@@ -532,7 +544,23 @@ IQueryFilter EntityAttributeFilter():
 	|
 	/* tree or list */
 	filter = EntityKeyExpression()
+	|
 	
+	/* record attributes */
+	/* String comparison */
+	filter = RecordStringExpression()
+	|
+	/* Numeric comparison */
+	filter = RecordNumberExpression()
+	| 
+	/* boolean */
+	filter = RecordBooleanExpression()
+	| 
+	/* date */
+	filter = RecordDateExpression()
+	|
+	/* tree or list */
+	filter = RecordKeyExpression()
 	)
 	{
 		return filter;
@@ -644,11 +672,145 @@ IQueryFilter EntityBooleanExpression():
 	<EATTRIBUTE_KEY_BOOLEAN > {return IntelAttributeFilter.create(token.image);}	
 }
 
+
+
+
+
+
+
+IQueryFilter RecordDateExpression():
+{
+  String key = null;
+  Date date1 = null;
+  Date date2 = null;
+  Operator op = null;
+}
+{
+	(
+		< RATTRIBUTE_KEY_DATE > {key = token.image;}
+		op = DateOp()
+		< DATE_STRING >  {
+		  String datestring = token.image;
+		  try
+		  {
+		    date1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+		  }catch (Exception ex)
+		  {
+		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
+		  }
+		}
+		< K_AND >
+		< DATE_STRING > {
+		  datestring = token.image;
+		  try
+		  {
+		    date2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+		  }catch (Exception ex)
+		  {
+		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
+		  }
+		}
+	)
+	{
+  		return RecordAttributeFilter.create(key, op, date1, date2);
+	}	
+}
+
+
+IQueryFilter RecordStringExpression():
+{
+  Operator op = null;
+  String key = null;
+  String value = null;
+}
+{
+	( 
+		<RATTRIBUTE_KEY_STRING> {key = token.image;}
+		op = StringOp()
+		< QUOTED_STRING > {value = token.image;}
+	)
+	{
+  		return RecordAttributeFilter.create(key, op, value);
+	}
+}
+
+IQueryFilter RecordNumberExpression():
+{
+  Operator op = null;
+  String key = null;
+  Double value = null;
+}
+{
+	( 
+		<RATTRIBUTE_KEY_NUMERIC> {key = token.image;}
+		op = NumberOp()
+		<NUMBER> {value = Double.parseDouble(token.image);}
+	)
+	{
+  		return RecordAttributeFilter.create(key, op, value);
+	}
+}
+
+IQueryFilter RecordKeyExpression():
+{
+  String op = null;
+  String key = null;
+  String value = null;
+}
+{
+	(
+	  	( 
+			<RATTRIBUTE_KEY_LIST> {key = token.image;}
+			<  EQUAL > {op = token.image;}
+			< DM_KEY >  {value = token.image;}
+		)
+		|
+		( 
+			<RATTRIBUTE_KEY_EMPLOYEE> {key = token.image;}
+			<  EQUAL > {op = token.image;}
+			(< UUID > | < DM_KEY >)  {value = token.image;}
+		)
+				|
+		( 
+			<RATTRIBUTE_KEY_ENTITY> {key = token.image;}
+			<  EQUAL > {op = token.image;}
+			(< UUID > | < DM_KEY >)  {value = token.image;}
+		)
+	)
+	{
+  		return RecordAttributeFilter.create(key, value);
+	}
+}
+
+IQueryFilter RecordBooleanExpression():
+{
+}
+{
+	
+	<RATTRIBUTE_KEY_BOOLEAN > {return RecordAttributeFilter.create(token.image);}	
+}
+
+
+
+
+
+
+
+
+
+
 IQueryFilter EntityTypeFilter():
 {
 }
 {
   < ENTITY_TYPE_KEY >{return EntityTypeFilter.create(token.image);}  
+}
+
+IQueryFilter RecourdSourceFilter():
+{
+}
+{
+  < RECORDSOURCE_KEY >{return RecordSourceFilter.create(token.image);}  
 }
 
 IQueryFilter EntityFilter():

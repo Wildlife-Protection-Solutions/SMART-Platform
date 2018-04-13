@@ -377,7 +377,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 				if (item instanceof IntelEntityType) {
 					return (new EntityTreeFilterItem((IntelEntityType)item)).asDropItem();
 				}else if (item instanceof IntelAttribute) {
-					return (new AttributeTreeFilterItem( ((IntelAttribute)item))).asDropItem();
+					return (new AttributeTreeFilterItem( ((IntelAttribute)item), true, false)).asDropItem();
 				}else if (item instanceof IntelEntityTypeAttribute) {
 					return (new AttributeTreeFilterItem( ((IntelEntityTypeAttribute)item))).asDropItem();
 				}

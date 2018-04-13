@@ -44,6 +44,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelRecordSource;
 
 /**
  * Multiple conservation area item provider for cross CCAA
@@ -148,6 +149,25 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 				.setParameter("atype",  areaType) //$NON-NLS-1$
 				.list();
 		return allAreas;
+	}
+	
+	@Override
+	public IntelRecordSource getRecordSource(String recordsourceKey, Session session) {
+		List<IntelRecordSource> allAttributes = session.createQuery("FROM IntelRecordSource WHERE keyId = :attribute and conservationArea in (:cas)", IntelRecordSource.class) //$NON-NLS-1$
+				.setParameterList("cas",  getConservationAreas()) //$NON-NLS-1$
+				.setParameter("attribute",  recordsourceKey) //$NON-NLS-1$
+				.list();
+		
+		for (IntelRecordSource type : allAttributes) {
+			if (type.getConservationArea().equals(getMainConservationArea())) {
+				IntelRecordSource a = new IntelRecordSource();
+				a.setKeyId(type.getKeyId());
+				a.setName(type.getName());
+				a.setIcon(type.getIcon());
+				return a;
+			}
+		}
+		return null;
 	}
 	
 

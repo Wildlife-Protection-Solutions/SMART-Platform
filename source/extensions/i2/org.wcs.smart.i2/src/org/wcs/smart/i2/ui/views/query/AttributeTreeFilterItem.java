@@ -29,14 +29,20 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
@@ -77,21 +83,70 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 	 * Create a new attribute filter for an attribute across all entity types
 	 * @param attribute
 	 */
-	public AttributeTreeFilterItem(IntelAttribute attribute) {
+	public AttributeTreeFilterItem(IntelAttribute attribute, boolean isEntity, boolean isRecord) {
 		super(attribute.getName());
 		type = attribute.getType();
 		attributeKey = attribute.getKeyId();
-		dropItemName = IntelQueryColumnProvider.generateName(attribute, null);
-		queryKey = "e_attribute:" + attribute.getType().key + ":" + attribute.getKeyId() + ":" ; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		dropItemName = IntelQueryColumnProvider.generateName(attribute, (IntelEntityType)null);
+		if (isEntity) {
+			queryKey = "e_attribute:" + attribute.getType().key + ":" + attribute.getKeyId() + ":" ; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}else if (isRecord) {
+			queryKey = "r_attribute:" + attribute.getType().key + ":" + attribute.getKeyId() + ":" ; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
 	}
 
+	public AttributeTreeFilterItem(IntelRecordSourceAttribute attribute) {
+		super(attribute.getName() != null ? attribute.getName() : (attribute.getAttribute() != null ? attribute.getAttribute().getName() : attribute.getEntityType().getName()));
+		dropItemName = IntelQueryColumnProvider.generateName(attribute,  attribute.getSource());
+		if (attribute.getAttribute() != null) {
+			type = attribute.getAttribute().getType();
+			attributeKey = attribute.getAttribute().getKeyId();
+			queryKey = "r_attribute:" + attribute.getAttribute().getType().key + ":" + attribute.getAttribute().getKeyId() + ":" + attribute.getSource().getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$	
+		}else {
+			type = null;
+			attributeKey = attribute.getEntityType().getKeyId();
+			queryKey = "r_attribute:entity:" + attribute.getEntityType().getKeyId() + ":" + attribute.getSource().getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ 
+		}
+		
+	}
+	
 	public IntelAttribute.AttributeType getType(){
 		return this.type;
 	}
 	
 	@Override
 	public DropItem[] asDropItem() {
-		
+		if (type == null) {
+			//entity type attribute
+			final List<String> labels = new ArrayList<String>();
+			final List<String> keys = new ArrayList<String>();
+			labels.add(DropItemFactory.ANY_LABEL);
+			keys.add(IQueryFilter.ANY_OPTION_KEY);
+			Job j = new Job("creating attribute drop item"){ //$NON-NLS-1$
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try(Session s = HibernateManager.openSession()){
+						Query<IntelEntity> query = s.createQuery("FROM IntelEntity WHERE conservationArea = :ca AND entityType.keyId = :keyId", IntelEntity.class);
+						query.setParameter("ca",  SmartDB.getCurrentConservationArea());
+						query.setParameter("keyId",  attributeKey);
+						for (IntelEntity e : query.list()) {
+							labels.add(e.getIdAttributeAsText());
+							keys.add(UuidUtils.uuidToString( e.getUuid() ));
+						}
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			j.schedule();
+			try {
+				j.join();
+			} catch (InterruptedException e) {
+				Intelligence2PlugIn.displayLog(Messages.AttributeTreeFilterItem_ErrorMsg, e);
+			}
+			
+			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]))};
+		}
 		switch(type){
 		case BOOLEAN:
 			return new DropItem[]{new TextDropItem(dropItemName, queryKey)};

@@ -159,10 +159,21 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			"ALTER TABLE smart.i_entity_summary_query ADD CONSTRAINT ientitysummquery_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 			"ALTER TABLE smart.i_entity_summary_query ADD CONSTRAINT ientitysummquery_createdby_fk FOREIGN KEY (created_by) REFERENCES smart.employee (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 			"ALTER TABLE smart.i_entity_summary_query ADD CONSTRAINT ientitysummquery_modifiedby_fk FOREIGN KEY (last_modified_by) REFERENCES smart.employee (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			
+			//entity (record) queries
+			"CREATE TABLE smart.i_entity_record_query(uuid char(16) for bit data NOT NULL,ca_uuid char(16) for bit data NOT NULL,query_string long varchar,date_created timestamp NOT NULL,last_modified_date timestamp,created_by char(16) for bit data NOT NULL,last_modified_by char(16) for bit data,PRIMARY KEY (uuid))", //$NON-NLS-1$
+			"ALTER TABLE smart.i_entity_record_query ADD CONSTRAINT ientityrecordquery_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.i_entity_record_query ADD CONSTRAINT ientityrecordquery_createdby_fk FOREIGN KEY (created_by) REFERENCES smart.employee (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.i_entity_record_query ADD CONSTRAINT ientityrecordquery_modifiedby_fk FOREIGN KEY (last_modified_by) REFERENCES smart.employee (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			
+			
+			//updates for working set queries
 			"ALTER TABLE smart.i_working_set_query DROP CONSTRAINT iworkingsetquery_query_fk", //$NON-NLS-1$
 			"ALTER TABLE smart.I_WORKING_SET_QUERY add column query_type varchar(32)", //$NON-NLS-1$
 			"UPDATE smart.i_working_set_query set query_type = '" +IntelRecordObservationQuery.KEY + "'",  //$NON-NLS-1$//$NON-NLS-2$
 			"ALTER TABLE smart.i_working_set_query alter column query_type set not null", //$NON-NLS-1$
+			
+			
 			
 			//index on record title
 			"create index i_record_titel on smart.i_record (title)" //$NON-NLS-1$

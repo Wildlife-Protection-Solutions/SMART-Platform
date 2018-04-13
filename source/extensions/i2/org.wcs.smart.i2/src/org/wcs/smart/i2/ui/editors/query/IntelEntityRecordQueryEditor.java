@@ -42,10 +42,11 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -70,11 +71,12 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
+import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.RunQueryJob;
-import org.wcs.smart.i2.query.SummaryQueryResult;
-import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
@@ -90,9 +92,9 @@ import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
  * @author Emily
  *
  */
-public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryEditor{
+public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEditor{
 
-	public static final String ID = "org.wcs.smart.i2.editor.query.entitysummary"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.i2.editor.query.entityrecord"; //$NON-NLS-1$
 
 	private boolean isDirty = false;
 	
@@ -101,20 +103,20 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 	private IEventBroker eventBroker;
 	
 	//query
-	private IntelEntitySummaryQuery query;
+	private IntelEntityRecordQuery query;
 	
 	//header & date part
 	private IntelQueryNameLabel header;
-	
+		
 	//filter panel
-	private SummaryDefinitionPanel summaryPanel;
-	private ToolItem runItem;
+	private FilterDefinitionPanel panel;
+	private ToolItem[] runItem = new ToolItem[1];
 	private ToolItem saveItem;
 	private ToolItem wsetItem;
 
 	//results area
 	private Composite stackPanel;
-	private Composite resultsArea;
+	private QueryLazyResultsTable resultsTable;
 	private ProgressPanel progressPanel;
 	private ErrorPanel errorPanel;
 	
@@ -122,9 +124,6 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 	private RunQueryJob runJob;
 	private List<EventHandler> eventHandles;
 	
-	private FormToolkit toolkit;
-	
-	private SummaryQueryResult cachedResults;
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -163,7 +162,6 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 	@Override
 	public void dispose(){
 		super.dispose();
-		toolkit.dispose();
 		//remove all event subscriptions
 		if (eventHandles != null) eventHandles.forEach((h)->eventBroker.unsubscribe(h));
 	}
@@ -175,7 +173,6 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 			MessageDialog.openError(getSite().getShell(), Messages.IntelQueryEditor_ErrorDialogTitle, Messages.IntelQueryEditor_InvalidQuery);
 			return;
 		}
-		query.setQueryString(queryString);
 		
 		InputDialog newName = new InputDialog(getSite().getShell(), Messages.IntelQueryEditor_SaveAsTitle, Messages.IntelQueryEditor_SaveAsMessage, MessageFormat.format(Messages.IntelQueryEditor_DefaultQueryName, query.getName()), new IInputValidator() {
 			@Override
@@ -188,9 +185,9 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 			return;
 		}
 		
-		IntelEntitySummaryQuery clone = new IntelEntitySummaryQuery();
+		IntelEntityRecordQuery clone = new IntelEntityRecordQuery();
 		clone.setConservationArea(SmartDB.getCurrentConservationArea());
-		clone.setQueryString(query.getQueryString());
+		clone.setQueryString(queryString);
 		clone.setName(newName.getValue());
 		clone.updateName(SmartDB.getCurrentLanguage(), clone.getName());
 		clone.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), clone.getName());
@@ -227,7 +224,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 	public void setDirty(boolean isDirty){
 		this.isDirty = isDirty;
 		if (saveItem != null) saveItem.setEnabled(isDirty);
-		summaryPanel.setQueryState(isDirty);
+		panel.setQueryState(isDirty);
 		firePropertyChange(IEditorPart.PROP_DIRTY);
 	}
 	
@@ -242,7 +239,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 	}
 	
 	private void closeEditor(){
-		getSite().getPage().closeEditor(IntelEntitySummaryQueryEditor.this, false);
+		getSite().getPage().closeEditor(IntelEntityRecordQueryEditor.this, false);
 	}
 
 	@Override
@@ -260,7 +257,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 			@Override
 			public void handleEvent(Event event) {
 				Object data = event.getProperty(IEventBroker.DATA);
-				if (data instanceof IntelEntitySummaryQuery){
+				if (data instanceof IntelEntityRecordQuery){
 					if (data.equals(query)){
 						closeEditor();
 						return;
@@ -291,22 +288,22 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 		((GridLayout)parent.getLayout()).marginWidth = 0;
 		((GridLayout)parent.getLayout()).marginHeight = 0;
 		
-		toolkit = new FormToolkit(parent.getDisplay());
+		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 		
 		Form pageForm = toolkit.createForm(parent);
 		pageForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		Composite main = pageForm.getBody();
 		main.setLayout(new GridLayout());
 		
-		Composite headerComp = toolkit.createComposite(main);
+		Composite headerComp = toolkit.createComposite(main, SWT.NONE);
 		headerComp.setLayout(new GridLayout(2, false));
-		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridLayout)headerComp.getLayout()).marginWidth = 0;
 		((GridLayout)headerComp.getLayout()).marginHeight = 0;
 		((GridData)headerComp.getLayoutData()).heightHint = 24;
 		
 		header = new IntelQueryNameLabel(headerComp, toolkit, pageForm.getFont(), pageForm.getForeground());
-		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		header.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		header.addListener(SWT.Selection, e-> {
 			if (query == null){
 				e.doit = false;
@@ -318,12 +315,13 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 		});
 		
 		ToolBar headerToolbar = new ToolBar(headerComp, SWT.FLAT);
-		headerToolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		headerToolbar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+//		((GridData)(headerToolbar.getLayoutData())).heightHint = 12;
 
 		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
 			saveItem = new ToolItem(headerToolbar, SWT.PUSH);
 			saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
-			saveItem.addListener(SWT.Selection, (event)->IntelEntitySummaryQueryEditor.this.getSite().getPage().saveEditor(IntelEntitySummaryQueryEditor.this, false));
+			saveItem.addListener(SWT.Selection, (event)->IntelEntityRecordQueryEditor.this.getSite().getPage().saveEditor(IntelEntityRecordQueryEditor.this, false));
 			saveItem.setToolTipText(Messages.IntelQueryEditor_saveTooltip);
 			
 			ToolItem saveAsItem = new ToolItem(headerToolbar, SWT.PUSH);
@@ -343,28 +341,40 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 		exportItem.addListener(SWT.Selection, (event)->exportQuery());
 		exportItem.setToolTipText(Messages.IntelQueryEditor_ExportTooltip);
 		
-		runItem = new ToolItem(headerToolbar, SWT.PUSH);
-		runItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
-		runItem.addListener(SWT.Selection, (event)->runQuery());
-		runItem.setToolTipText(Messages.IntelQueryEditor_RunTooltip);
-				
+		runItem[0] = new ToolItem(headerToolbar, SWT.PUSH);
+		runItem[0].setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		runItem[0].addListener(SWT.Selection, (event)->runQuery());
+		runItem[0].setToolTipText(Messages.IntelQueryEditor_RunTooltip);
+		
 		SashForm core = new SashForm(main, SWT.VERTICAL);
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		SmartSection resultsSection = new SmartSection(core, toolkit, "Results");
 		
-		Composite c = toolkit.createComposite(core);
+		Composite c = toolkit.createComposite(resultsSection, SWT.NONE);
 		c.setLayout(new GridLayout());
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		createResultSection(c, toolkit);
 		
-		SmartSection definitionSection = new SmartSection(core, toolkit, Messages.IntelQueryEditor_DefinitionSelctionLabel);
-		((GridLayout)definitionSection.getLayout()).verticalSpacing = 0;
+		SmartSection definitionSection = new SmartSection(core, toolkit, "Definition");
+		c = toolkit.createComposite(definitionSection);
+		c.setLayout(new GridLayout());
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		summaryPanel = new SummaryDefinitionPanel(this);
-		Composite temp = summaryPanel.createComposite(definitionSection);
-		temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		summaryPanel.addQueryChangedListener(()->{
+		panel = new FilterDefinitionPanel(){
+			public void runQuery(){
+				IntelEntityRecordQueryEditor.this.runQuery();
+			}
+			public void saveQuery(){
+				IntelEntityRecordQueryEditor.this.getSite().getPage().saveEditor(IntelEntityRecordQueryEditor.this, false);
+			}
+		};
+		Composite definitionPanel = panel.createComposite(c);
+		definitionPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	
+		panel.addQueryChangedListener(()->{
 			setDirty(true);
 			validateQuery();
 		});
@@ -388,57 +398,58 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 		});
 		
 		progressPanel = new ProgressPanel(stackPanel);
-		resultsArea = toolkit.createComposite(stackPanel, SWT.NONE);
-		resultsArea.setLayout(new GridLayout());
-		((GridLayout)resultsArea.getLayout()).marginWidth = 0;
-		((GridLayout)resultsArea.getLayout()).marginHeight = 0;
+		resultsTable = new QueryLazyResultsTable(stackPanel);
 		errorPanel = new ErrorPanel(stackPanel);
 		((StackLayout)stackPanel.getLayout()).topControl = runQueryComp;		
 	}
 	
 	private void exportQuery(){
-		SummaryQueryResult results = cachedResults;
-		if (results == null){
+		if (resultsTable.getCurrentResults() == null){
 			MessageDialog.openInformation(getSite().getShell(), Messages.IntelQueryEditor_ExportTitle, Messages.IntelQueryEditor_ExportMsg);
 			return;
 		}
-		ExportQueryWizard wizard = new ExportQueryWizard(query, results);
+		
+		ExportQueryWizard wizard = new ExportQueryWizard(query, resultsTable.getCurrentResults());
 		WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
 		wd.open();
 	}
 	
-	public void runQuery(){
-		cachedResults = null;
-		for (Control c : resultsArea.getChildren()) c.dispose();
+	private void runQuery(){
+		
+		resultsTable.setInput(null);
 		((StackLayout)stackPanel.getLayout()).topControl = progressPanel;
 		stackPanel.layout(true);
-		String queryString = summaryPanel.getQueryPart();
+		
+		String queryString = panel.getQueryPart();
 		query.setQueryString(queryString);
+		//TODO:
+		resultsTable.setQuery(query);
+		
+		runJob.setQuery(query);
 		runJob.schedule();
 	}
 	
 	
-	public String validateQuery(){
+	private String validateQuery(){
 		if (isInitializing) return null; //do not valid while initializing
-		String queryString = summaryPanel.getQueryPart();
+		String queryString = panel.getQueryPart();
 		try{
-			IntelEntitySummaryQuery.parseQuery(queryString);
-			summaryPanel.setErrorMessage(null, null);
-			runItem.setEnabled(true);
+			IntelEntityRecordQuery.parseQuery(queryString);
+			panel.setErrorMessage(null, null);
+			for(ToolItem i : runItem) i.setEnabled(true);
 			
 			return queryString;
 		}catch (Exception ex){
-			runItem.setEnabled(false);
-			summaryPanel.setErrorMessage(Messages.IntelQueryEditor_InvalidQueryError, ex);
+			for(ToolItem i : runItem) i.setEnabled(false);
+			panel.setErrorMessage(Messages.IntelQueryEditor_InvalidQueryError, ex);
 			return null;
 		}
 	}
 	
-	
 	@Override
 	public void addDropItems(DropItem[] item){
 		for (DropItem i : item){
-			summaryPanel.addItem(i);
+			panel.addItem(i);
 		}
 	}
 
@@ -446,7 +457,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 	public void setFocus() {
 		header.setFocus();
 	}
-	
+		
 	private void initUiField(){
 		setPartName(query.getName());
 		header.setText(query.getName());
@@ -454,7 +465,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 	}
 	
 	@Override
-	public IntelEntitySummaryQuery getQuery(){
+	public IntelEntityRecordQuery getQuery(){
 		return this.query;
 	}
 	
@@ -465,14 +476,12 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 			query = null;
 			UUID uuid = ((QueryEditorInput)getEditorInput()).getUuid();
 			
-			final List<DropItem> filterDropItems = new ArrayList<>();
-			final List<DropItem> rowGbDropItems = new ArrayList<>();
-			final List<DropItem> colGbDropItems = new ArrayList<>();
-			final List<DropItem> valueGbDropItems = new ArrayList<>();
+			List<DropItem> generatedDropItems = new ArrayList<>();
+			IQueryFilter.FilterType filterType = IQueryFilter.FilterType.OBSERVATION;
 			
 			if (((QueryEditorInput)getEditorInput()).isNew()){
 				uuid = null;
-				IntelEntitySummaryQuery temp = new IntelEntitySummaryQuery();
+				IntelEntityRecordQuery temp = new IntelEntityRecordQuery();
 				temp.setName(Messages.IntelQueryEditor_defaultQueryName);
 				temp.updateName(SmartDB.getCurrentLanguage(), temp.getName());
 				temp.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), temp.getName());
@@ -482,7 +491,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 			}else{
 				
 				try(Session s = HibernateManager.openSession()){
-					IntelEntitySummaryQuery temp = (IntelEntitySummaryQuery)s.get(IntelEntitySummaryQuery.class, uuid);
+					IntelEntityRecordQuery temp = (IntelEntityRecordQuery)s.get(IntelEntityRecordQuery.class, uuid);
 					if (temp == null){
 						Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_QueryNotfoundError, null);
 						closeEditor();
@@ -490,32 +499,32 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 					}
 					temp.getNames().size();
 					query = temp;
-					
+
 					try{
-						SumQueryDefinition parsedQuery = IntelEntitySummaryQuery.parseQuery(query.getQueryString());
-						
-						filterDropItems.addAll(  DropItemFactory.generateDropItems(parsedQuery.getFilter(), s) );
-						rowGbDropItems.addAll( DropItemFactory.generateDropItems(parsedQuery.getRowGroupByPart(), s));
-						colGbDropItems.addAll( DropItemFactory.generateDropItems(parsedQuery.getColumnGroupByPart(), s));
-						valueGbDropItems.addAll( DropItemFactory.generateDropItems(parsedQuery.getValuePart(), s));
+						ParsedObservationQuery parsedQuery = IntelEntityRecordQuery.parseQuery(query.getQueryString());
+						generatedDropItems = DropItemFactory.generateDropItems(parsedQuery.getFilter(), s);
+						filterType = parsedQuery.getFilterType();
 					}catch(Exception ex){
 						DropItem di = new ErrorDropItem(Messages.IntelQueryEditor_QueryParseError + ex.getMessage());
-						valueGbDropItems.add(di);
+						generatedDropItems.add(di);
 					}
 					
 				}catch (Exception ex){
 					Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_LoadError + ex.getMessage(), ex);
-					getSite().getPage().closeEditor(IntelEntitySummaryQueryEditor.this, false);
+					getSite().getPage().closeEditor(IntelEntityRecordQueryEditor.this, false);
 					return Status.OK_STATUS;
 				}
 			}
+			final List<DropItem> fGeneratedDropItems = generatedDropItems;
+			final IQueryFilter.FilterType fType = filterType;
 			
 			//configure run query job
 			runJob = new RunQueryJob(query) {
 				@Override
 				protected void onError(Exception ex) {
-					cachedResults = null;
 					Display.getDefault().syncExec(()->{
+						if (stackPanel.isDisposed()) return;
+						resultsTable.setInput(null);
 						((StackLayout)stackPanel.getLayout()).topControl = errorPanel;
 						errorPanel.setError(Messages.IntelQueryEditor_RunError + ex.getMessage());
 						stackPanel.layout(true);
@@ -524,20 +533,19 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 				
 				@Override
 				protected void onComplete(IQueryResult results) {
-					cachedResults = (SummaryQueryResult) results;
 					Display.getDefault().syncExec(()->{
-						SummaryResultTable summaryTable = new SummaryResultTable(resultsArea, (SummaryQueryResult) results, toolkit);
-						summaryTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-						((StackLayout)stackPanel.getLayout()).topControl = resultsArea;
+						if (stackPanel.isDisposed()) return;
+						resultsTable.setInput((IPagedQueryResultSet) results);
+						((StackLayout)stackPanel.getLayout()).topControl = resultsTable;
 						stackPanel.layout(true);
-						resultsArea.layout(true);
 					});
 				}
 				
 				@Override
 				protected void onCancel(){
-					cachedResults = null;
 					Display.getDefault().syncExec(()->{
+						if (stackPanel.isDisposed()) return;
+						resultsTable.setInput(null);
 						((StackLayout)stackPanel.getLayout()).topControl = errorPanel;
 						errorPanel.setError(Messages.IntelQueryEditor_CancelledError);
 						stackPanel.layout(true);
@@ -550,12 +558,8 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 				isInitializing = true;
 				try{
 					initUiField();
-					
-					summaryPanel.initGroupByItems(rowGbDropItems, true);
-					summaryPanel.initGroupByItems(colGbDropItems, false);
-					summaryPanel.initValueItems(valueGbDropItems);
-					summaryPanel.initFilterItems(filterDropItems);
-					
+					panel.setFilterType(fType);
+					panel.addItems(fGeneratedDropItems);
 				}finally{
 					isInitializing = false;
 				}
@@ -565,5 +569,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 			});
 			return Status.OK_STATUS;
 		}
+		
 	};
+
 }

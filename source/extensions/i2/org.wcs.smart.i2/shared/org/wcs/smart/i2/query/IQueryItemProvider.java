@@ -37,6 +37,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelRecordSource;
 /**
  * Query item provider for providing items for query module 
  * 
@@ -45,6 +46,14 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
  */
 public interface IQueryItemProvider {
 
+	/**
+	 * Get the record source given entity source key
+	 * @param recordsourceKey
+	 * @param session
+	 * @return
+	 */
+	public IntelRecordSource getRecordSource(String recordsourceKey, Session session);
+	
 	/**
 	 * Get the entity type with the given entity type key
 	 * @param entityTypeKey

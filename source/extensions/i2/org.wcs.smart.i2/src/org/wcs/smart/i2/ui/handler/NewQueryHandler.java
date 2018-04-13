@@ -31,6 +31,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
@@ -62,7 +63,8 @@ public class NewQueryHandler {
 			return;
 		}
 		typeKey = typeKey.toUpperCase();
-		if (!typeKey.equals(IntelRecordObservationQuery.KEY) && !typeKey.equals(IntelEntitySummaryQuery.KEY)) {
+		if (!typeKey.equals(IntelRecordObservationQuery.KEY) && !typeKey.equals(IntelEntitySummaryQuery.KEY)
+				&& !typeKey.equals(IntelEntityRecordQuery.KEY)) {
 			MessageDialog.openError(context.get(Shell.class), Messages.NewQueryHandler_ErrorTitle, MessageFormat.format(Messages.NewQueryHandler_InvalidQueryType, typeKey));
 			return;
 		}

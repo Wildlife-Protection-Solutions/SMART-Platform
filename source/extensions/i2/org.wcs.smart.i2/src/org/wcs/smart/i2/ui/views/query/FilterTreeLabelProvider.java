@@ -58,7 +58,12 @@ public class FilterTreeLabelProvider extends LabelProvider implements IColorProv
 		Image img = toDispose.get(element);
 		if (img != null) return img;
 		if (element instanceof AttributeTreeFilterItem){
-			return attributeInstance.getImage((Object)((AttributeTreeFilterItem) element).getType());
+			if ( ((AttributeTreeFilterItem) element).getType() != null) {
+				return attributeInstance.getImage((Object)((AttributeTreeFilterItem) element).getType());	
+			}else {
+				return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY);
+			}
+			
 		}
 		if (element instanceof EntityTypeTreeFilterItem){
 			if (((EntityTypeTreeFilterItem) element).getImage() != null){

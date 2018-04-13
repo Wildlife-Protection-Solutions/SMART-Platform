@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 
@@ -42,6 +43,8 @@ public enum QueryManager {
 			return session.get(IntelRecordObservationQuery.class, uuid);
 		}else if (typeKey.equals(IntelEntitySummaryQuery.KEY)) {
 			return session.get(IntelEntitySummaryQuery.class, uuid);
+		}else if (typeKey.equals(IntelEntityRecordQuery.KEY)) {
+			return session.get(IntelEntityRecordQuery.class, uuid);
 		}
 		return null;
 	}
@@ -51,6 +54,8 @@ public enum QueryManager {
 		q = session.get(IntelRecordObservationQuery.class, uuid);
 		if (q != null) return q;
 		q = session.get(IntelEntitySummaryQuery.class, uuid);
+		if (q != null) return q;
+		q = session.get(IntelEntityRecordQuery.class, uuid);
 		return q;
 	}
 }

@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -125,6 +126,7 @@ public class OptionDropItem extends DropItem {
 			initDrag(l);
 		}
 		combo = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		combo.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));	
 		combo.setContentProvider(ArrayContentProvider.getInstance());
 		combo.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
@@ -155,6 +157,11 @@ public class OptionDropItem extends DropItem {
 		
 		combo.setSelection(new StructuredSelection(currentOption));
 		initDrag(combo.getControl());
+		
+		combo.getControl().pack();
+		if (combo.getControl().getSize().x > 300) {
+			((GridData)combo.getControl().getLayoutData()).widthHint = 300;
+		}
 	}
 
 	private class Option{

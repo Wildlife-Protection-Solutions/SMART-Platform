@@ -27,8 +27,10 @@ import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.query.engine.EntityRecordQueryResultItem;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -49,7 +51,10 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 		LOC_DATE("loc:date"), //$NON-NLS-1$
 		LOC_TIME("loc:time"), //$NON-NLS-1$
 		LOC_COMMENT("loc:comment"), //$NON-NLS-1$
-		LOC_GEOMTRY("loc:geom"); //$NON-NLS-1$
+		LOC_GEOMTRY("loc:geom"), //$NON-NLS-1$
+		
+		ENTITY_ID("entity:id"),  //$NON-NLS-1$
+		ENTITY_TYPE("entity:type"); //$NON-NLS-1$
 		
 		public String key;
 		Column(String key){
@@ -71,6 +76,15 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 
 	@Override
 	public Object getValue(IResultItem item) {
+		if (item instanceof EntityRecordQueryResultItem) {
+			if (column == Column.ENTITY_ID) {
+				return ((EntityRecordQueryResultItem)item).getEnityId();
+			}else if (column == Column.ENTITY_TYPE) {
+				return ((EntityRecordQueryResultItem)item).getEnityTypeName();
+			}
+			return null;
+		}
+		
 		if (!(item instanceof  IntelObservationResultItem)) return null;
 		IntelObservationResultItem i = (IntelObservationResultItem) item;
 		switch(column){

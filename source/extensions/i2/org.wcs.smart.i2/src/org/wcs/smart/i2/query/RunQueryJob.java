@@ -36,8 +36,10 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.query.engine.IntelEntityRecordQueryEngine;
 import org.wcs.smart.i2.query.engine.IntelEntitySummaryQueryEngine;
 import org.wcs.smart.i2.query.engine.IntelObservationQueryEngine;
 import org.wcs.smart.i2.ui.editors.query.ProgressPanel;
@@ -114,6 +116,8 @@ public abstract class RunQueryJob extends Job {
 					results = (new IntelObservationQueryEngine()).executeQuery((IntelRecordObservationQuery)query, parameters);
 				}else if (query instanceof IntelEntitySummaryQuery) {
 					results = (new IntelEntitySummaryQueryEngine()).executeQuery((IntelEntitySummaryQuery)query, parameters);
+				}else if (query instanceof IntelEntityRecordQuery) {
+					results = (new IntelEntityRecordQueryEngine()).executeQuery((IntelEntityRecordQuery)query, parameters);
 				}else {
 					return Status.OK_STATUS;
 				}

@@ -48,13 +48,19 @@ import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
+import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.query.Operator;
 
@@ -67,10 +73,12 @@ import org.wcs.smart.i2.query.Operator;
 public class LoadFilterOptions extends Job {
 
 	private FilterTreeContentProvider viewer;
+	private AbstractIntelQuery query;
 	
-	public LoadFilterOptions(FilterTreeContentProvider viewer) {
+	public LoadFilterOptions(FilterTreeContentProvider viewer, AbstractIntelQuery query) {
 		super(Messages.LoadFilterOptions_JobName);
 		this.viewer= viewer;
+		this.query = query;
 	}
 
 
@@ -80,8 +88,17 @@ public class LoadFilterOptions extends Job {
 		try(Session s = HibernateManager.openSession()){
 			roots.add(loadEntity(s));
 			roots.add(loadAttributes(s));
-			roots.add(loadDataModel(s));
-			roots.add(loadAreas(s));
+			if (query.getTypeKey().equals(IntelEntityRecordQuery.KEY)) {
+				roots.add(loadRecords(s));
+				BasicTreeFilterItem opRoot = new BasicTreeFilterItem("Record Observations");
+				opRoot.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DATA_MODEL_ICON));
+				roots.add(opRoot);
+				opRoot.addChild(loadDataModel(s));
+				opRoot.addChild(loadAreas(s));
+			}else {
+				roots.add(loadDataModel(s));
+				roots.add(loadAreas(s));
+			}
 			roots.add(loadOperators());
 		}
 		
@@ -105,7 +122,7 @@ public class LoadFilterOptions extends Job {
 		return opRoot;
 	}
 	
-	private FilterTreeItem loadAreas(Session session){
+	private BasicTreeFilterItem loadAreas(Session session){
 		BasicTreeFilterItem locationFilters = new BasicTreeFilterItem(Messages.LoadFilterOptions_LocationFilterLabel);
 		locationFilters.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_AREA));
 		
@@ -124,7 +141,7 @@ public class LoadFilterOptions extends Job {
 		return locationFilters;
 	}
 	
-	private FilterTreeItem loadDataModel(Session session){
+	private BasicTreeFilterItem loadDataModel(Session session){
 		
 		BasicTreeFilterItem dataModelItem = new BasicTreeFilterItem(Messages.LoadFilterOptions_DataModelFilterLabel);
 		dataModelItem.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DATA_MODEL_ICON));
@@ -159,7 +176,7 @@ public class LoadFilterOptions extends Job {
 		List<IntelAttribute> attributes = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributes(session);
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for (IntelAttribute a : attributes){
-			AttributeTreeFilterItem item = new AttributeTreeFilterItem(a);
+			AttributeTreeFilterItem item = new AttributeTreeFilterItem(a, true, false);
 			attributeRoots.addChild(item);
 		}
 		
@@ -176,7 +193,7 @@ public class LoadFilterOptions extends Job {
 		
 		types.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for(IntelEntityType t : types){
-			BasicTreeFilterItem entityNode = new BasicTreeFilterItem(t.getName());
+			EntityTreeFilterItem entityNode = new EntityTreeFilterItem(t, false);
 			entityTypeRoot.addChild(entityNode);
 			final byte[] icon = t.getIcon();
 			if (icon != null){
@@ -239,6 +256,57 @@ public class LoadFilterOptions extends Job {
 			
 		}
 		return entityTypeRoot;
+		
+		
+	}
+	
+	
+	
+	private FilterTreeItem loadRecords(Session session){
+		BasicTreeFilterItem recordSourceRoot = new BasicTreeFilterItem("Record Sources");
+		recordSourceRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
+
+		List<IntelRecordSource> sources =
+				QueryFactory.buildQuery(session, IntelRecordSource.class, new Object[] {
+						"conservationArea", SmartDB.getCurrentConservationArea()
+				}).list();
+			
+		
+		
+		sources.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+		for(IntelRecordSource t : sources){
+			RecordSourceFilterItem sourceNode = new RecordSourceFilterItem(t);
+			recordSourceRoot.addChild(sourceNode);
+			final byte[] icon = t.getIcon();
+			if (icon != null){
+				sourceNode.setImageDescriptor(new ImageDescriptor() {
+					@Override
+					public ImageData getImageData() {
+						try(ByteArrayInputStream in = new ByteArrayInputStream(icon)){
+							BufferedImage image = ImageIO.read(in);
+							if (image != null){
+								return AWTSWTImageUtils.convertToSWTImage(image).getImageData();
+							}
+						}catch (Exception ex){
+							
+						}
+						return null;
+					}
+				});
+				
+			}
+
+			if (t.getAttributes() == null || t.getAttributes().size() == 0) {
+				sourceNode.addChild(null);
+			}else {
+				for (IntelRecordSourceAttribute a : t.getAttributes()) {
+					AttributeTreeFilterItem i = new AttributeTreeFilterItem(a);
+					sourceNode.addChild(i);
+				}
+			}
+			
+		}
+		return recordSourceRoot;
 		
 		
 	}

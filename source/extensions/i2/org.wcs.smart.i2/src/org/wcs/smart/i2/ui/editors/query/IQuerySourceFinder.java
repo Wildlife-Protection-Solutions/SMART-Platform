@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IResultItem;
 
@@ -61,7 +62,7 @@ public interface IQuerySourceFinder {
 	 * @param query
 	 * @return
 	 */
-	public static List<IQuerySourceFinder> getQuerySources(IntelRecordObservationQuery query){
+	public static List<IQuerySourceFinder> getQuerySources(AbstractIntelQuery query){
 		if (query.getClass().equals(IntelRecordObservationQuery.class)){
 			return Collections.singletonList(ObservationQuerySourceFinder.INSTANCE);
 		}

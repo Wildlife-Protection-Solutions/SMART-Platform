@@ -27,6 +27,7 @@ import java.util.Objects;
 
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.query.engine.EntityRecordQueryResultItem;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 import org.wcs.smart.i2.query.observation.filter.IColumnIdentifierProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
@@ -60,6 +61,14 @@ public class FilterQueryColumn extends AbstractQueryColumn {
 				}
 			}
 			
+		}else if (item instanceof EntityRecordQueryResultItem) {
+			for (Entry<IQueryFilter, Boolean> filterValue : ((EntityRecordQueryResultItem) item).getFilterValues().entrySet()){
+				if (filterValue.getKey() instanceof IColumnIdentifierProvider){
+					if (((IColumnIdentifierProvider)filterValue.getKey()).getUniqueColumnIdentifier().equals(filterKey)){
+						return filterValue.getValue();
+					}
+				}
+			}
 		}
 		return null;
 	}

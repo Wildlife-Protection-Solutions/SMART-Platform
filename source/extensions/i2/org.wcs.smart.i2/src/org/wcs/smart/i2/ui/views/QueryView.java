@@ -101,6 +101,7 @@ import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.QueryManager;
@@ -465,6 +466,8 @@ public class QueryView {
 					mi.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYSUM));
 				}else if (queryTypes[0].equalsIgnoreCase(IntelRecordObservationQuery.KEY)) {
 					mi.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_RECORDOBS));
+				}else if (queryTypes[0].equalsIgnoreCase(IntelEntityRecordQuery.KEY)) {
+						//TODO:
 				}
 				mi.addSelectionListener(new SelectionAdapter() {
 					@Override
@@ -589,7 +592,9 @@ public class QueryView {
 			if (queryTypeKey.equals(IntelEntitySummaryQuery.KEY)) {
 				provider = new EntitySummaryContentProvider();
 			}else if (queryTypeKey.equals(IntelRecordObservationQuery.KEY)) {
-				provider = new FilterTreeContentProvider();
+				provider = new FilterTreeContentProvider(new IntelRecordObservationQuery());
+			}else if (queryTypeKey.equals(IntelEntityRecordQuery.KEY)) {
+				provider = new FilterTreeContentProvider(new IntelEntityRecordQuery());
 			}
 			queryToContentProvider.put(queryTypeKey, provider);
 		}
@@ -656,6 +661,11 @@ public class QueryView {
 						QueryFactory.buildQuery(s, IntelEntitySummaryQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
 			
 				proxyItems.addAll(items2.stream().map(t->new QueryProxy(t.getName(), t.getUuid(), IntelEntitySummaryQuery.KEY)).collect(Collectors.toList()));
+				
+				List<IntelEntityRecordQuery> items3 =
+						QueryFactory.buildQuery(s, IntelEntityRecordQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
+			
+				proxyItems.addAll(items3.stream().map(t->new QueryProxy(t.getName(), t.getUuid(), IntelEntityRecordQuery.KEY)).collect(Collectors.toList()));
 			}
 
 			proxyItems.sort((a,b)-> Collator.getInstance().compare(a.getName(), b.getName()));

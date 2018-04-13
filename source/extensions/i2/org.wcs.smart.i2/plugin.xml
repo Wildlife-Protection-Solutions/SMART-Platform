@@ -153,7 +153,11 @@
       </class>
       <class
             class="org.wcs.smart.i2.model.IntelEntitySummaryQuery"
-            supportsCcaa="false">
+            supportsCcaa="true">
+      </class>
+      <class
+            class="org.wcs.smart.i2.model.IntelEntityRecordQuery"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension
@@ -902,6 +906,23 @@
             </parameter>
          </command>
          <command
+               commandId="org.wcs.smart.i2.command.query.record.new"
+               icon="images/icons/obj16/attribute_employee.png"
+               style="push"
+               tooltip="create a new entity record query">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     property="org.wcs.smart.i2.permission"
+                     value="create_query">
+               </test>
+            </visibleWhen>
+            <parameter
+                  name="org.wcs.smart.i2.query.new.type"
+                  value="I2_ENTITY_RECORD_QUERY">
+            </parameter>
+         </command>
+         <command
                commandId="org.wcs.smart.i2.command.query.refresh"
                style="push">
          </command>
@@ -1005,6 +1026,12 @@
             icon="images/icons/obj16/query_entity_sum.png"
             id="org.wcs.smart.i2.editor.query.entitysummary"
             name="Entity Summary Query">
+      </editor>
+      <editor
+            class="org.wcs.smart.i2.ui.editors.query.IntelEntityRecordQueryEditor"
+            default="false"
+            id="org.wcs.smart.i2.editor.query.entityrecord"
+            name="Entity Record Query">
       </editor>
    </extension>
    <extension

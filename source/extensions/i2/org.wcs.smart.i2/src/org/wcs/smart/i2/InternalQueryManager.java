@@ -32,6 +32,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
@@ -67,6 +68,8 @@ public enum InternalQueryManager {
 					removed = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, queryUuid);
 				}else if (queryType.equals(IntelEntitySummaryQuery.KEY)) {
 					removed = (IntelEntitySummaryQuery) s.get(IntelEntitySummaryQuery.class, queryUuid);
+				}else if (queryType.equals(IntelEntityRecordQuery.KEY)) {
+					removed = (IntelEntityRecordQuery) s.get(IntelEntityRecordQuery.class, queryUuid);
 				}
 				if (removed == null) throw new Exception(Messages.QueryManager_NotFoundError);
 				
@@ -94,7 +97,8 @@ public enum InternalQueryManager {
 	public String[][] getSupportQueryTypes() {
 		return new String[][] {
 			{ IntelRecordObservationQuery.KEY, Messages.InternalQueryManager_RecordObservationQueryName},
-			{ IntelEntitySummaryQuery.KEY, Messages.InternalQueryManager_EntitySummaryQueryName}
+			{ IntelEntitySummaryQuery.KEY, Messages.InternalQueryManager_EntitySummaryQueryName},
+			{ IntelEntityRecordQuery.KEY, "Entity Record Queyr"}
 		};
 	}
 	

@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.ui.views.QueryView;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -48,7 +49,11 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 
 	private List<FilterTreeItem> items;
 	private Viewer viewer;
+	private AbstractIntelQuery query;
 	
+	public FilterTreeContentProvider(AbstractIntelQuery query) {
+		this.query = query;
+	}
 	@Override
 	public void dispose() {
 	}
@@ -58,7 +63,7 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 		this.viewer = viewer;
 		this.items = null;
 		if (newInput != null) {
-			(new LoadFilterOptions(this)).schedule();
+			(new LoadFilterOptions(this, query)).schedule();
 		}
 	}
 

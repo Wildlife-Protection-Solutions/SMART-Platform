@@ -60,6 +60,8 @@ public class IntelWorkingSetItem {
 			this.descriptor = Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_QUERY_ENTITYSUM);
 		}else if (queryType.equals(IntelRecordObservationQuery.KEY)){
 			this.descriptor = Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_QUERY_RECORDOBS);
+		}else if (queryType.equals(IntelEntityRecordQuery.KEY)){
+			//TODO
 		}
 	}
 	

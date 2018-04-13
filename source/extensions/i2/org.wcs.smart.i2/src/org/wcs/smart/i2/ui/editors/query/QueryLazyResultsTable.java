@@ -44,6 +44,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
@@ -67,7 +68,7 @@ public class QueryLazyResultsTable extends Composite{
 	
 	private IPagedQueryResultSet currentResults;
 	
-	private IntelRecordObservationQuery query;
+	private AbstractIntelQuery query;
 	
 	public QueryLazyResultsTable(Composite parent){
 		super(parent, SWT.NONE);
@@ -91,7 +92,7 @@ public class QueryLazyResultsTable extends Composite{
 		addListener(SWT.Dispose, (event)->disposeResults());
 	}
 	
-	public void setQuery(IntelRecordObservationQuery query){
+	public void setQuery(AbstractIntelQuery query){
 		this.query = query;
 	}
 

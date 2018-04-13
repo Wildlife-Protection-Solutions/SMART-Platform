@@ -56,8 +56,13 @@ public class BasicTreeFilterItem extends FilterTreeItem {
 		this.parent = parent;
 	}
 	
+	/**
+	 * if kid is null this will flag this node as having no kids
+	 * @param kid
+	 */
 	public void addChild(BasicTreeFilterItem kid){
 		if (kids == null) kids = new ArrayList<FilterTreeItem>();
+		if (kid == null) return;
 		kid.setParent(this);
 		kids.add(kid);
 	}
