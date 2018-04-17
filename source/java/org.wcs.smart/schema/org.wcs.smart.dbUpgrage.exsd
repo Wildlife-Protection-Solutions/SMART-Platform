@@ -20,6 +20,7 @@
          <sequence minOccurs="1" maxOccurs="unbounded">
             <element ref="coreUpgrader" minOccurs="0" maxOccurs="unbounded"/>
             <element ref="dbUpgrader" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="pluginMapping" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -83,6 +84,37 @@
             </annotation>
          </attribute>
          <attribute name="toVersion" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="pluginMapping">
+      <annotation>
+         <documentation>
+            Maps an old plugin id to a new plugin it. Should be used when a plugin is &quot;renamed&quot;.
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="old_plugin_id" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="new_plugin_id" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="old_version_id" type="string">
             <annotation>
                <documentation>
                   

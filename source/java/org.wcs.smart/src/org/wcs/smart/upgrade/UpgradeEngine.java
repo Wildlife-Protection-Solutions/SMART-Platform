@@ -335,6 +335,25 @@ public class UpgradeEngine {
 		}
 	}
 	
+	public static HashMap<String, String[]> getPluginMappings() {
+		if (Platform.getExtensionRegistry() == null) return new HashMap<>();
+		HashMap<String,String[]> pluginMappings = new HashMap<>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				if (e.getName().equals("pluginMapping")){ //$NON-NLS-1$
+					String oldVersion = e.getAttribute("old_version_id"); //$NON-NLS-1$
+					String oldPluginId = e.getAttribute("old_plugin_id"); //$NON-NLS-1$
+					String newPluginId = e.getAttribute("new_plugin_id"); //$NON-NLS-1$
+					pluginMappings.put(oldPluginId, new String[] {oldVersion, newPluginId});
+				}
+			}
+		}catch (Exception ex){
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		return pluginMappings;
+	}
+	
 	/**
 	 * Gets all map of the pluginid to pluginversion stored in the 
 	 * plugin versions database table.

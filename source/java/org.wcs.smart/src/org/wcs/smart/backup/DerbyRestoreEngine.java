@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -251,6 +252,19 @@ public class DerbyRestoreEngine {
 		
 		try(Session s = HibernateManager.openSession()){
 			Map<String,String> backupVersions = UpgradeEngine.getVersions(s);
+			
+			for (Entry<String, String[]> mapping : UpgradeEngine.getPluginMappings().entrySet()) {
+				String oldId = mapping.getKey();
+				String oldVersion = mapping.getValue()[0];
+				String newId = mapping.getValue()[1];
+				
+				String version = backupVersions.get(oldId);
+				if (version != null && version.equals(oldVersion)) {
+					backupVersions.remove(oldId);
+					backupVersions.put(newId, oldVersion);
+				}
+			}
+			
 			for (String pluginId : backupVersions.keySet()){
 				if (!versions.keySet().contains(pluginId)){
 					missingPlugins.append(pluginId);
