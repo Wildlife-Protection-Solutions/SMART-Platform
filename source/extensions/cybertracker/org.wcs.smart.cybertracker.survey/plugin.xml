@@ -114,6 +114,11 @@
       <dbUpgrader
             upgrader="org.wcs.smart.cybertracker.survey.updatesite.DataQueueCtMissionDatabaseUpgrader">
       </dbUpgrader>
+      <pluginMapping
+            new_plugin_id="org.wcs.smart.cybertracker.survey"
+            old_plugin_id="org.wcs.smart.connect.dataqueue.cybertracker.survey"
+            old_version_id="1.0">
+      </pluginMapping>
    </extension>
    <extension
          point="org.wcs.smart.changeLogInstaller">

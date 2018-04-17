@@ -139,6 +139,11 @@
       <dbUpgrader
             upgrader="org.wcs.smart.cybertracker.patrol.json.updatesite.CtPatrolDatabaseUpgrader">
       </dbUpgrader>
+      <pluginMapping
+            new_plugin_id="org.wcs.smart.cybertracker.patrol"
+            old_plugin_id="org.wcs.smart.connect.dataqueue.cybertracker.patrol"
+            old_version_id="1.0">
+      </pluginMapping>
    </extension>
    <extension
          point="org.wcs.smart.cybertracker.json.processor">
