@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.views;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -501,6 +502,7 @@ public class BasicRecordSearchPanel extends Composite {
 				srcs.addAll(QueryFactory.buildQuery(session, IntelRecordSource.class,"conservationArea", SmartDB.getCurrentConservationArea()).getResultList()); //$NON-NLS-1$
 				srcs.forEach(e->((IntelRecordSource)e).getName());
 			}
+			srcs.sort((a,b)->Collator.getInstance().compare(((IntelRecordSource)a).getName(), ((IntelRecordSource)b).getName()));
 			srcs.add(0, ""); //$NON-NLS-1$
 			Display.getDefault().syncExec(()->{
 				cmbSource.setInput(srcs);
