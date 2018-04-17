@@ -444,7 +444,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 			treeDropDown.hide();
 		}
 		Waypoint wp = (Waypoint) super.getValue();
-
+		if(wp.getObservations() == null)wp.setObservations(new ArrayList<>());
 		final ObservationWizard wizard = new ObservationWizard(wp, this.observers, this.cmModel);
 		if (currentSelection != null){
 			wizard.setCategoriesToProcess(currentSelection);

@@ -309,8 +309,9 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 					}
 				}
 				//select the correct style from the list
+				if (getShell() == null || getShell().isDisposed()) return;
+				
 				getShell().getDisplay().asyncExec(new Runnable(){
-
 					@Override
 					public void run() {
 						lstSmart.refresh();
@@ -773,6 +774,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			if (lstSmart.getControl().isDisposed()) return Status.OK_STATUS;
 			final SmartStyleLabelProvider lprovider = (SmartStyleLabelProvider) lstSmart.getLabelProvider();
 			Object[] elements = ((ArrayContentProvider)lstSmart.getContentProvider()).getElements(lstSmart.getInput());
 			for (Object x : elements){
@@ -845,6 +847,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			if (addNoneOp){
 				optionItems.add(0,NOT_SELECTED);
 			}
+			if (getShell() == null || getShell().isDisposed()) return Status.OK_STATUS;
 			getShell().getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
