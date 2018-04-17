@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.editors.record;
 
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -948,6 +949,7 @@ public class RecordSummaryPage extends EditorPart{
 							});
 						}
 					});
+					sources.sort((a,b)->Collator.getInstance().compare(a.getName(),b.getName()));
 					allInput.addAll(sources);
 				}
 				allInput.add(0, ""); //$NON-NLS-1$

@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -268,7 +269,6 @@ public class AttributeDialog extends TitleAreaDialog {
 				if (attribute.getAttributeList() != null){
 					allItems.addAll(attribute.getAttributeList());
 				}
-				
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {

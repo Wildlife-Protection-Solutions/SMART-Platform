@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.dialogs;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -144,6 +145,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 				sources = srcs;
 			}
 			
+			sources.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 			Display.getDefault().syncExec(()->{
 				lstSources.setInput(sources);
 				for (Button b : srcButtons) b.setEnabled(true);
@@ -722,6 +724,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 			IntelRecordSource updatedItem = dialog.getUpdatedItem();
 			if (updatedItem.getAttributes() == null) updatedItem.setAttributes(new ArrayList<>());
 			sources.add(updatedItem);
+			sources.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 			lstSources.refresh();
 			lstSources.setSelection(new StructuredSelection(updatedItem));
 			modified();
@@ -763,6 +766,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 				}
 			};
 			if (dialog.open() == Window.OK){
+				sources.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 				lstSources.refresh();
 				modified();
 			}

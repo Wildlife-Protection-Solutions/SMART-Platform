@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.dialogs;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -90,6 +91,7 @@ public class AttributeListPanel extends Composite {
 	
 	public void setInput(IntelAttribute attribute){
 		this.attribute = attribute;
+		attribute.getAttributeList().sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		items.setInput(attribute.getAttributeList());
 	}
 	
@@ -206,6 +208,7 @@ public class AttributeListPanel extends Composite {
 		}else{
 			modified();
 		}
+		attribute.getAttributeList().sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		items.refresh();
 	}
 	
@@ -259,6 +262,7 @@ public class AttributeListPanel extends Composite {
 			}
 			modified();
 		}
+		attribute.getAttributeList().sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		items.refresh();
 	}
 	

@@ -185,6 +185,9 @@ public class AttributeFieldEditor {
 				crsLabel = GeometryUtils.SMART_CRS.getName().toString();
 			}
 		}
+		if (attribute.getAttributeList() != null) {
+			attribute.getAttributeList().sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+		}
 		createControl();
 	}
 
@@ -839,7 +842,7 @@ public class AttributeFieldEditor {
 				cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 				cmbViewer.setLabelProvider(new AttributeListItemLabelProvider());
 				List<Object> items = new ArrayList<Object>();
-				items.add(""); //$NON-NLS-1$
+				items.add(0, ""); //$NON-NLS-1$
 				items.addAll(attribute.getAttributeList());
 				cmbViewer.setInput(items);
 				cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
