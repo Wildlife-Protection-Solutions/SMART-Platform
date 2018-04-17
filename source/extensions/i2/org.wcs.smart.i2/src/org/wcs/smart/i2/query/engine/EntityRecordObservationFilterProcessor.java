@@ -305,7 +305,7 @@ public class EntityRecordObservationFilterProcessor {
 		String t2 = SqlGenerator.createTempTableName();
 		StringBuilder sql = new StringBuilder();
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
-		sql.append ("(observation_uuid char(16) for bit data) "); //$NON-NLS-1$
+		sql.append ("(entity_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		
@@ -313,9 +313,10 @@ public class EntityRecordObservationFilterProcessor {
 			//only a category filter
 			sql = new StringBuilder();
 			sql.append("INSERT INTO " + t2 + " " ); //$NON-NLS-1$ //$NON-NLS-2$
-			sql.append(" SELECT distinct o.uuid "); //$NON-NLS-1$
-			sql.append(" FROM " + obsTable + " a JOIN "); //$NON-NLS-1$ //$NON-NLS-2$
-			sql.append(" smart.i_observation o on a.observation_uuid = o.uuid "); //$NON-NLS-1$
+			sql.append(" SELECT distinct a.entity_uuid "); //$NON-NLS-1$
+			sql.append(" FROM " + obsTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" JOIN smart.i_entity_location l on l.entity_uuid = a.entity_uuid "); //$NON-NLS-1$
+			sql.append(" JOIN smart.i_observation o on l.location_uuid = o.location_uuid"); //$NON-NLS-1$
 			sql.append(" JOIN smart.dm_category c on c.uuid = o.category_uuid "); //$NON-NLS-1$
 			sql.append(" WHERE (c.hkey >= :hkey1 and c.hkey < :hkey2 ) "); //$NON-NLS-1$
 			String hkey1 = filter.getCategoryKey();
@@ -331,14 +332,14 @@ public class EntityRecordObservationFilterProcessor {
 			query.executeUpdate();
 			
 			sql = new StringBuilder();
-			sql.append("CREATE INDEX " + SqlGenerator.createIndexName("observation_uuid_tmp") + " on " + t2 + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			sql.append("CREATE INDEX " + SqlGenerator.createIndexName("entity_uuid_tmp") + " on " + t2 + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			logString(sql.toString());
 			s.createNativeQuery(sql.toString()).executeUpdate();
 			
 			sql = new StringBuilder();
 			sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
-			sql.append(" SELECT a.*, CASE WHEN b.observation_uuid is null then null else true end "); //$NON-NLS-1$
-			sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.observation_uuid = b.observation_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			sql.append(" SELECT a.*, CASE WHEN b.entity_uuid is null then null else true end "); //$NON-NLS-1$
+			sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			logString(sql.toString());
 			query = s.createNativeQuery(sql.toString());
 			query.executeUpdate();
@@ -354,9 +355,10 @@ public class EntityRecordObservationFilterProcessor {
 		//category and perhaps an attribute filter		
 		sql = new StringBuilder();
 		sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
-		sql.append(" SELECT distinct o.uuid "); //$NON-NLS-1$
+		sql.append(" SELECT distinct a.entity_uuid "); //$NON-NLS-1$
 		sql.append( "FROM " + obsTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append(" JOIN smart.i_observation o on a.observation_uuid = o.uuid "); //$NON-NLS-1$
+		sql.append(" JOIN smart.i_entity_location l on l.entity_uuid = a.entity_uuid "); //$NON-NLS-1$
+		sql.append(" JOIN smart.i_observation o on o.location_uuid = l.location_uuid "); //$NON-NLS-1$
 		if (filter.getCategoryKey() != null){
 			sql.append(" JOIN smart.dm_category c on c.uuid = o.category_uuid "); //$NON-NLS-1$
 		}
@@ -454,14 +456,14 @@ public class EntityRecordObservationFilterProcessor {
 		
 		
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("observation_uuid_tmp") + " on " + t2 + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("entity_uuid_tmp") + " on " + t2 + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
-		sql.append(" SELECT a.*, CASE WHEN b.observation_uuid is null then null else true end "); //$NON-NLS-1$
-		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.observation_uuid = b.observation_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append(" SELECT a.*, CASE WHEN b.entity_uuid is null then null else true end "); //$NON-NLS-1$
+		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
 		query = s.createNativeQuery(sql.toString());
 		query.executeUpdate();
@@ -933,7 +935,7 @@ public class EntityRecordObservationFilterProcessor {
 		String t2 = SqlGenerator.createTempTableName();
 		StringBuilder sql = new StringBuilder();
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
-		sql.append ("(location_uuid char(16) for bit data) "); //$NON-NLS-1$
+		sql.append ("(entity_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		
@@ -961,9 +963,10 @@ public class EntityRecordObservationFilterProcessor {
 		
 		sql = new StringBuilder();
 		sql.append("INSERT INTO " + t2 + " "); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("SELECT distinct l.uuid " ); //$NON-NLS-1$
+		sql.append("SELECT distinct ss.entity_uuid " ); //$NON-NLS-1$
 		sql.append(" FROM "); //$NON-NLS-1$
-		sql.append(obsTable + " ss JOIN smart.i_location l on ss.location_uuid = l.uuid, "); //$NON-NLS-1$
+		sql.append(obsTable + " ss JOIN smart.i_entity_location ll on ll.entity_uuid = ss.entity_uuid "); //$NON-NLS-1$
+		sql.append("JOIN smart.i_location l on ll.location_uuid = l.uuid, "); //$NON-NLS-1$
 		sql.append( " smart.area_geometries a "); //$NON-NLS-1$
 		sql.append(" WHERE a.uuid = :areauuid "); //$NON-NLS-1$
 		sql.append(" AND smart.intersects(a.geom, l.geometry) "); //$NON-NLS-1$
@@ -975,14 +978,14 @@ public class EntityRecordObservationFilterProcessor {
 		query.executeUpdate();
 		
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("entity_uuid") + " on " + t2 + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
-		sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end "); //$NON-NLS-1$
-		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append(" SELECT a.*, CASE WHEN b.entity_uuid is null then null else true end "); //$NON-NLS-1$
+		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
 		query = s.createNativeQuery(sql.toString());
 		query.executeUpdate();

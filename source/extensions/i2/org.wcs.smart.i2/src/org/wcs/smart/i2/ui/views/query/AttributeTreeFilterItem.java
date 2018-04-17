@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.i2.ui.views.query;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -45,6 +47,7 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
@@ -130,7 +133,9 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 						Query<IntelEntity> query = s.createQuery("FROM IntelEntity WHERE conservationArea = :ca AND entityType.keyId = :keyId", IntelEntity.class);
 						query.setParameter("ca",  SmartDB.getCurrentConservationArea());
 						query.setParameter("keyId",  attributeKey);
-						for (IntelEntity e : query.list()) {
+						List<IntelEntity> items = query.list();
+						items.sort((a,b)->Collator.getInstance().compare(a.getIdAttributeAsText(), b.getIdAttributeAsText()));
+						for (IntelEntity e : items) {
 							labels.add(e.getIdAttributeAsText());
 							keys.add(UuidUtils.uuidToString( e.getUuid() ));
 						}
@@ -162,7 +167,9 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try(Session s = HibernateManager.openSession()){
-						for (IntelAttributeListItem item : InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributeListItems(attributeKey, s)) {
+						List<IntelAttributeListItem> items = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributeListItems(attributeKey, s);
+						items.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+						for (IntelAttributeListItem item : items) {
 							labels.add(item.getName());
 							keys.add(item.getKeyId());
 						}
@@ -191,6 +198,7 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 				protected IStatus run(IProgressMonitor monitor) {
 					try(Session s = HibernateManager.openSession()){
 						List<Employee> emps = InternalQueryManager.INSTANCE.getQueryItemProvider().getEmployees(s);
+						emps.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getFullLabel(a), SmartLabelProvider.getFullLabel(b)));
 						for (Employee e : emps) {
 							elabels.add(SmartLabelProvider.getFullLabel(e));
 							ekeys.add(UuidUtils.uuidToString(e.getUuid()));

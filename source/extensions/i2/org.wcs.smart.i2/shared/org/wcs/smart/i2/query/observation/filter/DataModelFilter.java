@@ -33,7 +33,7 @@ import org.wcs.smart.util.SharedUtils;
  * @author Emily
  *
  */
-public class DataModelFilter implements IQueryFilter {
+public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider  {
 
 	//category
 	public static DataModelFilter createCategory(String key){
@@ -172,5 +172,44 @@ public class DataModelFilter implements IQueryFilter {
 	}
 	public Date[] getDateValues(){
 		return this.dateValues;
+	}
+
+	@Override
+	public String getUniqueColumnIdentifier() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("dm_"); //$NON-NLS-1$
+		sb.append(categoryKey != null ? categoryKey : "");
+		sb.append("_"); //$NON-NLS-1$
+		if (attributeKey != null) {
+			sb.append(attributeKey);
+			sb.append("_"); //$NON-NLS-1$
+			
+			switch(attributeType){
+				case BOOLEAN:
+					break;
+				case DATE:
+					sb.append(operator.name());
+					sb.append("_"); //$NON-NLS-1$
+					sb.append(dateValues[0].getTime());
+					sb.append("_"); //$NON-NLS-1$
+					sb.append(dateValues[1].getTime());
+					break;
+				case LIST:
+				case TREE:
+					sb.append(keyValue);
+					break;
+				case NUMERIC:
+					sb.append(operator.name());
+					sb.append("_"); //$NON-NLS-1$
+					sb.append(numberValue);
+					break;
+				case TEXT:
+					sb.append(operator.name());
+					sb.append("_"); //$NON-NLS-1$
+					sb.append(stringValue);
+					break;
+			}
+		}
+		return sb.toString();
 	}
 }

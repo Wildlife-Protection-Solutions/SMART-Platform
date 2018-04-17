@@ -38,6 +38,8 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.IntelHibernateManager;
@@ -49,6 +51,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
+import org.wcs.smart.i2.query.observation.filter.DataModelFilter;
 import org.wcs.smart.i2.query.observation.filter.EntityFilter;
 import org.wcs.smart.i2.query.observation.filter.EntityTypeFilter;
 import org.wcs.smart.i2.query.observation.filter.IFilterVisitor;
@@ -56,6 +59,7 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordSourceFilter;
+import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -222,7 +226,11 @@ public class IntelQueryColumnProvider {
 						}else if (filter instanceof RecordAttributeFilter) {
 							RecordAttributeFilter afilter = (RecordAttributeFilter)filter;
 							column = new FilterQueryColumn(generateColumnName(afilter, itemProvider, session, l), afilter.getUniqueColumnIdentifier(), afilter);
+						}else if (filter instanceof DataModelFilter) {
+							DataModelFilter afilter = (DataModelFilter)filter;
+							column = generateColumnName(afilter, itemProvider, session, l);
 						}
+						
 						if (column != null && !columns.contains(column)){
 							columns.add(column);
 						}
@@ -243,33 +251,7 @@ public class IntelQueryColumnProvider {
 		for (String key : keys) {
 			IntelAttribute ia = itemProvider.getAttribute(key, session);
 			columns.add(new IntelAttributeQueryColumn(ia));
-		}
-		
-
-//		//data model columns
-//		//categories
-//		Integer maxCategory = itemProvider.getMaxDmCategoryDepth(session);
-//		for (int i = 0; i < maxCategory; i ++){
-//			columns.add(new DataModelColumn(i, l));
-//		}
-//		
-//		//attributes - keep only active attributes
-//		List<?> q = session.createQuery("SELECT distinct id.attribute.keyId FROM CategoryAttribute a WHERE a.id.attribute.conservationArea in ( :cas ) and a.isActive = 'true'") //$NON-NLS-1$
-//				.setParameterList("cas", itemProvider.getConservationAreas()).list(); //$NON-NLS-1$
-//		Set<String> attributeKeys = new HashSet<>();
-//		q.forEach(e->attributeKeys.add((String)e));
-//			
-//		List<Attribute> attributes = itemProvider.getDmAttributes(session);
-//		for (Iterator<Attribute> iterator = attributes.iterator(); iterator.hasNext();) {
-//			Attribute attribute = (Attribute) iterator.next();
-//			if (!attributeKeys.contains(attribute.getKeyId())) iterator.remove();
-//		}
-//
-//		attributes.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
-//		for (Attribute attribute : attributes){
-//			columns.add(new DataModelColumn(attribute));
-//		}
-		
+		}	
 		return columns;
 	}
 
@@ -304,6 +286,80 @@ public class IntelQueryColumnProvider {
 			name = src.getName();
 		}
 		return new FilterQueryColumn(name, filter.getUniqueColumnIdentifier(), filter);
+	}
+	
+	private IQueryColumn generateColumnName(DataModelFilter filter, IQueryItemProvider itemProvider, Session session, Locale l){
+		Category c = null;
+		if (filter.getCategoryKey() != null) {
+			c = itemProvider.getCategory(filter.getCategoryKey(), session);
+		}
+		Attribute a = null;
+		if (filter.getAttributeKey() != null) {
+			a = itemProvider.getDmAttribute(filter.getAttributeKey(), session);
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		if (filter.getAttributeKey() == null) {
+			sb.append(c == null ? filter.getCategoryKey() : c.getName());
+		}else {
+			sb.append( a==null ? filter.getAttributeKey() : a.getName());
+		
+			switch(filter.getAttributeType()) {
+			case BOOLEAN:
+				break;
+			case DATE:
+				sb.append(" (" + DateFormat.getDateInstance().format(filter.getDateValues()[0]) + " - " + DateFormat.getDateInstance().format(filter.getDateValues()[1]));
+				break;
+			case LIST:
+				if (filter.getKeyValue().equals(DataModelFilter.ANY_OPTION_KEY)) {
+					sb.append(" (" + DropItemFactory.ANY_LABEL + ")");
+				}else {
+					List<AttributeListItem> allItems = itemProvider.getDmAttributeListItem(a, session);
+					boolean ok = false;
+					for (AttributeListItem i : allItems) {
+						if (i.getKeyId().equalsIgnoreCase(filter.getKeyValue())) {
+							sb.append(" (" + i.getName() + ") ");
+							ok = true;
+						}
+					}
+					if (!ok) sb.append(" ("+ filter.getKeyValue() + ")");
+				}
+				break;
+			case NUMERIC:
+				sb.append( " (" + filter.getOperator().getLabel(Locale.getDefault()) + " " + filter.getNumberValue() + ")");
+				break;
+			case TEXT:
+				sb.append(" (" + filter.getStringValue() + ")");
+				break;
+			case TREE:
+				List<AttributeTreeNode> nodes = new ArrayList<>(itemProvider.getDmAttributeTreeNodes(a, session));
+				boolean ok = false;
+				while(!nodes.isEmpty()) {
+					AttributeTreeNode n = nodes.remove(0);
+					if (n.getHkey().equalsIgnoreCase(filter.getKeyValue())) {
+						sb.append(" (" + n.getName() + ") ");
+						ok = true;
+						break;
+					}
+					nodes.addAll(n.getChildren());
+				}
+				if (!ok) 
+					sb.append( " (" + filter.getKeyValue() + ")");
+				break;
+			default:
+				break;
+			
+			}
+			
+			if (filter.getCategoryKey() != null) {
+				sb.append(" [");
+				sb.append(c == null ? filter.getCategoryKey() : c.getName() );
+				sb.append("]");
+			}
+				
+		}
+		
+		return new FilterQueryColumn(sb.toString(), filter.getUniqueColumnIdentifier(), filter);
 	}
 	
 	

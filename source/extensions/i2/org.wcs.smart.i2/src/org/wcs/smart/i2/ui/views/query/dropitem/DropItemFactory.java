@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.views.query.dropitem;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,6 +30,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Employee;
@@ -47,6 +49,8 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.ListItem;
 import org.wcs.smart.i2.query.Operator;
@@ -61,6 +65,8 @@ import org.wcs.smart.i2.query.observation.filter.GroupByPart;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.NotFilter;
+import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
+import org.wcs.smart.i2.query.observation.filter.RecordSourceFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
@@ -215,6 +221,8 @@ public class DropItemFactory {
 		
 		if (filter.getClass().equals(EntityTypeFilter.class))
 			return generateDropItem((EntityTypeFilter) filter);
+		if (filter.getClass().equals(RecordSourceFilter.class))
+			return generateDropItem((RecordSourceFilter)filter);
 		
 		if (filter.getClass().equals(IntelAttributeFilter.class))
 			return generateDropItem((IntelAttributeFilter) filter);
@@ -222,10 +230,24 @@ public class DropItemFactory {
 		if (filter.getClass().equals(NotFilter.class))
 			return generateDropItem((NotFilter) filter);
 		
+		if (filter.getClass().equals(RecordAttributeFilter.class))
+			return generateDropItem((RecordAttributeFilter)filter);
+		
 		ErrorDropItem error = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_FilterTypeNotSupported, filter.getClass().getName()));
 		return Collections.singletonList(error);
 	}
 	
+	public List<DropItem> generateDropItem(RecordSourceFilter filter){
+		IntelRecordSource type = null; 
+		if (filter.getTypeKey() != null){
+			type = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSource(filter.getTypeKey(), session);
+			if (type != null){
+				return Collections.singletonList(new TextDropItem(type.getName(), "recordsource:" + type.getKeyId())); //$NON-NLS-1$
+			}
+		}
+		ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find record source with key: {0}", filter.getTypeKey()));
+		return Collections.singletonList(item);
+	}
 	
 	public List<DropItem> generateDropItem(AreaFilter filter){
 		
@@ -294,6 +316,110 @@ public class DropItemFactory {
 	}
 	
 	
+	public List<DropItem> generateDropItem(RecordAttributeFilter filter){
+		String queryKeyPart = "r_attribute:";
+		if (filter.getEntityTypeKey() != null) {
+			queryKeyPart += "entity:" + filter.getEntityTypeKey();
+		}else {
+			queryKeyPart += filter.getAttributeType().key + ":" + filter.getAttributeKey();
+		}
+		queryKeyPart += ":" + filter.getRecordSourceKey();
+			
+		IntelRecordSource source = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSource(filter.getRecordSourceKey(), session);
+		if (source == null){
+			ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find attribute with key: {0}", filter.getAttributeKey()));
+			return Collections.singletonList(item);
+		}
+		
+		IntelAttribute attribute = null;
+		IntelEntityType entityType = null;
+		if (filter.getEntityTypeKey() != null){
+			entityType = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityType(filter.getEntityTypeKey(), session);
+			if (entityType == null){
+				ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find entity type with key: {0}", filter.getEntityTypeKey())) ;
+				return Collections.singletonList(item);	
+			}
+		}else if (filter.getAttributeKey() != null) {
+			attribute = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttribute(filter.getAttributeKey(), session);
+			if (attribute == null) {
+				ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find attribute key: {0}", filter.getAttributeKey())) ;
+				return Collections.singletonList(item);
+			}
+		}
+		IntelRecordSourceAttribute ia = new IntelRecordSourceAttribute();
+		ia.setSource(source);
+		if (attribute != null) ia.setAttribute(attribute);
+		if (entityType != null) ia.setEntityType(entityType);
+		
+		String name = IntelQueryColumnProvider.generateName(ia, source);
+		if (entityType != null) {
+			final List<String> labels = new ArrayList<String>();
+			final List<String> keys = new ArrayList<String>();
+			Query<IntelEntity> query = session.createQuery("FROM IntelEntity WHERE conservationArea = :ca AND entityType.keyId = :keyId", IntelEntity.class);
+			query.setParameter("ca",  SmartDB.getCurrentConservationArea());
+			query.setParameter("keyId",  entityType.getKeyId());
+			List<IntelEntity> items = query.list();
+			items.sort((a,b)->Collator.getInstance().compare(a.getIdAttributeAsText(), b.getIdAttributeAsText()));
+			for (IntelEntity e : items) {
+				labels.add(e.getIdAttributeAsText());
+				keys.add(UuidUtils.uuidToString( e.getUuid() ));
+			}
+			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]));
+			item.setInitialValue(filter.getKeyValue());
+			return Collections.singletonList(item);
+		}else {
+			if (filter.getAttributeType() == IntelAttribute.AttributeType.NUMERIC){
+				TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.NUMERIC);
+				item.setInitialValue(filter.getOperator(), filter.getNumberValue().toString());
+				return Collections.singletonList(item);
+			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.TEXT){
+				TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.TEXT);
+				item.setInitialValue(filter.getOperator(), filter.getStringValue());
+				return Collections.singletonList(item);
+			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.DATE){
+				DateDropItem item = new DateDropItem(name, queryKeyPart);
+				item.setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
+				return Collections.singletonList(item);
+			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.BOOLEAN){
+				TextDropItem item = new TextDropItem(name, queryKeyPart);
+				return Collections.singletonList(item);
+			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.LIST){
+				final List<String> labels = new ArrayList<String>();
+				final List<String> keys = new ArrayList<String>();
+				labels.add(ANY_LABEL);
+				keys.add(IQueryFilter.ANY_OPTION_KEY);
+				
+				List<IntelAttributeListItem> listItems = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributeListItems(attribute.getKeyId(), session);
+				listItems.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+				if (listItems != null){
+					for (IntelAttributeListItem i : listItems){
+						labels.add(i.getName());
+						keys.add(i.getKeyId());
+					}
+				}
+				OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]));
+				item.setInitialValue(filter.getKeyValue());
+				return Collections.singletonList(item);
+			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.EMPLOYEE){
+				final List<String> labels = new ArrayList<String>();
+				final List<String> keys = new ArrayList<String>();
+				labels.add(ANY_LABEL);
+				keys.add(IQueryFilter.ANY_OPTION_KEY);
+	
+				List<Employee> emps = InternalQueryManager.INSTANCE.getQueryItemProvider().getEmployees(session);
+				emps.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getFullLabel(a), SmartLabelProvider.getFullLabel(b)));
+				for (Employee e : emps) {
+					labels.add(SmartLabelProvider.getFullLabel(e));
+					keys.add(UuidUtils.uuidToString(e.getUuid()));
+				}
+				OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]));
+				item.setInitialValue(filter.getKeyValue());
+				return Collections.singletonList(item);
+			}
+		}
+		return Collections.emptyList();
+	}
+	
 	public List<DropItem> generateDropItem(IntelAttributeFilter filter){
 		String queryKeyPart = "e_attribute:" + filter.getAttributeType().key + ":" + filter.getAttributeKey() + ":"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		if (filter.getEntityTypeKey() != null){
@@ -338,6 +464,7 @@ public class DropItemFactory {
 			keys.add(IQueryFilter.ANY_OPTION_KEY);
 			
 			List<IntelAttributeListItem> listItems = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributeListItems(ia.getKeyId(), session);
+			listItems.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 			if (listItems != null){
 				for (IntelAttributeListItem i : listItems){
 					labels.add(i.getName());
@@ -354,6 +481,7 @@ public class DropItemFactory {
 			keys.add(IQueryFilter.ANY_OPTION_KEY);
 
 			List<Employee> emps = InternalQueryManager.INSTANCE.getQueryItemProvider().getEmployees(session);
+			emps.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getFullLabel(a), SmartLabelProvider.getFullLabel(b)));
 			for (Employee e : emps) {
 				labels.add(SmartLabelProvider.getFullLabel(e));
 				keys.add(UuidUtils.uuidToString(e.getUuid()));
