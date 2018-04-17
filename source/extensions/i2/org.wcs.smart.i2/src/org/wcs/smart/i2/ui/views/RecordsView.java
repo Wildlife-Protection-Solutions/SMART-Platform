@@ -210,7 +210,7 @@ public class RecordsView {
 		labelProviders.add(provider);
 		lstNewRecords = new TableViewer(newRecords, SWT.V_SCROLL | SWT.H_SCROLL| SWT.MULTI | SWT.BORDER | SWT.VIRTUAL);
 		lstNewRecords.setContentProvider(new RecordsViewContentProvider());
-		lstNewRecords.setLabelProvider(new RecordsViewLabelProvider());
+		lstNewRecords.setLabelProvider(new RecordsViewLabelProvider(context));
 		lstNewRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstNewRecords.addDoubleClickListener(openListener);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -224,7 +224,7 @@ public class RecordsView {
 		lstInProgress = new TableViewer(inProgress, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.VIRTUAL);
 	
 		lstInProgress.setContentProvider(new RecordsViewContentProvider());
-		lstInProgress.setLabelProvider(new RecordsViewLabelProvider());
+		lstInProgress.setLabelProvider(new RecordsViewLabelProvider(context));
 		lstInProgress.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstInProgress.addDoubleClickListener(openListener);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -273,7 +273,7 @@ public class RecordsView {
 		
 		lstAllRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		
-		final RecordsViewLabelProvider lblprovider = new RecordsViewLabelProvider(true);
+		final RecordsViewLabelProvider lblprovider = new RecordsViewLabelProvider(true, context);
 		lstAllRecords.getTree().addListener(SWT.MeasureItem, new Listener() {
 	 		public void handleEvent(Event event) {
 	 			TreeItem item = (TreeItem)event.item;
@@ -299,12 +299,14 @@ public class RecordsView {
 				int offset = 0;
 				Color c = event.gc.getBackground();
 				if (trailingImage != null) {
-					int x = event.x + event.width;
+					int x = event.x;
 					int itemHeight = lstAllRecords.getTree().getItemHeight();
 					int imageHeight = trailingImage.getBounds().height;
 					int y = event.y + (itemHeight - imageHeight) / 2;
 					event.gc.drawImage(trailingImage, x, y);
 					offset = x + trailingImage.getBounds().width;
+				}else {
+					offset = event.x;
 				}
 				if ((event.detail & SWT.SELECTED) == SWT.SELECTED) {
 					c = LIST_SELECTION_COLOR;

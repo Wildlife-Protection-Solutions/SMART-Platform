@@ -246,7 +246,7 @@ public class BasicRecordSearchPanel extends Composite {
 		if (!IntelSecurityManager.INSTANCE.canViewRecords()) {
 			tblResults.setInput(new String[] {Messages.BasicRecordSearchPanel_unauthorized});
 		}
-		final RecordsViewLabelProvider lblprovider = new RecordsViewLabelProvider(true);
+		final RecordsViewLabelProvider lblprovider = new RecordsViewLabelProvider(true, context);
 		tblResults.getControl().addListener(SWT.MeasureItem, new Listener() {
 	 		public void handleEvent(Event event) {
 	 			TableItem item = (TableItem)event.item;
@@ -272,7 +272,7 @@ public class BasicRecordSearchPanel extends Composite {
 				int offset = 0;
 				Color c = event.gc.getBackground();
 				if (trailingImage != null) {
-					int x = event.x + event.width;
+					int x = event.x;
 					int itemHeight = tblResults.getTable().getItemHeight();
 					int imageHeight = trailingImage.getBounds().height;
 					int y = event.y + (itemHeight - imageHeight) / 2;
@@ -480,6 +480,7 @@ public class BasicRecordSearchPanel extends Composite {
 					tblResults.setInput(fresult.getResults());
 					searchCount.setText(MessageFormat.format(Messages.BasicRecordSearchPanel_SearchResultCntLabel, fresult.getResults().size(), fresult.getTotalMatched()));
 					searchTime.setText(MessageFormat.format(Messages.BasicRecordSearchPanel_SearchResultTimeLabel, fresult.getTotalTime() / Math.pow(10, 9)));
+					tblResults.refresh();
 				});
 				return Status.OK_STATUS;
 			}
@@ -488,15 +489,21 @@ public class BasicRecordSearchPanel extends Composite {
 	}
 	
 	public void refreshSource(){
-		cmbSource.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		
 		refreshSourcesJob.setSystem(true);
 		refreshSourcesJob.schedule();
 	}
 
 	private Job refreshSourcesJob = new Job("refresh source list") { //$NON-NLS-1$
 
+		private ISelection currentSelection = null;
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+		
+			Display.getDefault().syncExec(()->{
+				currentSelection = cmbSource.getSelection();
+				cmbSource.setInput(new String[]{DialogConstants.LOADING_TEXT});
+			});
 			List<Object> srcs = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
 				srcs.addAll(QueryFactory.buildQuery(session, IntelRecordSource.class,"conservationArea", SmartDB.getCurrentConservationArea()).getResultList()); //$NON-NLS-1$
@@ -505,7 +512,13 @@ public class BasicRecordSearchPanel extends Composite {
 			srcs.sort((a,b)->Collator.getInstance().compare(((IntelRecordSource)a).getName(), ((IntelRecordSource)b).getName()));
 			srcs.add(0, ""); //$NON-NLS-1$
 			Display.getDefault().syncExec(()->{
+				
+				((RecordSourceLabelProvider)(cmbSource.getLabelProvider())).disposeImages();
 				cmbSource.setInput(srcs);
+				if (currentSelection != null) {
+					cmbSource.setSelection(currentSelection);
+					currentSelection = null;
+				}
 			});
 			return Status.OK_STATUS;
 		}

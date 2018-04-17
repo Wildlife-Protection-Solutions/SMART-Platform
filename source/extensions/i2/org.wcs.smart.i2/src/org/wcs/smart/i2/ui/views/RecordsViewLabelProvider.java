@@ -27,6 +27,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -37,8 +39,12 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordSource;
@@ -64,11 +70,21 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 	private HashMap<String, Image> images = new HashMap<String,Image>();
 	private Image NULL_IMAGE;
 	
-	public RecordsViewLabelProvider(){
-		this(false);
+	private IEventBroker eventBroker;
+	private EventHandler refreshImages = new EventHandler() {
+		@Override
+		public void handleEvent(Event event) {
+			srcProvider.disposeImages();
+			for (Image i : images.values()) i.dispose();
+			images.clear();
+		}
+	};
+	
+	public RecordsViewLabelProvider(IEclipseContext context){
+		this(false, context);
 	}
 	
-	public RecordsViewLabelProvider(boolean sourceAndStatusImg){
+	public RecordsViewLabelProvider(boolean sourceAndStatusImg, IEclipseContext context){
 		this.sourceAndStatusImg = sourceAndStatusImg;
 		FontData fd = Display.getDefault().getActiveShell().getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -79,6 +95,11 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 		ImageData newData = new ImageData(1, 1, 1, new PaletteData(new RGB[] {new RGB(0, 0, 0)}));
 		newData.setAlpha(0, 0, 0);
 		NULL_IMAGE = new Image(Display.getDefault(), newData);
+		
+		
+		eventBroker = context.get(IEventBroker.class);
+		eventBroker.subscribe(IntelEvents.RECORD_SOURCE_ALL, refreshImages);
+		eventBroker.subscribe(SmartPlugIn.E4_DATABASE_CHANGED_EVENT, refreshImages);
 	}
 	
 	@Override
@@ -88,6 +109,8 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 		srcProvider.dispose();
 		//dispose images
 		images.values().forEach(w->w.dispose());
+		
+		eventBroker.unsubscribe(refreshImages);
 	}
 	
 	private Image combineImage(IntelRecord.Status status, IntelRecordSource source) {
