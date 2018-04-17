@@ -24,6 +24,7 @@ package org.wcs.smart.connect.hibernate;
 import java.beans.Introspector;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Enumeration;
@@ -65,6 +66,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
+import org.hsqldb.types.Charset;
+import org.locationtech.udig.catalog.internal.shp.ShpServiceExtension;
 import org.opengis.referencing.AuthorityFactory;
 import org.wcs.smart.connect.apache.CleanUpJob;
 import org.wcs.smart.connect.apache.EnvironmentVariables;
@@ -295,6 +298,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 				
 		System.setProperty("org.eclipse.emf.common.util.ReferenceClearingQueue", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		System.setProperty("org.geotools.referencing.forceXY", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		System.setProperty(ShpServiceExtension.SHP_CHARSET_PARAM_NAME, StandardCharsets.UTF_8.name());
 		
 		logger.info("Configuring Hibernate SessionFactory"); //$NON-NLS-1$
 		Configuration config = new Configuration();

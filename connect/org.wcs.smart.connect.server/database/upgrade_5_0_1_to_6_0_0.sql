@@ -77,6 +77,22 @@ CREATE TABLE smart.i_entity_summary_query(
 ALTER TABLE smart.i_entity_summary_query ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.i_entity_summary_query ADD FOREIGN KEY (created_by) REFERENCES smart.employee (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.i_entity_summary_query ADD FOREIGN KEY (last_modified_by) REFERENCES smart.employee (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+CREATE TABLE smart.i_entity_record_query(
+  uuid uuid NOT NULL,
+  ca_uuid uuid NOT NULL,
+  query_string varchar,
+  date_created timestamp NOT NULL
+  ,last_modified_date timestamp,
+  created_by uuid NOT NULL,
+  last_modified_by uuid,
+  PRIMARY KEY (uuid));
+  
+  
+ALTER TABLE smart.i_entity_record_query ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_entity_record_query ADD FOREIGN KEY (created_by) REFERENCES smart.employee (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_entity_record_query ADD FOREIGN KEY (last_modified_by) REFERENCES smart.employee (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
 alter table smart.i_working_set_query drop constraint iworkingsetquery_query_fk;
 ALTER TABLE smart.I_WORKING_SET_QUERY add column query_type varchar(32);
 UPDATE smart.i_working_set_query set query_type = 'I2_OBS_QUERY';
@@ -317,7 +333,8 @@ DROP TRIGGER IF EXISTS trg_i_entity_type ON smart.i_entity_type;
 DROP TRIGGER IF EXISTS trg_i_location ON smart.i_location;                                                                                      
 DROP TRIGGER IF EXISTS trg_i_record ON smart.i_record;                                                                                          
 DROP TRIGGER IF EXISTS trg_i_record_obs_query ON smart.i_record_obs_query;
-DROP TRIGGER IF EXISTS trg_i_entity_summary_query ON smart.i_entity_summary_query;   
+DROP TRIGGER IF EXISTS trg_i_entity_summary_query ON smart.i_entity_summary_query;
+DROP TRIGGER IF EXISTS trg_i_entity_record_query ON smart.i_entity_record_query;
 DROP TRIGGER IF EXISTS trg_i_relationship_group ON smart.i_relationship_group;                                                                  
 DROP TRIGGER IF EXISTS trg_i_relationship_type ON smart.i_relationship_type;                                                                    
 DROP TRIGGER IF EXISTS trg_i_working_set ON smart.i_working_set;                                                                                
@@ -1074,6 +1091,7 @@ CREATE TRIGGER trg_i_location AFTER INSERT OR UPDATE OR DELETE ON smart.i_locati
 CREATE TRIGGER trg_i_record AFTER INSERT OR UPDATE OR DELETE ON smart.i_record FOR EACH ROW execute procedure connect.trg_changelog_common();
 CREATE TRIGGER trg_i_record_obs_query AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_obs_query FOR EACH ROW execute procedure connect.trg_changelog_common();
 CREATE TRIGGER trg_i_entity_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_summary_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_entity_record_query AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_record_query FOR EACH ROW execute procedure connect.trg_changelog_common();
 CREATE TRIGGER trg_i_relationship_group AFTER INSERT OR UPDATE OR DELETE ON smart.i_relationship_group FOR EACH ROW execute procedure connect.trg_changelog_common();
 CREATE TRIGGER trg_i_relationship_type AFTER INSERT OR UPDATE OR DELETE ON smart.i_relationship_type FOR EACH ROW execute procedure connect.trg_changelog_common();
 CREATE TRIGGER trg_i_working_set AFTER INSERT OR UPDATE OR DELETE ON smart.i_working_set FOR EACH ROW execute procedure connect.trg_changelog_common();
