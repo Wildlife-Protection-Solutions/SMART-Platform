@@ -59,7 +59,7 @@ public class IntelQueryLabelProvider extends LabelProvider {
 		}else if (queryType.equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) {
 			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYSUM);
 		}else if (queryType.equalsIgnoreCase(IntelEntityRecordQuery.KEY)) {
-			//	TODO:
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYRECORD);
 		}
 		return null;
 	}

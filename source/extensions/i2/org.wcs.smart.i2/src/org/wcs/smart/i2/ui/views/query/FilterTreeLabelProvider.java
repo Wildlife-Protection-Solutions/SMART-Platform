@@ -93,6 +93,7 @@ public class FilterTreeLabelProvider extends LabelProvider implements IColorProv
 			}
 			
 		}
+	
 		if (element instanceof BasicTreeFilterItem){
 			if (((BasicTreeFilterItem) element).getImage() != null){
 				img = ((BasicTreeFilterItem) element).getImage().createImage();

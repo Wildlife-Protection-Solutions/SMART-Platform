@@ -35,7 +35,27 @@ import org.wcs.smart.util.SharedUtils;
  */
 public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierProvider {
 
+	/**
+	 * For fixed record attributes
+	 * @author Emily
+	 *
+	 */
+	public static enum FixedAttribute{
+		STATUS("recordstatus"), //$NON-NLS-1$
+		DATE("recorddate"); //$NON-NLS-1$
 		
+		String key;
+		
+		FixedAttribute(String key){
+			this.key = key;
+		}
+		
+		public String getKey() {
+			return this.key;
+		}
+	}
+	
+	
 	//boolean
 	public static RecordAttributeFilter create(String key){
 		RecordAttributeFilter filter = createCore(key);
@@ -75,19 +95,25 @@ public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 		
 	private static RecordAttributeFilter createCore(String key){
 		String bits[] = key.split(":"); //$NON-NLS-1$
-		IntelAttribute.AttributeType type = parseType(bits[1]);
-		
-		String attributeentitykey = bits[2];
-		String recordsourcekey = null;
-		if (bits.length > 3){
-			recordsourcekey = bits[3];
-			if (recordsourcekey.trim().isEmpty()) recordsourcekey = null;
+		if (bits[0].trim().equalsIgnoreCase(FixedAttribute.STATUS.key)) {
+			return new RecordAttributeFilter(FixedAttribute.STATUS);
+		}else if (bits[0].trim().equalsIgnoreCase(FixedAttribute.DATE.key)) { 
+			return new RecordAttributeFilter(FixedAttribute.DATE);
+		}else {
+			IntelAttribute.AttributeType type = parseType(bits[1]);
+			
+			String attributeentitykey = bits[2];
+			String recordsourcekey = null;
+			if (bits.length > 3){
+				recordsourcekey = bits[3];
+				if (recordsourcekey.trim().isEmpty()) recordsourcekey = null;
+			}
+			return new RecordAttributeFilter(type,attributeentitykey,recordsourcekey);
 		}
-		return new RecordAttributeFilter(type,attributeentitykey,recordsourcekey);
 	}
 	
 	private static IntelAttribute.AttributeType parseType(String attributeType){
-		if (attributeType.equalsIgnoreCase("entity")) return null;
+		if (attributeType.equalsIgnoreCase("entity")) return null; //$NON-NLS-1$
 		for (IntelAttribute.AttributeType t : IntelAttribute.AttributeType.values()){
 			if (t.key.equalsIgnoreCase(attributeType)){
 				return t;
@@ -109,7 +135,12 @@ public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 	private String keyValue = null;
 	private Date[] dateValues = null;
 	
-
+	private FixedAttribute fixed;
+	
+	public RecordAttributeFilter(FixedAttribute fixed){
+		this.fixed = fixed;
+	}
+	
 	public RecordAttributeFilter(IntelAttribute.AttributeType type, String attributeentitykey, String recordsourceKey){
 		this.attributeType = type;
 		this.recordsourceKey = recordsourceKey;
@@ -121,28 +152,9 @@ public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 		}
 	}
 	
-//	public RecordAttributeFilter(IntelAttribute.AttributeType type, String attributeKey, String recordsourceKey, Operator operator, Double numberValue){
-//		this(type, attributeKey, entityTypeKey);
-//		this.operator = operator;
-//		this.numberValue = numberValue;
-//	}
-//	
-//	public RecordAttributeFilter(IntelAttribute.AttributeType type, String attributeKey, String entityTypeKey, Operator operator, String stringValue){
-//		this(type, attributeKey, entityTypeKey);
-//		this.operator = operator;
-//		this.stringValue = stringValue;
-//	}
-//
-//	public RecordAttributeFilter(IntelAttribute.AttributeType type, String attributeKey, String entityTypeKey, String keyId){
-//		this(type, attributeKey, entityTypeKey);
-//		this.keyValue = keyId;
-//	}
-//	
-//	public RecordAttributeFilter(IntelAttribute.AttributeType type, String attributeKey, String entityTypeKey, Operator operator, Date[] dates){
-//		this(type, attributeKey, entityTypeKey);
-//		this.operator = operator;
-//		this.dateValues = dates;
-//	}
+	public FixedAttribute getFixedAttribute() {
+		return this.fixed;
+	}
 	
 	public String getRecordSourceKey() {
 		return this.recordsourceKey;
@@ -156,6 +168,9 @@ public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 	 */
 	@Override
 	public String getUniqueColumnIdentifier(){
+		if (fixed != null) {
+			return fixed.key;
+		}
 		StringBuilder sb = new StringBuilder();
 		sb.append("ra_"); //$NON-NLS-1$
 		sb.append(attributeKey != null ? attributeKey : entityTypeKey);

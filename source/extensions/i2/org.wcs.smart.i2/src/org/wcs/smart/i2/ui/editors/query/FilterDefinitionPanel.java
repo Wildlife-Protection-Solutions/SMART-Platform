@@ -97,6 +97,8 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 	private boolean addToolbar;
 	private boolean includeWpObsOption;
 	
+	private Label filterOptionLabel;
+	
 	/**
 	 * Creates a new drop target panel.
 	 * @param addToolbar if the save/clear/run toolbar should be added to the panel
@@ -359,6 +361,15 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 	}
 	
 	/**
+	 * Returns the label that allows users to pick the filter type.  Primary intended
+	 * so users can add tooltips or change text
+	 * @return
+	 */
+	public Label getfilterOptionLabel() {
+		return this.filterOptionLabel;
+	}
+	
+	/**
 	 * Adds the filter type options to the parent composite.
 	 * @param parent
 	 * @return
@@ -377,8 +388,8 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		filterTypeComp.setLayout(layout);
 		
 		if (includeWpObsOption) {
-			Label l = new Label(filterTypeComp, SWT.NONE);
-			l.setText(Messages.FilterDefinitionPanel_FilterTypeLabel);
+			filterOptionLabel = new Label(filterTypeComp, SWT.NONE);
+			filterOptionLabel.setText(Messages.FilterDefinitionPanel_FilterTypeLabel);
 			
 			
 			opWaypoint = new Button(filterTypeComp, SWT.RADIO);

@@ -27,6 +27,8 @@ import java.util.List;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.CcaaQueryItemProvider;
@@ -45,7 +47,12 @@ public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 	private List<String> names;
 	
 	public IntelQueryDatasetResultSetMetadata(IntelQueryDataset dataset) throws OdaException{
-		IntelRecordObservationQuery query = dataset.getConnection().getSession().get(IntelRecordObservationQuery.class, dataset.getQuery());
+		AbstractIntelQuery query = null;
+		if (dataset.getQueryType().equalsIgnoreCase(IntelRecordObservationQuery.KEY)) {
+			query = dataset.getConnection().getSession().get(IntelRecordObservationQuery.class, dataset.getQuery());
+		}else if(dataset.getQueryType().equalsIgnoreCase(IntelEntityRecordQuery.KEY)) {
+			query = dataset.getConnection().getSession().get(IntelEntityRecordQuery.class, dataset.getQuery());
+		}
 		if (query == null) {
 			throw new OdaException("Profiles Record Observtion Query not found"); //$NON-NLS-1$
 		}
@@ -56,6 +63,7 @@ public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 			}else {
 				itemProvider = new CcaaQueryItemProvider(dataset.getConnection().getConservationAreas(), query.getConservationArea());
 			}
+			
 			columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, itemProvider, dataset.getConnection().getCurrentLocale(), dataset.getConnection().getSession());
 			names = new ArrayList<>(columns.size());
 			//ensure names are unique

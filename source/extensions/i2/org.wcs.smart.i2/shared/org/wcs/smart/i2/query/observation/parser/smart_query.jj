@@ -152,7 +152,9 @@ TOKEN :
  | < ENTITY_TYPE_KEY : "entitytype:" <DM_KEY> >
  | < ENTITY_KEY : "entity:" (< DIGIT> | < UUIDLETTER >)+>
 
-| < RECORDSOURCE_KEY : "recordsource:" <DM_KEY> >
+ | < RECORDSOURCE_KEY : "recordsource:" <DM_KEY> >
+ | < RECORDSTATUS_KEY : "recordstatus " >
+ | < RECORDDATE_KEY : "recorddate ">
 
  | < RATTRIBUTE_KEY_NUMERIC : "r_attribute:n:"< DM_KEY >":"(< DM_KEY >)?>
  | < RATTRIBUTE_KEY_STRING : "r_attribute:s:"< DM_KEY >":"(< DM_KEY >)?>
@@ -161,6 +163,8 @@ TOKEN :
  | < RATTRIBUTE_KEY_LIST: "r_attribute:l:"< DM_KEY >":"(< DM_KEY >)?>
  | < RATTRIBUTE_KEY_EMPLOYEE: "r_attribute:e:"< DM_KEY >":"(< DM_KEY >)?>
  | < RATTRIBUTE_KEY_ENTITY: "r_attribute:entity:"< DM_KEY >":"(< DM_KEY >)?>
+
+ 
  
  | < QUERY_SPLITTER : "|" >
  | < DATE_GB_KEY : ( "day" | "month" | "year" ) >
@@ -684,13 +688,40 @@ IQueryFilter RecordDateExpression():
   Date date1 = null;
   Date date2 = null;
   Operator op = null;
+  String datestring;
 }
 {
 	(
 		< RATTRIBUTE_KEY_DATE > {key = token.image;}
 		op = DateOp()
 		< DATE_STRING >  {
-		  String datestring = token.image;
+		  datestring = token.image;
+		  try
+		  {
+		    date1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+		  }catch (Exception ex)
+		  {
+		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
+		  }
+		}
+		< K_AND >
+		< DATE_STRING > {
+		  datestring = token.image;
+		  try
+		  {
+		    date2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+		  }catch (Exception ex)
+		  {
+		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
+		  }
+		}
+	)
+|
+(
+		< RECORDDATE_KEY > {key = token.image;}
+		op = DateOp()
+		< DATE_STRING >  {
+		  datestring = token.image;
 		  try
 		  {
 		    date1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
@@ -765,6 +796,12 @@ IQueryFilter RecordKeyExpression():
 			< DM_KEY >  {value = token.image;}
 		)
 		|
+		  	( 
+			<RECORDSTATUS_KEY> {key = token.image;}
+			<  EQUAL > {op = token.image;}
+			< DM_KEY >  {value = token.image;}
+		)
+		|
 		( 
 			<RATTRIBUTE_KEY_EMPLOYEE> {key = token.image;}
 			<  EQUAL > {op = token.image;}
@@ -808,9 +845,12 @@ IQueryFilter EntityTypeFilter():
 
 IQueryFilter RecourdSourceFilter():
 {
+  String key1;
 }
 {
-  < RECORDSOURCE_KEY >{return RecordSourceFilter.create(token.image);}  
+  (
+  	< RECORDSOURCE_KEY >{return RecordSourceFilter.create(token.image);}
+ )
 }
 
 IQueryFilter EntityFilter():

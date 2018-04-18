@@ -63,7 +63,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class EntityRecordObservationFilterProcessor {
+public class EntityRecordWaypointFilterProcessor {
 
 	private IQueryFilter filter;
 	private Session s;
@@ -73,9 +73,8 @@ public class EntityRecordObservationFilterProcessor {
 	private IQueryItemProvider itemProvider;
 	
 	private String dataModelTable = null;
-
 	
-	public EntityRecordObservationFilterProcessor(IQueryFilter filter, IQueryItemProvider itemProvider, Session s){
+	public EntityRecordWaypointFilterProcessor(IQueryFilter filter, IQueryItemProvider itemProvider, Session s){
 		this.filter = filter;
 		this.s = s;
 		this.itemProvider = itemProvider;
@@ -100,6 +99,7 @@ public class EntityRecordObservationFilterProcessor {
 	 * @throws Exception
 	 */
 	public String processFilter(IProgressMonitor monitor) throws Exception{
+		
 		try {
 			final int[] filtercnt = new int[]{0};
 			if(filter != null){	
@@ -128,7 +128,7 @@ public class EntityRecordObservationFilterProcessor {
 	
 			//1. - Observation Query Filter
 			//create a table of all entities using date filter
-			monitor.subTask(Messages.EntityRecordObservationFilterProcessor_CreatingTableSubTask);
+			monitor.subTask(Messages.EntityRecordWaypointFilterProcessor_CreateEntityTableSubTask);
 			String entityTable = SqlGenerator.createTempTableName();
 					
 			StringBuilder tableColumns = new StringBuilder();
@@ -138,7 +138,7 @@ public class EntityRecordObservationFilterProcessor {
 			tableColumnNames.add("entity_type_key"); //$NON-NLS-1$
 			
 			StringBuilder dataModelColumns = new StringBuilder();
-			dataModelColumns.append("entity_uuid char(16) for bit data, obs_uuid char(16) for bit data "); //$NON-NLS-1$
+			dataModelColumns.append("entity_uuid char(16) for bit data, location_uuid char(16) for bit data "); //$NON-NLS-1$
 			StringBuilder dataModelColumnsExtra = new StringBuilder();
 			
 			StringBuilder sql = new StringBuilder();
@@ -156,12 +156,7 @@ public class EntityRecordObservationFilterProcessor {
 			sql.append(" JOIN smart.i_entity_type o on l.entity_type_uuid = o.uuid "); //$NON-NLS-1$
 			sql.append( " WHERE "); //$NON-NLS-1$
 			sql.append(" l.ca_uuid in (:cas) "); //$NON-NLS-1$
-			
-	//		String dateFilter = SqlGenerator.generateDateClause(dFilter, "datetime"); //$NON-NLS-1$
-	//		if (dateFilter != null){
-	//			sql.append(" AND "); //$NON-NLS-1$
-	//			sql.append(dateFilter);
-	//		}
+	
 			List<UUID> caUuids = itemProvider.getConservationAreas().stream().map(e->e.getUuid()).collect(Collectors.toList());
 			for (UUID uuid : caUuids) {
 				logString(UuidUtils.uuidToString(uuid));
@@ -191,7 +186,7 @@ public class EntityRecordObservationFilterProcessor {
 					String tempTable = SqlGenerator.createTempTableName();
 					
 					private String createColumn(IQueryFilter filter){
-						monitor.subTask(MessageFormat.format(Messages.EntityRecordObservationFilterProcessor_FilterSubTask, columnCnt,filtercnt[0] ));
+						monitor.subTask(MessageFormat.format(Messages.EntityRecordWaypointFilterProcessor_FilterTask, columnCnt,filtercnt[0] ));
 						
 						String columnName = "filter_" + columnCnt++; //$NON-NLS-1$
 						if (filter instanceof DataModelFilter) {
@@ -200,6 +195,7 @@ public class EntityRecordObservationFilterProcessor {
 							tableColumns.append(", " + columnName + " boolean "); //$NON-NLS-1$ //$NON-NLS-2$
 							tableColumnNames.add(columnName);
 						}
+						
 						StringBuilder sql = new StringBuilder();
 						sql.append("CREATE TABLE "); //$NON-NLS-1$
 						sql.append(tempTable);
@@ -216,7 +212,6 @@ public class EntityRecordObservationFilterProcessor {
 						s.createNativeQuery(sql.toString()).executeUpdate();
 						
 						filterToColumnName.add(new Object[] {filter, columnName});
-						
 						monitor.worked(1);
 						return columnName;
 					}
@@ -353,7 +348,6 @@ public class EntityRecordObservationFilterProcessor {
 					deleteSql.append(","); //$NON-NLS-1$
 				}
 				deleteSql.deleteCharAt(deleteSql.length() - 1);
-				
 				logString(deleteSql.toString());
 				s.createNativeQuery(deleteSql.toString()).executeUpdate();
 				
@@ -375,15 +369,15 @@ public class EntityRecordObservationFilterProcessor {
 			StringBuilder sb = new StringBuilder();
 			sb.append("CREATE TABLE " ); //$NON-NLS-1$
 			sb.append(dataModelTable);
-			sb.append(" (entity_uuid char(16) for bit data, obs_uuid char(16) for bit data )"); //$NON-NLS-1$
+			sb.append(" (entity_uuid char(16) for bit data, location_uuid char(16) for bit data )"); //$NON-NLS-1$
 			logString(sb.toString());
 			s.createNativeQuery(sb.toString()).executeUpdate();
 			
 			sb = new StringBuilder();
 			sb.append(" INSERT INTO "); //$NON-NLS-1$
 			sb.append(dataModelTable);
-			sb.append(" SELECT e.entity_uuid, i.uuid FROM smart.i_entity_location e join smart.i_observation i on i.location_uuid = e.location_uuid "); //$NON-NLS-1$
-			sb.append(" WHERE e.entity_uuid in (SELECT entity_uuid FROM " + obsTable + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(" SELECT entity_uuid, location_uuid FROM smart.i_entity_location "); //$NON-NLS-1$
+			sb.append(" WHERE entity_uuid in (SELECT entity_uuid FROM " + obsTable + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			logString(sb.toString());
 			s.createNativeQuery(sb.toString()).executeUpdate();
@@ -392,7 +386,7 @@ public class EntityRecordObservationFilterProcessor {
 		String t2 = SqlGenerator.createTempTableName();
 		StringBuilder sql = new StringBuilder();
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
-		sql.append ("(entity_uuid char(16) for bit data, obs_uuid char(16) for bit data) "); //$NON-NLS-1$
+		sql.append ("(entity_uuid char(16) for bit data, location_uuid char(16) for bit data) "); //$NON-NLS-1$
 		logString(sql.toString());
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		
@@ -400,10 +394,10 @@ public class EntityRecordObservationFilterProcessor {
 			//only a category filter
 			sql = new StringBuilder();
 			sql.append("INSERT INTO " + t2 + " " ); //$NON-NLS-1$ //$NON-NLS-2$
-			sql.append(" SELECT distinct a.entity_uuid, o.uuid as obs_uuid "); //$NON-NLS-1$
+			sql.append(" SELECT distinct a.entity_uuid,  a.location_uuid "); //$NON-NLS-1$
 			sql.append(" FROM " + dataModelTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
-			sql.append(" JOIN smart.i_entity_location l on l.entity_uuid = a.entity_uuid "); //$NON-NLS-1$
-			sql.append(" JOIN smart.i_observation o on l.location_uuid = o.location_uuid and a.obs_uuid = o.uuid "); //$NON-NLS-1$
+			sql.append(" JOIN smart.i_entity_location l on l.entity_uuid = a.entity_uuid and a.location_uuid = l.location_uuid"); //$NON-NLS-1$
+			sql.append(" JOIN smart.i_observation o on l.location_uuid = o.location_uuid"); //$NON-NLS-1$
 			sql.append(" JOIN smart.dm_category c on c.uuid = o.category_uuid "); //$NON-NLS-1$
 			sql.append(" WHERE (c.hkey >= :hkey1 and c.hkey < :hkey2 ) "); //$NON-NLS-1$
 			String hkey1 = filter.getCategoryKey();
@@ -426,7 +420,7 @@ public class EntityRecordObservationFilterProcessor {
 			sql = new StringBuilder();
 			sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 			sql.append(" SELECT a.*, CASE WHEN b.entity_uuid is null then null else true end "); //$NON-NLS-1$
-			sql.append(" FROM " + dataModelTable + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid and a.obs_uuid = b.obs_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			sql.append(" FROM " + dataModelTable + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid and a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			logString(sql.toString());
 			query = s.createNativeQuery(sql.toString());
 			query.executeUpdate();
@@ -442,10 +436,10 @@ public class EntityRecordObservationFilterProcessor {
 		//category and perhaps an attribute filter		
 		sql = new StringBuilder();
 		sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
-		sql.append(" SELECT distinct a.entity_uuid, o.uuid as obs_uuid "); //$NON-NLS-1$
-		sql.append( "FROM " + dataModelTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append(" JOIN smart.i_entity_location l on l.entity_uuid = a.entity_uuid "); //$NON-NLS-1$
-		sql.append(" JOIN smart.i_observation o on o.location_uuid = l.location_uuid and o.uuid = a.obs_uuid "); //$NON-NLS-1$
+		sql.append(" SELECT distinct a.entity_uuid, a.location_uuid"); //$NON-NLS-1$
+		sql.append(" FROM " + dataModelTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(" JOIN smart.i_entity_location l on l.entity_uuid = a.entity_uuid and l.location_uuid = a.location_uuid"); //$NON-NLS-1$
+		sql.append(" JOIN smart.i_observation o on o.location_uuid = l.location_uuid "); //$NON-NLS-1$
 		if (filter.getCategoryKey() != null){
 			sql.append(" JOIN smart.dm_category c on c.uuid = o.category_uuid "); //$NON-NLS-1$
 		}
@@ -550,7 +544,7 @@ public class EntityRecordObservationFilterProcessor {
 		sql = new StringBuilder();
 		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
 		sql.append(" SELECT a.*, CASE WHEN b.entity_uuid is null then null else true end "); //$NON-NLS-1$
-		sql.append(" FROM " + dataModelTable + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid and a.obs_uuid = b.obs_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append(" FROM " + dataModelTable + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid and a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
 		query = s.createNativeQuery(sql.toString());
 		query.executeUpdate();
@@ -612,7 +606,7 @@ public class EntityRecordObservationFilterProcessor {
 		logString(sql.toString());
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		
-		if (filter.getFixedAttribute() != null) {
+if (filter.getFixedAttribute() != null) {
 			
 			sql = new StringBuilder();
 			sql.append(" INSERT INTO " + t2); //$NON-NLS-1$
@@ -688,7 +682,7 @@ public class EntityRecordObservationFilterProcessor {
 			
 		}else if (filter.getAttributeType() != null) {
 			IntelAttribute attribute = itemProvider.getAttribute(filter.getAttributeKey(), s);
-			if (attribute == null) throw new Exception(MessageFormat.format(Messages.EntityRecordObservationFilterProcessor_IntelAttributeNotFound, filter.getAttributeKey()));
+			if (attribute == null) throw new Exception(MessageFormat.format(Messages.EntityRecordWaypointFilterProcessor_IntelAttributeNotFound, filter.getAttributeKey()));
 		
 			IntelAttributeListItem listItem = null;
 			if (filter.getAttributeType() == AttributeType.LIST && filter.getKeyValue() != null){
@@ -700,7 +694,7 @@ public class EntityRecordObservationFilterProcessor {
 							break;
 						}
 					}
-					if (listItem == null) throw new Exception(MessageFormat.format(Messages.EntityRecordObservationFilterProcessor_IntelAttributeListItemNotFound, filter.getAttributeKey()));
+					if (listItem == null) throw new Exception(MessageFormat.format(Messages.EntityRecordWaypointFilterProcessor_IntelAttributeListItemNotFound, filter.getAttributeKey()));
 				}
 			}
 			
@@ -713,7 +707,7 @@ public class EntityRecordObservationFilterProcessor {
 						e = null;
 					}
 					if (e == null) {
-						throw new Exception(MessageFormat.format(Messages.EntityRecordObservationFilterProcessor_EmployeeNotFound, filter.getKeyValue()));
+						throw new Exception(MessageFormat.format(Messages.EntityRecordWaypointFilterProcessor_EmployeeNotFound, filter.getKeyValue()));
 					}
 					employee = e;
 				}
@@ -773,7 +767,7 @@ public class EntityRecordObservationFilterProcessor {
 				sql.append(" v.string_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
 
 			}else {
-				throw new Exception(MessageFormat.format(Messages.EntityRecordObservationFilterProcessor_AttributetypeNotSupported, filter.getAttributeType().name()));
+				throw new Exception(MessageFormat.format(Messages.EntityRecordWaypointFilterProcessor_AttributeTypeNotSupported, filter.getAttributeType().name()));
 			}
 			logString(sql.toString());
 			logString(filter.getRecordSourceKey());

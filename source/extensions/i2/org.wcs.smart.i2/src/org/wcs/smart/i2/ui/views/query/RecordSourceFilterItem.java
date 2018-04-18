@@ -23,41 +23,15 @@ package org.wcs.smart.i2.ui.views.query;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.ImageData;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.InternalQueryManager;
-import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelAttributeListItem;
-import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
-import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
-import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
-import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
-import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
-import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
-import org.wcs.smart.ui.SmartLabelProvider;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Filter item for entity types; children include attributes and specific entities
@@ -67,7 +41,6 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class RecordSourceFilterItem extends DeferredTreeFilterItem {
 
-	private Object LOCK = new Object();
 	private String typeKey;
 	
 	
@@ -97,7 +70,7 @@ public class RecordSourceFilterItem extends DeferredTreeFilterItem {
 	
 	@Override
 	public DropItem[] asDropItem() {
-		return new DropItem[]{new TextDropItem(this.getName(), "recordsource:" + typeKey)};
+		return new DropItem[]{new TextDropItem(this.getName(), "recordsource:" + typeKey)}; //$NON-NLS-1$
 	}
 
 

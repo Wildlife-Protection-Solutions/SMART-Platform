@@ -39,6 +39,7 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.IIntelQueryEngine;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
@@ -51,7 +52,7 @@ import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.IntelAttributeQueryColumn;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
-import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
 
 /**
@@ -84,14 +85,13 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 			locale = Locale.getDefault();
 		}
 		
+		@SuppressWarnings("unchecked")
 		Collection<ConservationArea> cas = (Collection<ConservationArea>)parameters.get(ConservationArea.class.getName());
 		if (cas == null){
 			 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
 		}
-		IQueryItemProvider itemProvider = new DesktopCcaaQueryItemProvider(cas, query.getConservationArea());
-		if (cas.size() == 1) {
-			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
-		}
+		
+		IQueryItemProvider itemProvider = InternalQueryManager.INSTANCE.getQueryItemProvider();
 		
 		progress.subTask(Messages.IntelObservationQueryEngine_Progress2);
 		ParsedObservationQuery parsedQuery = IntelEntityRecordQuery.parseQuery(query.getQueryString());
@@ -105,70 +105,36 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 				
 				connection.setAutoCommit(true);
 				try{
-					if (parsedQuery.getFilterType() == IQueryFilter.FilterType.OBSERVATION){
-						queryResults = new IntelEntityRecordQueryResults();
+					queryResults = new IntelEntityRecordQueryResults();
 						
-						//session.beginTransaction();
+					String dataTable = null;
+					List<Object[]> filterToColumnNames = null;
+					if (parsedQuery.getFilterType() == FilterType.OBSERVATION) {
 						EntityRecordObservationFilterProcessor parser = new EntityRecordObservationFilterProcessor(parsedQuery.getFilter(), fItemProvider, session); 
-						String dataTable = parser.processFilter(fmonitor.split(2));
-						
-						queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
-						
-						fmonitor.checkCanceled();
-						fmonitor.subTask(Messages.IntelObservationQueryEngine_Progress3);
-						configureTableContents(dataTable, parser.getFilterToColumnNames(), true, fItemProvider, session);
-						
-//						String sql = "DROP TABLE " + dataTable; //$NON-NLS-1$
-//						SqlGenerator.logString(sql);
-//						session.createNativeQuery(sql).executeUpdate();
-//						fmonitor.worked(1);
-						
-						fmonitor.checkCanceled();
-						fmonitor.subTask(Messages.IntelObservationQueryEngine_Progress4);
-						computeQueryColumns(session, flocale, query, fItemProvider);
-						fmonitor.worked(1);
-						
-						fmonitor.checkCanceled();
-						computeCount(session);
-						
-						fmonitor.worked(1);
-						
-						return queryResults;
-					}else if (parsedQuery.getFilterType() == IQueryFilter.FilterType.WAYPOINT){
-						queryResults = new IntelEntityRecordQueryResults();
-						//TODO:
-//						
-//						//session.beginTransaction();
-//						WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), dfilter, fItemProvider, session); 
-//						String dataTable = parser.processFilter(fmonitor.split(2));
-//						
-//						queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
-//						
-//						fmonitor.checkCanceled();
-//						fmonitor.subTask(Messages.IntelObservationQueryEngine_Progress5);
-//						configureTableContents(dataTable, parser.getFilterToColumnNames(), false, session);
-//						
-//						String sql = "DROP TABLE " + dataTable; //$NON-NLS-1$
-//						SqlGenerator.logString(sql);
-//						session.createNativeQuery(sql).executeUpdate();
-//						fmonitor.worked(1);
-//						
-//						fmonitor.checkCanceled();
-//						fmonitor.subTask(Messages.IntelObservationQueryEngine_Progress6);
-//						computeQueryColumns(session, flocale, query);
-//						fmonitor.worked(1);
-//						
-//						fmonitor.checkCanceled();
-//						fmonitor.subTask(Messages.IntelObservationQueryEngine_Progress7);
-//						computeCount(session);
-//						computeBounds(session);
-//						
-//						fmonitor.worked(1);
-//						
-//						//session.getTransaction().commit();
-						return queryResults;
-						//process waypoint filter
+						dataTable = parser.processFilter(fmonitor.split(2));
+						filterToColumnNames = parser.getFilterToColumnNames();
+					}else {
+						EntityRecordWaypointFilterProcessor parser = new EntityRecordWaypointFilterProcessor(parsedQuery.getFilter(), fItemProvider, session); 
+						dataTable = parser.processFilter(fmonitor.split(2));	
+						filterToColumnNames = parser.getFilterToColumnNames();
 					}
+					queryResults.setFilterToColumnMap(filterToColumnNames);
+						
+					fmonitor.checkCanceled();
+					fmonitor.subTask(Messages.IntelObservationQueryEngine_Progress3);
+					configureTableContents(dataTable, filterToColumnNames, true, fItemProvider, session);
+						
+					fmonitor.checkCanceled();
+					fmonitor.subTask(Messages.IntelObservationQueryEngine_Progress4);
+					computeQueryColumns(session, flocale, query, fItemProvider);
+					fmonitor.worked(1);
+						
+					fmonitor.checkCanceled();
+					computeCount(session);
+						
+					fmonitor.worked(1);
+					
+					return queryResults;
 				}catch (OperationCanceledException ex) {
 					return null;
 				}catch (Exception ex){
@@ -176,7 +142,6 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 				}finally{
 					connection.setAutoCommit(false);
 				}
-				return null;
 			}
 		});		
 	}
@@ -196,7 +161,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		//hide columns that are not part of and entity type
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT DISTINCT entity_type_key FROM ");
+		sb.append("SELECT DISTINCT entity_type_key FROM "); //$NON-NLS-1$
 		sb.append(queryResults.getQueryDataTable());
 		
 		List<Object> typeKeys = session.createNativeQuery(sb.toString()).list();
@@ -220,24 +185,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 				}
 			}
 		}
-			
-		//remove unused attribute columns
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("SELECT distinct a.keyid FROM "); //$NON-NLS-1$
-//		sb.append(" smart.dm_attribute a join smart.i_observation_attribute b ON a.uuid = b.attribute_uuid "); //$NON-NLS-1$
-//		sb.append(" join " + queryResults.getQueryDataTable() + " c on c.observation_uuid = b.observation_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-//		List<String> populatedAttributes = session.createNativeQuery(sb.toString()).list();
-//		for (Iterator<IQueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
-//			IQueryColumn column = (IQueryColumn) iterator.next();
-//			if (column instanceof DataModelColumn ){
-//				String attribute = ((DataModelColumn)column).getAttributeKey();
-//				if (attribute != null && !populatedAttributes.contains(attribute)){
-//					//iterator.remove();
-//					((DataModelColumn) column).setVisible(false);
-//				}
-//			}
-//			
-//		}
+
 		queryResults.setQueryColumns(columns);
 	}
 	
@@ -245,20 +193,18 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 	 * create the results table from the data table add necessary results columns
 	 */
 	@SuppressWarnings("unchecked")
-	private void configureTableContents(String observationTable, HashMap<IQueryFilter, String> filterToColumn, boolean obsFilter, IQueryItemProvider fItemProvider, Session session){
-		
-		
+	private void configureTableContents(String observationTable, List<Object[]> filterToColumn, boolean obsFilter, IQueryItemProvider fItemProvider, Session session){
+			
 		StringBuilder sb = new StringBuilder();
-		sb.append(" ALTER TABLE ");
+		sb.append(" ALTER TABLE "); //$NON-NLS-1$
 		sb.append(observationTable);
-		sb.append(" add column entity_type varchar(1024)");
+		sb.append(" add column entity_type varchar(1024)"); //$NON-NLS-1$
 		
 		SqlGenerator.logString(sb.toString());
 		session.createNativeQuery(sb.toString()).executeUpdate();
-		
-		
+				
 		sb = new StringBuilder();
-		sb.append("SELECT DISTINCT entity_type_key FROM ");
+		sb.append("SELECT DISTINCT entity_type_key FROM "); //$NON-NLS-1$
 		sb.append(observationTable);
 		
 		List<Object> typeKeys = session.createNativeQuery(sb.toString()).list();
@@ -267,17 +213,17 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 			IntelEntityType type = fItemProvider.getEntityType(entityTypeKey, session);
 			
 			sb = new StringBuilder();
-			sb.append("UPDATE ");
+			sb.append("UPDATE "); //$NON-NLS-1$
 			sb.append(observationTable);
-			sb.append(" set entity_type = :name ");
-			sb.append(" WHERE entity_type_key = :key ");
+			sb.append(" set entity_type = :name "); //$NON-NLS-1$
+			sb.append(" WHERE entity_type_key = :key "); //$NON-NLS-1$
 				
 			NativeQuery<?> update = session.createNativeQuery(sb.toString());
-			update.setParameter("key", entityTypeKey);
+			update.setParameter("key", entityTypeKey); //$NON-NLS-1$
 			if(type == null) {
-				update.setParameter("name", entityTypeKey);
+				update.setParameter("name", entityTypeKey); //$NON-NLS-1$
 			}else {
-				update.setParameter("name", type.getName());
+				update.setParameter("name", type.getName()); //$NON-NLS-1$
 			}
 			update.executeUpdate();
 		}
@@ -285,83 +231,14 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		HashMap<String, Integer> columnNameToIndex = new HashMap<>();
 		
 		int columnIndex = 0;
-		columnNameToIndex.put("entity_uuid", columnIndex++);
-		columnNameToIndex.put("entity_type_key", columnIndex++);
-		for (String v : filterToColumn.values()){
-			columnNameToIndex.put(v, columnIndex++);
+		columnNameToIndex.put("entity_uuid", columnIndex++); //$NON-NLS-1$
+		columnNameToIndex.put("entity_type_key", columnIndex++); //$NON-NLS-1$
+		for (Object[] v : filterToColumn){
+			columnNameToIndex.put((String)v[1], columnIndex++);
 		}
-		columnNameToIndex.put("entity_type", columnIndex++);
-		
-//		
-//		String newTable = SqlGenerator.createTempTableName();
-//		
-//		String[][] columns = new String[][]{
-//			{"observation_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
-//			{"location_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
-//			{"record_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
-//			{"record_source_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
-//			{"record_status", "varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
-//			{"record_title", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
-//			{"loc_id", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
-//			{"loc_datetime", "timestamp"}, //$NON-NLS-1$ //$NON-NLS-2$
-//			{"loc_comment", "varchar(4096)"}, //$NON-NLS-1$ //$NON-NLS-2$
-//			{"loc_geometry", "blob"}, //$NON-NLS-1$ //$NON-NLS-2$
-//			{"category_uuid", "char(16) for bit data"} //$NON-NLS-1$ //$NON-NLS-2$
-//		};
-//		
-//		String[][] sortColumns = new String[][]{
-//			{"str_sort", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
-//			{"dbl_sort", "double"}, //$NON-NLS-1$ //$NON-NLS-2$
-//			{"date_sort", "date"}		 //$NON-NLS-1$ //$NON-NLS-2$
-//		};
-//		
-//		StringBuilder insert = new StringBuilder();
-//		StringBuilder select = new StringBuilder();
-//		StringBuilder sb = new StringBuilder();
-//		int columnIndex = 0;
-//		sb.append("CREATE TABLE " + newTable + " ( "); //$NON-NLS-1$ //$NON-NLS-2$
-//		for (String[] c : columns){
-//			sb.append( c[0] + " " + c[1] + ","); //$NON-NLS-1$ //$NON-NLS-2$
-//			columnNameToIndex.put(c[0], columnIndex++);
-//			insert.append(c[0] + ","); //$NON-NLS-1$
-//		}
-//		for (String[] c : sortColumns){
-//			sb.append( c[0] + " " + c[1] + ","); //$NON-NLS-1$ //$NON-NLS-2$
-//			columnNameToIndex.put(c[0], columnIndex++);
-//		}
-//		for (String v : filterToColumn.values()){
-//			sb.append( v + " boolean,"); //$NON-NLS-1$
-//			columnNameToIndex.put(v, columnIndex++);
-//			insert.append(v + ","); //$NON-NLS-1$
-//			select.append(", a." + v ); //$NON-NLS-1$
-//		}
-//		
-//		insert.deleteCharAt(insert.length() - 1);
-//		sb.deleteCharAt(sb.length() - 1);
-//		sb.append(")"); //$NON-NLS-1$
-//		
-//		SqlGenerator.logString(sb.toString());
-//		session.createNativeQuery(sb.toString()).executeUpdate();
-//		
-//		
-//		sb = new StringBuilder();
-//		sb.append(" INSERT INTO " + newTable + " "); //$NON-NLS-1$ //$NON-NLS-2$
-//		sb.append(" ( " + insert.toString() + ")" ); //$NON-NLS-1$ //$NON-NLS-2$
-//		sb.append("SELECT o.uuid, a.location_uuid, r.uuid, r.source_uuid, r.status, r.title, l.id, l.datetime, l.comment, l.geometry, o.category_uuid "); //$NON-NLS-1$
-//		sb.append(select);
-//		sb.append(" FROM " + observationTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
-//		sb.append(" JOIN smart.i_location l on a.location_uuid = l.uuid "); //$NON-NLS-1$
-//		sb.append(" JOIN smart.i_record r on r.uuid = l.record_uuid "); //$NON-NLS-1$
-//		sb.append(" LEFT JOIN smart.i_observation o on o.location_uuid = a.location_uuid "); //$NON-NLS-1$
-//		if (obsFilter){
-//			sb.append(" AND o.uuid = a.observation_uuid "); //$NON-NLS-1$
-//		}
-//		SqlGenerator.logString(sb.toString());
-//		session.createNativeQuery(sb.toString()).executeUpdate();
-		
-		queryResults.setResultsTable(observationTable);
-		queryResults.setColumnNameToIndexMap(columnNameToIndex);
-		
-	}
+		columnNameToIndex.put("entity_type", columnIndex++); //$NON-NLS-1$
 	
+		queryResults.setResultsTable(observationTable);
+		queryResults.setColumnNameToIndexMap(columnNameToIndex);		
+	}
 }

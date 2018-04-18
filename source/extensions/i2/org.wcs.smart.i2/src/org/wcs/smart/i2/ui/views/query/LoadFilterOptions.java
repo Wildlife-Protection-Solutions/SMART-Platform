@@ -63,6 +63,7 @@ import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 
 /**
  * Job for loading roots for filter tree
@@ -90,7 +91,8 @@ public class LoadFilterOptions extends Job {
 			roots.add(loadAttributes(s));
 			if (query.getTypeKey().equals(IntelEntityRecordQuery.KEY)) {
 				roots.add(loadRecords(s));
-				BasicTreeFilterItem opRoot = new BasicTreeFilterItem("Record Observations");
+				roots.add(loadRecordAttributes(s));
+				BasicTreeFilterItem opRoot = new BasicTreeFilterItem(Messages.LoadFilterOptions_EntityObservationsNode);
 				opRoot.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DATA_MODEL_ICON));
 				roots.add(opRoot);
 				opRoot.addChild(loadDataModel(s));
@@ -150,7 +152,8 @@ public class LoadFilterOptions extends Job {
 		categoryItem.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.CATEGORY_ICON));
 		dataModelItem.addChild(categoryItem);
 		
-		List<Category> categories = InternalQueryManager.INSTANCE.getQueryItemProvider().getRootCategories(session);
+		List<Category> categories = new ArrayList<>(InternalQueryManager.INSTANCE.getQueryItemProvider().getRootCategories(session));
+		categories.sort((a,b)->((Integer)a.getCategoryOrder()).compareTo(b.getCategoryOrder()));
 		for (Category category : categories){
 			DataModelTreeFilterItem item = new DataModelTreeFilterItem(category);
 			categoryItem.addChild(item);
@@ -260,15 +263,26 @@ public class LoadFilterOptions extends Job {
 		
 	}
 	
-	
+	private FilterTreeItem loadRecordAttributes(Session session) {
+		BasicTreeFilterItem recordSourceRoot = new BasicTreeFilterItem(Messages.LoadFilterOptions_RecordAttributesNode);
+		recordSourceRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
+		
+		RecordAttributeFilterItem dateFilter = new RecordAttributeFilterItem(RecordAttributeFilter.FixedAttribute.DATE);
+		recordSourceRoot.addChild(dateFilter);
+		
+		RecordAttributeFilterItem statusFilter = new RecordAttributeFilterItem(RecordAttributeFilter.FixedAttribute.STATUS);
+		recordSourceRoot.addChild(statusFilter);
+		
+		return recordSourceRoot;
+	}
 	
 	private FilterTreeItem loadRecords(Session session){
-		BasicTreeFilterItem recordSourceRoot = new BasicTreeFilterItem("Record Sources");
+		BasicTreeFilterItem recordSourceRoot = new BasicTreeFilterItem(Messages.LoadFilterOptions_SourcesNode);
 		recordSourceRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
 
 		List<IntelRecordSource> sources =
 				QueryFactory.buildQuery(session, IntelRecordSource.class, new Object[] {
-						"conservationArea", SmartDB.getCurrentConservationArea()
+						"conservationArea", SmartDB.getCurrentConservationArea() //$NON-NLS-1$
 				}).list();
 			
 		

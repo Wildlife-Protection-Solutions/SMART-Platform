@@ -98,7 +98,7 @@ public enum InternalQueryManager {
 		return new String[][] {
 			{ IntelRecordObservationQuery.KEY, Messages.InternalQueryManager_RecordObservationQueryName},
 			{ IntelEntitySummaryQuery.KEY, Messages.InternalQueryManager_EntitySummaryQueryName},
-			{ IntelEntityRecordQuery.KEY, "Entity Record Queyr"}
+			{ IntelEntityRecordQuery.KEY, Messages.InternalQueryManager_EntityRecordQuery}
 		};
 	}
 	

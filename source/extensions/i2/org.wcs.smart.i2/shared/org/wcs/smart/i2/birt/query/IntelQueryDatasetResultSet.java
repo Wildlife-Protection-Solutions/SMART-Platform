@@ -40,6 +40,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IResultItem;
@@ -74,26 +76,34 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	public IntelQueryDatasetResultSet(IntelQueryDataset dataset, HashMap<Integer, Object> parameters) throws OdaException {
 		this.dataset = dataset;
 		
-		IntelRecordObservationQuery query = dataset.getConnection().getSession().get(IntelRecordObservationQuery.class, dataset.getQuery());
+		AbstractIntelQuery query = null;
+		if (dataset.getQueryType().equalsIgnoreCase(IntelRecordObservationQuery.KEY)) {
+			query = dataset.getConnection().getSession().get(IntelRecordObservationQuery.class, dataset.getQuery());
+		}else if (dataset.getQueryType().equalsIgnoreCase(IntelEntityRecordQuery.KEY)) {
+			query = dataset.getConnection().getSession().get(IntelEntityRecordQuery.class, dataset.getQuery());
+		}
 		if (query == null) {
 			throw new OdaException("Profiles Record Observtion Query not found"); //$NON-NLS-1$
-		}
-		
-		int sindex = ((IntelQueryDatasetParameterMetadata)dataset.getParameterMetaData()).findParameterIndex(DataSourceParameter.START_DATE.getName());
-		int eindex = ((IntelQueryDatasetParameterMetadata)dataset.getParameterMetaData()).findParameterIndex(DataSourceParameter.END_DATE.getName());
-		Date[] dfilter = new Date[] {null, null};
-		if (sindex > 0 && eindex > 0 && parameters.get(sindex) != null && parameters.get(eindex) != null) {
-			dfilter[0] = (Date) parameters.get(sindex);
-			dfilter[1] = (Date) parameters.get(eindex);
 		}
 		
 		IIntelQueryEngine engine = IIntelQueryEngine.createEngine(query.getTypeKey());
 		HashMap<String, Object> eparameters = new HashMap<>();
 		eparameters.put(Session.class.getName(), dataset.getConnection().getSession());
 		eparameters.put(IProgressMonitor.class.getName(), new NullProgressMonitor());
-		eparameters.put(Date.class.getName(), dfilter);
 		eparameters.put(Locale.class.getName(), dataset.getConnection().getCurrentLocale());
 		eparameters.put(ConservationArea.class.getName(), dataset.getConnection().getConservationAreas());
+		
+		if (dataset.getParameterMetaData().getParameterCount() > 0) {
+			Date[] dfilter = new Date[] {null, null};
+			int sindex = ((IntelQueryDatasetParameterMetadata)dataset.getParameterMetaData()).findParameterIndex(DataSourceParameter.START_DATE.getName());
+			int eindex = ((IntelQueryDatasetParameterMetadata)dataset.getParameterMetaData()).findParameterIndex(DataSourceParameter.END_DATE.getName());
+			if (sindex > 0 && eindex > 0 && parameters.get(sindex) != null && parameters.get(eindex) != null) {
+				dfilter[0] = (Date) parameters.get(sindex);
+				dfilter[1] = (Date) parameters.get(eindex);
+			}
+			eparameters.put(Date.class.getName(), dfilter);
+		}
+		
 		try {
 			results = (IPagedQueryResultSet) engine.executeQuery(query, eparameters);
 			m_maxRows = results.getItemCount();

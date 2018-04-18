@@ -43,6 +43,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.IntelHibernateManager;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -58,6 +59,7 @@ import org.wcs.smart.i2.query.observation.filter.IFilterVisitor;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
+import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
 import org.wcs.smart.i2.query.observation.filter.RecordSourceFilter;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.util.UuidUtils;
@@ -116,7 +118,15 @@ public class IntelQueryColumnProvider {
 		}
 		return instance;	
 	}
-	
+	public List<IQueryColumn> getQueryColumns (AbstractIntelQuery query, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
+		if (query instanceof IntelRecordObservationQuery) {
+			return getQueryColumns((IntelRecordObservationQuery)query, itemProvider, l, session);
+		}else if (query instanceof IntelEntityRecordQuery) {
+			return getQueryColumns((IntelEntityRecordQuery)query, itemProvider, l, session);
+		}
+		throw new IllegalStateException("getQueryColumns is not support for query type " + query.getTypeKey());
+	}
+
 	public List<IQueryColumn> getQueryColumns (IntelRecordObservationQuery query, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
 		
 		List<IQueryColumn> columns = new ArrayList<>();
@@ -250,7 +260,7 @@ public class IntelQueryColumnProvider {
 		
 		for (String key : keys) {
 			IntelAttribute ia = itemProvider.getAttribute(key, session);
-			columns.add(new IntelAttributeQueryColumn(ia));
+			if (ia != null) columns.add(new IntelAttributeQueryColumn(ia));
 		}	
 		return columns;
 	}
@@ -453,7 +463,10 @@ public class IntelQueryColumnProvider {
 	
 	private String generateColumnName(RecordAttributeFilter filter, IQueryItemProvider itemProvider, Session session, Locale l){
 		
-		
+		if (filter.getFixedAttribute() != null) {
+			if (filter.getFixedAttribute() == FixedAttribute.DATE) return "Record Date";
+			if (filter.getFixedAttribute() == FixedAttribute.STATUS) return "Record Status";
+		}
 		
 		if (filter.getAttributeType() != null) {
 			StringBuilder sb = new StringBuilder();

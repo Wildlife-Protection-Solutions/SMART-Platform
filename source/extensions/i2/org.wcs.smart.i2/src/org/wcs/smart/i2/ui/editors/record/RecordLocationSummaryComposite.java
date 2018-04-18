@@ -23,6 +23,8 @@ package org.wcs.smart.i2.ui.editors.record;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -34,6 +36,7 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.ObservationDialog;
 import org.wcs.smart.i2.ui.ObservationTreeViewer;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -78,28 +81,39 @@ public class RecordLocationSummaryComposite extends Composite{
 				editor.setActiveEditor(editor.getMapPage());
 			}
 		});
-		
-		MenuItem editItem = new MenuItem(mnu, SWT.PUSH);
-		editItem.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		editItem.addListener(SWT.Selection, e->{
-			Object element = observationViewer.getViewer().getStructuredSelection().getFirstElement();
-			IntelObservation loc = null;
-			if (element instanceof IntelObservation) {
-				loc = ((IntelObservation)element);
-			}else if (element instanceof IntelObservationAttribute) {
-				loc = ((IntelObservationAttribute)element).getObservation();
-			}
-			if (loc != null) {
-				ObservationDialog dialog = new ObservationDialog(getShell(), loc);
-				if (dialog.open() == Window.OK){
-					editor.setDirty(true);
-					editor.getMapPage().refreshLocationTable();
-					init();
+		if (IntelSecurityManager.INSTANCE.canEditRecord()){
+			MenuItem editItem = new MenuItem(mnu, SWT.PUSH);
+			editItem.setText(DialogConstants.EDIT_BUTTON_TEXT);
+			editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+			editItem.addListener(SWT.Selection, e->{
+				Object element = observationViewer.getViewer().getStructuredSelection().getFirstElement();
+				IntelObservation loc = null;
+				if (element instanceof IntelObservation) {
+					loc = ((IntelObservation)element);
+				}else if (element instanceof IntelObservationAttribute) {
+					loc = ((IntelObservationAttribute)element).getObservation();
 				}
-			}
-		});
-		
+				if (loc != null) {
+					ObservationDialog dialog = new ObservationDialog(getShell(), loc);
+					if (dialog.open() == Window.OK){
+						editor.setDirty(true);
+						editor.getMapPage().refreshLocationTable();
+						init();
+					}
+				}
+			});
+			editItem.setEnabled(false);
+			
+			mnu.addMenuListener(new MenuListener() {
+				@Override
+				public void menuShown(MenuEvent e) {
+					editItem.setEnabled( editor.getEditMode() ); 
+				}
+				
+				@Override
+				public void menuHidden(MenuEvent e) {}
+			});
+		}
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
 		

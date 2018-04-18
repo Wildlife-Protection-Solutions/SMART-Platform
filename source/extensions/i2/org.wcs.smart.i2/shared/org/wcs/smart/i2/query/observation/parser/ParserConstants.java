@@ -115,35 +115,39 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int RECORDSOURCE_KEY = 56;
   /** RegularExpression Id. */
-  int RATTRIBUTE_KEY_NUMERIC = 57;
+  int RECORDSTATUS_KEY = 57;
   /** RegularExpression Id. */
-  int RATTRIBUTE_KEY_STRING = 58;
+  int RECORDDATE_KEY = 58;
   /** RegularExpression Id. */
-  int RATTRIBUTE_KEY_BOOLEAN = 59;
+  int RATTRIBUTE_KEY_NUMERIC = 59;
   /** RegularExpression Id. */
-  int RATTRIBUTE_KEY_DATE = 60;
+  int RATTRIBUTE_KEY_STRING = 60;
   /** RegularExpression Id. */
-  int RATTRIBUTE_KEY_LIST = 61;
+  int RATTRIBUTE_KEY_BOOLEAN = 61;
   /** RegularExpression Id. */
-  int RATTRIBUTE_KEY_EMPLOYEE = 62;
+  int RATTRIBUTE_KEY_DATE = 62;
   /** RegularExpression Id. */
-  int RATTRIBUTE_KEY_ENTITY = 63;
+  int RATTRIBUTE_KEY_LIST = 63;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 64;
+  int RATTRIBUTE_KEY_EMPLOYEE = 64;
   /** RegularExpression Id. */
-  int DATE_GB_KEY = 65;
+  int RATTRIBUTE_KEY_ENTITY = 65;
   /** RegularExpression Id. */
-  int ENTITYTYPE_GB = 66;
+  int QUERY_SPLITTER = 66;
   /** RegularExpression Id. */
-  int EATTRIBUTE_GB_KEY_POSITION = 67;
+  int DATE_GB_KEY = 67;
   /** RegularExpression Id. */
-  int EATTRIBUTE_GB_KEY_DATE = 68;
+  int ENTITYTYPE_GB = 68;
   /** RegularExpression Id. */
-  int EATTRIBUTE_GB_KEY_LIST = 69;
+  int EATTRIBUTE_GB_KEY_POSITION = 69;
   /** RegularExpression Id. */
-  int EATTRIBUTE_GB_KEY_EMPLOYEE = 70;
+  int EATTRIBUTE_GB_KEY_DATE = 70;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 71;
+  int EATTRIBUTE_GB_KEY_LIST = 71;
+  /** RegularExpression Id. */
+  int EATTRIBUTE_GB_KEY_EMPLOYEE = 72;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 73;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -207,6 +211,8 @@ public interface ParserConstants {
     "<ENTITY_TYPE_KEY>",
     "<ENTITY_KEY>",
     "<RECORDSOURCE_KEY>",
+    "\"recordstatus \"",
+    "\"recorddate \"",
     "<RATTRIBUTE_KEY_NUMERIC>",
     "<RATTRIBUTE_KEY_STRING>",
     "<RATTRIBUTE_KEY_BOOLEAN>",

@@ -178,7 +178,7 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 	public String getUniqueColumnIdentifier() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("dm_"); //$NON-NLS-1$
-		sb.append(categoryKey != null ? categoryKey : "");
+		sb.append(categoryKey != null ? categoryKey : ""); //$NON-NLS-1$
 		sb.append("_"); //$NON-NLS-1$
 		if (attributeKey != null) {
 			sb.append(attributeKey);

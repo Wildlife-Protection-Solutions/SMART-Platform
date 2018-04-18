@@ -88,8 +88,11 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 		this.columnNameToIndex = columnNameToIndex;
 	}
 	
-	public void setFilterToColumnMap(HashMap<IQueryFilter, String> filterToColumn){
-		this.filterToColumn = filterToColumn;
+	public void setFilterToColumnMap(List<Object[]> filterToColumn){
+		this.filterToColumn = new HashMap<>();
+		for (Object[] o : filterToColumn) {
+			this.filterToColumn.put((IQueryFilter)o[0], (String)o[1]);
+		}
 	}
 	
 	public void setQueryColumns(List<IQueryColumn> columns){
@@ -127,7 +130,6 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 		
 		item.setEntityUuid(asUuid(rowData[columnNameToIndex.get("entity_uuid")])); //$NON-NLS-1$
 		
-		String entityTypeKey = (String) rowData[columnNameToIndex.get("entity_type_key")];
 		String entityType = (String) rowData[columnNameToIndex.get("entity_type")];
 		item.setEntityTypeName(entityType);
 

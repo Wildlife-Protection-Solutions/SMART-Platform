@@ -23,7 +23,6 @@ package org.wcs.smart.i2.ui.views.query;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -34,7 +33,6 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.InternalQueryManager;
@@ -47,7 +45,6 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
-import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
@@ -130,9 +127,9 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try(Session s = HibernateManager.openSession()){
-						Query<IntelEntity> query = s.createQuery("FROM IntelEntity WHERE conservationArea = :ca AND entityType.keyId = :keyId", IntelEntity.class);
-						query.setParameter("ca",  SmartDB.getCurrentConservationArea());
-						query.setParameter("keyId",  attributeKey);
+						Query<IntelEntity> query = s.createQuery("FROM IntelEntity WHERE conservationArea = :ca AND entityType.keyId = :keyId", IntelEntity.class); //$NON-NLS-1$
+						query.setParameter("ca",  SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+						query.setParameter("keyId",  attributeKey); //$NON-NLS-1$
 						List<IntelEntity> items = query.list();
 						items.sort((a,b)->Collator.getInstance().compare(a.getIdAttributeAsText(), b.getIdAttributeAsText()));
 						for (IntelEntity e : items) {

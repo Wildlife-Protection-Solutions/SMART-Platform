@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;

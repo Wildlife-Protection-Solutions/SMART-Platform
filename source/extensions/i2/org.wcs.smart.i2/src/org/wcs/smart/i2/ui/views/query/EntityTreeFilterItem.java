@@ -24,7 +24,6 @@ package org.wcs.smart.i2.ui.views.query;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.text.MessageFormat;
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 

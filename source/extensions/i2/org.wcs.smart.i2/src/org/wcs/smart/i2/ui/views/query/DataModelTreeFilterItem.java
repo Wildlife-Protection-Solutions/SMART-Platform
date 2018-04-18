@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.ui.views.query;
 
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -115,7 +114,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 								}
 								List<CategoryAttribute> cas = new ArrayList<>();
 								c.getAllCategoryAttribute(cas, null);
-								cas.sort((a,b)->Collator.getInstance().compare(a.getAttribute().getName(), b.getAttribute().getName()));
+								cas.sort((a,b)->((Integer)a.getOrder()).compareTo(b.getOrder()));
 								for (CategoryAttribute ca : cas){
 									temp.add(new DataModelTreeFilterItem(new CategoryAttribute(c, ca.getAttribute())));
 								}

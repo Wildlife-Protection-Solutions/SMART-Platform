@@ -98,6 +98,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		}
 		
 		//Conservation Area
+		@SuppressWarnings("unchecked")
 		Collection<ConservationArea> cas = (Collection<ConservationArea>)parameters.get(ConservationArea.class.getName());
 		if (cas == null){
 			 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);

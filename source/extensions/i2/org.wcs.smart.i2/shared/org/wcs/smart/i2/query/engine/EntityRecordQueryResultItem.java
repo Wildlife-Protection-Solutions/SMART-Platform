@@ -24,7 +24,6 @@ package org.wcs.smart.i2.query.engine;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 

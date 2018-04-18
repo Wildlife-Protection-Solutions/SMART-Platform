@@ -33,11 +33,22 @@ import org.wcs.smart.i2.birt.entity.EntityDataset;
  *
  */
 public class IntelQueryDatasetParameterMetadata implements IParameterMetaData{
-	private static DataSourceParameter[] parameters = new DataSourceParameter[]{
+	
+	private static DataSourceParameter[] dateParameters = new DataSourceParameter[]{
 		null,
 		DataSourceParameter.START_DATE,
 		DataSourceParameter.END_DATE,
 	};
+	
+	private DataSourceParameter[] parameters = null;
+	
+	public IntelQueryDatasetParameterMetadata() {
+		parameters = dateParameters;
+	}
+	
+	public IntelQueryDatasetParameterMetadata(DataSourceParameter[] parameters) {
+		this.parameters = parameters;
+	}
 	
 	public int findParameterIndex(String parameterName){
 		for (int i = 1; i < parameters.length; i ++){

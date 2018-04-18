@@ -41,6 +41,7 @@ import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.birt.query.IntelQueryDataset;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.security.IntelSecurityManager;
@@ -119,6 +120,7 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 		try(Session s = HibernateManager.openSession()){
 			queries.addAll( QueryFactory.buildQuery(s, IntelRecordObservationQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
 			queries.addAll( QueryFactory.buildQuery(s, IntelEntitySummaryQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
+			queries.addAll( QueryFactory.buildQuery(s, IntelEntityRecordQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
 		}
 		
 		Collections.sort(queries, (a,b) -> Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));

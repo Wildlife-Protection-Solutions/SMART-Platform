@@ -45,10 +45,10 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IResultItem;
+import org.wcs.smart.i2.query.engine.IntelEntityRecordQueryResults;
 import org.wcs.smart.i2.query.engine.IntelObservationQueryResults;
 
 /**
@@ -207,6 +207,8 @@ public class QueryLazyResultsTable extends Composite{
 			table.setInput(result);	
 			if (result instanceof IntelObservationQueryResults){
 				resultCnt.setText(MessageFormat.format(Messages.QueryLazyResultsTable_CntLabel1,result.getItemCount(), ((IntelObservationQueryResults)result).getWaypointCount()));
+			}else if (result instanceof IntelEntityRecordQueryResults){
+				resultCnt.setText(MessageFormat.format(Messages.QueryLazyResultsTable_EntitiesCntLabel, result.getItemCount()));
 			}else{
 				resultCnt.setText(MessageFormat.format(Messages.QueryLazyResultsTable_CntLabel2,result.getItemCount()));
 			}

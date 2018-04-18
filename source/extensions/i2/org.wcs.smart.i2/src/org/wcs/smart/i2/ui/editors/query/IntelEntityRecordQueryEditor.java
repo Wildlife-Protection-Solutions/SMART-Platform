@@ -42,8 +42,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -297,10 +295,10 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		
 		Composite headerComp = toolkit.createComposite(main, SWT.NONE);
 		headerComp.setLayout(new GridLayout(2, false));
-		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)headerComp.getLayout()).marginWidth = 0;
 		((GridLayout)headerComp.getLayout()).marginHeight = 0;
-		((GridData)headerComp.getLayoutData()).heightHint = 24;
+		((GridData)headerComp.getLayoutData()).heightHint = 27;
 		
 		header = new IntelQueryNameLabel(headerComp, toolkit, pageForm.getFont(), pageForm.getForeground());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
@@ -316,7 +314,6 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		
 		ToolBar headerToolbar = new ToolBar(headerComp, SWT.FLAT);
 		headerToolbar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-//		((GridData)(headerToolbar.getLayoutData())).heightHint = 12;
 
 		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
 			saveItem = new ToolItem(headerToolbar, SWT.PUSH);
@@ -349,7 +346,7 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		SashForm core = new SashForm(main, SWT.VERTICAL);
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		SmartSection resultsSection = new SmartSection(core, toolkit, "Results");
+		SmartSection resultsSection = new SmartSection(core, toolkit, Messages.IntelEntityRecordQueryEditor_ResultsSection);
 		
 		Composite c = toolkit.createComposite(resultsSection, SWT.NONE);
 		c.setLayout(new GridLayout());
@@ -358,7 +355,7 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		createResultSection(c, toolkit);
 		
-		SmartSection definitionSection = new SmartSection(core, toolkit, "Definition");
+		SmartSection definitionSection = new SmartSection(core, toolkit, Messages.IntelEntityRecordQueryEditor_DefinitionSection);
 		c = toolkit.createComposite(definitionSection);
 		c.setLayout(new GridLayout());
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -378,7 +375,8 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 			setDirty(true);
 			validateQuery();
 		});
-		
+		panel.getfilterOptionLabel().setToolTipText(Messages.IntelEntityRecordQueryEditor_FilterTypeTooltip);
+		panel.getfilterOptionLabel().setText(Messages.IntelEntityRecordQueryEditor_FiltetypeLabel);
 		loadQueryJob.schedule();
 	}
 
@@ -414,15 +412,13 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		wd.open();
 	}
 	
-	private void runQuery(){
-		
+	private void runQuery(){		
 		resultsTable.setInput(null);
 		((StackLayout)stackPanel.getLayout()).topControl = progressPanel;
 		stackPanel.layout(true);
 		
 		String queryString = panel.getQueryPart();
 		query.setQueryString(queryString);
-		//TODO:
 		resultsTable.setQuery(query);
 		
 		runJob.setQuery(query);
