@@ -140,10 +140,6 @@ public class IntelObservationQueryResults  implements IQueryResult, IPagedQueryR
 	public List<IQueryColumn> getQueryColumns(){
 		return this.queryColumns;
 	}
-	
-	public String getValueAsString(IntelObservationResultItem item, IQueryColumn qc, Locale l, Session session){
-		return qc.getValue(item, l);
-	}
 
 	
 	/**

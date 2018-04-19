@@ -37,9 +37,11 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.i2.ConnectIntelObservationResultItem;
+import org.wcs.smart.connect.query.engine.i2.IntelEntityRecordQueryResults;
 import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryResults;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
+import org.wcs.smart.i2.query.engine.EntityRecordQueryResultItem;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
@@ -128,7 +130,42 @@ public class CsvExporter {
 	 * Exports advanced query results 
 	 * 
 	 */
-	public void exportResults(IntelObservationQueryResults results, Session session) throws Exception{
+//	public void exportResults(IntelObservationQueryResults results, Session session) throws Exception{
+//		try (CSVWriter writer = new CSVWriter(
+//				new OutputStreamWriter(new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8) ,delimiter)) {
+//				
+//				List<IQueryColumn> cols = results.getQueryColumns();
+//				
+//				//headers
+//				String[] data = new String[cols.size()];
+//				for (int i = 0; i < cols.size(); i ++){
+//					data[i] = cols.get(i).getColumnName();
+//				}
+//				writer.writeNext(data);
+//				
+//				//get data and write
+//				PagedResultSetIterator rs = results.iterator(session);
+//				while(rs.hasNext()) {
+//					ConnectIntelObservationResultItem resultItem = (ConnectIntelObservationResultItem) rs.next();;
+//					data = new String[cols.size()];
+//					for (int i = 0; i < cols.size(); i ++){
+//						data[i] = results.getValueAsString(resultItem, cols.get(i), l, session);
+//					}
+//					writer.writeNext(data);
+//					
+//				}
+//		}catch (Exception ex){
+//			logger.log(Level.SEVERE, ex.getMessage(), ex);
+//			throw ex;
+//		}
+//		
+//	}
+	
+	/**
+	 * Exports advanced query results 
+	 * 
+	 */
+	public void exportResults(org.wcs.smart.i2.query.IPagedQueryResultSet results, Session session) throws Exception{
 		try (CSVWriter writer = new CSVWriter(
 				new OutputStreamWriter(new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8) ,delimiter)) {
 				
@@ -144,10 +181,10 @@ public class CsvExporter {
 				//get data and write
 				PagedResultSetIterator rs = results.iterator(session);
 				while(rs.hasNext()) {
-					ConnectIntelObservationResultItem resultItem = (ConnectIntelObservationResultItem) rs.next();;
+					org.wcs.smart.i2.query.IResultItem resultItem = rs.next();
 					data = new String[cols.size()];
 					for (int i = 0; i < cols.size(); i ++){
-						data[i] = results.getValueAsString(resultItem, cols.get(i), l, session);
+						data[i] = cols.get(i).getValue(resultItem, l);
 					}
 					writer.writeNext(data);
 					

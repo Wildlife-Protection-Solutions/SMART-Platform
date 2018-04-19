@@ -23,6 +23,7 @@ package org.wcs.smart.connect.query.engine.i2;
 
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.IQueryEngineFactory;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 
@@ -37,7 +38,7 @@ public class QueryEngineFactory implements IQueryEngineFactory {
 	public IIntelQueryEngine findQueryEngine(String queryType) {
 		if (queryType.equals(IntelEntitySummaryQuery.KEY)) return new IntelEntitySummaryQueryEngine();
 		if (queryType.equals(IntelRecordObservationQuery.KEY)) return new IntelObservationQueryEngine();
-
+		if (queryType.equals(IntelEntityRecordQuery.KEY)) return new IntelEntityRecordQueryEngine();
 		return null;
 	}
 

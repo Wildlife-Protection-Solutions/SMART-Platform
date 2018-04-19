@@ -59,6 +59,7 @@ import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
 import org.wcs.smart.i2.query.export.CsvRecordQueryExporter;
 import org.wcs.smart.i2.query.export.ShpRecordQueryExporter;
+import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 
@@ -112,6 +113,9 @@ public class AdvancedLabelProviderImpl implements
 		if (item == FixedQueryColumn.Column.RECORD_TITLE) return Messages.getString("AdvancedLabelProviderImpl.QueryColRecordTital", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.Column.RECORD_SOURCE) return Messages.getString("AdvancedLabelProviderImpl.QueryColRecordSource", l); //$NON-NLS-1$
 
+		if (item == FixedQueryColumn.Column.ENTITY_ID) return "Entity ID";
+		if (item == FixedQueryColumn.Column.ENTITY_TYPE) return "Entity Type";
+		
 		if (item == IntelRecord.Status.NEW) return Messages.getString("AdvancedLabelProviderImpl.IntelRecordStatusUnprocessed", l); //$NON-NLS-1$
 		if (item == IntelRecord.Status.PROCESSING) return Messages.getString("AdvancedLabelProviderImpl.IntelRecordStatusInProgress", l); //$NON-NLS-1$
 		if (item == IntelRecord.Status.COMPLETE) return Messages.getString("AdvancedLabelProviderImpl.IntelRecordStatusComplete", l); //$NON-NLS-1$
@@ -256,6 +260,9 @@ public class AdvancedLabelProviderImpl implements
 		if (item.equals(AdvancedEntitySearch.Error.TOKEN_NOT_SUPPORTED)) return Messages.getString("AdvancedLabelProviderImpl.AdvSearchTokenNotSupported", l); //$NON-NLS-1$
 		
 		if (item == ValuePart.ValueOption.NUMBER_ENTITIES) return Messages.getString("AdvancedLabelProviderImpl.NumberOfEntitiesValue", l); //$NON-NLS-1$
+		
+		if (item == FixedAttribute.DATE) return "Record Date";
+		if (item == FixedAttribute.STATUS) return "Record Status";
 		return ""; //$NON-NLS-1$
 	}
 

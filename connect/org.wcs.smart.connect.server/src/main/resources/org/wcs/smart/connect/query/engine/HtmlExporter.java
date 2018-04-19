@@ -34,6 +34,7 @@ import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.i2.ConnectIntelObservationResultItem;
 import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryResults;
+import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
@@ -128,7 +129,7 @@ public class HtmlExporter {
 	 * Exports advanced query results 
 	 * 
 	 */
-	public void exportResults(IntelObservationQueryResults results, Session session) throws Exception{
+	public void exportResults(IPagedQueryResultSet results, Session session) throws Exception{
 		try{
 			htmlText.append("<table>");
 			htmlText.append("<tr>");
@@ -142,11 +143,12 @@ public class HtmlExporter {
 			//get data and write
 			PagedResultSetIterator rs = results.iterator(session);
 			while(rs.hasNext()) {
-				ConnectIntelObservationResultItem resultItem = (ConnectIntelObservationResultItem) rs.next();
+				org.wcs.smart.i2.query.IResultItem resultItem = rs.next();
 				
 				htmlText.append("<tr>");
 				for (int i = 0; i < cols.size(); i ++){
-					htmlText.append("<td style='border: solid 1px grey;'>" + results.getValueAsString(resultItem, cols.get(i), l, session) + "</td>");
+					String text = cols.get(i).getValue(resultItem, l);
+					htmlText.append("<td style='border: solid 1px grey;'>" + text + "</td>");
 				}
 				htmlText.append("</tr>");
 			}					

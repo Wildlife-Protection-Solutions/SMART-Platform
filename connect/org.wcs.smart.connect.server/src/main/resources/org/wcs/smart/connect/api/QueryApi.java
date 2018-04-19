@@ -74,6 +74,7 @@ import org.wcs.smart.connect.query.engine.HtmlExporter;
 import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.connect.query.engine.ShpExporter;
 import org.wcs.smart.connect.query.engine.TiffRasterExporter;
+import org.wcs.smart.connect.query.engine.i2.IntelEntityRecordQueryResults;
 import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryResults;
 import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.QueryAction;
@@ -221,6 +222,7 @@ public class QueryApi extends HttpServlet{
 				return results.response;
 			}else {
 				AbstractIntelQuery query2 = QueryManager.INSTANCE.findIntelQuery(uuid, s);
+				if (query2 == null)  throw new SmartConnectException(Status.BAD_REQUEST, "Query not found."); //$NON-NLS-1$
 				validateDateFilter(query2.getTypeKey(), filter);
 				QueryResult results = executeAdvIntelQuery(query2, cafilter, df, srid, format, delimiter,  sortColumnName, sortDirectionInt, s);
 				result = results.result;
@@ -510,6 +512,25 @@ public class QueryApi extends HttpServlet{
 			}else if (format.equalsIgnoreCase(HtmlExporter.FORMAT_KEY)){
 				HtmlExporter exporter = new HtmlExporter(request.getLocale());
 				exporter.exportResults( (IntelObservationQueryResults)result, s);
+				return new QueryResult( Response
+						.status(Status.OK)
+						.header("Content-Type", MediaType.TEXT_HTML) //$NON-NLS-1$
+						.entity(exporter.getHtml() )
+						.build(), new NoDisposeQueryResult());
+			}
+		}
+		if (result instanceof IntelEntityRecordQueryResults){
+			//TODO: sorting
+//			((IntelEntityRecordQueryResults)result).setSorting(sortColumnName, sortDirectionInt);
+//			((IntelEntityRecordQueryResults)result).configureSort(s);
+			if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
+				java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
+				CsvExporter exporter = new CsvExporter(outputFile, delimiter.charAt(0),request.getLocale());
+				exporter.exportResults( (IntelEntityRecordQueryResults)result, s);
+				return new QueryResult(writeText(outputFile), new NoDisposeQueryResult());
+			}else if (format.equalsIgnoreCase(HtmlExporter.FORMAT_KEY)){
+				HtmlExporter exporter = new HtmlExporter(request.getLocale());
+				exporter.exportResults( (IntelEntityRecordQueryResults)result, s);
 				return new QueryResult( Response
 						.status(Status.OK)
 						.header("Content-Type", MediaType.TEXT_HTML) //$NON-NLS-1$

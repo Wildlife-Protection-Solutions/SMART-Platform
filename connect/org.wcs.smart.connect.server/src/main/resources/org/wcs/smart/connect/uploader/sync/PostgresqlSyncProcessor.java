@@ -140,7 +140,11 @@ public class PostgresqlSyncProcessor {
 			//update info label
 			CaProcessorUtils.updateCaLabel(session, info);
 		}finally{
-			FileUtils.deleteDirectory(tempDir.toFile());
+			try {
+				FileUtils.deleteDirectory(tempDir.toFile());
+			}catch (Exception ex) {
+				logger.log(Level.SEVERE, ex.getMessage(), ex);
+			}
 		}
 	}
 
