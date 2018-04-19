@@ -806,6 +806,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_RecordAttributeRsColumnStringValue;
 	public static String IntelligenceLabelProviderImpl_RecordCompleteLabel;
 	public static String IntelligenceLabelProviderImpl_RecordDatasetName;
+	public static String IntelligenceLabelProviderImpl_RecordDateLabel;
 	public static String IntelligenceLabelProviderImpl_RecordEntitiesDatasetName;
 	public static String IntelligenceLabelProviderImpl_RecordEntitiesRsEntityIdColumn;
 	public static String IntelligenceLabelProviderImpl_RecordEntitiesRsEntityImageColumn;
@@ -832,6 +833,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_RecordRsColumnTitle;
 	public static String IntelligenceLabelProviderImpl_RecordRsColumnUUID;
 	public static String IntelligenceLabelProviderImpl_RecordRsPrimaryDateColumnTitle;
+	public static String IntelligenceLabelProviderImpl_RecordStatusLabel;
 	public static String IntelligenceLabelProviderImpl_RecordsWorkingSetLabel;
 	public static String IntelligenceLabelProviderImpl_RecordUnprocessedLabel;
 	public static String IntelligenceLabelProviderImpl_SearchNotFound;

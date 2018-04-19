@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -45,8 +46,6 @@ import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
-import org.wcs.smart.i2.query.CaQueryItemProvider;
-import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IQueryItemProvider;
@@ -54,6 +53,7 @@ import org.wcs.smart.i2.query.IntelAttributeQueryColumn;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for intelligence observation queries.
@@ -195,13 +195,32 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 	@SuppressWarnings("unchecked")
 	private void configureTableContents(String observationTable, List<Object[]> filterToColumn, boolean obsFilter, IQueryItemProvider fItemProvider, Session session){
 			
+		String[][] sortColumns = new String[][]{
+			{"str_sort", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"dbl_sort", "double"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"date_sort", "date"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"entity_id", "varchar(1024)"} //$NON-NLS-1$ //$NON-NLS-2$
+		};
+		
 		StringBuilder sb = new StringBuilder();
 		sb.append(" ALTER TABLE "); //$NON-NLS-1$
 		sb.append(observationTable);
 		sb.append(" add column entity_type varchar(1024)"); //$NON-NLS-1$
-		
 		SqlGenerator.logString(sb.toString());
 		session.createNativeQuery(sb.toString()).executeUpdate();
+		
+		for (String[] items : sortColumns) {
+			sb = new StringBuilder();
+			sb.append(" ALTER TABLE "); //$NON-NLS-1$
+			sb.append(observationTable);
+			sb.append(" add column "); //$NON-NLS-1$
+			sb.append(items[0]);
+			sb.append(" " ); //$NON-NLS-1$
+			sb.append(items[1]);
+			
+			SqlGenerator.logString(sb.toString());
+			session.createNativeQuery(sb.toString()).executeUpdate();
+		}
 				
 		sb = new StringBuilder();
 		sb.append("SELECT DISTINCT entity_type_key FROM "); //$NON-NLS-1$

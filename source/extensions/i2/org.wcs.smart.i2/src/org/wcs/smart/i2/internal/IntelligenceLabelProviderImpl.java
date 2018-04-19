@@ -61,6 +61,7 @@ import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
 import org.wcs.smart.i2.query.export.CsvRecordQueryExporter;
 import org.wcs.smart.i2.query.export.ShpRecordQueryExporter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
+import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.ui.SmartLabelProvider;
 
@@ -276,6 +277,10 @@ public class IntelligenceLabelProviderImpl implements
 		if (item.equals(AdvancedEntitySearch.Error.TOKEN_NOT_SUPPORTED)) return Messages.IntelligenceLabelProviderImpl_AdvIntelEntitySearchTokenNotSupportedError;
 		
 		if (item == ValuePart.ValueOption.NUMBER_ENTITIES) return Messages.IntelligenceLabelProviderImpl_NumberOfEntitiesValue;
+		
+		if (item == FixedAttribute.DATE) return Messages.IntelligenceLabelProviderImpl_RecordDateLabel;
+		if (item == FixedAttribute.STATUS) return Messages.IntelligenceLabelProviderImpl_RecordStatusLabel;
+		
 		return ""; //$NON-NLS-1$
 	}
 	

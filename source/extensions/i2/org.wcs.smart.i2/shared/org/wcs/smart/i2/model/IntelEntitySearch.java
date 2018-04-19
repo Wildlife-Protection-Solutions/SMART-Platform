@@ -75,7 +75,7 @@ public class IntelEntitySearch extends NamedItem {
 		for (Type t : Type.values()) {
 			if (t.key.equals(typePart)) return t;
 		}
-		throw new IllegalStateException(MessageFormat.format("The search string type {0} is not supported", typePart)); 
+		throw new IllegalStateException(MessageFormat.format("The search string type {0} is not supported", typePart));  //$NON-NLS-1$
 	}
 	
 	/**
@@ -93,7 +93,7 @@ public class IntelEntitySearch extends NamedItem {
 				found = true; break;
 			}
 		}
-		if (!found) throw new IllegalStateException(MessageFormat.format("The search string type {0} is not supported", type));
+		if (!found) throw new IllegalStateException(MessageFormat.format("The search string type {0} is not supported", type)); //$NON-NLS-1$
 		this.searchString = searchString;
 	}
 

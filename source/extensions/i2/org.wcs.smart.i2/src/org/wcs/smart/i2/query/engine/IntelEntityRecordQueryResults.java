@@ -30,8 +30,8 @@ import java.util.UUID;
 
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.i2.birt.datasource.ui.IntelEntityAttributeLocaitonWizardPage;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -41,6 +41,7 @@ import org.wcs.smart.i2.query.FixedQueryColumn.Column;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IResultItem;
+import org.wcs.smart.i2.query.IntelAttributeQueryColumn;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.i2.query.observation.filter.IColumnIdentifierProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
@@ -130,7 +131,7 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 		
 		item.setEntityUuid(asUuid(rowData[columnNameToIndex.get("entity_uuid")])); //$NON-NLS-1$
 		
-		String entityType = (String) rowData[columnNameToIndex.get("entity_type")];
+		String entityType = (String) rowData[columnNameToIndex.get("entity_type")]; //$NON-NLS-1$
 		item.setEntityTypeName(entityType);
 
 		IntelEntity e = session.get(IntelEntity.class, item.getEntityUuid());
@@ -193,6 +194,38 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 				return sql + "record_status" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_TITLE){
 				return sql + "lower(record_title)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.ENTITY_TYPE){
+				return sql + "lower(entity_type)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.ENTITY_ID){
+				session.beginTransaction();
+				try {
+					List<Object> entities = session.createNativeQuery("SELECT distinct entity_uuid FROM " + resultsTable + " WHERE entity_id is null").list(); //$NON-NLS-1$ //$NON-NLS-2$
+					String updateQuerystr = "UPDATE " + resultsTable + " SET entity_id = :name WHERE entity_uuid = :uuid"; //$NON-NLS-1$ //$NON-NLS-2$
+					SqlGenerator.logString(updateQuerystr);
+					NativeQuery<?> updateQuery = session.createNativeQuery(updateQuerystr);
+					for (Object e : entities) {
+						UUID entityUuid = null;
+						if (e instanceof UUID) {
+							entityUuid = (UUID)e;
+						}else if (e instanceof byte[]) {
+							entityUuid = UuidUtils.byteToUUID((byte[])e);
+						}
+						IntelEntity ie = session.get(IntelEntity.class, entityUuid);
+						String name = ""; //$NON-NLS-1$
+						if (ie == null) {
+							name = UuidUtils.uuidToString(entityUuid);
+						}else {
+							name = ie.getIdAttributeAsText();
+						}
+						updateQuery
+							.setParameter("name", name) //$NON-NLS-1$
+							.setParameter("uuid", entityUuid) //$NON-NLS-1$
+							.executeUpdate();
+					}
+				}finally {
+					session.getTransaction().commit();
+				}
+				return sql + "lower(entity_id)" + getSortDirectionSql(); //$NON-NLS-1$
 			}
 		}else if (sortColumn instanceof FilterQueryColumn){
 			String filterKey = ((FilterQueryColumn)sortColumn).getFilterKey();
@@ -204,6 +237,80 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 				}
 			}
 		
+		}else if (sortColumn instanceof IntelAttributeQueryColumn) {
+			if (lastSortColumn != sortColumn){
+				session.getTransaction().begin();
+				
+				String attributeKey = ((IntelAttributeQueryColumn) sortColumn).getAttribute().getKeyId();
+				switch(((IntelAttributeQueryColumn) sortColumn).getAttribute().getType()){
+				case BOOLEAN:
+				case NUMERIC:
+					String updateQuery = "UPDATE " + resultsTable + " SET dbl_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
+					session.createNativeQuery(updateQuery).executeUpdate();
+					updateQuery = "UPDATE " + resultsTable + " SET dbl_sort = (SELECT a.double_value FROM smart.i_entity_attribute_value a join smart.i_attribute b on a.attribute_uuid = b.uuid WHERE a.entity_uuid = " + resultsTable + ".entity_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					SqlGenerator.logString(updateQuery);
+					session.createNativeQuery(updateQuery).executeUpdate();
+					break;
+				case DATE:
+					updateQuery = "UPDATE " + resultsTable + " SET date_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
+					session.createNativeQuery(updateQuery).executeUpdate();
+					updateQuery = "UPDATE " + resultsTable + " SET date_sort = (SELECT date(a.string_value) FROM smart.i_entity_attribute_value a join smart.i_attribute b on a.attribute_uuid = b.uuid WHERE a.entity_uuid = " + resultsTable + ".entity_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					SqlGenerator.logString(updateQuery);
+					session.createNativeQuery(updateQuery).executeUpdate();
+					break;
+				case LIST:		
+					updateQuery = "UPDATE " + resultsTable + " SET str_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
+					session.createNativeQuery(updateQuery).executeUpdate();
+					SqlGenerator.logString(updateQuery);
+					String attribute = "SELECT distinct a.list_item_uuid FROM " + resultsTable + " b join smart.i_entity_attribute_value a join smart.i_attribute b on a.attribute_uuid = b.uuid and b.keyid = '" + attributeKey + "' on b.entity_uuid = a.entity_uuid and a.list_item_uuid is not null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					List<Object> listitems = session.createNativeQuery(attribute).list();
+					for (Object b : listitems){
+						UUID uuid = null;
+						if (b instanceof UUID){ 
+							uuid = (UUID) b;
+						}else if (b instanceof byte[]){
+							uuid = UuidUtils.byteToUUID((byte[]) b);
+						}
+						IntelAttributeListItem item = (IntelAttributeListItem) session.get(IntelAttributeListItem.class, uuid);
+						if (item != null){
+							updateQuery = "UPDATE " + resultsTable + " SET str_sort = :value WHERE entity_uuid in (select entity_uuid FROM smart.i_entity_attribute_value a WHERE " + resultsTable + ".entity_uuid = a.entity_uuid and a.list_item_uuid = :listitem)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							SqlGenerator.logString(updateQuery);
+							NativeQuery<?> q = session.createNativeQuery(updateQuery);
+							q.setParameter("value", item.getName()); //$NON-NLS-1$
+							q.setParameter("listitem", item.getUuid()); //$NON-NLS-1$
+							
+							q.executeUpdate();
+						}
+					}
+					break;
+				case TEXT:
+					updateQuery = "UPDATE " + resultsTable + " SET str_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
+					session.createNativeQuery(updateQuery).executeUpdate();
+					
+					updateQuery = "UPDATE " + resultsTable + " SET str_sort = (SELECT a.string_value FROM smart.i_entity_attribute_value a join smart.i_attribute b on a.attribute_uuid = b.uuid WHERE a.entity_uuid = " + resultsTable + ".entity_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					SqlGenerator.logString(updateQuery);
+					session.createNativeQuery(updateQuery).executeUpdate();
+					break;
+				default:
+					break;
+				}
+				session.getTransaction().commit();
+				
+				lastSortColumn = sortColumn;
+			}
+			
+			switch(((IntelAttributeQueryColumn) sortColumn).getAttribute().getType()){
+			case BOOLEAN:
+			case NUMERIC:
+				return sql + "dbl_sort" + getSortDirectionSql(); //$NON-NLS-1$
+			case DATE:
+				return sql + "date_sort" + getSortDirectionSql(); //$NON-NLS-1$
+			case LIST:
+			case TEXT:
+				return sql + "lower(str_sort)" + getSortDirectionSql(); //$NON-NLS-1$
+			default:
+				break;
+			}
 		}
 		
 		return ""; //$NON-NLS-1$

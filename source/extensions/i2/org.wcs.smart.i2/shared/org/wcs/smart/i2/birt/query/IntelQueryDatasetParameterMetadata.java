@@ -61,6 +61,7 @@ public class IntelQueryDatasetParameterMetadata implements IParameterMetaData{
 	
 	@Override
 	public int getParameterCount() throws OdaException {
+		if (parameters.length == 0) return 0;
 		return parameters.length-1;
 	}
 

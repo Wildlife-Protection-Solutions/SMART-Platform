@@ -61,7 +61,6 @@ import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
 import org.wcs.smart.i2.query.observation.filter.RecordSourceFilter;
-import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -124,7 +123,7 @@ public class IntelQueryColumnProvider {
 		}else if (query instanceof IntelEntityRecordQuery) {
 			return getQueryColumns((IntelEntityRecordQuery)query, itemProvider, l, session);
 		}
-		throw new IllegalStateException("getQueryColumns is not support for query type " + query.getTypeKey());
+		throw new IllegalStateException("getQueryColumns is not support for query type " + query.getTypeKey()); //$NON-NLS-1$
 	}
 
 	public List<IQueryColumn> getQueryColumns (IntelRecordObservationQuery query, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
@@ -206,7 +205,6 @@ public class IntelQueryColumnProvider {
 		List<IQueryColumn> columns = new ArrayList<>();
 		
 		// Fixed query columns
-		
 		FixedQueryColumn.Column[] thiscolumns = new FixedQueryColumn.Column[]{
 				FixedQueryColumn.Column.ENTITY_ID,
 				FixedQueryColumn.Column.ENTITY_TYPE,
@@ -253,11 +251,12 @@ public class IntelQueryColumnProvider {
 		}
 		
 		//intel attribute columns
-		List<IntelAttribute> attributes = session.createQuery("SELECT distinct ia.id.attribute FROM IntelEntityTypeAttribute ia WHERE ia.id.attribute.conservationArea in(:cas)", IntelAttribute.class)
-				.setParameter("cas", itemProvider.getConservationAreas()).list();
-		Set<String> keys = new HashSet<>();
+		List<IntelAttribute> attributes = session.createQuery("SELECT distinct ia.id.attribute FROM IntelEntityTypeAttribute ia WHERE ia.id.attribute.conservationArea in(:cas)", IntelAttribute.class) //$NON-NLS-1$
+				.setParameter("cas", itemProvider.getConservationAreas()).list(); //$NON-NLS-1$
+		List<String> keys = new ArrayList<>();
 		attributes.forEach(e->keys.add(e.getKeyId()));
 		
+		keys.sort((a,b)->a.compareTo(b));
 		for (String key : keys) {
 			IntelAttribute ia = itemProvider.getAttribute(key, session);
 			if (ia != null) columns.add(new IntelAttributeQueryColumn(ia));
@@ -318,28 +317,46 @@ public class IntelQueryColumnProvider {
 			case BOOLEAN:
 				break;
 			case DATE:
-				sb.append(" (" + DateFormat.getDateInstance().format(filter.getDateValues()[0]) + " - " + DateFormat.getDateInstance().format(filter.getDateValues()[1]));
+				sb.append(" ("); //$NON-NLS-1$
+				sb.append(DateFormat.getDateInstance().format(filter.getDateValues()[0]));
+				sb.append(" - "); //$NON-NLS-1$
+				sb.append(DateFormat.getDateInstance().format(filter.getDateValues()[1]));
+				sb.append(")"); //$NON-NLS-1$
 				break;
 			case LIST:
 				if (filter.getKeyValue().equals(DataModelFilter.ANY_OPTION_KEY)) {
-					sb.append(" (" + DropItemFactory.ANY_LABEL + ")");
+					sb.append(" (" ); //$NON-NLS-1$
+					sb.append(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(ANY_ITEM, l));
+					sb.append(")"); //$NON-NLS-1$
 				}else {
 					List<AttributeListItem> allItems = itemProvider.getDmAttributeListItem(a, session);
 					boolean ok = false;
 					for (AttributeListItem i : allItems) {
 						if (i.getKeyId().equalsIgnoreCase(filter.getKeyValue())) {
-							sb.append(" (" + i.getName() + ") ");
+							sb.append(" ("); //$NON-NLS-1$
+							sb.append(i.getName());
+							sb.append(") "); //$NON-NLS-1$
 							ok = true;
 						}
 					}
-					if (!ok) sb.append(" ("+ filter.getKeyValue() + ")");
+					if (!ok) {
+						sb.append(" ("); //$NON-NLS-1$
+						sb.append(filter.getKeyValue());
+						sb.append(")"); //$NON-NLS-1$
+					}
 				}
 				break;
 			case NUMERIC:
-				sb.append( " (" + filter.getOperator().getLabel(Locale.getDefault()) + " " + filter.getNumberValue() + ")");
+				sb.append( " ("); //$NON-NLS-1$
+				sb.append(filter.getOperator().getLabel(l));
+				sb.append(" "); //$NON-NLS-1$
+				sb.append(filter.getNumberValue());
+				sb.append(")"); //$NON-NLS-1$
 				break;
 			case TEXT:
-				sb.append(" (" + filter.getStringValue() + ")");
+				sb.append(" ("); //$NON-NLS-1$
+				sb.append(filter.getStringValue());
+				sb.append(")"); //$NON-NLS-1$
 				break;
 			case TREE:
 				List<AttributeTreeNode> nodes = new ArrayList<>(itemProvider.getDmAttributeTreeNodes(a, session));
@@ -347,14 +364,19 @@ public class IntelQueryColumnProvider {
 				while(!nodes.isEmpty()) {
 					AttributeTreeNode n = nodes.remove(0);
 					if (n.getHkey().equalsIgnoreCase(filter.getKeyValue())) {
-						sb.append(" (" + n.getName() + ") ");
+						sb.append(" ("); //$NON-NLS-1$
+						sb.append(n.getName() );
+						sb.append(") "); //$NON-NLS-1$
 						ok = true;
 						break;
 					}
 					nodes.addAll(n.getChildren());
 				}
-				if (!ok) 
-					sb.append( " (" + filter.getKeyValue() + ")");
+				if (!ok) { 
+					sb.append( " ("); //$NON-NLS-1$
+					sb.append(filter.getKeyValue());
+					sb.append(")"); //$NON-NLS-1$
+				}
 				break;
 			default:
 				break;
@@ -362,9 +384,9 @@ public class IntelQueryColumnProvider {
 			}
 			
 			if (filter.getCategoryKey() != null) {
-				sb.append(" [");
+				sb.append(" ["); //$NON-NLS-1$
 				sb.append(c == null ? filter.getCategoryKey() : c.getName() );
-				sb.append("]");
+				sb.append("]"); //$NON-NLS-1$
 			}
 				
 		}
@@ -464,8 +486,8 @@ public class IntelQueryColumnProvider {
 	private String generateColumnName(RecordAttributeFilter filter, IQueryItemProvider itemProvider, Session session, Locale l){
 		
 		if (filter.getFixedAttribute() != null) {
-			if (filter.getFixedAttribute() == FixedAttribute.DATE) return "Record Date";
-			if (filter.getFixedAttribute() == FixedAttribute.STATUS) return "Record Status";
+			if (filter.getFixedAttribute() == FixedAttribute.DATE) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(FixedAttribute.DATE, l);
+			if (filter.getFixedAttribute() == FixedAttribute.STATUS) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(FixedAttribute.STATUS, l);
 		}
 		
 		if (filter.getAttributeType() != null) {

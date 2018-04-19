@@ -27,7 +27,6 @@ import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
-import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.engine.EntityRecordQueryResultItem;
@@ -106,6 +105,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			return i.getRecordSource();
 		case RECORD_TITLE:
 			return i.getRecordTitle();
+		default:
 		}
 		return null;
 	}
@@ -129,6 +129,8 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			case LOC_COMMENT:
 			case LOC_ID:
 			case RECORD_TITLE:
+			case ENTITY_ID:
+			case ENTITY_TYPE:
 				return (String)toFormat;
 			case RECORD_SOURCE:
 				return ((IntelRecordSource)toFormat).getName();
@@ -156,7 +158,11 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			case RECORD_STATUS:
 			case RECORD_TITLE:
 			case RECORD_SOURCE:
+			case ENTITY_ID:
+			case ENTITY_TYPE:
 				return Type.STRING;
+		default:
+			break;
 		}
 		return Type.STRING;
 	}
