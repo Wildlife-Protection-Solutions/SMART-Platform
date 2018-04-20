@@ -205,6 +205,12 @@ public class XmlToIntelData {
 		try {
 			attributes.forEach(a->session.save(a));
 			entities.forEach(a->session.save(a));
+			entityMappings.values().forEach(et->{
+				et.getAttributes().forEach(eta->{
+					session.save(eta);
+					if (eta.getAttributeGroup() != null) session.save(eta.getAttributeGroup());	
+				});
+			});
 			recordSources.forEach(a->session.save(a));
 			relationshipGroups.forEach(a->session.save(a));
 			relationshipTypes.forEach(a->session.save(a));

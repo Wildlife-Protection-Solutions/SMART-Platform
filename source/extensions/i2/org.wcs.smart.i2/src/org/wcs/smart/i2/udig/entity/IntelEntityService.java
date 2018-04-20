@@ -87,7 +87,7 @@ public class IntelEntityService extends IService {
 				Logger.getLogger(IntelEntityService.class.getName()).log(Level.WARNING, e.getMessage(), e);
 			}
 			try{
-				for (IGeoResource lresource : resources(monitor)){
+				for (IGeoResource lresource : new ArrayList<>(resources(monitor))){
 					if (lresource.getIdentifier().getRef().equals(LocationLayerType.ATTRIBUTE.name())){
 						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(MessageFormat.format(Messages.IntelEntityService_Title, recordName));
 					}else{
