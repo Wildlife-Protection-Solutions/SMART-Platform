@@ -292,6 +292,7 @@ public class Messages extends NLS {
 	public static String LoginHandler_SyncDialogMessage;
 	public static String LoginHandler_SyncDialogTitle;
 	public static String LoginHandler_SyncDialogTitleResume;
+	public static String PluginAdvisor_CannotInstallPlugins;
 	public static String ProgressInputStream_UserCancelled;
 	public static String RemoveConnectJob_jobName;
 	public static String RemoveConnectJob_UninstallError;

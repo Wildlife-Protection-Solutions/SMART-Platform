@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.wcs.smart.p2.Activator;
+import org.wcs.smart.p2.PluginAdvisorManager;
 import org.wcs.smart.p2.internal.Messages;
 
 /**
@@ -56,6 +57,12 @@ abstract class PreloadingRepositoryHandler extends AbstractHandler {
 		// handler, but if we don't have one, whatever we are trying to do
 		// will ultimately fail in a more subtle/low-level way.  So determine
 		// up front if the system is configured properly.
+		//check to ensure there is no reason we cannot install plugins
+		String canInstall = PluginAdvisorManager.INSTANCE.canInstall();
+		if (canInstall != null) {
+			MessageDialog.openInformation(null, Messages.PreloadingRepositoryHandler_SoftwareUpdates, canInstall);
+			return null;
+		}
 		String profileId = getProvisioningUI().getProfileId();
 		IProvisioningAgent agent = getProvisioningUI().getSession().getProvisioningAgent();
 		IProfile profile = null;

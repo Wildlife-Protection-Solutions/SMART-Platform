@@ -32,6 +32,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.changetracking.ChangeLogInstaller;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.p2.PluginAdvisorManager;
 
 
 /**
@@ -48,6 +49,9 @@ public abstract class UninstallProvisioningAction extends ProvisioningAction {
 
 	@Override
 	public IStatus execute(Map<String, Object> parameters) {
+		String error = PluginAdvisorManager.INSTANCE.canUninstall();
+		if (error != null) throw new RuntimeException(error);
+		
 		IInstallableUnit upgradeTo = null;
 		Object operand = parameters.get("operand"); //$NON-NLS-1$
 		try {

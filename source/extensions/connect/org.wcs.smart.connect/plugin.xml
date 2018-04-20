@@ -487,5 +487,11 @@
             class="org.wcs.smart.connect.internal.server.ConnectCaExportProcessor">
       </processor>
    </extension>
+   <extension
+         point="org.wcs.smart.p2.pluginadvisor">
+      <advisor
+            class="org.wcs.smart.connect.internal.PluginAdvisor">
+      </advisor>
+   </extension>
 
 </plugin>

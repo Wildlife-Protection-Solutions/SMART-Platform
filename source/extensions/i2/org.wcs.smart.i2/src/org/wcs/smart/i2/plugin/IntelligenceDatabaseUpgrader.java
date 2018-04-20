@@ -173,10 +173,8 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			"UPDATE smart.i_working_set_query set query_type = '" +IntelRecordObservationQuery.KEY + "'",  //$NON-NLS-1$//$NON-NLS-2$
 			"ALTER TABLE smart.i_working_set_query alter column query_type set not null", //$NON-NLS-1$
 			
-			
-			
 			//index on record title
-			"create index i_record_titel on smart.i_record (title)" //$NON-NLS-1$
+			"create index i_record_title on smart.i_record (title)" //$NON-NLS-1$
 		};
 		
 		for (String s : sql) {

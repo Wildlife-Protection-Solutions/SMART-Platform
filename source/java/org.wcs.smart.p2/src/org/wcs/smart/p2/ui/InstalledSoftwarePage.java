@@ -64,14 +64,18 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolTip;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.about.InstallationPage;
 import org.eclipse.ui.menus.AbstractContributionFactory;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.wcs.smart.SmartApp;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.p2.PluginAdvisorManager;
 import org.wcs.smart.p2.internal.Messages;
 import org.wcs.smart.ui.UserNamePasswordDialog;
 import org.wcs.smart.user.UserLevelManager;
@@ -142,6 +146,23 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 		detailsArea.setBackground(detailsArea.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		detailsArea.setLayoutData(gd);
 
+		
+		if (!SmartDB.isMultipleAnalysis() &&
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN)){
+			String canUninstall = PluginAdvisorManager.INSTANCE.canUninstall();
+			if (canUninstall != null) {
+				Composite warn = new Composite(composite, SWT.NONE);
+				warn.setLayout(new GridLayout(2, false));
+				warn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				
+				Label warning = new Label(warn, SWT.NONE);
+				warning.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+				
+				warning = new Label(warn, SWT.WRAP);
+				warning.setText(canUninstall);
+				warning.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			}
+		}
 		setControl(composite);
 	}
 
@@ -156,22 +177,25 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 		
 		if (!SmartDB.isMultipleAnalysis() &&
 				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN)){
- 			// Uninstall action
-			Action uninstallAction = new UninstallAction(getProvisioningUI(), 
-					installedIUGroup.getStructuredViewer(), profileId) {
-				public void run() {
-					if (!confirmUninstall()){
-						return;
+			String canUninstall = PluginAdvisorManager.INSTANCE.canUninstall();
+			if (canUninstall == null) {
+	 			// Uninstall action
+				Action uninstallAction = new UninstallAction(getProvisioningUI(), 
+						installedIUGroup.getStructuredViewer(), profileId) {
+					public void run() {
+						if (!confirmUninstall()){
+							return;
+						}
+						
+						super.run();
+						
+						if (getReturnCode() == Window.OK)
+							getPageContainer().closeModalContainers();
 					}
-					
-					super.run();
-					
-					if (getReturnCode() == Window.OK)
-						getPageContainer().closeModalContainers();
-				}
-			};
-			uninstallButton = createButton(parent, UNINSTALL_ID, uninstallAction.getText());
-			uninstallButton.setData(BUTTON_ACTION, uninstallAction);
+				};
+				uninstallButton = createButton(parent, UNINSTALL_ID, uninstallAction.getText());
+				uninstallButton.setData(BUTTON_ACTION, uninstallAction);
+			}
 		}
 		
 		// Properties action
