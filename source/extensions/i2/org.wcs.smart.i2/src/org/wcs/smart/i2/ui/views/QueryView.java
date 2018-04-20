@@ -467,7 +467,7 @@ public class QueryView {
 				}else if (queryTypes[0].equalsIgnoreCase(IntelRecordObservationQuery.KEY)) {
 					mi.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_RECORDOBS));
 				}else if (queryTypes[0].equalsIgnoreCase(IntelEntityRecordQuery.KEY)) {
-						//TODO:
+					mi.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYRECORD));
 				}
 				mi.addSelectionListener(new SelectionAdapter() {
 					@Override
