@@ -4,6 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="shared"/>
-	<classpathentry exported="true" kind="lib" path="lib/java-string-similarity-0.24.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/java-string-similarity-1.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

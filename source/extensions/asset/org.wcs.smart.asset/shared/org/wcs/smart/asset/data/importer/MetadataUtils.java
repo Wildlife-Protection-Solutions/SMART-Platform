@@ -22,12 +22,16 @@
 package org.wcs.smart.asset.data.importer;
 
 import com.drew.metadata.Directory;
+import com.drew.metadata.ErrorDirectory;
 import com.drew.metadata.Tag;
 import com.drew.metadata.adobe.AdobeJpegDirectory;
+import com.drew.metadata.avi.AviDirectory;
 import com.drew.metadata.bmp.BmpHeaderDirectory;
+import com.drew.metadata.eps.EpsDirectory;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifImageDirectory;
 import com.drew.metadata.exif.ExifInteropDirectory;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.ExifThumbnailDirectory;
 import com.drew.metadata.exif.GpsDirectory;
 import com.drew.metadata.exif.PanasonicRawDistortionDirectory;
@@ -64,7 +68,7 @@ import com.drew.metadata.exif.makernotes.SanyoMakernoteDirectory;
 import com.drew.metadata.exif.makernotes.SigmaMakernoteDirectory;
 import com.drew.metadata.exif.makernotes.SonyType1MakernoteDirectory;
 import com.drew.metadata.exif.makernotes.SonyType6MakernoteDirectory;
-import com.drew.metadata.file.FileMetadataDirectory;
+import com.drew.metadata.file.FileSystemDirectory;
 import com.drew.metadata.gif.GifAnimationDirectory;
 import com.drew.metadata.gif.GifControlDirectory;
 import com.drew.metadata.gif.GifHeaderDirectory;
@@ -77,11 +81,16 @@ import com.drew.metadata.jfxx.JfxxDirectory;
 import com.drew.metadata.jpeg.HuffmanTablesDirectory;
 import com.drew.metadata.jpeg.JpegCommentDirectory;
 import com.drew.metadata.jpeg.JpegDirectory;
+import com.drew.metadata.mov.media.QuickTimeMusicDirectory;
+import com.drew.metadata.mov.media.QuickTimeSubtitleDirectory;
+import com.drew.metadata.mov.media.QuickTimeTextDirectory;
+import com.drew.metadata.mov.metadata.QuickTimeMetadataDirectory;
 import com.drew.metadata.pcx.PcxDirectory;
 import com.drew.metadata.photoshop.DuckyDirectory;
 import com.drew.metadata.photoshop.PhotoshopDirectory;
 import com.drew.metadata.photoshop.PsdHeaderDirectory;
 import com.drew.metadata.png.PngChromaticitiesDirectory;
+import com.drew.metadata.wav.WavDirectory;
 import com.drew.metadata.webp.WebpDirectory;
 import com.drew.metadata.xmp.XmpDirectory;
 
@@ -97,17 +106,22 @@ public class MetadataUtils {
 	private static Directory[] supportedDirectories = new Directory[] {
 		new AdobeJpegDirectory(),
 		new AppleMakernoteDirectory(),
+		new AviDirectory(),
 		new BmpHeaderDirectory(),
 		new CanonMakernoteDirectory(),
 		new CasioType1MakernoteDirectory(),
 		new CasioType2MakernoteDirectory(),
 		new DuckyDirectory(),
+		new EpsDirectory(),
+		new ErrorDirectory(),
 		new ExifIFD0Directory(),
 		new ExifImageDirectory(),
+		new ExifSubIFDDirectory(),
 		new ExifInteropDirectory(),
 		new ExifThumbnailDirectory(),
 		new GpsDirectory(),
-		new FileMetadataDirectory(),
+		new FileSystemDirectory(),
+		//new FileTypeDirectory(),
 		new FujifilmMakernoteDirectory(),
 		new GifAnimationDirectory(),
 		new GifControlDirectory(),
@@ -125,6 +139,7 @@ public class MetadataUtils {
 		new KyoceraMakernoteDirectory(),
 		new LeicaMakernoteDirectory(),
 		new LeicaType5MakernoteDirectory(),
+//		new Mp4MediaDirectory(),
 		new NikonType1MakernoteDirectory(),
 		new NikonType2MakernoteDirectory(),
 		new OlympusCameraSettingsMakernoteDirectory(),
@@ -145,6 +160,13 @@ public class MetadataUtils {
 		new PhotoshopDirectory(),
 		new PngChromaticitiesDirectory(),
 //		new PngDirectory(),
+//		new QuickTimeMediaDirectory(),
+		new QuickTimeMetadataDirectory(),
+		new QuickTimeMusicDirectory(),
+//		new QuickTimeSourceDirectory(),
+		new QuickTimeSubtitleDirectory(),
+		new QuickTimeTextDirectory(),
+//		new QuickTimeTimeCodeDirectory(),
 		new PrintIMDirectory(),
 		new PsdHeaderDirectory(),
 		new ReconyxHyperFireMakernoteDirectory(),
@@ -155,6 +177,7 @@ public class MetadataUtils {
 		new SigmaMakernoteDirectory(), 
 		new SonyType1MakernoteDirectory(),
 		new SonyType6MakernoteDirectory(),
+		new WavDirectory(),
 		new WebpDirectory(),
 		new XmpDirectory(),
 	};

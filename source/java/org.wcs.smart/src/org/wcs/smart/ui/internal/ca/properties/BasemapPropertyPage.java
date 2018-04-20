@@ -29,22 +29,25 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
@@ -57,6 +60,7 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
 
+
 /**
  * Property page for displaying basemaps, picking a deafult
  * and deleting basemaps.
@@ -67,8 +71,9 @@ import org.wcs.smart.ui.properties.LanguageViewer;
 public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	private Button btnRename, btnDefault, btnDelete;
+	private MenuItem setDefault, renameItem, deleteItem;
 	private LanguageViewer langViewer;
-	private ListViewer lstBasemaps;
+	private TableViewer lstBasemaps;
 	private List<BasemapDefinition> basemaps;
 	private List<BasemapDefinition> itemsToDelete;
 	
@@ -146,10 +151,14 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 		
-		lstBasemaps = new ListViewer(left, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-		lstBasemaps.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)lstBasemaps.getList().getLayoutData()).heightHint = 50;
-		((GridData)lstBasemaps.getList().getLayoutData()).widthHint = 100;
+		Composite tableComp = new Composite(left, SWT.NONE);
+		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)tableComp.getLayoutData()).heightHint = 50;
+		((GridData)tableComp.getLayoutData()).widthHint = 100;
+		
+		lstBasemaps = new TableViewer(tableComp, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+		lstBasemaps.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
 		lstBasemaps.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
 				if (element instanceof BasemapDefinition){
@@ -174,6 +183,31 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 		
+		TableColumn singleColumn = new TableColumn(lstBasemaps.getTable(), SWT.NONE);
+		TableColumnLayout tableColumnLayout = new TableColumnLayout();
+		tableColumnLayout.setColumnData(singleColumn, new ColumnWeightData(100));
+		tableComp.setLayout(tableColumnLayout);
+		
+		Menu mnu = new Menu(lstBasemaps.getControl());
+				
+		setDefault = new MenuItem(mnu, SWT.PUSH);
+		setDefault.setText(Messages.BasemapPropertyPage_SetDefaultButton);
+		setDefault.addListener(SWT.Selection, e->setdefault());
+
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		renameItem = new MenuItem(mnu, SWT.PUSH);
+		renameItem.setText(Messages.BasemapPropertyPage_RenameButton);
+		renameItem.addListener(SWT.Selection, e->rename());
+		renameItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		
+		deleteItem = new MenuItem(mnu, SWT.PUSH);
+		deleteItem.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		deleteItem.addListener(SWT.Selection, e->delete());
+		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		
+		lstBasemaps.getControl().setMenu(mnu);
+		
 		Composite compButtons = new Composite(comp, SWT.NONE);
 		compButtons.setLayout(new GridLayout(1, false));
 		compButtons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
@@ -181,75 +215,75 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 		btnRename = new Button(compButtons, SWT.PUSH);
 		btnRename.setText(Messages.BasemapPropertyPage_RenameButton);
 		btnRename.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnRename.addSelectionListener(new SelectionAdapter() {		
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				
-				IStructuredSelection sel = (IStructuredSelection) lstBasemaps.getSelection();
-				if (sel.isEmpty() ) return;
-				BasemapDefinition toEdit = (BasemapDefinition) sel.getFirstElement();
-				
-				TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(getShell(), toEdit);
-				if (dialog.open() ==  Window.OK){
-					setChangesMade(true);
-					lstBasemaps.refresh();
-				}
-			}
-		});
+		btnRename.addListener(SWT.Selection, e->rename());
 		
 		btnDefault = new Button(compButtons, SWT.PUSH);
 		btnDefault.setText(Messages.BasemapPropertyPage_SetDefaultButton);
 		btnDefault.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnDefault.addSelectionListener(new SelectionAdapter() {		
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection sel = (IStructuredSelection) lstBasemaps.getSelection();
-				if (sel.isEmpty() ) return;
-				
-				BasemapDefinition newDefault = (BasemapDefinition) sel.getFirstElement();
-				for (BasemapDefinition def : basemaps){
-					if (def.getIsDefault() && !def.equals(newDefault)){
-						def.setIsDefault(false);
-						lstBasemaps.refresh(def);
-					}
-				}
-				newDefault.setIsDefault(true);
-				setChangesMade(true);
-				lstBasemaps.refresh(newDefault);
-			}
-		});
+		btnDefault.addListener(SWT.Selection, e->setdefault());
 		
 		btnDelete = new Button(compButtons, SWT.PUSH);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnDelete.addSelectionListener(new SelectionAdapter() {		
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection sel = (IStructuredSelection) lstBasemaps.getSelection();
-				if (sel.isEmpty() ) return;
-				BasemapDefinition toDelete = (BasemapDefinition) sel.getFirstElement();
-				
-				if (!MessageDialog.openConfirm(getShell(), Messages.BasemapPropertyPage_ConfirmDeleteTitle, MessageFormat.format(Messages.BasemapPropertyPage_ConfirmDeleteMessage, new Object[]{toDelete.getName()}))){
-					return;
-				}
-				
-				itemsToDelete.add(toDelete);
-				basemaps.remove(toDelete);
-				
-				lstBasemaps.refresh();
-				setChangesMade(true);
-			}
-		});
+		btnDelete.addListener(SWT.Selection,e->delete());
 		
 		loadData();
 		return comp;
 	}
+	
+	private void setdefault() {
+		IStructuredSelection sel = (IStructuredSelection) lstBasemaps.getSelection();
+		if (sel.isEmpty() ) return;
+		
+		BasemapDefinition newDefault = (BasemapDefinition) sel.getFirstElement();
+		for (BasemapDefinition def : basemaps){
+			if (def.getIsDefault() && !def.equals(newDefault)){
+				def.setIsDefault(false);
+				lstBasemaps.refresh(def);
+			}
+		}
+		newDefault.setIsDefault(true);
+		setChangesMade(true);
+		lstBasemaps.refresh(newDefault);
+	}
 
+	private void delete() {
+		IStructuredSelection sel = (IStructuredSelection) lstBasemaps.getSelection();
+		if (sel.isEmpty() ) return;
+		BasemapDefinition toDelete = (BasemapDefinition) sel.getFirstElement();
+		
+		if (!MessageDialog.openConfirm(getShell(), Messages.BasemapPropertyPage_ConfirmDeleteTitle, MessageFormat.format(Messages.BasemapPropertyPage_ConfirmDeleteMessage, new Object[]{toDelete.getName()}))){
+			return;
+		}
+		
+		itemsToDelete.add(toDelete);
+		basemaps.remove(toDelete);
+		
+		lstBasemaps.refresh();
+		setChangesMade(true);
+	}
+	
+	private void rename() {
+		IStructuredSelection sel = (IStructuredSelection) lstBasemaps.getSelection();
+		if (sel.isEmpty() ) return;
+		BasemapDefinition toEdit = (BasemapDefinition) sel.getFirstElement();
+		
+		TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(getShell(), toEdit);
+		if (dialog.open() ==  Window.OK){
+			setChangesMade(true);
+			lstBasemaps.refresh();
+		}
+	}
+	
 	private void updateUi(){
 		boolean isEmpty = lstBasemaps.getSelection().isEmpty();
 		btnDefault.setEnabled(!isEmpty);
 		btnDelete.setEnabled(!isEmpty);
 		btnRename.setEnabled(!isEmpty);
+		
+		setDefault.setEnabled(!isEmpty);
+		renameItem.setEnabled(!isEmpty);
+		deleteItem.setEnabled(!isEmpty);
 	}
 	
 	/*
@@ -263,7 +297,9 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 			s.beginTransaction();
 			try{
 				basemaps.forEach(b -> s.saveOrUpdate(b));
-				itemsToDelete.forEach(b -> s.delete(b));
+				for (BasemapDefinition d : itemsToDelete) {
+					s.delete( s.get(BasemapDefinition.class, d.getUuid()));
+				}
 				s.getTransaction().commit();
 				setChangesMade(false);
 				itemsToDelete.clear();
