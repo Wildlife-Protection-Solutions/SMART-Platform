@@ -174,7 +174,10 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			"ALTER TABLE smart.i_working_set_query alter column query_type set not null", //$NON-NLS-1$
 			
 			//index on record title
-			"create index i_record_title on smart.i_record (title)" //$NON-NLS-1$
+			"create index i_record_title on smart.i_record (title)", //$NON-NLS-1$
+			
+			//index on attribute list items
+			"ALTER TABLE smart.i_attribute_list_item add column list_order integer not null default 0" //$NON-NLS-1$
 		};
 		
 		for (String s : sql) {

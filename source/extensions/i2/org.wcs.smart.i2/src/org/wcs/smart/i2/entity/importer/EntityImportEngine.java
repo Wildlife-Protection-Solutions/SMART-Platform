@@ -305,9 +305,19 @@ public enum EntityImportEngine {
 			s.beginTransaction();
 			try{
 				//save new list items
+				Set<IntelAttribute> updatedItems = new HashSet<>(); 
 				for (IntelAttributeListItem i : addedItems){
 					s.save(i);
 					s.saveOrUpdate(i.getAttribute());
+					updatedItems.add(i.getAttribute());
+				}
+				
+				for (IntelAttribute ia : updatedItems) {
+					int cnt = 0;
+					for (IntelAttributeListItem li : ia.getAttributeList()) {
+						li.setOrder(cnt++);
+					}
+					s.saveOrUpdate(ia);
 				}
 				
 				//save new entities
@@ -355,6 +365,7 @@ public enum EntityImportEngine {
 				item[0].updateName(SmartDB.getCurrentLanguage(), value);
 				item[0].updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), value);
 				item[0].setName(value);
+				item[0].setOrder(attribute.getAttributeList().size());
 				attribute.getAttributeList().add(item[0]);
 			}
 		});

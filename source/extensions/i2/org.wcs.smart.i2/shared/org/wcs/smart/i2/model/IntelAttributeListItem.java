@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
@@ -37,6 +38,7 @@ import org.wcs.smart.ca.NamedKeyItem;
 public class IntelAttributeListItem extends NamedKeyItem {
 
 	private IntelAttribute attribute;
+	private int listOrder;			//order of item in list
 
 	/**
 	 * Constructor.
@@ -44,6 +46,22 @@ public class IntelAttributeListItem extends NamedKeyItem {
 	public IntelAttributeListItem() {
 	}
 
+	/**
+	 * 0 based
+	 * @return set order of the item in the list
+	 */
+	@Column(name="list_order")
+	public int getOrder(){
+		return this.listOrder;
+	}
+	/**
+	 * 
+	 * @param listOrder the order of the item in the list
+	 */
+	public void setOrder(int listOrder){
+		this.listOrder = listOrder;
+	}
+	
 	/**
 	 * 
 	 * @param attribute the attribute this list item is associated with

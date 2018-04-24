@@ -54,6 +54,7 @@ import org.wcs.smart.i2.ui.AttributeListItemLabelProvider;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+
 /**
  * Composite for managing the list items for an attribute of type list.
  * 
@@ -68,6 +69,10 @@ public class AttributeListPanel extends Composite {
 	private Button btnAdd;
 	private Button btnRemove;
 	private Button btnEdit;
+	
+	private Button btnMoveUp;
+	private Button btnMoveDown;
+	private Button btnSort;
 	
 	private MenuItem dItem;
 	private MenuItem eItem;
@@ -91,7 +96,6 @@ public class AttributeListPanel extends Composite {
 	
 	public void setInput(IntelAttribute attribute){
 		this.attribute = attribute;
-		attribute.getAttributeList().sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		items.setInput(attribute.getAttributeList());
 	}
 	
@@ -117,6 +121,8 @@ public class AttributeListPanel extends Composite {
 			public void selectionChanged(SelectionChangedEvent event) {
 				btnEdit.setEnabled(!items.getSelection().isEmpty());
 				btnRemove.setEnabled(!items.getSelection().isEmpty());
+				btnMoveDown.setEnabled(!items.getSelection().isEmpty());
+				btnMoveUp.setEnabled(!items.getSelection().isEmpty());
 				
 				dItem.setEnabled(!items.getSelection().isEmpty());
 				eItem.setEnabled(!items.getSelection().isEmpty());
@@ -194,8 +200,71 @@ public class AttributeListPanel extends Composite {
 				delete();
 			}
 		});
+		
+		org.eclipse.swt.widgets.Label l = new org.eclipse.swt.widgets.Label(btnPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		btnMoveUp = new Button(btnPanel, SWT.PUSH);
+		btnMoveUp.setText(Messages.AttributeListPanel_MoveUpButton);
+		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnMoveUp.setEnabled(false);
+		btnMoveUp.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				move(-1);
+			}
+		});
+		
+		btnMoveDown = new Button(btnPanel, SWT.PUSH);
+		btnMoveDown.setText(Messages.AttributeListPanel_MoveDownButton);
+		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnMoveDown.setEnabled(false);
+		btnMoveDown.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				move(1);
+			}
+		});
+		
+		l = new org.eclipse.swt.widgets.Label(btnPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		btnSort = new Button(btnPanel, SWT.PUSH);
+		btnSort.setText(Messages.AttributeListPanel_SortButton);
+		btnSort.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnSort.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				sort();
+			}
+		});
 	}
 
+	private void sort() {
+		attribute.getAttributeList().sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+		items.refresh();
+	}
+	
+	private void move(int direction) {
+		Object x = ((IStructuredSelection)items.getSelection()).getFirstElement();
+		if (! (x instanceof IntelAttributeListItem)) return;
+		
+		IntelAttributeListItem toMove = (IntelAttributeListItem) x;
+		
+		int index = attribute.getAttributeList().indexOf(toMove);
+		if (index < 0) return;
+		
+		index += direction;
+		if (index < 0) index = 0;
+		if (index > attribute.getAttributeList().size() - 1) index = attribute.getAttributeList().size()-1;
+		
+		attribute.getAttributeList().remove(toMove);
+		attribute.getAttributeList().add(index, toMove);
+		
+		items.refresh();
+	}
+	
+	
 	private void add(){
 		IntelAttributeListItem it = new IntelAttributeListItem();
 		it.setAttribute(attribute);
@@ -208,7 +277,6 @@ public class AttributeListPanel extends Composite {
 		}else{
 			modified();
 		}
-		attribute.getAttributeList().sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		items.refresh();
 	}
 	
@@ -262,7 +330,6 @@ public class AttributeListPanel extends Composite {
 			}
 			modified();
 		}
-		attribute.getAttributeList().sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		items.refresh();
 	}
 	

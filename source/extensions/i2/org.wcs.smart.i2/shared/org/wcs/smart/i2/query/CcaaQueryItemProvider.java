@@ -234,6 +234,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 					newItem.setKeyId(item.getKeyId());
 					newItem.setName(item.getName());
 					newItem.setAttribute(attributeClone);
+					newItem.setOrder(item.getOrder());
 					attributeClone.getAttributeList().add(newItem);
 					
 					listItems.put(item.getKeyId(), newItem);

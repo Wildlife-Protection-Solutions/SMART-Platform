@@ -141,7 +141,12 @@ public class AttributeDialog extends TitleAreaDialog {
 				}
 				s.flush();
 				s.clear();
-				
+				if (attribute.getAttributeList() != null) {
+					int i = 0;
+					for (IntelAttributeListItem li : attribute.getAttributeList()) {
+						li.setOrder(i++);
+					}
+				}
 				s.saveOrUpdate(attribute);
 				
 				this.allItems = new ArrayList<IntelAttributeListItem>();

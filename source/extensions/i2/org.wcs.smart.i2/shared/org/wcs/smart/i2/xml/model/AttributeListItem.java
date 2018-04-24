@@ -47,7 +47,9 @@ public class AttributeListItem {
     protected List<NamedItem> names;
     @XmlAttribute(name = "key")
     protected String key;
-
+    @XmlAttribute(name = "list_order")
+    protected int listOrder;
+    
     /**
      * Gets the value of the names property.
      * 
@@ -101,4 +103,27 @@ public class AttributeListItem {
         this.key = value;
     }
 
+    /**
+     * Gets the value of the listOrder property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public int getListOrder() {
+        return listOrder;
+    }
+
+    /**
+     * Sets the value of the listOrder property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setListOrder(int listOrder) {
+        this.listOrder = listOrder;
+    }
 }

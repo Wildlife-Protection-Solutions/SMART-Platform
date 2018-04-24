@@ -37,6 +37,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
@@ -137,6 +138,7 @@ public class IntelAttribute extends NamedKeyItem{
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade={CascadeType.ALL}, orphanRemoval=true)
 	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+	@OrderBy(clause = "list_order")
 	public List<IntelAttributeListItem> getAttributeList(){
 		return this.listItems;
 	}

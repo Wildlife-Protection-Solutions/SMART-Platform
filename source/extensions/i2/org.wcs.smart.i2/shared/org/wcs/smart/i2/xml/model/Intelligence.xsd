@@ -16,6 +16,7 @@
     		</element>
     	</sequence>
     	<attribute name="key" type="string"></attribute>
+    	<attribute name="list_order" type="int"></attribute>
     </complexType>
 
 

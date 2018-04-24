@@ -575,6 +575,7 @@ public class XmlToIntelData {
 					IntelAttributeListItem li = new IntelAttributeListItem();
 					li.setAttribute(a);
 					li.setKeyId(xmlListItem.getKey());
+					li.setOrder(xmlListItem.getListOrder());
 					updateNames(li, xmlListItem.getNames());		
 					
 					a.getAttributeList().add(li);

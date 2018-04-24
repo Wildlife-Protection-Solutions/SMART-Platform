@@ -185,9 +185,6 @@ public class AttributeFieldEditor {
 				crsLabel = GeometryUtils.SMART_CRS.getName().toString();
 			}
 		}
-		if (attribute.getAttributeList() != null) {
-			attribute.getAttributeList().sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-		}
 		createControl();
 	}
 

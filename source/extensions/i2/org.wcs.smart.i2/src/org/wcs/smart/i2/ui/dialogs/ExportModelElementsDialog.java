@@ -68,6 +68,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.jaitools.jiffle.parser.JiffleParser.compExpression_return;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -213,7 +214,11 @@ public class ExportModelElementsDialog extends TitleAreaDialog{
 	@SuppressWarnings("unchecked")
 	private <T> List<T> getSelected(Class<T> c, CheckboxTableViewer viewer){
 		List<T> items = new ArrayList<>();
-		for (Object x : viewer.getCheckedElements()) if (x.getClass().equals(c)) items.add((T)x);
+		for (Object x : viewer.getCheckedElements()) {
+			if (c.isAssignableFrom(x.getClass())) {
+				items.add((T)x);
+			}
+		}
 		return items;
 	}
 	

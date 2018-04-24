@@ -124,6 +124,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 				for (IntelAttributeListItem i : ia.getAttributeList()){
 					IntelAttributeListItem clonei = new IntelAttributeListItem();
 					clonei.setAttribute(clone);
+					clonei.setOrder(i.getOrder());
 					clonei.setKeyId(i.getKeyId());
 					engine.copyLabels(i, clonei);
 					clone.getAttributeList().add(clonei);

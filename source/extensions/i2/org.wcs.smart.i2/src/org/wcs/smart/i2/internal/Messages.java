@@ -85,6 +85,9 @@ public class Messages extends NLS {
 	public static String AttributeListItemDMAdvisor_ListItemAssociateObs;
 	public static String AttributeListPanel_ConfirmMsg;
 	public static String AttributeListPanel_ConfirmTitle;
+	public static String AttributeListPanel_MoveDownButton;
+	public static String AttributeListPanel_MoveUpButton;
+	public static String AttributeListPanel_SortButton;
 	public static String AttributeManager_DeleteError;
 	public static String AttributeMappingWizardPage_AttributeInfoJobName;
 	public static String AttributeMappingWizardPage_ColumnLabel;

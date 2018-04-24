@@ -206,6 +206,7 @@ create table smart.i_config_option (
 
 ALTER TABLE SMART.i_config_option ADD FOREIGN KEY (ca_uuid) REFERENCES SMART.conservation_area(UUID)  ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
 
+ ALTER TABLE smart.i_attribute_list_item add column list_order integer not null default 0;
  
 -- EVENTS
 CREATE TABLE smart.e_event_filter(

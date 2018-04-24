@@ -162,6 +162,7 @@ public class SearchDataGenerator {
 					li.setKeyId("list_" + i + "_" + k);
 					li.updateName(SmartDB.getCurrentLanguage(), "List Item " + i + " " + k);
 					li.setAttribute(attribute);
+					li.setOrder(attribute.getAttributeList().size());
 					attribute.getAttributeList().add(li);
 				}
 			}

@@ -319,6 +319,7 @@ public class IntelDataToXml {
 				for (IntelAttributeListItem li : a.getAttributeList()) {
 					AttributeListItem xmlListItem = new AttributeListItem();
 					xmlListItem.setKey(li.getKeyId());
+					xmlListItem.setListOrder(li.getOrder());
 					xmlListItem.getNames().addAll(convertNamedItem(li));
 					xmlAttribute.getListValues().add(xmlListItem);
 				}
