@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -70,6 +71,7 @@ import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
@@ -95,6 +97,7 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 	private CyberTrackerPropertiesProfile selectedProfile = null;
 	
 	private ConfigurableModel selectedModel = null;
+	private DataModelWrapper selectedDataModel = null;
 	
 	private CyberTrackerPropertiesProfile cmDefaultProfile = null;
 	
@@ -108,7 +111,11 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
     	
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_FILE_KEY, selectedFile);
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_MAPDIR_KEY, selectedMapDirectory);
-    	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_CM_KEY, UuidUtils.uuidToString(selectedModel.getUuid()));
+    	if (selectedModel != null) {
+    		CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_CM_KEY, UuidUtils.uuidToString(selectedModel.getUuid()));
+    	}else {
+    		CyberTrackerPlugIn.getDefault().getPreferenceStore().setToDefault(LAST_CM_KEY);
+    	}
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_PROFILE_KEY, UuidUtils.uuidToString(selectedProfile.getUuid()));
     	
 
@@ -141,7 +148,19 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
-						PatrolPackageExporter.INSTANCE.exportPackage(selectedModel, selectedProfile, fMapDirectory, exportFile, monitor);
+						SubMonitor progress = SubMonitor.convert(monitor, Messages.PatrolCTPackageDialog_TaskName, selectedDataModel == null ? 1 : 2);
+						ConfigurableModel toExport = null;
+						if (selectedDataModel != null) {
+							//convert data model to configurable model
+							monitor.subTask(Messages.PatrolCTPackageDialog_DmToCmTaskName);
+							try(Session session = HibernateManager.openSession()){
+								toExport = selectedDataModel.buildConfigurableModel(session, progress.split(1));
+								toExport.setConservationArea(SmartDB.getCurrentConservationArea());
+							}
+						}else {
+							toExport = selectedModel;
+						}
+						PatrolPackageExporter.INSTANCE.exportPackage(toExport, selectedProfile, fMapDirectory, exportFile, progress.split(1));
 						Display.getDefault().syncExec(()->{
 							MessageDialog.openInformation(getShell(), Messages.PatrolCTPackageDialog_CompleteTitle, MessageFormat.format(Messages.PatrolCTPackageDialog_CompleteMsg,exportFile.toString()));	
 						});
@@ -188,7 +207,7 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 			return;
 		}
 		
-		if (this.selectedModel == null) {
+		if (this.selectedModel == null && selectedDataModel == null) {
 			setErrorMessage(Messages.PatrolCTPackageDialog_CmRequired);
 			return;
 		}
@@ -260,6 +279,10 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 					selectedModel = (ConfigurableModel)profile;
 					cmDefaultProfile = getAssciatedProfile(selectedModel);
 					profileViewer.setSelection(new StructuredSelection(cmDefaultProfile));
+					selectedDataModel = null;
+				}else if (profile instanceof DataModelWrapper) {
+					selectedDataModel = (DataModelWrapper)profile;
+					selectedModel = null;					
 				}
 				validate();
 			}

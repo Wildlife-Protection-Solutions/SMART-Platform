@@ -99,7 +99,10 @@ public enum PatrolPackageExporter {
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
 		try {
 			try(Session session = HibernateManager.openSession()){
-				ConfigurableModel modelToExport = session.get(ConfigurableModel.class, cm.getUuid());
+				ConfigurableModel modelToExport = cm;
+				if (cm.getUuid() != null) {
+					modelToExport = session.get(ConfigurableModel.class, cm.getUuid());
+				}
 				
 				List<File> toIncludeInZip = new ArrayList<>();
 				

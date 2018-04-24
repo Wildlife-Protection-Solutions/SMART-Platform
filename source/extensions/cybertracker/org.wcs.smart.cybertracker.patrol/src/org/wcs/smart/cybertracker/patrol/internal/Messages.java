@@ -118,6 +118,8 @@ public class Messages extends NLS {
 	public static String PatrolCTPackageDialog_CtProfileLbl;
 	public static String PatrolCTPackageDialog_DialogTitle;
 	public static String PatrolCTPackageDialog_DmLbl;
+
+	public static String PatrolCTPackageDialog_DmToCmTaskName;
 	public static String PatrolCTPackageDialog_ErrorMsg;
 	public static String PatrolCTPackageDialog_ErrorTitle;
 	public static String PatrolCTPackageDialog_FileDialogTitle;
@@ -131,6 +133,8 @@ public class Messages extends NLS {
 	public static String PatrolCTPackageDialog_ProfileRequired;
 	public static String PatrolCTPackageDialog_ShellMsg;
 	public static String PatrolCTPackageDialog_ShellTitle;
+
+	public static String PatrolCTPackageDialog_TaskName;
 	public static String PatrolCTPackageDialog_WriteError;
 	public static String PatrolCTPackageDialog_ZipFileLbl;
 	public static String PatrolImporter_DuplicateMessage;

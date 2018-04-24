@@ -69,14 +69,24 @@ import org.wcs.smart.util.UuidUtils;
  * @since 3.0.0
  */
 public class CmSmartToXmlConverter {
-
+	
+	//EG: added support to export cm not in the database
+	/**
+	 * Configurable model can have a UUID or not.  If it has a uuid it will be reloaded from the database, otherwise
+	 * the object provided will be used.  This is support exporting the "original data model" to cybertracker.
+	 * @param cm
+	 * @param monitor
+	 * @return
+	 */
 	public static org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel convert(ConfigurableModel cm, IProgressMonitor monitor) {
 		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = new org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel();
 
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				cm = DataentryHibernateManager.getFullConfigurableModel(cm.getUuid(), session);
+				if (cm.getUuid() != null) {
+					cm = DataentryHibernateManager.getFullConfigurableModel(cm.getUuid(), session);
+				}
 				if (monitor.isCanceled()) return null;
 				
 				monitor.subTask(Messages.CmSmartToXmlConverter_ProcessLanguages);
@@ -120,7 +130,8 @@ public class CmSmartToXmlConverter {
 	private static void processCmAttributeConfigs(ConfigurableModel cm,
 			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
 			HashMap<String, Language> llookup, Session session, IProgressMonitor monitor) {
-
+		if(cm.getUuid() == null) return;
+		
 		List<CmAttributeConfig> configs = QueryFactory.buildQuery(session, CmAttributeConfig.class, "model", cm).list(); //$NON-NLS-1$
 		for (CmAttributeConfig config : configs) {
 			CmAttributeConfigType xmlConfig = new CmAttributeConfigType();
@@ -220,7 +231,9 @@ public class CmSmartToXmlConverter {
 			nt.setDisplayMode(node.getDisplayMode().name());
 		}
 		nt.setImageFile(getImageFileRef(node));
-		nt.setId(node.getUuid().toString()); //this will allow to reference this item in extradata
+		if (node.getUuid() != null) {
+			nt.setId(node.getUuid().toString()); //this will allow to reference this item in extradata
+		}
 		
 		if (node.getCmAttributes() != null){
 			for (CmAttribute ca : node.getCmAttributes()) {
@@ -261,8 +274,12 @@ public class CmSmartToXmlConverter {
 					}
 					at.getOption().add(aot);
 				}
-				at.setId(ca.getUuid().toString()); //this will allow to reference this item in extradata
-				at.setConfigId(ca.getConfig() != null ? ca.getConfig().getUuid().toString() : null);
+				if (ca.getUuid() != null) {
+					at.setId(ca.getUuid().toString()); //this will allow to reference this item in extradata
+				}
+				if (ca.getConfig() != null && ca.getConfig().getUuid() != null) {
+					at.setConfigId(ca.getConfig() != null ? ca.getConfig().getUuid().toString() : null);
+				}
 				at.setType(ca.getAttribute().getType().name());
 				nt.getAttribute().add(at);
 			}
@@ -292,9 +309,6 @@ public class CmSmartToXmlConverter {
 	}
 	
 	private static void setNames(List<NameType> list, Set<Label> elementNames, Set<Label> srcElementNames, HashMap<String, Language> llookup){
-//		if (names == null){
-//			return;
-//		}
 		Set<Language> allLangs = new HashSet<>();
 		if (elementNames != null) {
 			elementNames.forEach(l -> allLangs.add(l.getLanguage()));
