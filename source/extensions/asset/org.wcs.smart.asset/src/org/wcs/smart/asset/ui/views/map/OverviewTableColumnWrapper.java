@@ -51,6 +51,14 @@ public class OverviewTableColumnWrapper {
 	}
 	
 	/**
+	 * Sets the table column
+	 * @param column
+	 */
+	public void setColumn(IOverviewTableColumn column) {
+		this.column = column;
+	}
+	
+	/**
 	 * 
 	 * @return true if the column is fixed; false otherwise
 	 */

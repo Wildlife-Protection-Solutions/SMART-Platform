@@ -203,7 +203,6 @@ public class AssetMapColumnConfiguration {
 					if (!obj.containsKey("definition")) continue; //$NON-NLS-1$
 					
 					JSONObject definition = (JSONObject) obj.get("definition"); //$NON-NLS-1$
-					
 					IOverviewTableColumn column = FixedColumn.deserialize(definition);
 					if (column == null) column = CategoryOverviewColumn.deserialize(definition);
 					if (column == null) column = CombinedOverviewColumn.deserialize(definition);
@@ -216,9 +215,18 @@ public class AssetMapColumnConfiguration {
 					}else {
 						tryAgain.add(obj);
 					}
-					
 				}
 				
+				//update the fixed combined columns 
+				List<CombinedOverviewColumn> fixedOverviewColumns = CombinedOverviewColumn.getDefaultColumns(columns.stream().map(e->e.getColumn()).collect(Collectors.toList()));
+				for (OverviewTableColumnWrapper w : columns) {
+					for (CombinedOverviewColumn c : fixedOverviewColumns) {
+						if (w.getColumn().getKey().equalsIgnoreCase(c.getKey())) {
+							w.setColumn(c);
+							break;
+						}
+					}
+				}
 				columns.sort((a,b)->Integer.compare(a.getOrder(), b.getOrder()));
 				allColumns.addAll(columns);
 			}catch (Exception ex) {
