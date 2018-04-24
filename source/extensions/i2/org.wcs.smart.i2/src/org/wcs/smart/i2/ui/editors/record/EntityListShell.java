@@ -131,7 +131,7 @@ public class EntityListShell extends SmartShellDialog {
 					tblEntityTypeList.setInput(new String[]{DialogConstants.LOADING_TEXT});
 					loadEntityTypesJob.schedule();
 				}else if (selection == NEW_ENTITY){
-					NewEntityDialog dialog = new NewEntityDialog(editor.getSite().getShell());
+					NewEntityDialog dialog = new NewEntityDialog(editor.getSite().getShell(), false);
 					ContextInjectionFactory.inject(dialog, context);
 					if (dialog.open() == NewEntityDialog.OK){
 						editor.linkEntity(dialog.getNewEntity());

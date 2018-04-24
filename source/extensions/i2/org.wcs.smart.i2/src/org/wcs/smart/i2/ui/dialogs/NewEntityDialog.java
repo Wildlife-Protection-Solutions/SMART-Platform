@@ -102,6 +102,8 @@ public class NewEntityDialog extends TitleAreaDialog{
 	@Inject
 	private IEclipseContext context;
 	
+	private boolean openOnCreate;
+	
 	private Job loadEntityTypes = new Job(Messages.NewEntityDialog_LoadingJobName){
 
 		@Override
@@ -140,8 +142,22 @@ public class NewEntityDialog extends TitleAreaDialog{
 		
 	};
 	
+	/**
+	 * Creates a new entity dialog that will open the entity when the dialog is closed
+	 * @param parentShell
+	 */
 	public NewEntityDialog(Shell parentShell) {
+		this(parentShell, true);
+	}
+	
+	/**
+	 * Creates a new entity dialog that will not open the entity with the dialog is closed
+	 * @param parentShell
+	 * @param openOnCreate
+	 */
+	public NewEntityDialog(Shell parentShell, boolean openOnCreate) {
 		super(parentShell);
+		this.openOnCreate = openOnCreate;
 	}
 
 	@Override
@@ -217,7 +233,9 @@ public class NewEntityDialog extends TitleAreaDialog{
 		}
 		
 		//open editor
-		(new OpenEntityHandler()).openEntity(newEntity, context);
+		if (openOnCreate) {
+			(new OpenEntityHandler()).openEntity(newEntity, context);
+		}
 		super.okPressed();
 	}
 	
