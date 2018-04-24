@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.event.i2;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -198,6 +199,7 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 						"conservationArea", SmartDB.getCurrentConservationArea()).list()); //$NON-NLS-1$
 				
 			}
+			srcs.sort((a,b)-> Collator.getInstance().compare(((IntelRecordSource)a).getName(), ((IntelRecordSource)b).getName()));
 			srcs.add(0, ""); //$NON-NLS-1$
 			
 			Display.getDefault().syncExec(()->{
