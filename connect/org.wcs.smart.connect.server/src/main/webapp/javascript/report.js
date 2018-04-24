@@ -560,7 +560,11 @@ function resolve(url) {
 function addBooleanParamater(param, parent, newGroup){
 	if(newGroup == true){
 		var f = document.createElement("fieldset");
-		f.innerHTML = "<legend>" + param.displayText + ":" + "</legend>";
+		if(param.displayText != null){
+			f.innerHTML = "<legend>" + param.displayText + ":" + "</legend>";
+		}else{
+			f.innerHTML = "<legend>" + param.name + ":" + "</legend>";
+		}
 	}else{
 		var f = document.createElement("p");
 	}
@@ -583,7 +587,11 @@ function addBooleanParamater(param, parent, newGroup){
 function addTextboxParamater(param, parent, newGroup){
 	if(newGroup == true){
 		var f = document.createElement("fieldset");
-		f.innerHTML = "<legend>" + param.displayText + ":" + "</legend>";
+		if(param.displayText != null){
+			f.innerHTML = "<legend>" + param.displayText + ":" + "</legend>";
+		}else{
+			f.innerHTML = "<legend>" + param.name + ":" + "</legend>";
+		}
 	}else{
 		var f = document.createElement("p");
 	}
