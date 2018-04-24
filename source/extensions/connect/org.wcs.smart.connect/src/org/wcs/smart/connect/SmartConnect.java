@@ -325,18 +325,15 @@ public class SmartConnect {
 	 */
 	public String getCaUploadUrl(UUID caUuid, UUID version, File f) throws WebApplicationException{
 		createClient();
-		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
 		
+		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
 		ConnectClient simple = target.proxy(ConnectClient.class);
-		Response r = simple.getDataUploadUrl(f.length(), caUuid.toString(), version.toString());
-		try{
+		try(Response r = simple.getDataUploadUrl(f.length(), caUuid.toString(), version.toString())){
 			if (r.getStatus() == HttpStatus.SC_OK){
 				return r.getHeaderString(HttpHeaders.LOCATION);
 			}else{
 				throw new WebApplicationException(r);
 			}
-		}finally{
-			r.close();
 		}
 	}
 	
@@ -349,18 +346,15 @@ public class SmartConnect {
 	 */
 	public String getSyncUploadUrl(UUID caUuid, Path file) throws Exception{
 		createClient();
-		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
 		
+		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
 		ConnectClient simple = target.proxy(ConnectClient.class);
-		Response r = simple.updateConservationArea(Files.size(file), caUuid.toString());
-		try{
+		try(Response r = simple.updateConservationArea(Files.size(file), caUuid.toString())){
 			if (r.getStatus() == HttpStatus.SC_OK){
 				return r.getHeaderString(HttpHeaders.LOCATION);
 			}else{
 				throw new WebApplicationException(r);
 			}
-		}finally{
-			r.close();
 		}
 	}
 	
@@ -416,17 +410,11 @@ public class SmartConnect {
 		createClient();
 		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
 		ConnectClient simple = target.proxy(ConnectClient.class);
-		Response r = null;
-		try{
-			r = simple.downloadConservationArea(caUuid.toString(), ConnectClient.DATA_PARAM_ALL);
+		try(Response r = simple.downloadConservationArea(caUuid.toString(), ConnectClient.DATA_PARAM_ALL)){
 			if (r.getStatus() == Status.ACCEPTED.getStatusCode()){
 				return r.getHeaderString(HttpHeaders.LOCATION);
 			}else{
 				throw new WebApplicationException(r);
-			}
-		}finally{
-			if (r != null){
-				r.close();
 			}
 		}
 	}
@@ -447,17 +435,12 @@ public class SmartConnect {
 		createClient();
 		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
 		ConnectClient simple = target.proxy(ConnectClient.class);
-		Response r = null;
-		try{
-			r = simple.downloadChangeLog(caUuid.toString(), ConnectClient.DATA_PARAM_PACKAGE, version.toString(), String.valueOf(revision));
+		
+		try(Response r = simple.downloadChangeLog(caUuid.toString(), ConnectClient.DATA_PARAM_PACKAGE, version.toString(), String.valueOf(revision))){
 			if (r.getStatus() == Status.ACCEPTED.getStatusCode()){
 				return r.getHeaderString(HttpHeaders.LOCATION);
 			}else{
 				throw new WebApplicationException(Messages.SmartConnect_NoUrlError, r);
-			}
-		}finally{
-			if (r != null){
-				r.close();
 			}
 		}
 	}
@@ -538,41 +521,43 @@ public class SmartConnect {
 		
 		//first request; this one gives us the requested size
 		while(size == null && tryCount < ConnectServerOption.ConnectionOption.MAX_RETRY_DOWNLOAD.getIntegerValue(server)){
-			Response r = null;
+			
 			try{
 				createClient();
 				ResteasyWebTarget target = client.target(url);
-				r = target.request().get();
+				try(Response r = target.request().get()){
 
-				if (r.getStatus() == HttpURLConnection.HTTP_OK){
-					size = Long.valueOf(r.getHeaderString(HttpHeaders.CONTENT_LENGTH));
-					if (filestore == null){
-						String filename = parseFilenameFromContent(r.getHeaderString(HttpHeaders.CONTENT_DISPOSITION));
-						if (filename != null){
-							filestore = filestorea.resolve(System.nanoTime() + "." + filename); //$NON-NLS-1$
-						}else{
-							filestorea = filestorea.resolve(System.nanoTime() + ".temp"); //$NON-NLS-1$
+					if (r.getStatus() == HttpURLConnection.HTTP_OK){
+						size = Long.valueOf(r.getHeaderString(HttpHeaders.CONTENT_LENGTH));
+						if (filestore == null){
+							String filename = parseFilenameFromContent(r.getHeaderString(HttpHeaders.CONTENT_DISPOSITION));
+							if (filename != null){
+								filestore = filestorea.resolve(System.nanoTime() + "." + filename); //$NON-NLS-1$
+							}else{
+								filestorea = filestorea.resolve(System.nanoTime() + ".temp"); //$NON-NLS-1$
+							}
 						}
-					}
-					
-					if (promptDownloadSizeMb != null &&
-							size > promptDownloadSizeMb * 1000000 ){
-						//prompt to download before continuing
-						if (!promptToDownload(size, promptDownloadSizeMb * 1000000l)){
-							throw new PackageToLargeException(Messages.SmartConnect_UserCanceledError);
+						
+						if (promptDownloadSizeMb != null &&
+								size > promptDownloadSizeMb * 1000000 ){
+							//prompt to download before continuing
+							if (!promptToDownload(size, promptDownloadSizeMb * 1000000l)){
+								throw new PackageToLargeException(Messages.SmartConnect_UserCanceledError);
+							}
 						}
-					}
-					//parse target
-					try(InputStream is = r.readEntity(InputStream.class);
+						//parse target
+						
+						try(InputStream is = r.readEntity(InputStream.class);
 							OutputStream out = Files.newOutputStream(filestore)){
-						IOUtils.copy(is, out, size, progress);
-					}
-					
-					if (Files.size(filestore) > size){
-						throw new Exception(Messages.SmartConnect_FileToLargeError);
-					}
-					if (Files.size(filestore) == size){
-						return filestore;
+							IOUtils.copy(is, out, size, progress);
+						}
+						
+						if (Files.size(filestore) > size){
+							throw new Exception(Messages.SmartConnect_FileToLargeError);
+						}
+						if (Files.size(filestore) == size){
+							return filestore;
+						}
 					}
 				}
 			}catch (PackageToLargeException ex){
@@ -582,8 +567,6 @@ public class SmartConnect {
 				throw ex;	//user cancelled do not try again
 			}catch (Exception ex){
 				ConnectPlugIn.log(ex.getMessage(), ex);
-			}finally{
-				if (r != null) r.close();
 			}
 			tryCount ++;
 			Thread.sleep(waitTime);
@@ -594,7 +577,7 @@ public class SmartConnect {
 			downloadRequest(filestore, url, size, progress);
 			
 			if (Files.size(filestore) > size){
-				throw new Exception(Messages.SmartConnect_FileToLargeError);
+				throw new Exception(MessageFormat.format(Messages.SmartConnect_FileToBigError, Files.size(filestore), size));
 			}
 			if (Files.size(filestore) == size){
 				return filestore;
@@ -617,31 +600,30 @@ public class SmartConnect {
 	 */
 	private void downloadRequest(Path p, String url, long packageSize, SubMonitor monitor) throws OperationCanceledException{
 		ResteasyWebTarget target = client.target(url);
-		Response r = null;
+		
 		try {
 			Long start = Files.size(p);
-			Long end = packageSize;
+			Long end = packageSize-1;
 			
 			Builder requestBuilder = target.request();
 			if (start != 0){
 				requestBuilder.header("Range", "bytes=" + start + "-" + end); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			
-			r = target.request().get();
-			if (r.getStatus() == HttpURLConnection.HTTP_OK){
-				
-				//parse target
-				try(InputStream is = r.readEntity(InputStream.class);
-						OutputStream out = Files.newOutputStream(p, StandardOpenOption.CREATE, StandardOpenOption.APPEND)){
-					IOUtils.copy(is, out, packageSize, monitor);
+			try(Response r = requestBuilder.get()){
+				if (r.getStatus() == HttpURLConnection.HTTP_OK || r.getStatus() == HttpURLConnection.HTTP_PARTIAL){
+					
+					//parse target
+					try(InputStream is = r.readEntity(InputStream.class);
+							OutputStream out = Files.newOutputStream(p, StandardOpenOption.CREATE, StandardOpenOption.APPEND)){
+						IOUtils.copy(is, out, packageSize, monitor);
+					}
 				}
 			}
 		}catch (OperationCanceledException ex){
 			throw ex;
 		}catch (Exception ex){
 			ConnectPlugIn.log(ex.getMessage(), ex);
-		}finally{
-			if (r != null) r.close();
 		}
 	}
 	
@@ -657,16 +639,13 @@ public class SmartConnect {
 		createClient();
 		
 		ResteasyWebTarget target = client.target(url);
-		Response r = target.request().get();
-		try{
+		try(Response r = target.request().get()){
 			if (r.getStatus() == HttpURLConnection.HTTP_OK){
 				//parse target
 				return r.readEntity(WorkItemStatus.class);
 			}else{
 				throw new WebApplicationException(r);
 			}
-		}finally{
-			r.close();
 		}
 	}
 	

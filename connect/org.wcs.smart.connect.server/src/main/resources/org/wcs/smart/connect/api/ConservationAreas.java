@@ -478,9 +478,9 @@ public class ConservationAreas extends HttpServlet{
 				String regex = "^bytes=([0-9]*)-([0-9]*)$"; //$NON-NLS-1$
 				Pattern p = Pattern.compile(regex);
 				Matcher m = p.matcher(range);
-				
-				String p1 = m.group(0);
-				String p2 = m.group(1);
+				m.find();
+				String p1 = m.group(1);
+				String p2 = m.group(2);
 				if (!p1.isEmpty()){
 					start = Long.parseLong(p1);
 				}

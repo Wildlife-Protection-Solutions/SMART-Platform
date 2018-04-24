@@ -367,6 +367,7 @@ public class Messages extends NLS {
 	public static String SmartConnect_ConnectionError;
 	public static String SmartConnect_DialogTitle;
 	public static String SmartConnect_DownloadFailed;
+	public static String SmartConnect_FileToBigError;
 	public static String SmartConnect_FileToLargeError;
 	public static String SmartConnect_GeneralError;
 	public static String SmartConnect_InvalidUserNameError;
