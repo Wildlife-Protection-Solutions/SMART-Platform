@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: SMART Asset Management PlugIn
+Bundle-Name: SMART Field Sensor PlugIn
 Bundle-SymbolicName: org.wcs.smart.asset;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Activator: org.wcs.smart.asset.AssetPlugIn

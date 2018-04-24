@@ -76,7 +76,6 @@ public class Messages extends NLS {
 	public static String AssetCsvImporter_TypeNotFound;
 	public static String AssetCsvImporter_TypeRequired;
 	public static String AssetCsvImporter_WarningsMsg;
-	public static String AssetCurrentPage_7;
 	public static String AssetCurrentPage_AssetNotActive;
 	public static String AssetCurrentPage_CategoryColumn;
 	public static String AssetCurrentPage_DeploymentAttributesLabel;
@@ -924,7 +923,6 @@ public class Messages extends NLS {
 	public static String StationMappingPage_xRequired;
 	public static String StationMappingPage_yLabel;
 	public static String StationMappingPage_yRequired;
-	public static String StationPropertiesDialog_2;
 	public static String StationPropertiesDialog_AddStationAttributes;
 	public static String StationPropertiesDialog_CannotRemoveAttribute;
 	public static String StationPropertiesDialog_loadingStationJobName;

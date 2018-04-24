@@ -237,7 +237,7 @@ public class AssetCurrentPage {
 		mapPart.setLayout(new GridLayout(2, false));
 		
 		toolkit.createLabel(mapPart, Messages.AssetCurrentPage_StationLabel);
-		lblStatStation = toolkit.createHyperlink(mapPart, Messages.AssetCurrentPage_7, SWT.NONE);
+		lblStatStation = toolkit.createHyperlink(mapPart, "", SWT.NONE); //$NON-NLS-1$
 		lblStatStation.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {

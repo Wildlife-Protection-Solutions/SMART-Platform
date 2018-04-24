@@ -131,7 +131,7 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 				
 				//station attributes
 				for (AssetStationAttribute toDelete : deletedStationAttributes) {
-					String deleteQuery = Messages.StationPropertiesDialog_2;
+					String deleteQuery = "DELETE FROM AssetStationAttributeValue WHERE id.attribute = :attribute";
 					Query<?> q = session.createQuery(deleteQuery);
 					q.setParameter("attribute", toDelete.getAttribute()); //$NON-NLS-1$
 					q.executeUpdate();
