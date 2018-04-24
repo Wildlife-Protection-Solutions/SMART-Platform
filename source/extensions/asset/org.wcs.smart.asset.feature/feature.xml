@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.asset.feature"
-      label="Core SMART Field Sensors Module (Required)"
+      label="SMART Field Sensors Module (Required)"
       version="6.0.0.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"

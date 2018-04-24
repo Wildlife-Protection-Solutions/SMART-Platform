@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.event.feature"
-      label="Core SMART Events Feature (Required)"
+      label="SMART Triggers Module (Required)"
       version="6.0.0.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"

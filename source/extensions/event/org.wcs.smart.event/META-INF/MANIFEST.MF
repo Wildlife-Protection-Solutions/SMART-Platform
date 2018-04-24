@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: SMART Event Action Plugin
+Bundle-Name: SMART Triggers PlugIn
 Bundle-SymbolicName: org.wcs.smart.event;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Activator: org.wcs.smart.event.EventPlugIn
