@@ -104,8 +104,10 @@ public class Messages extends NLS {
 	public static String DataQueueView_LocalDataQueueLabel;
 	public static String DataQueueView_NameColumnName;
 	public static String DataQueueView_OnServerStatus;
+	public static String DataQueueView_ProcessAll;
 	public static String DataQueueView_ProcessAllLabel;
 	public static String DataQueueView_ProcessCheckedLabel;
+	public static String DataQueueView_ProcessItem;
 	public static String DataQueueView_ProcessorDialogMessage;
 	public static String DataQueueView_ProcessorDialogTitle;
 	public static String DataQueueView_RefreshLabel;

@@ -541,6 +541,29 @@ public class DataQueueView{
 				}
 			});
 		}
+		
+		Menu menu = new Menu(tblServer.getControl());
+		MenuItem miProcess = new MenuItem(menu, SWT.PUSH);
+		miProcess.setText(Messages.DataQueueView_ProcessItem);
+		miProcess.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
+		miProcess.addListener(SWT.Selection, e->{
+			tblServer.getStructuredSelection();
+			List<DataQueueItem> items = new ArrayList<>();
+			for (Iterator<?> iterator = tblServer.getStructuredSelection().iterator(); iterator.hasNext();) {
+				Object x = iterator.next();
+				if (x instanceof DataQueueItem) items.add((DataQueueItem)x);
+			}
+			processItems(items);
+			
+		});
+		new MenuItem(menu, SWT.SEPARATOR);
+		MenuItem miProcessAll = new MenuItem(menu, SWT.PUSH);
+		miProcessAll.setText(Messages.DataQueueView_ProcessAll);
+		miProcessAll.addListener(SWT.Selection, e->{
+			processAll();
+		});
+		
+		tblServer.getControl().setMenu(menu);
 	}
 	
 	private List<LocalDataQueueItem> getDataQueueSelection(){
