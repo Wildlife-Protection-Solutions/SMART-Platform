@@ -27,6 +27,8 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -36,7 +38,9 @@ import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
+import org.wcs.smart.i2.ui.views.QueryView;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
+import org.wcs.smart.util.E3Utils;
 
 import com.ibm.icu.text.MessageFormat;
 
@@ -71,6 +75,11 @@ public class NewQueryHandler {
 		//open editor
 		QueryEditorInput input = new QueryEditorInput(Messages.NewQueryHandler_DefaultQueryName, null, typeKey);
 		(new OpenQueryHandler()).openQuery(input, true);
+		
+		//show query view and show filters section
+		EPartService pService = context.get(EPartService.class);
+		pService.showPart(QueryView.ID, PartState.VISIBLE);
+		((QueryView)E3Utils.getSourceObject( pService.findPart(QueryView.ID) )).showFilters();
 	}
 	
 	public static class NewQueryHandlerWrapper extends AbstractHandler {

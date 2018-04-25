@@ -139,15 +139,13 @@ public class QueryView {
 	
 	private QueryViewerFilter queryFilter;
 	private TableViewer queryList;
-	
 	private TreeViewer filterTree = null;
-	//private Job refreshJob;
-	
-	//query filter tree
 	private Composite treePart;
-	private Listener refreshListener = (event)->refreshFiltersView();
-	
+	private SectionTabHeader tabList;
+
 	private HashMap<String, ITreeContentProvider> queryToContentProvider;
+	
+	private Listener refreshListener = (event)->refreshFiltersView();
 	
 	private IAreaModifiedListener areaListener = new IAreaModifiedListener() {
 		@Override
@@ -174,6 +172,14 @@ public class QueryView {
 		queryToContentProvider = new HashMap<>();
 	}
 
+	public void showFilters() {
+		tabList.selectTab(1);
+	}
+	
+	public void showQueries() {
+		tabList.selectTab(0);
+	}
+	
 	@PostConstruct
 	public void createPartControl(Composite parent) {
 		
@@ -189,7 +195,7 @@ public class QueryView {
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 		toolkit.adapt(parent);
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.QueryView_SaveQuerySection, Messages.QueryView_FiltersSection}, parent, toolkit, parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		tabList = new SectionTabHeader(new String[]{Messages.QueryView_SaveQuerySection, Messages.QueryView_FiltersSection}, parent, toolkit, parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)tabList.getLayoutData()).verticalIndent = 2;
 		
@@ -202,7 +208,6 @@ public class QueryView {
 		
 		tabList.setContent(new Composite[]{queryList, filterList}, tabPart);
 		tabList.selectTab(0);
-		
 		
 		refreshQueryList();
 		refreshFiltersView();
