@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: SMART Spanish QA Ecological Records Fragment
-Bundle-SymbolicName: org.wcs.smart.qa.er.nl_es
+Bundle-Name: SMART Indonesian Field Sensor Query Fragment
+Bundle-SymbolicName: org.wcs.smart.asset.query.nl_in
 Bundle-Version: 6.0.0
-Fragment-Host: org.wcs.smart.qa.er;bundle-version="6.0.0"
+Fragment-Host: org.wcs.smart.asset.query;bundle-version="6.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart

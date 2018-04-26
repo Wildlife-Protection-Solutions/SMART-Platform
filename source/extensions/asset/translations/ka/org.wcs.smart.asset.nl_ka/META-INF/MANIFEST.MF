@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: SMART Spanish Quality Assurance Fragment
-Bundle-SymbolicName: org.wcs.smart.qa.nl_es
+Bundle-Name: SMART Georgian Field Sensor Fragment
+Bundle-SymbolicName: org.wcs.smart.asset.nl_ka
 Bundle-Version: 6.0.0
-Fragment-Host: org.wcs.smart.qa;bundle-version="6.0.0"
+Fragment-Host: org.wcs.smart.asset;bundle-version="6.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart
