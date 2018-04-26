@@ -147,7 +147,18 @@ public class SummaryItemLabelProvider {
 	
 	public String getName(IValueItem item){
 		if (item instanceof PatrolValueItem){
-			return ((PatrolValueItem) item).getPatrolValueOption().getGuiName(l);
+			PatrolValueItem it = (PatrolValueItem)item;
+			String text = it.getPatrolValueOption().getGuiName(l);
+			
+			if (it.getPatrolValueOption().hasNoDataOption()) {
+				if (it.includeNoData()) {
+					text = text + "(All)";
+				}else {
+					text = text +" (Data Only)";
+				}
+			}
+			
+			return text;
 		}else if (item instanceof MissionValueItem){
 			return ((MissionValueItem)item).getValueItem().getGuiName(l);
 		}else if (item  instanceof CombinedValueItem){
