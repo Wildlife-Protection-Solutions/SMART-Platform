@@ -52,7 +52,7 @@ public abstract class AbstractValueDropItem extends DropItem implements IValueDr
 	
 	protected IValueDropItem encounterRatio;
 	private Font smallerFont;
-	private Composite main;
+	protected Composite main;
 	private IValueDropItem[] encounterRateOptions;
 		
 	protected boolean isEncounter;
@@ -175,7 +175,7 @@ public abstract class AbstractValueDropItem extends DropItem implements IValueDr
 	/*
 	 * Creates the ui element
 	 */
-	private void updateUi(){
+	protected void updateUi(){
 		Control[] kids = main.getChildren();
 		for (int i = 0; i < kids.length; i ++){
 			kids[i].dispose();
@@ -208,7 +208,7 @@ public abstract class AbstractValueDropItem extends DropItem implements IValueDr
 	 * Creates the compute/change rate link
 	 * @param parent
 	 */
-	private void createRateLink(Composite parent, String text) {
+	protected void createRateLink(Composite parent, String text) {
 		final Hyperlink link = new Hyperlink(parent,  SWT.NONE);
 		
 		link.setUnderlined(true);
