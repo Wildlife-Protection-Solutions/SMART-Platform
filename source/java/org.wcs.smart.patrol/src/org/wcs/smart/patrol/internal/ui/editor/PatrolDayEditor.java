@@ -80,7 +80,6 @@ public class PatrolDayEditor extends EditorPart {
 	public PatrolDayEditor(PatrolEditor editor) {
 		super.setPartName(""); //$NON-NLS-1$
 		this.editor = editor;
-		
 	}
 	
 	@Override

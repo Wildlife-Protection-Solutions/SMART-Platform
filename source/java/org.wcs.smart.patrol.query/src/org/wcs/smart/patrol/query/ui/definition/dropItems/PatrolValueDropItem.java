@@ -24,9 +24,15 @@ package org.wcs.smart.patrol.query.ui.definition.dropItems;
 import java.util.Locale;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 
 /**
@@ -39,6 +45,9 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 	
 	private PatrolValueOption item;
 	private String guiLabel;
+	
+	private Button noData = null;
+	
 	/**
 	 * Creates a new drop item
 	 * @param item
@@ -66,7 +75,17 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 	 */
 	@Override
 	public String getValueQueryPart() {
-		return ("patrol:sum:" + item.getKeyPart()); //$NON-NLS-1$
+		StringBuilder sb = new StringBuilder();
+		sb.append("patrol:sum:"); //$NON-NLS-1$
+		sb.append(item.getKeyPart());
+		if (item.hasNoDataOption()) {
+			if (noData != null && !noData.getSelection()) {
+				sb.append(":" + PatrolValueItem.EXCLUDE_DATA_OPTION); //$NON-NLS-1$
+			}
+		}
+		System.out.println(sb.toString());
+		return sb.toString();
+		
 	}
 
 
@@ -77,13 +96,46 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 		lbl.setText( formatStringForLabel(item.getGuiName(Locale.getDefault())));
 		initDrag(lbl);
 	}
-
+	
+	/*
+	 * Creates the ui element
+	 */
+	@Override
+	protected void updateUi(){
+		super.updateUi();
+		
+		if (item.hasNoDataOption()) {
+			noData = new Button(main, SWT.CHECK);
+			noData.setText(Messages.PatrolValueDropItem_ExcludeDaysWithoutDataOption);
+			noData.setToolTipText(noData.getText());
+			noData.addListener(SWT.Selection, e->getTargetPanel().fireQueryChangedListeners());
+			noData.setSelection(initNoDataValue);
+			noData.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			
+			FontData fd = noData.getFont().getFontData()[0];
+			fd.setHeight(fd.getHeight() - 2);
+			Font f = new Font(noData.getShell().getDisplay(), fd);
+			noData.setFont(f);
+			noData.addListener(SWT.Dispose, e->f.dispose());
+		}
+		
+		
+		main.layout();
+		main.redraw();
+		
+	}
+	
+	private boolean initNoDataValue = true;
 	/**
 	 * Does nothing
 	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#initializeValueData(java.lang.Object)
 	 */
 	@Override
 	protected void initializeValueData(Object data) {
+		if (item.hasNoDataOption() && data instanceof Boolean) {
+			initNoDataValue = (Boolean)data;
+			if (noData != null) noData.setSelection(initNoDataValue);
+		}
 	}
 
 }

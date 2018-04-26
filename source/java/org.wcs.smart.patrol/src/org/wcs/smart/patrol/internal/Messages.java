@@ -260,6 +260,7 @@ public class Messages extends NLS {
 	public static String PatrolEditor_LoadEditorError_NoMoreHandlers;
 	public static String PatrolEditor_LoadEditorError_Other;
 	public static String PatrolEditor_MinuteLabel;
+	public static String PatrolEditor_NoWaypoints;
 	public static String PatrolEditor_OtherPatrolTabName;
 	public static String PatrolEditor_PatrolMapPageName;
 	public static String PatrolEditor_PatrolSummaryPageName;
@@ -543,6 +544,7 @@ public class Messages extends NLS {
 	public static String PatrolSummaryEditor_EndDate_Label;
 	public static String PatrolSummaryEditor_Error_CannotEdit;
 	public static String PatrolSummaryEditor_Error_CouldNotFindEditor;
+	public static String PatrolSummaryEditor_HasData_ColumnName;
 	public static String PatrolSummaryEditor_LegDay_ColumnName;
 	public static String PatrolSummaryEditor_LegDistance_ColumnName;
 	public static String PatrolSummaryEditor_LegEnd_ColumnName;
@@ -557,6 +559,7 @@ public class Messages extends NLS {
 	public static String PatrolSummaryEditor_Mandate_Label;
 	public static String PatrolSummaryEditor_Member_Label;
 	public static String PatrolSummaryEditor_MultiLegPatrol_Label;
+	public static String PatrolSummaryEditor_NoDataLabel;
 	public static String PatrolSummaryEditor_NoManadateLabel;
 	public static String PatrolSummaryEditor_NoMandateLabel;
 	public static String PatrolSummaryEditor_NoStationLabel;
@@ -574,6 +577,7 @@ public class Messages extends NLS {
 	public static String PatrolSummaryEditor_Summary_TabName;
 	public static String PatrolSummaryEditor_Team_Label;
 	public static String PatrolSummaryEditor_TransportType_Label;
+	public static String PatrolSummaryEditor_YesDataLabel;
 	public static String PatrolTemplateCloner_ProgressCopyMandates;
 	public static String PatrolTemplateCloner_ProgressCopyTeams;
 	public static String PatrolTemplateCloner_ProgressCopyTypes;

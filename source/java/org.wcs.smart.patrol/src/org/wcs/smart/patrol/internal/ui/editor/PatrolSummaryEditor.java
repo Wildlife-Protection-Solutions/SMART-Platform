@@ -177,6 +177,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
 			input.setId(editor.getPatrol().getId());
 			editor.updatePartName();
+			editor.updateTabStyling();
 		}
 	};
 
@@ -440,8 +441,6 @@ public class PatrolSummaryEditor extends EditorPart {
 			}
 		});
 		
-		
-
 		employeeTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		editEmployee = createEditLink(toolkit, left, new EmployeeLeaderPilotComposite());
 		editEmployee.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
@@ -932,6 +931,7 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 	public enum PatrolLegDayColumn{
 		LEG(Messages.PatrolSummaryEditor_LegId_ColumnName, 1, true),
 		DAY(Messages.PatrolSummaryEditor_LegDay_ColumnName, 1, false),
+		HAS_DATA(Messages.PatrolSummaryEditor_HasData_ColumnName, 1, false),
 		START(Messages.PatrolSummaryEditor_LegStart_ColumnName, 1, false),
 		END(Messages.PatrolSummaryEditor_LegEnd_ColumnName, 1, false),
 		DISTANCE(Messages.PatrolSummaryEditor_LegDistance_ColumnName, 1, false),
@@ -962,52 +962,55 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 	
 	public String getText(Object element) {
 		if (element instanceof PatrolLegDay){
+			PatrolLegDay legDay = (PatrolLegDay)element;
 			if (column == PatrolLegDayColumn.DAY){
-				Date d = ((PatrolLegDay) element).getDate();
+				Date d = legDay.getDate();
 				return DateFormat.getDateInstance(DateFormat.MEDIUM).format(d) + " " + dayOfWeekFormatter.format(d) ; //$NON-NLS-1$
 			}else if (column == PatrolLegDayColumn.MANDATE){
-				if (((PatrolLegDay)element).getPatrolLeg().getMandate() != null) 
-					return ((PatrolLegDay) element).getPatrolLeg().getMandate().getName();
+				if (legDay.getPatrolLeg().getMandate() != null) 
+					return legDay.getPatrolLeg().getMandate().getName();
 				return ""; //$NON-NLS-1$
 			}else if (column == PatrolLegDayColumn.DISTANCE){
-				if (((PatrolLegDay) element).getTrack() != null){
-					return String.valueOf( ((PatrolLegDay) element).getTrack().getDistance() );
+				if (legDay.getTrack() != null){
+					return String.valueOf( legDay.getTrack().getDistance() );
 				}else{
 					return "0"; //$NON-NLS-1$
 				}
 			}else if (column == PatrolLegDayColumn.START){
-				if (((PatrolLegDay) element).getStartTime() != null){
-					return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(((PatrolLegDay) element).getStartTime() );
+				if (legDay.getStartTime() != null){
+					return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(legDay.getStartTime() );
 				}else{
 					return ""; //$NON-NLS-1$
 				}
 			}else if (column == PatrolLegDayColumn.END){
-				if (((PatrolLegDay) element).getEndTime() != null){
-					return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(((PatrolLegDay) element).getEndTime() );
+				if (legDay.getEndTime() != null){
+					return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(legDay.getEndTime() );
 				}else{
 					return ""; //$NON-NLS-1$
 				}
 			}else if (column == PatrolLegDayColumn.TOTALPATROLHOURS){
-				double hrs = ((PatrolLegDay) element).getPatrolHoursWorked();
+				double hrs = legDay.getPatrolHoursWorked();
 				return PatrolEditor.formatTimeRange(hrs);
 			}else if (column == PatrolLegDayColumn.TOTALHOURSINFIELD){
-				double hrs = ((PatrolLegDay) element).getFieldHoursWorked();
+				double hrs = legDay.getFieldHoursWorked();
 				return PatrolEditor.formatTimeRange(hrs);
 			}else if (column == PatrolLegDayColumn.LEG){
-				return ((PatrolLegDay)element).getPatrolLeg().getId();
+				return legDay.getPatrolLeg().getId();
 			}else if (column == PatrolLegDayColumn.LEADER){
-				if (((PatrolLegDay)element).getPatrolLeg().getLeader() == null){
+				if (legDay.getPatrolLeg().getLeader() == null){
 					return ""; //$NON-NLS-1$
 				}
 				return org.wcs.smart.ui.SmartLabelProvider.getFullLabel(((PatrolLegDay)element).getPatrolLeg().getLeader().getMember());
 			}else if (column == PatrolLegDayColumn.PILOT){
-				if (((PatrolLegDay)element).getPatrolLeg().getPilot() != null){
+				if (legDay.getPatrolLeg().getPilot() != null){
 					return org.wcs.smart.ui.SmartLabelProvider.getFullLabel(((PatrolLegDay)element).getPatrolLeg().getPilot().getMember());
 				}
 				return ""; //$NON-NLS-1$
 			}else if (column == PatrolLegDayColumn.TRANSPORT){
-				return ((PatrolLegDay)element).getPatrolLeg().getType().getName();
+				return legDay.getPatrolLeg().getType().getName();
 				
+			}else if (column == PatrolLegDayColumn.HAS_DATA) {
+				return legDay.hasData() ? Messages.PatrolSummaryEditor_YesDataLabel : Messages.PatrolSummaryEditor_NoDataLabel;
 			}
 		}
 		return super.getText(element);

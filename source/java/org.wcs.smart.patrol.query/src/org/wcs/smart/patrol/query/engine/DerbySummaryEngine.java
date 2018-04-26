@@ -27,9 +27,11 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -136,6 +138,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	private Session session;
 	private PatrolSummaryQuery query;
 	
+	private Set<String> tablesWithNoData = new HashSet<>();
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -180,7 +183,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	public IQueryResult executeQuery(
 			Query lquery,
 			HashMap<String, Object> parameters) throws SQLException{
-
+		tablesWithNoData.clear();
 		query = (PatrolSummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
 		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
@@ -531,6 +534,10 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			GroupByPart groupBy, 
 			PatrolValueItem patrolItem, ConservationAreaFilter caFilter) throws SQLException{
 		
+		if (patrolItem.getPatrolValueOption().hasNoDataOption() && !patrolItem.includeNoData()) {
+			addHasDataColumn(c, dataTableName);
+		}
+		
 		clearParameters();
 		
 		StringBuilder selectSql = new StringBuilder();
@@ -544,6 +551,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			selectSql.append(tmp + " as uniqueid"); //$NON-NLS-1$
 			selectSql.append(","); //$NON-NLS-1$
 		}
+		
+		StringBuilder innerWhere = new StringBuilder();
 		
 		StringBuilder groupBySql = new StringBuilder();
 		StringBuilder groupByInnerSql = new StringBuilder();
@@ -562,7 +571,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			}
 		}
 		
-		valueSql.append(getFieldName(option, hasAreaGroupBy));
+		valueSql.append(getFieldName(option, hasAreaGroupBy, patrolItem.includeNoData(), innerWhere));
 		valueAggSql.append(getAggFieldName(option, hasAreaGroupBy));
 
 		if (option.getOptionClass().equals(Track.class) && !hasAreaGroupBy){
@@ -614,6 +623,10 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		sql.append(valueSql);
 		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(fromSql);
+		if (innerWhere.length() > 0) {
+			sql.append(" WHERE "); //$NON-NLS-1$
+			sql.append(innerWhere);
+		}
 		sql.append(") foo"); //$NON-NLS-1$
 		if (groupBySql.length() > 0){
 			sql.append(" GROUP BY " ); //$NON-NLS-1$
@@ -1408,15 +1421,23 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		return ""; //$NON-NLS-1$
 	}
 	
-	private String getFieldName(PatrolValueOption option, boolean hasAreaGroupBy){
+	private String getFieldName(PatrolValueOption option, boolean hasAreaGroupBy, boolean includeNoData, StringBuilder sbWhere){
 		switch(option){
 		case NUM_PATROLS:
 		case NUM_PATROLS_TOTAL:
 			return "p_uuid"; //$NON-NLS-1$
 		case NUM_DAYS:
 		case NUM_DAYS_TOTAL:
+			if (!includeNoData) {
+				if (sbWhere.length() > 0) sbWhere.append(" AND "); //$NON-NLS-1$
+				sbWhere.append(" has_data is not null "); //$NON-NLS-1$
+			}
 			return "pld_patrol_day"; //$NON-NLS-1$
 		case NUM_NIGHTS:
+			if (!includeNoData) {
+				if (sbWhere.length() > 0) sbWhere.append(" AND "); //$NON-NLS-1$
+				sbWhere.append(" has_data is not null "); //$NON-NLS-1$
+			}
 			return "p_uuid, pld_patrol_day"; //$NON-NLS-1$
 		case DISTANCE:
 		case DISTANCE_TOTAL:
@@ -1443,10 +1464,16 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		case NUM_PATROLHOURS_TOTAL:
 		case NUM_FIELDHOURS_TOTAL:
 			if (!hasAreaGroupBy){
+				if (!includeNoData) {
+					if (sbWhere.length() > 0) sbWhere.append(" AND "); //$NON-NLS-1$
+					sbWhere.append(" has_data is not null "); //$NON-NLS-1$
+				}
 				return tablePrefix(PatrolLegDay.class) + ".start_time as pld_start_time," + //$NON-NLS-1$
-						tablePrefix(PatrolLegDay.class) + ".end_time as pld_end_time," + //$NON-NLS-1$
-						tablePrefix(PatrolLegDay.class) + ".rest_minutes as pld_rest_minutes "; //$NON-NLS-1$
+					tablePrefix(PatrolLegDay.class) + ".end_time as pld_end_time," + //$NON-NLS-1$
+					tablePrefix(PatrolLegDay.class) + ".rest_minutes as pld_rest_minutes "; //$NON-NLS-1$
 			}else{
+				//we don't need to check include no data here because 
+				//this computation is based on the track which means their is data
 				StringBuilder append = new StringBuilder();
 				StringBuilder valueSql = new StringBuilder();
 				valueSql.append("smart.computeHours("); //$NON-NLS-1$
@@ -1469,11 +1496,17 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		case MAN_HOURS:
 		case MAN_HOURS_TOTAL:
 			if (!hasAreaGroupBy){
+				if (!includeNoData) {
+					if (sbWhere.length() > 0) sbWhere.append(" AND "); //$NON-NLS-1$
+					sbWhere.append(" has_data is not null "); //$NON-NLS-1$
+				}
 				return tablePrefix(PatrolLegDay.class) + ".start_time as pld_start_time, " + //$NON-NLS-1$
 						tablePrefix(PatrolLegDay.class) + ".end_time as pld_end_time, " + //$NON-NLS-1$
 						tablePrefix(PatrolLegDay.class) + ".rest_minutes as pld_rest_minutes," + //$NON-NLS-1$
 						tablePrefix(PatrolLegMember.class) + ".employee_uuid as pl_member "; //$NON-NLS-1$
 			}else{
+				//we don't need to check include no data here because 
+				//this computation is based on the track which means their is data
 				StringBuilder valueSql = new StringBuilder();
 				StringBuilder append = new StringBuilder();
 				valueSql.append("smart.computeHours("); //$NON-NLS-1$
@@ -1496,8 +1529,11 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			}
 		case MAN_DAYS:
 		case MAN_DAYS_TOTAL:
-			return "pld_patrol_day, " + //$NON-NLS-1$
-			tablePrefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
+			if (!includeNoData) {
+				if (sbWhere.length() > 0) sbWhere.append(" AND "); //$NON-NLS-1$
+				sbWhere.append(" has_data is not null ");	 //$NON-NLS-1$
+			}	
+			return "pld_patrol_day, " + tablePrefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		//should not get here
 		return null;
@@ -1698,6 +1734,51 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		sql.append("plm_pilot char(16) for bit data"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
+	}
+	
+	
+	
+	private void addHasDataColumn(Connection c, String tableName) throws SQLException{
+		if (tablesWithNoData.contains(tableName)) return;
+		tablesWithNoData.add(tableName);
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("ALTER TABLE " + tableName + " ADD COLUMN has_data boolean "); //$NON-NLS-1$ //$NON-NLS-2$
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().executeUpdate(sql.toString());
+		
+		String temp = createTempTableName();
+		sql = new StringBuilder();
+		sql.append("CREATE TABLE " + temp + " (patrol_leg_uuid char(16) for bit data, patrol_day date, has_data boolean)"); //$NON-NLS-1$ //$NON-NLS-2$
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().executeUpdate(sql.toString());
+		
+		sql = new StringBuilder();
+		sql.append("INSERT INTO " + temp); //$NON-NLS-1$
+		sql.append(" SELECT a.patrol_leg_uuid, a.patrol_day, max(case when b.leg_day_uuid is null and c.uuid is null then false else true end ) as has_data "); //$NON-NLS-1$
+		sql.append(" FROM smart.patrol_leg_day a "); //$NON-NLS-1$
+		sql.append(" JOIN  "); //$NON-NLS-1$
+		sql.append( tableName );
+		sql.append( " d on a.uuid = d.pld_uuid " ); //$NON-NLS-1$
+		sql.append(" LEFT JOIN smart.patrol_waypoint b on a.uuid = b.leg_day_uuid "); //$NON-NLS-1$
+		sql.append(" LEFT JOIN smart.track c on a.uuid = c.patrol_leg_day_uuid "); //$NON-NLS-1$
+		sql.append(" group by a.patrol_leg_uuid, a.patrol_day"); //$NON-NLS-1$
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().executeUpdate(sql.toString());
+		
+		sql = new StringBuilder();
+		sql.append("UPDATE " + tableName + " set has_data = "); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("( SELECT foo.has_data FROM "); //$NON-NLS-1$
+		sql.append(temp);
+		sql.append(" foo " ); //$NON-NLS-1$
+		sql.append(" WHERE foo.has_data and foo.patrol_leg_uuid = " ); //$NON-NLS-1$
+		sql.append(tableName);
+		sql.append(".pl_uuid AND "); //$NON-NLS-1$
+		sql.append(tableName);
+		sql.append(".pld_patrol_day = foo.patrol_day ) "); //$NON-NLS-1$
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().executeUpdate(sql.toString());
+		
 	}
 
 	@Override

@@ -41,7 +41,11 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
@@ -104,6 +108,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	private PatrolSummaryEditor summaryEditor;
 	private PatrolMapPageEditor mapPage;
 	private Projection[] projections;
+	private Font noDataFont = null;
+	
 	private CombinedSelectionProvider selectionProvider = new CombinedSelectionProvider();
 	
 	private IPatrolEventListener saveListener = new IPatrolEventListener() {
@@ -207,6 +213,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	@Override
 	public void dispose() {
+		if (noDataFont != null) noDataFont.dispose();
+		
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_SAVED, saveListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolDeleteListener);
 		this.saveListener = null;
@@ -387,7 +395,36 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	public void updateSummaryPage(){
 		summaryEditor.refreshPatrolSummaryTable();
 	}
-	
+
+	public void updateTabStyling() {
+		int i = 0;
+		while ( i < getPageCount()) {
+			if (getEditor(i) instanceof PatrolDayEditor) {
+				PatrolDayEditor day = (PatrolDayEditor) getEditor(i);
+				boolean dayHasData = false;
+				for (PatrolLeg pl : getPatrol().getLegs()) {
+					for (PatrolLegDay pld : pl.getPatrolLegDays()) {
+						if (SharedUtils.isSameDate( pld.getDate(), ((PatrolDayEditorInput)day.getEditorInput()).getPatrolDay() )) {
+							dayHasData = pld.hasData();
+							break;
+						}
+					}
+					if (dayHasData) break;
+				}
+				
+				if (super.getContainer() instanceof CTabFolder) {
+					if (!dayHasData) {
+						((CTabFolder)super.getContainer()).getItem(i).setToolTipText(Messages.PatrolEditor_NoWaypoints);
+						((CTabFolder)super.getContainer()).getItem(i).setFont(noDataFont);
+					}else {
+						((CTabFolder)super.getContainer()).getItem(i).setToolTipText(null);
+						((CTabFolder)super.getContainer()).getItem(i).setFont(null);
+					}
+				}
+			}
+			i++;
+		}
+	}
 	
 	public void createDayPages( ) {
 		try {
@@ -408,17 +445,23 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			
 			Calendar calEnd = SharedUtils.convertDate(getPatrol().getEndDate());
 			
+			if (noDataFont == null) {
+				FontData fd = getSite().getShell().getFont().getFontData()[0];
+				fd.setStyle(SWT.ITALIC);
+				noDataFont = new Font(getSite().getShell().getDisplay(), fd);
+			}
+			
 			while (calStart.before(calEnd) || calStart.equals(calEnd)) {
+				//is there data in any of the legs for this day
 				PatrolDayEditorInput input = new PatrolDayEditorInput(calStart.getTime());
 				PatrolDayEditor editor = new PatrolDayEditor(this);
 				super.addPage(insertindex, editor, input);
-				super.setPageText(
-						insertindex,
-						DateFormat.getDateInstance(DateFormat.MEDIUM).format(
-								input.getPatrolDay()));
+				String text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(input.getPatrolDay());
+				super.setPageText(insertindex, text);
 				insertindex++;
 				calStart.add(Calendar.DAY_OF_MONTH, 1);
 			}
+			updateTabStyling();
 
 		} catch (Exception ex) {
 			SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_LoadEditorError_ErrorCreatingDayPages, ex);

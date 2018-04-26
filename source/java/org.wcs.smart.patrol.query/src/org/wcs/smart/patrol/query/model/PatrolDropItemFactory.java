@@ -172,8 +172,15 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	 * @param item
 	 * @return
 	 */
+	public DropItem createPatrolValueDropItem(PatrolValueItem item){
+		PatrolValueDropItem di = new PatrolValueDropItem(item.getPatrolValueOption());
+		di.initializeData(item.includeNoData());
+		return di;
+	}
+	
 	public DropItem createPatrolValueDropItem(PatrolValueOption item){
-		return new PatrolValueDropItem(item);
+		PatrolValueDropItem di = new PatrolValueDropItem(item);
+		return di;
 	}
 	
 	/**
@@ -523,7 +530,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	
 	
 	public DropItem asDropItem(PatrolValueItem item, Session session) throws Exception{
-		return createPatrolValueDropItem(item.getPatrolValueOption());
+		return createPatrolValueDropItem(item);
 	}
 	
 	public DropItem asDropItem(PatrolCategoryValueItem item, Session session) throws Exception{

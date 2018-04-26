@@ -30,7 +30,10 @@ import javax.persistence.Transient;
 
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.common.model.SummaryQuery;
+import org.wcs.smart.query.model.summary.CombinedValueItem;
+import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 
 /**
@@ -59,6 +62,23 @@ public class PatrolSummaryQuery extends SummaryQuery {
 		try(InputStream is = new ByteArrayInputStream(getQuery().getBytes())){
 			Parser parser = new Parser(is);
 			SumQueryDefinition myQuery = parser.SumQuery();
+			
+			//update value options for no data option
+			for (IValueItem item : myQuery.getValuePart().getValueItems()) {
+				if (!(item instanceof CombinedValueItem)) continue;
+				
+				CombinedValueItem cItem = (CombinedValueItem) item;
+				IValueItem part1 = cItem.getPart1();
+				IValueItem part2 = cItem.getPart2();
+				
+				if (part1 instanceof PatrolValueItem && part2 instanceof PatrolValueItem) {
+					PatrolValueItem p1 = (PatrolValueItem)part1;
+					PatrolValueItem p2 = (PatrolValueItem)part2;
+					if (p1.getPatrolValueOption().hasNoDataOption() && p2.getPatrolValueOption().hasNoDataOption()) {
+						p2.setIncludeNoData(p1.includeNoData());
+					}
+				}				
+			}
 			return myQuery;
 		}
 	}

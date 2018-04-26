@@ -180,6 +180,9 @@ public class Messages extends NLS {
 	public static String PatrolSummaryGroupByValuePanel_GroupByPanelTitle;
 	public static String PatrolSummaryGroupByValuePanel_ValueError;
 	public static String PatrolSummaryQueryType_SummaryQueryTypeName;
+	public static String PatrolValueDropItem_ExcludeDaysWithoutDataOption;
+	public static String PatrolValueItemLabelProvider_AllLabel;
+	public static String PatrolValueItemLabelProvider_DataOnlyLabel;
 	public static String PatrolValueTreeItem_PatrolValuesNodeLabel;
 	public static String PatrolWaypointQueryType_WaypointQueryTypeName;
 	public static String PatrolZoomToResultProvider_TrackGeomNotFound;

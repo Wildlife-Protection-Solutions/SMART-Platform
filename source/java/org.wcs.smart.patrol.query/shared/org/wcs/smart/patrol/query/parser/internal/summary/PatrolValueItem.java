@@ -34,10 +34,20 @@ import org.wcs.smart.query.model.summary.IValueItem;
  */
 public class PatrolValueItem implements IValueItem {
 
+	/**
+	 * If this is included in the query then no data values 
+	 * should be excluded from the results.  Otherwise all
+	 * data should be included
+	 * 
+	 */
+	public static final String EXCLUDE_DATA_OPTION = "nodata"; //$NON-NLS-1$
 
 	/**
 	 * Creates a patrol value item from a key of the form
-	 * patrol:<aggregation>:patrolkey
+	 * patrol:<aggregation>:patrolkey:nodata
+	 * 
+	 * The :nodata is option and if included then no data days
+	 * will be excluded from the query results.
 	 * 
 	 * @param part
 	 * @return
@@ -50,25 +60,48 @@ public class PatrolValueItem implements IValueItem {
 	private String key = null;
 	private String aggregation = null;
 	private PatrolValueOption patrolOp;
+	private Boolean includeNoData = false; 
 	
 	/**
 	 * Creates a patrol value item from a key of the form
-	 * patrol:<aggregation>:patrolkey
+	 * patrol:<aggregation>:patrolkey:nodata
+	 * 
+	 * The :nodata is optional. If supplied then we exclude 
+	 * days with no data from the value computation.  Nodata only
+	 * applies to some patrol value options
 	 * 
 	 * @param part
 	 */
 	public PatrolValueItem(String key){
-		this.key = key;
 		String[] bits = key.split(":"); //$NON-NLS-1$
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < 3; i ++) {
+			sb.append(bits[i]);
+			sb.append(":"); //$NON-NLS-1$
+		}
+		this.key = sb.substring(0, sb.length() -1 );
 		patrolOp = PatrolQueryOptions.findPatrolValueItem(bits[2]);
-		this.aggregation = bits[1];		
+		this.aggregation = bits[1];	
+		
+		this.includeNoData = false;
+		if (patrolOp.hasNoDataOption()) {
+			if (bits.length > 3) {
+				if (bits[3].equalsIgnoreCase(EXCLUDE_DATA_OPTION)) {
+					this.includeNoData = true;
+				}
+			}
+		}
 	}
 	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asString()
 	 */
 	public String asString(){
-		return this.key;
+		String key = this.key;
+		if (patrolOp.hasNoDataOption() && includeNoData()) {
+			key += ":" + EXCLUDE_DATA_OPTION; //$NON-NLS-1$
+		}
+		return key;
 	}
 	
 	/**
@@ -76,6 +109,14 @@ public class PatrolValueItem implements IValueItem {
 	 */
 	public PatrolValueOption getPatrolValueOption(){
 		return patrolOp;
+	}
+	
+	public boolean includeNoData() {
+		return this.includeNoData;
+	}
+	
+	public void setIncludeNoData(boolean includeNoData) {
+		this.includeNoData = includeNoData;
 	}
 	
 	public void accept(IValueVisitor visitor){

@@ -193,6 +193,17 @@ public class PatrolLegDay extends UuidItem {
 	}
 
 	/**
+	 * Returns true when there is at least one waypoint or one track for the patrol leg day
+	 * 
+	 * @return
+	 */
+	@Transient
+	public boolean hasData() {
+		boolean hasTrack = getTrack() != null;
+		boolean hasWaypoints = getWaypoints() != null && !getWaypoints().isEmpty();
+		return (hasTrack || hasWaypoints);
+	}
+	/**
 	 * Clones the patrol leg day 
 	 * NOTE: This function doesn't clone anything to do with waypoints
 	 */
