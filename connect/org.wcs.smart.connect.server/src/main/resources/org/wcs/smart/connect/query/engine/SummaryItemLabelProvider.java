@@ -152,9 +152,9 @@ public class SummaryItemLabelProvider {
 			
 			if (it.getPatrolValueOption().hasNoDataOption()) {
 				if (it.includeNoData()) {
-					text = text + "(All)";
+					text = text + Messages.getString("SummaryItemLabelProvider.AllDataOption", l); //$NON-NLS-1$
 				}else {
-					text = text +" (Data Only)";
+					text = text +Messages.getString("SummaryItemLabelProvider.DataOnlyOption", l); //$NON-NLS-1$
 				}
 			}
 			
