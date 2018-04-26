@@ -139,7 +139,7 @@ public class RecordLocationSummaryComposite extends Composite{
             observationViewer.getViewer().getTree().getColumn(i).pack();
 		
 		if (expanded == null || expanded.length == 0) {
-			observationViewer.getViewer().collapseAll();
+			observationViewer.getViewer().expandAll();
 		}else {
 			observationViewer.getViewer().setExpandedElements(expanded);
 		}

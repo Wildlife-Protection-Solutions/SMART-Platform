@@ -143,11 +143,7 @@ public class SummaryResultTable extends Composite {
 			}
 		});
 				
-		// sync selection the same in both tables
-		Listener mouseWheel = e-> {
-			vSlider.setSelection(vSlider.getSelection() + -1*e.count);	
-			updateVerticalSlider();
-		};
+		
 		
 		leftTable.getTable().addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
@@ -165,6 +161,12 @@ public class SummaryResultTable extends Composite {
 		});
 		
 		mainTable.setItemCount(results.getNumDataRows());
+		
+		// sync selection the same in both tables
+		Listener mouseWheel = e-> {
+			vSlider.setSelection(vSlider.getSelection() + -1*e.count);	
+			updateVerticalSlider();
+		};
 		mainTable.getControl().addListener(SWT.MouseWheel, mouseWheel);
 		leftTable.getControl().addListener(SWT.MouseWheel, mouseWheel);
 		
