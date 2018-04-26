@@ -27,23 +27,22 @@
 <script type="text/javascript">
 var menuOpen = true;
 //have to call this in each page since I can't overwrite the onload function (again) and the menu doesn't exist yet if you just run it right here.
-
 function menuCheckOnload(){
 	var menuState = readCookie("smartMenuState");
-	if(menuState == "hidden" || ""){
-		var items = document.getElementsByClassName("textMenu");
-		for (i = 0; i < items.length; i++) {
-	    	items[i].style.display = "none";
-		}
-		menuOpen = false;
-		document.getElementById("verticalmenu").style.minWidth = "0px";
-	}else if(menuState == "show"){
+	if(menuState == "show"){
 		var items = document.getElementsByClassName("textMenu");
 		for (i = 0; i < items.length; i++) {
 	    	items[i].style.display = "inline-block";
 		}
 		menuOpen = true;
 		document.getElementById("verticalmenu").style.minWidth = "180px";
+	}else{
+		var items = document.getElementsByClassName("textMenu");
+		for (i = 0; i < items.length; i++) {
+	    	items[i].style.display = "none";
+		}
+		menuOpen = false;
+		document.getElementById("verticalmenu").style.minWidth = "0px";
 	}
 }
 
