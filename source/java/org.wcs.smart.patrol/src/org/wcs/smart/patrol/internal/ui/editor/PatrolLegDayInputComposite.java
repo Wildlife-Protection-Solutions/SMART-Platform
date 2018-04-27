@@ -34,7 +34,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -69,13 +68,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -287,6 +283,12 @@ public class PatrolLegDayInputComposite {
 			data.setWaypoints(new ArrayList<PatrolWaypoint>());
 		}
 		observationTable.setInput(data.getWaypoints());
+		for (int i = 0; i < observationTable.getTable().getColumnCount(); i ++) {
+			observationTable.getTable().getColumn(i).pack();
+			if (observationTable.getTable().getColumn(i).getWidth() > 200) {
+				observationTable.getTable().getColumn(i).setWidth(200);
+			}
+		}
 		observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -543,17 +545,6 @@ public class PatrolLegDayInputComposite {
 		editor.getPatrolEditor().getSelectionProvider().addSelectionProvider(observationTable);
 		toolkit.adapt(observationTable.getTable());
 		setupObservationTable();
-		observationTable.getTable().addPaintListener(new PaintListener() {
-			
-			boolean called = false;
-			@Override
-			public void paintControl(PaintEvent e) {
-				if (called) return;
-				called = true;
-				resize();
-				
-			}
-		});
 		
 		Composite buttonComp = toolkit.createComposite(mainComposite);
 		buttonComp.setLayout(new GridLayout(3, false));
@@ -775,60 +766,9 @@ public class PatrolLegDayInputComposite {
 						PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);			}
 				});
 			}
-		});
-		
-		
+		});	
 	}
 	
-	private void resize(){
-		if (observationTableColumns == null){
-			return ;
-		}
-		
-		GC gc = new GC(observationTable.getTable().getDisplay());
-		gc.setFont(observationTable.getTable().getFont());
-		
-		for (Iterator<Entry<OtColumn, TableViewerColumn>> iterator = observationTableColumns.entrySet().iterator(); iterator.hasNext();) {
-			Entry<OtColumn, TableViewerColumn> type = iterator.next();
-			int maxWidth = getMaximumWidth(gc, type.getKey());
-			type.getValue().getColumn().setWidth(maxWidth);
-		}
-		gc.dispose();
-	}
-	
-	/**
-	 * This convenience method is used to determine an appropriate width for
-	 * the column based on the collection of event objects. The returned
-	 * value is the maximum width (in pixels) of the text the receiver
-	 * associates with each of the events. The events are provided as
-	 * Object[] because converting them to {@link UsageDataEventWrapper}[]
-	 * would be an unnecessary expense.
-	 * 
-	 * @param gc
-	 *            a {@link GC} loaded with the font used to display the
-	 *            events.
-	 * @param events
-	 *            an array of {@link UsageDataEventWrapper} instances.
-	 * @return the width of the widest event
-	 */
-	private int getMaximumWidth(GC gc, OtColumn column){ //, Object[] events) {
-		int width = 0;
-		Point extent = gc.textExtent(column.guiName);
-		width = extent.x;
-		for (Iterator<PatrolWaypoint> iterator = PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().iterator(); iterator.hasNext();) {
-			PatrolWaypoint e = iterator.next();
-			String str = getWaypointValueAsString(e, column);
-			
-			if (str != null){
-				int tmp = gc.textExtent(str).x;
-				if ( tmp > width){
-					width = tmp;
-				}
-			}
-		}
-		width = Math.min(200, width);
-		return width + 20;
-	}
 	
 	private void updateTotalHours(){
 		double totalTime = SmartUtils.getTime(dtEndTime).getTime() - SmartUtils.getTime(dtStartTime).getTime();
