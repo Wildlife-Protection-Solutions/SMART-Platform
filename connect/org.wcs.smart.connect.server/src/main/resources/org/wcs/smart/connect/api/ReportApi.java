@@ -200,7 +200,10 @@ public class ReportApi extends HttpServlet{
 					if (rformat == ReportFormat.HTML){
 						options = new HTMLRenderOption();
 						((HTMLRenderOption)options).setBaseImageURL(request.getContextPath() + REPORT_IMAGES_DIR); 
-						((HTMLRenderOption)options).setImageDirectory(context.getRealPath(REPORT_IMAGES_DIR)); 
+						((HTMLRenderOption)options).setImageDirectory(context.getRealPath(REPORT_IMAGES_DIR));
+						((HTMLRenderOption)options).setHtmlPagination(true);
+						((HTMLRenderOption)options).setEmbeddable(true);
+						((HTMLRenderOption)options).setEnableInlineStyle(true);
 						options.setOutputFormat(HTMLRenderOption.HTML);
 					}else{
 						options = new RenderOption();
@@ -224,12 +227,9 @@ public class ReportApi extends HttpServlet{
 						reportSession.beginTransaction();
 						try{
 							Map<String, Object> parameters = new HashMap<String, Object>();
-								//put all the non-constant parameters in the hashmap
-	
+								//put all the non-constant parameters in the hashmap	
 							covertParametersToMap(parameters, parameterList, reportSession, uuid);
-	//							parameters.put("reportUuid", reportUuid);
-	//							parameters.put("cafilter", cafilter);
-								
+
 							task.setRenderOption(options);
 							task.setParameterValues(parameters);
 							task.run();
@@ -241,8 +241,13 @@ public class ReportApi extends HttpServlet{
 					if(rformat != ReportFormat.HTML){
 						return writeBinary(bos, rformat, report);
 					}else{
-						String html = bos.toString(StandardCharsets.UTF_8.name());
-						return writeHtml(html);
+						StringBuilder sb = new StringBuilder();
+						sb.append("<html><head><link rel=\"shortcut icon\" href=\"/server/css/images/smart_fav_icon.png\"><title>SMART Connect - " ); //$NON-NLS-1$
+						sb.append(report.getName());
+						sb.append("</title></head><body>" ); //$NON-NLS-1$
+						sb.append(bos.toString(StandardCharsets.UTF_8.name()));
+						sb.append("</body></html>"); //$NON-NLS-1$
+						return writeHtml(sb.toString());
 					}
 				}
 			}
