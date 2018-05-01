@@ -108,8 +108,8 @@ elementFormDefault="qualified">
     		</element>
     	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>
-        <attribute name="dmUuid" type="string"></attribute>
-        <attribute name="id" type="string"></attribute>
+    	<attribute name="dmUuid" type="string"></attribute>
+    	<attribute name="id" type="string"></attribute>
     	<attribute name="configId" type="string"></attribute>
     	<attribute name="type">
     		<simpleType>
@@ -122,7 +122,12 @@ elementFormDefault="qualified">
     				<enumeration value="NUMERIC"></enumeration>
     			</restriction>
     		</simpleType>
-    	</attribute>
+    	</attribute>
+
+    	<attribute name="required" type="boolean">
+    		<annotation>
+    			<documentation>This value represents the data model attribute required flag.  Required cannot be specified for individual data model nodes.</documentation>
+    		</annotation></attribute>
     </complexType>
 
     <complexType name="AttributeOptionType">

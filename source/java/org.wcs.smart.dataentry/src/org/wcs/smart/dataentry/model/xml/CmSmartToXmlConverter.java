@@ -241,6 +241,8 @@ public class CmSmartToXmlConverter {
 				setNames(at.getName(), ca.getNames(), null, llookup);
 				at.setAttributeKey(ca.getAttribute().getKeyId());
 				at.setDmUuid(toString(ca.getAttribute().getUuid()));
+				at.setRequired(ca.getAttribute().getIsRequired());
+				
 				for (CmAttributeOption option : ca.getCmAttributeOptions().values()) {
 					AttributeOptionType aot = new AttributeOptionType();
 					aot.setId(option.getOptionId());
