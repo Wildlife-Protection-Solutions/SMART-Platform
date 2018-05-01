@@ -27,8 +27,8 @@ import java.util.Iterator;
 
 import org.eclipse.birt.core.data.ExpressionUtil;
 import org.eclipse.birt.core.exception.BirtException;
-import org.eclipse.birt.data.engine.api.IBaseQueryDefinition;
 import org.eclipse.birt.data.engine.api.IDataQueryDefinition;
+import org.eclipse.birt.data.engine.api.IQueryDefinition;
 import org.eclipse.birt.data.engine.api.querydefn.Binding;
 import org.eclipse.birt.data.engine.api.querydefn.ScriptExpression;
 import org.eclipse.birt.report.data.adapter.api.DataAdapterUtil;
@@ -40,7 +40,6 @@ import org.eclipse.birt.report.model.api.PropertyHandle;
 import org.eclipse.birt.report.model.api.ResultSetColumnHandle;
 import org.eclipse.birt.report.model.api.extension.ExtendedElementException;
 import org.eclipse.birt.report.model.elements.interfaces.IDataSetModel;
-import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.item.LayerItem;
 import org.wcs.smart.report.birt.map.item.SmartMapItem;
 
@@ -88,14 +87,15 @@ public class MapQuery extends ReportItemQueryBase {
 				LayerItem layer = crosstabItem.getLayer(i);
 				results[i] = processChildQuery(layer);
 			}
+			if (results.length == 0) return null;
 			return results;
 		}
-		return new IDataQueryDefinition[]{};
+		return null;
 	}
 
 	private IDataQueryDefinition processChildQuery(LayerItem layer) throws BirtException{
-
-		IBaseQueryDefinition def =  (IBaseQueryDefinition)context.createQuery(null, layer.getHandle())[0];
+		
+		IQueryDefinition def =  (IQueryDefinition)context.createQuery(null, layer.getHandle())[0];
 		
 		//configure bindings on-the-fly to reduce the number of problems with changing
 		//datamodels; here we also update the geometry column name to use the alias if provided
@@ -130,15 +130,7 @@ public class MapQuery extends ReportItemQueryBase {
 				def.addBinding( bind);
 			}
 		}
-		
-		 //create layer definition
-		MapQueryDefinition wrapper = new MapQueryDefinition(layer, def);	
-		MapLayerInfo info = new MapLayerInfo(layer.getLayerName(), 
-				layer.getLayerStyle(), layer.getLayerType(), layer.getGeometryColumn());
-		wrapper.setMapInfo(info);
-		
-		return wrapper;
-		
+		return def;
 	}
 
 }

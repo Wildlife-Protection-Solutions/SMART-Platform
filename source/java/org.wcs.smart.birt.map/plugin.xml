@@ -203,4 +203,11 @@
             class="org.wcs.smart.report.birt.map.SmartMapItemImageUi">
       </reportItemImageUI>
    </extension>
+   <extension
+         point="org.eclipse.birt.report.engine.reportitemGeneration">
+      <reportItemExecutor
+            class="org.wcs.smart.report.birt.map.execute.MapItemExecutor"
+            name="SMART Map Item Executor">
+      </reportItemExecutor>
+   </extension>
 </plugin>

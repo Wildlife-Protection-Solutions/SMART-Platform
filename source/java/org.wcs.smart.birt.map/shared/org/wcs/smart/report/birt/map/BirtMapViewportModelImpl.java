@@ -782,6 +782,7 @@ public class BirtMapViewportModelImpl extends EObjectImpl implements ViewportMod
      * @generated NOT
      */
     public void zoomToExtent() {
+    	if (getMap().getMapLayers().isEmpty()) return;
         try {
             if (!validState())
                 return;

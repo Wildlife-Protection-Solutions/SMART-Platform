@@ -95,8 +95,7 @@ public class SmartMapItem extends ReportItem {
 	 * @param item
 	 */
 	public SmartMapItem(ExtendedItemHandle item) {		
-		this.handle = item;
-		
+		this.handle = item;		
 	}
 
 

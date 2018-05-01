@@ -95,6 +95,8 @@ public class ReportView implements IReportListener{
 
 	private Path imageDirectory;
 	
+	private Path tempReportDocument;
+	
 	Job reportRunner = new Job(Messages.ReportView_PreviewReportJobName){
 		
 		protected IStatus run(IProgressMonitor monitor) {
@@ -103,8 +105,12 @@ public class ReportView implements IReportListener{
 			try {
 				Files.createDirectories(imageDirectory);
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				ReportPlugIn.log(e1.getMessage(), e1);
+			}
+			
+			if (tempReportDocument == null) {
+				String fileName = report.getFilename().replaceFirst(".rptdesign", ".rptdocument"); //$NON-NLS-1$ //$NON-NLS-2$
+				tempReportDocument = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve(EncryptUtils.TEMP_DIR).resolve(fileName);
 			}
 			try{
 				try(ByteArrayOutputStream bos = new ByteArrayOutputStream()){
@@ -114,7 +120,9 @@ public class ReportView implements IReportListener{
 					options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 					options.setOutputFormat(HTMLRenderOption.HTML);
 					options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, imageDirectory);
-					
+					options.setHtmlPagination(true);
+					options.setEmbeddable(true);
+					options.setEnableInlineStyle(true);
 					try(Session s = HibernateManager.openSession()){
 						try {
 							s.beginTransaction();
@@ -122,7 +130,7 @@ public class ReportView implements IReportListener{
 							SmartReportRunner.INSTANCE.runReport(report,
 								SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
 								ReportEngineManager.getBirtReportEngine(), 
-								options, s, selectedParams);
+								options, s, selectedParams, tempReportDocument);
 						}finally {
 							s.getTransaction().rollback();
 						}
@@ -161,8 +169,15 @@ public class ReportView implements IReportListener{
 		try {
 			FileUtils.deleteDirectory(cleanUp.toFile());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ReportPlugIn.log(e.getMessage(), e);
+		}
+		
+		if (tempReportDocument != null) {
+			try {
+				Files.delete(tempReportDocument);
+			}catch (Exception ex) {
+				ReportPlugIn.log(ex.getMessage(), ex);
+			}
 		}
 	}
 	
