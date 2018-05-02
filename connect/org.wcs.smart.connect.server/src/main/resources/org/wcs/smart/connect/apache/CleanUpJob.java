@@ -213,8 +213,9 @@ public class CleanUpJob implements Runnable {
 			
 			s.getTransaction().commit();
 		}catch (Exception ex){
-			s.getTransaction().rollback();
 			logger.log(Level.WARNING, "Unable to clean up work item table.", ex); //$NON-NLS-1$
+			s.getTransaction().rollback();
+			
 		}
 	}
 	

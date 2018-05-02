@@ -29,6 +29,7 @@ import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -435,6 +436,7 @@ public class ConservationAreas extends HttpServlet{
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.BadRequest", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 	
+		ConservationArea wkCa = null;
 		WorkItem item = null;
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -443,6 +445,9 @@ public class ConservationAreas extends HttpServlet{
 			if (item == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.DownloadPackageNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
+			wkCa = s.get(ConservationArea.class,  item.getConservationAreaInfo().getUuid());
+			wkCa.getId();
+			
 			validateRead(item.getConservationAreaInfo().getUuid(), s);
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
@@ -510,9 +515,12 @@ public class ConservationAreas extends HttpServlet{
 					}
 				}
 		    };
-			    
+			String fileName = toReturn.getName();
+			if (item.getType() == WorkItem.Type.DOWN_CA) {
+				fileName = wkCa.getId() + ".smart" + (new SimpleDateFormat("ddMMyyyy")).format(item.getStartTime()) + fileName.substring(fileName.lastIndexOf('.'));  //$NON-NLS-1$//$NON-NLS-2$
+			}
 			return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM)
-					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getName() + "\"") //$NON-NLS-1$ //$NON-NLS-2$
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName+ "\"") //$NON-NLS-1$ //$NON-NLS-2$
 					.header(HttpHeaders.CONTENT_LENGTH, toReturn.length())
 					.header("Accept-Ranges", "bytes") //$NON-NLS-1$ //$NON-NLS-2$
 					.build();
