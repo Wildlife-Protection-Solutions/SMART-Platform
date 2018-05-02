@@ -32,7 +32,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -82,10 +81,7 @@ public class AttachmentTable extends Composite implements Listener {
 	private Job loadImagesJob = new Job("loading images") { //$NON-NLS-1$
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			
-			int addedSize = 0;
-
-			while(true){
+					while(true){
 				if (resultSet == null) {
 					return Status.CANCEL_STATUS;
 				}
@@ -96,10 +92,7 @@ public class AttachmentTable extends Composite implements Listener {
 				List<IQueryImageData> items = resultSet.getImageData(currentIndex, pageSize);
 				currentIndex += pageSize;
 				//create spaces for remaining images
-				int remaining = resultSet.getImageCount() - currentIndex;
-				if (remaining > 0) {
-					addedSize = (int)Math.ceil(remaining / numColumns) * thumbnailSize;
-				}
+
 				final boolean[] needmore = new boolean[] {false};
 				
 				Display.getDefault().syncExec(()->{
@@ -117,20 +110,8 @@ public class AttachmentTable extends Composite implements Listener {
 				if (!needmore[0]) break;	
 			}
 			
-			final int faddedSize = addedSize;
 			Display.getDefault().syncExec(()->{
 				layoutAttachments();
-				if (spacer != null) {
-					spacer.dispose();
-					spacer = null;
-				}
-				if (faddedSize > 0) {
-					spacer = new Composite(infoSection.getBody(), SWT.BORDER);
-					spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-					spacer.setVisible(false);
-					((GridData)spacer.getLayoutData()).heightHint = faddedSize;
-				}
-				infoSection.reflow(true);
 				
 			});	
 			return Status.OK_STATUS;
@@ -221,9 +202,10 @@ public class AttachmentTable extends Composite implements Listener {
 			toolkit.adapt(thumb);
 			
 			infoSection.setOrigin(0, 0);
-			Point thumSize = thumb.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-			thumSize.x = infoSection.getSize().x - infoSection.getVerticalBar().getSize().x - 5;
-			thumb.setSize(thumSize);
+//			Point thumSize = thumb.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+//			thumSize.x = infoSection.getSize().x - infoSection.getVerticalBar().getSize().x - 5;
+//			thumb.setSize(thumSize);
+			setSize();
 			layoutAttachments();
 		});
 	}
@@ -233,6 +215,7 @@ public class AttachmentTable extends Composite implements Listener {
 		if (event == null || event.type == SWT.Resize){
 			if (infoSection.isDisposed()) return;
 			if (thumb != null){
+				setSize();
 				layoutAttachments();
 			}
 		}
@@ -261,22 +244,38 @@ public class AttachmentTable extends Composite implements Listener {
 		return more || more2;
 	}
 	
-	/*
-	 * layout attachments
-	 */
-	private void layoutAttachments() {
-		int mainWidth = infoSection.getClientArea().width - infoSection.getVerticalBar().getSize().x ;
+	private void setSize() {
 		int width = infoSection.getSize().x - infoSection.getVerticalBar().getSize().x;	
-		
 		int cols = (int)Math.floor(width / (thumbnailSize + 5 ));  //5 margin between images
 		if (cols < 1) cols = 1;
 		numColumns = cols;
 		thumb.updateLayout(cols);
-		((GridData)thumb.getLayoutData()).widthHint = mainWidth;
 		thumb.layout(true);
-		infoSection.getBody().layout(true);
-		infoSection.reflow(true);
 		
+		if (resultSet != null) {
+			int rows = (int)Math.ceil(resultSet.getImageCount() / (double)cols);
+			int y = (thumbnailSize + 5)* (rows);
+			int heightRequired = y;
+			
+			if (spacer != null) {
+				spacer.dispose();
+				spacer = null;
+			}
+			
+			if (heightRequired > thumb.getSize().y) {
+				spacer = new Composite(infoSection.getBody(), SWT.BORDER);
+				spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+				spacer.setVisible(true);
+				((GridData)spacer.getLayoutData()).heightHint = heightRequired - thumb.getSize().y;
+			}
+			infoSection.reflow(true);
+		}
+	}
+	
+	/*
+	 * layout attachments
+	 */
+	private void layoutAttachments() {
 		scheduleLoadJob();
 	}
 	

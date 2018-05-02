@@ -197,7 +197,7 @@ public class QueryResultsImagePage extends EditorPart  implements AttachmentTabl
 		btnDown.addListener(SWT.MouseDown, e->mnuIconSize.setVisible(true));
 		iconSizeLabel.addListener(SWT.MouseDown, e->mnuIconSize.setVisible(true));
 		
-		//image reuslts table
+		//image results table
 		imageTable = new AttachmentTable(outer, toolkit, this);
 		imageTable.setThumbnailSize(this.iconSize.size);
 		imageTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
