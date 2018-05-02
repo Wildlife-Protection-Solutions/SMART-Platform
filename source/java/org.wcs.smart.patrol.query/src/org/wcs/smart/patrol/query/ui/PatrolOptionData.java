@@ -167,6 +167,7 @@ public class PatrolOptionData implements IPatrolOptionData{
 				}
 			}
 		}
+		Collections.sort(results);
 		return results;
 	}
 

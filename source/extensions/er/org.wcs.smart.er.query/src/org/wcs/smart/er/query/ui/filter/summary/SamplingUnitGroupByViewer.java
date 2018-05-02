@@ -22,6 +22,7 @@
 package org.wcs.smart.er.query.ui.filter.summary;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -76,6 +77,7 @@ public class SamplingUnitGroupByViewer extends AbstractGroupByViewer<SamplingUni
 			//all sampling units for associated design
 			return null;
 		}
+		Collections.sort(listItems);
 		return listItems;
 	}
 	

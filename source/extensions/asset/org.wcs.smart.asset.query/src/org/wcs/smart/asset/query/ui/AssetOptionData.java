@@ -22,6 +22,7 @@
 package org.wcs.smart.asset.query.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -73,6 +74,7 @@ public class AssetOptionData implements IAssetGroupByOptionData{
 			ListItem listItem = iterator.next();
 			if (!uuids.contains(listItem.getUuid())) iterator.remove();
 		}
+		Collections.sort(results);
 		return results;
 	}
 
@@ -118,6 +120,7 @@ public class AssetOptionData implements IAssetGroupByOptionData{
 		default:
 			break;
 		}
+		Collections.sort(results);
 		return results;
 	}
 	

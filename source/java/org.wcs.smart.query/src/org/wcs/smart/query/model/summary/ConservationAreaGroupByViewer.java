@@ -58,7 +58,6 @@ public class ConservationAreaGroupByViewer extends AbstractGroupByViewer<Conserv
 		for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
 			items.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
 		}
-		Collections.sort(items);
 		
 		if (filterHkeys != null){
 			HashSet<String> lookup = new HashSet<String>();
@@ -73,7 +72,7 @@ public class ConservationAreaGroupByViewer extends AbstractGroupByViewer<Conserv
 			}
 			items.removeAll(remove);
 		}
-		
+		Collections.sort(items);
 		return items;
 	}
 

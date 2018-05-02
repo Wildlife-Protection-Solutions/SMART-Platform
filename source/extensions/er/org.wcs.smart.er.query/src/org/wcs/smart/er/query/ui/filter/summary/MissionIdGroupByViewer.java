@@ -22,6 +22,7 @@
 package org.wcs.smart.er.query.ui.filter.summary;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -73,6 +74,7 @@ public class MissionIdGroupByViewer extends AbstractGroupByViewer<MissionIdGroup
 				}
 			}
 		}
+		Collections.sort(allItems);
 		return allItems;
 	}
 

@@ -1,6 +1,7 @@
 package org.wcs.smart.observation.query.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -36,6 +37,7 @@ public class WaypointSourceGroupByViewer extends AbstractGroupByViewer<WaypointS
 				}
 			}
 		}
+		Collections.sort(items);
 		return items;
 	}
 

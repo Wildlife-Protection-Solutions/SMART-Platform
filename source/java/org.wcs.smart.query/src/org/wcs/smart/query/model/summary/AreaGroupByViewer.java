@@ -23,6 +23,7 @@ package org.wcs.smart.query.model.summary;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -96,7 +97,7 @@ public class AreaGroupByViewer extends AbstractGroupByViewer<AreaGroupBy> {
 				items.add(new ListItem(null, a.getName(), a.getKeyId()));
 			}
 		}
-		
+		Collections.sort(items);
 		return items;
 	}
 

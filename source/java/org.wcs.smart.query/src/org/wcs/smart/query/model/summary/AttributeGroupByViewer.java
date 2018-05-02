@@ -23,6 +23,7 @@ package org.wcs.smart.query.model.summary;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -97,6 +98,7 @@ public class AttributeGroupByViewer extends AbstractGroupByViewer<AttributeGroup
 				}
 			}
 		}
+		Collections.sort(items);
 		return items;
 	}
 

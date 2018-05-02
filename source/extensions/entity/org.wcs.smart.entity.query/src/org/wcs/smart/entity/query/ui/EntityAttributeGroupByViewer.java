@@ -23,6 +23,7 @@ package org.wcs.smart.entity.query.ui;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -162,6 +163,7 @@ public class EntityAttributeGroupByViewer extends AbstractGroupByViewer<EntityAt
 				}
 			}
 		}
+		Collections.sort(items);
 		return items;
 	}
 

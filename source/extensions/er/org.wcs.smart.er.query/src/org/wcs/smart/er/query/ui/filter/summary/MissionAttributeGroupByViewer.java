@@ -23,6 +23,7 @@ package org.wcs.smart.er.query.ui.filter.summary;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -76,6 +77,7 @@ public class MissionAttributeGroupByViewer extends AbstractGroupByViewer<Mission
 				allItems.add(new ListItem(null, mli.getName(), mli.getKeyId()));
 			}
 		}
+		Collections.sort(allItems);
 		return allItems;
 	}
 	

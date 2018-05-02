@@ -76,6 +76,7 @@ public class ObserverGroupByViewer extends AbstractGroupByViewer<ObserverGroupBy
 				items.add(new ListItem(e.getUuid(), SmartLabelProvider.getShortLabel(e)));
 			}
 		}
+		Collections.sort(items);
 		return items;
 	}
 
