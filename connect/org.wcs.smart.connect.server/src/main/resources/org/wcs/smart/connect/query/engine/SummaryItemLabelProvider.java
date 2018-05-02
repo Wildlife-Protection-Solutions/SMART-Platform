@@ -422,9 +422,8 @@ public class SummaryItemLabelProvider {
 			for (Area a : matching){
 				items.add(new ListItem(null, a.getName(), a.getKeyId()));
 			}
-			sortItems(items);
 		}
-		
+		sortItems(items);
 		return items;
 	}
 	
@@ -477,7 +476,6 @@ public class SummaryItemLabelProvider {
 					
 					items.add(new ListItem(null, name, li));
 				}
-				sortItems(items);
 			}
 		}else if (item.getAttributeType() == AttributeType.TREE){
 			if (filterHkeys != null){
@@ -500,9 +498,10 @@ public class SummaryItemLabelProvider {
 					
 					items.add(new ListItem(null, name, hkey));
 				}
-				sortItems(items);
+				
 			}
 		}
+		sortItems(items);
 		return items;
 	}
 	
@@ -529,8 +528,8 @@ public class SummaryItemLabelProvider {
 			for(Category child : cats){
 				items.add(new ListItem(null, child.getFullCategoryName(), child.getHkey()));
 			}
-			sortItems(items);
 		}
+		sortItems(items);
 		return items;
 	}
 
@@ -542,7 +541,6 @@ public class SummaryItemLabelProvider {
 		for (ConservationArea ca : cas){
 			if (!ca.getIsCcaa()) items.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
 		}
-		sortItems(items);
 		
 		if (filterHkeys != null){
 			HashSet<String> lookup = new HashSet<String>();
@@ -557,7 +555,7 @@ public class SummaryItemLabelProvider {
 			}
 			items.removeAll(remove);
 		}
-		
+		sortItems(items);
 		return items;
 	}
 	
@@ -758,6 +756,7 @@ public class SummaryItemLabelProvider {
 		for (ListItem i : aitems){
 			items.add(new ListItem(null, i.getName() + " [" + entityTypeName + "]", i.getKey())); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		sortItems(items);
 		return items;
 		
 	}
@@ -788,8 +787,8 @@ public class SummaryItemLabelProvider {
 			for (MissionAttributeListItem mli : ma.getAttributeList()){
 				allItems.add(new ListItem(null, mli.getName(), mli.getKeyId()));
 			}
-			sortItems(allItems);
 		}
+		sortItems(allItems);
 		return allItems;
 	}
 	
@@ -824,8 +823,8 @@ public class SummaryItemLabelProvider {
 				Object[] m = (Object[])mRow;
 				allItems.add(new ListItem((UUID)m[0], (String)m[1]));
 			}
-			sortItems(allItems);
 		}
+		sortItems(allItems);
 		return allItems;
 	}
 	
@@ -849,8 +848,8 @@ public class SummaryItemLabelProvider {
 			for (Employee e : es){
 				items.add(new ListItem(e.getUuid(), SmartLabelProvider.getFullName(e, l)));
 			}
-			sortItems(items);
 		}
+		sortItems(items);
 		return items;
 	}
 	
@@ -995,7 +994,8 @@ public class SummaryItemLabelProvider {
 				}
 			}
 		}
-		if (sort) sortItems(results);
+//		if (sort) sortItems(results);
+		sortItems(results);
 		return results;
 	}
 	
@@ -1113,8 +1113,8 @@ public class SummaryItemLabelProvider {
 			for (SamplingUnitAttributeListItem mli : su.getAttributeList()){
 				allItems.add(new ListItem(null, mli.getName(), mli.getKeyId()));
 			}
-			sortItems(allItems);
 		}
+		sortItems(allItems);
 		return allItems;
 	}
 	private List<ListItem> getName(SamplingUnitGroupBy item){
@@ -1146,10 +1146,10 @@ public class SummaryItemLabelProvider {
 				Object[] su = (Object[])suRow;
 				listItems.add(new ListItem((UUID)su[0], (String)su[1]));
 			}
-			sortItems(listItems);
 			listItems.add(new ListItem(null, Messages.getString("SummaryItemLabelProvider.NoneSuFilterOpt", l))); //$NON-NLS-1$
 			
 		}
+		sortItems(listItems);
 		return listItems;
 	}
 	
@@ -1184,8 +1184,8 @@ public class SummaryItemLabelProvider {
 				Object[] m = (Object[])mRow;
 				allItems.add(new ListItem((UUID)m[0], (String)m[1]));
 			}
-			sortItems(allItems);
 		}
+		sortItems(allItems);
 		return allItems;
 	}
 	private List<ListItem> getName(WaypointSourceGroupBy item){
@@ -1196,7 +1196,6 @@ public class SummaryItemLabelProvider {
 			for(IWaypointSource src : WaypointSourceEngine.INSTANCE.getSupportedSources()){
 				items.add(new ListItem(null,src.getName(l), src.getKey()));
 			}
-			sortItems(items);
 		}else{
 			for (String k : keys){
 				IWaypointSource c = WaypointSourceEngine.INSTANCE.getSource(k);
@@ -1205,6 +1204,7 @@ public class SummaryItemLabelProvider {
 				}
 			}
 		}
+		sortItems(items);
 		return items;
 	}
 	
