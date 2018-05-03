@@ -241,7 +241,7 @@ labels_en= {
 "dataqueue.deletetooltip":"Delete File",
 "dataqueue.edittooltip":"Update Status",
 "dataqueue.fileuploading":"Uploading File:",
-"ca.cadeleted":"Conservation Area data deleted.",
+"ca.cadeleted2":"The Conservation Area has been scheduled for deletion.",
 "ca.error":"Error",
 "ca.unauthorized":"Unauthorized",
 "pickaday.jan":"January",

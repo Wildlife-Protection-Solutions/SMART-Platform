@@ -85,7 +85,6 @@ import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Type;
-import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.security.ActionManager;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.ISmartConnectAction;
@@ -772,10 +771,7 @@ public class ConservationAreas extends HttpServlet{
 			s.getTransaction().commit();
 		}
 	}
-	/*
-	 * TODO: this might need to be done as a background process incase
-	 * deleting takes a long time
-	 */
+
 	/**
 	 * Deletes a given conservation area.
 	 * <p>URL: ../server/api/conservationarea/{cauuid}
@@ -817,7 +813,7 @@ public class ConservationAreas extends HttpServlet{
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.InvalidDataOnlyParameter", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
-		UUID caUuidToDelete = null;
+		
 		//Session s = HibernateManager.getSession(context, SmartUtils.getRequestLocale(request));
 		ConservationAreaInfo serverDelete = null;
 		try(Session s = HibernateManager.openNewSession(context, SmartUtils.getRequestLocale(request))){
@@ -844,68 +840,9 @@ public class ConservationAreas extends HttpServlet{
 					throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.VersionDoesNotExist" + serverDelete.getVersion() + "  -- " + UUID.fromString(version), SmartUtils.getRequestLocale(request))); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				validateDelete(serverDelete.getUuid(), s);
-	
-				
-				//need to do some of the (deleteall) work before the desktop data is gone
-				caUuidToDelete = serverDelete.getUuid();
-				if (deleteAll){
-					// delete query actions associated with any query from the CA being deleted
-					QueryManager.INSTANCE.removeAccessToQueriesFromCa(serverDelete.getUuid(), s);
-				}
-				
-
-				//disable change tracking while we delete the Conservation Area
-				ChangeLogManager.INSTANCE.disableChangeTracking(serverDelete, s);
-				try {
-
-					//delete desktop data
-					String query = "DELETE FROM smart.conservation_area WHERE uuid = :uuid"; //$NON-NLS-1$
-					s.createNativeQuery(query)
-						.setParameter("uuid", serverDelete.getUuid(), PostgresUUIDType.INSTANCE) //$NON-NLS-1$
-						.executeUpdate();
-		
-					//delete plugin data
-					s.createQuery("DELETE FROM CaPluginVersion WHERE id.conservationAreaUuid = :ca") //$NON-NLS-1$
-								.setParameter("ca", serverDelete.getUuid()) //$NON-NLS-1$
-								.executeUpdate();
-		
-					//delete change log data
-					ChangeLogManager.INSTANCE.deleteItems(s, serverDelete.getUuid());
-					
-					caUuidToDelete = serverDelete.getUuid();
-					if (deleteAll){
-						
-						//delete actions associated with resource
-						s.createQuery("DELETE FROM SmartUserAction WHERE resource = :ca") //$NON-NLS-1$
-							.setParameter("ca", serverDelete.getUuid()) //$NON-NLS-1$
-							.executeUpdate();
-						
-						//delete server only data
-						s.delete(serverDelete);
-					}else{
-						serverDelete.setStatus(Status.NODATA);
-						serverDelete.setVersion(null);
-					}
 			
-					s.getTransaction().commit();
-				
-					//delete all ca data and findstore
-					try{
-						DataStoreManager.INSTANCE.deleteDirectory(caUuidToDelete);
-					}catch (Exception ex){
-						logger.severe(Messages.getString("ConservationAreas.CouldNotDeleteFilestore", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-					}
-				}finally {
-					//re-enable triggers
-					try {
-						s.beginTransaction();
-						ChangeLogManager.INSTANCE.enableChangeTracking(serverDelete, s);
-						s.getTransaction().commit();
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
+				serverDelete.setStatus(Status.DELETING);
+				s.getTransaction().commit();
 			}catch (SmartConnectException ex){
 				logger.log(Level.WARNING, ex.getMessage(), ex);
 				s.getTransaction().rollback();
@@ -918,7 +855,9 @@ public class ConservationAreas extends HttpServlet{
 			}
 		}
 
-
+		DeleteCaJob job = new DeleteCaJob(serverDelete, deleteAll, HibernateManager.getSessionFactory(context), SmartUtils.getRequestLocale(request));
+		ExecutorService executor = (ExecutorService) context.getAttribute(ConnectStartupContextListener.EXECUTOR_KEY);
+		executor.execute(job);
 	}
 	
 	/**

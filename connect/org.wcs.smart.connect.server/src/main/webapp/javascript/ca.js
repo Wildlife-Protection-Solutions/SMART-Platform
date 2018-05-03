@@ -233,6 +233,9 @@ function confirmdeleteca(){
 	var label = this.dataset.label;
 	var version = this.dataset.version;
 	
+	if (status == 'DELETING'){
+		alert("This Conservation Area is already scheduled for deletion.  You should only reschedule it for deletion if you believe the original request has failed.");
+	}
 	if (status == 'DATA' || status == 'UPLOADING'){
 		document.querySelector("#deleteform > div#confirmtype").style.display = 'block';
 		document.querySelector("#deleteform > * > input[name=caoption][value=desktop]").checked = true;
@@ -302,7 +305,7 @@ function deleteca(){
 
 function caDeleted(){
 	if (this.status == 204) {
-		displayInfo(i18n("ca.cadeleted") + "(" + this.calabel + ")");
+		displayInfo(i18n("ca.cadeleted2") + "(" + this.calabel + ")");
 	} else if (this.status == 401){
 		displayError(parseError(i18n("ca.errordeletingca") + this.calabel + ". Unauthorized.", this.responseText));
 	}else{

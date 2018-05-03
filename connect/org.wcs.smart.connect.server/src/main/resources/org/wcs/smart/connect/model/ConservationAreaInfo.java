@@ -49,10 +49,12 @@ public class ConservationAreaInfo {
 	public static final UUID CCAA_UUID = ConservationArea.MULTIPLE_CA;
 	
 	public enum Status{
+		DELETING,
 		UPLOADING,
 		DATA,
 		CCAA,
-		NODATA
+		NODATA,
+		ERROR
 	}
 	
 	private UUID version;
