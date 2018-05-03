@@ -38,7 +38,8 @@ public class ConservationAreaProxy {
 		UPLOADING,
 		DATA,
 		NODATA,
-		CCAA
+		CCAA,
+		DELETING
 	}
 	
 	private UUID caUuid;

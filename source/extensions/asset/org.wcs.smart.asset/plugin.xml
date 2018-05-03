@@ -320,6 +320,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.observation.perspective.show"
+                  icon="images/icons/obj16/asset.png"
                   label="%viewassets.command.label"
                   style="push">
                <parameter
