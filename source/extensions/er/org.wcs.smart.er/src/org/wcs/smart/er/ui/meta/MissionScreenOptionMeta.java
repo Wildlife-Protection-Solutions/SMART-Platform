@@ -26,15 +26,21 @@ package org.wcs.smart.er.ui.meta;
  * @author elitvin
  */
 public enum MissionScreenOptionMeta {
-	COMMENT("SMART_Comments"), //$NON-NLS-1$
-	MEMBERS("SMART_Members"), //$NON-NLS-1$
-	LEADER("SMART_Leader"); //$NON-NLS-1$
+	COMMENT("SMART_Comments", false), //$NON-NLS-1$
+	MEMBERS("SMART_Members", true), //$NON-NLS-1$
+	LEADER("SMART_Leader", true); //$NON-NLS-1$
 	
 	public static final String MISSION_RESOURCE_ID = "mission"; //$NON-NLS-1$
 	
 	public String key;
+	private boolean required;
 	
-	MissionScreenOptionMeta(String key){
+	MissionScreenOptionMeta(String key, boolean required){
 		this.key = key;
+		this.required = required;
+	}
+	
+	public boolean isRequired() {
+		return this.required;
 	}
 }

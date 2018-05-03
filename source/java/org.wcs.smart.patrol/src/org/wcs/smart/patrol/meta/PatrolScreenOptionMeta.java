@@ -28,22 +28,28 @@ package org.wcs.smart.patrol.meta;
  */
 public enum PatrolScreenOptionMeta {
 
-	TRANSPORT("SMART_PatrolTransport"), //$NON-NLS-1$
-	ARMED("SMART_Armed"), //$NON-NLS-1$
-	STATION("SMART_Team"), //$NON-NLS-1$
-	TEAM("SMART_Station"), //$NON-NLS-1$
-	MANDATE("SMART_Mandate"), //$NON-NLS-1$
-	OBJECTIVE("SMART_Objective"), //$NON-NLS-1$
-	COMMENT("SMART_Comments"), //$NON-NLS-1$
-	MEMBERS("SMART_Members"), //$NON-NLS-1$
-	LEADER("SMART_Leader"), //$NON-NLS-1$
-	PILOT("SMART_Pilot"); //$NON-NLS-1$
+	TRANSPORT("SMART_PatrolTransport", true), //$NON-NLS-1$
+	ARMED("SMART_Armed", true), //$NON-NLS-1$
+	STATION("SMART_Station", false), //$NON-NLS-1$
+	TEAM("SMART_Team", false), //$NON-NLS-1$
+	MANDATE("SMART_Mandate", true), //$NON-NLS-1$
+	OBJECTIVE("SMART_Objective", false), //$NON-NLS-1$
+	COMMENT("SMART_Comments", false), //$NON-NLS-1$
+	MEMBERS("SMART_Members", true), //$NON-NLS-1$
+	LEADER("SMART_Leader", true), //$NON-NLS-1$
+	PILOT("SMART_Pilot", false); //$NON-NLS-1$
 	
 	public static final String PATROL_RESOURCE_ID = "patrol"; //$NON-NLS-1$
 	
 	public String key;
+	private boolean required;
 	
-	PatrolScreenOptionMeta(String key) {
+	PatrolScreenOptionMeta(String key, boolean required) {
 		this.key = key;
+		this.required = required;
+	}
+	
+	public boolean isRequired() {
+		return this.required;
 	}
 }

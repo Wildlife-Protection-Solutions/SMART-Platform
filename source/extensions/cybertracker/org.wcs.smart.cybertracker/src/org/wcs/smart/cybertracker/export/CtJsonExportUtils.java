@@ -63,6 +63,11 @@ import org.wcs.smart.util.UuidUtils;
 public class CtJsonExportUtils {
 	
 	/**
+	 * JSON is required property key
+	 */
+	public static final String JSON_REQUIRED_PROP_KEY = "isRequired"; //$NON-NLS-1$
+	
+	/**
 	 * JSON is visible property key
 	 */
 	public static final String JSON_ISVISIBILE_PROP_KEY = "isVisible"; //$NON-NLS-1$
@@ -278,10 +283,11 @@ public class CtJsonExportUtils {
 	 * @param ca
 	 * @return
 	 */
-	public static JSONObject convertStringOp(ScreenOption screenOption, String opKey, String opLabel, Session session, ConservationArea ca) {
+	public static JSONObject convertStringOp(ScreenOption screenOption, String opKey, String opLabel, boolean isRequired, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
 		objective.put(JSON_OPTION_TYPE_KEY, Type.TEXT.name());
 		objective.put(JSON_OPTION_LABEL_KEY, opLabel);
+		objective.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		if (screenOption != null) {
 			objective.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible() && screenOption.getStringValue() != null) {
@@ -305,10 +311,11 @@ public class CtJsonExportUtils {
 	 * @return
 	 */
 	
-	public static JSONObject convertEmployees(ScreenOption screenOption, Session session, ConservationArea ca) {
+	public static JSONObject convertEmployees(ScreenOption screenOption, boolean isRequired, Session session, ConservationArea ca) {
 		JSONObject optionType = new JSONObject();
 		optionType.put(JSON_OPTION_TYPE_KEY, Type.MULTI_CHOICE.name());
 		optionType.put(JSON_OPTION_LABEL_KEY, Messages.CtJsonExportUtils_EmployeePageLabel);
+		optionType.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		if (screenOption != null) {
 			optionType.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible()) {
@@ -341,11 +348,12 @@ public class CtJsonExportUtils {
 		return teamTypeOp;
 	}
 	
-	public static JSONObject convertLeaderPilot(ScreenOption screenOption, String opKey, String opLabel, Session session, ConservationArea ca) {
+	public static JSONObject convertLeaderPilot(ScreenOption screenOption, String opKey, String opLabel, boolean isRequired, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
 		objective.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
 		objective.put(JSON_OPTION_PARENT_KEY, JSON_EMPLOYEE_METADATA_KEY);
 		objective.put(JSON_OPTION_LABEL_KEY, opLabel);
+		objective.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		if (screenOption != null) {
 			objective.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible() && screenOption.getUuidValue() != null) {
@@ -360,10 +368,11 @@ public class CtJsonExportUtils {
 		return objectiveOp;
 	}
 	
-	public static JSONObject convertKeyOptions(ScreenOption screenOption, Class<? extends NamedKeyItem> clazz, String screenKey, String opLabel, Session session, ConservationArea ca) {
+	public static JSONObject convertKeyOptions(ScreenOption screenOption, Class<? extends NamedKeyItem> clazz, String screenKey, String opLabel, boolean isRequired, Session session, ConservationArea ca) {
 		JSONObject optionType = new JSONObject();
 		optionType.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
 		optionType.put(JSON_OPTION_LABEL_KEY, opLabel);
+		optionType.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		if (screenOption != null) {
 			optionType.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible()) {
@@ -405,7 +414,7 @@ public class CtJsonExportUtils {
 		dataType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.UUID.name());
 		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
 		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
-		
+		dataType.put(JSON_REQUIRED_PROP_KEY, true);
 		JSONObject typeOp = new JSONObject();
 		typeOp.put(ScreensUtil.RESULT_ID, dataType);
 		return typeOp;
@@ -416,7 +425,7 @@ public class CtJsonExportUtils {
 		dataType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.DATE.name());
 		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
 		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
-
+		dataType.put(JSON_REQUIRED_PROP_KEY, true);
 		JSONObject typeOp = new JSONObject();
 		typeOp.put(ScreensUtil.RESULT_START_DATE, dataType);
 		return typeOp;
@@ -428,7 +437,7 @@ public class CtJsonExportUtils {
 		dataType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.TIME.name());
 		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
 		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
-
+		dataType.put(JSON_REQUIRED_PROP_KEY, true);
 		JSONObject typeOp = new JSONObject();
 		typeOp.put(ScreensUtil.RESULT_START_TIME, dataType);
 		return typeOp;
@@ -440,7 +449,7 @@ public class CtJsonExportUtils {
 		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
 		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, false);
 		dataType.put(CtJsonExportUtils.JSON_DEFAULT_PROP_KEY, outputDataType);
-		
+		dataType.put(JSON_REQUIRED_PROP_KEY, true);
 		JSONObject typeOp = new JSONObject();
 		typeOp.put(ScreensUtil.RESULT_DATATYPE, dataType);
 		return typeOp;
