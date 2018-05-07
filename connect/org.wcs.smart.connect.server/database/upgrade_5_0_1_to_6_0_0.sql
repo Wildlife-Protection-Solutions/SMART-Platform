@@ -2157,6 +2157,9 @@ CREATE TABLE connect.gfw(
 );
 ALTER TABLE connect.gfw ADD FOREIGN KEY (alert_uuid) REFERENCES connect.alert_types(uuid); 
 
+
+ALTER TABLE connect.ca_info DROP CONSTRAINT status_chk;
+
 -- UPDATE VERSION
 ALTER TABLE connect.connect_version ADD COLUMN filestore_version varchar(5) default '-1';
 

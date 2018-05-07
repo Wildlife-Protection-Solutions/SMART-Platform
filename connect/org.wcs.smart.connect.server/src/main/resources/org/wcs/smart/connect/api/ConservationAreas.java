@@ -1019,7 +1019,7 @@ public class ConservationAreas extends HttpServlet{
 			
 			s.save(up);
 			
-			//we have a file to uploade and we expect more
+			//we have a file to upload and we expect more
 			
 			response.setHeader(HttpHeaders.LOCATION, up.getStatusURL(request));
 			response.setHeader(HttpHeaders.CONTENT_LENGTH, "0"); //$NON-NLS-1$
@@ -1091,7 +1091,7 @@ public class ConservationAreas extends HttpServlet{
 		
 			s.saveOrUpdate(up);
 			
-			//we have a file to uplodate and we expect more
+			//we have a file to upload and we expect more
 			String uploadURL = request.getScheme() + "://" + request.getServerName()  //$NON-NLS-1$
 					+ ":" + request.getServerPort()  //$NON-NLS-1$
 					+ request.getContextPath() 
