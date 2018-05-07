@@ -88,10 +88,12 @@ public abstract class FileUploaderJob extends Job {
 				//upload file
 				try{
 					cnt++;
-					connect.uploadFile(url, file, 
+					if (serverStatus != null) {
+						connect.uploadFile(url, file, 
 							serverStatus.getCurrentSize(),
 							progress.split(3));
-				}catch (Exception ex){
+					}
+				}catch (Throwable ex){
 					if (ex instanceof InternalServerErrorException){
 						try{
 							InternalServerErrorException isee = (InternalServerErrorException)ex;
@@ -102,11 +104,16 @@ public abstract class FileUploaderJob extends Job {
 					}
 					ConnectPlugIn.log(ex.getMessage(), ex);
 				}
-				
-				serverStatus = connect.getWorkItemStatus(url);
-				if (checkServerStatus(serverStatus, progress.split(2))){
-					return ;
+				try {
+					serverStatus = null;
+					serverStatus = connect.getWorkItemStatus(url);
+					if (checkServerStatus(serverStatus, progress.split(2))){
+						return ;
+					}
+				}catch (Throwable ex){
+					ConnectPlugIn.log(ex.getMessage(), ex);
 				}
+				
 				Thread.sleep(waitTime);
 				progress.checkCanceled();
 			}
@@ -144,6 +151,7 @@ public abstract class FileUploaderJob extends Job {
 	 */
 	protected boolean checkServerStatus(WorkItemStatus serverStatus,
 			IProgressMonitor monitor) throws Exception{
+		if (serverStatus == null) return false;
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.FileUploaderJob_StatusCheckSubTaskName, 1);
 	
 		if (serverStatus.getStatus() == Status.COMPLETE){
