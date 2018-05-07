@@ -144,6 +144,21 @@
 	</form>
 </div>
 
+<!-- Global Fire Watch -->
+<div class="overflow settingsTable">
+	<div class="block settings-header">Global Fire Watch Notification</div>
+	<button class="button top-spacer" id="btnNewGFW">New Global Fire Watch WebHook</button>
+	<table id="gfwtable" class="top-spacer smart-table">
+  	<tr class="table-row smart-table-header">
+			<th class="table-cell smart-table-cell">Alert Type</th>
+			<th class="table-cell smart-table-cell">SMART WebHook</th>
+			<th class="table-cell smart-table-cell">Last Data Push</th>
+			<th class="table-cell smart-table-cell"><fmt:message key="settings.style.actions" /></th>
+	</tr>
+	</table>
+
+</div>
+
 
 <div class="overflow settingsTable">
 	<div class="block settings-header"><fmt:message key="settings.styleconfigurationheader" /></div>
@@ -361,6 +376,25 @@ font-size: 40px;</textarea>
      		</div>
     	</form>
   </div>
+  
+  <div id="gfwDialog" style="display: none;" class="dialog">
+  <div class="dialog-title">Global Fire Watch WebHook</div>
+  <div id="gfwdialogerror" class="errorsection"></div>
+	<form id="gfwform">
+     		<label class="top-spacer block">Alert Type:</label>
+     		<select id="gfwalerttype" class="formtext" name="gfwalerttype">
+
+			</select>
+
+			
+       		<div class="top-spacer block" style="text-align: right">
+     			<input id="btnGfwCreate" class="button" type="button" value="Create" />
+     			<input id="btnGfwUpdate" class="button" type="button" value="Update" />
+     			<input class="button" type="button" id="btnGfwCancel" value="<fmt:message key="settings.cancel"/>" />
+     		</div>
+    	</form>
+  </div>
+  
 <br><br>Icon Credits:<br>
 <div>Hamburger menu by <a href="https://www.iconfinder.com/icons/134216/hamburger_lines_menu_icon">Timothy Miller</a> under <a href="https://creativecommons.org/licenses/by-sa/3.0/legalcode">creative commons SA-3.0 license</a>, no changes were made.</div>
 <div>Other menu icons made by <a href="https://www.flaticon.com/authors/gregor-cresnar" title="Gregor Cresnar">Gregor Cresnar</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> licensed under <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>

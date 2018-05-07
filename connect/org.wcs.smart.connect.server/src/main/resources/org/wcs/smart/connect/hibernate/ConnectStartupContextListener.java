@@ -79,6 +79,7 @@ import org.wcs.smart.connect.model.CaPluginVersion;
 import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConnectUuidItem;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.GlobalFireWatch;
 import org.wcs.smart.connect.model.MapLayer;
 import org.wcs.smart.connect.model.SharedLink;
 import org.wcs.smart.connect.model.SmartRole;
@@ -323,6 +324,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		config.addAnnotatedClass(SmartRoleAction.class);
 		config.addAnnotatedClass(SmartUserRole.class);
 		config.addAnnotatedClass(ServerDataQueueItem.class);
+		config.addAnnotatedClass(GlobalFireWatch.class);
 
 		try{
 			for(Class<?> c : SmartHibernateConfiguration.INSTANCE.getTables()){

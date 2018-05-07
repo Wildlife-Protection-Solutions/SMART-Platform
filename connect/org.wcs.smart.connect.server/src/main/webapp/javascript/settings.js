@@ -1,6 +1,7 @@
 var STYLE_URL = "../api/connectstyle/";
 var LAYER_URL = "../api/maplayer/";
 var TYPE_URL = "../api/connectalert/alertTypes/";
+var GFW_URL = "../api/gfw/";
 var DEFAULTS_URL = "../api/connectalertfilterdefault/";
 var ACTION_URL = STYLE_URL + "actions/";
 var allActions = null;
@@ -117,6 +118,22 @@ window.onload = function(){
 //	document.getElementById("btnResetDefaults").addEventListener("click", refreshDefaults);
 	document.getElementById("btnUpdateDefaults").addEventListener("click", saveDefaults);
 
+	//items gfw 
+	document.getElementById("btnNewGFW").onclick = function(){
+		document.getElementById("btnGfwUpdate").classList.remove("show");
+		document.getElementById("btnGfwUpdate").classList.add("hide");
+		document.getElementById("btnGfwCreate").classList.add("show");
+		document.getElementById("btnGfwCreate").classList.remove("hide");
+		displayDialogCenter('gfwDialog');
+	} 
+	document.getElementById("btnGfwCancel").onclick = function(){
+		closeDialog('gfwDialog');
+	} 
+	document.getElementById("btnGfwCreate").onclick = function(){
+		createNewGfw();
+	} 
+	
+	
 	//Layer table and actions
 	refreshLayers();
 
@@ -125,6 +142,8 @@ window.onload = function(){
 	refreshDefaults();
 	
 	setTimeout(refreshTypes, 50); //i don't know why but this table wasn't drawing properly 1 in 10 times without a delay, the delay seems to fix it.
+	
+	refreshGFWTable();
 }
 
 
@@ -289,6 +308,50 @@ function layerDeleted() {
 	refreshLayers();
 	
 }
+
+function createNewGfw(){
+	
+	var alertType = document.querySelector("select[name=gfwalerttype]").value;
+	var jsonData = {
+		"alertUuid" : alertType
+	};
+
+	//make ajax call
+	hideInfo();
+	document.querySelector("#message").style.display = "none";
+
+	var oReq = new XMLHttpRequest();
+	oReq.onload = gfwCreated;
+	oReq.open("POST", GFW_URL, true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.send(JSON.stringify(jsonData));
+	return false;
+}
+
+function gfwCreated(){
+	if (this.status == 201) {
+		//ok
+		var user = JSON.parse(this.responseText);
+		displayInfo("New GFW web hook created.  Use provided link to sign up for new alerts.");
+	} else {
+		displayError("Error creating new GFW Web Hook: " + this.responseText + "; " + this.statusText);
+	}
+	refreshGFWTable();
+	closeDialog('gfwDialog');
+}
+
+function gfwUpdated(){
+	if (this.status == 200) {
+		//ok
+		var user = JSON.parse(this.responseText);
+		displayInfo("GFW web hook updated.");
+	} else {
+		displayError("Error updating GFW Web Hook: " + this.responseText + "; " + this.statusText);
+	}
+	refreshGFWTable();
+	closeDialog('gfwDialog');
+}
+
 
 function createNewLayer(){
 	
@@ -464,6 +527,12 @@ function createTypeTable(){
 		ele.parentElement.removeChild(ele);
 	}
 	
+	var gfwCombo = document.getElementById("gfwalerttype");
+	for (var i = 0; i < gfwCombo.children.length; i ++){
+		gfwCombo.removeChild(gfwCombo.children[i]);
+	}
+	
+	
 	var parent = document.getElementById("typetable");
  	var types = JSON.parse(this.responseText);
  	for (var i = 0; i < types.length; i ++){
@@ -506,7 +575,135 @@ function createTypeTable(){
  		deleteicon.onclick = deleteType;
  		deleteicon.href="";
  		row.childNodes[6].appendChild(deleteicon);
+ 		
+ 		//add alert type to GFW Combo
+ 		var option = document.createElement("option");
+ 		option.value = types[i].uuid;
+ 		option.innerHTML = label;
+ 		gfwCombo.appendChild(option);
  	}
+}
+
+/* reload map types table */
+function refreshGFWTable(){
+	//clear current types table
+	var objects = document.querySelectorAll("tr.gfwrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+
+	var parent = document.getElementById("gfwtable");
+	var row = document.createElement("tr");
+	row.className="gfwrow";
+	row.innerHTML="Refreshing"
+	parent.appendChild(row);
+		
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = createGfwTable;
+ 	oReq.open("Get", GFW_URL, true);
+ 	oReq.send();
+}
+
+/* callback that displays all type info */
+function createGfwTable(){
+	
+	if (this.status != 200 && this.status != 201 ) {
+		var msg = "Error loading GFW configurations";
+		if (this.status == 401){
+			msg += "Unauthorized";
+		}
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	//clear current table of the "refreshing..." message, so this isn't a total duplication of effort.
+	var objects = document.querySelectorAll("tr.gfwrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	
+	var parent = document.getElementById("gfwtable");
+ 	var gfw = JSON.parse(this.responseText);
+ 	for (var i = 0; i < gfw.length; i ++){
+ 		var alertUuid = gfw[i].alertUuid;
+ 		var alertType = gfw[i].alertName;
+ 		var uuid = gfw[i].uuid;
+ 		var lastdate = gfw[i].lastDataDate;
+ 		var url = gfw[i].smartUrl;
+ 		
+ 		var row = tableCreateRowTDs(parent,
+ 				[alertType, null, lastdate, null], 
+ 				"gfwrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 		
+ 		row.id = "gfwrow" + i;
+ 		row.dataset.uuid = uuid;
+ 		row.dataset.alertuuid = alertUuid;
+ 		
+ 		var urlelement = document.createElement("div");
+ 		urlelement.className="scrollabel";
+ 		urlelement.innerHTML=url;
+ 		row.childNodes[1].appendChild(urlelement);
+ 		
+ 		var updateicon = document.createElement("a");
+ 		updateicon.className="update-icon";
+ 		updateicon.title= "update gfw"
+		updateicon.onclick = updateGfw;
+ 		updateicon.href="";
+ 		row.childNodes[3].appendChild(updateicon);
+
+ 		var deleteicon = document.createElement("a");
+ 		deleteicon.className="delete-icon";
+ 		deleteicon.title= "delete gfw"
+ 		deleteicon.onclick = deleteGfw;
+ 		deleteicon.href="";
+ 		row.childNodes[3].appendChild(deleteicon);
+ 	}
+}
+
+function updateGfw(){
+
+	var btnUpdate = document.getElementById("btnGfwUpdate");
+	var btnCreate =document.getElementById("btnGfwCreate");
+	
+	btnUpdate.classList.remove("hide");
+	btnUpdate.classList.add("show");
+	btnCreate.classList.add("hide");
+	btnCreate.classList.remove("show");
+	
+	
+	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
+	var alertTypeUuid = this.parentElement.parentElement.getAttribute('data-alertuuid');
+	
+	document.getElementById("gfwalerttype").value=alertTypeUuid;
+	
+	
+	btnUpdate.onclick = function() {
+			var alertTypeUuid = document.getElementById("gfwalerttype").value;
+			
+			var jsonData = {
+				"uuid": uuid,
+				"alertUuid" : alertTypeUuid
+			};
+
+			//make ajax call
+			hideInfo();
+			document.querySelector("#message").style.display = "none";
+
+			var oReq = new XMLHttpRequest();
+			oReq.onload = gfwUpdated;
+			oReq.open("POST", GFW_URL + encodeURIComponent(uuid), true);
+			oReq.setRequestHeader("Content-type", "application/json");
+			oReq.send(JSON.stringify(jsonData));
+			return false;
+	}
+	
+	displayDialogCenter('gfwDialog');
+	return false;
 }
 
 function updateType(){
@@ -560,6 +757,30 @@ function showCurrentType() {
 	//update the sample icon
 	displayDialogCenter('typeDialog');
 }
+
+function deleteGfw(){
+	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
+	displayConfirmDialog("Confirm Delete", "Are you sure you want to remove this web hook?  You should also unsubscribe from any GFW push request services this URL is linked with.", function(){
+		hideInfo();
+	
+		var oReq = new XMLHttpRequest();
+		oReq.onload = gfwDeleted;
+		oReq.open("DELETE", GFW_URL + encodeURIComponent(uuid), true);
+		oReq.send();
+	});
+	return false;
+}
+
+function gfwDeleted(){
+	if (this.status == 200  && this.status != 201 ) {
+		var r = JSON.parse(this.response);
+		displayInfo("Global Fire Watch web hook removed.");
+	} else {
+		displayError(parseError("Error removing Global Fire Watch web hook: " + this.response));
+	}
+	refreshGFWTable();
+}
+
 
 function deleteType(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');

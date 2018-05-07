@@ -2147,6 +2147,16 @@ BEGIN
 END;
 $$LANGUAGE plpgsql;
 
+
+--GFW
+CREATE TABLE connect.gfw(
+	uuid uuid not null,
+	alert_uuid uuid not null,
+	last_data date,
+	primary key (uuid)
+);
+ALTER TABLE connect.gfw ADD FOREIGN KEY (alert_uuid) REFERENCES connect.alert_types(uuid); 
+
 -- UPDATE VERSION
 ALTER TABLE connect.connect_version ADD COLUMN filestore_version varchar(5) default '-1';
 
