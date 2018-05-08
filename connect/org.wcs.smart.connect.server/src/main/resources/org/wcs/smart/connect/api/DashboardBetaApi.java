@@ -280,8 +280,11 @@ public class DashboardBetaApi extends HttpServlet {
 			if(user == null) throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			d = QueryFactory.buildQuery(s, UsersDefaultDashboard.class, "userUuid", user.getUuid()).uniqueResult(); //$NON-NLS-1$
 			if(d == null){
-				d = new UsersDefaultDashboard();
-				d.setUserUuid(user.getUuid());
+				throw new SmartConnectException("This user does have a default dashboard, use the 'Set as Default Dashboard' button");
+				//return null; //there is nothing passed in, so they haven't setup a default yet, we can't update the settings.
+				
+//				d = new UsersDefaultDashboard();
+//				d.setUserUuid(user.getUuid());
 			}
 
 			if(userDefault.getDashboardUuid() != null){
@@ -307,7 +310,7 @@ public class DashboardBetaApi extends HttpServlet {
 			}
 		
 			s.saveOrUpdate(d);
-			
+
 			//override the user-customizable portions of the dashboard then return to the user Dashboard object.
 			dashboard = (Dashboard)s.get(Dashboard.class, d.getDashboardUuid());
 			

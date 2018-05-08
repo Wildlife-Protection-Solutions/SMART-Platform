@@ -1,6 +1,7 @@
 var DashboardAPIURL = "../api/dashboardbeta";
 var UserURL = "../api/connectuser/iscurrentuseradmin";
 var REPORTURL = "../api/report/";
+var DATEFILTER2GLOBAL = "";
 
 var parameterNames1 = new Array();
 var parameterNames2 = new Array();
@@ -22,6 +23,9 @@ window.onload = function(){
 	
 	getDashBoards();
 	getUserDetails();
+	
+	changeReport1Date();
+
 }
 
 
@@ -39,7 +43,7 @@ function setDashboardDefaultToSelectedDashboard(){
 	if(!IsValidDashboardShown()){
 		return false;
 	}
-	var uuid = document.getElementById('dashboardtitle').dataset.uuid ;
+	var uuid = document.getElementById('dashboard').dataset.uuid ;
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = updateReportsFromDashBoardJson;
@@ -57,7 +61,7 @@ function getDashBoards(){
 function listOfDashboardsCallback(){
 	var links = JSON.parse(this.responseText);
 	var select = document.getElementById('admin-selectlist'); 
- 	var selectuuid = document.getElementById('dashboardtitle').dataset.uuid ;
+ 	var selectuuid = document.getElementById('dashboard').dataset.uuid ;
 	for (var i = 0; i < links.length; i++){
  		link = links[i];
  		var opt = document.createElement('option');
@@ -69,13 +73,16 @@ function listOfDashboardsCallback(){
  	    	opt.selected = true;	
  	    }    
  	}
+	if(i>0)	showDashboard();
+	
+	changeReport1Date();
 }
 
 function editDashboard(){
 	if(!IsValidDashboardShown()){
 		return false;
 	}
-	var uuid = document.getElementById('dashboardtitle').dataset.uuid ;
+	var uuid = document.getElementById('dashboard').dataset.uuid ;
 	window.location.href = "dashboardbetaadmin?action=edit&uuid=" + uuid;
 }
 
@@ -110,8 +117,8 @@ function deleteDashboard(){
 	if(!IsValidDashboardShown()){
 		return false;
 	}
-	var uuid = document.getElementById('dashboardtitle').dataset.uuid;
-	var title = document.getElementById('dashboardtitle').innerHTML ;
+	var uuid = document.getElementById('dashboard').dataset.uuid;
+	var title = document.getElementById('dashboard').innerHTML ;
 	displayConfirmDialog(i18n("dashboard.delete"), i18n("dashboard.areyousuredelete") + title + i18n("dashboard.thiswillremove"), function(){
 		var oReq = new XMLHttpRequest();
 	 	oReq.onload = function(){location.reload()};
@@ -124,9 +131,6 @@ function showDashboard(){
 	hideInfo();
 	var e = document.getElementById('admin-selectlist');
 	getDashboard(e.options[e.selectedIndex].value);
-	
-	document.getElementById("report1form").style.display="none";
-	document.getElementById("report2form").style.display="none";
 }
 
 function updateDateOnReport1(){
@@ -162,17 +166,11 @@ function updateDateOnReport2(){
 }
 
 function reportChanged(){
-	if(document.getElementById('dashboardtitle').dataset.uuid != document.getElementById('admin-selectlist').value){
-		document.getElementById('savedatebutton1').style.display = "none";
-		document.getElementById('savedatebutton2').style.display = "none";
-	}else{
-		document.getElementById('savedatebutton1').style.display = "inline-block";
-		document.getElementById('savedatebutton2').style.display = "inline-block";
-	}
+//not doing anything here any more. It will probably change again soon though, so I'm leaving the event setup for now.
 }
 
 function IsValidDashboardShown(){
-	var uuid = document.getElementById('dashboardtitle').dataset.uuid;
+	var uuid = document.getElementById('dashboard').dataset.uuid;
 	if(uuid == "" || uuid == null){
 		displayError("You do not have a valid Dashboard Loaded, use the 'View Dashboard' button then try again, or create a new Dashboard if none exist yet");
 		return false;

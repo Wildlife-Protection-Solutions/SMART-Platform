@@ -15,12 +15,12 @@
 <body style="${style_bodycss}">
 	<%@include file="header.jsp" %>
 	<%@include file="menu.jsp" %>
-	<div id= "main"><div id="pageheader" class="pageheader"><span id="dashboardtitle"><fmt:message key="dashboardbeta.title"/></span>
+	<div id= "main"><div id="pageheader" class="pageheader"><span id="dashboard"><fmt:message key="dashboardbeta.title"/></span>
 	</div>
 	
 	<div style="padding-top: 5px">
 	<select id="admin-selectlist" class="uielement" name="admin-selectlist" onchange="javascript:showDashboard();return false;"></select>
-	<!--  <button onClick="showDashboard(); return false;" class="button" style="padding:1px"> <fmt:message key="dashboardbeta.viewdashboard"/></button> -->
+	<button onClick="runReports(); return false;" class="button" style="padding:1px"> <fmt:message key="dashboardbeta.refreshreports"/></button>
 
 	
 	</div>
@@ -44,11 +44,11 @@
     </div>
     <div style="display:table-row">
     	<div style="display:table-cell; width:50%; height:1px">
-      		<div style="display:none;"><span id="reportdate1" ></span><a href="" onClick="document.getElementById('report1form').style.display='block'; return false;" style="padding-left:4px; font-size:0.9em"><fmt:message key="dashboardbeta.change"/></a>
-      		<form id="report1form" name="report1form" style="display:none">
+      		<div><span id="reportdate1" style="display:none;"></span>
+      		<form id="report1form" name="report1form" >
     			<input id="report1selecthidden" type="hidden"/>
     			<input id="report1paramshidden" type="hidden"/>
-				<select id='filterDate1' class='updateChange uielement' name="time_filter" style="margin-bottom:3px">
+				<select id='filterDate1' class='updateChange uielement' name="time_filter" style="margin-bottom:3px" onchange="javascript:changeReport1Date();return false;">
 					<option value=1><fmt:message key="dashboardbeta.oneday"/></option>
 					<option value=7><fmt:message key="dashboardbeta.oneweek"/></option>
 					<option value=30><fmt:message key="dashboardbeta.onemonth"/></option>
@@ -56,18 +56,18 @@
 					<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
 					<option value=-30><fmt:message key="dashboardbeta.monthtodate"/></option>
 					<option value=-365><fmt:message key="dashboardbeta.yeartodate"/></option>
-					<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
+					<option value=-9999><fmt:message key="dashboardbeta.custom"/></option>
 				</select>
 				<span><input type="text" id="report1From" class="date-input-center uielement"> - <input type="text" id="report1To" class="date-input-center uielement"></span>
 				<button style="padding:1px" class="button" onClick="rerunReport1(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>
-				<button id="savedatebutton1" style="padding:1px" class="button" onClick="updateDateOnReport1(); return false;" disabled><fmt:message key="dashboardbeta.datedefault"/></button>
+
     		</form>
     		</div>
 		</div>
     	
     	<div style="display:table-cell; width:50%; height:1px">
-	    	<div style="display:none;"><span id="reportdate2" ></span><a href="" onClick="document.getElementById('report2form').style.display='block'; return false;" style="padding-left:4px; font-size:0.9em"><fmt:message key="dashboardbeta.change"/></a>
-    		<form id="report2form" name="report2form" style="display:none">
+	    	<div><span id="reportdate2" style="display:none;"></span>
+    		<form id="report2form" name="report2form" >
     			<input id="report2selecthidden" type="hidden"/>
     			<input id="report2paramshidden" type="hidden"/>
     		
@@ -79,11 +79,23 @@
 					<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
 					<option value=-30><fmt:message key="dashboardbeta.monthtodate"/></option>
 					<option value=-365><fmt:message key="dashboardbeta.yeartodate"/></option>
-					<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
+					<option value=-9999><fmt:message key="dashboardbeta.custom"/></option>
+					<option value=-9998><fmt:message key="dashboardbeta.sameasreport1"/></option>
+					<option id="previousday" class="extrareport2dates" value=10001><fmt:message key="dashboardbeta.previousday"/></option>
+					<option id="samedaylastweek" class="extrareport2dates" value=70001><fmt:message key="dashboardbeta.samedaylastweek"/></option>
+					<option id="samedaylastmonth" class="extrareport2dates" value=300001><fmt:message key="dashboardbeta.samedaylastmonth"/></option>
+					<option id="samedaylastyear" class="extrareport2dates" value=3650001><fmt:message key="dashboardbeta.samedaylastyear"/></option>
+					<option id="previousweek" class="extrareport2dates" value=70007><fmt:message key="dashboardbeta.previousweek"/></option>
+					<option id="4weeksprevious" class="extrareport2dates" value=280007><fmt:message key="dashboardbeta.4weeksprevious"/></option>
+					<option id="sameweeklastyear" class="extrareport2dates" value=3650007><fmt:message key="dashboardbeta.sameweeklastyear"/></option>
+					<option id="previousmonth" class="extrareport2dates" value=300030><fmt:message key="dashboardbeta.previousmonth"/></option>
+					<option id="samemonthlastyear" class="extrareport2dates" value=3650030><fmt:message key="dashboardbeta.samemonthlastyear"/></option>
+					<option id="previous6month" class="extrareport2dates" value=1800180><fmt:message key="dashboardbeta.previous6month"/></option>
+					<option id="same6monthslastyear" class="extrareport2dates" value=3650180><fmt:message key="dashboardbeta.same6monthslastyear"/></option>
+					<option id="previousyear" class="extrareport2dates" value=0650365><fmt:message key="dashboardbeta.previousyear"/></option>
 				</select>
 				<span><input type="text" id="report2From" class="date-input-center uielement"> - <input type="text" id="report2To" class="date-input-center uielement"></span>
 				<button style="padding:1px" class="button" onClick="rerunReport2(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>
-				<button id="savedatebutton2" style="padding:1px" class="button" onClick="updateDateOnReport2(); return false;" disabled><fmt:message key="dashboardbeta.datedefault"/></button>
 				
     		</form>
     		</div>

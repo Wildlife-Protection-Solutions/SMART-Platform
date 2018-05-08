@@ -33,7 +33,7 @@
     		</select>
 			</div>
 			<div>Date Range:
-			<select id='filterDate1' class='updateChange uielement' name="time_filter" style="margin-bottom:3px">
+			<select id='filterDate1' class='updateChange uielement' name="time_filter" style="margin-bottom:3px" onchange="javascript:changeReport1Date();return false;">
 				<option value=1><fmt:message key="dashboardbeta.oneday"/></option>
 				<option value=7><fmt:message key="dashboardbeta.oneweek"/></option>
 				<option value=30><fmt:message key="dashboardbeta.onemonth"/></option>
@@ -41,7 +41,7 @@
 				<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
 				<option value=-30><fmt:message key="dashboardbeta.monthtodate"/></option>
 				<option value=-365><fmt:message key="dashboardbeta.yeartodate"/></option>
-				<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
+				<option value=-9999><fmt:message key="dashboardbeta.custom"/></option>
 			</select>
     		<input disabled type="text" name="report1From" id="report1From" class="date-input-center"> -
     		<input disabled type="text" name="report1To" id="report1To" class="date-input-center">
@@ -73,7 +73,20 @@
 				<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
 				<option value=-30><fmt:message key="dashboardbeta.monthtodate"/></option>
 				<option value=-365><fmt:message key="dashboardbeta.yeartodate"/></option>
-				<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
+				<option value=-9999><fmt:message key="dashboardbeta.custom"/></option>
+				<option value=-9998><fmt:message key="dashboardbeta.sameasreport1"/></option>
+				<option id="previousday" class="extrareport2dates" value=10001><fmt:message key="dashboardbeta.previousday"/></option>
+				<option id="samedaylastweek" class="extrareport2dates" value=70001><fmt:message key="dashboardbeta.samedaylastweek"/></option>
+				<option id="samedaylastmonth" class="extrareport2dates" value=300001><fmt:message key="dashboardbeta.samedaylastmonth"/></option>
+				<option id="samedaylastyear" class="extrareport2dates" value=3650001><fmt:message key="dashboardbeta.samedaylastyear"/></option>
+				<option id="previousweek" class="extrareport2dates" value=70007><fmt:message key="dashboardbeta.previousweek"/></option>
+				<option id="4weeksprevious" class="extrareport2dates" value=280007><fmt:message key="dashboardbeta.4weeksprevious"/></option>
+				<option id="sameweeklastyear" class="extrareport2dates" value=3650007><fmt:message key="dashboardbeta.sameweeklastyear"/></option>
+				<option id="previousmonth" class="extrareport2dates" value=300030><fmt:message key="dashboardbeta.previousmonth"/></option>
+				<option id="samemonthlastyear" class="extrareport2dates" value=3650030><fmt:message key="dashboardbeta.samemonthlastyear"/></option>
+				<option id="previous6month" class="extrareport2dates" value=1800180><fmt:message key="dashboardbeta.previous6month"/></option>
+				<option id="same6monthslastyear" class="extrareport2dates" value=3650180><fmt:message key="dashboardbeta.same6monthslastyear"/></option>
+				<option id="previousyear" class="extrareport2dates" value=0650365><fmt:message key="dashboardbeta.previousyear"/></option>
 			</select>
 			<input disabled type="text" name="report2From" id="report2From" class="date-input-center" > - 
     		<input disabled type="text" name="report2To" id="report2To" class="date-input-center">

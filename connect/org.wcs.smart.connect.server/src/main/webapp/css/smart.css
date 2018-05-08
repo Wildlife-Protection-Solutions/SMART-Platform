@@ -505,11 +505,11 @@ div.caSelector {
 }
 
 .date-input{
-	width: 8em;
+	width: 9em;
 	float: left;
 }
 .date-input-center{
-	width: 8em;
+	width: 9em;
 }
 .date-text{
 	float: left;
@@ -648,4 +648,7 @@ fieldset{
 
 #typetable{
 	width:100%;
+}
+.extrareport2dates{
+	display:none;
 }

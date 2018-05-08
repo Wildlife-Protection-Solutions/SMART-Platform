@@ -200,43 +200,84 @@ function addBooleanParamater(param, parent, newGroup){
 
 //check if the user selected or deselected "custom dates" and grey/de-grey the custom inputs. 
 function checkForCustomDates(){
-
+	var report1_startdate = picker1.toString("MMM DD, YYYY");;
+	var report1_enddate = picker2.toString("MMM DD, YYYY");;
 	
 	//Update the Custom date fields all the time, so we can just use that date range when submitting
-	var startYear = new Date();
+	var startDate = new Date();
 	var e = document.getElementById('filterDate1');
 	var days = e.options[e.selectedIndex].value;
 	
-	if(days != -1){
+	if(days != -9999){
 		if(days > 0){
-			startYear.setDate(startYear.getDate() - days);
+			startDate.setDate(startDate.getDate() - days);
+
 		}else if(days == -30){//"month to date" options
-			startYear.setDate(startYear.getDate() - getMonthToDate());
+			startDate.setDate(startDate.getDate() - getMonthToDate());
 		}else if(days == -365){//year to date option
-			startYear.setDate(startYear.getDate() - getYearToDate());
+			startDate.setDate(startDate.getDate() - getYearToDate());
 		}
-		picker1.setDate(startYear, false);
-		picker2.setDate(new Date(), false);
+		picker1.setDate(startDate, true);
+		picker2.setDate(new Date(), true);
+
+		report1_startdate = startDate;
+		report1_enddate = new Date();
 	}
 	
 	
-	startYear = new Date();
+	startDate = new Date();
+	endDate = new Date();
 	e = document.getElementById('filterDate2');
-	days = e.options[e.selectedIndex].value;
-	if(days != -1){
+	if(e.options[e.selectedIndex] != null){
+		days = e.options[e.selectedIndex].value;
+	}else{
+		return; //nothing selected 
+	}
+	if(days != -9999){
 		if(days > 0){
-			startYear.setDate(startYear.getDate() - days);
+			if(days > 1000){//the special ones, that are related to report1
+				var daysearlier = Math.round(days /10000); //the values are are all 11112222 where the 1's represent the number of days before Report 1, and the 2's represent the period of time. So 00070007 is a week before R1 and lasts for a week.
+				var dayslong = days % 1000; //remainder gives you the last 4 digits, which is how many days long the reporting period is.
+
+				var r1startDate = new Date(document.getElementById('report1From').value.substring(4));
+				var r1endDate = new Date(document.getElementById('report1To').value.substring(4));
+
+				if(days == "03650365"){//just shift all dates 1 year earlier in this case, the rest all relative to the start date
+					startDate.setYear(r1startDate.getFullYear());
+					startDate.setMonth(r1startDate.getMonth());
+					startDate.setDate(r1startDate.getDate() - daysearlier);
+					
+					endDate.setYear(r1endDate.getFullYear());
+					endDate.setMonth(r1endDate.getMonth());
+					endDate.setDate(r1endDate.getDate() - daysearlier);
+					
+				}else{
+					
+					startDate.setYear(r1startDate.getFullYear());
+					startDate.setMonth(r1startDate.getMonth());
+					startDate.setDate(r1startDate.getDate() - daysearlier);
+					
+					endDate.setYear(r1startDate.getFullYear());
+					endDate.setMonth(r1startDate.getMonth());
+					endDate.setDate(r1startDate.getDate() + (dayslong - daysearlier));
+				}
+			}else{
+				startDate.setDate(startDate.getDate() - days);
+			}
 		}else if(days == -30){//"month to date" options
-			startYear.setDate(startYear.getDate() - getMonthToDate());
+			startDate.setDate(startDate.getDate() - getMonthToDate());
 		}else if(days == -365){//year to date option
-			startYear.setDate(startYear.getDate() - getYearToDate());
+			startDate.setDate(startDate.getDate() - getYearToDate());
+		}else if(days==-9998){//same as report 1
+			startDate = report1_startdate;
+			endDate = report1_enddate;
 		}
-		picker3.setDate(startYear, false);
-		picker4.setDate(new Date(), false);
+		picker3.setDate(startDate, true);
+		picker4.setDate(endDate, true);
 	}
 
 	var date = document.getElementById('filterDate1');
-	if(date.value == -1){
+	if(date.value == -9999){
 		document.getElementById('report1From').disabled = false;
 		document.getElementById('report1To').disabled = false;
 	}else{
@@ -245,23 +286,25 @@ function checkForCustomDates(){
 	}
 	
 	var date = document.getElementById('filterDate2');
-	if(date.value == -1){
+	if(date.value == -9999){
 		document.getElementById('report2From').disabled = false;
 		document.getElementById('report2To').disabled = false;
 	}else{
 		document.getElementById('report2From').disabled = true;
 		document.getElementById('report2To').disabled = true;
 	}
-	document.getElementById('savedatebutton1').disabled = true;
-	document.getElementById('savedatebutton2').disabled = true;
+	if(document.getElementById('savedatebutton1') != null){
+		document.getElementById('savedatebutton1').disabled = true;
+		document.getElementById('savedatebutton2').disabled = true;
+	}
 }
 
 //enable save date buttons
 function date1Changed(){
-	document.getElementById('savedatebutton1').disabled = false;	
+	changeReport1Date();//update the report 2 dates, because they could have a Report1-dependant date selected.
 }
 function date2Changed(){
-	document.getElementById('savedatebutton2').disabled = false;
+	//nothing for this event yet
 }
 
 
@@ -385,6 +428,8 @@ function updateReportsFromDashBoardJson(){
 		}
 		document.getElementById('filterDate1').value = dashboard.dateRange1;
 		document.getElementById('filterDate2').value = dashboard.dateRange2;
+		
+		DATEFILTER2GLOBAL = dashboard.dateRange2;
 
 		
 		//if it is a "... to date" type of date range, we need to override the saved from-to date range
@@ -399,8 +444,8 @@ function updateReportsFromDashBoardJson(){
 		}else{
 			var start = new Date();
 			start.setDate(start.getDate() - from1override);
-			picker1.setDate(start, false);
-			picker2.setDate(new Date(), false);
+			picker1.setDate(start, true);
+			picker2.setDate(new Date(), true);
 
 			//now that the picker is set, update the reportdate1 field from the correct picker date 
 			if (document.getElementById('reportdate1') != null){
@@ -426,8 +471,8 @@ function updateReportsFromDashBoardJson(){
 		}else{
 			var start = new Date();
 			start.setDate(start.getDate() - from2override);
-			picker3.setDate(start, false);
-			picker4.setDate(new Date(), false);
+			picker3.setDate(start, true);
+			picker4.setDate(new Date(), true);
 
 			//now that the picker is set, update the reportdate1 field from the correct picker date 
 			if (document.getElementById('reportdate2') != null){
@@ -445,8 +490,8 @@ function updateReportsFromDashBoardJson(){
 		
 		//if we are not are the admin page we can write the label in the header, otherwise we put it in the input box on the admin page
 		if(document.getElementById('report1select') == null){
-			document.getElementById('dashboardtitle').innerHTML = dashboard.label;
-			document.getElementById('dashboardtitle').dataset.uuid = dashboard.uuid;
+			document.getElementById('dashboard').innerHTML = dashboard.label;
+			document.getElementById('dashboard').dataset.uuid = dashboard.uuid;
 			
 			var op = document.querySelectorAll('#admin-selectlist > option[value="' + dashboard.uuid + '"]')
 			if (op != null && op[0] != null){
@@ -457,7 +502,7 @@ function updateReportsFromDashBoardJson(){
 			document.getElementById('dashboardlabeltext').value = dashboard.label;
 		}
 	}else{
-		document.getElementById('dashboardtitle').innerHTML = i18n("dashboard.nodefaultdashboard");
+		document.getElementById('dashboard').innerHTML = i18n("dashboard.nodefaultdashboard");
 		document.getElementById('loading1').style.display = "none";
 		document.getElementById('loading2').style.display = "none";
 	}
@@ -539,10 +584,10 @@ function generateRelativeUrl(root, report){
 		if(uuid == ""){
 			return "about:blank";
 		}
-		//add the UUID
+		//add the UUID to the url
 		var url = root + uuid + "?format=HTML" ;
 		
-		//add the dates
+		//add the dates to the url
 		var startDate = new Date(document.getElementById('report1From').value.substring(4));
 		var dateStr = startDate.getFullYear() + "-" + (startDate.getMonth()+1) + "-" + startDate.getDate() + " 00:00:00";
 		url += "&parameterList=Start Date" + "," +dateStr + ",";
@@ -865,4 +910,49 @@ function getYearToDate(){
 function getMonthToDate(){
 	var date = new Date();
 	return date.getDate() - 1;
+}
+
+function changeReport1Date(){
+	
+	//turn off all special date options
+	var items = document.getElementsByClassName("extrareport2dates");
+	for(var i = 0; i < items.length; i++){
+	   items.item(i).style.display = "none";  
+	}
+	
+	//turn on the ones we want with the the selected option
+	var turn_on = []; 
+	date1 = document.getElementById('filterDate1').value;
+	if(date1 == 1){
+		turn_on.push(document.getElementById('previousday'));
+		turn_on.push(document.getElementById('samedaylastweek'));
+		turn_on.push(document.getElementById('samedaylastmonth'));
+		turn_on.push(document.getElementById('samedaylastyear'));
+	}else if(date1 == 7){
+		turn_on.push(document.getElementById('previousweek'));
+		turn_on.push(document.getElementById('4weeksprevious'));
+		turn_on.push(document.getElementById('sameweeklastyear'));
+	}else if(date1 ==30){
+		turn_on.push(document.getElementById('previousmonth'));
+		turn_on.push(document.getElementById('samemonthlastyear'));
+	}else if(date1 == 180){				
+		turn_on.push(document.getElementById('previous6month'));
+		turn_on.push(document.getElementById('same6monthslastyear'));
+	}else if(date1 == 365 || date1 == -9999){
+		turn_on.push(document.getElementById('previousyear'));
+	}
+	
+	
+	for(var i = 0; i < turn_on.length; i++){
+		turn_on[i].style.display = "inline";
+	}
+	checkForCustomDates();
+	
+	//document.getElementById('filterDate2').value = DATEFILTER2GLOBAL; //hack to make sure we show the report 2 filter, even if it is a special one that wasn't drawn at the time we laoded the dashboards in getDashboard()  
+}
+
+function checkForMissingReport2Date(){
+	if(document.getElementById('filterDate2').value == ""){
+		document.getElementById('filterDate2').value = "huh";//DATEFILTER2GLOBAL;
+	}
 }
