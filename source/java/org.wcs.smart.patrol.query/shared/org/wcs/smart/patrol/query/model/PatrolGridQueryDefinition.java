@@ -116,7 +116,7 @@ public class PatrolGridQueryDefinition extends GridQueryDefinition {
 	 */
 	public String asQuery(){
 		String query = super.asQuery();
-		query += "|" + (zeroOp == null ? ZeroFilterOption.DEFAULT.key : zeroOp.getKey()) + "|" + (zeroFilter == null ? "" : zeroFilter.asString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		query += "|" + (zeroOp == null ? ZeroFilterOption.DEFAULT.key : zeroOp.getKey()) + "|" + (zeroFilter == null ? "" : zeroFilter.asString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		return query;
 	}
 

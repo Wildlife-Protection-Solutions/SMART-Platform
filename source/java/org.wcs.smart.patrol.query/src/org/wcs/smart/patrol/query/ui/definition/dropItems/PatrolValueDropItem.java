@@ -83,7 +83,6 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 				sb.append(":" + PatrolValueItem.EXCLUDE_DATA_OPTION); //$NON-NLS-1$
 			}
 		}
-		System.out.println(sb.toString());
 		return sb.toString();
 		
 	}

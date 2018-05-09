@@ -211,7 +211,6 @@ public class BrowserView {
 			EPartService ePartService = part.getContext().get(EPartService.class);
 			MPart newPart = ePartService.createPart(BrowserView.ID);
 			this.part.getParent().getChildren().add(part);
-			System.out.println(newPart.getElementId());
 		    ePartService.showPart(newPart, PartState.ACTIVATE);	    
 			BrowserView newView = (BrowserView) E3Utils.getSourceObject(newPart);
 			newPart.getContext().set(DEFAULT_URL, part.getContext().get(DEFAULT_URL));
