@@ -1398,7 +1398,7 @@ public abstract class AssetDataPanel {
 			
 			wppart = toolkit.createComposite(item, SWT.NONE);
 			wppart.setLayout(new GridLayout(2, false));
-			wppart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
+			wppart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true ));
 			
 			((GridLayout)wppart.getLayout()).marginWidth = 0;
 			((GridLayout)wppart.getLayout()).marginHeight = 0;
@@ -1473,14 +1473,14 @@ public abstract class AssetDataPanel {
 			tt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			((GridData)tt.getLayoutData()).widthHint = displaySettings.getIconSize().getSize()*2+20;
 					
-			Composite spacer = toolkit.createComposite(wppart);
+			Composite spacer = toolkit.createComposite(wppart, SWT.NONE);
 			spacer.setLayout(new GridLayout());
-			spacer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			((GridLayout)spacer.getLayout()).marginWidth = 0;
 			((GridLayout)spacer.getLayout()).marginHeight = 3;
 			
 			Composite detailsPart = toolkit.createComposite(spacer);
-			detailsPart.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			detailsPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			detailsPart.setLayout(new GridLayout());
 			((GridLayout)detailsPart.getLayout()).verticalSpacing = 1;
 			((GridLayout)detailsPart.getLayout()).marginWidth = 1;
@@ -1488,7 +1488,7 @@ public abstract class AssetDataPanel {
 			detailsPart.setData(COLOR, false);
 			
 			Composite attributes = toolkit.createComposite(detailsPart);
-			attributes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			attributes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			attributes.setLayout(new GridLayout());
 			((GridLayout)detailsPart.getLayout()).verticalSpacing = 1;
 			((GridLayout)attributes.getLayout()).marginWidth = 0;

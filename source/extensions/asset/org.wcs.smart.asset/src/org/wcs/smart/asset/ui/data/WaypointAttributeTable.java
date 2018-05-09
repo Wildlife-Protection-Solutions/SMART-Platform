@@ -107,7 +107,7 @@ public class WaypointAttributeTable {
 			}
 			
 		}else if (page.isEdit()){
-			Composite placeholder = toolkit.createComposite(parent);
+			Composite placeholder = toolkit.createComposite(parent, SWT.NONE);
 			placeholder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			placeholder.addListener(SWT.MouseUp, event->{
 				if (event.button == 3) {
@@ -115,6 +115,15 @@ public class WaypointAttributeTable {
 					return;
 				}
 			});
+			placeholder.setLayout(new GridLayout());
+			ToolBar addtb = new ToolBar(placeholder, SWT.FLAT);
+			addtb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			toolkit.adapt(addtb);
+			ToolItem addItem = new ToolItem(addtb, SWT.PUSH);
+			addItem.setToolTipText("add a new observation");
+			addItem.setEnabled(true);
+			addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			addItem.addListener(SWT.Selection, e->addObservation());
 			
 		}
 		parent.layout(true, true);
