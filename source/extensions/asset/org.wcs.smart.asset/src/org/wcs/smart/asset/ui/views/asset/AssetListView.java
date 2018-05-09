@@ -224,7 +224,7 @@ public class AssetListView {
 		
 		ToolItem overviewMap = new ToolItem(toolbar, SWT.PUSH);
 		overviewMap.setToolTipText(Messages.AssetListView_maptooltip);
-		overviewMap.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
+		overviewMap.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_ASSET_MAP));
 		overviewMap.addListener(SWT.Selection, e->showOverviewMap());
 		
 		if (AssetSecurityManager.INSTANCE.canImportData()) {

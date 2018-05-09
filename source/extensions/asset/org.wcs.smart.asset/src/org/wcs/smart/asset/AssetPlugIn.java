@@ -68,6 +68,7 @@ public class AssetPlugIn extends AbstractUIPlugin {
 	public static final String ICON_STYLE_DEFAULT = "org.wcs.smart.asset.style.default"; //$NON-NLS-1$
 	
 	public static final String ICON_ASSET = "org.wcs.smart.asset.asset"; //$NON-NLS-1$
+	public static final String ICON_ASSET_MAP = "org.wcs.smart.asset.map"; //$NON-NLS-1$
 	
 	/**
 	 * The constructor
@@ -148,5 +149,6 @@ public class AssetPlugIn extends AbstractUIPlugin {
 		reg.put(ICON_IMPORT_FILE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_file.png")); //$NON-NLS-1$);
 		reg.put(ICON_STYLE_DEFAULT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/style_default.png")); //$NON-NLS-1$);
 		reg.put(ICON_ASSET, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/asset.png")); //$NON-NLS-1$);
+		reg.put(ICON_ASSET_MAP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/asset_map.png")); //$NON-NLS-1$);
 	}
 }

@@ -613,7 +613,7 @@
       <editor
             class="org.wcs.smart.asset.ui.views.map.AssetOverviewMap"
             default="false"
-            icon="platform:/plugin/org.wcs.smart/images/icons/obj16/map.png"
+            icon="images/icons/obj16/asset_map.png"
             id="org.wcs.smart.asset.overviewmap"
             name="%map.editor.name">
       </editor>
@@ -634,7 +634,7 @@
       </image>
       <image
             commandId="org.wcs.smart.asset.command.overviewmap.show"
-            icon="platform:/plugin/org.wcs.smart/images/icons/obj16/map.png">
+            icon="images/icons/obj16/asset_map.png">
       </image>
    </extension>
    <extension
