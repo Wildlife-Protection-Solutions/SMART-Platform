@@ -598,7 +598,7 @@ public class DataImportPage {
 			sb.append(UuidUtils.uuidToString(j.getUuid()));
 			sb.append(SEP_CHAR);
 		}
-		AssetPlugIn.getDefault().getPreferenceStore().putValue(key, sb.toString());
+		AssetPlugIn.getDefault().getPreferenceStore().putValue(key + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()), sb.toString());
 	}
 	
 	/**
@@ -769,7 +769,7 @@ public class DataImportPage {
 			selectedAssets.clear();
 			selectedLocations.clear();
 			try(Session session = HibernateManager.openSession()){
-				String assets = AssetPlugIn.getDefault().getPreferenceStore().getString(ASSET_LIST_KEY);
+				String assets = AssetPlugIn.getDefault().getPreferenceStore().getString(ASSET_LIST_KEY + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()));
 				if (assets != null && !assets.isEmpty()) {
 					String[] uuids = assets.split(SEP_CHAR);
 					for (int i = uuids.length-1; i >= 0 ; i --) {
@@ -778,7 +778,7 @@ public class DataImportPage {
 							UUID uuid = UuidUtils.stringToUuid(uuids[i]);
 							Asset a = session.get(Asset.class, uuid);
 							
-							if (a != null) {
+							if (a != null && a.getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
 								a.getId();
 								a.getAssetType().getIncidentCutoff();
 								addToQueue(selectedAssets, a, null);
@@ -789,7 +789,7 @@ public class DataImportPage {
 					}
 				}
 				
-				String locations = AssetPlugIn.getDefault().getPreferenceStore().getString(STATIONLOCATION_LIST_KEY);
+				String locations = AssetPlugIn.getDefault().getPreferenceStore().getString(STATIONLOCATION_LIST_KEY + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()));
 				if (locations != null && !locations.isEmpty()) {
 					String[] uuids = locations.split(SEP_CHAR);
 					for (int i = uuids.length-1; i >= 0 ; i --) {
@@ -797,7 +797,7 @@ public class DataImportPage {
 							if (uuids[i].isEmpty()) continue;
 							UUID uuid = UuidUtils.stringToUuid(uuids[i]);
 							AssetStationLocation a = session.get(AssetStationLocation.class, uuid);
-							if (a != null) {
+							if (a != null && a.getStation().getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
 								a.getId();
 								a.getStation().getId();
 								addToQueue(selectedLocations, a, null);
