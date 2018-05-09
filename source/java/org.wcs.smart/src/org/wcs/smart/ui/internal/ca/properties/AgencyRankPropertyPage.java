@@ -180,8 +180,13 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		setErrorMessage(null);
 		Set<String> keys = new HashSet<>();
 		for (Agency a : agencies) {
+			if (a.getKeyId() == null || a.getKeyId().trim().isEmpty()) {
+				setErrorMessage(Messages.AgencyRankPropertyPage_AgencyKeyRequired);
+				error = true;
+				break;
+			}
 			if (keys.contains(a.getKeyId())) {
-				setErrorMessage(MessageFormat.format("Duplicate agencies keys ({0}) are not allowed", a.getKeyId()));
+				setErrorMessage(MessageFormat.format(Messages.AgencyRankPropertyPage_DuplicateKeysFound, a.getKeyId()));
 				error = true;
 				break;
 			}
@@ -482,7 +487,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 				}
 			}
 		}else if (col == AgencyColumn.KEY) {
-			//TODO check unique and valid
+			//check unique and valid (done in setChangesMade method)
 			element.setKeyId(newName);
 		}
 	}
