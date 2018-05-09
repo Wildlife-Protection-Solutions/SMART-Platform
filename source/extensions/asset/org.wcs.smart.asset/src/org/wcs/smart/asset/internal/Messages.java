@@ -944,6 +944,7 @@ public class Messages extends NLS {
 	public static String StatisticsEngine_NumIncStatName;
 	public static String StatisticsEngine_NumUntaggedStatName;
 	public static String TimeInFieldAssetSummary_TimeInField;
+	public static String WaypointAttributeTable_addobstooltip;
 	public static String WaypointAttributeTable_deletetooltip;
 	public static String WaypointAttributeTable_edittooltip;
 	public static String WaypointAttributeTable_SaveError;

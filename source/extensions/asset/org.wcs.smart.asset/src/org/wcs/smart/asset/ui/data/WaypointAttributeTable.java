@@ -120,7 +120,7 @@ public class WaypointAttributeTable {
 			addtb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 			toolkit.adapt(addtb);
 			ToolItem addItem = new ToolItem(addtb, SWT.PUSH);
-			addItem.setToolTipText("add a new observation");
+			addItem.setToolTipText(Messages.WaypointAttributeTable_addobstooltip);
 			addItem.setEnabled(true);
 			addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			addItem.addListener(SWT.Selection, e->addObservation());
