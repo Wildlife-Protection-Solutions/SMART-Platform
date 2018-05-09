@@ -42,6 +42,9 @@ import com.drew.lang.GeoLocation;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
+import com.drew.metadata.exif.ExifDirectoryBase;
+import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.GpsDirectory;
 import com.drew.metadata.xmp.XmpDirectory;
 
@@ -80,6 +83,32 @@ public class FileMetadataReader {
 				fileInfo.setImageDate(dateTime);
 			}			
 		}
+		
+		//check other directories for a date
+		if (fileInfo.getImageDate() == null) {
+			for (Directory directory : metadata.getDirectoriesOfType(ExifSubIFDDirectory.class)) {
+				Date orig = ((ExifSubIFDDirectory)directory).getDateOriginal();
+				if (orig != null) {
+					fileInfo.setImageDate(orig);
+					break;
+				}
+				Date digit = ((ExifSubIFDDirectory)directory).getDateDigitized();
+				if (digit != null) {
+					fileInfo.setImageDate(digit);
+					break;
+				}
+			}
+		}
+		if (fileInfo.getImageDate() == null) {
+			for (Directory directory : metadata.getDirectoriesOfType(ExifIFD0Directory.class)) {
+				Date date = directory.getDate(ExifDirectoryBase.TAG_DATETIME);
+				if (date != null) {
+					fileInfo.setImageDate(date);
+				}
+					
+			}
+		}
+			
 	}
 	
 	/**
