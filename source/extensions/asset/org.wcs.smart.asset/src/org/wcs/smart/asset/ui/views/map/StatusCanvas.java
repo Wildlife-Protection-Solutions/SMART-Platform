@@ -24,13 +24,16 @@ package org.wcs.smart.asset.ui.views.map;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -70,8 +73,15 @@ public class StatusCanvas extends Composite{
 	
 	private List<Object> headerData;
 	
+	private Color redColor = null;
+	private Color greenColor = null;
+	
 	public StatusCanvas(Composite parent) {
 		super(parent, SWT.NONE);
+		
+		redColor = new Color(parent.getDisplay(), 244, 177, 131);
+		greenColor = new Color(parent.getDisplay(), 169, 209, 142);
+		
 		
 		cMain = new Canvas(this, SWT.V_SCROLL | SWT.H_SCROLL );
 		cTop = new Canvas(this, SWT.NONE);
@@ -125,6 +135,8 @@ public class StatusCanvas extends Composite{
 			if (mainImage != null) { mainImage.dispose(); mainImage = null; }
 			if (topImage != null) { topImage.dispose(); topImage = null; }
 			if (leftImage != null) { leftImage.dispose(); leftImage = null; }
+			if (redColor != null) { redColor.dispose(); redColor = null; }
+			if (greenColor != null) { greenColor.dispose(); greenColor = null; }
 			dateTooltip.dispose();
 			statusTooltip.dispose();
 		});
@@ -187,7 +199,8 @@ public class StatusCanvas extends Composite{
 		this.cellWidth = cellwidth;
 		this.cellHeight = cellheight;
 		
-		topImage = new Image(Display.getDefault(), (int)(cellwidth * numDays), (int)(cellheight));
+		int topCellHeight = charheight * 2 + 5 + 2;
+		topImage = new Image(Display.getDefault(), (int)(cellwidth * numDays), (int)(topCellHeight));
 		leftImage = new Image(Display.getDefault(), (int)(idcolwidth), (int)(cellheight * data.size()));
 		mainImage = new Image(Display.getDefault(), (int)(cellwidth * numDays), (int)(cellheight * data.size()));
 		
@@ -195,12 +208,19 @@ public class StatusCanvas extends Composite{
 		gc = new GC(topImage);
 		int y = 0;
 		int x = 0;
+		
 		LocalDate tmp = LocalDate.from(cStart);
 		while(!tmp.isAfter(cEnd)) {		
-			String text = String.valueOf(tmp.getDayOfMonth());
-			Point swidth = gc.stringExtent(text);
-			int xoff = (int)Math.floor( (cellwidth - 2 - swidth.x) / 2.0 );
-			gc.drawText(text, x + xoff, y);			
+			String text1 = tmp.getMonth().getDisplayName(TextStyle.SHORT,Locale.getDefault());
+			Point swidth1 = gc.stringExtent(text1);
+			int xoff = (int)Math.floor( (cellwidth - 2 - swidth1.x) / 2.0 );
+			gc.drawText(text1, x + xoff, y);			
+			
+			String text2 = String.valueOf(tmp.getDayOfMonth());
+			Point swidth = gc.stringExtent(text2);
+			xoff = (int)Math.floor( (cellwidth - 2 - swidth.x) / 2.0 );
+			gc.drawText(text2, x + xoff, y + swidth1.y);			
+			
 			x+= cellwidth;
 			tmp = tmp.plus(1, ChronoUnit.DAYS);
 		}
@@ -233,9 +253,9 @@ public class StatusCanvas extends Composite{
 			x = 0;
 			while(!tmp.isAfter(cEnd)) {
 				if (ee.getValue().contains(tmp.toEpochDay())) {
-					gc.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_GREEN));
+					gc.setBackground(greenColor);
 				}else {
-					gc.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+					gc.setBackground(redColor);
 				}
 				gc.fillRectangle(new Rectangle(x+1,y+1,cellwidth-2,cellheight-2));
 				x+= cellwidth;
