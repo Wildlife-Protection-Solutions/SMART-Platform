@@ -40,6 +40,7 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -408,7 +409,8 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		summaryTable.getTable().setLinesVisible(true);
 		summaryTable.setContentProvider(ArrayContentProvider.getInstance());
 		summaryTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+		ColumnViewerToolTipSupport.enableFor(summaryTable);
+		
 		for (OverviewTableColumnWrapper column : tableConfiguration.getColumns()) {
 			TableViewerColumn tColumn = new TableViewerColumn(summaryTable, SWT.NONE);
 			tColumn.getColumn().setText(column.getColumn().getName());
@@ -419,6 +421,19 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 							Object value = column.getColumn().getValue((StationData) element);
 						
 							return column.getColumn().getType().asString(value);
+						}
+						return Messages.AssetOverviewMap_ErrorValue;
+					}else {
+						return DialogConstants.LOADING_TEXT;
+					}
+				}
+				
+				public String getToolTipText(Object element) {
+					if (statEngine.isComputed(column.getColumn())) {
+						if (element instanceof StationData) {
+							Object value = column.getColumn().getValue((StationData) element);
+						
+							return column.getColumn().getType().asTooltip(value);
 						}
 						return Messages.AssetOverviewMap_ErrorValue;
 					}else {

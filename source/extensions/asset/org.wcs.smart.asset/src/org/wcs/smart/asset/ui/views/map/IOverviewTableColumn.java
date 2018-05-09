@@ -22,6 +22,7 @@
 package org.wcs.smart.asset.ui.views.map;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.util.Date;
 
 import org.json.simple.JSONObject;
@@ -86,7 +87,9 @@ public interface IOverviewTableColumn {
 			case LONG:
 				return ((Long)value).toString();
 			case NUMBER:
-				return ((Number)value).toString();
+				Number n = ((Number)value);
+				DecimalFormat nf = new DecimalFormat("#0.000"); //$NON-NLS-1$
+				return nf.format(n) + "..."; //$NON-NLS-1$
 			case TIME_STR:
 			case STRING:
 				return ((String)value);
@@ -94,6 +97,15 @@ public interface IOverviewTableColumn {
 				return DateFormat.getTimeInstance().format((Date)value);
 			}
 			return value.toString();
+		}
+		
+		public String asTooltip(Object value) {
+			if (value == null) return ""; //$NON-NLS-1$
+			if (value instanceof Exception) return "ERROR: " + ((Exception)value).getMessage(); //$NON-NLS-1$
+			if (this == NUMBER) {
+				return ((Number)value).toString();
+			}
+			return null;
 		}
 	}
 	
