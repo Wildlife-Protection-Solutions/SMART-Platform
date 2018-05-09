@@ -181,7 +181,7 @@ public class ConservationAreaTemplateCloner implements
 			Agency clone = new Agency();
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(a, clone);
-			
+			clone.setKeyId(a.getKeyId());
 			for (Rank r : a.getRanks()){
 				Rank rclone = new Rank();
 				rclone.setAgency(clone);
