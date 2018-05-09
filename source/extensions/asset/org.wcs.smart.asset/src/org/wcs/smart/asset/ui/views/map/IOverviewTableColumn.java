@@ -88,7 +88,7 @@ public interface IOverviewTableColumn {
 				return ((Long)value).toString();
 			case NUMBER:
 				Number n = ((Number)value);
-				DecimalFormat nf = new DecimalFormat("#0.000"); //$NON-NLS-1$
+				DecimalFormat nf = new DecimalFormat("#0.00"); //$NON-NLS-1$
 				return nf.format(n) + "..."; //$NON-NLS-1$
 			case TIME_STR:
 			case STRING:
