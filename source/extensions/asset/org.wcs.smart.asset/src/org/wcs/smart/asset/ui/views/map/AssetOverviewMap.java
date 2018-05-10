@@ -54,6 +54,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -136,9 +138,11 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	
 	private DateFilterDropDownComposite dateFilters;
 	private TableViewer summaryTable;
+	private AssetSummaryTable assetTable;
 	private AssetMapColumnConfiguration tableConfiguration;
 	private Composite tableComposite;
 	private Composite statusTableComposite;
+	private Composite assetTableComposite;
 	private AssetStationSummaryService service;
 	private StatusCanvas canvas;
 	
@@ -149,6 +153,10 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	private IEclipseContext parentContext;
 	private List<EventHandler> handlers = null;
 	private boolean fireStyleChange = true;
+	
+	private Hyperlink lnkSummary = null;
+	private Hyperlink lnkStatus = null;
+	private Hyperlink lnkAssets = null;
 	
 	private OverviewmapColumnEngine statEngine = new OverviewmapColumnEngine(SmartDB.getCurrentConservationArea()) {
 		
@@ -302,31 +310,69 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		((GridLayout)statusTableComposite.getLayout()).marginWidth = 0;
 		((GridLayout)statusTableComposite.getLayout()).marginHeight = 0;
 		
+		assetTableComposite = toolkit.createComposite(stackPart);
+		assetTableComposite.setLayout(new GridLayout());
+		assetTableComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)assetTableComposite.getLayout()).verticalSpacing = 0;
+		((GridLayout)assetTableComposite.getLayout()).marginWidth = 0;
+		((GridLayout)assetTableComposite.getLayout()).marginHeight = 0;
+		
 		((StackLayout)stackPart.getLayout()).topControl = tableComposite;
+		
 		createStatusTablePart();
+		createAssetTablePart();
 		
 		Composite bottomLinks = toolkit.createComposite(bottomPart);
-		bottomLinks.setLayout(new GridLayout(3, false));
+		bottomLinks.setLayout(new GridLayout(4, false));
 		bottomLinks.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		((GridLayout)bottomLinks.getLayout()).marginWidth = 0;
 		((GridLayout)bottomLinks.getLayout()).marginHeight = 0;
 		
-		Hyperlink lnkSummary = toolkit.createHyperlink(bottomLinks, Messages.AssetOverviewMap_SummaryTableSectionName, SWT.NONE);
+		FontData fd = bottomLinks.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		Font boldFont = new Font(bottomLinks.getDisplay(), fd);
+		Font normalFont = bottomLinks.getFont();
+		
+		
+		lnkSummary = toolkit.createHyperlink(bottomLinks, Messages.AssetOverviewMap_SummaryTableSectionName, SWT.NONE);
 		lnkSummary.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		lnkSummary.setFont(boldFont);
 		lnkSummary.addHyperlinkListener(new HyperlinkAdapter() {			
 			public void linkActivated(HyperlinkEvent e) {
 				((StackLayout)stackPart.getLayout()).topControl = tableComposite;
 				stackPart.layout();
+				lnkSummary.setFont(boldFont);
+				lnkStatus.setFont(normalFont);
+				lnkAssets.setFont(normalFont);
+				bottomLinks.layout();
+
 			}
 		});
 		
-		Hyperlink lnkStatus = toolkit.createHyperlink(bottomLinks, Messages.AssetOverviewMap_StatTableSectionName, SWT.NONE);
-		lnkStatus.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER,true, false));
+		lnkStatus = toolkit.createHyperlink(bottomLinks, Messages.AssetOverviewMap_StatTableSectionName, SWT.NONE);
+		lnkStatus.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER,false, false));
 		lnkStatus.addHyperlinkListener(new HyperlinkAdapter() {			
 			public void linkActivated(HyperlinkEvent e) {
 				((StackLayout)stackPart.getLayout()).topControl = statusTableComposite;
 				stackPart.layout();
+				lnkStatus.setFont(boldFont);
+				lnkSummary.setFont(normalFont);
+				lnkAssets.setFont(normalFont);
+				bottomLinks.layout();
+			}
+		});
+		
+		lnkAssets = toolkit.createHyperlink(bottomLinks, "Asset Table", SWT.NONE);
+		lnkAssets.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER,true, false));
+		lnkAssets.addHyperlinkListener(new HyperlinkAdapter() {			
+			public void linkActivated(HyperlinkEvent e) {
+				((StackLayout)stackPart.getLayout()).topControl = assetTableComposite;
+				stackPart.layout();
+				lnkAssets.setFont(boldFont);
+				lnkSummary.setFont(normalFont);
+				lnkStatus.setFont(normalFont);
+				bottomLinks.layout();
 			}
 		});
 		
@@ -366,6 +412,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		loadStylesJob.schedule();
 		loadTableJob.schedule();
 		configureStatusTableJob.schedule();
+		refreshAssetTable.schedule();
 		
 		//EVENTS
 		handlers = new ArrayList<>();
@@ -518,6 +565,11 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		canvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));		
 	}
 	
+	private void createAssetTablePart() {
+		assetTable = new AssetSummaryTable(assetTableComposite);
+		assetTable.getViewer().getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	}
+	
 	@Override
 	public EditorPart getParentEditor() {
 		return this;
@@ -528,6 +580,8 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		configureStatusTableJob.cancel();
 		computeStatisticsJob.schedule(500);
 		configureStatusTableJob.schedule(500);		
+		refreshAssetTable.cancel();
+		refreshAssetTable.schedule(500);
 	}
 
 	private List<DefaultAssetMapStyle> getDefaultMapStyles(){
@@ -719,6 +773,19 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			});
 			
 
+			return Status.OK_STATUS;
+		}
+		
+	};
+	
+	
+	private Job refreshAssetTable = new Job("Refresh Asset Summary Table") {
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			try(Session session = HibernateManager.openSession()){
+				assetTable.configureTable(session);
+			}
 			return Status.OK_STATUS;
 		}
 		
