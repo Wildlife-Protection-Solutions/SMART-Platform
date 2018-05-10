@@ -489,6 +489,17 @@ public class AssetCurrentPage {
 					Composite deployAtt = toolkit.createComposite(scrollDeployment);
 					deployAtt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 	
+					if (i == 1) {
+						ll = toolkit.createLabel(deployAtt, Messages.AssetCurrentPage_IDLabel);
+						ll.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+						ll = toolkit.createLabel(deployAtt, thisdeploy.getStationLocation().getId());
+					}
+					if (i == 2) {
+						ll = toolkit.createLabel(deployAtt, Messages.AssetCurrentPage_IDLabel);
+						ll.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+						ll = toolkit.createLabel(deployAtt, thisdeploy.getStationLocation().getStation().getId());
+					}
+					
 					List<? extends AbstractAssetAttributeValue> attributes = null;
 					if (i == 0) attributes = thisdeploy.getAttributeValues();
 					if (i == 1) attributes = thisdeploy.getStationLocation().getAttributeValues();

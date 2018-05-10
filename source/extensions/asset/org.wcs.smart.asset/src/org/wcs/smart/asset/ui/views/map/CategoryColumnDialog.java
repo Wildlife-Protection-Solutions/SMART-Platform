@@ -252,6 +252,7 @@ public class CategoryColumnDialog extends TitleAreaDialog {
 				((StackLayout)stackPanel.getLayout()).topControl = combinedOption;
 			}
 			stackPanel.layout();
+			validate();
 		}
 				
 		setTitle(Messages.CategoryColumnDialog_Title);

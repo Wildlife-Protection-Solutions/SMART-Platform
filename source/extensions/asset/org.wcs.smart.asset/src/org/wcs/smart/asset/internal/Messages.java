@@ -79,6 +79,7 @@ public class Messages extends NLS {
 	public static String AssetCurrentPage_AssetNotActive;
 	public static String AssetCurrentPage_CategoryColumn;
 	public static String AssetCurrentPage_DeploymentAttributesLabel;
+	public static String AssetCurrentPage_IDLabel;
 	public static String AssetCurrentPage_IncidentCntcolumn;
 	public static String AssetCurrentPage_IncidentsLabel;
 	public static String AssetCurrentPage_LocationAttributesLabel;
@@ -441,7 +442,9 @@ public class Messages extends NLS {
 	public static String AttributeManager_unknownError;
 	public static String CategoryColumnComposite_CategoryLabel;
 	public static String CategoryColumnComposite_categoryRequired;
+	public static String CategoryColumnComposite_DefinitionSectionLabel;
 	public static String CategoryColumnComposite_FiltersLabel;
+	public static String CategoryColumnComposite_InfoLabel;
 	public static String CategoryColumnComposite_loadDataModelJobName;
 	public static String CategoryColumnDialog_CategoryColumnType;
 	public static String CategoryColumnDialog_CombinedColumnType;
@@ -466,6 +469,7 @@ public class Messages extends NLS {
 	public static String ColumnListDialog_Title;
 	public static String CombinedColumnComposite_ColumnsLabel;
 	public static String CombinedColumnComposite_DefinitionLabel;
+	public static String CombinedColumnComposite_InfoLabel;
 	public static String CombinedColumnEngine_expressionNotSupported;
 	public static String CombinedColumnEngine_OpNotSupported;
 	public static String CombinedColumnEngine_ValueCannotBeConverted;

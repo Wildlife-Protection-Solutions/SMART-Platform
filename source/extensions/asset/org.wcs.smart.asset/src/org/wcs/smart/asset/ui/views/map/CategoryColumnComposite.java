@@ -31,6 +31,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -83,7 +85,8 @@ public class CategoryColumnComposite extends Composite {
 	
 	private CategoryColumnDialog dialog;
 	
-
+	private ControlDecoration cdError;
+	
 	/**
 	 * Creates a new dialog for editing an existing column
 	 * @param parentShell
@@ -107,6 +110,7 @@ public class CategoryColumnComposite extends Composite {
 	
 
 	public boolean validate() {
+		cdError.hide();
 		if (field.getValue() == null) {
 			dialog.setErrorMessage(Messages.CategoryColumnComposite_categoryRequired);
 			return false;
@@ -120,6 +124,8 @@ public class CategoryColumnComposite extends Composite {
 			} catch (Exception e) {
 				e.printStackTrace();
 				dialog.setErrorMessage(e.getMessage());
+				cdError.setDescriptionText(e.getMessage());
+				cdError.show();
 				return false;
 			}
 		}
@@ -183,13 +189,21 @@ public class CategoryColumnComposite extends Composite {
 		});
 		parent.addListener(SWT.Dispose, e->field.dispose());
 		
-		l = new Label(parent, SWT.NONE);
-		l.setText(Messages.CategoryColumnComposite_FiltersLabel);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
 		Composite attributeFilters = new Composite(parent, SWT.NONE);
 		attributeFilters.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		attributeFilters.setLayout(new GridLayout(2, true));
+		
+		l = new Label(attributeFilters, SWT.NONE);
+		l.setText(Messages.CategoryColumnComposite_DefinitionSectionLabel);
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		
+		cdError = new ControlDecoration(l, SWT.TOP | SWT.RIGHT);
+		cdError.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cdError.hide();
+		
+		l = new Label(attributeFilters, SWT.NONE);
+		l.setText(Messages.CategoryColumnComposite_FiltersLabel);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		
 		txtAttributeFilters = new Text(attributeFilters, SWT.BORDER | SWT.MULTI | SWT.WRAP);
 		txtAttributeFilters.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -279,6 +293,10 @@ public class CategoryColumnComposite extends Composite {
 			txtAttributeFilters.setText(toUpdate.getAttributeFilter());
 		}
 		
+		l = new Label(parent, SWT.WRAP);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		((GridData)l.getLayoutData()).widthHint = parent.computeSize(SWT.DEFAULT,  SWT.DEFAULT).y;
+		l.setText(Messages.CategoryColumnComposite_InfoLabel);
 		return parent;
 	}
 	

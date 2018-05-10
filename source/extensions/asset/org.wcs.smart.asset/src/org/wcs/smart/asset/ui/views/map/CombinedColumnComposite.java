@@ -27,6 +27,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -57,7 +59,8 @@ public class CombinedColumnComposite extends Composite {
 	private CombinedOverviewColumn toUpdate = null;
 	
 	private CategoryColumnDialog dialog;
-
+	private ControlDecoration cdError;
+	
 
 	/**
 	 * Creates a new dialog for editing an existing column
@@ -81,6 +84,7 @@ public class CombinedColumnComposite extends Composite {
 	}
 	
 	public boolean validate() {
+		cdError.hide();
 		String text = txtAttributeFilters.getText().trim();
 		if (!text.isEmpty()) {
 			
@@ -90,6 +94,8 @@ public class CombinedColumnComposite extends Composite {
 			} catch (Exception e) {
 				e.printStackTrace();
 				dialog.setErrorMessage(e.getMessage());
+				cdError.setDescriptionText(e.getMessage());
+				cdError.show();
 				return false;
 			}
 		}
@@ -117,6 +123,11 @@ public class CombinedColumnComposite extends Composite {
 	
 		Label l = new Label(parent, SWT.NONE);
 		l.setText(Messages.CombinedColumnComposite_DefinitionLabel);
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		
+		cdError = new ControlDecoration(l, SWT.TOP | SWT.RIGHT);
+		cdError.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cdError.hide();
 		
 		l = new Label(parent, SWT.NONE);
 		l.setText(Messages.CombinedColumnComposite_ColumnsLabel);
@@ -152,6 +163,11 @@ public class CombinedColumnComposite extends Composite {
 		if (toUpdate != null) {	
 			txtAttributeFilters.setText(toUpdate.getDefinition());
 		}
+		
+		l = new Label(parent, SWT.WRAP);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		((GridData)l.getLayoutData()).widthHint = parent.computeSize(SWT.DEFAULT,  SWT.DEFAULT).y;
+		l.setText(Messages.CombinedColumnComposite_InfoLabel);
 		
 		return parent;
 	}
