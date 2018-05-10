@@ -466,7 +466,7 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 		if (toSelect != null && locationOptions.contains(toSelect)) {
 			cmbLocation.setSelection(new StructuredSelection(toSelect));
 		}else {
-			if (!station.getLocations().isEmpty()) {
+			if (station!= null && !station.getLocations().isEmpty()) {
 				cmbLocation.setSelection(new StructuredSelection(station.getLocations().get(0)));
 			}else {
 				cmbLocation.setSelection(new StructuredSelection(NO_OP));

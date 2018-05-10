@@ -471,6 +471,9 @@ public class Messages extends NLS {
 	public static String ColumnListDialog_Message;
 	public static String ColumnListDialog_MovedownLabel;
 	public static String ColumnListDialog_MoveUpLabel;
+	public static String ColumnListDialog_ResetLink;
+	public static String ColumnListDialog_ResetTitle;
+	public static String ColumnListDialog_ResetWarn;
 	public static String ColumnListDialog_Title;
 	public static String CombinedColumnComposite_ColumnsLabel;
 	public static String CombinedColumnComposite_DefinitionLabel;

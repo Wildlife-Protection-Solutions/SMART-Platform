@@ -22,9 +22,12 @@
 package org.wcs.smart.asset.ui.views.map;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
+import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 
@@ -39,7 +42,7 @@ public class StationData {
 	private UUID keyUuid;
 	private AssetStation station;
 	private AssetStationLocation location;
-	
+	private Set<Asset> currentAssets = new HashSet<>();
 	private HashMap<IOverviewTableColumn, Object> values = new HashMap<>();
 	
 	public StationData(UUID keyUuid) {
@@ -86,4 +89,10 @@ public class StationData {
 		values.put(column, value);
 	}
 	
+	public void addAsset(Asset a) {
+		currentAssets.add(a);
+	}
+	public Set<Asset> getCurrentAssets(){
+		return this.currentAssets;
+	}
 }

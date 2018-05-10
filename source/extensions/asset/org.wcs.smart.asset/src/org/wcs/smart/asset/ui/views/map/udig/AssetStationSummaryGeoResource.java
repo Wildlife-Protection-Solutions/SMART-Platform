@@ -34,13 +34,16 @@ import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.data.store.ContentDataStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.styling.FeatureTypeStyle;
+import org.geotools.styling.Font;
 import org.geotools.styling.Mark;
+import org.geotools.styling.PointPlacement;
 import org.geotools.styling.PointSymbolizer;
 import org.geotools.styling.Rule;
 import org.geotools.styling.Stroke;
 import org.geotools.styling.Style;
 import org.geotools.styling.StyleBuilder;
 import org.geotools.styling.StyleFactory;
+import org.geotools.styling.TextSymbolizer;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.locationtech.udig.catalog.IService;
@@ -194,6 +197,12 @@ public class AssetStationSummaryGeoResource extends IGeoResource implements IFil
     	activeRule.symbolizers().add(point);
     	activeRule.setFilter(ff.equal(ff.property((new FixedColumn(FixedColumn.Column.STATUS_KEY)).getKey()), ff.literal(Asset.Status.ACTIVE.name()), false));
     	
+    	PointPlacement pp = sf.createPointPlacement(sf.createAnchorPoint(builder.literalExpression(0.5), builder.literalExpression(1.0)), sf.createDisplacement(builder.literalExpression(0.0), builder.literalExpression(-10.0)),null);
+    	Font fnt = sf.createFont(builder.literalExpression("Tahoma"), builder.literalExpression("normal"), builder.literalExpression("normal"), builder.literalExpression(10.0)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    	
+    	TextSymbolizer idlbl = sf.createTextSymbolizer(null, new Font[] {fnt}, null, ff.property(  (new FixedColumn(FixedColumn.Column.ID)).getKey() ), pp, null);
+    	activeRule.symbolizers().add(idlbl);
+    	
     	// inactive
     	lineColor = new Color(152,10,10);
     	fillColor = new Color(252,0,0);
@@ -211,6 +220,7 @@ public class AssetStationSummaryGeoResource extends IGeoResource implements IFil
     	inactiveRule.setName("Inactive"); //$NON-NLS-1$
     	inactiveRule.symbolizers().add(point);
     	inactiveRule.setFilter(ff.equal(ff.property((new FixedColumn(FixedColumn.Column.STATUS_KEY)).getKey()), ff.literal(Asset.Status.INACTIVE.name()), false));
+    	inactiveRule.symbolizers().add(idlbl);
     	
     	// retired
     	lineColor = new Color(78,78,78);
@@ -229,6 +239,7 @@ public class AssetStationSummaryGeoResource extends IGeoResource implements IFil
     	retiredRule.setName("Retired"); //$NON-NLS-1$
     	retiredRule.symbolizers().add(point);
     	retiredRule.setFilter(ff.equal(ff.property((new FixedColumn(FixedColumn.Column.STATUS_KEY)).getKey()), ff.literal(Asset.Status.RETIRED.name()), false));
+    	retiredRule.symbolizers().add(idlbl);
     	
     	fts.rules().add(activeRule);
     	fts.rules().add(inactiveRule);

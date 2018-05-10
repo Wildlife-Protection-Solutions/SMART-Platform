@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.asset.ui.views.map;
 
+import java.text.Collator;
 import java.util.Locale;
 
 import org.json.simple.JSONObject;
@@ -40,6 +41,7 @@ public class FixedColumn implements IOverviewTableColumn{
 		UUID(Messages.FixedColumn_UuidColumnName, IOverviewTableColumn.ColumnType.STRING, false),
 		STATUS(Messages.FixedColumn_StatusColumnName, IOverviewTableColumn.ColumnType.STRING, true),
 		STATUS_KEY(Messages.FixedColumn_StatusKeyColumnName, IOverviewTableColumn.ColumnType.STRING, false),
+		ASSETS("Current Assets", IOverviewTableColumn.ColumnType.STRING, true),
 		ACTIVE_DAYS(Messages.FixedColumn_ActiveDaysColumnName, IOverviewTableColumn.ColumnType.INTEGER, true),
 		ASSET_DAYS(Messages.FixedColumn_AssetDaysColumnName, IOverviewTableColumn.ColumnType.INTEGER, true),
 		INCIDENTS(Messages.FixedColumn_IncidentCntColumnName, IOverviewTableColumn.ColumnType.INTEGER, true);
@@ -94,6 +96,15 @@ public class FixedColumn implements IOverviewTableColumn{
 		}else if (this.column == Column.UUID) {
 			if (data.getStation() != null) return UuidUtils.uuidToString(data.getStation().getUuid());
 			if (data.getStationLocation() != null) return UuidUtils.uuidToString(data.getStationLocation().getUuid());
+		}else if (this.column == Column.ASSETS) {
+			StringBuilder sb = new StringBuilder();
+			data.getCurrentAssets().stream().map(a->a.getId()).sorted((a,b)->Collator.getInstance().compare(a, b)).forEach(a->{sb.append(a); sb.append(", ");});
+			if (sb.length() > 0) {
+				sb.deleteCharAt(sb.length() - 1 );
+				sb.deleteCharAt(sb.length() - 1 );
+			}
+			return sb.toString();
+			
 		}
 		return data.getColumnValue(this);
 	}

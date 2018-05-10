@@ -33,6 +33,7 @@ import java.util.UUID;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.views.map.CombinedOverviewColumn;
@@ -179,10 +180,17 @@ public class OverviewmapColumnEngine {
 						AssetStation station = (AssetStation)session.get(AssetStation.class, sd.getKeyUuid());
 						station.computeStatus(session);
 						sd.setAssetStationObject(station);
+						
+						for (AssetDeployment d : station.getActiveDeployments(session)) {
+							sd.addAsset(d.getAsset());
+						}
 					}else if (groupBy == GroupByOption.LOCATION) {
 						AssetStationLocation l = (AssetStationLocation)session.get(AssetStationLocation.class, sd.getKeyUuid());
 						l.computeStatus(session);
 						sd.setAssetLocationObject(l);
+						for (AssetDeployment d : l.getActiveDeployments(session)) {
+							sd.addAsset(d.getAsset());
+						}
 					}
 					data.add(sd);
 					map.put(sd.getKeyUuid(), sd);

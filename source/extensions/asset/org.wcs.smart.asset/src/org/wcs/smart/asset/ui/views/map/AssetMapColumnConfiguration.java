@@ -231,27 +231,30 @@ public class AssetMapColumnConfiguration {
 				allColumns.addAll(columns);
 			}catch (Exception ex) {
 				AssetPlugIn.displayLog(Messages.AssetMapColumnConfiguration_LoadError + ex.getMessage(), ex);
-			}
-				
+			}		
 		}
 		
 		//if we still have no columns we default to the fixed columns
 		if (allColumns.isEmpty()) {
-			for (FixedColumn.Column c : FixedColumn.Column.values()) {
-				IOverviewTableColumn oc = new FixedColumn(c);
-				OverviewTableColumnWrapper wrapper = new OverviewTableColumnWrapper(oc, true);
-				wrapper.setVisible(c.defaultVisibility);
-				allColumns.add(wrapper);
-			}
-			
-			for (CombinedOverviewColumn c : CombinedOverviewColumn.getDefaultColumns(allColumns.stream().map(e->e.getColumn()).collect(Collectors.toList()))) {
-				OverviewTableColumnWrapper wrapper = new OverviewTableColumnWrapper(c, true);
-				wrapper.setVisible(true);
-				allColumns.add(wrapper);
-			}
+			resetToDefault();
 		}
 	}
 	
+	public void resetToDefault() {
+		allColumns.clear();
+		for (FixedColumn.Column c : FixedColumn.Column.values()) {
+			IOverviewTableColumn oc = new FixedColumn(c);
+			OverviewTableColumnWrapper wrapper = new OverviewTableColumnWrapper(oc, true);
+			wrapper.setVisible(c.defaultVisibility);
+			allColumns.add(wrapper);
+		}
+		
+		for (CombinedOverviewColumn c : CombinedOverviewColumn.getDefaultColumns(allColumns.stream().map(e->e.getColumn()).collect(Collectors.toList()))) {
+			OverviewTableColumnWrapper wrapper = new OverviewTableColumnWrapper(c, true);
+			wrapper.setVisible(true);
+			allColumns.add(wrapper);
+		}
+	}
 	private static OverviewTableColumnWrapper createWrapper(JSONObject outerField, IOverviewTableColumn column) {
 		boolean isVisible = true;
 		boolean isFixed = true;

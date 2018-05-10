@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -47,6 +48,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
@@ -230,6 +232,19 @@ public class ColumnListDialog extends TitleAreaDialog {
 				
 				moveUpMenu.setEnabled(!chColumns.getStructuredSelection().isEmpty());
 				moveDownMenu.setEnabled(!chColumns.getStructuredSelection().isEmpty());
+			}
+		});
+		
+		Link btnReset = new Link(parent, SWT.PUSH);
+		btnReset.setText("<a>" + Messages.ColumnListDialog_ResetLink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		btnReset.addListener(SWT.Selection, e->{
+			if (MessageDialog.openQuestion(getShell(), Messages.ColumnListDialog_ResetTitle, Messages.ColumnListDialog_ResetWarn)) {
+				configuration.resetToDefault();
+				chColumns.setInput(configuration.getColumns());
+				for (OverviewTableColumnWrapper w : configuration.getColumns()) {
+					chColumns.setChecked(w, w.isVisible());
+				}
+				enableOk();
 			}
 		});
 		
