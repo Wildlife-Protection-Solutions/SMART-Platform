@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.asset.model;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -39,7 +40,6 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.asset.IAssetLabelProvider;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Model class of asset. These represent the individual asset units (cameras, drones, etc.). 
@@ -52,6 +52,10 @@ public class Asset extends UuidItem {
 	
 	public static final int ID_MAX_LENGTH = 128;
 	
+	/*
+	 * The order here matters as it is used for sort order 
+	 * 
+	 */
 	public enum Status{
 		ACTIVE,
 		INACTIVE,
@@ -199,13 +203,39 @@ public class Asset extends UuidItem {
 			return;
 		}
 		
-		Long activeDeployments = QueryFactory.buildCountQuery(session, AssetDeployment.class, 
-				new Object[] {"asset", this}, //$NON-NLS-1$
-				new Object[] {"endDate", null}); //$NON-NLS-1$
-		if (activeDeployments == 0) {
+		Date now = new Date();
+		String sql = "FROM AssetDeployment WHERE asset = :asset and startDate <= :now and (endDate is null or endDate >= :now2)"; //$NON-NLS-1$
+		List<AssetDeployment> ad = session.createQuery(sql, AssetDeployment.class)
+				.setParameter("asset",  this) //$NON-NLS-1$
+				.setParameter("now",  now) //$NON-NLS-1$
+				.setParameter("now2", now) //$NON-NLS-1$
+				.list();
+
+		if (ad.isEmpty()) {
 			status = Status.INACTIVE;
 		}else {
 			status = Status.ACTIVE;
 		}
+	}
+	
+	/**
+	 * Searches for the current active deployment for the sensor
+	 * @param session
+	 * @return null if there is not active deployment
+	 */
+	@Transient
+	public AssetDeployment findActiveDeployment(Session session) {
+		Date now = new Date();
+		String sql = "FROM AssetDeployment WHERE asset = :asset and startDate <= :now and (endDate is null or endDate >= :now2)"; //$NON-NLS-1$
+		List<AssetDeployment> ad = session.createQuery(sql, AssetDeployment.class)
+				.setParameter("asset",  this) //$NON-NLS-1$
+				.setParameter("now",  now) //$NON-NLS-1$
+				.setParameter("now2", now) //$NON-NLS-1$
+				.list();
+		if (ad.size() == 0) return null;
+		if (ad.size() == 1) return ad.get(0);
+		//this likely shouldn't happen but if startdate = enddate = current time it might happen
+		return ad.get(0);
+		
 	}
 }

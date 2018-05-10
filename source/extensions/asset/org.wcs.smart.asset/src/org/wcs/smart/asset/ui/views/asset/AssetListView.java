@@ -27,9 +27,11 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -132,6 +134,8 @@ public class AssetListView {
 	private boolean includeInactiveAssets = true;
 	private boolean includeInactiveStations = true;
 	
+	private AssetContentProvider assetContentProvider = new AssetContentProvider();
+	
 	public AssetListView() {
 		super();
 
@@ -202,7 +206,7 @@ public class AssetListView {
 		lstAssets = new TreeViewer(assetPanel, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		toolkit.adapt(lstAssets.getControl(), true, true);
 		lstAssets.setLabelProvider(new AssetLabelProvider());
-		lstAssets.setContentProvider(new MappingContentProvider<AssetType, Asset>((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase())));
+		lstAssets.setContentProvider(assetContentProvider);
 		lstAssets.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		lstAssets.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstAssets.addDoubleClickListener(new IDoubleClickListener() {
@@ -272,7 +276,7 @@ public class AssetListView {
 		
 		ToolItem overviewMap = new ToolItem(toolbar, SWT.PUSH);
 		overviewMap.setToolTipText(Messages.AssetListView_maptooltip);
-		overviewMap.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
+		overviewMap.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_ASSET_MAP));
 		overviewMap.addListener(SWT.Selection, e->showOverviewMap());
 		
 		if (AssetSecurityManager.INSTANCE.canImportData()) {
@@ -425,6 +429,33 @@ public class AssetListView {
 		retired.addListener(SWT.Selection, e->{
 			this.includeRetired = retired.getSelection();
 			loadAssets();
+		});
+		
+		MenuItem groupBy = new MenuItem(mnu, SWT.CASCADE);
+		groupBy.setText(Messages.AssetListView_GroupByOption);
+		
+		Menu gbMenu = new Menu(groupBy);
+		groupBy.setMenu(gbMenu);
+		
+		MenuItem gbType = new MenuItem(gbMenu, SWT.RADIO);
+		gbType.setText(Messages.AssetListView_TypeOption);
+		gbType.setSelection(true);
+		gbType.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_ASSET));
+		gbType.addListener(SWT.Selection, e->{
+			assetContentProvider.setType(AssetContentProvider.TYPE);
+			lstAssets.refresh();
+			lstAssets.expandAll();
+		});
+		
+		
+		MenuItem gbStatus = new MenuItem(gbMenu, SWT.RADIO);
+		gbStatus.setText(Messages.AssetListView_StatusOption);
+		gbStatus.setSelection(false);
+		gbStatus.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATUS_ACTIVE));
+		gbStatus.addListener(SWT.Selection, e->{
+			assetContentProvider.setType(AssetContentProvider.STATUS);
+			lstAssets.refresh();
+			lstAssets.expandAll();
 		});
 		
 		if (AssetSecurityManager.INSTANCE.canDeleteAsset()) {
@@ -712,19 +743,10 @@ public class AssetListView {
 				}
 			}
 			
-			HashMap<AssetType, List<Asset>> mappings = new HashMap<>();
-			assets.forEach(a->{
-				List<Asset> list = mappings.get(a.getAssetType());
-				if (list == null) {
-					list = new ArrayList<>();
-					mappings.put(a.getAssetType(), list);
-				}
-				list.add(a);
-			});
-			for (List<Asset> allassets : mappings.values()) allassets.sort((a,b)->Collator.getInstance().compare(a.getId(), b.getId()));
+			
 			Display.getDefault().syncExec(()->{
 				if (lstAssets != null && !lstAssets.getControl().isDisposed()){
-					lstAssets.setInput(mappings);
+					lstAssets.setInput(assets);
 					lstAssets.expandAll();
 				}
 			});
@@ -813,5 +835,91 @@ public class AssetListView {
 				mapping = (HashMap<T, List<V>>) newInput;
 			}
 		}
+	}
+	
+	private class AssetContentProvider implements ITreeContentProvider{
+		public static final int STATUS = 0;
+		public static final int TYPE = 1;
+		
+		private int type = TYPE;
+		
+		private List<Asset> assets = null;
+		
+		public void setType(int type) {
+			this.type = type;
+		}
+		
+		@Override
+		public Object[] getElements(Object inputElement) {
+			if (assets == null) return new Object[] {DialogConstants.LOADING_TEXT};
+			if (type == STATUS) {
+				List<Asset.Status> items = new ArrayList<>();
+				items.add(Asset.Status.ACTIVE);
+				if (includeInactiveAssets) {
+					items.add(Asset.Status.INACTIVE);
+				}
+				if (includeRetired) {
+					items.add(Asset.Status.RETIRED);
+				}
+				return items.toArray();
+				
+			}else if (type == TYPE) {
+				Set<AssetType> types = new HashSet<>();
+				assets.forEach(a->types.add(a.getAssetType()));
+				List<AssetType> sorted = new ArrayList<>();
+				sorted.addAll(types);
+				sorted.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+				return sorted.toArray();
+			}
+			return new Object[] {};
+		}
+
+		@Override
+		public Object[] getChildren(Object parentElement) {
+			if (type == STATUS && parentElement instanceof Asset.Status) {
+				Asset.Status status = (Asset.Status) parentElement;
+				List<Asset> kids = new ArrayList<>();
+				for (Asset a : assets) {
+					if (a.getCachedStatus().equals(status)) kids.add(a);
+				}
+			
+				kids.sort((a,b)->Collator.getInstance().compare(a.getId(), b.getId()));
+				return kids.toArray();
+			}else if (type == TYPE && parentElement instanceof AssetType) {
+				AssetType type = (AssetType) parentElement;
+				List<Asset> kids = new ArrayList<>();
+				for (Asset a : assets) {
+					if (a.getAssetType().equals(type)) kids.add(a);
+				}
+			
+				kids.sort((a,b)->Collator.getInstance().compare(a.getId(), b.getId()));
+				return kids.toArray();
+			}
+			return null;
+		}
+
+		@Override
+		public Object getParent(Object element) {
+			if (element instanceof Asset) {
+				if (type == TYPE) return ((Asset) element).getAssetType();
+				if (type == STATUS) return ((Asset)element).getCachedStatus();
+			}
+			return null;
+		}
+
+		@Override
+		public boolean hasChildren(Object element) {
+			return element instanceof Asset.Status || element instanceof AssetType;
+		}
+		
+		@SuppressWarnings("unchecked")
+		@Override
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			assets = null;
+			if (newInput instanceof ArrayList) {
+				assets = (List<Asset>) newInput;
+			}
+		}
+		
 	}
 }

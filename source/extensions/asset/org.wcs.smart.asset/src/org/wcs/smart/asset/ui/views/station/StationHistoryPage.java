@@ -23,7 +23,6 @@ package org.wcs.smart.asset.ui.views.station;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -177,10 +176,7 @@ public class StationHistoryPage {
 			case START_DATE: return DateFormat.getDateTimeInstance().format(record.getStartDate());
 			case END_DATE: return record.getEndDate() == null ? Messages.StationHistoryPage_CurrentLabel : DateFormat.getDateTimeInstance().format(record.getEndDate()); 
 			case TOTAL_TIME:
-				long start = record.getStartDate().getTime();
-				long end = (new Date()).getTime();
-				if (record.getEndDate() != null) end = record.getEndDate().getTime();
-				return AssetUtils.formatTime( (end-start)/1000.0);
+				return AssetUtils.formatTime( record.getActiveTimeInSeconds() );
 			}
 			return "";  //$NON-NLS-1$
 		}

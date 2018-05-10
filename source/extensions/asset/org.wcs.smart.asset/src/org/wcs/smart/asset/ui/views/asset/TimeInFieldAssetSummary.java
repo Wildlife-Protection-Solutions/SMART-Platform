@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.asset.ui.views.asset;
 
-import java.util.Date;
-
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetUtils;
@@ -58,11 +56,7 @@ public class TimeInFieldAssetSummary implements IAssetSummary {
 			try(ScrollableResults results = QueryFactory.buildQuery(session, AssetDeployment.class, "asset", asset).scroll()){ //$NON-NLS-1$
 				while(results.next()) {
 					AssetDeployment as = (AssetDeployment) results.get(0);
-					Date end = new Date();
-					if (as.getEndDate() != null) end = as.getEndDate();
-					Date start = as.getStartDate();
-					
-					totalHours += (end.getTime() - start.getTime()) / 1_000.0;
+					totalHours += as.getActiveTimeInSeconds();
 				}
 			}
 		}

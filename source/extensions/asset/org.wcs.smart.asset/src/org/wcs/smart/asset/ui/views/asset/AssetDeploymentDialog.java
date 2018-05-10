@@ -250,7 +250,7 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 		
 		Composite form = new Composite(parent, SWT.NONE);
 		form.setLayout(new GridLayout(2, false));
-		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(form, SWT.NONE);
 		l.setText(AssetDeploymentTableColumn.FixedColumn.STATION.guiName + ":"); //$NON-NLS-1$
@@ -407,6 +407,7 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 			}
 			
 			scroll.setMinSize(attributeComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+//			attributeComp.setSize(scroll.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		}
 		
 		
@@ -465,7 +466,11 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 		if (toSelect != null && locationOptions.contains(toSelect)) {
 			cmbLocation.setSelection(new StructuredSelection(toSelect));
 		}else {
-			cmbLocation.setSelection(new StructuredSelection(NO_OP));
+			if (!station.getLocations().isEmpty()) {
+				cmbLocation.setSelection(new StructuredSelection(station.getLocations().get(0)));
+			}else {
+				cmbLocation.setSelection(new StructuredSelection(NO_OP));
+			}
 		}
 		cmbLocation.getControl().setEnabled(station != null);
 	}

@@ -23,7 +23,6 @@ package org.wcs.smart.asset.ui.views.asset;
 
 import java.text.DateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -428,9 +427,19 @@ public class AssetCurrentPage {
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 				toolkit.createLabel(statDetailsSection, DateFormat.getDateTimeInstance().format(thisdeploy.getStartDate()));
 				
+				ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_EndDateLabel);
+				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+				toolkit.createLabel(statDetailsSection, thisdeploy.getEndDate() == null ? "" : DateFormat.getDateTimeInstance().format(thisdeploy.getEndDate())); //$NON-NLS-1$
+				
 				ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_TimeDeployedLabel);
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-				toolkit.createLabel(statDetailsSection, (AssetUtils.formatTime( ((new Date()).getTime() - thisdeploy.getStartDate().getTime()) / 1000.0 )));
+				toolkit.createLabel(statDetailsSection, (AssetUtils.formatTime( thisdeploy.getActiveTimeInSeconds() )));
+				
+				if (thisdeploy.getEndDate() != null) {
+					ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_TimeToEndDate);
+					ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+					toolkit.createLabel(statDetailsSection, (AssetUtils.formatTime( thisdeploy.getTimeToEndDate() )));
+				}
 				
 				ll = toolkit.createLabel(statDetailsSection, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 				ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));

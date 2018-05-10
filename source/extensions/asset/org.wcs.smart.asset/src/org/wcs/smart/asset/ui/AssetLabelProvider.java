@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.asset.ui;
 
+import java.util.Locale;
+
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.asset.AssetCoreLabelProvider;
@@ -46,6 +48,7 @@ public class AssetLabelProvider extends LabelProvider{
 		if (element instanceof Asset) return ((Asset)element).getId();
 		if (element instanceof AssetStation) return ((AssetStation)element).getId();
 		if (element instanceof AssetStationLocation) return ((AssetStationLocation)element).getId();
+		if (element instanceof Asset.Status) return ((Asset.Status)element).getGuiName(Locale.getDefault());
 		return super.getText(element);
 	}
 	
@@ -60,6 +63,9 @@ public class AssetLabelProvider extends LabelProvider{
 		}
 		if (element instanceof AssetStationLocation) {
 			return AssetCoreLabelProvider.getStatusImage(((AssetStationLocation)element).getCachedStatus());
+		}
+		if (element instanceof Asset.Status) {
+			return AssetCoreLabelProvider.getStatusImage((Asset.Status) element);
 		}
 		return super.getImage(element);
 	}

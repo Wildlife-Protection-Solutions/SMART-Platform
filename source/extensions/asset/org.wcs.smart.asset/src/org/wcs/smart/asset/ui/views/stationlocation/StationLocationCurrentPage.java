@@ -139,8 +139,7 @@ public class StationLocationCurrentPage {
 			drawCommand = new StationLocationDrawCommand();
 			final List<AssetDeployment> currentDeployments = new ArrayList<>();
 			try(Session s = HibernateManager.openSession()){
-				String hql = "SELECT d FROM AssetDeployment d WHERE d.stationLocation = :location and d.endDate is null"; //$NON-NLS-1$
-				currentDeployments.addAll( s.createQuery(hql, AssetDeployment.class).setParameter("location",  parentEditor.getAssetStationLocation()).list() ); //$NON-NLS-1$
+				currentDeployments.addAll(parentEditor.getAssetStationLocation().getActiveDeployments(s));
 				currentDeployments.forEach(d->{
 					d.getAsset().getId();
 					d.getAsset().getAssetType().getName();
@@ -503,7 +502,8 @@ public class StationLocationCurrentPage {
 		ASSET_ID (Messages.StationLocationCurrentPage_IDColumn),
 		STATION (Messages.StationLocationCurrentPage_StationColumn),
 		LOCATION (Messages.StationLocationCurrentPage_LocationColumn),
-		START_DATE(Messages.StationLocationCurrentPage_DateColumn);
+		START_DATE(Messages.StationLocationCurrentPage_DateColumn),
+		END_DATE(Messages.StationLocationCurrentPage_EndDateColumn);
 		
 		public String guiName;
 		
@@ -521,6 +521,9 @@ public class StationLocationCurrentPage {
 				return element.getStationLocation().getId();
 			case START_DATE:
 				return DateFormat.getDateTimeInstance().format(element.getStartDate());
+			case END_DATE:
+				if (element.getEndDate() == null) return ""; //$NON-NLS-1$
+				return DateFormat.getDateTimeInstance().format(element.getEndDate());
 			case STATION:
 				return element.getStationLocation().getStation().getId();
 				

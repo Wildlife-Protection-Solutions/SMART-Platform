@@ -79,6 +79,7 @@ public class Messages extends NLS {
 	public static String AssetCurrentPage_AssetNotActive;
 	public static String AssetCurrentPage_CategoryColumn;
 	public static String AssetCurrentPage_DeploymentAttributesLabel;
+	public static String AssetCurrentPage_EndDateLabel;
 	public static String AssetCurrentPage_IDLabel;
 	public static String AssetCurrentPage_IncidentCntcolumn;
 	public static String AssetCurrentPage_IncidentsLabel;
@@ -91,6 +92,7 @@ public class Messages extends NLS {
 	public static String AssetCurrentPage_statusJobName;
 	public static String AssetCurrentPage_SummaryLabel;
 	public static String AssetCurrentPage_TimeDeployedLabel;
+	public static String AssetCurrentPage_TimeToEndDate;
 	public static String AssetCurrentPage_UntaggedLabel;
 	public static String AssetCurrentPage_unTaggedTooltip;
 	public static String AssetDatabaseUpgrader_SubTaskName;
@@ -226,6 +228,7 @@ public class Messages extends NLS {
 	public static String AssetListView_DeleteTaskName;
 	public static String AssetListView_deletestationtooltip;
 	public static String AssetListView_deletetooltip;
+	public static String AssetListView_GroupByOption;
 	public static String AssetListView_importtooltip;
 	public static String AssetListView_loadingAssetsJobName;
 	public static String AssetListView_loadingstationsJobName;
@@ -242,6 +245,8 @@ public class Messages extends NLS {
 	public static String AssetListView_ShowRetiredAssetsMenuOp;
 	public static String AssetListView_StationMenuOp;
 	public static String AssetListView_StationsHeader;
+	public static String AssetListView_StatusOption;
+	public static String AssetListView_TypeOption;
 	public static String AssetLocationCsvImporter_10;
 	public static String AssetLocationCsvImporter_8;
 	public static String AssetLocationCsvImporter_BooleanParseError;
@@ -791,6 +796,7 @@ public class Messages extends NLS {
 	public static String StationAssetSelectionDialog_stationsJobName;
 	public static String StationCurrentPage_CategoryLbl;
 	public static String StationCurrentPage_DateColumName;
+	public static String StationCurrentPage_EndDateColumnName;
 	public static String StationCurrentPage_GotoLbl;
 	public static String StationCurrentPage_IdColumName;
 	public static String StationCurrentPage_initJobName;
@@ -848,6 +854,7 @@ public class Messages extends NLS {
 	public static String StationHistoryPage_TypeColumnName;
 	public static String StationLocationCurrentPage_CategoryColumn;
 	public static String StationLocationCurrentPage_DateColumn;
+	public static String StationLocationCurrentPage_EndDateColumn;
 	public static String StationLocationCurrentPage_GotoToLabel;
 	public static String StationLocationCurrentPage_IDColumn;
 	public static String StationLocationCurrentPage_IncidentCntColumn;

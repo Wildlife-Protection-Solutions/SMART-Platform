@@ -22,6 +22,7 @@
 
 package org.wcs.smart.asset.model;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -223,13 +224,38 @@ public class AssetStation extends UuidItem {
 			status = Status.INACTIVE;
 			return;
 		}
-		
-		String query = "SELECT count(*) FROM AssetDeployment d join d.id.stationLocation c WHERE d.endDate is null and c.station = :station"; //$NON-NLS-1$
-		Long activeDeployments = (Long) session.createQuery(query).setParameter("station",  this).uniqueResult(); //$NON-NLS-1$
+		Date now = new Date();
+		String query = "SELECT count(*) FROM AssetDeployment d join d.id.stationLocation c WHERE c.station = :station and d.startDate <= :now1 and (d.endDate is null or d.endDate >= :now2)"; //$NON-NLS-1$
+
+		Long activeDeployments = (Long) session.createQuery(query)
+				.setParameter("now1",  now) //$NON-NLS-1$
+				.setParameter("now2",  now) //$NON-NLS-1$
+				.setParameter("station",  this) //$NON-NLS-1$
+				.uniqueResult();
 		if (activeDeployments == 0) {
 			status = Status.INACTIVE;
 		}else {
 			status = Status.ACTIVE;
 		}
+	}
+	
+	/**
+	 * Searches for all the current active deployment for the asset
+	 * station location
+	 * @param session
+	 * @return empty list of there are no deployments
+	 */
+	@Transient
+	public List<AssetDeployment> getActiveDeployments(Session session) {
+		Date now = new Date();
+		
+		String query = "SELECT d FROM AssetDeployment d join d.id.stationLocation c WHERE c.station = :station and d.startDate <= :now and (d.endDate is null or d.endDate >= :now2)"; //$NON-NLS-1$
+		List<AssetDeployment> ad = session.createQuery(query, AssetDeployment.class)
+				.setParameter("station",  this) //$NON-NLS-1$
+				.setParameter("now",  now) //$NON-NLS-1$
+				.setParameter("now2", now) //$NON-NLS-1$
+				.list();
+		return ad;
+		
 	}
 }

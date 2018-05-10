@@ -107,10 +107,7 @@ public class AssetDeploymentTableColumn extends ColumnLabelProvider{
 			case STATION:
 				return deployment.getStationLocation().getStation().getId();
 			case TOTAL_TIME:
-				Date end = new Date();
-				if (deployment.getEndDate() != null) end = deployment.getEndDate();
-				long diff = end.getTime() - deployment.getStartDate().getTime();
-				return AssetUtils.formatTime(diff / 1000.0);			
+				return AssetUtils.formatTime(deployment.getActiveTimeInSeconds());			
 			}
 		}else if (attribute != null ) {
 			if (deployment.getAttributeValues() != null) {

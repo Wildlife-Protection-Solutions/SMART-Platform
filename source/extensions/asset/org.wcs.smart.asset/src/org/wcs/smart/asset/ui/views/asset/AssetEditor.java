@@ -236,9 +236,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 			AssetDeployment activeDeployment = null;
 			if (asset.getUuid() != null) {
 				try(Session session = HibernateManager.openSession()){
-					activeDeployment = QueryFactory.buildQuery(session, AssetDeployment.class, 
-						new Object[] {"asset.uuid", asset.getUuid()}, //$NON-NLS-1$
-						new Object[] {"endDate", null}).uniqueResult(); //$NON-NLS-1$
+					activeDeployment = asset.findActiveDeployment(session);
 				}
 			}
 			currentPage.initializePanel(activeDeployment);

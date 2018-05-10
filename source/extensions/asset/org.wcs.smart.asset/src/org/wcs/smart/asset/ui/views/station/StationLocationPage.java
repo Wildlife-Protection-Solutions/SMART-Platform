@@ -330,10 +330,8 @@ public class StationLocationPage {
 						l.getStation().getId();
 						l.getId();
 						
-						Long activeCnt = QueryFactory.buildCountQuery(session, AssetDeployment.class, 
-								new Object[] {"stationLocation", l}, //$NON-NLS-1$
-								new Object[] {"endDate", null}); //$NON-NLS-1$
-						proxy.status = activeCnt == 0 ? Asset.Status.INACTIVE : Asset.Status.ACTIVE; 
+						List<AssetDeployment> activeDeployments = l.getActiveDeployments(session);
+						proxy.status = activeDeployments.isEmpty() ? Asset.Status.INACTIVE : Asset.Status.ACTIVE; 
 						
 						for (AssetStationLocationAttributeValue value : l.getAttributeValues()) {
 							value.getAttribute().getName();

@@ -145,7 +145,7 @@ public class FixedColumnEngine implements IColumnEngine {
 				
 				LocalDate startDate = new java.sql.Date(d.getStartDate().getTime()).toLocalDate();
 				LocalDate endDate = LocalDate.now();
-				if (d.getEndDate() != null) {
+				if (d.getEndDate() != null && d.getEndDate().before(new Date())) {
 					endDate = new java.sql.Date(d.getEndDate().getTime()).toLocalDate();
 				}
 				
@@ -217,7 +217,7 @@ public class FixedColumnEngine implements IColumnEngine {
 				
 				LocalDate startDate = new java.sql.Date(d.getStartDate().getTime()).toLocalDate();
 				LocalDate endDate = LocalDate.now();
-				if (d.getEndDate() != null) {
+				if (d.getEndDate() != null && d.getEndDate().before(new Date())) {
 					endDate = new java.sql.Date(d.getEndDate().getTime()).toLocalDate();
 				}
 				

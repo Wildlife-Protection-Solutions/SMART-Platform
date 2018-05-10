@@ -34,6 +34,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.UuidItem;
 
@@ -210,5 +211,37 @@ public class AssetDeployment extends UuidItem {
 		this.waypoints = waypoints;
 	}
 
+	/**
+	 * Computes the time in field of this asset deployment. This is computed
+	 * as the number of seconds from the start date to either the current time
+	 * or the end time (whichever is older).  So future dates are not
+	 * included in the active time.
+	 * @return
+	 */
+	@Transient
+	public double getActiveTimeInSeconds() {
+		Date now = new Date();
+		if (getStartDate().after(now)) return 0;
+		long start = getStartDate().getTime();
+		long end = now.getTime();
+		if (getEndDate() != null && getEndDate().before(now)) {
+			end = getEndDate().getTime();
+		}
+		return (end-start) / 1000.0;
+	}
 
+	/**
+	 * If the end date is in the future this returns the number
+	 * of seconds to the end date otherwise it returns 0;
+	 * @return
+	 */
+	@Transient
+	public double getTimeToEndDate() {
+		if (getEndDate() == null) return 0;
+		if (getEndDate().before(new Date())) return 0;
+		
+		Date now = new Date();
+		long end = getEndDate().getTime();
+		return (end-now.getTime()) / 1000.0;
+	}
 }
