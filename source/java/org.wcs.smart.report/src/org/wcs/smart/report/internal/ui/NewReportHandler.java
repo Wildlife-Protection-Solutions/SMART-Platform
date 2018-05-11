@@ -35,6 +35,8 @@ import org.eclipse.birt.report.model.api.OdaDataSourceHandle;
 import org.eclipse.birt.report.model.api.ParameterGroupHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
+import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
+import org.eclipse.birt.report.model.elements.interfaces.IReportDesignModel;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -170,7 +172,6 @@ public class NewReportHandler {
 						}	
 					}
 					
-//					List
 					DataSourceHandle dataSource = null;
 					List<?> dataSources = library.getAllDataSources();
 					for (Iterator<?> iterator = dataSources.iterator(); iterator.hasNext();) {
@@ -186,7 +187,8 @@ public class NewReportHandler {
 					//open the report
 					ReportDesignHandle rdh = session.createDesign(reportFile.getAbsolutePath());
 					rdh.setTitle(report.getName());
-					
+					//initialize layout to auto-layout (see ticket #2437)
+					rdh.setProperty(IReportDesignModel.LAYOUT_PREFERENCE_PROP, DesignChoiceConstants.REPORT_LAYOUT_PREFERENCE_AUTO_LAYOUT);
 					//add default library
 					rdh.includeLibrary(SmartBirtLibrary.getInstance().getLibraryFileString(), SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
 					
