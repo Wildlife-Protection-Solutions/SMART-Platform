@@ -3,7 +3,9 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
+import java.awt.Desktop;
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,6 +34,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
@@ -97,7 +100,13 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 		lblOp.setText(Messages.CyberTrackerFileImportDialog_ImportFrom);
 		lblOp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-		btnFromStorage = new Button(container, SWT.RADIO);
+		Composite opComp = new Composite(container, SWT.NONE);
+		opComp.setLayout(new GridLayout(2, false));
+		opComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)opComp.getLayout()).marginWidth = 0; 
+		((GridLayout)opComp.getLayout()).marginHeight = 0;
+		
+		btnFromStorage = new Button(opComp, SWT.RADIO);
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER,true, false);
 		gd.horizontalIndent = 10;
 		btnFromStorage.setLayoutData(gd);
@@ -106,10 +115,28 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 		btnFromStorage.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				importOptionChanged();
+				if (btnFromStorage.getSelection()) {
+					btnFromFile.setSelection(false);
+					importOptionChanged();
+				}
 			}
 		});
 
+		Link lnkOp = new Link(opComp, SWT.NONE);
+		lnkOp.setText("<a>" + "Open Archive Folder..." + "</a>");
+		lnkOp.addListener(SWT.Selection,e->{
+			Desktop diapi = Desktop.getDesktop();
+			try {
+				File f = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea()).getCanonicalFile();
+				//if the folder doesn't exists then opening fails, so make sure the directory exists
+				if (!f.exists()) f.mkdir();
+				diapi.open(f);
+			} catch (IOException e1) {
+				CyberTrackerPlugIn.log(e1.getMessage(),  e1);
+			}
+		});
+		lnkOp.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		
 		storageViewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		GridData sgd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		sgd.horizontalIndent = 25;
@@ -156,6 +183,7 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 		sorter.setSortColumn(StorageColumn.FILEDATE, colDate);
 		sorter.setSortColumn(StorageColumn.FILEDATE, colDate);
 		
+		
 		btnFromFile = new Button(container, SWT.RADIO);
 		btnFromFile.setSelection(false);
 		gd = new GridData(SWT.FILL, SWT.CENTER,true, false);
@@ -165,7 +193,11 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 		btnFromFile.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				importOptionChanged();
+				if (btnFromFile.getSelection()) {
+					btnFromStorage.setSelection(false);
+					importOptionChanged();
+				}
+				
 			}
 		});
 
