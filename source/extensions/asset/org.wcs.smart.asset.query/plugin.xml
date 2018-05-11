@@ -135,7 +135,7 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.query.toolbar.menu.create?before=org.wcs.smart.query.createunknown.separator2">
          <menu
-               icon="images/icons/obj16/asset.png"
+               icon="platform:/plugin/org.wcs.smart.asset/images/icons/obj16/asset.png"
                id="org.wcs.smart.query.createquery.assetquery"
                label="%assetquery.menu.label"
                tooltip="%assetquery.menu.tooltip">
@@ -180,7 +180,7 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
          <menu
-               icon="images/icons/obj16/asset.png"
+               icon="platform:/plugin/org.wcs.smart.asset/images/icons/obj16/asset.png"
                id="org.wcs.smart.menu.query.newquery.assetqueries"
                label="%assetquery1.menu.label"
                tooltip="%assetquery1.menu.tooltip">
