@@ -163,6 +163,7 @@ public class AssetObservationEngine extends AssetQueryEngine {
 				{"asset_station","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
 				{"asset_location","varchar(32000)"},  //$NON-NLS-1$ //$NON-NLS-2$
 				{"asset_asset","varchar(32000)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"incident_length","integer"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 		};
@@ -174,6 +175,18 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		}
 		
 		StringBuilder sb = new StringBuilder();
+		sb.append("UPDATE "); //$NON-NLS-1$
+		sb.append(queryDataTable);
+		sb.append(" SET incident_length = (SELECT incident_length FROM "); //$NON-NLS-1$
+		sb.append(" ( SELECT wp_uuid, max(incident_length) as incident_length FROM "); //$NON-NLS-1$
+		sb.append(tableName(AssetWaypoint.class));
+		sb.append(" GROUP BY wp_uuid) foo WHERE foo.wp_uuid = "); //$NON-NLS-1$
+		sb.append(queryDataTable);
+		sb.append(".wp_uuid)"); //$NON-NLS-1$
+		logger.finest(sb.toString());
+		session.createNativeQuery(sb.toString()).executeUpdate();
+		
+		sb = new StringBuilder();
 		sb.append("SELECT DISTINCT tmp.wp_uuid, "); //$NON-NLS-1$
 		sb.append(tablePrefix(Asset.class) + ".id, "); //$NON-NLS-1$
 		sb.append(tablePrefix(AssetStation.class) + ".id, "); //$NON-NLS-1$
@@ -313,6 +326,7 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		it.setAssets(rs.getString("asset_asset")); //$NON-NLS-1$
 		it.setStation(rs.getString("asset_station")); //$NON-NLS-1$
 		it.setLocations(rs.getString("asset_location")); //$NON-NLS-1$
+		it.setIncidentLength(rs.getInt("incident_length")); //$NON-NLS-1$
 		
 		UUID t = (UUID)rs.getObject("ob_uuid"); //$NON-NLS-1$
 		it.setObservationUuid(t); 

@@ -23,7 +23,6 @@ package org.wcs.smart.connect.query.engine.asset;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 

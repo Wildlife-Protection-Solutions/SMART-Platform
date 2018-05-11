@@ -54,6 +54,7 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 			case ASSET: return Messages.getString("AssetQueryLabelProvider.AssetsColumnName", l); //$NON-NLS-1$
 			case LOCATION: return Messages.getString("AssetQueryLabelProvider.LocationsColumnName", l); //$NON-NLS-1$
 			case STATION: return Messages.getString("AssetQueryLabelProvider.StationsColumnName", l); //$NON-NLS-1$
+			case INCIDENT_LENGTH: return Messages.getString("AssetQueryLabelProvider.IncidentLengthColumnName", l); //$NON-NLS-1$
 			}
 		}
 		if (item instanceof AssetValueOption){

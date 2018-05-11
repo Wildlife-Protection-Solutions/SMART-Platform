@@ -1714,6 +1714,7 @@ CREATE TABLE smart.asset_waypoint (
  wp_uuid uuid NOT NULL, 
  asset_deployment_uuid uuid NOT NULL, 
  state smallint not null, 
+ incident_length integer not null,
  PRIMARY KEY (uuid), 
  UNIQUE(wp_uuid, asset_deployment_uuid)
 );

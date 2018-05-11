@@ -113,8 +113,8 @@ public class AdvancedLabelProviderImpl implements
 		if (item == FixedQueryColumn.Column.RECORD_TITLE) return Messages.getString("AdvancedLabelProviderImpl.QueryColRecordTital", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.Column.RECORD_SOURCE) return Messages.getString("AdvancedLabelProviderImpl.QueryColRecordSource", l); //$NON-NLS-1$
 
-		if (item == FixedQueryColumn.Column.ENTITY_ID) return "Entity ID";
-		if (item == FixedQueryColumn.Column.ENTITY_TYPE) return "Entity Type";
+		if (item == FixedQueryColumn.Column.ENTITY_ID) return Messages.getString("AdvancedLabelProviderImpl.QueryColEntityId", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.Column.ENTITY_TYPE) return Messages.getString("AdvancedLabelProviderImpl.QueryColEntityTable", l); //$NON-NLS-1$
 		
 		if (item == IntelRecord.Status.NEW) return Messages.getString("AdvancedLabelProviderImpl.IntelRecordStatusUnprocessed", l); //$NON-NLS-1$
 		if (item == IntelRecord.Status.PROCESSING) return Messages.getString("AdvancedLabelProviderImpl.IntelRecordStatusInProgress", l); //$NON-NLS-1$
@@ -261,8 +261,8 @@ public class AdvancedLabelProviderImpl implements
 		
 		if (item == ValuePart.ValueOption.NUMBER_ENTITIES) return Messages.getString("AdvancedLabelProviderImpl.NumberOfEntitiesValue", l); //$NON-NLS-1$
 		
-		if (item == FixedAttribute.DATE) return "Record Date";
-		if (item == FixedAttribute.STATUS) return "Record Status";
+		if (item == FixedAttribute.DATE) return Messages.getString("AdvancedLabelProviderImpl.RecordDateAttributeName", l); //$NON-NLS-1$
+		if (item == FixedAttribute.STATUS) return Messages.getString("AdvancedLabelProviderImpl.RecordSourceAttributeName", l); //$NON-NLS-1$
 		return ""; //$NON-NLS-1$
 	}
 
