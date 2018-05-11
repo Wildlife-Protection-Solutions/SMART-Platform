@@ -28,6 +28,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -346,10 +347,22 @@ public class DataImportPage {
 							Set<Asset> assets = new HashSet<>();
 							assets.add(p.getAsset());
 							relations.addAll(p.getRelations());
-							if (p.getFixedRelations() != null) relations.addAll(p.getFixedRelations());							
+							if (p.getFixedRelations() != null) relations.addAll(p.getFixedRelations());
+							Date minDate = wp.getDateTime();
+							Date maxDate = wp.getDateTime();
+							
 							for (FileProxy pp : relations) {
 								if (!items.contains(pp)) items.add(pp);
 								toProcess.remove(pp);
+								if (pp.getImageDate().before(wp.getDateTime())) {
+									wp.setDateTime(pp.getImageDate());
+								}
+								if (pp.getImageDate().before(minDate)) {
+									minDate = pp.getImageDate();
+								}
+								if (pp.getImageDate().after(maxDate)) {
+									maxDate = pp.getImageDate();
+								}
 								wa = new WaypointAttachment();
 								wa.setWaypoint(wp);
 								wa.setCopyFromLocation(pp.getFile().toFile());
@@ -374,6 +387,8 @@ public class DataImportPage {
 								assets.add(pp.getAsset());
 							}
 							
+							int incidentLength =  (int)Math.ceil( ( maxDate.getTime() - minDate.getTime()) / 1000.0);
+							
 							session.save(wp);
 							session.flush();
 							
@@ -391,6 +406,7 @@ public class DataImportPage {
 								aw.setState(AssetWaypoint.State.DIRTY);
 								aw.setWaypoint(wp);
 								aw.setAssetDeployment(d);
+								aw.setIncidentLength(incidentLength);
 								aw.setAttachments(new HashSet<>());
 								if (d.getAssetWaypoints() == null) d.setAssetWaypoints(new ArrayList<>());
 								d.getAssetWaypoints().add(aw);

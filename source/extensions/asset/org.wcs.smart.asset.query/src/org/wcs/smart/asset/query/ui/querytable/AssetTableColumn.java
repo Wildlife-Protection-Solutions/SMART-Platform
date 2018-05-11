@@ -24,9 +24,11 @@ package org.wcs.smart.asset.query.ui.querytable;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.query.model.observation.AssetAttributeQueryColumn;
 import org.wcs.smart.asset.query.model.observation.AssetCategoryQueryColumn;
 import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
@@ -40,7 +42,21 @@ public class AssetTableColumn {
 
 	public static ColumnLabelProvider getLabelProvider(QueryColumn column, List<QueryColumn> allColumns){
 		if (column instanceof FixedQueryColumn){
+			if (((FixedQueryColumn) column).getColumn() == FixedQueryColumn.FixedColumns.INCIDENT_LENGTH) {
+				return new QueryColumnLabelProvider(column) {
+					@Override
+					public String getText(Object element){
+						if (element == null) return ""; //$NON-NLS-1$
+						if (element instanceof IResultItem){
+							Integer valueInSeconds = (Integer)column.getValue(((IResultItem)element));
+							return AssetUtils.formatTimeHours(valueInSeconds);
+						}
+						return element.toString();
+					}
+				};
+			}
 			return new QueryColumnLabelProvider(column);
+			
 		}else if (column instanceof AssetAttributeQueryColumn){
 			return new AttributeColumnLabelProvider(column);
 		}else if (column instanceof AssetCategoryQueryColumn){

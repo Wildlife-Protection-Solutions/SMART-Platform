@@ -58,6 +58,16 @@ public class AssetWaypoint extends UuidItem implements IAdaptable{
 	private Waypoint wp;
 	private State state;
 	
+	/**
+	 * Time in seconds of the incident
+	 */
+	//If cameras are rigged on trails, incidents will mostly be short and a 
+	//few minutes at most, in which case this is fine, but if cameras are
+	//rigged at access points or waiting spots, the incidents could stretch
+	//to hours long. In that case, 
+	private int incidentLength;
+	
+	
 	private Set<AssetWaypointAttachment> attachments;
 	
 	@Column(name="state")
@@ -98,6 +108,22 @@ public class AssetWaypoint extends UuidItem implements IAdaptable{
 		this.attachments = attachments;
 	}
 		
+	/**
+	 * 
+	 * @return the length of the incident in seconds
+	 */
+	@Column(name="incident_length")
+	public int getIncidentLength() {
+		return this.incidentLength;
+	}
+	
+	/**
+	 * The length of the incident in seconds
+	 * @param length
+	 */
+	public void setIncidentLength(int length) {
+		this.incidentLength = length;
+	}
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {

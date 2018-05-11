@@ -174,12 +174,13 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 	}
 	
 	private void populateTemporaryTableExtra(Connection c, Session session, IProgressMonitor monitor) throws SQLException {
-		SubMonitor progress = SubMonitor.convert(monitor, 18);
+		SubMonitor progress = SubMonitor.convert(monitor, 19);
 		
 		String[][] columnsToAdd = new String[][]{
 			{"asset_station","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
 			{"asset_location","varchar(32000)"},  //$NON-NLS-1$ //$NON-NLS-2$
 			{"asset_asset","varchar(32000)"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"incident_length", "integer"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 		};
@@ -194,10 +195,26 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 			return;
 		}
 		
-		progress.subTask("Populate Station, Location, and Asset Fields"); //$NON-NLS-1$
-		progress.split(3);
+		//populate incident length field
+		progress.subTask(Messages.AssetWaypointEngine_IncidentLengthSubTask); 
+		progress.split(1);
 		
 		StringBuilder sb = new StringBuilder();
+		sb.append("UPDATE "); //$NON-NLS-1$
+		sb.append(queryDataTable);
+		sb.append(" SET incident_length = (SELECT incident_length FROM "); //$NON-NLS-1$
+		sb.append(" ( SELECT wp_uuid, max(incident_length) as incident_length FROM "); //$NON-NLS-1$
+		sb.append(tableName(AssetWaypoint.class));
+		sb.append(" GROUP BY wp_uuid) foo WHERE foo.wp_uuid = "); //$NON-NLS-1$
+		sb.append(queryDataTable);
+		sb.append(".wp_uuid)"); //$NON-NLS-1$
+		QueryPlugIn.logSql(sb.toString());
+		session.createNativeQuery(sb.toString()).executeUpdate();
+		
+		progress.subTask(Messages.AssetWaypointEngine_AssetDetailsSubTask); 
+		progress.split(3);
+		
+		sb = new StringBuilder();
 		sb.append("SELECT DISTINCT tmp.wp_uuid, "); //$NON-NLS-1$
 		sb.append(tablePrefix(Asset.class) + ".id, "); //$NON-NLS-1$
 		sb.append(tablePrefix(AssetStation.class) + ".id, "); //$NON-NLS-1$
@@ -332,6 +349,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 		it.setAssets(rs.getString("asset_asset")); //$NON-NLS-1$
 		it.setStation(rs.getString("asset_station")); //$NON-NLS-1$
 		it.setLocations(rs.getString("asset_location")); //$NON-NLS-1$
+		it.setIncidentLength(rs.getInt("incident_length")); //$NON-NLS-1$
 		return it;
 	}
 	

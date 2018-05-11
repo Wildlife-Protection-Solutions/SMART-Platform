@@ -93,6 +93,7 @@ public class Messages extends NLS {
 	public static String AssetQueryLabelProvider_AssetFilterOption;
 	public static String AssetQueryLabelProvider_AssetsColumnName;
 	public static String AssetQueryLabelProvider_AssetTypeFilterOption;
+	public static String AssetQueryLabelProvider_IncidentLengthColumnName;
 	public static String AssetQueryLabelProvider_LocationsColumnName;
 	public static String AssetQueryLabelProvider_StationColumnName;
 	public static String AssetQueryLabelProvider_StationLocationFilterOptoin;
@@ -104,6 +105,8 @@ public class Messages extends NLS {
 	public static String AssetQueryValidator_AssetTypeNotFound;
 	public static String AssetQueryValidator_CouldNotMatchFilter;
 	public static String AssetQueryValidator_StationNotFound;
+	public static String AssetObservationEngine_AssetDetailsSubTask;
+	public static String AssetObservationEngine_IncidentLengthSubTask;
 	public static String AssetObservationQueryType_AssetObservationQueryTypeName;
 	public static String AssetSimpleQueryResultEditor_MoreMessage;
 	public static String AssetSummaryEditor_ErrorLogMsg;
@@ -114,6 +117,8 @@ public class Messages extends NLS {
 	public static String AssetSummaryGroupByValuePanel_GroupByPanelTitle;
 	public static String AssetSummaryGroupByValuePanel_ValueError;
 	public static String AssetSummaryQueryType_SummaryQueryTypeName;
+	public static String AssetWaypointEngine_AssetDetailsSubTask;
+	public static String AssetWaypointEngine_IncidentLengthSubTask;
 	public static String AssetWaypointQueryType_WaypointQueryTypeName;
 	public static String Query_DefaultQueryName;
 	public static String QueryColumn_LoadingObservationColumnJobName;

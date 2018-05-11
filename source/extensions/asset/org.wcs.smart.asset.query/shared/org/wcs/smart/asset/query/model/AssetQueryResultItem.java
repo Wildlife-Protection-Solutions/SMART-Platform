@@ -75,7 +75,7 @@ public class AssetQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private String[] observationCategory;
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	
-	
+	private int incidentLength;
 	
 	public void setAssets(String assets) {
 		this.assets = assets;
@@ -94,6 +94,18 @@ public class AssetQueryResultItem implements IGeometryResultItem, IAdaptable{
 	}
 	public String getStation() {
 		return this.station;
+	}
+	
+	public void setIncidentLength(int incidentLength) {
+		this.incidentLength = incidentLength;
+	}
+	
+	/**
+	 * The incident length in seconds
+	 * @return
+	 */
+	public int getIncidentLength() {
+		return this.incidentLength;
 	}
 	
 	/**

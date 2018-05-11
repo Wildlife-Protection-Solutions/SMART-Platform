@@ -37,6 +37,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.asset.internal.Messages;
+import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.model.AssetWaypointMapping;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
@@ -50,10 +52,13 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class EditWaypointDialog extends TitleAreaDialog{
 
-	private Waypoint toUpdate;
+	private AssetWaypointMapping toUpdate;
 	
 	private Text txtId;
 	private Text txtComment;
+	private Text txtHours;
+	private Text txtMins;
+	private Text txtSecs;
 	private DateTime dDate;
 	private DateTime dTime;
 		
@@ -65,7 +70,7 @@ public class EditWaypointDialog extends TitleAreaDialog{
 	 * @param parentShell
 	 * @param toUpdate the waypoint to update
 	 */
-	public EditWaypointDialog(Shell parentShell, Waypoint toUpdate) {
+	public EditWaypointDialog(Shell parentShell, AssetWaypointMapping toUpdate) {
 		this(parentShell, toUpdate, true, true);
 	}
 	
@@ -77,7 +82,7 @@ public class EditWaypointDialog extends TitleAreaDialog{
 	 * @param showId true if users should be able to edit the waypoint id
 	 * @param showComment true if users should be able to edit the waypoint comment
 	 */
-	public EditWaypointDialog(Shell parentShell, Waypoint toUpdate, boolean showId, boolean showComment) {
+	public EditWaypointDialog(Shell parentShell, AssetWaypointMapping toUpdate, boolean showId, boolean showComment) {
 		super(parentShell);
 		this.toUpdate = toUpdate;
 		this.showId = showId;
@@ -98,21 +103,30 @@ public class EditWaypointDialog extends TitleAreaDialog{
 		}
 		
 		Date newDateTime =  SmartUtils.combineDateTime(SmartUtils.getDate(dDate), SmartUtils.getTime(dTime));
-		if (Math.abs(toUpdate.getDateTime().getTime() - newDateTime.getTime()) > 1000 * 60 * 60 * 24) {
+		if (Math.abs(toUpdate.getWaypoint().getDateTime().getTime() - newDateTime.getTime()) > 1000 * 60 * 60 * 24) {
 			if (!MessageDialog.openQuestion(getShell(), Messages.EditWaypointDialog_EditTitle, Messages.EditWaypointDialog_EditMessage)) return;
 		}
-		toUpdate.setDateTime(newDateTime);
+		toUpdate.getWaypoint().setDateTime(newDateTime);
+		
+		int hours = Integer.parseInt(txtHours.getText().trim());
+		int minutes = Integer.parseInt(txtMins.getText().trim());
+		int sec = Integer.parseInt(txtSecs.getText().trim());
+		int length = sec + minutes * 60 + hours * 3_600;
+		
+		for (AssetWaypoint aw : toUpdate.getAssetLinks()) {
+			aw.setIncidentLength(length);
+		}
 		
 		if (showId) {
 			Integer id = Integer.parseInt(txtId.getText().trim());
-			toUpdate.setId(id);
+			toUpdate.getWaypoint().setId(id);
 		}
 		
 		if (showComment) {
 			if (txtComment.getText().trim().isEmpty()) {
-				toUpdate.setComment(null);
+				toUpdate.getWaypoint().setComment(null);
 			}else {
-				toUpdate.setComment(txtComment.getText().trim());
+				toUpdate.getWaypoint().setComment(txtComment.getText().trim());
 			}
 		}
 		
@@ -121,7 +135,8 @@ public class EditWaypointDialog extends TitleAreaDialog{
 	
 	private boolean validate() {
 		Button btnOk = getButton(IDialogConstants.OK_ID);
-		btnOk.setEnabled(false);
+		if (btnOk != null) btnOk.setEnabled(false);
+		
 		setErrorMessage(null);
 		
 		if (showId) {
@@ -136,7 +151,51 @@ public class EditWaypointDialog extends TitleAreaDialog{
 				return false;
 			}
 		}
-		btnOk.setEnabled(true);
+		int hours = 0;
+		try {
+			hours = Integer.parseInt(txtHours.getText().trim());
+			if (hours< 0) {
+				setErrorMessage(Messages.EditWaypointDialog_HoursPositive);
+				return false;	
+			}
+		}catch (Exception ex) {
+			setErrorMessage(Messages.EditWaypointDialog_InvalidHours);
+			return false;
+		}
+		
+		int minutes = 0;
+		try {
+			minutes = Integer.parseInt(txtMins.getText().trim());
+			if (minutes< 0) {
+				setErrorMessage(Messages.EditWaypointDialog_MintuesPositivie);
+				return false;	
+			}
+		}catch (Exception ex) {
+			setErrorMessage(Messages.EditWaypointDialog_InvalidMinutes);
+			return false;
+		}
+		
+		int sec = 0;
+		try {
+			sec = Integer.parseInt(txtSecs.getText().trim());
+			if (hours< 0) {
+				setErrorMessage(Messages.EditWaypointDialog_SecondsPositive);
+				return false;	
+			}
+		}catch (Exception ex) {
+			setErrorMessage(Messages.EditWaypointDialog_InvalidSeconds);
+			return false;
+		}
+		
+		int length = sec + minutes * 60 + hours * 3_600;
+		
+		if (length > 604_800) { //7 days
+			setErrorMessage(Messages.EditWaypointDialog_LengthTooLong);
+			return false;
+			
+		}
+		
+		if (btnOk != null) btnOk.setEnabled(true);
 		return true;
 	}
 	
@@ -154,7 +213,7 @@ public class EditWaypointDialog extends TitleAreaDialog{
 			
 			txtId = new Text(form, SWT.BORDER);
 			
-			txtId.setText(String.valueOf(toUpdate.getId()));
+			txtId.setText(String.valueOf(toUpdate.getWaypoint().getId()));
 			txtId.addListener(SWT.Modify, e->validate());
 			txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		}
@@ -164,12 +223,51 @@ public class EditWaypointDialog extends TitleAreaDialog{
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dDate = new DateTime(form, SWT.DROP_DOWN | SWT.MEDIUM | SWT.DATE);
-		SmartUtils.initDateDateTimeWidget(dDate, toUpdate.getDateTime());
+		SmartUtils.initDateDateTimeWidget(dDate, toUpdate.getWaypoint().getDateTime());
 		dDate.addListener(SWT.Selection, e->validate());
 		
 		dTime = new DateTime(form, SWT.DROP_DOWN | SWT.TIME);
-		SmartUtils.initTimeDateTimeWidget(dTime, toUpdate.getDateTime());
+		SmartUtils.initTimeDateTimeWidget(dTime, toUpdate.getWaypoint().getDateTime());
 		dTime.addListener(SWT.Selection, e->validate());
+		
+		l = new Label(form, SWT.NONE);
+		l.setText(Messages.EditWaypointDialog_IncidentLengthLabel);
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+	
+		Composite times = new Composite(form, SWT.NONE);
+		times.setLayout(new GridLayout(6, false));
+		times.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		l = new Label(times, SWT.NONE);
+		l.setText(Messages.EditWaypointDialog_HoursLabel);
+		
+		txtHours = new Text(times, SWT.BORDER);
+		txtHours.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtHours.addListener(SWT.Modify, e->validate());
+		
+		l = new Label(times, SWT.NONE);
+		l.setText(Messages.EditWaypointDialog_MinutesLabel);
+		
+		txtMins = new Text(times, SWT.BORDER);
+		txtMins.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtMins.addListener(SWT.Modify, e->validate());
+		l = new Label(times, SWT.NONE);
+		l.setText(Messages.EditWaypointDialog_SecondsLabel);
+		
+		txtSecs = new Text(times, SWT.BORDER);
+		txtSecs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtSecs.addListener(SWT.Modify, e->validate());
+		
+		int length = toUpdate.getAssetLinks().iterator().next().getIncidentLength();
+		int hours = (int)Math.floor( length / 3_600.0 );
+		int remainder = length - hours * 3600;
+		int minutes = (int)Math.floor(remainder / 60.0);
+		int seconds = length - hours * 3600 - minutes * 60;
+		
+		txtHours.setText(String.valueOf(hours));
+		txtMins.setText(String.valueOf(minutes));
+		txtSecs.setText(String.valueOf(seconds));
+	
 		
 		if (showComment) {
 			l = new Label(form, SWT.NONE);
@@ -177,7 +275,7 @@ public class EditWaypointDialog extends TitleAreaDialog{
 			l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			
 			txtComment = new Text(form, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI | SWT.WRAP);
-			txtComment.setText(toUpdate.getComment() == null ? "" : toUpdate.getComment()); //$NON-NLS-1$
+			txtComment.setText(toUpdate.getWaypoint().getComment() == null ? "" : toUpdate.getWaypoint().getComment()); //$NON-NLS-1$
 			txtComment.addListener(SWT.Modify,  e->validate());
 			txtComment.setTextLimit(Waypoint.COMMENT_MAX_LENGTH);
 			txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));

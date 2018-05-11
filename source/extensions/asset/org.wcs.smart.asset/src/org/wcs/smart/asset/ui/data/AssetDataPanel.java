@@ -345,7 +345,11 @@ public abstract class AssetDataPanel {
 		dtWaypoint.setDateTime(aw.getWaypoint().getDateTime());
 		dtWaypoint.setComment(aw.getWaypoint().getComment());
 		
-		EditWaypointDialog dialog = new EditWaypointDialog(details.getShell(), dtWaypoint, false, true);
+		AssetWaypoint tmpwp = new AssetWaypoint();
+		tmpwp.setIncidentLength(aw.getAssetLinks().iterator().next().getIncidentLength());
+		AssetWaypointMapping temp = new AssetWaypointMapping(dtWaypoint, Collections.singletonList(tmpwp));
+				
+		EditWaypointDialog dialog = new EditWaypointDialog(details.getShell(), temp, false, true);
 		if (dialog.open() != Window.OK) return null;
 		
 		
@@ -383,6 +387,7 @@ public abstract class AssetDataPanel {
 									newlink.setState(State.DIRTY);
 									newlink.setAttachments(new HashSet<>());
 									newlink.setWaypoint(cloneWp);
+									newlink.setIncidentLength(tmpwp.getIncidentLength());
 									newDeployments.put(oldlink.getAssetDeployment(), newlink);
 								}
 								
@@ -750,13 +755,16 @@ public abstract class AssetDataPanel {
 		//modify the waypoint datetime and/or ID
 		if (!isEdit) return;
 		if (toedit == null) return;
-		EditWaypointDialog dialog = new EditWaypointDialog(details.getShell(), toedit.getWaypoint());
+		EditWaypointDialog dialog = new EditWaypointDialog(details.getShell(), toedit);
 		if (dialog.open() == EditWaypointDialog.OK) {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try {
 					validateAndExtend(toedit.getWaypoint(), toedit.getAssetLinks(), s);
 					s.saveOrUpdate(toedit.getWaypoint());
+					for (AssetWaypoint aw : toedit.getAssetLinks()) {
+						s.saveOrUpdate(aw);
+					}
 					s.getTransaction().commit();
 				}catch(Exception ex) {
 					AssetPlugIn.displayLog(Messages.AssetDataPanel_WpSaveError + ex.getMessage(), ex);
@@ -876,12 +884,13 @@ public abstract class AssetDataPanel {
 	private boolean mergeItems(List<AssetWaypointMapping> tomerge) {
 		if (!isEdit) return false;
 		if (tomerge.isEmpty() || tomerge.size() < 2) return false;
-		
+		int inlength = 0;
 		//To merge the station MUST be the same
 		Set<AssetStation> stns = new HashSet<>();
 		for (AssetWaypointMapping mapping : tomerge) {
 			for (AssetWaypoint aw : mapping.getAssetLinks()) {
 				stns.add(aw.getAssetDeployment().getStationLocation().getStation());
+				inlength = aw.getIncidentLength();
 			}	
 		}
 		if (stns.size() != 1) {
@@ -903,7 +912,10 @@ public abstract class AssetDataPanel {
 		});
 		dtWaypoint.setComment(sb.toString());
 		
-		EditWaypointDialog dialog = new EditWaypointDialog(details.getShell(), dtWaypoint, false, true);
+		AssetWaypoint tmpwp = new AssetWaypoint();
+		tmpwp.setIncidentLength(inlength);
+		AssetWaypointMapping tmpmap = new AssetWaypointMapping(dtWaypoint,Collections.singletonList(tmpwp));
+		EditWaypointDialog dialog = new EditWaypointDialog(details.getShell(), tmpmap, false, true);
 		if (dialog.open() != Window.OK) return false;
 		
 		AssetWaypointMapping core = tomerge.get(0);
@@ -989,7 +1001,9 @@ public abstract class AssetDataPanel {
 					session.delete(from.getWaypoint());
 					
 				}
-				
+				for (AssetWaypoint aw : core.getAssetLinks()) {
+					aw.setIncidentLength(tmpwp.getIncidentLength());
+				}
 				session.saveOrUpdate(core.getWaypoint());
 				toSave.forEach(a->session.save(a));
 				session.getTransaction().commit();
@@ -1187,6 +1201,7 @@ public abstract class AssetDataPanel {
 					assetWaypointLink.setWaypoint(waypoint.getWaypoint());
 					assetWaypointLink.setState(State.DIRTY);
 					assetWaypointLink.setAttachments(new HashSet<>());
+					assetWaypointLink.setIncidentLength(waypoint.getAssetLinks().iterator().next().getIncidentLength());
 					session.getTransaction().commit();
 				}catch (Exception ex) {
 					assetWaypointLink = null;
@@ -1316,6 +1331,9 @@ public abstract class AssetDataPanel {
 		public void populateHeaderLabel() {
 			StringBuilder sb = new StringBuilder();
 			sb.append(DateFormat.getDateTimeInstance().format(waypoint.getWaypoint().getDateTime()));
+			sb.append(" ("); //$NON-NLS-1$
+			sb.append(AssetUtils.formatTimeHours(waypoint.getAssetLinks().iterator().next().getIncidentLength()));
+			sb.append(")"); //$NON-NLS-1$
 			
 			Optional<AssetStation> station = waypoint.getAssetLinks().stream().map(e->e.getAssetDeployment().getStationLocation().getStation()).findFirst();
 			if (station.isPresent()) {

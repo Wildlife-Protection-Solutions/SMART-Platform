@@ -55,6 +55,7 @@ public class FixedQueryColumn extends QueryColumn {
 		WAYPOINT_ID( ColumnType.INTEGER,"waypoint:id"), //$NON-NLS-1$
 		WAYPOINT_DATE(ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
 		WAYPOINT_TIME(ColumnType.TIME,"waypoint:time"), //$NON-NLS-1$
+		INCIDENT_LENGTH(ColumnType.INTEGER,"waypoint:length"), //$NON-NLS-1$
 		WAYPOINT_X(ColumnType.NUMBER,"waypoint:x"), //$NON-NLS-1$
 		WAYPOINT_Y(ColumnType.NUMBER, "waypoint:y"), //$NON-NLS-1$
 		WAYPOINT_DIRECTION(ColumnType.NUMBER,"waypoint:direction"), //$NON-NLS-1$
@@ -134,6 +135,10 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getConservationAreaId();
 			case CA_NAME:
 				return item.getConservationAreaName();
+			case INCIDENT_LENGTH:
+				return item.getIncidentLength();
+			default:
+				break;
 			}
 		}
 		return ""; //$NON-NLS-1$
@@ -151,6 +156,7 @@ public class FixedQueryColumn extends QueryColumn {
 	
 	
 	public static String getDbColumnName(String key) {
+		if (key.equals("waypoint:length")) return "incident_length"; //$NON-NLS-1$ //$NON-NLS-2$
 		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$
 		for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
 			key = key.replace(data[0], data[1]);

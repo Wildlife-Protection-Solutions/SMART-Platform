@@ -58,6 +58,32 @@ public class AssetUtils {
 		return MessageFormat.format(Messages.AssetUtils_DayHourLabel, days, hours);
 	}
 	
+	/**
+	 * Formats the given time in maximum of hours 
+	 * if (timeInSeconds = 0) return 0 mins
+	 * if (timeinSeconds < 60) return <1 min
+	 * if (timeinSeconds < 3600) return x mins
+	 * if (timeinSeconds >= 3600) return xhrs ymins 
+	 * @param timeInSeconds
+	 * @return
+	 */
+	public static String formatTimeHours(double timeInSeconds) {
+		if (timeInSeconds == 0) return Messages.AssetUtils_0minsLabel;
+		if (timeInSeconds < 60) return Messages.AssetUtils_lessthan1minlabel;
+		if (timeInSeconds < 3600) {
+			int minutes = (int) Math.ceil( timeInSeconds / 60.0 );
+			return MessageFormat.format( Messages.AssetUtils_minlabel,  minutes);
+		}
+		int hours = (int)Math.floor(timeInSeconds / 3_600.0);
+		double remainder = timeInSeconds - hours * 3_600;
+		int minutes = (int)Math.ceil( remainder/ 60.0);
+		if (minutes == 60) {
+			minutes = 0;
+			hours++;
+		}
+		
+		return MessageFormat.format(Messages.AssetUtils_hrminlabel, hours, minutes);
+	}
 	
 	/**
 	 * Reconfirms the curernt users password.
