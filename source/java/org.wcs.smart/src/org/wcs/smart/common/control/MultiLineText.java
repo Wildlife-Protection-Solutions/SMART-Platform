@@ -22,13 +22,18 @@
 package org.wcs.smart.common.control;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.SmartPlugIn;
 
@@ -42,7 +47,7 @@ public class MultiLineText extends Composite implements Listener{
 
 	private Text text;
 	private Integer minSize;
-	private Label move;
+	private Canvas move;
 	private Integer lastY = null;
 	private Integer lastHeight = null;
 	
@@ -51,10 +56,13 @@ public class MultiLineText extends Composite implements Listener{
 	public MultiLineText(Composite parent) {
 		super(parent, SWT.BORDER | SWT.FLAT);
 
-//		Image x = new Image(getDisplay(),"C:\\data\\SMART\\Source\\trunk\\source\\java\\org.wcs.smart\\images\\icons\\resize.png");
-		move = new Label(this, SWT.NONE);
-		move.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RESIZE_IMAGE));
-		int imagewidth = move.getImage().getBounds().width;
+		move = new Canvas(this, SWT.NONE);  
+		move.addPaintListener(new PaintListener() {
+		  public void paintControl(PaintEvent e) {
+			  e.gc.drawImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RESIZE_IMAGE), 0, 0);        
+		  }
+		}); 
+		int imagewidth = SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.RESIZE_IMAGE).createImage().getBounds().width;
 		move.setBounds(super.getBounds().width - imagewidth - offset, super.getBounds().height - imagewidth - offset, imagewidth, imagewidth);
 		
 		move.addListener(SWT.MouseMove, this);
@@ -62,8 +70,7 @@ public class MultiLineText extends Composite implements Listener{
 		move.addListener(SWT.MouseUp, this);
 		move.addListener(SWT.MouseEnter, this);
 		move.addListener(SWT.MouseExit, this);
-		
-		
+	
 		text = new Text(this, SWT.MULTI | SWT.WRAP  | SWT.V_SCROLL );
 		text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -89,15 +96,17 @@ public class MultiLineText extends Composite implements Listener{
 		text.addListener(SWT.Modify, scrollBarListener);
 		text.setBounds(0, 0, super.getBounds().width - offset, super.getBounds().height - offset);
 		
+		minSize = text.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		Rectangle r = super.getBounds();
+		r.height = minSize + offset + 2;
+		lastHeight = minSize + offset;
+		
 		addListener(SWT.Resize, e->{
-			text.setBounds(0, 0, super.getBounds().width - offset, super.getBounds().height - offset);
+			text.setBounds(0, 0, super.getBounds().width - offset, lastHeight);// super.getBounds().height - offset);
 			move.setBounds(super.getBounds().width - imagewidth - offset, super.getBounds().height - imagewidth - offset, imagewidth, imagewidth);
 
 		});
 		
-		minSize = text.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-		Rectangle r = super.getBounds();
-		r.height = minSize + offset + 2;
 		super.setBounds(r);
 	}
 	
@@ -162,21 +171,27 @@ public class MultiLineText extends Composite implements Listener{
 	public void setText(String text) {
 		this.text.setText(text);
 		if (text.contains("\n") || text.length() > 75) { //$NON-NLS-1$
-
 			Rectangle r = super.getBounds();
 			r.height = minSize * 4 + offset + 2;
+			lastHeight = r.height;
 			super.setBounds(r);
 		}
 	}
 	
-	/*
+	
 	public static void main(String[] args) {
 		Display display = new Display ();
 		Shell shell = new Shell (display);
 		shell.setLayout(new GridLayout());
-		Text text = new Text(shell, SWT.BORDER);
+		
+		Composite c = new Composite(shell, SWT.BORDER);
+		c.setLayout(new GridLayout());
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Text text = new Text(c, SWT.BORDER);
 		text.setText("abc");
-		MultiLineText txt = new MultiLineText(shell);
+		
+		MultiLineText txt = new MultiLineText(c);
 		txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		shell.pack();
@@ -186,5 +201,5 @@ public class MultiLineText extends Composite implements Listener{
 		}
 		display.dispose ();
 	}
-	*/
+	
 }
