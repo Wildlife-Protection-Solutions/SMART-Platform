@@ -62,6 +62,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityManager;
@@ -269,21 +270,16 @@ public class NewEntityDialog extends TitleAreaDialog{
 		parent.setLayout(new GridLayout(2, false));
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		
 		Label l = new Label(parent, SWT.NONE);
 		l.setText(Messages.NewEntityDialog_EntityTypeLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		
-		ComboViewer t = new ComboViewer(parent, SWT.BORDER | SWT.DROP_DOWN);
-		int height = t.getControl().computeSize(SWT.DEFAULT,SWT.DEFAULT).y;
-		t.getControl().dispose();
 		
 		cmbEntityType = new TableComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 		cmbEntityType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbEntityType.setLabelProvider(new EntityTypeLabelProvider());
 		cmbEntityType.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbEntityType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)cmbEntityType.getControl().getLayoutData()).heightHint = height;
+		SmartUiUtils.configure(cmbEntityType);
 		cmbEntityType.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override

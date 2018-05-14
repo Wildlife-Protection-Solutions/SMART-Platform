@@ -77,6 +77,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -150,20 +151,14 @@ public class BasicRecordSearchPanel extends Composite {
 		Composite top = toolkit.createComposite(parent);
 		top.setLayout(new GridLayout(2, false));
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-//		((GridLayout)top.getLayout()).marginWidth = 0;
-//		((GridLayout)top.getLayout()).marginHeight = 0;
-		
+
 		toolkit.createLabel(top, Messages.BasicRecordSearchPanel_SourceLabel);
-		
-		ComboViewer t = new ComboViewer(parent, SWT.BORDER | SWT.DROP_DOWN);
-		int height = t.getControl().computeSize(SWT.DEFAULT,SWT.DEFAULT).y;
-		t.getControl().dispose();
-		
+
 		cmbSource = new TableComboViewer(top, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 		cmbSource.setContentProvider(ArrayContentProvider.getInstance());
 		cmbSource.setLabelProvider(new RecordSourceLabelProvider());
 		cmbSource.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)cmbSource.getControl().getLayoutData()).heightHint = height;
+		SmartUiUtils.configure(cmbSource);
 		cmbSource.getControl().addListener(SWT.KeyDown, e->{
 			if (e.character == SWT.CR){
 				doSearch();

@@ -27,13 +27,10 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.SmartPlugIn;
 
@@ -178,7 +175,7 @@ public class MultiLineText extends Composite implements Listener{
 		}
 	}
 	
-	
+	/*
 	public static void main(String[] args) {
 		Display display = new Display ();
 		Shell shell = new Shell (display);
@@ -200,6 +197,6 @@ public class MultiLineText extends Composite implements Listener{
 			if (!display.readAndDispatch ()) display.sleep ();
 		}
 		display.dispose ();
-	}
+	}*/
 	
 }

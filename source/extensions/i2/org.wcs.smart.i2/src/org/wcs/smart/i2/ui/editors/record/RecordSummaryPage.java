@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -90,6 +89,7 @@ import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -462,16 +462,12 @@ public class RecordSummaryPage extends EditorPart{
 		}
 		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_StatusLabel);
 		
-		ComboViewer ctmp = new ComboViewer(leftPart, SWT.DROP_DOWN);
-		ctmp.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		int tableviewercomboheight = ctmp.getControl().computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-		ctmp.getControl().dispose();
 		
 		if (recordEditor.getEditMode() && IntelSecurityManager.INSTANCE.canEditRecordStatus()){
 			TableComboViewer cmbStatus = new TableComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 			toolkit.adapt(cmbStatus.getControl(), true, true);
+			SmartUiUtils.configure(cmbStatus);
 			cmbStatus.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			((GridData)cmbStatus.getControl().getLayoutData()).heightHint = tableviewercomboheight;
 			cmbStatus.setContentProvider(ArrayContentProvider.getInstance());
 			cmbStatus.setLabelProvider(new LabelProvider(){
 				@Override
@@ -511,13 +507,13 @@ public class RecordSummaryPage extends EditorPart{
 			l = toolkit.createLabel(temp, ""); //$NON-NLS-1$
 			l.setText(RecordLabelProvider.getRecordStatusLabel(recordEditor.getRecord().getStatus()));
 		}
-		
+
 		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_SourceLabel);
 		if (recordEditor.getEditMode()){
 			TableComboViewer cmbSource = new TableComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 			toolkit.adapt(cmbSource.getControl(), true, true);
 			cmbSource.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			((GridData)cmbSource.getControl().getLayoutData()).heightHint = tableviewercomboheight;
+			SmartUiUtils.configure(cmbSource);
 			cmbSource.setContentProvider(ArrayContentProvider.getInstance());
 			cmbSource.setLabelProvider(new RecordSourceLabelProvider());
 			cmbSource.setInput(new String[]{DialogConstants.LOADING_TEXT});
@@ -619,6 +615,7 @@ public class RecordSummaryPage extends EditorPart{
 		historyPart.layout();
 		
 		initWeights();
+
 	}
 	
 	/*
