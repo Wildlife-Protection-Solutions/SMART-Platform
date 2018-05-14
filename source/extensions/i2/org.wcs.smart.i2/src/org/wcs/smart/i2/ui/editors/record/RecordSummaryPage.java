@@ -466,8 +466,8 @@ public class RecordSummaryPage extends EditorPart{
 		if (recordEditor.getEditMode() && IntelSecurityManager.INSTANCE.canEditRecordStatus()){
 			TableComboViewer cmbStatus = new TableComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 			toolkit.adapt(cmbStatus.getControl(), true, true);
-			SmartUiUtils.configure(cmbStatus);
 			cmbStatus.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			SmartUiUtils.configure(cmbStatus);
 			cmbStatus.setContentProvider(ArrayContentProvider.getInstance());
 			cmbStatus.setLabelProvider(new LabelProvider(){
 				@Override
