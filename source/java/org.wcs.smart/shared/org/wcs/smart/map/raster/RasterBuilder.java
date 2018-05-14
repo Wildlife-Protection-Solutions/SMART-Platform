@@ -21,9 +21,15 @@
  */
 package org.wcs.smart.map.raster;
 
-import java.awt.Point;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.ComponentSampleModel;
 import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferFloat;
+import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 import java.io.BufferedWriter;
@@ -34,15 +40,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.media.jai.JAI;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.RasterFactory;
-import javax.media.jai.RenderedOp;
-import javax.media.jai.TiledImage;
+import javax.imageio.ImageIO;
 
 import org.geotools.geometry.Envelope2D;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
 import org.wcs.smart.util.SharedUtils;
 
 
@@ -67,8 +68,6 @@ import org.wcs.smart.util.SharedUtils;
  *
  */
 public class RasterBuilder {
-
-	private static final int BAND_0 = 0;
 	
 	private static final float NO_DATA = -9999;	//no data value
 	
@@ -152,26 +151,19 @@ public class RasterBuilder {
 		assert this.table != null;
 		assert this.envelope != null;
 
-		TiledImage raster = null;
+		BufferedImage raster = null;
 		try {
 			raster = createRaster();
-
 			File out = new File(fileName);
-			RenderedOp op = JAI.create("filestore",raster,out.getCanonicalPath(),"TIFF"); //$NON-NLS-1$ //$NON-NLS-2$
-			op.dispose();
+			ImageIO.write(raster, "TIFF", out.getCanonicalFile()); //$NON-NLS-1$
 			allFiles.add(out);
-
 			String baseFile = out.getCanonicalPath().substring(0,  out.getCanonicalPath().lastIndexOf('.'));
 			createProjectionFile(baseFile, envelope.getCoordinateReferenceSystem());
 			createWorldFile(baseFile, gridCellSize, envelope.getMinX(), envelope.getMaxY());
 			this.file = out;
-			
+
 		}catch (Exception ex){
 			throw ex;
-		} finally {
-			if (raster != null){
-				raster.dispose();
-			}
 		}
 	}
 
@@ -229,35 +221,32 @@ public class RasterBuilder {
 	 * @return {@link WritableRaster}
 	 * @throws Exception 
 	 */
-	private TiledImage createRaster() throws Exception {
-		SampleModel sampleModel = RasterFactory.createBandedSampleModel(
-				DataBuffer.TYPE_FLOAT, this.width, this.height, 1);
-		ColorModel colorModel = PlanarImage.createColorModel(sampleModel);
-		WritableRaster raster = RasterFactory.createWritableRaster(sampleModel,
-				new Point(0, 0));
-		
+	private BufferedImage createRaster() throws Exception {
+
+		DataBuffer raster = new DataBufferFloat(this.width * this.height);
 		//initialize data to no data
-		for (int x = 0; x < raster.getWidth(); x++) {
-			for (int y = 0; y < raster.getHeight(); y++) {
-				raster.setSample(x, y, BAND_0, NO_DATA);
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				raster.setElemFloat(x + y * width, NO_DATA);
 			}
 		}
 		
 		//add data points
 		for (GridResultItem item : table) {
-			// computes the raster x,y coord based on the top left bounds' coordenates (MinX, MaxY)
 			if (item.getTileX() >= metadata.getMinXTile() && item.getTileX() <= metadata.getMaxXTile() && item.getTileY() >= metadata.getMinYTile() && item.getTileY() <= metadata.getMaxYTile()){
 				int x = (int)(item.getTileX() - metadata.getMinXTile());
 				int y = (int)(height - (item.getTileY() - metadata.getMinYTile() +1));
-				raster.setSample(x, y,BAND_0, item.getValue());
+				raster.setElemFloat(x  + y * width, (float)item.getValue());
 			}
 		}			
 		
-		TiledImage tiledImage = new TiledImage(0, 0, width, height, 0, 0,
-				sampleModel, colorModel);
-		tiledImage.setData(raster);
-		return tiledImage;
-
+		
+		ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
+		ColorModel cm = new ComponentColorModel(cs, false, true, Transparency.OPAQUE,DataBuffer.TYPE_FLOAT);
+		SampleModel sampleModel = new ComponentSampleModel(DataBuffer.TYPE_FLOAT, width, height, 1, width, new int[] {0});
+		WritableRaster wraster = Raster.createWritableRaster(sampleModel, raster, null);
+		BufferedImage newImg = new BufferedImage(cm, wraster, true, null);
+		return newImg;
 	}
 
 	/**

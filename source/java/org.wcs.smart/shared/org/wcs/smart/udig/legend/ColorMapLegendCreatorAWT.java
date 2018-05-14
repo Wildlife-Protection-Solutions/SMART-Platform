@@ -241,7 +241,9 @@ public class ColorMapLegendCreatorAWT {
 	        lentries.add(le);
 			
 		}
-		lentries.get(lentries.size()-1).setSpacingAfter(null);	//default spacing
+		if (!lentries.isEmpty()) {
+			lentries.get(lentries.size()-1).setSpacingAfter(null);	//default spacing
+		}
 		return lentries;
 	}
 	
