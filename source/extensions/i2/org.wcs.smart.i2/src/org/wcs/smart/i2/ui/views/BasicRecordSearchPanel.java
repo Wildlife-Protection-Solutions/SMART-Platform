@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -154,10 +155,15 @@ public class BasicRecordSearchPanel extends Composite {
 		
 		toolkit.createLabel(top, Messages.BasicRecordSearchPanel_SourceLabel);
 		
+		ComboViewer t = new ComboViewer(parent, SWT.BORDER | SWT.DROP_DOWN);
+		int height = t.getControl().computeSize(SWT.DEFAULT,SWT.DEFAULT).y;
+		t.getControl().dispose();
+		
 		cmbSource = new TableComboViewer(top, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 		cmbSource.setContentProvider(ArrayContentProvider.getInstance());
 		cmbSource.setLabelProvider(new RecordSourceLabelProvider());
 		cmbSource.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)cmbSource.getControl().getLayoutData()).heightHint = height;
 		cmbSource.getControl().addListener(SWT.KeyDown, e->{
 			if (e.character == SWT.CR){
 				doSearch();

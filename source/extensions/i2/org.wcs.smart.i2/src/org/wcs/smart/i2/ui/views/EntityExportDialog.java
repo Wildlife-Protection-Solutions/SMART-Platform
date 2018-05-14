@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -130,8 +131,13 @@ public class EntityExportDialog extends TitleAreaDialog {
 		Label l = new Label(main, SWT.NONE);
 		l.setText(Messages.EntityExportDialog_FormatLabel);
 		
+		ComboViewer t = new ComboViewer(parent, SWT.BORDER | SWT.DROP_DOWN);
+		int height = t.getControl().computeSize(SWT.DEFAULT,SWT.DEFAULT).y;
+		t.getControl().dispose();
+		
 		cmbFormat = new TableComboViewer(main);
 		cmbFormat.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		((GridData)cmbFormat.getControl().getLayoutData()).heightHint = height;
 		cmbFormat.setContentProvider(ArrayContentProvider.getInstance());
 		cmbFormat.setLabelProvider(new LabelProvider(){
 			private HashMap<EmitterInfo, Image> images = new HashMap<>();

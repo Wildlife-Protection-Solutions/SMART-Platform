@@ -137,8 +137,8 @@ public class ImagesTablePanel {
 				FileProxy proxy = (FileProxy)file;
 				if (proxy.getIncidentGroup() == null) return super.getThumbColor(file);
 				
-				int colorIndex = proxy.getIncidentGroup() % view.getRowColors().length;
-				return toHex(view.getRowColors()[colorIndex]);	
+				int colorIndex = proxy.getIncidentGroup() % ImagesTablePanel.this.view.getRowColors().length;
+				return toHex(ImagesTablePanel.this.view.getRowColors()[colorIndex]);	
 			}
 			
 			@Override

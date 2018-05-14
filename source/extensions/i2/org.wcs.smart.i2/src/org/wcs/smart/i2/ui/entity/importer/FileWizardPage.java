@@ -174,11 +174,16 @@ public class FileWizardPage extends WizardPage{
 		l.setToolTipText(Messages.FileWizardPage_ETtooltip);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
+		ComboViewer t = new ComboViewer(parent, SWT.BORDER | SWT.DROP_DOWN);
+		int height = t.getControl().computeSize(SWT.DEFAULT,SWT.DEFAULT).y;
+		t.getControl().dispose();
+		
 		cmbEntityType = new TableComboViewer(upper, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 		cmbEntityType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbEntityType.setLabelProvider(new EntityTypeLabelProvider());
 		cmbEntityType.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbEntityType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		((GridData)cmbEntityType.getControl().getLayoutData()).heightHint = height;
 		cmbEntityType.addSelectionChangedListener(event-> getWizard().getContainer().updateButtons());
 		
 		l = new Label(upper, SWT.NONE);

@@ -40,6 +40,7 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -273,12 +274,16 @@ public class NewEntityDialog extends TitleAreaDialog{
 		l.setText(Messages.NewEntityDialog_EntityTypeLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
+		ComboViewer t = new ComboViewer(parent, SWT.BORDER | SWT.DROP_DOWN);
+		int height = t.getControl().computeSize(SWT.DEFAULT,SWT.DEFAULT).y;
+		t.getControl().dispose();
 		
 		cmbEntityType = new TableComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 		cmbEntityType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbEntityType.setLabelProvider(new EntityTypeLabelProvider());
 		cmbEntityType.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbEntityType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)cmbEntityType.getControl().getLayoutData()).heightHint = height;
 		cmbEntityType.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override

@@ -602,11 +602,17 @@ public class EntitySearchView {
 		
 		toolkit.createLabel(core, Messages.EntitySearchView_EtLabel);
 		
+		ComboViewer t = new ComboViewer(parent, SWT.BORDER | SWT.DROP_DOWN);
+		int height = t.getControl().computeSize(SWT.DEFAULT,SWT.DEFAULT).y;
+		t.getControl().dispose();
+		
 		cmbEntityType = new TableComboViewer(core, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 		cmbEntityType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbEntityType.setLabelProvider(new EntityTypeLabelProvider());
 		cmbEntityType.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbEntityType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)cmbEntityType.getControl().getLayoutData()).heightHint = height;
+		
 		toolkit.adapt(cmbEntityType.getTableCombo());
 		cmbEntityType.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
