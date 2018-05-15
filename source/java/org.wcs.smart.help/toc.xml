@@ -2,6 +2,8 @@
 <?NLS TYPE="org.eclipse.help.toc"?>
 
 <toc label="SMART Help">
+   <topic href="html/TrainingDocs.html" label="Training Documents">
+   </topic>
    <topic href="html/Requirements.html" label="System Requirements">
       <topic href="html/Requirements.html#hardware" label="Hardware / OS Requirements">
       </topic>
