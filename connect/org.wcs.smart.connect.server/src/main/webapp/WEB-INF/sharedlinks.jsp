@@ -27,22 +27,18 @@
 <%@include file="menu.jsp" %>
 
 <div id="main">
-<div class="pageheader"><fmt:message key="sharedlinks.title"/></div>
-<div><div id="message" class="msgsection"></div></div>
-
-
-<div style="display:table; border-collapse: collapse;">
-<div style="display:table-row;">
-  <div style="display:table-cell; white-space:nowrap; padding: 10px 25px 10px 0px"><span title="<fmt:message key="sharedlinks.linkinfo"/>" > <fmt:message key="sharedlinks.linktitle"/> </span></div>
-  <div style="display:table-cell;padding: 10px 10px 10px 0px"><p><fmt:message key="sharedlinks.shared_creation"/></p></div>
+  <div class="pageheader"><fmt:message key="sharedlinks.title"/></div>
+  <div><div id="message" class="msgsection"></div></div>
+  <div style="display:table; border-collapse: collapse;">
+    <div style="display:table-row;">
+      <div style="display:table-cell; white-space:nowrap; padding: 10px 25px 10px 0px"><span title="<fmt:message key="sharedlinks.linkinfo"/>" > <fmt:message key="sharedlinks.linktitle"/> </span></div>
+      <div style="display:table-cell;padding: 10px 10px 10px 0px"><p><fmt:message key="sharedlinks.shared_creation"/></p></div>
+    </div>
+    <div style="display:table-row; " >
+      <div style="display:table-cell; white-space:nowrap;padding: 10px 25px 10px 0px"><span title="<fmt:message key="sharedlinks.tokeninfo"/>" ><fmt:message key="sharedlinks.tokentitle" /></span></div>
+      <button id="opentokendialog" class="button" type="button"><fmt:message key="sharedlinks.maketoken" /></button>
+    </div>
 </div>
-<div style="display:table-row; " >
-  <div style="display:table-cell; white-space:nowrap;padding: 10px 25px 10px 0px"><span title="<fmt:message key="sharedlinks.tokeninfo"/>" ><fmt:message key="sharedlinks.tokentitle" /></span></div>
-  <button id="opentokendialog" class="button" type="button"><fmt:message key="sharedlinks.maketoken" /></button></p></div>
-</div>
-</div>
-
-
 
 
 <div class="top-spacer"> 
@@ -58,8 +54,6 @@
   </div>
  
 </div>
-
-
 
 </div>
 <%@include file="footer.jsp" %>

@@ -128,7 +128,14 @@ public class SharedLinkApi extends HttpServlet{
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			
+			if(SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY)) {
+				//admins can see all shared links
+				List<SharedLink> links =  QueryFactory.buildQuery(s, SharedLink.class).list();
+				for (SharedLink l : links){
+					l.setOwnerUsername( ((SmartUser)s.get(SmartUser.class, l.getOwnerUuid())).getUsername() );
+				}
+				return links;
+			}
 			if(SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName())){
 				//only return links from the CA(s) they are CaAdmin users for
 				List<SmartUserAction> list = QueryFactory.buildQuery(s, SmartUserAction.class, 
@@ -144,17 +151,20 @@ public class SharedLinkApi extends HttpServlet{
 						t.setOwnerUsername( ((SmartUser)s.get(SmartUser.class, t.getOwnerUuid())).getUsername() );
 					}
 				}
-				return links;
-			}
-			if(!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY)) {
-				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-			}else{
-				List<SharedLink> links =  QueryFactory.buildQuery(s, SharedLink.class).list();
-				for (SharedLink l : links){
-					l.setOwnerUsername( ((SmartUser)s.get(SmartUser.class, l.getOwnerUuid())).getUsername() );
+				//add links for tokens without CA, but for which they are the owner
+				
+				List<SharedLink> temp = QueryFactory.buildQuery(s, SharedLink.class, 
+						new Object[] {"conservationArea", null}, //$NON-NLS-1$
+						new Object[] {"ownerUuid", HibernateManager.getUser(s, request.getUserPrincipal().getName()).getUuid()}).list();  //$NON-NLS-1$
+				for(SharedLink t : temp){//add all shared links from this CA
+					links.add(t);
+					t.setOwnerUsername( ((SmartUser)s.get(SmartUser.class, t.getOwnerUuid())).getUsername() );
 				}
 				return links;
 			}
+			
+			throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+			
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
