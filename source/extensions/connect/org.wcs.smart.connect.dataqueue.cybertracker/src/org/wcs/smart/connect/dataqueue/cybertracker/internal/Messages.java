@@ -14,16 +14,6 @@ public class Messages extends NLS {
 	public static String CybertrackerItemProcessor_ProcessedMsg;
 	public static String CybertrackerItemProcessor_TaskName;
 	public static String CybertrackerItemProcessor_WarningTitle;
-	public static String JsonCtParser_AttributeNotFound;
-	public static String JsonCtParser_CatAttributeNotFound;
-	public static String JsonCtParser_CouldNotImportPhoto;
-	public static String JsonCtParser_CouldNotParseValue;
-	public static String JsonCtParser_ListAttributeNotFound;
-	public static String JsonCtParser_MultiValuesSameAttribute;
-	public static String JsonCtParser_NoCateogyr;
-	public static String JsonCtParser_NoFeatureFound;
-	public static String JsonCtParser_ObserverNotFound;
-	public static String JsonCtParser_ParseError;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

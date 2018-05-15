@@ -140,24 +140,10 @@ public class Messages extends NLS {
 
 	public static String IWaypointSourceUiProvider_ErrorString;
 	public static String GPSDataImport_DateTimeRequired;
-	public static String GPSDataImport_TrackError_CouldNotParseFile;
 	public static String GPSDataImport_Progress_ImportingFromGPS;
-	public static String GPSDataImport_Progress_ParsingTrackPoints;
 	public static String GPSDataImport_Progress_ParsingTracks;
 	public static String GPSDataImport_Progress_ParsingWaypoints;
 	public static String GPSDataImport_Progress_ReadingData;
-	public static String GPSDataImport_Progress_ReadingGpxFileName;
-	public static String GPSDataImport_TrackError_CouldNotReadFile;
-	public static String GPSDataImport_TrackImportDescrption;
-	public static String GPSDataImport_TrackName;
-	public static String GPSDataImport_TrackPointError_CouldNotParse;
-	public static String GPSDataImport_TrackPointError_CouldNotRead;
-	public static String GPSDataImport_TrackProgress_ReadingGPXData;
-	public static String GPSDataImport_WaypointError_CouldNotParse;
-	public static String GPSDataImport_WaypointError_CouldNotReadFile;
-	public static String GPSDataImport_WaypointImportDescription;
-	public static String GPSDataImport_WaypointName;
-	public static String GPSDataImport_WaypointProgress_ReadingGpx;
 	
 	public static String ObservationCellEditor_LoadDataModel_JobName;
 	public static String ObservationCellEditor_NoObservations_Label;

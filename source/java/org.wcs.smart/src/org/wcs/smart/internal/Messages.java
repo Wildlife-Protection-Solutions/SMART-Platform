@@ -55,14 +55,10 @@ public class Messages extends NLS {
 	public static String AgencyCsvImporter_LanguageDialog_Title;
 	public static String AgencyDeleteAdvisor_Error_AgencyReferenced;
 	public static String AgencyDeleteAdvisor_Error_NotAgency;
-	public static String AgencyRankPropertyPage_Add_Button;
-	public static String AgencyRankPropertyPage_AddRank_Button;
 	public static String AgencyRankPropertyPage_Agencies_Label;
 	public static String AgencyRankPropertyPage_AgencyKeyRequired;
 	public static String AgencyRankPropertyPage_DefaultAgencyName;
 	public static String AgencyRankPropertyPage_DefaultRankName;
-	public static String AgencyRankPropertyPage_Delete_Button;
-	public static String AgencyRankPropertyPage_DeleteRank_Button;
 	public static String AgencyRankPropertyPage_DialogMessage;
 	public static String AgencyRankPropertyPage_DialogTitle;
 	public static String AgencyRankPropertyPage_DuplicateKeysFound;
@@ -259,7 +255,6 @@ public class Messages extends NLS {
 	public static String CaImporter_Error_CaAlreadyExists;
 	public static String CaImporter_Error_CirculateTableDependencies;
 	public static String CaImporter_Error_CleanUpFailed;
-	public static String CaImporter_Error_CouldNotCloseSession;
 	public static String CaImporter_Error_CouldNotFindImportFile;
 	public static String CaImporter_Error_FilestoreNotImported1;
 	public static String CaImporter_Error_ImportErrorBackupNoRestored;
@@ -488,11 +483,6 @@ public class Messages extends NLS {
 	public static String DataModelManager_Progress_DeleteListItem;
 	public static String DataModelManager_Progress_DeleteTreeNode;
 	public static String DataModelManager_Progress_ValidatingDelete;
-	public static String DataModelMergeAndUpdater_AttributeNotFound;
-	public static String DataModelMergeAndUpdater_AttributesTask;
-	public static String DataModelMergeAndUpdater_AttributeTypeError;
-	public static String DataModelMergeAndUpdater_CategoriesTask;
-	public static String DataModelMergeAndUpdater_TaskName;
 	public static String DataModelMergeDialog_allfileslbl;
 	public static String DataModelMergeDialog_CaMsg;
 	public static String DataModelMergeDialog_CaRequiredErr;
@@ -529,7 +519,6 @@ public class Messages extends NLS {
 	public static String DataModelPropertyPage_Delete_DialogTitle;
 	public static String DataModelPropertyPage_Delete_Tooltip;
 	public static String DataModelPropertyPage_DeleteError;
-	public static String DataModelPropertyPage_DeleteErrorDialogTitle;
 	public static String DataModelPropertyPage_Dialog_Message;
 	public static String DataModelPropertyPage_Dialog_Title;
 	public static String DataModelPropertyPage_Disable_Tooltip;
@@ -560,7 +549,6 @@ public class Messages extends NLS {
 	public static String DataModelPropertyPage_Progress_ExportingXml;
 	public static String DataModelPropertyPage_Progress_WritingXml;
 	public static String DataModelPropertyPage_Progress1;
-	public static String DataModelPropertyPage_Progress2;
 	public static String DataModelPropertyPage_PropertiesGroup_Label;
 	public static String DataModelPropertyPage_SaveChanges_DialogMessage;
 	public static String DataModelPropertyPage_SaveChanges_DialogTitle;
@@ -577,8 +565,6 @@ public class Messages extends NLS {
 	public static String DataModelSmartToXmlConverter_ProgressCategories;
 	public static String DataModelSmartToXmlConverter_ProgressCategory;
 	public static String DataModelXmlToSmartConverter_Error_AggregationNotFound;
-	public static String DataModelXmlToSmartConverter_Error_AttributeTypeNotFound1;
-	public static String DataModelXmlToSmartConverter_Error_CategoryAttributeNotFound;
 	public static String DataStoreDataExporter_progress;
 	public static String DatastoreImporter_ImportFilestore;
 	public static String DateFilter_Custom;
@@ -635,7 +621,6 @@ public class Messages extends NLS {
 	public static String DerbyRestoreEngine_Error_Failure;
 	public static String DerbyRestoreEngine_Error_NoBackupFile;
 	public static String DerbyRestoreEngine_Error_NoDbInBackupFile;
-	public static String DerbyRestoreEngine_Error_NoFilestoreInBackupFile;
 	public static String DerbyRestoreEngine_Error_RestoreFailedCouldNotRevert;
 	public static String DerbyRestoreEngine_Error_RestoreFailedRevertSuccessful;
 	public static String DerbyRestoreEngine_ExtraPlugins;
@@ -714,7 +699,6 @@ public class Messages extends NLS {
 	public static String EmployeeComposite_UserLevelRequired;
 	public static String EmployeeCsvImporter_Error_AgencyNotFound;
 	public static String EmployeeCsvImporter_Error_BirthDate;
-	public static String EmployeeCsvImporter_Error_BirthDateFormat;
 	public static String EmployeeCsvImporter_Error_EndEmployementDateFormat;
 	public static String EmployeeCsvImporter_Error_EndAfterStartDate;
 	public static String EmployeeCsvImporter_Error_Gender;
@@ -821,13 +805,10 @@ public class Messages extends NLS {
 	public static String GPSBabel_Error_CouldNotImport;
 	public static String GPSBabel_Error_ProcessTerminatedTooLong;
 	public static String GPSBabel_Error_ReadingBabelOps;
-	public static String GPSDataImport_DateTimeRequired;
 	public static String GPSDataImport_TrackError_CouldNotParseFile;
-	public static String GPSDataImport_Progress_ImportingFromGPS;
 	public static String GPSDataImport_Progress_ParsingTrackPoints;
 	public static String GPSDataImport_Progress_ParsingTracks;
 	public static String GPSDataImport_Progress_ParsingWaypoints;
-	public static String GPSDataImport_Progress_ReadingData;
 	public static String GPSDataImport_Progress_ReadingGpxFileName;
 	public static String GPSDataImport_TrackError_CouldNotReadFile;
 	public static String GPSDataImport_TrackImportDescrption;
@@ -975,7 +956,6 @@ public class Messages extends NLS {
 	public static String NameKeyComposite_ChangeKey_ConfirmDialog_Title;
 	public static String NameKeyComposite_ChangeKey_Dialog_Message;
 	public static String NameKeyComposite_ChangeKey_Dialog_Title;
-	public static String NameKeyComposite_Error_InvalidName;
 	public static String NameKeyComposite_Error_KeyNotEmpty;
 	public static String NameKeyComposite_Error_NameNotBlank;
 	public static String NameKeyComposite_Key_Label;

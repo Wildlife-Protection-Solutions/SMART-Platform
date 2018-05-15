@@ -17,7 +17,7 @@
             locationURI="menu:org.wcs.smart.cybertracker2.menu?after=org.wcs.smart.cybertracker2.separator.import">
          <command
                commandId="org.wcs.smart.cybertracker.survey.export.package"
-               label="Export Survey Package"
+               label="%exportsurvey.command.label"
                style="push">
          </command>
       </menuContribution>
@@ -65,7 +65,7 @@
       </command>
       <command
             id="org.wcs.smart.cybertracker.survey.export.package"
-            name="Export Survey Package">
+            name="%exportsurvey.command.name">
       </command>
    </extension>
    <extension

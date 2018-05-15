@@ -17,7 +17,7 @@
             locationURI="menu:org.wcs.smart.cybertracker2.menu?after=org.wcs.smart.cybertracker2.separator.import">
          <command
                commandId="org.wcs.smart.cybertracker.patrol.export.package"
-               label="Export Patrol Package"
+               label="%exportpatrol.command.label"
                style="push">
          </command>
       </menuContribution>
@@ -65,7 +65,7 @@
       </command>
       <command
             id="org.wcs.smart.cybertracker.patrol.export.package"
-            name="Export Patrol Package">
+            name="%exportpatrol.command.name">
       </command>
    </extension>
    <extension

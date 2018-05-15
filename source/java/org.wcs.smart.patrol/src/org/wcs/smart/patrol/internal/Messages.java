@@ -325,7 +325,6 @@ public class Messages extends NLS {
 	public static String PatrolIdWizardPage_Title;
 	public static String PatrolImporter_ConfirmationMessage;
 	public static String PatrolImporter_ConfirmationMessage_SameId;
-	public static String PatrolImporter_Error_ReadingPatrolXmlFile;
 	public static String PatrolImporter_Error_UnzipError;
 	public static String PatrolImporter_Error_XmlFileNotFound;
 	public static String PatrolImporter_ImportPatrol_DialogTitle;
@@ -334,7 +333,6 @@ public class Messages extends NLS {
 	public static String PatrolImporter_Progress_ConvertingPatrol;
 	public static String PatrolImporter_Progress_ProcessingFile;
 	public static String PatrolImporter_Progress_ReadingFile;
-	public static String PatrolImporter_Progress_ReadingXml;
 	public static String PatrolImporter_Progress_RemovingTempFiles;
 	public static String PatrolImporter_Progress_Saving;
 	public static String PatrolImporter_Progress_TaskName;
@@ -488,7 +486,6 @@ public class Messages extends NLS {
 	public static String PatrolListView_DeleteFoldersJob_Error;
 	public static String PatrolListView_EditFolderOp;
 	public static String PatrolListView_ExpandAllOp;
-	public static String PatrolListView_LoadingLabel;
 	public static String PatrolListView_NoneFolder_Name;
 	public static String PatrolListView_Progress_LoadingPatrols;
 	public static String PatrolListView_UpdatePatrolJobName;
@@ -560,7 +557,6 @@ public class Messages extends NLS {
 	public static String PatrolSummaryEditor_Member_Label;
 	public static String PatrolSummaryEditor_MultiLegPatrol_Label;
 	public static String PatrolSummaryEditor_NoDataLabel;
-	public static String PatrolSummaryEditor_NoManadateLabel;
 	public static String PatrolSummaryEditor_NoMandateLabel;
 	public static String PatrolSummaryEditor_NoStationLabel;
 	public static String PatrolSummaryEditor_NoTeamLabel;

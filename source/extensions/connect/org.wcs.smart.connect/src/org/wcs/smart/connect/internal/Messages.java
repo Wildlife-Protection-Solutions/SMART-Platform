@@ -72,8 +72,6 @@ public class Messages extends NLS {
 	public static String AutoOptionsPanel_PackageOpLable;
 	public static String AutoOptionsPanel_ShutdownOpLabel;
 	public static String AutoOptionsPanel_StartUpOptionLabel;
-	public static String AutoOptionsWizardPage_Message;
-	public static String AutoOptionsWizardPage_Title;
 	public static String AutoReplicationJob_AutoConfigError;
 	public static String AutoReplicationJob_AutoDownloadError;
 	public static String AutoReplicationJob_AutoUploadError;
@@ -113,7 +111,6 @@ public class Messages extends NLS {
 	public static String ConnectCaListPage_NoCa;
 	public static String ConnectCaListPage_Title;
 	public static String ConnectDatabaseUpgrader_TaskName;
-	public static String ConnectDatabaseUpgrader_UpgradeError;
 	public static String ConnectDialog_ConfigureLabel;
 	public static String ConnectDialog_ConnectingTask;
 	public static String ConnectDialog_DecryptError;
@@ -130,17 +127,13 @@ public class Messages extends NLS {
 	public static String ConnectDialog_UsernameLabel;
 	public static String ConnectDialog_UsernameRequired;
 	public static String ConnectDialog_UserRequiredError;
-	public static String ConnectPlugIn_ErrorDialogTitle;
 	public static String ConnectServerInfoDialog_AccountDeleteError;
 	public static String ConnectServerInfoDialog_AddBtn;
-	public static String ConnectServerInfoDialog_AutoTab;
 	public static String ConnectServerInfoDialog_ConfirmMessage;
 	public static String ConnectServerInfoDialog_ConfirmTitle;
-	public static String ConnectServerInfoDialog_ConnectTab;
 	public static String ConnectServerInfoDialog_ConnectUsernameColumnLabel;
 	public static String ConnectServerInfoDialog_DeleteError;
 	public static String ConnectServerInfoDialog_DeleteServerTaskName;
-	public static String ConnectServerInfoDialog_DisableSubTasName;
 	public static String ConnectServerInfoDialog_EditBnt;
 	public static String ConnectServerInfoDialog_editButton;
 	public static String ConnectServerInfoDialog_editTooltip;
@@ -200,7 +193,6 @@ public class Messages extends NLS {
 	public static String DownloadChangeLogDialog_Message;
 	public static String DownloadChangeLogDialog_Title;
 	public static String DownloadChangeLogEngine_AlreadyProcessingError;
-	public static String DownloadChangeLogEngine_CCAAError;
 	public static String DownloadChangeLogEngine_DownloadError;
 	public static String DownloadChangeLogEngine_ReplicationNotEnabledError;
 	public static String DownloadChangeLogEngine_ServerNotFoundError;
@@ -238,12 +230,8 @@ public class Messages extends NLS {
 	public static String DownloadReplaceCaHandler_message;
 	public static String DownloadReplaceCaHandler_shelltitle;
 	public static String DownloadReplaceCaHandler_title;
-	public static String EditConnectServerInfoDialog_autoError;
-	public static String EditConnectServerInfoDialog_AutoLabel;
 	public static String EditConnectServerInfoDialog_CertificationError;
 	public static String EditConnectServerInfoDialog_ConfigLabel;
-	public static String EditConnectServerInfoDialog_connectError;
-	public static String EditConnectServerInfoDialog_ConnectLabel;
 	public static String EditConnectServerInfoDialog_Message;
 	public static String EditConnectServerInfoDialog_PanelErrorMessage;
 	public static String EditConnectServerInfoDialog_serverError;
@@ -260,7 +248,6 @@ public class Messages extends NLS {
 	public static String FileStoreWatcher_Error2;
 	public static String FileStoreWatcher_FilestoreLogError;
 	public static String FileStoreWatcher_Overflow;
-	public static String FileUploaderJob_Cancelled;
 	public static String FileUploaderJob_StatusCheckSubTaskName;
 	public static String FileUploaderJob_subTaskName;
 	public static String FileUploaderJob_TaskName;
@@ -268,7 +255,6 @@ public class Messages extends NLS {
 	public static String FileUploaderJob_ToManyTried;
 	public static String FileUploaderJob_Waiting;
 	public static String ImportFromConnectStartupOption_name;
-	public static String IOUtils_DownloadCancelled;
 	public static String IServerOptionsPanel_InfoMessage;
 	public static String LocalCaListPage_CaLabel;
 	public static String LocalCaListPage_CaLoadError;
@@ -293,7 +279,6 @@ public class Messages extends NLS {
 	public static String LoginHandler_SyncDialogTitle;
 	public static String LoginHandler_SyncDialogTitleResume;
 	public static String PluginAdvisor_CannotInstallPlugins;
-	public static String ProgressInputStream_UserCancelled;
 	public static String RemoveConnectJob_jobName;
 	public static String RemoveConnectJob_UninstallError;
 	public static String RemoveConnectJob_UninstallError2;
@@ -350,7 +335,6 @@ public class Messages extends NLS {
 	public static String ServerOptionsPanel_Description;
 	public static String ServerOptionsPanel_InvalidNumber;
 	public static String ServerOptionsPanel_NotApplicable;
-	public static String ServerOptionsWizardPage_Message;
 	public static String ServerOptionsWizardPage_Title;
 	public static String ServerPanel_AllFiles;
 	public static String ServerPanel_CertificateFilterName;
@@ -430,7 +414,6 @@ public class Messages extends NLS {
 	public static String UploadCaEngine_ConfigureError;
 	public static String UploadCaEngine_ConfigureSubtask;
 	public static String UploadCaEngine_ConnectSubtaskName;
-	public static String UploadCaEngine_EnableFailed;
 	public static String UploadCaEngine_ErrorDialogTitle;
 	public static String UploadCaEngine_ExportCaSubtaskName;
 	public static String UploadCaEngine_FileDeleted;
@@ -450,7 +433,6 @@ public class Messages extends NLS {
 	public static String UploadChangeLogDialog_ShellTitle;
 	public static String UploadChangeLogDialog_Title;
 	public static String UploadChangeLogEngine_AlreadyProcessing;
-	public static String UploadChangeLogEngine_CCAAError;
 	public static String UploadChangeLogEngine_NothingtoDo;
 	public static String UploadChangeLogEngine_ReplicationNotEnabled;
 	public static String UploadChangeLogEngine_TaskName;

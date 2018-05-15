@@ -211,7 +211,7 @@
          <command
                commandId="org.wcs.smart.report.query.bindings.fix"
                style="push"
-               tooltip="fixes problems with query bindings in the reports">
+               tooltip="%updatebindings.menu.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -242,7 +242,7 @@
          <command
                commandId="org.wcs.smart.report.query.bindings.fix"
                style="push"
-               tooltip="fixes problems with query bindings in the reports">
+               tooltip="%updatebindings.command.tooltip.">
          </command>
       </menuContribution>
    </extension>
@@ -250,7 +250,7 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.report.query.bindings.fix"
-            name="Update Report Query Bindings">
+            name="%updatebindings.command.name">
       </command>
    </extension>
    <extension

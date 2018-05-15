@@ -119,7 +119,7 @@
             class="org.wcs.smart.ui.BrowserView$BrowserViewWrapper"
             icon="images/icons/eview16/world.png"
             id="org.wcs.smart.view.browser"
-            name="SMART Web Browser"
+            name="%view.webbrowser.name"
             restorable="false">
       </view>
    </extension>
@@ -1456,10 +1456,10 @@
             class="org.wcs.smart.udig.EditPointTool"
             icon="images/icons/etool16/move_point.png"
             id="org.wcs.smart.map.tool.edit.point"
-            name="Edit Point Tool"
+            name="%editpoint.tool.name"
             onToolbar="true"
             toolCursorId="org.wcs.smart.cursor.move"
-            tooltip="move waypoint">
+            tooltip="%move.tool.tooltip">
       </modalTool>
       <toolCursor
             hotspotX="16"
@@ -1482,9 +1482,9 @@
             class="org.wcs.smart.ui.map.tool.SplitTrackTool"
             icon="images/icons/track/split_track.png"
             id="org.wcs.smart.track.split"
-            name="Split Track"
+            name="%splittrack.tool.name"
             onToolbar="true"
-            tooltip="Split Track">
+            tooltip="%splittrack.tool.tooltip">
          <cursor
                hotspotX="10"
                hotspotY="10"
@@ -1600,7 +1600,7 @@
       <layerAdded
             class="org.wcs.smart.udig.style.SmartLayerStyleInterceptor"
             id="org.wcs.smart.layerAdded1"
-            name="SMART Style Configurator">
+            name="%smart.style.configurator.name">
       </layerAdded>
    </extension>
    <extension
@@ -1654,7 +1654,7 @@
       <renderer
             class="org.wcs.smart.udig.legend.SmartMapGraphicRendererMetricsFactory"
             id="org.wcs.smart.udig.legend.LegendRenderer"
-            name="Smart Legend Renderer">
+            name="%smartlengend.renderer.name">
       </renderer>
    </extension>
    <extension

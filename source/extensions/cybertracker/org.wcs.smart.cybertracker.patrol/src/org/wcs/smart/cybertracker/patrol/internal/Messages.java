@@ -151,7 +151,6 @@ public class Messages extends NLS {
 	public static String PatrolLegImporter_MemberOverlapError_Message;
 	public static String PatrolLegImporter_MemberOverlapError_Title;
 	public static String PatrolLegImporter_MetaWarning_IsArmed;
-	public static String PatrolLegImporter_MetaWarning_Mandate;
 	public static String PatrolLegImporter_MetaWarning_Station;
 	public static String PatrolLegImporter_MetaWarning_Team;
 	public static String PatrolLegImporter_Warn_TimeGap_End;
