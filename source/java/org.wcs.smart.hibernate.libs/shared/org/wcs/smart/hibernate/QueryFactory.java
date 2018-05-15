@@ -59,7 +59,11 @@ public class QueryFactory {
 		Root<T> root = c.from(clazz);
 		if (parameters != null) {
 			if (parameters.length == 1) {
-				c.where(cb.equal(getRoot(root, ((String)parameters[0][0])), parameters[0][1]));
+				if (parameters[0][1]==null) {
+					c.where(cb.isNull(getRoot(root,((String)parameters[0][0]))));
+				}else {
+					c.where(cb.equal(getRoot(root, ((String)parameters[0][0])), parameters[0][1]));
+				}
 			}else {
 				Predicate[] p = new Predicate[parameters.length];
 				for (int i = 0; i < parameters.length; i ++) {
