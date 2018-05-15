@@ -67,7 +67,7 @@ public class ImageProcessor {
 				}
 			}
 		}catch(Exception ex){
-			ex.printStackTrace();
+			CyberTrackerPlugIn.log(ex.getMessage(), ex);
 		}
 	}
 	

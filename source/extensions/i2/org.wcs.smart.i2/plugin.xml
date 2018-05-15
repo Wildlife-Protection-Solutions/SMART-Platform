@@ -424,7 +424,7 @@
                </command>
                <command
                      commandId="org.wcs.smart.i2.command.import.entity.xml"
-                     label="Import Entities from XML..."
+                     label="%ImportEntitiesXmlLabel"
                      style="push">
                   <visibleWhen
                         checkEnabled="false">
@@ -452,7 +452,7 @@
                </command>
                <command
                      commandId="org.wcs.smart.i2.command.record.import.xml"
-                     label="Import Records from XML..."
+                     label="%ImportRecordsXmlLabel"
                      style="push">
                   <visibleWhen
                         checkEnabled="false">
@@ -469,7 +469,7 @@
                <command
                      commandId="org.wcs.smart.i2.command.export.model.xml"
                      style="push"
-                     tooltip="export entity types, relationship types, attributes to xml file">
+                     tooltip="%Exportmodelxmltooltip">
                   <visibleWhen
                         checkEnabled="false">
                      <test
@@ -481,7 +481,7 @@
                <command
                      commandId="org.wcs.smart.i2.command.import.model.xml"
                      style="push"
-                     tooltip="import model elements from an xml file">
+                     tooltip="%Importmodelxmltooltip">
                   <visibleWhen
                         checkEnabled="false">
                      <test
@@ -506,7 +506,7 @@
             </menu>
             <command
                   commandId="org.wcs.smart.i2.command.config.show"
-                  label="Module Settings..."
+                  label="%ModuleSettingsMenuLabel"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -577,7 +577,7 @@
                label="Profiles">
             <command
                   commandId="org.wcs.smart.i2.command.config.show"
-                  label="Module Settings..."
+                  label="%ModuleSettingsCommandLabel"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -895,7 +895,7 @@
                commandId="org.wcs.smart.i2.command.query.record.new"
                icon="images/icons/obj16/query_entity_record_add.png"
                style="push"
-               tooltip="create a new entity query">
+               tooltip="%newquerycommandtooltip">
             <visibleWhen
                   checkEnabled="false">
                <test
@@ -912,7 +912,7 @@
                commandId="org.wcs.smart.i2.command.query.record.new"
                icon="images/icons/obj16/query_entity_sum_add.png"
                style="push"
-               tooltip="create a new entity summary query">
+               tooltip="%newsummaryquerycommandtooltip">
             <visibleWhen
                   checkEnabled="false">
                <test
@@ -929,7 +929,7 @@
                commandId="org.wcs.smart.i2.command.query.record.new"
                icon="images/icons/obj16/query_record_obs_add.png"
                style="push"
-               tooltip="create a new record query">
+               tooltip="%newrecordquerycommandtooltip">
             <visibleWhen
                   checkEnabled="false">
                <test
@@ -1046,14 +1046,14 @@
             default="false"
             icon="images/icons/obj16/query_entity_sum.png"
             id="org.wcs.smart.i2.editor.query.entitysummary"
-            name="Entity Summary Query">
+            name="%QueryEntitySummaryName">
       </editor>
       <editor
             class="org.wcs.smart.i2.ui.editors.query.IntelEntityRecordQueryEditor"
             default="false"
             icon="images/icons/obj16/query_entity_record.png"
             id="org.wcs.smart.i2.editor.query.entityrecord"
-            name="Entity Record Query">
+            name="%QueryEntityRecordQuery">
       </editor>
    </extension>
    <extension
@@ -1105,7 +1105,7 @@
       </command>
       <command
             id="org.wcs.smart.i2.command.import.entity.xml"
-            name="Import Entities From XML">
+            name="%ImportEntitiesXmlCommandName2">
       </command>
       <command
             id="org.wcs.smart.i2.command.record.import"
@@ -1142,7 +1142,7 @@
       </command>
       <command
             id="org.wcs.smart.i2.command.config.show"
-            name="Module Settings...">
+            name="%ModuleSettingsCommandName">
       </command>
    </extension>
    <extension

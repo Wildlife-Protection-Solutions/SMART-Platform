@@ -7,7 +7,6 @@ public class Messages extends NLS {
 	public static String AddAssetQueryJob_AddingAssetJobName;
 	public static String AddAssetQueryJob_ErrorMsg;
 	public static String AddAssetQueryJob_ErrorTitle;
-	public static String AttributeValueItem_AggNoSupported;
 	public static String DeleteObservationResultInfoProvider_CancelBtn;
 	public static String DeleteObservationResultInfoProvider_DeleteMsg;
 	public static String DeleteObservationResultInfoProvider_DeleteObsBtn;
@@ -22,15 +21,9 @@ public class Messages extends NLS {
 	public static String DerbyObservationEngine_Progress_CaInfo;
 	public static String DerbyObservationEngine_Progress_CategoryData;
 	public static String DerbyObservationEngine_Progress_FetchSize;
-	public static String DerbyObservationEngine_Progress_LeaderPilotData;
 	public static String DerbyObservationEngine_Progress_ListAttributesData;
-	public static String DerbyObservationEngine_Progress_MandateData;
-	public static String DerbyObservationEngine_Progress_StationData;
-	public static String DerbyObservationEngine_Progress_TeamData;
-	public static String DerbyObservationEngine_Progress_TransportData;
 	public static String DerbyObservationEngine_Progress_TreeAttributesData;
 	public static String DerbyQueryEngine2_Progress_RunningQuery;
-	public static String DerbySummaryEngine_InvalidRateFilterComputation;
 	public static String DerbySummaryEngine_Progress_CreatingObservationTable;
 	public static String DerbySummaryEngine_Progress_CreatingTempTable;
 	public static String DerbySummaryEngine_Progress_LoadingHeaders;
@@ -39,11 +32,6 @@ public class Messages extends NLS {
 	public static String FilterProcessor_DmAttributeFilterTaskName;
 	public static String FilterProcessor_DmAttributeTaskName;
 	public static String FilterProcessor_FiltersTaskName;
-	public static String FilterValidator_AssetFilter_EmployeeError;
-	public static String FilterValidator_AssetFilter_UnqiueIdMatchingError;
-	public static String FilterValidator_AssetFilter_ValueMatchingError;
-	public static String FilterValidator_AssetFilterError;
-	public static String FilterValidator_AssetFilterErrorB;
 	public static String FixedQueryColumn_CaIdColumnName;
 	public static String FixedQueryColumn_CaNameColumnName;
 	public static String FixedQueryColumn_CommentColumnName;
@@ -72,17 +60,11 @@ public class Messages extends NLS {
 	public static String AssetDropItemFactory_AssetStationNotFound;
 	public static String AssetDropItemFactory_AssetTypeNotFound;
 	public static String AssetDropItemFactory_AssetTypeNotFound2;
-	public static String AssetFilter_InvalidPrefix;
 	public static String AssetFilterContentProvider_AssetFilterTreeNodeName;
 	public static String AssetFilterContentProvider_StationsLocationFilterTreeNodeName;
 	public static String AssetFilterSqlGenerator_AssetFilterError;
 	public static String AssetFilterTreeItem_AssetFiltersTreeItem;
 	public static String AssetGroupBy_CouldNotParse;
-	public static String AssetGroupBy_CouldNotResolveFilter;
-	public static String AssetGroupBy_Error_NoEmployee;
-	public static String AssetGroupBy_Error_NoMatchingValue;
-	public static String AssetGroupBy_Error_NotUniqueId;
-	public static String AssetGroupBy_KeyNotFoundError;
 	public static String AssetGroupBy_AssetOptionParseError;
 	public static String AssetGroupByDropItem_AllLabel;
 	public static String AssetGroupByDropItem_Error_LoadingListItems;
@@ -103,7 +85,6 @@ public class Messages extends NLS {
 	public static String AssetQueryTemplateCloner_AssetTypeNotFound;
 	public static String AssetQueryTemplateCloner_QueryNotCloned;
 	public static String AssetQueryValidator_AssetTypeNotFound;
-	public static String AssetQueryValidator_CouldNotMatchFilter;
 	public static String AssetQueryValidator_StationNotFound;
 	public static String AssetObservationEngine_AssetDetailsSubTask;
 	public static String AssetObservationEngine_IncidentLengthSubTask;
@@ -127,7 +108,6 @@ public class Messages extends NLS {
 	public static String QueryColumnCache_LoadingWPQueryColumnJobName;
 	public static String QueryDataSource_CannotCreateMapLayer;
 	public static String QueryDataSource_LocationIdTableName;
-	public static String QueryDataSource_SchemaError;
 	public static String QueryDataSource_StationIDColumnName;
 	public static String QueryDataSourceFactory_Description;
 	public static String QueryDataSourceFactory_DisplayName;
@@ -146,7 +126,6 @@ public class Messages extends NLS {
 	public static String QueryServiceInfo_Keyword3;
 	public static String QueryServiceInfo_Keyword4;
 	public static String QueryServiceInfo_Keyword5;
-	public static String QueryServiceInfo_Keyword6;
 	public static String QueryServiceInfo_ServiceName;
 	public static String QueryTemplateCloner_ProgressCopyObservation;
 	public static String QueryTemplateCloner_ProgressCopySummary;
@@ -162,8 +141,6 @@ public class Messages extends NLS {
 	public static String SummaryValueGroupByPanel_GroupByValuePanelTitle;
 	public static String EditObservationResultInfoProvider_DeleteError;
 	public static String EditObservationResultInfoProvider_EditLabel;
-	public static String MapWaypointEditManager_MoveError;
-
 	public static String RemoveAssetQueryJob_ErrorMsg;
 	public static String RemoveAssetQueryJob_JobName;
 	public static String WaypointFilterProcessor_FilterTaskName;

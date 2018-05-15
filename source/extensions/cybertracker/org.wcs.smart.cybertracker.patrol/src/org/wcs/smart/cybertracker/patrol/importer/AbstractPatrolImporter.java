@@ -330,6 +330,7 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 		List<ISmartAttachment> attachments = new ArrayList<>();
 		for (PatrolLeg l : legs){
 			for (PatrolLegDay pld : l.getPatrolLegDays()){
+				if (pld.getWaypoints() == null) continue;
 				for (PatrolWaypoint pw : pld.getWaypoints()){
 					if (pw.getWaypoint().getAttachments() == null) continue;
 					for (WaypointAttachment attachment : pw.getWaypoint().getAttachments()){
