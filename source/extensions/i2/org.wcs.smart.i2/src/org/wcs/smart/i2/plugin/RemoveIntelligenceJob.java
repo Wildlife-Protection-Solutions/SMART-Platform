@@ -132,6 +132,10 @@ public class RemoveIntelligenceJob extends Job {
 				"DROP TABLE smart.i_attribute",
 				"DROP TABLE smart.i_recordsource",
 				
+				"DROP TABLE smart.i_config_option",
+				"DROP TABLE smart.i_entity_summary_query",
+				"DROP TABLE smart.i_entity_record_query",
+				
 				"DROP FUNCTION smart.metaphoneContains",
 		};
 		
