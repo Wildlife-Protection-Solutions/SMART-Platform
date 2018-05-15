@@ -516,7 +516,7 @@ public class ConservationAreas extends HttpServlet{
 		    };
 			String fileName = toReturn.getName();
 			if (item.getType() == WorkItem.Type.DOWN_CA) {
-				fileName = wkCa.getId() + ".smart" + (new SimpleDateFormat("ddMMyyyy")).format(item.getStartTime()) + fileName.substring(fileName.lastIndexOf('.'));  //$NON-NLS-1$//$NON-NLS-2$
+				fileName = wkCa.getId() + ".smart" + (new SimpleDateFormat("yyyyMMdd")).format(item.getStartTime()) + fileName.substring(fileName.lastIndexOf('.'));  //$NON-NLS-1$//$NON-NLS-2$
 			}
 			return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM)
 					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName+ "\"") //$NON-NLS-1$ //$NON-NLS-2$
