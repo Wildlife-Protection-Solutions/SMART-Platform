@@ -50,7 +50,6 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -130,7 +129,7 @@ public class FileProcessor {
 				sb.append(" b.filename = :filename "); //$NON-NLS-1$
 				
 				Long fileCnt = (Long)session.createQuery(sb.toString())
-				.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+				.setParameter("ca", ca) //$NON-NLS-1$
 				.setParameter("filename", proxy.getFilename()) //$NON-NLS-1$
 				.uniqueResult();
 				
