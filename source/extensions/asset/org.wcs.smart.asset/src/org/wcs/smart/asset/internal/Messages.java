@@ -50,6 +50,7 @@ public class Messages extends NLS {
 	public static String AssetCoreLabelProvider_NumberParseError2;
 	public static String AssetCoreLabelProvider_PositionAttributeType;
 	public static String AssetCoreLabelProvider_PositionColumnName;
+	public static String AssetCoreLabelProvider_PotentialDupData;
 	public static String AssetCoreLabelProvider_StationLocationTable;
 	public static String AssetCoreLabelProvider_StationNotFound;
 	public static String AssetCoreLabelProvider_StationsTable;
@@ -776,6 +777,7 @@ public class Messages extends NLS {
 	public static String RemoveAssetJob_JobName;
 	public static String ResultsPanel_AssetColumnName;
 	public static String ResultsPanel_CompleteLabel;
+	public static String ResultsPanel_CompleteWarnLabel;
 	public static String ResultsPanel_CreateCustomGroup;
 	public static String ResultsPanel_DateColumnName;
 	public static String ResultsPanel_DeletedFilesSection;

@@ -53,6 +53,7 @@ public class AssetPlugIn extends AbstractUIPlugin {
 	public static final String ICON_VALIDATE = "org.wcs.smart.asset.validate"; //$NON-NLS-1$
 	public static final String ICON_VALIDATE_ALL = "org.wcs.smart.asset.validateall"; //$NON-NLS-1$
 	
+	public static final String ICON_IMPORT_COMPLETE_WARN = "org.wcs.smart.asset.import.completewarn"; //$NON-NLS-1$
 	public static final String ICON_IMPORT_COMPLETE = "org.wcs.smart.asset.import.complete"; //$NON-NLS-1$
 	public static final String ICON_IMPORT_INCOMPLETE = "org.wcs.smart.asset.import.incomplete"; //$NON-NLS-1$
 	public static final String ICON_IMPORT = "org.wcs.smart.asset.import"; //$NON-NLS-1$
@@ -138,6 +139,7 @@ public class AssetPlugIn extends AbstractUIPlugin {
 		reg.put(ICON_STATUS_INACTIVE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_inactive.png")); //$NON-NLS-1$);
 		reg.put(ICON_STATUS_RETIRED, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_retired.png")); //$NON-NLS-1$);
 		reg.put(ICON_IMPORT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import.png")); //$NON-NLS-1$);
+		reg.put(ICON_IMPORT_COMPLETE_WARN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_complete_warn.png")); //$NON-NLS-1$);
 		reg.put(ICON_IMPORT_COMPLETE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_complete.png")); //$NON-NLS-1$);
 		reg.put(ICON_IMPORT_INCOMPLETE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_incomplete.png")); //$NON-NLS-1$);
 		reg.put(ICON_SETTINGS, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/settings.png")); //$NON-NLS-1$);

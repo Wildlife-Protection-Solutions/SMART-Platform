@@ -24,6 +24,7 @@ package org.wcs.smart.asset;
 import java.util.Locale;
 
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.asset.data.importer.DuplicateFileWarning;
 import org.wcs.smart.asset.data.importer.FileProcessor;
 import org.wcs.smart.asset.data.importer.FileProxy;
 import org.wcs.smart.asset.internal.Messages;
@@ -128,6 +129,8 @@ public class AssetCoreLabelProvider implements IAssetLabelProvider {
 		
 		if (item == ExifMetadataField.TAG_FORMAT_1) return Messages.AssetCoreLabelProvider_TagFormat0;
 		if (item == ExifMetadataField.TAG_FORMAT_2) return Messages.AssetCoreLabelProvider_TagFormat1;
+		if (item.equals(DuplicateFileWarning.class)) return Messages.AssetCoreLabelProvider_PotentialDupData;
+		
 		return null;
 	}
 }

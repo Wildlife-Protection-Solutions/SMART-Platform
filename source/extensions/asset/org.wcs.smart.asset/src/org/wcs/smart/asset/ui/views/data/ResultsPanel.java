@@ -454,7 +454,9 @@ public class ResultsPanel {
 			case STATION:
 				return proxy.getStation() == null ? "" : proxy.getStation().getId(); //$NON-NLS-1$
 			case STATUS:
-				return proxy.isValid() ? Messages.ResultsPanel_CompleteLabel : Messages.ResultsPanel_InCompleteLabel;			
+				if (!proxy.isValid()) return Messages.ResultsPanel_InCompleteLabel;
+				if (proxy.getDuplicateWarning() != null) return Messages.ResultsPanel_CompleteWarnLabel;
+				return Messages.ResultsPanel_CompleteLabel;			
 			}
 			return ""; //$NON-NLS-1$
 		}
@@ -464,8 +466,10 @@ public class ResultsPanel {
 				@Override
 				public Image getImage(Object element) {
 					if (ResultsColumn.this == STATUS && element instanceof FileProxy) {
-						if (((FileProxy) element).isValid()) return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_COMPLETE);
-						return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_INCOMPLETE);
+						FileProxy fp = (FileProxy)element;
+						if (!fp.isValid()) return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_INCOMPLETE);
+						if (fp.getDuplicateWarning() != null) return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_COMPLETE_WARN);
+						return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_COMPLETE);
 					}
 					return null;
 				}

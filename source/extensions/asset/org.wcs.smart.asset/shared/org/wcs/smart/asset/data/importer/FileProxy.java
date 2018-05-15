@@ -441,6 +441,15 @@ public class FileProxy extends ISmartAttachment{
 		return true;
 	}
 	
+	public ActionableWarning getDuplicateWarning() {
+		for (ActionableWarning aw : getWarnings()) {
+			if (aw instanceof DuplicateFileWarning) {
+				return aw;
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * If not valid, returns a message identifying the missing data
 	 * @return

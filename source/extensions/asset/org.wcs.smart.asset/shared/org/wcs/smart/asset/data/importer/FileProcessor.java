@@ -50,6 +50,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -119,6 +120,24 @@ public class FileProcessor {
 		try {
 			FileProxy proxy = FileMetadataReader.readFile(file, ca);
 			try(Session session = provider.openSession()){
+
+				//check for potential duplicate data
+				StringBuilder sb = new StringBuilder();
+				sb.append("SELECT count(*) FROM "); //$NON-NLS-1$
+				sb.append("AssetWaypointAttachment a join a.id.waypointAttachment b "); //$NON-NLS-1$
+				sb.append(" join b.waypoint c " ); //$NON-NLS-1$
+				sb.append(" WHERE c.conservationArea = :ca AND "); //$NON-NLS-1$
+				sb.append(" b.filename = :filename "); //$NON-NLS-1$
+				
+				Long fileCnt = (Long)session.createQuery(sb.toString())
+				.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+				.setParameter("filename", proxy.getFilename()) //$NON-NLS-1$
+				.uniqueResult();
+				
+				if (fileCnt > 0) {
+					proxy.addWarning(new DuplicateFileWarning(proxy.getFilename(), locale));
+				}
+				
 				processMetadata(proxy, session);
 				proxy.updateStationLocation(session, this);
 			}
