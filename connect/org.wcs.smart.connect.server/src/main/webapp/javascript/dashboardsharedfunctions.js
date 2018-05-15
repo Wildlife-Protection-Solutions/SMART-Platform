@@ -944,7 +944,7 @@ function changeReport1Date(){
 	
 	
 	for(var i = 0; i < turn_on.length; i++){
-		turn_on[i].style.display = "inline";
+		turn_on[i].style.display = "block";
 	}
 	checkForCustomDates();
 	

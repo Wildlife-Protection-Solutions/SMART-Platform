@@ -20,7 +20,7 @@
 	
 	<div style="padding-top: 5px">
 	<select id="admin-selectlist" class="uielement" name="admin-selectlist" onchange="javascript:showDashboard();return false;"></select>
-	<button onClick="runReports(); return false;" class="button" style="padding:1px"> <fmt:message key="dashboardbeta.refreshreports"/></button>
+	<button onClick="runReports(); return false;" class="button" style="padding:3px 10px"> <fmt:message key="dashboardbeta.refreshreports"/></button>
 
 	
 	</div>
@@ -59,7 +59,7 @@
 					<option value=-9999><fmt:message key="dashboardbeta.custom"/></option>
 				</select>
 				<span><input type="text" id="report1From" class="date-input-center uielement"> - <input type="text" id="report1To" class="date-input-center uielement"></span>
-				<button style="padding:1px" class="button" onClick="rerunReport1(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>
+				<button style="padding:2px 10px;" class="button" onClick="rerunReport1(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>
 
     		</form>
     		</div>
@@ -95,7 +95,7 @@
 					<option id="previousyear" class="extrareport2dates" value=0650365><fmt:message key="dashboardbeta.previousyear"/></option>
 				</select>
 				<span><input type="text" id="report2From" class="date-input-center uielement"> - <input type="text" id="report2To" class="date-input-center uielement"></span>
-				<button style="padding:1px" class="button" onClick="rerunReport2(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>
+				<button style="padding:2px 10px;" class="button" onClick="rerunReport2(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>
 				
     		</form>
     		</div>
