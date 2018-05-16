@@ -197,7 +197,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 				try(NamedPreparedStatement ps = new NamedPreparedStatement(connection, sb.toString())){
 					log ( sb.toString() );
 					for (Entry<String,Object> parameter : namesToValues.entrySet()) {
-						log( parameter.getKey() + ":" + parameter.getValue().toString() ); //$NON-NLS-1$
+						log( parameter.getKey() + ":" + (parameter.getValue() == null ? "" : parameter.getValue().toString() )); //$NON-NLS-1$
 						ps.setObject(parameter.getKey(), parameter.getValue());
 					}
 					try(ResultSet rs = ps.executeQuery()){
