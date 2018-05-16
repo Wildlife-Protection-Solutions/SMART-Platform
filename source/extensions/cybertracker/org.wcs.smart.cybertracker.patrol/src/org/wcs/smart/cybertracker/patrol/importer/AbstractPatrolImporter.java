@@ -285,7 +285,7 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 			
 			long delta = Math.abs(wp.getDateTime().getTime() - lastWp.getWaypoint().getDateTime().getTime());
 			if (delta > WARN_WP_TIME_FRAME * 60 * 1000) {
-				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_AddToWaypointTimeframe, lastWp.getId(), WARN_WP_TIME_FRAME));
+				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_AddToWaypointTimeframe, lastWp.getWaypoint().getId(), WARN_WP_TIME_FRAME));
 			}
 		}
 		return lastWp.getWaypoint();

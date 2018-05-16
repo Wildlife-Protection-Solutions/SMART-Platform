@@ -90,8 +90,7 @@ public class ImageProcessor {
 				toResize = reader.read(0, reader.getDefaultReadParam());
 				return toResize;
 			}catch (Exception ex){
-					//TODO:
-				ex.printStackTrace();
+				CyberTrackerPlugIn.log(ex.getMessage(), ex);
 				return null;
 			} finally {
 				reader.dispose();
