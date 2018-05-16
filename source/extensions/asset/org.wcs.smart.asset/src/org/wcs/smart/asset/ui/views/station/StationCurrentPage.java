@@ -523,7 +523,7 @@ public class StationCurrentPage {
 			case START_DATE:
 				return DateFormat.getDateTimeInstance().format(element.getStartDate());
 			case END_DATE:
-				if (element.getStartDate() == null) return ""; //$NON-NLS-1$
+				if (element.getEndDate() == null) return ""; //$NON-NLS-1$
 				return DateFormat.getDateTimeInstance().format(element.getEndDate());
 			}
 			return null;
