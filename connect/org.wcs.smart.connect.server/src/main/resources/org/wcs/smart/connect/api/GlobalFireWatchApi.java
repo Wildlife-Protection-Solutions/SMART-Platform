@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -91,7 +92,7 @@ public class GlobalFireWatchApi extends HttpServlet{
 	@POST
     @Path("")
 	@Produces({ MediaType.APPLICATION_JSON })
-    public GlobalFireWatchProxy createGFW(GlobalFireWatchProxy gfw){
+    public GlobalFireWatchProxy createGFW(GlobalFireWatchProxy gfw,  @Context final HttpServletResponse response){
 		
 		if (gfw.getAlertUuid() == null) {
 			throw new SmartConnectException(Status.BAD_REQUEST, "Alert type must be provided.");
@@ -127,6 +128,10 @@ public class GlobalFireWatchApi extends HttpServlet{
 			proxy = null;
 			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, ex.getMessage(),ex);
 		}
+		response.setStatus(HttpServletResponse.SC_CREATED);
+		try {
+	        response.flushBuffer();
+	    }catch(Exception e){}
 		return proxy;
 	}
 	

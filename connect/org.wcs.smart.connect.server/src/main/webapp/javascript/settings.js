@@ -772,8 +772,7 @@ function deleteGfw(){
 }
 
 function gfwDeleted(){
-	if (this.status == 200  && this.status != 201 ) {
-		var r = JSON.parse(this.response);
+	if (this.status == 200 || this.status == 204 ) {
 		displayInfo("Global Fire Watch web hook removed.");
 	} else {
 		displayError(parseError("Error removing Global Fire Watch web hook: " + this.response));
