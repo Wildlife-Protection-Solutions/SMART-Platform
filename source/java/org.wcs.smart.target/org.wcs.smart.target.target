@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="SMART - Oxygen" sequenceNumber="38">
+<?pde version="3.8"?><target name="SMART - Oxygen" sequenceNumber="41">
 <locations>
 <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.media.jai_imageio-feature.feature.group" version="1.1.3"/>
@@ -28,27 +28,6 @@
 <repository location="http://download.eclipse.org/tools/orbit/R-builds/R20170516192513/repository"/>
 </location>
 <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.birt.doc.feature.group" version="4.7.0.v201706222054"/>
-<unit id="org.eclipse.birt.feature.group" version="4.7.0.v201706222054"/>
-<unit id="org.eclipse.datatools.sdk.feature.feature.group" version="1.14.1.201712071719"/>
-<unit id="org.eclipse.e4.core.tools.feature.source.feature.group" version="4.7.0.v20170515-1617"/>
-
-<unit id="org.eclipse.ecf.core.feature.group" version="3.13.8.v20170715-2257"/>
-<unit id="org.eclipse.ecf.core.source.feature.group" version="3.13.8.v20170715-2257"/>
-
-<unit id="org.eclipse.ecf.filetransfer.httpclient4.feature.feature.group" version="3.13.8.v20170715-2257"/>
-<unit id="org.eclipse.ecf.filetransfer.httpclient4.ssl.feature.feature.group" version="1.1.0.v20170110-1317"/>
-
-<unit id="org.eclipse.ecf.remoteservice.sdk.feature.feature.group" version="3.13.8.v20170816-0246"/>
-<unit id="org.eclipse.ecf.remoteservice.sdk.feature.source.feature.group" version="3.13.8.v20170816-0246"/>
-
-<unit id="org.eclipse.emf.sdk.feature.group" version="2.13.0.v20170609-0928"/>
-<unit id="org.eclipse.gef.sdk.feature.group" version="3.11.0.201606061308"/>
-<unit id="org.eclipse.gmf.runtime.sdk.feature.group" version="1.11.0.201706061437"/>
-<unit id="org.eclipse.xsd.sdk.feature.group" version="2.13.0.v20170609-0928"/>
-<repository location="http://download.eclipse.org/releases/oxygen/"/>
-</location>
-<location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.ecf.core.feature.feature.group" version="1.4.0.v20170516-2248"/>
 <unit id="org.eclipse.ecf.core.ssl.feature.feature.group" version="1.1.0.v20170110-1317"/>
 <unit id="org.eclipse.ecf.filetransfer.feature.feature.group" version="3.13.7.v20170516-2248"/>
@@ -60,19 +39,59 @@
 <unit id="org.eclipse.rcp.feature.group" version="4.7.0.v20170612-1255"/>
 <repository location="http://download.eclipse.org/eclipse/updates/4.7/"/>
 </location>
+<location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="com.google.guava" version="15.0.0.v201403281430"/>
+<unit id="com.google.inject" version="3.0.0.v201312141243"/>
+<unit id="com.google.inject.assistedinject" version="3.0.0.v201402270930"/>
+<unit id="com.google.inject.multibindings" version="3.0.0.v201402270930"/>
+<unit id="org.eclipse.gef.common.sdk.feature.group" version="5.0.0.201805110202"/>
+<unit id="org.eclipse.gef.fx.sdk.feature.group" version="5.0.2.201805110202"/>
+<unit id="org.eclipse.gef.geometry.sdk.feature.group" version="5.0.2.201805110202"/>
+<unit id="org.eclipse.gef.graph.sdk.feature.group" version="5.1.0.201801270315"/>
+<unit id="org.eclipse.gef.layout.sdk.feature.group" version="5.0.0.201805110202"/>
+<unit id="org.eclipse.gef.mvc.sdk.feature.group" version="5.0.2.201805110202"/>
+<unit id="org.eclipse.gef.zest.sdk.feature.group" version="5.0.2.201805110202"/>
+<repository location="http://download.eclipse.org/tools/gef/updates/integration"/>
+</location>
+<location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.birt.doc.feature.group" version="4.7.0.v201706222054"/>
+<unit id="org.eclipse.birt.feature.group" version="4.7.0.v201706222054"/>
+<unit id="org.eclipse.datatools.sdk.feature.feature.group" version="1.14.1.201712071719"/>
+<unit id="org.eclipse.e4.core.tools.feature.source.feature.group" version="4.7.0.v20170515-1617"/>
+<unit id="org.eclipse.ecf.core.feature.group" version="3.13.8.v20170715-2257"/>
+<unit id="org.eclipse.ecf.core.source.feature.group" version="3.13.8.v20170715-2257"/>
+<unit id="org.eclipse.ecf.filetransfer.httpclient4.feature.feature.group" version="3.13.8.v20170715-2257"/>
+<unit id="org.eclipse.ecf.filetransfer.httpclient4.ssl.feature.feature.group" version="1.1.0.v20170110-1317"/>
+<unit id="org.eclipse.ecf.remoteservice.sdk.feature.feature.group" version="3.13.8.v20170816-0246"/>
+<unit id="org.eclipse.ecf.remoteservice.sdk.feature.source.feature.group" version="3.13.8.v20170816-0246"/>
+<unit id="org.eclipse.emf.sdk.feature.group" version="2.13.0.v20170609-0928"/>
+<unit id="org.eclipse.fx.ide.feature.feature.group" version="3.0.0.201705220750"/>
+<unit id="org.eclipse.gef.sdk.feature.group" version="3.11.0.201606061308"/>
+<unit id="org.eclipse.gmf.runtime.sdk.feature.group" version="1.11.0.201706061437"/>
+<unit id="org.eclipse.xsd.sdk.feature.group" version="2.13.0.v20170609-0928"/>
+<repository location="http://download.eclipse.org/releases/oxygen/"/>
+</location>
 </locations>
 <includeBundles>
 <plugin id="ch.ethz.iks.r_osgi.remote"/>
 <plugin id="ch.ethz.iks.r_osgi.remote.source"/>
 <plugin id="ch.ethz.iks.slp"/>
 <plugin id="ch.ethz.iks.slp.source"/>
-<plugin id="com.google.guava"/>
-<plugin id="com.google.guava.source"/>
+<plugin id="com.google.guava" version="21.0.0.v20170206-1425"/>
+<plugin id="com.google.guava.source" version="15.0.0.v201403281430"/>
+<plugin id="com.google.guava.source" version="21.0.0.v20170206-1425"/>
+<plugin id="com.google.inject"/>
+<plugin id="com.google.inject.assistedinject"/>
+<plugin id="com.google.inject.assistedinject.source"/>
+<plugin id="com.google.inject.multibindings"/>
+<plugin id="com.google.inject.multibindings.source"/>
+<plugin id="com.google.inject.source"/>
 <plugin id="com.ibm.icu"/>
 <plugin id="com.ibm.icu.source"/>
 <plugin id="com.jcraft.jsch"/>
 <plugin id="com.jcraft.jsch.source"/>
 <plugin id="com.lowagie.text" version="2.1.7.v201004222200"/>
+<plugin id="com.lowagie.text.source" version="2.1.7.v201004222200"/>
 <plugin id="com.lowagie.text.source" version="2.1.7.v201004222200"/>
 <plugin id="com.sun.el"/>
 <plugin id="com.sun.el.source"/>
@@ -88,6 +107,7 @@
 <plugin id="javax.servlet.jsp"/>
 <plugin id="javax.servlet.jsp.source"/>
 <plugin id="javax.servlet.source" version="3.1.0.v201410161800"/>
+<plugin id="javax.servlet.source" version="3.1.0.v201410161800"/>
 <plugin id="javax.wsdl"/>
 <plugin id="javax.xml"/>
 <plugin id="javax.xml.rpc"/>
@@ -102,34 +122,54 @@
 <plugin id="org.apache.axis"/>
 <plugin id="org.apache.batik.bridge" version="1.7.0.v201011041433"/>
 <plugin id="org.apache.batik.bridge.source" version="1.7.0.v201011041433"/>
+<plugin id="org.apache.batik.bridge.source" version="1.6.0.v201011041432"/>
 <plugin id="org.apache.batik.css" version="1.7.0.v201011041433"/>
+<plugin id="org.apache.batik.css.source" version="1.8.0.v20170214-1941"/>
+<plugin id="org.apache.batik.css.source" version="1.8.0.v20170214-1941"/>
 <plugin id="org.apache.batik.css.source" version="1.7.0.v201011041433"/>
+<plugin id="org.apache.batik.css.source" version="1.6.0.v201011041432"/>
 <plugin id="org.apache.batik.dom" version="1.7.1.v201505191845"/>
 <plugin id="org.apache.batik.dom.source" version="1.7.1.v201505191845"/>
+<plugin id="org.apache.batik.dom.source" version="1.6.1.v201505192100"/>
 <plugin id="org.apache.batik.dom.svg" version="1.7.0.v201011041433"/>
 <plugin id="org.apache.batik.dom.svg.source" version="1.7.0.v201011041433"/>
+<plugin id="org.apache.batik.dom.svg.source" version="1.6.0.v201011041432"/>
 <plugin id="org.apache.batik.ext.awt" version="1.7.0.v201011041433"/>
 <plugin id="org.apache.batik.ext.awt.extension"/>
 <plugin id="org.apache.batik.ext.awt.extension.source"/>
+<plugin id="org.apache.batik.ext.awt.source" version="1.6.0.v201011041432"/>
 <plugin id="org.apache.batik.ext.awt.source" version="1.7.0.v201011041433"/>
 <plugin id="org.apache.batik.extension"/>
+<plugin id="org.apache.batik.extension.source"/>
 <plugin id="org.apache.batik.parser" version="1.7.0.v201011041433"/>
 <plugin id="org.apache.batik.parser.source" version="1.7.0.v201011041433"/>
+<plugin id="org.apache.batik.parser.source" version="1.6.0.v201011041432"/>
 <plugin id="org.apache.batik.svggen" version="1.7.0.v201011041433"/>
 <plugin id="org.apache.batik.svggen.source" version="1.7.0.v201011041433"/>
+<plugin id="org.apache.batik.svggen.source" version="1.6.0.v201011041432"/>
 <plugin id="org.apache.batik.transcoder" version="1.7.0.v201011041433"/>
 <plugin id="org.apache.batik.transcoder.source" version="1.7.0.v201011041433"/>
+<plugin id="org.apache.batik.transcoder.source" version="1.6.0.v201011041432"/>
 <plugin id="org.apache.batik.util" version="1.7.0.v201011041433"/>
 <plugin id="org.apache.batik.util.gui" version="1.7.0.v200903091627"/>
+<plugin id="org.apache.batik.util.gui.source" version="1.8.0.v20170214-1941"/>
+<plugin id="org.apache.batik.util.gui.source" version="1.7.0.v200903091627"/>
+<plugin id="org.apache.batik.util.gui.source" version="1.6.0.v201011041432"/>
+<plugin id="org.apache.batik.util.gui.source" version="1.8.0.v20170214-1941"/>
+<plugin id="org.apache.batik.util.source" version="1.6.0.v201011041432"/>
+<plugin id="org.apache.batik.util.source" version="1.8.0.v20170214-1941"/>
+<plugin id="org.apache.batik.util.source" version="1.8.0.v20170214-1941"/>
 <plugin id="org.apache.batik.util.source" version="1.7.0.v201011041433"/>
 <plugin id="org.apache.batik.xml" version="1.7.0.v201011041433"/>
 <plugin id="org.apache.batik.xml.source" version="1.7.0.v201011041433"/>
+<plugin id="org.apache.batik.xml.source" version="1.6.0.v201011041432"/>
 <plugin id="org.apache.commons.codec"/>
 <plugin id="org.apache.commons.codec.source"/>
 <plugin id="org.apache.commons.discovery"/>
 <plugin id="org.apache.commons.jxpath"/>
 <plugin id="org.apache.commons.jxpath.source"/>
 <plugin id="org.apache.commons.logging" version="1.1.1.v201101211721"/>
+<plugin id="org.apache.commons.logging.source" version="1.1.1.v201101211721"/>
 <plugin id="org.apache.commons.logging.source" version="1.1.1.v201101211721"/>
 <plugin id="org.apache.derby"/>
 <plugin id="org.apache.derby.source"/>
@@ -144,9 +184,11 @@
 <plugin id="org.apache.hadoop.zookeeper"/>
 <plugin id="org.apache.hadoop.zookeeper.source"/>
 <plugin id="org.apache.httpcomponents.httpcore"/>
+<plugin id="org.apache.httpcomponents.httpcore.source"/>
 <plugin id="org.apache.jasper.glassfish"/>
 <plugin id="org.apache.jasper.glassfish.source"/>
 <plugin id="org.apache.log4j" version="1.2.15.v201012070815"/>
+<plugin id="org.apache.log4j.source" version="1.2.15.v201012070815"/>
 <plugin id="org.apache.log4j.source" version="1.2.15.v201012070815"/>
 <plugin id="org.apache.lucene.analyzers-common"/>
 <plugin id="org.apache.lucene.analyzers-common.source"/>
@@ -635,10 +677,10 @@
 <plugin id="org.eclipse.ecf.provider.zookeeper"/>
 <plugin id="org.eclipse.ecf.provider.zookeeper.source"/>
 <plugin id="org.eclipse.ecf.remoteservice"/>
-<plugin id="org.eclipse.ecf.remoteservice.asyncproxy" version="1.0.100.v20160907-0906"/>
 <plugin id="org.eclipse.ecf.remoteservice.asyncproxy" version="2.0.100.v20160907-0906"/>
-<plugin id="org.eclipse.ecf.remoteservice.asyncproxy.source" version="2.0.100.v20160907-0906"/>
+<plugin id="org.eclipse.ecf.remoteservice.asyncproxy" version="1.0.100.v20160907-0906"/>
 <plugin id="org.eclipse.ecf.remoteservice.asyncproxy.source" version="1.0.100.v20160907-0906"/>
+<plugin id="org.eclipse.ecf.remoteservice.asyncproxy.source" version="2.0.100.v20160907-0906"/>
 <plugin id="org.eclipse.ecf.remoteservice.eventadmin"/>
 <plugin id="org.eclipse.ecf.remoteservice.eventadmin.source"/>
 <plugin id="org.eclipse.ecf.remoteservice.rest"/>
@@ -902,10 +944,85 @@
 <plugin id="org.eclipse.equinox.weaving.hook.source"/>
 <plugin id="org.eclipse.equinox.wireadmin"/>
 <plugin id="org.eclipse.equinox.wireadmin.source"/>
+<plugin id="org.eclipse.fx.code.editor.configuration"/>
+<plugin id="org.eclipse.fx.code.editor.ldef"/>
+<plugin id="org.eclipse.fx.code.editor.ldef.ui"/>
+<plugin id="org.eclipse.fx.core"/>
+<plugin id="org.eclipse.fx.core.guice"/>
+<plugin id="org.eclipse.fx.formats.svg"/>
+<plugin id="org.eclipse.fx.ide.converter"/>
+<plugin id="org.eclipse.fx.ide.css"/>
+<plugin id="org.eclipse.fx.ide.css.cssext"/>
+<plugin id="org.eclipse.fx.ide.css.cssext.proposals"/>
+<plugin id="org.eclipse.fx.ide.css.cssext.ui"/>
+<plugin id="org.eclipse.fx.ide.css.jfx2"/>
+<plugin id="org.eclipse.fx.ide.css.jfx8"/>
+<plugin id="org.eclipse.fx.ide.css.ui"/>
+<plugin id="org.eclipse.fx.ide.fxgraph"/>
+<plugin id="org.eclipse.fx.ide.fxgraph.ui"/>
+<plugin id="org.eclipse.fx.ide.fxml"/>
+<plugin id="org.eclipse.fx.ide.fxml.compiler"/>
+<plugin id="org.eclipse.fx.ide.gmodel"/>
+<plugin id="org.eclipse.fx.ide.gmodel.ui"/>
+<plugin id="org.eclipse.fx.ide.jdt.core"/>
+<plugin id="org.eclipse.fx.ide.jdt.ui"/>
+<plugin id="org.eclipse.fx.ide.l10n"/>
+<plugin id="org.eclipse.fx.ide.l10n.ui"/>
+<plugin id="org.eclipse.fx.ide.model"/>
+<plugin id="org.eclipse.fx.ide.pde.core"/>
+<plugin id="org.eclipse.fx.ide.pde.ui"/>
+<plugin id="org.eclipse.fx.ide.pde.ui.e4"/>
+<plugin id="org.eclipse.fx.ide.rrobot"/>
+<plugin id="org.eclipse.fx.ide.rrobot.dsl"/>
+<plugin id="org.eclipse.fx.ide.rrobot.dsl.ui"/>
+<plugin id="org.eclipse.fx.ide.rrobot.model"/>
+<plugin id="org.eclipse.fx.ide.ui"/>
+<plugin id="org.eclipse.fx.ide.ui.preview"/>
+<plugin id="org.eclipse.fx.osgi"/>
+<plugin id="org.eclipse.fx.osgi.util"/>
+<plugin id="org.eclipse.fx.ui.animation"/>
+<plugin id="org.eclipse.fx.ui.controls"/>
+<plugin id="org.eclipse.fx.ui.panes"/>
+<plugin id="org.eclipse.fx.ui.workbench3"/>
 <plugin id="org.eclipse.gef"/>
+<plugin id="org.eclipse.gef.common"/>
+<plugin id="org.eclipse.gef.common.doc"/>
+<plugin id="org.eclipse.gef.common.source"/>
 <plugin id="org.eclipse.gef.doc.isv"/>
 <plugin id="org.eclipse.gef.examples.ui.pde"/>
+<plugin id="org.eclipse.gef.fx"/>
+<plugin id="org.eclipse.gef.fx.doc"/>
+<plugin id="org.eclipse.gef.fx.jface"/>
+<plugin id="org.eclipse.gef.fx.jface.source"/>
+<plugin id="org.eclipse.gef.fx.source"/>
+<plugin id="org.eclipse.gef.fx.swt"/>
+<plugin id="org.eclipse.gef.fx.swt.source"/>
+<plugin id="org.eclipse.gef.geometry"/>
+<plugin id="org.eclipse.gef.geometry.convert.fx"/>
+<plugin id="org.eclipse.gef.geometry.convert.fx.source"/>
+<plugin id="org.eclipse.gef.geometry.convert.swt"/>
+<plugin id="org.eclipse.gef.geometry.convert.swt.source"/>
+<plugin id="org.eclipse.gef.geometry.doc"/>
+<plugin id="org.eclipse.gef.geometry.source"/>
+<plugin id="org.eclipse.gef.graph"/>
+<plugin id="org.eclipse.gef.graph.doc"/>
+<plugin id="org.eclipse.gef.graph.source"/>
+<plugin id="org.eclipse.gef.layout"/>
+<plugin id="org.eclipse.gef.layout.doc"/>
+<plugin id="org.eclipse.gef.layout.source"/>
+<plugin id="org.eclipse.gef.mvc.doc"/>
+<plugin id="org.eclipse.gef.mvc.fx"/>
+<plugin id="org.eclipse.gef.mvc.fx.source"/>
+<plugin id="org.eclipse.gef.mvc.fx.ui"/>
+<plugin id="org.eclipse.gef.mvc.fx.ui.source"/>
 <plugin id="org.eclipse.gef.source"/>
+<plugin id="org.eclipse.gef.zest.doc"/>
+<plugin id="org.eclipse.gef.zest.fx"/>
+<plugin id="org.eclipse.gef.zest.fx.jface"/>
+<plugin id="org.eclipse.gef.zest.fx.jface.source"/>
+<plugin id="org.eclipse.gef.zest.fx.source"/>
+<plugin id="org.eclipse.gef.zest.fx.ui"/>
+<plugin id="org.eclipse.gef.zest.fx.ui.source"/>
 <plugin id="org.eclipse.gmf"/>
 <plugin id="org.eclipse.gmf.examples.runtime"/>
 <plugin id="org.eclipse.gmf.examples.runtime.diagram.geoshapes"/>
@@ -1157,13 +1274,17 @@
 <plugin id="org.tukaani.xz.source"/>
 <plugin id="org.w3c.css.sac" version="1.3.1.v200903091627"/>
 <plugin id="org.w3c.css.sac.source" version="1.3.1.v200903091627"/>
+<plugin id="org.w3c.css.sac.source" version="1.3.1.v200903091627"/>
 <plugin id="org.w3c.dom.events" version="3.0.0.draft20060413_v201105210656"/>
 <plugin id="org.w3c.dom.events.source" version="3.0.0.draft20060413_v201105210656"/>
+<plugin id="org.w3c.dom.events.source" version="3.0.0.draft20060413_v201105210656"/>
 <plugin id="org.w3c.dom.smil" version="1.0.1.v200903091627"/>
+<plugin id="org.w3c.dom.smil.source" version="1.0.1.v200903091627"/>
 <plugin id="org.w3c.dom.smil.source" version="1.0.1.v200903091627"/>
 <plugin id="org.w3c.dom.svg" version="1.1.0.v201011041433"/>
 <plugin id="org.w3c.dom.svg.extension"/>
 <plugin id="org.w3c.dom.svg.extension.source"/>
+<plugin id="org.w3c.dom.svg.source" version="1.1.0.v201011041433"/>
 <plugin id="org.w3c.dom.svg.source" version="1.1.0.v201011041433"/>
 <plugin id="org.w3c.sac"/>
 <plugin id="org.w3c.sac.source"/>
