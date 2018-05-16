@@ -237,6 +237,7 @@ public class Messages extends NLS {
 	public static String EntityEditor_RefreshDialogTitle;
 	public static String EntityEditor_refreshtooltip;
 	public static String EntityEditor_RelationshipColumnName;
+	public static String EntityEditor_RelationshipDiagramTitle;
 	public static String EntityEditor_RelationshipInfoDialog;
 	public static String EntityEditor_RelationshipInfoMsg;
 	public static String EntityEditor_RelationshipsTitle;
@@ -1304,6 +1305,8 @@ public class Messages extends NLS {
 	public static String RelationshipAttributeDialog_SaveConfirmTitle;
 	public static String RelationshipAttributeDialog_Title;
 	public static String RelationshipContentProvider_NoneGroupName;
+	public static String RelationshipGraphContentProvider_LoadDataError;
+	public static String RelationshipGraphLoadDataJob_JobTitle;
 	public static String RelationshipGroupDialog_LoadError;
 	public static String RelationshipGroupDialog_Message;
 	public static String RelationshipGroupDialog_SaveError;

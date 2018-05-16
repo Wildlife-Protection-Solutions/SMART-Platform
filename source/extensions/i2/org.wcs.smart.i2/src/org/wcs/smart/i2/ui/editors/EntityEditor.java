@@ -53,6 +53,9 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.gef.layout.algorithms.SpringLayoutAlgorithm;
+import org.eclipse.gef.zest.fx.jface.ZestContentViewer;
+import org.eclipse.gef.zest.fx.jface.ZestFxJFaceModule;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -62,7 +65,9 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -93,6 +98,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -239,11 +245,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private Composite compMap;
 	private Composite compRecords;
 	private Composite compRelationships;
+	private Composite compRelationshipDiagram;
 	private TableViewer tblRecords;
 	private TreeViewer relationshipTree;
 	private List<IntelEntityAttachment> attachmentsToDelete = new ArrayList<IntelEntityAttachment>();
 	private List<IntelEntityRelationship> relationshipsToAdd = new ArrayList<IntelEntityRelationship>();
 	private List<IntelEntityRelationship> relationshipsToDelete = new ArrayList<IntelEntityRelationship>();
+	
+	private ZestContentViewer graphViewer;
 	
 	private IEclipseContext context;
 	private IEventBroker eventBroker;
@@ -745,7 +754,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		((GridLayout)bottom.getLayout()).marginWidth = 0;
 		((GridLayout)bottom.getLayout()).marginHeight = 0;
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.EntityEditor_MapTitle, Messages.EntityEditor_RecordsTitle, Messages.EntityEditor_RelationshipsTitle}, bottom, toolkit, ()->maximizeMainPanel(1));
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.EntityEditor_MapTitle, Messages.EntityEditor_RecordsTitle, Messages.EntityEditor_RelationshipsTitle, Messages.EntityEditor_RelationshipDiagramTitle}, bottom, toolkit, ()->maximizeMainPanel(1));
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite tabPart = toolkit.createComposite(bottom, SWT.NONE);
@@ -766,8 +775,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 		compRelationships.setLayout(new GridLayout());
 		createRelationshipPanel(compRelationships);
 		addEntityDropTarget(compRelationships);
+
+		compRelationshipDiagram = toolkit.createComposite(tabPart, SWT.NONE);
+		compRelationshipDiagram.setLayout(new FillLayout(SWT.VERTICAL));
+		createRelationshipDiagramPanel(compRelationshipDiagram);
 		
-		tabList.setContent(new Composite[]{compMap,  compRecords, compRelationships}, tabPart);
+		tabList.setContent(new Composite[]{compMap,  compRecords, compRelationships, compRelationshipDiagram}, tabPart);
 		tabList.selectTab(0);
 		return tabList.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 	}
@@ -1517,6 +1530,24 @@ public class EntityEditor extends EditorPart implements MapPart{
 		}
 	}
 	
+	private void createRelationshipDiagramPanel(Composite parent) {
+		//ZZZZZZZZ: implement properly
+		parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+		graphViewer = new ZestContentViewer(new ZestFxJFaceModule());
+		graphViewer.createControl(parent, SWT.NONE);
+//		diagramViewer.setContentProvider(new MyContentProvider());
+//		diagramViewer.setLabelProvider(new MyLabelProvider());
+		graphViewer.setContentProvider(new RelationshipGraphContentProvider());
+		graphViewer.setLabelProvider(new RelationshipGraphLabelProvider());
+		graphViewer.setLayoutAlgorithm(new SpringLayoutAlgorithm());
+		graphViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				System.out.println(
+						"Selection changed: " + (event.getSelection()));
+			}
+		});
+	}
+
 	private void createRecordsPanel(Composite parent){
 		tblRecords = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION);
 		tblRecords.setContentProvider(ArrayContentProvider.getInstance());
@@ -1974,6 +2005,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 		relationshipTree.refresh();
 		relationshipTree.expandAll();
 		
+		graphViewer.setInput(entity);
+		
 		mapPart.refresh();
 		loadRecords.schedule(0);
 	}
@@ -2159,4 +2192,5 @@ public class EntityEditor extends EditorPart implements MapPart{
 	public IStatusLineManager getStatusLineManager() {
 		return mapPart.getStatusLineManager();
 	}
+	
 }
