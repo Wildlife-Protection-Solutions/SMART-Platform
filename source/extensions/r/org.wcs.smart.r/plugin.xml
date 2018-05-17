@@ -21,6 +21,25 @@
    </extension>
    <extension
          point="org.wcs.smart.dbUpgrade">
+      <dbUpgrader
+            upgrader="org.wcs.smart.r.plugin.RDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
+   <extension
+         point="org.wcs.smart.changeLogInstaller">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.r.plugin.ChangeTrackerInstaller">
+      </ChangeLogTracker>
+   </extension>
+   <extension
+         point="org.wcs.smart.hibernate.libs.mapping">
+   </extension>
+   <extension
+         point="org.wcs.smart.caTemplateCloner">
+      <templateCloner
+            class="org.wcs.smart.r.plugin.CaTemplateCloner"
+            id="org.wcs.smart.r.caCloner">
+      </templateCloner>
    </extension>
 
 </plugin>

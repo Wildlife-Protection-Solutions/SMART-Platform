@@ -22,14 +22,13 @@
 package org.wcs.smart.r.plugin;
 
 import org.eclipse.core.runtime.jobs.Job;
-import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
+import org.wcs.smart.r.RPlugIn;
 
 /**
- * Action that is called when asset plug-in is uninstalled
+ * Action that is called when r plug-in is uninstalled
  * 
- * @author elitvin
- * @since 3.0.0
+ * @author Emily
  */
 public class OnUninstallAction extends UninstallProvisioningAction {
 
@@ -40,11 +39,11 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 		try{
 			job.join();
 		}catch(InterruptedException ex){
-			AssetPlugIn.log(ex.getLocalizedMessage(), ex);
+			RPlugIn.log(ex.getLocalizedMessage(), ex);
 		}
 	}
 	@Override
 	protected String getPluginId() {
-		return AssetPlugIn.PLUGIN_ID;
+		return RPlugIn.PLUGIN_ID;
 	}
 }

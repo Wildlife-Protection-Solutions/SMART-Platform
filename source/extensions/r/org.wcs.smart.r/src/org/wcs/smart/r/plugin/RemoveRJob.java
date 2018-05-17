@@ -63,7 +63,8 @@ public class RemoveRJob extends Job {
 	}
 
 	private void uninstall(Session session){
-		
+		//TODO fill out these two variables with the tables
+		//to drop and the label tables (objects that extend NamedItem or NamedKeyItem)
 		String[] TABLES = new String[]{	
 		};
 		

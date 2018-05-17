@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2016 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,38 +21,35 @@
  */
 package org.wcs.smart.r.plugin;
 
-import java.util.Map;
-
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.p2.common.updatesite.InstallProvisioningAction;
-import org.wcs.smart.r.RPlugIn;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.DeleteConservationAreaHandler;
+import org.wcs.smart.ca.ICaDeleteHandler;
 
 /**
- * Action that is called when r plug-in is installed
+ * Handler for deleting plugin specific data when the
+ * Conservation Area is deleted.
  * 
  * @author Emily
+ *
  */
-public class OnInstallAction extends InstallProvisioningAction {
+public class DeleteCaHandler implements ICaDeleteHandler {
 
-	@Override
-	public IStatus executeInternal(Map<String, Object> parameters) {
-		Job job = new AddRJob();
-		job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
-		job.schedule();
-		try{
-			job.join();
-		}catch(InterruptedException ex){
-			RPlugIn.log(ex.getLocalizedMessage(), ex);
-		}
-		return Status.OK_STATUS;
-	}
+	/**
+	 * This represents the order the plugin should be deleted in.  Higher orders
+	 * are deleted first.  Lower orders deleted after.  So if this plugin must delete
+	 * data before another plugin then the execute order needs to be higher than 
+	 * the other plugin.
+	 */
+	//currently this is only requires to be executed before the core data is 
+	//removed.
+	public static final int EXECUTE_ORDER =  DeleteConservationAreaHandler.EXECUTE_ORDER + 1;
 
+	
 	@Override
-	protected String getPluginId() {
-		return RPlugIn.PLUGIN_ID;
+	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
+		//TODO: delete all r plugin specific data from the conservation area
 	}
 
 }

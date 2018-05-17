@@ -92,6 +92,7 @@ public class AddRJob extends Job {
 	private void createTables(Session session){
 		String[] sql = new String[]{
 				//Tables
+				//TODO: populate create sql commands
 				
 				
 		};

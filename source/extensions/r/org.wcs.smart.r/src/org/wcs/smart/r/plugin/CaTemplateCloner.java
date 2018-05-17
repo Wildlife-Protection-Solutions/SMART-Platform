@@ -21,38 +21,31 @@
  */
 package org.wcs.smart.r.plugin;
 
-import java.util.Map;
-
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.p2.common.updatesite.InstallProvisioningAction;
-import org.wcs.smart.r.RPlugIn;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.ca.ConservationAreaClonerEngine;
+import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 
 /**
- * Action that is called when r plug-in is installed
+ * 
+ * Functionality to clone Conservation Area configuration into
+ * a new Conservation area. 
  * 
  * @author Emily
+ *
  */
-public class OnInstallAction extends InstallProvisioningAction {
+public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 
-	@Override
-	public IStatus executeInternal(Map<String, Object> parameters) {
-		Job job = new AddRJob();
-		job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
-		job.schedule();
-		try{
-			job.join();
-		}catch(InterruptedException ex){
-			RPlugIn.log(ex.getLocalizedMessage(), ex);
-		}
-		return Status.OK_STATUS;
+	public static final String ID = "org.wcs.smart.r.caCloner"; //$NON-NLS-1$
+	
+	public CaTemplateCloner() {
 	}
 
 	@Override
-	protected String getPluginId() {
-		return RPlugIn.PLUGIN_ID;
+	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
+		//TODO: clone the conservation area configurations you want 
+		//copied into the new conservation area; engine provides
+		//details about old and new conservation area mappings between
+		//old object uuids and new object uuid for some objects (data model objects etc)
 	}
 
 }

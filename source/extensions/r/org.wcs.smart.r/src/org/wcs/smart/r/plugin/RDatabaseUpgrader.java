@@ -25,14 +25,15 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.asset.AssetPlugIn;
-import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.r.RPlugIn;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
 /**
- * Asset upgrade operations while upgrade/restore backup.
+ * R plugin database upgrade scripts.  Upgrades the database
+ * and file store options to match the current 
+ * plugin version
  * 
  * @author Emily
  * @since 3.0.0
@@ -41,16 +42,15 @@ public class RDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.AssetDatabaseUpgrader_TaskName, 1);
+		monitor.beginTask("Upgrading R Module Database Tables", 1);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
 				Map<String, String> versions = UpgradeEngine.getVersions(session);
 				if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-				String currentPluginVersion = versions.get(AssetPlugIn.PLUGIN_ID);
+				String currentPluginVersion = versions.get(RPlugIn.PLUGIN_ID);
 				
 				if (currentPluginVersion == null) {
-					monitor.subTask(Messages.AssetDatabaseUpgrader_SubTaskName);
 					(new AddRJob()).installPlugin(session);
 				}else{
 					upgrade(currentPluginVersion, session);
@@ -66,6 +66,7 @@ public class RDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	/**
 	 * Upgrades from the currentVersion to the most recent version.
+	 * 
 	 * @param currentVersion
 	 * @param session is active transaction
 	 */
