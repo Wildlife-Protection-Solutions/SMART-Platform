@@ -195,9 +195,6 @@ public class AlertFilter {
 	
 		
 		if(caUuidFilter != null){
-			if(caUuidFilter.size() == 0){
-				return emptyList; //if you have no options selected, your result will always be no alerts.
-			}
 			List<Predicate> orFilters = new ArrayList<Predicate>();
 			for(int x=0; x < caUuidFilter.size();x++){
 				if(SecurityManager.INSTANCE.canAccess(s, username , AlertAction.VIEW_ALERTS_KEY, caUuidFilter.get(x)) ){;
@@ -205,6 +202,11 @@ public class AlertFilter {
 
 				}
 			}
+			//add null ca alerts
+			if(SecurityManager.INSTANCE.canAccess(s, username , AlertAction.VIEW_ALERTS_KEY, null) ){
+				orFilters.add(from.get("ca").get("uuid") .isNull()); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			
 			andFilters.add(cb.or(orFilters.toArray(new Predicate[orFilters.size()])));
 		}
 

@@ -312,8 +312,10 @@ function layerDeleted() {
 function createNewGfw(){
 	
 	var alertType = document.querySelector("select[name=gfwalerttype]").value;
+	var alertLevel = document.querySelector("select[name=gfwalertlevel]").value;
 	var jsonData = {
-		"alertUuid" : alertType
+		"alertUuid" : alertType,
+		"level": alertLevel
 	};
 
 	//make ajax call
@@ -632,12 +634,13 @@ function createGfwTable(){
  	for (var i = 0; i < gfw.length; i ++){
  		var alertUuid = gfw[i].alertUuid;
  		var alertType = gfw[i].alertName;
+ 		var alertLevel = gfw[i].level;
  		var uuid = gfw[i].uuid;
  		var lastdate = gfw[i].lastDataDate;
  		var url = gfw[i].smartUrl;
  		
  		var row = tableCreateRowTDs(parent,
- 				[alertType, null, lastdate, null], 
+ 				[alertType, alertLevel, null, lastdate, null], 
  				"gfwrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		row.id = "gfwrow" + i;
@@ -647,21 +650,21 @@ function createGfwTable(){
  		var urlelement = document.createElement("div");
  		urlelement.className="scrollabel";
  		urlelement.innerHTML=url;
- 		row.childNodes[1].appendChild(urlelement);
+ 		row.childNodes[2].appendChild(urlelement);
  		
  		var updateicon = document.createElement("a");
  		updateicon.className="update-icon";
  		updateicon.title= "update gfw"
 		updateicon.onclick = updateGfw;
  		updateicon.href="";
- 		row.childNodes[3].appendChild(updateicon);
+ 		row.childNodes[4].appendChild(updateicon);
 
  		var deleteicon = document.createElement("a");
  		deleteicon.className="delete-icon";
  		deleteicon.title= "delete gfw"
  		deleteicon.onclick = deleteGfw;
  		deleteicon.href="";
- 		row.childNodes[3].appendChild(deleteicon);
+ 		row.childNodes[4].appendChild(deleteicon);
  	}
 }
 
@@ -684,10 +687,12 @@ function updateGfw(){
 	
 	btnUpdate.onclick = function() {
 			var alertTypeUuid = document.getElementById("gfwalerttype").value;
-			
+			var alertLevel = document.querySelector("select[name=gfwalertlevel]").value;
+
 			var jsonData = {
 				"uuid": uuid,
-				"alertUuid" : alertTypeUuid
+				"alertUuid" : alertTypeUuid,
+				"level": alertLevel
 			};
 
 			//make ajax call
@@ -773,9 +778,9 @@ function deleteGfw(){
 
 function gfwDeleted(){
 	if (this.status == 200 || this.status == 204 ) {
-		displayInfo("Global Fire Watch web hook removed.");
+		displayInfo("Global Forest Watch web hook removed.");
 	} else {
-		displayError(parseError("Error removing Global Fire Watch web hook: " + this.response));
+		displayError(parseError("Error removing Global Forest Watch web hook: " + this.response));
 	}
 	refreshGFWTable();
 }

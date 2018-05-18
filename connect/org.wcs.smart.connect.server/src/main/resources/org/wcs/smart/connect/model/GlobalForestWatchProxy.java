@@ -27,18 +27,19 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 import org.wcs.smart.connect.api.ConnectRESTApplication;
-import org.wcs.smart.connect.api.GlobalFireWatchApi;
+import org.wcs.smart.connect.api.GlobalForestWatchApi;
 import org.wcs.smart.util.UuidUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GlobalFireWatchProxy {
+public class GlobalForestWatchProxy {
 
 	private UUID uuid = null;
 	private UUID alertUuid = null;
 	private Date lastDataDate = null;
 	private String alertName = null;
+	private int level = -1;
 	
 	private String smartUrl = null;
 	
@@ -49,24 +50,23 @@ public class GlobalFireWatchProxy {
 		sb.append(":");
 		sb.append(request.getServerPort());
 		sb.append(request.getContextPath());
-		sb.append("/");
 		sb.append(ConnectRESTApplication.NO_AUTH_PATH );
-		sb.append("/"); //$NON-NLS-1$
-		sb.append(GlobalFireWatchApi.PATH);
+		sb.append(GlobalForestWatchApi.PATH);
 		return sb.toString();
 		
 	}
 	
-	public GlobalFireWatchProxy() {
+	public GlobalForestWatchProxy() {
 		
 	}
 	
-	public GlobalFireWatchProxy(GlobalFireWatch gfw, String urlPrefix) {
+	public GlobalForestWatchProxy(GlobalForestWatch gfw, String urlPrefix) {
 		this.uuid = gfw.getUuid();
 		this.alertUuid = gfw.getAlertType().getUuid();
 		this.alertName = gfw.getAlertType().getLabel();
 		this.lastDataDate = gfw.getLastDataDate();
 		this.smartUrl = urlPrefix + "/" + UuidUtils.uuidToString(this.uuid); //$NON-NLS-1$
+		this.level = gfw.getLevel();
 	}
 	
 	public String getSmartUrl() {
@@ -106,6 +106,11 @@ public class GlobalFireWatchProxy {
 		this.lastDataDate = date;
 	}
 	
-	
+	public int getLevel() {
+		return this.level;
+	}
+	public void setLevel(int level) {
+		this.level = level;
+	}
 	
 }

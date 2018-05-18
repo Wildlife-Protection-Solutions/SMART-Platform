@@ -158,6 +158,12 @@ public class Alert extends ConnectUuidItem{
 		this.track = track;
 	}
 	
+	/**
+	 * The conservation area associated with the alert OR NULL is no
+	 * specific conservation area is associated with the alert (global forest watch 
+	 * alerts)
+	 * @return
+	 */
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="ca_uuid", referencedColumnName="ca_uuid")
 	public ConservationAreaInfo getCa() {

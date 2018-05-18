@@ -144,13 +144,14 @@
 	</form>
 </div>
 
-<!-- Global Fire Watch -->
+<!-- Global Forest Watch -->
 <div class="overflow settingsTable">
-	<div class="block settings-header">Global Fire Watch Notification</div>
-	<button class="button top-spacer" id="btnNewGFW">New Global Fire Watch WebHook</button>
+	<div class="block settings-header">Global Forest Watch Notification</div>
+	<button class="button top-spacer" id="btnNewGFW">New Global Forest Watch WebHook</button>
 	<table id="gfwtable" class="top-spacer smart-table">
   	<tr class="table-row smart-table-header">
 			<th class="table-cell smart-table-cell">Alert Type</th>
+			<th class="table-cell smart-table-cell">Alert Level</th>
 			<th class="table-cell smart-table-cell">SMART WebHook</th>
 			<th class="table-cell smart-table-cell">Last Data Push</th>
 			<th class="table-cell smart-table-cell"><fmt:message key="settings.style.actions" /></th>
@@ -378,7 +379,7 @@ font-size: 40px;</textarea>
   </div>
   
   <div id="gfwDialog" style="display: none;" class="dialog">
-  <div class="dialog-title">Global Fire Watch WebHook</div>
+  <div class="dialog-title">Global Forest Watch WebHook</div>
   <div id="gfwdialogerror" class="errorsection"></div>
 	<form id="gfwform">
      		<label class="top-spacer block">Alert Type:</label>
@@ -386,6 +387,14 @@ font-size: 40px;</textarea>
 
 			</select>
 
+			<label class="top-spacer block">Alert Level:</label>
+     		<select id="gfwalertlevel" class="formtext" name="gfwalertlevel">
+			<option value=1><fmt:message key="alert.alertlevel1"/></option>
+			<option value=2><fmt:message key="alert.alertlevel2"/></option>
+			<option value=3><fmt:message key="alert.alertlevel3"/></option>
+			<option value=4><fmt:message key="alert.alertlevel4"/></option>
+			<option value=5><fmt:message key="alert.alertlevel5"/></option>
+			</select>
 			
        		<div class="top-spacer block" style="text-align: right">
      			<input id="btnGfwCreate" class="button" type="button" value="Create" />

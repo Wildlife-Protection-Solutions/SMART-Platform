@@ -45,18 +45,19 @@ import org.hibernate.Session;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.AlertType;
-import org.wcs.smart.connect.model.GlobalFireWatch;
-import org.wcs.smart.connect.model.GlobalFireWatchProxy;
+import org.wcs.smart.connect.model.GlobalForestWatch;
+import org.wcs.smart.connect.model.GlobalForestWatchProxy;
+import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 
-@Path(ConnectRESTApplication.PATH_SEPERATOR + GlobalFireWatchApi.PATH)
+@Path(ConnectRESTApplication.PATH_SEPERATOR + GlobalForestWatchApi.PATH)
 
-public class GlobalFireWatchApi extends HttpServlet{
+public class GlobalForestWatchApi extends HttpServlet{
 	
 	private static final long serialVersionUID = 1L;
-	private final Logger logger = Logger.getLogger(GlobalFireWatchApi.class.getName());
+	private final Logger logger = Logger.getLogger(GlobalForestWatchApi.class.getName());
 	
 	public static final String PATH = "gfw"; //$NON-NLS-1$
 
@@ -66,8 +67,8 @@ public class GlobalFireWatchApi extends HttpServlet{
 	@GET
     @Path("")
 	@Produces({ MediaType.APPLICATION_JSON })
-    public List<GlobalFireWatchProxy> getGFWSettings(){
-		List<GlobalFireWatchProxy> proxies = new ArrayList<GlobalFireWatchProxy>();
+    public List<GlobalForestWatchProxy> getGFWSettings(){
+		List<GlobalForestWatchProxy> proxies = new ArrayList<GlobalForestWatchProxy>();
 		
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
 		s.beginTransaction();
@@ -76,9 +77,9 @@ public class GlobalFireWatchApi extends HttpServlet{
 				throw new SmartConnectException(Status.UNAUTHORIZED);
 			}
 			 
-			List<GlobalFireWatch> fws = QueryFactory.buildQuery(s, GlobalFireWatch.class).list();
+			List<GlobalForestWatch> fws = QueryFactory.buildQuery(s, GlobalForestWatch.class).list();
 			fws.forEach(fw->{
-				proxies.add(new GlobalFireWatchProxy(fw, GlobalFireWatchProxy.generateUrl(request)));
+				proxies.add(new GlobalForestWatchProxy(fw, GlobalForestWatchProxy.generateUrl(request)));
 			});
 		}catch (Exception ex) {
 			logger.log(Level.SEVERE,ex.getMessage(),ex);
@@ -92,13 +93,13 @@ public class GlobalFireWatchApi extends HttpServlet{
 	@POST
     @Path("")
 	@Produces({ MediaType.APPLICATION_JSON })
-    public GlobalFireWatchProxy createGFW(GlobalFireWatchProxy gfw,  @Context final HttpServletResponse response){
+    public GlobalForestWatchProxy createGFW(GlobalForestWatchProxy gfw,  @Context final HttpServletResponse response){
 		
 		if (gfw.getAlertUuid() == null) {
 			throw new SmartConnectException(Status.BAD_REQUEST, "Alert type must be provided.");
 		}
 		
-		GlobalFireWatchProxy proxy = null;
+		GlobalForestWatchProxy proxy = null;
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
 		s.beginTransaction();
 		try{
@@ -110,14 +111,20 @@ public class GlobalFireWatchApi extends HttpServlet{
 			if (type == null) {
 				throw new SmartConnectException(Status.BAD_REQUEST, "Alert type must be provided.");
 			}
+			if (gfw.getLevel() < 1 || gfw.getLevel() > 5) {
+				throw new SmartConnectException(Status.BAD_REQUEST, "Invalid alert level");
+			}
+			SmartUser creator = HibernateManager.getUser(s, request.getUserPrincipal().getName());
 			
-			GlobalFireWatch g = new GlobalFireWatch();
+			GlobalForestWatch g = new GlobalForestWatch();
 			g.setAlertType(type);
 			g.setLastDataDate(null);
+			g.setCreator(creator);
+			g.setLevel(gfw.getLevel());
 			s.saveOrUpdate(g);
 			s.getTransaction().commit();
 			
-			proxy = new GlobalFireWatchProxy(g, GlobalFireWatchProxy.generateUrl(request));
+			proxy = new GlobalForestWatchProxy(g, GlobalForestWatchProxy.generateUrl(request));
 		}catch(SmartConnectException ex) {
 			s.getTransaction().rollback();
 			proxy  = null;
@@ -149,7 +156,7 @@ public class GlobalFireWatchApi extends HttpServlet{
 			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY)) {
 				throw new SmartConnectException(Status.UNAUTHORIZED);
 			}
-			GlobalFireWatch w = s.get(GlobalFireWatch.class, gfwUuid);
+			GlobalForestWatch w = s.get(GlobalForestWatch.class, gfwUuid);
 			if (w == null) {
 				throw new SmartConnectException(Status.BAD_REQUEST, "Alert type must be provided.");
 			}
@@ -168,13 +175,15 @@ public class GlobalFireWatchApi extends HttpServlet{
 	@POST
 	@Path("/{gfwUuid}")
 	@Produces({ MediaType.APPLICATION_JSON })
-    public GlobalFireWatchProxy updateGFW(@PathParam("gfwUuid") UUID gfwUuid, GlobalFireWatchProxy gfw){
+    public GlobalForestWatchProxy updateGFW(@PathParam("gfwUuid") UUID gfwUuid, GlobalForestWatchProxy gfw){
 		
 		if (gfw.getAlertUuid() == null) {
 			throw new SmartConnectException(Status.BAD_REQUEST, "Alert type must be provided.");
 		}
-		
-		GlobalFireWatchProxy proxy = null;
+		if (gfw.getLevel() < 1 || gfw.getLevel() > 5) {
+			throw new SmartConnectException(Status.BAD_REQUEST, "Invalid alert level");
+		}
+		GlobalForestWatchProxy proxy = null;
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
 		s.beginTransaction();
 		try{
@@ -187,16 +196,18 @@ public class GlobalFireWatchApi extends HttpServlet{
 				throw new SmartConnectException(Status.BAD_REQUEST, "Alert type must be provided.");
 			}
 			
-			GlobalFireWatch g = s.get(GlobalFireWatch.class, gfwUuid);
+			GlobalForestWatch g = s.get(GlobalForestWatch.class, gfwUuid);
 			if (g == null) {
 				throw new SmartConnectException(Status.BAD_REQUEST, "Item to update not found.");
 			}
+			
+			g.setLevel(gfw.getLevel());
 			g.setAlertType(type);
 			g.setLastDataDate(null);
 			s.saveOrUpdate(g);
 			s.getTransaction().commit();
 			
-			proxy = new GlobalFireWatchProxy(g, GlobalFireWatchProxy.generateUrl(request));
+			proxy = new GlobalForestWatchProxy(g, GlobalForestWatchProxy.generateUrl(request));
 		}catch(SmartConnectException ex) {
 			s.getTransaction().rollback();
 			proxy  = null;

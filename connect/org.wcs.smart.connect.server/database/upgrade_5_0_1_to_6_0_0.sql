@@ -2154,9 +2154,15 @@ CREATE TABLE connect.gfw(
 	uuid uuid not null,
 	alert_uuid uuid not null,
 	last_data date,
+	creator_uuid uuid not null,
+	level smallint not null,
 	primary key (uuid)
 );
 ALTER TABLE connect.gfw ADD FOREIGN KEY (alert_uuid) REFERENCES connect.alert_types(uuid); 
+
+-- DROP not null constraint from Conervation Area of alerts for global forest watch alerts
+--which will not have a conservation area
+alter table connect.alerts alter column ca_uuid drop not null;
 
 
 ALTER TABLE connect.ca_info DROP CONSTRAINT status_chk;

@@ -422,7 +422,7 @@ public class ConnectAlert extends HttpServlet {
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 			
-			if(SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AlertAction.VIEW_ALERTS_KEY, a.getCa().getUuid()) ){
+			if(SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AlertAction.VIEW_ALERTS_KEY, a.getCa() == null ? null : a.getCa().getUuid()) ){
 						return a;
 			}else{
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
@@ -578,7 +578,7 @@ public class ConnectAlert extends HttpServlet {
 						MessageFormat.format(Messages.getString("ConnectAlert.AlertNotFound", SmartUtils.getRequestLocale(request)), alertUuid)); //$NON-NLS-1$
 			}
 			
-			if(!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AlertAction.DELETE_ALERTS_KEY, toDelete.getCa().getUuid())){
+			if(!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AlertAction.DELETE_ALERTS_KEY, toDelete.getCa() == null ? null : toDelete.getCa().getUuid())){
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 	    	
@@ -735,7 +735,11 @@ public class ConnectAlert extends HttpServlet {
     	            
     	            JSONObject properties = new JSONObject();
     	            properties.put("uuid", obj.getUuid()); //$NON-NLS-1$
-    	            properties.put("cauuid", obj.getCa().getUuid()); //$NON-NLS-1$
+    	            if (obj.getCa() != null) {
+    	            	properties.put("cauuid", obj.getCa().getUuid()); //$NON-NLS-1$
+    	            }else {
+    	            	properties.put("cauuid", (String)null); //$NON-NLS-1$
+    	            }
     	            properties.put("creatoruuid", obj.getCreatorUuid()); //$NON-NLS-1$
     	            String utcDate = obj.getDate().toGMTString();
     	            properties.put("date", utcDate); //$NON-NLS-1$
@@ -757,11 +761,13 @@ public class ConnectAlert extends HttpServlet {
     	    		properties.put("timezoneOffset", tz.getOffset(new Date().getTime()) / 1000 / 60); //$NON-NLS-1$
     	    		
     	    		//add ca name/label and type label
-    	    		ConservationAreaInfo ca = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, obj.getCa().getUuid());
-    	    		if(ca != null){
-    	    			properties.put("caname", ca.getLabel()); //$NON-NLS-1$
-    	    		}else{
-    	    			properties.put("caname", ""); //$NON-NLS-1$ //$NON-NLS-2$
+    	    		if (obj.getCa() != null) {
+	    	    		ConservationAreaInfo ca = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, obj.getCa().getUuid());
+	    	    		if(ca != null){
+	    	    			properties.put("caname", ca.getLabel()); //$NON-NLS-1$
+	    	    		}else{
+	    	    			properties.put("caname", ""); //$NON-NLS-1$ //$NON-NLS-2$
+	    	    		}
     	    		}
     	    		
 
@@ -770,23 +776,27 @@ public class ConnectAlert extends HttpServlet {
     	            featureList.put(feature);
     	            
     	            //the Track feature
-    	            JSONObject propertiesTrack = new JSONObject();
-    	            propertiesTrack.put("id", obj.getUserGeneratedId() + "Track"); //$NON-NLS-1$ //$NON-NLS-2$
-    	            propertiesTrack.put("typeuuid", obj.getTypeUuid()); //need these to draw the right colors and popups //$NON-NLS-1$
-    	            propertiesTrack.put("date", obj.getDate() ); //$NON-NLS-1$
-    	            //propertiesTrack.put("date", convertTimeToGMT(obj.getDate()) ); //$NON-NLS-1$
-    	            propertiesTrack.put("desc", obj.getDescription()); //$NON-NLS-1$
-    	            propertiesTrack.put("level", obj.getLevel()); //$NON-NLS-1$
-    	            JSONObject line = new JSONObject();
-    	            JSONArray a = new JSONArray(obj.getTrack());
-    	            line.put("coordinates", a); //$NON-NLS-1$
-    	            line.put("type", "LineString"); //$NON-NLS-1$ //$NON-NLS-2$
-    	            JSONObject featureTrack = new JSONObject();
-    	            featureTrack.put("geometry", line); //$NON-NLS-1$
-    	            featureTrack.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
-    	            featureTrack.put("properties", propertiesTrack); //$NON-NLS-1$
+    	            if (obj.getTrack() != null) {
+	    	            JSONObject propertiesTrack = new JSONObject();
+	    	            propertiesTrack.put("id", obj.getUserGeneratedId() + "Track"); //$NON-NLS-1$ //$NON-NLS-2$
+	    	            propertiesTrack.put("typeuuid", obj.getTypeUuid()); //need these to draw the right colors and popups //$NON-NLS-1$
+	    	            propertiesTrack.put("date", obj.getDate() ); //$NON-NLS-1$
+	    	            //propertiesTrack.put("date", convertTimeToGMT(obj.getDate()) ); //$NON-NLS-1$
+	    	            propertiesTrack.put("desc", obj.getDescription()); //$NON-NLS-1$
+	    	            propertiesTrack.put("level", obj.getLevel()); //$NON-NLS-1$
+	    	            JSONObject line = new JSONObject();
+	    	            
+	    	            JSONArray a = new JSONArray(obj.getTrack());
+	    	            line.put("coordinates", a); //$NON-NLS-1$
+	    	            line.put("type", "LineString"); //$NON-NLS-1$ //$NON-NLS-2$
+	    	            JSONObject featureTrack = new JSONObject();
+	    	            featureTrack.put("geometry", line); //$NON-NLS-1$
+	    	            featureTrack.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
+	    	            featureTrack.put("properties", propertiesTrack); //$NON-NLS-1$
+	    	            featureList.put(featureTrack);
+    	            }
     	            
-    	            featureList.put(featureTrack);
+    	            
     	        }
     	        featureCollection.put("features", featureList); //$NON-NLS-1$
     	        
@@ -821,7 +831,7 @@ public class ConnectAlert extends HttpServlet {
 			s1.getTransaction().commit();
 		}
 	
-		validateUser(AlertAction.UPDATE_ALERTS_KEY, toUpdate.getCa().getUuid());
+		validateUser(AlertAction.UPDATE_ALERTS_KEY, toUpdate.getCa() == null ? null : toUpdate.getCa().getUuid());
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();

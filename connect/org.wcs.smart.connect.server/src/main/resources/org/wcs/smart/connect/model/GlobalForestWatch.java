@@ -38,10 +38,12 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "connect.gfw")
-public class GlobalFireWatch extends ConnectUuidItem{
+public class GlobalForestWatch extends ConnectUuidItem{
 
 	private AlertType alertType;
 	private Date lastDataDate;
+	private SmartUser creator;
+	private int alertLevel;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="alert_uuid", referencedColumnName="uuid")
@@ -53,6 +55,16 @@ public class GlobalFireWatch extends ConnectUuidItem{
 		this.alertType = alertType;
 	}
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="creator_uuid", referencedColumnName="uuid")
+	public SmartUser getCreator() {
+		return this.creator;
+	}
+	
+	public void setCreator(SmartUser creator) {
+		this.creator = creator;
+	}
+	
 	@Column(name="last_data")
 	public Date getLastDataDate() {
 		return this.lastDataDate;
@@ -60,5 +72,14 @@ public class GlobalFireWatch extends ConnectUuidItem{
 	
 	public void setLastDataDate(Date date) {
 		this.lastDataDate = date;
+	}
+	
+	@Column(name="level")
+	public int getLevel() {
+		return this.alertLevel;
+	}
+	
+	public void setLevel(int alertLevel) {
+		this.alertLevel = alertLevel;
 	}
 }
