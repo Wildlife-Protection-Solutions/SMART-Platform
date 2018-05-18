@@ -108,6 +108,7 @@ public class Messages extends NLS {
 	public static String ConnectCaListPage_ErrorLabel;
 	public static String ConnectCaListPage_LoadingLabel;
 	public static String ConnectCaListPage_Message;
+	public static String ConnectCaListPage_NoAuthorized;
 	public static String ConnectCaListPage_NoCa;
 	public static String ConnectCaListPage_Title;
 	public static String ConnectDatabaseUpgrader_TaskName;

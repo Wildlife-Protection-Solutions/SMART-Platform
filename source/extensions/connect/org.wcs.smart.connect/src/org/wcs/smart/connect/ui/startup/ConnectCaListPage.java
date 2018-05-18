@@ -24,6 +24,8 @@ package org.wcs.smart.connect.ui.startup;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.NotAuthorizedException;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -110,6 +112,16 @@ public class ConnectCaListPage extends WizardPage implements ISelectionChangedLi
 					cmbList.refresh();
 				}
 			});
+		}catch (NotAuthorizedException ex) {
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					cmbList.setInput(new String[]{Messages.ConnectCaListPage_ErrorLabel});
+					setErrorMessage(Messages.ConnectCaListPage_NoAuthorized) ;
+				}
+			});
+			
+			ConnectPlugIn.log(Messages.ConnectCaListPage_CouldNotConnect2 + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}catch(Exception ex){
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
