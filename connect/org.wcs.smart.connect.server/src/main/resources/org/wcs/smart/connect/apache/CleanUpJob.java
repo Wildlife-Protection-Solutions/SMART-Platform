@@ -120,12 +120,14 @@ public class CleanUpJob implements Runnable {
 			
 			//ca export directory
 			Path caExportDirectory = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(DataStoreManager.CA_EXPORT_LOCATION);
-			try(DirectoryStream<Path> stream = Files.newDirectoryStream(caExportDirectory)){
-				for (Path path : stream){
-					checkAndDelete(s, path);
+			if (Files.exists(caExportDirectory)) {
+				try(DirectoryStream<Path> stream = Files.newDirectoryStream(caExportDirectory)){
+					for (Path path : stream){
+						checkAndDelete(s, path);
+					}
+				}catch (Exception ex){
+					logger.log(Level.WARNING, "Unable to list files in uploads directory for cleaning.", ex); //$NON-NLS-1$
 				}
-			}catch (Exception ex){
-				logger.log(Level.WARNING, "Unable to list files in uploads directory for cleaning.", ex); //$NON-NLS-1$
 			}
 			
 			//tempDir
@@ -391,21 +393,23 @@ public class CleanUpJob implements Runnable {
 		}
 		Path dataqueueDir = DataStoreManager.INSTANCE.getFile(DataQueue.FILE_STORE_LOCATION).toPath();
 		Path root = DataStoreManager.INSTANCE.getRootDirectory().toPath();
-		try(DirectoryStream<Path> files = Files.newDirectoryStream(dataqueueDir)){
-			for (Path f : files){
-				//find any matching item in the data queue
-				String check = root.relativize(f).toString();
-				if (!allFiles.contains(check)){
-					//delete
-					try{
-						Files.deleteIfExists(f);
-					}catch(Exception ex){
-						logger.log(Level.WARNING, MessageFormat.format("Unable to delete data queue file that is not associated with any files: {0}.", f.toString()), ex);		 //$NON-NLS-1$
+		if (Files.exists(dataqueueDir)) {
+			try(DirectoryStream<Path> files = Files.newDirectoryStream(dataqueueDir)){
+				for (Path f : files){
+					//find any matching item in the data queue
+					String check = root.relativize(f).toString();
+					if (!allFiles.contains(check)){
+						//delete
+						try{
+							Files.deleteIfExists(f);
+						}catch(Exception ex){
+							logger.log(Level.WARNING, MessageFormat.format("Unable to delete data queue file that is not associated with any files: {0}.", f.toString()), ex);		 //$NON-NLS-1$
+						}
 					}
 				}
+			}catch (Exception ex){
+				logger.log(Level.WARNING, "Unable to delete data queue files that are not associated with any files.", ex); //$NON-NLS-1$
 			}
-		}catch (Exception ex){
-			logger.log(Level.WARNING, "Unable to delete data queue files that are not associated with any files.", ex); //$NON-NLS-1$
 		}
 	}
 	
