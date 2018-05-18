@@ -92,7 +92,7 @@
 					<option id="samemonthlastyear" class="extrareport2dates" value=3650030><fmt:message key="dashboardbeta.samemonthlastyear"/></option>
 					<option id="previous6month" class="extrareport2dates" value=1800180><fmt:message key="dashboardbeta.previous6month"/></option>
 					<option id="same6monthslastyear" class="extrareport2dates" value=3650180><fmt:message key="dashboardbeta.same6monthslastyear"/></option>
-					<option id="previousyear" class="extrareport2dates" value=0650365><fmt:message key="dashboardbeta.previousyear"/></option>
+					<option id="previousyear" class="extrareport2dates" value=3650365><fmt:message key="dashboardbeta.previousyear"/></option>
 				</select>
 				<span><input type="text" id="report2From" class="date-input-center uielement"> - <input type="text" id="report2To" class="date-input-center uielement"></span>
 				<button style="padding:2px 10px;" class="button" onClick="rerunReport2(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>

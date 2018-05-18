@@ -242,14 +242,14 @@ function checkForCustomDates(){
 				var r1startDate = new Date(document.getElementById('report1From').value.substring(4));
 				var r1endDate = new Date(document.getElementById('report1To').value.substring(4));
 
-				if(days == "03650365"){//just shift all dates 1 year earlier in this case, the rest all relative to the start date
-					startDate.setYear(r1startDate.getFullYear());
+				if(days == "3650365"){//just shift all dates 1 year earlier in this case, the rest all relative to the start date
+					startDate.setYear(r1startDate.getFullYear() - 1);
 					startDate.setMonth(r1startDate.getMonth());
-					startDate.setDate(r1startDate.getDate() - daysearlier);
+					startDate.setDate(r1startDate.getDate());
 					
-					endDate.setYear(r1endDate.getFullYear());
+					endDate.setYear(r1endDate.getFullYear()-1);
 					endDate.setMonth(r1endDate.getMonth());
-					endDate.setDate(r1endDate.getDate() - daysearlier);
+					endDate.setDate(r1endDate.getDate());
 					
 				}else{
 					
