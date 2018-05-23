@@ -442,9 +442,11 @@ public class Messages extends NLS {
 	public static String EntitySummaryContentProvider_GroupByTreeNode;
 	public static String EntitySummaryContentProvider_NotNode;
 	public static String EntitySummaryContentProvider_ValuesTreeNode;
+	public static String EntityToXml_compresssubtask;
 	public static String EntityToXml_ConvertingEntitiesSubTask;
 	public static String EntityToXml_ConvertingRelationshipsSubTask;
 	public static String EntityToXml_ConvertingXmlSubTask;
+	public static String EntityToXml_exportrecordssubtask;
 	public static String EntityToXml_LoadingSubTask;
 	public static String EntityToXml_TaskName;
 	public static String EntityToXml_ZipSubTask;
@@ -494,6 +496,7 @@ public class Messages extends NLS {
 	public static String EntityTypeListDialog_Title;
 	public static String EntityTypeManager_DeleteError;
 	public static String EntityTypeTreeFilterItem_EntitiesLabel;
+	public static String ExportEntityToFileDialog_includeRecordXmls;
 	public static String ExportEntityXmlDialog_AllFiles;
 	public static String ExportEntityXmlDialog_CanceledMsg;
 	public static String ExportEntityXmlDialog_CompleteMsg;

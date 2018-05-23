@@ -15,16 +15,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for Location complex type.
+ * <p>Java class for NamedItem complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="Location">
+ * &lt;complexType name="NamedItem">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="recordKey" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="language_code" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="value" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -33,60 +33,60 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Location")
-public class Location {
+@XmlType(name = "NamedItem")
+public class NamedItem {
 
-    @XmlAttribute(name = "id")
-    protected String id;
-    @XmlAttribute(name = "recordKey")
-    protected String recordKey;
+    @XmlAttribute(name = "language_code")
+    protected String languageCode;
+    @XmlAttribute(name = "value")
+    protected String value;
 
     /**
-     * Gets the value of the id property.
+     * Gets the value of the languageCode property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getId() {
-        return id;
+    public String getLanguageCode() {
+        return languageCode;
     }
 
     /**
-     * Sets the value of the id property.
+     * Sets the value of the languageCode property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setId(String value) {
-        this.id = value;
+    public void setLanguageCode(String value) {
+        this.languageCode = value;
     }
 
     /**
-     * Gets the value of the recordKey property.
+     * Gets the value of the value property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getRecordKey() {
-        return recordKey;
+    public String getValue() {
+        return value;
     }
 
     /**
-     * Sets the value of the recordKey property.
+     * Sets the value of the value property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setRecordKey(String value) {
-        this.recordKey = value;
+    public void setValue(String value) {
+        this.value = value;
     }
 
 }

@@ -23,6 +23,7 @@ package org.wcs.smart.i2.xml;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -42,11 +43,12 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -56,6 +58,7 @@ import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelValueItem;
 import org.wcs.smart.i2.xml.entity.Attachment;
 import org.wcs.smart.i2.xml.entity.AttributeType;
@@ -63,9 +66,11 @@ import org.wcs.smart.i2.xml.entity.AttributeValue;
 import org.wcs.smart.i2.xml.entity.Entity;
 import org.wcs.smart.i2.xml.entity.InstanceData;
 import org.wcs.smart.i2.xml.entity.Location;
+import org.wcs.smart.i2.xml.entity.NamedItem;
 import org.wcs.smart.i2.xml.entity.ObjectFactory;
 import org.wcs.smart.i2.xml.entity.Record;
 import org.wcs.smart.i2.xml.entity.Relationship;
+import org.wcs.smart.i2.xml.record.RecordType;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
@@ -87,23 +92,25 @@ public class EntityToXml {
 	private InstanceData data;
 	private Set<ISmartAttachment> filesToInclude;
 	
+	private Set<IntelRecord> recordsToExport = null;
+	
 	public EntityToXml(Session session) {
 		this.session = session;
 	}
 	
-	public void export(Path outputFile, List<UUID> entities, boolean includeRecords, boolean includeRelationships, IProgressMonitor monitor) throws Exception{
+	public void export(Path outputFile, List<UUID> entities, boolean includeRecordLinks, boolean includeRelationships, boolean includeRecordXml, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.EntityToXml_TaskName, 4);
-		toXml(entities, includeRecords, includeRelationships, progress.split(3));
+		toXml(entities, includeRecordLinks, includeRelationships, progress.split(3));
 		if (data  != null) {
-			writeData(outputFile, progress.split(1));
+			writeData(outputFile, includeRecordXml, progress.split(1));
 		}else {
 			throw new IOException(Messages.IntelDataToXml_ConvservationFailedMsg);
 		}
 		
 	}
 	
-	private void writeData(Path outputFile, IProgressMonitor monitor) throws Exception {
-		SubMonitor progress = SubMonitor.convert(monitor, 3);
+	private void writeData(Path outputFile, boolean includeRecordXml,  IProgressMonitor monitor) throws Exception {
+		SubMonitor progress = SubMonitor.convert(monitor, includeRecordXml ? 3 : 6);
 		
 		monitor.subTask(Messages.EntityToXml_ZipSubTask);
 		progress.split(1);
@@ -131,14 +138,36 @@ public class EntityToXml {
 				sub.worked(1);
 			}
 			
-			//zip together 
-			progress.split(1);
+			if (includeRecordXml) {
+				progress.subTask(Messages.EntityToXml_exportrecordssubtask);
+				progress.setWorkRemaining(recordsToExport.size() + 1);
+				
+				Path recordsPath = tempDir.resolve("records"); //$NON-NLS-1$
+				Files.createDirectories(recordsPath);
+				try(Session session = HibernateManager.openSession()){
+					for (IntelRecord r : recordsToExport) {
+						Path recordPath = recordsPath.resolve(UuidUtils.uuidToString(r.getUuid()) + ".xml"); //$NON-NLS-1$
+						RecordType xmlRecord = RecordXmlExporter.convertRecord(r, new ArrayList<>(), session);
+						try(OutputStream out = Files.newOutputStream(recordPath)){
+							JAXBContext context = JAXBContext.newInstance(RecordXmlExporter.METADATA_CLASSES_PACKAGE);
+							Marshaller marshaller = context.createMarshaller();
+							marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+							org.wcs.smart.i2.xml.record.ObjectFactory factory = new org.wcs.smart.i2.xml.record.ObjectFactory();
+							marshaller.marshal(factory.createIntelRecord(xmlRecord), out);
+						}
+						progress.split(1);		
+					}
+				}						
+			}
+
+			//zip together
+			progress.subTask(Messages.EntityToXml_compresssubtask);
 			List<Path> files = Files.list(tempDir).collect(Collectors.toList());
 			File[] toExport = new File[files.size()];
 			for (int i = 0; i < files.size(); i ++) {
 				toExport[i] = files.get(i).toFile();
 			}
-			ZipUtil.createZip(toExport, outputFile.toFile(), new NullProgressMonitor());
+			ZipUtil.createZip(toExport, outputFile.toFile(), progress.split(1));
 		}finally {
 			//clean up
 			try {
@@ -150,8 +179,11 @@ public class EntityToXml {
 		
 	}
 	
-	private void toXml(List<UUID> entities, boolean includeRecords, boolean includeRelationships, IProgressMonitor monitor) {
+	private void toXml(List<UUID> entities, boolean includeRecordLinks, boolean includeRelationships, IProgressMonitor monitor) {
 	
+		
+		recordsToExport = new HashSet<>();
+		
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.IntelDataToXml_ExportTask2, 3);
 		
 		Set<IntelEntity> entitiesToExport = new HashSet<>();
@@ -166,6 +198,10 @@ public class EntityToXml {
 				IntelEntity entity = session.get(IntelEntity.class, a);
 				if (entity != null) {
 					entitiesToExport.add(entity);
+					
+					if (entity.getIntelligenceRecords() != null) {
+						entity.getIntelligenceRecords().forEach(rec->recordsToExport.add(rec.getRecord()));
+					}
 					
 					if (includeRelationships) {
 						CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -183,17 +219,14 @@ public class EntityToXml {
 		
 		
 		progress.subTask(Messages.EntityToXml_ConvertingEntitiesSubTask);
-		List<Entity> xmlEntities = convertEntities(entitiesToExport, includeRecords, progress.split(1));
+		List<Entity> xmlEntities = convertEntities(entitiesToExport, includeRecordLinks, progress.split(1));
 		
 		progress.subTask(Messages.EntityToXml_ConvertingRelationshipsSubTask);
-		
-		
 		List<Relationship> xmlRelationships = new ArrayList<>();
 		SubMonitor sub = progress.split(1);
 		if (includeRelationships) xmlRelationships = convertRelationships(relationshipsToExport, sub);
 		
 		progress.subTask(Messages.EntityToXml_ConvertingXmlSubTask);
-		
 		data = new InstanceData();
 		data.getEntities().addAll(xmlEntities);
 		data.getRelationships().addAll(xmlRelationships);
@@ -290,6 +323,14 @@ public class EntityToXml {
 			xmlRelationship.setTargetEntityId(relationship.getTargetEntity().getIdAttributeAsText());
 			xmlRelationship.setTargetEntityTypeKey(relationship.getTargetEntity().getEntityType().getKeyId());
 			
+			xmlRelationship.setLabel(relationship.getRelationshipType().getName());
+			for (Label ll : relationship.getRelationshipType().getNames()) {
+				NamedItem ni = new NamedItem();
+				ni.setLanguageCode(ll.getLanguage().getCode());
+				ni.setValue(ll.getValue());
+				xmlRelationship.getLabels().add(ni);
+			}
+			
 			if (relationship.getAttributes() != null && !relationship.getAttributes().isEmpty()) {
 				for (IntelEntityRelationshipAttributeValue value : relationship.getAttributes()) {
 					AttributeValue xmlValue = convertAttribueValue(value);
@@ -305,6 +346,7 @@ public class EntityToXml {
 		AttributeValue xmlValue = new AttributeValue();
 		xmlValue.setAttributeKey(value.getAttribute().getKeyId());
 		xmlValue.setType(AttributeType.valueOf(value.getAttribute().getType().name()));
+		xmlValue.setLabel(value.getAttribute().getName());
 		if (value.getNumberValue() != null) xmlValue.setDoubleValue(value.getNumberValue());
 		if (value.getNumberValue2() != null) xmlValue.setDoubleValue2(value.getNumberValue2());
 		if (value.getStringValue() != null) xmlValue.setStringValue(value.getStringValue());
@@ -312,6 +354,13 @@ public class EntityToXml {
 		if (value.getEmployee() != null) {
 			xmlValue.setStringValue(SmartLabelProvider.getFullLabel(value.getEmployee()));
 			xmlValue.setListKey(UuidUtils.uuidToString(value.getEmployee().getUuid()));
+		}
+		
+		for (Label l : value.getAttribute().getNames()) {
+			NamedItem ni = new NamedItem();
+			ni.setLanguageCode(l.getLanguage().getCode());
+			ni.setValue(l.getValue());
+			xmlValue.getLabels().add(ni);
 		}
 		return xmlValue;
 	}

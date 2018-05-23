@@ -2,15 +2,19 @@
 <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/Intelligence" xmlns:tns="http://www.example.org/Intelligence" elementFormDefault="qualified">
 
     <complexType name="AttributeValue">
+    	<sequence>
+    		<element name="labels" type="tns:NamedItem" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>
-		<attribute name="type" type="tns:AttributeType"></attribute>
-        <attribute name="stringValue" type="string"></attribute>
+    	<attribute name="type" type="tns:AttributeType"></attribute>
+    	<attribute name="stringValue" type="string"></attribute>
     	<attribute name="doubleValue" type="double"></attribute>
     	<attribute name="doubleValue2" type="double"></attribute>
     	<attribute name="listKey" type="string"></attribute>
+    	<attribute name="label" type="string"></attribute>
     </complexType>
-    
-	<simpleType name="AttributeType">
+
+    <simpleType name="AttributeType">
     	<restriction base="string">
     		<enumeration value="NUMERIC"></enumeration>
     		<enumeration value="TEXT"></enumeration>
@@ -52,13 +56,17 @@
 
 	<complexType name="Relationship">
 		<sequence>
-			<element name="attributes" type="tns:AttributeValue" maxOccurs="unbounded" minOccurs="1"></element>
+			<element name="attributes" type="tns:AttributeValue"
+				maxOccurs="unbounded" minOccurs="1">
+			</element>
+			<element name="labels" type="tns:NamedItem" maxOccurs="unbounded" minOccurs="1"></element>
 		</sequence>
 		<attribute name="relationshipTypeKey" type="string"></attribute>
 		<attribute name="sourceEntityId" type="string"></attribute>
 		<attribute name="sourceEntityTypeKey" type="string"></attribute>
 		<attribute name="targetEntityId" type="string"></attribute>
 		<attribute name="targetEntityTypeKey" type="string"></attribute>
+		<attribute name="label" type="string"></attribute>
 	</complexType>
 
 
@@ -70,4 +78,10 @@
 	</complexType>
 
     <element name="data" type="tns:InstanceData"></element>
+
+
+    <complexType name="NamedItem">
+    	<attribute name="language_code" type="string"></attribute>
+    	<attribute name="value" type="string"></attribute>
+    </complexType>
 </schema>

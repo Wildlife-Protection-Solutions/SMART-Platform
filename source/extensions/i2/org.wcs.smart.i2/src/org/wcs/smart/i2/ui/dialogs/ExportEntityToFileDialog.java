@@ -75,6 +75,7 @@ public class ExportEntityToFileDialog extends TitleAreaDialog {
 
 	private Button btnIncludeRelationships;
 	private Button btnIncludeRecords;
+	private Button btnIncludeRecordXml;
 	private Text txtOutputFile;
 
 	private DelimiterCombo cmbDelimiters;
@@ -146,6 +147,7 @@ public class ExportEntityToFileDialog extends TitleAreaDialog {
 			final Path outFile = outputFile;
 			final boolean includeRecords = btnIncludeRecords.getSelection();
 			final boolean includeRelationships = btnIncludeRelationships.getSelection();
+			final boolean includeRecordXml = btnIncludeRecordXml.getSelection();
 			final char delimiter = cmbDelimiters.getDelimiter();
 			
 			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
@@ -157,7 +159,7 @@ public class ExportEntityToFileDialog extends TitleAreaDialog {
 					try (Session s = HibernateManager.openSession()) {
 						if (format == Format.XML) {
 							EntityToXml hh = new EntityToXml(s);
-							hh.export(outFile, entityUuids, includeRecords, includeRelationships, progress.split(1));
+							hh.export(outFile, entityUuids, includeRecords, includeRelationships, includeRecordXml, progress.split(1));
 						}else if (format == Format.CSV) {
 							EntityRelationshipExporter exporter = new EntityRelationshipExporter();
 							exporter.exportEntities(entityUuids, 0, outFile, delimiter, progress.split(1));
@@ -268,6 +270,11 @@ public class ExportEntityToFileDialog extends TitleAreaDialog {
 		btnIncludeRecords.setText(Messages.ExportEntityXmlDialog_IncludeRecordLinks);
 		btnIncludeRecords.setSelection(true);
 		btnIncludeRecords.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		btnIncludeRecordXml = new Button(xmlOp, SWT.CHECK);
+		btnIncludeRecordXml.setText(Messages.ExportEntityToFileDialog_includeRecordXmls);
+		btnIncludeRecordXml.setSelection(true);
+		btnIncludeRecordXml.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		((StackLayout)optionsComposite.getLayout()).topControl = csvOp;
 		
