@@ -43,8 +43,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.hibernate.Session;
+import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Dashboard;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.UsersDefaultDashboard;
@@ -280,11 +282,7 @@ public class DashboardBetaApi extends HttpServlet {
 			if(user == null) throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			d = QueryFactory.buildQuery(s, UsersDefaultDashboard.class, "userUuid", user.getUuid()).uniqueResult(); //$NON-NLS-1$
 			if(d == null){
-				throw new SmartConnectException("This user does have a default dashboard, use the 'Set as Default Dashboard' button");
-				//return null; //there is nothing passed in, so they haven't setup a default yet, we can't update the settings.
-				
-//				d = new UsersDefaultDashboard();
-//				d.setUserUuid(user.getUuid());
+				throw new SmartConnectException(Messages.getString("DashboardBetaApi.NoDashboard", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 
 			if(userDefault.getDashboardUuid() != null){

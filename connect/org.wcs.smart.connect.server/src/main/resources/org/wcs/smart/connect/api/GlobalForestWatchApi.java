@@ -42,8 +42,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.Session;
+import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.GlobalForestWatch;
 import org.wcs.smart.connect.model.GlobalForestWatchProxy;
@@ -52,8 +54,13 @@ import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 
+/**
+ * API for configuring global forest watch  
+ * 
+ * @author Emily
+ *
+ */
 @Path(ConnectRESTApplication.PATH_SEPERATOR + GlobalForestWatchApi.PATH)
-
 public class GlobalForestWatchApi extends HttpServlet{
 	
 	private static final long serialVersionUID = 1L;
@@ -79,7 +86,7 @@ public class GlobalForestWatchApi extends HttpServlet{
 			 
 			List<GlobalForestWatch> fws = QueryFactory.buildQuery(s, GlobalForestWatch.class).list();
 			fws.forEach(fw->{
-				proxies.add(new GlobalForestWatchProxy(fw, GlobalForestWatchProxy.generateUrl(request)));
+				proxies.add(new GlobalForestWatchProxy(fw, request));
 			});
 		}catch (Exception ex) {
 			logger.log(Level.SEVERE,ex.getMessage(),ex);
@@ -96,7 +103,7 @@ public class GlobalForestWatchApi extends HttpServlet{
     public GlobalForestWatchProxy createGFW(GlobalForestWatchProxy gfw,  @Context final HttpServletResponse response){
 		
 		if (gfw.getAlertUuid() == null) {
-			throw new SmartConnectException(Status.BAD_REQUEST, "Alert type must be provided.");
+			throw new SmartConnectException(Status.BAD_REQUEST, Messages.getString("GlobalForestWatchApi.AlertTypeRequired", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
 		GlobalForestWatchProxy proxy = null;
@@ -109,10 +116,10 @@ public class GlobalForestWatchApi extends HttpServlet{
 			
 			AlertType type = s.get(AlertType.class, gfw.getAlertUuid());
 			if (type == null) {
-				throw new SmartConnectException(Status.BAD_REQUEST, "Alert type must be provided.");
+				throw new SmartConnectException(Status.BAD_REQUEST, Messages.getString("GlobalForestWatchApi.AlertTypeRequired", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			if (gfw.getLevel() < 1 || gfw.getLevel() > 5) {
-				throw new SmartConnectException(Status.BAD_REQUEST, "Invalid alert level");
+				throw new SmartConnectException(Status.BAD_REQUEST, Messages.getString("GlobalForestWatchApi.InvalidAlertLevel", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			SmartUser creator = HibernateManager.getUser(s, request.getUserPrincipal().getName());
 			
@@ -124,7 +131,7 @@ public class GlobalForestWatchApi extends HttpServlet{
 			s.saveOrUpdate(g);
 			s.getTransaction().commit();
 			
-			proxy = new GlobalForestWatchProxy(g, GlobalForestWatchProxy.generateUrl(request));
+			proxy = new GlobalForestWatchProxy(g, request);
 		}catch(SmartConnectException ex) {
 			s.getTransaction().rollback();
 			proxy  = null;
@@ -158,7 +165,7 @@ public class GlobalForestWatchApi extends HttpServlet{
 			}
 			GlobalForestWatch w = s.get(GlobalForestWatch.class, gfwUuid);
 			if (w == null) {
-				throw new SmartConnectException(Status.BAD_REQUEST, "Alert type must be provided.");
+				throw new SmartConnectException(Status.BAD_REQUEST, Messages.getString("GlobalForestWatchApi.AlertTypeRequired", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			s.delete(w);
 			s.getTransaction().commit();
@@ -178,10 +185,10 @@ public class GlobalForestWatchApi extends HttpServlet{
     public GlobalForestWatchProxy updateGFW(@PathParam("gfwUuid") UUID gfwUuid, GlobalForestWatchProxy gfw){
 		
 		if (gfw.getAlertUuid() == null) {
-			throw new SmartConnectException(Status.BAD_REQUEST, "Alert type must be provided.");
+			throw new SmartConnectException(Status.BAD_REQUEST, Messages.getString("GlobalForestWatchApi.AlertTypeRequired", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		if (gfw.getLevel() < 1 || gfw.getLevel() > 5) {
-			throw new SmartConnectException(Status.BAD_REQUEST, "Invalid alert level");
+			throw new SmartConnectException(Status.BAD_REQUEST, Messages.getString("GlobalForestWatchApi.InvalidAlertLevel", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		GlobalForestWatchProxy proxy = null;
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
@@ -193,12 +200,12 @@ public class GlobalForestWatchApi extends HttpServlet{
 			
 			AlertType type = s.get(AlertType.class, gfw.getAlertUuid());
 			if (type == null) {
-				throw new SmartConnectException(Status.BAD_REQUEST, "Alert type must be provided.");
+				throw new SmartConnectException(Status.BAD_REQUEST, Messages.getString("GlobalForestWatchApi.AlertTypeRequired", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			
 			GlobalForestWatch g = s.get(GlobalForestWatch.class, gfwUuid);
 			if (g == null) {
-				throw new SmartConnectException(Status.BAD_REQUEST, "Item to update not found.");
+				throw new SmartConnectException(Status.BAD_REQUEST, Messages.getString("GlobalForestWatchApi.GfwNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			
 			g.setLevel(gfw.getLevel());
@@ -207,7 +214,7 @@ public class GlobalForestWatchApi extends HttpServlet{
 			s.saveOrUpdate(g);
 			s.getTransaction().commit();
 			
-			proxy = new GlobalForestWatchProxy(g, GlobalForestWatchProxy.generateUrl(request));
+			proxy = new GlobalForestWatchProxy(g, request);
 		}catch(SmartConnectException ex) {
 			s.getTransaction().rollback();
 			proxy  = null;

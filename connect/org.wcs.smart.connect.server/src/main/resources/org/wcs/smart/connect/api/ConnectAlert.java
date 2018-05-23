@@ -776,27 +776,24 @@ public class ConnectAlert extends HttpServlet {
     	            featureList.put(feature);
     	            
     	            //the Track feature
-    	            if (obj.getTrack() != null) {
-	    	            JSONObject propertiesTrack = new JSONObject();
-	    	            propertiesTrack.put("id", obj.getUserGeneratedId() + "Track"); //$NON-NLS-1$ //$NON-NLS-2$
-	    	            propertiesTrack.put("typeuuid", obj.getTypeUuid()); //need these to draw the right colors and popups //$NON-NLS-1$
-	    	            propertiesTrack.put("date", obj.getDate() ); //$NON-NLS-1$
-	    	            //propertiesTrack.put("date", convertTimeToGMT(obj.getDate()) ); //$NON-NLS-1$
-	    	            propertiesTrack.put("desc", obj.getDescription()); //$NON-NLS-1$
-	    	            propertiesTrack.put("level", obj.getLevel()); //$NON-NLS-1$
-	    	            JSONObject line = new JSONObject();
+    	            JSONObject propertiesTrack = new JSONObject();
+    	            propertiesTrack.put("id", obj.getUserGeneratedId() + "Track"); //$NON-NLS-1$ //$NON-NLS-2$
+    	            propertiesTrack.put("typeuuid", obj.getTypeUuid()); //need these to draw the right colors and popups //$NON-NLS-1$
+    	            propertiesTrack.put("date", obj.getDate() ); //$NON-NLS-1$
+    	            //propertiesTrack.put("date", convertTimeToGMT(obj.getDate()) ); //$NON-NLS-1$
+    	            propertiesTrack.put("desc", obj.getDescription()); //$NON-NLS-1$
+    	            propertiesTrack.put("level", obj.getLevel()); //$NON-NLS-1$
+    	            JSONObject line = new JSONObject();
 	    	            
-	    	            JSONArray a = new JSONArray(obj.getTrack());
-	    	            line.put("coordinates", a); //$NON-NLS-1$
-	    	            line.put("type", "LineString"); //$NON-NLS-1$ //$NON-NLS-2$
-	    	            JSONObject featureTrack = new JSONObject();
-	    	            featureTrack.put("geometry", line); //$NON-NLS-1$
-	    	            featureTrack.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
-	    	            featureTrack.put("properties", propertiesTrack); //$NON-NLS-1$
-	    	            featureList.put(featureTrack);
-    	            }
-    	            
-    	            
+    	            JSONArray a = new JSONArray(obj.getTrack());
+    	            line.put("coordinates", a); //$NON-NLS-1$
+    	            line.put("type", "LineString"); //$NON-NLS-1$ //$NON-NLS-2$
+    	            JSONObject featureTrack = new JSONObject();
+    	            featureTrack.put("geometry", line); //$NON-NLS-1$
+    	            featureTrack.put("type", "Feature"); //$NON-NLS-1$ //$NON-NLS-2$
+    	            featureTrack.put("properties", propertiesTrack); //$NON-NLS-1$
+    	            featureList.put(featureTrack);
+
     	        }
     	        featureCollection.put("features", featureList); //$NON-NLS-1$
     	        

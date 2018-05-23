@@ -20,5 +20,7 @@
 	<ResourceLink global="smartconnect.ca_export_days_available" name="smartconnect.ca_export_days_available" type="java.lang.Integer"/>
 	<ResourceLink global="smartconnect.sync_download_hours_available" name="smartconnect.sync_download_hours_available" type="java.lang.Integer"/>
 	<ResourceLink global="smartconnect.cleanup_task_interval_hours" name="smartconnect.cleanup_task_interval_hours" type="java.lang.Integer"/>
+	<ResourceLink global="smartconnect.gfw_cleanup_days" name="smartconnect.gfw_cleanup_days" type="java.lang.Integer"/>
+	
 	<ResourceLink global="mail/Session" name="mail/Session"/>
 </Context>

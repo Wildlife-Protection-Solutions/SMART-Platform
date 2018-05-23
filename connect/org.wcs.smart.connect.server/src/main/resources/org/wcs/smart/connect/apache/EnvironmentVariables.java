@@ -45,6 +45,7 @@ public enum EnvironmentVariables {
 		WORK_HISTORY_ITEM_AVAILABLE("smartconnect.work_item_history_days_available"), //$NON-NLS-1$
 		CA_EXPORT_AVAILABLE("smartconnect.ca_export_days_available"), //$NON-NLS-1$
 		CHANGELOG_CLEAN_UP_DAYS("smartconnect.changelog_cleanup_days"), //$NON-NLS-1$
+		GFW_CLEAN_UP_DAYS("smartconnect.gfw_cleanup_days"), //$NON-NLS-1$
 		SPATIAL_REF_SYS_TABLE("smartconnect.spatial_ref_sys_table"), //$NON-NLS-1$
 		DATA_QUEUE_CLEAN_UP_DAYS("smartconnect.dataqueue_cleanup_days"); //$NON-NLS-1$
 		

@@ -30,6 +30,9 @@
 	<ResourceLink name="smartconnect.cleanup_task_interval_hours" 
 		global="smartconnect.cleanup_task_interval_hours"
 		type="java.lang.Integer"  />
+	<ResourceLink name="smartconnect.gfw_cleanup_days" 
+		global="smartconnect.gfw_cleanup_days"
+		type="java.lang.Integer"  />
 		
 	<ResourceLink name="mail/Session" 
 		global="mail/Session"

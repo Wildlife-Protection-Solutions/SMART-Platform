@@ -22,11 +22,16 @@
 package org.wcs.smart.connect.apache;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -55,6 +60,7 @@ import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.model.WorkItem.Type;
+import org.wcs.smart.connect.servlet.GlobalForestWatchProcessorServlet;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 import org.wcs.smart.hibernate.QueryFactory;
 
@@ -73,6 +79,7 @@ public class CleanUpJob implements Runnable {
 	private Integer syncDownloadAvailableHrs = null;
 	private Integer caExportAvailableDays = null;
 	private Integer changeLogCleanUpDays = null;
+	private Integer gfwCleanUpDays = null;
 	private ServletContext context;
 	
 	public CleanUpJob(SessionFactory sessionFactory, ServletContext context){
@@ -87,7 +94,7 @@ public class CleanUpJob implements Runnable {
 		syncDownloadAvailableHrs = getEnvironmentVariable(EnvironmentVariables.Variable.SYNC_DOWNLOAD_AVAILABLE);
 		caExportAvailableDays = getEnvironmentVariable(EnvironmentVariables.Variable.CA_EXPORT_AVAILABLE);
 		changeLogCleanUpDays = getEnvironmentVariable(EnvironmentVariables.Variable.CHANGELOG_CLEAN_UP_DAYS);
-		
+		gfwCleanUpDays = getEnvironmentVariable(EnvironmentVariables.Variable.GFW_CLEAN_UP_DAYS);
 		
 		try{
 			cleanUp();
@@ -155,6 +162,9 @@ public class CleanUpJob implements Runnable {
 			
 			//clean up temporary tables
 			cleanupQueryTempTables(s);
+			
+			//clean up gfw files logged
+			cleanUpGlobalForestWatchFiles();
 		}
 		
 		cleanReportImages();
@@ -333,6 +343,57 @@ public class CleanUpJob implements Runnable {
 		}
 	}
 
+	/**
+	 * Clean up items in the change log table.
+	 * @param session
+	 */
+	private void cleanUpGlobalForestWatchFiles(){
+		if (gfwCleanUpDays == null || gfwCleanUpDays <= 0) return;
+		
+		Path gfwPath = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(GlobalForestWatchProcessorServlet.LOG_DIRECTORY);
+		if (!Files.exists(gfwPath)) return;
+		
+		Date lastDate = new Date((new Date()).getTime() - gfwCleanUpDays * 24l * 60 *60 *1000);
+		try {
+			Files.walkFileTree(gfwPath, new FileVisitor<Path>() {
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+						String fileName = file.getFileName().toString();
+						int firstIndex = fileName.indexOf('.');
+						int lastIndex = fileName.indexOf('.', firstIndex+1);
+						if (firstIndex < 0 || lastIndex < 0)  return null;
+						
+						String datetime = fileName.substring(firstIndex+1, lastIndex);
+						try {
+							SimpleDateFormat df = new SimpleDateFormat(GlobalForestWatchProcessorServlet.DATE_FORMAT);
+							Date dd = df.parse(datetime);
+							
+							if (dd.before(lastDate)) {
+								Files.delete(file);
+							}
+						}catch (Exception ex) {
+							logger.log(Level.WARNING,  "Error cleaning up gfw directory: " + ex.getMessage(), ex); //$NON-NLS-1$
+						}
+						return FileVisitResult.CONTINUE;
+					}
+
+					@Override
+					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+						return FileVisitResult.CONTINUE;
+					}
+					@Override
+					public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+						return FileVisitResult.CONTINUE;
+					}
+					@Override
+					public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+						return FileVisitResult.CONTINUE;
+				}});
+		} catch (IOException ex) {
+			logger.log(Level.WARNING,  "Error cleaning up gfw directory: " + ex.getMessage(), ex); //$NON-NLS-1$
+		}
+	}
+	
 	/*
 	 * delete items from the data queue table and associated files
 	 */

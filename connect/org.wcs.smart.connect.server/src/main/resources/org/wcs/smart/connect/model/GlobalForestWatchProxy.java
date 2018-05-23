@@ -32,6 +32,12 @@ import org.wcs.smart.util.UuidUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+/**
+ * Proxy object for global forest watch settings
+ * 
+ * @author Emily
+ *
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GlobalForestWatchProxy {
 
@@ -43,11 +49,17 @@ public class GlobalForestWatchProxy {
 	
 	private String smartUrl = null;
 	
-	public static String generateUrl(HttpServletRequest request) {
+	/**
+	 * Provides the base URL for POST data to for Global Forest Watch
+	 * 
+	 * @param request
+	 * @return
+	 */
+	private static String generateUrl(HttpServletRequest request) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("https://"); //$NON-NLS-1$
 		sb.append(request.getServerName());
-		sb.append(":");
+		sb.append(":"); //$NON-NLS-1$
 		sb.append(request.getServerPort());
 		sb.append(request.getContextPath());
 		sb.append(ConnectRESTApplication.NO_AUTH_PATH );
@@ -60,13 +72,13 @@ public class GlobalForestWatchProxy {
 		
 	}
 	
-	public GlobalForestWatchProxy(GlobalForestWatch gfw, String urlPrefix) {
+	public GlobalForestWatchProxy(GlobalForestWatch gfw, HttpServletRequest request) {
 		this.uuid = gfw.getUuid();
 		this.alertUuid = gfw.getAlertType().getUuid();
 		this.alertName = gfw.getAlertType().getLabel();
 		this.lastDataDate = gfw.getLastDataDate();
-		this.smartUrl = urlPrefix + "/" + UuidUtils.uuidToString(this.uuid); //$NON-NLS-1$
 		this.level = gfw.getLevel();
+		this.smartUrl = generateUrl(request) + "/" + UuidUtils.uuidToString(this.uuid); //$NON-NLS-1$
 	}
 	
 	public String getSmartUrl() {

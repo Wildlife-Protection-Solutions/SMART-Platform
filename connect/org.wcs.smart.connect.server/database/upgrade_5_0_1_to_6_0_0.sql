@@ -2163,6 +2163,9 @@ ALTER TABLE connect.gfw ADD FOREIGN KEY (alert_uuid) REFERENCES connect.alert_ty
 -- DROP not null constraint from Conervation Area of alerts for global forest watch alerts
 --which will not have a conservation area
 alter table connect.alerts alter column ca_uuid drop not null;
+--add not null constraint to alerts
+-- at a minimum this should be set to [[x,y]]
+alter table connect.alerts alter column track set not null;
 
 
 ALTER TABLE connect.ca_info DROP CONSTRAINT status_chk;

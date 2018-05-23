@@ -1,11 +1,33 @@
+/*
+ * Copyright (C) 2015 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.servlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,26 +48,63 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.GlobalForestWatchApi;
+import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
 import org.wcs.smart.connect.model.GlobalForestWatch;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Servlet for processing global forest watch push requests
+ * 
+ * @author Emily
+ *
+ */
 @WebServlet(ConnectRESTApplication.NO_AUTH_PATH  + GlobalForestWatchApi.PATH + "/*")
 public class GlobalForestWatchProcessorServlet extends HttpServlet {
+	
+	
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Directory in file store for logging global forest watch data files.  These
+	 * will be cleaned up as part of the clean up tasks
+	 */
+	public static final String LOG_DIRECTORY = "gfw"; //$NON-NLS-1$
+
+	/**
+	 * Dateformat for filenames for logging gfw files
+	 */
+	public static final String DATE_FORMAT = "yyyyMMdd"; //$NON-NLS-1$
+	/*
+	 * JSON fields
+	 */
+	private static final String ACQ_TIME_JSON_KEY = "acq_time"; //$NON-NLS-1$
+	private static final String ACQ_DATE_JSON_KEY = "acq_date"; //$NON-NLS-1$
+	private static final String LONGITUDE_JSON_KEY = "longitude"; //$NON-NLS-1$
+	private static final String LATITUDE_JSON_KEY = "latitude"; //$NON-NLS-1$
+	private static final String ALERTS_JSON_KEY = "alerts"; //$NON-NLS-1$
+	private static final String JSONFILE_JSON_KEY = "json"; //$NON-NLS-1$
+	private static final String DOWNLOAD_URLS_JSON_KEY = "downloadUrls"; //$NON-NLS-1$
+	private static final String ALERT_NAME_JSON_KEY = "alert_name"; //$NON-NLS-1$
+
 	
 	private final Logger logger = Logger.getLogger(GlobalForestWatchProcessorServlet.class.getName());
 
 	
+	/**
+	 * Process Global Forest Watch post request
+	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
 		
 		String pathInfo = request.getPathInfo();
-		if (pathInfo.startsWith("/")) {
+		if (pathInfo.startsWith("/")) { //$NON-NLS-1$
 			pathInfo = pathInfo.substring(1);
 		}
 		
@@ -59,12 +118,9 @@ public class GlobalForestWatchProcessorServlet extends HttpServlet {
 		
 		GlobalForestWatch gw = null;
 		Session s = HibernateManager.getSession(request.getServletContext());
-		
-		
 		try {
 			s.beginTransaction();
 			gw = s.get(GlobalForestWatch.class, gfwUuid);
-		
 		
 			if (gw == null) {
 				response.setStatus(Status.NOT_FOUND.getStatusCode());
@@ -80,66 +136,118 @@ public class GlobalForestWatchProcessorServlet extends HttpServlet {
 			
 			
 			List<Alert> alerts = processJson(json.toString(), gw);
-			//TODO: remove duplicates
 			for (Alert a : alerts) {
-				s.saveOrUpdate(a);
+				if (!isDuplicate(a, s)) {
+					a.setTrack("[[" + a.getX() + "," + a.getY() + "]]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					s.saveOrUpdate(a);
+				}
 			}
 			s.getTransaction().commit();
 		}catch (Exception ex) {
-			logger.log(Level.SEVERE, "Error saving global forest watch alerts",  ex);
+			logger.log(Level.SEVERE, "Error saving global forest watch alerts",  ex); //$NON-NLS-1$
 			s.getTransaction().rollback();
 		}
 	}
 
+	/**
+	 * Checks the database for a duplicate alert.  Duplicate alerts
+	 * are alerts that have the smart conservationarea, date, time, location, level
+	 * and type
+	 * 
+	 * @param a
+	 * @param s
+	 * @return
+	 */
+	private boolean isDuplicate(Alert a, Session s) {
+		Long cnt = QueryFactory.buildCountQuery(s, Alert.class, 
+				new Object[] {"Ca", a.getCa()}, //$NON-NLS-1$
+				new Object[] {"level", a.getLevel()}, //$NON-NLS-1$
+				new Object[] {"typeUuid", a.getTypeUuid()}, //$NON-NLS-1$
+				new Object[] {"x",a.getX()}, //$NON-NLS-1$
+				new Object[] {"y", a.getY()}, //$NON-NLS-1$
+				new Object[] {"date", a.getDate()}); //$NON-NLS-1$
+		if (cnt > 0) return true;
+		return false;
+	}
 	
+	@SuppressWarnings("unchecked")
 	private List<Alert> processJson(String json, GlobalForestWatch gfw) throws JsonParseException, JsonMappingException, IOException {
-		List<Alert> createdAlerts = new ArrayList<>();
+
+		//log json to filestore; mostly for debugging but these will be cleaned up as part of the cleanup task 
+		try {
+			Path gfwDir = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(LOG_DIRECTORY);
+			if (!Files.exists(gfwDir)) Files.createDirectories(gfwDir);
+			
+			SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
+			String fileName = "gfw." + df.format(new Date()) + ".json"; //$NON-NLS-1$ //$NON-NLS-2$
+			Path jsonFile = gfwDir.resolve(fileName);
+			Files.write(jsonFile, json.getBytes());
+		}catch (Exception ex) {
+			logger.log(Level.WARNING, "Unable to log GFW JSON data to filestore: " + ex.getMessage(), ex); //$NON-NLS-1$
+		}
 		
-		StringBuilder sbDescription = new StringBuilder();
-		sbDescription.append("Global Forest Watch");
+		
+		List<Alert> createdAlerts = new ArrayList<>();
 		
 		ObjectMapper objectMapper = new ObjectMapper();
 		HashMap<String, Object> jsonData  = objectMapper.readValue(json, HashMap.class);
-		
-		if (jsonData.containsKey("alert_name")) {
-			sbDescription.append(" (");
-			sbDescription.append(jsonData.get("alert_name"));
-			sbDescription.append(")");
-			
+	
+		//alert description
+		StringBuilder sbDescription = new StringBuilder();
+		sbDescription.append("Global Forest Watch"); //$NON-NLS-1$
+		if (jsonData.containsKey(ALERT_NAME_JSON_KEY)) {
+			sbDescription.append(" ("); //$NON-NLS-1$
+			sbDescription.append(jsonData.get(ALERT_NAME_JSON_KEY));
+			sbDescription.append(")"); //$NON-NLS-1$
 		}
 		
 		List<Map<String, Object>> alerts = null;
-		if (jsonData.containsKey("downloadUrls")) {
-			Map<String, Object> downloads = (Map<String, Object>) jsonData.get("downloadUrls");
-			if (downloads.containsKey("json")) {
-				String alertsUrl =(String) downloads.get("json");
-				
+		if (jsonData.containsKey(DOWNLOAD_URLS_JSON_KEY)) {
+			Map<String, Object> downloads = (Map<String, Object>) jsonData.get(DOWNLOAD_URLS_JSON_KEY);
+			if (downloads.containsKey(JSONFILE_JSON_KEY)) {
+				String alertsUrl =(String) downloads.get(JSONFILE_JSON_KEY);
 				//reading alert data from url
-				logger.log(Level.WARNING, "Reading GFW JSON Alert Data From File: " + alertsUrl);
-				
+				//logger.log(Level.WARNING, "Reading GFW JSON Alert Data From File: " + alertsUrl); //$NON-NLS-1$
 				StringWriter sw = new StringWriter();
 				try {
 					URL url = new URL(alertsUrl);
-					
 					IOUtils.copy(url.openStream(), sw, StandardCharsets.UTF_8);
 				}catch (Exception ex) {
-					logger.log(Level.SEVERE, "Unable to read gfw json alert data from additional json file.",  ex);
+					logger.log(Level.SEVERE, "Unable to read GFW JSON alert data from additional JSON file.",  ex); //$NON-NLS-1$
 					throw ex;
 				}
+				
+				//write json to log file
 				try {
-					alerts = objectMapper.readValue(sw.toString(), List.class);
+					Path gfwDir = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(LOG_DIRECTORY);
+					if (!Files.exists(gfwDir)) Files.createDirectories(gfwDir);
+					
+					SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
+					String fileName = "gfw." + df.format(new Date()) + ".extra.json";  //$NON-NLS-1$//$NON-NLS-2$
+					Path jsonFile = gfwDir.resolve(fileName);
+					Files.write(jsonFile, sw.toString().getBytes());
 				}catch (Exception ex) {
-					logger.log(Level.WARNING, "Json data attempting to parse");
-					logger.log(Level.WARNING, sw.toString());
-					logger.log(Level.SEVERE, "Unable to read parse json data from additional json file.",  ex);
-					throw ex;
+					logger.log(Level.WARNING, "Unable to log GFW JSON data to filestore: " + ex.getMessage(), ex); //$NON-NLS-1$
+				}
+				
+				if (!sw.toString().isEmpty()) {
+					try {
+						alerts = objectMapper.readValue(sw.toString(), List.class);
+					}catch (Exception ex) {
+						logger.log(Level.WARNING, "JSON data attempting to parse"); //$NON-NLS-1$
+						logger.log(Level.WARNING, sw.toString());
+						logger.log(Level.SEVERE, "Unable to read parse JSON data from additional JSON file.",  ex); //$NON-NLS-1$
+						throw ex;
+					}
+				}else {
+					logger.log(Level.WARNING, "No JSON data to parse"); //$NON-NLS-1$
 				}
 			}
 		}
 		
 		if (alerts == null) {
-			if (jsonData.containsKey("alerts")) {
-				alerts = (List<Map<String, Object>>) jsonData.get("alerts");
+			if (jsonData.containsKey(ALERTS_JSON_KEY)) {
+				alerts = (List<Map<String, Object>>) jsonData.get(ALERTS_JSON_KEY);
 			}
 		}
 		
@@ -151,28 +259,28 @@ public class GlobalForestWatchProcessorServlet extends HttpServlet {
 			String time = null;
 			Date datetime = null;
 			
-			if (alertMap.containsKey("latitude")) {
-				lat = (Double)alertMap.get("latitude");
+			if (alertMap.containsKey(LATITUDE_JSON_KEY)) {
+				lat = (Double)alertMap.get(LATITUDE_JSON_KEY);
 			}
 			
-			if (alertMap.containsKey("longitude")) {
-				lng = (Double)alertMap.get("latitude");
+			if (alertMap.containsKey(LONGITUDE_JSON_KEY)) {
+				lng = (Double)alertMap.get(LONGITUDE_JSON_KEY);
 			}
 			
-			if (alertMap.containsKey("acq_date")) {
-				date = (String)alertMap.get("acq_date");
+			if (alertMap.containsKey(ACQ_DATE_JSON_KEY)) {
+				date = (String)alertMap.get(ACQ_DATE_JSON_KEY);
 			}
 			
-			if (alertMap.containsKey("acq_time")) {
-				time = (String)alertMap.get("acq_time");
+			if (alertMap.containsKey(ACQ_TIME_JSON_KEY)) {
+				time = (String)alertMap.get(ACQ_TIME_JSON_KEY);
 			}
 			
 			if (date != null && time != null) {
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm"); //$NON-NLS-1$
 				try {
-					datetime = sdf.parse(date +" " + time);
+					datetime = sdf.parse(date + " " + time); //$NON-NLS-1$
 				}catch (Exception ex) {
-					//TODO:
+					logger.log(Level.WARNING, "Unable to parse datetime for alert: " + ex.getMessage(), ex); //$NON-NLS-1$
 				}
 			}
 			

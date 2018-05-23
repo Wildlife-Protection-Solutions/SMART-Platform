@@ -66,7 +66,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
-import org.hsqldb.types.Charset;
 import org.locationtech.udig.catalog.internal.shp.ShpServiceExtension;
 import org.opengis.referencing.AuthorityFactory;
 import org.wcs.smart.connect.apache.CleanUpJob;
