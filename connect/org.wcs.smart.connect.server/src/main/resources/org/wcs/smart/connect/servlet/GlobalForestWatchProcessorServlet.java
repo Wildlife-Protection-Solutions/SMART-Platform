@@ -160,7 +160,7 @@ public class GlobalForestWatchProcessorServlet extends HttpServlet {
 	 */
 	private boolean isDuplicate(Alert a, Session s) {
 		Long cnt = QueryFactory.buildCountQuery(s, Alert.class, 
-				new Object[] {"Ca", a.getCa()}, //$NON-NLS-1$
+				new Object[] {"ca", a.getCa()}, //$NON-NLS-1$
 				new Object[] {"level", a.getLevel()}, //$NON-NLS-1$
 				new Object[] {"typeUuid", a.getTypeUuid()}, //$NON-NLS-1$
 				new Object[] {"x",a.getX()}, //$NON-NLS-1$
@@ -173,15 +173,11 @@ public class GlobalForestWatchProcessorServlet extends HttpServlet {
 	@SuppressWarnings("unchecked")
 	private List<Alert> processJson(String json, GlobalForestWatch gfw) throws JsonParseException, JsonMappingException, IOException {
 
-		//log json to filestore; mostly for debugging but these will be cleaned up as part of the cleanup task 
+		//log json to filestore; mostly for debugging but these will be cleaned up as part of the cleanup task
+		Path[] jsonLogFiles = new Path[] {null, null};
 		try {
-			Path gfwDir = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(LOG_DIRECTORY);
-			if (!Files.exists(gfwDir)) Files.createDirectories(gfwDir);
-			
-			SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
-			String fileName = "gfw." + df.format(new Date()) + ".json"; //$NON-NLS-1$ //$NON-NLS-2$
-			Path jsonFile = gfwDir.resolve(fileName);
-			Files.write(jsonFile, json.getBytes());
+			jsonLogFiles = getJsonFileNames();
+			Files.write(jsonLogFiles[0], json.getBytes());
 		}catch (Exception ex) {
 			logger.log(Level.WARNING, "Unable to log GFW JSON data to filestore: " + ex.getMessage(), ex); //$NON-NLS-1$
 		}
@@ -219,13 +215,10 @@ public class GlobalForestWatchProcessorServlet extends HttpServlet {
 				
 				//write json to log file
 				try {
-					Path gfwDir = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(LOG_DIRECTORY);
-					if (!Files.exists(gfwDir)) Files.createDirectories(gfwDir);
-					
-					SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
-					String fileName = "gfw." + df.format(new Date()) + ".extra.json";  //$NON-NLS-1$//$NON-NLS-2$
-					Path jsonFile = gfwDir.resolve(fileName);
-					Files.write(jsonFile, sw.toString().getBytes());
+					if (jsonLogFiles[1] == null) {
+						throw new Exception("Unable to determine log file for logging GFW data."); //$NON-NLS-1$
+					}
+					Files.write(jsonLogFiles[1], sw.toString().getBytes());
 				}catch (Exception ex) {
 					logger.log(Level.WARNING, "Unable to log GFW JSON data to filestore: " + ex.getMessage(), ex); //$NON-NLS-1$
 				}
@@ -304,6 +297,29 @@ public class GlobalForestWatchProcessorServlet extends HttpServlet {
 			createdAlerts.add(alert);
 		}
 		return createdAlerts;
-		
 	}
+	
+	/*
+	 * compute the filename for logging json data to
+	 */
+	private Path[] getJsonFileNames() throws IOException {
+		
+		Path gfwDir = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(LOG_DIRECTORY);
+		if (!Files.exists(gfwDir)) Files.createDirectories(gfwDir);
+		
+		SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
+		String fileName = "gfw." + df.format(new Date()); //$NON-NLS-1$
+		
+		Path jsonFile = gfwDir.resolve(fileName + ".json"); //$NON-NLS-1$
+		Path extraFile = gfwDir.resolve(fileName + "extra.json"); //$NON-NLS-1$
+		int cnt = 1;
+		while(Files.exists(jsonFile) && cnt < 5000) {
+			jsonFile = gfwDir.resolve(fileName + "." + cnt + ".json"); //$NON-NLS-1$ //$NON-NLS-2$
+			extraFile = gfwDir.resolve(fileName + ".extra." + cnt + ".json"); //$NON-NLS-1$ //$NON-NLS-2$
+			cnt ++;
+		}
+		return new Path[] {jsonFile, extraFile};
+	}
+
+		
 }
