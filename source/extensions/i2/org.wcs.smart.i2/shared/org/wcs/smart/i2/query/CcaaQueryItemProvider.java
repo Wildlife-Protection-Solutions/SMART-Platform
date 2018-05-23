@@ -157,7 +157,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 				.setParameterList("cas",  getConservationAreas()) //$NON-NLS-1$
 				.setParameter("attribute",  recordsourceKey) //$NON-NLS-1$
 				.list();
-		
+		if (allAttributes.size() == 0) return null;
 		for (IntelRecordSource type : allAttributes) {
 			if (type.getConservationArea().equals(getMainConservationArea())) {
 				IntelRecordSource a = new IntelRecordSource();
@@ -167,7 +167,12 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 				return a;
 			}
 		}
-		return null;
+		//pick one
+		IntelRecordSource a = new IntelRecordSource();
+		a.setKeyId(allAttributes.get(0).getKeyId());
+		a.setName(allAttributes.get(0).getName());
+		a.setIcon(allAttributes.get(0).getIcon());
+		return a;
 	}
 	
 
@@ -177,6 +182,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 				.setParameterList("cas",  getConservationAreas()) //$NON-NLS-1$
 				.setParameter("attribute",  entityTypeKey) //$NON-NLS-1$
 				.list();
+		if (allAttributes.size() == 0) return null;
 		
 		for (IntelEntityType type : allAttributes) {
 			if (type.getConservationArea().equals(getMainConservationArea())) {
@@ -187,7 +193,14 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 				return a;
 			}
 		}
-		return null;
+		
+		//pick one of the conservation areas
+		IntelEntityType a = new IntelEntityType();
+		a.setKeyId(allAttributes.get(0).getKeyId());
+		a.setName(allAttributes.get(0).getName());
+		a.setIcon(allAttributes.get(0).getIcon());
+		return a;
+		
 	}
 	
 	@Override
@@ -196,7 +209,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 				.setParameterList("cas",  getConservationAreas()) //$NON-NLS-1$
 				.setParameter("attribute",  attributeKey) //$NON-NLS-1$
 				.list();
-		
+		if (allAttributes.size() == 0) return null;
 		for (IntelAttribute type : allAttributes) {
 			if (type.getConservationArea().equals(getMainConservationArea())) {
 				IntelAttribute a = new IntelAttribute();
@@ -206,7 +219,12 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 				return a;
 			}
 		}
-		return null;
+		//pick one of the conservation areas
+		IntelAttribute a = new IntelAttribute();
+		a.setKeyId(allAttributes.get(0).getKeyId());
+		a.setName(allAttributes.get(0).getName());
+		a.setType(allAttributes.get(0).getType());
+		return a;
 	}
 	
 	@Override

@@ -163,13 +163,12 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT DISTINCT entity_type_key FROM "); //$NON-NLS-1$
 		sb.append(queryResults.getQueryDataTable());
-		
 		List<Object> typeKeys = session.createNativeQuery(sb.toString()).list();
 		Set<String> attributeKeys = new HashSet<>();
 		for (Object t : typeKeys) {
 			String entityTypeKey = (String)t;
 			IntelEntityType type = fItemProvider.getEntityType(entityTypeKey, session);
-			
+			if (type == null) continue; //entity type not found
 			for (IntelEntityTypeAttribute aa : fItemProvider.getEntityTypeAttributes(type, session)) {
 				if (aa.getAttribute() != null) attributeKeys.add(aa.getAttribute().getKeyId());
 				if (aa.getEntityType() != null) attributeKeys.add(aa.getEntityType().getKeyId());
