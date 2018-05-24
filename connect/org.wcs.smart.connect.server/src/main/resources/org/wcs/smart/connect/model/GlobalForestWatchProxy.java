@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.connect.model;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;

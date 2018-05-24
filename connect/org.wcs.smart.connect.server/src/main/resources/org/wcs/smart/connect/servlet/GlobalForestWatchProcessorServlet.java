@@ -127,6 +127,7 @@ public class GlobalForestWatchProcessorServlet extends HttpServlet {
 				return;
 			}
 			
+			gw.setLastDataDate(new Date());
 			//log the request json so I can figure out how to parse it
 			StringBuilder json = new StringBuilder();
 			try(BufferedReader reader = request.getReader()){
