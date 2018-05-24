@@ -92,9 +92,18 @@ public class AddRJob extends Job {
 	private void createTables(Session session){
 		String[] sql = new String[]{
 				//Tables
-				//TODO: populate create sql commands
-				
-				
+				"CREATE TABLE smart.r_script(uuid char(16) for bit data NOT NULL, ca_uuid char(16) for bit data NOT NULL, filename varchar(2048) NOT NULL, creator_uuid char(16) for bit data  NOT NULL, default_parameters varchar(32672), PRIMARY KEY (uuid))",
+				"CREATE TABLE smart.r_script_runparameter(uuid char(16) for bit data NOT NULL, script_uuid char(16) for bit data NOT NULL, pkey varchar(64) NOT NULL, value varchar(32672), PRIMARY KEY (uuid))",
+
+				/* Create Foreign Keys */
+				"ALTER TABLE smart.r_script ADD CONSTRAINT rscript_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.r_script ADD CONSTRAINT rscript_creatoruuid_fk FOREIGN KEY (creator_uuid) REFERENCES smart.employee(uuid) DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.r_script_runparameter ADD CONSTRAINT rscriptparameter_scriptuuid_fk FOREIGN KEY (script_uuid) REFERENCES smart.r_script(uuid) DEFERRABLE INITIALLY IMMEDIATE",
+
+				"GRANT ALL PRIVILEGES ON smart.r_script TO ANALYST",
+				"GRANT ALL PRIVILEGES ON smart.r_script_runparameter TO ANALYST",
+				"GRANT ALL PRIVILEGES ON smart.r_script TO MANAGER",
+				"GRANT ALL PRIVILEGES ON smart.r_script_runparameter TO MANAGER",
 		};
 		
 		session.doWork(new Work(){

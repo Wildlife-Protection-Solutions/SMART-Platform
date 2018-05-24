@@ -9,7 +9,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.wcs.smart.p2;bundle-version="6.0.0",
  org.wcs.smart.hibernate.libs;bundle-version="6.0.0",
- org.wcs.smart
+ org.wcs.smart,
+ org.wcs.smart.query;bundle-version="6.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: org.wcs.smart.r
 Bundle-ActivationPolicy: lazy
+Export-Package: org.wcs.smart.r.model
