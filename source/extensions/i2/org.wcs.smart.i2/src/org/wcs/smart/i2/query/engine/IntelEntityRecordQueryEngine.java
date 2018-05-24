@@ -30,7 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -53,7 +52,6 @@ import org.wcs.smart.i2.query.IntelAttributeQueryColumn;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for intelligence observation queries.
