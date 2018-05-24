@@ -546,7 +546,8 @@
                   tooltip="%command.showinactive.tooltip">
             </command>
             <separator
-                  name="org.wcs.smart.query.separator1">
+                  name="org.wcs.smart.query.separator.options"
+                  visible="true">
             </separator>
             <command
                   commandId="org.wcs.smart.command.showperspective"
