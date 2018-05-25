@@ -419,9 +419,8 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 			public void dragEnter(DropTargetEvent event) {
 				if (dragItem == null){
 					StructuredSelection selection = (StructuredSelection) LocalSelectionTransfer.getTransfer().getSelection();
-					if (selection == null) {
-						return;
-					}
+					if (selection == null) return;
+					if (!(selection.getFirstElement() instanceof DropItem)) return;
 					//hide drop item and setup proxy
 					dragItem = (DropItem)selection.getFirstElement();
 				}

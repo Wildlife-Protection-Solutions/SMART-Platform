@@ -31,7 +31,6 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -82,20 +81,7 @@ public class ExportQueryTypePage extends WizardPage {
 		outputOptions = new TableViewer(main, SWT.BORDER | SWT.SINGLE );
 		outputOptions.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		outputOptions.setContentProvider(ArrayContentProvider.getInstance());
-		outputOptions.setLabelProvider(new LabelProvider(){
-			public String getText(Object element) {
-				if (element instanceof IQueryExporter){
-					IQueryExporter exp = (IQueryExporter) element;
-					String name = exp.getName();
-					String ext = exp.getDefaultExtension();
-					if (ext != null){
-						name = name  + " (*." + ext + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-					}
-					return name;					
-				}
-				return element == null ? "" : element.toString();//$NON-NLS-1$
-			}
-		});
+		outputOptions.setLabelProvider(new QueryExportLabelProvider());
 		List<IQueryExporter> exports = QueryExportEngine.getQueryExports(((ExportQueryWizard)getWizard()).getQuery() );
 		Collections.sort(exports, new Comparator<IQueryExporter>() {
 
