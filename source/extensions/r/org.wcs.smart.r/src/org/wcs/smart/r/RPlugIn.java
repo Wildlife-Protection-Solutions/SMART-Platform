@@ -24,6 +24,7 @@ package org.wcs.smart.r;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -58,6 +59,8 @@ public class RPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String DB_VERSION = DB_VERSION_1;
   
+	public static final String ICON_UP = "org.wcs.smart.r.ICON_UP";
+	public static final String ICON_DOWN = "org.wcs.smart.r.ICON_DOWN";
 	
 	
 	/**
@@ -124,6 +127,13 @@ public class RPlugIn extends AbstractUIPlugin {
 		});
 		
 	}	
+	
+	@Override
+	 protected void initializeImageRegistry(ImageRegistry reg) {
+		super.initializeImageRegistry(reg);
+	    reg.put(ICON_DOWN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/down.png")); //$NON-NLS-1$
+	    reg.put(ICON_UP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/up.png")); //$NON-NLS-1$
+	}
 	
 }
 

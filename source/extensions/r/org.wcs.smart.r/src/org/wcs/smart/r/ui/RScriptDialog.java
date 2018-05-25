@@ -1,18 +1,22 @@
 package org.wcs.smart.r.ui;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.HashSet;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
@@ -21,6 +25,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.r.RPlugIn;
+import org.wcs.smart.r.RScriptInterceptor;
 import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -32,28 +37,73 @@ public class RScriptDialog extends TitleAreaDialog {
 	private Text txtDefaultParameters;
 	private Text txtName;
 	
+	private Text txtFile;
+	
 	public RScriptDialog(Shell parentShell, RScript script) {
 		super(parentShell);
 		this.script = script;
 	}
-
-	@Override
-	protected Point getInitialSize() {
-		Point p = super.getInitialSize();
-		return new Point(p.x,(int)(p.y*2));
+	
+	public RScriptDialog(Shell parentShell) {
+		super(parentShell);
+		
+		script = new RScript();
+		script.setNames(new HashSet<>());
+		script.setConservationArea(SmartDB.getCurrentConservationArea());
+		script.setCreator(SmartDB.getCurrentEmployee());
+		script.setName("");
 	}
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		try(Session s = HibernateManager.openSession()){
-			script = s.get(RScript.class, script.getUuid());
-			script.getNames().forEach(e->e.getValue());
+		if (script.getUuid() != null) {
+			try(Session s = HibernateManager.openSession()){
+				script = s.get(RScript.class, script.getUuid());
+				script.getNames().forEach(e->e.getValue());
+			}
 		}
 		
 		parent = (Composite) super.createDialogArea(parent);
 		parent = new Composite(parent, SWT.NONE);
 		parent.setLayout(new GridLayout(3, false));
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		if (this.script.getUuid() == null) {
+			//new script we need to get a file
+			Label l = new Label(parent, SWT.NONE);
+			l.setText("Script File:");
+			
+			txtFile = new Text(parent, SWT.BORDER);
+			txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			txtFile.addListener(SWT.Modify, e->validate());
+			
+			Button btnBrowse = new Button(parent, SWT.PUSH);
+			btnBrowse.setText("...");
+			btnBrowse.addListener(SWT.Selection, e->{
+				FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
+				fd.setText("Import R Script");
+				fd.setFilterExtensions(new String[] {"*.R, *.RData", "*.txt", "*.*"});
+				fd.setFilterNames(new String[] {"R Scripts (*.R, *.RData)", "Text Files (*.txt)", "All Files (*.*)"});
+				String fileName = fd.open();
+				
+				if (fileName == null) return;
+				txtFile.setText(fileName);
+				
+				Path p = Paths.get(txtFile.getText());
+				
+				String scriptname = p.getFileName().toString();
+				int index = scriptname.lastIndexOf('.');
+				if (index > 0) {
+					scriptname = scriptname.substring(0, index);
+				}
+				if (txtName.getText().trim().isEmpty()) {
+					txtName.setText(scriptname);
+				}
+			});
+			
+			l = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+		}
 		
 		Label l = new Label(parent, SWT.NONE);
 		l.setText("Name:");
@@ -74,6 +124,7 @@ public class RScriptDialog extends TitleAreaDialog {
 		});
 		
 		
+		
 		l = new Label(parent, SWT.NONE);
 		l.setText("Default Script Parameters:");
 		l.setToolTipText("the parameters to sent to the r script along with the output from SMART queries.");
@@ -81,6 +132,7 @@ public class RScriptDialog extends TitleAreaDialog {
 		
 		txtDefaultParameters = new Text(parent, SWT.BORDER | SWT.WRAP  | SWT.V_SCROLL);
 		txtDefaultParameters.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
+		((GridData)txtDefaultParameters.getLayoutData()).heightHint = 100;
 		txtDefaultParameters.addListener(SWT.Modify, e->validate());
 		if (script.getDefaultParameters() != null) txtDefaultParameters.setText(script.getDefaultParameters());
 			
@@ -111,6 +163,18 @@ public class RScriptDialog extends TitleAreaDialog {
 			enableOk(false);
 			return;
 		}
+		
+		if (txtFile != null) {
+			if (txtFile.getText().trim().isEmpty()) {
+				setErrorMessage("You must select an R script to import");
+				enableOk(false);
+				return;	
+			}
+			Path p = Paths.get(txtFile.getText());
+			if (!Files.exists(p)) {
+				setErrorMessage(MessageFormat.format("The file {0} could not be found.", p.toString()));
+			}
+		}
 		enableOk(true);
 		setErrorMessage(null);
 	}
@@ -133,6 +197,7 @@ public class RScriptDialog extends TitleAreaDialog {
 			}else if (ret == 0){
 				//yes
 				okPressed();	
+				return;
 			}
 		}
 		super.cancelPressed();
@@ -143,11 +208,16 @@ public class RScriptDialog extends TitleAreaDialog {
 		validate();
 		if (getErrorMessage() != null) return;
 		
-		script.setName(txtName.getText());
-		script.updateName(SmartDB.getCurrentLanguage(),txtName.getText());
+		script.setName(txtName.getText().trim());
+		script.updateName(SmartDB.getCurrentLanguage(),txtName.getText().trim());
 		script.setDefaultParameters(txtDefaultParameters.getText());
-		
-		try(Session session = HibernateManager.openSession()){
+		if (script.getUuid() == null) {
+			script.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), txtName.getText().trim());
+			
+			Path p = Paths.get(txtFile.getText());
+			script.setImportFile(p);
+		}
+		try(Session session = HibernateManager.openSession(new RScriptInterceptor())){
 			session.beginTransaction();
 			try {
 				session.saveOrUpdate(script);

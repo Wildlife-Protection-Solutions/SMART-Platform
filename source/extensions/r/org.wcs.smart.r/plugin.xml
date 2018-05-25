@@ -61,6 +61,31 @@
                style="push">
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.wcs.smart.query.parts.itemlist?after=org.wcs.smart.query.separator1">
+         <menu
+               id="org.wcs.smart.r.scripts.runlist"
+               label="Run R Script">
+            <dynamic
+                  class="org.wcs.smart.r.ui.RunScriptMenuContribution"
+                  id="org.wcs.smart.r.scripts.runlist.dynamic">
+            </dynamic>
+            <separator
+                  name="org.wcs.smart.r.scripts.runlist.seperator.other"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.r.scirpt.run"
+                  label="Other..."
+                  style="push">
+            </command>
+         </menu>
+         <separator
+               name="org.wcs.smart.query.r.separator"
+               visible="true">
+         </separator>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
@@ -77,12 +102,25 @@
             id="org.wcs.smart.r.scripts.manage.show"
             name="Configure R Scripts">
       </command>
+      <command
+            id="org.wcs.smart.r.scirpt.run"
+            name="Run R Script">
+         <commandParameter
+               id="org.wcs.smart.r.scirpt.run.scriptuuid"
+               name="R Script Uuid"
+               optional="true">
+         </commandParameter>
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
             class="org.wcs.smart.r.ui.ShowRScriptHandler$ShowRScriptHandlerWrapper"
             commandId="org.wcs.smart.r.scripts.manage.show">
+      </handler>
+      <handler
+            class="org.wcs.smart.r.ui.RunRScriptHandler$RunRScriptHandlerWrapper"
+            commandId="org.wcs.smart.r.scirpt.run">
       </handler>
    </extension>
 

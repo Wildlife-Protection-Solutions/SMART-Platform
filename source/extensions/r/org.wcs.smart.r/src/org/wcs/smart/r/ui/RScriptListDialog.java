@@ -1,9 +1,7 @@
 package org.wcs.smart.r.ui;
 
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -14,8 +12,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -27,7 +23,6 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -39,10 +34,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
@@ -55,9 +46,7 @@ import org.wcs.smart.r.RPlugIn;
 import org.wcs.smart.r.RScriptInterceptor;
 import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.ui.NamedItemLabelProvider;
-import org.wcs.smart.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.ui.properties.FilterComposite;
 
 public class RScriptListDialog extends TitleAreaDialog {
 
@@ -82,6 +71,8 @@ public class RScriptListDialog extends TitleAreaDialog {
 				script = QueryFactory.buildQuery(session, RScript.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
 				script.forEach(c->c.getName()); 
 			}
+			
+			script.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 			
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
@@ -224,59 +215,10 @@ public class RScriptListDialog extends TitleAreaDialog {
 	}
 	
 	private void add(){
-		FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
-		fd.setText("Import R Script");
-		fd.setFilterExtensions(new String[] {"*.R", "*.txt", "*.*"});
-		fd.setFilterNames(new String[] {"R Scripts (*.R)", "Text Files (*.txt)", "All Files (*.*)"});
-		String fileName = fd.open();
-		
-		if (fileName == null) return;
-		
-		Path p = Paths.get(fileName);
-		if (!Files.exists(p)) {
-			RPlugIn.displayLog(MessageFormat.format("File {0} not found.", p.toString()), null);
-			return;
-		}
-		String name = p.getFileName().toString();
-		int index = name.lastIndexOf('.');
-		if (index > 0) {
-			name = name.substring(0, index);
-		}
-		InputDialog id = new InputDialog(getShell(), "Import R Script", "Enter a name for the R Script", name, new IInputValidator() {
-			
-			@Override
-			public String isValid(String newText) {
-				if (newText.trim().isEmpty() || newText.trim().length() > org.wcs.smart.ca.Label.MAX_LENGTH) {
-					return MessageFormat.format("A name must be provided and be fewer then {0} characters.", org.wcs.smart.ca.Label.MAX_LENGTH);
-				}
-				return null;
-			}
-		});
-		if (id.open() == Window.CANCEL) return;
-		
-		String scriptname = id.getValue();
-		
-		RScript script = new RScript();
-		script.setConservationArea(SmartDB.getCurrentConservationArea());
-		script.setName(scriptname);
-		script.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), scriptname);
-		script.updateName(SmartDB.getCurrentLanguage(), scriptname);
-		script.setDefaultParameters("");
-		script.setImportFile(p);
-		script.setCreator(SmartDB.getCurrentEmployee());
-		script.setParameters(new ArrayList<>());
-		
-		try(Session session = HibernateManager.openSession(new RScriptInterceptor())){
-			session.beginTransaction();
-			try {
-				session.save(script);
-				session.getTransaction().commit();
-			}catch (Exception ex) {
-				RPlugIn.log(MessageFormat.format("Could not import R Script into SMART: {0}", ex.getMessage()),ex);
-				session.getTransaction().rollback();
-			}
-		}
-		refresh();
+		RScriptDialog dialog = new RScriptDialog(getShell());
+		if (dialog.open() == Window.OK) {
+			refresh();
+		}	
 	}
 
 	private void edit(){

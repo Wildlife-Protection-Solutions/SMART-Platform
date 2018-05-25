@@ -1,10 +1,19 @@
 package org.wcs.smart.r.ui.editor.script;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringWriter;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -58,11 +67,23 @@ public class ResultsPage extends EditorPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
+		toolkit = new FormToolkit(parent.getDisplay());
+		
 		Composite main = toolkit.createComposite(parent);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Hyperlink clear = toolkit.createHyperlink(main, "clear", SWT.DEFAULT);
+		Composite header = toolkit.createComposite(main);
+		header.setLayout(new GridLayout(2, false));
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)header.getLayout()).marginWidth = 0;
+		((GridLayout)header.getLayout()).marginHeight = 0;
+		
+		Label l = toolkit.createLabel(header, "R Script Output:");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Hyperlink clear = toolkit.createHyperlink(header, "clear", SWT.NONE);
+		clear.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		clear.addHyperlinkListener(new IHyperlinkListener() {
 			@Override
 			public void linkExited(HyperlinkEvent e) {
@@ -78,7 +99,9 @@ public class ResultsPage extends EditorPart {
 			}
 		});
 
-		txtOutput = new Text(main, SWT.WRAP | SWT.V_SCROLL | SWT.H_SCROLL);
+		txtOutput = new Text(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		txtOutput.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		txtOutput.setEditable(false);
 	}
 
 	@Override
@@ -89,5 +112,35 @@ public class ResultsPage extends EditorPart {
 	public void update() {
 		
 	}
+	
+	public OutputStream createPage2OutputStream() {
 
+		return new OutputStream() {
+			StringWriter sb = new StringWriter();	
+			private Job j = new Job("refreshJob") {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					Display.getDefault().syncExec(()->txtOutput.setText(sb.toString()));
+					return Status.OK_STATUS;
+				}
+				
+			};
+			@Override
+			public void close() throws IOException {
+				final String lastString = sb.toString();
+				Display.getDefault().asyncExec(()->txtOutput.setText(lastString));
+				super.close();
+				j.cancel();
+				j = null;
+			}
+			
+			@Override
+			public void write(int b) throws IOException {
+				sb.append((char)b);
+				j.schedule(500);
+			}
+		};
+
+	}
 }

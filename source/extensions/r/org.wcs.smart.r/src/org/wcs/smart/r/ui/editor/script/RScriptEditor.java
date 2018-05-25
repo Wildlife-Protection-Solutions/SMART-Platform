@@ -1,16 +1,17 @@
 package org.wcs.smart.r.ui.editor.script;
 
+import java.io.OutputStream;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.r.model.RScript;
 
 public class RScriptEditor extends MultiPageEditorPart {
@@ -53,6 +54,14 @@ public class RScriptEditor extends MultiPageEditorPart {
 		page1.setFocus();
 	}
 
+	void showResults() {
+		setActiveEditor(page2);
+	}
+	
+	OutputStream createPage2OutputStream() {
+		return page2.createPage2OutputStream();
+	}
+	
 	@Override
 	protected void createPages() {
 		
@@ -85,7 +94,7 @@ public class RScriptEditor extends MultiPageEditorPart {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			UUID suuid = ((QueryEditorInput) getEditorInput()).getUuid();
+			UUID suuid = ((RScriptEditorInput) getEditorInput()).getRScript();
 			RScript temp = null;
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
@@ -99,9 +108,13 @@ public class RScriptEditor extends MultiPageEditorPart {
 			
 			RScriptEditor.this.script = temp; 
 			
-			page1.update();
-			page2.update();
-			page3.update();
+			Display.getDefault().syncExec(()->{
+				page1.update();
+				page2.update();
+				page3.update();
+				
+				setPartName(script.getName());
+			});
 			
 			return Status.OK_STATUS;
 		}
