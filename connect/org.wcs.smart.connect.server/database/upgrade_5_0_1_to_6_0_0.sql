@@ -2153,7 +2153,7 @@ $$LANGUAGE plpgsql;
 CREATE TABLE connect.gfw(
 	uuid uuid not null,
 	alert_uuid uuid not null,
-	last_data date,
+	last_data timestamp,
 	creator_uuid uuid not null,
 	level smallint not null,
 	primary key (uuid)

@@ -636,7 +636,10 @@ function createGfwTable(){
  		var alertType = gfw[i].alertName;
  		var alertLevel = gfw[i].level;
  		var uuid = gfw[i].uuid;
- 		var lastdate = gfw[i].lastDataDate;
+ 		var lastdate = "";
+ 		if (gfw[i].lastDataDate != null){
+ 			lastdate = (new Date(gfw[i].lastDataDate)).toLocaleString();
+ 		}
  		var url = gfw[i].smartUrl;
  		
  		var row = tableCreateRowTDs(parent,
