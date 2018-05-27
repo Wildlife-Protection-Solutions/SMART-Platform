@@ -88,6 +88,9 @@ public class RelationshipGraphLoadDataJob extends Job {
 					}
 				}
 			}
+			for (IntelEntityRelationship r : graphData.getRelationships()) {
+				r.getRelationshipType().getNames().size();
+			}
 		}
 		
 		loadedData = graphData;

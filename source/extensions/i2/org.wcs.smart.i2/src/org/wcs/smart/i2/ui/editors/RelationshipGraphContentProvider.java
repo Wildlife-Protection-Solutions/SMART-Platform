@@ -98,4 +98,14 @@ public class RelationshipGraphContentProvider implements IGraphContentProvider {
 		return null;
 	}
 
+	public IntelEntityRelationship getRelationship(Object source, Object target) {
+		Set<IntelEntityRelationship> rels = relationships;
+		for (IntelEntityRelationship r : rels) {
+			if (source.equals(r.getSourceEntity()) && target.equals(r.getTargetEntity())) {
+				return r;
+			}
+		}
+		return null;
+	}
+
 }

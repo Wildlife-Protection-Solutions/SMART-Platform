@@ -29,12 +29,14 @@ import org.eclipse.gef.zest.fx.ZestProperties;
 import org.eclipse.gef.zest.fx.jface.IGraphAttributesProvider;
 import org.eclipse.gef.zest.fx.jface.ZestContentViewer;
 import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.ui.Thumbnail;
 
 /**
@@ -59,6 +61,15 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 		}
 		return node.equals(input);
 	}
+	
+	private IntelEntityRelationship getRelationship(Object source, Object target) {
+		IContentProvider cp = graphViewer.getContentProvider();
+		if (cp instanceof RelationshipGraphContentProvider) {
+			return ((RelationshipGraphContentProvider)cp).getRelationship(source, target);
+		}
+		return null;
+	}
+	
 	
 	@Override
 	public String getText(Object element) {
@@ -96,6 +107,11 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 		attributes.put(ZestProperties.TARGET_DECORATION__E, new javafx.scene.shape.Polygon(0, 0, 10, 3, 10, -3));
 		attributes.put(ZestProperties.TARGET_DECORATION_CSS_STYLE__E, "-fx-stroke: red; -fx-fill: red;");
 		attributes.put(ZestProperties.CURVE_CSS_STYLE__E, "-fx-stroke: red;");
+		
+		IntelEntityRelationship r = getRelationship(sourceNode, targetNode);
+		if (r != null) {
+			attributes.put(ZestProperties.LABEL__NE, r.getRelationshipType().getName());
+		}
 		
 		return attributes;
 	}
