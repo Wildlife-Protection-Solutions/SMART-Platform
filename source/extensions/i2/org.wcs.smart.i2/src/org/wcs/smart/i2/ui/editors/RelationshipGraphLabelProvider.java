@@ -21,11 +21,19 @@
  */
 package org.wcs.smart.i2.ui.editors;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.gef.zest.fx.ZestProperties;
 import org.eclipse.gef.zest.fx.jface.IGraphAttributesProvider;
+import org.eclipse.gef.zest.fx.jface.ZestContentViewer;
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.ui.Thumbnail;
 
@@ -36,7 +44,21 @@ import org.wcs.smart.ui.Thumbnail;
  * @since 6.0.0
  *
  */
-public class RelationshipGraphLabelProvider extends LabelProvider implements IGraphAttributesProvider {
+public class RelationshipGraphLabelProvider extends LabelProvider implements IGraphAttributesProvider, IColorProvider {
+	
+	private ZestContentViewer graphViewer;
+	
+	public RelationshipGraphLabelProvider(ZestContentViewer graphViewer) {
+		this.graphViewer = graphViewer; 
+	}
+
+	private boolean isRootNode(Object node) {
+		Object input = graphViewer.getInput();
+		if (input instanceof Collection<?>) {
+			return ((Collection<?>)input).contains(node);
+		}
+		return node.equals(input);
+	}
 	
 	@Override
 	public String getText(Object element) {
@@ -51,7 +73,7 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 	public Image getImage(Object element) {
 		if (element instanceof IntelEntity) {
 			IntelEntity e = (IntelEntity) element;
-			Thumbnail thum = new Thumbnail(e.getPrimaryAttachment());
+			Thumbnail thum = new Thumbnail(e.getPrimaryAttachment(), 50);
 			return thum.getImage();
 		}
 		return super.getImage(element);
@@ -59,12 +81,23 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 
 	@Override
 	public Map<String, Object> getNodeAttributes(Object node) {
+		if (node instanceof IntelEntity) {
+			IntelEntity e = (IntelEntity) node;
+			Map<String, Object> attributes = new HashMap<>();
+			attributes.put(ZestProperties.TOOLTIP__N, "Tooltip: " + e.getIdAttributeAsText()); //TODO: ZZZZZZZ need proper tooltip!!!
+			return attributes;
+		}
 		return null;
 	}
 	
 	@Override
 	public Map<String, Object> getEdgeAttributes(Object sourceNode, Object targetNode) {
-		return null;
+		Map<String, Object> attributes = new HashMap<>();
+		attributes.put(ZestProperties.TARGET_DECORATION__E, new javafx.scene.shape.Polygon(0, 0, 10, 3, 10, -3));
+		attributes.put(ZestProperties.TARGET_DECORATION_CSS_STYLE__E, "-fx-stroke: red; -fx-fill: red;");
+		attributes.put(ZestProperties.CURVE_CSS_STYLE__E, "-fx-stroke: red;");
+		
+		return attributes;
 	}
 
 	@Override
@@ -74,6 +107,22 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 
 	@Override
 	public Map<String, Object> getNestedGraphAttributes(Object nestingNode) {
+		return null;
+	}
+
+	@Override
+	public Color getForeground(Object element) {
+		if (isRootNode(element)) {
+			return Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
+		}
+		return null;
+	}
+
+	@Override
+	public Color getBackground(Object element) {
+		if (isRootNode(element)) {
+			return Display.getCurrent().getSystemColor(SWT.COLOR_YELLOW);
+		}
 		return null;
 	}
 

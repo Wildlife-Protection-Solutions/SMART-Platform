@@ -53,9 +53,6 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.gef.layout.algorithms.SpringLayoutAlgorithm;
-import org.eclipse.gef.zest.fx.jface.ZestContentViewer;
-import org.eclipse.gef.zest.fx.jface.ZestFxJFaceModule;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -65,9 +62,7 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -98,7 +93,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -252,7 +246,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private List<IntelEntityRelationship> relationshipsToAdd = new ArrayList<IntelEntityRelationship>();
 	private List<IntelEntityRelationship> relationshipsToDelete = new ArrayList<IntelEntityRelationship>();
 	
-	private ZestContentViewer graphViewer;
+	private RelationshipGraphComposite graphComposite;
 	
 	private IEclipseContext context;
 	private IEventBroker eventBroker;
@@ -777,14 +771,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 		addEntityDropTarget(compRelationships);
 
 		compRelationshipDiagram = toolkit.createComposite(tabPart, SWT.NONE);
-		compRelationshipDiagram.setLayout(new FillLayout(SWT.VERTICAL));
-		createRelationshipDiagramPanel(compRelationshipDiagram);
+		compRelationshipDiagram.setLayout(new GridLayout());
+		graphComposite = new RelationshipGraphComposite(compRelationshipDiagram, toolkit);
 		
 		tabList.setContent(new Composite[]{compMap,  compRecords, compRelationships, compRelationshipDiagram}, tabPart);
 		tabList.selectTab(0);
 		return tabList.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 	}
-	
+
 	private void addEntityDropTarget(Composite comp){
 		DropTarget dropTarget = new DropTarget(comp, DND.DROP_LINK);
 		dropTarget.setTransfer(new Transfer[]{IntelEntitySelectionTransfer.getTransfer()});
@@ -1530,24 +1524,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 		}
 	}
 	
-	private void createRelationshipDiagramPanel(Composite parent) {
-		//ZZZZZZZZ: implement properly
-		parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
-		graphViewer = new ZestContentViewer(new ZestFxJFaceModule());
-		graphViewer.createControl(parent, SWT.NONE);
-//		diagramViewer.setContentProvider(new MyContentProvider());
-//		diagramViewer.setLabelProvider(new MyLabelProvider());
-		graphViewer.setContentProvider(new RelationshipGraphContentProvider());
-		graphViewer.setLabelProvider(new RelationshipGraphLabelProvider());
-		graphViewer.setLayoutAlgorithm(new SpringLayoutAlgorithm());
-		graphViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				System.out.println(
-						"Selection changed: " + (event.getSelection()));
-			}
-		});
-	}
-
 	private void createRecordsPanel(Composite parent){
 		tblRecords = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION);
 		tblRecords.setContentProvider(ArrayContentProvider.getInstance());
@@ -2005,7 +1981,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		relationshipTree.refresh();
 		relationshipTree.expandAll();
 		
-		graphViewer.setInput(entity);
+		graphComposite.setInput(entity);
 		
 		mapPart.refresh();
 		loadRecords.schedule(0);
