@@ -1,0 +1,1962 @@
+﻿<html dir="ltr">
+<head>
+  
+  <title>Los componentes de SMART</title>
+  
+  <link href="smart_help.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body dir="ltr">
+<h2>Componentes de SMART</h2>
+
+<h4><a id="Overview">Introducción </a></h4>
+
+<p>El software SMART consta de una serie de perspectivas y componentes que
+interactúan entre sí para producir un flujo de trabajo para la gestión de los patrullajes y la
+información colectada durante los patrullajes. Muchas perspectivas comparten componentes parecidos
+lo que facilita la familiaridad con toda la aplicación, mientras 
+proporciona funcionalidad única para cada perspectiva. </p>
+
+<p></p>
+
+<p><strong>1.1 Introducción </strong></p>
+
+<p><img alt="Descripción general de SMART" src="images/Overview.png" width="631" height="485" /></p>
+
+<p></p>
+
+<p><strong>Los componentes de SMART</strong></p>
+
+<table border="1">
+  <thead>
+    <tr>
+      <td>Componente SMART</td>
+      <td>Icono</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Perspectiva de Mapa</td>
+      <td><img alt="Perspectiva de Mapa" src="images/iconMapPerspective.png" width="22" height="21" /></td>
+    </tr>
+    <tr>
+      <td>Perspectiva de Patrullaje</td>
+      <td><img alt="Perspectiva de Patrullaje" src="images/iconPatrolPerspective.png" width="22" height="21" /></td>
+    </tr>
+    <tr>
+      <td>Perspectiva de Consulta</td>
+      <td><img alt="Perspectiva de Consulta" src="images/iconQueryPerspective.png" width="22" height="21" /></td>
+    </tr>
+    <tr>
+      <td>Informes</td>
+      <td><img alt="Informes" src="images/iconReports.png" width="22" height="21" /></td>
+    </tr>
+    <tr>
+      <td>Planes SMART</td>
+      <td><img alt="Icono de Plan" src="images/plans.png" width="21" height="20" /></td>
+    </tr>
+    <tr>
+      <td>Inteligencia SMART</td>
+      <td><img alt="Icono de Inteligencia" src="images/intelligence.png" width="21" height="20" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2><a id="MapView">Perspectiva de Mapa</a></h2>
+
+<p>La perspectiva de mapa es el punto de partida al iniciar una sesión en SMART. En
+esta ventana se mostrarán las cinco (5) capas administrativas previamente cargadas
+en la pestaña Capas, que se encuentra al lado izquierdo de la pantalla. Los iconos encima
+de la lista de capas permite la reordenación, re-estilización y la opción de zoom a las extensiones de
+las capas. En esta perspectiva, el administrador puede realizar cambios en
+la cartografía predeterminada del Área de Conservación (consulte Creación de mapas de base). </p>
+
+<p><em>Nota: Existen ventanas de mapeo en las perspectivas de patrullaje y de búsqueda y la
+</em><em>navegación de mapas para estas ventanas son las mismas que la perspectiva de mapa.
+</em></p>
+
+<p></p>
+
+<table border="1">
+  <caption>Iconos de Capas de Mapa</caption>
+  <col />
+  <col />
+  <tbody>
+    <tr>
+      <td>Subir la capa seleccionada en la lista</td>
+      <td><img alt="Arriba" src="images/upArrow.png" width="21" height="23" /></td>
+    </tr>
+    <tr>
+      <td>Bajar la capa seleccionada en la lista</td>
+      <td><img alt="abajo" src="images/downArrow.png" width="21" height="23" /></td>
+    </tr>
+    <tr>
+      <td>Cambia el estilo de la capa seleccionada</td>
+      <td><img alt="editor de estilo" src="images/styleEditor.png" width="25" height="22" /></td>
+    </tr>
+    <tr>
+      <td>Cambia si la capa seleccionada se debe enfocar o no</td>
+      <td><img alt="enfoque capa" src="images/layerFocus.png" width="25" height="22" /></td>
+    </tr>
+    <tr>
+      <td>Zoom a las capas seleccionadas</td>
+      <td><img alt="acercar a la capa seleccionada" src="images/ZoomToSelectedLayers.png" width="25" height="22" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<h4><a id="MapNav">Navegación de Mapa</a></h4>
+
+<p>Navegar en la ventana de mapeo de SMART es un proceso simple que sigue muchos
+de los mismos procedimientos que en otras aplicaciones de SIG. Los usuarios pueden desplazarse por el mapa,
+acercarse/alejarse en toda la extensión de los archivos espaciales cargados en la
+ventana de mapeo. </p>
+
+<p></p>
+
+<table border="1">
+  <caption>Iconos del Navegación de Mapa</caption>
+  <col />
+  <col />
+  <tbody>
+    <tr>
+      <td>Guardar un mapa de base</td>
+      <td><img alt="guardar mapa de base" src="images/saveBaseMap.png" width="20" height="19" /></td>
+    </tr>
+    <tr>
+      <td>Seleccione un mapa de base</td>
+      <td><img alt="seleccione mapa de base" src="images/selectBaseMap.png" width="20" height="19" /></td>
+    </tr>
+    <tr>
+      <td>Panóramica</td>
+      <td><img alt="panóramica de mapa" src="images/panMap.png" width="20" height="19" /></td>
+    </tr>
+    <tr>
+      <td>Acercar a área</td>
+      <td><img alt="zoom seleccionado por usuario" src="images/zoomUserSelected.png" width="20" height="19" /></td>
+    </tr>
+    <tr>
+      <td>Alejarse</td>
+      <td><img alt="alejarse" src="images/zoomOut.png" width="20" height="19" /></td>
+    </tr>
+    <tr>
+      <td>Acercarse</td>
+      <td><img alt="acercarse" src="images/zoomIn.png" width="20" height="19" /></td>
+    </tr>
+    <tr>
+      <td>Zoom a la extensión completa</td>
+      <td><img alt="alejarse para visualizar toda su extensión" src="images/ZoomTopFullExtent.png" width="20" height="19" /></td>
+    </tr>
+    <tr>
+      <td>Añadir una capa al mapa</td>
+      <td><img alt="Añadir Capas" src="images/iconAddLayers.png" width="20" height="19" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<p><strong>Configurando Escala y Proyección de Mapa</strong></p>
+
+<p>En la parte inferior de la ventana de mapeo, los usuarios pueden ajustar manualmente la escala de la visualización
+y las proyecciones disponibles. </p>
+
+<p><em>Nota: Las proyecciones adicionales sólo están disponibles después que un administrador
+</em><em>ha añadido las proyecciones adicionales a la zona de conservación (vea Manejo de
+</em><em>Proyecciones)</em></p>
+
+<p></p>
+
+<h4><a id="AddLayer">Añadir capas</a></h4>
+
+<p>Capas espaciales adicionales pueden ser añadidas a la perspectiva de mapeo para añadir
+contexto a los cinco (5) archivos de límites que se cargan durante la
+inicialización del Área de Conservación. </p>
+
+<p></p>
+
+<p><img alt="Agregar diálogo de capas" src="images/AddLayersDialog.png" width="407" height="372" /></p>
+
+<p><strong>Archivos</strong> - ESRI Shapefiles, archivos ArcGRID y varios
+formatos de imagenes son compatibles.</p>
+
+<p><strong>Decoración de Mapa</strong> - Flecha de norte, barra de escala, leyenda y una cuadricula
+son elementos cartográficos adicionales.</p>
+
+<p><strong>Página de Conexión de Área SMART  -</strong> abre el diálogo para
+la adición/actualización de los cinco (5) archivos de límites originales.</p>
+
+<p><strong>Servidor de Mapas Web</strong> - Agrega una conexión a un Servidor de Mapas Web
+(WMS).</p>
+
+<p><strong>Servidor de Mapas Web Caché de Bloques </strong> - Agrega una conexión con un Servidor de Mapas Web
+Cache de bloques (WMS-C).</p>
+
+<p></p>
+
+<h4><a id="StyleLayer">Estilizando Capas</a></h4>
+
+<p>SMART tiene un amplio conjunto de herramientas para crear mapas personalizados con colores y etiquetas definidos por el usuario.
+ El diálogo de Editor de Estilos permite la personalización de muchos
+de los componentes cartrográficos para capas de punto, línea y polígonos. </p>
+
+<p></p>
+
+<p><strong>Propiedades de estilo</strong></p>
+
+<p><strong>Generales</strong> - configura la escala de visualización minima y máxima y cualquier potencial
+de desplazamiento aplicado a la visualización de la capa.</p>
+
+<p><strong>Límite</strong> - establece las características de los bordes del polígono.</p>
+
+<p><strong>Relleno</strong> - establece las características internas del polígono.</p>
+
+<p><strong>Etiquetas</strong> - establece las características de las etiquetas.</p>
+
+<p><strong>Filtro</strong> - Filtros personalizados pueden ser creados para reducir las
+características no deseadas de las ventanas de mapeo.</p>
+
+<p></p>
+
+<p><img alt="diálogo de editor de estilo" src="images/styleEditorDialog.png" width="975" height="699" /></p>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="DeleteLayer">Eliminación de capas</a></h4>
+
+<p>Las capas se pueden eliminar seleccionando la capa y haciendo clic-derecho para
+que aparezca las opciones adicionales que incluyen Eliminar. Las capas también se pueden eliminar al
+seleccionar la capa y haciendo clic en el botón &quot;Delete&quot; en el teclado.</p>
+
+<h4><a id="ExportMap">Exportar un mapa</a></h4>
+
+<p>Las capas individuales se pueden exportar a Shapefiles y toda la ventana
+de mapeo se puede exportar a un archivo de imagen. La exportación de capas o imágenes de mapa pueden ser
+accedidas a través de la opción en el menú <em>Archivo - Exportación de Mapa</em> o seleccionando
+capas y haciendo clic-derecho para acceder a la funcionalidad Exportación de Mapa.</p>
+
+<p></p>
+
+<p><img alt="exportar mapa" src="images/exportMap.png" width="410" height="359" /></p>
+
+<p></p>
+
+<h4><a id="Basemaps">Mapas de base</a></h4>
+
+<p>Los mapas de base son una representación cartográfica guardada que se puede aplicar al 
+Área de Conservación entera para dar consistencia a través de las diversas
+perspectivas. Las capas, los colores y las etiquetas son algunos de los elementos que pueden ser
+guardados en un mapa de base. Varios mapas de base pueden ser creados por el Administrador, y
+a estos mapas de base se puede acceder más tarde por el resto de cuentas a nivel de usuario. </p>
+
+<p><img alt="Iconos de mapa de base" src="images/baseMapIcons.png" width="243" height="26" /></p>
+
+<p></p>
+
+<p><strong>Crear y seleccionar un mapa de base</strong></p>
+
+<p>La cartografía de mapas de base se encuentran en la perspectiva de mapa. Después que la
+cartografía se ha creado, el mapa de base se guarda como un nuevo mapa de base o sobre-escribe
+un mapa existente. </p>
+
+<p>Después de crear un mapa de base, el administrador puede establecer ese mapa de base para que
+sea el predeterminado para el Área de Conservación. </p>
+
+<p>Un usuario que no sea administrador puede optar por utilizar un mapa de base alternativo para una sesión abierta
+usando la opción para seleccionar mapa de base y eligiendo &quot;Usar un mapa predeterminado de sesión&quot;. <img src="images/selectBaseMap.png" alt="Seleccionar mapa de base" height="19" width="20" /></p>
+
+<p></p>
+
+<p><strong>Manejando mapas de base</strong></p>
+
+<p>Al selecciónar Áreas de Conservación - Manejar mapas de base, un administrador puede establecer un
+mapa de base como el mapa de defecto para el área de conservación, eliminar un mapa de base ya existente o
+cambiar/traducir su nombre.</p>
+
+<p></p>
+
+<p><img alt="Administrar mapas de base" src="images/manageBasemaps.png" width="353" height="274" /></p>
+
+<p></p>
+
+<p><strong>Mapas de base en informes</strong></p>
+
+<p>Mapas integrados en los informes también utilizan mapas de base para establecer la cartografía del objeto mapa.
+ En la pestaña Capas de Mapa, el usuario puede seleccionar el mapa de base que desea utilizar para el
+mapa en el informe.</p>
+
+<p><img alt="Mapas de base en los informes" src="images/basemapsReports.png" width="708" height="234" /></p>
+
+<p></p>
+
+<h2><a id="Patrol">Perspectiva de Patrullaje</a></h2>
+
+<p>La perspectiva de patrullaje es donde se crean los patrullajes y donde sus observaciones asociades
+se registran. La perspectiva de la patrullaje se divide en tres
+partes.</p>
+
+<p></p>
+
+<p><strong>Perspectiva de Lista de Patrullajes</strong> - La lista de las patrullajes ingresadas en el
+Área de Conservación.</p>
+
+<p><strong>Capas</strong> - Capas de mapeo incluyendo los puntos de patrullaje y
+los trayectos en la ventana de mapeo.</p>
+
+<p><strong>Ventana de Información de Patrullaje</strong> - Esta es la ventana principal donde la
+información recopilada durante el patrullaje se puede acceder. En la parte inferior de esta
+ventana habrá:</p>
+<ul>
+  <li>una pestaña de resumen que muestra una visión general del patrullaje;</li>
+  <li>una pestaña para cada día del patrullaje que contiene las observaciones recolectadas y
+    los puntos registrados;</li>
+  <li>una pestaña de mapa que muestra cartográficamente los puntos y los trayectos del
+    patrullaje; y,</li>
+  <li>otra pestaña que contiene información de planificación e inteligencia.</li>
+</ul>
+
+<p></p>
+
+<p><img alt="Perspectiva de Patrullaje" src="images/PatrolPerspective.png" width="1059" height="772" /></p>
+
+<p></p>
+
+<h4><a id="PatrolOp">Opciones de Patrullaje</a></h4>
+
+<p>Como parte del proceso de inicialización para una nueva área de conservación,
+se requiere que el/la administrador(a) configure diversos parámetros de patrullaje. 
+Opciones de Patrullaje permiten que (1) revisiones a un patrullaje sean admisibles durante un período determinado
+de tiempo y (2) la información adicional esté disponible durante la creación de
+patrullajes. Este proceso no es un requisito durante la inicialización de la
+información de patrullaje para el área de conservación.</p>
+
+<p></p>
+
+<p><strong>Registro de Distancia y Dirección:</strong> Si se selecciona, los datos de patrullaje
+tendrán dos columnas adicionales para registrar la distancia y dirección compensadas de las observaciones
+y sus coordenadas capturadas por el GPS.</p>
+
+<p><strong>Editar opciones:</strong> Indica el número de días después de la entrada de datos
+durante el cual los datos de patrullaje pueden ser editados por cuentas que no sean de administrador. El valor
+predeterminado de -1 especifica que el patrullaje siempre será editable.</p>
+
+<p></p>
+
+<p><img alt="Opciones de patrullaje" src="images/patrolOptions.png" width="509" height="395" /></p>
+
+<h4><a id="PatrolMandates">Mandatos de Patrullaje</a></h4>
+
+<p>Mandatos de Patrullaje son una lista de mandatos que se asocian a cada patrullaje.
+Este proceso no es un requisito durante la inicialización de la información
+de patrullaje para el área de conservación.</p>
+
+<p></p>
+
+<p><strong>Añadir:</strong> Añade nuevos mandatos a la lista.</p>
+
+<p><strong>Desactivar/Activar:</strong> Un mandato puede ser desactivado si no está
+en uso, pero todavía tiene patrullajes asociados. Se puede activar más tarde
+para su uso en el futuro.</p>
+
+<p><strong>Eliminar:</strong> Elimina de forma permanente el mandato de la lista. Esta acción
+sólo es posible si no hay información de patrullaje asociado con el mandato.</p>
+
+<p><em>Nota: El idioma se configura antes de entrar a los registros dentro de la lista de mandatos.
+</em><em></em></p>
+
+<p><img alt="mandatos" src="images/mandates.png" width="508" height="321" /></p>
+
+<h4><a id="PatrolTypes">Tipos de Patrullaje</a></h4>
+
+<p>Los Tipos de Patrullaje son los tipos de transporte utilizados por los equipos de patrullaje en el
+Área de Conservación. Las opciones de base para los Tipos de Patrullaje son Aire, Tierra y
+Mar. Cada una de estas opciones puede ser desactivado si no se están usando por la Área de Conservación.
+ Las opciones de transporte son los tipos específicos de transporte para
+las opciones de base de aire, tierra y mar. </p>
+
+<p></p>
+
+<p><strong>Añadir:</strong> Añade nuevas opciones/tipos de transporte a la lista.</p>
+
+<p><strong>Desactivar/Activar:</strong> La opción/el tipo de transporte puede ser
+deshabilitado si no está actualmente en uso, pero todavía tiene patrullajes asociados.
+Más tarde se puede habilitar para su uso en el futuro.</p>
+
+<p><strong>Eliminar:</strong> Elimina de forma permanente la opción/tipo de la lista.
+Esto sólo es posible si no hay información de patrullaje que se asocia con la opción o el tipo de patrullaje.</p>
+
+<p></p>
+
+<p><em>Nota: El idioma se configura antes de entrar a las opciones de transporte.
+</em><em></em></p>
+
+<p></p>
+
+<p><img alt="tipos de transporte" src="images/transportationTypes.png" width="508" height="461" /></p>
+
+<p></p>
+
+<h4><a id="PatrolTeams">Equipos de Patrullaje</a></h4>
+
+<p>Equipos de patrullaje, sus mandatos y descripciones están introducidos y manejados desde
+esta pantalla. Si no se han creado mandatos, no habrá opción de
+seleccionarlos de la lista. Este proceso no es un requisito durante la
+inicialización de la información de patrullaje para el área de conservación.</p>
+
+<p></p>
+
+<p><strong>Equipo:</strong> El nombre del equipo de patrullaje.</p>
+
+<p><strong>Mandato:</strong> El mandato del equipo de patrullaje seleccionado de la
+lista de mandatos creados anteriormente.</p>
+
+<p><strong>Descripción:</strong> La descripción del equipo de patrullaje.</p>
+
+<p></p>
+
+<p><strong>Añadir:</strong> Añade nuevos equipos de patrullaje a la lista.</p>
+
+<p><strong>Desactivar/Activar:</strong> Un patrullaje se puede desactivar si no
+está actualmente en uso, pero todavía tiene patrullajes asociados. Se puede habilitar más adelante
+para su uso en el futuro.</p>
+
+<p><strong>Eliminar:</strong> Elimina de forma permanente el equipo de la lista. Esta acción
+sólo es posible si no hay información de patrullaje asociada con el equipo.</p>
+
+<p></p>
+
+<p><em>Nota: El idioma se configura antes de entrar a los equipos de patrullaje.</em></p>
+
+<p><img alt="equipos de patrullaje" src="images/patrolTeams.png" width="509" height="340" /></p>
+
+<p></p>
+
+<h4><a id="CreatePatrol">La creación de patrullajes</a></h4>
+
+<p>Patrullajes y sus observaciones pueden ser introducidos por un usuario SMART
+con los permisos adecuados, después de que el área de conservación y las propiedades de patrullaje han
+sido completadas. </p>
+
+<p>La creación de un patrullaje nuevo comienza con la selección de la opción &quot;Crear nuevo patrullaje&quot;
+en el menú de patrullaje al iniciar el asistente de ingreso de patrullaje. El asistente para ingresar patrullajes en SMART
+está diseñado para guiar al usuario a través del proceso de ingresar
+las características del patrullaje. </p>
+
+<p></p>
+
+<p><strong>Pasos para Ventana de Ingreso de Patrullaje</strong></p>
+<ol>
+  <li>ID de patrullaje</li>
+  <li>Enlaces a los Planes</li>
+  <li>Enlaces a registros de inteligencia</li>
+  <li>Tipo de Patrullaje (Aire, Tierra, Mar)</li>
+  <li>Tipo de Transporte de Patrullaje</li>
+  <li>Patrullaje armado</li>
+  <li>Equipo y Estación</li>
+  <li>Mandato de Patrullaje</li>
+  <li>Objetivo de Patrullaje</li>
+  <li>Comentarios de Patrullaje</li>
+  <li>Fecha inicial y final</li>
+  <li>Funcionarios</li>
+  <li>Líder de Patrullaje y el piloto (si el tipo de patrulla es aire o agua)</li>
+  <li>Patrullaje de Múltiples Tramos (este es el último paso si esta opción No se selecciona, sin embargo, en caso afirmativo
+    el asistente de patrullajes de varios tramos se abre)</li>
+</ol>
+
+<p></p>
+
+<p><strong>Asistente de Patrullajes de Múltiples Tramos</strong></p>
+
+<p>Un patrullaje de varios tramos sucede cuando un grupo de patrullaje se divide en dos o más
+grupos o si el patrullaje cambia de tipos de transporte o líder. Un patrullaje puede
+dividirse en dos grupos, cada uno con su propio líder y
+tipo de transporte. Si un patrullaje requiere una mayor división entonces uno de los
+sub-grupos requerirá una división más. Grupos divididos pueden combinarse en
+un solo grupo, o pueden completar el patrullaje en grupos separados.</p>
+
+<p></p>
+
+<p><img alt="multitramos" src="images/MultiLeg.png" width="730" height="410" /></p>
+
+<p></p>
+
+<h4><a id="ImportWaypoints">Importando los Puntos del Patrullaje</a></h4>
+
+<p>Las coordenadas del punto del patrullaje se ingresan principalmente a SMART a través de procesos automatizados
+que extraen los puntos directamente desde una unidad GPS o mediante la
+importación de archivos GPX estandarizados. El asistente de importación SMART tiene opciones para
+asignar automáticamente los puntos del patrullaje al día correcto basado en la marca de tiempo en el GPS
+o puede que el usuario asigne manualmente los puntos a un día específico si
+se requiere. Existe una opción manual para ingresar las coordenadas del punto si la
+información de ubicación no fue capturada por un GPS.</p>
+
+<p></p>
+
+<p><img alt="fechas de puntos de patrullaje" src="images/PatrolDateImport.png" width="695" height="311" /></p>
+
+<p></p>
+
+<p><strong>Hora de inicio</strong> - La hora de inicio del patrullaje para ese día o ese tramo.</p>
+
+<p><strong>Hora de finalización</strong> - La hora de finalización del patrullaje para ese día o ese tramo.</p>
+
+<p><strong>Minutos de Descanso</strong> - Número de minutos de descanso durante el patrullaje.</p>
+
+<p><strong>Distancia recorrida (km)</strong> - Distancia calculada de viaje durante
+el día de patrullaje o el tramo (en base a información del trayecto del GPS o calculado por
+los puntos disponibles).</p>
+
+<p><strong>Establecer Trayecto</strong> - Abre el asistente de importación de trayectos GPS.</p>
+
+<p><strong>Ver Trayectos</strong> - Abre una ventana para ver las coordenadas y marcas de tiempo de los trayectos.
+</p>
+
+<p><strong>Importar puntos del patrullaje</strong> - Abre el asistente de puntos GPS.</p>
+<br />
+
+
+<p><strong><u>Campos de la Tabla de Puntos</u></strong></p>
+
+<p><strong>ID de punto en el patrullaje -</strong> Identificación de un punto asignado por el GPS o por SMART
+si se ha introducido de forma manual.</p>
+
+<p><strong>Longitud</strong> - Coordenada de longitud capturada por el GPS o
+ingresado por el usuario de SMART.</p>
+
+<p><strong>Latitud</strong> - Coordenadas de latitud capturadas por el GPS o
+ingresada por el usuario de SMART.</p>
+
+<p><strong>Tiempo</strong> - Marca de tiempo capturados por el GPS</p>
+
+<p><strong>Observación</strong> - Al hacer clic en el icono de la celda de observación
+se iniciará el asistente Observación del Punto</p>
+
+<p><strong>Comentario</strong> - Comentarios ingresados en el GPS son presentadas de forma automática
+en este campo. Comentarios ingresados manualmente también son posibles. </p>
+
+<p><strong>Adjuntos</strong> - Archivos adjuntos son añadidos a los puntos
+haciendo clic en el icono en esta celda para abrir la ventana de archivos adjuntos.</p>
+
+<h5>Asistente para importación de Puntos</h5>
+
+<p>El primer paso después de seleccionar el vínculo Importar puntos es seleccionar el
+método de importación. </p>
+
+<p><strong>Importación de GPS -</strong> Seleccione este método si el GPS no funciona como
+un aparato de almacenamiento masivo.</p>
+
+<p><strong>Importación GPX -</strong> Seleccione este método si el GPS funciona como
+aparato de almacenamiento masivo.</p>
+<br />
+<br />
+
+
+<p><strong><u>Opciones de importación GPS</u></strong></p>
+
+<p><strong>Tipo de GPS -</strong> Seleccione el aparato de GPS y el protocolo.</p>
+
+<p><strong>Importar todo (y asignar a día correcto) -</strong> SMART utilizará la marca
+de fecha y hora del GPS y asignará los puntos obtenidos a la fecha correcta.
+</p>
+
+<p><strong>Importación sólo waypoints para &lt;fecha&gt; -</strong> SMART importará
+sólo los puntos para la fecha seleccionada.</p>
+
+<p><strong>Seleccione los puntos para la importación de &lt;fecha&gt; -</strong> El
+usuario SMART seleccionará y asignará puntos a la fecha seleccionada.</p>
+
+<p></p>
+
+<p><strong>Seleccione los puntos para importar</strong></p>
+
+<p><img alt="Seleccione los Puntos del Patrullaje" src="images/selectWaypoints.png" width="478" height="488" /></p>
+
+<p>Se pueden seleccionar los puntos individualmente o con la
+opción <em>Seleccionar todo.</em></p>
+<br />
+<br />
+
+
+<p><strong><u>Opciones de importación GPX</u></strong></p>
+
+<p><strong>Añadir -</strong> Abre una ventana para permitir la selección de los archivos GPX.
+Los archivos se pueden almacenar en el GPS o en un equipo independiente.</p>
+
+<p><strong>Eliminar -</strong> Elimina archivos GPX seleccionados del asistente.</p>
+
+<p><strong>Importar todo (y asignar al día correcto) -</strong> SMART utilizará la
+marca de fecha y hora del GPS y asignará los puntos obtenidos a la fecha correcta.
+</p>
+
+<p><strong>Importación de puntos sólo para &lt;fecha&gt; -</strong> SMART importará
+sólo los puntos para la fecha seleccionada.</p>
+
+<p><strong>Seleccione cuales puntos importar para la &lt;fecha&gt; -</strong> El
+usuario SMART seleccionará y asignará puntos a la fecha seleccionada.</p>
+
+<p></p>
+
+<p><strong>Ingreso manual de puntos</strong></p>
+
+<p> SMART permite el ingreso manual de información de puntos. </p>
+
+<p><strong>Añadir Puntos</strong> - Ingreso manual de información de puntos.</p>
+
+<p><strong>Elimina Punto (s)</strong> - Elimina puntos seleccionado (s).</p>
+
+<p><strong>Mover Punto (s)</strong> - reasigna los puntos seleccionado (s) para
+otro día.</p>
+
+<p></p>
+
+<p><strong>Notas especiales sobre la importación de Puntos GPS para Patrullajes de Varios Tramos
+</strong><strong></strong></p>
+<ul>
+  <li>Si dos (o más) de los tramos tienen el mismo rango de tiempo SMART no sabe a cual
+    tramo asignar los puntos y escogerá uno de los tramos. Puntos de Patrullaje
+    debe ser verificado después de la importación de los patrullajes de múltiples tramos. No
+    siempre es posible determinar a cual tramo se debe importar los datos basados sólo en
+    la fecha.</li>
+  <li>La configuración adecuada de los intervalos de tiempo para cada tramo proporcionará SMART con
+    más información para permitir la adecuada asignación de los puntos.</li>
+  <li>Si la asignación de los puntos es incorrecta, el usuario puede moverlos a
+    un tramo diferente.</li>
+</ul>
+
+<p></p>
+
+<h4><a id="ImportTracks">Importación de Trayectos</a></h4>
+
+<p>Si la información de trayectos ha sido capturado por el GPS, el proceso de
+importar la información de los trayectos es el mismo que el proceso para los puntos, excepto que el
+proceso se inicia seleccionando <em>Configurar Trayecto ...</em> </p>
+
+<p><em>Nota: Los trayectos pueden ser creados a partir de los puntos disponibles si no se ha colectado información de trayectos por el GPS.
+</em><em></em> </p>
+
+<p></p>
+
+<h4><a id="Observations">Ingresando Observaciones</a></h4>
+
+<p>Después que un patrullaje se ha creado y los puntos se han importado, el siguiente paso es
+ingresar las observaciones registradas durante el patrullaje. </p>
+
+<p>El proceso comienza haciendo clic en el botón de la columna Observación. Este
+botón iniciará el asistente para el ingreso de Observaciones de Puntos.</p>
+<ol>
+  <li>Seleccione la categoría o categorías asociadas a ese punto.</li>
+  <li>Completa el ingreso de datos para la categoría. Utilice el botón Añadir Observación para
+    completar la entrada de datos para esa categoría 
+    <ul>
+      <li>Si existen varias observaciones, volver a entrar en la nueva observación y utilize
+        el botón Añadir Observación para añadir la nueva observación.</li>
+    </ul>
+  </li>
+  <li>Utilice el botón Siguiente para pasar a la siguiente categoría (si múltiples categorías
+    fueron elegidas) 
+    <ul>
+      <li>Repita el proceso para completar la entrada de datos para el resto de
+      las categorías</li>
+    </ul>
+  </li>
+  <li>Una vez que todas las categorías y las observaciones correspondientes se han completado, haga clic en Siguiente
+    para pasar a la ventana de revisión o haga clic en Finalizar para completar el proceso para
+    el punto seleccionado.</li>
+</ol>
+
+<p></p>
+
+<h4><a id="ViewPatrols">Visualización de Patrullajes</a></h4>
+
+<p>Después que un patrullaje se ha creado y contiene información de puntos y/ o trayectos,
+ el usuario de SMART puede usar la pestaña de mapa (abajo a la derecha) para ver la la información de trayectos y puntos.
+ </p>
+
+<p>Navegación del mapa será igual aquí que con la ventana <a name="Mapping" id="Mapping">Perspectiva de Mapas</a>. La única adición es el
+icono de información [ <img alt="Icono de Información" src="images/InformationIcon.png" width="5" height="11" /> ]. Al seleccionar esta herramienta y luego haciendo clic encima de
+un elemento del mapa, SMART abrirá una ventana que muestra la información de atributos
+asociada con esa característica.</p>
+
+<p></p>
+
+<h4><a id="ExportImportPatrol">Exportación/Importación de Patrullajes</a></h4>
+
+<p>El ingreso de datos en SMART está diseñado para ser distribuible. Varios usuarios de SMART
+pueden ingresar patrullajes y las observaciones correspondientes a ellos en varias computadoras y
+exportar el patrullaje después de haber introducido la información. El patrullaje es
+exportado en una estructura XML y contiene archivos adjuntos (si los hay). Este paquete XML
+puede ser importado después a un equipo diferente.</p>
+
+<p></p>
+
+<h5>Exportación de Patrullaje</h5>
+
+<p><img alt="Exportar Patrullaje" src="images/ExportPatrol.png" width="508" height="574" /></p>
+
+<p></p>
+
+<p><strong>Buscar</strong> - Se usa para seleccionar la ubicación de los patrullajes exportados.
+</p>
+
+<p><strong>Incluir archivos adjuntos</strong> - Si se selecciona, las exportaciones de patrullaje
+incluirán archivos adjuntos asociados a los puntos.</p>
+
+<p><strong>Filtro de Patrullaje</strong> - Por defecto, sólo los últimos 20 patrullajes
+se muestran, en orden inverso. Si se necesitan más patrullajes, haz clic en el enlace &quot;aquí&quot; para
+mostrar todos los patrullajes.</p>
+
+<p><strong>Seleccionar todo</strong> - Los patrullajes pueden seleccionarse de forma individual, o todos
+a la vez, haciendo clic en <em>Seleccionar todo.</em></p>
+
+<p><strong>De-Seleccionar todo</strong> - Este botón de-selecciona todos los patrullajes previamente
+seleccionados.</p>
+
+<p><strong>Exportar</strong> - Ejecuta el proceso de exportación de patrullaje.</p>
+
+<p></p>
+
+<h5>Importación de Patrullaje</h5>
+
+<p><strong><img alt="Importar Patrullaje" src="images/ImportPatrol.png" width="509" height="270" /></strong></p>
+
+<p><strong>Buscar</strong> - Importa un archivo de patrullaje singular.</p>
+
+<p><strong>Añadir</strong> - Permite la selección de múltiples archivos de patrullaje.</p>
+
+<p><strong>Eliminar</strong> - Elimina archivos de patrullaje no deseados del proceso de importación.
+</p>
+
+<p><strong>Importar</strong> - Ejecuta el proceso de importación de patrullaje.</p>
+
+<p></p>
+
+<h2><a id="Query">Perspectiva de Consulta</a></h2>
+
+<p>La perspectiva de consulta es donde la mayoría de las capacidades analíticas
+de SMART se encuentran. Las consultas se pueden crear, ejecutar, guardar y exportar/importar.
+Los resultados de las consultas se pueden ver directamente desde la Perspectiva de Consultas o
+exportadas para su uso en otras aplicaciones de software. </p>
+
+<p></p>
+
+<p>La perspectiva de consulta SMART comparte el mismo marco básico para todos los tipos de consultas.
+ Los componentes individuales de los cuatro tipos de consulta variarán dependiendo
+en cual la consulta se elija.</p>
+
+<p><em>Nota: Las consultas de Patrullaje y Puntos comparten todos los mismos componentes
+</em><em>entre si y muchos de los mismos componentes de Consultas de Resúmenes y Espaciales.</em></p>
+
+<p></p>
+
+<h4><a id="QueryType">Tipos de Consultas</a></h4>
+
+<p>Una consulta SMART es una expresión lógica utilizada para filtrar los registros en la
+base de datos. SMART tiene cuatro tipos de consultas (puntos de patrullajest, patrullaje, resumen y espacial).</p>
+
+<h5>Puntos de Patrullaje</h5>
+
+<p>Muestra los registros de observación que se seleccionaron utilizando filtros, sin
+resumir (totales, etc.). Las consultas se pueden ver en tablas o en un mapa.</p>
+
+<p><em>Ejemplo: Mostrar todos los puntos del Patrullaje ID 1021</em></p>
+
+<table border="1">
+  <thead>
+    <tr>
+      <td>Patrullaje ID</td>
+      <td>Tramo de Patrullaje</td>
+      <td>Fecha de Patrullaje</td>
+      <td>Hora</td>
+      <td>Tipo de Observación</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1021</td>
+      <td>1</td>
+      <td>03 de noviembre 2011</td>
+      <td>9:34</td>
+      <td>Actividad Humana</td>
+    </tr>
+    <tr>
+      <td>1021</td>
+      <td>1</td>
+      <td>03 de noviembre 2011</td>
+      <td>10:23</td>
+      <td>Animales</td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<h5>Patrullaje</h5>
+
+<p>Muestra los patrullajes seleccionados usando los filtros de búsqueda. Los Puntos de Patrullaje
+no se muestran en los resultados. Las Consultas
+pueden ser visualizadas en tablas o en un mapa.</p>
+
+<p><em>Ejemplo: Mostrar todos los patrullajes en el cual se encontró un cádaver de elefante. 
+</em><em></em></p>
+
+<table border="1">
+  <thead>
+    <tr>
+      <td>ID de Patrullaje</td>
+      <td>Tramo de Patrullaje</td>
+      <td>Fecha de Patrullaje</td>
+      <td>Hora</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>101</td>
+      <td>1</td>
+      <td>03 de noviembre 2011</td>
+      <td>16:34</td>
+    </tr>
+    <tr>
+      <td>103</td>
+      <td>1</td>
+      <td>07 de noviembre 2011</td>
+      <td>10:23</td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<h5>Resumen</h5>
+
+<p>Un resumen resume los datos brutos y permite agruparlos en diferentes
+categorías. Los elementos que se pueden resumir son valores como el número total de
+patrullajes, la distancia total recorrida, el número total de observaciones de trampas,
+etc. Las agrupaciones son categorías como los sectores de gestión, los tipos de patrullaje, los mandatos de patrullaje,
+estaciones, equipos, etc. Resúmenes sólo se pueden ver en forma de tablas. Resultados
+sólo se visualizan en tablas.</p>
+
+<p><em>Ejemplo: Mostrar el número total de trampas observadas en cada sector de gestión
+</em><em>para cada uno de los últimos 6 meses.</em></p>
+
+<table border="1">
+  <thead>
+    <tr>
+      <td></td>
+      <td>Enero</td>
+      <td>Febrero</td>
+      <td>Marzo</td>
+      <td>Abril</td>
+      <td>Mayo</td>
+      <td>Junio</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>N º de Trampas</td>
+      <td>N º de Trampas</td>
+      <td>N º de Trampas</td>
+      <td>N º de Trampas</td>
+      <td>N º de Trampas</td>
+      <td>N º de Trampas</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Sector A</th>
+      <td></td>
+      <td>7</td>
+      <td>6</td>
+      <td></td>
+      <td>3</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>Sector B</th>
+      <td>15</td>
+      <td>10</td>
+      <td>2</td>
+      <td>19</td>
+      <td>5
+</td>
+      <td>3</td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<h5>Espacial</h5>
+
+<p>Los resultados se muestran en un formato de cuadrícula especificado por el usuario (raster) con
+resultados agregados basados ​​en el tamaño de la cuadrícula definida. Los resultados se muestran en
+tablas o en un mapa.</p>
+
+<p><em>Ejemplo: Mostrar el número de patrullas en cada celda cuadrículada</em></p>
+
+<table border="1">
+  <thead>
+    <tr>
+      <td>ID de celda X</td>
+      <td>ID de celda Y</td>
+      <td>Valor</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>-12358</td>
+      <td>4839</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>-12356</td>
+      <td>4838</td>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<h4><a id="PatrolObservationQuery">Consultas de Patrullaje y Observación</a></h4>
+
+<p></p>
+
+<p><img alt="Perspectiva de Consulta" src="images/QueryPerspective2.png" width="986" height="665" /></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<table border="1">
+  <caption><strong>Iconos Perspectiva de Consulta</strong></caption>
+  <thead>
+    <tr>
+      <td><strong>Icono o enlace</strong></td>
+      <td><strong>Descripción</strong></td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><img alt="cambio de fecha de consulta" src="images/30days.png" width="264" height="38" /></td>
+      <td>Filtra la fecha de la consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="cambio de nombre de consulta" src="images/query_noNameQuery.png" width="214" height="30" /> </td>
+      <td>Se utiliza para cambiar el nombre de la consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="propiedades de consulta" src="images/queryProperties.png" width="111" height="28" /> </td>
+      <td>Cambia el nombre de la consulta. Filtra los campos devueltos en los
+        resultados de la consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="mapa de resultados tabulares" src="images/tabMap.png" width="183" height="33" /> </td>
+      <td>Cambia entre los resultados en tablas y resultados mapeados.</td>
+    </tr>
+    <tr>
+      <td><img alt="carpeta de consulta" src="images/QueryFolders.png" width="189" height="61" /> </td>
+      <td>Ubicación de las consultas y los resúmenes guardados. Por defecto hay dos
+        carpetas (Consultas de Área de Conservación y Mis Consultas). 
+
+        <p>Cualquier cuenta de usuario se puede guardar en Mis Consultas, pero los elementos guardados son sólo
+        accesibles a la cuenta del usuario que los creó. </p>
+
+        <p>Sólo las cuentas de administrador y gerente pueden guardar dentro de la
+        carpeta Consultas de Área de Conservación.</p>
+      </td>
+    </tr>
+    <tr>
+      <td><img alt="filtro de patrullaje" src="images/patroLFilters.png" width="116" height="21" /> </td>
+      <td>Se utiliza para filtrar los resultados basádos en la información de patrullaje.</td>
+    </tr>
+    <tr>
+      <td><img alt="filtro de modelo de datos" src="images/dataModelFilters.png" width="122" height="21" /> </td>
+      <td>Se utiliza para filtrar los resultados basados en las categorías y los atributos del
+        modelo de datos.</td>
+    </tr>
+    <tr>
+      <td><img alt="filtro de área" src="images/AreaFilters.png" width="87" height="21" /> </td>
+      <td>Se utiliza para filtrar los resultados en función de los límites espaciales del
+        Área de Conservación.</td>
+    </tr>
+    <tr>
+      <td><img alt="operadores" src="images/Operators.png" width="86" height="54" /> </td>
+      <td>Los operadores de NO y los brackets () se utilizan para cambiar la lógica de la
+        consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="ejecutar la consulta" src="images/runQuery1.png" width="83" height="25" /> Y <img alt="icono para ejecutar consulta" src="images/runQuery2.png" width="16" height="13" /> </td>
+      <td>Ejecuta la consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="borrar consulta" src="images/eraseQuery.png" width="19" height="20" /> </td>
+      <td>Borra la consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="Guardar consulta" src="images/SaveQuery.png" width="23" height="20" /></td>
+      <td>Guarda la consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="pestaña de consulta" src="images/queryTab.png" width="85" height="20" /></td>
+      <td>Pestaña contiene los componentes utilizados para construir la consulta o
+      el resumen.</td>
+    </tr>
+    <tr>
+      <td><img alt="pestaña de capas de mapa" src="images/layersTab.png" width="55" height="19" /></td>
+      <td>Pestaña contiene las capas del mapa.</td>
+    </tr>
+    <tr>
+      <td><img alt="ventana de definición SMART" src="images/SmartDefinitionWindow.png" width="145" height="21" /></td>
+      <td>Ventana donde se construye, borra, ejecuta, y guarda la consulta o el resumen.
+        </td>
+    </tr>
+  </tbody>
+</table>
+
+<h5>Creando Búsquedas</h5>
+
+<p>La ruta de trabajo básica para crear búsquedas es la misma para todos los tipos de búsquedas,
+pero los detalles varían dependiendo del tipo de búsqueda siendo
+construida.</p>
+<br />
+
+
+<p><strong><u>Tipos de filtro</u></strong></p>
+
+<p><strong>Patrullaje -</strong> características utilizadas cuando
+se define el patrullaje (estación, equipo, miembros, etc ...)</p>
+
+<p><strong>Modelo de Datos -</strong> componentes del
+modelo de datos del Área de Conservación. Categorías o atributos del modelo de datos o atributos pueden ser
+seleccionados.</p>
+<ul>
+  <li><strong>Categorías -</strong> una consulta creada usando una categoría
+    que devolverá todos los registros dentro la categoría elegida y todas las sub-categorías
+    dentro de ella.</li>
+  <li><strong>Atributos -</strong> una consulta creada mediante un atributo
+    que devolverá los resultados a través del modelo de datos completo para cualquier categoría que utiliza el
+    atributo elegido.</li>
+</ul>
+
+<p><strong>Área -</strong> permite el filtrado espacial del patrullaje
+basado en los cinco límites predeterminados del Área de Conservación.</p>
+
+<p><strong>Operadores -</strong> se utilizan para alterar la lógica de la búsqueda
+permitiendo a los usuarios SMART crear consultas más complejas.</p>
+
+<p></p>
+
+<p><strong>Los operadores incluyen:</strong></p>
+<ul>
+  <li>Y</li>
+  <li>O</li>
+  <li>NO</li>
+  <li>Paréntesis: () </li>
+  <li>Contiene</li>
+  <li>No Contiene</li>
+  <li>Igual a: = </li>
+  <li>Menos que: &lt;</li>
+  <li>Más que: &gt;</li>
+  <li>Menos que o Igual a: &lt;=</li>
+  <li>Más que o Igual a: &gt;=</li>
+  <li>Menos o Más que (No es igual a): &lt;&gt;</li>
+</ul>
+
+<p></p>
+
+<table>
+  <caption><strong>Consultas de Patrullaje u Observación</strong></caption>
+  <thead>
+    <tr>
+      <td><strong>Definición de consulta</strong></td>
+      <td><strong>Descripción</strong></td>
+      <td><strong>Filtros Usados</strong></td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><img alt="consulta 1" src="images/query1.png" width="414" height="32" />
+      </td>
+      <td>Todos los patrullajes u observaciones dirigidas por el Equipo 2 que salió de la estación central.
+      </td>
+      <td>Patrullaje</td>
+    </tr>
+    <tr>
+      <td><img alt="consulta 2" src="images/query2.png" width="457" height="33" />
+      </td>
+      <td>Todos los patrullajes u observaciones en los cuales Roger Barrett fue el líder de patrullaje.
+      </td>
+      <td>Patrullaje</td>
+    </tr>
+    <tr>
+      <td><img alt="consulta 3" src="images/query3.png" width="360" height="31" /></td>
+      <td>Todos los patrullajes u observaciones registrados en la categoría (o
+        sub-categorías) de Biológico - Uso de Recursos - Tala y Madera
+        </td>
+      <td>Modelo de datos - Categorías</td>
+    </tr>
+    <tr>
+      <td><img alt="consulta 4" src="images/query4.png" width="685" height="30" /></td>
+      <td>Todas las Amenazas en la categoría Biológico - Uso de Recursos menos Recolección de Plantas Terrestres
+         </td>
+      <td>Modelo de datos - Categorías</td>
+    </tr>
+    <tr>
+      <td><img alt="consulta 5" src="images/query5.png" width="341" height="32" /></td>
+      <td>Selecciona todos los patrullajes u observaciones en las cuales se encontró un tigre de Sumatra
+        independientemente de la categoría en la cual se registró.</td>
+      <td>Modelo de Datos - Atributo (global)</td>
+    </tr>
+    <tr>
+      <td><img alt="consulta 6" src="images/query6.png" width="700" height="23" /></td>
+      <td>Selecciona todos los patrullajes u observaciones que confiscaron en las cuales se confiscó un Tigre de Sumatra muerto
+        dentro de la categoría padre Caza y Recolección de Animales Terrestres
+        </td>
+      <td>Modelo de Datos - Atributo (categoría específica)</td>
+    </tr>
+    <tr>
+      <td><img alt="consulta 7" src="images/query7.png" width="167" height="33" /></td>
+      <td>Selecciona todos los patrullajes u observaciones que sucedierón en el Área Administrativa Este
+        </td>
+      <td>Área</td>
+    </tr>
+    <tr>
+      <td><img alt="consulta 8" src="images/query8.png" width="673" height="32" /></td>
+      <td>Todas los patrullajes u observaciones en las cuales se encontró una Amenaza de Caza y Recolección
+        y ocurrieron en el Área Administrativa Oriente.</td>
+      <td><p>Modelo de datos - categoría y área</p>
+      </td>
+    </tr>
+    <tr>
+      <td><img alt="consulta 9" src="images/query9.png" width="670" height="64" /></td>
+      <td>Todos los patrullajes u observaciones hechas por el equipo 2 en las cuales se encuentran huellas de Tigres de Sumatra
+        en las áreas administrativas Este o Oeste</td>
+      <td>Modelo de Datos - Atributo (categoría específica) y Patrullaje y
+      Área.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="SummaryQuery">Consulta de Resumen</a></h4>
+
+<p></p>
+
+<p><strong>Introducción a la Consulta de Resumen</strong></p>
+
+<p><img alt="resumen de resúmenes" src="images/summaryOverview.png" width="913" height="583" /></p>
+
+<p></p>
+
+<h5>Iconos y Enlaces de Resumen</h5>
+
+<table>
+  <thead>
+    <tr>
+      <td>Icono o enlace</td>
+      <td>Descripción</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><img alt="FILTRO DE FECHA" src="images/30days.png" width="264" height="38" /></td>
+      <td>Filtra la fecha de la consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="consulta sin nombre" src="images/query_noNameQuery.png" width="214" height="30" /></td>
+      <td>Se utiliza para cambiar el nombre de la consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="propiedades de resumen" src="images/summaryProperties.png" width="127" height="18" /></td>
+      <td>Cambia el nombre de la consulta. Filtra los campos devueltos en los
+        resultados de la búsqueda.</td>
+    </tr>
+    <tr>
+      <td><img alt="carpeta de consultas guardadas" src="images/QueryFolders.png" width="189" height="61" /></td>
+      <td>Ubicación de las búsquedas y los resúmenes guardados. Por defecto hay dos
+        carpetas (Búsquedas de Área de Conservación y Mis Búsquedas). 
+
+        <p>Cualquier cuenta de usuario se puede guardar en Mis Búsquedas, pero los elementos guardados sólo son
+        accesibles a la cuenta del usuario quien los creó.</p>
+
+        <p>Sólo las cuentas de Administrador y Gerente pueden guardar dentro de la carpeta Búsquedas de Área de Conservación.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><img alt="pestaña de consulta" src="images/queryTab.png" width="85" height="20" /></td>
+      <td>Filtra la lista de búsquedas disponibles. La construcción de los filtros es lo
+        mismo que la construcción de una búsqueda de observación o patrullaje.</td>
+    </tr>
+    <tr>
+      <td><img alt="ejecutar consulta 1" src="images/runQuery1.png" width="83" height="25" /> Y <img alt="ejecutar consulta 2" src="images/runQuery2.png" width="16" height="13" /></td>
+      <td>Ejecuta la búsqueda.</td>
+    </tr>
+    <tr>
+      <td><img alt="Guardar consulta" src="images/SaveQuery.png" width="23" height="20" /></td>
+      <td>Guarda la búsqueda.</td>
+    </tr>
+    <tr>
+      <td><img alt="borrar consulta" src="images/eraseQuery.png" width="19" height="20" /></td>
+      <td>Borra la búsqueda.</td>
+    </tr>
+    <tr>
+      <td><img alt="Pestaña filtro agrupar por" src="images/groupByFilterTab.png" width="171" height="25" /></td>
+      <td>Abre las ventanas &quot;Pestaña para Agrupar por y Valores&quot; y &quot;Pestaña Filtro&quot;.</td>
+    </tr>
+    <tr>
+      <td><img alt="opciones para agrupar por" src="images/groupByOptions.png" width="132" height="18" /></td>
+      <td>Opciones para Agrupar Por se utilizan para agregar los resultados del resumen de valores.</td>
+    </tr>
+    <tr>
+      <td><img alt="Opciones para valor x" src="images/valueOptions.png" width="100" height="18" /></td>
+      <td>Valores de resumen disponibles para crear el resumen.</td>
+    </tr>
+    <tr>
+      <td><img alt="encabezado de fila" src="images/RowHeaders.png" width="108" height="21" /></td>
+      <td>Agrupar Por serán colocados verticalmente en la tabla como el
+        encabezado para cada fila.</td>
+    </tr>
+    <tr>
+      <td><img alt="encabezado de columna" src="images/ColumnHeaders.png" width="122" height="21" /></td>
+      <td>Agrupar Por serán colocadas horizontalmente en la tabla, como el
+        encabezado para cada columna.</td>
+    </tr>
+    <tr>
+      <td><img alt="Valores de X" src="images/xValues.png" width="59" height="20" /></td>
+      <td>Valores de Patrullaje o Modelo de datos utilizados para construir el resumen.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Opciones para Agrupar Por</strong></p>
+
+<p><strong>Agrupar por Patrullaje -</strong> agregaciones de valores basados ​​en
+características de patrullaje</p>
+
+<p><strong> Agrupar por Modelo de Datos -</strong> agregaciones de valores basados ​​en registros del modelo de datos
+</p>
+
+<p></p>
+
+<p><strong>Opciones de Valor</strong></p>
+
+<p><strong>Valores de Patrullaje -</strong> ingresados para averiguar los valores
+asociados con patrullajes</p>
+
+<p><strong>Valores del Modelo de Datos -</strong> ingresados para averiguar los valores asociados
+con las observaciones del modelo de datos</p>
+
+<p></p>
+
+<p>Resúmenes de SMART puede ser formateados de varias maneras utilizando las ventanas de Encabezado de Fila o
+Encabezado de Columna.</p>
+
+<p><strong>Encabezados de fila -</strong> Los valores insertados en Encabezados de Fila
+devolverá los resultados con los registros agrupados o agregadas apareciendo en la
+columna a la izquierda resultando en una tabla con múltiples filas.</p>
+
+<p><strong>Encabezados de columna -</strong> Los valores insertados en encabezados de columna
+obtendrá resultados con los registros agrupados o agregados apareciendo en
+la fila superior resultando en una tabla con varias columnas.</p>
+
+<p><strong>Valor X -</strong> Ubicación donde se colocan los valores para el resumen
+</p>
+
+<p><em>Nota: más que un ingreso se puede introducir en las ventanas Valores o Agrupar Por
+</em><em> pero no todas las combinaciones están permitidas si rompen las agrupaciones lógicas.
+</em><em></em></p>
+
+<p><strong>Resúmenes de muestra</strong></p>
+
+<p>El resumen que sigue es un resumen básico para contar el número de Amenazas Observadas
+Agrupadas Por Tipo de Patrullaje. </p>
+
+<p><img alt="" src="images/summary2.png" width="646" height="346" /></p>
+
+<p></p>
+
+<p>La búsqueda se ha modificado con el Número de Amenazas añadido una segunda vez,
+pero con la opción de Cuenta de Incidentes elegida.</p>
+
+<p>Esto le dará el número de observaciones y el número de incidentes
+(Múltiples observaciones en un waypoint).</p>
+
+<p><img alt="" src="images/summary2b.png" width="651" height="319" /></p>
+
+<p></p>
+
+<p>Este ejemplo muestra algunos datos básicos sobre el patrullaje saliendo de las
+estaciones de la Área de Conservación. Los valores de X  son número de patrullajes, Días, Noches,
+Distancia, etc. y se seleccionan a partir de la sección Valores de Patrullaje. </p>
+
+<p>La lista de estaciones se rellena al seleccionar la opción Agrupar por - Patrullajes Agrupar Por - 
+Estación. </p>
+
+<p><img alt="" src="images/summary-1.png" width="882" height="604" /></p>
+
+<p></p>
+
+<p>Este ejemplo es del mismo resumen pero sin el Agrupar Por Estaciones.</p>
+
+<p><img alt="" src="images/summary1b.png" width="881" height="105" /></p>
+
+<p></p>
+
+<p></p>
+
+<p><strong>Ágregados </strong></p>
+
+<p>Una vez que un atributo de número del modelo de datos tiene sus agregados inicializados, pueden
+ser utilizados en los resúmenes para dar Min, Max, Suma y Promedio como Resumenes para ese
+atributo particular. </p>
+
+<p>En el siguiente ejemplo, la búsqueda es para mostrar la suma del número de
+armas confiscadas y vistas.</p>
+
+<p><em>Nota: Si no hay Agregados disponibles al construir un Resumen, el
+</em><em>modelo de datos se ha configurado para no permitirlos. </em><em>Si es necesario, se debe poner en contacto con el administrador SMART
+</em><em>para inicializar los Agregados.</em></p>
+
+<p><img alt="" src="images/aggregates.png" width="724" height="378" /></p>
+
+<p><strong>Calcular Tasa/Tasa de Encuentro</strong></p>
+
+<p>SMART puede proveer Tasas de Encuentro para las Opciones de Valor X. Los valores de base
+se calculan en contra de la Tasa de Encuentro para dar una cuenta de cuantas
+Observaciones / Incidentes por X...</p>
+
+<p>Estas tasas se acceden a través del enlace &quot;Calcular Tasa.&quot; Si múltiples
+Tasas de Encuentro se requieren en el resumen, entonces el elemento valor tendrá que ser
+añadido cuantas veces sea necesario.</p>
+
+<p></p>
+
+<p><img alt="" src="images/encounterRates.png" width="709" height="441" /></p>
+
+<p></p>
+
+<p></p>
+
+<p>En el siguiente ejemplo, la Cuenta de Amenazas (Incidentes) por Distancia,
+Horas de Persona y Patrullajes son resumidos por Equipos. Los resultados de este resumen
+muestran que Equipo 2 se encuentra con casi 10 veces amenazas por distancia viajado más que
+el Equipo 1 y aproximadamente 2,5 veces más observaciones por kilómetro
+que el Equipo 3. </p>
+
+<p><img alt="" src="images/EncounterRate2.png" width="901" height="561" /></p>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="GriddedQueries">Búsqueda Cuadriculada</a></h4>
+
+<p>La Búsqueda de Resumen Cuadriculada SMART resume la búsqueda en una cuadrícula definida por el usuario
+y emite los resultados en forma de una tabla o en un mapa raster. El mapa raster de resultados
+muestra un mapa de calor de los resultados de resumen que puede ser rápidamente
+interpretado por los usuarios para ver dónde se encuentran los problemas. Los valores de X para el
+Resumen cuadriculado se construyen de la misma manera que con las búsquedas de resumen
+con la diferencia principal de que no hay Opciones de Agrupar Por disponibles.</p>
+
+<h5>Iconos y Enlaces para Resumen Cuadriculado</h5>
+
+<table>
+  <thead>
+    <tr>
+      <td>Icono o enlace</td>
+      <td>Descripción</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><img alt="FILTRO DE FECHA" src="images/30days.png" width="264" height="38" /></td>
+      <td>Filtra la fecha de la consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="Consulta sin nombre" src="images/query_noNameQuery.png" width="214" height="30" /></td>
+      <td>Se utiliza para cambiar el nombre de la consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="propiedades de resumen" src="images/summaryProperties.png" width="127" height="18" /></td>
+      <td>Cambia el nombre de la consulta. Filtra los campos devueltos en los
+        resultados de la consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="carpeta de consultas guardadas" src="images/QueryFolders.png" width="189" height="61" /></td>
+      <td>Ubicación de las consultas y los resúmenes guardados. Por defecto hay dos
+        carpetas (Consultas de Área de Conservación y Mis Consultas). 
+
+        <p>Cualquier cuenta de usuario puede guardar dentro de la carpeta Mis Consultas, pero los elementos guardados sólo son
+        disponibles a la cuenta del usuario que los creó.</p>
+
+        <p>Sólo las cuentas de Aministrador y Gerente pueden guardar dentro de la carpeta de Consultas de Área de Conservación.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><img alt="ejecutar consulta 1" src="images/runQuery1.png" width="83" height="25" /> Y <img alt="ejecutar consulta 2" src="images/runQuery2.png" width="16" height="13" /></td>
+      <td>Ejecuta la consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="Guardar consulta" src="images/SaveQuery.png" width="23" height="20" /></td>
+      <td>Guarda la consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="borrar consulta" src="images/eraseQuery.png" width="19" height="20" /></td>
+      <td>Borra la consulta.</td>
+    </tr>
+    <tr>
+      <td><img alt="Valores de Filtro Espacial" src="images/FilterValues1.png" width="187" height="16" /></td>
+      <td>Abre las ventanas &quot;Pestaña Agrupar por y Valores&quot; y &quot;Pestaña Filtro&quot;.</td>
+    </tr>
+    <tr>
+      <td><img alt="Proyección de cuadrícula" src="images/gridprojection.png" width="185" height="30" /></td>
+      <td>Opción de elegir las proyecciones disponibles para construir la cuadricula.</td>
+    </tr>
+    <tr>
+      <td><img alt="Tamaño de cuadrícula" src="images/gridSize.png" width="103" height="25" /></td>
+      <td>Ajusta el tamaño de la cuadrícula sobre la base de las unidades de mapeo de la proyección.</td>
+    </tr>
+    <tr>
+      <td><img alt="Valor X de cuadrícula" src="images/xGridValue.png" width="94" height="26" /></td>
+      <td>El valor del Resumen espacial. </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>El siguiente ejemplo es de un simple resumen espacial para mostrar las amenazas observadas
+basadas en una cuadrícula de 0.01 grado. En una consulta espacial siempre hay una visualización base
+de donde fueron los patrullajes.  </p>
+
+<p>A estos ingresos se les da un valor de 0. Cualquier valor mayor de 0 indica la
+presencia del valor de cuadrícula seleccionado.</p>
+
+<p><img alt="Mapa de cuadrícula raster" src="images/rasterGrid.png" width="680" height="589" /></p>
+
+<p></p>
+
+<p></p>
+
+<p><strong>Filtros espacial</strong></p>
+
+<p>Filtros adicionales se pueden aplicar a las consultas espaciales de la misma manera como con
+otros tipos de consultas. Seleccionando la pestaña de filtro abrirá el marco para la adición
+de filtros adicionales a la consulta.</p>
+
+<p><em>Nota: Si la Tasa de Encuentros se aplica a los valores de cuadricula X, un filtro adicional
+</em><em>(filtro de tasa) aparecerá en la pestaña de filtro. </em><em>Este filtro adicional puede
+</em><em>permitir al usuario ajustar los parámetros de filtro para producir un filtro multicapa
+</em><em>que se aplica a los elementos de valores de cuadrícula X.</em></p>
+
+<p></p>
+
+<p><img alt="Filtro Cuadricula Filtro Tasa" src="images/GridFilters.png" width="775" height="100" /></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<h2><a id="Reports">Perspectiva de Informe</a></h2>
+
+<p>Los informes SMART son altamente configurables y permiten una amplia gama de
+informe estándarizado. La información en los informes puede ser dinámicamente
+generada con base en los resultados de las consultas y los resúmenes SMART. Un componente principal
+de SMART es su capacidad de mapeo, los informes SMART permiten que los mapas sean
+incluidos y personalizados para adaptarse al informe. Informes SMART contienen muchos elementos de reportaje comunes
+(tablas, cuadros/gráficos, imágenes, etc ..), así como otros
+elementos (mapas y los resultados de consultas dinámicas) que resulta en un poderoso
+paquete de reportaje. </p>
+
+<p></p>
+
+<p><img alt="Icono Informe" src="images/reportICon.png" width="418" height="67" /></p>
+
+<p></p>
+
+<h4><a id="reportools">Componentes y herramientas de informe</a></h4>
+
+<p></p>
+
+<p><strong>Barra de Herramientas de Informe</strong></p>
+
+<p>La barra de herramientas de informe contiene iconos para crear, editar, ejecutar, exportar y
+eliminar informes.</p>
+
+<p><img alt="Lista de informes" src="images/reportList.png" width="328" height="130" /></p>
+
+<p></p>
+
+<p><strong>Iconos en la Barra de Herramientas de Informe</strong></p>
+
+<table border="1">
+  <col />
+  <col />
+  <tbody>
+    <tr>
+      <td><img alt="Eliminar Informe" src="images/deleteReport.png" width="22" height="18" /></td>
+      <td>Elimina el(los) informe(s) seleccionado(s)</td>
+    </tr>
+    <tr>
+      <td><img alt="Crear Informe" src="images/CreateReport.png" width="22" height="18" /></td>
+      <td>Crea un nuevo informe</td>
+    </tr>
+    <tr>
+      <td><img alt="Editar informe" src="images/editReport.png" width="22" height="18" /></td>
+      <td>Edita el(los) informe(s) seleccionado(s)</td>
+    </tr>
+    <tr>
+      <td><img alt="Ejecutar y Exportar informe" src="images/RunExportReport.png" width="22" height="18" /></td>
+      <td>Ejecuta y exporta el(los) informe(s) seleccionado(s)</td>
+    </tr>
+    <tr>
+      <td><img alt="Ejecutar Informe" src="images/RunReport.png" width="22" height="18" /></td>
+      <td>Ejecuta el(los) informe(s) seleccionado(s)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<p><strong>Editor de Informes</strong></p>
+
+<p>El Editor de Informes consiste de algunos componentes básicos, que contienen su
+propia funcionalidad y tienen su propio propósito. Cuando se construyen informes básicos a intermedios,
+es probable que haya muchas funciones del informe SMART que
+no se utilizarán. </p>
+
+<p></p>
+
+<p><img alt="Marco Editor de Informe" src="images/ReportFramework.png" width="1090" /></p>
+
+<p></p>
+
+<p></p>
+
+<p><strong>Ventana de Diseño</strong></p>
+
+<p>La Ventana de Diseño es donde se organizan los componentes del informe. Esta
+ventana da una vista previa de cómo será el informe final ya que los informes son
+generalmente basados en datos dínamicos. La ventana permite que se pueda cambiar, mover, y añadir los
+objetos de informe y que se puedan personalizar en cuanto al contenido, el tamaño y el estilo.</p>
+
+<p>Las pestañas de Diseñol y Página Maestra a la base de la pantalla son las dos pestañas que
+la mayoría de los usuarios estarán usando.  Se recomienda altamente no hacer cambios en las
+pestañas Script o Fuente XML, al menos que sea un usuario avanzado que entiende los
+riesgos de editar directamente el código utilizado para generar el informe.</p>
+
+<p></p>
+
+<p><strong>Editor de Propiedades</strong></p>
+
+<p>Esta ventana se utiliza para editar las propiedades de los objetos que han sido
+cargados en la ventana de diseño. Las opciones de editor de propiedades cambiarán si
+cambias entre las pestañas de Diseño y Página Maestra.</p>
+
+<p></p>
+
+<p><strong>Propiedades del informe (Pestaña Página Maestra)</strong></p>
+
+<p>Se utiliza para especificar las propiedades generales de la página principal del informe.</p>
+
+<p><img alt="Informe de Página Maestra" src="images/ReportMasterPage.png" width="1017" height="291" /></p>
+
+<p></p>
+
+<p><strong>Esquema
+</strong></p>
+
+<p>El esquema se utiliza para organizar los objetos que se utilizan para crear y
+organizar su informe. Objetos y elementos se importan al esquema, y
+permite un fácil acceso a estos componentes cuando los informes están diseñados en la
+Ventana de Diseño. Si un objeto es usado y común a través de muchos informes (logos, títulos,
+...), entonces estos objetos se pueden exportar a la biblioteca de recursos compartidos. Esto
+se hace con un clic derecho sobre el objeto y seleccionando &quot;Exportar a la biblioteca ...&quot; </p>
+
+<p><img alt="Esquema del informe" src="images/ReportOutline.png" width="193" height="266" /></p>
+
+<p></p>
+<ul>
+  <li><strong>Conjuntos de Datos</strong> - vinculados a las tablas existentes
+    en la base de datos (los funcionarios, las estaciones, las instituciones y los cargos, etc ..) o a
+    las consultas y los resúmenes guardados.</li>
+  <li><strong>Cuerpo</strong> - Cuando los objetos del informe son introducidas a el
+    Editor de Diseño, estos objetos serán visibles en la sección Cuerpo. Objetos
+    pueden ser seleccionados directamente en esta carpeta, movidos, eliminados o editados
+    a través de los parámetros expuestos.</li>
+  <li><strong>Imágenes embebidas</strong> - Cualquier imágen que se incluya en el
+    informe se debe incluir en esta carpeta primero.</li>
+</ul>
+
+<p></p>
+
+<p><strong>Explorador de Recursos</strong></p>
+
+<p>El Explorador de Recursos es donde los Recursos Compartidos de la biblioteca pueden ser
+accesados. Aquí es donde usted puede guardar elementos de informe comunes que se utilizan en
+varios informes, por ejemplo, logos. Si es probable que se utilize un objeto para la mayoría,
+si no todos, los informes, entonces lo mejor es compartir el objeto en la biblioteca de recursos compartidos.
+ Cualquier creación y edición de informes puede acceder inmediatamente a estos objetos y
+no es necesario importar o vincular a ninguna de ellas. </p>
+
+<p><em>Nota: Se recomienda limitar los objetos de la biblioteca de recursos compartidos
+</em><em>a objetos que serán utilizados por la mayoría si no todos los informes. </em><em>Agregando demasiados
+</em><em>objetos a la biblioteca impacta negativamente el rendimiento del marco del informe.
+</em><em></em></p>
+
+<p><img alt="Explorador de Recursos Informe" src="images/ResourceExplorere.png" width="320" height="336" /></p>
+
+<p></p>
+
+<p><strong>Elementos de informe</strong></p>
+
+<p>Los elementos de informe contienen muchos de los objetos que se utilizan para crear el informe. Estos
+objetos se seleccionan y se insertan en la ventana de editor de informes para construir el
+informe deseado.</p>
+
+<p><img alt="Elementos de informe" src="images/ReportItems.png" width="327" height="398" /></p>
+
+<p></p>
+<ul>
+  <li><strong>Etiqueta</strong> - en general los objetos de una sola línea utilizados para los títulos de informe
+    o etiquetas de objeto</li>
+  <li><strong>Texto</strong> - abre los cuadros de texto permitiendo que texto estático sea 
+    escrito dentro del informe</li>
+  <li><strong>Texto dinámico</strong> - texto basado en variables o funciones personalizadas o predefinidas
+    </li>
+  <li><strong>Datos</strong> - artículos en esta sección de datos tienen que ser pre-cargados
+    en el esquema o la biblioteca antes que aparezcan</li>
+  <li><strong>Imagen</strong> - artículos en la sección de imagen tienen que ser pre-cargados
+    en el esquema o en la biblioteca antes que aparezcan</li>
+  <li><strong>Cuadrícula</strong> - cuadriculas permiten que objetos de puesta de papel se organicen
+    en filas y columnas</li>
+  <li><strong>Lista</strong> - ingresa un formato de presentación flexible de filas de conjuntos de datos
+    en el encabezado/detalle y pies de página</li>
+  <li><strong>Tabla</strong> - insertar presentación en columna de filas del conjunto de datos en
+    encabezado/detalle y pie de página</li>
+  <li><strong>Gráfico</strong> - se utiliza para insertar gráficos en el informe</li>
+  <li><strong>Tabulación Cruzada</strong> - se utiliza para insertar datos agregados en formato de fila y columna
+    </li>
+  <li><strong>Mapa SMART</strong> - inserta mapas en el informe</li>
+</ul>
+
+<p></p>
+
+<h2><a id="DataModel">El modelo de datos SMART</a></h2>
+
+<p>El modelo de datos de SMART es la fundación del ingreso de datos, el análisis y la
+presentación de informes. Definir el modelo de datos para satisfacer las necesidades de un área de conservación es
+crucial para asegurar que el ingreso de datos, el análisis y la presentación de informes trabajen juntos para
+proporcionar la información necesaria para gestionar adecuadamente los patrullajes.
+El software SMART viene con un modelo de datos predeterminado que se puede personalizar por un
+Administrador SMART para satisfacer plenamente las necesidades del área de conservación.</p>
+
+<p></p>
+
+<h4><strong><a id="dmcategories">Categorías</a></strong></h4>
+
+<p>La estructura del modelo de datos de SMART se basa en una estructura de árbol, que consiste en
+nodos (Categorías) y una serie de &#39;hojas&#39; (atributos) que pueden
+ser asociados a cualquier número de categorías del árbol. <img src="images/category.png" alt="Icono Categoría" height="16" width="16" /></p>
+
+<p>Las categorías pueden tener o no tener atributos, y pueden ser padre a otras
+categorías o un niño de los demás. </p>
+
+<p></p>
+
+<h4><strong><a id="dmattributes">Atributos</a></strong></h4>
+
+<p>SMART es compatible con los tipos de atributos: numérico, texto, lista, árbol y Boolean.
+El uso de los tipos de atributos dependerá de la naturaleza de la información de observación
+recolectada en el campo.</p>
+
+<p>Ejemplos y usos recomendados de los tipos de atributos son:</p>
+
+<table border="1">
+  <caption></caption>
+  <col />
+  <col />
+  <col />
+  <tbody>
+    <tr>
+      <td><strong>Icono</strong></td>
+      <td><strong>Tipo</strong></td>
+      <td><strong>DESCRIPCIÓN</strong></td>
+    </tr>
+    <tr>
+      <td><img alt="Número Atributo" src="images/att_number.png" width="19" height="18" /></td>
+      <td>Numérico</td>
+      <td>Anchos, largos, cantidades, números de animales, personas u objetos</td>
+    </tr>
+    <tr>
+      <td><img alt="Lista de atributos" src="images/att_list.png" width="19" height="18" /></td>
+      <td>Lista</td>
+      <td>Los nombres de los elementos en donda la lista se conoce y no es demasiada
+      larga</td>
+    </tr>
+    <tr>
+      <td><img alt="Texto del atributo" src="images/attribute_text.png" width="19" height="18" /></td>
+      <td>Texto</td>
+      <td>Los nombres específicos que no pueden ser cargados de antemano a una lista</td>
+    </tr>
+    <tr>
+      <td><img alt="Árbol de atributos" src="images/attTree.png" width="18" height="19" /></td>
+      <td>Árbol</td>
+      <td>Una colección de atributos que se pueden organizar en una estructura jerárquica o
+        en un formato lógico, como especies de animales</td>
+    </tr>
+    <tr>
+      <td><img alt="Atributo Boolean" src="images/att_boolean.png" width="18" height="17" /></td>
+      <td>Boolean</td>
+      <td>Cualquier situación que se pueda responder con un Sí o un No</td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<h4><strong><a id="dmcreateattributes">Creación de atributos</a></strong></h4>
+
+<p>Un atributo no puede existir por sí mismo. Se trata de una extensión de una categoría y
+debe estar asociado con una categoría. Una categoría en contraste no necesariamente
+requiere atributos. </p>
+
+<p>Los atributos pueden ser asociados con una sola categoría o con múltiples
+categorías. </p>
+<ol>
+  <li>Selecciona una categoría y haga clic en Agregar atributo</li>
+  <li>Elige si crear un nuevo atributo o aplicar un atributo o atributos existente.
+     Si la elección es aplicar un atributo existente (s) a la categoría seleccionada,
+    el usuario puede seleccionar un atributo único o múltiples atributos.
+  </li>
+  <li>Seleccione el tipo de atributo y de el nombre (la clave será automáticamente
+    generada) y si se requiere el atributo. 
+    <ul>
+      <li><strong>Numérico</strong> - seleccione agregaciones y provee un rango de datos
+        (Si se solicita)</li>
+      <li><strong>Texto</strong> - validación de expresiones frecuentes opcional </li>
+      <li><strong>Lista</strong> - Haz clic para <strong>agregar</strong> valores a
+        la lista</li>
+      <li><strong>Árbol</strong> - haz clic en <strong>la raíz</strong> y luego
+        <strong>añadir</strong> para iniciar la construcción de los nodos y ramas de árboles.
+        Existen opciones de importación para los atributos formateados correctamente en XML.</li>
+      <li><strong>Boolean</strong> - hay opciones adicionales disponibles para
+        atributos booleanos.</li>
+    </ul>
+  </li>
+  <li><strong>Finalizar</strong> y <strong>Guardar</strong></li>
+</ol>
+
+<h4><strong><a id="dmdisabledelete">Desactivación y eliminación de las categorías o
+</a></strong><strong><a id="dmdisabledelete">Atributos</a></strong></h4>
+
+<p>Categorías, atributos o valores dentro de todos los atributos pueden ser eliminados del
+modelo de datos, o deshabilitados.</p>
+
+<p><strong>Eliminación</strong> - elimina completamente la función de los modelos de datos.
+ Esto sólo puede hacerse si no hay dependencias. Una dependencia puede ser
+una categoría hija, un atributo, una observación registrada o una consulta/resumen. Si no existen
+dependencias, la función se puede eliminar por completo de los modelos de datos.
+</p>
+
+<p><strong>Deshabilitar</strong> - Si existen dependencias o el administrador
+no desea eliminar por completo la función, ésta se puede deshabilitar. Deshabilitación elimina la
+capacidad de registrar observaciones basadas en la característica deshabilitada, pero sí
+preserva la capacidad de realizar análisis sobre la función. Deshabilitando/Habilitando
+categorías es un proceso mucho más fácil, ya que no requiere que todos las
+dependencias sean deshabilitadas antes de proceder con la categoría a nivel superior. 
+También permite la reintroducción en caso que se requiera. Una categoría o un atributo deshabilitado
+aparecerá gris hasta que se vuelva a habilitar.</p>
+
+<p></p>
+
+<h4><strong><a id="dmmoving">Moviendo Categorías y atributos</a></strong></h4>
+
+<p>Categorías y atributos pueden cambiarse de posición al ser arrastrados a una
+nueva posición dentro de ese nivel. </p>
+
+<p></p>
+
+<h4><a id="dmimportingattributes">Importación de Atributos</a></h4>
+
+<p>Atributos de árboles pueden ser pre-definidos fuera de SMART en un formato XML e
+importados al modelo de datos utilizando la opción <strong>Importar</strong> del atributo
+cuando se crea un nuevo atributo. El uso más común de esta característica sería
+cuando se crea una nueva área de conservación y se define el modelo de datos para el
+área.</p>
+
+<p>El modelo de datos predeterminado no contiene una lista de especies predefinido. La
+opción Importar permite una importación de una lista de especies personalizada que trae
+sólo las especies deseadas al modelo de datos del Área de Conservación. Otros atributos de árbol
+pueden ser importados si el XML está bien construido.</p>
+
+<p></p>
+
+<h4><strong><a id="dmkeys">Claves de Modelo de Datos</a></strong></h4>
+
+<p>Cuando se crea un atributo o categoría, una clave única es automáticamente
+generada. Las claves generadas son por lo general el nombre común sin espacios ni
+otros caracteres. Si un nombre común es el mismo que un nombre previo, SMART
+añadirá un número al final del nombre común para que sea único. Si el
+nombre común comienza con un número, SMART eliminará el/los número(s) de manera que la clave
+comience con un carácter alfabético.</p>
+
+<p><em><strong><span style="color:#ff0000">Nota: Se recomienda
+</span></strong></em><em><strong><span style="color:#ff0000">dejar las llaves sin editar a menos que usted entienda completamente lo que podría suceder si las
+</span></strong></em><em><strong><span style="color:#ff0000">llaves se cambian.</span></strong></em></p>
+
+<p></p>
+
+<p></p>
+
+<h2><a id="CrossCa" name="Patrol1">Análisis Transvesal de Áreas de Conservación</a></h2>
+
+<p>Análisis entre las áreas de conservación se lleva a cabo dentro del
+Marco de análisis Trans-Áreas de Conservación. Este marco permite realizar búsquedas entre las áreas de conservación
+almacenadas dentro de una instalación de SMART. Análisis Trans-Áreas de Conservación
+requiere que más que una Área de Conservación esté cargada dentro de una instalación de
+SMART. </p>
+
+<h4><strong><a id="ccalogin">Requisitos para iniciar sesión</a></strong></h4>
+
+<p>1. Más de una Área de Conservación sea cargada en SMART</p>
+
+<p>2. El nombre de usuario y passsword sea común a las Áreas de Conservación disponibles</p>
+
+<p></p>
+
+<p><img alt="Iniciar Sesión Trans-Área de Conservación" src="images/X-CA_login.png" width="495" height="314" /></p>
+
+<p>Para iniciar sesión, el usuario selecciona <strong>&quot;XXX - Análisis Trans-Áreas de Conservación</strong> y es requirido ingresar el nombre de usuario y contraseña que
+es común a las Áreas de Conservación.</p>
+
+<p></p>
+
+<p>Después de ingresar a SMART, abra la lista de Áreas de Conservación
+disponibles para el análisis. Esta pantalla permite que las áreas de conservación sean
+incluidas en el análisis. El usuario SMART puede seleccionar qué áreas de conservación incluir
+haciendo clic al enlace <em><strong>&quot;Modificar ...&quot;</strong></em>. Esto abrirá una
+ventana donde el usuario puede seleccionar las Áreas de Conservación específicas para el análisis.
+Después que se seleccionan las áreas de conservación, SMART valida los modelos de datos seleccionados y
+busca componentes en comun que estarán disponibles para su uso en
+consultas o informes. </p>
+
+<p></p>
+
+<table border="1">
+  <col />
+  <col />
+  <tbody>
+    <tr>
+      <td><strong>Icono</strong></td>
+      <td><strong>DESCRIPCIÓN</strong></td>
+    </tr>
+    <tr>
+      <td><img alt="Icono consulta" src="images/iconQueryPerspective.png" width="22" height="21" /></td>
+      <td>Perspectiva de Consulta</td>
+    </tr>
+    <tr>
+      <td><img alt="Icono de informe" src="images/iconReports.png" width="22" height="21" /></td>
+      <td>Perspectiva de informe</td>
+    </tr>
+    <tr>
+      <td><img alt="Icono guardar consulta" src="images/querySave.png" width="22" height="19" /></td>
+      <td>Guardar consulta</td>
+    </tr>
+    <tr>
+      <td><img alt="Icono Guardar como..." src="images/querySaveAs.png" width="17" height="18" /></td>
+      <td>Guardar consulta como</td>
+    </tr>
+    <tr>
+      <td><img alt="Icono exportar consulta" src="images/exportQuery.png" width="17" height="18" /></td>
+      <td>Exportar consulta</td>
+    </tr>
+    <tr>
+      <td><img alt="Icono crear nueva consulta" src="images/CreateNewQueryIcon.png" width="18" height="18" /></td>
+      <td>Crear consulta</td>
+    </tr>
+    <tr>
+      <td><img alt="Actualizar" src="images/refreshPerspectiveIcon.png" width="18" height="18" /></td>
+      <td>Restaurar ventanas</td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<p><em>Nota: Los iconos utilizados en el análisis trans-áreas de conservación son los mismos
+</em><em>iconos utilizados por el resto del programa. </em></p>
+
+<p></p>
+
+<h4><a id="ccaqueries">Las Consultas</a></h4>
+
+<p>Los filtros de consulta (patrullaje y modelo de datos) disponibles para su uso son los
+componentes que son comunes a todos los modelos de datos. SMART busca las llaves de modelos de datos
+y la información de patrullaje única para extraer los elementos comunes a todos las
+Áreas de Conservación seleccionadas. Si una clave de modelo de datos ha sido alterada, el software
+no será capaz de búscar en contra de otras áreas a menos que todas las demás claves han sido
+actualizadas de manera parecida. Preservar las llaves en un modelo de datos estandarizado permite el
+análisis trans-áreas de conservación. Al alterar claves, quitas esta habilidad. </p>
+
+<p></p>
+
+<p>Una consulta trans-áreas de conservación se construye utilizando la misma ruta de trabajo como una consulta estándar.
+ </p>
+<ul>
+  <li>Se aplican filtros (fecha, patrullaje, y modelo de datos)</li>
+  <li>Se añaden operadores si se requiere</li>
+  <li>Se ejecuta consulta</li>
+  <li>Los resultados se ven en la ventana tabular o mapa</li>
+  <li>La consulta se guarda (si es necesario) en las carpetas Consultas de Áreas de Conservación o Mis
+    Consultas</li>
+</ul>
+
+<p></p>
+
+<h4><a id="ccareports">Informe</a></h4>
+
+<p>Al igual que con los informes SMART estándar, informes Trans-Áreas de Conservación están vinculados
+a las consultas guardadas. Cualquier informe trans-áreas de conservación que desean vincularse a
+una consulta debe primero crear consultas específicas dentro del marco de análisis trans-áreas de conservación.
+ Una vez que las consultas se han guardado, ellos estarán disponibles para su uso en
+los informes del análisis trans-áreas de conservación.</p>
+
+<p><em>Nota: Los conjuntos de datos del informe vinculados a las tablas no necesitan ningún trabajo adicional
+</em><em>para acceder la información. </em></p>
+
+<p></p>
+
+<p>Un Informe trans-área de conservación está construido utilizando la misma ruta de trabajo que un informe estándar.
+</p>
+<ul>
+  <li>Construir un informe</li>
+  <li>Guardar el informe</li>
+  <li>Ejecutar y/o exportar un informe</li>
+</ul>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+</body>
+</html>
