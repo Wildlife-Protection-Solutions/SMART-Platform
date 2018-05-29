@@ -22,6 +22,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.importexport.QueryExportEngine;
 import org.wcs.smart.query.model.IQueryType;
@@ -43,7 +44,7 @@ public class QueryListComposite extends Composite{
 	private ScrolledForm form;
 	
 	public QueryListComposite(Composite parent) {
-		super(parent, SWT.BORDER);
+		super(parent, SWT.NONE);
 		
 		queries = new ArrayList<>();
 		
@@ -56,6 +57,9 @@ public class QueryListComposite extends Composite{
 		
 		form = toolkit.createScrolledForm(this);
 		form.getBody().setLayout(new GridLayout());
+		((GridLayout)form.getBody().getLayout()).marginWidth = 0;
+		((GridLayout)form.getBody().getLayout()).marginHeight = 0;
+		
 		list = toolkit.createComposite(form.getBody(), SWT.NONE);
 		list.setLayout(new GridLayout(5, false));
 		form.setContent(list);
@@ -66,14 +70,21 @@ public class QueryListComposite extends Composite{
 		((GridLayout)list.getLayout()).marginHeight = 0;
 	}
 	
-	
+	protected boolean canAdd(Query query) {
+		return !query.getTypeKey().equalsIgnoreCase(CompoundMapQuery.TYPE_KEY);
+	}
 	
 	public void addQuery(Query query) {
+		if (!canAdd(query)) return;
 		queries.add(query);
 		updateList();
 	}
+	
 	public void addQueries(List<Query> queries) {
-		this.queries.addAll(queries);
+		for (Query q : queries) {
+			if (!canAdd(q)) continue;
+			this.queries.add(q);
+		}
 		updateList();
 	}
 
@@ -116,13 +127,18 @@ public class QueryListComposite extends Composite{
 			toolkit.createLabel(list, q.getName());
 			
 			//date filter
-			QueryDateFilterComposite dateComposite = new QueryDateFilterComposite(list, qType.getDateFilterOptions(), IDateFilter.DATE_FILTERS, false);
-			dateComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			adapt(dateComposite);
-			dateComposite.addChangeListener(evt->{
-				list.layout(true);
-				form.reflow(true);
-			});
+			QueryDateFilterComposite dateComposite = null;
+			if (qType.getDateFilterOptions().length > 0) {
+				dateComposite = new QueryDateFilterComposite(list, qType.getDateFilterOptions(), IDateFilter.DATE_FILTERS, false);
+				dateComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				adapt(dateComposite);
+				dateComposite.addChangeListener(evt->{
+					list.layout(true);
+					form.reflow(true);
+				});
+			}else {
+				toolkit.createLabel(list, "");
+			}
 			
 			//format
 			ComboViewer cmbFormat = new ComboViewer(list, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -138,7 +154,7 @@ public class QueryListComposite extends Composite{
 			cmbFormat.setInput(exports);
 			IQueryExporter selection = exports.get(0);
 			for (IQueryExporter i : exports) {
-				if (i.getDefaultExtension().equalsIgnoreCase("csv")) {
+				if (i.getDefaultExtension() != null && i.getDefaultExtension().equalsIgnoreCase("csv")) {
 					selection = i;
 					break;
 				}
@@ -204,8 +220,7 @@ public class QueryListComposite extends Composite{
 		
 		private QueryConfiguration asQueryConfiguration() {
 			IQueryExporter exporter = (IQueryExporter) formatSelector.getStructuredSelection().getFirstElement();
-			DateFilter dFilter = dateCom.getDateFilter();
-			return new QueryConfiguration(query, exporter, dFilter);
+			return new QueryConfiguration(query, exporter, dateCom == null ? null : dateCom.getDateFilter());
 		}
 	}
 }

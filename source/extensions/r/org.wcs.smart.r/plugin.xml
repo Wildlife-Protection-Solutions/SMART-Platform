@@ -57,6 +57,7 @@
             locationURI="menu:org.wcs.smart.menu.query?before=org.wcs.smart.query.separator.options">
          <command
                commandId="org.wcs.smart.r.scripts.manage.show"
+               icon="images/icons/rlogo_16.png"
                label="Configure R Scripts"
                style="push">
          </command>
@@ -65,6 +66,7 @@
             allPopups="false"
             locationURI="popup:org.wcs.smart.query.parts.itemlist?after=org.wcs.smart.query.separator1">
          <menu
+               icon="images/icons/rlogo_16.png"
                id="org.wcs.smart.r.scripts.runlist"
                label="Run R Script">
             <dynamic
@@ -92,6 +94,7 @@
       <editor
             class="org.wcs.smart.r.ui.editor.script.RScriptEditor"
             default="false"
+            icon="images/icons/rlogo_16.png"
             id="org.wcs.smart.r.script.editor"
             name="R Script Editor">
       </editor>
@@ -122,6 +125,14 @@
             class="org.wcs.smart.r.ui.RunRScriptHandler$RunRScriptHandlerWrapper"
             commandId="org.wcs.smart.r.scirpt.run">
       </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.wcs.smart.r.ui.RPreferencePage"
+            id="org.wcs.smart.preference.r"
+            name="R">
+      </page>
    </extension>
 
 </plugin>

@@ -105,7 +105,8 @@ public class RunPage extends EditorPart {
 		txtParameters.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)txtParameters.getLayoutData()).heightHint = 70;
 
-		l = toolkit.createLabel(main, "Queries:");
+//		l = toolkit.createLabel(main, "Queries:");
+		l = toolkit.createLabel(main, "");
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		queryList = new QueryListComposite(main);
@@ -178,14 +179,14 @@ public class RunPage extends EditorPart {
 		
 		Button btnRun = new Button(main, SWT.PUSH);
 		btnRun.setText("Run Script");
-		btnRun.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 3, 1));
+		btnRun.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, 3, 1));
 		btnRun.addListener(SWT.Selection, e-> executeScript());
 	}
 	
 
 	public void update() {
 		RScript script = parent.getScript();
-		mainForm.setText(script.getName());
+		mainForm.setText("R Script: " + script.getName());
 		boolean found = false;
 		if (script.getParameters() != null) {
 			for (RScriptParameter p : script.getParameters()) {

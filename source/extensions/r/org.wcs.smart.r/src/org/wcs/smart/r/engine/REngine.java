@@ -20,6 +20,7 @@ import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.r.RPlugIn;
+import org.wcs.smart.r.ui.RPreferencePage;
 import org.wcs.smart.util.UuidUtils;
 
 public class REngine {
@@ -78,13 +79,14 @@ public class REngine {
 					Path p = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename);
 					queryFiles.add(p);
 					HashMap<String, Object> parameters = new HashMap<>();
+					//TODO: delete temporary query files after run
 					query.getQueryExporter().export(query.getQuery(), results, p.toFile(), parameters, new NullProgressMonitor());
 					writeString("Query Exported to : " + p.toString());
 					writeString("----------------------------------------");
 				}
 				
 				StringBuilder command = new StringBuilder();
-				command.append("R_EXEC");
+				command.append("\"" + RPreferencePage.getRSystemProperty() + "\"");
 				if (rParameters != null) {
 					command.append(" ");
 					command.append(rParameters);
