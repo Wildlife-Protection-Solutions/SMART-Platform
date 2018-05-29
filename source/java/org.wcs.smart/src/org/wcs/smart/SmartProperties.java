@@ -155,8 +155,10 @@ public class SmartProperties {
 	public void setKey(String key, String value) throws Exception{
 		if (key.equals(PROP_GPS_BABEL)){
 			ConfigurationScope.INSTANCE.getNode(SmartPlugIn.PLUGIN_ID).put(key, value);
+			ConfigurationScope.INSTANCE.getNode(SmartPlugIn.PLUGIN_ID).flush();
 		}else if (key.equals(SYSPROP_DATASTORE)){
 			ConfigurationScope.INSTANCE.getNode(SmartPlugIn.PLUGIN_ID).put(key, value);
+			ConfigurationScope.INSTANCE.getNode(SmartPlugIn.PLUGIN_ID).flush();
 		}
 	}
 }

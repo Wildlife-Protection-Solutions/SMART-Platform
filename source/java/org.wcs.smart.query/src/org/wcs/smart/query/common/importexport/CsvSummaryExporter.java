@@ -82,8 +82,7 @@ public class CsvSummaryExporter implements ICsvQueryExporter {
 	public void export(Query query, IQueryResult result, File file,
 			HashMap<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
-		SummaryQuery sumQuery = (SummaryQuery)query;
-		SummaryQueryResult results = (SummaryQueryResult) sumQuery.getCachedResults();
+		SummaryQueryResult results = (SummaryQueryResult) result;
 		if (results == null){
 			throw new Exception(Messages.CsvSummaryExporter_QueryNotRun);
 		}
