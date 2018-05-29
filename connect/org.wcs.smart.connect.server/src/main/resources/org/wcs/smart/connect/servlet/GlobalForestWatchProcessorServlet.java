@@ -128,13 +128,11 @@ public class GlobalForestWatchProcessorServlet extends HttpServlet {
 			}
 			
 			gw.setLastDataDate(new Date());
-			//log the request json so I can figure out how to parse it
 			StringBuilder json = new StringBuilder();
 			try(BufferedReader reader = request.getReader()){
 				reader.lines().forEach(e->json.append(e));
 			}
-			logger.log(Level.SEVERE, json.toString());
-			
+			//logger.log(Level.SEVERE, json.toString());
 			
 			List<Alert> alerts = processJson(json.toString(), gw);
 			for (Alert a : alerts) {
