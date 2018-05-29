@@ -28,12 +28,9 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -47,6 +44,7 @@ import org.wcs.smart.i2.model.IntelEntity;
  */
 public class RelationshipGraphComposite extends Composite {
 
+	private RelationshipGraphFilterComposite cmpFilter;
 	private ZestContentViewer graphViewer;
 	private FormToolkit toolkit;
 	
@@ -63,20 +61,9 @@ public class RelationshipGraphComposite extends Composite {
 	private void createContent(Composite parent) {
 		Composite topCmp = toolkit.createComposite(parent, SWT.NONE);
 		topCmp.setLayout(new GridLayout(2, false));
-		topCmp.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
+		topCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Button btnFilter = toolkit.createButton(topCmp, "Filter...", SWT.PUSH);
-		btnFilter.setToolTipText("Filter what is displayed in the graph");
-		btnFilter.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				//TODO: ZZZZZZZZZZZ implement
-			}
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// nothing
-			}
-		});
+		cmpFilter = new RelationshipGraphFilterComposite(topCmp);
 
 		toolkit.createLabel(topCmp, "Style:");
 		
@@ -106,7 +93,7 @@ public class RelationshipGraphComposite extends Composite {
 			}
 		});
 	}
-	
+
 	public void setInput(IntelEntity entity) {
 		graphViewer.setInput(entity);
 	}
