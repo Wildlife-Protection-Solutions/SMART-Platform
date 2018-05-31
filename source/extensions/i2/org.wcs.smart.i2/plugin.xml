@@ -367,6 +367,18 @@
                   </test>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.graphstyles.show"
+                  label="Relationship Diagram Styles..."
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="configure">
+                  </test>
+               </visibleWhen>
+            </command>
             <separator
                   name="org.wcs.smart.i2.separator2"
                   visible="true">
@@ -1057,6 +1069,10 @@
             name="%ShowRelationshipGroupsCommandName">
       </command>
       <command
+            id="org.wcs.smart.i2.command.graphstyles.show"
+            name="Relationship Diagram Styles...">
+      </command>
+      <command
             id="org.wcs.smart.i2.command.record.new"
             name="%NewRecordCommandName3">
       </command>
@@ -1242,6 +1258,16 @@
       <handler
             class="org.wcs.smart.i2.ui.handler.ShowConfigurationDialogHandler$ShowConfigurationDialogHandlerWrapper"
             commandId="org.wcs.smart.i2.command.config.show">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.i2.permission"
+                  value="configure">
+            </test>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.ShowRelationshipDiagramStylesHandler$ShowRelationshipDiagramStylesHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.graphstyles.show">
          <enabledWhen>
             <test
                   property="org.wcs.smart.i2.permission"
