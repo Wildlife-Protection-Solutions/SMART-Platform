@@ -4,7 +4,8 @@
       label="SMART Triggers Khmer Language Pack"
       version="6.0.0"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart-feature">
+      license-feature="org.wcs.smart.license.feature"
+      license-feature-version="6.0.0.qualifier">
 
    <description>
       The Khmer translations for the Triggers plugin.

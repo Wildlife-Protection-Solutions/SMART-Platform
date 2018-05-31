@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Mongolian Field Sensor Query Fragment
-Bundle-SymbolicName: org.wcs.smart.asset.er.nl_mn
+Bundle-SymbolicName: org.wcs.smart.asset.query.nl_mn
 Bundle-Version: 6.0.0
 Fragment-Host: org.wcs.smart.asset.query;bundle-version="6.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
