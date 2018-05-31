@@ -94,11 +94,11 @@ public class ConnectStyleConfiguration extends HttpServlet {
 		
 	
 	/**
-	 * Get Style Configuration
-	 * URL: ../server/api/connectstyle/
+	 * <p>Get Style Configuration</p>
+	 * URL: ../server/api/connectstyle/<br>
 	 * Call Type: GET
 	 * 
-	 * @return Returns a JSON StyleConfiguration object. ( https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/StyleConfiguration.java ) 
+	 * @return Returns a JSON StyleConfiguration object. (<a href="https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/StyleConfiguration.java">StyleConfiguration</a>) 
 	 */
 	
 	@GET
@@ -120,18 +120,19 @@ public class ConnectStyleConfiguration extends HttpServlet {
 	}
 	
 	/**
-	 * Create a Style Configuration
-	 * URL: ../server/api/connectstyle/
-	 * Call Type: POST
-	 * Payload: Multi-part form data where attributes match the object of attributes that match the Java attributes you wish to update, EX:
+	 * <p>Create a Style Configuration</p>
+	 * URL: ../server/api/connectstyle/<br>
+	 * Call Type: POST<br>
+	 * Payload: Multi-part form data where attributes match the object of attributes that match the Java attributes you wish to update.
+	 * <pre>
 	 * 		
 	 * ------WebKitFormBoundaryAxRJfYeZhy4BeRWV
 	 * Content-Disposition: form-data; name="server_name"
 	 * 
-	 * SMART Connect <img src='https://smartconservationsoftware.org/photos/smart_logo_96.png'>
+	 * SMART Connect &lt;img src='https://smartconservationsoftware.org/photos/smart_logo_96.png'&gt;
 	 * ------WebKitFormBoundaryAxRJfYeZhy4BeRWV
 	 * Content-Disposition: form-data; name="footer_text"
-	 * <img src='../css/images/smart_logo.png'> Copyright 2015, 2016
+	 * &lt;img src='../css/images/smart_logo.png&gt;> Copyright 2015, 2016
 	 * ------WebKitFormBoundaryAxRJfYeZhy4BeRWV
 	 * Content-Disposition: form-data; name="header_style"
 	 * 
@@ -147,7 +148,7 @@ public class ConnectStyleConfiguration extends HttpServlet {
 	 * JFIF  H H   .....binary image....
 	 * 
 	 * ------WebKitFormBoundaryAxRJfYeZhy4BeRWV--
-	 * 
+	 * </pre>
 	 * 
 	 * 
 	 * @return Returns a JSON StyleConfiguration object for the created style configuration 
@@ -220,9 +221,9 @@ public class ConnectStyleConfiguration extends HttpServlet {
 	}
 	
 	/**
-	 * Edit Style Configuration
-	 * URL: ../server/api/connectstyle/
-	 * Call Type: PUT
+	 * <p>Edit Style Configuration</p>
+	 * URL: ../server/api/connectstyle/<br>
+	 * Call Type: PUT<br>
 	 * Payload: Multi-part form data where attributes match the object of attributes that match the Java attributes you wish to update
 	 * see the docs for creating a new style for an example.
 	 * 
@@ -322,8 +323,8 @@ public class ConnectStyleConfiguration extends HttpServlet {
 	}
 	
 	/**
-	 * Delete Style Configuration
-	 * URL: ../server/api/connectstyle/
+	 * <p>Delete Style Configuration</p>
+	 * URL: ../server/api/connectstyle/<br>
 	 * Call Type: DELETE
 	 * 
 	 * @return Returns a JSON StyleConfiguration object for the deleted style configuration 

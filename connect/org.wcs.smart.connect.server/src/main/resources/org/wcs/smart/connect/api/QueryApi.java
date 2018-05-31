@@ -131,9 +131,11 @@ public class QueryApi extends HttpServlet{
 	@Context private HttpServletRequest request;
 	
 	/**
-	 * <p>Runs a query and returns the results.
-	 * <p>URL: ../server/api/query/{queryuuid}
-	 * <p>Call Type: GET
+	 * <p>Runs a query and returns the results.</p>
+	 * <p>
+	 * URL: ../server/api/query/{queryuuid}<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
 	 * @param queryuuid		provided in the URL, the uuid of the query requested
 	 * @param format	requested format, not all options makes sense for all query types: csv, shp, tif, geojson
@@ -640,14 +642,16 @@ public class QueryApi extends HttpServlet{
 	}
 	
 	/**
-	 * returns all Queries the user is able to view 
-	 * <p>URL: ../server/api/query/
-	 * <p>Call Type: GET
+	 * <p>Returns all queries the current user is able to view/run</p> 
+	 * <p>
+	 * URL: ../server/api/query/<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
-	 * @param type - optional type String - only return queries that match the type key provided, see getAllQueryTypes for list of possible values. leave blank to get everything.
-	 * @param ca - optional UUID - only return queries that match the CA UUID provided. leave blank to get everything.
-	 * @param isccaa - optional boolean - only returns string that are CCAA queries when True, only ones that are not when False. leave blank to get everything. 
-	 * @return A JSON list of QueryProxy objects. ( https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/query/QueryProxy.java )
+	 * @param typeFilter - optional type String - only return queries that match the type key provided, see getAllQueryTypes for list of possible values. leave blank to get everything.
+	 * @param caFilter - optional UUID - only return queries that match the CA UUID provided. leave blank to get everything.
+	 * @param isCcaaFilter - optional boolean - only returns string that are CCAA queries when True, only ones that are not when False. leave blank to get everything. 
+	 * @return A JSON list of QueryProxy objects. (<a href="https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/query/QueryProxy.java">Query Proxy</a>)
 	 */
 	@GET
     @Path("")

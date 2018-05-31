@@ -119,9 +119,13 @@ public class ReportApi extends HttpServlet{
 	@Context private HttpServletRequest request;
 	
 	/**
-	 * Runs a query and returns the results.
+	 * <p>Runs a query and returns the results.</p>
+	 * <p>
+	 * URL: ../server/api/report/{reportuuid}<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
-	 * @param reportuuid - The report UUID, passed in as part of the URL 
+	 * @param reportUuid - The report UUID, passed in as part of the URL 
 	 * @param format  - html, pdf, doc, odt are the options.
 	 * @param parameterList - any custom parameters in a comma separated list, eg. &parameterList=param1,value1,param2,value2
 	 * @param cafilter - only run against CAs listed in this parameter, comma separated list of UUIDs.
@@ -316,13 +320,16 @@ public class ReportApi extends HttpServlet{
 	}
 	
 	/**
-	 * returns all Reports the user is able to view
+	 * <p>Returns all reports the current user is able to view</p>
+	 *<p>
+	 * URL: ../server/api/report<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
 	 * @param username - The report UUID, passed in as part of the URL 
-	 * @return
+	 * @return list of ReportProxy JSON objects
 	 *
 	 **/
-	
 	@GET
     @Path("")
 	@Produces({ MediaType.APPLICATION_JSON })
@@ -393,12 +400,14 @@ public class ReportApi extends HttpServlet{
 	}
 	
 	/**
-	 * Returns the report requested, not the results of the report, but the report definition/DB row
-	 * URL: ../server/api/report/definition/{uuid}
+	 * <p>Returns the report requested, not the results of the report, but the report definition/DB row</p>
+	 * <p>
+	 * URL: ../server/api/report/definition/{uuid}<br>
 	 * Call Type: GET
+	 * </p>
 	 * 
-	 * @parameter = the report uuid, passed in through the url
-	 * @return Returns a JSON representation of a Report object 
+	 * @param reportUuid  the report uuid, passed in through the url
+	 * @return JSON representation of a ReportProxy object 
 	 */
 	@GET
 	@Path("/definition/{reportuuid}")
@@ -426,12 +435,14 @@ public class ReportApi extends HttpServlet{
 	
 	
 	/**
-	 * Returns all of the parameters of the given report
-	 * URL: ../server/api/report/{uuid}/params
+	 * <p>Returns all of the parameters of the given report</p>
+	 * <p>
+	 * URL: ../server/api/report/{uuid}/params<br>
 	 * Call Type: GET
+	 * </p>
 	 * 
-	 * @parameter = the report uuid, passed in through the url
-	 * @return Returns a JSON list of ReportParameter objects 
+	 * @param reportUuid the report uuid, passed in through the url
+	 * @return a JSON list of ReportParameter objects 
 	 */
 	@GET
     @Path("/{reportuuid}/params")

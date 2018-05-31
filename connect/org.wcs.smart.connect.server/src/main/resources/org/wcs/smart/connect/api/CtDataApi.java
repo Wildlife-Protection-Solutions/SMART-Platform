@@ -91,12 +91,13 @@ public class CtDataApi extends HttpServlet {
 	}
 	
 	/**
-	 * Post a new data packet
-	 * URL: ../server/api/ctdata/{cauuid{
-	 * Call Type: POST
-	 * 
+	 * <p>Post a new data packet</p>
+	 * <p>
+	 * URL: ../server/api/ctdata/{cauuid}<br>
+	 * Call Type: POST<br>
 	 * Payload: A JSON object representing a collection of cybertracker
 	 * observations
+	 * </p>
 	 *
 	 * 
 	 */

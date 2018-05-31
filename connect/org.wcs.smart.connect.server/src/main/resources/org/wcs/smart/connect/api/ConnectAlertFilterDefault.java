@@ -53,8 +53,9 @@ import org.wcs.smart.connect.security.SecurityManager;
 
 /**
  * Smart Connect REST API for default filters used on the alert/operations map.
- * allows users to get and set what the defaults are, only one default is allowed for  
- * all users and cas across a single Connect instance, although the database is designed to allow for more eventually.
+ * <p>Allows users to get and set what the defaults are, only one default is allowed for  
+ * all users and Conservation Areas s across a single Connect instance, 
+ * although the database is designed to allow for more eventually.</p>
  * 
  * @author Jeff
  *
@@ -106,9 +107,9 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 	
 	
 	/**
-	 * Get the default filters for showing alerts 
-	 * URL: ../server/api/connectalertfilterdefault/
-	 * Call Type: GET
+	 * Get the default filters for showing alerts<br>
+	 * URL: ../server/api/connectalertfilterdefault/<br>
+	 * Call Type: GET<br>
 	 * 
 	 * @return Returns a JSON list of AlertFilterDefault objects, there is only ever 1 object in the list currently. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/AlertFilterDefault.java) 
 	 */
@@ -126,14 +127,30 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 	}
 	
 	/**
-	 * update default filters for showing alerts 
-	 * URL: ../server/api/connectalertfilterdefault/{uuid}
-	 * Call Type: PUT
-	 * Payload: A JSON object of attributes that match the Java attributes you wish to update, EX:
-	 * 		{"defaultPastHours":"744","defaultTypeUuids":"b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50,d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52,c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51,e0eebc99-9c0b-4ef8-bb6d-91b9bd380a53,","defaultActive":true,"defaultDisabled":false,"defaultLevel1":true,"defaultLevel2":true,"defaultLevel3":true,"defaultLevel4":true,"defaultLevel5":true,"defaultCaUuids":"8f7fbe1b-201a-4ef4-bda8-14f5581e65ce,2a304b75-5b83-4d0a-83cd-52d0b4742c14,00000000-0000-0000-0000-000000000000,fb5938b9-3ecd-4972-819e-867ee42623bb,2c5dbf89-ee89-473e-93fc-cc816205dba7,","defaultText":"","secondsRefresh":"30","startingZoomLevel":"8","startingLong":"-123","startingLat":"48"}
+	 * <p>Update default filters for showing alerts.</p> 
+	 * URL: ../server/api/connectalertfilterdefault/{uuid}<br>
+	 * Call Type: PUT<br>
+	 * Payload: A JSON object of attributes that match the Java attributes you wish to update,
+	 * <pre>{
+	 *   "defaultPastHours":"744",
+	 *   "defaultTypeUuids":"b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50,d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52,c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51,e0eebc99-9c0b-4ef8-bb6d-91b9bd380a53,",
+	 *   "defaultActive":true,
+	 *   "defaultDisabled":false,
+	 *   "defaultLevel1":true,
+	 *   "defaultLevel2":true,
+	 *   "defaultLevel3":true,
+	 *   "defaultLevel4":true,
+	 *   "defaultLevel5":true,
+	 *   "defaultCaUuids":"8f7fbe1b-201a-4ef4-bda8-14f5581e65ce,2a304b75-5b83-4d0a-83cd-52d0b4742c14,00000000-0000-0000-0000-000000000000,fb5938b9-3ecd-4972-819e-867ee42623bb,2c5dbf89-ee89-473e-93fc-cc816205dba7,",
+	 *   "defaultText":"",
+	 *   "secondsRefresh":"30",
+	 *   "startingZoomLevel":"8",
+	 *   "startingLong":"-123",
+	 *   "startingLat":"48"
+	 *}</pre>
 	 * 
-	 * attributes that are not going to be updated can be left out entirely if desired.
-	 * set defaultPastHours=-99 to select 'all dates' as the default
+	 * <p>Attributes that are not going to be updated can be left out entirely if desired.<p>
+	 * <p>Set defaultPastHours=-99 to select 'all dates' as the default.</p>
 	 * 
 	 * @param	uuid	provided in the URL, the uuid of the alert defaults to update.
 	 * @return Returns a JSON AlertFilterDefault object for the updated alert defaults
@@ -170,11 +187,27 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 
 	
 	/**
-	 * create default filters for the first time 
-	 * URL: ../server/api/connectalertfilterdefault/
-	 * Call Type: PUT
-	 * Payload: A JSON object of attributes that match the Java attributes you wish to update, EX:
-	 * 		{"defaultPastHours":"744","defaultTypeUuids":"b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50,d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52,c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51,e0eebc99-9c0b-4ef8-bb6d-91b9bd380a53,","defaultActive":true,"defaultDisabled":false,"defaultLevel1":true,"defaultLevel2":true,"defaultLevel3":true,"defaultLevel4":true,"defaultLevel5":true,"defaultCaUuids":"8f7fbe1b-201a-4ef4-bda8-14f5581e65ce,2a304b75-5b83-4d0a-83cd-52d0b4742c14,00000000-0000-0000-0000-000000000000,fb5938b9-3ecd-4972-819e-867ee42623bb,2c5dbf89-ee89-473e-93fc-cc816205dba7,","defaultText":"","secondsRefresh":"30","startingZoomLevel":"8","startingLong":"-123","startingLat":"48"}
+	 * <p>Create default filters for the first time</p> 
+	 * URL: ../server/api/connectalertfilterdefault/<br>
+	 * Call Type: PUT<br>
+	 * Payload: A JSON object of attributes that match the Java attributes you wish to update/.
+	 * <pre>{
+	 *   "defaultPastHours":"744",
+	 *   "defaultTypeUuids":"b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50,d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52,c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51,e0eebc99-9c0b-4ef8-bb6d-91b9bd380a53,",
+	 *   "defaultActive":true,
+	 *   "defaultDisabled":false,
+	 *   "defaultLevel1":true,
+	 *   "defaultLevel2":true,
+	 *   "defaultLevel3":true,
+	 *   "defaultLevel4":true,
+	 *   "defaultLevel5":true,
+	 *   "defaultCaUuids":"8f7fbe1b-201a-4ef4-bda8-14f5581e65ce,2a304b75-5b83-4d0a-83cd-52d0b4742c14,00000000-0000-0000-0000-000000000000,fb5938b9-3ecd-4972-819e-867ee42623bb,2c5dbf89-ee89-473e-93fc-cc816205dba7,",
+	 *   "defaultText":"",
+	 *   "secondsRefresh":"30",
+	 *   "startingZoomLevel":"8",
+	 *   "startingLong":"-123",
+	 *   "startingLat":"48"
+	 *}</pre>
 	 * 
 	 * @return Returns a JSON AlertFilterDefault object for the updated alert defaults
 	 */

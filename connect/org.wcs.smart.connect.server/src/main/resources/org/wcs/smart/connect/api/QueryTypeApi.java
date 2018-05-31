@@ -52,11 +52,13 @@ public class QueryTypeApi extends HttpServlet{
 	@Context private HttpServletRequest request;
 	
 	/**
-	 * returns all valid Query types 
-	 * URL: ../server/api/querytype/
+	 * <p>Gets all valid query types</p>
+	 * <p> 
+	 * URL: ../server/api/querytype/<br>
 	 * Call Type: GET
+	 * </p>
 	 * 
-	 * @return A JSON list of query type keys that are valid.
+	 * @return An array of strings representing all the value query ytpes
 	 */
 	@GET
     @Path("/")

@@ -92,10 +92,11 @@ public class DataModelApi extends HttpServlet{
 	
 	
 	/**
-	 * Uploads data to server via POST
-	 * URL: .../server/uploader/{uploaduuid}
+	 * <p>Uploads data to server</p>
+	 * <p>
+	 * URL: .../server/uploader/{uploaduuid}<br>
+	 * Call Type: POST<br>
 	 * 
-	 * @param uploaduuid	provided in the URL, uuid of the workItem this file upload belongs to.
 	 * @param input	MultipartFormDataInput containing a "dm_file" component which is
 	 * the data model xml file in utf-8 encoding, and a "conservation_areas" component which is
 	 * a comma delimited list of Conservation Area Uuids to update.

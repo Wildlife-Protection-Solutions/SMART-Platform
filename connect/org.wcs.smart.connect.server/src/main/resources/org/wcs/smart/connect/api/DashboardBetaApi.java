@@ -96,11 +96,13 @@ public class DashboardBetaApi extends HttpServlet {
 	
 
 	/**
-	 * Get the Default Dashboard for the current user 
-	 * URL: ../server/api/dashboardbeta/default/
+	 * <p>Get the Default Dashboard for the current user</p>
+	 * <p> 
+	 * URL: ../server/api/dashboardbeta/default/<br>
 	 * Call Type: GET
+	 * </p>
 	 * 
-	 * @return Returns a JSON representation of a UsersDefaultDashboard object 
+	 * @return Returns a JSON representation of a Dashboard object 
 	 */
 	@GET
     @Path("/default/")
@@ -136,11 +138,13 @@ public class DashboardBetaApi extends HttpServlet {
 	
 	
 	/**
-	 * Get all DashBoards in the system 
-	 * URL: ../server/api/dashboardbeta/
+	 * <p>Get all DashBoards in the system</p> 
+	 * <p>
+	 * URL: ../server/api/dashboardbeta/<br>
 	 * Call Type: GET
+	 * </p>
 	 * 
-	 * @return Returns a JSON representation of a list of Quicklink objects 
+	 * @return Returns a JSON representation of a list of Dashboard objects 
 	 */
 	@GET
     @Path("/")
@@ -157,10 +161,13 @@ public class DashboardBetaApi extends HttpServlet {
 	}
 	
 	/**
-	 * Get a DashBoards - must be an admin to use this function 
-	 * URL: ../server/api/dashboardbeta/{uuid}
+	 * <p>Get a DashBoards - must be an admin to use this function</p> 
+	 * <p>
+	 * URL: ../server/api/dashboardbeta/{uuid}<br>
 	 * Call Type: GET
+	 * </p>
 	 * 
+	 * @param uuid dashboard uuid to get
 	 * @return Returns a JSON representation of a Dashboard
 	 */
 	@GET
@@ -177,11 +184,25 @@ public class DashboardBetaApi extends HttpServlet {
 	
 	
 	/**
-	 * Create or Update a new Dashboard - must be an admin to do this
-	 * URL: ../server/api/dashboardbeta
-	 * Call Type: POST
-	 * Payload: A GeoJSON object that has properties that match the Java attributes of a DashBoard
-	 * <p> Examples: {"reportUuid1":"c9e4fcee-8a9d-44e0-997a-8142e79619c7","reportUuid2":"bc6a73c4-105f-407c-8bf6-c5a5847a510b","dateRange1":"1","dateRange2":"1","customDate1":"","customDate2":"","parameterList1":"","parameterList2":"","label":"New Dashboard"}
+	 * <p>Create or Update a new Dashboard - must be an admin to do this</p>
+	 * <p>
+	 * URL: ../server/api/dashboardbeta<br>
+	 * Call Type: POST<br>
+	 * Payload: A GeoJSON object that has properties that match the Java attributes of a Dashboard
+	 * </p>
+	 * <pre>{
+	 *   "reportUuid1":"c9e4fcee-8a9d-44e0-997a-8142e79619c7",
+	 *   "reportUuid2":"bc6a73c4-105f-407c-8bf6-c5a5847a510b",
+	 *   "dateRange1":"1",
+	 *   "dateRange2":"1",
+	 *   "customDate1":"",
+	 *   "customDate2":"",
+	 *   "parameterList1":"",
+	 *   "parameterList2":"",
+	 *   "label":"New Dashboard"
+	 * }</pre>
+	 * 
+	 * @param dashboard JSON Dashboard object
 	 * 
 	 * @return Returns a JSON Dashboard object for the created Dashboard
 	 */
@@ -236,9 +257,13 @@ public class DashboardBetaApi extends HttpServlet {
 	
 	
 	/**
-	 * Delete a DashBoard - must be an admin to use this function 
-	 * URL: ../server/api/dashboardbeta/{uuid}
+	 * <p>Delete a DashBoard - must be an admin to use this function</p> 
+	 * <p>
+	 * URL: ../server/api/dashboardbeta/{uuid}<br>
 	 * Call Type: DELETE
+	 * <p>
+	 * 
+	 * @param uuid dashboard uuid to delete
 	 * 
 	 * @return Returns a JSON representation of Dashboard object, the one you just deleted 
 	 */
@@ -259,13 +284,15 @@ public class DashboardBetaApi extends HttpServlet {
 	}
 	
 	/**
-	 * Set the User's Default Dashboard to one passed in, used when users want to update their date and parameter settings.
-	 * URL: ../server/api/dashboardbeta/default
-	 * Call Type: PUT
-	 * Payload: A GeoJSON object that has properties that match the Java attributes of a UsersDefaultDashboard
-	 * <p> Example:
+	 * <p>Set the User's Default Dashboard to the one passed in, used when users want to update their date and parameter settings.</p>
+	 * <p>
+	 * URL: ../server/api/dashboardbeta/default<br>
+	 * Call Type: PUT<br>
+	 * Payload: A JSON object that has properties that match the Java attributes of a UsersDefaultDashboard
+	 * </p>
 	 * 
-	 * @return Returns a JSON UsersDefaultDashboard object, the one just created. 
+	 * @param userDefault JSON representation of UsersDefaultDashboard
+	 * @return Returns the newly created JSON Dashboard object 
 	 */
 	
 	@PUT
@@ -337,14 +364,16 @@ public class DashboardBetaApi extends HttpServlet {
 	
 	
 	/**
+	 * <p>
 	 * Set the User's Default Dashboard to an existing dashboard
-	 * URL: ../server/api/dashboardbeta/default/{uuid}
-	 * Call Type: PUT
-	 * Payload: A GeoJSON object that has properties that match the Java attributes of a UsersDefaultDashboard
-	 * <p> Example:
+	 * </p>
+	 * <p>
+	 * URL: ../server/api/dashboardbeta/default/{uuid}<br>
+	 * Call Type: PUT<br>
+	 * </p>
 	 * 
 	 * @parameter uuid - provided in the url, the uuid of the dashboard they want as the new default.
-	 * @return Returns a JSON UsersDefaultDashboard object, the one just created. 
+	 * @return Returns the JSON Dashboard object (either the one from the system or the new one created) 
 	 */
 	
 	

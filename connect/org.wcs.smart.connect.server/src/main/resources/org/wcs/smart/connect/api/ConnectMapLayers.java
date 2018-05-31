@@ -54,13 +54,13 @@ import org.wcs.smart.connect.security.SecurityManager;
 
 
 /**
- * Smart Connect REST API for Alert/operations map saved layers.
- * 
+ * <p>Smart Connect REST API for Alert/operations map saved layers.</p>
+ * <p>
  * Users can add new layers using this api to configure their Connect basemap.
  * The connect web page also uses this api when loading to get all the information
  * for layers it is supposed to draw.
- * 
- * Currently this is setup to have only a single configuration across each Connect instance. 
+ * </p>
+ * <p>Currently this is setup to have only a single configuration across each Connect instance.</p> 
  * 
  * @author Jeff
  *
@@ -95,11 +95,11 @@ public class ConnectMapLayers extends HttpServlet {
 	
 	
 	/**
-	 * Get All Map Layers
-	 * URL: ../server/api/maplayer/
-	 * Call Type: GET
+	 * <p>Get All Map Layers</p>
+	 * URL: ../server/api/maplayer/<br>
+	 * Call Type: GET<br>
 	 * 
-	 * @return Returns a JSON list of MapLayer objects. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/MapLayer.java) 
+	 * @return Returns a JSON list of MapLayer objects. (<a href="https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/MapLayer.java">MapLayer</a>) 
 	 */
 	
 	@GET
@@ -118,8 +118,8 @@ public class ConnectMapLayers extends HttpServlet {
 	}
 	
 	/**
-	 * Get a single Map Layer
-	 * URL: ../server/api/maplayer/{layerUuid}
+	 * <p>Get a single Map Layer</p>
+	 * URL: ../server/api/maplayer/{layerUuid}<br>
 	 * Call Type: GET
 	 * 
 	 * @param	layerUuid	provided in the URL, the UUID of of the map layer.
@@ -145,13 +145,20 @@ public class ConnectMapLayers extends HttpServlet {
 	}
 	
 	/**
-	 * Create new Map Layer
-	 * URL: ../server/api/maplayer/{layername}
-	 * Call Type: POST
-	 * Payload: A JSON object of attributes that match the Java attributes you wish to create, EX:
-	 * 		{"layerOrder":"052","layerName":"newlayername","wmsLayerList":"layer1,layer2","layerType":"3","token":"tokenorwmsurl","mapboxId":"","active":"true"}
-	 * 
-	 * layertype: 1=mapbox.com 2=giscloud.com 3=WMS 
+	 * <p>Create new Map Layer</p>
+	 * URL: ../server/api/maplayer/{layername}<br>
+	 * Call Type: POST<br>
+	 * Payload: A JSON object of attributes that match the Java attributes you wish to create/
+	 * <pre>{
+	 *  "layerOrder":"052",
+	 *  "layerName":"newlayername",
+	 *  "wmsLayerList":"layer1,layer2",
+	 *  "layerType":"WMS",
+	 *  "token":"tokenorwmsurl",
+	 *  "mapboxId":"",
+	 *  "active":"true"
+	 *}</pre>
+	 * <p>The only supported value for layer type is "WMS"</p>
 	 * 
 	 * @param	layername	provided in the URL, a name for the created layer
 	 * @return Returns a JSON MapLayer object for the created layer.
@@ -200,13 +207,21 @@ public class ConnectMapLayers extends HttpServlet {
 	}
 	
 	/**
-	 * Update Map Layers
-	 * URL: ../server/api/maplayer/{uuid}
-	 * Call Type: PUT
-	 * Payload: A JSON object of attributes that match the Java attributes you wish to update, EX:
-	 * {"layerOrder":"51","layerName":"newlayername2","wmsLayerList":"layer1,layer2,layer3","layerType":"3","token":"tokenorwmsurl","mapboxId":"","active":"true"} 		
+	 * <p>Update Map Layers</p>
+	 * URL: ../server/api/maplayer/{uuid}<br>
+	 * Call Type: PUT<br>
+	 * Payload: A JSON object of attributes that match the Java attributes you wish to update<br>
+	 * <pre>{
+	 *   "layerOrder":"51",
+	 *   "layerName":"newlayername2",
+	 *   "wmsLayerList":"layer1,layer2,layer3",
+	 *   "layerType":"WMS",
+	 *   "token":"tokenorwmsurl",
+	 *   "mapboxId":"",
+	 *   "active":"true"
+	 *}</pre> 		
 	 * 
-	 * attributes that are not going to be updated can be left out entirely if desired.
+	 * <p>Attributes that are not going to be updated can be left out entirely if desired.</p>
 	 * 
 	 * @param	uuid	provided in the URL, the uuid id of the layer to update.
 	 * @return Returns a JSON MapLayer object for the updated layer 
@@ -265,8 +280,8 @@ public class ConnectMapLayers extends HttpServlet {
     }
 	
 	/**
-	 * Delete a Map Layers
-	 * URL: ../server/api/maplayer/{uuid}
+	 * <p>Delete a Map Layers</p>
+	 * URL: ../server/api/maplayer/{uuid}<br>
 	 * Call Type: DELETE
 	 * 
 	 * @param	uuid	provided in the URL, the uuid of the layer to delete.

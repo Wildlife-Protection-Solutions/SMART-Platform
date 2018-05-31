@@ -85,10 +85,15 @@ public class Uploader extends HttpServlet {
 	@Context private ServletContext context;
 	
 	/**
-	 * Gets the status of the current upload.
+	 * <p>Gets the status of the current upload.</p>
+	 * <p>
+	 * URL: ../server/api/uploader/{uploaduuid}<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
-	 * @param uuid
-	 * @return
+	 * 
+	 * @param uuid the upload uuid
+	 * @return JSON UploadStatus object
 	 */
 	@GET
 	@Path("/{uploaduuid}")
@@ -123,18 +128,23 @@ public class Uploader extends HttpServlet {
 	//TODO: figure how to prevent concurrent calls to this method
 	//which would write the same data twice to the file and fail miserably
 	/**
-	 * Uploads a file to the server's data Queue.
-	 * 
-	 * Payload: Multipart data containing an "upload_file" item, Example:
-	 *  
-	 * ------WebKitFormBoundaryYhW4Zu5MYMA5orxj
+	 * <p>Uploads a file to the server's data Queue.</p>
+	 * 	<p>
+	 * URL: ../server/api/uploader/{uploaduuid}<br>
+	 * Call Type: PUT<br>
+	 * Payload: Multipart data containing an "upload_file" item
+	 * 	</p>
+	 * <pre> ------WebKitFormBoundaryYhW4Zu5MYMA5orxj
 	 * Content-Disposition: form-data; name="upload_file"; filename="Demo_00001.xml"
 	 * Content-Type: text/xml
 	 * <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 	 * ....the rest of an XML file upload...
 	 * ------WebKitFormBoundaryYhW4Zu5MYMA5orxj--
+	 * </pre>
 	 * 
-	 * @param uuid	the uuid of the workitem, you must first call the "create work item" API to generate this uuid: ../server/api/dataqueue/items/ , then you can upload the file. 
+	 * @param uuid	the uuid of the workitem, you must first call the "create work item" API to generate this uuid: ../server/api/dataqueue/items/ , then you can upload the file.
+	 * @param data multipart form data
+	 *  
 	 * @return HTTP/1.1 202 Accepted, and JSON of WorkItem details.
 	 * @throws Exception 
 	 */
@@ -253,8 +263,11 @@ public class Uploader extends HttpServlet {
 	 * */
 	
 	/**
-	 * Uploads data to server via POST
+	 * <p>Uploads data to server via POST</p>
+	 * <p>
 	 * URL: .../server/uploader/{uploaduuid}
+	 * Call Type: POST
+	 * </p>
 	 * 
 	 * @param uploaduuid	provided in the URL, uuid of the workItem this file upload belongs to.
 	 * @param input	MultipartFormDataInput containing an "upload_file" component  

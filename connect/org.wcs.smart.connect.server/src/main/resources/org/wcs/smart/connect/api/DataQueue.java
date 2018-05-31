@@ -151,14 +151,17 @@ public class DataQueue {
 	
 	
 	/**
-	 * <p>Get Detailed Data Queue Items
-	 * <p>URL: ../server/api/dataqueue/detailedItems/
-	 * <p>Call Type: GET
+	 * <p>Get details of data queue items that match provided filter</p>
+	 * 
+	 * <p>
+	 * URL: ../server/api/dataqueue/detailedItems/<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
 	 * @param	cafilter	only show items from these CAs. A comma separated string of UUIDs.
 	 * @param	status	comma separated list of status states to include.
 	 * 
-	 * @return Returns a list of JSON ServerDataQueueItemProxy objects. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/dataqueue/ServerDataQueueItemProxy.java) 
+	 * @return Returns a list of JSON ServerDataQueueItemProxy objects. (<a href="https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/dataqueue/ServerDataQueueItemProxy.java">ServerDataQueueItemProxy</a>) 
 	 */
 	
 	@GET
@@ -173,14 +176,15 @@ public class DataQueue {
 	}
 		
 	/**
-	 * Get data Queue Items
-	 * <p>This will only return items that the user has permission to see.
-	 * <p>URL: ../server/api/dataqueue/items/
-	 * <p>Call Type: GET
+	 * <p>Get data queue items that match given filter. This will only return items that the user has permission to see.
+	 * <p>
+	 * URL: ../server/api/dataqueue/items/<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
 	 * @param caFilter a comma delimited list of ca uuids (or null for all)
 	 * @param status comma delimited list of status values to filter on or null for all
-	 * @return a list of all data queue items sorted by date added.  
+	 * @return a list of all data queue items sorted by date added represented by DataQueueItem.  
 	 */
 	@GET
     @Path("/items")
@@ -274,11 +278,12 @@ public class DataQueue {
 	}
 	
 	/**
-	 * Deletes the given data queue item (and associated work item if applicable).
-	 * <p>URL: ../server/api/dataqueue/items/{uuid}
-	 * <p>Call Type: DELETE
+	 * <p>Deletes the given data queue item (and associated work item if applicable).</p>
+	 * <p>URL: ../server/api/dataqueue/items/{uuid}<br>
+	 * Call Type: DELETE
+	 * </p>
 	 * 
-	 * @param uuid
+	 * @param uuid data queue item to delete
 	 */
 	@DELETE
     @Path("/items/{uuid}")
@@ -323,11 +328,17 @@ public class DataQueue {
 	}
 	
 	/**
-	 * Creates an item and associated work item for file uploading.  Returns the URL that
-	 * can be used for uploading the file.
-	 * <p>URL: ../server/api/dataqueue/items/
-	 * <p>Call Type: POST
-	 * <p>Payload: a ServerDataQueueItem object, example {"conservationArea":"8f7fbe1b-201a-4ef4-bda8-14f5581e65ce","type":"PATROL_XML","name":"patrol1234.xml"}
+	 * <p>Creates an item and associated work item for file uploading.  Returns the URL that
+	 * can be used for uploading the file.</p>
+	 * <p>URL: ../server/api/dataqueue/items/<br>
+	 * Call Type: POST<br>
+	 * Payload: a ServerDataQueueItem object
+	 * </p>
+	 *<pre>{
+	 *   "conservationArea":"8f7fbe1b-201a-4ef4-bda8-14f5581e65ce",
+	 *   "type":"PATROL_XML",
+	 *   "name":"patrol1234.xml"
+	 *}</pre>
 	 * 
 	 * @param item - not used in the web API, use the PST payload to provide details of what you want created, see above.
 	 * @return the location of where to upload the file in the "location" header, in javascript you can get it like: oReq.getResponseHeader("location");
@@ -417,12 +428,14 @@ public class DataQueue {
 	}
 	
 	/**
-	 * Gets a particular data queue item.
-	 * <p>URL: ../server/api/dataqueue/items/{uuid}
-	 * <p>Call Type: GET
+	 * <p>Gets a particular data queue item.</p>
+	 * <p>
+	 * URL: ../server/api/dataqueue/items/{uuid}<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
 	 * @param uuid	provided in the URL, the uuid of the item requested.
-	 * @return JSON representation of a ServerDataQueueItem object. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/dataqueue/ServerDataQueueItem.java) 
+	 * @return JSON representation of a ServerDataQueueItem object. (<a href="https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/dataqueue/ServerDataQueueItem.java">ServerDataQueueItem</a>) 
 	 */
 	@GET
 	@Path("/items/{uuid}")
@@ -448,6 +461,17 @@ public class DataQueue {
 		}
 	}
 	
+	/**
+	 * <p>Updates the status of a data queue item</p>
+	 * <p>
+	 * URL: ../server/api/dataqueue/items/{uuid}/status/{status}<br>
+	 * Call Type: PUT
+	 * </p>
+	 * 
+	 * @param uuid	the uuid from the item to update
+	 * @param newStatus the new status fro the data queue item
+	 * @return JSON representation of a DataQueueItem object 
+	 */
 	@PUT
 	@Path("/items/{uuid}/status/{status}")
 	public DataQueueItem updateItemStatus(@PathParam("uuid") String itemUuid, 
@@ -487,15 +511,21 @@ public class DataQueue {
 	}
 	
 	/**
-	 * <p>Updates the type and status of a data queue item
-	 * <p>URL: ../server/api/dataqueue/items/{uuid}
-	 * <p>Call Type: PUT
+	 * <p>Updates the type and status of a data queue item</p>
+	 * <p>
+	 * URL: ../server/api/dataqueue/items/{uuid}<br>
+	 * Call Type: PUT<br>
+	 * Payload: JSON of the attributes to update, ex
+	 * </p>
+	 * <pre>{
+	 *   "type":"MISSION_XML",
+	 *   "status":"QUEUED"
+	 * }</pre>
 	 * 
-	 * <p>Payload: JSON of the attributes to update, ex:
-	 * 		{"type":"MISSION_XML","status":"QUEUED"}
-	 * 
-	 * <p>type options: PATROL_XML, MISSION_XML, INCIDENT_XML
-	 * <p>Status options: QUEUED, COMPLETE, ERROR
+	 * <p>
+	 * Type options: PATROL_XML, MISSION_XML, INCIDENT_XML<br>
+	 * Status options: QUEUED, COMPLETE, ERROR
+	 * </p>
 	 * 
 	 * @param uuid	the uuid of the item to update, from the URL
 	 * @return a JSON representation of the modified DataQueueItem object.
@@ -533,7 +563,9 @@ public class DataQueue {
 	}
 	
 	
-	/* Used by SMART Desktop Only
+	/**
+	 *  <p>Used by SMART Desktop Only - not to be used by api call</p>
+	 *  
 	 */
 
 	@GET

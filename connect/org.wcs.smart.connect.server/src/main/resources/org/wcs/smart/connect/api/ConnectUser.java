@@ -100,11 +100,13 @@ public class ConnectUser extends HttpServlet {
 	}
 	
 	/**
-	 * Get all Active Users.
-	 * <p>URL: ../server/api/connectuser/
-	 * <p>Call Type: GET
+	 * <p>Get all active users.</p>
+	 * <p>
+	 * URL: ../server/api/connectuser/<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
-	 * @return Returns a JSON Array of SmartUser objects for all active users (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/SmartUser.java)
+	 * @return Returns a JSON Array of SmartUser objects for all active users (<a href="https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/SmartUser.java">SmartUser</a>)
 	 * 
 	 */
 	@GET
@@ -125,9 +127,11 @@ public class ConnectUser extends HttpServlet {
 	
 	
 	/**
-	 * Gets all inactive users
-	 * <p>URL: ../server/api/connectuser/getinactive/
-	 * <p>Call Type: GET
+	 * <p>Gets all inactive users.</p>
+	 * <p>
+	 * URL: ../server/api/connectuser/getinactive/<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
 	 * @return Returns a JSON Array of SmartUser objects for all inactive users 
 	 */
@@ -148,9 +152,11 @@ public class ConnectUser extends HttpServlet {
 	}
 	
 	/**
-	 * Returns whether the current user is an admin user or not.
-	 * <p>URL: ../server/api/iscurrentuseradmin/
-	 * <p>Call Type: GET
+	 * <p>Returns whether the current user is an admin user or not.</p>
+	 * <p>
+	 * URL: ../server/api/iscurrentuseradmin/<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
 	 * @return Returns a JSON SmartUser object for the selected user 
 	 */
@@ -168,9 +174,11 @@ public class ConnectUser extends HttpServlet {
 	}
 	
 	/**
-	 * Gets the current user's details
-	 * <p>URL: ../server/api/connectuser/getCurrent/
-	 * <p>Call Type: GET
+	 * <p>Gets the current user's details</p>
+	 * <p>
+	 * URL: ../server/api/connectuser/getCurrent/<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
 	 * @return Returns a JSON SmartUser object of the currently logged in user 
 	 */
@@ -194,12 +202,14 @@ public class ConnectUser extends HttpServlet {
 	}
 
 	/**
-	 * Gets a single user's details
-	 * <p>URL: ../server/api/connectuser/{username}
-	 * <p>Call Type: GET
+	 * <p>Gets a single user's details</p>
+	 * <p>
+	 * URL: ../server/api/connectuser/{username}<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
 	 * @param username	provided in the URL, the username of the requested user.
-	 * @param validate Boolean, optional, set to true if you only want to validate this user and not get their full details back. 
+	 * @param validateOnly Boolean, optional, set to true if you only want to validate this user and not get their full details back. 
 	 * 
 	 * @return Returns a JSON SmartUser object for the selected user 
 	 */
@@ -238,11 +248,17 @@ public class ConnectUser extends HttpServlet {
 	
 	
 	/**
-	 * Create a new user
-	 * <p>URL: ../server/api/connectuser/{username}
-	 * <p>Call Type: POST
-	 * <p>Payload: A JSON object of attributes that match the Java attributes, EX:
-	 * 		{username: "testtest", email: "testtest", password: "testtest"} 
+	 * <p>Create a new user</p>
+	 * <p>
+	 * URL: ../server/api/connectuser/{username}<br>
+	 * Call Type: POST
+	 * Payload: A JSON object of attributes that match the Java attributes.
+	 * </p>
+	 * <pre>{
+	 *   username: "testtest", 
+	 *   email: "testtest", 
+	 *   password: "testtest"
+	 *}</pre> 
 	 * 
 	 * @param	username	provided in the URL, the username of the user.
 	 * @return Returns a JSON SmartUser object for the created user 
@@ -304,12 +320,22 @@ public class ConnectUser extends HttpServlet {
 	}
  
 	/**
-	 * Update a user's details
-	 * <p>URL: ../server/api/connectuser/{username}
-	 * <p>Call Type: PUT
-	 * <p>Payload: A JSON object of attributes you wish to update 
-	 * 		Example: {username: "testtest", email: "testtest@email.com"}
-	 * 		<br>Password Change example: {oldpassword: "testtest", password: "testtest1"}
+	 * <p>Update a user's details</p>
+	 * <p>
+	 * URL: ../server/api/connectuser/{username}<br>
+	 * Call Type: PUT<br>
+	 * Payload: A JSON object of attributes you wish to update
+	 * </p>
+	 * Example:
+	 * <pre>{
+	 *   username: "testtest", 
+	 *   email: "testtest@email.com"
+	 *}</pre>
+	 * Password Change Example:
+	 * <pre>{
+	 *   oldpassword: "testtest", 
+	 *   password: "testtest1"
+	 *}</pre>
 	 * 
 	 * @param	username	provided in the URL, the username of the requested user. 
 	 * @return Returns a JSON SmartUser object for the updated user
@@ -404,10 +430,10 @@ public class ConnectUser extends HttpServlet {
     }
  
     /**
-	 * Active an inactive user
-	 * <p>URL: ../server/api/connectuser/activate/{username}
-	 * <p>Call Type: PUT
-	 * <p>Payload: none
+	 * <p>Active an inactive user</p>
+	 * URL: ../server/api/connectuser/activate/{username}<br>
+	 * Call Type: PUT<br>
+	 * Payload: none<br>
 	 * 
 	 * @param	username	provided in the URL, the username of the requested user. 
 	 * @return Returns a JSON SmartUser object for the activated user
@@ -445,9 +471,11 @@ public class ConnectUser extends HttpServlet {
     }
     
     /**
-	 * Deactivate a user
-	 * <p>URL: ../server/api/connectuser/activate/{username}
-	 * <p>Call Type: DELETE
+	 * <p>Deactivate a user</p>
+	 * <p>
+	 * URL: ../server/api/connectuser/activate/{username}<br>
+	 * Call Type: DELETE
+	 * </p>
 	 * 
 	 * @param	username	provided in the URL, the username of the requested user. 
 	 * @return Returns a JSON SmartUser object for the deactivated user
@@ -485,9 +513,11 @@ public class ConnectUser extends HttpServlet {
     }
     
     /**
-	 * Delete a user
-	 * <p>URL: ../server/api/connectuser/{username}
-	 * <p>Call Type: Delete
+	 * <p>Delete a user</p>
+	 * <p>
+	 * URL: ../server/api/connectuser/{username}</br>
+	 * Call Type: Delete
+	 * </p>
 	 * 
 	 * @param	username	provided in the URL, the username of the requested user. 
 	 * @return Returns a JSON SmartUser object for the deleted user

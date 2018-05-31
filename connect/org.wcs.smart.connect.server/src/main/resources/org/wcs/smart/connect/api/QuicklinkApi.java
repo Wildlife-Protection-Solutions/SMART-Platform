@@ -110,9 +110,11 @@ public class QuicklinkApi extends HttpServlet {
 	}
 
 	/**
-	 * Get all Quicklinks in the system - must be an admin to use this function 
-	 * URL: ../server/api/quicklink/
+	 * <p>Get all Quicklinks in the system - must be an admin to use this function</p>
+	 * <p> 
+	 * URL: ../server/api/quicklink/<br>
 	 * Call Type: GET
+	 * </p>
 	 * 
 	 * @return Returns a JSON representation of a list of Quicklink objects 
 	 */
@@ -137,9 +139,11 @@ public class QuicklinkApi extends HttpServlet {
 	
 	
 	/**
-	 * Get all Quicklinks created by admin users
-	 * URL: ../server/api/quicklink/adminonly
+	 * <p>Get all Quicklinks created by admin users</p>
+	 * <p>
+	 * URL: ../server/api/quicklink/adminonly<br>
 	 * Call Type: GET
+	 * </p>
 	 * 
 	 * @return Returns a JSON representation of a list of Quicklink objects 
 	 */
@@ -162,13 +166,14 @@ public class QuicklinkApi extends HttpServlet {
 	
 	
 	 /**
-	 * Updates a Quicklink - must be an admin to do this. 
-	 * <p>URL: ../server/api/quicklink/{uuid}
-	 * <p>Call Type: PUT
-	 * 
-	 * <p>Payload: A JSON string containing url and/or label properties to update the specificed QuickLink
+	 * <p>Updates a Quicklink - must be an admin to do this.</p> 
+	 * <p>URL: ../server/api/quicklink/{uuid}<br>
+	 * Call Type: PUT<br>
+	 * Payload: A JSON string containing url and/or label properties to update the specified Quicklink
+	 * </p>
 	 * 
 	 * @param	uuid	provided in the path, the UUID of the quicklink to update.
+	 * @param Quicklink new quicklink properties 
 	 * @return Returns a JSON UserQuicklink object that was deleted 
 	 */
     @PUT
@@ -207,12 +212,14 @@ public class QuicklinkApi extends HttpServlet {
     
 
 	/**
-	 * Delete a Quicklink - removes all UserQuicklinks associated with it as well - must be an admin
-	 * URL: ../server/api/quicklink/{uuid}
+	 * <p>Delete a Quicklink - removes all UserQuicklinks associated with it as well - must be an admin</p>
+	 * <p>
+	 * URL: ../server/api/quicklink/{uuid}<br>
 	 * Call Type: DELETE
+	 * </p>
 	 * 
 	 * @param	uuid	provided in the path, the UUID of the quicklink to delete.
-	 * @return Returns a JSON Quicklink object that was deleted 
+	 * @return the JSON Quicklink object that was deleted 
 	 */
     @DELETE
     @Path("/{uuid}")
@@ -245,11 +252,13 @@ public class QuicklinkApi extends HttpServlet {
 	    
 	
 	/**
-	 * Get a list of Quicklinks to show on the homepage for the User currently logged in. Use this function for Web-UI interaction. 
-	 * URL: ../server/api/quicklink/user/
+	 * <p>Get a list of Quicklinks to show on the homepage for the User currently logged in. Use this function for Web-UI interaction.</p> 
+	 * <p>
+	 * URL: ../server/api/quicklink/user/<br>
 	 * Call Type: GET
+	 * <p>
 	 * 
-	 * @return Returns a JSON representation of Quicklink wrappers  for the user currently logged into to a tomcat session 
+	 * @return a JSON representation of QuicklinkWrapper for the current user 
 	 */
 	@GET
     @Path("/user/")
@@ -270,12 +279,14 @@ public class QuicklinkApi extends HttpServlet {
 	}
 	
 	/**
-	 * Get a list of Quicklinks for a particular User uuid. User this function directly when not using the WEB-UI or otherwise have no session open already.
-	 * URL: ../server/api/quicklink/user/{uuid}
+	 * <p>Get a list of Quicklinks for a particular User uuid. User this function directly when not using the WEB-UI or otherwise have no session open already.</p>
+	 * <p>
+	 * URL: ../server/api/quicklink/user/{uuid}<br>
 	 * Call Type: GET
+	 * </p>
 	 * 
 	 * @param	uuid	provided in the URL, the uuid of the user.
-	 * @return Returns a JSON representation of Quicklink objects for the user 
+	 * @return a list of JSON representation of QuicklinkWrapper objects for the user 
 	 */
 	@GET
     @Path("/user/{uuid}")
@@ -304,13 +315,16 @@ public class QuicklinkApi extends HttpServlet {
 	
 	
 	/**
-	 * Create a new Quicklink
-	 * URL: ../server/api/quicklink/
-	 * Call Type: POST
+	 * <p>Create a new Quicklink</p>
+	 * <p>
+	 * URL: ../server/api/quicklink/<br>
+	 * Call Type: POST<br>
 	 * Payload: A GeoJSON object that has properties that match the Java attributes of a Quicklink, 
 	 * leaving out the uuid which will get created in the Database automatically.
+	 * </p>
 	 * 
-	 * @return Returns a JSON Quicklink object for the created Quicklink,
+	 * @param quicklink JSON representation of Quicklink to create
+	 * @return the JON Quicklink object for the created Quicklink
 	 */
 	
 	@POST
@@ -359,13 +373,15 @@ public class QuicklinkApi extends HttpServlet {
 	}
 	
 	/**
-	 * Add a Quicklink to a user's homepage list - user the currently logged in user, use this method in the web UI.
-	 * URL: ../server/api/quicklink/addtolist/
+	 * <p>Add a Quicklink to the current users homepage list - use this method in the web UI.</p>
+	 * <p>
+	 * URL: ../server/api/quicklink/addtolist/<bt>
 	 * Call Type: GET
+	 * </p>
 	 * 
-	 * @parameter quicklinkUuid - the uuid for the quicklink you want to add to your list
+	 * @param quicklinkUuid - the uuid for the quicklink you want to add to your list
 	 * 
-	 * @return Returns a JSON UsersQuicklinkList object you just added to your list
+	 * @return the JSON UserQuicklink added the current user
 	 */
 	
 	@GET
@@ -386,11 +402,15 @@ public class QuicklinkApi extends HttpServlet {
 	}
 	
 	/**
-	 * Add a Quicklink to a user's homepage list - provide the user-uuid in the url, use this function when you don't have a browser session open and logged in.
-	 * URL: ../server/api/quicklink/addtolist/{user uuid}
+	 * <p>Add a Quicklink to a user's homepage list - provide the user-uuid in the url, use this function when you don't have a browser session open and logged in.</p>
+	 * <p>
+	 * URL: ../server/api/quicklink/addtolist/{user uuid}<br>
 	 * Call Type: GET
+	 * </p>
+	 * @param uuid the user uuid to add the quicklink to
+	 * @param quicklinkUuid the quicklink uuid to add
 	 * 
-	 * @return Returns a JSON QuicklinkWrapper object for just added to your list
+	 * @return the  JSON UserQuicklink object added
 	 */
 	
 	@GET
@@ -419,9 +439,11 @@ public class QuicklinkApi extends HttpServlet {
 	
 	
 	/**
-	 * Delete a UserQuicklink - removes a link from that users page, the related quicklink itself is deleted as well if it is owned by this user and no other users are using it.
-	 * URL: ../server/api/quicklink/user/{uuid}
+	 * <p>Delete a UserQuicklink - removes a link from that users page, the related quicklink itself is deleted as well if it is owned by this user and no other users are using it.</p>
+	 * <p>
+	 * URL: ../server/api/quicklink/user/{uuid}<br>
 	 * Call Type: DELETE
+	 * </p>
 	 * 
 	 * @param	uuid	provided in the path, the UUID of the userquicklink to delete.
 	 * @return Returns a JSON UserQuicklink object that was deleted 
@@ -470,13 +492,15 @@ public class QuicklinkApi extends HttpServlet {
     
     
     /**
-	 * Updates a UserQuicklink 
-	 * <p>URL: ../server/api/quicklink/user/{uuid}
-	 * <p>Call Type: PUT
-	 * 
-	 * <p>Payload: A JSON string containing order and/or labelOverride properties to update the specificed UserQuickLink
+	 * <p>Updates a UserQuicklink</p> 
+	 * <p>
+	 * URL: ../server/api/quicklink/user/{uuid}<br>
+	 * Call Type: PUT<br>
+	 * Payload: A JSON string containing order and/or labelOverride properties to update the specified UserQuickLink
+	 * </p>
 	 * 
 	 * @param	uuid	provided in the path, the UUID of the userquicklink to update.
+	 * @param userQuicklink 
 	 * @return Returns a JSON UserQuicklink object that was deleted 
 	 */
     @PUT
@@ -518,12 +542,13 @@ public class QuicklinkApi extends HttpServlet {
     
     
     /**
-	 * <p>Create a new Quicklink and add it to all user's homepages - must be an admin to do this
-	 * <p>URL: ../server/api/quicklink/addtoall/
-	 * <p>Call Type: POST
-	 * <p>payload: a JSON version of a Quicklink Object, leaving out the uuid which will get created in the Database automatically.
+	 * <p>Create a new Quicklink and add it to all user's homepages - must be an admin to do this</p>
+	 * <p>URL: ../server/api/quicklink/addtoall/<br>
+	 * Call Type: POST<br>
+	 * payload: a JSON version of a Quicklink Object, leaving out the uuid which will get created in the Database automatically.
+	 * </p>
 	 * 
-	 * @parameter quicklinkUuid - the uuid for the quicklink you want to add to your list
+	 * @param quicklink - the quick link to add 
 	 * 
 	 * @return Returns a JSON UsersQuicklinkList object you just added to your list
 	 */

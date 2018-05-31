@@ -71,6 +71,16 @@ public class GlobalForestWatchApi extends HttpServlet{
 	@Context private ServletContext context; 
 	@Context private HttpServletRequest request;
 	
+    /**
+	 * <p>Get all GlobalForestWatch configurations</p>
+	 * <p>
+	 * URL: ../server/api/gfw<br>
+	 * Call Type: GET
+	 * </p>
+	 * 
+	 * @return Returns a JSON Array of GlobalForestWatchProxy objects 
+	 * 
+	 */
 	@GET
     @Path("")
 	@Produces({ MediaType.APPLICATION_JSON })
@@ -97,6 +107,19 @@ public class GlobalForestWatchApi extends HttpServlet{
 		return proxies;
 	}
 	
+	/**
+	 * <p>
+	 * Create a new all GlobalForestWatch configurations
+	 * </p>
+	 * <p>
+	 * URL: ../server/api/gfw<br>
+	 * Call Type: POST
+	 * </p>
+	 * 
+	 * @param gfw the JSON representation of a GlobalForestWatchProxy object 
+	 * @return Returns a JSON Array of representing the GlobalForestWatchProxy object created
+	 * 
+	 */
 	@POST
     @Path("")
 	@Produces({ MediaType.APPLICATION_JSON })
@@ -149,6 +172,18 @@ public class GlobalForestWatchApi extends HttpServlet{
 		return proxy;
 	}
 	
+	/**
+	 * <p>
+	 * Delete a GlobalForestWatch configuration
+	 * </p>
+	 * <p>
+	 * URL: ../server/api/gfw/{gfwUuid}<br>
+	 * Call Type: DELETE
+	 * </p>
+	 * 
+	 * @param gfwUuuid ths uuid of the GlobalForestWatch configuration to delete 
+	 * 
+	 */
 	@DELETE
 	@Path("/{gfwUuid}")
 	@Produces({ MediaType.APPLICATION_JSON })

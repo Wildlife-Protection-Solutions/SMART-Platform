@@ -107,11 +107,13 @@ public class DesktopUser extends HttpServlet {
 	}
 	
 	/**
-	 * Get all Desktop Users accounts.
-	 * <p>URL: ../server/api/desktopuser/
-	 * <p>Call Type: GET
+	 * <p>Get all Desktop Users accounts.</p>
+	 * <p>
+	 * URL: ../server/api/desktopuser/<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
-	 * @return Returns a JSON Array of Employee objects for all users
+	 * @return Returns a JSON Array of EmployeeInfo objects for all users
 	 * 
 	 */
 	@GET
@@ -150,7 +152,16 @@ public class DesktopUser extends HttpServlet {
 	}
 
 	
-	
+	/**
+	 * <p>Determines if the current logged in user is an admin user or not.</p>
+	 * <p>
+	 * URL: ../server/api/desktopuser/iscurrentuseradmin<br>
+	 * Call Type: GET
+	 * </p>
+	 * 
+	 * @return Returns true if the current user is an admin user otherwise returns false
+	 * 
+	 */
 	@GET
     @Path("/iscurrentuseradmin/")
     public boolean isCurrentUserAnAdmin(){
@@ -164,9 +175,11 @@ public class DesktopUser extends HttpServlet {
 	}
 	
 	/**
-	 * Gets the current user's details
-	 * <p>URL: ../server/api/desktopuser/getCurrent/
-	 * <p>Call Type: GET
+	 * <p>Gets the current user's details</p>
+	 * <p>
+	 * URL: ../server/api/desktopuser/getCurrent/<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
 	 * @return Returns a JSON SmartUser object of the currently logged in user 
 	 */
@@ -190,9 +203,16 @@ public class DesktopUser extends HttpServlet {
 	}
 
 	/**
-	 * Gets the details of a single from a particular CA, including a list of allother CAs this user also exists in (this list is restricted if the requesting user is only a CaAdmin, to the CAs they can adminsitrate)
-	 * <p>URL: ../server/api/desktopuser/{username}
-	 * <p>Call Type: GET
+	 * <p>Gets the details of a single user from a particular CA, including a list of all other CAs this user also exists in 
+	 * (this list is restricted if the requesting user is only a CaAdmin, to the CAs they can administor)
+	 * </p>
+	 * <p>
+	 * URL: ../server/api/desktopuser/{username}<br>
+	 * Call Type: GET
+	 * </p>
+	 * 
+	 * @param username the desktop smart user name
+	 * @param cauuid the Conservation Area to search for the user name
 	 * 
 	 * @return Returns a JSON EmployeeInfo object of the requested user 
 	 */
@@ -255,13 +275,14 @@ public class DesktopUser extends HttpServlet {
 	
 	
 	/**
-	 * Create a new desktop user
-	 * <p>URL: ../server/api/desktopuser/{username}
-	 * <p>Call Type: POST
-	 * <p>Payload: A JSON object of attributes that match the Java EmployeeInfo class attributes, EX:
-	 * 		//TODO add example
+	 * <p>Create a new desktop user</p>
+	 * <p>URL: ../server/api/desktopuser/{username}<br>
+	 * Call Type: POST<br>
+	 * Payload: A JSON object of attributes that match the Java EmployeeInfo class attributes
+	 * </p>
 	 * 
-	 * @param	username	provided in the URL, the username of the user.
+	 * @param	user	provided in the URL, the username of the user.
+	 * @param newUser json representation of EmployeeInfo object that represents the details of the new user
 	 * @return Returns a JSON SmartUser object for the created user 
 	 */
 	@POST
@@ -341,14 +362,15 @@ public class DesktopUser extends HttpServlet {
 	 
 	
 	/**
-	 * Update a user's details
-	 * <p>URL: ../server/api/connectuser/{username}
-	 * <p>Call Type: PUT
-	 * <p>Payload: A JSON object of attributes you wish to update 
-	 * 		Example: {username: "testtest", email: "testtest@email.com"}
-	 * 		<br>Password Change example: {oldpassword: "testtest", password: "testtest1"}
+	 * <p>Update a desktop user's details</p>
+	 * URL: ../server/api/connectuser/{username}<br>
+	 * Call Type: PUT<br>
+	 * Payload: A JSON object of attributes you wish to update
+	 * </p> 
 	 * 
-	 * @param	username	provided in the URL, the username of the requested user. 
+	 * @param	olduser	the username of the user to update
+	 * @param cauuid the Conservation Area to update
+	 * @param newUser the JSON representation of the EmployeeInfo class containing the new details for the user 
 	 * @return Returns a JSON SmartUser object for the updated user
 	 */
     @PUT
@@ -444,12 +466,15 @@ public class DesktopUser extends HttpServlet {
  
     
     /**
-	 * Deactivate a user
-	 * <p>URL: ../server/api/desktopuser/{username}
-	 * <p>Call Type: DELETE
+	 * <p>Deactivate a desktop user</p>
+	 * <p>
+	 * URL: ../server/api/desktopuser/{username}<br>
+	 * Call Type: DELETE
+	 * </p>
 	 * 
-	 * @param	username	provided in the URL, the username of the requested user. 
-	 * @return Returns a JSON SmartUser object for the deactivated user
+	 * @param	username	provided in the URL, the username of the requested user.
+	 * @param caUuid the Conservation Area to update 
+	 * @return Returns a JSON EmployeeInfo object for the deactivated user
 	 */
     @DELETE
     @Path("/{username}")
@@ -527,11 +552,13 @@ public class DesktopUser extends HttpServlet {
     }
  
     /**
-	 * Get all Ca UUIDs the CaAdmin is allowed to access
-	 * <p>URL: ../server/api/desktopuser/caUuidsAllowed/
-	 * <p>Call Type: GET
+	 * <p>Get all Conservation Areas the CaAdmin is allowed to access</p>
+	 * <p>
+	 * URL: ../server/api/desktopuser/caUuidsAllowed/<br>
+	 * Call Type: GET
+	 * </p>
 	 * 
-	 * @return Returns a JSON Array of Employee objects for all users
+	 * @return Returns a JSON Array of SimpleConservationAreaList objects representing the Conservation Areas the current user has CaAdmin access to.
 	 * 
 	 */
 	@GET
