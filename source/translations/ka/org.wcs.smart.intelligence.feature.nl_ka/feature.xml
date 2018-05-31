@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.wcs.smart.intelligence.feature.nl.ka"
-      label="Intelligence Karen Language Pack"
-      version="5.0.0"
+      id="org.wcs.smart.intelligence.feature.nl_ka"
+      label="Intelligence Georgian Language Pack"
+      version="6.0.0"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart.smart.feature">
+      license-feature="org.wcs.smart.license.feature"
+      license-feature-version="6.0.0.qualifier">
 
    <description>
-      The Karen translations for the Intelligence plugin.
+      The Georgian translations for the Intelligence plugin.
    </description>
 
    <copyright>
@@ -15,7 +16,7 @@
    </copyright>
 
    <plugin
-         id="org.wcs.smart.intelligence.nl_kar"
+         id="org.wcs.smart.intelligence.nl_ka"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -23,7 +24,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.wcs.smart.intelligence.query.nl_kar"
+         id="org.wcs.smart.intelligence.query.nl_ka"
          download-size="0"
          install-size="0"
          version="0.0.0"

@@ -4,7 +4,8 @@
       label="SMART Vietnamese Language Pack"
       version="6.0.0"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart-feature">
+      license-feature="org.wcs.smart.license.feature"
+      license-feature-version="6.0.0.qualifier">
 
    <description>
       Vietnamese language pack for core SMART features.  This includes the BIRT and Eclipse language packs.
@@ -13,6 +14,14 @@
    <copyright>
       Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
+
+   <includes
+         id="org.eclipse.babel.nls_birt_vi"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.babel.nls_eclipse_vi"
+         version="0.0.0"/>
 
    <plugin
          id="org.wcs.smart.nl_vi"
