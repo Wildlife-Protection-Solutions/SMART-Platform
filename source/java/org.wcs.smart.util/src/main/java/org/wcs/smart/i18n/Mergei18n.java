@@ -32,15 +32,31 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 public class Mergei18n {
 
     public static final String IN_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\java",
-    	"C:\\data\\SMART\\Source\\trunk\\source\\extensions",
+    	
+    	"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\asset",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\cybertracker",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\entity",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect"};
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa",
+//		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
+		
+		
+    };
     
     
     public static final String TRANS_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\translations\\",
-    	"C:\\data\\SMART\\Source\\trunk\\source\\extensions",
+    	
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\asset\\translations",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect\\translations",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\cybertracker\\translations",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\entity\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect\\translations"};
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event\\translations",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa\\translations",
+//		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
+    };
 	
     public static final String LINE_SEP = "\n";
 
@@ -81,7 +97,7 @@ public class Mergei18n {
                 if (f == null){
                     return false;
                 }
-                if (f.getName().equals("bin")){
+                if (f.getName().equals("bin") || f.getName().equals("target")){
                     return true;
                 }
                 return checkBin(f.getParentFile());

@@ -28,7 +28,10 @@ public class Sumaryi18n {
 		LAOS("lo", "Laos"),
 		HINDI("hi", "Hindi"),
 		INDONESIAN("in", "Indonesian"), // should be id
-		KHMER("km", "Khmer");
+		KHMER("km", "Khmer"),
+		Georgian("ka", "Georgian"),
+		KAREN("kar", "Karen"),
+		MONGOLIAN("mn", "Mongolian");
 
 		String code;
 		String name;
@@ -41,14 +44,28 @@ public class Sumaryi18n {
 
 	public static final String[] IN_DIRS = {
 			"C:\\data\\SMART\\Source\\trunk\\source\\java",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er"
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\asset",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\cybertracker",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\entity",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa",
+//			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
 		};
 
 	public static final String[] TRANS_DIRS = {
 			"C:\\data\\SMART\\Source\\trunk\\source\\translations",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations" 
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\asset\\translations",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect\\translations",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\cybertracker\\translations",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\entity\\translations",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event\\translations",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2\\translations",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa\\translations",
+//			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r\\translations", 
 		};
 
 	public static final String LINE_SEP = "\n";
@@ -90,7 +107,7 @@ public class Sumaryi18n {
 				if (f == null) {
 					return false;
 				}
-				if (f.getName().equals("bin")) {
+				if (f.getName().equals("bin") || f.getName().equals("target")) {
 					return true;
 				}
 				return checkBin(f.getParentFile());
@@ -165,13 +182,16 @@ public class Sumaryi18n {
 
 					@Override
 					public boolean accept(File arg0, String name) {
-						return name.startsWith(matchDir);
+//						if (matchDir.endsWith("ka")) {
+//							System.out.println("test");
+//						}
+						return name.equalsIgnoreCase(matchDir);
 					}
 				});
 				for (File tmp : transToMerge) {
 					filesList.add(tmp);
 				}
-				if (flangDir.getName().startsWith(matchDir)){
+				if (flangDir.getName().equals(matchDir)){
 					filesList.add(flangDir);
 				}
 
