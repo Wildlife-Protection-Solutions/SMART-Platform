@@ -369,7 +369,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.graphstyles.show"
-                  label="Relationship Diagram Styles..."
+                  label="%ShowRelationshipDiagramStylesMenuItemName"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -1070,7 +1070,7 @@
       </command>
       <command
             id="org.wcs.smart.i2.command.graphstyles.show"
-            name="Relationship Diagram Styles...">
+            name="%ShowRelationshipDiagramStylesCommandName">
       </command>
       <command
             id="org.wcs.smart.i2.command.record.new"
