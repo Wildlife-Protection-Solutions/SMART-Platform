@@ -21,30 +21,42 @@
  */
 package org.wcs.smart.connect.model;
 
+import java.util.UUID;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 
 /**
- * SMART Connect action associated with a user role.
+ * Abstract class for smart action that links an action to 
+ * a resource (optional)
+ * 
  * @author Emily
  *
  */
 @Entity
-@Table(name="connect.role_actions")
-public class SmartRoleAction  extends AbstractSmartAction{
-
-	private SmartRole role;
-
+@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+public class AbstractSmartAction extends ConnectUuidItem{
 	
-	@JoinColumn(name="role_id")
-	@ManyToOne
-	public SmartRole getRole() {
-		return role;
-	}
-	public void setRole(SmartRole role) {
-		this.role = role;
+	private String actionKey;
+	private UUID resource;
+	
+	@Column(name="action")
+	public String getAction(){
+		return this.actionKey;
 	}
 	
+	public void setAction(String actionKey){
+		this.actionKey = actionKey;
+	}
+	
+	@Column(name="resource")
+	public UUID getResource(){
+		return this.resource;
+	}
+	public void setResource(UUID resource){
+		this.resource = resource;
+	}
+
 }

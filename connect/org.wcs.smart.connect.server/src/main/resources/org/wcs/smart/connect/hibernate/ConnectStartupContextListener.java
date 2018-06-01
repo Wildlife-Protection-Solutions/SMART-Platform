@@ -71,6 +71,7 @@ import org.opengis.referencing.AuthorityFactory;
 import org.wcs.smart.connect.apache.CleanUpJob;
 import org.wcs.smart.connect.apache.EnvironmentVariables;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
+import org.wcs.smart.connect.model.AbstractSmartAction;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.model.AlertType;
@@ -307,6 +308,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		
 		//Add you annotated model classes here
 		config.addAnnotatedClass(SmartUser.class);
+		config.addAnnotatedClass(AbstractSmartAction.class);
 		config.addAnnotatedClass(ConnectUuidItem.class);
 		config.addAnnotatedClass(SmartUserAction.class);
 		config.addAnnotatedClass(ConservationAreaInfo.class);

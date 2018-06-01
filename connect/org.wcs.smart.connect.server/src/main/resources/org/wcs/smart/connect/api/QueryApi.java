@@ -64,6 +64,10 @@ import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.model.AbstractSmartAction;
+import org.wcs.smart.connect.model.SmartRoleAction;
+import org.wcs.smart.connect.model.SmartUserAction;
+import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
@@ -77,8 +81,10 @@ import org.wcs.smart.connect.query.engine.TiffRasterExporter;
 import org.wcs.smart.connect.query.engine.i2.IntelEntityRecordQueryResults;
 import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryResults;
 import org.wcs.smart.connect.security.AdvIntelAction;
+import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -662,6 +668,7 @@ public class QueryApi extends HttpServlet{
 		List<QueryProxy> allowed = new ArrayList<QueryProxy>();
 
 
+		
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
 		s.beginTransaction();
 		try{
@@ -675,17 +682,37 @@ public class QueryApi extends HttpServlet{
 				allowed = QueryManager.INSTANCE.getQueries(s, request.getLocale());
 			}else {
 				//Get all Queries and check each one for specific permission to this user.
+				
+				//get all actions for the current user
+				List<AbstractSmartAction> allActions = new ArrayList<>();
+				allActions.addAll(QueryFactory.buildQuery(s, SmartUserAction.class, "username", request.getUserPrincipal().getName()).list()); //$NON-NLS-1$				
+				List<SmartUserRole> roles = HibernateManager.getUserRoles(s, request.getUserPrincipal().getName());
+				for (SmartUserRole r : roles) {
+					allActions.addAll(QueryFactory.buildQuery(s, SmartRoleAction.class, "role", r.getRole()).list()); //$NON-NLS-1$
+				}
+				
 				List<QueryProxy> all = QueryManager.INSTANCE.getQueries(s, request.getLocale());
 				for (QueryProxy q : all){
-					//Do they have access to all queries from this CA? if yes then add it.
-					if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, q.getCaUuid())){
-						allowed.add(q);
-					}else{
-						//Do they have specific permission to this query? if yes then add it.
-						if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, q.getUuid())){
-							allowed.add(q);
+					boolean canAdd = false;
+					
+					for (AbstractSmartAction a : allActions) {
+						//admin action; and permission to run all queries is captured above
+
+						if (a.getAction().equalsIgnoreCase(CaAdminAccountAction.KEY) && a.getResource().equals(q.getCaUuid())){
+							//ca admin
+							canAdd = true;
+							break;
+						}else if (a.getAction().equalsIgnoreCase(QueryAction.RUNQUERY_KEY) && a.getResource().equals(q.getCaUuid())){
+							//run query for ca
+							canAdd = true;
+							break;
+						}else if (a.getAction().equalsIgnoreCase(QueryAction.RUNQUERY_KEY) && a.getResource().equals(q.getUuid())) {
+							//run query for query
+							canAdd = true;
+							break;
 						}
 					}
+					if (canAdd) allowed.add(q);
 				}
 			}
 			allowed.addAll(getAdvancedIntelQueries(s,request.getLocale()));
@@ -707,15 +734,32 @@ public class QueryApi extends HttpServlet{
 			return queries;
 		}
 		List<QueryProxy> allowed = new ArrayList<>();
+		
+		List<AbstractSmartAction> allActions = new ArrayList<>();
+		allActions.addAll(QueryFactory.buildQuery(s, SmartUserAction.class, "username", request.getUserPrincipal().getName()).list()); //$NON-NLS-1$				
+		List<SmartUserRole> roles = HibernateManager.getUserRoles(s, request.getUserPrincipal().getName());
+		for (SmartUserRole r : roles) {
+			allActions.addAll(QueryFactory.buildQuery(s, SmartRoleAction.class, "role", r.getRole()).list()); //$NON-NLS-1$
+		}
+		
 		for (QueryProxy q : queries){
-			//Do they have access to all queries from this CA? if yes then add it.
-			if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdvIntelAction.RUNQUERY_KEY, q.getCaUuid())){
-				allowed.add(q);
-			}else if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdvIntelAction.RUNQUERY_KEY, q.getUuid())){
-				//Do they have specific permission to this query? if yes then add it.
-				allowed.add(q);
-				
+			boolean canAdd = false;
+			
+			for (AbstractSmartAction a : allActions) {
+				//note: ca admins caanot access profile queries unless they also have profile query permissions
+				if (a.getAction().equalsIgnoreCase(AdvIntelAction.RUNQUERY_KEY) && a.getResource().equals(q.getCaUuid())){
+					//run query for ca
+					canAdd = true;
+					break;
+				}else if (a.getAction().equalsIgnoreCase(AdvIntelAction.RUNQUERY_KEY) && a.getResource().equals(q.getUuid())) {
+					//run query for query
+					canAdd = true;
+					break;
+				}
 			}
+			if (canAdd) allowed.add(q);
+			
+
 		}
 		return allowed;
 	}
