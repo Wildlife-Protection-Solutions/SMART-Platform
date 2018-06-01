@@ -277,7 +277,7 @@ public class EntityRecordWaypointFilterProcessor {
 					String[] cols = dataModelColumnsExtra.substring(1).replaceAll("boolean", "").replaceAll(" ", "").split(","); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 					for (String c : cols) {
 						deleteSql.append(","); //$NON-NLS-1$
-						deleteSql.append(" max(b." + c + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+						deleteSql.append(" case when max( case when b." + c + " then 1 else 0 end ) = 1 then true else false end "); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
 				deleteSql.append(" FROM "); //$NON-NLS-1$

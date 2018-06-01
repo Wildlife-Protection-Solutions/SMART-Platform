@@ -57,11 +57,13 @@ import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.security.AdminAccountAction;
+import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.ReportAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.UuidUtils;
@@ -215,29 +217,66 @@ public class SharedLinkApi extends HttpServlet{
 				
 				Query query = QueryManager.INSTANCE.findQuery(uuid, s);
 				Report report = (Report) s.get(Report.class, uuid);
+				AbstractIntelQuery query2 = null;
+				if (query == null && report == null) {
+					//check for advanced intelligence query
+					query2 = QueryManager.INSTANCE.findIntelQuery(uuid, s);
+				}
 							
-				if (query == null && report == null){
+				if (query == null && report == null && query2 == null){
 					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SharedLinkApi.InvalidReportQueryLink", request.getLocale())); //$NON-NLS-1$
 				}
 				
-				boolean hasAccessQuery = SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, uuid);
-				boolean hasAccessReport = SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, uuid);
-				boolean hasAccessAllReports = false;
-				boolean hasAccessAllQueries = false;
-				if(query != null){
-					hasAccessAllQueries = SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, query.getConservationArea().getUuid());
+				boolean canAccessQuery = false;
+				if (query != null) {
+					if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, uuid)) {
+						//admin or specific access to query
+						canAccessQuery = true;
+					}else if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, query.getConservationArea().getUuid())) {
+						//admin or access to conservation area
+						canAccessQuery = true;
+					}else if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, null)) {
+						//admin or access to all queries
+						canAccessQuery = true;
+					}
 				}
-				if(report != null){
-					hasAccessAllReports = SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, report.getConservationArea().getUuid());
+				boolean canAccessIntelQuery = false;
+				if (query2 != null) {
+					if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdvIntelAction.RUNQUERY_KEY, uuid)) {
+						//admin or specific access to query
+						canAccessIntelQuery = true;
+					}else if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdvIntelAction.RUNQUERY_KEY, query.getConservationArea().getUuid())) {
+						//admin or specific access to query
+						canAccessIntelQuery = true;
+					}
+						
 				}
-				if(!hasAccessQuery && !hasAccessReport && !hasAccessAllQueries && !hasAccessAllReports){
+				
+				boolean canAccessReport = false;
+				if (report != null) {
+					if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, uuid)) {
+						//admin or specific access to report
+						canAccessReport = true;
+					}else if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, report.getConservationArea().getUuid())) {
+						//admin or access to conservation area
+						canAccessReport = true;
+					}else if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, null)) {
+						//admin or access to all report
+						canAccessReport = true;
+					}
+				}
+				
+			
+				if(!canAccessQuery && !canAccessReport &&!canAccessIntelQuery){
 					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SharedLinkApi.NoAccess", request.getLocale())); //$NON-NLS-1$
 				}
 				
 				//set CA uuid
 				if(query != null){
 					newLink.setConservationArea(query.getConservationArea().getUuid());
-				}else{
+				}else if (query2 != null) {
+					newLink.setConservationArea(query2.getConservationArea().getUuid());
+				}else if (report != null) {
 					newLink.setConservationArea(report.getConservationArea().getUuid());
 				}
 				
