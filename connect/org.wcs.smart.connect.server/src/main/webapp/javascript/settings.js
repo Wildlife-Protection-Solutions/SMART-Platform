@@ -286,7 +286,7 @@ function createLayerTable(){
 /* delete layer*/
 function deleteLayer(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	displayConfirmDialog("Confirm Delete", i18n("settings.suredeletelayer"), function(){
+	displayConfirmDialog(i18n("settings.layereletetitle"), i18n("settings.suredeletelayer"), function(){
 		hideInfo();
 		
 		var oReq = new XMLHttpRequest();
@@ -334,9 +334,9 @@ function gfwCreated(){
 	if (this.status == 201) {
 		//ok
 		var user = JSON.parse(this.responseText);
-		displayInfo("New GFW web hook created.  Use provided link to sign up for new alerts.");
+		displayInfo(i18n("settings.gfwcreatedok"));
 	} else {
-		displayError("Error creating new GFW Web Hook: " + this.responseText + "; " + this.statusText);
+		displayError(i18n("settings.gfwcreateerror") + this.responseText + "; " + this.statusText);
 	}
 	refreshGFWTable();
 	closeDialog('gfwDialog');
@@ -346,9 +346,9 @@ function gfwUpdated(){
 	if (this.status == 200) {
 		//ok
 		var user = JSON.parse(this.responseText);
-		displayInfo("GFW web hook updated.");
+		displayInfo(i18n("settings.gfwupdateok"));
 	} else {
-		displayError("Error updating GFW Web Hook: " + this.responseText + "; " + this.statusText);
+		displayError(i18n("settings.gfwupdateerror") + this.responseText + "; " + this.statusText);
 	}
 	refreshGFWTable();
 	closeDialog('gfwDialog');
@@ -611,9 +611,9 @@ function refreshGFWTable(){
 function createGfwTable(){
 	
 	if (this.status != 200 && this.status != 201 ) {
-		var msg = "Error loading GFW configurations";
+		var msg = i18n("settings.gfwerror");
 		if (this.status == 401){
-			msg += "Unauthorized";
+			msg += i18n("settings.unathorized");
 		}
 		try {
 			msg = JSON.parse(this.responseText).error
@@ -768,7 +768,7 @@ function showCurrentType() {
 
 function deleteGfw(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	displayConfirmDialog("Confirm Delete", "Are you sure you want to remove this web hook?  You should also unsubscribe from any GFW push request services this URL is linked with.", function(){
+	displayConfirmDialog( i18n("settings.gfwdeletetitle"),  i18n("settings.gfwdeletemsg"), function(){
 		hideInfo();
 	
 		var oReq = new XMLHttpRequest();
@@ -781,9 +781,9 @@ function deleteGfw(){
 
 function gfwDeleted(){
 	if (this.status == 200 || this.status == 204 ) {
-		displayInfo("Global Forest Watch web hook removed.");
+		displayInfo( i18n("settings.gfwdeleteok") );
 	} else {
-		displayError(parseError("Error removing Global Forest Watch web hook: " + this.response));
+		displayError(parseError(i18n("settings.gfwdeleteerror") + this.response));
 	}
 	refreshGFWTable();
 }
@@ -791,7 +791,7 @@ function gfwDeleted(){
 
 function deleteType(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	displayConfirmDialog("Confirm Delete", i18n("settings.areyoursuredeletetype"), function(){
+	displayConfirmDialog(i18n("settings.typedeletetitle"), i18n("settings.areyoursuredeletetype"), function(){
 		hideInfo();
 	
 		var oReq = new XMLHttpRequest();
@@ -1153,7 +1153,7 @@ function createStyleConfigurationTable(){
 
 function deleteStyle(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	displayConfirmDialog("Confirm Delete", i18n("settings.areyoursuredeletestyle"), function(){
+	displayConfirmDialog(i18n("settings.styledeletetitle"), i18n("settings.areyoursuredeletestyle"), function(){
 		hideInfo();
 	
 		var oReq = new XMLHttpRequest();

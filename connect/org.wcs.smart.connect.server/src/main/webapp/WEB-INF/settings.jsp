@@ -379,15 +379,15 @@ font-size: 40px;</textarea>
   </div>
   
   <div id="gfwDialog" style="display: none;" class="dialog">
-  <div class="dialog-title">Global Forest Watch WebHook</div>
+  <div class="dialog-title"><fmt:message key="settings.gfwcreate"/></div>
   <div id="gfwdialogerror" class="errorsection"></div>
 	<form id="gfwform">
-     		<label class="top-spacer block">Alert Type:</label>
+     		<label class="top-spacer block"><fmt:message key="settings.gfwalerttype"/></label>
      		<select id="gfwalerttype" class="formtext" name="gfwalerttype">
 
 			</select>
 
-			<label class="top-spacer block">Alert Level:</label>
+			<label class="top-spacer block"><fmt:message key="settings.gfwalertlevel"/></label>
      		<select id="gfwalertlevel" class="formtext" name="gfwalertlevel">
 			<option value=1><fmt:message key="alert.alertlevel1"/></option>
 			<option value=2><fmt:message key="alert.alertlevel2"/></option>
@@ -397,16 +397,16 @@ font-size: 40px;</textarea>
 			</select>
 			
        		<div class="top-spacer block" style="text-align: right">
-     			<input id="btnGfwCreate" class="button" type="button" value="Create" />
-     			<input id="btnGfwUpdate" class="button" type="button" value="Update" />
+     			<input id="btnGfwCreate" class="button" type="button" value="<fmt:message key="settings.gfwcreate"/>" />
+     			<input id="btnGfwUpdate" class="button" type="button" value="<fmt:message key="settings.gfwupdate"/>" />
      			<input class="button" type="button" id="btnGfwCancel" value="<fmt:message key="settings.cancel"/>" />
      		</div>
     	</form>
   </div>
   
-<br><br>Icon Credits:<br>
-<div>Hamburger menu by <a href="https://www.iconfinder.com/icons/134216/hamburger_lines_menu_icon">Timothy Miller</a> under <a href="https://creativecommons.org/licenses/by-sa/3.0/legalcode">creative commons SA-3.0 license</a>, no changes were made.</div>
-<div>Other menu icons made by <a href="https://www.flaticon.com/authors/gregor-cresnar" title="Gregor Cresnar">Gregor Cresnar</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> licensed under <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+<br><br><fmt:message key="settings.iconcredits"/><br>
+<div><fmt:message key="settings.hamburger"/><a href="https://www.iconfinder.com/icons/134216/hamburger_lines_menu_icon">Timothy Miller</a><fmt:message key="settings.hamburder2"/><a href="https://creativecommons.org/licenses/by-sa/3.0/legalcode">creative commons SA-3.0 license</a><fmt:message key="settings.hamburger3"/></div>
+<div><fmt:message key="settings.othericon"/><a href="https://www.flaticon.com/authors/gregor-cresnar" title="Gregor Cresnar">Gregor Cresnar</a><fmt:message key="settings.othericon2"/><a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a><fmt:message key="settings.othericon3"/><a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
 
 </body>
 </html>
