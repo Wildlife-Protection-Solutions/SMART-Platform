@@ -171,7 +171,7 @@ public class DateFilterComposite extends Composite {
 				case LAST_1_YEARS:
 					return cal.getTime();
 				case LAST_YEAR: 	
-					cal.set(cal.get(Calendar.YEAR)-1, cal.getActualMaximum(Calendar.MONTH), cal.getActualMaximum(Calendar.DAY_OF_MONTH), cal.getActualMaximum(Calendar.HOUR), cal.getActualMaximum(Calendar.MINUTE), cal.getActualMaximum(Calendar.SECOND));
+					cal.set(cal.get(Calendar.YEAR)-1, cal.getActualMaximum(Calendar.MONTH), 31, cal.getActualMaximum(Calendar.HOUR_OF_DAY), cal.getActualMaximum(Calendar.MINUTE), cal.getActualMaximum(Calendar.SECOND));
 					return cal.getTime();
 				case NEXT_30_DAYS:
 				case RANGE_30_DAYS:
@@ -182,7 +182,7 @@ public class DateFilterComposite extends Composite {
 					cal.add(Calendar.DAY_OF_MONTH, 60);
 					return cal.getTime();
 				case CURRENT_YEAR:
-					cal.set(cal.get(Calendar.YEAR), cal.getActualMinimum(Calendar.DAY_OF_MONTH), cal.getActualMaximum(Calendar.HOUR), cal.getActualMaximum(Calendar.MINUTE), cal.getActualMaximum(Calendar.SECOND));
+					cal.set(cal.get(Calendar.YEAR), cal.getActualMaximum(Calendar.MONTH), 31, cal.getActualMaximum(Calendar.HOUR_OF_DAY), cal.getActualMaximum(Calendar.MINUTE), cal.getActualMaximum(Calendar.SECOND));
 					return cal.getTime();
 				case CURRENT_MONTH:
 					cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.getActualMaximum(Calendar.DAY_OF_MONTH), 23, 59, 59);
