@@ -372,7 +372,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		}
 		query = "FROM AttributeListItem a WHERE a.attribute.keyId = :attributeKey AND a.attribute.conservationArea = :ca AND a.keyId IN (:keys)"; //$NON-NLS-1$
 		q = session.createQuery(query);
-		q.setParameter("ca", getConservationAreas()); //$NON-NLS-1$
+		q.setParameter("ca", getMainConservationArea()); //$NON-NLS-1$
 		q.setParameterList("keys", keys); //$NON-NLS-1$
 		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
 				
