@@ -37,6 +37,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -45,6 +47,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -53,6 +56,8 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -72,6 +77,10 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 	private ControlDecoration styleNameDecoration;
 	
 	private TreeViewer treeViewer;
+
+	private Composite infoInnerPanel;
+	private Composite emptyComposite;
+	private RelationshipDiagramDefaultStyleComposite defaultComposite;
 	
 	public RelationshipDiagramStyleEditDialog(Shell shell, final RelationshipDiagramStyle style) {
 		super(shell, "Relationship Diagram Style");
@@ -200,15 +209,72 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 		Composite rightPanel = new Composite(container, SWT.NONE);
 		rightPanel.setLayout(new GridLayout(1, false));
 
-		//TODO: ZZZZZZZZZZZZ create right side panels
+		Group area = new Group(rightPanel, SWT.NONE);
+		area.setLayout(new GridLayout());
+		area.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)area.getLayout()).marginWidth = 0;
+		((GridLayout)area.getLayout()).marginHeight = 0;
+		ScrolledComposite scrolled = new ScrolledComposite(area, SWT.V_SCROLL | SWT.H_SCROLL );
+		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		// always show the focus control
+		scrolled.setShowFocusedControl(true);
+		scrolled.setExpandHorizontal(true);
+		scrolled.setExpandVertical(true);
+		
+		infoInnerPanel = new Composite(scrolled, SWT.NONE);
+
+		StackLayout layout = new StackLayout();
+		layout.marginHeight = 2;
+		infoInnerPanel.setLayout(layout);
+		infoInnerPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		emptyComposite = new Composite(infoInnerPanel, SWT.NONE);
+		emptyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+
+		defaultComposite = new RelationshipDiagramDefaultStyleComposite(infoInnerPanel);
+		
+		container.setWeights(new int[]{40,60});
+		
+
+		scrolled.setContent(infoInnerPanel);
+		scrolled.setMinSize(infoInnerPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+		updateRightPanelState();
 	}
 
 	private void updateRightPanelState() {
 		IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
 		Object obj = selection.getFirstElement();
 		
-		//TODO: ZZZZZZZZZZZZ
+		if (obj instanceof RelationshipDiagramTreeRootStyleObjects) {
+			RelationshipDiagramTreeRootStyleObjects styleObj = (RelationshipDiagramTreeRootStyleObjects) obj;
+			switch (styleObj) {
+			case DEFAULT: {
+//				defaultComposite.setSourceOptions(rdStyle.getStyleOptions()); //TODO: ZZZZZZZZZ fix this
+				((StackLayout)infoInnerPanel.getLayout()).topControl = defaultComposite;
+				break;
+			}
+			case ROOT: {
+				//TODO: ZZZZZZZZZ impl
+				((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
+				break;
+			}
+			case ENTITY_TYPE:
+			case RELATIONSIP_TYPE:
+				((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
+				break;
+			}
+		} else if (obj instanceof IntelEntityType) {
+			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
+			//TODO: ZZZZZZZZZ
+		} else if (obj instanceof IntelRelationshipType) {
+			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
+			//TODO: ZZZZZZZZZ
+		} else {
+			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
+		}
+		infoInnerPanel.layout();
 	}
 	
 	@Override
