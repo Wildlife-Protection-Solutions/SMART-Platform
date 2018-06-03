@@ -21,7 +21,12 @@
  */
 package org.wcs.smart.i2.diagram.style;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.diagram.LoadEntityTypeJob;
+import org.wcs.smart.i2.diagram.LoadRelationshipTypeJob;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
@@ -34,6 +39,23 @@ import org.wcs.smart.i2.model.RelationshipDiagramStyle;
  *
  */
 public class RelationshipDiagramStyledObjectsTreeContentProvider implements ITreeContentProvider {
+
+	private IntelEntityType[] entityTypes;
+	private IntelRelationshipType[] relationshipTypes;
+	
+	private LoadEntityTypeJob entityTypeJob = new LoadEntityTypeJob() {
+		@Override
+		protected void processData(List<IntelEntityType> types) {
+			entityTypes = types.toArray(new IntelEntityType[]{});
+		}
+	};
+	
+	private LoadRelationshipTypeJob relationshipTypeJob = new LoadRelationshipTypeJob() {
+		@Override
+		protected void processData(List<IntelRelationshipType> types) {
+			relationshipTypes = types.toArray(new IntelRelationshipType[]{});;
+		}
+	};
 	
 	@Override
 	public Object[] getElements(Object inputElement) {
@@ -47,13 +69,29 @@ public class RelationshipDiagramStyledObjectsTreeContentProvider implements ITre
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof RelationshipDiagramTreeRootStyleObjects) {
 			switch ((RelationshipDiagramTreeRootStyleObjects)parentElement) {
-			case ENTITY_TYPE:
-				//TODO: ZZZZZZZZZZZZ
-				break;
-			case RELATIONSIP_TYPE:
-				//TODO: ZZZZZZZZZZZZ
-				break;
-
+			case ENTITY_TYPE: {
+				if (entityTypes == null) {
+					entityTypeJob.schedule();
+					try{
+						entityTypeJob.join();
+					}catch(InterruptedException ex){
+						Intelligence2PlugIn.log(ex.getLocalizedMessage(), ex);
+					}
+				}
+				return entityTypes;
+			}
+			case RELATIONSIP_TYPE: {
+				if (relationshipTypes == null) {
+					relationshipTypeJob.schedule();
+					try{
+						relationshipTypeJob.join();
+					}catch(InterruptedException ex){
+						Intelligence2PlugIn.log(ex.getLocalizedMessage(), ex);
+					}
+				}
+				return relationshipTypes;
+				
+			}
 			default:
 				return new Object[]{};
 			}
