@@ -27,42 +27,41 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.NamedItem;
 
 /**
- * Style representation for relationship diagram.
- *  
+ * Node style related to {@link RelationshipDiagramStyle}
+ * 
  * @author elitvin
  * @since 6.0.0
+ *
  */
-@Entity
-@Table(name = "smart.i_diagram_style")
-public class RelationshipDiagramStyle extends NamedItem {
+//@Entity
+//@Table(name = "smart.i_diagram_node_style")
+public class RelationshipDiagramNodeStyle {
 	
-	private ConservationArea conservationArea;
-	private boolean isDefault = false;
+	private RelationshipDiagramStyle style;
+	private IntelEntityType node;
 	private String options;
-
+	
+	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
-	public ConservationArea getConservationArea() {
-		return this.conservationArea;
+	@JoinColumn(name="style_uuid", referencedColumnName="uuid")
+	public RelationshipDiagramStyle getStyle() {
+		return style;
 	}
-	public void setConservationArea(ConservationArea ca) {
-		this.conservationArea = ca;
+	public void setStyle(RelationshipDiagramStyle style) {
+		this.style = style;
 	}
 	
-	@Column(name = "is_default")
-	public boolean isDefault() {
-		return isDefault;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="node_uuid", referencedColumnName="uuid")
+	public IntelEntityType getNode() {
+		return node;
 	}
-	public void setDefault(Boolean isDefault) {
-		this.isDefault = Boolean.TRUE.equals(isDefault); //null <==> false
+	public void setNode(IntelEntityType node) {
+		this.node = node;
 	}
-
+	
 	@Column(name="options")
 	public String getOptions() {
 		return options;
@@ -71,12 +70,5 @@ public class RelationshipDiagramStyle extends NamedItem {
 		this.options = options;
 	}
 	
-	@Transient
-	public RelationshipDiagramStyleOptions getStyleOptions() {
-		return new RelationshipDiagramStyleOptions(getOptions());
-	}
-	public void setStyleOptions(RelationshipDiagramStyleOptions styleOptions) {
-		this.options = styleOptions.getJson().toString();
-	}
 	
 }
