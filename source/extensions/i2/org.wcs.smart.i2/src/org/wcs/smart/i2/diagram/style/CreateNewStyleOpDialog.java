@@ -50,7 +50,7 @@ import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
- * Dialog for creating new relatinship diagram style.
+ * Dialog for creating new relationship diagram style.
  * 
  * @author elitvin
  * @since 6.0.0
