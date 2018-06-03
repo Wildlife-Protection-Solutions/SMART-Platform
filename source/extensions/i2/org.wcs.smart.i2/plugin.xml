@@ -159,6 +159,10 @@
             class="org.wcs.smart.i2.model.IntelEntityRecordQuery"
             supportsCcaa="true">
       </class>
+      <class
+            class="org.wcs.smart.i2.model.RelationshipDiagramStyle"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.caDeleteAdvisor">
