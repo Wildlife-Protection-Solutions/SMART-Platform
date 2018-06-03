@@ -395,6 +395,8 @@ public class Messages extends NLS {
 	public static String ChangeUserPasswordDialog_Updated_DialogTitle;
 	public static String ChangeUserPasswordDialog_Username_Label;
 	public static String ChangeUserPasswordDialog_UserNameValidationError;
+	public static String ColorSelector_Button_Color;
+	public static String ColorSelector_Dialog_Title;
 	public static String ConservationAreaClonerEngine_Error_CircularDependency;
 	public static String ConservationAreaClonerEngine_ErrorCleanUpRequired;
 	public static String ConservationAreaClonerEngine_Progress_CopyingCa;
