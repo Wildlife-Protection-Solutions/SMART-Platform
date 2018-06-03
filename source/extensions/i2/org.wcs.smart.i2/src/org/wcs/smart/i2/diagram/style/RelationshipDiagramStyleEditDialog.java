@@ -1,0 +1,267 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.i2.diagram.style;
+
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.model.RelationshipDiagramStyle;
+import org.wcs.smart.ui.TranslateSimpleListItemDialog;
+import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+
+/**
+ * The CyberTracker property dialog for managing 
+ * CyberTracker application default properties
+ * 
+ * @author elitvin
+ * @since 1.0.0
+ */
+public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderDialog {
+
+	private RelationshipDiagramStyle rdStyle;
+	
+	private Text txtStyleName;
+	private ControlDecoration styleNameDecoration;
+	
+	private TreeViewer treeViewer;
+	
+	public RelationshipDiagramStyleEditDialog(Shell shell, final RelationshipDiagramStyle style) {
+		super(shell, "Relationship Diagram Style");
+		if (style.getUuid() == null) {
+			//this is a newly created style
+			rdStyle = style;
+		} else {
+			//reloading current style with full data
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+			try {
+				pmd.run(true, false, new IRunnableWithProgress() {
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						monitor.beginTask("Loading relationship diagram style", 1);
+						try(Session s = HibernateManager.openSession()){
+							s.beginTransaction();
+							try {
+								rdStyle = (RelationshipDiagramStyle) s.get(RelationshipDiagramStyle.class, style.getUuid());
+								rdStyle.getNames().size();
+							} catch (Exception ex) {
+								SmartPlugIn.displayLog("Error occurs while loading relationship diagram style.", ex);
+							} finally {
+								s.getTransaction().rollback();
+							}
+						}
+					}
+				});
+			} catch (Exception e) {
+				SmartPlugIn.displayLog("Error occurs while loading relationship diagram style.", e);
+			}
+		}
+	}
+
+	@Override
+	protected Composite createContent(Composite parent) {
+		setChangesMade(rdStyle.getUuid() == null);
+		
+		Composite main = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
+		main.setLayout(layout);
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		Composite topCmp = new Composite(main, SWT.NONE);
+		GridLayout topLayout = new GridLayout(3, false);
+		topLayout.horizontalSpacing = 7; //need this to properly fit error decorator
+		topCmp.setLayout(topLayout);
+		topCmp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		Label lblStyleName = new Label(topCmp, SWT.NONE);
+		lblStyleName.setText("Style Name:");
+		lblStyleName.setToolTipText("The name for current relationship diagram style.");
+
+		txtStyleName = new Text(topCmp, SWT.BORDER);
+		txtStyleName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtStyleName.setToolTipText("The name for current relationship diagram style.");
+		txtStyleName.setText(rdStyle.getName() != null ? rdStyle.getName() : ""); //$NON-NLS-1$
+		txtStyleName.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isStyleNameValid()) {
+					//update cached name
+					rdStyle.setName(txtStyleName.getText());
+					//update name for current language
+					rdStyle.updateName(SmartDB.getCurrentLanguage(), txtStyleName.getText());
+					styleNameDecoration.hide();
+				} else {
+					styleNameDecoration.show();
+				}
+				setChangesMade(true);
+			}
+		});
+
+		styleNameDecoration = new ControlDecoration(txtStyleName, SWT.LEFT);
+		styleNameDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		styleNameDecoration.setShowHover(true);
+		styleNameDecoration.setDescriptionText(MessageFormat.format("Style Name cannot exceed {0} characters.", org.wcs.smart.ca.Label.MAX_LENGTH));
+		styleNameDecoration.hide();
+		
+		Button btnTranslate = new Button(topCmp, SWT.PUSH);
+		btnTranslate.setText("Translate...");
+		btnTranslate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (rdStyle != null){
+					TranslateSimpleListItemDialog translateDialog = new TranslateSimpleListItemDialog(getShell(), rdStyle);
+					if (translateDialog.open() == Window.OK){
+						updateText(rdStyle);
+						setChangesMade(true);
+					}
+				}
+			}
+		});
+		
+		createMainControls(main);
+		
+		setTitle("Relationship Diagram Style");
+		setMessage("Style configuration which can be applied to relationship diagram.");
+		
+		return main;
+	}
+
+	private void createMainControls(Composite main) {
+		SashForm container = new SashForm(main, SWT.HORIZONTAL);
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite innerLeft = new Composite(container, SWT.NONE);
+		innerLeft.setLayout(new GridLayout());
+		
+		treeViewer = new TreeViewer(innerLeft, SWT.V_SCROLL | SWT.H_SCROLL| SWT.BORDER);
+		treeViewer.setLabelProvider(new RelationshipDiagramStyledObjectsLabelProvider());
+		treeViewer.setContentProvider(new  RelationshipDiagramStyledObjectsTreeContentProvider());
+		treeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		((GridData)treeViewer.getControl().getLayoutData()).widthHint = 100;
+//		((GridData)treeViewer.getControl().getLayoutData()).heightHint = 100;
+		treeViewer.setInput(rdStyle);
+		treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				updateRightPanelState();
+			}
+		});
+		treeViewer.expandToLevel(2);
+
+		Composite rightPanel = new Composite(container, SWT.NONE);
+		rightPanel.setLayout(new GridLayout(1, false));
+
+		//TODO: ZZZZZZZZZZZZ create right side panels
+		
+	}
+
+	private void updateRightPanelState() {
+		IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
+		Object obj = selection.getFirstElement();
+		
+		//TODO: ZZZZZZZZZZZZ
+	}
+	
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		super.createButtonsForButtonBar(parent);
+		getButton(IDialogConstants.OK_ID).setEnabled(this.changesMade); //this will enable "Save" button when new model is just created
+	}
+
+	private void updateText(NamedItem item){
+		String name = item.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+		txtStyleName.setText(name);
+	}
+	
+	protected boolean isStyleNameValid() {
+		return txtStyleName != null && txtStyleName.getText() != null 
+				&& txtStyleName.getText().length() <= org.wcs.smart.ca.Label.MAX_LENGTH;
+	}
+	
+	@Override
+	protected boolean performSave() {
+//		if (!isStyleNameValid() || !tabs.recordValuesToObj(rdStyle)) {
+//			MessageDialog.openError(getShell(), Messages.CyberTrackerPropertiesDialog_Error, Messages.CyberTrackerPropertiesDialog_DataNotValid);
+//			return false;
+//		}
+//		final boolean[] isOk = {false};
+//		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+//		try {
+//			pmd.run(true, false, new IRunnableWithProgress() {
+//				@Override
+//				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+//					monitor.beginTask(Messages.CyberTrackerPropertiesDialog_SaveStyle_Task, 1);
+//					try(Session s = HibernateManager.openSession()){
+//						s.beginTransaction();
+//						try {
+//							s.saveOrUpdate(rdStyle);
+//							s.getTransaction().commit();
+//							isOk[0] = true;
+//						} catch (Exception ex) {
+//							s.getTransaction().rollback();
+//							SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_SaveStyle_Error, ex);
+//						}
+//					}
+//				}
+//			});
+//		} catch (Exception e) {
+//			SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_SaveStyle_Error, e);
+//		}
+//
+//		if (isOk[0]) {
+//			setChangesMade(false);
+//		}
+//		return isOk[0];
+		return false;
+	}
+
+}

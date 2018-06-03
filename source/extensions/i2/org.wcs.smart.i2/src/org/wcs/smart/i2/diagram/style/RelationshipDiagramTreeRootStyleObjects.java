@@ -19,30 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.handler;
-
-import org.eclipse.e4.tools.compat.parts.DIHandler;
-import org.wcs.smart.i2.diagram.style.RelationshipDiagramStylesDialog;
+package org.wcs.smart.i2.diagram.style;
 
 /**
- * Handler to open {@link RelationshipDiagramStylesDialog}.
+ * Root objects in styles configuration tree. 
  * 
  * @author elitvin
  * @since 6.0.0
- *
  */
-@SuppressWarnings("restriction")
-public class ShowRelationshipDiagramStylesHandler extends ShowDialogHandler {
+public enum RelationshipDiagramTreeRootStyleObjects {
+	DEFAULT("Default Style"),
+	ROOT("Root Node"),
+	ENTITY_TYPE("Entity Type"),
+	RELATIONSIP_TYPE("Relationship Type");
 
-	public ShowRelationshipDiagramStylesHandler() {
-		super(RelationshipDiagramStylesDialog.class);
+	private final String displayName;
+
+	private RelationshipDiagramTreeRootStyleObjects(String displayName) {
+		this.displayName = displayName;
 	}
-	
-	// E3
-	public static class ShowRelationshipDiagramStylesHandlerWrapper extends DIHandler<ShowRelationshipDiagramStylesHandler> {
-		public ShowRelationshipDiagramStylesHandlerWrapper() {
-			super(ShowRelationshipDiagramStylesHandler.class);
-		}
+
+	public String getGuiName() {
+		return this.displayName;
 	}
-	
 }

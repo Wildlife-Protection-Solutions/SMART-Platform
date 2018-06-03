@@ -19,11 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.dialogs;
+package org.wcs.smart.i2.diagram.style;
 
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -31,6 +32,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -40,6 +42,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -156,26 +159,27 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 	}
 
 	protected void createNewStyle() {
-//		CreateNewStyleOpDialog opDialog = new CreateNewStyleOpDialog(getShell(), getStylesList());
-//		if (opDialog.open() == Window.OK){
-//			RelationshipDiagramStyle initStyle  = null;
-//		
-//			try{
-//				initStyle = opDialog.getStyle();
-//			}catch (Exception ex){
-//				SmartPlugIn.displayLog(Messages.ManageStylesDialog_CreateStyle_Erorr + ex.getLocalizedMessage(), ex);
-//				return;
-//			}
-//			if (initStyle == null){
-//				//cancelled or invalid model
-//				return;
-//			}
-//			Dialog dialog = new CyberTrackerPropertiesDialog(getShell(), initStyle);
-//			dialog.open();
-//			
-//			//refresh list
-//			reloadData();
-//		}
+		CreateNewStyleOpDialog opDialog = new CreateNewStyleOpDialog(getShell(), getStylesList());
+		if (opDialog.open() == Window.OK){
+			RelationshipDiagramStyle initStyle  = null;
+		
+			try{
+				initStyle = opDialog.getStyle();
+			}catch (Exception ex){
+				SmartPlugIn.displayLog("Error creating relationship diagram style.", ex);
+				return;
+			}
+			if (initStyle == null){
+				//cancelled or invalid model
+				return;
+			}
+			
+			Dialog dialog = new RelationshipDiagramStyleEditDialog(getShell(), initStyle);
+			dialog.open();
+			
+			//refresh list
+			reloadData();
+		}
 	}
 
 	protected void deleteCurrentStyle() {
@@ -217,12 +221,13 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 	}
 
 	protected void editCurrentStyle() {
-//		Dialog dialog = new CyberTrackerPropertiesDialog(getShell(), getSelectedStyle());
-//		dialog.open();
-//		reloadData();
+		Dialog dialog = new RelationshipDiagramStyleEditDialog(getShell(), getSelectedStyle());
+		dialog.open();
+		reloadData();
 	}
 
 	private List<RelationshipDiagramStyle> getStylesList() {
+		//TODO: ZZZZZZZZZZ impl
 //		final List<RelationshipDiagramStyle> styleList = new ArrayList<RelationshipDiagramStyle>();
 //		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 //		try {

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.editors;
+package org.wcs.smart.i2.diagram;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,10 +28,10 @@ import java.util.Set;
 import org.eclipse.gef.zest.fx.jface.IGraphContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.i2.diagram.RelationshipGraphLoadDataJob.GraphData;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
-import org.wcs.smart.i2.ui.editors.RelationshipGraphLoadDataJob.GraphData;
 
 /**
  * Content provider for displaying relationship data as a graph.

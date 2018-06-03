@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.editors;
+package org.wcs.smart.i2.diagram;
 
 import java.util.Collection;
 import java.util.HashMap;
