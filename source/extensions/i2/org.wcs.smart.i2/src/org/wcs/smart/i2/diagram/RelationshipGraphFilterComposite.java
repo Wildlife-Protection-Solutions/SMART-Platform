@@ -21,18 +21,12 @@
  */
 package org.wcs.smart.i2.diagram;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -40,12 +34,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.EntityTypeManager;
-import org.wcs.smart.i2.RelationshipTypeManager;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
@@ -68,9 +56,29 @@ public class RelationshipGraphFilterComposite extends Composite {
 	private CheckBoxDropDown cmbEntityTypes;
 	private CheckBoxDropDown cmbRelationTypes;
 	
-	private LoadEntityTypeJob entityTypeJob = new LoadEntityTypeJob();
-	private LoadRelationshipTypeJob relationshipTypeJob = new LoadRelationshipTypeJob();
-
+	private LoadEntityTypeJob entityTypeJob = new LoadEntityTypeJob() {
+		@Override
+		protected void processData(List<IntelEntityType> types) {
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					cmbEntityTypes.setInput(types);
+				}		
+			});
+		}
+	};
+	
+	private LoadRelationshipTypeJob relationshipTypeJob = new LoadRelationshipTypeJob() {
+		@Override
+		protected void processData(List<IntelRelationshipType> types) {
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					cmbRelationTypes.setInput(types);
+				}		
+			});
+		}
+	};
 
 	public RelationshipGraphFilterComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -130,63 +138,4 @@ public class RelationshipGraphFilterComposite extends Composite {
 		relationshipTypeJob.schedule();
 	}
 
-	/*
-	 * job for loading entity types
-	 */
-	private class LoadEntityTypeJob extends Job {
-
-		public LoadEntityTypeJob() {
-			super("Loading Entity Types");
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			List<IntelEntityType> types = new ArrayList<>();
-			try(Session session = HibernateManager.openSession()) {
-				types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(session, SmartDB.getCurrentConservationArea()));
-			}
-
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					cmbEntityTypes.setInput(types);
-				}		
-			});
-			return Status.OK_STATUS;
-		}
-	}
-
-	/*
-	 * job for loading relationship types
-	 */
-	private class LoadRelationshipTypeJob extends Job {
-
-		public LoadRelationshipTypeJob() {
-			super("Loading Relationship Types");
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			List<IntelRelationshipType> types = new ArrayList<>();
-			try(Session session = HibernateManager.openSession()) {
-				types.addAll(RelationshipTypeManager.INSTANCE.getRelationshipTypes(session, SmartDB.getCurrentConservationArea()));
-				//loading lazy items
-				for (IntelRelationshipType t : types){
-					t.getName();
-					if (t.getRelationshipGroup() != null) {
-						t.getRelationshipGroup().getName();
-					}
-				}
-			}
-
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					cmbRelationTypes.setInput(types);
-				}		
-			});
-			return Status.OK_STATUS;
-		}
-	}
-	
 }
