@@ -784,10 +784,14 @@ public class Messages extends NLS {
 	public static String ExportMapWizardPage_ImgFormatLabel;
 	public static String ExportMapWizardPage_InvalidDestinationFolder;
 	public static String ExportMapWizardPage_InvalidFileName;
+	public static String ExportMapWizardPage_invalidScaleFactor;
+	public static String ExportMapWizardPage_invalidScaleFactor1;
 	public static String ExportMapWizardPage_LowSmallLabel;
 	public static String ExportMapWizardPage_NoMapFoundErrorMsg;
 	public static String ExportMapWizardPage_PageDescription;
 	public static String ExportMapWizardPage_PageTitle;
+	public static String ExportMapWizardPage_ScaleFactorTooltip;
+	public static String ExportMapWizardPage_ScaleFactoryLabel;
 	public static String ExportMapWizardPage_ScaleOpLabel;
 	public static String ExportMapWizardPage_WidthLabel;
 	public static String FilterComposite_ClearButton_Tooltip;

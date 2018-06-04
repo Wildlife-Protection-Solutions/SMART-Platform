@@ -61,10 +61,12 @@ import org.eclipse.birt.report.model.api.DesignElementHandle;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.styling.Style;
+import org.geotools.styling.visitor.RescaleStyleVisitor;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.mapgraphic.MapGraphic;
@@ -75,6 +77,7 @@ import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.project.internal.StyleEntry;
 import org.locationtech.udig.project.internal.impl.MapImpl;
 import org.locationtech.udig.project.internal.render.CompositeRenderContext;
 import org.locationtech.udig.project.internal.render.RenderContext;
@@ -463,7 +466,6 @@ public class MapItemExecutor implements IReportItemExecutor{
 
 			layers.add(geoSmart);
 			toAdd.add(resource);
-			
 		}
 		
 		AddLayersCommand cmd = new AddLayersCommand(toAdd, renderedMap.getMapLayers().size());
@@ -505,8 +507,30 @@ public class MapItemExecutor implements IReportItemExecutor{
 			bounds = mapItem.getMapBounds();
 		}
 		
-		// --  reorder layers so mapgraphic layers are at the top
+
 		List<Layer> maplayers = ((Map)renderedMap).getLayersInternal();
+		
+		//scale style to match map dpi settings (scales symbols and fonts)
+		final int[] currentdpi = new int[] {96};
+		Display.getDefault().syncExec(()->{
+			currentdpi[0] = Display.getDefault().getDPI().x;
+			
+		});
+		int newdpi = mapItem.getDPI();
+		double scale = newdpi / (double)currentdpi[0];
+		for (Layer l : maplayers) {
+			for (StyleEntry cc : l.getStyleBlackboard().getContent()) {
+				if ( cc.getStyle() != null && cc.getStyle() instanceof Style) {
+					Style style = (Style)cc.getStyle();
+					RescaleStyleVisitor scaledstyle = new RescaleStyleVisitor(scale);
+					style.accept(scaledstyle);
+					cc.setStyle(scaledstyle.getCopy());
+				}
+			}
+			
+		}
+		
+		// --  reorder layers so mapgraphic layers are at the top		
 		List<Layer> orderedLayers = new ArrayList<Layer>();
 		int cnt = 0;
 		for (Layer l : maplayers) {
@@ -524,6 +548,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 		//draw map
 		BufferedImage image = new BufferedImage(iwidth, iheight, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = image.createGraphics();
+		
 		try {
 			drawMap(g, new java.awt.Dimension(iwidth, iheight), renderedMap, localdpi);
 			if (layerErrors.length() > 0){

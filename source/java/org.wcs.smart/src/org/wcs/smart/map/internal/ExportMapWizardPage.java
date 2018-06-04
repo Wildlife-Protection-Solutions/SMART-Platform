@@ -22,6 +22,7 @@
 package org.wcs.smart.map.internal;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,6 +55,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -82,6 +84,7 @@ import org.wcs.smart.internal.Messages;
  */
 public class ExportMapWizardPage extends WizardPage {
 
+	private static final String SCALEFACTOR_COMBO_KEY = "org.wcs.smart.enabled"; //$NON-NLS-1$
 	/*
 	 * Keys for storing dialog last values
 	 */
@@ -93,12 +96,15 @@ public class ExportMapWizardPage extends WizardPage {
 	private static final String ASPECT_KEY = "ExportMapWizardPageAspect"; //$NON-NLS-1$
 	private static final String FORMAT_KEY = "ExportMapWizardPageFormat"; //$NON-NLS-1$
 	private static final String DIR_KEY = "ExportMapWizardPageDir"; //$NON-NLS-1$
+	private static final String SCALEFACTORY_KEY = "ExportMapWizardScaleFactory"; //$NON-NLS-1$
+
 	
 	private Text destDir;
 	private Text fileName;
 	private ComboViewer cmbMap;
 	private ComboViewer cmbFormat;
 	private Composite formatOpComp;
+	
 	
 	private ArrayList<ImageExportFormat> formats;
 	private Shell temporaryParent;
@@ -115,7 +121,8 @@ public class ExportMapWizardPage extends WizardPage {
 	private Button chCustomSize;
 	private Label low;
 	private Label high;
-	
+	private Combo cmbScaleFactor;
+	private Label scaleFactor;
 	/**
 	 * Creates a new page
 	 */
@@ -153,7 +160,6 @@ public class ExportMapWizardPage extends WizardPage {
 				}
 			}
 		}
-		
 	}
 	
 	/**
@@ -257,6 +263,22 @@ public class ExportMapWizardPage extends WizardPage {
 		return height;
 	}
 	    
+	/**
+	 * The scale factor to apply to symbols and mapgraphics or null
+	 * if not applicable 
+	 * @return
+	 */
+	public Double getScaleFactor() {
+		if ( !((Boolean)cmbScaleFactor.getData(SCALEFACTOR_COMBO_KEY))) return null;
+		try {
+			Double value = Double.parseDouble(cmbScaleFactor.getText());
+			if (value <= 0) return 1.0;
+			return value;
+		}catch (Exception ex) {
+			return 1.0;	
+		}
+	}
+	
 	/**
 	 * Bounds strategy to use when exporting map.  Either
 	 * preserves bounds or scale.
@@ -369,6 +391,11 @@ public class ExportMapWizardPage extends WizardPage {
         	 opSize.setSelection(getWizard().getDialogSettings().getInt(SIZE_KEY));
          }
          updateCustomSizeEnabled();
+         
+         if (getWizard().getDialogSettings().get(SCALEFACTORY_KEY) != null){
+        	 cmbScaleFactor.setText(getWizard().getDialogSettings().get(SCALEFACTORY_KEY));
+         }
+         
     }
     
     private void validate(){
@@ -382,6 +409,17 @@ public class ExportMapWizardPage extends WizardPage {
     	if (cmbMap.getSelection().isEmpty()){
     		error = Messages.ExportMapWizardPage_NoMapFoundErrorMsg;
     	}
+    	if (cmbScaleFactor.isEnabled()) {
+	    	try {
+	    		Double scale = Double.parseDouble(cmbScaleFactor.getText());
+	    		if (scale <= 0) {
+	    			error = Messages.ExportMapWizardPage_invalidScaleFactor;
+	    		}
+	    	}catch (Exception ex) {
+	    		error = Messages.ExportMapWizardPage_invalidScaleFactor1;
+	    	}
+    	}
+    	
     	setErrorMessage(error);
     }
     /**
@@ -409,6 +447,7 @@ public class ExportMapWizardPage extends WizardPage {
     	getWizard().getDialogSettings().put(DIR_KEY, destDir.getText());
     	getWizard().getDialogSettings().put(CUSTOM_SIZE_KEY, chCustomSize.getSelection());
     	getWizard().getDialogSettings().put(SIZE_KEY, opSize.getSelection());
+    	getWizard().getDialogSettings().put(SCALEFACTORY_KEY, cmbScaleFactor.getText());
     	
     }
     
@@ -452,6 +491,7 @@ public class ExportMapWizardPage extends WizardPage {
     		float pos = (opSize.getMaximum() - opSize.getMinimum()) * percent;
     		int value = Math.round(pos+opSize.getMinimum()) ;
     		opSize.setSelection(value);
+    		updateScaleFactor();
     		event.doit = false;
     	});
     	new Label(outer, SWT.NONE); //spacer
@@ -486,6 +526,10 @@ public class ExportMapWizardPage extends WizardPage {
     	((GridLayout)a.getLayout()).marginWidth = 0;
     	opWidth = createSpinner(WIDTH_KEY, a);
     	opHeight = createSpinner(HEIGHT_KEY, a);
+    	
+    	opWidth.addListener(SWT.Modify, e->updateScaleFactor());
+    	opHeight.addListener(SWT.Modify, e->updateScaleFactor());
+    	
     	btnOpAspect = new Button(a, SWT.CHECK);
     	btnOpAspect.setText(Messages.ExportMapWizardPage_AspectRatioLabel);
     	btnOpAspect.addSelectionListener(new SelectionListener() {
@@ -507,8 +551,40 @@ public class ExportMapWizardPage extends WizardPage {
     	
     	chCustomSize.addListener(SWT.Selection, (event) -> {
     		updateCustomSizeEnabled();
+    		updateScaleFactor();
     	});
     	updateCustomSizeEnabled();
+    	
+    	
+    	Composite scaleComposite = new Composite(outer, SWT.NONE);
+    	scaleComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+    	scaleComposite.setLayout(new GridLayout(2, false));
+    	((GridData)scaleComposite.getLayoutData()).verticalIndent = 3;
+    	scaleFactor = new Label(scaleComposite, SWT.NONE);
+    	scaleFactor.setText(Messages.ExportMapWizardPage_ScaleFactoryLabel);
+    	scaleFactor.setToolTipText(Messages.ExportMapWizardPage_ScaleFactorTooltip);
+    	scaleFactor.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+    	
+    	cmbScaleFactor = new Combo(scaleComposite, SWT.DROP_DOWN);
+    	cmbScaleFactor.setItems(new String[] {"1", "2", "3", "4"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+    	cmbScaleFactor.setText("1"); //$NON-NLS-1$
+    	cmbScaleFactor.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+    	((GridData)cmbScaleFactor.getLayoutData()).widthHint = 50;
+    	enableScaleFactor(true);
+    }
+    
+    private void updateScaleFactor() {
+    	if (getMap() != null && getMap().getRenderManager() != null && getMap().getRenderManager().getMapDisplay() != null) {
+    		Double xApproxScaleFactor = getWidth() / ((double)getMap().getRenderManager().getMapDisplay().getWidth());
+    		Double yApproxScaleFactor = getHeight() / ((double)getMap().getRenderManager().getMapDisplay().getHeight());
+    		Double approxScaleFactor = ( xApproxScaleFactor + yApproxScaleFactor ) / 2.0; 
+    		cmbScaleFactor.setText( (new DecimalFormat("0.######")).format( approxScaleFactor )); //$NON-NLS-1$
+    	}
+    }
+    
+    private void enableScaleFactor(boolean enable) {
+    	cmbScaleFactor.setEnabled(enable);
+    	cmbScaleFactor.setData(SCALEFACTOR_COMBO_KEY, enable);
     }
     
     private void updateCustomSizeEnabled(){
@@ -594,6 +670,7 @@ public class ExportMapWizardPage extends WizardPage {
 			public void selectionChanged(SelectionChangedEvent event) {
 				ImageExportFormat format = getSelectedFormat();
 				if (format == null){
+					
 					return;
 				}
 				if (lastFormat != null){
@@ -603,6 +680,8 @@ public class ExportMapWizardPage extends WizardPage {
 				
 				lastFormat.setParent(formatOpComp);
 				formatOpComp.layout();
+				
+				enableScaleFactor(!format.getExtension().equalsIgnoreCase("PDF")); //$NON-NLS-1$
 			}
 		});
        

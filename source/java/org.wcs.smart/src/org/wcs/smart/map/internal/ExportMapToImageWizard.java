@@ -31,7 +31,9 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -45,9 +47,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.geotools.styling.Style;
+import org.geotools.styling.visitor.RescaleStyleVisitor;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.ICatalog;
 import org.locationtech.udig.catalog.ID;
@@ -58,6 +63,7 @@ import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.project.internal.StyleEntry;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayerCommand;
 import org.locationtech.udig.project.render.RenderException;
@@ -81,6 +87,8 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 
 	private ExportMapWizardPage mapSelectorPage;
 
+	private int deviceDpi = 96;
+	
 	public ExportMapToImageWizard() {
 		setWindowTitle(Messages.ExportMapToImageWizard_WindowTitle);
 		setDialogSettings(SmartPlugIn.getDefault().getDialogSettings());
@@ -89,6 +97,7 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 		mapSelectorPage = new ExportMapWizardPage(); 
 		addPage(mapSelectorPage);
 		setNeedsProgressMonitor(true);
+		deviceDpi = Display.getDefault().getDPI().x;
 	}
 
 	@Override
@@ -176,19 +185,53 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 				BufferedImage.TYPE_INT_RGB); // .TYPE_INT_ARGB);
 
 		Graphics2D g = image.createGraphics();
-
+		HashMap<StyleEntry, Style> oldStyles = new HashMap<>();
 		IMap renderedMap;
 		try {
 			monitor.worked(1);
 			monitor.setTaskName(MessageFormat.format(Messages.ExportMapToImageWizard_Progress_RenderingMap,  new Object[] { map.getName() }));
 
-			DrawMapParameter drawMapParameter = new DrawMapParameter(g,
-					new java.awt.Dimension(width, height), map,
-					mapSelectorPage.getBoundsStrategy(),
-					mapSelectorPage.getSelectedFormat().getDPI(),SelectionStyle.IGNORE,
-					monitor);
+			int dpi = deviceDpi;
 
-			renderedMap = ApplicationGIS.drawMap(drawMapParameter);
+			//scale mapgraphic/symbols
+			Double scalefactor = mapSelectorPage.getScaleFactor();
+			if (scalefactor == null) {
+				dpi = mapSelectorPage.getSelectedFormat().getDPI();
+				scalefactor = (double)dpi / deviceDpi;
+			}else {
+				//need to set the dpi so mapgraphics are scaled
+				dpi = (int) (dpi * scalefactor);
+			}
+			
+			try {
+				for (ILayer l : map.getMapLayers()) {
+					for (StyleEntry cc : ((StyleBlackboard)l.getStyleBlackboard()).getContent()) {
+						if ( cc.getStyle() != null && cc.getStyle() instanceof Style) {
+							Style style = (Style)cc.getStyle();
+							oldStyles.put(cc, style);
+							
+							RescaleStyleVisitor scaledstyle = new RescaleStyleVisitor(scalefactor);
+							style.accept(scaledstyle);
+							cc.setStyle(scaledstyle.getCopy());	
+						}
+					}
+				}
+				
+
+				
+				DrawMapParameter drawMapParameter = new DrawMapParameter(g,
+						new java.awt.Dimension(width, height), map,
+						mapSelectorPage.getBoundsStrategy(),
+						dpi,SelectionStyle.IGNORE,
+						monitor);
+	
+				renderedMap = ApplicationGIS.drawMap(drawMapParameter);
+			}finally {
+			for (Entry<StyleEntry, Style> ee : oldStyles.entrySet()) {
+				ee.getKey().setStyle(ee.getValue());
+			}
+		}
+		
 		} finally {
 			g.dispose();
 		}
@@ -198,6 +241,8 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 
 		resetCatalog( destination ); 
 
+		
+		
 		monitor.done();
 		return true;
 	}
