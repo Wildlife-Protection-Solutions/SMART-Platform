@@ -61,7 +61,9 @@ public class ColorSelector extends Composite {
 
 		// Use a label full of spaces to show the color
 		colorLabel = new Label(this, SWT.NONE);
-		colorLabel.setText("               "); //$NON-NLS-1$
+		colorLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+		((GridData)colorLabel.getLayoutData()).widthHint = 50;
+		colorLabel.addListener(SWT.Dispose, e->disposeColor());		
 
 		Button button = new Button(this, SWT.PUSH);
 		button.setText(Messages.ColorSelector_Button_Color);
@@ -69,21 +71,25 @@ public class ColorSelector extends Composite {
 			public void widgetSelected(SelectionEvent event) {
 				// Create the color-change dialog
 				ColorDialog dlg = new ColorDialog(getShell());
+				dlg.setText(Messages.ColorSelector_Dialog_Title);
 				if (color != null) {
 					dlg.setRGB(color.getRGB());
 				}
-				dlg.setText(Messages.ColorSelector_Dialog_Title);
+				disposeColor();
 				RGB rgb = dlg.open();
 				if (rgb != null) {
-					if (color != null) {
-						color.dispose();
-					}
 					color = new Color(Display.getCurrent(), rgb);
 					colorLabel.setBackground(color);
 					fireColorSelectionChanged();
 				}
 			}
 		});
+	}
+
+	private void disposeColor() {
+		if (color != null && !color.isDisposed()) {
+			color.dispose();
+		}
 	}
 
 	public Color getColor() {
