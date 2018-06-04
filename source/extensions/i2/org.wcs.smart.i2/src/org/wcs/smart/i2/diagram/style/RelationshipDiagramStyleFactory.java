@@ -31,6 +31,7 @@ import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions.ImageSizeOption;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
+import org.wcs.smart.i2.model.RelationshipDiagramStyleOptions;
 
 /**
  * Factory for creating {@link RelationshipDiagramStyle}.
@@ -41,6 +42,12 @@ import org.wcs.smart.i2.model.RelationshipDiagramStyle;
  */
 public class RelationshipDiagramStyleFactory {
 
+	public static RelationshipDiagramStyleOptions createDefaultStyleOptions() {
+		RelationshipDiagramStyleOptions options = new RelationshipDiagramStyleOptions("{}"); //$NON-NLS-1$
+		options.setDefaultNodeStyle(createDefaultNodeOptions());
+		return options;
+	}
+	
 	public static RelationshipDiagramNodeStyleOptions createDefaultNodeOptions() {
 		RelationshipDiagramNodeStyleOptions options = new RelationshipDiagramNodeStyleOptions("{}"); //$NON-NLS-1$
 		options.setImageSize(ImageSizeOption.SMALL);
@@ -58,7 +65,7 @@ public class RelationshipDiagramStyleFactory {
 	}
 
 	public static RelationshipDiagramEdgeStyleOptions createDefaultEdgeOptions() {
-		return null;
+		return null; //TODO: ZZZZZZZZZZZZ impl
 	}
 	
 	/**
@@ -69,6 +76,9 @@ public class RelationshipDiagramStyleFactory {
 		style.setConservationArea(SmartDB.getCurrentConservationArea());
 		style.setName(name);
 		style.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
+		
+		style.setStyleOptions(createDefaultStyleOptions());
+		
 		return style;
 	}
 	
@@ -83,6 +93,8 @@ public class RelationshipDiagramStyleFactory {
 		progress.subTask("Creating relationship diagram style");
 		RelationshipDiagramStyle clone = createUsingDefaults(name);
 		try {
+			
+			clone.setOptions(style.getOptions());
 //TODO: ZZZZZZZZZZZ implement
 //			//NOTE: we are not coping isDefault and names
 //			Map<StyleOptionID, CyberTrackerPropertiesStyleOption> options = style.getOptions();

@@ -25,30 +25,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
-import org.wcs.smart.i2.model.RelationshipDiagramStyleOptions;
 
 /**
- * Composite containing controls to manage default style options for relationship diagram.
+ * Composite containing controls to manage node style for relationship diagram.
  * 
  * @author elitvin
  * @since 6.0.0
  *
  */
-public class RelationshipDiagramDefaultStyleComposite extends Composite {
-	
-	private RelationshipDiagramStyleOptions options;
-	
-	private RelationshipDiagramNodeStyleOptionsComposite nodeCmp;
-	private RelationshipDiagramEdgeStyleOptionsComposite edgeCmp;
+public class RelationshipDiagramNodeStyleComposite extends Composite {
 
-	private List<IStyleOptionsChangeListener> listeners = new ArrayList<>();
+	private Button btnOverride;
+	private RelationshipDiagramNodeStyleOptionsComposite nodeCmp;
+
+	private boolean fireListeners = true;
+	private List<INodeStyleOptionsChangeListener> listeners = new ArrayList<>();
 	
-	public RelationshipDiagramDefaultStyleComposite(Composite parent) {
+	public RelationshipDiagramNodeStyleComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(1, false);
 		this.setLayout(layout);
@@ -56,42 +56,54 @@ public class RelationshipDiagramDefaultStyleComposite extends Composite {
 		createContent(this);
 	}
 	
-	public void setSourceOptions(RelationshipDiagramStyleOptions options) {
-		this.options = options;
-		nodeCmp.setSourceOptions(options.getDefaultNodeStyle());
-		//TODO: ZZZZZZZZZZ update controls
-//		edgeCmp.setSourceOptions(options.get);
+	public void setSourceOptions(RelationshipDiagramNodeStyleOptions options) {
+		fireListeners = false;
+		btnOverride.setSelection(options != null);
+		nodeCmp.setVisible(options != null);
+		nodeCmp.setSourceOptions(options);
+		fireListeners = true;
+		this.layout(true);
+	}
+	
+	private void handleOverrideChanged() {
+		RelationshipDiagramNodeStyleOptions newOptions = btnOverride.getSelection() ? RelationshipDiagramStyleFactory.createDefaultNodeOptions() : null;
+		fireOptionsChanged(newOptions);
+		setSourceOptions(newOptions);
 	}
 
 	private void createContent(Composite parent) {
-		Group grpNode = new Group(parent, SWT.NONE);
-		grpNode.setText("Node (Entity)");
-		grpNode.setLayout(new GridLayout());
-		grpNode.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		nodeCmp = new RelationshipDiagramNodeStyleOptionsComposite(grpNode);
-		nodeCmp.addOptionsChangeListener(new INodeStyleOptionsChangeListener() {
+		btnOverride = new Button(parent, SWT.CHECK);
+		btnOverride.setText("Override default node settings");
+		btnOverride.addSelectionListener(new SelectionListener() {
 			@Override
-			public void optionsChanged(RelationshipDiagramNodeStyleOptions ops) {
-				fireOptionsChanged(options);
+			public void widgetSelected(SelectionEvent e) {
+				if (fireListeners) {
+					handleOverrideChanged();
+				}
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
 			}
 		});
 		
-		Group grpEdge = new Group(parent, SWT.NONE);
-		grpEdge.setText("Edge (Relationship)");
-		grpEdge.setLayout(new GridLayout());
-		grpEdge.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		edgeCmp = new RelationshipDiagramEdgeStyleOptionsComposite(grpEdge);
-		//TODO: ZZZZZZZZ track changes!!!!
+		nodeCmp = new RelationshipDiagramNodeStyleOptionsComposite(parent);
+		nodeCmp.addOptionsChangeListener(new INodeStyleOptionsChangeListener() {
+			@Override
+			public void optionsChanged(RelationshipDiagramNodeStyleOptions options) {
+				if (fireListeners) {
+					fireOptionsChanged(options);
+				}
+			}
+		});
 	}
 
-	public void addOptionsChangeListener(IStyleOptionsChangeListener listener) {
+	public void addOptionsChangeListener(INodeStyleOptionsChangeListener listener) {
 		listeners.add(listener);
 	}
 	
-	private void fireOptionsChanged(RelationshipDiagramStyleOptions ops) {
-		for (IStyleOptionsChangeListener l : listeners) {
+	private void fireOptionsChanged(RelationshipDiagramNodeStyleOptions ops) {
+		for (INodeStyleOptionsChangeListener l : listeners) {
 			l.optionsChanged(ops);
 		}
 	}

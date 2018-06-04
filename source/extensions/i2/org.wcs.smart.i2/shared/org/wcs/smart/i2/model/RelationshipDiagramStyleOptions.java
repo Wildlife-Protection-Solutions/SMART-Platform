@@ -31,9 +31,10 @@ import com.google.gson.JsonObject;
  */
 public class RelationshipDiagramStyleOptions {
 	
-	private RelationshipDiagramNodeStyleOptions defaultNodeStyle;
-	private RelationshipDiagramNodeStyleOptions rootNodeStyle;
-
+	private static final String NODE_DEFAULT = "nodeDefault"; //$NON-NLS-1$
+	private static final String NODE_ROOT = "nodeRoot"; //$NON-NLS-1$
+	private static final String EDGE_DEFAULT = "edgeDefault"; //$NON-NLS-1$
+	
 	private JsonObject json;
 	
 	public RelationshipDiagramStyleOptions(String options) {
@@ -45,17 +46,30 @@ public class RelationshipDiagramStyleOptions {
 	}
 
 	public RelationshipDiagramNodeStyleOptions getDefaultNodeStyle() {
-		return new RelationshipDiagramNodeStyleOptions(json.getAsJsonObject("nodeDefault"));
+		JsonObject defaultNode = json.getAsJsonObject(NODE_DEFAULT);
+		return defaultNode != null ? new RelationshipDiagramNodeStyleOptions(defaultNode) : null;
 	}
 	public void setDefaultNodeStyle(RelationshipDiagramNodeStyleOptions nodeOptions) {
-		json.add("nodeDefault", nodeOptions.getJson());
+		json.add(NODE_DEFAULT, nodeOptions.getJson());
 	}
 
 	public RelationshipDiagramNodeStyleOptions getRootNodeStyle() {
-		return new RelationshipDiagramNodeStyleOptions(json.getAsJsonObject("nodeRoot"));
+		JsonObject rootNode = json.getAsJsonObject(NODE_ROOT);
+		return rootNode != null ? new RelationshipDiagramNodeStyleOptions(rootNode) : null;
 	}
 	public void setRootNodeStyle(RelationshipDiagramNodeStyleOptions nodeOptions) {
-		json.add("nodeRoot", nodeOptions.getJson());
+		if (nodeOptions != null) {
+			json.add(NODE_ROOT, nodeOptions.getJson());
+		} else {
+			json.remove(NODE_ROOT);
+		}
 	}
+
+//	public RelationshipDiagramEdgeStyleOptions getDefaultEdgeStyle() {
+//		return new RelationshipDiagramEdgeStyleOptions(json.getAsJsonObject(EDGE_DEFAULT));
+//	}
+//	public void setDefaultEdgeStyle(RelationshipDiagramEdgeStyleOptions edgeOptions) {
+//		json.add(NODE_ROOT, edgeOptions.getJson());
+//	}
 	
 }

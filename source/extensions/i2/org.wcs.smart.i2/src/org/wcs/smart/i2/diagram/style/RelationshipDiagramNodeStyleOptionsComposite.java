@@ -21,10 +21,15 @@
  */
 package org.wcs.smart.i2.diagram.style;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
@@ -50,6 +55,9 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 	private ComboViewer cmbImageSize;
 	private ColorSelector csBackgroundColor;
 	private ColorSelector csForegroundColor;
+	
+	private boolean fireListeners = true;
+	private List<INodeStyleOptionsChangeListener> listeners = new ArrayList<>();
 
 	public RelationshipDiagramNodeStyleOptionsComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -61,9 +69,15 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 	
 	public void setSourceOptions(RelationshipDiagramNodeStyleOptions options) {
 		this.options = options;
-		//TODO: ZZZZZZZZZZ update controls
+		if (options != null) {
+			fireListeners = false;
+			cmbImageSize.setSelection(new StructuredSelection(options.getImageSize()));
+			csBackgroundColor.setColor(options.getBackgroudColor());
+			csForegroundColor.setColor(options.geForegroundColor());
+			fireListeners = true;
+		}
 	}
-
+	
 	private void createContent(Composite parent) {
 		Label lblImageSize = new Label(parent, SWT.NONE);
 		lblImageSize.setText("Image Size:");
@@ -75,7 +89,11 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 		cmbImageSize.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				//TODO: ZZZZZZZZ implement
+				if (options != null && fireListeners) {
+					IStructuredSelection sel = (IStructuredSelection) cmbImageSize.getSelection();
+					options.setImageSize((ImageSizeOption)sel.getFirstElement());
+					fireOptionsChanged(options);
+				}
 			}
 		});
 
@@ -86,7 +104,10 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 		csBackgroundColor.addColorSelectionChangeListener(new IColorSelectionChangeListener() {
 			@Override
 			public void colorSelectionChanged(Color color) {
-				//TODO: ZZZZZZZZ implement
+				if (options != null && fireListeners) {
+					options.setBackgroudColor(color);
+					fireOptionsChanged(options);
+				}
 			}
 		});
 
@@ -97,9 +118,22 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 		csForegroundColor.addColorSelectionChangeListener(new IColorSelectionChangeListener() {
 			@Override
 			public void colorSelectionChanged(Color color) {
-				//TODO: ZZZZZZZZ implement
+				if (options != null && fireListeners) {
+					options.setBackgroudColor(color);
+					fireOptionsChanged(options);
+				}
 			}
 		});
+	}
+
+	public void addOptionsChangeListener(INodeStyleOptionsChangeListener listener) {
+		listeners.add(listener);
+	}
+	
+	private void fireOptionsChanged(RelationshipDiagramNodeStyleOptions ops) {
+		for (INodeStyleOptionsChangeListener l : listeners) {
+			l.optionsChanged(ops);
+		}
 	}
 
 }

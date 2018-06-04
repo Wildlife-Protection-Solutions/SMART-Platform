@@ -28,6 +28,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 /**
+ * Style options for relationship diagram node.
+ * 
  * @author elitvin
  * @since 6.0.0
  *

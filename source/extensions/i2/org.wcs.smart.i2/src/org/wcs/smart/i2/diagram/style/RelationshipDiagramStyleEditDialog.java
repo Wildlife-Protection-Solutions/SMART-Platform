@@ -58,7 +58,9 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
+import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
+import org.wcs.smart.i2.model.RelationshipDiagramStyleOptions;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
@@ -81,6 +83,7 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 	private Composite infoInnerPanel;
 	private Composite emptyComposite;
 	private RelationshipDiagramDefaultStyleComposite defaultComposite;
+	private RelationshipDiagramNodeStyleComposite nodeRootComposite;
 	
 	public RelationshipDiagramStyleEditDialog(Shell shell, final RelationshipDiagramStyle style) {
 		super(shell, "Relationship Diagram Style");
@@ -233,6 +236,22 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 		emptyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 		defaultComposite = new RelationshipDiagramDefaultStyleComposite(infoInnerPanel);
+		defaultComposite.addOptionsChangeListener(new IStyleOptionsChangeListener() {
+			@Override
+			public void optionsChanged(RelationshipDiagramStyleOptions options) {
+				rdStyle.setStyleOptions(options);
+			}
+		});
+		
+		nodeRootComposite = new RelationshipDiagramNodeStyleComposite(infoInnerPanel);
+		nodeRootComposite.addOptionsChangeListener(new INodeStyleOptionsChangeListener() {
+			@Override
+			public void optionsChanged(RelationshipDiagramNodeStyleOptions options) {
+				RelationshipDiagramStyleOptions so = rdStyle.getStyleOptions();
+				so.setRootNodeStyle(options);
+				rdStyle.setStyleOptions(so);
+			}
+		});
 		
 		container.setWeights(new int[]{40,60});
 		
@@ -251,13 +270,13 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 			RelationshipDiagramTreeRootStyleObjects styleObj = (RelationshipDiagramTreeRootStyleObjects) obj;
 			switch (styleObj) {
 			case DEFAULT: {
-//				defaultComposite.setSourceOptions(rdStyle.getStyleOptions()); //TODO: ZZZZZZZZZ fix this
+				defaultComposite.setSourceOptions(rdStyle.getStyleOptions());
 				((StackLayout)infoInnerPanel.getLayout()).topControl = defaultComposite;
 				break;
 			}
 			case ROOT: {
-				//TODO: ZZZZZZZZZ impl
-				((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
+				nodeRootComposite.setSourceOptions(rdStyle.getStyleOptions().getRootNodeStyle());
+				((StackLayout)infoInnerPanel.getLayout()).topControl = nodeRootComposite;
 				break;
 			}
 			case ENTITY_TYPE:
@@ -266,6 +285,8 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 				break;
 			}
 		} else if (obj instanceof IntelEntityType) {
+//			nodeComposite.setSourceOptions(???);
+//			((StackLayout)infoInnerPanel.getLayout()).topControl = nodeComposite;
 			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
 			//TODO: ZZZZZZZZZ
 		} else if (obj instanceof IntelRelationshipType) {
