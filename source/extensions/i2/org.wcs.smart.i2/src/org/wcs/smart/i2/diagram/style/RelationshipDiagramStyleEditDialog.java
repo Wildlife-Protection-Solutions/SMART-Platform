@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -65,11 +66,11 @@ import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
- * The CyberTracker property dialog for managing 
- * CyberTracker application default properties
+ * The relationship diagram style dialog for managing 
+ * relationship diagram style options.
  * 
  * @author elitvin
- * @since 1.0.0
+ * @since 6.0.0
  */
 public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderDialog {
 
@@ -198,8 +199,6 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 		treeViewer.setLabelProvider(new RelationshipDiagramStyledObjectsLabelProvider());
 		treeViewer.setContentProvider(new  RelationshipDiagramStyledObjectsTreeContentProvider());
 		treeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//		((GridData)treeViewer.getControl().getLayoutData()).widthHint = 100;
-//		((GridData)treeViewer.getControl().getLayoutData()).heightHint = 100;
 		treeViewer.setInput(rdStyle);
 		treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -240,6 +239,7 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 			@Override
 			public void optionsChanged(RelationshipDiagramStyleOptions options) {
 				rdStyle.setStyleOptions(options);
+				setChangesMade(true);
 			}
 		});
 		
@@ -250,6 +250,7 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 				RelationshipDiagramStyleOptions so = rdStyle.getStyleOptions();
 				so.setRootNodeStyle(options);
 				rdStyle.setStyleOptions(so);
+				setChangesMade(true);
 			}
 		});
 		
@@ -316,39 +317,38 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 	
 	@Override
 	protected boolean performSave() {
-//		if (!isStyleNameValid() || !tabs.recordValuesToObj(rdStyle)) {
-//			MessageDialog.openError(getShell(), Messages.CyberTrackerPropertiesDialog_Error, Messages.CyberTrackerPropertiesDialog_DataNotValid);
-//			return false;
-//		}
-//		final boolean[] isOk = {false};
-//		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-//		try {
-//			pmd.run(true, false, new IRunnableWithProgress() {
-//				@Override
-//				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-//					monitor.beginTask(Messages.CyberTrackerPropertiesDialog_SaveStyle_Task, 1);
-//					try(Session s = HibernateManager.openSession()){
-//						s.beginTransaction();
-//						try {
-//							s.saveOrUpdate(rdStyle);
-//							s.getTransaction().commit();
-//							isOk[0] = true;
-//						} catch (Exception ex) {
-//							s.getTransaction().rollback();
-//							SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_SaveStyle_Error, ex);
-//						}
-//					}
-//				}
-//			});
-//		} catch (Exception e) {
-//			SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_SaveStyle_Error, e);
-//		}
-//
-//		if (isOk[0]) {
-//			setChangesMade(false);
-//		}
-//		return isOk[0];
-		return false;
+		if (!isStyleNameValid()) {
+			MessageDialog.openError(getShell(), "Error", "Some data is not valid. Correct the data before saving changes.");
+			return false;
+		}
+		final boolean[] isOk = {false};
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Saving relationship diagram style", 1);
+					try(Session s = HibernateManager.openSession()){
+						s.beginTransaction();
+						try {
+							s.saveOrUpdate(rdStyle);
+							s.getTransaction().commit();
+							isOk[0] = true;
+						} catch (Exception ex) {
+							s.getTransaction().rollback();
+							SmartPlugIn.displayLog("Error occured while saving relationship diagram style.", ex);
+						}
+					}
+				}
+			});
+		} catch (Exception e) {
+			SmartPlugIn.displayLog("Error occured while saving relationship diagram style.", e);
+		}
+
+		if (isOk[0]) {
+			setChangesMade(false);
+		}
+		return isOk[0];
 	}
 
 }

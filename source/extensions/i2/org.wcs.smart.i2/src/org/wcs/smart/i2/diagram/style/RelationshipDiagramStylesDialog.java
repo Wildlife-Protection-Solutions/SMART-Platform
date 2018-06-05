@@ -21,10 +21,17 @@
  */
 package org.wcs.smart.i2.diagram.style;
 
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -42,9 +49,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.RelationshipDiagramManager;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
-import org.wcs.smart.ui.NamedItemLabelProvider;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -81,7 +90,7 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		stylesViewer = new TableViewer(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-		stylesViewer.setLabelProvider(new NamedItemLabelProvider()); //TODO: ZZZZZZZZ need custom label provider that will mark default style
+		stylesViewer.setLabelProvider(new RelationshipDiagramStyleLabelProvider());
 		stylesViewer.setContentProvider(ArrayContentProvider.getInstance());
 		stylesViewer.setInput(getStylesList());
 		stylesViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -183,41 +192,41 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 	}
 
 	protected void deleteCurrentStyle() {
-//		final RelationshipDiagramStyle p = getSelectedStyle();
-//		if (p == null){
-//			return;
-//		}
-//		if (!MessageDialog.openConfirm(getShell(), Messages.ManageStylesDialog_DeleteConfirmDialog_Title, MessageFormat.format(Messages.ManageStylesDialog_DeleteConfirmDialog_Message, p.getName()))){
-//			return;
-//		}
-//
-//		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-//		try {
-//			pmd.run(true, false, new IRunnableWithProgress() {
-//
-//				@Override
-//				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-//					monitor.beginTask(Messages.ManageStylesDialog_DeleteTask_Name, 1);
-//					
-//					try(Session session = HibernateManager.openSession()){
-//						session.beginTransaction();
-//						try {
-//							CyberTrackerHibernateManager.deleteStyle(session, p);
-//							session.getTransaction().commit();							
-//						}catch (Exception ex){
-//							session.getTransaction().rollback();
-//							SmartPlugIn.displayLog(Messages.ManageStylesDialog_DeleteTask_Error, ex);
-//						}
-//					} finally {
-//						monitor.done();
-//					}
-//				}
-//			});
-//		} catch (Exception ex) {
-//			SmartPlugIn.displayLog(Messages.ManageStylesDialog_DeleteTask_Error, ex);
-//		}
-//		
-//		reloadData();
+		final RelationshipDiagramStyle style = getSelectedStyle();
+		if (style == null) {
+			return;
+		}
+		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the relationship diagram style \"{0}\"?  This action cannot be undone.\r\nAny diagram that references this style will be referenced to default style.", style.getName()))){
+			return;
+		}
+
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Deleteing relationship diagram style", 1);
+					
+					try(Session session = HibernateManager.openSession()){
+						session.beginTransaction();
+						try {
+							RelationshipDiagramManager.INSTANCE.deleteStyle(session, style);
+							session.getTransaction().commit();							
+						}catch (Exception ex){
+							session.getTransaction().rollback();
+							SmartPlugIn.displayLog("Error occured while deleting relationship diagram style", ex);
+						}
+					} finally {
+						monitor.done();
+					}
+				}
+			});
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog("Error occured while deleting relationship diagram style", ex);
+		}
+		
+		reloadData();
 	}
 
 	protected void editCurrentStyle() {
@@ -227,33 +236,31 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 	}
 
 	private List<RelationshipDiagramStyle> getStylesList() {
-		//TODO: ZZZZZZZZZZ impl
-//		final List<RelationshipDiagramStyle> styleList = new ArrayList<RelationshipDiagramStyle>();
-//		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-//		try {
-//			pmd.run(true, false, new IRunnableWithProgress() {
-//				@Override
-//				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-//					monitor.beginTask(Messages.ManageStylesDialog_LoadStyleList_Task, 1);
-//					try(Session session = HibernateManager.openSession()){
-//						session.beginTransaction();
-//						try {
-//							styleList.addAll(CyberTrackerHibernateManager.getPropertiesStyles(session));
-//							Collections.sort(styleList, new CtStyleDefaultNameComparator());
-//						} catch (Exception ex) {
-//							SmartPlugIn.displayLog(Messages.ManageStylesDialog_LoadStyleList_Error, ex);
-//						} finally {
-//							session.getTransaction().rollback();
-//						}
-//					}
-//				}
-//			});
-//		} catch (Exception e) {
-//			SmartPlugIn.displayLog(Messages.ManageStylesDialog_LoadStyleList_Error, e);
-//			return Collections.emptyList();
-//		}
-//		return styleList;
-		return Collections.emptyList();
+		final List<RelationshipDiagramStyle> styleList = new ArrayList<RelationshipDiagramStyle>();
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Loading relationship diagram styles list", 1);
+					try(Session session = HibernateManager.openSession()){
+						session.beginTransaction();
+						try {
+							styleList.addAll(RelationshipDiagramManager.INSTANCE.getStyles(session));
+							Collections.sort(styleList, new RelationshipDiagramStyleDefaultNameComparator());
+						} catch (Exception ex) {
+							SmartPlugIn.displayLog("Error occurs while loading relationship diagram styles list.", ex);
+						} finally {
+							session.getTransaction().rollback();
+						}
+					}
+				}
+			});
+		} catch (Exception e) {
+			SmartPlugIn.displayLog("Error occurs while loading relationship diagram styles list.", e);
+			return Collections.emptyList();
+		}
+		return styleList;
 	}
 
 	@Override

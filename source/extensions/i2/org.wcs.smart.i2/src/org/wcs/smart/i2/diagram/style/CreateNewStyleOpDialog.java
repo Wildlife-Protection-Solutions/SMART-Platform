@@ -47,7 +47,6 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
-import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
  * Dialog for creating new relationship diagram style.
@@ -149,7 +148,7 @@ public class CreateNewStyleOpDialog extends TitleAreaDialog {
 		cbStyle.getControl().setToolTipText("Creates a relationship diagram style using a selected relationship diagram style as a template.");
 		cbStyle.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		cbStyle.setContentProvider(ArrayContentProvider.getInstance());
-		cbStyle.setLabelProvider(new NamedItemLabelProvider()); //TODO: ZZZZZZZZ need custom label provider that will mark default style
+		cbStyle.setLabelProvider(new RelationshipDiagramStyleLabelProvider());
  		cbStyle.setInput(styleList);
 		
 		getShell().setText("New Relationship Diagram Style");
