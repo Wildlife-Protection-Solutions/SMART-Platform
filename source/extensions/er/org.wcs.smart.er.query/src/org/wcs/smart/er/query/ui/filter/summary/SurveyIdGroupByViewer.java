@@ -97,8 +97,9 @@ public class SurveyIdGroupByViewer extends AbstractGroupByViewer<SurveyIdGroupBy
 		c.select(from);
 		if (filter == null){
 			//get all surveys for the current ca
-			c.where(cb.equal(from.join("survey").get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$ //$NON-NLS-2$
-			c.orderBy(cb.asc(from.join("survey").get("keyId"))); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			c.where(cb.equal(from.join("surveyDesign").get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$ //$NON-NLS-2$
+			c.orderBy(cb.asc(from.join("surveyDesign").get("keyId"))); //$NON-NLS-1$ //$NON-NLS-2$
 			List<Survey> surveys = session.createQuery(c).getResultList();
 			
 			for (Survey s : surveys){
@@ -107,9 +108,9 @@ public class SurveyIdGroupByViewer extends AbstractGroupByViewer<SurveyIdGroupBy
 			}			
 		}else{
 			c.where(cb.and(
-					cb.equal(from.join("survey").get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$ //$NON-NLS-2$
-					cb.equal(from.join("survey").get("keyId"), filter.getKey()))); //$NON-NLS-1$ //$NON-NLS-2$
-			c.orderBy(cb.asc(from.join("survey").get("keyId"))); //$NON-NLS-1$ //$NON-NLS-2$
+					cb.equal(from.join("surveyDesign").get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$ //$NON-NLS-2$
+					cb.equal(from.join("surveyDesign").get("keyId"), filter.getKey()))); //$NON-NLS-1$ //$NON-NLS-2$
+			c.orderBy(cb.asc(from.join("surveyDesign").get("keyId"))); //$NON-NLS-1$ //$NON-NLS-2$
 			List<Survey> surveys = session.createQuery(c).getResultList();
 			for (Survey s : surveys){
 				ListItem li = new ListItem(s.getUuid(), s.getId() );
