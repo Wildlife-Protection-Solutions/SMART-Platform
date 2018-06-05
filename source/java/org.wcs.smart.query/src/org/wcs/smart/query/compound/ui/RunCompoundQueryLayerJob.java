@@ -117,20 +117,25 @@ public class RunCompoundQueryLayerJob extends Job{
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		try(Session s = HibernateManager.openSession()){
-			item.getQuery().setDateFilter(item.getDateFilter());
-			ProgressMonitorWrapper wrapper = new ProgressMonitorWrapper(monitor, item.getProgressBar());
-			IQueryResult results = QueryExecutor.INSTANCE.executeQuery(item.getQuery(), s, wrapper);
-			item.getQuery().setCachedResults(results);
-			((CompoundMapQueryResults)mapEditor.getQueryProxy().getQuery().getCachedResults()).addResults(item.getQuery().getUuid(), results);
-			
-			if (results instanceof IPagedQueryResultSet){
-				item.setTotalCount(((IPagedQueryResultSet) results).getItemCount());
-			}else if (results instanceof MemoryQueryResult<?>){
-				item.setTotalCount(((MemoryQueryResult<?>)results).getData().size());
-			}else{
-				item.setTotalCount(-1);
+			s.beginTransaction();
+			try {
+				item.getQuery().setDateFilter(item.getDateFilter());
+				ProgressMonitorWrapper wrapper = new ProgressMonitorWrapper(monitor, item.getProgressBar());
+				IQueryResult results = QueryExecutor.INSTANCE.executeQuery(item.getQuery(), s, wrapper);
+				item.getQuery().setCachedResults(results);
+				((CompoundMapQueryResults)mapEditor.getQueryProxy().getQuery().getCachedResults()).addResults(item.getQuery().getUuid(), results);
+				
+				if (results instanceof IPagedQueryResultSet){
+					item.setTotalCount(((IPagedQueryResultSet) results).getItemCount());
+				}else if (results instanceof MemoryQueryResult<?>){
+					item.setTotalCount(((MemoryQueryResult<?>)results).getData().size());
+				}else{
+					item.setTotalCount(-1);
+				}
+				item.setStatus(QueryItem.Status.DONE);
+			}finally {
+				s.getTransaction().commit();
 			}
-			item.setStatus(QueryItem.Status.DONE);
 			
 		}catch(Exception ex){
 			item.setStatus(QueryItem.Status.ERROR);
