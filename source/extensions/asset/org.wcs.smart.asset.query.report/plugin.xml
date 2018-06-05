@@ -39,12 +39,12 @@
       <StaticTable
             category="org.wcs.smart.asset.query.report.assetcategory"
             class="org.wcs.smart.asset.report.table.AssetTable"
-            supportsCcaa="false">
+            supportsCcaa="true">
       </StaticTable>
       <StaticTable
             category="org.wcs.smart.asset.query.report.assetcategory"
             class="org.wcs.smart.asset.report.table.StationTable"
-            supportsCcaa="false">
+            supportsCcaa="true">
       </StaticTable>
       <ImageProvider
             class="org.wcs.smart.asset.report.table.TableImageProvider">
@@ -52,7 +52,7 @@
       <StaticTable
             category="org.wcs.smart.asset.query.report.assetcategory"
             class="org.wcs.smart.asset.report.table.LocationTable"
-            supportsCcaa="false">
+            supportsCcaa="true">
       </StaticTable>
    </extension>
 
