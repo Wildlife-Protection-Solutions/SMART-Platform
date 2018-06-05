@@ -37,6 +37,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
+import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
+import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions.ImageSizeOption;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyleOptions;
 import org.wcs.smart.ui.Thumbnail;
@@ -77,6 +79,15 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 		this.style = style;
 	}
 	
+	private RelationshipDiagramNodeStyleOptions getNodeOptions(Object element) {
+		RelationshipDiagramStyleOptions styleOptions = style.getStyleOptions();
+		if (isRootNode(element) && styleOptions.getRootNodeStyle() != null) {
+			return styleOptions.getRootNodeStyle();
+		}
+		//TODO: ZZZZZZZ fetch for specific node
+		return styleOptions.getDefaultNodeStyle();
+		
+	}
 	
 	@Override
 	public String getText(Object element) {
@@ -91,8 +102,8 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 	public Image getImage(Object element) {
 		if (element instanceof IntelEntity) {
 			IntelEntity e = (IntelEntity) element;
-			
-			Thumbnail thum = new Thumbnail(e.getPrimaryAttachment(), 50);
+			int size = style != null ? getNodeOptions(element).getImageSize().getSize() : ImageSizeOption.DEFAULT_IMAGE_SIZE_OPTION.getSize();
+			Thumbnail thum = new Thumbnail(e.getPrimaryAttachment(), size);
 			return thum.getImage();
 		}
 		return super.getImage(element);
@@ -137,30 +148,16 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 	@Override
 	public Color getForeground(Object element) {
 		if (style != null) {
-			RelationshipDiagramStyleOptions styleOptions = style.getStyleOptions();
-			if (isRootNode(element) && styleOptions.getRootNodeStyle() != null) {
-				return styleOptions.getRootNodeStyle().getForegroundColor();
-			}
-			return styleOptions.getDefaultNodeStyle().getForegroundColor();
+			return getNodeOptions(element).getForegroundColor();
 		}
-//		if (isRootNode(element)) {
-//			return Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
-//		}
 		return null;
 	}
 
 	@Override
 	public Color getBackground(Object element) {
 		if (style != null) {
-			RelationshipDiagramStyleOptions styleOptions = style.getStyleOptions();
-			if (isRootNode(element) && styleOptions.getRootNodeStyle() != null) {
-				return styleOptions.getRootNodeStyle().getBackgroudColor();
-			}
-			return styleOptions.getDefaultNodeStyle().getBackgroudColor();
+			return getNodeOptions(element).getBackgroudColor();
 		}
-//		if (isRootNode(element)) {
-//			return Display.getCurrent().getSystemColor(SWT.COLOR_YELLOW);
-//		}
 		return null;
 	}
 
