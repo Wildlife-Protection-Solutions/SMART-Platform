@@ -72,7 +72,7 @@ public class DataModelListener implements IDataModelListener {
 				q.executeUpdate();
 						
 				//delete all nodes that reference in-active categories
-				Query<CmNode> nodeQuery = session.createQuery("FROM CmNode n WHERE n.category.conservationArea = :ca AND n.category.isActive = 'false')", CmNode.class); //$NON-NLS-1$
+				Query<CmNode> nodeQuery = session.createQuery("FROM CmNode n WHERE n.category.conservationArea = :ca AND n.category.isActive = 'false'", CmNode.class); //$NON-NLS-1$
 				nodeQuery.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 				List<CmNode> toDelete = nodeQuery.list();
 				for (CmNode delete : toDelete){
