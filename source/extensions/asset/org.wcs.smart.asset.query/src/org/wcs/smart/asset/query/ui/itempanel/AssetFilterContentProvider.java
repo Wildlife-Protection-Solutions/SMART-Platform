@@ -53,6 +53,7 @@ public class AssetFilterContentProvider implements ITreeContentProvider {
 
 	@Override
 	public Object[] getElements(Object inputElement) {
+		if (assets == null) return null;
 		return new Object[] {ASSET_ROOT, STATION_ROOT};
 	}
 
