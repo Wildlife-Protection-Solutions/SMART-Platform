@@ -118,20 +118,26 @@
                   style="push">
                <visibleWhen
                      checkEnabled="false">
-                  <or>
+                  <and>
+                     <or>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                     </or>
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
                      </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                  </or>
+                  </and>
                </visibleWhen>
             </command>
          </toolbar>
