@@ -85,6 +85,7 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 		cmbImageSize = new ComboViewer(this, SWT.READ_ONLY | SWT.BORDER);
 		cmbImageSize.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		cmbImageSize.setContentProvider(ArrayContentProvider.getInstance());
+		cmbImageSize.setLabelProvider(new ImageSizeLabelProvider());
 		cmbImageSize.setInput(ImageSizeOption.values());
 		cmbImageSize.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
