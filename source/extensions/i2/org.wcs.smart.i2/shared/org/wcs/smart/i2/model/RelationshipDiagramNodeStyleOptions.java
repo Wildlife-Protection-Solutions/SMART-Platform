@@ -36,8 +36,6 @@ import com.google.gson.JsonObject;
  */
 public class RelationshipDiagramNodeStyleOptions {
 
-	private static final ImageSizeOption DEFAULT_IMAGE_SIZE_OPTION = ImageSizeOption.SMALL;
-	
 	/**
 	 * The supported image sizes.
 	 * 
@@ -50,6 +48,8 @@ public class RelationshipDiagramNodeStyleOptions {
 		LARGE  (150);
 
 		private final int size;
+		
+		public static final ImageSizeOption DEFAULT_IMAGE_SIZE_OPTION = SMALL;
 
 		private ImageSizeOption(int size) {
 			this.size = size;
@@ -66,7 +66,7 @@ public class RelationshipDiagramNodeStyleOptions {
 		json = new Gson().fromJson(options, JsonObject.class);
 	}
 
-	public RelationshipDiagramNodeStyleOptions(JsonObject json) {
+	protected RelationshipDiagramNodeStyleOptions(JsonObject json) {
 		this.json = json;
 	}
 	
@@ -77,7 +77,7 @@ public class RelationshipDiagramNodeStyleOptions {
 	public ImageSizeOption getImageSize() {
 		String strSize = json.get("imageSize").getAsString();
 		if (strSize == null || strSize.isEmpty()) {
-			return DEFAULT_IMAGE_SIZE_OPTION;
+			return ImageSizeOption.DEFAULT_IMAGE_SIZE_OPTION;
 		}
 		ImageSizeOption sizeOp = ImageSizeOption.valueOf(strSize);
 		return sizeOp;

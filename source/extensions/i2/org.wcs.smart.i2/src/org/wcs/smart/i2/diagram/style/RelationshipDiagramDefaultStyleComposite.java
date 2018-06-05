@@ -29,6 +29,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramStyleOptions;
 
@@ -59,8 +60,7 @@ public class RelationshipDiagramDefaultStyleComposite extends Composite {
 	public void setSourceOptions(RelationshipDiagramStyleOptions options) {
 		this.options = options;
 		nodeCmp.setSourceOptions(options.getDefaultNodeStyle());
-		//TODO: ZZZZZZZZZZ update controls
-//		edgeCmp.setSourceOptions(options.get);
+		edgeCmp.setSourceOptions(options.getDefaultEdgeStyle());
 	}
 
 	private void createContent(Composite parent) {
@@ -83,7 +83,12 @@ public class RelationshipDiagramDefaultStyleComposite extends Composite {
 		grpEdge.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		edgeCmp = new RelationshipDiagramEdgeStyleOptionsComposite(grpEdge);
-		//TODO: ZZZZZZZZ track changes!!!!
+		edgeCmp.addOptionsChangeListener(new IEdgeStyleOptionsChangeListener() {
+			@Override
+			public void optionsChanged(RelationshipDiagramEdgeStyleOptions ops) {
+				fireOptionsChanged(options);
+			}
+		});
 	}
 
 	public void addOptionsChangeListener(IStyleOptionsChangeListener listener) {

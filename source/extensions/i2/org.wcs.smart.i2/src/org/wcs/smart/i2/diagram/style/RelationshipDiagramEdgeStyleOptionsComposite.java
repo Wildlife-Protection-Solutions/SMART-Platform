@@ -21,16 +21,21 @@
  */
 package org.wcs.smart.i2.diagram.style;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.common.control.ColorSelector;
 import org.wcs.smart.common.control.ColorSelector.IColorSelectionChangeListener;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
-import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
 
 /**
  * Composite containing controls to manage edge style options for relationship diagram.
@@ -44,6 +49,10 @@ public class RelationshipDiagramEdgeStyleOptionsComposite extends Composite {
 	private RelationshipDiagramEdgeStyleOptions options;
 
 	private ColorSelector csEdgeColor;
+	private Button btnShowLabel;
+
+	private boolean fireListeners = true;
+	private List<IEdgeStyleOptionsChangeListener> listeners = new ArrayList<>();
 	
 	public RelationshipDiagramEdgeStyleOptionsComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -55,7 +64,12 @@ public class RelationshipDiagramEdgeStyleOptionsComposite extends Composite {
 	
 	public void setSourceOptions(RelationshipDiagramEdgeStyleOptions options) {
 		this.options = options;
-		//TODO: ZZZZZZZZZZZZ update controls
+		if (options != null) {
+			fireListeners = false;
+			csEdgeColor.setColor(options.getColor());
+			btnShowLabel.setSelection(options.isShowLabel());
+			fireListeners = true;
+		}
 	}
 
 	private void createContent(Composite parent) {
@@ -66,8 +80,40 @@ public class RelationshipDiagramEdgeStyleOptionsComposite extends Composite {
 		csEdgeColor.addColorSelectionChangeListener(new IColorSelectionChangeListener() {
 			@Override
 			public void colorSelectionChanged(Color color) {
-				//TODO: ZZZZZZZZ implement
+				if (options != null && fireListeners) {
+					options.setColor(color);
+					fireOptionsChanged(options);
+				}
+			}
+		});
+
+		Label lblShowLabel = new Label(parent, SWT.NONE);
+		lblShowLabel.setText("Show Label:");
+		
+		btnShowLabel = new Button(parent, SWT.CHECK);
+		btnShowLabel.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (options != null && fireListeners) {
+					options.setShowLabel(btnShowLabel.getSelection());
+					fireOptionsChanged(options);
+				}
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
 			}
 		});
 	}
+	
+	public void addOptionsChangeListener(IEdgeStyleOptionsChangeListener listener) {
+		listeners.add(listener);
+	}
+	
+	private void fireOptionsChanged(RelationshipDiagramEdgeStyleOptions ops) {
+		for (IEdgeStyleOptionsChangeListener l : listeners) {
+			l.optionsChanged(ops);
+		}
+	}
+	
 }

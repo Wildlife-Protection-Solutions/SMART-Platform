@@ -19,54 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.model;
+package org.wcs.smart.i2.diagram.style;
 
-import org.eclipse.swt.graphics.Color;
-import org.wcs.smart.util.ColorUtil;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
 
 /**
- * Style options for relationship diagram edge.
+ * Interface to listen for {@link RelationshipDiagramEdgeStyleOptions} changes.
  * 
  * @author elitvin
  * @since 6.0.0
  *
  */
-public class RelationshipDiagramEdgeStyleOptions {
+interface IEdgeStyleOptionsChangeListener {
+	public void optionsChanged(RelationshipDiagramEdgeStyleOptions options);
 
-	private JsonObject json;
-
-	public RelationshipDiagramEdgeStyleOptions(String options) {
-		json = new Gson().fromJson(options, JsonObject.class);
-	}
-
-	protected RelationshipDiagramEdgeStyleOptions(JsonObject json) {
-		this.json = json;
-	}
-	
-	protected JsonObject getJson() {
-		return json;
-	}
-
-	public Color getColor() {
-		String hex = json.get("color").getAsString();
-		Color color = ColorUtil.hex2Color(hex);
-		return color;
-	}
-	public String getColorAsString() {
-		return json.get("color").getAsString();
-	}
-	public void setColor(Color color) {
-		json.addProperty("color", ColorUtil.color2HexStr(color));
-	}
-
-	public boolean isShowLabel() {
-		return json.get("showLabel").getAsBoolean();
-	}
-	public void setShowLabel(boolean showLabel) {
-		json.addProperty("showLabel", showLabel);
-	}
-	
 }

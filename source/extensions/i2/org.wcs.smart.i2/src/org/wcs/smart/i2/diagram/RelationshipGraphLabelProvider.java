@@ -31,12 +31,11 @@ import org.eclipse.gef.zest.fx.jface.ZestContentViewer;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
+import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions.ImageSizeOption;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
@@ -88,6 +87,12 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 		return styleOptions.getDefaultNodeStyle();
 		
 	}
+
+	private RelationshipDiagramEdgeStyleOptions getEdgeOptions(Object element) {
+		//TODO: ZZZZZZZ fetch for specific node
+		return style.getStyleOptions().getDefaultEdgeStyle();
+		
+	}
 	
 	@Override
 	public String getText(Object element) {
@@ -124,12 +129,15 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 	public Map<String, Object> getEdgeAttributes(Object sourceNode, Object targetNode) {
 		Map<String, Object> attributes = new HashMap<>();
 		attributes.put(ZestProperties.TARGET_DECORATION__E, new javafx.scene.shape.Polygon(0, 0, 10, 3, 10, -3));
-		attributes.put(ZestProperties.TARGET_DECORATION_CSS_STYLE__E, "-fx-stroke: red; -fx-fill: red;");
-		attributes.put(ZestProperties.CURVE_CSS_STYLE__E, "-fx-stroke: red;");
-		
 		IntelEntityRelationship r = getRelationship(sourceNode, targetNode);
-		if (r != null) {
-			attributes.put(ZestProperties.LABEL__NE, r.getRelationshipType().getName());
+		if (r != null && style != null) {
+			RelationshipDiagramEdgeStyleOptions options = getEdgeOptions(r);
+			String color = options.getColorAsString();
+			attributes.put(ZestProperties.TARGET_DECORATION_CSS_STYLE__E, "-fx-stroke: "+color+"; -fx-fill: "+color+";"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			attributes.put(ZestProperties.CURVE_CSS_STYLE__E, "-fx-stroke: "+color+";"); //$NON-NLS-1$ //$NON-NLS-2$
+			if (options.isShowLabel()) {
+				attributes.put(ZestProperties.LABEL__NE, r.getRelationshipType().getName());
+			}
 		}
 		
 		return attributes;

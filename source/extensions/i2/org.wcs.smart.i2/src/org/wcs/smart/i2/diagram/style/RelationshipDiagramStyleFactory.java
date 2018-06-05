@@ -24,12 +24,9 @@ package org.wcs.smart.i2.diagram.style;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
-import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions.ImageSizeOption;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyleOptions;
 
@@ -45,27 +42,18 @@ public class RelationshipDiagramStyleFactory {
 	public static RelationshipDiagramStyleOptions createDefaultStyleOptions() {
 		RelationshipDiagramStyleOptions options = new RelationshipDiagramStyleOptions("{}"); //$NON-NLS-1$
 		options.setDefaultNodeStyle(createDefaultNodeOptions());
+		options.setDefaultEdgeStyle(createDefaultEdgeOptions());
 		return options;
 	}
 	
 	public static RelationshipDiagramNodeStyleOptions createDefaultNodeOptions() {
-		RelationshipDiagramNodeStyleOptions options = new RelationshipDiagramNodeStyleOptions("{}"); //$NON-NLS-1$
-		options.setImageSize(ImageSizeOption.SMALL);
-		options.setBackgroudColor(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		options.setForegroundColor(Display.getCurrent().getSystemColor(SWT.COLOR_BLACK));
-		return options;
-	}
-
-	public static RelationshipDiagramNodeStyleOptions createDefaultRootNodeOptions() {
-		RelationshipDiagramNodeStyleOptions options = new RelationshipDiagramNodeStyleOptions("{}"); //$NON-NLS-1$
-		options.setImageSize(ImageSizeOption.SMALL);
-		options.setBackgroudColor(Display.getCurrent().getSystemColor(SWT.COLOR_YELLOW));
-		options.setForegroundColor(Display.getCurrent().getSystemColor(SWT.COLOR_BLACK));
+		RelationshipDiagramNodeStyleOptions options = new RelationshipDiagramNodeStyleOptions("{'imageSize':'SMALL','backgroundColor':'#FFFFFF','foregroundColor':'#000000'}"); //$NON-NLS-1$
 		return options;
 	}
 
 	public static RelationshipDiagramEdgeStyleOptions createDefaultEdgeOptions() {
-		return null; //TODO: ZZZZZZZZZZZZ impl
+		RelationshipDiagramEdgeStyleOptions options = new RelationshipDiagramEdgeStyleOptions("{'color':'#FF0000','showLabel':true}"); //$NON-NLS-1$
+		return options;
 	}
 	
 	/**

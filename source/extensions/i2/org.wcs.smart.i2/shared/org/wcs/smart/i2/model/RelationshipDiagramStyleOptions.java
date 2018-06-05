@@ -41,7 +41,7 @@ public class RelationshipDiagramStyleOptions {
 		json = new Gson().fromJson(options, JsonObject.class);
 	}
 
-	public JsonObject getJson() {
+	protected JsonObject getJson() {
 		return json;
 	}
 
@@ -65,11 +65,16 @@ public class RelationshipDiagramStyleOptions {
 		}
 	}
 
-//	public RelationshipDiagramEdgeStyleOptions getDefaultEdgeStyle() {
-//		return new RelationshipDiagramEdgeStyleOptions(json.getAsJsonObject(EDGE_DEFAULT));
-//	}
-//	public void setDefaultEdgeStyle(RelationshipDiagramEdgeStyleOptions edgeOptions) {
-//		json.add(NODE_ROOT, edgeOptions.getJson());
-//	}
+	public RelationshipDiagramEdgeStyleOptions getDefaultEdgeStyle() {
+		JsonObject defaultEdge = json.getAsJsonObject(EDGE_DEFAULT);
+		return defaultEdge != null ? new RelationshipDiagramEdgeStyleOptions(defaultEdge) : null;
+	}
+	public void setDefaultEdgeStyle(RelationshipDiagramEdgeStyleOptions edgeOptions) {
+		if (edgeOptions != null) {
+			json.add(EDGE_DEFAULT, edgeOptions.getJson());
+		} else {
+			json.remove(EDGE_DEFAULT);
+		}
+	}
 	
 }
