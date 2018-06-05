@@ -119,7 +119,7 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 			@Override
 			public void colorSelectionChanged(Color color) {
 				if (options != null && fireListeners) {
-					options.setBackgroudColor(color);
+					options.setForegroundColor(color);
 					fireOptionsChanged(options);
 				}
 			}
