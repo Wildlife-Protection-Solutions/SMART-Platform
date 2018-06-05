@@ -21,7 +21,13 @@
  */
 package org.wcs.smart.event.ui;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.MessageFormat;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
@@ -29,12 +35,16 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.EventProcessingJob;
 import org.wcs.smart.event.internal.Messages;
+import org.wcs.smart.event.xml.EventsToXml;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Dialog for configuring events.
@@ -102,6 +112,20 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		typesTab.setControl(typesPanel);
 		typesTab.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ACTION_TYPE));
 		
+		
+		Composite linkComp = new Composite(main, SWT.NONE);
+		linkComp.setLayout(new GridLayout(2, false));
+		linkComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		((GridLayout)linkComp.getLayout()).marginWidth = 0;
+		((GridLayout)linkComp.getLayout()).marginHeight = 0;
+		
+		Link export = new Link(main, SWT.NONE);
+		export.setText("<a>" + "export" + "</a>");
+		export.addListener(SWT.Selection, e->{
+			export();
+		});
+		
+		
 		setTitle(Messages.ConfigureEventsDialog_Title);
 		getShell().setText(Messages.ConfigureEventsDialog_Title);
 		setMessage(Messages.ConfigureEventsDialog_Message);
@@ -109,6 +133,35 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		return parent;
 	}
 	
+	private void export() {
+		FileDialog fd = new FileDialog(getShell(),  SWT.SAVE);
+		fd.setFilterExtensions(new String[] {"*.xml", "*.*"});
+		fd.setFilterNames(new String[] {"XML File (*.xml)", "All Files (*.*)"});
+		String file = fd.open();
+		if (file == null) return;
+		
+		Path outputFile = Paths.get(file);
+		
+		if (Files.exists(outputFile)) {
+			if (!MessageDialog.openConfirm(getShell(), "Overwrite", 
+					MessageFormat.format("{0} exists.  Are you sure you want to overwrite it?", outputFile.toString()))){
+				return;
+			}
+		}
+		
+		try {
+			if (!Files.exists(outputFile.getParent())) {
+				Files.createDirectories(outputFile.getParent());
+			}
+			
+			EventsToXml xml = new EventsToXml(SmartDB.getCurrentConservationArea());
+			xml.toXml(outputFile);
+			
+			MessageDialog.openInformation(getShell(), "Export", MessageFormat.format("Export to {0} complete.", outputFile.toString()));
+		}catch (Exception ex) {
+			EventPlugIn.displayLog("Unable to export trigger module configuration to xml file: " + ex.getMessage(), ex);
+		}
+	}
 	
 	@Override
 	public boolean isResizable() {

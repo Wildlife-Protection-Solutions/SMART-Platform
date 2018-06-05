@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+	targetNamespace="http://smartconservationtools.org/xml/1.0/EventActions" 
+	xmlns:tns="http://smartconservationtools.org/xml/1.0/EventActions" elementFormDefault="qualified">
+
+
+    <complexType name="EAction">
+    	<sequence>
+    		<element name="parameters" type="tns:EActionParameter"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="id" type="string"></attribute>
+    	<attribute name="actionTypeKey" type="string"></attribute>
+    	<attribute name="uuid" type="string"></attribute>
+    </complexType>
+
+    <complexType name="EActionParameter">
+    	<sequence>
+    		<element name="value" type="string"></element>
+    	</sequence>
+    	<attribute name="key" type="string"></attribute>
+    </complexType>
+
+    <complexType name="EActionEvent">
+    	<attribute name="eActionUuid" type="string"></attribute>
+    	<attribute name="eFilterUuid" type="string"></attribute>
+    	<attribute name="enabled" type="boolean"></attribute>
+    </complexType>
+
+    <complexType name="EFilter">
+    	<sequence>
+    		<element name="filterString" type="string"></element>
+    	</sequence>
+    	<attribute name="id" type="string"></attribute>
+    	<attribute name="uuid" type="string"></attribute>
+    </complexType>
+
+
+    <complexType name="Configuration">
+    	<sequence>
+    		<element name="actions" type="tns:EAction"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="filters" type="tns:EFilter"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="actionEvents" type="tns:EActionEvent" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <element name="configuration" type="tns:Configuration"></element>
+</schema>
