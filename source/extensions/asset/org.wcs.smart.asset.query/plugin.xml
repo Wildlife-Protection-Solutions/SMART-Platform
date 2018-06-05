@@ -28,7 +28,7 @@
       <QueryCategory
             html_description="%asset.querycategory.html_description"
             id="org.wcs.smart.asset.query.group.AssetQueries"
-            name="Asset Queries">
+            name="%asset.querycategory.name">
       </QueryCategory>
       <QueryType
             QueryCategory="org.wcs.smart.asset.query.group.AssetQueries"
