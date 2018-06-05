@@ -244,7 +244,7 @@ public class MultiCaDataModelManagerImpl extends AbstractDataModelManager {
 	 * @return
 	 */
 	public Attribute getAttribute(Session session, Attribute attribute){
-		if (attribute.getConservationArea().equals(SmartDB.getConservationAreaConfiguration().getMainConservationArea())){
+		if (attribute.getConservationArea() != null && attribute.getConservationArea().equals(SmartDB.getConservationAreaConfiguration().getMainConservationArea())){
 			return attribute;
 		}
 		return getAttribute(session, attribute.getKeyId());
@@ -271,7 +271,7 @@ public class MultiCaDataModelManagerImpl extends AbstractDataModelManager {
 		q.setParameter("key", attribute.getKeyId());//$NON-NLS-1$
 		q.setParameter("level", level);//$NON-NLS-1$
 		q.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas());//$NON-NLS-1$
-		q.setParameter("cnt", SmartDB.getConservationAreaConfiguration().getCaCount());//$NON-NLS-1$
+		q.setParameter("cnt", new Long(SmartDB.getConservationAreaConfiguration().getCaCount()));//$NON-NLS-1$
 		List<String> hkeys = (List<String>) q.list();
 			
 		q = session.createQuery("FROM AttributeTreeNode a WHERE a.attribute.keyId = :attributeKey AND a.attribute.conservationArea = :ca and hkey in (:hkeys)");//$NON-NLS-1$
@@ -312,7 +312,7 @@ public class MultiCaDataModelManagerImpl extends AbstractDataModelManager {
 		String query = "SELECT hkey FROM Category WHERE smart.hkeyLength(hkey) = :level and conservationArea in (:cas) group by hkey having count(*) = :cnt";//$NON-NLS-1$
 		Query<?> q = session.createQuery(query);
 		q.setParameter("level", level);//$NON-NLS-1$
-		q.setParameter("cnt", SmartDB.getConservationAreaConfiguration().getCaCount());//$NON-NLS-1$
+		q.setParameter("cnt", new Long(SmartDB.getConservationAreaConfiguration().getCaCount()));//$NON-NLS-1$
 		q.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas());//$NON-NLS-1$
 		List<String> hkeys = (List<String>) q.list();
 			
