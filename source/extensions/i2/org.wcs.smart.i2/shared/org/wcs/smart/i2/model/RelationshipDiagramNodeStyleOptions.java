@@ -98,7 +98,7 @@ public class RelationshipDiagramNodeStyleOptions {
 		json.addProperty("backgroundColor", ColorUtil.color2HexStr(color));
 	}
 
-	public Color geForegroundColor() {
+	public Color getForegroundColor() {
 		String hex = json.get("foregroundColor").getAsString();
 		Color color = ColorUtil.hex2Color(hex);
 		return color;

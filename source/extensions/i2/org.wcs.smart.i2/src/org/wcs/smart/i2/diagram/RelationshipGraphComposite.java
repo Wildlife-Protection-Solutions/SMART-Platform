@@ -24,7 +24,10 @@ package org.wcs.smart.i2.diagram;
 import org.eclipse.gef.layout.algorithms.SpringLayoutAlgorithm;
 import org.eclipse.gef.zest.fx.jface.ZestContentViewer;
 import org.eclipse.gef.zest.fx.jface.ZestFxJFaceModule;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -33,7 +36,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.i2.RelationshipDiagramManager;
+import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLabelProvider;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions.ImageSizeOption;
+import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 
 /**
  * Composite that contains controls related to relationship graph visualization.
@@ -44,9 +51,11 @@ import org.wcs.smart.i2.model.IntelEntity;
  */
 public class RelationshipGraphComposite extends Composite {
 
+	private FormToolkit toolkit;
+
 	private RelationshipGraphFilterComposite cmpFilter;
 	private ZestContentViewer graphViewer;
-	private FormToolkit toolkit;
+	private RelationshipGraphLabelProvider graphLabelProvider;
 	
 	public RelationshipGraphComposite(Composite parent, FormToolkit toolkit) {
 		super(parent, SWT.NONE);
@@ -60,12 +69,26 @@ public class RelationshipGraphComposite extends Composite {
 
 	private void createContent(Composite parent) {
 		Composite topCmp = toolkit.createComposite(parent, SWT.NONE);
-		topCmp.setLayout(new GridLayout(2, false));
+		topCmp.setLayout(new GridLayout(3, false));
 		topCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		cmpFilter = new RelationshipGraphFilterComposite(topCmp);
 
 		toolkit.createLabel(topCmp, "Style:");
+		
+		ComboViewer cmbStyle = new ComboViewer(topCmp, SWT.READ_ONLY | SWT.BORDER);
+		cmbStyle.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		cmbStyle.setContentProvider(ArrayContentProvider.getInstance());
+		cmbStyle.setLabelProvider(new RelationshipDiagramStyleLabelProvider());
+		cmbStyle.setInput(RelationshipDiagramManager.INSTANCE.loadStyles(getShell()));
+		cmbStyle.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				IStructuredSelection selection = (IStructuredSelection) cmbStyle.getStructuredSelection();
+				graphLabelProvider.setStyle((RelationshipDiagramStyle)selection.getFirstElement());
+				graphViewer.refresh();
+			}
+		});
 		
 		Composite mainCmp = new Composite(parent, SWT.NONE);
 		StackLayout stackLayout = new StackLayout();
@@ -84,7 +107,8 @@ public class RelationshipGraphComposite extends Composite {
 		graphViewer = new ZestContentViewer(new ZestFxJFaceModule());
 		graphViewer.createControl(graphCmp, SWT.NONE);
 		graphViewer.setContentProvider(new RelationshipGraphContentProvider());
-		graphViewer.setLabelProvider(new RelationshipGraphLabelProvider(graphViewer));
+		graphLabelProvider = new RelationshipGraphLabelProvider(graphViewer);
+		graphViewer.setLabelProvider(graphLabelProvider);
 		graphViewer.setLayoutAlgorithm(new SpringLayoutAlgorithm());
 		graphViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {

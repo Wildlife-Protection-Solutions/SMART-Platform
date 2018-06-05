@@ -21,12 +21,22 @@
  */
 package org.wcs.smart.i2;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleDefaultNameComparator;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 
 /**
@@ -42,6 +52,40 @@ public enum RelationshipDiagramManager {
 	
 	private RelationshipDiagramManager() {}
 
+	/**
+	 * Fetches a list of {@link RelationshipDiagramStyle} for current conservation area
+	 * 
+	 * @param shell shell
+	 * @return List of {@link RelationshipDiagramStyle}
+	 */
+	public List<RelationshipDiagramStyle> loadStyles(Shell shell) {
+		final List<RelationshipDiagramStyle> styleList = new ArrayList<RelationshipDiagramStyle>();
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Loading relationship diagram styles list", 1);
+					try(Session session = HibernateManager.openSession()){
+						session.beginTransaction();
+						try {
+							styleList.addAll(RelationshipDiagramManager.INSTANCE.getStyles(session));
+							Collections.sort(styleList, new RelationshipDiagramStyleDefaultNameComparator());
+						} catch (Exception ex) {
+							SmartPlugIn.displayLog("Error occurs while loading relationship diagram styles list.", ex);
+						} finally {
+							session.getTransaction().rollback();
+						}
+					}
+				}
+			});
+		} catch (Exception e) {
+			SmartPlugIn.displayLog("Error occurs while loading relationship diagram styles list.", e);
+			return Collections.emptyList();
+		}
+		return styleList;
+	}
+	
 	/**
 	 * Fetches a list of {@link RelationshipDiagramStyle} for current conservation area
 	 * 

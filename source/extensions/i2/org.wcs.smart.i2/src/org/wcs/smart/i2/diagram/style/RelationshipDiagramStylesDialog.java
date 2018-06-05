@@ -236,31 +236,7 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 	}
 
 	private List<RelationshipDiagramStyle> getStylesList() {
-		final List<RelationshipDiagramStyle> styleList = new ArrayList<RelationshipDiagramStyle>();
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Loading relationship diagram styles list", 1);
-					try(Session session = HibernateManager.openSession()){
-						session.beginTransaction();
-						try {
-							styleList.addAll(RelationshipDiagramManager.INSTANCE.getStyles(session));
-							Collections.sort(styleList, new RelationshipDiagramStyleDefaultNameComparator());
-						} catch (Exception ex) {
-							SmartPlugIn.displayLog("Error occurs while loading relationship diagram styles list.", ex);
-						} finally {
-							session.getTransaction().rollback();
-						}
-					}
-				}
-			});
-		} catch (Exception e) {
-			SmartPlugIn.displayLog("Error occurs while loading relationship diagram styles list.", e);
-			return Collections.emptyList();
-		}
-		return styleList;
+		return RelationshipDiagramManager.INSTANCE.loadStyles(getShell());
 	}
 
 	@Override

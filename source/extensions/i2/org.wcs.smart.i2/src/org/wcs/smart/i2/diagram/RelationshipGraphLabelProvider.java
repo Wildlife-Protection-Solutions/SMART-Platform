@@ -37,6 +37,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
+import org.wcs.smart.i2.model.RelationshipDiagramStyle;
+import org.wcs.smart.i2.model.RelationshipDiagramStyleOptions;
 import org.wcs.smart.ui.Thumbnail;
 
 /**
@@ -49,6 +51,7 @@ import org.wcs.smart.ui.Thumbnail;
 public class RelationshipGraphLabelProvider extends LabelProvider implements IGraphAttributesProvider, IColorProvider {
 	
 	private ZestContentViewer graphViewer;
+	private RelationshipDiagramStyle style;
 	
 	public RelationshipGraphLabelProvider(ZestContentViewer graphViewer) {
 		this.graphViewer = graphViewer; 
@@ -70,6 +73,10 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 		return null;
 	}
 	
+	public void setStyle(RelationshipDiagramStyle style) {
+		this.style = style;
+	}
+	
 	
 	@Override
 	public String getText(Object element) {
@@ -84,6 +91,7 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 	public Image getImage(Object element) {
 		if (element instanceof IntelEntity) {
 			IntelEntity e = (IntelEntity) element;
+			
 			Thumbnail thum = new Thumbnail(e.getPrimaryAttachment(), 50);
 			return thum.getImage();
 		}
@@ -128,17 +136,31 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 
 	@Override
 	public Color getForeground(Object element) {
-		if (isRootNode(element)) {
-			return Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
+		if (style != null) {
+			RelationshipDiagramStyleOptions styleOptions = style.getStyleOptions();
+			if (isRootNode(element) && styleOptions.getRootNodeStyle() != null) {
+				return styleOptions.getRootNodeStyle().getForegroundColor();
+			}
+			return styleOptions.getDefaultNodeStyle().getForegroundColor();
 		}
+//		if (isRootNode(element)) {
+//			return Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
+//		}
 		return null;
 	}
 
 	@Override
 	public Color getBackground(Object element) {
-		if (isRootNode(element)) {
-			return Display.getCurrent().getSystemColor(SWT.COLOR_YELLOW);
+		if (style != null) {
+			RelationshipDiagramStyleOptions styleOptions = style.getStyleOptions();
+			if (isRootNode(element) && styleOptions.getRootNodeStyle() != null) {
+				return styleOptions.getRootNodeStyle().getBackgroudColor();
+			}
+			return styleOptions.getDefaultNodeStyle().getBackgroudColor();
 		}
+//		if (isRootNode(element)) {
+//			return Display.getCurrent().getSystemColor(SWT.COLOR_YELLOW);
+//		}
 		return null;
 	}
 

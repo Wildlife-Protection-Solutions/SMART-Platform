@@ -73,7 +73,7 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 			fireListeners = false;
 			cmbImageSize.setSelection(new StructuredSelection(options.getImageSize()));
 			csBackgroundColor.setColor(options.getBackgroudColor());
-			csForegroundColor.setColor(options.geForegroundColor());
+			csForegroundColor.setColor(options.getForegroundColor());
 			fireListeners = true;
 		}
 	}
