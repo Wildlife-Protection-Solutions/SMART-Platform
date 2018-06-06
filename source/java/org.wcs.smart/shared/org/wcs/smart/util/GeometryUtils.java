@@ -294,14 +294,14 @@ public class GeometryUtils {
 				for (int i = 0; i < c.length-1; i ++){
 					Coordinate c1 = c[i];
 					Coordinate c2 = c[i+1];
-					
+										
 					if (!p.getEnvelopeInternal().intersects(new Envelope(c1, c2))){
 						//outside envelop
 						continue;
 					}
 					LineString temp = GeometryFactoryProvider.getFactory().createLineString(new Coordinate[]{c1, c2});
 					if (pg.containsProperly(temp)){
-						//entirely contained within
+						//entirely contained within	 
 						value += (c2.z - c1.z);
 					}else if (pg.intersects(temp)){
 						double time = c2.z - c1.z;
@@ -318,6 +318,7 @@ public class GeometryUtils {
 				}
 			}
 		}
+		if ((new Double(value).isNaN())) value = 0;  //this should never happen but if it doesn't lets make sure it doesn't cause an error
 		return value / MILLISEC_PER_HOUR;
 	}
 
