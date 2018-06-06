@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.diagram;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,6 +61,10 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 
 	private boolean isRootNode(Object node) {
 		Object input = graphViewer.getInput();
+		if (input instanceof Object[]) {
+			Object[] objs = (Object[]) input;
+			return Arrays.stream(objs).anyMatch(node::equals);
+		}
 		if (input instanceof Collection<?>) {
 			return ((Collection<?>)input).contains(node);
 		}

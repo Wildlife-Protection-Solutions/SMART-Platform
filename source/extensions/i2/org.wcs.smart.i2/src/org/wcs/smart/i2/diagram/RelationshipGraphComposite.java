@@ -118,7 +118,7 @@ public class RelationshipGraphComposite extends Composite {
 		});
 	}
 
-	public void setInput(IntelEntity entity) {
+	public void setInput(IntelEntity... entity) {
 		graphViewer.setInput(entity);
 	}
 

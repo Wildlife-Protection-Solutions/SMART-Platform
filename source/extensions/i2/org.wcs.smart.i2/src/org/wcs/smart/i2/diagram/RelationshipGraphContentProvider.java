@@ -46,13 +46,16 @@ public class RelationshipGraphContentProvider implements IGraphContentProvider {
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if (newInput instanceof IntelEntity) {
+		if (newInput instanceof IntelEntity[]) {
+			IntelEntity[] roots = (IntelEntity[]) newInput;
+			loadGraphData(roots);
+		} else if (newInput instanceof IntelEntity) {
 			IntelEntity root = (IntelEntity) newInput;
 			loadGraphData(root);
 		}
 	}
 
-	private void loadGraphData(IntelEntity root) {
+	private void loadGraphData(IntelEntity... root) {
 		RelationshipGraphLoadDataJob loadJob = new RelationshipGraphLoadDataJob(2, root);
 		loadJob.schedule();
 		try {

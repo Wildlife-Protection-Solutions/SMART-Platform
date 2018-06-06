@@ -1049,6 +1049,12 @@
             id="org.wcs.smart.i2.editor.query.entityrecord"
             name="Entity Record Query">
       </editor>
+      <editor
+            class="org.wcs.smart.i2.ui.editors.RelationshipGraphEditor"
+            default="false"
+            id="org.wcs.smart.i2.editor.graph"
+            name="Relationships">
+      </editor>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
