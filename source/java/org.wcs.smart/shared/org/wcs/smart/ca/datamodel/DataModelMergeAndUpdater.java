@@ -120,6 +120,16 @@ public class DataModelMergeAndUpdater {
 		mergeAttributes(monitor);
 	
 		monitor.subTask(getMessage(I18NMessages.MERGE_CAT_TASKNAME));
+		List<Category> visits = new ArrayList<>();
+		visits.addAll(targetDm.getCategories());
+		visits.addAll(sourceDm.getCategories());
+		
+		while(!visits.isEmpty()) {
+			Category c = visits.remove(0);
+			c.getNames().size();	//this seems to be necessary to avoid hibernate issues in the next section
+			if (c.getChildren() != null) visits.addAll(c.getChildren());
+		}
+		
 		for (Category targetCategory : targetDm.getCategories()){
 			boolean found = false;
 			for (Category sourceCategory : sourceDm.getCategories()){
