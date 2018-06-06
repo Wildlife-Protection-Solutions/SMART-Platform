@@ -167,6 +167,10 @@ public class FiltersPanel extends Composite {
 		loadEventsJob.schedule();
 	}
 	
+	public void refresh() {
+		loadEventsJob.schedule();
+	}
+	
 	public void addListener(Listener listener) {
 		modifiedListeners.add(listener);
 	}

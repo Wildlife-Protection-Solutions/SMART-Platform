@@ -53,7 +53,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class EventsToXml {
 	
-	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.event.xml.model"; //$NON-NLS-1$
+	public static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.event.xml.model"; //$NON-NLS-1$
 		
 	/**
 	 * Writes a xml patrol object to a file.

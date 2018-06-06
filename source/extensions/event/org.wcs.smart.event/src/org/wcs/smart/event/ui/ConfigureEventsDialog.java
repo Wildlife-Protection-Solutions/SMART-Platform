@@ -21,14 +21,18 @@
  */
 package org.wcs.smart.event.ui;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -43,6 +47,7 @@ import org.eclipse.swt.widgets.TabItem;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.EventProcessingJob;
 import org.wcs.smart.event.internal.Messages;
+import org.wcs.smart.event.xml.EventsFromXml;
 import org.wcs.smart.event.xml.EventsToXml;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -54,6 +59,12 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class ConfigureEventsDialog extends TitleAreaDialog {
 
+	private EventsPanel eventPanel;
+	private FiltersPanel filtersPanel;
+	private ActionsPanel actionPanel;
+	private ActionTypesPanel typesPanel;
+	
+	
 	public ConfigureEventsDialog(Shell parentShell) {
 		super(parentShell);
 	}
@@ -73,6 +84,12 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		super.okPressed();
 	}
 	
+	private void refresh() {
+		eventPanel.refresh();
+		filtersPanel.refresh();
+		actionPanel.refresh();		
+	}
+	
 	@Override
 	public Control createDialogArea(Composite parent) {
 		parent = (Composite) super.createDialogArea(parent);
@@ -84,10 +101,10 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		TabFolder tabs = new TabFolder(main, SWT.NONE);
 		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		EventsPanel eventPanel = new EventsPanel(tabs, SWT.NONE);
-		FiltersPanel filtersPanel = new FiltersPanel(tabs, SWT.NONE);
-		ActionsPanel actionPanel = new ActionsPanel(tabs, SWT.NONE);
-		ActionTypesPanel typesPanel = new ActionTypesPanel(tabs, SWT.NONE);
+		eventPanel = new EventsPanel(tabs, SWT.NONE);
+		filtersPanel = new FiltersPanel(tabs, SWT.NONE);
+		actionPanel = new ActionsPanel(tabs, SWT.NONE);
+		typesPanel = new ActionTypesPanel(tabs, SWT.NONE);
 		
 		filtersPanel.addListener(e->eventPanel.refresh());
 		actionPanel.addListener(e->eventPanel.refresh());
@@ -119,12 +136,16 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		((GridLayout)linkComp.getLayout()).marginWidth = 0;
 		((GridLayout)linkComp.getLayout()).marginHeight = 0;
 		
-		Link export = new Link(main, SWT.NONE);
+		Link export = new Link(linkComp, SWT.NONE);
 		export.setText("<a>" + "export" + "</a>");
 		export.addListener(SWT.Selection, e->{
 			export();
 		});
-		
+		Link importmerge = new Link(linkComp, SWT.NONE);
+		importmerge.setText("<a>" + "import/merge" + "</a>");
+		importmerge.addListener(SWT.Selection, e->{
+			importmerge();
+		});
 		
 		setTitle(Messages.ConfigureEventsDialog_Title);
 		getShell().setText(Messages.ConfigureEventsDialog_Title);
@@ -161,6 +182,50 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		}catch (Exception ex) {
 			EventPlugIn.displayLog("Unable to export trigger module configuration to xml file: " + ex.getMessage(), ex);
 		}
+	}
+	
+	private void importmerge() {
+		if (!MessageDialog.openConfirm(getParentShell(), "Import & Merge",
+				"This feature will import new actions, filters and triggers from an xml file and merge them with the existing items in the database.  Items in the database with the same id will be updated to match the items from the xml file.  Items that appear in the xml file but not the database will be added to the database.  Items that are in the database but not the xml file are not modified. Continue?"
+				)) {
+			return;
+		}
+	
+		FileDialog fd = new FileDialog(getShell(),  SWT.OPEN);
+		fd.setFilterExtensions(new String[] {"*.xml", "*.*"});
+		fd.setFilterNames(new String[] {"XML File (*.xml)", "All Files (*.*)"});
+		String file = fd.open();
+		if (file == null) return;
+		
+		Path outputFile = Paths.get(file);
+		
+		if (!Files.exists(outputFile)) {
+			MessageDialog.openError(getShell(), "Not Found", 
+					MessageFormat.format("File {0} not found.", outputFile.toString()));
+			return;
+		}
+		
+		try {
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+			pmd.run(true, false, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					EventsFromXml xml = new EventsFromXml(SmartDB.getCurrentConservationArea());
+					try {
+						xml.importAndMerge(outputFile, monitor);	
+					}catch (Exception ex) {
+						EventPlugIn.displayLog("Unable to import and merge trigger module configuration from xml file: " + ex.getMessage(), ex);
+					}
+					
+				}
+			});
+			
+			
+		}catch (Exception ex) {
+			EventPlugIn.displayLog("Unable to import and merge trigger module configuration from xml file: " + ex.getMessage(), ex);
+		}
+		refresh();
 	}
 	
 	@Override
