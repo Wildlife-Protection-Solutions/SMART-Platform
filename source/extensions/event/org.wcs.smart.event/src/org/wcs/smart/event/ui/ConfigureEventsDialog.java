@@ -137,12 +137,12 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		((GridLayout)linkComp.getLayout()).marginHeight = 0;
 		
 		Link export = new Link(linkComp, SWT.NONE);
-		export.setText("<a>" + "export" + "</a>");
+		export.setText("<a>" + Messages.ConfigureEventsDialog_ExportLink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		export.addListener(SWT.Selection, e->{
 			export();
 		});
 		Link importmerge = new Link(linkComp, SWT.NONE);
-		importmerge.setText("<a>" + "import/merge" + "</a>");
+		importmerge.setText("<a>" + Messages.ConfigureEventsDialog_MergeLink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		importmerge.addListener(SWT.Selection, e->{
 			importmerge();
 		});
@@ -156,16 +156,16 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 	
 	private void export() {
 		FileDialog fd = new FileDialog(getShell(),  SWT.SAVE);
-		fd.setFilterExtensions(new String[] {"*.xml", "*.*"});
-		fd.setFilterNames(new String[] {"XML File (*.xml)", "All Files (*.*)"});
+		fd.setFilterExtensions(new String[] {"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setFilterNames(new String[] {Messages.ConfigureEventsDialog_XmlFile, Messages.ConfigureEventsDialog_AllFile});
 		String file = fd.open();
 		if (file == null) return;
 		
 		Path outputFile = Paths.get(file);
 		
 		if (Files.exists(outputFile)) {
-			if (!MessageDialog.openConfirm(getShell(), "Overwrite", 
-					MessageFormat.format("{0} exists.  Are you sure you want to overwrite it?", outputFile.toString()))){
+			if (!MessageDialog.openConfirm(getShell(), Messages.ConfigureEventsDialog_OverwriteTitle, 
+					MessageFormat.format(Messages.ConfigureEventsDialog_OverwriteMsg, outputFile.toString()))){
 				return;
 			}
 		}
@@ -178,30 +178,30 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 			EventsToXml xml = new EventsToXml(SmartDB.getCurrentConservationArea());
 			xml.toXml(outputFile);
 			
-			MessageDialog.openInformation(getShell(), "Export", MessageFormat.format("Export to {0} complete.", outputFile.toString()));
+			MessageDialog.openInformation(getShell(), Messages.ConfigureEventsDialog_ExportTitle, MessageFormat.format(Messages.ConfigureEventsDialog_ExportCompleteMsg, outputFile.toString()));
 		}catch (Exception ex) {
-			EventPlugIn.displayLog("Unable to export trigger module configuration to xml file: " + ex.getMessage(), ex);
+			EventPlugIn.displayLog(Messages.ConfigureEventsDialog_ExportError + ex.getMessage(), ex);
 		}
 	}
 	
 	private void importmerge() {
-		if (!MessageDialog.openConfirm(getParentShell(), "Import & Merge",
-				"This feature will import new actions, filters and triggers from an xml file and merge them with the existing items in the database.  Items in the database with the same id will be updated to match the items from the xml file.  Items that appear in the xml file but not the database will be added to the database.  Items that are in the database but not the xml file are not modified. Continue?"
+		if (!MessageDialog.openConfirm(getParentShell(), Messages.ConfigureEventsDialog_ImportTitle,
+				Messages.ConfigureEventsDialog_ImportMsg
 				)) {
 			return;
 		}
 	
 		FileDialog fd = new FileDialog(getShell(),  SWT.OPEN);
-		fd.setFilterExtensions(new String[] {"*.xml", "*.*"});
-		fd.setFilterNames(new String[] {"XML File (*.xml)", "All Files (*.*)"});
+		fd.setFilterExtensions(new String[] {"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setFilterNames(new String[] {Messages.ConfigureEventsDialog_XmlFile, Messages.ConfigureEventsDialog_AllFile});
 		String file = fd.open();
 		if (file == null) return;
 		
 		Path outputFile = Paths.get(file);
 		
 		if (!Files.exists(outputFile)) {
-			MessageDialog.openError(getShell(), "Not Found", 
-					MessageFormat.format("File {0} not found.", outputFile.toString()));
+			MessageDialog.openError(getShell(), Messages.ConfigureEventsDialog_NotFoundTitle, 
+					MessageFormat.format(Messages.ConfigureEventsDialog_NotFoundMsg, outputFile.toString()));
 			return;
 		}
 		
@@ -215,7 +215,7 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 					try {
 						xml.importAndMerge(outputFile, monitor);	
 					}catch (Exception ex) {
-						EventPlugIn.displayLog("Unable to import and merge trigger module configuration from xml file: " + ex.getMessage(), ex);
+						EventPlugIn.displayLog(Messages.ConfigureEventsDialog_ImportError + ex.getMessage(), ex);
 					}
 					
 				}
@@ -223,7 +223,7 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 			
 			
 		}catch (Exception ex) {
-			EventPlugIn.displayLog("Unable to import and merge trigger module configuration from xml file: " + ex.getMessage(), ex);
+			EventPlugIn.displayLog(Messages.ConfigureEventsDialog_ImportError + ex.getMessage(), ex);
 		}
 		refresh();
 	}

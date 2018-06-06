@@ -1,4 +1,5 @@
 /*
+
  * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -114,7 +115,7 @@ public class EventsToXml {
 	}
 	
 	private void convertActions(Session session, org.wcs.smart.event.xml.model.Configuration xmlConfig) {
-		List<EAction> actions = QueryFactory.buildQuery(session, EAction.class, new Object[] {"conservationArea", ca}).list();
+		List<EAction> actions = QueryFactory.buildQuery(session, EAction.class, new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 		for (EAction a : actions) {
 			org.wcs.smart.event.xml.model.EAction xmlAction = new org.wcs.smart.event.xml.model.EAction();
 			xmlAction.setActionTypeKey(a.getActionTypeKey());
@@ -133,7 +134,7 @@ public class EventsToXml {
 	}
 	
 	private void convertFilters(Session session, org.wcs.smart.event.xml.model.Configuration xmlConfig) {
-		List<EFilter> filters = QueryFactory.buildQuery(session, EFilter.class, new Object[] {"conservationArea", ca}).list();
+		List<EFilter> filters = QueryFactory.buildQuery(session, EFilter.class, new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 		for (EFilter f : filters) {
 			org.wcs.smart.event.xml.model.EFilter xmlFilter = new org.wcs.smart.event.xml.model.EFilter();
 			xmlFilter.setId(f.getId());
@@ -144,7 +145,7 @@ public class EventsToXml {
 	}
 	
 	private void convertActionEvents(Session session, org.wcs.smart.event.xml.model.Configuration xmlConfig) {
-		List<EActionEvent> actionEvents = QueryFactory.buildQuery(session, EActionEvent.class, new Object[] {"action.conservationArea", ca}).list();
+		List<EActionEvent> actionEvents = QueryFactory.buildQuery(session, EActionEvent.class, new Object[] {"action.conservationArea", ca}).list(); //$NON-NLS-1$
 		for (EActionEvent ae : actionEvents) {
 			org.wcs.smart.event.xml.model.EActionEvent xmlActionEvent = new org.wcs.smart.event.xml.model.EActionEvent();
 			

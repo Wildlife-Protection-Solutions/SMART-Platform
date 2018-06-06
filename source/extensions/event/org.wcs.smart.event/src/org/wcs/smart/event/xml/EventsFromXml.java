@@ -20,6 +20,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.event.ActionTypeManager;
+import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.model.EAction;
 import org.wcs.smart.event.model.EActionEvent;
 import org.wcs.smart.event.model.EActionParameterValue;
@@ -43,6 +44,7 @@ public class EventsFromXml {
 	 * Reads a event xml file into a Configuration objects
 	 * 
 	 */
+	@SuppressWarnings("unchecked")
 	public static org.wcs.smart.event.xml.model.Configuration readEventXml(Path intputFile ) throws JAXBException, IOException{
 		JAXBContext context = JAXBContext.newInstance(EventsToXml.METADATA_CLASSES_PACKAGE);
 		Unmarshaller un = context.createUnmarshaller();	
@@ -63,7 +65,7 @@ public class EventsFromXml {
 		warnings = new ArrayList<>();
 		SubMonitor progress = SubMonitor.convert(monitor);
 		
-		progress.beginTask("Importing and merging trigger configuration",  3);
+		progress.beginTask(Messages.EventsFromXml_progress1,  3);
 		org.wcs.smart.event.xml.model.Configuration xmlConfig = readEventXml(inputFile);
 		progress.worked(1);
 		
@@ -81,11 +83,11 @@ public class EventsFromXml {
 		List<EFilter> filtersToSaveOrUpdate = new ArrayList<>();
 		List<EAction> toSaveOrUpdate = new ArrayList<>();
 		
-		monitor.beginTask("merging triggers", 4);
+		monitor.beginTask(Messages.EventsFromXml_progress2, 4);
 		try(Session session = HibernateManager.openSession()){
 			
 			//merge actions
-			List<EAction> dbActions = QueryFactory.buildQuery(session, EAction.class, new Object[] {"conservationArea", ca}).list();
+			List<EAction> dbActions = QueryFactory.buildQuery(session, EAction.class, new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 			
 			
 			for (EAction newAction : items.actions) {
@@ -135,7 +137,7 @@ public class EventsFromXml {
 			monitor.worked(1);
 			
 			//merge filters
-			List<EFilter> dbFilters = QueryFactory.buildQuery(session, EFilter.class, new Object[] {"conservationArea", ca}).list();
+			List<EFilter> dbFilters = QueryFactory.buildQuery(session, EFilter.class, new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 			for (EFilter newFilter : items.filters) {
 				//find an action with the same type and id
 				EFilter dbFilterToMerge = null;
@@ -164,7 +166,7 @@ public class EventsFromXml {
 			monitor.worked(1);
 			
 			//merge action/events
-			List<EActionEvent> dbActionEvents = QueryFactory.buildQuery(session, EActionEvent.class, new Object[] {"action.conservationArea", ca}).list();
+			List<EActionEvent> dbActionEvents = QueryFactory.buildQuery(session, EActionEvent.class, new Object[] {"action.conservationArea", ca}).list(); //$NON-NLS-1$
 			for (EActionEvent newActionEvent : items.events) {
 				//find an action with the same type and id
 				boolean save = true;
@@ -182,7 +184,7 @@ public class EventsFromXml {
 		
 		if (!warnings.isEmpty()) {
 			WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), 
-					"Warnings", "The following warnings were generted while importing data.  Are you sure you want to continue?", 
+					Messages.EventsFromXml_WaringsTitle, Messages.EventsFromXml_WarningsMsg, 
 					warnings,
 					new String[]{IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL},
 					1);
@@ -200,7 +202,7 @@ public class EventsFromXml {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				throw new Exception("Unable to merge event configuration with imported events: " + ex.getMessage(), ex);
+				throw new Exception(Messages.EventsFromXml_MergeError + ex.getMessage(), ex);
 			}
 		}
 		monitor.worked(1);
@@ -210,7 +212,7 @@ public class EventsFromXml {
 	private SmartModelItems convertToSmart(org.wcs.smart.event.xml.model.Configuration xmlConfig, SubMonitor monitor) {
 		SmartModelItems items = new SmartModelItems();
 		
-		monitor.beginTask("converting xml file", 3);
+		monitor.beginTask(Messages.EventsFromXml_progress3, 3);
 		//import filters
 		HashMap<String, EFilter> newFilters = new HashMap<>();
 		for (org.wcs.smart.event.xml.model.EFilter xmlFilter : xmlConfig.getFilters()) {
@@ -230,7 +232,7 @@ public class EventsFromXml {
 			
 			IActionType type = ActionTypeManager.INSTANCE.getActionType(xmlAction.getActionTypeKey());
 			if (type == null) {
-				warnings.add(MessageFormat.format("Not action type {0} found.  The action (and associated events) will not be imported.", xmlAction.getActionTypeKey()));
+				warnings.add(MessageFormat.format(Messages.EventsFromXml_ActionTypeNotFound, xmlAction.getActionTypeKey()));
 				continue;
 			}
 			
@@ -250,7 +252,7 @@ public class EventsFromXml {
 					}
 				}
 				if (actionParameter == null) {
-					warnings.add(MessageFormat.format("Not parameter with key {0} supported for action type {0}.  Parameter will no be imported.", xmlParam.getKey(), xmlAction.getActionTypeKey()));
+					warnings.add(MessageFormat.format(Messages.EventsFromXml_ParameterKeyNotFoun, xmlParam.getKey(), xmlAction.getActionTypeKey()));
 					continue;
 				}
 				
