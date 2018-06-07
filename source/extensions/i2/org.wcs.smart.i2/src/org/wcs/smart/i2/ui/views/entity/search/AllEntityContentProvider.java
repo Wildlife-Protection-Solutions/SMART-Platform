@@ -52,7 +52,7 @@ public class AllEntityContentProvider {
 					switch(attribute.getType()) {
 					case BOOLEAN:
 					case NUMERIC:
-						sb.append("double");
+						sb.append(" double");
 						break;
 					case DATE:
 					case EMPLOYEE:
@@ -63,7 +63,7 @@ public class AllEntityContentProvider {
 						break;
 					case POSITION:
 					case TEXT:
-						sb.append("varchar(1024)");
+						sb.append(" varchar(1024)");
 						break;
 					}
 					sb.append(", ");
@@ -121,28 +121,28 @@ public class AllEntityContentProvider {
 					switch(attribute.getType()) {
 					case BOOLEAN:
 					case NUMERIC:
-						sb.append(attribute.getKeyId() + " = ");
+						sb.append(attribute.getKeyId() + " = (SELECT ");
 						sb.append(" v.double_value ");
 						break;
 					case DATE:
 					case EMPLOYEE:
 					case TEXT:
-						sb.append(attribute.getKeyId() + " = ");
-						sb.append("v.string_value)");
+						sb.append(attribute.getKeyId() + " = (SELECT ");
+						sb.append("v.string_value");
 						break;
 					case POSITION:
 						//TODO:
-						sb.append(attribute.getKeyId() + " = ");
-						sb.append(" v.double_value ");
+						sb.append(attribute.getKeyId() + " = (SELECT ");
+						sb.append(" v.string_value ");
 						break;
 					case LIST:
-						sb.append(attribute.getKeyId() + "_uuid = ");
-						sb.append("_uuid v.list_item_uuid");				
+						sb.append(attribute.getKeyId() + "_uuid = (SELECT ");
+						sb.append(" v.list_item_uuid");				
 					}
 					sb.append(" FROM smart.i_entity_attribute_value v join smart.i_attribute a on v.attribute_uuid = a.uuid ");
 					sb.append(" WHERE a.keyid = :attribute and v.entity_uuid = ");
 					sb.append( DB_NAME_NAME );
-					sb.append(".entity_uuid");
+					sb.append(".entity_uuid)");
 					
 					session.createNativeQuery(sb.toString())
 						.setParameter("attribute", attribute.getKeyId())
@@ -155,7 +155,7 @@ public class AllEntityContentProvider {
 					if (attribute.getType() != AttributeType.LIST) continue;
 					
 					sb = new StringBuilder();
-					sb.append("SELECT distinct " + attribute.getKeyId() + "_uuid FROM " + DB_NAME_NAME + ")");
+					sb.append("SELECT distinct " + attribute.getKeyId() + "_uuid FROM " + DB_NAME_NAME + "");
 					List<?> listItems = session.createNativeQuery(sb.toString()).list();
 					for (Object x : listItems) {
 						if (x == null) continue;
