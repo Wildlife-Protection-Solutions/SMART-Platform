@@ -23,12 +23,8 @@ package org.wcs.smart.i2.diagram;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.gef.layout.algorithms.SpringLayoutAlgorithm;
 import org.eclipse.gef.zest.fx.jface.ZestContentViewer;
 import org.eclipse.gef.zest.fx.jface.ZestFxJFaceModule;
@@ -49,11 +45,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.i2.RelationshipDiagramManager;
-import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLabelProvider;
-import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 
 /**
