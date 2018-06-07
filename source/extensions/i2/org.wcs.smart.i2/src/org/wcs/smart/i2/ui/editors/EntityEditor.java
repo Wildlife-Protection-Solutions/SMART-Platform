@@ -169,6 +169,7 @@ import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
+import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.IntelAttachmentPropertiesDialog;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
@@ -266,7 +267,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 			if (isDirty && perspective.getId().equals(IntelDataAnalysisPerspective.ID)){
 				//save and be done with it
 				setEditMode(false);
-			}else if (perspective.getId().equals(IntelDataAssessmentPerspective.ID)){
+			}else if (perspective.getId().equals(IntelDataAssessmentPerspective.ID) ||
+					perspective.getId().equals(EntityPerspective.ID)){
 				setEditMode(true);
 			}
 		}
@@ -674,6 +676,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 		MPart part = context.get(MPart.class); 
 		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
 		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
+		if (!part.getTags().contains(EntityPerspective.ID)) part.getTags().add(EntityPerspective.ID);
+
 		
 		getSite().getWorkbenchWindow().addPerspectiveListener(perspectiveListener);
 		

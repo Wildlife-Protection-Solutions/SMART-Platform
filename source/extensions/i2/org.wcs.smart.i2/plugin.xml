@@ -212,6 +212,11 @@
             id="org.wcs.smart.i2.report.entity.edit"
             name="%BirtPerspectiveName">
       </perspective>
+      <perspective
+            class="org.wcs.smart.i2.ui.EntityPerspective"
+            id="org.wcs.smart.i2.IntelEntityPerspective"
+            name="Profiles Entity Perspective">
+      </perspective>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -552,6 +557,24 @@
                   </test>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.perspective.open"
+                  icon="images/icons/obj16/entity.png"
+                  label="Entity Mode"
+                  style="push"
+                  tooltip="open entity perspective">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.i2.IntelEntityPerspective">
+               </parameter>
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="entity_perspective">
+                  </test>
+               </visibleWhen>
+            </command>
             <visibleWhen
                   checkEnabled="false">
                <and>
@@ -725,6 +748,30 @@
                      <test
                            property="org.wcs.smart.i2.permission"
                            value="assessment_perspective">
+                     </test>
+                  </and>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.perspective.open"
+                  icon="images/icons/obj16/entity.png"
+                  label="Entity Perspective"
+                  style="push"
+                  tooltip="open entity perspective">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.i2.IntelEntityPerspective">
+               </parameter>
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <test
+                           property="org.wcs.smart.i2.permission"
+                           value="entity_perspective">
                      </test>
                   </and>
                </visibleWhen>

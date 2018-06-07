@@ -76,6 +76,7 @@ import org.wcs.smart.i2.query.RunQueryJob;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.SmartSection;
@@ -246,7 +247,8 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		MPart part = context.get(MPart.class);
 		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
 		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
-				
+		if (!part.getTags().contains(EntityPerspective.ID)) part.getTags().add(EntityPerspective.ID);
+		
 		eventBroker = context.get(IEventBroker.class);
 		
 		eventHandles = new ArrayList<>();

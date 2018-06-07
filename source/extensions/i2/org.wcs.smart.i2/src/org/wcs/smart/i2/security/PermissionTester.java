@@ -10,6 +10,7 @@ public class PermissionTester extends PropertyTester {
 	public static enum Permission{
 		ANALYST_PERSPECTIVE,
 		ASSESSMENT_PERSPECTIVE,
+		ENTITY_PERSPECTIVE,
 		IMPORT_DATA,
 		EXPORT_DATA,
 		CREATE_RECORD,
@@ -60,6 +61,21 @@ public class PermissionTester extends PropertyTester {
 					//UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDataEntryUserLevel.INSTANCE) ||
 					UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelCreateRecordUserLevel.INSTANCE) || 
 					UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelEditRecordUserLevel.INSTANCE);
+		case ENTITY_PERSPECTIVE:
+			intelUserLevels = new SmartUserLevel[] {
+					IntelAnalystUserLevel.INSTANCE,
+					IntelCreateEntityUserLevel.INSTANCE,
+					IntelCreateRecordUserLevel.INSTANCE,
+					IntelEditEntityUserLevel.INSTANCE,
+					IntelEditRecordUserLevel.INSTANCE,
+					IntelReadOnlyUserLevel.INSTANCE,
+					IntelViewEntityUserLevel.INSTANCE,
+					IntelViewRecordsUserLevel.INSTANCE
+			};
+			for (SmartUserLevel l : intelUserLevels) {
+				if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), l)) return true;
+			}
+			return false;
 		case CONFIGURE:
 			return IntelSecurityManager.INSTANCE.canConfigure();
 		case CREATE_ENTITY:

@@ -124,6 +124,7 @@ import org.wcs.smart.i2.udig.IWorkingSetResource;
 import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
 import org.wcs.smart.i2.udig.query.QueryService;
 import org.wcs.smart.i2.udig.query.QueryService.State;
+import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.views.LayerVisibleEvent;
@@ -432,6 +433,8 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 		//configure tags so editors show in both perspectives
 		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
 		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
+		if (!part.getTags().contains(EntityPerspective.ID)) part.getTags().add(EntityPerspective.ID);
+		
 		//part.get
 		EventHandler handler = new EventHandler() {
 			@Override

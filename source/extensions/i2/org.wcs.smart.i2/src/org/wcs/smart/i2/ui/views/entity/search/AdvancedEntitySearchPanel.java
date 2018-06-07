@@ -73,6 +73,7 @@ import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.views.EntitySearchResultTable;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
@@ -107,6 +108,8 @@ public class AdvancedEntitySearchPanel extends Composite {
 		}
 	}
 	
+	private EntitySearchResultTable entityList;
+	
 	private EntitySearchPanel searchPanel;
 	
 	private Button btnAddFilter;
@@ -123,6 +126,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 	}
 	
 	private void createContents(FormToolkit toolkit){
+		
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;
 		((GridLayout)getLayout()).marginHeight = 0;
