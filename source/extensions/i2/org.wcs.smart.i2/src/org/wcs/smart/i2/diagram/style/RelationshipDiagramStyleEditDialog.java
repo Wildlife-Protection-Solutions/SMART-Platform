@@ -21,16 +21,12 @@
  */
 package org.wcs.smart.i2.diagram.style;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -52,10 +48,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.RelationshipDiagramManager;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -357,34 +350,11 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 			MessageDialog.openError(getShell(), "Error", "Some data is not valid. Correct the data before saving changes.");
 			return false;
 		}
-		final boolean[] isOk = {false};
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Saving relationship diagram style", 1);
-					try(Session s = HibernateManager.openSession()){
-						s.beginTransaction();
-						try {
-							s.saveOrUpdate(rdStyle);
-							s.getTransaction().commit();
-							isOk[0] = true;
-						} catch (Exception ex) {
-							s.getTransaction().rollback();
-							SmartPlugIn.displayLog("Error occured while saving relationship diagram style.", ex);
-						}
-					}
-				}
-			});
-		} catch (Exception e) {
-			SmartPlugIn.displayLog("Error occured while saving relationship diagram style.", e);
-		}
-
-		if (isOk[0]) {
+		boolean isOk = RelationshipDiagramManager.INSTANCE.saveStyle(getShell(), rdStyle);
+		if (isOk) {
 			setChangesMade(false);
 		}
-		return isOk[0];
+		return isOk;
 	}
 
 }

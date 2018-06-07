@@ -21,16 +21,12 @@
  */
 package org.wcs.smart.i2.diagram.style;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -48,9 +44,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.RelationshipDiagramManager;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
@@ -205,33 +199,7 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the relationship diagram style \"{0}\"?  This action cannot be undone.\r\nAny diagram that references this style will be referenced to default style.", style.getName()))){
 			return;
 		}
-
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
-
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Deleteing relationship diagram style", 1);
-					
-					try(Session session = HibernateManager.openSession()){
-						session.beginTransaction();
-						try {
-							RelationshipDiagramManager.INSTANCE.deleteStyle(session, style);
-							session.getTransaction().commit();							
-						}catch (Exception ex){
-							session.getTransaction().rollback();
-							SmartPlugIn.displayLog("Error occured while deleting relationship diagram style", ex);
-						}
-					} finally {
-						monitor.done();
-					}
-				}
-			});
-		} catch (Exception ex) {
-			SmartPlugIn.displayLog("Error occured while deleting relationship diagram style", ex);
-		}
-		
+		RelationshipDiagramManager.INSTANCE.deleteStyle(getShell(), style);
 		reloadData();
 	}
 

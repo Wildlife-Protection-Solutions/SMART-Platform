@@ -23,6 +23,12 @@ package org.wcs.smart.i2.diagram;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.gef.layout.algorithms.SpringLayoutAlgorithm;
 import org.eclipse.gef.zest.fx.jface.ZestContentViewer;
 import org.eclipse.gef.zest.fx.jface.ZestFxJFaceModule;
@@ -38,10 +44,16 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.wcs.smart.i2.RelationshipDiagramManager;
+import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLabelProvider;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 
 /**
@@ -56,8 +68,26 @@ public class RelationshipGraphComposite extends Composite {
 	private FormToolkit toolkit;
 
 	private RelationshipGraphFilterComposite cmpFilter;
+	private ComboViewer cmbStyle;
 	private ZestContentViewer graphViewer;
 	private RelationshipGraphLabelProvider graphLabelProvider;
+	
+	private EventHandler handler = new EventHandler() {
+		@Override
+		public void handleEvent(Event event) {
+			Object data = event.getProperty(IEventBroker.DATA);
+			if (data instanceof List) {
+				IStructuredSelection selection = (IStructuredSelection) cmbStyle.getStructuredSelection();
+				Object selObj = selection.getFirstElement();
+				List<?> lst = (List<?>) data;
+				cmbStyle.setInput(lst);
+				if (!lst.contains(selObj)) {
+					selObj = lst.get(0);
+				}
+				cmbStyle.setSelection(new StructuredSelection(selObj));
+			}
+		}
+	};
 	
 	public RelationshipGraphComposite(Composite parent, FormToolkit toolkit) {
 		super(parent, SWT.NONE);
@@ -80,7 +110,7 @@ public class RelationshipGraphComposite extends Composite {
 		
 		toolkit.createLabel(topCmp, "Style:");
 		
-		ComboViewer cmbStyle = new ComboViewer(topCmp, SWT.READ_ONLY | SWT.BORDER);
+		cmbStyle = new ComboViewer(topCmp, SWT.READ_ONLY | SWT.BORDER);
 		cmbStyle.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		cmbStyle.setContentProvider(ArrayContentProvider.getInstance());
 		cmbStyle.setLabelProvider(new RelationshipDiagramStyleLabelProvider());
@@ -119,10 +149,20 @@ public class RelationshipGraphComposite extends Composite {
 			//TODO: do we want to persist selected style?
 			cmbStyle.setSelection(new StructuredSelection(stylesList.get(0)));
 		}
+		
+        IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		context.get(IEventBroker.class).subscribe(RelationshipDiagramManager.GRAPH_STYLESET_CHANGED, handler);
 	}
 
 	public void setInput(IntelEntity... entity) {
 		graphViewer.setInput(entity);
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+        IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+        context.get(IEventBroker.class).unsubscribe(handler);
 	}
 
 }

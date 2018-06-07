@@ -29,9 +29,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
@@ -56,9 +59,10 @@ public enum RelationshipDiagramManager {
 	/**
 	 * A name for default style.
 	 */
-	public static final String DEFAULT_STYLE_NAME = "Default"; //$NON-NLS-1$
-
+	private static final String DEFAULT_STYLE_NAME = "Default"; //$NON-NLS-1$
 	
+	public static final String GRAPH_STYLESET_CHANGED = "GRAPH_STYLESET/CHANGED"; //$NON-NLS-1$
+
 	private RelationshipDiagramManager() {}
 	
 	/**
@@ -137,7 +141,7 @@ public enum RelationshipDiagramManager {
 	 * @param session session
 	 * @return List of {@link RelationshipDiagramStyle}
 	 */
-	public List<RelationshipDiagramStyle> getStyles(Session session) {
+	private List<RelationshipDiagramStyle> getStyles(Session session) {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		List<RelationshipDiagramStyle>  styles =
 				QueryFactory.buildQuery(session, RelationshipDiagramStyle.class,"conservationArea", ca).getResultList(); //$NON-NLS-1$
@@ -148,27 +152,91 @@ public enum RelationshipDiagramManager {
 		return styles;
 	}
 
-	/**
-	 * Fetches default style.
-	 * 
-	 * @param session
-	 * @return
-	 */
-	public RelationshipDiagramStyle getDefaultStyle(Session session) {
-		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		RelationshipDiagramStyle style = QueryFactory.buildQuery(session, RelationshipDiagramStyle.class,
-				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"default", true}).uniqueResult(); //$NON-NLS-1$
-		return style != null ? style : createDefaultStyle(session);
-	}
-	
+//	/**
+//	 * Fetches default style.
+//	 * 
+//	 * @param session
+//	 * @return
+//	 */
+//	public RelationshipDiagramStyle getDefaultStyle(Session session) {
+//		ConservationArea ca = SmartDB.getCurrentConservationArea();
+//		RelationshipDiagramStyle style = QueryFactory.buildQuery(session, RelationshipDiagramStyle.class,
+//				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+//				new Object[] {"default", true}).uniqueResult(); //$NON-NLS-1$
+//		return style != null ? style : createDefaultStyle(session);
+//	}
+
 	/**
 	 * Delete a {@link RelationshipDiagramStyle}
 	 */
-	public void deleteStyle(Session session, RelationshipDiagramStyle style) {
-		session.delete(style);
+	public boolean saveStyle(Shell shell, RelationshipDiagramStyle style) {
+		final boolean[] isOk = {false};
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Saving relationship diagram style", 1);
+					try(Session session = HibernateManager.openSession()){
+						session.beginTransaction();
+						try {
+							session.saveOrUpdate(style);
+							session.getTransaction().commit();
+							isOk[0] = true;
+						} catch (Exception ex) {
+							session.getTransaction().rollback();
+							SmartPlugIn.displayLog("Error occured while saving relationship diagram style.", ex);
+						}
+					}
+				}
+			});
+		} catch (Exception e) {
+			SmartPlugIn.displayLog("Error occured while saving relationship diagram style.", e);
+		}
+		
+		if (isOk[0]) {
+	        IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+			context.get(IEventBroker.class).send(GRAPH_STYLESET_CHANGED, loadStyles(shell));
+		}
+
+		return isOk[0];
 	}
 
+
+	/**
+	 * Delete a {@link RelationshipDiagramStyle}
+	 */
+	public void deleteStyle(Shell shell, RelationshipDiagramStyle style) {
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Deleteing relationship diagram style", 1);
+					
+					try(Session session = HibernateManager.openSession()){
+						session.beginTransaction();
+						try {
+							session.delete(style);
+							session.getTransaction().commit();							
+						}catch (Exception ex){
+							session.getTransaction().rollback();
+							SmartPlugIn.displayLog("Error occured while deleting relationship diagram style", ex);
+						}
+					} finally {
+						monitor.done();
+					}
+				}
+			});
+		} catch (Exception ex) {
+			SmartPlugIn.displayLog("Error occured while deleting relationship diagram style", ex);
+		}
+		
+        IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		context.get(IEventBroker.class).send(GRAPH_STYLESET_CHANGED, loadStyles(shell));
+	}
+	
 	/**
 	 * This method must create and persist a default style,
 	 * but it is not allowed to use current session for that (as transaction may be reverted)
