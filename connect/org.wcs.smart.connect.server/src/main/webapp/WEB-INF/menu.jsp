@@ -10,12 +10,12 @@
   -->
 
 
-<div style="height:24px;padding:3px;"><a href="javascript:hamburgerMenu()"><img height="24" width="24" src="../css/images/hamburger.png"></a>
+<div style="height:24px;padding:3px;"><a href="javascript:hamburgerMenu()"><img height="24" width="24" src="${pageContext.request.contextPath}/css/images/hamburger.png"></a>
 </div>
 
 <c:forEach var="item" items="${menuitems}">
  	<div style="" class="${item[2]}" onclick="window.location='${item[1]}'">
- 		<img title="${item[0]}" height="24" width="24" src="../css/images/${item[3]}"/>
+ 		<img title="${item[0]}" height="24" width="24" src="${item[3]}"/>
 		<div class="textMenu" style="display:none;vertical-align:super">${item[0]}</div>
 	</div>
  </c:forEach>

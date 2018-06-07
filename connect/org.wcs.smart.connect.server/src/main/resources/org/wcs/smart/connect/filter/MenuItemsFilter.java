@@ -110,10 +110,11 @@ public class MenuItemsFilter implements Filter {
 						continue;
 					}
 				}
+				;
 				menuItems.add( new String[]{
 					Messages.getString(p.nameKey, l),
 					pathprefix + p.url,
-					styleAll, p.imageFileName});
+					styleAll, request.getServletContext().getContextPath() + "/css/images/" + p.imageFileName});
 			}
 		}finally{
 			s.getTransaction().commit();
