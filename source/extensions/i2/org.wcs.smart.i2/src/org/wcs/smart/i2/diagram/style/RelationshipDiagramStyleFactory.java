@@ -26,7 +26,9 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
+import org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
+import org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyleOptions;
 
@@ -81,26 +83,28 @@ public class RelationshipDiagramStyleFactory {
 		progress.subTask("Creating relationship diagram style");
 		RelationshipDiagramStyle clone = createUsingDefaults(name);
 		try {
-			
+			//NOTE: we are not coping isDefault and names
 			clone.setOptions(style.getOptions());
-//TODO: ZZZZZZZZZZZ implement
-//			//NOTE: we are not coping isDefault and names
-//			Map<StyleOptionID, CyberTrackerPropertiesStyleOption> options = style.getOptions();
-//			for (StyleOptionID id : options.keySet()) {
-//				CyberTrackerPropertiesStyleOption option = options.get(id);
-//				
-//				CyberTrackerPropertiesStyleOption newOption = new CyberTrackerPropertiesStyleOption();
-//				newOption.setStyle(clone);
-//				newOption.setOptionId(option.getOptionId());
-//				newOption.setDoubleValue(option.getDoubleValue());
-//				newOption.setIntegerValue(option.getIntegerValue());
-//				newOption.setStringValue(option.getStringValue());
-//				
-//				clone.getOptions().put(id, newOption);
-//				progress.checkCanceled();
-//			}
+			
+			for (RelationshipDiagramEntityTypeStyle etStyle : style.getEntityTypeStyles().values()) {
+				RelationshipDiagramEntityTypeStyle ets = new RelationshipDiagramEntityTypeStyle();
+				ets.setStyle(clone);
+				ets.setEntityType(etStyle.getEntityType());
+				ets.setOptions(etStyle.getOptions());
+				clone.getEntityTypeStyles().put(ets.getEntityType(), ets);
+				progress.checkCanceled();
+			}
 
-		}catch ( OperationCanceledException ex) {
+			for (RelationshipDiagramRelationshipTypeStyle rtStyle : style.getRelationshipTypeStyles().values()) {
+				RelationshipDiagramRelationshipTypeStyle rts = new RelationshipDiagramRelationshipTypeStyle();
+				rts.setStyle(clone);
+				rts.setRelationshipType(rtStyle.getRelationshipType());
+				rts.setOptions(rtStyle.getOptions());
+				clone.getRelationshipTypeStyles().put(rts.getRelationshipType(), rts);
+				progress.checkCanceled();
+			}
+
+		} catch ( OperationCanceledException ex) {
 			return null;
 		}
 		return clone;

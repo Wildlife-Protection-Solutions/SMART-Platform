@@ -191,7 +191,7 @@ public class CreateNewStyleOpDialog extends TitleAreaDialog {
 		}
 		}
 		//this line should never be reached
-		throw new IllegalStateException("Unknown template option for creaing a CyberTracker properties style: " + option); //$NON-NLS-1$
+		throw new IllegalStateException("Unknown template option for creaing a relationship diagram style: " + option); //$NON-NLS-1$
 	}
 	
 }

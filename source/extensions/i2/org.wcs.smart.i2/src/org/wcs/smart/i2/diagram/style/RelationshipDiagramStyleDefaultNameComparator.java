@@ -39,6 +39,9 @@ public class RelationshipDiagramStyleDefaultNameComparator implements Comparator
 		if (s1.isDefault()) {
 			return -1; //by design we have only one default profile and we place it at the beginning
 		}
+		if (s2.isDefault()) {
+			return 1; //by design we have only one default profile and we place it at the beginning
+		}
 		if (s1.getName() == null) {
 			return s2.getName() == null ? 0 : -1;
 		}

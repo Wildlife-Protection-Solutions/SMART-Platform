@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.diagram;
 
+import java.util.List;
+
 import org.eclipse.gef.layout.algorithms.SpringLayoutAlgorithm;
 import org.eclipse.gef.zest.fx.jface.ZestContentViewer;
 import org.eclipse.gef.zest.fx.jface.ZestFxJFaceModule;
@@ -29,6 +31,7 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.FillLayout;
@@ -73,13 +76,15 @@ public class RelationshipGraphComposite extends Composite {
 		
 		cmpFilter = new RelationshipGraphFilterComposite(topCmp);
 
+		List<RelationshipDiagramStyle> stylesList = RelationshipDiagramManager.INSTANCE.loadStyles(getShell());
+		
 		toolkit.createLabel(topCmp, "Style:");
 		
 		ComboViewer cmbStyle = new ComboViewer(topCmp, SWT.READ_ONLY | SWT.BORDER);
 		cmbStyle.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		cmbStyle.setContentProvider(ArrayContentProvider.getInstance());
 		cmbStyle.setLabelProvider(new RelationshipDiagramStyleLabelProvider());
-		cmbStyle.setInput(RelationshipDiagramManager.INSTANCE.loadStyles(getShell()));
+		cmbStyle.setInput(stylesList);
 		cmbStyle.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -109,12 +114,11 @@ public class RelationshipGraphComposite extends Composite {
 		graphLabelProvider = new RelationshipGraphLabelProvider(graphViewer);
 		graphViewer.setLabelProvider(graphLabelProvider);
 		graphViewer.setLayoutAlgorithm(new SpringLayoutAlgorithm());
-//		graphViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-//			public void selectionChanged(SelectionChangedEvent event) {
-//				System.out.println(
-//						"Selection changed: " + (event.getSelection()));
-//			}
-//		});
+
+		if (!stylesList.isEmpty()) {
+			//TODO: do we want to persist selected style?
+			cmbStyle.setSelection(new StructuredSelection(stylesList.get(0)));
+		}
 	}
 
 	public void setInput(IntelEntity... entity) {

@@ -23,6 +23,7 @@ package org.wcs.smart.i2;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -38,6 +39,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleDefaultNameComparator;
+import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleFactory;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 
 /**
@@ -50,6 +52,12 @@ import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 public enum RelationshipDiagramManager {
 
 	INSTANCE;
+	
+	/**
+	 * A name for default style.
+	 */
+	public static final String DEFAULT_STYLE_NAME = "Default"; //$NON-NLS-1$
+
 	
 	private RelationshipDiagramManager() {}
 	
@@ -88,8 +96,6 @@ public enum RelationshipDiagramManager {
 		}
 		return style[0];
 	}
-	
-	
 
 	/**
 	 * Fetches a list of {@link RelationshipDiagramStyle} for current conservation area
@@ -135,19 +141,67 @@ public enum RelationshipDiagramManager {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		List<RelationshipDiagramStyle>  styles =
 				QueryFactory.buildQuery(session, RelationshipDiagramStyle.class,"conservationArea", ca).getResultList(); //$NON-NLS-1$
-		//TODO: ZZZZZZZZZZZ need default style
-//		if (profiles.isEmpty()) {
-//			RelationshipDiagramStyle defaultProfile = createDefaultStyle(session);
-//			return Arrays.asList(defaultProfile);
-//		}
+		if (styles.isEmpty()) {
+			RelationshipDiagramStyle defaultProfile = createDefaultStyle(session);
+			return Arrays.asList(defaultProfile);
+		}
 		return styles;
 	}
 
+	/**
+	 * Fetches default style.
+	 * 
+	 * @param session
+	 * @return
+	 */
+	public RelationshipDiagramStyle getDefaultStyle(Session session) {
+		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		RelationshipDiagramStyle style = QueryFactory.buildQuery(session, RelationshipDiagramStyle.class,
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"default", true}).uniqueResult(); //$NON-NLS-1$
+		return style != null ? style : createDefaultStyle(session);
+	}
+	
 	/**
 	 * Delete a {@link RelationshipDiagramStyle}
 	 */
 	public void deleteStyle(Session session, RelationshipDiagramStyle style) {
 		session.delete(style);
+	}
+
+	/**
+	 * This method must create and persist a default style,
+	 * but it is not allowed to use current session for that (as transaction may be reverted)
+	 * At the same time returned(created) style must be attached to current session.
+	 * 
+	 * @param session
+	 * @return default style
+	 */
+	private RelationshipDiagramStyle createDefaultStyle(Session session) {
+		final RelationshipDiagramStyle defaultStyle = RelationshipDiagramStyleFactory.createUsingDefaults(DEFAULT_STYLE_NAME);
+		defaultStyle.setDefault(true);
+		
+		Thread thread = new Thread() { //new thread is created so it will have it's own hibernate session
+		    public void run() {
+		    	try(Session s = HibernateManager.openSession()){
+		    		try {
+		    			s.beginTransaction();
+		    			s.save(defaultStyle);
+		    			s.getTransaction().commit();
+		    		} catch (Exception e) {
+		    			SmartPlugIn.displayLog("Error occurred while trying to save default relationship diagram style.", e);
+		    		}
+	    		}
+		    }  
+		};
+		thread.start();
+		try {
+			thread.join(); //we need to wait till thread is completed
+		} catch (InterruptedException e) {
+			SmartPlugIn.displayLog("Error occurred while trying to save default relationship diagram style.", e);
+		}
+		
+		return (RelationshipDiagramStyle) session.merge(defaultStyle); //attaching create object to current session
 	}
 	
 }
