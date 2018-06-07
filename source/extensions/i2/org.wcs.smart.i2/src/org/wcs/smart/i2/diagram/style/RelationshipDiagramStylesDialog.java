@@ -23,12 +23,11 @@ package org.wcs.smart.i2.diagram.style;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -83,6 +82,13 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		return new Point(DIALOG_WIDTH, DIALOG_HEIGHT);
 	}
 
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		createButton(parent, IDialogConstants.CLOSE_ID,IDialogConstants.CLOSE_LABEL, true);
+		getButton(IDialogConstants.CLOSE_ID).setFocus();
+		super.setReturnCode(IDialogConstants.CLOSE_ID);
+	}
+	
 	@Override
 	protected Composite createContent(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
