@@ -21,11 +21,17 @@
  */
 package org.wcs.smart.i2.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -45,6 +51,8 @@ public class RelationshipDiagramStyle extends NamedItem {
 	private ConservationArea conservationArea;
 	private boolean isDefault = false;
 	private String options;
+	private Map<IntelEntityType, RelationshipDiagramEntityTypeStyle> entityTypeStyles;
+	private Map<IntelRelationshipType, RelationshipDiagramRelationshipTypeStyle> relationshipTypeStyles;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -70,13 +78,35 @@ public class RelationshipDiagramStyle extends NamedItem {
 	public void setOptions(String options) {
 		this.options = options;
 	}
+
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="style", cascade = {CascadeType.ALL}, orphanRemoval = true)
+	@MapKey(name = "entityType")
+	public Map<IntelEntityType, RelationshipDiagramEntityTypeStyle> getEntityTypeStyles() {
+		if (entityTypeStyles == null)
+			entityTypeStyles = new HashMap<>();
+		return entityTypeStyles;
+	}
+	public void setEntityTypeStyles(Map<IntelEntityType, RelationshipDiagramEntityTypeStyle> entityTypeStyles) {
+		this.entityTypeStyles = entityTypeStyles;
+	}
+
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="style", cascade = {CascadeType.ALL}, orphanRemoval = true)
+	@MapKey(name = "relationshipType")
+	public Map<IntelRelationshipType, RelationshipDiagramRelationshipTypeStyle> getRelationshipTypeStyles() {
+		if (relationshipTypeStyles == null)
+			relationshipTypeStyles = new HashMap<>();
+		return relationshipTypeStyles;
+	}
+	public void setRelationshipTypeStyles(Map<IntelRelationshipType, RelationshipDiagramRelationshipTypeStyle> relationshipTypeStyles) {
+		this.relationshipTypeStyles = relationshipTypeStyles;
+	}
 	
 	@Transient
 	public RelationshipDiagramStyleOptions getStyleOptions() {
 		return new RelationshipDiagramStyleOptions(getOptions());
 	}
 	public void setStyleOptions(RelationshipDiagramStyleOptions styleOptions) {
-		this.options = styleOptions.getJson().toString();
+		setOptions(styleOptions.getJson().toString());
 	}
 	
 }

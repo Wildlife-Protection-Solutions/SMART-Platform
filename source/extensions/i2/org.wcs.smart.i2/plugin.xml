@@ -163,6 +163,16 @@
             class="org.wcs.smart.i2.model.RelationshipDiagramStyle"
             supportsCcaa="false">
       </class>
+      <class
+            ca_property=".style.conservationArea"
+            class="org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".style.conservationArea"
+            class="org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.caDeleteAdvisor">

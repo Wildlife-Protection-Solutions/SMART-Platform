@@ -57,9 +57,13 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.RelationshipDiagramManager;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
+import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
+import org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
+import org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyleOptions;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
@@ -85,6 +89,8 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 	private Composite emptyComposite;
 	private RelationshipDiagramDefaultStyleComposite defaultComposite;
 	private RelationshipDiagramNodeStyleComposite nodeRootComposite;
+	private RelationshipDiagramNodeStyleComposite entityTypeComposite;
+	private RelationshipDiagramEdgeStyleComposite relationshipTypeComposite;
 	
 	public RelationshipDiagramStyleEditDialog(Shell shell, final RelationshipDiagramStyle style) {
 		super(shell, "Relationship Diagram Style");
@@ -93,28 +99,7 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 			rdStyle = style;
 		} else {
 			//reloading current style with full data
-			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-			try {
-				pmd.run(true, false, new IRunnableWithProgress() {
-					@Override
-					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						monitor.beginTask("Loading relationship diagram style", 1);
-						try(Session s = HibernateManager.openSession()){
-							s.beginTransaction();
-							try {
-								rdStyle = (RelationshipDiagramStyle) s.get(RelationshipDiagramStyle.class, style.getUuid());
-								rdStyle.getNames().size();
-							} catch (Exception ex) {
-								SmartPlugIn.displayLog("Error occurs while loading relationship diagram style.", ex);
-							} finally {
-								s.getTransaction().rollback();
-							}
-						}
-					}
-				});
-			} catch (Exception e) {
-				SmartPlugIn.displayLog("Error occurs while loading relationship diagram style.", e);
-			}
+			rdStyle = RelationshipDiagramManager.INSTANCE.getStyle(getShell(), style.getUuid());
 		}
 	}
 
@@ -254,6 +239,57 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 			}
 		});
 		
+
+		entityTypeComposite = new RelationshipDiagramNodeStyleComposite(infoInnerPanel);
+		entityTypeComposite.addOptionsChangeListener(new INodeStyleOptionsChangeListener() {
+			@Override
+			public void optionsChanged(RelationshipDiagramNodeStyleOptions options) {
+				IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
+				Object obj = selection.getFirstElement();
+				if (obj instanceof IntelEntityType) {
+					IntelEntityType entityType = (IntelEntityType) obj;
+					if (options == null) {
+						rdStyle.getEntityTypeStyles().remove(entityType);
+					} else {
+						RelationshipDiagramEntityTypeStyle etStyle = rdStyle.getEntityTypeStyles().get(entityType);
+						if (etStyle == null) {
+							etStyle = new RelationshipDiagramEntityTypeStyle();
+							etStyle.setStyle(rdStyle);
+							etStyle.setEntityType(entityType);
+						}
+						etStyle.setStyleOptions(options);
+						rdStyle.getEntityTypeStyles().put(entityType, etStyle);
+					}
+					setChangesMade(true);
+				}
+			}
+		});
+
+		relationshipTypeComposite = new RelationshipDiagramEdgeStyleComposite(infoInnerPanel);
+		relationshipTypeComposite.addOptionsChangeListener(new IEdgeStyleOptionsChangeListener() {
+			@Override
+			public void optionsChanged(RelationshipDiagramEdgeStyleOptions options) {
+				IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
+				Object obj = selection.getFirstElement();
+				if (obj instanceof IntelRelationshipType) {
+					IntelRelationshipType relationshipType = (IntelRelationshipType) obj;
+					if (options == null) {
+						rdStyle.getRelationshipTypeStyles().remove(relationshipType);
+					} else {
+						RelationshipDiagramRelationshipTypeStyle rtStyle = rdStyle.getRelationshipTypeStyles().get(relationshipType);
+						if (rtStyle == null) {
+							rtStyle = new RelationshipDiagramRelationshipTypeStyle();
+							rtStyle.setStyle(rdStyle);
+							rtStyle.setRelationshipType(relationshipType);
+						}
+						rtStyle.setStyleOptions(options);
+						rdStyle.getRelationshipTypeStyles().put(relationshipType, rtStyle);
+					}
+					setChangesMade(true);
+				}
+			}
+		});
+		
 		container.setWeights(new int[]{40,60});
 		
 
@@ -286,13 +322,13 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 				break;
 			}
 		} else if (obj instanceof IntelEntityType) {
-//			nodeComposite.setSourceOptions(???);
-//			((StackLayout)infoInnerPanel.getLayout()).topControl = nodeComposite;
-			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
-			//TODO: ZZZZZZZZZ
+			RelationshipDiagramEntityTypeStyle etStyle = rdStyle.getEntityTypeStyles().get(obj);
+			entityTypeComposite.setSourceOptions(etStyle != null ? etStyle.getStyleOptions() : null);
+			((StackLayout)infoInnerPanel.getLayout()).topControl = entityTypeComposite;
 		} else if (obj instanceof IntelRelationshipType) {
-			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
-			//TODO: ZZZZZZZZZ
+			RelationshipDiagramRelationshipTypeStyle rtStyle = rdStyle.getRelationshipTypeStyles().get(obj);
+			relationshipTypeComposite.setSourceOptions(rtStyle != null ? rtStyle.getStyleOptions() : null);
+			((StackLayout)infoInnerPanel.getLayout()).topControl = relationshipTypeComposite;
 		} else {
 			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
 		}

@@ -27,20 +27,23 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.wcs.smart.ca.UuidItem;
 
 /**
- * Node style related to {@link RelationshipDiagramStyle}
+ * Specific styles configuration related to {@link IntelEntityType}
  * 
  * @author elitvin
  * @since 6.0.0
  *
  */
-//@Entity
-//@Table(name = "smart.i_diagram_node_style")
-public class RelationshipDiagramNodeStyle {
+@Entity
+@Table(name = "smart.i_diagram_entity_type_style")
+public class RelationshipDiagramEntityTypeStyle extends UuidItem {
 	
 	private RelationshipDiagramStyle style;
-	private IntelEntityType node;
+	private IntelEntityType entityType;
 	private String options;
 	
 	
@@ -54,12 +57,12 @@ public class RelationshipDiagramNodeStyle {
 	}
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="node_uuid", referencedColumnName="uuid")
-	public IntelEntityType getNode() {
-		return node;
+	@JoinColumn(name="entity_type_uuid", referencedColumnName="uuid")
+	public IntelEntityType getEntityType() {
+		return entityType;
 	}
-	public void setNode(IntelEntityType node) {
-		this.node = node;
+	public void setEntityType(IntelEntityType entityType) {
+		this.entityType = entityType;
 	}
 	
 	@Column(name="options")
@@ -69,6 +72,17 @@ public class RelationshipDiagramNodeStyle {
 	public void setOptions(String options) {
 		this.options = options;
 	}
-	
-	
+
+	@Transient
+	public RelationshipDiagramNodeStyleOptions getStyleOptions() {
+		return getOptions() != null ? new RelationshipDiagramNodeStyleOptions(getOptions()) : null;
+	}
+	public void setStyleOptions(RelationshipDiagramNodeStyleOptions styleOptions) {
+		if (styleOptions != null) {
+			setOptions(styleOptions.getJson().toString());
+		} else {
+			setOptions(null);
+		}
+	}
+
 }

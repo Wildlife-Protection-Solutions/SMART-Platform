@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -51,6 +52,44 @@ public enum RelationshipDiagramManager {
 	INSTANCE;
 	
 	private RelationshipDiagramManager() {}
+	
+	/**
+	 * Fetches {@link RelationshipDiagramStyle} with full it's details
+	 * 
+	 * @param shell shell
+	 * @param uuid uuid
+	 * @return {@link RelationshipDiagramStyle}
+	 */
+	public RelationshipDiagramStyle getStyle(Shell shell, UUID uuid) {
+		final RelationshipDiagramStyle[] style = new RelationshipDiagramStyle[1];
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Loading relationship diagram style", 1);
+					try(Session s = HibernateManager.openSession()){
+						s.beginTransaction();
+						try {
+							style[0] = (RelationshipDiagramStyle) s.get(RelationshipDiagramStyle.class, uuid);
+							style[0].getNames().size();
+							style[0].getEntityTypeStyles().size();
+							style[0].getRelationshipTypeStyles().size();
+						} catch (Exception ex) {
+							SmartPlugIn.displayLog("Error occurs while loading relationship diagram style.", ex);
+						} finally {
+							s.getTransaction().rollback();
+						}
+					}
+				}
+			});
+		} catch (Exception e) {
+			SmartPlugIn.displayLog("Error occurs while loading relationship diagram style.", e);
+		}
+		return style[0];
+	}
+	
+	
 
 	/**
 	 * Fetches a list of {@link RelationshipDiagramStyle} for current conservation area

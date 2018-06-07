@@ -34,11 +34,15 @@ import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.i2.RelationshipDiagramManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
+import org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions.ImageSizeOption;
+import org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyleOptions;
 import org.wcs.smart.ui.Thumbnail;
@@ -80,7 +84,7 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 	}
 	
 	public void setStyle(RelationshipDiagramStyle style) {
-		this.style = style;
+		this.style = RelationshipDiagramManager.INSTANCE.getStyle(Display.getCurrent().getActiveShell(), style.getUuid());
 	}
 	
 	private RelationshipDiagramNodeStyleOptions getNodeOptions(Object element) {
@@ -88,13 +92,22 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 		if (isRootNode(element) && styleOptions.getRootNodeStyle() != null) {
 			return styleOptions.getRootNodeStyle();
 		}
-		//TODO: ZZZZZZZ fetch for specific node
+		if (element instanceof IntelEntity) {
+			IntelEntity e = (IntelEntity) element;
+			RelationshipDiagramEntityTypeStyle etStyle = style.getEntityTypeStyles().get(e.getEntityType());
+			if (etStyle != null) {
+				return etStyle.getStyleOptions();
+			}
+		}
 		return styleOptions.getDefaultNodeStyle();
 		
 	}
 
-	private RelationshipDiagramEdgeStyleOptions getEdgeOptions(Object element) {
-		//TODO: ZZZZZZZ fetch for specific node
+	private RelationshipDiagramEdgeStyleOptions getEdgeOptions(IntelEntityRelationship r) {
+		RelationshipDiagramRelationshipTypeStyle rtStyle = style.getRelationshipTypeStyles().get(r.getRelationshipType());
+		if (rtStyle != null) {
+			return rtStyle.getStyleOptions();
+		}
 		return style.getStyleOptions().getDefaultEdgeStyle();
 		
 	}

@@ -39,7 +39,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.i2.RelationshipDiagramManager;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLabelProvider;
 import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions.ImageSizeOption;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 
 /**
@@ -110,12 +109,12 @@ public class RelationshipGraphComposite extends Composite {
 		graphLabelProvider = new RelationshipGraphLabelProvider(graphViewer);
 		graphViewer.setLabelProvider(graphLabelProvider);
 		graphViewer.setLayoutAlgorithm(new SpringLayoutAlgorithm());
-		graphViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				System.out.println(
-						"Selection changed: " + (event.getSelection()));
-			}
-		});
+//		graphViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+//			public void selectionChanged(SelectionChangedEvent event) {
+//				System.out.println(
+//						"Selection changed: " + (event.getSelection()));
+//			}
+//		});
 	}
 
 	public void setInput(IntelEntity... entity) {
