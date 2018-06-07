@@ -39,6 +39,9 @@ public class CtProfileDefaultNameComparator implements Comparator<CyberTrackerPr
 		if (p1.isDefault()) {
 			return -1; //by design we have only one default profile and we place it at the beginning
 		}
+		if (p2.isDefault()) {
+			return 1; //by design we have only one default profile and we place it at the beginning
+		}
 		if (p1.getName() == null) {
 			return p2.getName() == null ? 0 : -1;
 		}
