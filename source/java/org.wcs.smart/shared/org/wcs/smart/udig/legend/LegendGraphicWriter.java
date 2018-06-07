@@ -23,7 +23,9 @@ package org.wcs.smart.udig.legend;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ComponentColorModel;
@@ -84,8 +86,12 @@ public class LegendGraphicWriter  {
 	private int imageWidth;
 	private int imageHeight; // size of glyph image
 
+	private double scale;	//scale based on dpi
+	
 	public void draw(MapGraphicContext context) {
 
+		scale = context.getMapDisplay().getDPI() / 96.0;
+		
 		IBlackboard blackboard = context.getLayer().getStyleBlackboard();
 		LegendStyle legendStyle = (LegendStyle) blackboard.get(LegendStyleContent.ID);
 		if (legendStyle == null) {
@@ -111,8 +117,8 @@ public class LegendGraphicWriter  {
 		this.horizontalSpacing = legendStyle.horizontalSpacing;
 		this.verticalSpacing = legendStyle.verticalSpacing;
 		this.indentSize = legendStyle.indentSize;
-		this.imageHeight = legendStyle.imageHeight;
-		this.imageWidth = legendStyle.imageWidth;
+		this.imageHeight = (int)(legendStyle.imageHeight * scale);
+		this.imageWidth = (int)(legendStyle.imageWidth * scale);
 
 		final ViewportGraphics graphics = context.getGraphics();
 
@@ -347,6 +353,23 @@ public class LegendGraphicWriter  {
 		if (text.length == 0){
 			return;
 		}
+		
+		
+		if (icon.getWidth() != imageWidth || icon.getHeight() != imageHeight) {
+			//scale the icon image
+			double scalex = imageWidth / icon.getWidth();
+			double scaley = imageHeight / icon.getHeight();
+			AffineTransform scaletransform = new AffineTransform();
+			scaletransform.scale(scalex, scaley);
+			
+			BufferedImage resizedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
+			Graphics2D g = resizedImage.createGraphics();
+			g.drawRenderedImage(icon, scaletransform);
+			g.dispose();
+			
+			icon = resizedImage;
+		}
+		
 		Rectangle2D stringBounds = graphics.getStringBounds(text[0]);
 
 		/*
