@@ -22,12 +22,14 @@
 package org.wcs.smart.i2.diagram;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -51,19 +53,22 @@ import org.wcs.smart.i2.model.IntelEntityRelationship;
  */
 public class RelationshipGraphLoadDataJob extends Job {
 
-	private int expandLevel;
+	RelationshipGraphFilterData filterData;
 	private IntelEntity[] roots;
 	private GraphData loadedData;
 	
-	public RelationshipGraphLoadDataJob(int expandLevel, IntelEntity... roots) {
+	public RelationshipGraphLoadDataJob(RelationshipGraphFilterData filterData, IntelEntity... roots) {
 		super(Messages.RelationshipGraphLoadDataJob_JobTitle);
-		this.expandLevel = expandLevel;
+		this.filterData = filterData;
 		this.roots = roots;
 	}
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		loadedData = null;
+		loadedData = new GraphData();
+		if (roots == null || roots.length == 0) {
+			return Status.OK_STATUS;
+		}
 		GraphData graphData = new GraphData();
 		try (Session s = HibernateManager.openSession()) {
 			for (IntelEntity e : roots) {
@@ -73,7 +78,7 @@ public class RelationshipGraphLoadDataJob extends Job {
 
 			List<IntelEntity> rootEntities = new ArrayList<>(graphData.entities);
 			for (IntelEntity e : rootEntities) {
-				extractRelations(s, graphData, e, expandLevel-1);
+				extractRelations(s, graphData, e, filterData.getDepth()-1);
 			}
 			
 			//load required lazy data
@@ -99,22 +104,19 @@ public class RelationshipGraphLoadDataJob extends Job {
 	}
 
 	private void extractRelations(Session s, GraphData graphData, IntelEntity intelEntity, int depth) {
-		CriteriaBuilder cb = s.getCriteriaBuilder();
-		CriteriaQuery<IntelEntityRelationship> c = cb.createQuery(IntelEntityRelationship.class);
-		Root<IntelEntityRelationship> from = c.from(IntelEntityRelationship.class);
-		c.where(cb.or(
-				cb.equal(from.get("sourceEntity"), intelEntity), //$NON-NLS-1$
-				cb.equal(from.get("targetEntity"), intelEntity) //$NON-NLS-1$
-				));
-		List<IntelEntityRelationship> newRepationships = s.createQuery(c).getResultList();
+		List<IntelEntityRelationship> newRepationships = fetchRelations(s, intelEntity);
 		
 		//remove known relationships
 		newRepationships.removeAll(graphData.getRelationships());
 		
 		Set<IntelEntity> newEntities = new HashSet<>();
 		for (IntelEntityRelationship r : newRepationships) {
-			newEntities.add(r.getSourceEntity());
-			newEntities.add(r.getTargetEntity());
+			if (filterData.getEntityTypes().contains(r.getSourceEntity().getEntityType())) {
+				newEntities.add(r.getSourceEntity());
+			}
+			if (filterData.getEntityTypes().contains(r.getTargetEntity().getEntityType())) {
+				newEntities.add(r.getTargetEntity());
+			}
 		}
 
 		//remove known entities
@@ -133,6 +135,23 @@ public class RelationshipGraphLoadDataJob extends Job {
 		}
 	}
 
+	private List<IntelEntityRelationship> fetchRelations(Session s, IntelEntity intelEntity) {
+		if (filterData.getRelationshipTypes().isEmpty()) {
+			return Collections.emptyList(); 
+		}
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<IntelEntityRelationship> c = cb.createQuery(IntelEntityRelationship.class);
+		Root<IntelEntityRelationship> from = c.from(IntelEntityRelationship.class);
+		Predicate entityPredicate = cb.or(
+				cb.equal(from.get("sourceEntity"), intelEntity), //$NON-NLS-1$
+				cb.equal(from.get("targetEntity"), intelEntity) //$NON-NLS-1$
+				);
+		Predicate rtPredicate = from.get("relationshipType").in(filterData.getRelationshipTypes()); //$NON-NLS-1$
+		c.where(cb.and(entityPredicate, rtPredicate));
+		List<IntelEntityRelationship> newRepationships = s.createQuery(c).getResultList();
+		return newRepationships;
+	}
+	
 	public GraphData getLoadedData() {
 		return loadedData;
 	}

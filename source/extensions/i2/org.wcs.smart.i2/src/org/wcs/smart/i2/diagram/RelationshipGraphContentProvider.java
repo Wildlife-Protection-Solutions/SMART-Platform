@@ -43,20 +43,27 @@ public class RelationshipGraphContentProvider implements IGraphContentProvider {
 	
 	private Set<IntelEntityRelationship> relationships = Collections.emptySet();
 	private Set<IntelEntity> entities = Collections.emptySet();
+	private IntelEntity[] roots;
+	private RelationshipGraphFilterData filterData = new RelationshipGraphFilterData();
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (newInput instanceof IntelEntity[]) {
-			IntelEntity[] roots = (IntelEntity[]) newInput;
+			roots = (IntelEntity[]) newInput;
 			loadGraphData(roots);
 		} else if (newInput instanceof IntelEntity) {
-			IntelEntity root = (IntelEntity) newInput;
-			loadGraphData(root);
+			roots = new IntelEntity[] {(IntelEntity) newInput};
+			loadGraphData(roots);
 		}
+	}
+	
+	public void setFilterData(RelationshipGraphFilterData filterData) {
+		this.filterData = filterData;
+		loadGraphData(roots);
 	}
 
 	private void loadGraphData(IntelEntity... root) {
-		RelationshipGraphLoadDataJob loadJob = new RelationshipGraphLoadDataJob(2, root);
+		RelationshipGraphLoadDataJob loadJob = new RelationshipGraphLoadDataJob(filterData, root);
 		loadJob.schedule();
 		try {
 			loadJob.join();
@@ -66,8 +73,6 @@ public class RelationshipGraphContentProvider implements IGraphContentProvider {
 		GraphData loadedData = loadJob.getLoadedData();
 		relationships = loadedData.getRelationships();
 		entities = loadedData.getEntities();
-
-
 	}
 
 	@Override

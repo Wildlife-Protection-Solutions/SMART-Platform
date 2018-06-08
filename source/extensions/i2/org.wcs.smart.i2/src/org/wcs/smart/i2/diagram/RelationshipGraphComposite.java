@@ -64,7 +64,8 @@ public class RelationshipGraphComposite extends Composite {
 	private ComboViewer cmbStyle;
 	private ZestContentViewer graphViewer;
 	private RelationshipGraphLabelProvider graphLabelProvider;
-	
+	private RelationshipGraphContentProvider graphContentProvider;
+
 	private EventHandler handler = new EventHandler() {
 		@Override
 		public void handleEvent(Event event) {
@@ -81,7 +82,7 @@ public class RelationshipGraphComposite extends Composite {
 			}
 		}
 	};
-	
+
 	public RelationshipGraphComposite(Composite parent, FormToolkit toolkit) {
 		super(parent, SWT.NONE);
 		this.toolkit = toolkit;
@@ -96,13 +97,13 @@ public class RelationshipGraphComposite extends Composite {
 		Composite topCmp = toolkit.createComposite(parent, SWT.NONE);
 		topCmp.setLayout(new GridLayout(3, false));
 		topCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
+
 		cmpFilter = new RelationshipGraphFilterComposite(topCmp);
 
 		List<RelationshipDiagramStyle> stylesList = RelationshipDiagramManager.INSTANCE.loadStyles(getShell());
-		
+
 		toolkit.createLabel(topCmp, "Style:");
-		
+
 		cmbStyle = new ComboViewer(topCmp, SWT.READ_ONLY | SWT.BORDER);
 		cmbStyle.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		cmbStyle.setContentProvider(ArrayContentProvider.getInstance());
@@ -116,7 +117,7 @@ public class RelationshipGraphComposite extends Composite {
 				graphViewer.refresh();
 			}
 		});
-		
+
 		Composite mainCmp = new Composite(parent, SWT.NONE);
 		StackLayout stackLayout = new StackLayout();
 		stackLayout.marginHeight = stackLayout.marginWidth = 0;
@@ -125,15 +126,16 @@ public class RelationshipGraphComposite extends Composite {
 
 		Composite sizingCmp = toolkit.createComposite(mainCmp, SWT.NONE);
 		sizingCmp.setLayout(new GridLayout());
-		
+
 		Composite graphCmp = toolkit.createComposite(mainCmp, SWT.NONE);
 		graphCmp.setLayout(new FillLayout(SWT.VERTICAL));
-		
+
 		((StackLayout)mainCmp.getLayout()).topControl = graphCmp; //NOTE: this is a hack to coordinate sizing of composites with GridLayout and FillLayout
-		
+
+		graphContentProvider = new RelationshipGraphContentProvider();
 		graphViewer = new ZestContentViewer(new ZestFxJFaceModule());
 		graphViewer.createControl(graphCmp, SWT.NONE);
-		graphViewer.setContentProvider(new RelationshipGraphContentProvider());
+		graphViewer.setContentProvider(graphContentProvider);
 		graphLabelProvider = new RelationshipGraphLabelProvider(graphViewer);
 		graphViewer.setLabelProvider(graphLabelProvider);
 		graphViewer.setLayoutAlgorithm(new SpringLayoutAlgorithm());
@@ -142,20 +144,29 @@ public class RelationshipGraphComposite extends Composite {
 			//TODO: do we want to persist selected style?
 			cmbStyle.setSelection(new StructuredSelection(stylesList.get(0)));
 		}
-		
-        IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+
+		cmpFilter.addFilterChangeListener(new IRelationshipGraphFilterChangeListener() {
+			@Override
+			public void filterChanged(RelationshipGraphFilterData filterData) {
+				graphContentProvider.setFilterData(filterData);
+				graphViewer.refresh();
+			}
+		});
+		graphContentProvider.setFilterData(cmpFilter.getFilterData());
+
+		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
 		context.get(IEventBroker.class).subscribe(RelationshipDiagramManager.GRAPH_STYLESET_CHANGED, handler);
 	}
 
 	public void setInput(IntelEntity... entity) {
 		graphViewer.setInput(entity);
 	}
-
+	
 	@Override
 	public void dispose() {
 		super.dispose();
-        IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-        context.get(IEventBroker.class).unsubscribe(handler);
+		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		context.get(IEventBroker.class).unsubscribe(handler);
 	}
 
 }

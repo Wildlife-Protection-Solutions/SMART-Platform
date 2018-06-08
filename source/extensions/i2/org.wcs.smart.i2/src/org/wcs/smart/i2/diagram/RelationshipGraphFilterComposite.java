@@ -21,13 +21,16 @@
  */
 package org.wcs.smart.i2.diagram;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -56,6 +59,10 @@ public class RelationshipGraphFilterComposite extends Composite {
 	private CheckBoxDropDown cmbEntityTypes;
 	private CheckBoxDropDown cmbRelationTypes;
 	
+	private RelationshipGraphFilterData filterData;
+	
+	private List<IRelationshipGraphFilterChangeListener> listeners = new ArrayList<>();
+	
 	private LoadEntityTypeJob entityTypeJob = new LoadEntityTypeJob() {
 		@Override
 		protected void processData(List<IntelEntityType> types) {
@@ -63,6 +70,9 @@ public class RelationshipGraphFilterComposite extends Composite {
 				@Override
 				public void run() {
 					cmbEntityTypes.setInput(types);
+					cmbEntityTypes.setValue(types);
+					filterData.setEntityTypes(types);
+					fireFilterChanged(filterData);
 				}		
 			});
 		}
@@ -75,6 +85,9 @@ public class RelationshipGraphFilterComposite extends Composite {
 				@Override
 				public void run() {
 					cmbRelationTypes.setInput(types);
+					cmbRelationTypes.setValue(types);
+					filterData.setRelationshipTypes(types);
+					fireFilterChanged(filterData);
 				}		
 			});
 		}
@@ -82,6 +95,7 @@ public class RelationshipGraphFilterComposite extends Composite {
 
 	public RelationshipGraphFilterComposite(Composite parent) {
 		super(parent, SWT.NONE);
+		filterData = new RelationshipGraphFilterData();
 		GridLayout layout = new GridLayout(6, false);
 		layout.marginHeight = layout.marginWidth = 0;
 		this.setLayout(layout);
@@ -97,10 +111,13 @@ public class RelationshipGraphFilterComposite extends Composite {
 		cmbDepth.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		cmbDepth.setContentProvider(ArrayContentProvider.getInstance());
 		cmbDepth.setInput(GRAPH_DEPTH_OPTIONS);
+		cmbDepth.setSelection(new StructuredSelection(filterData.getDepth()));
 		cmbDepth.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				//TODO: ZZZZZZZZ implement
+				IStructuredSelection selection = (IStructuredSelection) cmbDepth.getSelection();
+				filterData.setDepth((Integer)selection.getFirstElement());
+				fireFilterChanged(filterData);
 			}
 		});
 		
@@ -115,7 +132,10 @@ public class RelationshipGraphFilterComposite extends Composite {
 		cmbEntityTypes.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				//TODO: ZZZZZZZZ implement
+				@SuppressWarnings("unchecked")
+				List<IntelEntityType> types = (List<IntelEntityType>) cmbEntityTypes.getCheckObjects();
+				filterData.setEntityTypes(types);
+				fireFilterChanged(filterData);
 			}
 		});
 		
@@ -130,12 +150,29 @@ public class RelationshipGraphFilterComposite extends Composite {
 		cmbRelationTypes.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				//TODO: ZZZZZZZZ implement
+				@SuppressWarnings("unchecked")
+				List<IntelRelationshipType> types = (List<IntelRelationshipType>) cmbRelationTypes.getCheckObjects();
+				filterData.setRelationshipTypes(types);
+				fireFilterChanged(filterData);
 			}
 		});
 		
 		entityTypeJob.schedule();
 		relationshipTypeJob.schedule();
 	}
+	
+	public RelationshipGraphFilterData getFilterData() {
+		return filterData;
+	}
 
+	public void addFilterChangeListener(IRelationshipGraphFilterChangeListener listener) {
+		listeners.add(listener);
+	}
+	
+	private void fireFilterChanged(RelationshipGraphFilterData data) {
+		for (IRelationshipGraphFilterChangeListener l : listeners) {
+			l.filterChanged(data);
+		}
+	}
+	
 }
