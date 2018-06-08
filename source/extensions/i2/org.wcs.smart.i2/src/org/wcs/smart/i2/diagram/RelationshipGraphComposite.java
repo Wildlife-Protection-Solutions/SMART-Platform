@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.gef.layout.algorithms.SpringLayoutAlgorithm;
+import org.eclipse.gef.layout.algorithms.RadialLayoutAlgorithm;
 import org.eclipse.gef.zest.fx.jface.ZestContentViewer;
 import org.eclipse.gef.zest.fx.jface.ZestFxJFaceModule;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -138,7 +138,7 @@ public class RelationshipGraphComposite extends Composite {
 		graphViewer.setContentProvider(graphContentProvider);
 		graphLabelProvider = new RelationshipGraphLabelProvider(graphViewer);
 		graphViewer.setLabelProvider(graphLabelProvider);
-		graphViewer.setLayoutAlgorithm(new SpringLayoutAlgorithm());
+		graphViewer.setLayoutAlgorithm(new RadialLayoutAlgorithm());
 
 		if (!stylesList.isEmpty()) {
 			//TODO: do we want to persist selected style?
