@@ -40,10 +40,12 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -71,6 +73,9 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  */
 public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderDialog {
 
+	private static final int DIALOG_WIDTH = 700;
+	private static final int DIALOG_HEIGHT = 700;
+	
 	private RelationshipDiagramStyle rdStyle;
 	
 	private Text txtStyleName;
@@ -97,7 +102,17 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 	}
 
 	@Override
+	protected Point getInitialSize() {
+		return new Point(DIALOG_WIDTH, DIALOG_HEIGHT);
+	}
+
+	@Override
 	protected Composite createContent(Composite parent) {
+		throw new IllegalStateException("Method shuold never be called."); //$NON-NLS-1$
+	}
+	
+	@Override
+	public Control createDialogArea(Composite parent) {
 		setChangesMade(rdStyle.getUuid() == null);
 		
 		Composite main = new Composite(parent, SWT.NONE);
@@ -283,7 +298,7 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 			}
 		});
 		
-		container.setWeights(new int[]{40,60});
+		container.setWeights(new int[]{50,50});
 		
 
 		scrolled.setContent(infoInnerPanel);
@@ -356,5 +371,6 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 		}
 		return isOk;
 	}
+
 
 }
