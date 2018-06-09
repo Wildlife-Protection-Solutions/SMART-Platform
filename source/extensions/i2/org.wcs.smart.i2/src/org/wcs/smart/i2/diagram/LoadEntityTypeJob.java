@@ -42,9 +42,6 @@ import org.wcs.smart.i2.model.IntelEntityType;
  *
  */
 public abstract class LoadEntityTypeJob extends Job {
-	/*
-	 * job for loading entity types
-	 */
 
 	public LoadEntityTypeJob() {
 		super("Loading Entity Types");
