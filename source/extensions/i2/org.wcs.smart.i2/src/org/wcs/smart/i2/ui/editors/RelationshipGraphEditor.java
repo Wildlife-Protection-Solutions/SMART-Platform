@@ -114,20 +114,6 @@ public class RelationshipGraphEditor extends EditorPart {
 
 			graphComposite = new RelationshipGraphComposite(parent, new FormToolkit(Display.getCurrent()));
 			
-			//loading data from current working set if it is available
-			if (WorkingSetManager.INSTANCE.isSet()) {
-				try(Session s = HibernateManager.openSession()) {
-					IntelWorkingSet workingset = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
-					final List<IntelEntity> activeEntries = workingset.getEntities().stream().filter(e -> e.getIsVisible()).map(e -> e.getEntity()).collect(Collectors.toList());
-					Display.getDefault().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							graphComposite.setInput(activeEntries.toArray(new IntelEntity[] {}));
-						}
-					});
-				}
-			}
-
 			//part.get
 			EventHandler handler = new EventHandler() {
 				@Override
@@ -172,6 +158,9 @@ public class RelationshipGraphEditor extends EditorPart {
 			parentContext.get(IEventBroker.class).subscribe(IntelEvents.ACTIVE_WS_LAYER_VISIBILITY, handler);
 			handlers.add(handler);
 
+			//loading data from current working set if it is available
+			graphUpdateJob.cancel();
+			graphUpdateJob.schedule();
 		}
 
 		@Override
