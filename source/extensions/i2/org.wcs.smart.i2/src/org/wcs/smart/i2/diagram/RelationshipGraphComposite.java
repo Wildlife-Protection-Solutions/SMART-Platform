@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.i2.diagram;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -71,7 +74,7 @@ public class RelationshipGraphComposite extends Composite {
 	private IntelEntity[] roots;
 
 
-	private EventHandler handler = new EventHandler() {
+	private EventHandler styleHandler = new EventHandler() {
 		@Override
 		public void handleEvent(Event event) {
 			Object data = event.getProperty(IEventBroker.DATA);
@@ -84,6 +87,30 @@ public class RelationshipGraphComposite extends Composite {
 					selObj = lst.get(0);
 				}
 				cmbStyle.setSelection(new StructuredSelection(selObj));
+			}
+		}
+	};
+
+	private EventHandler entityHandler = new EventHandler() {
+		@Override
+		public void handleEvent(Event event) {
+			Object data = event.getProperty(IEventBroker.DATA);
+			if (data instanceof List) {
+				processList((List<?>)data);
+			} else {
+				processList(Arrays.asList(data));
+			}
+		}
+		
+		private void processList(List<?> entities) {
+			Object input = graphViewer.getInput();
+			if (input instanceof IRelationshipGraphData) {
+				IRelationshipGraphData graphData = (IRelationshipGraphData) input;
+				Set<?> eSet = new HashSet<>(Arrays.asList(graphData.getEntities()));
+				eSet.retainAll(entities);
+				if (!eSet.isEmpty()) {
+					refreshGraphContent();
+				}
 			}
 		}
 	};
@@ -178,7 +205,10 @@ public class RelationshipGraphComposite extends Composite {
 		});
 
 		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-		context.get(IEventBroker.class).subscribe(IntelEvents.GRAPH_STYLESET_CHANGED, handler);
+		IEventBroker eventBroker = context.get(IEventBroker.class);
+		eventBroker.subscribe(IntelEvents.GRAPH_STYLESET_CHANGED, styleHandler);
+		eventBroker.subscribe(IntelEvents.ENTITY_ALL, entityHandler);
+		
 	}
 
 	public void setInput(IntelEntity... entity) {
@@ -197,7 +227,9 @@ public class RelationshipGraphComposite extends Composite {
 	public void dispose() {
 		super.dispose();
 		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-		context.get(IEventBroker.class).unsubscribe(handler);
+		IEventBroker eventBroker = context.get(IEventBroker.class);
+		eventBroker.unsubscribe(styleHandler);
+		eventBroker.unsubscribe(entityHandler);
 	}
 
 }
