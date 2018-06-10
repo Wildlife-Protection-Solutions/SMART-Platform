@@ -65,41 +65,19 @@ public enum RelationshipDiagramManager {
 	private RelationshipDiagramManager() {}
 	
 	/**
-	 * Fetches {@link RelationshipDiagramStyle} with full it's details
+	 * Fetches a {@link RelationshipDiagramStyle} with all it's details
 	 * 
-	 * @param shell shell
-	 * @param uuid uuid
+	 * @param session session
 	 * @return {@link RelationshipDiagramStyle}
 	 */
-	public RelationshipDiagramStyle getStyle(Shell shell, UUID uuid) {
-		final RelationshipDiagramStyle[] style = new RelationshipDiagramStyle[1];
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
-		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Loading relationship diagram style", 1);
-					try(Session s = HibernateManager.openSession()){
-						s.beginTransaction();
-						try {
-							style[0] = (RelationshipDiagramStyle) s.get(RelationshipDiagramStyle.class, uuid);
-							style[0].getNames().size();
-							style[0].getEntityTypeStyles().size();
-							style[0].getRelationshipTypeStyles().size();
-						} catch (Exception ex) {
-							SmartPlugIn.displayLog("Error occurs while loading relationship diagram style.", ex);
-						} finally {
-							s.getTransaction().rollback();
-						}
-					}
-				}
-			});
-		} catch (Exception e) {
-			SmartPlugIn.displayLog("Error occurs while loading relationship diagram style.", e);
-		}
-		return style[0];
+	public RelationshipDiagramStyle getStyle(Session session, UUID uuid) {
+		RelationshipDiagramStyle style = (RelationshipDiagramStyle) session.get(RelationshipDiagramStyle.class, uuid);
+		style.getNames().size();
+		style.getEntityTypeStyles().size();
+		style.getRelationshipTypeStyles().size();
+		return style;
 	}
-
+	
 	/**
 	 * Fetches a list of {@link RelationshipDiagramStyle} for current conservation area
 	 * 

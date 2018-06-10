@@ -50,6 +50,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.i2.RelationshipDiagramManager;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLabelProvider;
+import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLoadJob;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
@@ -128,6 +129,21 @@ public class RelationshipGraphComposite extends Composite {
 			});
 		}
 	};
+	
+	private RelationshipDiagramStyleLoadJob loadStyleJob = new RelationshipDiagramStyleLoadJob() {
+		@Override
+		protected void processData(RelationshipDiagramStyle style) {
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					if (!RelationshipGraphComposite.this.isDisposed()) {
+						graphLabelProvider.setStyle(style);
+						graphViewer.refresh();
+					}
+				}		
+			});
+		}
+	};
 
 	public RelationshipGraphComposite(Composite parent, FormToolkit toolkit) {
 		super(parent, SWT.NONE);
@@ -164,8 +180,12 @@ public class RelationshipGraphComposite extends Composite {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection selection = (IStructuredSelection) cmbStyle.getStructuredSelection();
-				graphLabelProvider.setStyle((RelationshipDiagramStyle)selection.getFirstElement());
-				graphViewer.refresh();
+				loadStyleJob.cancel();
+				RelationshipDiagramStyle st = (RelationshipDiagramStyle)selection.getFirstElement();
+				if (st != null) {
+					loadStyleJob.setUuid(st.getUuid());
+					loadStyleJob.schedule();
+				}
 			}
 		});
 

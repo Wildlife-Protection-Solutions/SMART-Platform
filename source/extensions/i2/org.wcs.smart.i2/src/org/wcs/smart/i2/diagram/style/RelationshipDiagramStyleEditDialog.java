@@ -21,12 +21,17 @@
  */
 package org.wcs.smart.i2.diagram.style;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.UUID;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -50,7 +55,10 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.RelationshipDiagramManager;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -97,10 +105,36 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 			rdStyle = style;
 		} else {
 			//reloading current style with full data
-			rdStyle = RelationshipDiagramManager.INSTANCE.getStyle(getShell(), style.getUuid());
+			rdStyle = getStyle(getShell(), style.getUuid());
 		}
 	}
 
+	private RelationshipDiagramStyle getStyle(Shell shell, UUID uuid) {
+		final RelationshipDiagramStyle[] style = new RelationshipDiagramStyle[1];
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Loading relationship diagram style", 1);
+					try(Session s = HibernateManager.openSession()){
+						s.beginTransaction();
+						try {
+							style[0] = RelationshipDiagramManager.INSTANCE.getStyle(s, uuid);
+						} catch (Exception ex) {
+							SmartPlugIn.displayLog("Error occurs while loading relationship diagram style.", ex);
+						} finally {
+							s.getTransaction().rollback();
+						}
+					}
+				}
+			});
+		} catch (Exception e) {
+			SmartPlugIn.displayLog("Error occurs while loading relationship diagram style.", e);
+		}
+		return style[0];
+	}
+	
 	@Override
 	protected Point getInitialSize() {
 		return new Point(DIALOG_WIDTH, DIALOG_HEIGHT);

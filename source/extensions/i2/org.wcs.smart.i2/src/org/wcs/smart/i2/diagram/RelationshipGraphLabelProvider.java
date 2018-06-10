@@ -30,8 +30,6 @@ import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.i2.RelationshipDiagramManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
@@ -68,7 +66,7 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 	}
 	
 	public void setStyle(RelationshipDiagramStyle style) {
-		this.style = RelationshipDiagramManager.INSTANCE.getStyle(Display.getCurrent().getActiveShell(), style.getUuid());
+		this.style = style;
 	}
 	
 	private RelationshipDiagramNodeStyleOptions getNodeOptions(Object element) {
