@@ -36,7 +36,7 @@ import org.wcs.smart.i2.model.IntelRelationshipType;
  */
 public class RelationshipGraphFilterData {
 	
-	private static final int DEFAULT_GRAPH_DEPTH = 2;
+	private static final int DEFAULT_GRAPH_DEPTH = 1;
 	
 	private int depth = DEFAULT_GRAPH_DEPTH;
 	private List<IntelEntityType> entityTypes = new ArrayList<>();
