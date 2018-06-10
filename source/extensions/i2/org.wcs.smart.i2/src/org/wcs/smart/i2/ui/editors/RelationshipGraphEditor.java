@@ -113,6 +113,19 @@ public class RelationshipGraphEditor extends EditorPart {
 			parent.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_GREEN));
 
 			graphComposite = new RelationshipGraphComposite(parent, new FormToolkit(Display.getCurrent()));
+			
+			if (WorkingSetManager.INSTANCE.isSet()) {
+				try(Session s = HibernateManager.openSession()) {
+					IntelWorkingSet workingset = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
+					final List<IntelEntity> activeEntries = workingset.getEntities().stream().filter(e -> e.getIsVisible()).map(e -> e.getEntity()).collect(Collectors.toList());
+					Display.getDefault().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							graphComposite.setInput(activeEntries.toArray(new IntelEntity[] {}));
+						}
+					});
+				}
+			}
 
 			//part.get
 			EventHandler handler = new EventHandler() {
