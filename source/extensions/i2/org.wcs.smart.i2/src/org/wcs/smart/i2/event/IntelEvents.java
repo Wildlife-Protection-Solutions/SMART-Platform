@@ -100,4 +100,8 @@ public class IntelEvents {
 	//event to fire with list of attachments of items to
 	//search
 	public static final String ATTACHMENT_SEARCH = "INTEL_ATTACHMENT_SEARCH"; //$NON-NLS-1$
+	
+	//changes in graph style
+	public static final String GRAPH_STYLESET_CHANGED = "GRAPH_STYLESET/CHANGED"; //$NON-NLS-1$
+	
 }

@@ -47,6 +47,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.i2.RelationshipDiagramManager;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLabelProvider;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 
@@ -178,7 +179,7 @@ public class RelationshipGraphComposite extends Composite {
 		});
 
 		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-		context.get(IEventBroker.class).subscribe(RelationshipDiagramManager.GRAPH_STYLESET_CHANGED, handler);
+		context.get(IEventBroker.class).subscribe(IntelEvents.GRAPH_STYLESET_CHANGED, handler);
 	}
 
 	public void setInput(IntelEntity... entity) {

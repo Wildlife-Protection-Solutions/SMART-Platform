@@ -43,6 +43,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleDefaultNameComparator;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleFactory;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 
 /**
@@ -61,8 +62,6 @@ public enum RelationshipDiagramManager {
 	 */
 	private static final String DEFAULT_STYLE_NAME = "Default"; //$NON-NLS-1$
 	
-	public static final String GRAPH_STYLESET_CHANGED = "GRAPH_STYLESET/CHANGED"; //$NON-NLS-1$
-
 	private RelationshipDiagramManager() {}
 	
 	/**
@@ -196,7 +195,7 @@ public enum RelationshipDiagramManager {
 		
 		if (isOk[0]) {
 	        IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-			context.get(IEventBroker.class).send(GRAPH_STYLESET_CHANGED, loadStyles(shell));
+			context.get(IEventBroker.class).send(IntelEvents.GRAPH_STYLESET_CHANGED, loadStyles(shell));
 		}
 
 		return isOk[0];
@@ -234,7 +233,7 @@ public enum RelationshipDiagramManager {
 		}
 		
         IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-		context.get(IEventBroker.class).send(GRAPH_STYLESET_CHANGED, loadStyles(shell));
+		context.get(IEventBroker.class).send(IntelEvents.GRAPH_STYLESET_CHANGED, loadStyles(shell));
 	}
 	
 	/**
