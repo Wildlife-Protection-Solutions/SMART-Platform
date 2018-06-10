@@ -36,6 +36,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
@@ -96,18 +97,23 @@ public class RelationshipGraphFilterComposite extends Composite {
 	public RelationshipGraphFilterComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		filterData = new RelationshipGraphFilterData();
-		GridLayout layout = new GridLayout(6, false);
-		layout.marginHeight = layout.marginWidth = 0;
+		GridLayout layout = new GridLayout(1, false);
+		layout.marginWidth = layout.marginHeight = 0;
 		this.setLayout(layout);
-		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		createContent(this);
 	}
 
 	private void createContent(Composite parent) {
-		Label lblDepth = new Label(parent, SWT.NONE);
+		Group grp = new Group(parent, SWT.NONE );
+		grp.setLayout(new GridLayout(2, false));
+		grp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		grp.setText("Filter");
+		
+		Label lblDepth = new Label(grp, SWT.NONE);
 		lblDepth.setText("Depth:");
 
-		cmbDepth = new ComboViewer(this, SWT.READ_ONLY | SWT.BORDER);
+		cmbDepth = new ComboViewer(grp, SWT.READ_ONLY | SWT.BORDER);
 		cmbDepth.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		cmbDepth.setContentProvider(ArrayContentProvider.getInstance());
 		cmbDepth.setInput(GRAPH_DEPTH_OPTIONS);
@@ -121,11 +127,11 @@ public class RelationshipGraphFilterComposite extends Composite {
 			}
 		});
 		
-		Label lblEntityTypes = new Label(parent, SWT.NONE);
+		Label lblEntityTypes = new Label(grp, SWT.NONE);
 		lblEntityTypes.setText("Entity Types:");
 
-		cmbEntityTypes = new CheckBoxDropDown(parent);
-		cmbEntityTypes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		cmbEntityTypes = new CheckBoxDropDown(grp);
+		cmbEntityTypes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbEntityTypes.setLabelProvider(new EntityTypeLabelProvider());
 		cmbEntityTypes.setContentProvider(ArrayContentProvider.getInstance());
 		cmbEntityTypes.setInput(Arrays.asList(DialogConstants.LOADING_TEXT));
@@ -139,11 +145,11 @@ public class RelationshipGraphFilterComposite extends Composite {
 			}
 		});
 		
-		Label lblRelationTypes = new Label(parent, SWT.NONE);
+		Label lblRelationTypes = new Label(grp, SWT.NONE);
 		lblRelationTypes.setText("Relationship Types:");
 
-		cmbRelationTypes = new CheckBoxDropDown(parent);
-		cmbRelationTypes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		cmbRelationTypes = new CheckBoxDropDown(grp);
+		cmbRelationTypes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbRelationTypes.setLabelProvider(new RelationshipTypeLabelProvider());
 		cmbRelationTypes.setContentProvider(ArrayContentProvider.getInstance());
 		cmbRelationTypes.setInput(Arrays.asList(DialogConstants.LOADING_TEXT));

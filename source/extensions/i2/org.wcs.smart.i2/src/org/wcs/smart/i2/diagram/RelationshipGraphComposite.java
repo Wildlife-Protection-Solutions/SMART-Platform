@@ -113,17 +113,22 @@ public class RelationshipGraphComposite extends Composite {
 
 	private void createContent(Composite parent) {
 		Composite topCmp = toolkit.createComposite(parent, SWT.NONE);
-		topCmp.setLayout(new GridLayout(3, false));
+		topCmp.setLayout(new GridLayout(2, false));
 		topCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		cmpFilter = new RelationshipGraphFilterComposite(topCmp);
-
+		
+		Composite styleCmp = toolkit.createComposite(topCmp, SWT.NONE);
+		styleCmp.setLayout(new GridLayout(2, false));
+		styleCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)styleCmp.getLayoutData()).minimumWidth = 200; //NOTE: need this to fix layout issues caused by CheckBoxDropDown located in RelationshipGraphFilterComposite
+		
 		List<RelationshipDiagramStyle> stylesList = RelationshipDiagramManager.INSTANCE.loadStyles(getShell());
 
-		toolkit.createLabel(topCmp, "Style:");
+		toolkit.createLabel(styleCmp, "Style:");
 
-		cmbStyle = new ComboViewer(topCmp, SWT.READ_ONLY | SWT.BORDER);
-		cmbStyle.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		cmbStyle = new ComboViewer(styleCmp, SWT.READ_ONLY | SWT.BORDER);
+		cmbStyle.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbStyle.setContentProvider(ArrayContentProvider.getInstance());
 		cmbStyle.setLabelProvider(new RelationshipDiagramStyleLabelProvider());
 		cmbStyle.setInput(stylesList);
