@@ -49,7 +49,7 @@ public class RelationshipGraphContentProvider implements IGraphContentProvider {
 		if (graphData != null ) {
 			return graphData.getEntities();
 		}
-		return new Object[] {"Loading..."};
+		return new Object[]{};
 	}
 	
 	@Override

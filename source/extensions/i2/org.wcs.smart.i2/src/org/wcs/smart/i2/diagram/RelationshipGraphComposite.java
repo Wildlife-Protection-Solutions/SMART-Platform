@@ -164,7 +164,6 @@ public class RelationshipGraphComposite extends Composite {
 		graphViewer.setContentProvider(graphContentProvider);
 		graphViewer.setLabelProvider(graphLabelProvider);
 		graphViewer.setLayoutAlgorithm(new RadialLayoutAlgorithm());
-		graphViewer.setInput(new Object());
 
 		if (!stylesList.isEmpty()) {
 			//TODO: do we want to persist selected style?
