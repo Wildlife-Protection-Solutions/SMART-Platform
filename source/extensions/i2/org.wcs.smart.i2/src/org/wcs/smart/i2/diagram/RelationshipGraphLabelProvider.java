@@ -125,7 +125,7 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 		if (node instanceof IntelEntity) {
 			IntelEntity e = (IntelEntity) node;
 			Map<String, Object> attributes = new HashMap<>();
-			attributes.put(ZestProperties.TOOLTIP__N, "Tooltip: " + e.getIdAttributeAsText()); //TODO: ZZZZZZZ need proper tooltip!!!
+			attributes.put(ZestProperties.TOOLTIP__N, e.getIdAttributeAsText()); //TODO: need proper tooltip!!!
 			return attributes;
 		}
 		return null;
