@@ -114,6 +114,7 @@ public class RelationshipGraphEditor extends EditorPart {
 
 			graphComposite = new RelationshipGraphComposite(parent, new FormToolkit(Display.getCurrent()));
 			
+			//loading data from current working set if it is available
 			if (WorkingSetManager.INSTANCE.isSet()) {
 				try(Session s = HibernateManager.openSession()) {
 					IntelWorkingSet workingset = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
