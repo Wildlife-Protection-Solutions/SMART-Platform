@@ -40,6 +40,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.osgi.service.event.Event;
@@ -65,6 +66,9 @@ public class RelationshipGraphComposite extends Composite {
 	private ZestContentViewer graphViewer;
 	private RelationshipGraphLabelProvider graphLabelProvider;
 	private RelationshipGraphContentProvider graphContentProvider;
+	
+	private IntelEntity[] roots;
+
 
 	private EventHandler handler = new EventHandler() {
 		@Override
@@ -80,6 +84,20 @@ public class RelationshipGraphComposite extends Composite {
 				}
 				cmbStyle.setSelection(new StructuredSelection(selObj));
 			}
+		}
+	};
+	
+	private RelationshipGraphLoadDataJob loadGraphDataJob = new RelationshipGraphLoadDataJob() {
+		@Override
+		protected void processData(IRelationshipGraphData graphData) {
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					if (!RelationshipGraphComposite.this.isDisposed()) {
+						graphViewer.setInput(graphData);
+					}
+				}		
+			});
 		}
 	};
 
@@ -133,12 +151,14 @@ public class RelationshipGraphComposite extends Composite {
 		((StackLayout)mainCmp.getLayout()).topControl = graphCmp; //NOTE: this is a hack to coordinate sizing of composites with GridLayout and FillLayout
 
 		graphContentProvider = new RelationshipGraphContentProvider();
+		graphLabelProvider = new RelationshipGraphLabelProvider(graphContentProvider);
+		
 		graphViewer = new ZestContentViewer(new ZestFxJFaceModule());
 		graphViewer.createControl(graphCmp, SWT.NONE);
 		graphViewer.setContentProvider(graphContentProvider);
-		graphLabelProvider = new RelationshipGraphLabelProvider(graphViewer);
 		graphViewer.setLabelProvider(graphLabelProvider);
 		graphViewer.setLayoutAlgorithm(new RadialLayoutAlgorithm());
+		graphViewer.setInput(new Object());
 
 		if (!stylesList.isEmpty()) {
 			//TODO: do we want to persist selected style?
@@ -148,18 +168,24 @@ public class RelationshipGraphComposite extends Composite {
 		cmpFilter.addFilterChangeListener(new IRelationshipGraphFilterChangeListener() {
 			@Override
 			public void filterChanged(RelationshipGraphFilterData filterData) {
-				graphContentProvider.setFilterData(filterData);
-				graphViewer.refresh();
+				refreshGraphContent();
 			}
 		});
-		graphContentProvider.setFilterData(cmpFilter.getFilterData());
 
 		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
 		context.get(IEventBroker.class).subscribe(RelationshipDiagramManager.GRAPH_STYLESET_CHANGED, handler);
 	}
 
 	public void setInput(IntelEntity... entity) {
-		graphViewer.setInput(entity);
+		roots = entity;
+		refreshGraphContent();
+	}
+	
+	private void refreshGraphContent() {
+		loadGraphDataJob.cancel();
+		loadGraphDataJob.setRoots(roots);
+		loadGraphDataJob.setFilterData(cmpFilter.getFilterData());
+		loadGraphDataJob.schedule();
 	}
 	
 	@Override

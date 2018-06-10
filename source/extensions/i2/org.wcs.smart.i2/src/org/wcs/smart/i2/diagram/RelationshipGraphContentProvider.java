@@ -21,16 +21,8 @@
  */
 package org.wcs.smart.i2.diagram;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.eclipse.gef.zest.fx.jface.IGraphContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.i2.diagram.RelationshipGraphLoadDataJob.GraphData;
-import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 
 /**
@@ -41,57 +33,29 @@ import org.wcs.smart.i2.model.IntelEntityRelationship;
  */
 public class RelationshipGraphContentProvider implements IGraphContentProvider {
 	
-	private Set<IntelEntityRelationship> relationships = Collections.emptySet();
-	private Set<IntelEntity> entities = Collections.emptySet();
-	private IntelEntity[] roots;
-	private RelationshipGraphFilterData filterData = new RelationshipGraphFilterData();
+	private IRelationshipGraphData graphData;
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if (newInput instanceof IntelEntity[]) {
-			roots = (IntelEntity[]) newInput;
-			loadGraphData(roots);
-		} else if (newInput instanceof IntelEntity) {
-			roots = new IntelEntity[] {(IntelEntity) newInput};
-			loadGraphData(roots);
+		if (newInput instanceof IRelationshipGraphData) {
+			graphData = (IRelationshipGraphData) newInput;
+		} else if (newInput == null) {
+			graphData = null;
 		}
 	}
 	
-	public void setFilterData(RelationshipGraphFilterData filterData) {
-		this.filterData = filterData;
-		loadGraphData(roots);
-	}
-
-	private void loadGraphData(IntelEntity... root) {
-		RelationshipGraphLoadDataJob loadJob = new RelationshipGraphLoadDataJob(filterData, root);
-		loadJob.schedule();
-		try {
-			loadJob.join();
-		} catch (InterruptedException e) {
-			SmartPlugIn.displayError(Messages.RelationshipGraphContentProvider_LoadDataError, e);
-		}
-		GraphData loadedData = loadJob.getLoadedData();
-		relationships = loadedData.getRelationships();
-		entities = loadedData.getEntities();
-	}
-
 	@Override
 	public Object[] getNodes() {
-		return entities.toArray();
+		if (graphData != null ) {
+			return graphData.getEntities();
+		}
+		return new Object[] {"Loading..."};
 	}
 	
 	@Override
 	public Object[] getAdjacentNodes(Object node) {
-		if (node instanceof IntelEntity) {
-			IntelEntity e = (IntelEntity) node;
-			Set<IntelEntityRelationship> rels = relationships;
-			Set<IntelEntity> ents = new HashSet<>();
-			for (IntelEntityRelationship r : rels) {
-				if (e.equals(r.getSourceEntity())) {
-					ents.add(r.getTargetEntity());
-				}
-			}
-			return ents.toArray();
+		if (graphData != null) {
+			return graphData.getTargets(node);
 		}
 		return null;
 	}
@@ -106,14 +70,17 @@ public class RelationshipGraphContentProvider implements IGraphContentProvider {
 		return null;
 	}
 
+	public boolean isRootNode(Object node) {
+		if (graphData != null) {
+			return graphData.isRootNode(node);
+		}
+		return false;
+	}
+
 	public IntelEntityRelationship getRelationship(Object source, Object target) {
-		Set<IntelEntityRelationship> rels = relationships;
-		for (IntelEntityRelationship r : rels) {
-			if (source.equals(r.getSourceEntity()) && target.equals(r.getTargetEntity())) {
-				return r;
-			}
+		if (graphData != null) {
+			return graphData.getRelationship(source, target);
 		}
 		return null;
 	}
-
 }

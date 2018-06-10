@@ -56,31 +56,19 @@ import org.wcs.smart.ui.Thumbnail;
  */
 public class RelationshipGraphLabelProvider extends LabelProvider implements IGraphAttributesProvider, IColorProvider {
 	
-	private ZestContentViewer graphViewer;
+	private RelationshipGraphContentProvider graphContentProvider;
 	private RelationshipDiagramStyle style;
 	
-	public RelationshipGraphLabelProvider(ZestContentViewer graphViewer) {
-		this.graphViewer = graphViewer; 
+	public RelationshipGraphLabelProvider(RelationshipGraphContentProvider graphContentProvider) {
+		this.graphContentProvider = graphContentProvider; 
 	}
 
 	private boolean isRootNode(Object node) {
-		Object input = graphViewer.getInput();
-		if (input instanceof Object[]) {
-			Object[] objs = (Object[]) input;
-			return Arrays.stream(objs).anyMatch(node::equals);
-		}
-		if (input instanceof Collection<?>) {
-			return ((Collection<?>)input).contains(node);
-		}
-		return node.equals(input);
+		return graphContentProvider.isRootNode(node);
 	}
 	
 	private IntelEntityRelationship getRelationship(Object source, Object target) {
-		IContentProvider cp = graphViewer.getContentProvider();
-		if (cp instanceof RelationshipGraphContentProvider) {
-			return ((RelationshipGraphContentProvider)cp).getRelationship(source, target);
-		}
-		return null;
+		return graphContentProvider.getRelationship(source, target);
 	}
 	
 	public void setStyle(RelationshipDiagramStyle style) {
