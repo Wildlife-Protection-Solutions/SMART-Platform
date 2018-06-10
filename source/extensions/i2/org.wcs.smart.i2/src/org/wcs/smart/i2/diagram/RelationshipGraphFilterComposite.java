@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -38,6 +40,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.PlatformUI;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
@@ -94,6 +100,22 @@ public class RelationshipGraphFilterComposite extends Composite {
 		}
 	};
 
+	private EventHandler entityTypesHandler = new EventHandler() {
+		@Override
+		public void handleEvent(Event event) {
+			entityTypeJob.cancel();
+			entityTypeJob.schedule();
+		}
+	};
+
+	private EventHandler relationshipTypesHandler = new EventHandler() {
+		@Override
+		public void handleEvent(Event event) {
+			relationshipTypeJob.cancel();
+			relationshipTypeJob.schedule();
+		}
+	};
+	
 	public RelationshipGraphFilterComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		filterData = new RelationshipGraphFilterData();
@@ -162,9 +184,26 @@ public class RelationshipGraphFilterComposite extends Composite {
 				fireFilterChanged(filterData);
 			}
 		});
+
+		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		IEventBroker eventBroker = context.get(IEventBroker.class);
+		eventBroker.subscribe(IntelEvents.ENTITY_TYPE_ALL, entityTypesHandler);
+		eventBroker.subscribe(IntelEvents.RELATION_TYPE_ALL, relationshipTypesHandler);
 		
+		entityTypeJob.cancel();
 		entityTypeJob.schedule();
+
+		relationshipTypeJob.cancel();
 		relationshipTypeJob.schedule();
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		IEventBroker eventBroker = context.get(IEventBroker.class);
+		eventBroker.unsubscribe(entityTypesHandler);
+		eventBroker.unsubscribe(relationshipTypesHandler);
 	}
 	
 	public RelationshipGraphFilterData getFilterData() {
