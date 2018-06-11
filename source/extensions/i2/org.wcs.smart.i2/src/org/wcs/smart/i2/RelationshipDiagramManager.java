@@ -44,6 +44,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleDefaultNameComparator;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleFactory;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 
 /**
@@ -96,20 +97,6 @@ public enum RelationshipDiagramManager {
 		return styles;
 	}
 
-//	/**
-//	 * Fetches default style.
-//	 * 
-//	 * @param session
-//	 * @return
-//	 */
-//	public RelationshipDiagramStyle getDefaultStyle(Session session) {
-//		ConservationArea ca = SmartDB.getCurrentConservationArea();
-//		RelationshipDiagramStyle style = QueryFactory.buildQuery(session, RelationshipDiagramStyle.class,
-//				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-//				new Object[] {"default", true}).uniqueResult(); //$NON-NLS-1$
-//		return style != null ? style : createDefaultStyle(session);
-//	}
-
 	/**
 	 * Delete a {@link RelationshipDiagramStyle}
 	 */
@@ -121,7 +108,7 @@ public enum RelationshipDiagramManager {
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Saving relationship diagram style", 1);
+					monitor.beginTask(Messages.RelationshipDiagramManager_Task_Save, 1);
 					try(Session session = HibernateManager.openSession()){
 						session.beginTransaction();
 						try {
@@ -131,13 +118,13 @@ public enum RelationshipDiagramManager {
 							styleList.addAll(getStyles(session));
 						} catch (Exception ex) {
 							session.getTransaction().rollback();
-							SmartPlugIn.displayLog("Error occured while saving relationship diagram style.", ex);
+							SmartPlugIn.displayLog(Messages.RelationshipDiagramManager_SaveError, ex);
 						}
 					}
 				}
 			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog("Error occured while saving relationship diagram style.", e);
+			SmartPlugIn.displayLog(Messages.RelationshipDiagramManager_SaveError, e);
 		}
 		
 		if (isOk[0] && !styleList.isEmpty()) {
@@ -160,7 +147,7 @@ public enum RelationshipDiagramManager {
 
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Deleteing relationship diagram style", 1);
+					monitor.beginTask(Messages.RelationshipDiagramManager_Task_Delete, 1);
 					
 					try(Session session = HibernateManager.openSession()){
 						session.beginTransaction();
@@ -170,7 +157,7 @@ public enum RelationshipDiagramManager {
 							styleList.addAll(getStyles(session));
 						}catch (Exception ex){
 							session.getTransaction().rollback();
-							SmartPlugIn.displayLog("Error occured while deleting relationship diagram style", ex);
+							SmartPlugIn.displayLog(Messages.RelationshipDiagramManager_DeleteError, ex);
 						}
 					} finally {
 						monitor.done();
@@ -178,7 +165,7 @@ public enum RelationshipDiagramManager {
 				}
 			});
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog("Error occured while deleting relationship diagram style", ex);
+			SmartPlugIn.displayLog(Messages.RelationshipDiagramManager_DeleteError, ex);
 		}
 		
         IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
@@ -205,7 +192,7 @@ public enum RelationshipDiagramManager {
 		    			s.save(defaultStyle);
 		    			s.getTransaction().commit();
 		    		} catch (Exception e) {
-		    			SmartPlugIn.displayLog("Error occurred while trying to save default relationship diagram style.", e);
+		    			SmartPlugIn.displayLog(Messages.RelationshipDiagramManager_DefaultStyleSaveError, e);
 		    		}
 	    		}
 		    }  
@@ -214,7 +201,7 @@ public enum RelationshipDiagramManager {
 		try {
 			thread.join(); //we need to wait till thread is completed
 		} catch (InterruptedException e) {
-			SmartPlugIn.displayLog("Error occurred while trying to save default relationship diagram style.", e);
+			SmartPlugIn.displayLog(Messages.RelationshipDiagramManager_DefaultStyleSaveError, e);
 		}
 		
 		return (RelationshipDiagramStyle) session.merge(defaultStyle); //attaching create object to current session

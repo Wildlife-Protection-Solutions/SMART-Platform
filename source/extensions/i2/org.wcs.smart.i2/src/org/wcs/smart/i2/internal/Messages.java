@@ -1307,6 +1307,11 @@ public class Messages extends NLS {
 	public static String RelationshipAttributeDialog_SaveConfirmTitle;
 	public static String RelationshipAttributeDialog_Title;
 	public static String RelationshipContentProvider_NoneGroupName;
+	public static String RelationshipDiagramManager_DefaultStyleSaveError;
+	public static String RelationshipDiagramManager_DeleteError;
+	public static String RelationshipDiagramManager_SaveError;
+	public static String RelationshipDiagramManager_Task_Delete;
+	public static String RelationshipDiagramManager_Task_Save;
 	public static String RelationshipGraphComposite_Style;
 	public static String RelationshipGraphContentProvider_LoadDataError;
 	public static String RelationshipGraphFilterComposite_Depth;
