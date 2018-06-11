@@ -48,12 +48,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import org.wcs.smart.i2.RelationshipDiagramManager;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLabelProvider;
+import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleListLoadJob;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLoadJob;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Composite that contains controls related to relationship graph visualization.
@@ -80,14 +81,7 @@ public class RelationshipGraphComposite extends Composite {
 		public void handleEvent(Event event) {
 			Object data = event.getProperty(IEventBroker.DATA);
 			if (data instanceof List) {
-				IStructuredSelection selection = (IStructuredSelection) cmbStyle.getStructuredSelection();
-				Object selObj = selection.getFirstElement();
-				List<?> lst = (List<?>) data;
-				cmbStyle.setInput(lst);
-				if (!lst.contains(selObj)) {
-					selObj = lst.get(0);
-				}
-				cmbStyle.setSelection(new StructuredSelection(selObj));
+				updateStylesInput((List<?>) data);
 			}
 		}
 	};
@@ -125,6 +119,18 @@ public class RelationshipGraphComposite extends Composite {
 					if (!RelationshipGraphComposite.this.isDisposed()) {
 						graphViewer.setInput(graphData);
 					}
+				}		
+			});
+		}
+	};
+
+	private RelationshipDiagramStyleListLoadJob loadStyleListJob = new RelationshipDiagramStyleListLoadJob() {
+		@Override
+		protected void processData(List<RelationshipDiagramStyle> styles) {
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					updateStylesInput(styles);
 				}		
 			});
 		}
@@ -167,15 +173,13 @@ public class RelationshipGraphComposite extends Composite {
 		styleCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)styleCmp.getLayoutData()).minimumWidth = 200; //NOTE: need this to fix layout issues caused by CheckBoxDropDown located in RelationshipGraphFilterComposite
 		
-		List<RelationshipDiagramStyle> stylesList = RelationshipDiagramManager.INSTANCE.loadStyles(getShell());
-
 		toolkit.createLabel(styleCmp, "Style:");
 
 		cmbStyle = new ComboViewer(styleCmp, SWT.READ_ONLY | SWT.BORDER);
 		cmbStyle.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbStyle.setContentProvider(ArrayContentProvider.getInstance());
 		cmbStyle.setLabelProvider(new RelationshipDiagramStyleLabelProvider());
-		cmbStyle.setInput(stylesList);
+		cmbStyle.setInput(Arrays.asList(DialogConstants.LOADING_TEXT));
 		cmbStyle.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -212,17 +216,14 @@ public class RelationshipGraphComposite extends Composite {
 		graphViewer.setLabelProvider(graphLabelProvider);
 		graphViewer.setLayoutAlgorithm(new RadialLayoutAlgorithm());
 
-		if (!stylesList.isEmpty()) {
-			//TODO: do we want to persist selected style?
-			cmbStyle.setSelection(new StructuredSelection(stylesList.get(0)));
-		}
-
 		cmpFilter.addFilterChangeListener(new IRelationshipGraphFilterChangeListener() {
 			@Override
 			public void filterChanged(RelationshipGraphFilterData filterData) {
 				refreshGraphContent();
 			}
 		});
+		
+		loadStyleListJob.schedule();
 
 		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
 		IEventBroker eventBroker = context.get(IEventBroker.class);
@@ -234,6 +235,19 @@ public class RelationshipGraphComposite extends Composite {
 	public void setInput(IntelEntity... entity) {
 		roots = entity;
 		refreshGraphContent();
+	}
+
+	private void updateStylesInput(List<?> newStyles) {
+		if (cmbStyle.getControl().isDisposed()) {
+			return;
+		}
+		IStructuredSelection selection = (IStructuredSelection) cmbStyle.getStructuredSelection();
+		Object selObj = selection.getFirstElement();
+		cmbStyle.setInput(newStyles);
+		if (!newStyles.contains(selObj)) {
+			selObj = newStyles.get(0);
+		}
+		cmbStyle.setSelection(new StructuredSelection(selObj));
 	}
 	
 	private void refreshGraphContent() {

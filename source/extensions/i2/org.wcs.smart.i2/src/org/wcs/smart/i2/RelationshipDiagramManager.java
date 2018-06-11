@@ -84,7 +84,7 @@ public enum RelationshipDiagramManager {
 	 * @param shell shell
 	 * @return List of {@link RelationshipDiagramStyle}
 	 */
-	public List<RelationshipDiagramStyle> loadStyles(Shell shell) {
+	private List<RelationshipDiagramStyle> loadStyles(Shell shell) {
 		final List<RelationshipDiagramStyle> styleList = new ArrayList<RelationshipDiagramStyle>();
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
@@ -118,7 +118,7 @@ public enum RelationshipDiagramManager {
 	 * @param session session
 	 * @return List of {@link RelationshipDiagramStyle}
 	 */
-	private List<RelationshipDiagramStyle> getStyles(Session session) {
+	public List<RelationshipDiagramStyle> getStyles(Session session) {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		List<RelationshipDiagramStyle>  styles =
 				QueryFactory.buildQuery(session, RelationshipDiagramStyle.class,"conservationArea", ca).getResultList(); //$NON-NLS-1$

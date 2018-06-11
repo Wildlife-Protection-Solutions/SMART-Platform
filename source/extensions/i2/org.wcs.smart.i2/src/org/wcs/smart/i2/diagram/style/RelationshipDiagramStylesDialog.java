@@ -22,6 +22,8 @@
 package org.wcs.smart.i2.diagram.style;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -43,11 +45,13 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.RelationshipDiagramManager;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Dialog for managing relationship diagram styles.
@@ -66,6 +70,25 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 	private Button btnCreate;
 	private Button btnEdit;
 	private Button btnDelete;
+	
+	private List<RelationshipDiagramStyle> currentStylesList = new ArrayList<>();
+
+	private RelationshipDiagramStyleListLoadJob loadStyleListJob = new RelationshipDiagramStyleListLoadJob() {
+		@Override
+		protected void processData(List<RelationshipDiagramStyle> styles) {
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					if (!stylesViewer.getControl().isDisposed()) {
+						currentStylesList = styles;
+						stylesViewer.setInput(styles);
+						stylesViewer.refresh();
+						updateState();
+					}
+				}		
+			});
+		}
+	};
 	
 	public RelationshipDiagramStylesDialog(Shell parent) {
 		super(parent, "Relationship Diagram Styles");
@@ -92,7 +115,7 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		stylesViewer = new TableViewer(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		stylesViewer.setLabelProvider(new RelationshipDiagramStyleLabelProvider());
 		stylesViewer.setContentProvider(ArrayContentProvider.getInstance());
-		stylesViewer.setInput(getStylesList());
+		stylesViewer.setInput(Arrays.asList(DialogConstants.LOADING_TEXT));
 		stylesViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		stylesViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
@@ -145,6 +168,8 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		setTitle("Relationship Diagram Styles");
 		setMessage("Manage the list of available styles for relationship diagram.\nDouble click to edit.");
 		
+		loadStyleListJob.schedule();
+		
 		return main;
 	}
 	
@@ -155,10 +180,8 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 	}
 	
 	private void reloadData() {
-		stylesViewer.setInput(getStylesList());
-		
-		stylesViewer.refresh();
-		updateState();
+		loadStyleListJob.cancel();
+		loadStyleListJob.schedule();
 	}
 	
 	protected RelationshipDiagramStyle getSelectedStyle() {
@@ -168,7 +191,7 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 	}
 
 	protected void createNewStyle() {
-		CreateNewStyleOpDialog opDialog = new CreateNewStyleOpDialog(getShell(), getStylesList());
+		CreateNewStyleOpDialog opDialog = new CreateNewStyleOpDialog(getShell(), currentStylesList);
 		if (opDialog.open() == Window.OK){
 			RelationshipDiagramStyle initStyle  = null;
 		
@@ -207,10 +230,6 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		Dialog dialog = new RelationshipDiagramStyleEditDialog(getShell(), getSelectedStyle());
 		dialog.open();
 		reloadData();
-	}
-
-	private List<RelationshipDiagramStyle> getStylesList() {
-		return RelationshipDiagramManager.INSTANCE.loadStyles(getShell());
 	}
 
 	@Override
