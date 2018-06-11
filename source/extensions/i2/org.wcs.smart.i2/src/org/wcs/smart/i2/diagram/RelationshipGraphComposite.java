@@ -52,6 +52,7 @@ import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLabelProvider;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleListLoadJob;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLoadJob;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -173,7 +174,7 @@ public class RelationshipGraphComposite extends Composite {
 		styleCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)styleCmp.getLayoutData()).minimumWidth = 200; //NOTE: need this to fix layout issues caused by CheckBoxDropDown located in RelationshipGraphFilterComposite
 		
-		toolkit.createLabel(styleCmp, "Style:");
+		toolkit.createLabel(styleCmp, Messages.RelationshipGraphComposite_Style);
 
 		cmbStyle = new ComboViewer(styleCmp, SWT.READ_ONLY | SWT.BORDER);
 		cmbStyle.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

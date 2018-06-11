@@ -32,6 +32,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 
 /**
@@ -44,7 +45,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 public abstract class LoadEntityTypeJob extends Job {
 
 	public LoadEntityTypeJob() {
-		super("Loading Entity Types");
+		super(Messages.LoadEntityTypeJob_Title);
 	}
 
 	@Override

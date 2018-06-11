@@ -32,6 +32,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.RelationshipTypeManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 
 /**
@@ -44,7 +45,7 @@ import org.wcs.smart.i2.model.IntelRelationshipType;
 public abstract class LoadRelationshipTypeJob extends Job {
 
 	public LoadRelationshipTypeJob() {
-		super("Loading Relationship Types");
+		super(Messages.LoadRelationshipTypeJob_Title);
 	}
 
 	@Override

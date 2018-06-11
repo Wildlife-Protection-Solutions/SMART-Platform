@@ -44,6 +44,7 @@ import org.eclipse.ui.PlatformUI;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
@@ -130,10 +131,10 @@ public class RelationshipGraphFilterComposite extends Composite {
 		Group grp = new Group(parent, SWT.NONE );
 		grp.setLayout(new GridLayout(2, false));
 		grp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		grp.setText("Filter");
+		grp.setText(Messages.RelationshipGraphFilterComposite_Filter);
 		
 		Label lblDepth = new Label(grp, SWT.NONE);
-		lblDepth.setText("Depth:");
+		lblDepth.setText(Messages.RelationshipGraphFilterComposite_Depth);
 
 		cmbDepth = new ComboViewer(grp, SWT.READ_ONLY | SWT.BORDER);
 		cmbDepth.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -150,7 +151,7 @@ public class RelationshipGraphFilterComposite extends Composite {
 		});
 		
 		Label lblEntityTypes = new Label(grp, SWT.NONE);
-		lblEntityTypes.setText("Entity Types:");
+		lblEntityTypes.setText(Messages.RelationshipGraphFilterComposite_EntityTypes);
 
 		cmbEntityTypes = new CheckBoxDropDown(grp);
 		cmbEntityTypes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -168,7 +169,7 @@ public class RelationshipGraphFilterComposite extends Composite {
 		});
 		
 		Label lblRelationTypes = new Label(grp, SWT.NONE);
-		lblRelationTypes.setText("Relationship Types:");
+		lblRelationTypes.setText(Messages.RelationshipGraphFilterComposite_RelationshipTypes);
 
 		cmbRelationTypes = new CheckBoxDropDown(grp);
 		cmbRelationTypes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

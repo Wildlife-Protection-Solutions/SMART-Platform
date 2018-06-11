@@ -909,6 +909,7 @@ public class Messages extends NLS {
 	public static String IntelReportManager_SaveTitle;
 	public static String InternalQueryManager_EntitySummaryQueryName;
 	public static String InternalQueryManager_RecordObservationQueryName;
+	public static String LoadEntityTypeJob_Title;
 	public static String LoadFilterOptions_AttributeFilterLabel;
 	public static String LoadFilterOptions_CategoriesFilterLabel;
 	public static String LoadFilterOptions_DataModelFilterLabel;
@@ -918,6 +919,7 @@ public class Messages extends NLS {
 	public static String LoadFilterOptions_JobName;
 	public static String LoadFilterOptions_LocationFilterLabel;
 	public static String LoadFilterOptions_OperatorsLabel;
+	public static String LoadRelationshipTypeJob_Title;
 	public static String LoadSavedSearches_errorMsg;
 	public static String LoadSavedSearches_jobname;
 	public static String LocationDetailsShell_EntitiesLabel;
@@ -1305,7 +1307,12 @@ public class Messages extends NLS {
 	public static String RelationshipAttributeDialog_SaveConfirmTitle;
 	public static String RelationshipAttributeDialog_Title;
 	public static String RelationshipContentProvider_NoneGroupName;
+	public static String RelationshipGraphComposite_Style;
 	public static String RelationshipGraphContentProvider_LoadDataError;
+	public static String RelationshipGraphFilterComposite_Depth;
+	public static String RelationshipGraphFilterComposite_EntityTypes;
+	public static String RelationshipGraphFilterComposite_Filter;
+	public static String RelationshipGraphFilterComposite_RelationshipTypes;
 	public static String RelationshipGraphLoadDataJob_JobTitle;
 	public static String RelationshipGroupDialog_LoadError;
 	public static String RelationshipGroupDialog_Message;
