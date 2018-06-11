@@ -1364,6 +1364,8 @@ public class Messages extends NLS {
 	public static String RelationshipDiagramTreeRootStyleObjects_RootNode;
 	public static String RelationshipGraphComposite_Style;
 	public static String RelationshipGraphContentProvider_LoadDataError;
+	public static String RelationshipGraphEditor_Name;
+	public static String RelationshipGraphEditor_UpdateGraph_Job;
 	public static String RelationshipGraphFilterComposite_Depth;
 	public static String RelationshipGraphFilterComposite_EntityTypes;
 	public static String RelationshipGraphFilterComposite_Filter;

@@ -50,6 +50,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.diagram.RelationshipGraphComposite;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
@@ -69,7 +70,7 @@ public class RelationshipGraphEditor extends EditorPart {
 	private IEclipseContext parentContext;
 	private RelationshipGraphComposite graphComposite;
 
-	private Job graphUpdateJob = new Job("Updating graph input") {
+	private Job graphUpdateJob = new Job(Messages.RelationshipGraphEditor_UpdateGraph_Job) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -220,7 +221,7 @@ public class RelationshipGraphEditor extends EditorPart {
 
 			@Override
 			public String getName() {
-				return "Relationships";
+				return Messages.RelationshipGraphEditor_Name;
 			}
 
 			@Override
