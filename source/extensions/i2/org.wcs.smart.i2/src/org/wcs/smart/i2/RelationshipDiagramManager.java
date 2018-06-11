@@ -81,40 +81,6 @@ public enum RelationshipDiagramManager {
 	/**
 	 * Fetches a list of {@link RelationshipDiagramStyle} for current conservation area
 	 * 
-	 * @param shell shell
-	 * @return List of {@link RelationshipDiagramStyle}
-	 */
-	private List<RelationshipDiagramStyle> loadStyles(Shell shell) {
-		final List<RelationshipDiagramStyle> styleList = new ArrayList<RelationshipDiagramStyle>();
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
-		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Loading relationship diagram styles list", 1);
-					try(Session session = HibernateManager.openSession()){
-						session.beginTransaction();
-						try {
-							styleList.addAll(RelationshipDiagramManager.INSTANCE.getStyles(session));
-							Collections.sort(styleList, new RelationshipDiagramStyleDefaultNameComparator());
-						} catch (Exception ex) {
-							SmartPlugIn.displayLog("Error occurs while loading relationship diagram styles list.", ex);
-						} finally {
-							session.getTransaction().rollback();
-						}
-					}
-				}
-			});
-		} catch (Exception e) {
-			SmartPlugIn.displayLog("Error occurs while loading relationship diagram styles list.", e);
-			return Collections.emptyList();
-		}
-		return styleList;
-	}
-	
-	/**
-	 * Fetches a list of {@link RelationshipDiagramStyle} for current conservation area
-	 * 
 	 * @param session session
 	 * @return List of {@link RelationshipDiagramStyle}
 	 */
@@ -126,6 +92,7 @@ public enum RelationshipDiagramManager {
 			RelationshipDiagramStyle defaultProfile = createDefaultStyle(session);
 			return Arrays.asList(defaultProfile);
 		}
+		Collections.sort(styles, new RelationshipDiagramStyleDefaultNameComparator());
 		return styles;
 	}
 
@@ -148,6 +115,7 @@ public enum RelationshipDiagramManager {
 	 */
 	public boolean saveStyle(Shell shell, RelationshipDiagramStyle style) {
 		final boolean[] isOk = {false};
+		final List<RelationshipDiagramStyle> styleList = new ArrayList<RelationshipDiagramStyle>();
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -160,6 +128,7 @@ public enum RelationshipDiagramManager {
 							session.saveOrUpdate(style);
 							session.getTransaction().commit();
 							isOk[0] = true;
+							styleList.addAll(getStyles(session));
 						} catch (Exception ex) {
 							session.getTransaction().rollback();
 							SmartPlugIn.displayLog("Error occured while saving relationship diagram style.", ex);
@@ -171,9 +140,9 @@ public enum RelationshipDiagramManager {
 			SmartPlugIn.displayLog("Error occured while saving relationship diagram style.", e);
 		}
 		
-		if (isOk[0]) {
+		if (isOk[0] && !styleList.isEmpty()) {
 	        IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-			context.get(IEventBroker.class).send(IntelEvents.GRAPH_STYLESET_CHANGED, loadStyles(shell));
+			context.get(IEventBroker.class).send(IntelEvents.GRAPH_STYLESET_CHANGED, styleList);
 		}
 
 		return isOk[0];
@@ -184,6 +153,7 @@ public enum RelationshipDiagramManager {
 	 * Delete a {@link RelationshipDiagramStyle}
 	 */
 	public void deleteStyle(Shell shell, RelationshipDiagramStyle style) {
+		final List<RelationshipDiagramStyle> styleList = new ArrayList<RelationshipDiagramStyle>();
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -196,7 +166,8 @@ public enum RelationshipDiagramManager {
 						session.beginTransaction();
 						try {
 							session.delete(style);
-							session.getTransaction().commit();							
+							session.getTransaction().commit();
+							styleList.addAll(getStyles(session));
 						}catch (Exception ex){
 							session.getTransaction().rollback();
 							SmartPlugIn.displayLog("Error occured while deleting relationship diagram style", ex);
@@ -211,7 +182,7 @@ public enum RelationshipDiagramManager {
 		}
 		
         IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-		context.get(IEventBroker.class).send(IntelEvents.GRAPH_STYLESET_CHANGED, loadStyles(shell));
+		context.get(IEventBroker.class).send(IntelEvents.GRAPH_STYLESET_CHANGED, styleList);
 	}
 	
 	/**

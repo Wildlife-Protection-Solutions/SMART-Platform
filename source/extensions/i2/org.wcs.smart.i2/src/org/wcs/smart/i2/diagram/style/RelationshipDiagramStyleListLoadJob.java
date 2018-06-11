@@ -52,7 +52,6 @@ public abstract class RelationshipDiagramStyleListLoadJob extends Job {
 		final List<RelationshipDiagramStyle> styleList = new ArrayList<RelationshipDiagramStyle>();
 		try(Session session = HibernateManager.openSession()) {
 			styleList.addAll(RelationshipDiagramManager.INSTANCE.getStyles(session));
-			Collections.sort(styleList, new RelationshipDiagramStyleDefaultNameComparator());
 		}
 		
 		processData(styleList);
