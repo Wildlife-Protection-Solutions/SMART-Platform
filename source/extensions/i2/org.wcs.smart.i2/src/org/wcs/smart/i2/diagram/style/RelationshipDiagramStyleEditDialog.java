@@ -61,6 +61,7 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.RelationshipDiagramManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
@@ -99,7 +100,7 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 	private RelationshipDiagramEdgeStyleComposite relationshipTypeComposite;
 	
 	public RelationshipDiagramStyleEditDialog(Shell shell, final RelationshipDiagramStyle style) {
-		super(shell, "Relationship Diagram Style");
+		super(shell, Messages.RelationshipDiagramStyleEditDialog_Dialog_Title);
 		if (style.getUuid() == null) {
 			//this is a newly created style
 			rdStyle = style;
@@ -116,13 +117,13 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Loading relationship diagram style", 1);
+					monitor.beginTask(Messages.RelationshipDiagramStyleEditDialog_LoadingStyle_Task, 1);
 					try(Session s = HibernateManager.openSession()){
 						s.beginTransaction();
 						try {
 							style[0] = RelationshipDiagramManager.INSTANCE.getStyle(s, uuid);
 						} catch (Exception ex) {
-							SmartPlugIn.displayLog("Error occurs while loading relationship diagram style.", ex);
+							SmartPlugIn.displayLog(Messages.RelationshipDiagramStyleEditDialog_LoadingStyle_Error, ex);
 						} finally {
 							s.getTransaction().rollback();
 						}
@@ -130,7 +131,7 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 				}
 			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog("Error occurs while loading relationship diagram style.", e);
+			SmartPlugIn.displayLog(Messages.RelationshipDiagramStyleEditDialog_LoadingStyle_Error, e);
 		}
 		return style[0];
 	}
@@ -162,12 +163,12 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 		topCmp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Label lblStyleName = new Label(topCmp, SWT.NONE);
-		lblStyleName.setText("Style Name:");
-		lblStyleName.setToolTipText("The name for current relationship diagram style.");
+		lblStyleName.setText(Messages.RelationshipDiagramStyleEditDialog_StyleName);
+		lblStyleName.setToolTipText(Messages.RelationshipDiagramStyleEditDialog_StyleName_Tooltip);
 
 		txtStyleName = new Text(topCmp, SWT.BORDER);
 		txtStyleName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtStyleName.setToolTipText("The name for current relationship diagram style.");
+		txtStyleName.setToolTipText(Messages.RelationshipDiagramStyleEditDialog_StyleName_Tooltip);
 		txtStyleName.setText(rdStyle.getName() != null ? rdStyle.getName() : ""); //$NON-NLS-1$
 		txtStyleName.addModifyListener(new ModifyListener() {
 			@Override
@@ -189,11 +190,11 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 		styleNameDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		styleNameDecoration.setShowHover(true);
-		styleNameDecoration.setDescriptionText(MessageFormat.format("Style Name cannot exceed {0} characters.", org.wcs.smart.ca.Label.MAX_LENGTH));
+		styleNameDecoration.setDescriptionText(MessageFormat.format(Messages.RelationshipDiagramStyleEditDialog_StyleName_MaxLength_Error, org.wcs.smart.ca.Label.MAX_LENGTH));
 		styleNameDecoration.hide();
 		
 		Button btnTranslate = new Button(topCmp, SWT.PUSH);
-		btnTranslate.setText("Translate...");
+		btnTranslate.setText(Messages.RelationshipDiagramStyleEditDialog_Button_Translate);
 		btnTranslate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -209,8 +210,8 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 		
 		createMainControls(main);
 		
-		setTitle("Relationship Diagram Style");
-		setMessage("Style configuration which can be applied to relationship diagram.");
+		setTitle(Messages.RelationshipDiagramStyleEditDialog_Dialog_Title);
+		setMessage(Messages.RelationshipDiagramStyleEditDialog_Dialog_Message);
 		
 		return main;
 	}
@@ -396,7 +397,7 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 	@Override
 	protected boolean performSave() {
 		if (!isStyleNameValid()) {
-			MessageDialog.openError(getShell(), "Error", "Some data is not valid. Correct the data before saving changes.");
+			MessageDialog.openError(getShell(), Messages.RelationshipDiagramStyleEditDialog_ErrorDialog_Title, Messages.RelationshipDiagramStyleEditDialog_ErrorDialog_Message);
 			return false;
 		}
 		boolean isOk = RelationshipDiagramManager.INSTANCE.saveStyle(getShell(), rdStyle);

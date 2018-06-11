@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.common.control.ColorSelector;
 import org.wcs.smart.common.control.ColorSelector.IColorSelectionChangeListener;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions.ImageSizeOption;
 
@@ -80,7 +81,7 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 	
 	private void createContent(Composite parent) {
 		Label lblImageSize = new Label(parent, SWT.NONE);
-		lblImageSize.setText("Image Size:");
+		lblImageSize.setText(Messages.RelationshipDiagramNodeStyleOptionsComposite_ImageSize);
 		
 		cmbImageSize = new ComboViewer(this, SWT.READ_ONLY | SWT.BORDER);
 		cmbImageSize.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -99,7 +100,7 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 		});
 
 		Label lblBackgroundColor = new Label(parent, SWT.NONE);
-		lblBackgroundColor.setText("Background Color:");
+		lblBackgroundColor.setText(Messages.RelationshipDiagramNodeStyleOptionsComposite_BackgroundColor);
 		
 		csBackgroundColor = new ColorSelector(parent);
 		csBackgroundColor.addColorSelectionChangeListener(new IColorSelectionChangeListener() {
@@ -113,7 +114,7 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 		});
 
 		Label lblForegroundColor = new Label(parent, SWT.NONE);
-		lblForegroundColor.setText("Foreground Color:");
+		lblForegroundColor.setText(Messages.RelationshipDiagramNodeStyleOptionsComposite_ForegroundColor);
 		
 		csForegroundColor = new ColorSelector(parent);
 		csForegroundColor.addColorSelectionChangeListener(new IColorSelectionChangeListener() {

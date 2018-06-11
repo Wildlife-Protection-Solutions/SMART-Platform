@@ -31,6 +31,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
 
 /**
@@ -73,7 +74,7 @@ public class RelationshipDiagramNodeStyleComposite extends Composite {
 
 	private void createContent(Composite parent) {
 		btnOverride = new Button(parent, SWT.CHECK);
-		btnOverride.setText("Override default node settings");
+		btnOverride.setText(Messages.RelationshipDiagramNodeStyleComposite_Override);
 		btnOverride.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

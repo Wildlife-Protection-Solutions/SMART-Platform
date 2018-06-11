@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.RelationshipDiagramManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -91,7 +92,7 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 	};
 	
 	public RelationshipDiagramStylesDialog(Shell parent) {
-		super(parent, "Relationship Diagram Styles");
+		super(parent, Messages.RelationshipDiagramStylesDialog_Dialog_Title);
 	}
 
 	@Override
@@ -135,7 +136,7 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		btnCmp.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 		
 		btnCreate = new Button(btnCmp, SWT.PUSH);
-		btnCreate.setText("Create New...");
+		btnCreate.setText(Messages.RelationshipDiagramStylesDialog_Button_Create);
 		btnCreate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnCreate.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -145,7 +146,7 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		});
 
 		btnEdit = new Button(btnCmp, SWT.PUSH);
-		btnEdit.setText("Edit...");
+		btnEdit.setText(Messages.RelationshipDiagramStylesDialog_Button_Edit);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -155,7 +156,7 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		});
 		
 		btnDelete = new Button(btnCmp, SWT.PUSH);
-		btnDelete.setText("Delete");
+		btnDelete.setText(Messages.RelationshipDiagramStylesDialog_Button_Delete);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -165,8 +166,8 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		});
 
 		updateState();
-		setTitle("Relationship Diagram Styles");
-		setMessage("Manage the list of available styles for relationship diagram.\nDouble click to edit.");
+		setTitle(Messages.RelationshipDiagramStylesDialog_Dialog_Title);
+		setMessage(Messages.RelationshipDiagramStylesDialog_Dialog_Message);
 		
 		loadStyleListJob.schedule();
 		
@@ -198,7 +199,7 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 			try{
 				initStyle = opDialog.getStyle();
 			}catch (Exception ex){
-				SmartPlugIn.displayLog("Error creating relationship diagram style.", ex);
+				SmartPlugIn.displayLog(Messages.RelationshipDiagramStylesDialog_CreateStyle_Error, ex);
 				return;
 			}
 			if (initStyle == null){
@@ -219,7 +220,7 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		if (style == null) {
 			return;
 		}
-		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the relationship diagram style \"{0}\"?  This action cannot be undone.\r\nAny diagram that references this style will be referenced to default style.", style.getName()))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.RelationshipDiagramStylesDialog_ConfirmDelete_Title, MessageFormat.format(Messages.RelationshipDiagramStylesDialog_ConfirmDelete_Message, style.getName()))){
 			return;
 		}
 		RelationshipDiagramManager.INSTANCE.deleteStyle(getShell(), style);

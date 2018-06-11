@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 
 /**
@@ -89,7 +90,7 @@ public class CreateNewStyleOpDialog extends TitleAreaDialog {
 	
 	private String validate() {
 		if (CreateStyleOption.STYLE.equals(option) && cbStyle.getSelection().isEmpty()) {
-			return "Relationship diagram style that will be used as a template is not selected.";
+			return Messages.CreateNewStyleOpDialog_TemplateSelection_Error;
 		}
 		return null;
 	}
@@ -102,20 +103,20 @@ public class CreateNewStyleOpDialog extends TitleAreaDialog {
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		((GridLayout)panel.getLayout()).marginWidth = 20;
 		Label lblName = new Label(panel, SWT.NONE);
-		lblName.setText("Name:");
+		lblName.setText(Messages.CreateNewStyleOpDialog_Name);
 		
 		txtName = new Text(panel, SWT.BORDER);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		txtName.setText("New Style");
+		txtName.setText(Messages.CreateNewStyleOpDialog_DefaultStyleName);
 		
 		Label lblOp = new Label(panel, SWT.NONE);
-		lblOp.setText("Template:");
+		lblOp.setText(Messages.CreateNewStyleOpDialog_Templete);
 		
 		opBlank = new Button(panel, SWT.RADIO);
 		opBlank.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 2, 1));
 		opBlank.setSelection(true);
-		opBlank.setText("Blank (creates a style with parameters set to their default value)");
-		opBlank.setToolTipText("Creates a relationship diagram style with parameters set to their default value.");
+		opBlank.setText(Messages.CreateNewStyleOpDialog_BlankOp_Title);
+		opBlank.setToolTipText(Messages.CreateNewStyleOpDialog_BlankOp_Tooltip);
 		opBlank.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -130,8 +131,8 @@ public class CreateNewStyleOpDialog extends TitleAreaDialog {
 		new Label(panel, SWT.NONE);
 
 		opStyle = new Button(panel, SWT.RADIO);
-		opStyle.setText("Relationship diagram style");
-		opStyle.setToolTipText("Creates a relationship diagram style using a selected relationship diagram style as a template.");
+		opStyle.setText(Messages.CreateNewStyleOpDialog_StyleOp_Title);
+		opStyle.setToolTipText(Messages.CreateNewStyleOpDialog_StypeOp_Tooltip);
 		opStyle.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -145,15 +146,15 @@ public class CreateNewStyleOpDialog extends TitleAreaDialog {
 
 		cbStyle = new ComboViewer(panel, SWT.READ_ONLY);
 		cbStyle.getControl().setEnabled(false);
-		cbStyle.getControl().setToolTipText("Creates a relationship diagram style using a selected relationship diagram style as a template.");
+		cbStyle.getControl().setToolTipText(Messages.CreateNewStyleOpDialog_StypeOp_Tooltip);
 		cbStyle.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		cbStyle.setContentProvider(ArrayContentProvider.getInstance());
 		cbStyle.setLabelProvider(new RelationshipDiagramStyleLabelProvider());
  		cbStyle.setInput(styleList);
 		
-		getShell().setText("New Relationship Diagram Style");
-		setTitle("New Relationship Diagram Style");
-		setMessage("Select option for relationship diagram style template");
+		getShell().setText(Messages.CreateNewStyleOpDialog_Dialog_Title);
+		setTitle(Messages.CreateNewStyleOpDialog_Dialog_Title);
+		setMessage(Messages.CreateNewStyleOpDialog_Dialog_Message);
 		
 		return parent;
 	}
@@ -173,14 +174,14 @@ public class CreateNewStyleOpDialog extends TitleAreaDialog {
 			pmd.run(true, true, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					SubMonitor progress = SubMonitor.convert(monitor, "Loading relationship diagram style", 1);
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.CreateNewStyleOpDialog_Task_LoadingStyle, 1);
 					try(Session s = HibernateManager.openSession()){
 						s.beginTransaction();
 						try {
 							RelationshipDiagramStyle fullStyle = (RelationshipDiagramStyle) s.get(RelationshipDiagramStyle.class, styleTemplate.getUuid());
 							initStyle = RelationshipDiagramStyleFactory.createStyleClone(fullStyle, name, progress.split(1));
 						} catch (Exception ex) {
-							SmartPlugIn.displayLog("Error occurs while loading relationship diagram style.", ex);
+							SmartPlugIn.displayLog(Messages.CreateNewStyleOpDialog_LoadStyle_Error, ex);
 						} finally {
 							s.getTransaction().rollback();
 						}

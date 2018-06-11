@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.diagram.style;
 
+import org.wcs.smart.i2.internal.Messages;
+
 /**
  * Root objects in styles configuration tree. 
  * 
@@ -28,10 +30,10 @@ package org.wcs.smart.i2.diagram.style;
  * @since 6.0.0
  */
 public enum RelationshipDiagramTreeRootStyleObjects {
-	DEFAULT("Default Style"),
-	ROOT("Root Node"),
-	ENTITY_TYPE("Entity Type"),
-	RELATIONSIP_TYPE("Relationship Type");
+	DEFAULT(Messages.RelationshipDiagramTreeRootStyleObjects_Default),
+	ROOT(Messages.RelationshipDiagramTreeRootStyleObjects_RootNode),
+	ENTITY_TYPE(Messages.RelationshipDiagramTreeRootStyleObjects_EntityType),
+	RELATIONSIP_TYPE(Messages.RelationshipDiagramTreeRootStyleObjects_RelationshipType);
 
 	private final String displayName;
 

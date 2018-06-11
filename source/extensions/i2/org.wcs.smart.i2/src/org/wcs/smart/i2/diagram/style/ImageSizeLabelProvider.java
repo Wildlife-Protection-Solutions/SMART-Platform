@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.diagram.style;
 
 import org.eclipse.jface.viewers.LabelProvider;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions.ImageSizeOption;
 
 /**
@@ -37,9 +38,9 @@ public class ImageSizeLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		if (element instanceof ImageSizeOption) {
 			switch ((ImageSizeOption)element) {
-			case SMALL: return "Small";
-			case MEDIUM: return "Medium";
-			case LARGE: return "Large";
+			case SMALL: return Messages.ImageSizeLabelProvider_Small;
+			case MEDIUM: return Messages.ImageSizeLabelProvider_Medium;
+			case LARGE: return Messages.ImageSizeLabelProvider_Large;
 			}
 		}
 		return super.getText(element);

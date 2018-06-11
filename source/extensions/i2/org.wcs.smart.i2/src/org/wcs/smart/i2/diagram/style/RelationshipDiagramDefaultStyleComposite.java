@@ -29,6 +29,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramStyleOptions;
@@ -65,7 +66,7 @@ public class RelationshipDiagramDefaultStyleComposite extends Composite {
 
 	private void createContent(Composite parent) {
 		Group grpNode = new Group(parent, SWT.NONE);
-		grpNode.setText("Node (Entity)");
+		grpNode.setText(Messages.RelationshipDiagramDefaultStyleComposite_NodeGroup_Title);
 		grpNode.setLayout(new GridLayout());
 		grpNode.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -78,7 +79,7 @@ public class RelationshipDiagramDefaultStyleComposite extends Composite {
 		});
 		
 		Group grpEdge = new Group(parent, SWT.NONE);
-		grpEdge.setText("Edge (Relationship)");
+		grpEdge.setText(Messages.RelationshipDiagramDefaultStyleComposite_EdgeGroup_Title);
 		grpEdge.setLayout(new GridLayout());
 		grpEdge.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 

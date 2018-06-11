@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.diagram.style;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,6 +31,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.RelationshipDiagramManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 
 /**
@@ -44,7 +44,7 @@ import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 public abstract class RelationshipDiagramStyleListLoadJob extends Job {
 	
 	public RelationshipDiagramStyleListLoadJob() {
-		super("Loading relationship diagram styles");
+		super(Messages.RelationshipDiagramStyleListLoadJob_Title);
 	}
 	
 	@Override

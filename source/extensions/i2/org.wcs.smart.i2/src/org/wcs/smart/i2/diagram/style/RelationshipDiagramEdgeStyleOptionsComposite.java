@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.common.control.ColorSelector;
 import org.wcs.smart.common.control.ColorSelector.IColorSelectionChangeListener;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
 
 /**
@@ -74,7 +75,7 @@ public class RelationshipDiagramEdgeStyleOptionsComposite extends Composite {
 
 	private void createContent(Composite parent) {
 		Label lblEdgeColor = new Label(parent, SWT.NONE);
-		lblEdgeColor.setText("Color:");
+		lblEdgeColor.setText(Messages.RelationshipDiagramEdgeStyleOptionsComposite_Color);
 		
 		csEdgeColor = new ColorSelector(parent);
 		csEdgeColor.addColorSelectionChangeListener(new IColorSelectionChangeListener() {
@@ -88,7 +89,7 @@ public class RelationshipDiagramEdgeStyleOptionsComposite extends Composite {
 		});
 
 		Label lblShowLabel = new Label(parent, SWT.NONE);
-		lblShowLabel.setText("Show Label:");
+		lblShowLabel.setText(Messages.RelationshipDiagramEdgeStyleOptionsComposite_ShowLabel);
 		
 		btnShowLabel = new Button(parent, SWT.CHECK);
 		btnShowLabel.addSelectionListener(new SelectionListener() {

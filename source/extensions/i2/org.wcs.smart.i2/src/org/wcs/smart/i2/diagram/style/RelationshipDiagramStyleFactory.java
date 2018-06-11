@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
@@ -78,9 +79,9 @@ public class RelationshipDiagramStyleFactory {
 	 * to call done() on the given monitor
 	 */
 	public static RelationshipDiagramStyle createStyleClone(RelationshipDiagramStyle style, String name, IProgressMonitor monitor) {
-		SubMonitor progress = SubMonitor.convert(monitor, "Creating relationship diagram style", 1);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.RelationshipDiagramStyleFactory_CloneStyle_Task, 1);
 		
-		progress.subTask("Creating relationship diagram style");
+		progress.subTask(Messages.RelationshipDiagramStyleFactory_CloneStyle_Task);
 		RelationshipDiagramStyle clone = createUsingDefaults(name);
 		try {
 			//NOTE: we are not coping isDefault and names

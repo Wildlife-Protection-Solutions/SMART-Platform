@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.RelationshipDiagramManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 
 /**
@@ -44,7 +45,7 @@ public abstract class RelationshipDiagramStyleLoadJob extends Job {
 	private UUID uuid;
 
 	public RelationshipDiagramStyleLoadJob() {
-		super("Loading relationship diagram style");
+		super(Messages.RelationshipDiagramStyleLoadJob_Title);
 	}
 	
 	public void setUuid(UUID uuid) {
