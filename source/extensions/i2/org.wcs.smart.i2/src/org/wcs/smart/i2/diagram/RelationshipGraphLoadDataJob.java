@@ -46,7 +46,9 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
+import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 
 /**
  * Job which is responsible for loading data for {@link IntelEntity} relationships graph.
@@ -99,7 +101,19 @@ public abstract class RelationshipGraphLoadDataJob extends Job {
 			
 			//load required lazy data
 			for (IntelEntity e : entities) {
-				e.getEntityType().getUuid();
+				e.getEntityType().getAttributes().size();
+				for (IntelEntityTypeAttribute a : e.getEntityType().getAttributes()) {
+					a.getAttribute().getNames().size();
+				}
+				for (IntelEntityAttributeValue v : e.getAttributes()) {
+					v.getAttribute().getNames().size();
+					if (v.getAttributeListItem() != null) {
+						v.getAttributeListItem().getNames().size();
+					}
+					if (v.getEmployee() != null) {
+						v.getEmployee().getId();
+					}
+				}
 				e.getIdAttributeAsText();
 				IntelAttachment pa = e.getPrimaryAttachment();
 				if (pa != null) {

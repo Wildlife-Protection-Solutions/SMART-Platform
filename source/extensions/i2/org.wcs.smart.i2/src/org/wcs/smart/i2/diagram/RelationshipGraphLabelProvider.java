@@ -31,7 +31,9 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
+import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
@@ -39,6 +41,7 @@ import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions.ImageSizeOptio
 import org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyleOptions;
+import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
 import org.wcs.smart.ui.Thumbnail;
 
 /**
@@ -52,6 +55,8 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 	
 	private RelationshipGraphContentProvider graphContentProvider;
 	private RelationshipDiagramStyle style;
+	
+	private AttributeValueLabelProvider attributeLabelProvider = new AttributeValueLabelProvider();
 	
 	public RelationshipGraphLabelProvider(RelationshipGraphContentProvider graphContentProvider) {
 		this.graphContentProvider = graphContentProvider; 
@@ -119,10 +124,29 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 		if (node instanceof IntelEntity) {
 			IntelEntity e = (IntelEntity) node;
 			Map<String, Object> attributes = new HashMap<>();
-			attributes.put(ZestProperties.TOOLTIP__N, e.getIdAttributeAsText()); //TODO: need proper tooltip!!!
+			attributes.put(ZestProperties.TOOLTIP__N, buildTooltip(e));
 			return attributes;
 		}
 		return null;
+	}
+	
+	private String buildTooltip(IntelEntity e) {
+		StringBuilder sb = new StringBuilder();
+		for (IntelEntityTypeAttribute a : e.getEntityType().getAttributes()) {
+			if (sb.length() > 0) {
+				sb.append("\n"); //$NON-NLS-1$
+			}
+			sb.append(a.getAttribute().getName()).append(": "); //$NON-NLS-1$
+			String text = ""; //$NON-NLS-1$
+			for (IntelEntityAttributeValue v : e.getAttributes()) {
+				if (v.getAttribute().equals(a.getAttribute())){
+					text = attributeLabelProvider.getText(v);
+					break;
+				}
+			}
+			sb.append(text);
+		}
+		return sb.toString();
 	}
 	
 	@Override
