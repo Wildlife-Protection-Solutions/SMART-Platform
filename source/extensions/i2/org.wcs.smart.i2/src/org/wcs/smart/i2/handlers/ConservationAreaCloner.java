@@ -47,6 +47,9 @@ import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
+import org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle;
+import org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle;
+import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 
 /**
  * Clones intelligence template details
@@ -60,7 +63,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
 		
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConservationAreaCloner_TaskName, 6);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConservationAreaCloner_TaskName, 7);
 		
 		progress.subTask(Messages.ConservationAreaCloner_AttributeSubTask);
 		cloneAttributes(engine);
@@ -85,6 +88,10 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 		progress.subTask(Messages.ConservationAreaCloner_SettingsSubTask);
 		cloneSettings(engine);
 		progress.worked(1);
+
+		progress.subTask(Messages.ConservationAreaCloner_DiagramStylesSubTask);
+		cloneStyles(engine);
+		progress.worked(1);
 		
 		//clone record template
 		Path source = IntelReportManager.INSTANCE.getRecordTemplate(engine.getTemplateCa());
@@ -94,7 +101,6 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 		
 	}
 
-	
 	private void cloneSettings(ConservationAreaClonerEngine engine){
 		List<IntelConfigurationOption> options = QueryFactory.buildQuery(engine.getSession(), 
 				IntelConfigurationOption.class, new Object[] {"conservationArea", engine.getTemplateCa()}).list(); //$NON-NLS-1$
@@ -245,6 +251,8 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			
 			engine.getSession().save(clone);
 			engine.getSession().flush();
+
+			engine.addConservationItemMapping(g, clone);
 		}
 		
 	}
@@ -280,6 +288,37 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			engine.getSession().flush();
 		}
 		
+	}
+
+	
+	private void cloneStyles(ConservationAreaClonerEngine engine) {
+		List<RelationshipDiagramStyle> styles = QueryFactory.buildQuery(engine.getSession(), RelationshipDiagramStyle.class, "conservationArea", engine.getTemplateCa()).list(); //$NON-NLS-1$
+
+		for (RelationshipDiagramStyle s : styles) {
+			RelationshipDiagramStyle clone = new RelationshipDiagramStyle();
+			engine.copyLabels(s, clone);
+			clone.setConservationArea(engine.getNewCa());
+			clone.setDefault(s.isDefault());
+			clone.setOptions(s.getOptions());
+			for (RelationshipDiagramEntityTypeStyle ets : s.getEntityTypeStyles().values()) {
+				RelationshipDiagramEntityTypeStyle etsClone = new RelationshipDiagramEntityTypeStyle();
+				etsClone.setEntityType((IntelEntityType)engine.getNewConservationItem(ets.getEntityType()));
+				etsClone.setStyle(clone);
+				etsClone.setOptions(ets.getOptions());
+				clone.getEntityTypeStyles().put(etsClone.getEntityType(), etsClone);
+			}
+			for (RelationshipDiagramRelationshipTypeStyle rts : s.getRelationshipTypeStyles().values()) {
+				RelationshipDiagramRelationshipTypeStyle rtsClone = new RelationshipDiagramRelationshipTypeStyle();
+				rtsClone.setRelationshipType((IntelRelationshipType)engine.getNewConservationItem(rts.getRelationshipType()));
+				rtsClone.setStyle(clone);
+				rtsClone.setOptions(rts.getOptions());
+				clone.getRelationshipTypeStyles().put(rtsClone.getRelationshipType(), rtsClone);
+			}
+			
+			engine.getSession().save(clone);
+			engine.getSession().flush();
+		}
+
 	}
 
 }

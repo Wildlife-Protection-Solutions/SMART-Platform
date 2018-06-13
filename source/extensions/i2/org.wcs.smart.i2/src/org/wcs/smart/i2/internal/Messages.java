@@ -147,6 +147,7 @@ public class Messages extends NLS {
 	public static String ConfigureRecordAttributesHandler_SaveRequired;
 	public static String ConfigureRecordAttributesHandler_Title;
 	public static String ConservationAreaCloner_AttributeSubTask;
+	public static String ConservationAreaCloner_DiagramStylesSubTask;
 	public static String ConservationAreaCloner_EntityRecordSearchSubTask;
 	public static String ConservationAreaCloner_EntityTypeSubTask;
 	public static String ConservationAreaCloner_GroupsSubTask;
