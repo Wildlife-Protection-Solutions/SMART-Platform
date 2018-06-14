@@ -25,6 +25,7 @@ import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -253,8 +254,19 @@ public class IntelQueryColumnProvider {
 		//intel attribute columns
 		List<IntelAttribute> attributes = session.createQuery("SELECT distinct ia.id.attribute FROM IntelEntityTypeAttribute ia WHERE ia.id.attribute.conservationArea in(:cas)", IntelAttribute.class) //$NON-NLS-1$
 				.setParameter("cas", itemProvider.getConservationAreas()).list(); //$NON-NLS-1$
+		
 		List<String> keys = new ArrayList<>();
-		attributes.forEach(e->keys.add(e.getKeyId()));
+		HashMap<String, IntelAttribute.AttributeType> types = new HashMap<>();
+		List<String> toremove= new ArrayList<>();
+		attributes.forEach(e->{
+			if (!keys.contains(e.getKeyId())) {
+				keys.add(e.getKeyId());
+			}
+			IntelAttribute.AttributeType type = types.get(e.getKeyId());
+			if (type != null && type != e.getType()) toremove.add(e.getKeyId());
+			if (type == null) types.put(e.getKeyId(), e.getType());
+		});
+		keys.removeAll(toremove);
 		
 		keys.sort((a,b)->a.compareTo(b));
 		for (String key : keys) {

@@ -162,7 +162,7 @@ public class LoadFilterOptions extends Job {
 		BasicTreeFilterItem attributesItem = new BasicTreeFilterItem(Messages.LoadFilterOptions_DmAttributesFilterLabel);
 		attributesItem.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.ATTRIBUTE_NUMBER_ICON));
 		dataModelItem.addChild(attributesItem);
-		List<Attribute> attributes= InternalQueryManager.INSTANCE.getQueryItemProvider().getDmAttributes(session);
+		List<Attribute> attributes= new ArrayList<>(InternalQueryManager.INSTANCE.getQueryItemProvider().getDmAttributes(session));
 		
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for (Attribute a : attributes){
