@@ -34,6 +34,8 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntitySearch;
@@ -175,17 +177,22 @@ public class SpatialEntitySearch implements IIntelEntitySearch {
 	private void processPoint(HashMap<IntelEntity, Double> results, Point geometry,  List<IntelEntityAttributeValue> valuesToSearch, Double maxDistance) throws TransformException {
 		Coordinate locationc = ((Point)geometry).getCoordinate();
 		for (IntelEntityAttributeValue value : valuesToSearch) {
+			if (value.getAttribute().getType() != AttributeType.POSITION) continue;
 			if (value.getNumberValue() != null && value.getNumberValue2() != null) {
 				Coordinate vc = new Coordinate(value.getNumberValue(), value.getNumberValue2());
-				double distance = JTS.orthodromicDistance(locationc, vc, GeometryUtils.SMART_CRS);
-				if (distance <= maxDistance) {
-					Double d = results.get(value.getEntity());
-					if (d == null) {
-						d = distance;
-					}else if (distance < d) {
-						d = distance;
+				try {
+					double distance = JTS.orthodromicDistance(locationc, vc, GeometryUtils.SMART_CRS);
+					if (distance <= maxDistance) {
+						Double d = results.get(value.getEntity());
+						if (d == null) {
+							d = distance;
+						}else if (distance < d) {
+							d = distance;
+						}
+						results.put(value.getEntity(), d);				
 					}
-					results.put(value.getEntity(), d);				
+				}catch (Exception ex) {
+					Intelligence2PlugIn.log(ex.getMessage(), ex);
 				}
 			}
 		}
