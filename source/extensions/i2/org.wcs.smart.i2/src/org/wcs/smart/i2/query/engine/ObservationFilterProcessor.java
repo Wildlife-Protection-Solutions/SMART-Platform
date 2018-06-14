@@ -615,7 +615,7 @@ public class ObservationFilterProcessor {
 			sql.append(" v.double_value " + SqlGenerator.operatorToSql(Operator.GREATERTHAN) + " 0.5"); //$NON-NLS-1$ //$NON-NLS-2$
 			break;
 		case DATE:
-			sql.append(" cast(v.string_value as date) " + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" case when ia.type = 'DATE' then cast(v.string_value as date) " + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as date) and cast(:value2 as date) else false end"); //$NON-NLS-1$ //$NON-NLS-2$
 			break;
 		case LIST:
 			if (listItem == null){
