@@ -54,16 +54,17 @@ public enum LastYearDateFilter implements IDateFilter {
 		
 		int year = cal.get(Calendar.YEAR);
 		cal.set(Calendar.YEAR, year-1);
-		cal.set(Calendar.MONTH, cal.getActualMinimum(Calendar.MONTH));
-		cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
+		cal.set(Calendar.MONTH, 0);
+		cal.set(Calendar.DAY_OF_MONTH, 1);
 		java.sql.Date d1 = new java.sql.Date(cal.getTimeInMillis());
 			
-		cal.set(Calendar.YEAR, year-1);
-		cal.set(Calendar.MONTH, cal.getActualMaximum(Calendar.MONTH));
-		cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-		cal.set(Calendar.HOUR, cal.getActualMaximum(Calendar.HOUR));
-		cal.set(Calendar.MINUTE, cal.getActualMaximum(Calendar.MINUTE));
-		cal.set(Calendar.SECOND, cal.getActualMaximum(Calendar.SECOND));
+		//end date is not inclusive for this date filter
+		cal.set(Calendar.YEAR, year);
+		cal.set(Calendar.MONTH, 0);
+		cal.set(Calendar.DAY_OF_MONTH, 1);
+		cal.set(Calendar.HOUR, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
 		
 		java.sql.Date d2 = new java.sql.Date(cal.getTimeInMillis());
 		return new java.sql.Date[]{d1, d2};
