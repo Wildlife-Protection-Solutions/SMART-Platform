@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2016 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,33 +19,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.properties;
+package org.wcs.smart.util;
 
-import java.util.Comparator;
-
-import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
 
 /**
- * Comparator for sorting a list of {@link CyberTrackerPropertiesProfile} objects based
- * on their isDefault state and name.
- * 
+ * Util for manipulations with colors
+ *  
  * @author elitvin
- * @since 4.0.0
+ * @since 6.0.0
+ *
  */
-public class CtProfileDefaultNameComparator implements Comparator<CyberTrackerPropertiesProfile> {
+public class ColorUtil {
 
-	@Override
-	public int compare(CyberTrackerPropertiesProfile p1, CyberTrackerPropertiesProfile p2) {
-		if (p1.isDefault()) {
-			return -1; //by design we have only one default profile and we place it at the beginning
+	/**
+	 * Convert {@link Color} into hex string representation (e.g. "#FFFFFF")
+	 * 
+	 */
+	public static String color2HexStr(Color color) {
+		if (color == null) {
+			return null;
 		}
-		if (p2.isDefault()) {
-			return 1; //by design we have only one default profile and we place it at the beginning
+		String hex = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue()); //$NON-NLS-1$
+		return hex;
+	}
+	
+	/**
+	 * Convert string representation into {@link Color}
+	 * 
+	 * @param colorStr e.g. "#FFFFFF"
+	 * @return color
+	 */
+	public static Color hex2Color(String colorStr) {
+		if (colorStr == null || colorStr.isEmpty()) {
+			return null;
 		}
-		if (p1.getName() == null) {
-			return p2.getName() == null ? 0 : -1;
-		}
-		return p1.getName().compareTo(p2.getName());
+		int r = Integer.valueOf(colorStr.substring(1, 3), 16);
+		int g = Integer.valueOf(colorStr.substring(3, 5), 16);
+		int b = Integer.valueOf(colorStr.substring(5, 7), 16);
+	    return new Color(Display.getCurrent(), r ,g, b);
 	}
 
 }

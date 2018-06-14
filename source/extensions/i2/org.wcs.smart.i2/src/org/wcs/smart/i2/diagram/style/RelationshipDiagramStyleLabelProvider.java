@@ -19,33 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.properties;
+package org.wcs.smart.i2.diagram.style;
 
-import java.util.Comparator;
-
-import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.RelationshipDiagramStyle;
+import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
- * Comparator for sorting a list of {@link CyberTrackerPropertiesProfile} objects based
- * on their isDefault state and name.
+ * Label provider for {@link RelationshipDiagramStyle}.
  * 
  * @author elitvin
- * @since 4.0.0
+ * @since 6.0.0
  */
-public class CtProfileDefaultNameComparator implements Comparator<CyberTrackerPropertiesProfile> {
+public class RelationshipDiagramStyleLabelProvider extends NamedItemLabelProvider {
 
 	@Override
-	public int compare(CyberTrackerPropertiesProfile p1, CyberTrackerPropertiesProfile p2) {
-		if (p1.isDefault()) {
-			return -1; //by design we have only one default profile and we place it at the beginning
+	public String getText(Object element) {
+		if (element instanceof RelationshipDiagramStyle) {
+			RelationshipDiagramStyle s = (RelationshipDiagramStyle) element;
+			String name = super.getText(element);
+			return s.isDefault() ? name + Messages.RelationshipDiagramStyleLabelProvider_DefaultStyle_Postfix : name;
 		}
-		if (p2.isDefault()) {
-			return 1; //by design we have only one default profile and we place it at the beginning
-		}
-		if (p1.getName() == null) {
-			return p2.getName() == null ? 0 : -1;
-		}
-		return p1.getName().compareTo(p2.getName());
+		return super.getText(element);
 	}
 
 }

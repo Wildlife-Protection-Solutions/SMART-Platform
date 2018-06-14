@@ -29,10 +29,12 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.ui.editors.IntelligenceMapEditor;
+import org.wcs.smart.i2.ui.editors.RelationshipGraphEditor;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -55,7 +57,11 @@ public class ShowPerspectiveHandler {
 			
 			try {
 				//ensure map editor is open
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(IntelligenceMapEditor.MAPINPUT, IntelligenceMapEditor.ID);
+				IEditorPart mapEditorPart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(IntelligenceMapEditor.MAPINPUT, IntelligenceMapEditor.ID);
+				//ensure relationship graph editor is open
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(RelationshipGraphEditor.GRAPHINPUT, RelationshipGraphEditor.ID);
+				//activating map editor by default
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(mapEditorPart);
 			} catch (PartInitException e) {
 				e.printStackTrace();
 			}

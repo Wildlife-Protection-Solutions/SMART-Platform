@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2016 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,33 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.properties;
+package org.wcs.smart.i2.diagram.style;
 
-import java.util.Comparator;
-
-import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
- * Comparator for sorting a list of {@link CyberTrackerPropertiesProfile} objects based
- * on their isDefault state and name.
+ * Root objects in styles configuration tree. 
  * 
  * @author elitvin
- * @since 4.0.0
+ * @since 6.0.0
  */
-public class CtProfileDefaultNameComparator implements Comparator<CyberTrackerPropertiesProfile> {
+public enum RelationshipDiagramTreeRootStyleObjects {
+	DEFAULT(Messages.RelationshipDiagramTreeRootStyleObjects_Default),
+	ROOT(Messages.RelationshipDiagramTreeRootStyleObjects_RootNode),
+	ENTITY_TYPE(Messages.RelationshipDiagramTreeRootStyleObjects_EntityType),
+	RELATIONSIP_TYPE(Messages.RelationshipDiagramTreeRootStyleObjects_RelationshipType);
 
-	@Override
-	public int compare(CyberTrackerPropertiesProfile p1, CyberTrackerPropertiesProfile p2) {
-		if (p1.isDefault()) {
-			return -1; //by design we have only one default profile and we place it at the beginning
-		}
-		if (p2.isDefault()) {
-			return 1; //by design we have only one default profile and we place it at the beginning
-		}
-		if (p1.getName() == null) {
-			return p2.getName() == null ? 0 : -1;
-		}
-		return p1.getName().compareTo(p2.getName());
+	private final String displayName;
+
+	private RelationshipDiagramTreeRootStyleObjects(String displayName) {
+		this.displayName = displayName;
 	}
 
+	public String getGuiName() {
+		return this.displayName;
+	}
 }

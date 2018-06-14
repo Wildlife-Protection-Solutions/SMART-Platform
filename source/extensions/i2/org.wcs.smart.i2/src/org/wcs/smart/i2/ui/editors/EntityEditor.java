@@ -146,6 +146,7 @@ import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.birt.IntelReportManager;
+import org.wcs.smart.i2.diagram.RelationshipGraphComposite;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
@@ -239,11 +240,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private Composite compMap;
 	private Composite compRecords;
 	private Composite compRelationships;
+	private Composite compRelationshipDiagram;
 	private TableViewer tblRecords;
 	private TreeViewer relationshipTree;
 	private List<IntelEntityAttachment> attachmentsToDelete = new ArrayList<IntelEntityAttachment>();
 	private List<IntelEntityRelationship> relationshipsToAdd = new ArrayList<IntelEntityRelationship>();
 	private List<IntelEntityRelationship> relationshipsToDelete = new ArrayList<IntelEntityRelationship>();
+	
+	private RelationshipGraphComposite graphComposite;
 	
 	private IEclipseContext context;
 	private IEventBroker eventBroker;
@@ -745,7 +749,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		((GridLayout)bottom.getLayout()).marginWidth = 0;
 		((GridLayout)bottom.getLayout()).marginHeight = 0;
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.EntityEditor_MapTitle, Messages.EntityEditor_RecordsTitle, Messages.EntityEditor_RelationshipsTitle}, bottom, toolkit, ()->maximizeMainPanel(1));
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.EntityEditor_MapTitle, Messages.EntityEditor_RecordsTitle, Messages.EntityEditor_RelationshipsTitle, Messages.EntityEditor_RelationshipDiagramTitle}, bottom, toolkit, ()->maximizeMainPanel(1));
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite tabPart = toolkit.createComposite(bottom, SWT.NONE);
@@ -766,12 +770,16 @@ public class EntityEditor extends EditorPart implements MapPart{
 		compRelationships.setLayout(new GridLayout());
 		createRelationshipPanel(compRelationships);
 		addEntityDropTarget(compRelationships);
+
+		compRelationshipDiagram = toolkit.createComposite(tabPart, SWT.NONE);
+		compRelationshipDiagram.setLayout(new GridLayout());
+		graphComposite = new RelationshipGraphComposite(compRelationshipDiagram, toolkit);
 		
-		tabList.setContent(new Composite[]{compMap,  compRecords, compRelationships}, tabPart);
+		tabList.setContent(new Composite[]{compMap,  compRecords, compRelationships, compRelationshipDiagram}, tabPart);
 		tabList.selectTab(0);
 		return tabList.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 	}
-	
+
 	private void addEntityDropTarget(Composite comp){
 		DropTarget dropTarget = new DropTarget(comp, DND.DROP_LINK);
 		dropTarget.setTransfer(new Transfer[]{IntelEntitySelectionTransfer.getTransfer()});
@@ -1974,6 +1982,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 		relationshipTree.refresh();
 		relationshipTree.expandAll();
 		
+		graphComposite.setInput(entity);
+		
 		mapPart.refresh();
 		loadRecords.schedule(0);
 	}
@@ -2159,4 +2169,5 @@ public class EntityEditor extends EditorPart implements MapPart{
 	public IStatusLineManager getStatusLineManager() {
 		return mapPart.getStatusLineManager();
 	}
+	
 }

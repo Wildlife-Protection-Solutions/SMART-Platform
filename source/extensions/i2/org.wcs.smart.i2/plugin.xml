@@ -159,6 +159,20 @@
             class="org.wcs.smart.i2.model.IntelEntityRecordQuery"
             supportsCcaa="true">
       </class>
+      <class
+            class="org.wcs.smart.i2.model.RelationshipDiagramStyle"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".style.conservationArea"
+            class="org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".style.conservationArea"
+            class="org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.caDeleteAdvisor">
@@ -378,6 +392,18 @@
             <command
                   commandId="org.wcs.smart.i2.command.record.configuration"
                   label="%ConfigureRecordSourceCommandName"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="configure">
+                  </test>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.graphstyles.show"
+                  label="%ShowRelationshipDiagramStylesMenuItemName"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -1113,6 +1139,12 @@
             id="org.wcs.smart.i2.editor.query.entityrecord"
             name="%QueryEntityRecordQuery">
       </editor>
+      <editor
+            class="org.wcs.smart.i2.ui.editors.RelationshipGraphEditor"
+            default="false"
+            id="org.wcs.smart.i2.editor.graph"
+            name="Relationships">
+      </editor>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -1135,6 +1167,10 @@
       <command
             id="org.wcs.smart.i2.command.relationshipgrouplist.show"
             name="%ShowRelationshipGroupsCommandName">
+      </command>
+      <command
+            id="org.wcs.smart.i2.command.graphstyles.show"
+            name="%ShowRelationshipDiagramStylesCommandName">
       </command>
       <command
             id="org.wcs.smart.i2.command.record.new"
@@ -1322,6 +1358,16 @@
       <handler
             class="org.wcs.smart.i2.ui.handler.ShowConfigurationDialogHandler$ShowConfigurationDialogHandlerWrapper"
             commandId="org.wcs.smart.i2.command.config.show">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.i2.permission"
+                  value="configure">
+            </test>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.ShowRelationshipDiagramStylesHandler$ShowRelationshipDiagramStylesHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.graphstyles.show">
          <enabledWhen>
             <test
                   property="org.wcs.smart.i2.permission"

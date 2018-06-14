@@ -176,8 +176,30 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			//index on record title
 			"create index i_record_title on smart.i_record (title)", //$NON-NLS-1$
 			
-			//index on attribute list items
-			"ALTER TABLE smart.i_attribute_list_item add column list_order integer not null default 0" //$NON-NLS-1$
+			//relationship diagram related table
+			"CREATE TABLE smart.i_diagram_style (uuid CHAR(16) for bit data NOT NULL, ca_uuid CHAR(16) for bit data NOT NULL, IS_DEFAULT BOOLEAN, OPTIONS VARCHAR(2048), PRIMARY KEY (UUID))", //$NON-NLS-1$
+			"ALTER TABLE smart.i_diagram_style ADD CONSTRAINT I_DIAGRAM_STYLE_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.i_diagram_style to data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.i_diagram_style to manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.i_diagram_style to analyst", //$NON-NLS-1$
+			"GRANT SELECT ON smart.i_diagram_style to login", //$NON-NLS-1$
+			
+			"CREATE TABLE smart.i_diagram_entity_type_style (uuid CHAR(16) for bit data NOT NULL, style_uuid CHAR(16) for bit data NOT NULL, entity_type_uuid CHAR(16) for bit data NOT NULL, OPTIONS VARCHAR(1024), PRIMARY KEY (UUID))", //$NON-NLS-1$
+			"ALTER TABLE smart.i_diagram_entity_type_style ADD CONSTRAINT I_DIAGRAM_ENTITY_TYPE_STYLE_STYLE_UUID_FK FOREIGN KEY (STYLE_UUID) REFERENCES SMART.I_DIAGRAM_STYLE(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.i_diagram_entity_type_style ADD CONSTRAINT I_DIAGRAM_ENTITY_TYPE_STYLE_ENTITY_TYPE_UUID_FK FOREIGN KEY (ENTITY_TYPE_UUID) REFERENCES SMART.I_ENTITY_TYPE(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.i_diagram_entity_type_style to data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.i_diagram_entity_type_style to manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.i_diagram_entity_type_style to analyst", //$NON-NLS-1$
+			"GRANT SELECT ON smart.i_diagram_entity_type_style to login", //$NON-NLS-1$
+
+			"CREATE TABLE smart.i_diagram_relationship_type_style (uuid CHAR(16) for bit data NOT NULL, style_uuid CHAR(16) for bit data NOT NULL, relationship_type_uuid CHAR(16) for bit data NOT NULL, OPTIONS VARCHAR(1024), PRIMARY KEY (UUID))", //$NON-NLS-1$
+			"ALTER TABLE smart.i_diagram_relationship_type_style ADD CONSTRAINT I_DIAGRAM_RELATIONSHIP_TYPE_STYLE_STYLE_UUID_FK FOREIGN KEY (STYLE_UUID) REFERENCES SMART.I_DIAGRAM_STYLE(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.i_diagram_relationship_type_style ADD CONSTRAINT I_DIAGRAM_RELATIONSHIP_TYPE_STYLE_RELATIONSHIP_TYPE_UUID_FK FOREIGN KEY (RELATIONSHIP_TYPE_UUID) REFERENCES SMART.I_RELATIONSHIP_TYPE(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.i_diagram_relationship_type_style to data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.i_diagram_relationship_type_style to manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.i_diagram_relationship_type_style to analyst", //$NON-NLS-1$
+			"GRANT SELECT ON smart.i_diagram_relationship_type_style to login" //$NON-NLS-1$
+			
 		};
 		
 		for (String s : sql) {
@@ -186,5 +208,5 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		
 		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_3, session);
 	}
-	
+
 }

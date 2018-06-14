@@ -19,33 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.properties;
+package org.wcs.smart.i2.diagram.style;
 
 import java.util.Comparator;
 
-import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 
 /**
- * Comparator for sorting a list of {@link CyberTrackerPropertiesProfile} objects based
+ * Comparator for sorting a list of {@link RelationshipDiagramStyle} objects based
  * on their isDefault state and name.
  * 
  * @author elitvin
- * @since 4.0.0
+ * @since 6.0.0
  */
-public class CtProfileDefaultNameComparator implements Comparator<CyberTrackerPropertiesProfile> {
+public class RelationshipDiagramStyleDefaultNameComparator implements Comparator<RelationshipDiagramStyle> {
 
 	@Override
-	public int compare(CyberTrackerPropertiesProfile p1, CyberTrackerPropertiesProfile p2) {
-		if (p1.isDefault()) {
+	public int compare(RelationshipDiagramStyle s1, RelationshipDiagramStyle s2) {
+		if (s1.isDefault()) {
 			return -1; //by design we have only one default profile and we place it at the beginning
 		}
-		if (p2.isDefault()) {
+		if (s2.isDefault()) {
 			return 1; //by design we have only one default profile and we place it at the beginning
 		}
-		if (p1.getName() == null) {
-			return p2.getName() == null ? 0 : -1;
+		if (s1.getName() == null) {
+			return s2.getName() == null ? 0 : -1;
 		}
-		return p1.getName().compareTo(p2.getName());
+		return s1.getName().compareTo(s2.getName());
 	}
 
 }

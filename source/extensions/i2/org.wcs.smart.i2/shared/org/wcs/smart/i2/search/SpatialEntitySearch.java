@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.geometry.jts.JTS;
@@ -34,7 +36,6 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -192,7 +193,7 @@ public class SpatialEntitySearch implements IIntelEntitySearch {
 						results.put(value.getEntity(), d);				
 					}
 				}catch (Exception ex) {
-					Intelligence2PlugIn.log(ex.getMessage(), ex);
+					Logger.getLogger(SpatialEntitySearch.class.getName()).log(Level.INFO, ex.getMessage(), ex);
 				}
 			}
 		}
