@@ -39,6 +39,7 @@ import org.wcs.smart.upgrade.v400.Upgrader400To401;
 import org.wcs.smart.upgrade.v410.Upgrader401To410;
 import org.wcs.smart.upgrade.v500.Upgrader410To500;
 import org.wcs.smart.upgrade.v600.Upgrader500To600;
+import org.wcs.smart.upgrade.v600.Upgrader600To601;
 
 
 /**
@@ -66,7 +67,9 @@ public class UpgradeEngine {
 		V401("4.0.0", "4.0.1", Upgrader400To401.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V410("4.0.1", "4.1.0", Upgrader401To410.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V500("4.1.0", "5.0.0", Upgrader410To500.class), //$NON-NLS-1$ //$NON-NLS-2$
-		V600("5.0.0", "6.0.0", Upgrader500To600.class); //$NON-NLS-1$ //$NON-NLS-2$
+		V600("5.0.0", "6.0.0", Upgrader500To600.class), //$NON-NLS-1$ //$NON-NLS-2$
+		V601("6.0.0", "6.0.1", Upgrader600To601.class); //$NON-NLS-1$ //$NON-NLS-2$
+		
 		public String fromVersion;
 		public String toVersion;
 		public Class<? extends IDatabaseUpgrader> upgradeEngine;

@@ -293,11 +293,11 @@ public class EntitySearchView {
 		
 		
 		allPanel = new AllPanel(main, this, toolkit);
+		ContextInjectionFactory.inject(allPanel, context);
 		allPanel.setLayout(new GridLayout());
 		allPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		toolkit.createLabel(allPanel, "ALL TABLE HERE");
-		
+				
 		basicPanel.doSearch();
 		
 		outerStack.topControl = searchSashForm;
