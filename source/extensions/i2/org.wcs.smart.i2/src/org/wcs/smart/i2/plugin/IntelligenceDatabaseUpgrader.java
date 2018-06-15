@@ -176,6 +176,9 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			//index on record title
 			"create index i_record_title on smart.i_record (title)", //$NON-NLS-1$
 			
+			//index on attribute list items
+			"ALTER TABLE smart.i_attribute_list_item add column list_order integer not null default 0", //$NON-NLS-1$
+			
 			//relationship diagram related table
 			"CREATE TABLE smart.i_diagram_style (uuid CHAR(16) for bit data NOT NULL, ca_uuid CHAR(16) for bit data NOT NULL, IS_DEFAULT BOOLEAN, OPTIONS VARCHAR(2048), PRIMARY KEY (UUID))", //$NON-NLS-1$
 			"ALTER TABLE smart.i_diagram_style ADD CONSTRAINT I_DIAGRAM_STYLE_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
