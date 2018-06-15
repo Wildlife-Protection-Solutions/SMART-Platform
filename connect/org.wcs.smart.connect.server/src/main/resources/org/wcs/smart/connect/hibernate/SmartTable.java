@@ -162,6 +162,9 @@ import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetEntity;
 import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.model.IntelWorkingSetRecord;
+import org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle;
+import org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle;
+import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligenceAttachment;
@@ -395,7 +398,9 @@ public enum SmartTable {
 	I2_RECORD_ATTRIBUTE_VALUE(IntelRecordAttributeValue.class, ".id.record.conservationArea"),
 	I2_RECORD_ATTRIBUTE_LIST_VALUE(IntelRecordAttributeValueList.class, ".id.value.record.conservationArea"),
 	I2_CONFIG_OPTION(IntelConfigurationOption.class, null),
-
+	I2_RELATIONSHIP_DIAGRAM_STYLE(RelationshipDiagramStyle.class, null),
+	I2_RELATIONSHIP_DIAGRAM_ENTITY_TYPE_STYLE(RelationshipDiagramEntityTypeStyle.class, ".style.conservationArea"),
+	I2_RELATIONSHIP_DIAGRAM_REL_TYPE_STYLE(RelationshipDiagramRelationshipTypeStyle.class, ".style.conservationArea"),
 	
 	QA_ERROR(QaError.class, null),
 	QA_ROUTINE(QaRoutine.class, null),

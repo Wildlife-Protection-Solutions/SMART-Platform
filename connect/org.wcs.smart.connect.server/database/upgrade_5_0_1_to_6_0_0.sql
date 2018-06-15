@@ -98,6 +98,40 @@ ALTER TABLE smart.I_WORKING_SET_QUERY add column query_type varchar(32);
 UPDATE smart.i_working_set_query set query_type = 'I2_OBS_QUERY';
 ALTER TABLE smart.i_working_set_query alter column query_type set not null;
 
+
+CREATE TABLE smart.i_diagram_style (
+  uuid UUID NOT NULL, 
+  ca_uuid UUID NOT NULL, 
+  IS_DEFAULT BOOLEAN, 
+  OPTIONS VARCHAR(2048), 
+  PRIMARY KEY (UUID)
+);
+
+ALTER TABLE smart.i_diagram_style ADD FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+		
+
+CREATE TABLE smart.i_diagram_entity_type_style (
+  uuid UUID NOT NULL, 
+  style_uuid UUID NOT NULL, 
+  entity_type_uuid UUID NOT NULL, 
+  OPTIONS VARCHAR(1024), 
+  PRIMARY KEY (UUID)
+);
+ALTER TABLE smart.i_diagram_entity_type_style ADD FOREIGN KEY (STYLE_UUID) REFERENCES SMART.I_DIAGRAM_STYLE(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_diagram_entity_type_style ADD FOREIGN KEY (ENTITY_TYPE_UUID) REFERENCES SMART.I_ENTITY_TYPE(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+			
+CREATE TABLE smart.i_diagram_relationship_type_style (
+  uuid UUID NOT NULL, 
+  style_uuid UUID NOT NULL, 
+  relationship_type_uuid UUID NOT NULL, 
+  OPTIONS VARCHAR(1024), 
+  PRIMARY KEY (UUID)
+);
+			
+ALTER TABLE smart.i_diagram_relationship_type_style ADD FOREIGN KEY (STYLE_UUID) REFERENCES SMART.I_DIAGRAM_STYLE(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_diagram_relationship_type_style ADD FOREIGN KEY (RELATIONSHIP_TYPE_UUID) REFERENCES SMART.I_RELATIONSHIP_TYPE(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+
 -- QA Plugin
 
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.qa', '1.0');
@@ -1477,6 +1511,50 @@ CREATE TRIGGER trg_cm_attribute_config AFTER INSERT OR UPDATE OR DELETE ON smart
 CREATE TRIGGER trg_compound_query_layer AFTER INSERT OR UPDATE OR DELETE ON smart.compound_query_layer FOR EACH ROW execute procedure connect.trg_compound_query_layer();
 
 
+
+CREATE TRIGGER trg_i_diagram_style AFTER INSERT OR UPDATE OR DELETE ON smart.i_diagram_style FOR EACH ROW execute procedure connect.trg_changelog_common();
+
+CREATE OR REPLACE FUNCTION connect.trg_i_diagram_entity_type_style() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID 
+ 		FROM smart.i_diagram_style a
+ 		WHERE a.uuid = ROW.style_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_i_diagram_entity_type_style AFTER INSERT OR UPDATE OR DELETE ON smart.i_diagram_entity_type_style FOR EACH ROW execute procedure connect.trg_i_diagram_entity_type_style();
+
+CREATE OR REPLACE FUNCTION connect.trg_i_diagram_relationship_type_style() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID 
+ 		FROM smart.i_diagram_style a
+ 		WHERE a.uuid = ROW.style_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_i_diagram_relationship_type_style AFTER INSERT OR UPDATE OR DELETE ON smart.i_diagram_relationship_type_style FOR EACH ROW execute procedure connect.trg_i_diagram_relationship_type_style();
+
+
 -- EVENTS TRIGGERS
 CREATE TRIGGER trg_e_event_filter AFTER INSERT OR UPDATE OR DELETE ON smart.e_event_filter FOR EACH ROW execute procedure connect.trg_changelog_common();
 CREATE TRIGGER trg_e_action AFTER INSERT OR UPDATE OR DELETE ON smart.e_action FOR EACH ROW execute procedure connect.trg_changelog_common();
@@ -1561,6 +1639,8 @@ RETURN NEW; END$$ LANGUAGE 'plpgsql';
 
 CREATE  TRIGGER trg_connect_account_before BEFORE INSERT ON connect.change_log  FOR EACH ROW execute procedure connect.trg_changelog_before();
 CREATE  TRIGGER trg_connect_account_after AFTER INSERT ON connect.change_log  FOR EACH ROW execute procedure connect.trg_changelog_after();
+
+
 
 
 ALTER TABLE smart.connect_data_queue DROP CONSTRAINT type_chk;

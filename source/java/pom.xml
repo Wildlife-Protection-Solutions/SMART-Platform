@@ -68,9 +68,7 @@
 					<optionalDependencies>ignore</optionalDependencies>
 				</dependency-resolution>
                     		<pomDependencies>consider</pomDependencies>
-                    		<includePackedArtifacts>false</includePackedArtifacts>
-                    		
-				
+                    		<includePackedArtifacts>false</includePackedArtifacts>				
 			</configuration>
 		</plugin>
 		
@@ -104,7 +102,23 @@
                    <artifactId>maven-dependency-plugin</artifactId>
                    <version>2.9</version>
                 </plugin>
-
+                <plugin>
+ 			<groupId>org.eclipse.tycho</groupId>
+ 			<artifactId>tycho-compiler-plugin</artifactId>
+ 			<version>${tycho-version}</version>
+ 			<configuration>
+ 				<encoding>UTF-8</encoding>
+ 				<extraClasspathElements>
+ 				<extraClasspathElement>
+ 					<groupId>com.oracle</groupId>
+ 					<artifactId>javafx</artifactId>
+ 					<version>8.0.0-SNAPSHOT</version>
+ 					<systemPath>${java.home}/lib/jfxswt.jar</systemPath>
+ 					<scope>system</scope>
+ 				</extraClasspathElement>
+ 				</extraClasspathElements>
+ 			</configuration>
+ 		</plugin>
     
 
                <!-- for updating version numbers <plugin>
@@ -323,7 +337,7 @@
 			<modules>
 			
 
-<!-- ES CORE -->
+				<!-- ES CORE -->
 				<module>../translations/es/org.wcs.smart.birt.map.nl_es</module>
 				<module>../translations/es/org.wcs.smart.dataentry.nl_es</module>
 				<module>../translations/es/org.wcs.smart.feature.nl_es</module>
@@ -374,6 +388,7 @@
 				<module>../translations/fr/org.wcs.smart.plan.nl_fr</module>
 				
 				<!-- HI CORE -->
+				<!-- no translations
 				<module>../translations/hi/org.wcs.smart.birt.map.nl_hi</module>
 				<module>../translations/hi/org.wcs.smart.dataentry.nl_hi</module>
 				<module>../translations/hi/org.wcs.smart.feature.nl_hi</module>
@@ -397,6 +412,7 @@
 				<module>../translations/hi/org.wcs.smart.intelligence.query.nl_hi</module>
 				<module>../translations/hi/org.wcs.smart.plan.feature.nl_hi</module>
 				<module>../translations/hi/org.wcs.smart.plan.nl_hi</module>
+				-->
 				
 				<!-- IN CORE -->
 				<module>../translations/in/org.wcs.smart.birt.map.nl_in</module>
@@ -449,6 +465,8 @@
 				<module>../translations/ka/org.wcs.smart.plan.nl_ka</module>   
 				
 				<!-- KAR CORE -->
+				
+				<!-- at this time we don't have any kar translations
 				<module>../translations/kar/org.wcs.smart.birt.map.nl_kar</module>
 				<module>../translations/kar/org.wcs.smart.dataentry.nl_kar</module>
 				<module>../translations/kar/org.wcs.smart.feature.nl_kar</module>
@@ -472,8 +490,10 @@
 				<module>../translations/kar/org.wcs.smart.intelligence.query.nl_kar</module>
 				<module>../translations/kar/org.wcs.smart.plan.feature.nl_kar</module>
 				<module>../translations/kar/org.wcs.smart.plan.nl_kar</module>   
+				-->
 				
 				<!-- KM CORE -->
+				<!-- we don't have any translations
 				<module>../translations/km/org.wcs.smart.birt.map.nl_km</module>
 				<module>../translations/km/org.wcs.smart.dataentry.nl_km</module>
 				<module>../translations/km/org.wcs.smart.feature.nl_km</module>
@@ -497,6 +517,7 @@
 				<module>../translations/km/org.wcs.smart.intelligence.query.nl_km</module>
 				<module>../translations/km/org.wcs.smart.plan.feature.nl_km</module>
 				<module>../translations/km/org.wcs.smart.plan.nl_km</module>   
+				-->
 				
 				<!-- LO CORE -->
 				<module>../translations/lo/org.wcs.smart.birt.map.nl_lo</module>                         
@@ -774,6 +795,7 @@
 				<module>../extensions/qa/translations/fr/org.wcs.smart.qa.patrol.nl_fr</module>				
 				
 				<!-- HI EXTENSIONS -->
+				<!-- no translations 
 				<module>../extensions/asset/translations/hi/org.wcs.smart.asset.feature.nl_hi</module>
 				<module>../extensions/asset/translations/hi/org.wcs.smart.asset.nl_hi</module>
 				<module>../extensions/asset/translations/hi/org.wcs.smart.asset.query.nl_hi</module>
@@ -822,6 +844,7 @@
 				<module>../extensions/qa/translations/hi/org.wcs.smart.qa.incident.nl_hi</module>
 				<module>../extensions/qa/translations/hi/org.wcs.smart.qa.nl_hi</module>
 				<module>../extensions/qa/translations/hi/org.wcs.smart.qa.patrol.nl_hi</module>
+				-->
 				
 				<!-- IN EXTENSIONS -->
 				<module>../extensions/asset/translations/in/org.wcs.smart.asset.feature.nl_in</module>
@@ -924,6 +947,7 @@
 				<module>../extensions/qa/translations/ka/org.wcs.smart.qa.patrol.nl_ka</module>
 				
 				<!-- KAR EXTENSIONS -->
+				<!-- no translations 
 				<module>../extensions/asset/translations/kar/org.wcs.smart.asset.feature.nl_kar</module>
 				<module>../extensions/asset/translations/kar/org.wcs.smart.asset.nl_kar</module>
 				<module>../extensions/asset/translations/kar/org.wcs.smart.asset.query.nl_kar</module>
@@ -972,8 +996,10 @@
 				<module>../extensions/qa/translations/kar/org.wcs.smart.qa.incident.nl_kar</module>
 				<module>../extensions/qa/translations/kar/org.wcs.smart.qa.nl_kar</module>
 				<module>../extensions/qa/translations/kar/org.wcs.smart.qa.patrol.nl_kar</module>
+				-->
 				
 				<!-- KM EXTENSIONS -->
+				<!-- no translations 
 				<module>../extensions/asset/translations/km/org.wcs.smart.asset.feature.nl_km</module>
 				<module>../extensions/asset/translations/km/org.wcs.smart.asset.nl_km</module>
 				<module>../extensions/asset/translations/km/org.wcs.smart.asset.query.nl_km</module>
@@ -1022,6 +1048,7 @@
 				<module>../extensions/qa/translations/km/org.wcs.smart.qa.incident.nl_km</module>
 				<module>../extensions/qa/translations/km/org.wcs.smart.qa.nl_km</module>
 				<module>../extensions/qa/translations/km/org.wcs.smart.qa.patrol.nl_km</module>
+				-->
 				
 				<!-- LO EXTENSIONS -->
 				<module>../extensions/asset/translations/lo/org.wcs.smart.asset.feature.nl_lo</module>

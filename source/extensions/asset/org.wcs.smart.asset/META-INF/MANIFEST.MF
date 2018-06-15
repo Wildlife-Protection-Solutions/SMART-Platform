@@ -17,5 +17,4 @@ Export-Package: org.wcs.smart.asset,
  org.wcs.smart.asset.model,
  org.wcs.smart.asset.ui.handler,
  org.wcs.smart.asset.ui.views.station
-Bundle-ClassPath: lib/jfxswt.jar,
- .
+Bundle-ClassPath: .

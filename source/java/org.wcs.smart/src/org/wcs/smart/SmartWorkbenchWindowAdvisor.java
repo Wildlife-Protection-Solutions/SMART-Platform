@@ -36,6 +36,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimBar;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimElement;
+import org.eclipse.e4.ui.model.application.ui.menu.MToolBar;
 import org.eclipse.e4.ui.model.application.ui.menu.MToolControl;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -269,6 +270,15 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 		//so instead we ensure it is visible here.
 		MTrimBar statusBar = (MTrimBar) modelService.find("org.eclipse.ui.trim.status", ctx.get(MApplication.class)); //$NON-NLS-1$
 		statusBar.setVisible(true);
+		
+		//when we added the -Dosgi.framework.extensions=org.eclipse.fx.osgi vm argument
+		//this caused the undoredo toolbar to show up - I couldn't figure out why so
+		//for now I hide it (removing it causes other issues)
+		MToolBar x = (MToolBar)modelService.find("undoredo.toolbar", ctx.get(MApplication.class)); //$NON-NLS-1$
+		if (x != null) {
+			x.setVisible(false);
+			x.setToBeRendered(false);
+		}
 		
 		//add a spacer so we can force items to be on the right
 		MToolControl tc = modelService.createModelElement(MToolControl.class);
