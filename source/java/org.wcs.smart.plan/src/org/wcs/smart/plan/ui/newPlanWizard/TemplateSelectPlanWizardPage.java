@@ -126,6 +126,10 @@ public class TemplateSelectPlanWizardPage extends PlanWizardPage implements IPla
 				SmartPlanPlugIn.displayLog(Messages.TemplateSelectPlanWizardPage_PlanNotFound_Error, null);
 				return false;
 			}
+			if (source.getParent() != null) {
+				source.getParent().getStartDate();
+				source.getParent().getEndDate();
+			}
 			
 			//fetch real data for nested lazy elements (not lazy bags)
 			if (source.getTeam() != null) {
@@ -134,33 +138,30 @@ public class TemplateSelectPlanWizardPage extends PlanWizardPage implements IPla
 			if (source.getStation() != null) {
 				source.getStation().getName();
 			}
+		
+			p.setTemplatePlan(source);
+			p.setName(source.getName());
+			//p.setId(source.getId());  //DO NOT CLONE ID
+			p.setDescription(source.getDescription());
+			p.setStartDate(source.getStartDate());
+			p.setEndDate(source.getEndDate());
+			p.setStation(source.getStation());
+			p.setTeam(source.getTeam());
+				
+			p.setParent(source.getParent());
+			p.setType(source.getType());
+			p.setUnavailableEmployees(source.getUnavailableEmployees());
+				
+			//clone the targets
+			List<PlanTarget> tars = source.getTargets();
+			List<PlanTarget> newTars = new ArrayList<PlanTarget>();
+			for(PlanTarget x : tars){
+				newTars.add(x.clone());
+			}
+			p.setTargets(newTars);
 		}finally{
 			s.getTransaction().rollback();
 		}
-
-		
-		
-		
-		p.setTemplatePlan(source);
-		p.setName(source.getName());
-		//p.setId(source.getId());  //DO NOT CLONE ID
-		p.setDescription(source.getDescription());
-		p.setStartDate(source.getStartDate());
-		p.setEndDate(source.getEndDate());
-		p.setStation(source.getStation());
-		p.setTeam(source.getTeam());
-			
-		p.setParent(source.getParent());
-		p.setType(source.getType());
-		p.setUnavailableEmployees(source.getUnavailableEmployees());
-			
-		//clone the targets
-		List<PlanTarget> tars = source.getTargets();
-		List<PlanTarget> newTars = new ArrayList<PlanTarget>();
-		for(PlanTarget x : tars){
-			newTars.add(x.clone());
-		}
-		p.setTargets(newTars);
 		return true;
 	}
 
