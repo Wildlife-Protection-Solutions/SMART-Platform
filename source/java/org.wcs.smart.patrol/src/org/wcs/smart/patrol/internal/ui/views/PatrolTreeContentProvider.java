@@ -170,7 +170,7 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 				}
 				result.sort((a,b)->{
 					Integer a1 = Integer.valueOf(((DateGroupBy)a.getObject()).getYear());
-					Integer b1 = Integer.valueOf(((DateGroupBy)a.getObject()).getYear());
+					Integer b1 = Integer.valueOf(((DateGroupBy)b.getObject()).getYear());
 					return -1 * a1.compareTo(b1);
 				});
 				return result;
@@ -199,11 +199,11 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 				}
 				result.sort((a,b)->{
 					Integer y1 = Integer.valueOf(((DateGroupBy)a.getObject()).getYear());
-					Integer y2 = Integer.valueOf(((DateGroupBy)a.getObject()).getYear());
+					Integer y2 = Integer.valueOf(((DateGroupBy)b.getObject()).getYear());
 					if (y1 != y2) return -1 * y1.compareTo(y2);
 					
 					Integer m1 = Integer.valueOf(((DateGroupBy)a.getObject()).getMonth());
-					Integer m2 = Integer.valueOf(((DateGroupBy)a.getObject()).getMonth());
+					Integer m2 = Integer.valueOf(((DateGroupBy)b.getObject()).getMonth());
 					return -1 * m1.compareTo(m2);
 				});
 				return result;
