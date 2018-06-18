@@ -1,441 +1,527 @@
-/*
- * Copyright (C) 2016 Wildlife Conservation Society
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 package org.wcs.smart.i2.ui.views.entity.search;
 
+import java.text.Collator;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-import org.eclipse.jface.util.LocalSelectionTransfer;
-import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DropTarget;
-import org.eclipse.swt.dnd.DropTargetAdapter;
-import org.eclipse.swt.dnd.DropTargetEvent;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.search.AdvancedEntitySearch;
+import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.AttributeLabelProvider;
+import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
-import org.wcs.smart.i2.ui.views.query.dropitem.IDefinitionPanel;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
-import org.wcs.smart.i2.ui.views.query.dropitem.ProxyItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem.InputType;
+import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextOperatorDropItem;
+import org.wcs.smart.ui.SmartShellDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SharedUtils;
 
-/**
- * Simple definition panel for creating filter queries
- * 
- * @author Emily
- *
- */
-public class EntitySearchPanel implements IDefinitionPanel {
-	
-	private Composite mainComposite;
-	private ScrolledComposite dropTarget = null;
-	private Composite dropTargetContent;
-	
-	private ProxyItem proxy = null;	//drag proxy item
-	protected ArrayList<DropItem> items = new ArrayList<DropItem>();	//list of controls in formula
-	private DropItem dragItem;
-	
-	private List<Listener> modifiedEvents = null;
-	/**
-	 * Creates a new drop target panel.
-	 * 
-	 */
-	public EntitySearchPanel(){
-		modifiedEvents= new ArrayList<Listener>();
-	}
+public abstract class EntitySearchPanel extends Composite {
 
-	public void addQueryModifiedListener(Listener l){
-		modifiedEvents.add(l);
-	}
-
-	@Override
-	public void dispose(){
-		mainComposite.dispose();
-	}
-
-	/**
-	 * Clears all items from the query and hides the 
-	 * proxy.
-	 * 
-	 */
-	@Override
-	public void clear(){
-		for (DropItem item: items){
-			if (item == proxy){
-				continue;
-			}
-			if (item != null){
-				item.dispose();
-			}
-		}
-		proxy.getWidget().setVisible(false);
-		items.clear();
-		dropTarget.redraw();
-		if (this.dragItem != null){
-			this.dragItem.dispose();
-			this.dragItem = null;
-		}		
-	}
-	
-	
-	/**
-	 * Converts the items that make up the query to 
-	 * a query string.
-	 * 
-	 * @return the query string represented by the items in the query panel
-	 */
-	@Override
-	public String getQueryPart(){
-		StringBuilder query = new StringBuilder();
-
-		for (Object item : items){
-			if (item instanceof DropItem){
-				DropItem it = (DropItem)item;
-				query.append(it.asQueryPart());
-				query.append("|"); //$NON-NLS-1$
-			}
-		}
+	private enum FilterOption{
+		ENTITY_TYPE(Messages.AdvancedEntitySearchPanel_EntityTypeFilterLabel),
+		ENTITY_ATTRIBUTE_TYPE(Messages.AdvancedEntitySearchPanel_AttributeFilterLabel),
+		NOT(Operator.NOT.getLabel(Locale.getDefault())),
+		BRACKET(Messages.AdvancedEntitySearchPanel_bracketsFilterLabel);
 		
-		if (query.length() > 0 && query.charAt(query.length() - 1) == '|'){
-			query.deleteCharAt(query.length() - 1);
-		}
+		public String guiName;
 		
-		return query.toString();
+		FilterOption(String name){
+			this.guiName = name;
+		}
 	}
 	
 	
-	/**
-	 * Validates the items in the filter panel 
-	 */
-	@Override
-	public String validate(){
-		for (DropItem di : items){
-			if (di instanceof ErrorDropItem) return ((ErrorDropItem)di).getText();
-		}
-		return null;
-	}
+	private EntitySearchDropPanel searchPanel;
+	private FilterOptionShell optionShell;
+	private Button btnAddFilter;
+	private Button btnSearch;
+	private FormToolkit toolkit;
+	private ToolBar toolbar;
 	
-	/**
-	 * Adds all items to the current query.  
-	 * <p>This does not fire the query changed event.
-	 * </p>
-	 * 
-	 * @param items
-	 */
-	
-	public void initializeItems(List<DropItem> items) {
-		if (items != null) {
-			for (DropItem item : items) {
-				item.createWidget(this, dropTargetContent);
-				this.items.add(item);
-			}
-		}
-		orderElements();
-	}
-	
-	/**
-	 * Adds a drop item to the query formula; fires a query changed
-	 *  event after item added
-	 * @param item drop item to add
-	 */
-	@Override
-	public void addItem(DropItem item) {
-		item.createWidget(this, dropTargetContent);
-		
-		if (items.size() > 0){
-			boolean addBoolean = true;
-			if (item instanceof TextOperatorDropItem){
-				Operator op = ((TextOperatorDropItem)item).getOperator();
-				if (op.equals(Operator.NOT) || op.equals(Operator.BRACKET_CLOSE) || 
-						op.equals(Operator.BRACKET_OPEN) || op.equals(Operator.BRACKETS)){ 
-					addBoolean = false;
-				}
-			}
-			if (addBoolean){
-				DropItem it = OptionDropItem.createAndOrDropItem();
-				it.createWidget(this, dropTargetContent);
-				items.add(it);	
-			}
-		}
-		items.add(item);
-		orderElements();
-		fireQueryChangedListeners();
+	public EntitySearchPanel(Composite parent) {
+		super(parent, SWT.NONE);
+		toolkit = new FormToolkit(parent.getDisplay());
+		addListener(SWT.Dispose, e->toolkit.dispose());
+		createContent();
 	}
 
 	/**
-	 * Remove an element from the drop item
-	 * 
-	 * @param item item to remove
+	 * Save the search to the database
 	 */
-	@Override
-	public void removeItem(DropItem item){
-		if (items.remove(item)){
-			item.dispose();
-		}
-		orderElements();
-	}
+	public abstract void saveSearch();
 	
 	/**
-	 * Redraws the items in the query formula in the correct order
+	 * Run the search and display the results
 	 */
-	private void orderElements() {
-		int currx = 0;
-		int curry = 0;
-		int maxWidth = dropTarget.getBounds().width;
-		int height = 10;
-		int width = 0;
-		for (int i = 0; i < items.size(); i++) {
-			Point pnt = items.get(i).getWidget().computeSize(SWT.DEFAULT, SWT.DEFAULT);
-			height = Math.max(33,pnt.y);
-			if (currx + pnt.x > maxWidth && currx != 0) {
-				// move to next line
-				width = Math.max(width, currx);
-				curry += height;
-				currx = 0;
-			}
-			items.get(i).getWidget().setBounds(currx, curry, pnt.x, height);
-			currx += pnt.x;
-			if (items.get(i).getWidget() != null) {
-				items.get(i).getWidget().layout();
-			}
-		}
-		width = Math.max(width, currx);
-		dropTargetContent.setSize(width, curry + height);
-		dropTarget.setMinSize(width, curry+height);
-		dropTarget.redraw();
-	}
-
-
+	public abstract void doSearch();
 	
-	/**
-	 * @see org.wcs.smart.query.ui.IDefinitionPanel.IDropPanel#finishDrag(org.wcs.smart.query.ui.formulaDnd.DropItem)
-	 */
-	@Override
-	public void finishDrag(DropItem di){
-		if (di.getTargetPanel() != this){
-			items.remove(di);
-		}
-		if (di.getTargetPanel() == null && !items.contains(di)){
-			int index= items.indexOf(proxy);
-			
-			proxy.getWidget().setVisible(false);
-			if (index >= 0){
-				items.add(index, di);
-			}else{
-				items.add(di);
-			}
-			di.getWidget().setVisible(true);
-		}
-		items.remove(proxy);
-		proxy.getWidget().setVisible(false);
-		dragItem = null;
-		
-		orderElements();
-		fireQueryChangedListeners();
-
+	public ToolBar getToolbar() {
+		return this.toolbar;
 	}
-	
-	@Override
-	public void redraw(){
-		orderElements();
-	}
-	
-	/**
-	 * Creates the drop target composite
-	 * @param parent
-	 * @return
-	 */
-	@Override
-	public Composite createComposite(Composite parent) {
+	private void createContent() {
+		setLayout(new GridLayout());
+		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginHeight = 0;
 		
-		mainComposite = new Composite(parent, SWT.BORDER);
-		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		GridLayout layout = new GridLayout();
-		layout.horizontalSpacing = 0;
-		layout.verticalSpacing = 0;
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
-		mainComposite.setLayout(layout);
+		Composite top = new Composite(this, SWT.NONE);
+		top.setLayout(new GridLayout(2, false));
+		((GridLayout)top.getLayout()).marginWidth = 0;
+		((GridLayout)top.getLayout()).marginHeight = 0;
+		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		dropTarget = new ScrolledComposite(mainComposite, SWT.H_SCROLL | SWT.V_SCROLL);
-		dropTarget.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)dropTarget.getLayoutData()).heightHint = 20;
-		dropTarget.setExpandHorizontal(true);
-		dropTarget.setExpandVertical(true);
-//		dropTarget.addListener(SWT.Resize, new Listener() {
-//			@Override
-//			public void handleEvent(Event event) {
-//				orderElements();
-//			}
-//		});		
+		btnAddFilter = toolkit.createButton(top, Messages.AdvancedEntitySearchPanel_addFilterBtn, SWT.PUSH);
+		btnAddFilter.addListener(SWT.Selection, e-> showFilterMenu(e));
+		btnAddFilter.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		
-		dropTargetContent = new Composite(dropTarget, SWT.NONE);
-		dropTargetContent.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		dropTarget.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		dropTarget.setContent(dropTargetContent);
+		toolbar = new ToolBar(top, SWT.FLAT);
+		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		
-		DropTarget dtarget = new DropTarget(dropTarget, DND.DROP_MOVE);
-		dtarget.setTransfer(DND_TYPES);
-		dtarget.addDropListener(new DropTargetAdapter() {
-
-			
-			@Override
-			public void dragEnter(DropTargetEvent event) {
-				if (dragItem == null){
-					StructuredSelection selection = (StructuredSelection) LocalSelectionTransfer.getTransfer().getSelection();
-					if (selection == null) {
-						return;
-					}
-					//hide drop item and setup proxy
-					dragItem = (DropItem)selection.getFirstElement();
-				}
-				if (dragItem.getTargetPanel() != EntitySearchPanel.this){
-					event.detail  = DND.DROP_NONE;
-					dragItem = null;
-					return;
-				}
+		ToolItem clear = new ToolItem(toolbar, SWT.PUSH);
+		clear.setToolTipText(Messages.AdvancedEntitySearchPanel_Cleartooltip);
+		clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
+		clear.addListener(SWT.Selection, (event)->searchPanel.clear());
+		clear.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		
+		searchPanel = new EntitySearchDropPanel(){
+			public String validate(){
+				String validate = super.validate();
 				
-				if (dragItem.getWidget().isVisible()){
-					dragItem.getWidget().setVisible(false);
-					int i = items.indexOf(dragItem);
-					if ( i < 0){
-						items.add(proxy);
-					}else{
-						items.add(i, proxy);
-						items.remove(dragItem);
-					}
-				}else if (!proxy.getWidget().isVisible()){
-					moveElements(event.x, event.y);
-					
-				}
-				proxy.setLabelText(dragItem.getText());
-				proxy.getWidget().setVisible(true);
-				orderElements();
+				btnSearch.setEnabled(validate == null);
+				if (validate != null) btnSearch.setToolTipText(validate);
+				return validate;
 			}
-
-			public void dragLeave(DropTargetEvent event) {
-				if (proxy.getWidget().isVisible() && dragItem.getTargetPanel() != EntitySearchPanel.this){
-					items.remove(proxy);
-					proxy.getWidget().setVisible(false);
-				}
-				orderElements();
-			}
-			
+		};
+		searchPanel.addQueryModifiedListener((event)->searchPanel.validate());
+		Composite c = searchPanel.createComposite(this);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		toolkit.adapt(c);
+		
+		Composite bottom = toolkit.createComposite(this);
+		bottom.setLayout(new GridLayout(2, false));
+		((GridLayout)bottom.getLayout()).marginWidth = 0;
+		((GridLayout)bottom.getLayout()).marginHeight = 0;
+		bottom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		btnSearch = toolkit.createButton(bottom, Messages.AdvancedEntitySearchPanel_SaveButton, SWT.PUSH);
+		btnSearch.addListener(SWT.Selection, e->doSearch());
+		btnSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		
+		Hyperlink saveSearch = toolkit.createHyperlink(bottom, Messages.AdvancedEntitySearchPanel_SaveSearchlink, SWT.NONE);
+		saveSearch.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+		saveSearch.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
-			public void dragOperationChanged(DropTargetEvent event) {
-			}
-
-			@Override
-			public void dragOver(DropTargetEvent event) {
-				if (event.detail != DND.DROP_NONE){
-					if (dragItem == null) return;
-					moveElements(event.x, event.y);
-					orderElements();
-				}
-				
-			}
-
-			@Override
-			public void dropAccept(DropTargetEvent event) {
-			}
-
-			@Override
-			public void drop(DropTargetEvent event) {
-				if (event.detail == DND.DROP_NONE || dragItem == null){
-					return;
-				}
-				moveElements(event.x, event.y);
-				//remove proxy and put back the drop item
-				int i = items.indexOf(proxy);
-				items.add(i, dragItem);
-				dragItem.getWidget().setVisible(true);
-				items.remove(proxy);
-				proxy.getWidget().setVisible(false);
-				orderElements();
-				
-				dragItem = null;
-			}
-
-			private void moveElements(int x, int y) {
-				DropItem target = null;
-				boolean before = false;
-				for (DropItem children : items) {
-					Rectangle childBounds = children.getWidget().getBounds();
-					Point p = children.getWidget().getParent().toDisplay(childBounds.x, childBounds.y);
-					Rectangle r = new Rectangle(p.x, p.y, childBounds.width,childBounds.height);
-					if (r.contains(x, y)) {
-						target = children;
-						before = x < p.x + (childBounds.width / 2.0);
-						break;
-					}
-				}
-				if (target == null) {
-					items.remove(proxy);
-					items.add(proxy);
-				} else if (target == proxy) {
-					return;
-				} else {
-					items.remove(proxy);
-					int toIndex = items.indexOf(target);
-					if (!before) {
-						toIndex++;
-					}
-					if (toIndex < 0) {
-						toIndex = 0;
-					}
-					items.add(toIndex, proxy);
-				}
+			public void linkActivated(HyperlinkEvent e) {
+				saveSearch();
 			}
 		});
-		dropTarget.setMinSize(dropTargetContent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		
-		//create proxy item
-		proxy = new ProxyItem();
-		proxy.createWidget(this, dropTargetContent);
-		proxy.getWidget().setVisible(false);
-		
-		return mainComposite;
+		saveSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+
 	}
-
-	@Override
-	public Composite getDropTargetComposite() {
-		return dropTargetContent;
+	
+	public void addQueryModifiedListener(Listener l) {
+		searchPanel.addQueryModifiedListener(l);
 	}
-
-
-	@Override
-	public void fireQueryChangedListeners() {
-		for (Listener l : modifiedEvents){
-			l.handleEvent(new Event());
+	
+	private void showFilterMenu(Event e){
+		optionShell = new FilterOptionShell(getShell());
+		Rectangle r = btnAddFilter.getBounds();
+		optionShell.open(btnAddFilter.toDisplay(r.x + r.width, r.y));
+	}
+	
+	public String getQueryString() {
+		return searchPanel.getQueryPart();
+	}
+	
+	public String validate() {
+		return searchPanel.validate();
+	}
+	
+	public void initPanel(String searchString){
+		searchPanel.clear();
+		
+		List<DropItem> toAdd = new ArrayList<DropItem>();
+		
+		String[] parts = searchString.split("\\|"); //$NON-NLS-1$
+		
+		for(String p : parts){
+			if (p.equalsIgnoreCase(Operator.BRACKET_OPEN.getKey())){
+				toAdd.add(createOpenBracketDropItem());
+			}else if (p.equalsIgnoreCase(Operator.BRACKET_CLOSE.getKey())){
+				toAdd.add(createCloseBracketDropItem());
+			}else if (p.equalsIgnoreCase(Operator.NOT.getKey())){
+				toAdd.add(createNotDropItem());
+			}else if (p.equalsIgnoreCase(Operator.AND.getKey())){
+				OptionDropItem di = OptionDropItem.createAndOrDropItem();
+				di.setInitialValue(Operator.AND.getKey());
+				toAdd.add(di);
+			}else if (p.equalsIgnoreCase(Operator.OR.getKey())){
+				OptionDropItem di = OptionDropItem.createAndOrDropItem();
+				di.setInitialValue(Operator.OR.getKey());
+				toAdd.add(di);
+			}else if (p.startsWith(AdvancedEntitySearch.ENTITYTYPE_KEY)){
+				String entityTypeKey = p.split("=")[1].trim(); //$NON-NLS-1$
+				toAdd.add(createEntityTypeDropItem(entityTypeKey));				
+			}else if (p.startsWith(AdvancedEntitySearch.ATTRIBUTE_KEY + ":")){ //$NON-NLS-1$
+				String[] bits = p.split(" ")[0].split(":"); //$NON-NLS-1$ //$NON-NLS-2$
+				String key = bits[2];
+				IntelAttribute ia = null;
+				try(Session session = HibernateManager.openSession()){
+					ia = QueryFactory.buildQuery(session, IntelAttribute.class,
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+							new Object[] {"keyId", key}).uniqueResult(); //$NON-NLS-1$
+					
+					if (ia != null && ia.getType() == AttributeType.LIST){
+						String listKey = p.split(" ")[2]; //$NON-NLS-1$
+						boolean found = false;
+						if (ia.getAttributeList() != null){
+							for (IntelAttributeListItem listitem : ia.getAttributeList()){
+								listitem.getName();
+								if (listitem.getKeyId().equalsIgnoreCase(listKey)){
+									found = true;
+								}
+							}
+						}
+						if (!found){
+							toAdd.add(new ErrorDropItem(MessageFormat.format(Messages.AdvancedEntitySearchPanel_listitemnotfound, listKey, ia.getName())));
+							continue;
+						}
+					}
+				}
+				if (ia == null){
+					toAdd.add(new ErrorDropItem(MessageFormat.format(Messages.AdvancedEntitySearchPanel_attributenotfound, key)));
+				}else{
+					try{
+						DropItem di = createAttributeDropItem(ia);
+						if (ia.getType() == IntelAttribute.AttributeType.TEXT){
+							String[] queryParts = p.split(" "); //$NON-NLS-1$
+							Operator op = Operator.parse(queryParts[1]);
+							int startIndex = p.indexOf(queryParts[2], queryParts[0].length());
+							String strValue = p.substring(startIndex).trim();
+							String value = SharedUtils.stripQuotes(strValue);
+							((TextBoxDropItem)di).setInitialValue(op, value);
+						}else if (ia.getType() == IntelAttribute.AttributeType.NUMERIC){
+							String[] queryParts = p.split(" "); //$NON-NLS-1$
+							Operator op = Operator.parse(queryParts[1]);
+							String value = queryParts[2];
+							((TextBoxDropItem)di).setInitialValue(op, value);
+						}else if (ia.getType() == IntelAttribute.AttributeType.DATE){
+							String[] queryParts = p.split(" "); //$NON-NLS-1$
+							Operator op = Operator.parse(queryParts[1]);
+							Date d1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR )).parse(queryParts[2]);
+							Date d2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR )).parse(queryParts[4]);
+							((DateDropItem)di).setInitialValue(op, d1, d2);
+						}else if (ia.getType() == IntelAttribute.AttributeType.LIST){
+							String listKey = p.split(" ")[2]; //$NON-NLS-1$
+							((OptionDropItem)di).setInitialValue(listKey);
+						}
+						toAdd.add(di);
+					}catch (Exception ex){
+						toAdd.add(new ErrorDropItem(MessageFormat.format(Messages.AdvancedEntitySearchPanel_ParseError, ex.getMessage())));
+					}
+				}
+					
+			}
 		}
+		searchPanel.initializeItems(toAdd);
+	}
+	
+	private class FilterOptionShell extends SmartShellDialog {
+
+		private TableViewer optionsTable;
+		private TableViewer attributeTable;
+		
+		private List<IntelAttribute> attributes = null;
+		
+		public FilterOptionShell(Shell owner){
+			super(owner);
+		}
+		
+		@Override
+		public void createContents(Composite parent){
+			parent.setLayout(new GridLayout(2, true));
+			optionsTable = new TableViewer(parent, SWT.BORDER);
+			optionsTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			optionsTable.setContentProvider(ArrayContentProvider.getInstance());
+			optionsTable.setLabelProvider(new LabelProvider(){
+				public String getText(Object element){
+					if (element instanceof FilterOption){
+						return ((FilterOption) element).guiName;
+					}
+					return super.getText(element);
+				}
+			});
+			
+			optionsTable.setInput(FilterOption.values());
+			optionsTable.addDoubleClickListener(new IDoubleClickListener() {
+				@Override
+				public void doubleClick(DoubleClickEvent event) {
+					FilterOption op = (FilterOption) ((IStructuredSelection)optionsTable.getSelection()).getFirstElement();
+					List<DropItem> dis = null;
+					if (op == FilterOption.ENTITY_TYPE){
+						DropItem di = createEntityTypeDropItem(null);
+						if (di != null) dis = Collections.singletonList(di);
+					}else if (op == FilterOption.NOT){
+						DropItem di = createNotDropItem();
+						if (di != null) dis = Collections.singletonList(di);
+					}else if (op == FilterOption.BRACKET){
+						dis = createBracketDropItem();
+					}
+					if (dis != null){
+						dis.forEach(di -> searchPanel.addItem(di));
+						FilterOptionShell.this.close();
+					}
+				}
+			});
+			
+			optionsTable.addSelectionChangedListener(event-> processOptionSelection());
+			
+			
+			attributeTable = new TableViewer(parent, SWT.BORDER);
+			attributeTable.setContentProvider(ArrayContentProvider.getInstance());
+			attributeTable.setLabelProvider(new LabelProvider(){
+				private EntityTypeLabelProvider typeLabelProvider = new EntityTypeLabelProvider();
+				private AttributeLabelProvider attributeProvider = new AttributeLabelProvider();
+				
+				@Override
+				public void dispose(){
+					typeLabelProvider.dispose();
+					attributeProvider.dispose();
+				}
+				
+				@Override
+				public String getText(Object element){
+					if (element instanceof IntelEntityType){
+						return typeLabelProvider.getText(element);
+					}
+					if (element instanceof IntelAttribute){
+						return attributeProvider.getText(element);
+					}
+					return super.getText(element);
+				}
+				
+				@Override
+				public Image getImage(Object element){
+					if (element instanceof IntelEntityType){
+						return typeLabelProvider.getImage(element);
+					}
+					if (element instanceof IntelAttribute){
+						return attributeProvider.getImage(element);
+					}
+					return super.getImage(element);
+				}
+				
+			});
+			attributeTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			attributeTable.addDoubleClickListener(new IDoubleClickListener() {
+				@Override
+				public void doubleClick(DoubleClickEvent event) {
+					if (attributeTable.getSelection().isEmpty()) return;
+					
+					Object x =((IStructuredSelection) attributeTable.getSelection()).getFirstElement();
+					DropItem di = null;
+					if (x instanceof IntelEntityType){
+						di = createEntityTypeDropItem(((IntelEntityType)x).getKeyId());
+					}else if (x instanceof IntelAttribute){
+						di = createAttributeDropItem((IntelAttribute)x);
+					}
+					if (di != null){
+						searchPanel.addItem(di);
+						FilterOptionShell.this.close();
+					}
+				}
+			});
+		}
+		
+		private void processOptionSelection(){
+			FilterOption op = (FilterOption) ((IStructuredSelection)optionsTable.getSelection()).getFirstElement();
+			switch(op){
+			case NOT:
+			case BRACKET:
+				attributeTable.setInput(null);
+				break;
+			case ENTITY_TYPE:
+				attributeTable.setInput(DialogConstants.LOADING_TEXT);
+				Job entityJob = new Job(Messages.AdvancedEntitySearchPanel_LoadingEntitiesJobName){
+
+					private List<IntelEntityType> entities;
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						try(Session s = HibernateManager.openSession()){
+							entities = QueryFactory.buildQuery(s,IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
+							entities.forEach(ent->ent.getName());
+						}
+						Display.getDefault().syncExec(()->{if (!attributeTable.getControl().isDisposed()) attributeTable.setInput(entities);});
+						return Status.OK_STATUS;
+					}
+				};
+				entityJob.schedule();
+				break;
+			case ENTITY_ATTRIBUTE_TYPE:
+				//show
+				if (attributes != null){
+					attributeTable.setInput(attributes);
+				}else{
+					attributeTable.setInput(new String[]{DialogConstants.LOADING_TEXT});
+					Job j = new Job(Messages.AdvancedEntitySearchPanel_loadingAttributeJobName){
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							try(Session s = HibernateManager.openSession()){
+								List<IntelAttribute> ats = QueryFactory.buildQuery(s, IntelAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
+								ats.forEach(a->{
+									a.getName();
+									if (a.getType() == IntelAttribute.AttributeType.LIST){
+										a.getAttributeList().forEach(li -> li.getName());
+									}
+								});
+								
+								attributes = ats;
+							}
+							attributes.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
+							Display.getDefault().syncExec(()->{if (!attributeTable.getControl().isDisposed()) attributeTable.setInput(attributes);});
+							return Status.OK_STATUS;
+						}
+					};
+					j.schedule();
+				}
+				break;
+			default:
+				break;
+			
+			}
+		}
+	}
+	
+	
+	private DropItem createAttributeDropItem(IntelAttribute a){
+		DropItem di = null;
+		String key = AdvancedEntitySearch.ATTRIBUTE_KEY + ":" + a.getType().key + ":" + a.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
+		switch(a.getType()){
+		case BOOLEAN:
+			di = new TextDropItem(a.getName(), key);
+			break;
+		case DATE:
+			di = new DateDropItem(a.getName(), key);
+			break;
+		case LIST:
+			String[] names = new String[a.getAttributeList().size()];
+			String[] keys = new String[a.getAttributeList().size()];
+			for (int i = 0; i < a.getAttributeList().size(); i ++){
+				names[i] = a.getAttributeList().get(i).getName();
+				keys[i] = a.getAttributeList().get(i).getKeyId();
+			}
+			di = new OptionDropItem(a.getName(), key, names, keys);
+			break;
+		case NUMERIC:
+			di = new TextBoxDropItem(a.getName(), key, InputType.NUMERIC);
+			break;
+		case TEXT:
+			di = new TextBoxDropItem(a.getName(), key, InputType.TEXT);
+			break;
+		default:
+			break;
+		
+		}
+		return di;
+	}
+	
+	private DropItem createEntityTypeDropItem(String entityTypeKey){
+		String[][] values = new String[2][];
+		Job j = new Job(Messages.AdvancedEntitySearchPanel_loadingEntityTypeJobName){
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try(Session s = HibernateManager.openSession()){
+					List<IntelEntityType> types = QueryFactory.buildQuery(s, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$				
+					values[0] = new String[types.size()];
+					values[1] = new String[types.size()];
+					for (int i = 0;i < types.size(); i ++){
+						values[0][i] = types.get(i).getName();
+						values[1][i] = types.get(i).getKeyId();
+					}
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		j.setSystem(true);
+		j.schedule();
+		try {
+			j.join();
+		} catch (InterruptedException e) {
+			return new ErrorDropItem(e.getMessage());
+		}
+		
+		OptionDropItem dropItem = new OptionDropItem(Messages.AdvancedEntitySearchPanel_EntityTypeOptionDropItemName, AdvancedEntitySearch.ENTITYTYPE_KEY, values[0], values[1]);
+		if (entityTypeKey != null){
+			dropItem.setInitialValue(entityTypeKey);
+		}
+		return dropItem;
+	}
+	
+	private TextOperatorDropItem createNotDropItem(){
+		return new TextOperatorDropItem(Operator.NOT);
+	}
+	
+	private List<DropItem> createBracketDropItem(){
+		List<DropItem> newList = new ArrayList<DropItem>();
+		newList.add(createOpenBracketDropItem());
+		newList.add(createCloseBracketDropItem());
+		return newList;
+	}
+	
+	private TextOperatorDropItem createOpenBracketDropItem(){
+		return new TextOperatorDropItem(Operator.BRACKET_OPEN);
+	}
+	private TextOperatorDropItem createCloseBracketDropItem(){
+		return new TextOperatorDropItem(Operator.BRACKET_CLOSE);
 	}
 }

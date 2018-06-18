@@ -84,6 +84,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
+import org.wcs.smart.i2.search.AllEntitySearch;
 import org.wcs.smart.i2.search.BasicEntitySearch;
 import org.wcs.smart.i2.search.IIntelEntitySearch;
 import org.wcs.smart.i2.search.IntelSearchResult;
@@ -541,6 +542,10 @@ public class EntitySearchView {
 			advancedSearchPanel.initPanel(advsearch);
 			updateHyperlink(new HyperlinkEvent(advancedSearch, null, null, -1));
 			advancedSearchPanel.doSearch();
+		}else if (iSearch instanceof AllEntitySearch) {
+			AllEntitySearch allSearch = (AllEntitySearch)iSearch;
+			allPanel.initPanel(allSearch); //this will reload data as necessary
+			updateHyperlink(new HyperlinkEvent(allTable, null, null, -1));
 		}
 		this.lastSearch =  search;
 		
@@ -578,7 +583,6 @@ public class EntitySearchView {
 	/*
 	 * Initializes the basic search panel with the provided search
 	 */
-	@SuppressWarnings("unchecked")
 	private void setSearch(BasicEntitySearch search){
 		basicPanel.setSearch(search);
 	}
