@@ -59,8 +59,10 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -70,6 +72,7 @@ import org.hibernate.query.Query;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.locationtech.udig.project.ui.tool.IToolManager;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
@@ -130,6 +133,23 @@ public class StationEditor extends EditorPart implements MapPart {
 	
 	CoordinateReferenceSystem viewCrs;
 	
+	private IPartListener2 partlistener = new IPartListener2(){
+        public void partActivated( IWorkbenchPartReference partRef ) {
+            if (partRef.getPart(false) == StationEditor.this && getMap() != ApplicationGIS.NO_MAP) {
+                IToolManager toolManager = ApplicationGIS.getToolManager();
+                toolManager.setCurrentEditor( StationEditor.this );
+            }
+        }
+        public void partBroughtToTop( IWorkbenchPartReference partRef ) { }
+        public void partClosed( IWorkbenchPartReference partRef ) { }
+        public void partDeactivated( IWorkbenchPartReference partRef ) { }
+        public void partOpened( IWorkbenchPartReference partRef ) { }
+        public void partHidden( IWorkbenchPartReference partRef ) { }
+        public void partVisible( IWorkbenchPartReference partRef ) { }
+        public void partInputChanged( IWorkbenchPartReference partRef ) { }
+
+    };
+    
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		boolean isNew = station.getUuid() == null;
@@ -331,6 +351,8 @@ public class StationEditor extends EditorPart implements MapPart {
 			}
 			
 		});
+		
+		getSite().getWorkbenchWindow().getPartService().addPartListener(partlistener);
 	}
 	
 	private void validateAndRefresh() {
@@ -571,6 +593,7 @@ public class StationEditor extends EditorPart implements MapPart {
 			handlers.forEach((h)->event.unsubscribe(h));
 		}
 		this.handlers = null;
+		getSite().getWorkbenchWindow().getPartService().removePartListener(partlistener);
 		super.dispose();
 		
 		if (this.currentPage.getMapViewer() != null) this.currentPage.getMapViewer().dispose();
