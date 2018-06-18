@@ -244,6 +244,13 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 	}
 
 	private static class MandateGroupingContentBuilder implements IGroupContentBuilder {
+		
+		private static final PatrolMandate NONE_MANDATE = new PatrolMandate();
+		
+		static {
+			NONE_MANDATE.setName(Messages.PatrolTreeContentProvider_NoStationLabel);
+		}
+		
 		@Override
 		public List<ITreeElement> applyGrouping(Object input) {
 			if (input instanceof PatrolEditorInput[]) {
@@ -260,7 +267,9 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 								Patrol pp = (Patrol) s.get(Patrol.class, p.getUuid());
 								for (PatrolLeg leg : pp.getLegs()) {
 									PatrolMandate m = leg.getMandate();
-									
+									if (m == null) {
+										m = NONE_MANDATE;
+									}
 									TreeElement el = obj2Element.get(m);
 									if(el == null) {
 										el = new TreeElement(m, null);
@@ -291,7 +300,12 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 				} catch (InterruptedException e) {
 					SmartPlugIn.displayError(Messages.PatrolTreeContentProvider_SortMandateJob_Error, e);
 				}
-				result.sort(new ObjectNameComparator());
+				result.sort(new ObjectNameComparator() {
+					@Override
+					public Object getTopObject() {
+						return NONE_MANDATE;
+					}
+				});
 				return result;
 			}
 			return null;
