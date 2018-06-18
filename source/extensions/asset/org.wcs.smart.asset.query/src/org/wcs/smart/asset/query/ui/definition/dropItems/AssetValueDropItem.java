@@ -44,7 +44,7 @@ public class AssetValueDropItem extends AbstractValueDropItem{
 	 * @param item
 	 */
 	public AssetValueDropItem(AssetValueOption item){
-		super(true);
+		super(false);
 		this.item = item;
 		this.guiLabel = item.getGuiName(Locale.getDefault());
 	}

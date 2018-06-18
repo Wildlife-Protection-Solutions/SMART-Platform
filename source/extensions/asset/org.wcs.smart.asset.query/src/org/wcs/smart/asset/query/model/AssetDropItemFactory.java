@@ -142,31 +142,6 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 				items = new DropItem[]{createCategoryValueDropItem(null)};
 			}
 		}
-//			
-		
-//		} else if (source instanceof AssetValueOption) {
-//			items = new DropItem[]{createAssetValueDropItem(
-//							(AssetValueOption) source)};
-//
-		
-//			}else{
-//				items = new DropItem[]{createAssetFilterDropItem((AssetFilterOption) source)};
-//			}
-//		} else if (source instanceof IDateGroupBy) {
-//			items = new DropItem[]{createDateGroupByDropItem(
-//							(IDateGroupBy) source)};
-//		
-//		} else if (source instanceof SummaryDmObject) {
-//			items = new DropItem[]{createSummaryDmDropItem((SummaryDmObject)source)};
-//			
-//		}else if (source instanceof AreaType){
-//			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
-//				items = new DropItem[]{createAreaGroupByDropItem((AreaType)source)};
-//			}
-//		}else if (source instanceof Area){
-//			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
-//				items = new DropItem[]{createAreaGroupByDropItem((Area)source)};
-//			}
 
 		return items;
 		
@@ -261,7 +236,7 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 	 */
 	@Override
 	public DropItem createAttributeValueDropItem(Attribute att){
-		return new AttributeValueDropItem(true, att);
+		return new AttributeValueDropItem(false, att);
 	}
 	
 	/**
@@ -271,7 +246,7 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 	 */
 	@Override
 	public DropItem createAttributeValueDropItem(CategoryAttribute catatt){
-		return new AttributeValueDropItem(true, catatt);
+		return new AttributeValueDropItem(false, catatt);
 	}
 	
 	/**
@@ -281,7 +256,7 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 	 */
 	@Override
 	public DropItem createAttributeListItemValueDropItem(AttributeListItem item){
-		return new AttributeListValueDropItem(true, item);
+		return new AttributeListValueDropItem(false, item);
 	}
 	
 	/**
@@ -292,7 +267,7 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 	 */
 	@Override
 	public DropItem createAttributeListItemValueDropItem(AttributeListItem item, Category cat){
-		return new AttributeListValueDropItem(true, item,cat);
+		return new AttributeListValueDropItem(false, item,cat);
 	}
 	
 	/**
@@ -302,7 +277,7 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 	 */
 	@Override
 	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item ){
-		return new AttributeTreeValueDropItem(true, item);
+		return new AttributeTreeValueDropItem(false, item);
 	}
 	
 	/**
@@ -313,7 +288,7 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 	 */
 	@Override
 	public DropItem createAttributeTreeNodeValueDropItem(AttributeTreeNode item, Category cat){
-		return new AttributeTreeValueDropItem(true, item,cat);
+		return new AttributeTreeValueDropItem(false, item,cat);
 	}
 	
 	/**
@@ -324,9 +299,9 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 	@Override
 	public DropItem createCategoryValueDropItem(Category cat){
 		if (cat == null){
-			return new CategoryValueDropItem(true);
+			return new CategoryValueDropItem(false);
 		}
-		return new CategoryValueDropItem(true, cat);
+		return new CategoryValueDropItem(false, cat);
 	}
 	
 	/**
