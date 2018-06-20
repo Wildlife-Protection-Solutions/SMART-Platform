@@ -909,7 +909,7 @@ public class WorkingSetView {
 								ImageDescriptor img =  Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD);
 								if (record.getRecord().getRecordSource() != null){
 									img = sourceImages.get(record.getRecord().getRecordSource());
-									if (img == null){
+									if (img == null && record.getRecord().getRecordSource().getIcon() != null){
 										//get image descriptor for record source	
 										img = new ImageDescriptor() {
 											
