@@ -53,6 +53,8 @@ public class EntityPerspective implements IPerspectiveFactory {
 			left.addView(EntitySearchView.ID);
 			left.addView(LayersView.ID);
 			layout.getViewLayout(EntitySearchView.ID).setCloseable(false);
+			
+			
 		}
 		
 		if (IntelSecurityManager.INSTANCE.canViewRecords() || 

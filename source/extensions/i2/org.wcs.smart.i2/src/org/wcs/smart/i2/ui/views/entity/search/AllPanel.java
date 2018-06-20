@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.views.entity.search;
 
 import java.text.DateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
@@ -47,13 +48,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.AllEntitySearch;
@@ -61,6 +65,9 @@ import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.entity.search.AllEntityContentProvider.EntityTableData;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
+
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * All entity table panel for entity search view
@@ -70,6 +77,14 @@ import org.wcs.smart.ui.SmartLabelProvider;
  */
 public class AllPanel extends Composite {
 
+	private static final String WEIGHTS_DATAKEY = "WEIGHTS"; //$NON-NLS-1$
+	private static final String FILTER_DATAKEY = "FILTER"; //$NON-NLS-1$
+
+	/*
+	 * Preference store key for the last entity search run
+	 */
+	private static final String LAST_SEARCH_KEY = "org.wcs.smart.i2.ui.views.entity.search.all"; //$NON-NLS-1$
+	
 	@Inject
 	private IEclipseContext context;
 	private EntitySearchView view;
@@ -79,18 +94,42 @@ public class AllPanel extends Composite {
 	private Composite tableComposite;
 	private TableViewer entityTable;
 	private EntitySearchPanel searchPanel;
-
+	private SashForm main;
+	private Label cntLabel;
+			
 	//search object
 	private AllEntitySearch entitySearch;
+	private boolean needsRefresh = false;
 	
 	public AllPanel(Composite parent, EntitySearchView view, FormToolkit toolkit) {
 		super(parent, SWT.NONE);
 		this.view = view;
 		this.toolkit = toolkit;
-		createContents();
-		addDisposeListener(e->toolkit.dispose());
-		
 		entitySearch = new AllEntitySearch(null);
+		
+		addDisposeListener(e->{
+			toolkit.dispose();
+			
+			try(Session session = HibernateManager.openSession()){
+				try {
+					session.beginTransaction();
+					session.createNativeQuery("DROP TABLE " + AllEntityContentProvider.DB_NAME_NAME); //$NON-NLS-1$
+					session.getTransaction().commit();
+				}catch (Exception ex) {
+					//don't worry about it;
+					ex.printStackTrace();
+				}
+			}
+			if (entitySearch != null) {
+				//save current search to preference store to reload when application is restarted
+				entitySearch.setFilterString(getFilterString());
+				String toSave = entitySearch.serialize();	
+				Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(LAST_SEARCH_KEY, toSave);
+			}
+			
+		});
+		
+		createContents();
 	}
 
 	private void createContents() {
@@ -98,7 +137,7 @@ public class AllPanel extends Composite {
 		((GridLayout)getLayout()).marginWidth = 0;
 		((GridLayout)getLayout()).marginHeight = 0;
 		
-		SashForm main = new SashForm(this, SWT.VERTICAL);
+		main = new SashForm(this, SWT.VERTICAL);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		searchPanel = new EntitySearchPanel(main) {
@@ -110,9 +149,8 @@ public class AllPanel extends Composite {
 			
 			@Override
 			public void doSearch() {
-				
 				if (entityTable == null || entityTable.getControl().isDisposed()) {
-					refresh();
+					refresh(0);
 				}else {
 					((AllEntityContentProvider)entityTable.getContentProvider()).setFilter(getQueryString());
 				}
@@ -120,52 +158,85 @@ public class AllPanel extends Composite {
 		};
 		searchPanel.addQueryModifiedListener(e->{
 			//show if hidden; otherwise leave alone 
-			double ratio = main.getWeights()[0] / (double)main.getWeights()[1];
-			if (ratio <= 1/20.0) {
-				main.setWeights(new int[] {1,4});
-			}
+			showHideFilter(true);
 		});
 		
 		ToolItem refreshItem = new ToolItem(searchPanel.getToolbar(), SWT.PUSH);
-		refreshItem.addListener(SWT.Selection, e->refresh());
+		refreshItem.addListener(SWT.Selection, e->refresh(0));
 		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
-		refreshItem.setToolTipText("reload entity results");
+		refreshItem.setToolTipText(Messages.AllPanel_loadresultstooltip);
 		
 		ToolItem configureItem = new ToolItem(searchPanel.getToolbar(), SWT.PUSH);
 		configureItem.addListener(SWT.Selection, e->configureTable());
 		configureItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CONFIGURE));
-		configureItem.setToolTipText("configure table columns");
+		configureItem.setToolTipText(Messages.AllPanel_configtabletooltip);
 		
 		ToolItem hideFilters = new ToolItem(searchPanel.getToolbar(), SWT.PUSH);
 		hideFilters.addListener(SWT.Selection, e->{
-			double ratio = main.getWeights()[0] / (double)main.getWeights()[1];
-			if (ratio <= 1/20.0) {
-				main.setWeights(new int[] {1,4});
-			}else {
-				main.setWeights(new int[] {1,20});
-			}
+			boolean isVisible = (boolean) main.getData(FILTER_DATAKEY);
+			showHideFilter(!isVisible);
 		});
 		hideFilters.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_FILTERS));
-		hideFilters.setToolTipText("show/hide filters");
+		hideFilters.setToolTipText(Messages.AllPanel_showhidetooltip);
 		
 		tableComposite = toolkit.createComposite(main);
 		
 		tableComposite.setLayout(new GridLayout());
 		((GridLayout)tableComposite.getLayout()).marginWidth = 0;
 		((GridLayout)tableComposite.getLayout()).marginHeight = 0;
-	
+		
 		//only do search when this panel is viewed
+		boolean showHide = false;
+		String toLoad = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(LAST_SEARCH_KEY);
+		if (toLoad != null && !toLoad.isEmpty()) {
+			AllEntitySearch load = AllEntitySearch.parse(toLoad, Collections.singleton(SmartDB.getCurrentConservationArea()));
+			if (load != null && load.getQueryColumns() != null && !load.getFilterString().isEmpty()) {
+				//if load is not empty; then load it and display filter panel
+				this.entitySearch = load;
+				searchPanel.initPanel(load.getFilterString());
+				
+				showHide = true;
+			}
+		}
+		
+		final boolean fshowHide = showHide;
 		Listener firstSearch = new Listener() {
 			@Override
 			public void handleEvent(Event event) {
 				tableComposite.removeListener(SWT.Paint, this);
-				refresh();
+				showHideFilter(fshowHide);
+				refresh(0);
 			}};
+		Listener otherRefresh = new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					if (needsRefresh) refreshJob.schedule();
+				}};
 		tableComposite.addListener(SWT.Paint, firstSearch);
-			
+		tableComposite.addListener(SWT.Paint, otherRefresh);
+	}
+	
+	private void showHideFilter(boolean visible) {
+		if (main.getData(FILTER_DATAKEY) != null && (boolean)main.getData(FILTER_DATAKEY) == visible) return;
+		main.setData(FILTER_DATAKEY, visible);
 		
+		if (!visible) {
+			main.setData(WEIGHTS_DATAKEY, main.getWeights());
+		}
+		if (visible && main.getData(WEIGHTS_DATAKEY) != null) {
+			main.setWeights((int[])main.getData(WEIGHTS_DATAKEY));
+			return;
+		}
 		
-		main.setWeights(new int[] {1,20});
+		int total = main.getBounds().height;
+		if (total == 0) total = 10;
+		int first = (int)(total * 0.2);
+		
+		if (!visible) {
+			first = searchPanel.getToolbar().getParent().getBounds().height + 2;
+			if (first == 0) first = 1;
+		}
+		main.setWeights(new int[] {first, total});
 	}
 	
 	/**
@@ -182,11 +253,19 @@ public class AllPanel extends Composite {
 	/**
 	 * Clears the table and reruns the search
 	 */
-	public void refresh() {
+	public void refresh(long delay) {
+		
 		for (Control c : tableComposite.getChildren()) c.dispose();
-		toolkit.createLabel(tableComposite, "Loading....");
+		toolkit.createLabel(tableComposite, DialogConstants.LOADING_TEXT);
 		tableComposite.layout();
-		refreshJob.schedule();
+		
+		if (tableComposite.isVisible()) {
+			refreshJob.schedule();
+		}else {
+			//don't refresh immediately - only refresh when it becomes visible
+			//which is done via a paint event
+			needsRefresh = true;
+		}
 	}
 
 	/*
@@ -217,6 +296,7 @@ public class AllPanel extends Composite {
 	private void createTable(EntityTableData data, AllEntityContentProvider provider) {
 		for (Control c : tableComposite.getChildren()) c.dispose();
 
+		
 		entityTable = new TableViewer(tableComposite, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION);
 		entityTable.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		entityTable.setContentProvider(provider);
@@ -241,7 +321,7 @@ public class AllPanel extends Composite {
 					}
 				}
 				if (temp == null) {
-					MessageDialog.openInformation(context.get(Shell.class), "Not Found", "Entity Not Found.");
+					MessageDialog.openInformation(context.get(Shell.class), Messages.AllPanel_NotFoundTitle, Messages.AllPanel_NotFoundMessage);
 					return;
 				}
 				(new OpenEntityHandler()).openEntity(temp, context);
@@ -250,13 +330,13 @@ public class AllPanel extends Composite {
 		});
 		
 		TableViewerColumn idColumn = new TableViewerColumn(entityTable, SWT.NONE);
-		idColumn.getColumn().setText("Entity ID");
+		idColumn.getColumn().setText(Messages.AllPanel_EntityIdColumn);
 		idColumn.getColumn().setWidth(150);
 		
 		idColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element == null) return "...";
+				if (element == null) return "..."; //$NON-NLS-1$
 				String keyId = ((EntityTableRowItem)element).getId();
 				
 				Object value =  ((EntityTableRowItem)element).getAttributeValue(keyId);
@@ -267,7 +347,7 @@ public class AllPanel extends Composite {
 						break;
 					}
 				}
-				if (value == null || attribute == null) return "";
+				if (value == null || attribute == null) return ""; //$NON-NLS-1$
 				switch(attribute.getType()) {
 				case BOOLEAN:
 					if (((Double)value) < 0.5) return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
@@ -287,7 +367,7 @@ public class AllPanel extends Composite {
 		});
 		
 		TableViewerColumn typeColumn = new TableViewerColumn(entityTable, SWT.NONE);
-		typeColumn.getColumn().setText("Entity Type");
+		typeColumn.getColumn().setText(Messages.AllPanel_EntityTypeColumn);
 		typeColumn.getColumn().setWidth(150);
 		typeColumn.getColumn().addListener(SWT.Selection, e->{
 			provider.setSortColumn(AllEntityContentProvider.COL_ENTITY_TYPE_NAME);
@@ -297,7 +377,7 @@ public class AllPanel extends Composite {
 		typeColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element == null) return "...";
+				if (element == null) return "..."; //$NON-NLS-1$
 				return ((EntityTableRowItem)element).getType();
 			}
 		});
@@ -317,9 +397,9 @@ public class AllPanel extends Composite {
 			aColumn.setLabelProvider(new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
-					if (element == null) return "...";
+					if (element == null) return "..."; //$NON-NLS-1$
 					Object value =  ((EntityTableRowItem)element).getAttributeValue(attribute.getKeyId());
-					if (value == null) return "";
+					if (value == null) return ""; //$NON-NLS-1$
 					switch(attribute.getType()) {
 					case BOOLEAN:
 						if (((Double)value) < 0.5) return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
@@ -337,9 +417,12 @@ public class AllPanel extends Composite {
 				}
 			});
 		}
+
+		cntLabel = new Label(tableComposite, SWT.NONE);
+		cntLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cntLabel.setText(DialogConstants.LOADING_TEXT);
 		
 		tableComposite.layout(true);
-		
 		entityTable.setInput(data);
 	}
 
@@ -347,14 +430,25 @@ public class AllPanel extends Composite {
 		return searchPanel.getQueryString();
 	}
 	
-	private Job refreshJob = new Job("refresh entity table") {
+	private Job refreshJob = new Job(Messages.AllPanel_refreshJobName) {
 
 		private String filterString = null;
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			
+			needsRefresh = false;
 			AllEntityContentProvider provider = new AllEntityContentProvider();
 			EntityTableData data = provider.generateData();
+			provider.addListener(e->{
+				EntityTableData thisdata = (EntityTableData)e.data;
+				if (cntLabel.isDisposed()) return;
+				if (thisdata != null) {
+					cntLabel.setText(MessageFormat.format(Messages.AllPanel_CountLabel, thisdata.getDisplayCount(), thisdata.getTotalCount()));
+				}else {
+					cntLabel.setText(""); //$NON-NLS-1$
+				}
+				
+			});
+			
 			
 			Display.getDefault().syncExec(()->{filterString = getFilterString();});
 			
@@ -364,7 +458,7 @@ public class AllPanel extends Composite {
 			
 			if (data == null) {
 				Display.getDefault().syncExec(()->{
-					toolkit.createLabel(tableComposite, "ERROR");
+					toolkit.createLabel(tableComposite, Messages.AllPanel_ErrorLabel);
 					tableComposite.layout(true);
 				});
 				return Status.OK_STATUS;

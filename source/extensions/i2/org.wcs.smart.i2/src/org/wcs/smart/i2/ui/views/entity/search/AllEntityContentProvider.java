@@ -38,6 +38,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
@@ -46,6 +48,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -67,12 +70,13 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class AllEntityContentProvider implements ILazyContentProvider {
 
-	//TODO: dispose of table
-	//temporary table for storing all entities for querying and sorting
-	private static final String DB_NAME_NAME = "smart.i_entity_view";
+	/**
+	 * temporary table for storing all entities for querying and sorting
+	 */
+	public static final String DB_NAME_NAME = "smart.i_entity_view"; //$NON-NLS-1$
 	
 	
-	public static final String COL_ENTITY_TYPE_NAME = "i_entity_type_name";
+	public static final String COL_ENTITY_TYPE_NAME = "i_entity_type_name"; //$NON-NLS-1$
 	
 	private TableViewer viewer;
 	//set of indexes that have been loaded into the table viewer
@@ -84,6 +88,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 	private String sortColumn = null;
 	private int sortDirection = SWT.UP;
 	
+	private List<Listener> dataModified = new ArrayList<>();
 	/**
 	 * Generates the temporary entity table to support viewing and
 	 * sorting of all entity table
@@ -91,7 +96,6 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 	 */
 	@SuppressWarnings("unchecked")
 	public synchronized EntityTableData generateData() {
-	
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		
 		try(Session session = HibernateManager.openSession()){
@@ -99,7 +103,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			try {
 			
 				try {
-					session.createNativeQuery("DROP TABLE " + DB_NAME_NAME).executeUpdate();
+					session.createNativeQuery("DROP TABLE " + DB_NAME_NAME).executeUpdate(); //$NON-NLS-1$
 				}catch (Exception ex) {
 					//ignore; table likely doesn't exist
 					ex.printStackTrace();
@@ -107,8 +111,8 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				
 				//find all attributes
 				List<IntelEntityTypeAttribute> etattributes = session
-						.createQuery("FROM IntelEntityTypeAttribute WHERE id.attribute.conservationArea = :ca")
-						.setParameter("ca", ca)
+						.createQuery("FROM IntelEntityTypeAttribute WHERE id.attribute.conservationArea = :ca") //$NON-NLS-1$
+						.setParameter("ca", ca) //$NON-NLS-1$
 						.list();
 						
 				List<IntelAttribute> eattributes = new ArrayList<>();
@@ -118,56 +122,56 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 						
 				//create a temporary entity table for working with
 				StringBuilder sb = new StringBuilder();
-				sb.append("CREATE TABLE ");
+				sb.append("CREATE TABLE "); //$NON-NLS-1$
 				sb.append(DB_NAME_NAME);
-				sb.append(" ( entity_uuid char(16) for bit data, ");
-				sb.append(" entity_type_uuid char(16) for bit data, ");
-				sb.append(" i_primary_id varchar(1024), ");
-				sb.append(" filter boolean, ");
+				sb.append(" ( entity_uuid char(16) for bit data, "); //$NON-NLS-1$
+				sb.append(" entity_type_uuid char(16) for bit data, "); //$NON-NLS-1$
+				sb.append(" i_primary_id varchar(1024), "); //$NON-NLS-1$
+				sb.append(" filter boolean, "); //$NON-NLS-1$
 				sb.append(COL_ENTITY_TYPE_NAME);
-				sb.append(" varchar(1024) ");
-				sb.append(")");
+				sb.append(" varchar(1024) "); //$NON-NLS-1$
+				sb.append(")"); //$NON-NLS-1$
 				session.createNativeQuery(sb.toString()).executeUpdate();
 				
 								
 				//now we need to populate this table
 				//entity uuid for this ca
 				sb = new StringBuilder();
-				sb.append(" INSERT INTO ");
+				sb.append(" INSERT INTO "); //$NON-NLS-1$
 				sb.append( DB_NAME_NAME );
-				sb.append(" (entity_uuid, entity_type_uuid, i_primary_id, filter)");
-				sb.append(" SELECT e.uuid, t.uuid, a.keyid, true FROM smart.i_entity e join smart.i_entity_type t on e.entity_type_uuid = t.uuid join smart.i_attribute a on t.id_attribute_uuid = a.uuid " );
-				sb.append(" WHERE e.ca_uuid = :ca");
+				sb.append(" (entity_uuid, entity_type_uuid, i_primary_id, filter)"); //$NON-NLS-1$
+				sb.append(" SELECT e.uuid, t.uuid, a.keyid, true FROM smart.i_entity e join smart.i_entity_type t on e.entity_type_uuid = t.uuid join smart.i_attribute a on t.id_attribute_uuid = a.uuid " ); //$NON-NLS-1$
+				sb.append(" WHERE e.ca_uuid = :ca"); //$NON-NLS-1$
 				session.createNativeQuery(sb.toString())
-					.setParameter("ca", ca.getUuid())
+					.setParameter("ca", ca.getUuid()) //$NON-NLS-1$
 					.executeUpdate();
 				sb = new StringBuilder();
-				sb.append(" CREATE INDEX i_temp_entity_uuid_idx on " + DB_NAME_NAME + "(entity_uuid)");
+				sb.append(" CREATE INDEX i_temp_entity_uuid_idx on " + DB_NAME_NAME + "(entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 				session.createNativeQuery(sb.toString()).executeUpdate();
 				
 				//entity type names
 				sb = new StringBuilder();
-				sb.append("SELECT distinct entity_type_uuid FROM " + DB_NAME_NAME);
+				sb.append("SELECT distinct entity_type_uuid FROM " + DB_NAME_NAME); //$NON-NLS-1$
 				List<?> entityTypes = session.createNativeQuery(sb.toString()).list();
 				for (Object x : entityTypes) {
 					UUID entityTypeUuid = UuidUtils.byteToUUID( (byte[]) x );
 					IntelEntityType type = session.get(IntelEntityType.class, entityTypeUuid);
 				
 					sb = new StringBuilder();
-					sb.append(" UPDATE ");
+					sb.append(" UPDATE "); //$NON-NLS-1$
 					sb.append(DB_NAME_NAME);
-					sb.append(" SET ");
+					sb.append(" SET "); //$NON-NLS-1$
 					sb.append(COL_ENTITY_TYPE_NAME);
-					sb.append(" = :name WHERE entity_type_uuid = :uuid");
+					sb.append(" = :name WHERE entity_type_uuid = :uuid"); //$NON-NLS-1$
 					
 					session.createNativeQuery(sb.toString())
-						.setParameter("name", type.getName())
-						.setParameter("uuid", entityTypeUuid)
+						.setParameter("name", type.getName()) //$NON-NLS-1$
+						.setParameter("uuid", entityTypeUuid) //$NON-NLS-1$
 						.executeUpdate();
 					
 				}
 				
-				Integer count = (Integer) session.createNativeQuery("SELECT count(*) FROM " + DB_NAME_NAME).uniqueResult();
+				Integer count = (Integer) session.createNativeQuery("SELECT count(*) FROM " + DB_NAME_NAME).uniqueResult(); //$NON-NLS-1$
 				
 				session.getTransaction().commit();
 				
@@ -186,7 +190,20 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			return null;
 		}
 	}
+	
+	public void addListener(Listener dataModified) {
+		this.dataModified.add(dataModified);
+	}
+	public void removeListener(Listener dataModified) {
+		this.dataModified.remove(dataModified);
+	}
 
+	private void fireEvents() {
+		Event evt = new Event();
+		evt.data = data;
+		
+		for (Listener l : dataModified)l.handleEvent(evt);
+	}
 	@Override
 	public void updateElement(int index) {
 		if (viewer.getElementAt(index) != null || loaded.contains(index)){
@@ -207,10 +224,13 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		if (newInput == null || !(newInput instanceof EntityTableData)) {
 			data = null;
 			this.viewer.setItemCount(0);
+			fireEvents();
 			return;
 		}
+		loaded.clear();
 		data = (EntityTableData) newInput;
 		this.viewer.setItemCount(data.currentCount);
+		fireEvents();
 	}
 	
 	/**
@@ -229,7 +249,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		this.sortColumn = sortColumn;
 		
 		
-		Job j = new Job("update sort column") {
+		Job j = new Job("update sort column") { //$NON-NLS-1$
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -275,35 +295,35 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		if (sortAttribute == null) return;
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("ALTER TABLE " + DB_NAME_NAME);
-		sb.append(" ADD COLUMN ");
+		sb.append("ALTER TABLE " + DB_NAME_NAME); //$NON-NLS-1$
+		sb.append(" ADD COLUMN "); //$NON-NLS-1$
 		sb.append(sortAttribute.getKeyId());
 		switch(sortAttribute.getType()) {
 		case BOOLEAN:
 		case NUMERIC:
 		case POSITION:
-			sb.append(" double ");
+			sb.append(" double "); //$NON-NLS-1$
 			break;
 		case DATE:
-			sb.append(" date ");
+			sb.append(" date "); //$NON-NLS-1$
 			break;
 		
 		case TEXT:
-			sb.append(" varchar(1024)");
+			sb.append(" varchar(1024)"); //$NON-NLS-1$
 			break;
 		case LIST:
 		case EMPLOYEE:
-			sb.append("_uuid char(16) for bit data");
+			sb.append("_uuid char(16) for bit data"); //$NON-NLS-1$
 		}
 		session.createNativeQuery(sb.toString())
 			.executeUpdate();
 		
 		if (sortAttribute.getType() == AttributeType.LIST || sortAttribute.getType() == AttributeType.EMPLOYEE) {
 			sb = new StringBuilder();
-			sb.append("ALTER TABLE " + DB_NAME_NAME);
-			sb.append(" ADD COLUMN ");
+			sb.append("ALTER TABLE " + DB_NAME_NAME); //$NON-NLS-1$
+			sb.append(" ADD COLUMN "); //$NON-NLS-1$
 			sb.append(sortAttribute.getKeyId());
-			sb.append(" varchar(1024)");
+			sb.append(" varchar(1024)"); //$NON-NLS-1$
 			
 			session.createNativeQuery(sb.toString())
 				.executeUpdate();
@@ -314,95 +334,95 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				sortAttribute.getType() == AttributeType.NUMERIC ||
 				sortAttribute.getType() == AttributeType.POSITION) {	//position sorts on x
 			sb = new StringBuilder();
-			sb.append("UPDATE " + DB_NAME_NAME);
-			sb.append(" SET ");
-			sb.append(sortAttribute.getKeyId() + " = (SELECT ");
-			sb.append(" v.double_value ");
-			sb.append(" FROM smart.i_entity_attribute_value v join smart.i_attribute a on v.attribute_uuid = a.uuid ");
-			sb.append(" WHERE a.keyid = :attribute and v.entity_uuid = ");
+			sb.append("UPDATE " + DB_NAME_NAME); //$NON-NLS-1$
+			sb.append(" SET "); //$NON-NLS-1$
+			sb.append(sortAttribute.getKeyId() + " = (SELECT "); //$NON-NLS-1$
+			sb.append(" v.double_value "); //$NON-NLS-1$
+			sb.append(" FROM smart.i_entity_attribute_value v join smart.i_attribute a on v.attribute_uuid = a.uuid "); //$NON-NLS-1$
+			sb.append(" WHERE a.keyid = :attribute and v.entity_uuid = "); //$NON-NLS-1$
 			sb.append( DB_NAME_NAME );
-			sb.append(".entity_uuid)");
+			sb.append(".entity_uuid)"); //$NON-NLS-1$
 			
 			session.createNativeQuery(sb.toString())
-			.setParameter("attribute", sortAttribute.getKeyId())
+			.setParameter("attribute", sortAttribute.getKeyId()) //$NON-NLS-1$
 			.executeUpdate();
 		}else if (sortAttribute.getType() == AttributeType.TEXT) {
 			sb = new StringBuilder();
-			sb.append("UPDATE " + DB_NAME_NAME);
-			sb.append(" SET ");
-			sb.append(sortAttribute.getKeyId() + " = (SELECT ");
-			sb.append(" lower(v.string_value) ");
-			sb.append(" FROM smart.i_entity_attribute_value v join smart.i_attribute a on v.attribute_uuid = a.uuid ");
-			sb.append(" WHERE a.keyid = :attribute and v.entity_uuid = ");
+			sb.append("UPDATE " + DB_NAME_NAME); //$NON-NLS-1$
+			sb.append(" SET "); //$NON-NLS-1$
+			sb.append(sortAttribute.getKeyId() + " = (SELECT "); //$NON-NLS-1$
+			sb.append(" lower(v.string_value) "); //$NON-NLS-1$
+			sb.append(" FROM smart.i_entity_attribute_value v join smart.i_attribute a on v.attribute_uuid = a.uuid "); //$NON-NLS-1$
+			sb.append(" WHERE a.keyid = :attribute and v.entity_uuid = "); //$NON-NLS-1$
 			sb.append( DB_NAME_NAME );
-			sb.append(".entity_uuid)");
+			sb.append(".entity_uuid)"); //$NON-NLS-1$
 			
 			session.createNativeQuery(sb.toString())
-				.setParameter("attribute", sortAttribute.getKeyId())
+				.setParameter("attribute", sortAttribute.getKeyId()) //$NON-NLS-1$
 				.executeUpdate();
 			
 		}else if (sortAttribute.getType() == AttributeType.DATE) {
 			sb = new StringBuilder();
-			sb.append("UPDATE " + DB_NAME_NAME);
-			sb.append(" SET ");
-			sb.append(sortAttribute.getKeyId() + " = (SELECT ");
-			sb.append("cast(v.string_value as date)");
-			sb.append(" FROM smart.i_entity_attribute_value v join smart.i_attribute a on v.attribute_uuid = a.uuid ");
-			sb.append(" WHERE a.keyid = :attribute and v.entity_uuid = ");
+			sb.append("UPDATE " + DB_NAME_NAME); //$NON-NLS-1$
+			sb.append(" SET "); //$NON-NLS-1$
+			sb.append(sortAttribute.getKeyId() + " = (SELECT "); //$NON-NLS-1$
+			sb.append("cast(v.string_value as date)"); //$NON-NLS-1$
+			sb.append(" FROM smart.i_entity_attribute_value v join smart.i_attribute a on v.attribute_uuid = a.uuid "); //$NON-NLS-1$
+			sb.append(" WHERE a.keyid = :attribute and v.entity_uuid = "); //$NON-NLS-1$
 			sb.append( DB_NAME_NAME );
-			sb.append(".entity_uuid)");
+			sb.append(".entity_uuid)"); //$NON-NLS-1$
 			
 			session.createNativeQuery(sb.toString())
-				.setParameter("attribute", sortAttribute.getKeyId())
+				.setParameter("attribute", sortAttribute.getKeyId()) //$NON-NLS-1$
 				.executeUpdate();
 			
 		}else if (sortAttribute.getType() == AttributeType.LIST) {
 			sb = new StringBuilder();
-			sb.append("UPDATE " + DB_NAME_NAME);
-			sb.append(" SET ");
-			sb.append(sortAttribute.getKeyId() + "_uuid = (SELECT ");
-			sb.append(" v.list_item_uuid ");
-			sb.append(" FROM smart.i_entity_attribute_value v join smart.i_attribute a on v.attribute_uuid = a.uuid ");
-			sb.append(" WHERE a.keyid = :attribute and v.entity_uuid = ");
+			sb.append("UPDATE " + DB_NAME_NAME); //$NON-NLS-1$
+			sb.append(" SET "); //$NON-NLS-1$
+			sb.append(sortAttribute.getKeyId() + "_uuid = (SELECT "); //$NON-NLS-1$
+			sb.append(" v.list_item_uuid "); //$NON-NLS-1$
+			sb.append(" FROM smart.i_entity_attribute_value v join smart.i_attribute a on v.attribute_uuid = a.uuid "); //$NON-NLS-1$
+			sb.append(" WHERE a.keyid = :attribute and v.entity_uuid = "); //$NON-NLS-1$
 			sb.append( DB_NAME_NAME );
-			sb.append(".entity_uuid)");
+			sb.append(".entity_uuid)"); //$NON-NLS-1$
 			
 			session.createNativeQuery(sb.toString())
-				.setParameter("attribute", sortAttribute.getKeyId())
+				.setParameter("attribute", sortAttribute.getKeyId()) //$NON-NLS-1$
 				.executeUpdate();
 			
 			IntelAttribute temp = session.get(IntelAttribute.class, sortAttribute.getUuid());
 			for (IntelAttributeListItem item : temp.getAttributeList()) {
 				sb = new StringBuilder();
-				sb.append(" UPDATE ");
+				sb.append(" UPDATE "); //$NON-NLS-1$
 				sb.append(DB_NAME_NAME);
-				sb.append(" SET " + sortAttribute.getKeyId() + " = :name WHERE " + sortAttribute.getKeyId() + "_uuid = :uuid");
+				sb.append(" SET " + sortAttribute.getKeyId() + " = :name WHERE " + sortAttribute.getKeyId() + "_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
 				session.createNativeQuery(sb.toString())
-					.setParameter("name", item.getName().toLowerCase())
-					.setParameter("uuid", item.getUuid())
+					.setParameter("name", item.getName().toLowerCase()) //$NON-NLS-1$
+					.setParameter("uuid", item.getUuid()) //$NON-NLS-1$
 					.executeUpdate();
 			}
 			
 		}else if (sortAttribute.getType() == AttributeType.EMPLOYEE) {
 			sb = new StringBuilder();
-			sb.append("UPDATE " + DB_NAME_NAME);
-			sb.append(" SET ");
-			sb.append(sortAttribute.getKeyId() + "_uuid = (SELECT ");
-			sb.append(" v.employee_uuid ");
-			sb.append(" FROM smart.i_entity_attribute_value v join smart.i_attribute a on v.attribute_uuid = a.uuid ");
-			sb.append(" WHERE a.keyid = :attribute and v.entity_uuid = ");
+			sb.append("UPDATE " + DB_NAME_NAME); //$NON-NLS-1$
+			sb.append(" SET "); //$NON-NLS-1$
+			sb.append(sortAttribute.getKeyId() + "_uuid = (SELECT "); //$NON-NLS-1$
+			sb.append(" v.employee_uuid "); //$NON-NLS-1$
+			sb.append(" FROM smart.i_entity_attribute_value v join smart.i_attribute a on v.attribute_uuid = a.uuid "); //$NON-NLS-1$
+			sb.append(" WHERE a.keyid = :attribute and v.entity_uuid = "); //$NON-NLS-1$
 			sb.append( DB_NAME_NAME );
-			sb.append(".entity_uuid)");
+			sb.append(".entity_uuid)"); //$NON-NLS-1$
 			
 			session.createNativeQuery(sb.toString())
-				.setParameter("attribute", sortAttribute.getKeyId())
+				.setParameter("attribute", sortAttribute.getKeyId()) //$NON-NLS-1$
 				.executeUpdate();
 		
 			sb = new StringBuilder();
-			sb.append("SELECT distinct " + sortAttribute.getKeyId() + "_uuid FROM ");
+			sb.append("SELECT distinct " + sortAttribute.getKeyId() + "_uuid FROM "); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(DB_NAME_NAME);
-			sb.append(" WHERE " + sortAttribute.getKeyId() + "_uuid is not null");
+			sb.append(" WHERE " + sortAttribute.getKeyId() + "_uuid is not null"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			List<?> employees = session.createNativeQuery(sb.toString()).list();
 			
@@ -411,13 +431,13 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				Employee e = session.get(Employee.class, uuid);
 				
 				sb = new StringBuilder();
-				sb.append(" UPDATE ");
+				sb.append(" UPDATE "); //$NON-NLS-1$
 				sb.append(DB_NAME_NAME);
-				sb.append(" SET " + sortAttribute.getKeyId() + " = :name WHERE " + sortAttribute.getKeyId() + "_uuid = :uuid");
+				sb.append(" SET " + sortAttribute.getKeyId() + " = :name WHERE " + sortAttribute.getKeyId() + "_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
 				session.createNativeQuery(sb.toString())
-					.setParameter("name", SmartLabelProvider.getShortLabel(e).toLowerCase())
-					.setParameter("uuid", uuid)
+					.setParameter("name", SmartLabelProvider.getShortLabel(e).toLowerCase()) //$NON-NLS-1$
+					.setParameter("uuid", uuid) //$NON-NLS-1$
 					.executeUpdate();
 			}	
 		}
@@ -429,7 +449,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 	 */
 	public void setFilter(String filterString) {
 		if (filterString == null || filterString.isEmpty()) {
-			Job j = new Job("update filter") {
+			Job j = new Job(Messages.AllEntityContentProvider_UpdateFilterJobName) {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -437,7 +457,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 						session.beginTransaction();
 						try {
 							StringBuilder sb = new StringBuilder();
-							sb.append("UPDATE " + DB_NAME_NAME + " SET filter = true");
+							sb.append("UPDATE " + DB_NAME_NAME + " SET filter = true"); //$NON-NLS-1$ //$NON-NLS-2$
 							session.createNativeQuery(sb.toString())
 							.executeUpdate();
 						} catch (Exception e) {
@@ -452,6 +472,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 						for (int i = 0; i < data.currentCount; i ++) viewer.clear(i);						
 						viewer.setItemCount(data.totalCount);
 						data.currentCount = data.totalCount;
+						fireEvents();
 						viewer.refresh();
 					});
 					
@@ -465,7 +486,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		AdvancedEntitySearch search = new AdvancedEntitySearch(SmartDB.getCurrentConservationArea());
 		search.setSearchString(filterString);
 		
-		Job j = new Job("update filter") {
+		Job j = new Job(Messages.AllEntityContentProvider_UpdateFilterJobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -479,21 +500,21 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 						e.getAllResults().forEach(ii->items.add(ii.getEntityUuid()));
 						
 						StringBuilder sb = new StringBuilder();
-						sb.append("UPDATE " + DB_NAME_NAME + " SET filter = false");
+						sb.append("UPDATE " + DB_NAME_NAME + " SET filter = false"); //$NON-NLS-1$ //$NON-NLS-2$
 						session.createNativeQuery(sb.toString())
 						.executeUpdate();
 						
 						if (!items.isEmpty()) {
 							sb = new StringBuilder();
-							sb.append("UPDATE " + DB_NAME_NAME + " SET filter = true WHERE entity_uuid in (:uuids)");
+							sb.append("UPDATE " + DB_NAME_NAME + " SET filter = true WHERE entity_uuid in (:uuids)"); //$NON-NLS-1$ //$NON-NLS-2$
 							
 							session.createNativeQuery(sb.toString())
-							.setParameterList("uuids", items)
+							.setParameterList("uuids", items) //$NON-NLS-1$
 							.executeUpdate();
 						}
 						
 						sb = new StringBuilder();
-						sb.append(" SELECT count(*) FROM "+ DB_NAME_NAME + " WHERE filter = true");
+						sb.append(" SELECT count(*) FROM "+ DB_NAME_NAME + " WHERE filter = true"); //$NON-NLS-1$ //$NON-NLS-2$
 						newCount = (Integer)session.createNativeQuery(sb.toString()).uniqueResult();
 						
 						
@@ -510,6 +531,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 					for (int i = 0; i < data.currentCount; i ++) viewer.clear(i);
 					data.currentCount = icount;
 					viewer.setItemCount(icount);
+					fireEvents();
 					viewer.refresh();
 				});
 				
@@ -550,9 +572,8 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		 * @return
 		 */
 		public List<IntelAttribute> getAttributes(){ return attributes; }
-		
-		
-		
+		public int getTotalCount() { return this.totalCount; }
+		public int getDisplayCount() { return this.currentCount; }
 	}
 
 	class LoadDataJob extends Job{
@@ -563,7 +584,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		private EntityTableData data;
 		
 		public LoadDataJob( int startIndex , TableViewer viewer, EntityTableData data) {
-			super("loading entity data");
+			super(Messages.AllEntityContentProvider_LoadingDataJobName);
 			this.startIndex = startIndex;
 			this.viewer = viewer;
 			this.data = data;
@@ -579,11 +600,11 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 
 			try(Session session = HibernateManager.openSession()){
 				StringBuilder sb = new StringBuilder();
-				sb.append("SELECT entity_uuid, i_primary_id, ");
+				sb.append("SELECT entity_uuid, i_primary_id, "); //$NON-NLS-1$
 				sb.append(COL_ENTITY_TYPE_NAME);
-				sb.append(" FROM ");
+				sb.append(" FROM "); //$NON-NLS-1$
 				sb.append( data.tableName );
-				sb.append(" WHERE filter = true ");
+				sb.append(" WHERE filter = true "); //$NON-NLS-1$
 				if (sortColumn != null) {
 					boolean lower = false;
 					boolean date = false;
@@ -603,20 +624,20 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 							}
 						}
 					}
-					sb.append(" ORDER BY ");
+					sb.append(" ORDER BY "); //$NON-NLS-1$
 					if (lower) {
-						sb.append(" LOWER(");
+						sb.append(" LOWER("); //$NON-NLS-1$
 						sb.append(sortColumn);
-						sb.append(")");
+						sb.append(")"); //$NON-NLS-1$
 					}else if (date) {
-						sb.append(" cast(");
+						sb.append(" cast("); //$NON-NLS-1$
 						sb.append(sortColumn);
-						sb.append(" as date)");
+						sb.append(" as date)"); //$NON-NLS-1$
 					}else {
 						sb.append(sortColumn);
 					}
-					sb.append(" ");
-					sb.append(getSortDirection() == SWT.UP ? " ASC " : " DESC ");
+					sb.append(" "); //$NON-NLS-1$
+					sb.append(getSortDirection() == SWT.UP ? " ASC " : " DESC "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				
 				NativeQuery<?> query = session.createNativeQuery(sb.toString());

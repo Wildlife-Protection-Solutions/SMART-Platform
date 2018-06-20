@@ -40,7 +40,13 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
+import org.eclipse.e4.ui.model.application.ui.advanced.MPerspectiveStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.UIEvents.EventTags;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -92,6 +98,7 @@ import org.wcs.smart.i2.search.LoadSavedSearches;
 import org.wcs.smart.i2.search.SearchProxy;
 import org.wcs.smart.i2.search.SpatialEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.EntitySearchJob;
 import org.wcs.smart.i2.ui.dialogs.SaveSearchDialog;
 import org.wcs.smart.i2.ui.views.entity.search.AdvancedEntitySearchPanel;
@@ -121,6 +128,8 @@ public class EntitySearchView {
 	
 	private static final int searchDelay = 500;
 	
+	public enum Panel {BASIC, ADVANCED, SAVED, SPATIAL, ALL};
+	
 	@Inject
 	private IEclipseContext context;
 	
@@ -145,8 +154,9 @@ public class EntitySearchView {
 	private Composite searchArea;
 	private SashForm searchSashForm;
 	
-	private BasicEntitySearchPanel basicPanel = null;
 	private IntelEntitySearch lastSearch = null;
+	
+	private BasicEntitySearchPanel basicPanel = null;
 	private AdvancedEntitySearchPanel advancedSearchPanel;
 	private SpatialSearchPanel spatialPanel;
 	private AllPanel allPanel = null;
@@ -219,13 +229,33 @@ public class EntitySearchView {
 		return this.entityList.getEntities();
 	}
 	
+	public void setPanel(Panel p) {
+		switch(p) {
+		case ADVANCED:
+			updateHyperlink(new HyperlinkEvent(advancedSearch, null, null, -1));
+			return;
+		case ALL:
+			updateHyperlink(new HyperlinkEvent(allTable, null, null, -1));
+			return;
+		case BASIC:
+			updateHyperlink(new HyperlinkEvent(basicSearch, null, null, -1));
+			return;
+		case SAVED:
+			updateHyperlink(new HyperlinkEvent(savedSearch, null, null, -1));
+			return;
+		case SPATIAL:
+			updateHyperlink(new HyperlinkEvent(spatialSearch, null, null, -1));
+			return;
+		}
+	}
+	
 	@PostConstruct
 	public void createPartControl(Composite parent) {
 		//we seem to need this one and the one at the end to get this view to show on top of 
 		//the other views in the perspective stacks
 		//I am sure there must be a better way...
 		context.get(EPartService.class).activate(context.get(MPart.class), true);	
-		
+	
 		parent.setLayout(new GridLayout());
 		((GridLayout)parent.getLayout()).marginHeight = 0;
 		((GridLayout)parent.getLayout()).marginWidth = 0;
@@ -243,9 +273,7 @@ public class EntitySearchView {
 		main.setLayout(new StackLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		outerStack = (StackLayout) main.getLayout();
-		
-		
-		
+
 		searchSashForm = new SashForm(main, SWT.VERTICAL);
 		searchSashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -298,15 +326,36 @@ public class EntitySearchView {
 		allPanel.setLayout(new GridLayout());
 		allPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-				
-		basicPanel.doSearch();
-		
 		outerStack.topControl = searchSashForm;
 		searchStack.topControl = searchArea.getChildren()[0];
 		searchArea.layout();
 		searchSashForm.getParent().layout();
 		
 		context.get(EPartService.class).activate(context.get(MPart.class), true);
+		
+		if (context.get(EModelService.class).getActivePerspective(context.get(MWindow.class)).getElementId().equals(EntityPerspective.ID)) {
+			setPanel(Panel.ALL);
+		}else {
+			setPanel(Panel.BASIC);
+			basicPanel.doSearch();
+		}
+	}
+	
+	@Inject
+	@Optional
+	public void subscribeTopicSelectedElement(@EventTopic
+	        (UIEvents.ElementContainer.TOPIC_SELECTEDELEMENT) org.osgi.service.event.Event event) {
+		//when the Entity Perspective is selected ensure the all entity panel is displayed.
+	    Object element = event.getProperty(EventTags.ELEMENT);
+	    Object newValue = event.getProperty(EventTags.NEW_VALUE);
+	    // ensure that the selected element of a perspective stack is changed and that this is a perspective
+	    if (!(element instanceof MPerspectiveStack) || !(newValue instanceof MPerspective)) {
+	        return;
+	    }
+
+		if (((MPerspective) newValue).getElementId().equals(EntityPerspective.ID)) {
+			setPanel(Panel.ALL);
+		}
 	}
 	
 	private void updateHyperlink(HyperlinkEvent e){
@@ -322,7 +371,6 @@ public class EntitySearchView {
 		weightMap.put(searchStack.topControl, searchSashForm.getWeights());
 		if (e.widget == basicSearch){
 			searchStack.topControl = searchArea.getChildren()[0];
-			
 			outerStack.topControl = searchSashForm;
 		}else if (e.widget == advancedSearch){
 			searchStack.topControl = searchArea.getChildren()[1];
@@ -362,8 +410,8 @@ public class EntitySearchView {
 		spatialSearch = toolkit.createHyperlink(header, Messages.EntitySearchView_SpatialSearchLabel, SWT.NONE);
 		spatialSearch.setToolTipText(Messages.EntitySearchView_SpatialSearchTooltip);
 		
-		allTable = toolkit.createHyperlink(header, "All", SWT.NONE);
-		allTable.setToolTipText("lists all entities");
+		allTable = toolkit.createHyperlink(header, Messages.EntitySearchView_AllLabel, SWT.NONE);
+		allTable.setToolTipText(Messages.EntitySearchView_AllTooltip);
 		
 		IHyperlinkListener hlistener = new HyperlinkAdapter() {
 			@Override
@@ -611,18 +659,21 @@ public class EntitySearchView {
 	@Optional
 	private void entityModified(@UIEventTopic(IntelEvents.ENTITY_ALL) IntelEntity entity){
 		doSearch(null, searchDelay);
+		allPanel.refresh(searchDelay);
 	}
 	
 	@Inject
 	@Optional
 	private void entityModified(@UIEventTopic(IntelEvents.ENTITY_ALL) Collection<IntelEntity> entity){
 		doSearch(null, searchDelay);
+		allPanel.refresh(searchDelay);
 	}
 	
 	@Inject
 	@Optional
 	private void entityTypesModified(@UIEventTopic(IntelEvents.ENTITY_TYPE_ALL) IntelEntityType type){
 		basicPanel.refresh();
+		allPanel.refresh(searchDelay);
 		doSearch(null, searchDelay);
 	}
 
@@ -630,6 +681,7 @@ public class EntitySearchView {
 	@Inject
 	private void dbModified(@EventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
 		basicPanel.refresh();
+		allPanel.refresh(searchDelay);
 		loadSearchJob.schedule();
 		doSearch(null, searchDelay);
 	}

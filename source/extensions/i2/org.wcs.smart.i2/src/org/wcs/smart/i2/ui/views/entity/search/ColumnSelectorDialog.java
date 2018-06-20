@@ -51,6 +51,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
@@ -97,7 +98,7 @@ public class ColumnSelectorDialog extends TitleAreaDialog{
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Entity Table Columns:");
+		l.setText(Messages.ColumnSelectorDialog_TableColumns);
 		
 		tblAttributes = CheckboxTableViewer.newCheckList(main, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 		tblAttributes.setContentProvider(ArrayContentProvider.getInstance());
@@ -131,22 +132,22 @@ public class ColumnSelectorDialog extends TitleAreaDialog{
 		((GridLayout)bottomPanel.getLayout()).marginHeight = 0;
 		
 		Link hlink = new Link(bottomPanel, SWT.NONE);
-		hlink.setText("<a>" + "Select All" + "</a>");
+		hlink.setText("<a>" + Messages.ColumnSelectorDialog_SelectAllLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		hlink.addListener(SWT.Selection, e->tblAttributes.setAllChecked(true));
 		
-		l = new Label(bottomPanel, SWT.SEPARATOR | SWT.VERTICAL); //$NON-NLS-1$
+		l = new Label(bottomPanel, SWT.SEPARATOR | SWT.VERTICAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)l.getLayoutData()).heightHint = 10;
 		
 		hlink = new Link(bottomPanel, SWT.NONE);
-		hlink.setText("<a>" + "De-Select All" + "</a>");
+		hlink.setText("<a>" + Messages.ColumnSelectorDialog_DeSelectAllLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		hlink.addListener(SWT.Selection, e->tblAttributes.setAllChecked(false));
 		
 		loadAttributesJob.schedule();
 		
-		setTitle("Entity Table Columns");
-		getShell().setText("Entity Table Columns");
-		setMessage("Select visible columns for entity tables.");
+		setTitle(Messages.ColumnSelectorDialog_Title);
+		getShell().setText(Messages.ColumnSelectorDialog_Title);
+		setMessage(Messages.ColumnSelectorDialog_Message);
 		
 		return parent;
 	}
@@ -156,13 +157,13 @@ public class ColumnSelectorDialog extends TitleAreaDialog{
 		return true;
 	}
 
-	private Job loadAttributesJob = new Job("load entity type attributes") {
+	private Job loadAttributesJob = new Job(Messages.ColumnSelectorDialog_loadingJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelAttribute> attributes = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				List<IntelEntityType> types = QueryFactory.buildQuery(session, IntelEntityType.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+				List<IntelEntityType> types = QueryFactory.buildQuery(session, IntelEntityType.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 				for (IntelEntityType type : types) {
 					for (IntelEntityTypeAttribute a : type.getAttributes()) {
 						if (!attributes.contains(a.getAttribute())) attributes.add(a.getAttribute());
