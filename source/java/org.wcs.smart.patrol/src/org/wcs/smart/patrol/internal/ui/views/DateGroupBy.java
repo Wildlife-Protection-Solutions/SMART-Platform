@@ -35,8 +35,8 @@ public class DateGroupBy{
 	
 	public enum Type{MONTH, YEAR};
 	
-	private final static SimpleDateFormat MONTH_FORMAT = new SimpleDateFormat("MMM, YYYY"); //$NON-NLS-1$
-	private final static SimpleDateFormat YEAR_FORMAT = new SimpleDateFormat("YYYY"); //$NON-NLS-1$
+	private final static SimpleDateFormat MONTH_FORMAT = new SimpleDateFormat("MMM, yyyy"); //$NON-NLS-1$
+	private final static SimpleDateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy"); //$NON-NLS-1$
 	
 	private Calendar c;
 	private Type type;
