@@ -318,9 +318,17 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					}
 				}
 				
+				if (isnew) {
+					//add any entities this record was initialized with
+					for (IntelEntityRecord rr : record.getEntities()) {
+						modifiedEntities.add(rr.getEntity());
+					}
+				}
 				for (IntelEntityRecord r : summaryPage.getNewEntityLinks()){
 					modifiedEntities.add(r.getEntity());
 				}
+				
+				
 				for (IntelLocation location : locationsToDelete){
 					if (location.getUuid() == null) continue;
 					//find any entity location links and remove these

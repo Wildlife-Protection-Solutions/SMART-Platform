@@ -45,11 +45,17 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.DragSourceAdapter;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -84,6 +90,7 @@ import org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog;
 import org.wcs.smart.i2.ui.handler.CompareEntitiesHandler;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
+import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
 import org.wcs.smart.i2.ui.views.entity.search.AllEntityContentProvider.EntityTableData;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -430,6 +437,44 @@ public class AllPanel extends Composite {
 		
 		//create menu
 		createMenu(entityTable.getTable());
+		addDragListeners();
+	}
+	
+	private void addDragListeners() {
+		final IntelEntitySelectionTransfer trans = IntelEntitySelectionTransfer.getTransfer();
+		DragSourceAdapter listener = new DragSourceAdapter() {
+			
+			@Override
+			public void dragStart(DragSourceEvent event) {
+				List<IntelEntity> items = new ArrayList<>();
+				for (EntityTableRowItem i : getCurrentSelection()) {
+					IntelEntity temp = new IntelEntity();
+					temp.setUuid(i.getEntityUuid());
+					items.add(temp);
+				}
+				IntelEntitySelectionTransfer.getTransfer().setSelection(new StructuredSelection(items));				
+			}
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				if (IntelEntitySelectionTransfer.getTransfer().isSupportedType(event.dataType)) {
+					List<IntelEntity> items = new ArrayList<>();
+					for (EntityTableRowItem i : getCurrentSelection()) {
+						IntelEntity temp = new IntelEntity();
+						temp.setUuid(i.getEntityUuid());
+						items.add(temp);
+					}
+					
+					event.data = new StructuredSelection(items);
+				}
+			}
+			@Override
+			public void dragFinished(DragSourceEvent event) {
+				IntelEntitySelectionTransfer.getTransfer().setSelection(null);
+			}
+		};
+		DragSource dragSource = new DragSource(entityTable.getControl(), DND.DROP_LINK);
+		dragSource.setTransfer(new Transfer[]{trans});
+		dragSource.addDragListener(listener);
 	}
 	
 	public List<EntityTableRowItem> getCurrentSelection(){

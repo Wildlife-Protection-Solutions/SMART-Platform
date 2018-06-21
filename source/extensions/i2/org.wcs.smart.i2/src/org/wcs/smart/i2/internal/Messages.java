@@ -205,6 +205,7 @@ public class Messages extends NLS {
 	public static String EntityComparisonEditor_LoadJobName;
 	public static String EntityComparisonEditor_removelink;
 	public static String EntityComparisonInput_ComparisonName_type_numentities;
+	public static String EntityEditor_1;
 	public static String EntityEditor_38;
 	public static String EntityEditor_addtowstooltip;
 	public static String EntityEditor_AddAttachmentBtn;
@@ -229,6 +230,7 @@ public class Messages extends NLS {
 	public static String EntityEditor_ModifiedLabel;
 	public static String EntityEditor_ModifiedMsg;
 	public static String EntityEditor_ModifiedTitle;
+	public static String EntityEditor_NewRecordLabel;
 	public static String EntityEditor_NewRelationshipBtn;
 	public static String EntityEditor_OpenAttachmentMnuItem;
 	public static String EntityEditor_OpenRecordMnuItem;
