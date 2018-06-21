@@ -22,9 +22,14 @@
 package org.wcs.smart.i2.ui.views.entity.search;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -33,6 +38,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -42,6 +50,10 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -50,22 +62,32 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.InternalEntityManager;
+import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.AllEntitySearch;
+import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.dialogs.ExportEntityToFileDialog;
+import org.wcs.smart.i2.ui.editors.record.RecordEditor;
+import org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog;
+import org.wcs.smart.i2.ui.handler.CompareEntitiesHandler;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.entity.search.AllEntityContentProvider.EntityTableData;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.E3Utils;
 
 import com.ibm.icu.text.MessageFormat;
 
@@ -297,7 +319,7 @@ public class AllPanel extends Composite {
 		for (Control c : tableComposite.getChildren()) c.dispose();
 
 		
-		entityTable = new TableViewer(tableComposite, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION);
+		entityTable = new TableViewer(tableComposite, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
 		entityTable.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		entityTable.setContentProvider(provider);
 		entityTable.getTable().setHeaderVisible(true);
@@ -306,26 +328,7 @@ public class AllPanel extends Composite {
 			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
-				
-				Object item = entityTable.getStructuredSelection().getFirstElement();
-				if (item == null) return;
-				if (!(item instanceof EntityTableRowItem)) return;
-				
-				UUID entityUuid = ((EntityTableRowItem)item).getEntityUuid();
-				IntelEntity temp = null;
-				try(Session session = HibernateManager.openSession()){
-					temp = session.get(IntelEntity.class, entityUuid);
-					if (temp != null) {
-						temp.getIdAttributeAsText();
-						temp.getEntityType();
-					}
-				}
-				if (temp == null) {
-					MessageDialog.openInformation(context.get(Shell.class), Messages.AllPanel_NotFoundTitle, Messages.AllPanel_NotFoundMessage);
-					return;
-				}
-				(new OpenEntityHandler()).openEntity(temp, context);
-				
+				openEntities();
 			}
 		});
 		
@@ -424,8 +427,263 @@ public class AllPanel extends Composite {
 		
 		tableComposite.layout(true);
 		entityTable.setInput(data);
+		
+		//create menu
+		createMenu(entityTable.getTable());
 	}
-
+	
+	public List<EntityTableRowItem> getCurrentSelection(){
+		ArrayList<EntityTableRowItem> selections = new ArrayList<>();
+		if (entityTable == null || entityTable.getTable().isDisposed()) return selections;
+		
+		for (Iterator<?> iterator = entityTable.getStructuredSelection().iterator(); iterator.hasNext();) {
+			Object x = iterator.next();
+			if (x instanceof EntityTableRowItem) {
+				selections.add((EntityTableRowItem) x);
+			}	
+		}
+		return selections;
+	}
+	public List<IntelEntity> getCurrentEntities(){
+		List<IntelEntity> ies = new ArrayList<>();
+		try(Session session = HibernateManager.openSession()){
+			for (EntityTableRowItem item : getCurrentSelection()) {
+				IntelEntity ie = session.get(IntelEntity.class, item.getEntityUuid());
+				if (ie != null) {
+					ie.getIdAttributeAsText();
+					ies.add(ie);
+				}
+			}
+		}
+		return ies;
+	}
+	private void openEntities(){
+		if (!getCurrentSelection().isEmpty()){
+			List<IntelEntity> toOpen = new ArrayList<>();
+			try(Session session = HibernateManager.openSession()){
+				for (EntityTableRowItem item : getCurrentSelection()) {
+					UUID entityUuid = ((EntityTableRowItem)item).getEntityUuid();
+					IntelEntity temp = null;
+					temp = session.get(IntelEntity.class, entityUuid);
+					if (temp != null) {
+						temp.getIdAttributeAsText();
+						temp.getEntityType();
+						toOpen.add(temp);
+					}
+					
+				}
+			}
+			toOpen.forEach(e->(new OpenEntityHandler()).openEntity(e, context));
+		}
+	}
+	
+	private void exportEntity(){
+		if (getCurrentSelection().isEmpty()) return;
+		EntityTableRowItem item = getCurrentSelection().get(0);
+		
+		IntelEntity ie = null;
+		try(Session session = HibernateManager.openSession()){
+			ie = session.get(IntelEntity.class, item.getEntityUuid());
+			if (ie == null) return;
+			ie.getIdAttributeAsText();
+		}
+		EntityRelationshipExportDialog dialog = new EntityRelationshipExportDialog(ie, getShell());
+		dialog.open();
+	}
+	
+	private void exportEntityToFile(boolean filter){
+		List<UUID> toexport = null;
+		if (filter) {
+			toexport = getCurrentSelection().stream().map(e->e.getEntityUuid()).collect(Collectors.toList());
+			if (toexport.isEmpty()) return;
+		}else {
+			//get all uuids from content provider
+			if (entityTable == null || entityTable.getTable().isDisposed()) return;
+			toexport = ((AllEntityContentProvider)entityTable.getContentProvider()).getAllDataItems();
+		}
+		ExportEntityToFileDialog dialog = new ExportEntityToFileDialog(getShell(), toexport);
+		dialog.open();
+	}
+		
+	private void createMenu(Control parent){
+		Menu menu = new Menu(parent);
+		
+		MenuItem mnuOpen = new MenuItem(menu, SWT.PUSH);
+		mnuOpen.setText(Messages.EntitySearchResultTable_OpenItem);
+		mnuOpen.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				openEntities();
+			}
+		});
+		
+		MenuItem mnuCompare = new MenuItem(menu, SWT.PUSH);
+		mnuCompare.setText(Messages.EntitySearchResultTable_CompareItem);
+		mnuCompare.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				try{
+					List<IntelEntity> ies = new ArrayList<>();
+					try(Session session = HibernateManager.openSession()){
+						for (EntityTableRowItem item : getCurrentSelection()) {
+							IntelEntity ie = session.get(IntelEntity.class, item.getEntityUuid());
+							if (ie != null) {
+								ie.getIdAttributeAsText();
+								ies.add(ie);
+							}
+						}
+					}
+					(new CompareEntitiesHandler()).compare(ies, context.get(EPartService.class));
+				}catch (Exception ex){
+					MessageDialog.openInformation(getShell(), Messages.EntitySearchResultTable_CompareErrorDialogTitle, ex.getMessage());
+				}
+			}
+		});
+		
+		new MenuItem(menu, SWT.SEPARATOR);
+		
+		MenuItem mnuPrint = new MenuItem(menu, SWT.PUSH);
+		mnuPrint.setText(Messages.EntitySearchResultTable_PrintMenuItem);
+		mnuPrint.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
+		mnuPrint.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				List<UUID> uuids = getCurrentSelection().stream().map(row->row.getEntityUuid()).collect(Collectors.toList());
+				InternalEntityManager.INSTANCE.printEntities(getShell(), uuids);
+			}
+		});
+		
+		MenuItem miExport = new MenuItem(menu, SWT.CASCADE);
+		miExport.setText(Messages.EntitySearchResultTable_ExportMenu);
+		
+		Menu exportMenu  = new Menu(miExport);
+		miExport.setMenu(exportMenu);
+		
+		MenuItem mnuExport = new MenuItem(exportMenu, SWT.PUSH);
+		mnuExport.setText(Messages.EntitySearchResultTable_ExportMenuItem2);
+		mnuExport.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY_EXPORT));
+		mnuExport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				exportEntity();
+			}
+		});
+		
+		MenuItem mnuExportXml = new MenuItem(exportMenu, SWT.PUSH);
+		mnuExportXml.setText(Messages.EntitySearchResultTable_ExportToXML);
+		mnuExportXml.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				exportEntityToFile(true);
+			}
+		});
+		
+		MenuItem mnuExportXml2 = new MenuItem(exportMenu, SWT.PUSH);
+		mnuExportXml2.setText(Messages.EntitySearchResultTable_ExportAllEntitiesToXml);
+		mnuExportXml2.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				exportEntityToFile(false);
+			}
+		});
+		
+		if (IntelSecurityManager.INSTANCE.canEditEntity()){
+			MenuItem mnuDelete = new MenuItem(menu, SWT.PUSH);
+			mnuDelete.setText(Messages.EntitySearchResultTable_DeleteMenuItem);
+			mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			mnuDelete.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					List<UUID> uuids = getCurrentSelection().stream().map(item->item.getEntityUuid()).collect(Collectors.toList());
+					InternalEntityManager.INSTANCE.deleteEntities(getShell(), context.get(EPartService.class), context.get(IEventBroker.class), uuids);
+				}
+			});
+		}
+		
+		
+		MenuItem mnuWorkingset = null;
+		if (IntelSecurityManager.INSTANCE.canEditWorkingSet()) {
+			new MenuItem(menu, SWT.SEPARATOR);
+			mnuWorkingset = new MenuItem(menu, SWT.PUSH);
+			mnuWorkingset.setText(Messages.EntitySearchResultTable_AddToWsMenuItem);
+			mnuWorkingset.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
+			mnuWorkingset.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					WorkingSetManager.INSTANCE.addEntityToActiveWorkingSet(getCurrentEntities(), context);
+				}
+			});
+		}
+		
+		MenuItem fmnuWorkingset = mnuWorkingset;
+		menu.addMenuListener(new MenuListener() {
+			private MenuItem mnuAddToRecord = null;
+			private Menu subRecord = null;
+			@Override
+			public void menuShown(MenuEvent e) {
+				boolean hasSelection = !getCurrentSelection().isEmpty();
+				mnuOpen.setEnabled(hasSelection);
+				mnuPrint.setEnabled(hasSelection);
+				if (fmnuWorkingset != null) fmnuWorkingset.setEnabled(hasSelection && WorkingSetManager.INSTANCE.isSet());
+				mnuCompare.setEnabled(getCurrentSelection().size() > 0);
+				
+				if (mnuAddToRecord == null || mnuAddToRecord.isDisposed()){
+					mnuAddToRecord = new MenuItem(menu, SWT.CASCADE);
+					mnuAddToRecord.setText(Messages.EntitySearchResultTable_AddToRecordMenuItem);
+				
+					subRecord = new Menu(menu);
+					mnuAddToRecord.setMenu(subRecord);
+				}
+				if (subRecord != null && !subRecord.isDisposed()){
+					for (MenuItem mi : subRecord.getItems()){
+						mi.dispose();
+					}
+				}
+				
+				Collection<MPart> parts = context.get(EPartService.class).getParts();
+				for (MPart p : parts){
+					if (E3Utils.isCompatibilityEditor(p)){
+						Object editor = E3Utils.getSourceObject(p);
+						if (editor instanceof RecordEditor && ((RecordEditor)editor).getEditMode()){
+							MenuItem relate = new MenuItem(subRecord, SWT.PUSH);
+							relate.setText( ((RecordEditor)editor).getRecord().getTitle()  );
+							relate.addSelectionListener(new SelectionAdapter() {
+								@Override
+								public void widgetSelected(SelectionEvent e) {
+									if (!getCurrentSelection().isEmpty()){
+										for (IntelEntity entity : getCurrentEntities()){
+											((RecordEditor)editor).linkEntity(entity);
+										}
+									}
+								}
+							});
+						}
+					}
+				}
+				if (subRecord == null || subRecord.getItemCount() == 0){
+					mnuAddToRecord.dispose();
+				}
+				
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {
+			}
+		});
+//		parent.setMenu(menu);
+		List<Control> kids = new ArrayList<Control>();
+		kids.add(parent);
+		while(!kids.isEmpty()){
+			Control c = kids.remove(0);
+			c.setMenu(menu);
+			if (c instanceof Composite){
+				for (Control cc : ((Composite)c).getChildren()){
+					kids.add(cc);
+				}
+			}
+		}
+	}
+	
 	private String getFilterString() {
 		return searchPanel.getQueryString();
 	}

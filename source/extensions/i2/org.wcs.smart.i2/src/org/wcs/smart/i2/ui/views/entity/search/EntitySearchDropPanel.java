@@ -181,7 +181,8 @@ public class EntitySearchDropPanel implements IDefinitionPanel {
 				}
 			}
 			if (addBoolean){
-				DropItem it = OptionDropItem.createAndOrDropItem();
+				OptionDropItem it = OptionDropItem.createAndOrDropItem();
+				it.setInitialValue(Operator.OR.getKey());
 				it.createWidget(this, dropTargetContent);
 				items.add(it);	
 			}
@@ -291,12 +292,6 @@ public class EntitySearchDropPanel implements IDefinitionPanel {
 		((GridData)dropTarget.getLayoutData()).heightHint = 20;
 		dropTarget.setExpandHorizontal(true);
 		dropTarget.setExpandVertical(true);
-//		dropTarget.addListener(SWT.Resize, new Listener() {
-//			@Override
-//			public void handleEvent(Event event) {
-//				orderElements();
-//			}
-//		});		
 		
 		dropTargetContent = new Composite(dropTarget, SWT.NONE);
 		dropTargetContent.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));

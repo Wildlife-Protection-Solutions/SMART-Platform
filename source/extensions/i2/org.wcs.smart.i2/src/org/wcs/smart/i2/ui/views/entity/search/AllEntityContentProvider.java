@@ -540,6 +540,27 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		};
 		j.schedule();
 	}
+	
+	/**
+	 * 
+	 * @return uuids of all entities that match the current filter
+	 */
+	public List<UUID> getAllDataItems(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT entity_uuid FROM "); //$NON-NLS-1$
+		sb.append(DB_NAME_NAME);
+		sb.append(" WHERE filter = true "); //$NON-NLS-1$
+		
+		List<UUID> allUuids = new ArrayList<>();
+		try(Session session = HibernateManager.openSession()){
+			List<?> items = session.createNativeQuery(sb.toString()).list();
+			for (Object x : items) {
+				allUuids.add(  UuidUtils.byteToUUID((byte[])x));
+			}
+		}
+		return allUuids;
+	}
+	
 	/**
 	 * Gets the current sort direction
 	 * @return
