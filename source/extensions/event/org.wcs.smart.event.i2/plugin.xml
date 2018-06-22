@@ -7,6 +7,10 @@
             class="org.wcs.smart.event.i2.CreateRecordActionType"
             parameter_collector="org.wcs.smart.event.i2.CreateRecordParameterCollector">
       </actiontype>
+      <actiontype
+            class="org.wcs.smart.event.i2.entity.CreateEntityActionType"
+            parameter_collector="org.wcs.smart.event.i2.entity.CreateEntityParameterCollector">
+      </actiontype>
    </extension>
 
 </plugin>

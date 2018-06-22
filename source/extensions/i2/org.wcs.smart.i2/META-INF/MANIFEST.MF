@@ -30,6 +30,7 @@ Export-Package: org.wcs.smart.i2,
  org.wcs.smart.i2.model,
  org.wcs.smart.i2.search,
  org.wcs.smart.i2.security,
+ org.wcs.smart.i2.ui.dialogs,
  org.wcs.smart.i2.xml,
  org.wcs.smart.i2.xml.record
 Bundle-Activator: org.wcs.smart.i2.Intelligence2PlugIn
