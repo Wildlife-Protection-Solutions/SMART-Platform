@@ -309,8 +309,8 @@ public class EntitySearchView {
 		entityList.addListener(SWT.Resize, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
-				Point topSize = main.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-				int topHeight = topSize.y;
+				Point topSize = ((StackLayout)searchArea.getLayout()).topControl.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+				int topHeight = topSize.y+5;
 				int totalHeight = searchSashForm.getBounds().height;
 				if (topHeight > totalHeight) return;
 				if (searchSashForm.getChildren()[0].getBounds().height < topHeight){

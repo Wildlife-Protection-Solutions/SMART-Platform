@@ -959,6 +959,7 @@ public class AttributeFieldEditor {
 				}
 			});
 			btnOnOff.setSelection(true);
+			btnOnOff.setEnabled(false);
 			cd = createDecoration(btnOnOff);
 		}else if (attribute.getType() == AttributeType.POSITION){
 			
@@ -1046,8 +1047,12 @@ public class AttributeFieldEditor {
 			md.setInitPoint(position[0], position[1]);
 		}
 		
-		MapPart currentPart = ApplicationGIS.getToolManager().getActiveTool().getContext().getViewportPane().getMapEditor();
-		IAction lastToolAction = ((ToolManager)ApplicationGIS.getToolManager()).getActiveToolProxy().getAction();
+		MapPart currentPart = null;
+		IAction lastToolAction = null;
+		if (ApplicationGIS.getToolManager().getActiveTool().getContext() != null && ApplicationGIS.getToolManager().getActiveTool().getContext().getViewportPane() != null) {
+			currentPart = ApplicationGIS.getToolManager().getActiveTool().getContext().getViewportPane().getMapEditor();
+			lastToolAction = ((ToolManager)ApplicationGIS.getToolManager()).getActiveToolProxy().getAction();
+		}
 		try{
 			if (md.open() == SelectPointMapDialog.OK){
 				if (md.getPoint() != null){
@@ -1057,8 +1062,8 @@ public class AttributeFieldEditor {
 				}
 			}
 		}finally{
-			ApplicationGIS.getToolManager().setCurrentEditor(currentPart);
-			lastToolAction.run();
+			if (currentPart != null) ApplicationGIS.getToolManager().setCurrentEditor(currentPart);
+			if (lastToolAction != null) lastToolAction.run();
 		}
 	}
 	

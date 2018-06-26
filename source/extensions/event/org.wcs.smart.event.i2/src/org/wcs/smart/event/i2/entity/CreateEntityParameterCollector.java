@@ -143,9 +143,10 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 				datamodelParam.getId().setParameterKey(MappingParameter.INSTANCE.getKey());
 				action.getParameters().add(datamodelParam);
 			}
+			//order does matter in the case of duplicate mappings
 			JSONArray jj = new JSONArray();
-			for (EntityMapping m : mappings) {
-				jj.add(m);
+			for (EntityMapping m : mappings) {				
+				jj.add(m.toJson());
 			}
 			datamodelParam.setParameterValue(jj.toJSONString());
 		}
@@ -264,11 +265,33 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		btnAdd.addListener(SWT.Selection, e->addMapping());
 		btnAdd.setEnabled(false);
 		
+		Button btnEdit= new Button(buttonArea, SWT.PUSH);
+		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnEdit.addListener(SWT.Selection, e->editMapping());
+		btnEdit.setEnabled(false);
+		
 		Button btnRemove= new Button(buttonArea, SWT.PUSH);
 		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnRemove.addListener(SWT.Selection, e->deleteMapping());
 		btnRemove.setEnabled(false);
+		
+		l = new Label(buttonArea, SWT.SEPARATOR | SWT.HORIZONTAL);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Button btnMoveUp= new Button(buttonArea, SWT.PUSH);
+		btnMoveUp.setText("Move Up");
+		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnMoveUp.addListener(SWT.Selection, e->move(-1));
+		btnMoveUp.setEnabled(false);
+		
+		Button btnMoveDown= new Button(buttonArea, SWT.PUSH);
+		btnMoveDown.setText("Move Down");
+		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnMoveDown.addListener(SWT.Selection, e->move(1));
+		btnMoveDown.setEnabled(false);
+		
 		
 		cmbEntityType.addSelectionChangedListener(e->{
 			btnAdd.setEnabled(cmbEntityType.getStructuredSelection().getFirstElement() instanceof IntelEntityType);
@@ -287,6 +310,9 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		
 		tblMappings.addSelectionChangedListener(e->{
 			btnRemove.setEnabled(!tblMappings.getStructuredSelection().isEmpty());
+			btnEdit.setEnabled(!tblMappings.getStructuredSelection().isEmpty());
+			btnMoveUp.setEnabled(!tblMappings.getStructuredSelection().isEmpty());
+			btnMoveDown.setEnabled(!tblMappings.getStructuredSelection().isEmpty());
 		});
 		
 		Menu mnu = new Menu(tblMappings.getControl());
@@ -295,15 +321,31 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		mnuAdd.addListener(SWT.Selection, e->addMapping());
 		
+		MenuItem mnuEdit = new MenuItem(mnu, SWT.PUSH);
+		mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		mnuEdit.addListener(SWT.Selection, e->editMapping());
+		
 		MenuItem mnuDelete = new MenuItem(mnu, SWT.PUSH);
 		mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		mnuDelete.addListener(SWT.Selection, e->addMapping());
+		mnuDelete.addListener(SWT.Selection, e->deleteMapping());
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		 
+		MenuItem mnuMoveUp = new MenuItem(mnu, SWT.PUSH);
+		mnuMoveUp.setText("Move Up");
+		mnuMoveUp.addListener(SWT.Selection, e->move(-1));
+		
+		MenuItem mnuDownUp = new MenuItem(mnu, SWT.PUSH);
+		mnuDownUp.setText("Move Down");
+		mnuDownUp.addListener(SWT.Selection, e->move(1));
 		
 		mnu.addMenuListener(new MenuListener() {
 			@Override
 			public void menuShown(MenuEvent e) {
 				mnuDelete.setEnabled(!tblMappings.getSelection().isEmpty());
+				mnuEdit.setEnabled(!tblMappings.getSelection().isEmpty());
 				mnuAdd.setEnabled(cmbEntityType.getStructuredSelection().getFirstElement() instanceof IntelEntityType);
 			}
 			
@@ -315,6 +357,20 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		
 		loadEntities.schedule();
 		return main;
+	}
+	
+	private void move(int dir) {
+		Object x = tblMappings.getStructuredSelection().iterator().next();
+		int index = mappings.indexOf(x);
+		index += dir;
+		
+		if (index < 0) index = 0;
+		if (index >= mappings.size()) index = mappings.size()-1;
+		
+		mappings.remove(x);
+		mappings.add(index, (EntityMapping) x);
+		tblMappings.refresh();
+		fireListeners();
 	}
 	
 	
@@ -333,8 +389,30 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		
 		NewMappingDialog dialog = new NewMappingDialog(cmbEntityType.getControl().getShell(), (IntelEntityType)x, dmAttributes);
 		if (dialog.open() != Window.OK) return;
+		EntityMapping mapping = dialog.getMapping();
+		if (mapping != null) {
+			mappings.add(dialog.getMapping());
+			tblMappings.refresh();
+			fireListeners();
+		}
+	}
+	
+	private void editMapping() {
+		EntityMapping toEdit = (EntityMapping) tblMappings.getStructuredSelection().iterator().next();
+		if (toEdit == null) return;
+		Object x = cmbEntityType.getStructuredSelection().getFirstElement();
+		if (!(x instanceof IntelEntityType)) return;
 		
-		mappings.add(dialog.getMapping());
+		NewMappingDialog dialog = new NewMappingDialog(cmbEntityType.getControl().getShell(), (IntelEntityType)x, dmAttributes, toEdit);
+		if (dialog.open() != Window.OK) return;
+		EntityMapping mapping = dialog.getMapping();
+		if (mapping == null) {
+			mappings.remove(toEdit);
+		}else {
+			int index = mappings.indexOf(toEdit);
+			mappings.remove(toEdit);
+			mappings.add(index, mapping);
+		}
 		tblMappings.refresh();
 		fireListeners();
 	}

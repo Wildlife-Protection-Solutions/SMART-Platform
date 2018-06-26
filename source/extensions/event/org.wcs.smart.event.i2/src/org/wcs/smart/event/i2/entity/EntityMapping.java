@@ -22,20 +22,30 @@
 package org.wcs.smart.event.i2.entity;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Attribute mapping for Create Entity action
@@ -44,10 +54,13 @@ import org.wcs.smart.ui.SmartLabelProvider;
  */
 public class EntityMapping {
 
+	private static final String DATE_FORMAT = "yyyy-MM-dd";
+	
 	//JSON keys
 	private static final String JSON_FIXED2_KEY = "fixed2";
 	private static final String JSON_FIXED_KEY = "fixed";
 	private static final String JSON_DMATTRIBUTE_KEY = "dmattribute";
+	private static final String JSON_LIST_KEY = "listmapping";
 	private static final String JSON_INTELATTRIBUTE_KEY = "intelattribute";
 	private static final String JSON_TYPE_KEY = "type";
 
@@ -100,15 +113,35 @@ public class EntityMapping {
 						new Object[] {"keyId", dmAttributeKey}).uniqueResult();
 				if (dmAttribute == null) continue;
 				mapping.setDataModelAttribute(dmAttribute);
+				
+				if (intelAttribute.getType() == AttributeType.LIST) {
+					JSONArray listMappings = (JSONArray) item.get(JSON_LIST_KEY);
+					if (listMappings != null) {
+						for (Object olist : listMappings) {
+							JSONObject llist = (JSONObject)olist;
+							String iKey = (String) llist.keySet().iterator().next();
+							String dmKey = (String) llist.get(iKey);
+							mapping.addListItemMapping(iKey, dmKey);
+						}
+					}
+				}
 			}else {
 				switch(intelAttribute.getType()) {
 				case BOOLEAN:
 					mapping.setFixedValue((Boolean)item.get(JSON_FIXED_KEY));
 					break;
 				case DATE:
-					mapping.setFixedValue((Date)item.get(JSON_FIXED_KEY));
+					try {
+						Date d = (new SimpleDateFormat(DATE_FORMAT)).parse((String)item.get(JSON_FIXED_KEY));
+						mapping.setFixedValue(d);
+					}catch (Exception ex) {
+						EventPlugIn.log(ex.getMessage(),  ex);
+					}
 					break;
 				case EMPLOYEE:
+					String employeeKey = (String)item.get(JSON_FIXED_KEY);
+					Employee e = session.get(Employee.class, UuidUtils.stringToUuid(employeeKey));
+					mapping.setFixedEmployee(e);
 					break;
 				case LIST:
 					String itemKey = (String)item.get(JSON_FIXED_KEY);
@@ -150,6 +183,9 @@ public class EntityMapping {
 	private Double fixedDoubleValue1;
 	private Double fixedDoubleValue2;
 	private IntelAttributeListItem intelListItem;
+	private Employee fixedEmployee;
+	
+	private HashMap<String,String> listItemMappings = null;
 	
 	public EntityMapping(Type type) {
 		this.type = type;
@@ -168,7 +204,7 @@ public class EntityMapping {
 		case DATE:
 			return DateFormat.getDateInstance().format(fixedDateValue);
 		case EMPLOYEE:
-			break;
+			return SmartLabelProvider.getShortLabel(fixedEmployee);
 		case LIST:
 			return intelListItem.getName();
 		case NUMERIC:
@@ -181,6 +217,28 @@ public class EntityMapping {
 		return "";
 	}
 	
+	public String getFixedStringValue() {
+		return this.fixedStringValue;
+	}
+	public Double getFixedDouble1Value() {
+		return this.fixedDoubleValue1;
+	}
+	public Double getFixedDouble2Value() {
+		return this.fixedDoubleValue2;
+	}
+	public Date getFixedDateValue() {
+		return this.fixedDateValue;
+	}
+	public Boolean getFixedBooleanValue() {
+		return this.fixedBooleanValue;
+	}
+	public Employee getFixedEmployee() {
+		return this.fixedEmployee;
+	}
+	
+	public void setFixedEmployee(Employee value) {
+		this.fixedEmployee = value;
+	}
 	public void setFixedValue(String value) {
 		this.fixedStringValue = value;
 	}
@@ -221,6 +279,20 @@ public class EntityMapping {
 	public void setIntelListItem(IntelAttributeListItem listItem) {
 		this.intelListItem = listItem;
 	}
+	
+	public void addListItemMapping(String iitem, String dmItem) {
+		if (listItemMappings == null) listItemMappings = new HashMap<>();
+		listItemMappings.put(iitem, dmItem);
+	}
+	
+	public void addListItemMapping(IntelAttributeListItem iitem, AttributeListItem dmItem) {
+		addListItemMapping(iitem.getKeyId(), dmItem.getKeyId());
+	}
+	
+	public Map<String,String> getListItemMappings(){
+		if (listItemMappings == null) return Collections.emptyMap();
+		return this.listItemMappings;
+	}
 
 	/**
 	 * Converts the mapping to a json object
@@ -235,15 +307,25 @@ public class EntityMapping {
 		
 		if (type == Type.DM) {
 			item.put(JSON_DMATTRIBUTE_KEY, dataModelAttribute.getKeyId());
+			if (intelAttribute.getType() == IntelAttribute.AttributeType.LIST && listItemMappings != null) {
+				JSONArray items = new JSONArray();
+				for (Entry<String,String> map : listItemMappings.entrySet()) {
+					JSONObject jmap = new JSONObject();
+					jmap.put(map.getKey(), map.getValue());
+					items.add(jmap);
+				}
+				item.put(JSON_LIST_KEY, items);
+			}
 		}else {
 			switch(intelAttribute.getType()) {
 			case BOOLEAN:
 				item.put(JSON_FIXED_KEY, fixedBooleanValue);
 				break;
 			case DATE:
-				item.put(JSON_FIXED_KEY, fixedDateValue);
+				item.put(JSON_FIXED_KEY, (new SimpleDateFormat(DATE_FORMAT)).format(fixedDateValue));
 				break;
 			case EMPLOYEE:
+				item.put(JSON_FIXED_KEY, UuidUtils.uuidToString(fixedEmployee.getUuid()));
 				break;
 			case LIST:
 				item.put(JSON_FIXED_KEY, intelListItem.getKeyId());

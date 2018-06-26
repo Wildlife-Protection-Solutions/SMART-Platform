@@ -21,16 +21,25 @@
  */
 package org.wcs.smart.event.i2.entity;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ComboBoxViewerCellEditor;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -41,8 +50,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
+import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.event.i2.entity.EntityMapping.Type;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
@@ -71,6 +87,9 @@ public class NewMappingDialog extends TitleAreaDialog {
 	private Button btnDm;
 	private Button btnObsPosition;
 	
+	private TableViewer tblList;
+	private ComboBoxViewerCellEditor cellEditor ;
+	
 	public NewMappingDialog(Shell parentShell, IntelEntityType type, List<Attribute> dmAttributes) {
 		super(parentShell);
 		
@@ -78,6 +97,11 @@ public class NewMappingDialog extends TitleAreaDialog {
 		this.dmAttributes = dmAttributes;
 	}
 
+	public NewMappingDialog(Shell parentShell, IntelEntityType type, List<Attribute> dmAttributes, EntityMapping toEdit) {
+		this(parentShell, type, dmAttributes);
+		this.mapping = toEdit;
+	}
+	
 	public EntityMapping getMapping() {
 		return this.mapping;
 	}
@@ -107,13 +131,28 @@ public class NewMappingDialog extends TitleAreaDialog {
 			
 			switch(attribute.getAttribute().getType()) {
 			case BOOLEAN:
+				if (temp.getNumberValue() == null) {
+					mapping = null;
+					super.okPressed();
+					return;
+				}
 				mapping.setFixedValue(temp.getNumberValue() >= 0.5);
 				break;
 			case DATE:
+				if (temp.getDateValue() == null) {
+					mapping = null;
+					super.okPressed();
+					return;
+				}
 				mapping.setFixedValue(temp.getDateValue());
 				break;
 			case EMPLOYEE:
-				//TODO: don't support employee mappings
+				if (temp.getEmployee() == null) {
+					mapping = null;
+					super.okPressed();
+					return;
+				}
+				mapping.setFixedEmployee(temp.getEmployee());
 				break;
 			case LIST:
 				mapping.setIntelListItem(temp.getAttributeListItem());
@@ -135,6 +174,14 @@ public class NewMappingDialog extends TitleAreaDialog {
 		if (btnDm.getSelection()) {
 			Attribute dmAttribute = (Attribute)cmbDmAttribute.getStructuredSelection().getFirstElement();
 			mapping.setDataModelAttribute(dmAttribute);
+			mapping.getListItemMappings().clear();
+			if (dmAttribute.getType() == Attribute.AttributeType.LIST) {
+				List<ListItemMapping> mappings = (List<ListItemMapping>) tblList.getInput();
+				for (ListItemMapping m : mappings) {
+					if (m.dmItem == null) continue;
+					mapping.addListItemMapping(m.iItem, m.dmItem);
+				}
+			}
 		}
 		
 		super.okPressed();
@@ -151,12 +198,12 @@ public class NewMappingDialog extends TitleAreaDialog {
 		
 		Composite temp = new Composite(parent, SWT.NONE);
 		temp.setLayout(new GridLayout(2, false));
-		temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		
 		Label l = new Label(temp, SWT.NONE);
 		l.setText("Attribute:");
-		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
+		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		cmbIntelAttribute = new ComboViewer(temp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbIntelAttribute.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -190,7 +237,11 @@ public class NewMappingDialog extends TitleAreaDialog {
 		
 		Composite addArea = new Composite(temp, SWT.NONE);
 		addArea.setLayout(new GridLayout(1, false));
-		addArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		addArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		btnObsPosition = new Button(addArea, SWT.RADIO);
+		btnObsPosition.setText("Observation Position");
+		btnObsPosition.setEnabled(false);
 		
 		btnFixed = new Button(addArea, SWT.RADIO);
 		btnFixed.setText("Fixed Value:");
@@ -206,7 +257,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 		
 		cmpDmMap = new Composite(addArea, SWT.NONE);
 		cmpDmMap.setLayout(new GridLayout());
-		cmpDmMap.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmpDmMap.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		cmpDmMap.setEnabled(false);
 		btnFixed.addSelectionListener(new SelectionListener() {			
 			@Override
@@ -247,12 +298,159 @@ public class NewMappingDialog extends TitleAreaDialog {
 			}
 		});
 		
-		btnObsPosition = new Button(addArea, SWT.RADIO);
-		btnObsPosition.setText("Observation Position");
-		btnObsPosition.setEnabled(false);
+		cmbDmAttribute.addSelectionChangedListener(e->{
+			IntelAttribute iAttribute = ((IntelEntityTypeAttribute) cmbIntelAttribute.getStructuredSelection().getFirstElement()).getAttribute();
+			Attribute dAttribute = (Attribute) cmbDmAttribute.getStructuredSelection().getFirstElement();
+		
+			if (iAttribute.getType() != IntelAttribute.AttributeType.LIST) {
+				tblList.setInput(Collections.emptyList());
+				return;
+			}else {
+				List<ListItemMapping> itemMappings = new ArrayList<>();
+				try(Session s = HibernateManager.openSession()){
+					dAttribute = s.get(Attribute.class, dAttribute.getUuid());
+					dAttribute.getAttributeList().forEach(a->a.getName());
+				}
+				for (IntelAttributeListItem iItem : iAttribute.getAttributeList()) {
+					ListItemMapping mp = new ListItemMapping();
+					mp.iItem = iItem;
+					itemMappings.add(mp);
+			
+					String dmKey = iItem.getKeyId();
+					if (mapping != null) {
+						dmKey = null;
+						for (Entry<String,String> items : mapping.getListItemMappings().entrySet()) {
+							if (items.getKey().equals(iItem.getKeyId())) {
+								dmKey = items.getValue();
+								break;
+							}
+						}
+					}
+					for (AttributeListItem i : dAttribute.getAttributeList()) {
+						if (i.getKeyId().equals(dmKey)) {
+							mp.dmItem = i;
+							break;
+						}
+					}
+					
+				}
+				itemMappings.sort((a,b)->Collator.getInstance().compare(a.iItem.getName(), b.iItem.getName()));
+				tblList.setInput(itemMappings);
+				tblList.refresh();
+				for (TableColumn tc : tblList.getTable().getColumns()) tc.pack();
+				List<Object> items = new ArrayList<>();
+				items.add("");
+				items.addAll(dAttribute.getAttributeList());
+				cellEditor.setInput(items);
+				
+			}
+			
+		});
+		
+		tblList = new TableViewer(cmpDmMap, SWT.FULL_SELECTION | SWT.BORDER | SWT.V_SCROLL);
+		tblList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tblList.getTable().setHeaderVisible(true);
+		tblList.getTable().setLinesVisible(true);
+		tblList.setContentProvider(ArrayContentProvider.getInstance());
+		tblList.getTable().setEnabled(false);
+		
+		TableViewerColumn iItemColumn = new TableViewerColumn(tblList, SWT.NONE);
+		iItemColumn.getColumn().setText("Entity List Item");
+		iItemColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				return ((ListItemMapping)element).iItem.getName() + " (" + ((ListItemMapping)element).iItem.getKeyId() +")";
+				
+			}
+		});
+		iItemColumn.getColumn().pack();
+		
+		TableViewerColumn dmItemColumn = new TableViewerColumn(tblList, SWT.NONE);
+		dmItemColumn.getColumn().setText("DataModel List Item");
+		dmItemColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				ListItemMapping m = (ListItemMapping)element;
+				if (m.dmItem == null) return "";
+				return m.dmItem.getName() + " (" + m.dmItem.getKeyId() +")";
+			}
+		});
+		dmItemColumn.getColumn().pack();
+		
+		dmItemColumn.setEditingSupport(new EditingSupport(dmItemColumn.getViewer()) {
+			
+			@Override
+			protected void setValue(Object element, Object value) {
+				if (value instanceof AttributeListItem) {
+					((ListItemMapping)element).dmItem = (AttributeListItem) value;
+				}else {
+					((ListItemMapping)element).dmItem = null;
+				}
+				tblList.refresh();
+			}
+			
+			@Override
+			protected Object getValue(Object element) {
+				return ((ListItemMapping)element).dmItem;
+			}
+			
+			@Override
+			protected CellEditor getCellEditor(Object element) {
+				return cellEditor;
+			}
+			
+			@Override
+			protected boolean canEdit(Object element) {
+				return true;
+			}
+		});
+		
+		cellEditor = new ComboBoxViewerCellEditor(tblList.getTable(), SWT.DROP_DOWN | SWT.READ_ONLY);
+		cellEditor.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				if (element instanceof AttributeListItem) {
+					return ((AttributeListItem)element).getName() + " (" + ((AttributeListItem)element).getKeyId() + ")";
+				}
+				return super.getText(element);
+			}
+		});
+		cellEditor.setContentProvider(ArrayContentProvider.getInstance());
 		
 		cmbIntelAttribute.setInput(type.getAttributes());
 		cmbIntelAttribute.setSelection(new StructuredSelection(type.getAttributes().get(0)));
+		
+		
+		//initialize controls
+		if (mapping != null) {
+			for (IntelEntityTypeAttribute a : type.getAttributes()) {
+				if (a.getAttribute().equals(mapping.getEntityAttribute())) {
+					cmbIntelAttribute.setSelection(new StructuredSelection(a));		
+				}
+			}
+			
+			if (mapping.getType() == Type.DM) {
+				btnDm.setSelection(true);
+				btnFixed.setSelection(false);
+				btnObsPosition.setSelection(false);
+				cmbDmAttribute.setSelection(new StructuredSelection(mapping.getDataModelAttribute()));
+				configureFixedValue();
+				configureDm();
+			}else if (mapping.getType() == Type.FIXED) {
+				btnDm.setSelection(false);
+				btnFixed.setSelection(true);
+				btnObsPosition.setSelection(false);
+				
+				configureFixedValue();
+				configureDm();
+			}else if (mapping.getType() == Type.POSITION) {
+				btnDm.setSelection(false);
+				btnFixed.setSelection(false);
+				btnObsPosition.setSelection(true);
+				configureFixedValue();
+				configureDm();
+				
+			}
+		}
 		
 		setTitle(type.getName());
 		setMessage(MessageFormat.format("Create new attribute mapping for entity type {0}", type.getName()));
@@ -261,6 +459,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 	}
 	
 	private void configureFixedValue() {
+		setEnabled(cmpFixedMap, btnFixed.getSelection());
 		IntelEntityTypeAttribute ea = (IntelEntityTypeAttribute) cmbIntelAttribute.getStructuredSelection().getFirstElement();
 		if (ea == null) return;
 		Object x = cmpFixedMap.getData("ATTRIBUTE");
@@ -272,11 +471,55 @@ public class NewMappingDialog extends TitleAreaDialog {
 		cmpFixedMap.setData("EDITOR", fieldEditor);
 		cmpFixedMap.setData("ATTRIBUTE", ea.getAttribute());
 		cmpFixedMap.layout(true);
+		
+		if (mapping != null && mapping.getType() == Type.FIXED && mapping.getEntityAttribute().equals(ea.getAttribute())) {
+			IntelEntityAttributeValue temp = new IntelEntityAttributeValue();
+			temp.setAttribute(ea.getAttribute());
+			switch(ea.getAttribute().getType()){
+			case BOOLEAN:
+				temp.setNumberValue(mapping.getFixedBooleanValue() ? 1.0 : 0.0);
+				break;
+			case DATE:
+				temp.setDateValue(mapping.getFixedDateValue());
+				break;
+			case EMPLOYEE:
+				temp.setEmployee(mapping.getFixedEmployee());
+				break;
+			case LIST:
+				temp.setAttributeListItem(mapping.getIntelListItem());
+				break;
+			case NUMERIC:
+				temp.setNumberValue(mapping.getFixedDouble1Value());
+				break;
+			case POSITION:
+				temp.setNumberValue(mapping.getFixedDouble1Value());
+				temp.setNumberValue2(mapping.getFixedDouble2Value());
+				break;
+			case TEXT:
+				temp.setStringValue(mapping.getFixedStringValue());
+				break;
+			default:
+				break;
+				
+			}
+			fieldEditor.initControl(temp);
+		}else {
+			IntelEntityAttributeValue temp = new IntelEntityAttributeValue();
+			temp.setAttribute(ea.getAttribute());
+			if (ea.getAttribute().getType() == IntelAttribute.AttributeType.DATE) {
+				temp.setDateValue(new Date());
+				fieldEditor.initControl(temp);
+			}else if (ea.getAttribute().getType() == IntelAttribute.AttributeType.BOOLEAN) {
+				temp.setNumberValue(1.0);
+				fieldEditor.initControl(temp);
+			}
+		}
 				
 		setEnabled(cmpFixedMap, cmpFixedMap.getEnabled());
 	}
 	
 	private void configureDm() {
+		setEnabled(cmpDmMap, btnDm.getSelection());
 		if (dmAttributes == null) return;
 		IntelEntityTypeAttribute ea = (IntelEntityTypeAttribute) cmbIntelAttribute.getStructuredSelection().getFirstElement();
 		if (ea == null) {
@@ -285,6 +528,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 		}
 		Object x = cmpDmMap.getData("ATTRIBUTE");
 		if (x != null && x == ea.getAttribute()) return;
+		tblList.getTable().setVisible(ea.getAttribute().getType() == AttributeType.LIST);
 		
 		cmpDmMap.setData("ATTRIBUTE", ea.getAttribute());
 		List<Attribute> filtered = new ArrayList<>();
@@ -316,7 +560,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 			if (add) filtered.add(a);
 		}
 		cmbDmAttribute.setInput(filtered);
-		setEnabled(cmpDmMap, cmpDmMap.getEnabled());
+		setEnabled(cmpDmMap, btnDm.getSelection());
 	}
 
 	private void setEnabled(Control c, boolean enabled) {
@@ -331,5 +575,10 @@ public class NewMappingDialog extends TitleAreaDialog {
 				}
 			}
 		}
+	}
+	
+	private class ListItemMapping{
+		AttributeListItem dmItem;
+		IntelAttributeListItem iItem;
 	}
 }
