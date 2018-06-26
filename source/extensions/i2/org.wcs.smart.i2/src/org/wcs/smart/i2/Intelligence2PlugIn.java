@@ -85,6 +85,8 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_GROUP_BY = "org.wcs.smart.i2.query.groupby"; //$NON-NLS-1$
 	public static final String ICON_VALUES = "org.wcs.smart.i2.query.value"; //$NON-NLS-1$
 	public static final String ICON_FILTERS = "org.wcs.smart.i2.query.filters"; //$NON-NLS-1$
+	public static final String ICON_CONFIGURE = "org.wcs.smart.i2.configure"; //$NON-NLS-1$
+
 	
 	public static final String ICON_QUERY_RECORDOBS = "org.wcs.smart.i2.query.recordobs"; //$NON-NLS-1$
 	public static final String ICON_QUERY_ENTITYSUM = "org.wcs.smart.i2.query.entitysum"; //$NON-NLS-1$
@@ -147,6 +149,9 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_QUERY_RECORDOBS, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/query_record_obs.png")); //$NON-NLS-1$
 		reg.put(ICON_QUERY_ENTITYSUM, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/query_entity_sum.png")); //$NON-NLS-1$
 		reg.put(ICON_QUERY_ENTITYRECORD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/query_entity_record.png")); //$NON-NLS-1$
+		
+		reg.put(ICON_CONFIGURE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/configure.png")); //$NON-NLS-1$
+
 	}
 	
 	/*

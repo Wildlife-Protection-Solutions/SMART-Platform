@@ -22,17 +22,24 @@
 package org.wcs.smart.i2.ui.handler;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.UUID;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.ui.PlatformUI;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
+import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 
@@ -45,6 +52,12 @@ import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 @SuppressWarnings("restriction")
 public class NewRecordHandler {
 	
+	/**
+	 * Context key containing collection of entities that should
+	 * be linked to the record when created
+	 */
+	public static final String ENTITY_UUID_LINK = "org.wcs.smart.i2.ui.handler.NewRecordHandler.entities"; //$NON-NLS-1$
+	
 	@Execute
 	public void createNewRecord(IEclipseContext context){
 		IntelRecord newRecord = new IntelRecord();
@@ -56,10 +69,33 @@ public class NewRecordHandler {
 		newRecord.setPrimaryDate(new Date());
 		RecordEditorInput input = new RecordEditorInput(newRecord);
 		
+		if (context.containsKey(ENTITY_UUID_LINK) && context.get(ENTITY_UUID_LINK) instanceof Collection) {
+			Collection<UUID> entityUuids = (Collection<UUID>) context.get(ENTITY_UUID_LINK);
+			
+			try(Session session = HibernateManager.openSession()){
+				for (UUID entity: entityUuids) {
+					IntelEntity ie = session.get(IntelEntity.class,entity);
+					if (ie == null) continue;
+					ie.getIdAttributeAsText();
+					try {
+						ie.getPrimaryAttachment().computeFileLocation(session);
+					}catch (Exception ex) {}
+					
+					IntelEntityRecord rr = new IntelEntityRecord();
+					rr.setRecord(newRecord);
+					rr.setEntity(ie);
+					newRecord.getEntities().add(rr);
+				}
+			}
+			
+		}
 		//open perspective
-		IEclipseContext kid = context.createChild();
-		kid.set( org.wcs.smart.ui.ShowPerspectiveHandler.PERSPECTIVE_ID_PARAM, IntelDataAssessmentPerspective.ID);
-		ContextInjectionFactory.invoke(new ShowPerspectiveHandler(), Execute.class, kid);
+		String pId = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
+		if (!pId.equals(EntityPerspective.ID) && !pId.equals(IntelDataAssessmentPerspective.ID)) {
+			IEclipseContext kid = context.createChild();
+			kid.set( org.wcs.smart.ui.ShowPerspectiveHandler.PERSPECTIVE_ID_PARAM, IntelDataAssessmentPerspective.ID);
+			ContextInjectionFactory.invoke(new ShowPerspectiveHandler(), Execute.class, kid);
+		}
 		
 		//open editor
 		(new OpenRecordHandler()).openRecord(input, true);

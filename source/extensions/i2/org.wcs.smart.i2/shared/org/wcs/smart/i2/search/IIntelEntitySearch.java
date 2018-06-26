@@ -76,6 +76,8 @@ public interface IIntelEntitySearch {
 		}else if (searchString.startsWith(IntelEntitySearch.Type.ADVANCED.key + IntelEntitySearch.SEPARATOR)){
 			//advanced search
 			return AdvancedEntitySearch.parse(searchString, cas);
+		}else if (searchString.startsWith(IntelEntitySearch.Type.ALL.key + IntelEntitySearch.SEPARATOR)) {
+			return AllEntitySearch.parse(searchString, cas);
 		}
 		
 		return null;

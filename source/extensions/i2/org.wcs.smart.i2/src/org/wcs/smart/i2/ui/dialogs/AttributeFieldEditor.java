@@ -138,13 +138,24 @@ public class AttributeFieldEditor {
 	
 	private boolean fireEvents = true;
 	
+	private boolean createLabel = true;
+	
 	/**
 	 * Assumption is the parent layout is a 2 column grid layout
 	 * @param parent
 	 * @param attribute
 	 */
 	public AttributeFieldEditor(Composite parent, IntelAttribute attribute) {
-		this(parent, attribute, false, null);
+		this(parent, attribute, true);
+	}
+	
+	/**
+	 * Assumption is the parent layout is a 1 column grid layout
+	 * @param parent
+	 * @param attribute
+	 */
+	public AttributeFieldEditor(Composite parent, IntelAttribute attribute, boolean createLabel) {
+		this(parent, attribute, false, null, createLabel);
 	}
 	
 	/**
@@ -155,9 +166,22 @@ public class AttributeFieldEditor {
 	 * @param multiSelect - if multiple list items can be selected; only valid for list attributes
 	 */
 	public AttributeFieldEditor(Composite parent, IntelAttribute attribute, Boolean multiSelect, String name) {
+		this(parent, attribute, multiSelect, name, true);
+	}
+	
+	/**
+	 * 
+	 * @param parent
+	 * @param attribute
+	 * @param name field name or null if attribute name to be used
+	 * @param multiSelect - if multiple list items can be selected; only valid for list attributes
+	 * @param createLabel - if attribute label should be created
+	 */
+	public AttributeFieldEditor(Composite parent, IntelAttribute attribute, Boolean multiSelect, String name, boolean createLabel) {
 		this.parent = parent;
 		this.attribute = attribute;
 		this.isMulti = multiSelect == null ? false : multiSelect;
+		this.createLabel = createLabel;
 		if (name == null){
 			this.name = attribute.getName();
 		}else{
@@ -808,10 +832,11 @@ public class AttributeFieldEditor {
 	
 	
 	private void createControl(){
-		Label l = new Label(parent, SWT.NONE);
-		l.setText(this.name + ":"); //$NON-NLS-1$
-		
-		l.setLayoutData(new GridData(SWT.RIGHT, attribute.getType() == AttributeType.TEXT ? SWT.TOP : SWT.CENTER, false, false));
+		if (createLabel) {
+			Label l = new Label(parent, SWT.NONE);
+			l.setText(this.name + ":"); //$NON-NLS-1$
+			l.setLayoutData(new GridData(SWT.RIGHT, attribute.getType() == AttributeType.TEXT ? SWT.TOP : SWT.CENTER, false, false));
+		}
 		
 		if (attribute.getType() == AttributeType.TEXT){
 			txtMulti = new MultiLineText(parent);
@@ -934,6 +959,7 @@ public class AttributeFieldEditor {
 				}
 			});
 			btnOnOff.setSelection(true);
+			btnOnOff.setEnabled(false);
 			cd = createDecoration(btnOnOff);
 		}else if (attribute.getType() == AttributeType.POSITION){
 			
@@ -959,7 +985,7 @@ public class AttributeFieldEditor {
 			((GridData)txtValue.getLayoutData()).widthHint = 50;
 			cd = createDecoration(txtValue);
 				
-			l = new Label(c, SWT.NONE);
+			Label l = new Label(c, SWT.NONE);
 			l.setText(":"); //$NON-NLS-1$
 			l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 
@@ -1021,8 +1047,12 @@ public class AttributeFieldEditor {
 			md.setInitPoint(position[0], position[1]);
 		}
 		
-		MapPart currentPart = ApplicationGIS.getToolManager().getActiveTool().getContext().getViewportPane().getMapEditor();
-		IAction lastToolAction = ((ToolManager)ApplicationGIS.getToolManager()).getActiveToolProxy().getAction();
+		MapPart currentPart = null;
+		IAction lastToolAction = null;
+		if (ApplicationGIS.getToolManager().getActiveTool().getContext() != null && ApplicationGIS.getToolManager().getActiveTool().getContext().getViewportPane() != null) {
+			currentPart = ApplicationGIS.getToolManager().getActiveTool().getContext().getViewportPane().getMapEditor();
+			lastToolAction = ((ToolManager)ApplicationGIS.getToolManager()).getActiveToolProxy().getAction();
+		}
 		try{
 			if (md.open() == SelectPointMapDialog.OK){
 				if (md.getPoint() != null){
@@ -1032,8 +1062,8 @@ public class AttributeFieldEditor {
 				}
 			}
 		}finally{
-			ApplicationGIS.getToolManager().setCurrentEditor(currentPart);
-			lastToolAction.run();
+			if (currentPart != null) ApplicationGIS.getToolManager().setCurrentEditor(currentPart);
+			if (lastToolAction != null) lastToolAction.run();
 		}
 	}
 	

@@ -90,6 +90,7 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
+import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.TransparentInfoDialog;
@@ -135,7 +136,8 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			if (isDirty && perspective.getId().equals(IntelDataAnalysisPerspective.ID)){
 				//save and be done with it
 				setEditMode(false);
-			}else if (perspective.getId().equals(IntelDataAssessmentPerspective.ID)){
+			}else if (perspective.getId().equals(IntelDataAssessmentPerspective.ID) ||
+					perspective.getId().equals(EntityPerspective.ID) ){
 				setEditMode(true);
 			}
 		}
@@ -316,9 +318,17 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					}
 				}
 				
+				if (isnew) {
+					//add any entities this record was initialized with
+					for (IntelEntityRecord rr : record.getEntities()) {
+						modifiedEntities.add(rr.getEntity());
+					}
+				}
 				for (IntelEntityRecord r : summaryPage.getNewEntityLinks()){
 					modifiedEntities.add(r.getEntity());
 				}
+				
+				
 				for (IntelLocation location : locationsToDelete){
 					if (location.getUuid() == null) continue;
 					//find any entity location links and remove these
@@ -445,6 +455,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			MPart part = parentContext.get(MPart.class); 
 			if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
 			if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
+			if (!part.getTags().contains(EntityPerspective.ID)) part.getTags().add(EntityPerspective.ID);
 			
 			//on delete close editor
 			subscribeToEvent(IntelEvents.RECORD_DELETE, (event)->{

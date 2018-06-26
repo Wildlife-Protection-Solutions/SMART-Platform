@@ -21,20 +21,35 @@
  */
 package org.wcs.smart.event.ui;
 
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.MessageFormat;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.EventProcessingJob;
 import org.wcs.smart.event.internal.Messages;
+import org.wcs.smart.event.xml.EventsFromXml;
+import org.wcs.smart.event.xml.EventsToXml;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Dialog for configuring events.
@@ -44,6 +59,12 @@ import org.wcs.smart.event.internal.Messages;
  */
 public class ConfigureEventsDialog extends TitleAreaDialog {
 
+	private EventsPanel eventPanel;
+	private FiltersPanel filtersPanel;
+	private ActionsPanel actionPanel;
+	private ActionTypesPanel typesPanel;
+	
+	
 	public ConfigureEventsDialog(Shell parentShell) {
 		super(parentShell);
 	}
@@ -63,6 +84,12 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		super.okPressed();
 	}
 	
+	private void refresh() {
+		eventPanel.refresh();
+		filtersPanel.refresh();
+		actionPanel.refresh();		
+	}
+	
 	@Override
 	public Control createDialogArea(Composite parent) {
 		parent = (Composite) super.createDialogArea(parent);
@@ -74,10 +101,10 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		TabFolder tabs = new TabFolder(main, SWT.NONE);
 		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		EventsPanel eventPanel = new EventsPanel(tabs, SWT.NONE);
-		FiltersPanel filtersPanel = new FiltersPanel(tabs, SWT.NONE);
-		ActionsPanel actionPanel = new ActionsPanel(tabs, SWT.NONE);
-		ActionTypesPanel typesPanel = new ActionTypesPanel(tabs, SWT.NONE);
+		eventPanel = new EventsPanel(tabs, SWT.NONE);
+		filtersPanel = new FiltersPanel(tabs, SWT.NONE);
+		actionPanel = new ActionsPanel(tabs, SWT.NONE);
+		typesPanel = new ActionTypesPanel(tabs, SWT.NONE);
 		
 		filtersPanel.addListener(e->eventPanel.refresh());
 		actionPanel.addListener(e->eventPanel.refresh());
@@ -102,6 +129,24 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		typesTab.setControl(typesPanel);
 		typesTab.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ACTION_TYPE));
 		
+		
+		Composite linkComp = new Composite(main, SWT.NONE);
+		linkComp.setLayout(new GridLayout(2, false));
+		linkComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		((GridLayout)linkComp.getLayout()).marginWidth = 0;
+		((GridLayout)linkComp.getLayout()).marginHeight = 0;
+		
+		Link export = new Link(linkComp, SWT.NONE);
+		export.setText("<a>" + Messages.ConfigureEventsDialog_ExportLink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		export.addListener(SWT.Selection, e->{
+			export();
+		});
+		Link importmerge = new Link(linkComp, SWT.NONE);
+		importmerge.setText("<a>" + Messages.ConfigureEventsDialog_MergeLink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		importmerge.addListener(SWT.Selection, e->{
+			importmerge();
+		});
+		
 		setTitle(Messages.ConfigureEventsDialog_Title);
 		getShell().setText(Messages.ConfigureEventsDialog_Title);
 		setMessage(Messages.ConfigureEventsDialog_Message);
@@ -109,6 +154,79 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		return parent;
 	}
 	
+	private void export() {
+		FileDialog fd = new FileDialog(getShell(),  SWT.SAVE);
+		fd.setFilterExtensions(new String[] {"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setFilterNames(new String[] {Messages.ConfigureEventsDialog_XmlFile, Messages.ConfigureEventsDialog_AllFile});
+		String file = fd.open();
+		if (file == null) return;
+		
+		Path outputFile = Paths.get(file);
+		
+		if (Files.exists(outputFile)) {
+			if (!MessageDialog.openConfirm(getShell(), Messages.ConfigureEventsDialog_OverwriteTitle, 
+					MessageFormat.format(Messages.ConfigureEventsDialog_OverwriteMsg, outputFile.toString()))){
+				return;
+			}
+		}
+		
+		try {
+			if (!Files.exists(outputFile.getParent())) {
+				Files.createDirectories(outputFile.getParent());
+			}
+			
+			EventsToXml xml = new EventsToXml(SmartDB.getCurrentConservationArea());
+			xml.toXml(outputFile);
+			
+			MessageDialog.openInformation(getShell(), Messages.ConfigureEventsDialog_ExportTitle, MessageFormat.format(Messages.ConfigureEventsDialog_ExportCompleteMsg, outputFile.toString()));
+		}catch (Exception ex) {
+			EventPlugIn.displayLog(Messages.ConfigureEventsDialog_ExportError + ex.getMessage(), ex);
+		}
+	}
+	
+	private void importmerge() {
+		if (!MessageDialog.openConfirm(getParentShell(), Messages.ConfigureEventsDialog_ImportTitle,
+				Messages.ConfigureEventsDialog_ImportMsg
+				)) {
+			return;
+		}
+	
+		FileDialog fd = new FileDialog(getShell(),  SWT.OPEN);
+		fd.setFilterExtensions(new String[] {"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setFilterNames(new String[] {Messages.ConfigureEventsDialog_XmlFile, Messages.ConfigureEventsDialog_AllFile});
+		String file = fd.open();
+		if (file == null) return;
+		
+		Path outputFile = Paths.get(file);
+		
+		if (!Files.exists(outputFile)) {
+			MessageDialog.openError(getShell(), Messages.ConfigureEventsDialog_NotFoundTitle, 
+					MessageFormat.format(Messages.ConfigureEventsDialog_NotFoundMsg, outputFile.toString()));
+			return;
+		}
+		
+		try {
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+			pmd.run(true, false, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					EventsFromXml xml = new EventsFromXml(SmartDB.getCurrentConservationArea());
+					try {
+						xml.importAndMerge(outputFile, monitor);	
+					}catch (Exception ex) {
+						EventPlugIn.displayLog(Messages.ConfigureEventsDialog_ImportError + ex.getMessage(), ex);
+					}
+					
+				}
+			});
+			
+			
+		}catch (Exception ex) {
+			EventPlugIn.displayLog(Messages.ConfigureEventsDialog_ImportError + ex.getMessage(), ex);
+		}
+		refresh();
+	}
 	
 	@Override
 	public boolean isResizable() {

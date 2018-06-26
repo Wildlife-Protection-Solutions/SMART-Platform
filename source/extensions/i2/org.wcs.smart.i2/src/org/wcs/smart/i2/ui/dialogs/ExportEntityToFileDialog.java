@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,6 +57,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.entity.exporter.EntityRelationshipExporter;
 import org.wcs.smart.i2.internal.Messages;
@@ -95,6 +97,11 @@ public class ExportEntityToFileDialog extends TitleAreaDialog {
 		}
 	}
 	
+	/**
+	 * if no entity uuids are provided then all entities are exported.
+	 * @param parentShell
+	 * @param entityUuids
+	 */
 	public ExportEntityToFileDialog(Shell parentShell, List<UUID> entityUuids) {
 		super(parentShell);
 		this.entityUuids = entityUuids;
@@ -108,7 +115,7 @@ public class ExportEntityToFileDialog extends TitleAreaDialog {
 	@Override
 	public void okPressed() {
 		// check for data
-		if (entityUuids.isEmpty()) {
+		if (entityUuids != null && entityUuids.isEmpty()) {
 			MessageDialog.openInformation(getShell(), EXPORT_DIALOG_TITLE, Messages.ExportEntityXmlDialog_NothingToExportMsg);
 			return;
 		}
@@ -157,6 +164,14 @@ public class ExportEntityToFileDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.ExportEntityXmlDialog_Task, 1);
 					try (Session s = HibernateManager.openSession()) {
+						if (entityUuids == null) {
+							entityUuids = new ArrayList<>();
+							
+							List<Object> items = s.createQuery("SELECT uuid FROM IntelEntity WHERE conservationArea = :ca")
+							.setParameter("ca",  SmartDB.getCurrentConservationArea())
+							.list();
+							items.forEach(item-> entityUuids.add((UUID)item));
+						}
 						if (format == Format.XML) {
 							EntityToXml hh = new EntityToXml(s);
 							hh.export(outFile, entityUuids, includeRecords, includeRelationships, includeRecordXml, progress.split(1));

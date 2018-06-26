@@ -105,6 +105,19 @@ public class GeometryUtils {
 	
 	
 	/**
+	 * Converts and x and y position into a string
+	 * representing the position.
+
+	 * @param x
+	 * @param y
+	 * 
+	 * @return
+	 */
+	public static String toPoint(Double x, Double y){
+		return "(" + x + "," + y + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+	
+	/**
 	 * Determines if the given point is in the polygon.
 	 * <p>
 	 * Assumes the point and polygon are of

@@ -187,6 +187,10 @@ public class ActionsPanel extends Composite {
 		loadActionsJob.schedule();
 	}
 	
+	public void refresh() {
+		loadActionsJob.schedule();
+	}
+	
 	public void addListener(Listener listener) {
 		modifiedListeners.add(listener);
 	}

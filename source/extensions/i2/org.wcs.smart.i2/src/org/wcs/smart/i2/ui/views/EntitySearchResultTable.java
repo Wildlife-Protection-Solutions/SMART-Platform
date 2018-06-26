@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.ui.views;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -30,14 +29,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -69,7 +65,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -77,10 +72,9 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.InternalEntityManager;
 import org.wcs.smart.i2.WorkingSetManager;
-import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.IntelSearchResult;
@@ -525,79 +519,13 @@ public class EntitySearchResultTable extends Composite {
 	}
 	
 	private void printEntities(){
-		EntityExportDialog dialog = new EntityExportDialog(getShell(), getCurrentSelection());
-		dialog.open();
+		List<UUID> entityUuids = getCurrentSelection().stream().map(e->e.getUuid()).collect(Collectors.toList());
+		InternalEntityManager.INSTANCE.printEntities(getShell(), entityUuids);
 	}
 	
 	private void deleteEntities(){
-		List<IntelEntity> itemsToDelete = getCurrentSelection();
-		if (itemsToDelete.isEmpty()) return;
-		
-		if (!MessageDialog.openQuestion(getShell(), Messages.EntitySearchResultTable_DeleteEntityTitle, MessageFormat.format(Messages.EntitySearchResultTable_DeleteEntityMsg, itemsToDelete.size()))) return; 
-		
-		
-		//look for any dirty record editors and save them first
-		List<RecordEditor> editors = new ArrayList<>();
-		StringBuilder names = new StringBuilder();
-		for(MPart p : context.get(EPartService.class).getParts()){
-			Object x = E3Utils.getSourceObject(p);
-			if ( x instanceof RecordEditor && ((RecordEditor)x).isDirty()){
-				editors.add((RecordEditor)x);
-				names.append(((RecordEditor)x).getPartName());
-				names.append(", "); //$NON-NLS-1$
-			}
-		}
-		if (!editors.isEmpty()){
-			StringBuilder sb = new StringBuilder();
-			sb.append(Messages.EntitySearchResultTable_SaveRequiredMsg);
-			sb.append("\n"); //$NON-NLS-1$
-			sb.append(names.substring(0, names.length() - 2));
-			
-			if (!MessageDialog.openQuestion(getShell(), Messages.EntitySearchResultTable_DeleteEntitiesTitle2, sb.toString())){
-				return;
-			}
-			for (RecordEditor p : editors){
-				try{
-					//context.get(EPartService.class).savePart(p, false); -> this doesn't work it still prompts the user; we do not want to prompt user
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().saveEditor(p, false);
-				}catch (Exception ex){
-					Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
-				}
-			}
-		}
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		try{
-			pmd.run(true, false, new IRunnableWithProgress() {
-				
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException,
-						InterruptedException {
-					monitor.beginTask(Messages.EntitySearchResultTable_DeleteTaskName, itemsToDelete.size());
-					try(Session s = HibernateManager.openSession()){
-						s.beginTransaction();
-						try{
-							for (IntelEntity entity : itemsToDelete){	
-								EntityManager.INSTANCE.deleteEntity(entity, s);
-								monitor.worked(1);
-							}
-							s.getTransaction().commit();
-						}catch (Exception ex){
-							s.getTransaction().rollback();
-							throw new InvocationTargetException(ex);
-						}
-					}
-					try{
-						context.get(IEventBroker.class).send(IntelEvents.ENTITY_DELETE, itemsToDelete);
-					}catch (Exception ex){
-						//error with events;
-						Intelligence2PlugIn.displayLog(Messages.EntitySearchResultTable_RefreshError + ex.getMessage(), ex);
-					}
-				}
-			});
-		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog(Messages.EntitySearchResultTable_DeleteError + ex.getMessage(), ex);
-			return;
-		}
+		List<UUID> toDelete = getCurrentSelection().stream().map(e->e.getUuid()).collect(Collectors.toList());
+		InternalEntityManager.INSTANCE.deleteEntities(getShell(), context.get(EPartService.class), context.get(IEventBroker.class),toDelete);
 	}
 	
 	private void createMenu(Composite parent){

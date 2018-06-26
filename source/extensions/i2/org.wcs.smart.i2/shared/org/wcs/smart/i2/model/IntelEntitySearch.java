@@ -48,7 +48,8 @@ public class IntelEntitySearch extends NamedItem {
 	public enum Type{
 		BASIC("basic"), //$NON-NLS-1$
 		ADVANCED("adv"), //$NON-NLS-1$
-		RECORD("record"); //$NON-NLS-1$
+		RECORD("record"), //$NON-NLS-1$
+		ALL("all"); //$NON-NLS-1$
 		
 		public String key;
 		

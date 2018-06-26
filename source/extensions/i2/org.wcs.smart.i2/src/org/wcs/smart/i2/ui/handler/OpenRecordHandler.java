@@ -29,6 +29,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
@@ -45,7 +46,7 @@ public class OpenRecordHandler {
 		try {
 			String pId = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
 			if (IntelSecurityManager.INSTANCE.canEditRecord() || IntelSecurityManager.INSTANCE.canCreateRecord()) {
-				input.setIsInitEditable(pId.equals(IntelDataAssessmentPerspective.ID) || editMode);
+				input.setIsInitEditable(pId.equals(IntelDataAssessmentPerspective.ID) || pId.equals(EntityPerspective.ID) || editMode);
 			}else {
 				input.setIsInitEditable(false);
 			}

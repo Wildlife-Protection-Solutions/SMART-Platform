@@ -65,6 +65,7 @@ import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
@@ -151,6 +152,8 @@ public class RecordNarrativeView {
 		if (!part.getTags().contains(PerspectiveEditorTracker.EDITOR_TAG)) part.getTags().add(PerspectiveEditorTracker.EDITOR_TAG);
 		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
 		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
+		if (!part.getTags().contains(EntityPerspective.ID)) part.getTags().add(EntityPerspective.ID);
+		
 		part.getTags().remove("View"); //$NON-NLS-1$
 		
 		this.type = (FieldType) part.getTransientData().get(TYPE_KEY);

@@ -121,7 +121,10 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.IFormColors;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.themes.ColorUtil;
@@ -170,6 +173,7 @@ import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
+import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.IntelAttachmentPropertiesDialog;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
@@ -182,6 +186,7 @@ import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
 import org.wcs.smart.i2.ui.dialogs.RelationshipSelectorDialog;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog;
+import org.wcs.smart.i2.ui.handler.NewRecordHandler;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.i2.ui.views.FileSearchView;
@@ -225,7 +230,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private Label lblModified;
 	private Label lblIdentifier;
 	private Label lblType;
-	
+	private Hyperlink lnkNewRecord;
+
 	private Composite compAttributes;
 	private Composite compAttachments;
 	private Text txtScratchpad;
@@ -270,7 +276,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 			if (isDirty && perspective.getId().equals(IntelDataAnalysisPerspective.ID)){
 				//save and be done with it
 				setEditMode(false);
-			}else if (perspective.getId().equals(IntelDataAssessmentPerspective.ID)){
+			}else if (perspective.getId().equals(IntelDataAssessmentPerspective.ID) ||
+					perspective.getId().equals(EntityPerspective.ID)){
 				setEditMode(true);
 			}
 		}
@@ -678,6 +685,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 		MPart part = context.get(MPart.class); 
 		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
 		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
+		if (!part.getTags().contains(EntityPerspective.ID)) part.getTags().add(EntityPerspective.ID);
+
 		
 		getSite().getWorkbenchWindow().addPerspectiveListener(perspectiveListener);
 		
@@ -1166,6 +1175,16 @@ public class EntityEditor extends EditorPart implements MapPart{
 		if (entity != null) initControl();
 		if (deleteItem != null && !deleteItem.isDisposed()) deleteItem.setEnabled(isEdit && IntelSecurityManager.INSTANCE.canEditEntity());
 		if (editItem != null && !editItem.isDisposed()) editItem.setSelection(isEdit);
+		if (lnkNewRecord != null && !lnkNewRecord.isDisposed()){
+			if (isEdit) {
+				lnkNewRecord.setVisible(true);
+				((GridData)lnkNewRecord.getLayoutData()).heightHint = 20;
+			}else {
+				lnkNewRecord.setVisible(false);
+				((GridData)lnkNewRecord.getLayoutData()).heightHint = 0;
+			}
+			lnkNewRecord.getParent().layout(true);
+		}
 	}
 	
 	public void setDirty(boolean isDirty){
@@ -1526,6 +1545,24 @@ public class EntityEditor extends EditorPart implements MapPart{
 	}
 	
 	private void createRecordsPanel(Composite parent){
+		lnkNewRecord = toolkit.createHyperlink(parent, Messages.EntityEditor_NewRecordLabel, SWT.NONE);
+		lnkNewRecord.addHyperlinkListener(new IHyperlinkListener() {
+			@Override
+			public void linkExited(HyperlinkEvent e) { }
+			@Override
+			public void linkEntered(HyperlinkEvent e) { }
+			
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				createNewRecord();
+			}
+		});
+		
+		lnkNewRecord.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		if (!getEditMode()) {
+			((GridData)lnkNewRecord.getLayoutData()).heightHint = 0;
+			lnkNewRecord.setVisible(false);
+		}
 		tblRecords = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION);
 		tblRecords.setContentProvider(ArrayContentProvider.getInstance());
 		tblRecords.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -1574,17 +1611,56 @@ public class EntityEditor extends EditorPart implements MapPart{
 		Menu recordsMenu = new Menu(tblRecords.getTable());
 		tblRecords.getTable().setMenu(recordsMenu);
 		
-		if (IntelSecurityManager.INSTANCE.canViewRecords()) {
-			MenuItem open = new MenuItem(recordsMenu, SWT.PUSH);
-			open.setText(Messages.EntityEditor_OpenRecordMnuItem);
-			open.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					openSelectedRecord();
+		recordsMenu.addMenuListener(new MenuListener() {
+			@Override
+			public void menuHidden(MenuEvent e) {
+			}
+
+			@Override
+			public void menuShown(MenuEvent e) {
+				for (MenuItem mi : recordsMenu.getItems()) mi.dispose();
+				
+				if (IntelSecurityManager.INSTANCE.canViewRecords()) {
+					MenuItem open = new MenuItem(recordsMenu, SWT.PUSH);
+					open.setText(Messages.EntityEditor_OpenRecordMnuItem);
+					open.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							openSelectedRecord();
+						}
+					});
 				}
-			});
-		}
+				
+				
+				if (getEditMode() && IntelSecurityManager.INSTANCE.canCreateRecord()) {
+					new MenuItem(recordsMenu, SWT.SEPARATOR);
+					
+					MenuItem open = new MenuItem(recordsMenu, SWT.PUSH);
+					open.setText(Messages.EntityEditor_1);
+					open.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+					open.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							createNewRecord();
+						}
+					});
+					
+					
+				}
+			}
+			
+		});
+		
+		
 	}
+	
+	private void createNewRecord() {
+		if (!IntelSecurityManager.INSTANCE.canCreateRecord()) return;
+		IEclipseContext ctx = context.createChild();
+		ctx.set(NewRecordHandler.ENTITY_UUID_LINK, Collections.singleton(getEntity().getUuid()));
+		(new NewRecordHandler()).createNewRecord(ctx);
+	}
+	
 	
 	private void openSelectedRecord(){
 		if (!IntelSecurityManager.INSTANCE.canViewRecords()) return;

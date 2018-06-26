@@ -28,6 +28,18 @@ public class Messages extends NLS {
 	public static String AdvancedEntitySearchPanel_SaveSearchlink;
 	public static String AdvancedIntelDataSourcePropertyPage_notconfigurable;
 	public static String AdvancedIntelDataSourcePropertyPage_title;
+	public static String AllEntityContentProvider_LoadingDataJobName;
+	public static String AllEntityContentProvider_UpdateFilterJobName;
+	public static String AllPanel_configtabletooltip;
+	public static String AllPanel_CountLabel;
+	public static String AllPanel_EntityIdColumn;
+	public static String AllPanel_EntityTypeColumn;
+	public static String AllPanel_ErrorLabel;
+	public static String AllPanel_loadresultstooltip;
+	public static String AllPanel_NotFoundMessage;
+	public static String AllPanel_NotFoundTitle;
+	public static String AllPanel_refreshJobName;
+	public static String AllPanel_showhidetooltip;
 	public static String AttachmentListComposite_AddAttachmentItem;
 	public static String AttachmentListComposite_AttachmentsLinked;
 	public static String AttachmentListComposite_LinkEntityItem;
@@ -118,6 +130,12 @@ public class Messages extends NLS {
 	public static String CategoryAttributeDMAdvisor_CatAttUsedObs;
 	public static String CategoryDMAdvisor_CategoryAssociatedObs;
 	public static String CleanUpJob_jobname;
+	public static String ColumnSelectorDialog_DeSelectAllLabel;
+	public static String ColumnSelectorDialog_loadingJobName;
+	public static String ColumnSelectorDialog_Message;
+	public static String ColumnSelectorDialog_SelectAllLabel;
+	public static String ColumnSelectorDialog_TableColumns;
+	public static String ColumnSelectorDialog_Title;
 	public static String CompareEntitiesHandler_DifferentTypeError;
 	public static String CompareEntitiesHandler_EntityRequired;
 	public static String ConfigurationDialog_defaultLabel;
@@ -201,6 +219,7 @@ public class Messages extends NLS {
 	public static String EntityComparisonEditor_LoadJobName;
 	public static String EntityComparisonEditor_removelink;
 	public static String EntityComparisonInput_ComparisonName_type_numentities;
+	public static String EntityEditor_1;
 	public static String EntityEditor_38;
 	public static String EntityEditor_addtowstooltip;
 	public static String EntityEditor_AddAttachmentBtn;
@@ -225,6 +244,7 @@ public class Messages extends NLS {
 	public static String EntityEditor_ModifiedLabel;
 	public static String EntityEditor_ModifiedMsg;
 	public static String EntityEditor_ModifiedTitle;
+	public static String EntityEditor_NewRecordLabel;
 	public static String EntityEditor_NewRelationshipBtn;
 	public static String EntityEditor_OpenAttachmentMnuItem;
 	public static String EntityEditor_OpenRecordMnuItem;
@@ -429,6 +449,8 @@ public class Messages extends NLS {
 	public static String EntitySearchShell_AddtoRecordItem;
 	public static String EntitySearchShell_NoResultsFound;
 	public static String EntitySearchView_AdvSearchTab;
+	public static String EntitySearchView_AllLabel;
+	public static String EntitySearchView_AllTooltip;
 	public static String EntitySearchView_AllTypesOption;
 	public static String EntitySearchView_BasicSearchTab;
 	public static String EntitySearchView_BasicSearchTooltip;
