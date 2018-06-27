@@ -33,6 +33,7 @@ import org.opengis.coverage.grid.GridCoverage;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
@@ -74,9 +75,12 @@ public class GridArcImageExporter implements IQueryExporter {
 		
 		File sourceFile = ((GridQueryResult)result).getRasterFile();
 		if (sourceFile == null || !sourceFile.exists()){
-			throw new Exception(Messages.GridArcImageExporter_ExportError, 
+			sourceFile = RasterService.createRasterFile((GridQueryResult)result, (GriddedQuery) query, ((GriddedQuery)query).getRasterFileName().getAbsolutePath().toString());
+			if (sourceFile == null) {			
+				throw new Exception(Messages.GridArcImageExporter_ExportError, 
 					new Exception(
 							MessageFormat.format(Messages.GridArcImageExporter_FileNotFound, new Object[]{(sourceFile == null ? "NULL" : sourceFile.toString()) }))); //$NON-NLS-1$
+			}
 		}
 
 		

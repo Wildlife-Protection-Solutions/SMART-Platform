@@ -179,38 +179,9 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 			rb.build();
 			return rb.getImageFile();	
 		}
-		GridQueryResult results = (GridQueryResult) query.getCachedResults();
-		if (results == null){
-			//query has not been run
-			return null;
-		}
-		
-		GridMetadata metadata = results.getMetadata();
-		if (metadata == null){
-			//query has not been run
-			return null;
-		}
-		long width = metadata.getMaxXTile() - metadata.getMinXTile() + 1;
-		long height = metadata.getMaxYTile() - metadata.getMinYTile() + 1;
-		if (width > Integer.MAX_VALUE || height > Integer.MAX_VALUE || width * height > Grid.MAX_GRID_CELLS){
-			throw Grid.GRID_TO_BIG_EXCEPTION;
-		}
-		rb.setRasterDimensions((int)width, (int)height);
-			
-		// sets the envelope based in the map bound
-		double gridCellSize = query.getGridSize();
-		rb.setEnvelope(
-				new Envelope2D(
-					query.getCoordinateReferenceSystem(), 
-					(metadata.getMinXTile()-1)* gridCellSize + 0.5* gridCellSize + query.getGridOrigin().x, 
-					(metadata.getMinYTile()-1) * gridCellSize - 0.5*gridCellSize + query.getGridOrigin().y, 
-					width * gridCellSize , height*gridCellSize)); 
-		rb.setTable(  ((GridQueryResult)query.getCachedResults()).getData(), 
-				results.getMetadata());
-		rb.setGridCellSize(gridCellSize);
-		rb.build();
-		File f = rb.getImageFile();
-		results.setLastRasterFile(f);
+		File f = createRasterFile((GridQueryResult) query.getCachedResults(), query, rasterFileName);
+		if (f == null) return null;
+		((GridQueryResult) query.getCachedResults()).setLastRasterFile(f);
 		return f;
 	}
 
@@ -502,6 +473,41 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 		}
 		return null;
 
+	}
+	
+	public static File createRasterFile(GridQueryResult results, GriddedQuery query, String fileName) throws Exception {
+		RasterBuilder rb = new RasterBuilder();
+		rb.setFileName(fileName);
+		if (results == null){
+			//query has not been run
+			return null;
+		}
+		
+		GridMetadata metadata = results.getMetadata();
+		if (metadata == null){
+			//query has not been run
+			return null;
+		}
+		long width = metadata.getMaxXTile() - metadata.getMinXTile() + 1;
+		long height = metadata.getMaxYTile() - metadata.getMinYTile() + 1;
+		if (width > Integer.MAX_VALUE || height > Integer.MAX_VALUE || width * height > Grid.MAX_GRID_CELLS){
+			throw Grid.GRID_TO_BIG_EXCEPTION;
+		}
+		rb.setRasterDimensions((int)width, (int)height);
+			
+		// sets the envelope based in the map bound
+		double gridCellSize = query.getGridSize();
+		rb.setEnvelope(
+				new Envelope2D(
+					query.getCoordinateReferenceSystem(), 
+					(metadata.getMinXTile()-1)* gridCellSize + 0.5* gridCellSize + query.getGridOrigin().x, 
+					(metadata.getMinYTile()-1) * gridCellSize - 0.5*gridCellSize + query.getGridOrigin().y, 
+					width * gridCellSize , height*gridCellSize)); 
+		rb.setTable(  results.getData(), 
+				results.getMetadata());
+		rb.setGridCellSize(gridCellSize);
+		rb.build();
+		return rb.getImageFile();
 	}
 
 }

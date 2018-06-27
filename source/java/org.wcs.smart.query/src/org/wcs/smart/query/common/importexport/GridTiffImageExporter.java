@@ -33,6 +33,7 @@ import org.opengis.coverage.grid.GridCoverageWriter;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
@@ -77,9 +78,12 @@ public class GridTiffImageExporter implements IQueryExporter {
 		
 		File sourceFile = ((GridQueryResult)result).getRasterFile();
 		if (sourceFile == null || !sourceFile.exists()){
-			throw new Exception(Messages.GridTiffImageExporter_QueryError, 
+			sourceFile = RasterService.createRasterFile((GridQueryResult)result, (GriddedQuery) query, ((GriddedQuery)query).getRasterFileName().getAbsolutePath().toString());
+			if (sourceFile == null) {
+				throw new Exception(Messages.GridTiffImageExporter_QueryError, 
 					new Exception(
 					MessageFormat.format(Messages.GridTiffImageExporter_FileNotFound, new Object[]{(sourceFile == null ? "NULL" : sourceFile.toString()) }))); //$NON-NLS-1$
+			}
 		}
 
 	    GeoTiffFormat frmt = new GeoTiffFormat();
