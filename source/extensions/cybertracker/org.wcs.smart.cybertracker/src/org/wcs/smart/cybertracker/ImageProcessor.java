@@ -34,6 +34,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 
@@ -171,6 +172,11 @@ public class ImageProcessor {
 				try {
 					ImageWriteParam imageWriteParam = writer.getDefaultWriteParam();
 					imageWriteParam.setCompressionMode(ImageWriteParam.MODE_COPY_FROM_METADATA);
+					if (imageWriteParam instanceof JPEGImageWriteParam) {
+						//to fix #2442 - javax.imageio.IIOException: Missing Huffman code table entry
+						//this will always create huffman tables
+						((JPEGImageWriteParam)imageWriteParam).setOptimizeHuffmanTables(true);
+					}
 					writer.setOutput(ios);
 					writer.write(null, new IIOImage(resizedImage, null, metadata),imageWriteParam);
 				} finally {
