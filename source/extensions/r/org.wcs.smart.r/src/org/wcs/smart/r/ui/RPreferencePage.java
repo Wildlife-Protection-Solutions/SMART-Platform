@@ -10,9 +10,11 @@ import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.osgi.service.prefs.BackingStoreException;
@@ -91,6 +93,11 @@ public class RPreferencePage extends PreferencePage implements IWorkbenchPrefere
 		main.setLayout(new GridLayout(3, false));
 		rLocation = new FileFieldEditor("", "R Program:", main); //$NON-NLS-1$
 		rLocation.setStringValue(getRSystemProperty());
+		
+		Label l = new Label(main, SWT.NONE);
+		l.setText("This should point to the R script executable (Rscript.exe) file.");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+		
 		return main;
 	}
 

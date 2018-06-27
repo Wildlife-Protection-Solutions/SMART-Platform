@@ -79,10 +79,9 @@ public class RunPage extends EditorPart {
 		return false;
 	}
 
-	private void executeScript() {
+	void executeScript() {
 		parent.showResults();
-		
-		REngine engine = new REngine(queryList.getQueries(),txtParameters.getText(),parent.createPage2OutputStream());
+		REngine engine = new REngine(parent.getScript(), queryList.getQueries(),txtParameters.getText(),parent.createPage2OutputStream());
 		engine.execute();
 		
 	}

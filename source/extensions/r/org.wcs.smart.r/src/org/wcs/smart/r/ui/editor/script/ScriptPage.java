@@ -16,8 +16,12 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
+import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.r.RPlugIn;
 import org.wcs.smart.r.RScriptManager;
 
@@ -68,10 +72,24 @@ public class ScriptPage extends EditorPart {
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		if (RScriptManager.INSTANCE.canEditScript()) {
+			Hyperlink lnkEdit = toolkit.createHyperlink(main, "edit", SWT.NONE);
+			lnkEdit.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			lnkEdit.addHyperlinkListener(new IHyperlinkListener() {
+				@Override
+				public void linkExited(HyperlinkEvent e) {}
+				@Override
+				public void linkEntered(HyperlinkEvent e) {}
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					AttachmentUtil.launch(RScriptManager.INSTANCE.getScriptPath(ScriptPage.this.parent.getScript()).toFile());
+				}
+			});
+		}
+		
 		txtScript = new Text(main, SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		txtScript.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		txtScript.setEditable(false);
-		
 	}
 
 	@Override
@@ -80,9 +98,7 @@ public class ScriptPage extends EditorPart {
 	}
 	
 	public void update() {
-		String fileName = parent.getScript().getFilename();
-		txtScript.setText("TODO: show contents for " + fileName + " here. ");
-		
+		txtScript.setText("");
 		Path fileToRead = RScriptManager.INSTANCE.getScriptPath(parent.getScript());
 		if (fileToRead == null || !Files.exists(fileToRead)) {
 			txtScript.setText("ERROR - No R Script file found");

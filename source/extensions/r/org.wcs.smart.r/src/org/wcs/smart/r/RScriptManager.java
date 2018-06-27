@@ -5,7 +5,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.r.model.RScript;
+import org.wcs.smart.user.UserLevelManager;
 
 public enum RScriptManager {
 	INSTANCE;
@@ -43,5 +45,11 @@ public enum RScriptManager {
 			cnt++;
 		}
 		return temp;
+	}
+	
+	public boolean canEditScript() {
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.MANAGER) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ANALYST);
 	}
 }

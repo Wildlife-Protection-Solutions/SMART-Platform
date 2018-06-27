@@ -82,7 +82,7 @@ public class RScriptDialog extends TitleAreaDialog {
 			btnBrowse.addListener(SWT.Selection, e->{
 				FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
 				fd.setText("Import R Script");
-				fd.setFilterExtensions(new String[] {"*.R, *.RData", "*.txt", "*.*"});
+				fd.setFilterExtensions(new String[] {"*.R;*.RData", "*.txt", "*.*"});
 				fd.setFilterNames(new String[] {"R Scripts (*.R, *.RData)", "Text Files (*.txt)", "All Files (*.*)"});
 				String fileName = fd.open();
 				

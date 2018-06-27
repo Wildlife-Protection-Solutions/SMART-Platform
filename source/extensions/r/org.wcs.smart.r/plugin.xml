@@ -60,6 +60,23 @@
                icon="images/icons/rlogo_16.png"
                label="Configure R Scripts"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="analyst">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution

@@ -74,13 +74,30 @@ public class ResultsPage extends EditorPart {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Composite header = toolkit.createComposite(main);
-		header.setLayout(new GridLayout(2, false));
+		header.setLayout(new GridLayout(3, false));
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)header.getLayout()).marginWidth = 0;
 		((GridLayout)header.getLayout()).marginHeight = 0;
 		
 		Label l = toolkit.createLabel(header, "R Script Output:");
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Hyperlink rerun = toolkit.createHyperlink(header, "run", SWT.NONE);
+		rerun.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		rerun.addHyperlinkListener(new IHyperlinkListener() {
+			@Override
+			public void linkExited(HyperlinkEvent e) {
+			}
+			
+			@Override
+			public void linkEntered(HyperlinkEvent e) {
+			}
+			
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				ResultsPage.this.parent.executeScript();
+			}
+		});
 		
 		Hyperlink clear = toolkit.createHyperlink(header, "clear", SWT.NONE);
 		clear.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));

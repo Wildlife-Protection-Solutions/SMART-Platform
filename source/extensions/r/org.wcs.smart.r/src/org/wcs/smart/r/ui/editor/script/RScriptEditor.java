@@ -54,6 +54,16 @@ public class RScriptEditor extends MultiPageEditorPart {
 		page1.setFocus();
 	}
 
+	/**
+	 * Executes the script
+	 */
+	void executeScript() {
+		page1.executeScript();
+	}
+	
+	/**
+	 * Shows the results page
+	 */
 	void showResults() {
 		setActiveEditor(page2);
 	}

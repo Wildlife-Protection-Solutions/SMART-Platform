@@ -1,6 +1,8 @@
 package org.wcs.smart.r.engine;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -20,6 +22,8 @@ import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.r.RPlugIn;
+import org.wcs.smart.r.RScriptManager;
+import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.r.ui.RPreferencePage;
 import org.wcs.smart.util.UuidUtils;
 
@@ -29,11 +33,13 @@ public class REngine {
 	private String rParameters;
 	
 	private OutputStream outStream;
+	private RScript script;
 	
-	public REngine(List<QueryConfiguration> queryConfigs, String rParameters, OutputStream outStream) {
+	public REngine(RScript script, List<QueryConfiguration> queryConfigs, String rParameters, OutputStream outStream) {
 		this.queryConfigs = queryConfigs;
 		this.rParameters = rParameters;
 		this.outStream = outStream;
+		this.script = script;
 	}
 	
 	private void writeString(String string) throws IOException {
@@ -65,41 +71,57 @@ public class REngine {
 					IQueryResult results = null;
 							
 					try(Session session = HibernateManager.openSession()){
-						
-						query.getQuery().setDateFilter(query.getDateFilter());
-						HashMap<String, Object> parameters = new HashMap<>();
-						parameters.put(Session.class.getName(), session);
-						parameters.put(IProgressMonitor.class.getName(), new NullProgressMonitor());
-						
-						results = engine.executeQuery(query.getQuery(), parameters);
+						session.beginTransaction();
+						try {
+							query.getQuery().setDateFilter(query.getDateFilter());
+							HashMap<String, Object> parameters = new HashMap<>();
+							parameters.put(Session.class.getName(), session);
+							parameters.put(IProgressMonitor.class.getName(), new NullProgressMonitor());
+							
+							results = engine.executeQuery(query.getQuery(), parameters);
+							session.getTransaction().commit();
+						}catch (Exception ex) {
+							session.getTransaction().rollback();
+							throw ex;
+						}
 					}
 					
 					String filename = UuidUtils.uuidToString(query.getQuery().getUuid()) + "." + System.nanoTime() + "." + query.getQueryExporter().getDefaultExtension();
 					
-					Path p = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename);
+					Path p = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename).normalize();
 					queryFiles.add(p);
 					HashMap<String, Object> parameters = new HashMap<>();
+					
 					//TODO: delete temporary query files after run
 					query.getQueryExporter().export(query.getQuery(), results, p.toFile(), parameters, new NullProgressMonitor());
 					writeString("Query Exported to : " + p.toString());
-					writeString("----------------------------------------");
+					writeString("-----------------------------------------------------------------------------------------------");
 				}
 				
-				StringBuilder command = new StringBuilder();
-				command.append("\"" + RPreferencePage.getRSystemProperty() + "\"");
+				StringBuilder sb = new StringBuilder();
+				sb.append("\"");
+				sb.append(RPreferencePage.getRSystemProperty());
+				sb.append("\" \"");
+				sb.append(RScriptManager.INSTANCE.getScriptPath(script).toAbsolutePath().toString());
+				sb.append("\"");
 				if (rParameters != null) {
-					command.append(" ");
-					command.append(rParameters);
+					sb.append(" ");
+					sb.append(rParameters);
+					sb.append(" ");
 				}
 				for (Path p : queryFiles) {
-					command.append(" " );
-					command.append("\"");
-					command.append(p.toString());
-					command.append("\"");
+					sb.append(" \"");
+					sb.append(p.toString());
+					sb.append("\"");
 				}
-				writeString(command.toString());
+				
+				writeString("Command: " + sb.toString());
+				writeString("---------------------------------------- SCRIPT OUTPUT ----------------------------------------");
 				
 				//TODO: 
+				//run command
+				runCommand(sb.toString(), outStream);
+				
 			}catch (Exception ex) {
 				try {
 					writeString("ERROR: " + ex.getMessage());
@@ -120,4 +142,27 @@ public class REngine {
 		}
 		
 	};
+	
+	private void runCommand(String command, OutputStream outStream) {
+		try {  
+	        Process p = Runtime.getRuntime().exec(command);
+	        
+	        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+	        BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+
+	        String s = null;
+	        while ((s = stdInput.readLine()) != null) {
+	        	writeString(s);
+	        }
+
+	        while ((s = stdError.readLine()) != null) {
+	        	writeString("ERROR: " + s);
+	        	
+	        }
+	        
+	    } catch(Exception e) {  
+	        System.out.println(e.toString());  
+	        e.printStackTrace();  
+	    }  
+	}
 }
