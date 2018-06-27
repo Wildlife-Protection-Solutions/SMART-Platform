@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.wcs.smart.entity.feature.nl_sw"
+      label="SMART Entity Tracker Swahili Language Pack"
+      version="6.0.0"
+      provider-name="org.wcs.smart"
+      license-feature="org.wcs.smart.license.feature"
+      license-feature-version="6.0.0.qualifier">
+
+   <description>
+      The Swahili translations for the Entity Tracker plugin.
+   </description>
+
+   <copyright>
+      Copyright (c): 2012, 2013 Wildlife Conservation Society
+   </copyright>
+
+   <plugin
+         id="org.wcs.smart.entity.nl_sw"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.entity.query.nl_sw"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.entity.query.report.nl_sw"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+</feature>
