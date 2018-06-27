@@ -632,7 +632,7 @@ public class AllPanel extends Composite {
 			}
 		});
 		
-		if (IntelSecurityManager.INSTANCE.canEditEntity()){
+		if (IntelSecurityManager.INSTANCE.canDeleteEntity()){
 			MenuItem mnuDelete = new MenuItem(menu, SWT.PUSH);
 			mnuDelete.setText(Messages.EntitySearchResultTable_DeleteMenuItem);
 			mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));

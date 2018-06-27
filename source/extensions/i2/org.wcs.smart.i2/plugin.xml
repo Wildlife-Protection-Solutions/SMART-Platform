@@ -2615,6 +2615,12 @@
       <SMARTUserLevel
             class="org.wcs.smart.i2.security.IntelQueryAllUserLevel">
       </SMARTUserLevel>
+      <SMARTUserLevel
+            class="org.wcs.smart.i2.security.IntelDeleteEntityUserLevel">
+      </SMARTUserLevel>
+      <SMARTUserLevel
+            class="org.wcs.smart.i2.security.IntelDeleteRecordUserLevel">
+      </SMARTUserLevel>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">

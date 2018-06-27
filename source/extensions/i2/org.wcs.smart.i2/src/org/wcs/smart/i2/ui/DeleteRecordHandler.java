@@ -26,6 +26,7 @@ import java.util.Collection;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -36,6 +37,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 
 public class DeleteRecordHandler {
@@ -48,6 +50,11 @@ public class DeleteRecordHandler {
 	 */
 	public boolean deleteRecords(Collection<Object> toDelete, IEclipseContext context){
 		if (toDelete.isEmpty()) return false;
+		
+		if (!IntelSecurityManager.INSTANCE.canDeleteRecord()) {
+			MessageDialog.openError(context.get(Shell.class), "Insufficient privileges", "You do not have permission to delete records.");
+			return false;
+		}
 		
 		String confirmMessage = MessageFormat.format(Messages.DeleteRecordHandler_DeleteConfirmMulti,  toDelete.size());
 		if (toDelete.size() == 1){

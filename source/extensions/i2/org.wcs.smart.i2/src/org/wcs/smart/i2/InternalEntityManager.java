@@ -40,6 +40,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.views.EntityExportDialog;
 import org.wcs.smart.util.E3Utils;
@@ -66,6 +67,10 @@ public enum InternalEntityManager {
 	 */
 	public void deleteEntities(Shell shell, EPartService pService, IEventBroker eventBroker, List<UUID> entitiesToDelete){
 		if (entitiesToDelete.isEmpty()) return;
+		if (!IntelSecurityManager.INSTANCE.canDeleteEntity()) {
+			MessageDialog.openError(shell, "Insufficient privileges", "You do not have permission to delete entities.");
+			return;
+		}
 		
 		if (!MessageDialog.openQuestion(shell, Messages.EntitySearchResultTable_DeleteEntityTitle,
 				MessageFormat.format(Messages.EntitySearchResultTable_DeleteEntityMsg, 

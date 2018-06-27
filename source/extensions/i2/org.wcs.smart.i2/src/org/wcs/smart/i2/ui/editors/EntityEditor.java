@@ -1074,7 +1074,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				
 			}
 		});
-		deleteItem.setEnabled(getEditMode() && IntelSecurityManager.INSTANCE.canEditEntity());
+		deleteItem.setEnabled(getEditMode() && IntelSecurityManager.INSTANCE.canDeleteEntity());
 		
 		wsetItem = new ToolItem(buttonBar, SWT.PUSH);
 		wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
@@ -1173,7 +1173,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		}
 		this.isEditMode = isEdit;
 		if (entity != null) initControl();
-		if (deleteItem != null && !deleteItem.isDisposed()) deleteItem.setEnabled(isEdit && IntelSecurityManager.INSTANCE.canEditEntity());
+		if (deleteItem != null && !deleteItem.isDisposed()) deleteItem.setEnabled(isEdit && IntelSecurityManager.INSTANCE.canDeleteEntity());
 		if (editItem != null && !editItem.isDisposed()) editItem.setSelection(isEdit);
 		if (lnkNewRecord != null && !lnkNewRecord.isDisposed()){
 			if (isEdit) {

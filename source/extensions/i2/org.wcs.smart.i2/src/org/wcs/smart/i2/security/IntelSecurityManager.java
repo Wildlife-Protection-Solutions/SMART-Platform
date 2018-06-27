@@ -61,11 +61,21 @@ public enum IntelSecurityManager {
 	}
 	
 	/**
-	 * Determine if the current user can edit entities records
+	 * Determine if the current user can delete records
 	 * @return
 	 */
 	public boolean canDeleteRecord(){
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE);
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDeleteRecordUserLevel.INSTANCE);
+	}
+	
+	/**
+	 * Determine if the current user can delete entities
+	 * @return
+	 */
+	public boolean canDeleteEntity(){
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDeleteEntityUserLevel.INSTANCE);
 	}
 	
 	/**
