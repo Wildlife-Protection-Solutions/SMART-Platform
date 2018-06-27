@@ -58,6 +58,7 @@ import org.json.simple.JSONArray;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.event.i2.entity.EntityMapping.Type;
+import org.wcs.smart.event.i2.internal.Messages;
 import org.wcs.smart.event.model.EAction;
 import org.wcs.smart.event.model.EActionParameterValue;
 import org.wcs.smart.event.ui.model.IActionParameterCollector;
@@ -170,7 +171,7 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		((GridLayout)top.getLayout()).marginHeight = 0;
 		
 		Label l = new Label(top, SWT.NONE);
-		l.setText("Entity Type:");
+		l.setText(Messages.CreateEntityParameterCollector_EntityTypeLabel);
 		
 		cmbEntityType = new ComboViewer(top, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbEntityType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -187,7 +188,7 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		cmbEntityType.setInput(new String[] {DialogConstants.LOADING_TEXT});
 
 		l = new Label(main, SWT.NONE);
-		l.setText("Entity Attribute Mappings:");
+		l.setText(Messages.CreateEntityParameterCollector_MappingsLable);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite bottom = new Composite(main, SWT.NONE);
@@ -203,7 +204,7 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		tblMappings.setContentProvider(ArrayContentProvider.getInstance());
 		
 		TableViewerColumn entityColumn = new TableViewerColumn(tblMappings, SWT.NONE);
-		entityColumn.getColumn().setText("Entity Attribute");
+		entityColumn.getColumn().setText(Messages.CreateEntityParameterCollector_AttributeColumn);
 		entityColumn.getColumn().pack();
 		entityColumn.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
@@ -218,14 +219,14 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		});
 		
 		TableViewerColumn dmColumn = new TableViewerColumn(tblMappings, SWT.NONE);
-		dmColumn.getColumn().setText("Data Model Attribute");
+		dmColumn.getColumn().setText(Messages.CreateEntityParameterCollector_DmAttributeColumn);
 		dmColumn.getColumn().pack();
 		dmColumn.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
 				if (element instanceof EntityMapping) {
 					StringBuilder sb = new StringBuilder();
 					EntityMapping map = (EntityMapping) element;
-					if (map.getDataModelAttribute() == null) return ""; //fixed
+					if (map.getDataModelAttribute() == null) return ""; //fixed //$NON-NLS-1$
 					sb.append(map.getDataModelAttribute().getName());
 					return sb.toString();
 				}
@@ -234,7 +235,7 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		});
 		
 		TableViewerColumn fixedColumn = new TableViewerColumn(tblMappings, SWT.NONE);
-		fixedColumn.getColumn().setText("Fixed Value");
+		fixedColumn.getColumn().setText(Messages.CreateEntityParameterCollector_FixedOp);
 		fixedColumn.getColumn().pack();
 		fixedColumn.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
@@ -243,9 +244,9 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 					if (map.getType() == Type.FIXED) {
 						return map.getFixedValueAsString();
 					}else if (map.getType() == Type.POSITION) {
-						return "<Observation Position>";
+						return Messages.CreateEntityParameterCollector_PositionLabel;
 					}
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 				return super.getText(element);
 			}
@@ -281,13 +282,13 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Button btnMoveUp= new Button(buttonArea, SWT.PUSH);
-		btnMoveUp.setText("Move Up");
+		btnMoveUp.setText(Messages.CreateEntityParameterCollector_UpButton);
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveUp.addListener(SWT.Selection, e->move(-1));
 		btnMoveUp.setEnabled(false);
 		
 		Button btnMoveDown= new Button(buttonArea, SWT.PUSH);
-		btnMoveDown.setText("Move Down");
+		btnMoveDown.setText(Messages.CreateEntityParameterCollector_DownButton);
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveDown.addListener(SWT.Selection, e->move(1));
 		btnMoveDown.setEnabled(false);
@@ -297,7 +298,7 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 			btnAdd.setEnabled(cmbEntityType.getStructuredSelection().getFirstElement() instanceof IntelEntityType);
 			if (lastSelection == cmbEntityType.getStructuredSelection().getFirstElement()) return;
 			if (!mappings.isEmpty()) {
-				if (!MessageDialog.openConfirm(main.getShell(), "Clear", "By changing the entity type you will loose all the configured mappings.  Are you sure you want to continue?")) {
+				if (!MessageDialog.openConfirm(main.getShell(), Messages.CreateEntityParameterCollector_ClearTitle, Messages.CreateEntityParameterCollector_ClearMessage)) {
 					cmbEntityType.setSelection(new StructuredSelection(lastSelection));
 					return;
 				}
@@ -334,11 +335,11 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		new MenuItem(mnu, SWT.SEPARATOR);
 		 
 		MenuItem mnuMoveUp = new MenuItem(mnu, SWT.PUSH);
-		mnuMoveUp.setText("Move Up");
+		mnuMoveUp.setText(Messages.CreateEntityParameterCollector_UpButton);
 		mnuMoveUp.addListener(SWT.Selection, e->move(-1));
 		
 		MenuItem mnuDownUp = new MenuItem(mnu, SWT.PUSH);
-		mnuDownUp.setText("Move Down");
+		mnuDownUp.setText(Messages.CreateEntityParameterCollector_DownButton);
 		mnuDownUp.addListener(SWT.Selection, e->move(1));
 		
 		mnu.addMenuListener(new MenuListener() {
@@ -447,7 +448,7 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 	}
 	
 	
-	private Job loadEntities = new Job("loading entity types") {
+	private Job loadEntities = new Job(Messages.CreateEntityParameterCollector_loadingJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -467,7 +468,7 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 				}
 				
 				dmAttributes.addAll(QueryFactory.buildQuery(session, Attribute.class,
-						"conservationArea", SmartDB.getCurrentConservationArea()).list());
+						"conservationArea", SmartDB.getCurrentConservationArea()).list()); //$NON-NLS-1$
 				for (Attribute a : dmAttributes) {
 					a.getName();
 				}

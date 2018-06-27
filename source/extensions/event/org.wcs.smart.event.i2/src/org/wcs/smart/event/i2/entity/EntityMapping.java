@@ -54,15 +54,15 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class EntityMapping {
 
-	private static final String DATE_FORMAT = "yyyy-MM-dd";
+	private static final String DATE_FORMAT = "yyyy-MM-dd"; //$NON-NLS-1$
 	
 	//JSON keys
-	private static final String JSON_FIXED2_KEY = "fixed2";
-	private static final String JSON_FIXED_KEY = "fixed";
-	private static final String JSON_DMATTRIBUTE_KEY = "dmattribute";
-	private static final String JSON_LIST_KEY = "listmapping";
-	private static final String JSON_INTELATTRIBUTE_KEY = "intelattribute";
-	private static final String JSON_TYPE_KEY = "type";
+	private static final String JSON_FIXED2_KEY = "fixed2"; //$NON-NLS-1$
+	private static final String JSON_FIXED_KEY = "fixed"; //$NON-NLS-1$
+	private static final String JSON_DMATTRIBUTE_KEY = "dmattribute"; //$NON-NLS-1$
+	private static final String JSON_LIST_KEY = "listmapping"; //$NON-NLS-1$
+	private static final String JSON_INTELATTRIBUTE_KEY = "intelattribute"; //$NON-NLS-1$
+	private static final String JSON_TYPE_KEY = "type"; //$NON-NLS-1$
 
 	/**
 	 * Type of mapping
@@ -101,16 +101,16 @@ public class EntityMapping {
 			
 			String intelAttributeKey = (String) item.get(JSON_INTELATTRIBUTE_KEY);
 			IntelAttribute intelAttribute = QueryFactory.buildQuery(session, IntelAttribute.class, 
-					new Object[] {"conservationArea", ca},
-					new Object[] {"keyId", intelAttributeKey}).uniqueResult();
+					new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+					new Object[] {"keyId", intelAttributeKey}).uniqueResult(); //$NON-NLS-1$
 			if (intelAttribute == null) continue;
 			mapping.setEntityAttribute(intelAttribute);
 			
 			if (type == Type.DM) {
 				String dmAttributeKey = (String)item.get(JSON_DMATTRIBUTE_KEY);
 				Attribute dmAttribute = QueryFactory.buildQuery(session, Attribute.class,
-						new Object[] {"conservationArea", ca},
-						new Object[] {"keyId", dmAttributeKey}).uniqueResult();
+						new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+						new Object[] {"keyId", dmAttributeKey}).uniqueResult(); //$NON-NLS-1$
 				if (dmAttribute == null) continue;
 				mapping.setDataModelAttribute(dmAttribute);
 				
@@ -196,7 +196,7 @@ public class EntityMapping {
 	}
 	
 	public String getFixedValueAsString() {
-		if (type != Type.FIXED) return "";
+		if (type != Type.FIXED) return ""; //$NON-NLS-1$
 		switch (intelAttribute.getType()) {
 		case BOOLEAN:
 			if (fixedBooleanValue) return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
@@ -210,11 +210,11 @@ public class EntityMapping {
 		case NUMERIC:
 			return fixedDoubleValue1.toString();
 		case POSITION:
-			return "POINT(" + fixedDoubleValue1.toString() + ", " + fixedDoubleValue2.toString() + ")";
+			return "POINT(" + fixedDoubleValue1.toString() + ", " + fixedDoubleValue2.toString() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		case TEXT:
 			return fixedStringValue;
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	public String getFixedStringValue() {

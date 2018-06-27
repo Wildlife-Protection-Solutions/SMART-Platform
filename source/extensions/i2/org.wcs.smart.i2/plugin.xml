@@ -228,8 +228,9 @@
       </perspective>
       <perspective
             class="org.wcs.smart.i2.ui.EntityPerspective"
+            icon="images/icons/obj16/entity2.png"
             id="org.wcs.smart.i2.IntelEntityPerspective"
-            name="Profiles Entity Perspective">
+            name="%EntityPerspectiveName">
       </perspective>
    </extension>
    <extension
@@ -585,10 +586,10 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
-                  icon="images/icons/obj16/entity.png"
+                  icon="images/icons/obj16/entity2.png"
                   label="Entity Mode"
                   style="push"
-                  tooltip="open entity perspective">
+                  tooltip="%openentityperspectivetooltip">
                <parameter
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.IntelEntityPerspective">
@@ -780,10 +781,10 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
-                  icon="images/icons/obj16/entity.png"
-                  label="Entity Perspective"
+                  icon="images/icons/obj16/entity2.png"
+                  label="%EntityPerspectiveName"
                   style="push"
-                  tooltip="open entity perspective">
+                  tooltip="%openentityperspectivetooltip">
                <parameter
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.IntelEntityPerspective">
@@ -1085,7 +1086,7 @@
                icon="images/icons/obj16/query_entity_record.png"
                id="org.wcs.smart.menu.query.createquery.i2queries"
                label="Profile Queries"
-               tooltip="new profile queries">
+               tooltip="%newprofilequerytooltip">
             <command
                   commandId="org.wcs.smart.i2.command.query.record.new"
                   icon="images/icons/obj16/query_entity_record_add.png"
@@ -1153,7 +1154,7 @@
                icon="images/icons/obj16/query_entity_record.png"
                id="org.wcs.smart.menu.query.newquery.i2queries"
                label="Profile Queries"
-               tooltip="new profile queries">
+               tooltip="%newprofilequerytooltip">
             <command
                   commandId="org.wcs.smart.i2.command.query.record.new"
                   icon="images/icons/obj16/query_entity_record_add.png"
@@ -1325,8 +1326,9 @@
       <editor
             class="org.wcs.smart.i2.ui.editors.RelationshipGraphEditor"
             default="false"
+            icon="images/icons/obj16/analysis.png"
             id="org.wcs.smart.i2.editor.graph"
-            name="Relationships">
+            name="%relationshipsEditor">
       </editor>
    </extension>
    <extension

@@ -55,6 +55,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.event.i2.entity.EntityMapping.Type;
+import org.wcs.smart.event.i2.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -72,6 +73,8 @@ import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
  */
 public class NewMappingDialog extends TitleAreaDialog {
 
+	private static final String ATTRIBUTE_KEY = "ATTRIBUTE"; //$NON-NLS-1$
+	private static final String EDITOR_KEY = "EDITOR"; //$NON-NLS-1$
 	private ComboViewer cmbIntelAttribute;
 	private ComboViewer cmbDmAttribute;
 	
@@ -124,7 +127,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 		mapping.setEntityAttribute(attribute.getAttribute());
 		
 		if (btnFixed.getSelection()) {
-			AttributeFieldEditor fieldEditor = (AttributeFieldEditor) cmpFixedMap.getData("EDITOR");
+			AttributeFieldEditor fieldEditor = (AttributeFieldEditor) cmpFixedMap.getData(EDITOR_KEY);
 			IntelEntityAttributeValue temp = new IntelEntityAttributeValue();
 			temp.setAttribute(attribute.getAttribute());
 			fieldEditor.updateValue(temp);
@@ -202,7 +205,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 		
 		
 		Label l = new Label(temp, SWT.NONE);
-		l.setText("Attribute:");
+		l.setText(Messages.NewMappingDialog_AttributeLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		cmbIntelAttribute = new ComboViewer(temp, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -212,7 +215,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof IntelEntityTypeAttribute) {
-					return MessageFormat.format("{0} ({1})", ((IntelEntityTypeAttribute)element).getAttribute().getName(), ((IntelEntityTypeAttribute)element).getAttribute().getType().name().toLowerCase());
+					return MessageFormat.format("{0} ({1})", ((IntelEntityTypeAttribute)element).getAttribute().getName(), ((IntelEntityTypeAttribute)element).getAttribute().getType().name().toLowerCase()); //$NON-NLS-1$
 				}
 				return super.getText(element);
 			}
@@ -232,7 +235,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 		
 		
 		l = new Label(temp, SWT.NONE);
-		l.setText("Map To:");
+		l.setText(Messages.NewMappingDialog_MapToLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, true));
 		
 		Composite addArea = new Composite(temp, SWT.NONE);
@@ -240,11 +243,11 @@ public class NewMappingDialog extends TitleAreaDialog {
 		addArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		btnObsPosition = new Button(addArea, SWT.RADIO);
-		btnObsPosition.setText("Observation Position");
+		btnObsPosition.setText(Messages.NewMappingDialog_PositionLabel);
 		btnObsPosition.setEnabled(false);
 		
 		btnFixed = new Button(addArea, SWT.RADIO);
-		btnFixed.setText("Fixed Value:");
+		btnFixed.setText(Messages.NewMappingDialog_FixedLabel);
 		btnFixed.setSelection(true);
 		
 		cmpFixedMap = new Composite(addArea, SWT.NONE);
@@ -253,7 +256,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 		cmpFixedMap.setEnabled(true);
 		 
 		btnDm = new Button(addArea, SWT.RADIO);
-		btnDm.setText("Data Model Attribute:");
+		btnDm.setText(Messages.NewMappingDialog_DmAttributeLabel);
 		
 		cmpDmMap = new Composite(addArea, SWT.NONE);
 		cmpDmMap.setLayout(new GridLayout());
@@ -292,7 +295,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof Attribute) {
-					return MessageFormat.format("{0} ({1})", ((Attribute) element).getName(), ((Attribute) element).getType().name().toLowerCase());
+					return MessageFormat.format("{0} ({1})", ((Attribute) element).getName(), ((Attribute) element).getType().name().toLowerCase()); //$NON-NLS-1$
 				}
 				return super.getText(element);
 			}
@@ -339,7 +342,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 				tblList.refresh();
 				for (TableColumn tc : tblList.getTable().getColumns()) tc.pack();
 				List<Object> items = new ArrayList<>();
-				items.add("");
+				items.add(""); //$NON-NLS-1$
 				items.addAll(dAttribute.getAttributeList());
 				cellEditor.setInput(items);
 				
@@ -355,24 +358,24 @@ public class NewMappingDialog extends TitleAreaDialog {
 		tblList.getTable().setEnabled(false);
 		
 		TableViewerColumn iItemColumn = new TableViewerColumn(tblList, SWT.NONE);
-		iItemColumn.getColumn().setText("Entity List Item");
+		iItemColumn.getColumn().setText(Messages.NewMappingDialog_IListItems);
 		iItemColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				return ((ListItemMapping)element).iItem.getName() + " (" + ((ListItemMapping)element).iItem.getKeyId() +")";
+				return ((ListItemMapping)element).iItem.getName() + " (" + ((ListItemMapping)element).iItem.getKeyId() +")"; //$NON-NLS-1$ //$NON-NLS-2$
 				
 			}
 		});
 		iItemColumn.getColumn().pack();
 		
 		TableViewerColumn dmItemColumn = new TableViewerColumn(tblList, SWT.NONE);
-		dmItemColumn.getColumn().setText("DataModel List Item");
+		dmItemColumn.getColumn().setText(Messages.NewMappingDialog_DmListItem);
 		dmItemColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				ListItemMapping m = (ListItemMapping)element;
-				if (m.dmItem == null) return "";
-				return m.dmItem.getName() + " (" + m.dmItem.getKeyId() +")";
+				if (m.dmItem == null) return ""; //$NON-NLS-1$
+				return m.dmItem.getName() + " (" + m.dmItem.getKeyId() +")"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		});
 		dmItemColumn.getColumn().pack();
@@ -409,7 +412,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 		cellEditor.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
 				if (element instanceof AttributeListItem) {
-					return ((AttributeListItem)element).getName() + " (" + ((AttributeListItem)element).getKeyId() + ")";
+					return ((AttributeListItem)element).getName() + " (" + ((AttributeListItem)element).getKeyId() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				return super.getText(element);
 			}
@@ -453,8 +456,8 @@ public class NewMappingDialog extends TitleAreaDialog {
 		}
 		
 		setTitle(type.getName());
-		setMessage(MessageFormat.format("Create new attribute mapping for entity type {0}", type.getName()));
-		getShell().setText("New Attribute Mapping");
+		setMessage(MessageFormat.format(Messages.NewMappingDialog_Message, type.getName()));
+		getShell().setText(Messages.NewMappingDialog_Title);
 		return parent;
 	}
 	
@@ -462,14 +465,14 @@ public class NewMappingDialog extends TitleAreaDialog {
 		setEnabled(cmpFixedMap, btnFixed.getSelection());
 		IntelEntityTypeAttribute ea = (IntelEntityTypeAttribute) cmbIntelAttribute.getStructuredSelection().getFirstElement();
 		if (ea == null) return;
-		Object x = cmpFixedMap.getData("ATTRIBUTE");
+		Object x = cmpFixedMap.getData(ATTRIBUTE_KEY);
 		if (x != null && x == ea.getAttribute()) return;
 		for (Control c : cmpFixedMap.getChildren()) c.dispose();
 		
 		//create entity editor
 		AttributeFieldEditor fieldEditor = new AttributeFieldEditor(cmpFixedMap, ea.getAttribute(), false);
-		cmpFixedMap.setData("EDITOR", fieldEditor);
-		cmpFixedMap.setData("ATTRIBUTE", ea.getAttribute());
+		cmpFixedMap.setData(EDITOR_KEY, fieldEditor);
+		cmpFixedMap.setData(ATTRIBUTE_KEY, ea.getAttribute());
 		cmpFixedMap.layout(true);
 		
 		if (mapping != null && mapping.getType() == Type.FIXED && mapping.getEntityAttribute().equals(ea.getAttribute())) {
@@ -526,11 +529,11 @@ public class NewMappingDialog extends TitleAreaDialog {
 			cmbDmAttribute.setInput(Collections.emptyList());
 			return;
 		}
-		Object x = cmpDmMap.getData("ATTRIBUTE");
+		Object x = cmpDmMap.getData(ATTRIBUTE_KEY);
 		if (x != null && x == ea.getAttribute()) return;
 		tblList.getTable().setVisible(ea.getAttribute().getType() == AttributeType.LIST);
 		
-		cmpDmMap.setData("ATTRIBUTE", ea.getAttribute());
+		cmpDmMap.setData(ATTRIBUTE_KEY, ea.getAttribute());
 		List<Attribute> filtered = new ArrayList<>();
 		for (Attribute a : dmAttributes) {
 			boolean add = false;

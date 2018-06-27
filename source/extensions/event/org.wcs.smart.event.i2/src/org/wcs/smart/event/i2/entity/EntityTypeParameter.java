@@ -23,6 +23,7 @@ package org.wcs.smart.event.i2.entity;
 
 import java.util.Locale;
 
+import org.wcs.smart.event.i2.internal.Messages;
 import org.wcs.smart.event.model.IActionParameter;
 
 /**
@@ -41,7 +42,7 @@ public class EntityTypeParameter implements IActionParameter{
 
 	@Override
 	public String getName(Locale l) {
-		return "Entity Type";
+		return Messages.EntityTypeParameter_Name;
 	}
 
 	@Override

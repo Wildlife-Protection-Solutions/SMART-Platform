@@ -36,6 +36,9 @@ import com.google.gson.JsonObject;
  */
 public class RelationshipDiagramEdgeStyleOptions {
 
+	private static final String SHOW_LABEL_KEY = "showLabel"; //$NON-NLS-1$
+	private static final String COLOR_KEY = "color"; //$NON-NLS-1$
+	
 	private JsonObject json;
 
 	public RelationshipDiagramEdgeStyleOptions(String options) {
@@ -51,22 +54,25 @@ public class RelationshipDiagramEdgeStyleOptions {
 	}
 
 	public Color getColor() {
-		String hex = json.get("color").getAsString();
+		String hex = json.get(COLOR_KEY).getAsString();
 		Color color = ColorUtil.hex2Color(hex);
 		return color;
 	}
+	
 	public String getColorAsString() {
-		return json.get("color").getAsString();
+		return json.get(COLOR_KEY).getAsString();
 	}
+	
 	public void setColor(Color color) {
-		json.addProperty("color", ColorUtil.color2HexStr(color));
+		json.addProperty(COLOR_KEY, ColorUtil.color2HexStr(color));
 	}
 
 	public boolean isShowLabel() {
-		return json.get("showLabel").getAsBoolean();
+		return json.get(SHOW_LABEL_KEY).getAsBoolean();
 	}
+	
 	public void setShowLabel(boolean showLabel) {
-		json.addProperty("showLabel", showLabel);
+		json.addProperty(SHOW_LABEL_KEY, showLabel);
 	}
 	
 }

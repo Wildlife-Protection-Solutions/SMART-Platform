@@ -36,6 +36,10 @@ import com.google.gson.JsonObject;
  */
 public class RelationshipDiagramNodeStyleOptions {
 
+	private static final String FG_COLOR_KEY = "foregroundColor"; //$NON-NLS-1$
+	private static final String BG_COLOR_KEY = "backgroundColor"; //$NON-NLS-1$
+	private static final String IMAGE_SIZE_KEY = "imageSize"; //$NON-NLS-1$
+	
 	/**
 	 * The supported image sizes.
 	 * 
@@ -75,7 +79,7 @@ public class RelationshipDiagramNodeStyleOptions {
 	}
 	
 	public ImageSizeOption getImageSize() {
-		String strSize = json.get("imageSize").getAsString();
+		String strSize = json.get(IMAGE_SIZE_KEY).getAsString();
 		if (strSize == null || strSize.isEmpty()) {
 			return ImageSizeOption.DEFAULT_IMAGE_SIZE_OPTION;
 		}
@@ -84,28 +88,28 @@ public class RelationshipDiagramNodeStyleOptions {
 	}
 	public void setImageSize(ImageSizeOption size) {
 		if (size != null) {
-			json.addProperty("imageSize", size.name());
+			json.addProperty(IMAGE_SIZE_KEY, size.name());
 		}
 	}
 	
 	public Color getBackgroudColor() {
-		String hex = json.get("backgroundColor").getAsString();
+		String hex = json.get(BG_COLOR_KEY).getAsString();
 		Color color = ColorUtil.hex2Color(hex);
 		return color;
 		
 	}
 	public void setBackgroudColor(Color color) {
-		json.addProperty("backgroundColor", ColorUtil.color2HexStr(color));
+		json.addProperty(BG_COLOR_KEY, ColorUtil.color2HexStr(color));
 	}
 
 	public Color getForegroundColor() {
-		String hex = json.get("foregroundColor").getAsString();
+		String hex = json.get(FG_COLOR_KEY).getAsString();
 		Color color = ColorUtil.hex2Color(hex);
 		return color;
 		
 	}
 	public void setForegroundColor(Color color) {
-		json.addProperty("foregroundColor", ColorUtil.color2HexStr(color));
+		json.addProperty(FG_COLOR_KEY, ColorUtil.color2HexStr(color));
 	}
 	
 }

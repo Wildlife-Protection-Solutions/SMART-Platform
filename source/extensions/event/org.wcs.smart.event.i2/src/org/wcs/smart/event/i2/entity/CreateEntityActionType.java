@@ -85,12 +85,12 @@ public class CreateEntityActionType implements IActionType {
 
 	@Override
 	public String getName(Locale l) {
-		return "Create Profile Entity";
+		return Messages.CreateEntityActionType_ActionName;
 	}
 
 	@Override
 	public String getDescription(Locale l) {
-		return "Creates a new entity in the profiles module optionally mapping data model attributes to entity attributes";
+		return Messages.CreateEntityActionType_ActionDescription;
 	}
 
 	@Override
@@ -122,8 +122,8 @@ public class CreateEntityActionType implements IActionType {
 			}
 			
 			IntelEntityType entityType = QueryFactory.buildQuery(session, IntelEntityType.class, 
-					new Object[] {"keyId", entityTypeKey},
-					new Object[] {"conservationArea", data.getWaypoint().getConservationArea()}).uniqueResult();
+					new Object[] {"keyId", entityTypeKey}, //$NON-NLS-1$
+					new Object[] {"conservationArea", data.getWaypoint().getConservationArea()}).uniqueResult(); //$NON-NLS-1$
 			if (entityType == null) {
 				EventPlugIn.log(MessageFormat.format("No entity type with key {0} found for Conservation Area {1} for create entity action.", entityTypeKey, ca.getId()), null); //$NON-NLS-1$
 				return;
@@ -170,7 +170,7 @@ public class CreateEntityActionType implements IActionType {
 					}
 				}
 				if (!found) {
-					EventPlugIn.log(MessageFormat.format("Not attribute with key {0} found for entity type {1}. Attribute will not be mapped.", iattribute.getKeyId(), newEntity.getEntityType().getKeyId()), null);
+					EventPlugIn.log(MessageFormat.format(Messages.CreateEntityActionType_AttributeNotFound, iattribute.getKeyId(), newEntity.getEntityType().getKeyId()), null);
 					continue;
 				}
 				
@@ -316,20 +316,20 @@ public class CreateEntityActionType implements IActionType {
 					break;
 				case NUMERIC:
 					Long cnt = QueryFactory.buildCountQuery(session, IntelEntity.class, 
-							new Object[] {"conservationArea", ca},
-							new Object[] {"entityType", newEntity.getEntityType()});
+							new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+							new Object[] {"entityType", newEntity.getEntityType()}); //$NON-NLS-1$
 					idvalue.setNumberValue(new Double(cnt+1));
 					break;
 				case POSITION:
 					break;
 				case TEXT:
 					cnt = QueryFactory.buildCountQuery(session, IntelEntity.class, 
-							new Object[] {"conservationArea", ca},
-							new Object[] {"entityType", newEntity.getEntityType()});
+							new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+							new Object[] {"entityType", newEntity.getEntityType()}); //$NON-NLS-1$
 					
 					StringBuilder sb = new StringBuilder();
 					sb.append(newEntity.getEntityType().getName());
-					sb.append(" - ");
+					sb.append(" - "); //$NON-NLS-1$
 					sb.append(cnt+1);
 					idvalue.setStringValue(sb.toString());
 					break;

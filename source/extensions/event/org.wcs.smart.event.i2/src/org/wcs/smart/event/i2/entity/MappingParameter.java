@@ -23,6 +23,7 @@ package org.wcs.smart.event.i2.entity;
 
 import java.util.Locale;
 
+import org.wcs.smart.event.i2.internal.Messages;
 import org.wcs.smart.event.model.IActionParameter;
 
 /**
@@ -42,7 +43,7 @@ public class MappingParameter implements IActionParameter{
 
 	@Override
 	public String getName(Locale l) {
-		return "Attribute Mappings";
+		return Messages.MappingParameter_Name;
 	}
 
 	@Override
