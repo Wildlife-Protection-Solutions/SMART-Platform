@@ -38,6 +38,7 @@ public class Mergei18n {
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\cybertracker",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\entity",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa",
 //		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
@@ -53,6 +54,7 @@ public class Mergei18n {
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\cybertracker\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\entity\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa\\translations",
 //		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
@@ -132,7 +134,7 @@ public class Mergei18n {
 
         List<File> filesList = new ArrayList<File>();
 
-        final String matchDir = pluginName + ".nl";  /*ADD _XX if you want to search for a specific language */
+        final String matchDir = pluginName + ".nl_sw";  /*ADD _XX if you want to search for a specific language */
         for (File flangDir : transDir.listFiles()){
             if (!flangDir.isDirectory()){
                 continue;
@@ -186,9 +188,9 @@ public class Mergei18n {
         for (Entry<String, String> e : source.entrySet()){
             if (!target.containsKey(e.getKey())){
                 //System.out.println("add: " + e.getKey());
-//                target.put(e.getKey(), e.getValue());
+                target.put(e.getKey(), e.getValue());
                 //target.put(e.getKey(), "**NEW**" + e.getValue());
-                //changes = true;
+                changes = true;
             }
         }
 

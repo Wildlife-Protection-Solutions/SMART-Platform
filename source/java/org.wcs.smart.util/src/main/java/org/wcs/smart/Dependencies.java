@@ -7,7 +7,6 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.core.runtime.SubMonitor;
 
 /**
  * A tool to scan directories and determine which i18n files and added that shouldn't be
