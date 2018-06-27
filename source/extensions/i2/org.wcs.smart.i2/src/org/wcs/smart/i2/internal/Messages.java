@@ -197,6 +197,8 @@ public class Messages extends NLS {
 	public static String DeleteRecordHandler_DeleteConfirmMulti;
 	public static String DeleteRecordHandler_DeleteConfirmSingle;
 	public static String DeleteRecordHandler_InvalidPassword;
+	public static String DeleteRecordHandler_PrivilegeMessage;
+	public static String DeleteRecordHandler_PrivilegeTitle;
 	public static String DrawPointTool_InvalidPointMsg;
 	public static String DrawPolygonTool_InvalidPolygonMsg;
 	public static String DropItem_DeleteItemTooltip;
@@ -953,6 +955,8 @@ public class Messages extends NLS {
 	public static String IntelReportManager_ResetValidate;
 	public static String IntelReportManager_SaveMessage;
 	public static String IntelReportManager_SaveTitle;
+	public static String InternalEntityManager_PrivilegeMessage;
+	public static String InternalEntityManager_PrivilegeTitle;
 	public static String InternalQueryManager_EntityRecordQuery;
 	public static String InternalQueryManager_EntitySummaryQueryName;
 	public static String InternalQueryManager_RecordObservationQueryName;

@@ -52,7 +52,7 @@ public class DeleteRecordHandler {
 		if (toDelete.isEmpty()) return false;
 		
 		if (!IntelSecurityManager.INSTANCE.canDeleteRecord()) {
-			MessageDialog.openError(context.get(Shell.class), "Insufficient privileges", "You do not have permission to delete records.");
+			MessageDialog.openError(context.get(Shell.class), Messages.DeleteRecordHandler_PrivilegeTitle, Messages.DeleteRecordHandler_PrivilegeMessage);
 			return false;
 		}
 		

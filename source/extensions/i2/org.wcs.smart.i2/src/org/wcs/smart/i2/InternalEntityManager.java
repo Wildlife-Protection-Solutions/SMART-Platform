@@ -68,7 +68,7 @@ public enum InternalEntityManager {
 	public void deleteEntities(Shell shell, EPartService pService, IEventBroker eventBroker, List<UUID> entitiesToDelete){
 		if (entitiesToDelete.isEmpty()) return;
 		if (!IntelSecurityManager.INSTANCE.canDeleteEntity()) {
-			MessageDialog.openError(shell, "Insufficient privileges", "You do not have permission to delete entities.");
+			MessageDialog.openError(shell, Messages.InternalEntityManager_PrivilegeTitle, Messages.InternalEntityManager_PrivilegeMessage);
 			return;
 		}
 		
