@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: SMART Query Spanich NLS Support
+Bundle-Name: SMART Query Spanish NLS Support
 Bundle-SymbolicName: org.wcs.smart.report.birt.query.nl_es
 Bundle-Version: 6.0.0
 Bundle-Vendor: org.wcs.smart
