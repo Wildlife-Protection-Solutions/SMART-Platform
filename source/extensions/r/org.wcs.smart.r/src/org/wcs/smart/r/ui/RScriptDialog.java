@@ -1,10 +1,14 @@
 package org.wcs.smart.r.ui;
 
+import java.awt.Desktop;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.HashSet;
+
+import javax.script.ScriptEngineManager;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -22,10 +26,12 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.r.RPlugIn;
 import org.wcs.smart.r.RScriptInterceptor;
+import org.wcs.smart.r.RScriptManager;
 import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -122,6 +128,43 @@ public class RScriptDialog extends TitleAreaDialog {
 				validate();
 			}
 		});
+		
+		if (this.script.getUuid() != null) {
+			l = new Label(parent, SWT.NONE);
+			l.setText("File:");
+			
+			Text txtFile = new Text(parent, SWT.BORDER);
+			txtFile.setText(script.getFilename());
+			txtFile.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)txtFile.getLayoutData()).widthHint = 200;
+			txtFile.setEditable(false);
+			
+			Composite temp = new Composite(parent, SWT.NONE);
+			temp.setLayout(new GridLayout(2, false));
+			((GridLayout)temp.getLayout()).marginWidth = 0;
+			((GridLayout)temp.getLayout()).marginHeight = 0;
+			
+			link = new Link(temp,  SWT.NONE);
+			link.setText("<a>" + "edit" + "</a>");
+			link.setToolTipText("open file in system editor");
+			link.addListener(SWT.Selection, evt->{
+				AttachmentUtil.launch( RScriptManager.INSTANCE.getScriptPath( this.script ).toFile() );
+			});
+			
+			link = new Link(temp,  SWT.NONE);
+			link.setText("<a>" + "show" + "</a>");
+			link.setToolTipText("open file explorer to the directory containing file");
+			link.addListener(SWT.Selection, evt->{
+				try {
+					Desktop.getDesktop().open( RScriptManager.INSTANCE.getScriptPath( this.script ).getParent().toFile() );
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			});
+		}
+		
+		
 		
 		
 		

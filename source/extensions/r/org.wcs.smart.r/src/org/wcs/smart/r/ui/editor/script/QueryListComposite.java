@@ -10,6 +10,8 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -27,7 +29,6 @@ import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.importexport.QueryExportEngine;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.importexport.QueryExportLabelProvider;
@@ -194,6 +195,23 @@ public class QueryListComposite extends Composite{
 			
 			uiElements.add(new QueryItem(q, dateComposite, cmbFormat));
 		}
+		
+		l = toolkit.createLabel(list, "Drag and drop queries here to add to the R script input. ");
+		l.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, 5, 1));
+		((GridData)l.getLayoutData()).verticalIndent = 10;
+		l.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
+		
+		FontData fd = l.getFont().getFontData()[0];
+		fd.setStyle(SWT.ITALIC);
+		Font newFont = new Font(l.getDisplay(), fd);
+		l.addListener(SWT.Dispose, e->newFont.dispose());
+		l.setFont(newFont);
+		
+		l = toolkit.createLabel(list, "Query results are saved to files which are passed to the R script as parameters");
+		l.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, 5, 1));
+		l.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
+		l.setFont(newFont);
+		
 		
 		list.layout();
 		form.reflow(true);

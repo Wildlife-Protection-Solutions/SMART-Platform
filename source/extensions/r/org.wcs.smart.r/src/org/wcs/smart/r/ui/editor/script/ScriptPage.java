@@ -1,5 +1,6 @@
 package org.wcs.smart.r.ui.editor.script;
 
+import java.awt.Desktop;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,6 +13,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -73,7 +75,33 @@ public class ScriptPage extends EditorPart {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		if (RScriptManager.INSTANCE.canEditScript()) {
-			Hyperlink lnkEdit = toolkit.createHyperlink(main, "edit", SWT.NONE);
+			
+			Composite header = new Composite(main, SWT.NONE);
+			header.setLayout(new GridLayout(2, false));
+			((GridLayout)header.getLayout()).marginWidth = 0;
+			((GridLayout)header.getLayout()).marginHeight = 0;
+			header.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			
+			Hyperlink lnkEdit = toolkit.createHyperlink(header, "show", SWT.NONE);
+			lnkEdit.setToolTipText("open file explorer to the directory containing file.");
+			lnkEdit.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			lnkEdit.addHyperlinkListener(new IHyperlinkListener() {
+				@Override
+				public void linkExited(HyperlinkEvent e) {}
+				@Override
+				public void linkEntered(HyperlinkEvent e) {}
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					try {
+						Desktop.getDesktop().open( RScriptManager.INSTANCE.getScriptPath( ScriptPage.this.parent.getScript() ).getParent().toFile() );
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			});
+			
+			lnkEdit = toolkit.createHyperlink(header, "edit", SWT.NONE);
+			lnkEdit.setToolTipText("open file in system editor");
 			lnkEdit.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 			lnkEdit.addHyperlinkListener(new IHyperlinkListener() {
 				@Override
@@ -85,6 +113,8 @@ public class ScriptPage extends EditorPart {
 					AttachmentUtil.launch(RScriptManager.INSTANCE.getScriptPath(ScriptPage.this.parent.getScript()).toFile());
 				}
 			});
+			
+			
 		}
 		
 		txtScript = new Text(main, SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);

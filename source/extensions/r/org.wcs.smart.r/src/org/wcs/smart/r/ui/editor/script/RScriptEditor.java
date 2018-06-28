@@ -12,9 +12,12 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.ui.editor.IQueryEditor;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.r.model.RScript;
 
-public class RScriptEditor extends MultiPageEditorPart {
+public class RScriptEditor extends MultiPageEditorPart implements IQueryEditor {
 
 	public static final String ID = "org.wcs.smart.r.script.editor"; //$NON-NLS-1$
 	
@@ -130,4 +133,35 @@ public class RScriptEditor extends MultiPageEditorPart {
 		}
 		
 	};
+
+	@Override
+	public QueryProxy getQueryProxy() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public QueryEditorInput getInputInternal() {
+		
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void validate() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void reparseQuery() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setDirty(boolean dirty) {
+		// TODO Auto-generated method stub
+		
+	}
 }
