@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.r.ui;
 
 import java.text.Collator;
@@ -44,6 +65,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.r.RPlugIn;
+import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.r.ui.editor.script.RScriptEditor;
 import org.wcs.smart.r.ui.editor.script.RScriptEditorInput;
@@ -51,7 +74,11 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
-
+/**
+ * Run R script handler
+ * @author Emily
+ *
+ */
 public class RunRScriptHandler {
 
 	public static final String SCRIPTUUID_PARAM = "org.wcs.smart.r.scirpt.run.scriptuuid"; //$NON-NLS-1$
@@ -72,7 +99,8 @@ public class RunRScriptHandler {
 				scriptToRun = session.get(RScript.class,sid);
 			}
 			if (scriptToRun == null) {
-				MessageDialog.openError(activeShell, "Error", "R script not found.");
+				MessageDialog.openError(activeShell, Messages.RunRScriptHandler_ErrorTitle, Messages.RunRScriptHandler_NotFound);
+				RunScriptMenuContribution.removeScript(scriptToRun);
 			}
 		}
 		if (scriptToRun == null) {
@@ -84,28 +112,23 @@ public class RunRScriptHandler {
 		if (scriptToRun == null) return;
 		
 		//update menu
-		//open R editor with scriptToRun
 		RunScriptMenuContribution.addScript(scriptToRun);
-//		updateMenu(context);
-		//selection = query editor input 
-		
-		//manage last run list
-		
-		//org.wcs.smart.r.scripts.runlist
+
 		List<QueryEditorInput> defaultQueries = new ArrayList<>();
-		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-			Object item = iterator.next();
-			if (item instanceof QueryEditorInput) {
-				defaultQueries.add((QueryEditorInput) item);
+		if (selection != null) {
+			for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+				Object item = iterator.next();
+				if (item instanceof QueryEditorInput) {
+					defaultQueries.add((QueryEditorInput) item);
+				}
+				
 			}
-			
 		}
 		RScriptEditorInput input = new RScriptEditorInput(scriptToRun, defaultQueries.isEmpty() ? null : defaultQueries);
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, RScriptEditor.ID);
 		} catch (PartInitException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			RPlugIn.displayLog(e.getMessage(), e);
 		}	
 
 	}
@@ -148,7 +171,7 @@ public class RunRScriptHandler {
 			protected IStatus run(IProgressMonitor monitor) {
 				script = null;
 				try(Session session = HibernateManager.openSession()){
-					script = QueryFactory.buildQuery(session, RScript.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+					script = QueryFactory.buildQuery(session, RScript.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 					script.forEach(c->c.getName()); 
 				}
 				
@@ -201,9 +224,9 @@ public class RunRScriptHandler {
 				}
 			});
 			cmbScripts.addSelectionChangedListener(evt->getButton(IDialogConstants.OK_ID).setEnabled(true));
-			setTitle("R Scripts");
-			getShell().setText("R Scripts");
-			setMessage("Select the R Script to run");
+			setTitle(Messages.RunRScriptHandler_Title);
+			getShell().setText(Messages.RunRScriptHandler_Title);
+			setMessage(Messages.RunRScriptHandler_Message);
 			
 			loadScript.setSystem(true);
 			loadScript.schedule();

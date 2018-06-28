@@ -1,14 +1,31 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.r.ui;
 
-import java.awt.Desktop;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.HashSet;
-
-import javax.script.ScriptEngineManager;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -32,10 +49,17 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.r.RPlugIn;
 import org.wcs.smart.r.RScriptInterceptor;
 import org.wcs.smart.r.RScriptManager;
+import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Dialog for editing r script details
+ * 
+ * @author Emily
+ *
+ */
 public class RScriptDialog extends TitleAreaDialog {
 
 	private RScript script;
@@ -57,7 +81,7 @@ public class RScriptDialog extends TitleAreaDialog {
 		script.setNames(new HashSet<>());
 		script.setConservationArea(SmartDB.getCurrentConservationArea());
 		script.setCreator(SmartDB.getCurrentEmployee());
-		script.setName("");
+		script.setName(""); //$NON-NLS-1$
 	}
 	
 	@Override
@@ -77,19 +101,19 @@ public class RScriptDialog extends TitleAreaDialog {
 		if (this.script.getUuid() == null) {
 			//new script we need to get a file
 			Label l = new Label(parent, SWT.NONE);
-			l.setText("Script File:");
+			l.setText(Messages.RScriptDialog_ScriptFileName);
 			
 			txtFile = new Text(parent, SWT.BORDER);
 			txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			txtFile.addListener(SWT.Modify, e->validate());
 			
 			Button btnBrowse = new Button(parent, SWT.PUSH);
-			btnBrowse.setText("...");
+			btnBrowse.setText("..."); //$NON-NLS-1$
 			btnBrowse.addListener(SWT.Selection, e->{
 				FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
-				fd.setText("Import R Script");
-				fd.setFilterExtensions(new String[] {"*.R;*.RData", "*.txt", "*.*"});
-				fd.setFilterNames(new String[] {"R Scripts (*.R, *.RData)", "Text Files (*.txt)", "All Files (*.*)"});
+				fd.setText(Messages.RScriptDialog_ImportTitle);
+				fd.setFilterExtensions(new String[] {"*.R;*.RData", "*.txt", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				fd.setFilterNames(new String[] {Messages.RScriptDialog_RScripts, Messages.RScriptDialog_TextFiles, Messages.RScriptDialog_AllFiles});
 				String fileName = fd.open();
 				
 				if (fileName == null) return;
@@ -112,7 +136,7 @@ public class RScriptDialog extends TitleAreaDialog {
 		}
 		
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("Name:");
+		l.setText(Messages.RScriptDialog_NameLabel);
 		
 		txtName = new Text(parent, SWT.BORDER);
 		txtName.setText(script.getName());
@@ -121,7 +145,7 @@ public class RScriptDialog extends TitleAreaDialog {
 		txtName.addListener(SWT.Modify, e->validate());
 		
 		Link link = new Link(parent,  SWT.NONE);
-		link.setText("<a>" + "translate" + "</a>");
+		link.setText("<a>" + Messages.RScriptDialog_TranslateOp + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		link.addListener(SWT.Selection, evt->{
 			TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(getShell(), script);
 			if (dialog.open() == Window.OK) {
@@ -131,7 +155,7 @@ public class RScriptDialog extends TitleAreaDialog {
 		
 		if (this.script.getUuid() != null) {
 			l = new Label(parent, SWT.NONE);
-			l.setText("File:");
+			l.setText(Messages.RScriptDialog_FileName);
 			
 			Text txtFile = new Text(parent, SWT.BORDER);
 			txtFile.setText(script.getFilename());
@@ -145,32 +169,24 @@ public class RScriptDialog extends TitleAreaDialog {
 			((GridLayout)temp.getLayout()).marginHeight = 0;
 			
 			link = new Link(temp,  SWT.NONE);
-			link.setText("<a>" + "edit" + "</a>");
-			link.setToolTipText("open file in system editor");
+			link.setText("<a>" + Messages.RScriptDialog_EditOp + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
+			link.setToolTipText(Messages.RScriptDialog_edittooltip);
 			link.addListener(SWT.Selection, evt->{
 				AttachmentUtil.launch( RScriptManager.INSTANCE.getScriptPath( this.script ).toFile() );
 			});
 			
 			link = new Link(temp,  SWT.NONE);
-			link.setText("<a>" + "show" + "</a>");
-			link.setToolTipText("open file explorer to the directory containing file");
+			link.setText("<a>" + Messages.RScriptDialog_ShowOp + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
+			link.setToolTipText(Messages.RScriptDialog_showtooltip);
 			link.addListener(SWT.Selection, evt->{
-				try {
-					Desktop.getDesktop().open( RScriptManager.INSTANCE.getScriptPath( this.script ).getParent().toFile() );
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				AttachmentUtil.launch( RScriptManager.INSTANCE.getScriptPath( this.script ).getParent().toFile() );
 			});
 		}
 		
 		
-		
-		
-		
 		l = new Label(parent, SWT.NONE);
-		l.setText("Default Script Parameters:");
-		l.setToolTipText("the parameters to sent to the r script along with the output from SMART queries.");
+		l.setText(Messages.RScriptDialog_DefaultParams);
+		l.setToolTipText(Messages.RScriptDialog_ParamInfo);
 		l.setLayoutData(new GridData(SWT.TOP, SWT.FILL, false, false, 3, 1));
 		
 		txtDefaultParameters = new Text(parent, SWT.BORDER | SWT.WRAP  | SWT.V_SCROLL);
@@ -179,9 +195,9 @@ public class RScriptDialog extends TitleAreaDialog {
 		txtDefaultParameters.addListener(SWT.Modify, e->validate());
 		if (script.getDefaultParameters() != null) txtDefaultParameters.setText(script.getDefaultParameters());
 			
-		setTitle("R Script");
-		getShell().setText("R Script");
-		setMessage("Update properties associated with R script");
+		setTitle(Messages.RScriptDialog_Title);
+		getShell().setText(Messages.RScriptDialog_Title);
+		setMessage(Messages.RScriptDialog_Message);
 		
 		return parent;
 	}
@@ -196,26 +212,26 @@ public class RScriptDialog extends TitleAreaDialog {
 	private void validate() {
 		String newName = txtName.getText();
 		if (newName.trim().isEmpty() || newName.trim().length() > org.wcs.smart.ca.Label.MAX_LENGTH) {
-			setErrorMessage(MessageFormat.format("A name between 1 and {0} characters is required.", org.wcs.smart.ca.Label.MAX_LENGTH));
+			setErrorMessage(MessageFormat.format(Messages.RScriptDialog_NameError, org.wcs.smart.ca.Label.MAX_LENGTH));
 			enableOk(false);
 			return;
 		}
 		String param = txtDefaultParameters.getText();
 		if (param.trim().length() > RScript.MAX_DEFAULT_PARAM_SIZE) {
-			setErrorMessage(MessageFormat.format("Default parameters cannot exceed {0} characters.", RScript.MAX_DEFAULT_PARAM_SIZE));
+			setErrorMessage(MessageFormat.format(Messages.RScriptDialog_ParamError, RScript.MAX_DEFAULT_PARAM_SIZE));
 			enableOk(false);
 			return;
 		}
 		
 		if (txtFile != null) {
 			if (txtFile.getText().trim().isEmpty()) {
-				setErrorMessage("You must select an R script to import");
+				setErrorMessage(Messages.RScriptDialog_ScriptRequired);
 				enableOk(false);
 				return;	
 			}
 			Path p = Paths.get(txtFile.getText());
 			if (!Files.exists(p)) {
-				setErrorMessage(MessageFormat.format("The file {0} could not be found.", p.toString()));
+				setErrorMessage(MessageFormat.format(Messages.RScriptDialog_FileNotFound, p.toString()));
 			}
 		}
 		enableOk(true);
@@ -232,7 +248,7 @@ public class RScriptDialog extends TitleAreaDialog {
 	public void cancelPressed() {
 		Button ok = getButton(IDialogConstants.OK_ID);
 		if (ok != null && ok.isEnabled()) {
-			MessageDialog md = new MessageDialog(getShell(), "Confirm Save", null, "There are unsaved changes. Would you like to save your changes before closing?", MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
+			MessageDialog md = new MessageDialog(getShell(), Messages.RScriptDialog_SaveTitle, null, Messages.RScriptDialog_SaveMessage, MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
 			int ret = md.open();
 			if (ret == 2){
 				//cancel
@@ -266,7 +282,7 @@ public class RScriptDialog extends TitleAreaDialog {
 				session.saveOrUpdate(script);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
-				RPlugIn.displayLog(MessageFormat.format("Unable to save changes to R script: {0}", ex.getMessage()), ex);
+				RPlugIn.displayLog(MessageFormat.format(Messages.RScriptDialog_SaveError, ex.getMessage()), ex);
 				session.getTransaction().rollback();
 				return;
 			}

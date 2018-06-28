@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.r.ui;
 
 import java.lang.reflect.InvocationTargetException;
@@ -44,10 +65,16 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.r.RPlugIn;
 import org.wcs.smart.r.RScriptInterceptor;
+import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * dialog for listing all r scripts
+ * @author Emily
+ *
+ */
 public class RScriptListDialog extends TitleAreaDialog {
 
 	private TableViewer cmbScripts;
@@ -68,7 +95,9 @@ public class RScriptListDialog extends TitleAreaDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			script = null;
 			try(Session session = HibernateManager.openSession()){
-				script = QueryFactory.buildQuery(session, RScript.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+				script = QueryFactory.buildQuery(session, RScript.class,
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}) //$NON-NLS-1$
+							.list(); 
 				script.forEach(c->c.getName()); 
 			}
 			
@@ -199,9 +228,9 @@ public class RScriptListDialog extends TitleAreaDialog {
 		mnuDelete.setEnabled(false);
 		
 		
-		setTitle("R Scripts");
-		getShell().setText("R Scripts");
-		setMessage("Manage R Script in the system");
+		setTitle(Messages.RScriptListDialog_Title);
+		getShell().setText(Messages.RScriptListDialog_Title);
+		setMessage(Messages.RScriptListDialog_Message);
 		
 		loadScript.setSystem(true);
 		loadScript.schedule();
@@ -247,7 +276,7 @@ public class RScriptListDialog extends TitleAreaDialog {
 		sb.deleteCharAt(sb.length() - 1);
 		sb.deleteCharAt(sb.length() - 1);
 		
-		if (!MessageDialog.openConfirm(getShell(), "Confirm Delete", MessageFormat.format("Are you sure you want to delete the following R Scripts?  This action cannot be undone.\n\n{0}", sb.toString()))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.RScriptListDialog_DeleteTitle, MessageFormat.format(Messages.RScriptListDialog_DeleteMessage, sb.toString()))){
 			return;
 		}
 		
@@ -258,7 +287,7 @@ public class RScriptListDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 
-					monitor.beginTask("Deleteing R Scripts", toDelete.size());
+					monitor.beginTask(Messages.RScriptListDialog_DeleteTask, toDelete.size());
 					List<RScript> deleted = new ArrayList<RScript>();
 					try(Session s = HibernateManager.openSession(new RScriptInterceptor())){
 
@@ -271,18 +300,18 @@ public class RScriptListDialog extends TitleAreaDialog {
 								deleted.add(t);
 							}catch(Exception ex){
 								s.getTransaction().rollback();
-								RPlugIn.displayLog(MessageFormat.format("Coult no delete R Script {0}: {1}", t.getName(), ex.getMessage()), ex);
+								RPlugIn.displayLog(MessageFormat.format(Messages.RScriptListDialog_DeleteError1, t.getName(), ex.getMessage()), ex);
 							}
 							monitor.worked(1);
 						}
 					}
+					deleted.forEach(e->RunScriptMenuContribution.removeScript(e));
 					monitor.done();
 				}
 			});
 		} catch (Exception e) {
-			RPlugIn.displayLog("Error deleting R Scripts: " + e.getMessage(), e);
+			RPlugIn.displayLog(Messages.RScriptListDialog_DeleteError2 + e.getMessage(), e);
 		}
-		
 		refresh();
 	}
 	

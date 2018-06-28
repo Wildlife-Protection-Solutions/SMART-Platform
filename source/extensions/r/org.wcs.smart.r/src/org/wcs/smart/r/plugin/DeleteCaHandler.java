@@ -23,6 +23,7 @@ package org.wcs.smart.r.plugin;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.ca.ICaDeleteHandler;
@@ -50,6 +51,16 @@ public class DeleteCaHandler implements ICaDeleteHandler {
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
 		//TODO: delete all r plugin specific data from the conservation area
+		
+		monitor.subTask("removing R plugin data"); //$NON-NLS-1$
+		
+		Query<?>  q = session.createQuery("delete from RScriptParameter sa where sa.script in (from RScript a where conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("delete from RScript a where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();		
 	}
 
 }

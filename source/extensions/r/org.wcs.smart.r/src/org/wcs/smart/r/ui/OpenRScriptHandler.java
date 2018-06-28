@@ -19,39 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.r.engine;
+package org.wcs.smart.r.ui;
 
-import org.wcs.smart.query.importexport.IQueryExporter;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.DateFilter;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.r.RPlugIn;
+import org.wcs.smart.r.model.RQuery;
+import org.wcs.smart.r.ui.editor.script.RScriptEditor;
+import org.wcs.smart.r.ui.editor.script.RScriptEditorInput;
 
 /**
- * Query configuration for r script
- * 
+ * Open R queyr handler
  * @author Emily
  *
  */
-public class QueryConfiguration {
+public class OpenRScriptHandler {
 
-	private Query query;
-	private IQueryExporter exporter;
-	private DateFilter dateFilter;
 	
-	public QueryConfiguration(Query query, IQueryExporter exporter, DateFilter dateFilter) {
-		this.query = query;
-		this.exporter = exporter;
-		this.dateFilter = dateFilter;
+	public OpenRScriptHandler() {
 	}
-	
-	public Query getQuery() {
-		return this.query;
+
+	@Execute
+	public void execute(RQuery rquery) {	
+		RScriptEditorInput input = new RScriptEditorInput(rquery);
+		try {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, RScriptEditor.ID);
+		} catch (PartInitException e) {
+			RPlugIn.displayLog(e.getMessage(), e);
+		}	
+
 	}
-	
-	public IQueryExporter getQueryExporter() {
-		return this.exporter;
-	}
-	
-	public DateFilter getDateFilter() {
-		return this.dateFilter;
-	}
+
 }

@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.r.engine;
 
 import java.io.BufferedReader;
@@ -5,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +36,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -23,18 +49,34 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.r.RPlugIn;
 import org.wcs.smart.r.RScriptManager;
+import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.r.ui.RPreferencePage;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * RScript engine that runs the queries then the script 
+ * 
+ * @author Emily
+ *
+ */
 public class REngine {
 
+	private static final String ERROR_PREFIX = Messages.REngine_ErrorPrefix;
 	private List<QueryConfiguration> queryConfigs;
 	private String rParameters;
 	
 	private OutputStream outStream;
 	private RScript script;
 	
+	/**
+	 * Creates a new engine; does not run the script.  Must call execute() to run the script
+	 * 
+	 * @param script
+	 * @param queryConfigs
+	 * @param rParameters
+	 * @param outStream
+	 */
 	public REngine(RScript script, List<QueryConfiguration> queryConfigs, String rParameters, OutputStream outStream) {
 		this.queryConfigs = queryConfigs;
 		this.rParameters = rParameters;
@@ -45,24 +87,29 @@ public class REngine {
 	private void writeString(String string) throws IOException {
 		if (outStream == null) return;
 		outStream.write(string.getBytes());
-		outStream.write("\n".getBytes());
+		outStream.write("\n".getBytes()); //$NON-NLS-1$
 	}
 	
 	public void execute()  {
+		if (RPreferencePage.getRSystemProperty()== null || RPreferencePage.getRSystemProperty().isEmpty()) {
+			//open preference page
+			MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.REngine_Title, Messages.REngine_RRequiredMessage);
+			PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null, RPreferencePage.ID, null, null);
+			dialog.open();
+			return;
+		}
 		executeJob.schedule();
-		
 	}
 	
-	private Job executeJob = new Job("executing R script") {
-
+	private Job executeJob = new Job(Messages.REngine_JobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
 				List<Path> queryFiles = new ArrayList<>();
 				for (QueryConfiguration query : queryConfigs) {
-					writeString("Executing Query: " + query.getQuery().getName());
-					writeString("Date Filter: " + query.getDateFilter().asString());
-					writeString("Format: " + query.getQueryExporter().getDefaultExtension());
+					writeString(MessageFormat.format(Messages.REngine_QueryName, query.getQuery().getName()));
+					writeString(MessageFormat.format(Messages.REngine_DateFilter, query.getDateFilter().asString()));
+					writeString(MessageFormat.format(Messages.REngine_Format, query.getQueryExporter().getDefaultExtension()));
 					
 					//execute query
 					IQueryType qtype = QueryTypeManager.INSTANCE.findQueryType(query.getQuery().getTypeKey());
@@ -86,7 +133,7 @@ public class REngine {
 						}
 					}
 					
-					String filename = UuidUtils.uuidToString(query.getQuery().getUuid()) + "." + System.nanoTime() + "." + query.getQueryExporter().getDefaultExtension();
+					String filename = UuidUtils.uuidToString(query.getQuery().getUuid()) + "." + System.nanoTime() + "." + query.getQueryExporter().getDefaultExtension(); //$NON-NLS-1$ //$NON-NLS-2$
 					
 					Path p = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename).normalize();
 					queryFiles.add(p);
@@ -94,48 +141,45 @@ public class REngine {
 					
 					//TODO: delete temporary query files after run
 					query.getQueryExporter().export(query.getQuery(), results, p.toFile(), parameters, new NullProgressMonitor());
-					writeString("Query Exported to : " + p.toString());
-					writeString("-----------------------------------------------------------------------------------------------");
+					writeString(Messages.REngine_ExportFile + p.toString());
+					writeString("-----------------------------------------------------------------------------------------------"); //$NON-NLS-1$
 				}
 				
 				StringBuilder sb = new StringBuilder();
-				sb.append("\"");
+				sb.append("\""); //$NON-NLS-1$
 				sb.append(RPreferencePage.getRSystemProperty());
-				sb.append("\" \"");
+				sb.append("\" \""); //$NON-NLS-1$
 				sb.append(RScriptManager.INSTANCE.getScriptPath(script).toAbsolutePath().toString());
-				sb.append("\"");
+				sb.append("\""); //$NON-NLS-1$
 				if (rParameters != null) {
-					sb.append(" ");
+					sb.append(" "); //$NON-NLS-1$
 					sb.append(rParameters);
-					sb.append(" ");
+					sb.append(" "); //$NON-NLS-1$
 				}
 				for (Path p : queryFiles) {
-					sb.append(" \"");
+					sb.append(" \""); //$NON-NLS-1$
 					sb.append(p.toString());
-					sb.append("\"");
+					sb.append("\""); //$NON-NLS-1$
 				}
 				
-				writeString("Command: " + sb.toString());
-				writeString("---------------------------------------- SCRIPT OUTPUT ----------------------------------------");
+				writeString(Messages.REngine_CommandLabel + sb.toString());
+				writeString("---------------------------------------- " + Messages.REngine_ScriptOutput + "----------------------------------------"); //$NON-NLS-1$ //$NON-NLS-2$
 				
-				//TODO: 
 				//run command
 				runCommand(sb.toString(), outStream);
 				
 			}catch (Exception ex) {
 				try {
-					writeString("ERROR: " + ex.getMessage());
+					writeString(ERROR_PREFIX + ex.getMessage());
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					RPlugIn.displayLog(ex.getMessage(), ex);
+					RPlugIn.log(e.getMessage(), e);
 				}
-				RPlugIn.displayLog(ex.getMessage(), ex);
+				RPlugIn.log(ex.getMessage(), ex);
 			}finally {
 				try {
 					outStream.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					RPlugIn.log(e.getMessage(), e);
 				}
 			}
 			return Status.OK_STATUS;
@@ -156,13 +200,16 @@ public class REngine {
 	        }
 
 	        while ((s = stdError.readLine()) != null) {
-	        	writeString("ERROR: " + s);
-	        	
+	        	writeString(ERROR_PREFIX + s);
 	        }
 	        
 	    } catch(Exception e) {  
-	        System.out.println(e.toString());  
-	        e.printStackTrace();  
+	    	try {
+				writeString(ERROR_PREFIX + e.getMessage());
+			} catch (IOException e1) {
+				RPlugIn.log(e1.getMessage(), e1);
+			}
+	    	RPlugIn.log(e.getMessage(), e);
 	    }  
 	}
 }

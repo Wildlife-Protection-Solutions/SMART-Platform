@@ -38,8 +38,7 @@
             supportsCcaa="true">
       </class>
       <class
-            ca_property=".script.conservationArea"
-            class="org.wcs.smart.r.model.RScriptParameter"
+            class="org.wcs.smart.r.model.RQuery"
             supportsCcaa="true">
       </class>
    </extension>
@@ -58,7 +57,7 @@
          <command
                commandId="org.wcs.smart.r.scripts.manage.show"
                icon="images/icons/rlogo_16.png"
-               label="Configure R Scripts"
+               label="%configure.command.label"
                style="push">
             <visibleWhen
                   checkEnabled="false">
@@ -85,7 +84,7 @@
          <menu
                icon="images/icons/rlogo_16.png"
                id="org.wcs.smart.r.scripts.runlist"
-               label="Run R Script">
+               label="%run.menu.label">
             <dynamic
                   class="org.wcs.smart.r.ui.RunScriptMenuContribution"
                   id="org.wcs.smart.r.scripts.runlist.dynamic">
@@ -96,7 +95,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.r.scirpt.run"
-                  label="Other..."
+                  label="%other.menu.command.label"
                   style="push">
             </command>
          </menu>
@@ -113,18 +112,18 @@
             default="false"
             icon="images/icons/rlogo_16.png"
             id="org.wcs.smart.r.script.editor"
-            name="R Script Editor">
+            name="%r.editor.name">
       </editor>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.r.scripts.manage.show"
-            name="Configure R Scripts">
+            name="%configure.command.name">
       </command>
       <command
             id="org.wcs.smart.r.scirpt.run"
-            name="Run R Script">
+            name="%run.command.name">
          <commandParameter
                id="org.wcs.smart.r.scirpt.run.scriptuuid"
                name="R Script Uuid"
@@ -148,8 +147,31 @@
       <page
             class="org.wcs.smart.r.ui.RPreferencePage"
             id="org.wcs.smart.preference.r"
-            name="R">
+            name="%preferences.page.name">
       </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.wcs.smart.r.ui.view.script.RScriptView$RScriptViewWrapper"
+            icon="images/icons/rlogo_16.png"
+            id="org.wcs.smart.r.view.rscripts"
+            name="R "
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.wcs.smart.query.persepectives.single">
+         <view
+               id="org.wcs.smart.r.view.rscripts"
+               minimized="false"
+               relationship="stack"
+               relative="org.wcs.smart.query.parts.itemlist"
+               visible="true">
+         </view>
+      </perspectiveExtension>
    </extension>
 
 </plugin>

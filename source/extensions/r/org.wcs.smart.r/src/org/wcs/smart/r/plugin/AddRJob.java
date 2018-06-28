@@ -34,6 +34,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.r.RPlugIn;
+import org.wcs.smart.r.internal.Messages;
 
 /**
  * Adds and/or upgrades the R plugin database tables.
@@ -44,7 +45,7 @@ import org.wcs.smart.r.RPlugIn;
 public class AddRJob extends Job {
 
 	public AddRJob() {
-		super("Adding R Module Database Tables");
+		super(Messages.AddRJob_JobName);
 	}
 
 	@Override
@@ -62,10 +63,10 @@ public class AddRJob extends Job {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						RPlugIn.displayLog("An error occurred while installing the R Module database tables:" + ex.getMessage(), ex);
+						RPlugIn.displayLog(Messages.AddRJob_Error + ex.getMessage(), ex);
 					}
 				});
-				return new Status(IStatus.ERROR, RPlugIn.PLUGIN_ID, 1, "An error occurred while installing the R Module database tables:" + ex.getMessage(), ex);
+				return new Status(IStatus.ERROR, RPlugIn.PLUGIN_ID, 1, Messages.AddRJob_Error + ex.getMessage(), ex);
 			}
 		}
 		monitor.done();
@@ -92,18 +93,19 @@ public class AddRJob extends Job {
 	private void createTables(Session session){
 		String[] sql = new String[]{
 				//Tables
-				"CREATE TABLE smart.r_script(uuid char(16) for bit data NOT NULL, ca_uuid char(16) for bit data NOT NULL, filename varchar(2048) NOT NULL, creator_uuid char(16) for bit data  NOT NULL, default_parameters varchar(32672), PRIMARY KEY (uuid))",
-				"CREATE TABLE smart.r_script_runparameter(uuid char(16) for bit data NOT NULL, script_uuid char(16) for bit data NOT NULL, pkey varchar(64) NOT NULL, value varchar(32672), PRIMARY KEY (uuid))",
+				"CREATE TABLE smart.r_script(uuid char(16) for bit data NOT NULL, ca_uuid char(16) for bit data NOT NULL, filename varchar(2048) NOT NULL, creator_uuid char(16) for bit data  NOT NULL, default_parameters varchar(32672), PRIMARY KEY (uuid))", //$NON-NLS-1$
+				"CREATE TABLE smart.r_query(uuid char(16) for bit data NOT NULL, script_uuid char(16) for bit data NOT NULL, ca_uuid char(16) for bit data not null, config varchar(32672), PRIMARY KEY (uuid))", //$NON-NLS-1$
 
 				/* Create Foreign Keys */
-				"ALTER TABLE smart.r_script ADD CONSTRAINT rscript_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) DEFERRABLE INITIALLY IMMEDIATE",
-				"ALTER TABLE smart.r_script ADD CONSTRAINT rscript_creatoruuid_fk FOREIGN KEY (creator_uuid) REFERENCES smart.employee(uuid) DEFERRABLE INITIALLY IMMEDIATE",
-				"ALTER TABLE smart.r_script_runparameter ADD CONSTRAINT rscriptparameter_scriptuuid_fk FOREIGN KEY (script_uuid) REFERENCES smart.r_script(uuid) DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.r_script ADD CONSTRAINT rscript_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.r_script ADD CONSTRAINT rscript_creatoruuid_fk FOREIGN KEY (creator_uuid) REFERENCES smart.employee(uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.r_query ADD CONSTRAINT rquery_scriptuuid_fk FOREIGN KEY (script_uuid) REFERENCES smart.r_script(uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.r_query ADD CONSTRAINT rquery_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 
-				"GRANT ALL PRIVILEGES ON smart.r_script TO ANALYST",
-				"GRANT ALL PRIVILEGES ON smart.r_script_runparameter TO ANALYST",
-				"GRANT ALL PRIVILEGES ON smart.r_script TO MANAGER",
-				"GRANT ALL PRIVILEGES ON smart.r_script_runparameter TO MANAGER",
+				"GRANT ALL PRIVILEGES ON smart.r_script TO ANALYST", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.r_query TO ANALYST", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.r_script TO MANAGER", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.r_query TO MANAGER", //$NON-NLS-1$
 		};
 		
 		session.doWork(new Work(){

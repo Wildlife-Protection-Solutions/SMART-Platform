@@ -1,10 +1,28 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.r.ui.editor.script;
 
-import java.awt.Desktop;
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -13,7 +31,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -26,7 +43,14 @@ import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.r.RPlugIn;
 import org.wcs.smart.r.RScriptManager;
+import org.wcs.smart.r.internal.Messages;
 
+/**
+ * Script page of editor
+ * 
+ * @author Emily
+ *
+ */
 public class ScriptPage extends EditorPart {
 
 	private RScriptEditor parent;
@@ -75,15 +99,14 @@ public class ScriptPage extends EditorPart {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		if (RScriptManager.INSTANCE.canEditScript()) {
-			
 			Composite header = new Composite(main, SWT.NONE);
 			header.setLayout(new GridLayout(2, false));
 			((GridLayout)header.getLayout()).marginWidth = 0;
 			((GridLayout)header.getLayout()).marginHeight = 0;
 			header.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 			
-			Hyperlink lnkEdit = toolkit.createHyperlink(header, "show", SWT.NONE);
-			lnkEdit.setToolTipText("open file explorer to the directory containing file.");
+			Hyperlink lnkEdit = toolkit.createHyperlink(header, Messages.ScriptPage_showlink, SWT.NONE);
+			lnkEdit.setToolTipText(Messages.ScriptPage_showtooltip);
 			lnkEdit.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 			lnkEdit.addHyperlinkListener(new IHyperlinkListener() {
 				@Override
@@ -92,16 +115,12 @@ public class ScriptPage extends EditorPart {
 				public void linkEntered(HyperlinkEvent e) {}
 				@Override
 				public void linkActivated(HyperlinkEvent e) {
-					try {
-						Desktop.getDesktop().open( RScriptManager.INSTANCE.getScriptPath( ScriptPage.this.parent.getScript() ).getParent().toFile() );
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
+					AttachmentUtil.launch(RScriptManager.INSTANCE.getScriptPath(ScriptPage.this.parent.getScript()).getParent().toFile());
 				}
 			});
 			
-			lnkEdit = toolkit.createHyperlink(header, "edit", SWT.NONE);
-			lnkEdit.setToolTipText("open file in system editor");
+			lnkEdit = toolkit.createHyperlink(header, Messages.ScriptPage_editlink, SWT.NONE);
+			lnkEdit.setToolTipText(Messages.ScriptPage_edittooltip);
 			lnkEdit.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 			lnkEdit.addHyperlinkListener(new IHyperlinkListener() {
 				@Override
@@ -113,8 +132,6 @@ public class ScriptPage extends EditorPart {
 					AttachmentUtil.launch(RScriptManager.INSTANCE.getScriptPath(ScriptPage.this.parent.getScript()).toFile());
 				}
 			});
-			
-			
 		}
 		
 		txtScript = new Text(main, SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
@@ -128,21 +145,21 @@ public class ScriptPage extends EditorPart {
 	}
 	
 	public void update() {
-		txtScript.setText("");
+		txtScript.setText(""); //$NON-NLS-1$
 		Path fileToRead = RScriptManager.INSTANCE.getScriptPath(parent.getScript());
 		if (fileToRead == null || !Files.exists(fileToRead)) {
-			txtScript.setText("ERROR - No R Script file found");
+			txtScript.setText(Messages.ScriptPage_NotFound);
 		}else {
 			try(BufferedReader io = Files.newBufferedReader(fileToRead)){
 				String line = null;
 				StringBuilder sb = new StringBuilder();
 				while ((line = io.readLine()) != null) {
 					sb.append(line);
-					sb.append("\n");
+					sb.append("\n"); //$NON-NLS-1$
 				}
 				txtScript.setText(sb.toString());
 			} catch (IOException ex) {
-				txtScript.setText("Error Reading RScript file" + "\n" + ex.getMessage());
+				txtScript.setText(Messages.ScriptPage_ReadError + "\n" + ex.getMessage()); //$NON-NLS-1$
 				RPlugIn.log(ex.getMessage(), ex);
 			}
 		}

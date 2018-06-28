@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.r.ui.editor.script;
 
 import java.io.IOException;
@@ -12,18 +33,26 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.r.internal.Messages;
 
+/**
+ * R Editor results page
+ * 
+ * @author Emily
+ *
+ */
 public class ResultsPage extends EditorPart {
 
 	private FormToolkit toolkit;
@@ -70,55 +99,30 @@ public class ResultsPage extends EditorPart {
 		toolkit = new FormToolkit(parent.getDisplay());
 		
 		Composite main = toolkit.createComposite(parent);
-		main.setLayout(new GridLayout());
+		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Composite header = toolkit.createComposite(main);
-		header.setLayout(new GridLayout(3, false));
-		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridLayout)header.getLayout()).marginWidth = 0;
-		((GridLayout)header.getLayout()).marginHeight = 0;
-		
-		Label l = toolkit.createLabel(header, "R Script Output:");
+		Label l = toolkit.createLabel(main, Messages.ResultsPage_OutputLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Hyperlink rerun = toolkit.createHyperlink(header, "run", SWT.NONE);
-		rerun.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-		rerun.addHyperlinkListener(new IHyperlinkListener() {
-			@Override
-			public void linkExited(HyperlinkEvent e) {
-			}
-			
-			@Override
-			public void linkEntered(HyperlinkEvent e) {
-			}
-			
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				ResultsPage.this.parent.executeScript();
-			}
-		});
+		ToolBar tb = new ToolBar(main, SWT.FLAT);
 		
-		Hyperlink clear = toolkit.createHyperlink(header, "clear", SWT.NONE);
-		clear.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-		clear.addHyperlinkListener(new IHyperlinkListener() {
-			@Override
-			public void linkExited(HyperlinkEvent e) {
-			}
+		ToolItem btnRun = new ToolItem(tb, SWT.PUSH);
+		btnRun.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
+		btnRun.setToolTipText(Messages.ResultsPage_rereuntooltip);
+		btnRun.addListener(SWT.Selection, e-> ResultsPage.this.parent.executeScript());
 			
-			@Override
-			public void linkEntered(HyperlinkEvent e) {
-			}
-			
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				txtOutput.setText("");
-			}
-		});
-
+		ToolItem btnClear = new ToolItem(tb, SWT.PUSH);
+		btnClear.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.CLEAR_ICON));
+		btnClear.setToolTipText(Messages.ResultsPage_cleartooltip);
+		btnClear.addListener(SWT.Selection, e->txtOutput.setText("")); //$NON-NLS-1$
+		
 		txtOutput = new Text(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-		txtOutput.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		txtOutput.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		txtOutput.setEditable(false);
+		
+		main.setTabList(new Control[] {txtOutput, tb});
+		
 	}
 
 	@Override
@@ -134,7 +138,7 @@ public class ResultsPage extends EditorPart {
 
 		return new OutputStream() {
 			StringWriter sb = new StringWriter();	
-			private Job j = new Job("refreshJob") {
+			private Job j = new Job("refreshJob") { //$NON-NLS-1$
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {

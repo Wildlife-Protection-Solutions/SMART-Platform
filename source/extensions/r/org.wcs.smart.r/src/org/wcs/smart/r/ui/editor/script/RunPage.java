@@ -1,10 +1,30 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.r.ui.editor.script;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.util.LocalSelectionTransfer;
@@ -28,14 +48,30 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.r.RPlugIn;
+import org.wcs.smart.r.engine.QueryConfiguration;
 import org.wcs.smart.r.engine.REngine;
+import org.wcs.smart.r.internal.Messages;
+import org.wcs.smart.r.model.RQuery;
 import org.wcs.smart.r.model.RScript;
-import org.wcs.smart.r.model.RScriptParameter;
+import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Run page of R script editor
+ * @author Emily
+ *
+ */
 public class RunPage extends EditorPart {
 
 	private FormToolkit toolkit;
@@ -79,6 +115,56 @@ public class RunPage extends EditorPart {
 		return false;
 	}
 
+	void updateQuery(RQuery query) {
+		JSONObject items = new JSONObject();
+		items.put("p", txtParameters.getText());
+		
+		JSONArray array = new JSONArray();
+		for (QueryConfiguration cc : queryList.getQueries()) {
+			JSONObject jquery = new JSONObject();
+			
+			jquery.put("t", cc.getQuery().getTypeKey());
+			jquery.put("u", UuidUtils.uuidToString(cc.getQuery().getUuid()));
+			jquery.put("e", cc.getQueryExporter().getId());
+			jquery.put("d", cc.getDateFilter().asString());
+			
+			array.add(jquery);
+		}
+		items.put("q",array);
+		query.setConfiguration(items.toJSONString());
+	}
+	
+	private void parse(RQuery query) throws ParseException {
+		JSONParser jsonParser = new JSONParser();
+		JSONObject items = (JSONObject) jsonParser.parse(query.getConfiguration());
+		
+		String params = (String)items.get("p");
+		txtParameters.setText(params);
+		JSONArray queries = (JSONArray)items.get("q");
+		for (Object q : queries.toArray()) {
+			JSONObject item = (JSONObject)q;
+			
+			String typeKey = (String) item.get("t");
+			UUID qUuid = UuidUtils.stringToUuid((String)item.get("u"));
+			String eFormat = (String) item.get("e");
+			String dates = (String)item.get("d");
+			
+			IQueryType qType = QueryTypeManager.INSTANCE.findQueryType(typeKey);
+			DateFilter dFilter = null;
+			try {
+				dFilter = DateFilter.fromString(dates, qType.getDateFilterOptions());
+			}catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			
+			Query dbquery = null;
+			try(Session session = HibernateManager.openSession()){
+				dbquery = QueryHibernateManager.getInstance().findQuery(session, qUuid, qType);
+			}
+			if (dbquery != null) queryList.addQuery(dbquery, dFilter, eFormat);
+		}
+		
+	}
 	void executeScript() {
 		parent.showResults();
 		REngine engine = new REngine(parent.getScript(), queryList.getQueries(),txtParameters.getText(),parent.createPage2OutputStream());
@@ -91,21 +177,19 @@ public class RunPage extends EditorPart {
 		
 		mainForm = toolkit.createForm(parent);
 		mainForm.getBody().setLayout(new GridLayout());
-//		mainForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite main = toolkit.createComposite(mainForm.getBody(), SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Label l = toolkit.createLabel(main, "R Script Parameters:");
+		Label l = toolkit.createLabel(main, Messages.RunPage_Parameters);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		txtParameters = toolkit.createText(main, "", SWT.V_SCROLL | SWT.WRAP);
+		txtParameters = toolkit.createText(main, "", SWT.V_SCROLL | SWT.WRAP); //$NON-NLS-1$
 		txtParameters.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)txtParameters.getLayoutData()).heightHint = 70;
-
-//		l = toolkit.createLabel(main, "Queries:");
-		l = toolkit.createLabel(main, "");
+		((GridData)txtParameters.getLayoutData()).heightHint = 50;
+		txtParameters.addListener(SWT.Modify, e->RunPage.this.parent.setDirty(true));
+		l = toolkit.createLabel(main, ""); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		queryList = new QueryListComposite(main);
@@ -114,30 +198,16 @@ public class RunPage extends EditorPart {
 		DropTarget dtarget = new DropTarget(queryList, DND.DROP_MOVE);
 		dtarget.setTransfer(new Transfer[] { LocalSelectionTransfer.getTransfer() });
 		dtarget.addDropListener(new DropTargetAdapter() {
-
 			@Override
-			public void dragEnter(DropTargetEvent event) {
-
-				
-			}
-
-			public void dragLeave(DropTargetEvent event) {
-
-			}
-			
+			public void dragEnter(DropTargetEvent event) {}
 			@Override
-			public void dragOperationChanged(DropTargetEvent event) {
-			}
-
+			public void dragLeave(DropTargetEvent event) {}
 			@Override
-			public void dragOver(DropTargetEvent event) {
-				
-			}
-
+			public void dragOperationChanged(DropTargetEvent event) {}
 			@Override
-			public void dropAccept(DropTargetEvent event) {
-			}
-
+			public void dragOver(DropTargetEvent event) {}
+			@Override
+			public void dropAccept(DropTargetEvent event) {}
 			@Override
 			public void drop(DropTargetEvent event) {
 				if (event.detail == DND.DROP_NONE ){
@@ -177,26 +247,28 @@ public class RunPage extends EditorPart {
 		}
 		
 		Button btnRun = new Button(main, SWT.PUSH);
-		btnRun.setText("Run Script");
+		btnRun.setText(Messages.RunPage_RunButton);
 		btnRun.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, 3, 1));
 		btnRun.addListener(SWT.Selection, e-> executeScript());
 	}
 	
 
 	public void update() {
-		RScript script = parent.getScript();
-		mainForm.setText("R Script: " + script.getName());
-		boolean found = false;
-		if (script.getParameters() != null) {
-			for (RScriptParameter p : script.getParameters()) {
-				if (p.getKey().equalsIgnoreCase(RScriptParameter.R_PARAMETER)) {
-					txtParameters.setText(p.getValue());
-					found = true;
-					break;
-				}
+		if (parent.getQuery() != null) {
+			mainForm.setText(parent.getQuery().getName());
+			mainForm.setImage(RPlugIn.getDefault().getImageRegistry().get(RPlugIn.ICON_R));
+			
+			try {
+				parse(parent.getQuery());
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		}
-		if (!found && script.getDefaultParameters() != null) {
+			
+		}else {
+			RScript script = parent.getScript();
+			mainForm.setText(script.getName());
+			mainForm.setImage(RPlugIn.getDefault().getImageRegistry().get(RPlugIn.ICON_R));
 			txtParameters.setText(script.getDefaultParameters());
 		}
 	}

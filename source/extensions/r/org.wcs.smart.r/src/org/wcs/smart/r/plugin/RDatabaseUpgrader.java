@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.r.RPlugIn;
+import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
@@ -42,7 +43,7 @@ public class RDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask("Upgrading R Module Database Tables", 1);
+		monitor.beginTask(Messages.RDatabaseUpgrader_UpgradeTaskName, 1);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
