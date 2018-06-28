@@ -94,8 +94,10 @@ public class QueryDefView  {
 				IQueryEditor qpart = (IQueryEditor)lpart;
 				if (qpart.getQueryProxy() != current){
 					setQuery(qpart.getQueryProxy());
+					return;
 				}
 			}
+			setQuery(null);
 		}
 		
 		@Override
