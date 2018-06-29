@@ -212,6 +212,9 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String CLEAR_STYLE = "org.wcs.smart.query.clearstyle"; //$NON-NLS-1$
 	
+	public static final String CLEAR_ICON = "org.wcs.smart.query.clear"; //$NON-NLS-1$
+	public static final String RUN_ICON = "org.wcs.smart.query.run"; //$NON-NLS-1$
+	
 	
 	private static List<AbstractQueryPropertyProvider>  propertyProviders = null;
 	private QueryEmployeeListener employeeListener = new QueryEmployeeListener();
@@ -306,6 +309,9 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		reg.put(COMPOUND_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/compound_query.png"));//$NON-NLS-1$)
 		reg.put(DATE_APPLY_ALL, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/date_apply_all.png")); //$NON-NLS-1$
 		reg.put(CLEAR_STYLE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/clearstyle.png")); //$NON-NLS-1$
+		
+		reg.put(CLEAR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/clear.png")); //$NON-NLS-1$
+		reg.put(RUN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/run_query.png")); //$NON-NLS-1$
 		super.initializeImageRegistry(reg);
 		
 	}

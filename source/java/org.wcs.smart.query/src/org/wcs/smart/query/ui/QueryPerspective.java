@@ -42,6 +42,8 @@ public class QueryPerspective implements IPerspectiveFactory {
 	 */
 	public static final String ID = "org.wcs.smart.query.persepectives.single"; //$NON-NLS-1$
 	
+	public static final String ITEM_FOLDER = "org.wcs.smart.query.itemFolder"; //$NON-NLS-1$
+	public static final String DEF_FOLDER = "org.wcs.smart.query.definitionFolder"; //$NON-NLS-1$
 	/**
 	 * @see org.eclipse.ui.IPerspectiveFactory#createInitialLayout(org.eclipse.ui.IPageLayout)
 	 */
@@ -52,18 +54,20 @@ public class QueryPerspective implements IPerspectiveFactory {
 		layout.addView(QueryListView.ID, IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA);
 		
 		//right side - filters and layer manager
-		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.query.queryFolder1", IPageLayout.RIGHT, 0.8f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+		IFolderLayout folder1 = layout.createFolder(ITEM_FOLDER, IPageLayout.RIGHT, 0.8f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		folder1.addView(QueryItemView.ID);
 		folder1.addView("org.locationtech.udig.project.ui.layerManager"); //$NON-NLS-1$
 		folder1.addView(WaypointInfoView.ID); 
 		
 		//bottom query and info view
-		IFolderLayout folder2 = layout.createFolder("org.wcs.smart.query.queryFolder2", IPageLayout.BOTTOM, 0.7f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+		IFolderLayout folder2 = layout.createFolder(DEF_FOLDER, IPageLayout.BOTTOM, 0.7f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		folder2.addView(QueryDefView.ID);
 		folder2.addPlaceholder("org.locationtech.udig.tool.info.infoView"); //$NON-NLS-1$
 
 		layout.getViewLayout(QueryDefView.ID).setCloseable(false);
 		layout.getViewLayout(QueryItemView.ID).setCloseable(false);
 		layout.getViewLayout(QueryListView.ID).setCloseable(false);
+		
+		
 	}
 }

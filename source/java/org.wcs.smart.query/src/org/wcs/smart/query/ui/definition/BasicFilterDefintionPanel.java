@@ -563,6 +563,7 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 	@Override
 	public void initItems(QueryProxy q) throws Exception{
 		this.currentQuery = q;
+		if(q == null) return;
 		addItems(q.getDropItems(getId()));
 		
 		if (q.getQuery() instanceof SimpleQuery){
