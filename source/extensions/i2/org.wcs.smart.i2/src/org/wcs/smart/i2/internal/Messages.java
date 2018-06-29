@@ -32,6 +32,7 @@ public class Messages extends NLS {
 	public static String AllEntityContentProvider_UpdateFilterJobName;
 	public static String AllPanel_configtabletooltip;
 	public static String AllPanel_CountLabel;
+	public static String AllPanel_CreateRecord;
 	public static String AllPanel_EntityIdColumn;
 	public static String AllPanel_EntityTypeColumn;
 	public static String AllPanel_ErrorLabel;
@@ -403,6 +404,7 @@ public class Messages extends NLS {
 	public static String EntitySearchResultTable_AddToWsMenuItem;
 	public static String EntitySearchResultTable_CompareErrorDialogTitle;
 	public static String EntitySearchResultTable_CompareItem;
+	public static String EntitySearchResultTable_CreateNewRecord;
 	public static String EntitySearchResultTable_DateCreatedLabel;
 	public static String EntitySearchResultTable_DateModifiedLabel;
 	public static String EntitySearchResultTable_DeleteEntitiesTitle2;
