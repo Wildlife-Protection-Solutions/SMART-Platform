@@ -44,14 +44,14 @@
 <unit id="com.google.inject" version="3.0.0.v201312141243"/>
 <unit id="com.google.inject.assistedinject" version="3.0.0.v201402270930"/>
 <unit id="com.google.inject.multibindings" version="3.0.0.v201402270930"/>
-<unit id="org.eclipse.gef.common.sdk.feature.group" version="5.0.0.201806090202"/>
-<unit id="org.eclipse.gef.fx.sdk.feature.group" version="5.0.2.201806090202"/>
-<unit id="org.eclipse.gef.geometry.sdk.feature.group" version="5.0.2.201806090202"/>
-<unit id="org.eclipse.gef.graph.sdk.feature.group" version="5.1.0.201801270315"/>
-<unit id="org.eclipse.gef.layout.sdk.feature.group" version="5.0.0.201806090202"/>
-<unit id="org.eclipse.gef.mvc.sdk.feature.group" version="5.0.2.201806090202"/>
-<unit id="org.eclipse.gef.zest.sdk.feature.group" version="5.0.2.201806090202"/>
-<repository location="http://download.eclipse.org/tools/gef/updates/integration"/>
+<unit id="org.eclipse.gef.fx.sdk.feature.group" version="5.0.2.201805280201"/>
+<unit id="org.eclipse.gef.geometry.sdk.feature.group" version="5.0.2.201805280201"/>
+<unit id="org.eclipse.gef.graph.sdk.feature.group" version="5.0.0.201805280201"/>
+<unit id="org.eclipse.gef.mvc.sdk.feature.group" version="5.0.2.201805280201"/>
+<unit id="org.eclipse.gef.zest.sdk.feature.group" version="5.0.2.201805280201"/>
+<unit id="org.eclipse.gef.common.sdk.feature.group" version="5.0.0.201805280201"/>
+<unit id="org.eclipse.gef.layout.sdk.feature.group" version="5.0.0.201805280201"/>
+<repository location="http://download.eclipse.org/tools/gef/updates/releases"/>
 </location>
 <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.birt.doc.feature.group" version="4.7.0.v201706222054"/>
