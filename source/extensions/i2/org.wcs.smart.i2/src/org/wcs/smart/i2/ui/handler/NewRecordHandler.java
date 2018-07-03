@@ -53,7 +53,7 @@ import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 public class NewRecordHandler {
 	
 	/**
-	 * Context key containing collection of entities that should
+	 * Context key containing collection of entity uuids that should
 	 * be linked to the record when created
 	 */
 	public static final String ENTITY_UUID_LINK = "org.wcs.smart.i2.ui.handler.NewRecordHandler.entities"; //$NON-NLS-1$

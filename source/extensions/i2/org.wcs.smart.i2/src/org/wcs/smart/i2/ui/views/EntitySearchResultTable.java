@@ -85,6 +85,7 @@ import org.wcs.smart.i2.ui.dialogs.ExportEntityToFileDialog;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog;
 import org.wcs.smart.i2.ui.handler.CompareEntitiesHandler;
+import org.wcs.smart.i2.ui.handler.NewRecordHandler;
 import org.wcs.smart.i2.ui.handler.OpenAttachmentViewHandler;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.ui.Thumbnail;
@@ -652,6 +653,7 @@ public class EntitySearchResultTable extends Composite {
 				if (fmnuWorkingset != null) fmnuWorkingset.setEnabled(hasSelection && WorkingSetManager.INSTANCE.isSet());
 				mnuCompare.setEnabled(getCurrentSelection().size() > 0);
 				
+				
 				if (mnuAddToRecord == null || mnuAddToRecord.isDisposed()){
 					mnuAddToRecord = new MenuItem(menu, SWT.CASCADE);
 					mnuAddToRecord.setText(Messages.EntitySearchResultTable_AddToRecordMenuItem);
@@ -664,24 +666,42 @@ public class EntitySearchResultTable extends Composite {
 						mi.dispose();
 					}
 				}
-				
-				Collection<MPart> parts = context.get(EPartService.class).getParts();
-				for (MPart p : parts){
-					if (E3Utils.isCompatibilityEditor(p)){
-						Object editor = E3Utils.getSourceObject(p);
-						if (editor instanceof RecordEditor && ((RecordEditor)editor).getEditMode()){
-							MenuItem relate = new MenuItem(subRecord, SWT.PUSH);
-							relate.setText( ((RecordEditor)editor).getRecord().getTitle()  );
-							relate.addSelectionListener(new SelectionAdapter() {
-								@Override
-								public void widgetSelected(SelectionEvent e) {
-									if (!getCurrentSelection().isEmpty()){
-										for (IntelEntity entity : getCurrentSelection()){
-											((RecordEditor)editor).linkEntity(entity);
+				if (IntelSecurityManager.INSTANCE.canCreateRecord()) {
+					MenuItem createRecord = new MenuItem(subRecord, SWT.PUSH);
+					createRecord.setText(Messages.EntitySearchResultTable_CreateNewRecord);
+					createRecord.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+					createRecord.addListener(SWT.Selection, cr->{
+						List<UUID> uuids = new ArrayList<>();
+						getCurrentSelection().forEach(entity->uuids.add(entity.getUuid()));
+						IEclipseContext kid = context.createChild();
+						kid.set(NewRecordHandler.ENTITY_UUID_LINK, uuids);
+						(new NewRecordHandler()).createNewRecord(kid);
+					});
+				}
+				if (IntelSecurityManager.INSTANCE.canEditRecord()) {
+					Collection<MPart> parts = context.get(EPartService.class).getParts();
+					boolean first = false;
+					for (MPart p : parts){
+						if (E3Utils.isCompatibilityEditor(p)){
+							Object editor = E3Utils.getSourceObject(p);
+							if (editor instanceof RecordEditor && ((RecordEditor)editor).getEditMode()){
+								if (!first) {
+									new MenuItem(subRecord, SWT.SEPARATOR);
+									first = true;
+								}
+								MenuItem relate = new MenuItem(subRecord, SWT.PUSH);
+								relate.setText( ((RecordEditor)editor).getRecord().getTitle()  );
+								relate.addSelectionListener(new SelectionAdapter() {
+									@Override
+									public void widgetSelected(SelectionEvent e) {
+										if (!getCurrentSelection().isEmpty()){
+											for (IntelEntity entity : getCurrentSelection()){
+												((RecordEditor)editor).linkEntity(entity);
+											}
 										}
 									}
-								}
-							});
+								});
+							}
 						}
 					}
 				}
