@@ -134,6 +134,11 @@ public abstract class EntitySearchPanel extends Composite {
 	public ToolBar getToolbar() {
 		return this.toolbar;
 	}
+	
+	void clearPanel() {
+		searchPanel.clear();
+	}
+	
 	private void createContent() {
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;
@@ -155,7 +160,7 @@ public abstract class EntitySearchPanel extends Composite {
 		ToolItem clear = new ToolItem(toolbar, SWT.PUSH);
 		clear.setToolTipText(Messages.AdvancedEntitySearchPanel_Cleartooltip);
 		clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
-		clear.addListener(SWT.Selection, (event)->searchPanel.clear());
+		clear.addListener(SWT.Selection, (event)->clearPanel());
 		clear.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		
 		searchPanel = new EntitySearchDropPanel(){

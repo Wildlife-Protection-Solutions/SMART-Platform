@@ -185,15 +185,21 @@ public class AllPanel extends Composite {
 					((AllEntityContentProvider)entityTable.getContentProvider()).setFilter(getQueryString());
 				}
 			}
+			
+			@Override
+			void clearPanel() {
+				super.clearPanel();
+				doSearch();
+			}
 		};
 		searchPanel.addQueryModifiedListener(e->{
 			//show if hidden; otherwise leave alone 
 			showHideFilter(true);
 		});
-		
+
 		ToolItem refreshItem = new ToolItem(searchPanel.getToolbar(), SWT.PUSH);
-		refreshItem.addListener(SWT.Selection, e->refresh(0));
-		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
+		refreshItem.addListener(SWT.Selection, e->searchPanel.doSearch());
+		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
 		refreshItem.setToolTipText(Messages.AllPanel_loadresultstooltip);
 		
 		ToolItem configureItem = new ToolItem(searchPanel.getToolbar(), SWT.PUSH);

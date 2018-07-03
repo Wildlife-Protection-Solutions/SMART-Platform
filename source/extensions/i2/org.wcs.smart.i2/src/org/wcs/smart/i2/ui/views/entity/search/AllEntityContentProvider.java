@@ -517,12 +517,13 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 						sb.append(" SELECT count(*) FROM "+ DB_NAME_NAME + " WHERE filter = true"); //$NON-NLS-1$ //$NON-NLS-2$
 						newCount = (Integer)session.createNativeQuery(sb.toString()).uniqueResult();
 						
-						
+						session.getTransaction().commit();	
 					} catch (Exception e) {
 						Intelligence2PlugIn.displayLog(e.getMessage(), e);
+						session.getTransaction().rollback();
 					}
 					
-					session.getTransaction().commit();
+					
 				}
 				final int icount = newCount;
 				Display.getDefault().syncExec(()->{
