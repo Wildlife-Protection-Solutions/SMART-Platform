@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.r.ui.view.script;
 
 import java.text.MessageFormat;
@@ -32,10 +53,10 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
@@ -48,36 +69,32 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.r.RPlugIn;
 import org.wcs.smart.r.RScriptManager;
+import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.r.model.RQuery;
 import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.r.ui.OpenRScriptHandler;
 import org.wcs.smart.r.ui.RunRScriptHandler;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Simple view for listing R scripts and queries
+ * 
+ * @author Emily
+ *
+ */
 public class RScriptView {
 
 	public static final String ID = "org.wcs.smart.r.view.rscripts"; //$NON-NLS-1$
 
 	@Inject private IEclipseContext context;
 	
-	
 	private TreeViewer itemViewer;
 	private List<UuidItem> queries = new ArrayList<>();
 	private List<UuidItem> scripts = new ArrayList<>();
 	
-	private final static String QUERY_NODE = "R Queries";
-	private final static String SCRIPT_NODE = "R Scripts";
-	
-//	/**
-//	 * listener for Plan change events.
-//	 */
-//	private IPlanEventListener planListener = new IPlanEventListener(){
-//		@Override
-//		public void eventFired(int type, Plan source) {
-//			updateContent();
-//		}
-//	};
-	
+	private final static String QUERY_NODE = "RQueries"; //$NON-NLS-1$
+	private final static String SCRIPT_NODE = "RScripts"; //$NON-NLS-1$
 	
 	/**
 	 * Default constructor
@@ -159,10 +176,20 @@ public class RScriptView {
 		
 		itemViewer.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
-				if (element == QUERY_NODE) return "R Queries";
-				if (element == SCRIPT_NODE) return "R Scripts";
+				if (element == QUERY_NODE) return Messages.RScriptView_RQueryLabel;
+				if (element == SCRIPT_NODE) return Messages.RScriptView_RScirptLabel;
 				if (element instanceof UuidItem) return ((UuidItem)element).name;
 				return super.getText(element);
+			}
+			
+			public Image getImage(Object element) {
+				if (element == QUERY_NODE) return RPlugIn.getDefault().getImageRegistry().get(RPlugIn.ICON_QUERY);
+				if (element == SCRIPT_NODE) return RPlugIn.getDefault().getImageRegistry().get(RPlugIn.ICON_R);
+				if (element instanceof UuidItem) {
+					if  (((UuidItem)element).type == Type.QUERY) return RPlugIn.getDefault().getImageRegistry().get(RPlugIn.ICON_QUERY);
+					if  (((UuidItem)element).type == Type.SCRIPT) return RPlugIn.getDefault().getImageRegistry().get(RPlugIn.ICON_R);
+				}
+				return null;
 			}
 		});
 		
@@ -192,19 +219,19 @@ public class RScriptView {
 				Object x = itemViewer.getStructuredSelection().getFirstElement();
 				if (x instanceof UuidItem && ((UuidItem) x).type == Type.QUERY) {
 					MenuItem miOpen= new MenuItem(mnu, SWT.PUSH);
-					miOpen.setText("Open");
+					miOpen.setText(Messages.RScriptView_OpenLabel);
 					miOpen.addListener(SWT.Selection, s->newQuery((UuidItem)x));
 					
 					new MenuItem(mnu, SWT.SEPARATOR);
 					
 					MenuItem miDelete= new MenuItem(mnu, SWT.PUSH);
-					miDelete.setText("Delete");
+					miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 					miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 					miDelete.addListener(SWT.Selection, s->deleteQueries());
 					
 				}else if (x instanceof UuidItem && ((UuidItem) x).type == Type.SCRIPT) {
 					MenuItem miNew = new MenuItem(mnu, SWT.PUSH);
-					miNew.setText("New R Query...");
+					miNew.setText(Messages.RScriptView_NewQueryLabel);
 					miNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 					miNew.addListener(SWT.Selection, s->newQuery((UuidItem)x));
 				}
@@ -214,18 +241,13 @@ public class RScriptView {
 			public void menuHidden(MenuEvent e) {
 			}
 		});
-		
+	
 		updateContent();
-		
-		Button btn = new Button(main, SWT.NONE);
-		btn.setText("refresh");
-		btn.addListener(SWT.Selection, e->updateContent());
-
 	}
 	
 	private void deleteQueries() {
 		List<UUID> toDelete = new ArrayList<>();
-		for (Iterator iterator = itemViewer.getStructuredSelection().iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = itemViewer.getStructuredSelection().iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
 			if (x instanceof UuidItem && ((UuidItem) x).type == Type.QUERY) {
 				toDelete.add(((UuidItem)x).uuid);
@@ -233,8 +255,8 @@ public class RScriptView {
 		}
 		if (toDelete.isEmpty()) return;
 		
-		if (!MessageDialog.openConfirm(itemViewer.getControl().getShell(), "Delete", 
-				MessageFormat.format("Are you sure you want to delete the {0} selected queries?", toDelete.size()))) {
+		if (!MessageDialog.openConfirm(itemViewer.getControl().getShell(), Messages.RScriptView_DeleteTitle, 
+				MessageFormat.format(Messages.RScriptView_DeleteMssage, toDelete.size()))) {
 			return;
 		}
 		List<RQuery> deleted = new ArrayList<>();
@@ -251,7 +273,7 @@ public class RScriptView {
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				RPlugIn.displayLog("Error deleting selected queries: " + ex.getMessage(), ex);
+				RPlugIn.displayLog(Messages.RScriptView_DeleteError + ex.getMessage(), ex);
 			}
 		}
 		
@@ -293,21 +315,21 @@ public class RScriptView {
 		itemViewer.getControl().setFocus();
 	}
 
-	private Job loadData = new Job("refreshing scripts") {
+	private Job loadData = new Job(Messages.RScriptView_RefreshJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
 			try(Session session = HibernateManager.openSession()){
 				List<RQuery> qs = QueryFactory.buildQuery(session, RQuery.class,
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 				queries.clear();
 				for (RQuery q : qs) {
 					queries.add(new UuidItem(Type.QUERY, q.getName(),q.getUuid()));
 				}
 				
 				List<RScript> ss = QueryFactory.buildQuery(session, RScript.class,
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 				scripts.clear();
 				for (RScript s : ss) {
 					scripts.add(new UuidItem(Type.SCRIPT, s.getName(),s.getUuid()));

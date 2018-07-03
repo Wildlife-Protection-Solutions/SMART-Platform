@@ -6,6 +6,10 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.r.internal.messages"; //$NON-NLS-1$
 	public static String AddRJob_Error;
 	public static String AddRJob_JobName;
+	public static String HeaderComposite_HeaderPart;
+	public static String HeaderComposite_NameToLongMessage;
+	public static String HeaderComposite_NameToLongTitle;
+	public static String HeaderComposite_QueryType;
 	public static String QueryListComposite_DataFilterLabel;
 	public static String QueryListComposite_ExportLabel;
 	public static String QueryListComposite_Message1;
@@ -59,9 +63,11 @@ public class Messages extends NLS {
 	public static String RScriptDialog_TextFiles;
 	public static String RScriptDialog_Title;
 	public static String RScriptDialog_TranslateOp;
+	public static String RScriptEditor_CopyOfName;
 	public static String RScriptEditor_loadJobName;
 	public static String RScriptEditor_ResultsPageName;
 	public static String RScriptEditor_RunPageName;
+	public static String RScriptEditor_SaveError;
 	public static String RScriptEditor_ScriptPageName;
 	public static String RScriptEditorInput_Name;
 	public static String RScriptListDialog_DeleteError1;
@@ -71,6 +77,14 @@ public class Messages extends NLS {
 	public static String RScriptListDialog_DeleteTitle;
 	public static String RScriptListDialog_Message;
 	public static String RScriptListDialog_Title;
+	public static String RScriptView_DeleteError;
+	public static String RScriptView_DeleteMssage;
+	public static String RScriptView_DeleteTitle;
+	public static String RScriptView_NewQueryLabel;
+	public static String RScriptView_OpenLabel;
+	public static String RScriptView_RefreshJobName;
+	public static String RScriptView_RQueryLabel;
+	public static String RScriptView_RScirptLabel;
 	public static String RunPage_Parameters;
 	public static String RunPage_RunButton;
 	public static String RunPage_ScriptName;

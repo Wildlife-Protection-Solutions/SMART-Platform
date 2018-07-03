@@ -62,6 +62,7 @@ public class RPlugIn extends AbstractUIPlugin {
 	public static final String ICON_UP = "org.wcs.smart.r.ICON_UP"; //$NON-NLS-1$
 	public static final String ICON_DOWN = "org.wcs.smart.r.ICON_DOWN"; //$NON-NLS-1$
 	public static final String ICON_R = "org.wcs.smart.r.ICON_R"; //$NON-NLS-1$
+	public static final String ICON_QUERY = "org.wcs.smart.r.ICON_QUERY"; //$NON-NLS-1$
 	
 	
 	/**
@@ -135,6 +136,7 @@ public class RPlugIn extends AbstractUIPlugin {
 	    reg.put(ICON_DOWN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/down.png")); //$NON-NLS-1$
 	    reg.put(ICON_UP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/up.png")); //$NON-NLS-1$
 	    reg.put(ICON_R, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/rlogo_16.png")); //$NON-NLS-1$
+	    reg.put(ICON_QUERY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/query.png")); //$NON-NLS-1$
 	}
 	
 }

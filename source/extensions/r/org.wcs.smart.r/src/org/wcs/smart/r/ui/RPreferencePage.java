@@ -129,11 +129,11 @@ public class RPreferencePage extends PreferencePage implements IWorkbenchPrefere
 		rLocation = new FileFieldEditor("", Messages.RPreferencePage_RLabel + "*", main); //$NON-NLS-1$ //$NON-NLS-2$
 		rLocation.setStringValue(getRSystemProperty());
 		
-		Label l = new Label(main, SWT.NONE);
+		Label l = new Label(main, SWT.WRAP);
 		l.setText("*" + Messages.RPreferencePage_RInfo); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		((GridData)l.getLayoutData()).verticalIndent = 5;
-
+		((GridData)l.getLayoutData()).widthHint = 150;
 		
 		Link lnk = new Link(main, SWT.NONE);
 		lnk.setText(MessageFormat.format("{0} <a>{1}</a>", Messages.RPreferencePage_RInstall, "http://www.r-project.org")); //$NON-NLS-1$ //$NON-NLS-2$ 

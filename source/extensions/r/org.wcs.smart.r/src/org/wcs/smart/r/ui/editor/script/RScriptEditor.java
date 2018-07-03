@@ -72,6 +72,7 @@ public class RScriptEditor extends MultiPageEditorPart {
 	private RQuery query;
 	private boolean isDirty = false;
 	
+	
 	/*
 	 * show & hide definition and item areas when vision r script
 	 * editor as these are not a part of the r script process
@@ -120,11 +121,8 @@ public class RScriptEditor extends MultiPageEditorPart {
 	@Override
 	public void dispose() {
 		super.dispose();
-		
-		
 		IEclipseContext context = (IEclipseContext) getSite().getService(IEclipseContext.class);
 		context.get(EPartService.class).removePartListener(partListener);
-		
 	}
 	
 	@Override
@@ -133,7 +131,7 @@ public class RScriptEditor extends MultiPageEditorPart {
 		
 		if (query == null) {
 			query = new RQuery();
-			query.setName(script.getName() + "_ test ");
+			query.setName(page1.getName());
 			query.updateName(SmartDB.getCurrentLanguage(), query.getName());
 			query.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), query.getName());
 			query.setScript(script);
@@ -151,7 +149,7 @@ public class RScriptEditor extends MultiPageEditorPart {
 				setDirty(false);
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				RPlugIn.displayLog("Error saving r query: " +ex.getMessage(),ex);
+				RPlugIn.displayLog(Messages.RScriptEditor_SaveError + ex.getMessage(),ex);
 			}
 		}
 		String eventType = isNew ? RScriptManager.R_NEW : RScriptManager.R_EDIT;
@@ -162,14 +160,16 @@ public class RScriptEditor extends MultiPageEditorPart {
 	public void doSaveAs() {
 		if (this.query == null) {
 			query = new RQuery();
-			query.setName(script.getName() + "_ test ");
+			query.setName(page1.getName());
 			query.setScript(script);
 			query.updateName(SmartDB.getCurrentLanguage(), query.getName());
 			query.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), query.getName());
 			query.setConservationArea(SmartDB.getCurrentConservationArea());
 		}else {
 			RQuery newQuery = new RQuery();
-			newQuery.setName("Copy of " + query.getName());
+			newQuery.setName(Messages.RScriptEditor_CopyOfName + query.getName());
+			newQuery.updateName(SmartDB.getCurrentLanguage(), newQuery.getName());
+			newQuery.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), newQuery.getName());
 			newQuery.setScript(query.getScript());
 			this.query = newQuery;
 		}
@@ -182,7 +182,7 @@ public class RScriptEditor extends MultiPageEditorPart {
 				setDirty(false);
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
-				RPlugIn.displayLog("Error saving r query: " +ex.getMessage(),ex);
+				RPlugIn.displayLog(Messages.RScriptEditor_SaveError +ex.getMessage(),ex);
 			}
 		}
 		
@@ -229,6 +229,15 @@ public class RScriptEditor extends MultiPageEditorPart {
 		return page2.createPage2OutputStream();
 	}
 	
+	public void updateName(String newName) {
+		if (query != null) {
+			query.setName(newName);
+			query.updateName(SmartDB.getCurrentLanguage(), newName);
+		}
+		setDirty(true);
+		setPartName(newName);
+	}
+	
 	@Override
 	protected void createPages() {
 		
@@ -249,8 +258,8 @@ public class RScriptEditor extends MultiPageEditorPart {
 			setPageImage(i, RPlugIn.getDefault().getImageRegistry().get(RPlugIn.ICON_R));
 			
 		} catch (PartInitException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			RPlugIn.displayLog(e.getMessage(),e);
+			return;
 		}
 		loadScriptJob.schedule();
 		
@@ -280,6 +289,7 @@ public class RScriptEditor extends MultiPageEditorPart {
 						temp = (RQuery) session.load(RQuery.class, quuid);
 						temp.getName();
 						temp.getScript().getName();
+						temp.getNames().size();
 					}finally {
 						session.getTransaction().rollback();
 					}

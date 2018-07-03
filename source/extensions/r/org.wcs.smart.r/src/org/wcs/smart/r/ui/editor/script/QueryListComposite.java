@@ -29,6 +29,8 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
@@ -38,7 +40,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -107,13 +111,17 @@ public class QueryListComposite extends Composite{
 	}
 	
 	public void addQuery(Query query, DateFilter dFilter, String exportId) {
+		addQuery(query,dFilter, exportId, true);
+	}
+	
+	public void addQuery(Query query, DateFilter dFilter, String exportId, boolean refresh) {
 		if (!canAdd(query)) return;
 		
 		QueryItem qi = new QueryItem(query, null, null);
 		qi.lastDate = dFilter;
 		qi.lastFormat = exportId;
 		uiElements.add(qi);
-		updateList();
+		if (refresh) updateList();
 	}
 	
 	public void addQuery(Query query) {
@@ -135,7 +143,16 @@ public class QueryListComposite extends Composite{
 	private void removeQuery(QueryItem query) {
 		uiElements.remove(query);
 		updateList();
+		fireListeners();
 	}
+	
+	private void fireListeners() {
+		Event modified = new Event();
+		for(Listener l : getListeners(SWT.Selection)) {
+			l.handleEvent(modified);
+		}
+	}
+	
 	
 	private void adapt(Control c) {
 		toolkit.adapt(c,false, false);
@@ -146,7 +163,7 @@ public class QueryListComposite extends Composite{
 		}
 	}
 	
-	private void updateList() {
+	void updateList() {
 		for (Control c : list.getChildren()) c.dispose();
 		
 		Label l = toolkit.createLabel(list, Messages.QueryListComposite_NameLabel);
@@ -181,6 +198,12 @@ public class QueryListComposite extends Composite{
 				if (q.lastDate != null) {
 					dateComposite.setDateFilter((DateFilter)q.lastDate);
 				}
+				dateComposite.addChangeListener(new ISelectionChangedListener() {
+					@Override
+					public void selectionChanged(SelectionChangedEvent event) {
+						fireListeners();
+					}
+				});
 			}else {
 				toolkit.createLabel(list, ""); //$NON-NLS-1$
 			}
@@ -197,7 +220,6 @@ public class QueryListComposite extends Composite{
 				}
 			});
 			cmbFormat.setInput(exports);
-			
 			
 			if (q.lastFormat != null) {
 				String id = (String) q.lastFormat;
@@ -219,6 +241,12 @@ public class QueryListComposite extends Composite{
 				}
 				cmbFormat.setSelection(new StructuredSelection(selection));
 			}
+			cmbFormat.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					fireListeners();
+				}
+			});
 			
 			ToolBar btn = new ToolBar(list, SWT.FLAT);
 			adapt(btn);
@@ -231,6 +259,7 @@ public class QueryListComposite extends Composite{
 				uiElements.remove(q);
 				uiElements.add(index, q);
 				updateList();
+				fireListeners();
 			});
 			
 			ToolItem moveDown = new ToolItem(btn, SWT.PUSH );
@@ -242,6 +271,7 @@ public class QueryListComposite extends Composite{
 				if (index > uiElements.size()) index = uiElements.size();
 				uiElements.add(index, q);
 				updateList();
+				fireListeners();
 			});
 			
 			ToolItem miDelete = new ToolItem(btn, SWT.PUSH);

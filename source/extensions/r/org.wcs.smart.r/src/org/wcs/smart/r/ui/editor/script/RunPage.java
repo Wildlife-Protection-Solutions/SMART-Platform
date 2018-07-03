@@ -59,8 +59,6 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
-import org.wcs.smart.r.RPlugIn;
-import org.wcs.smart.r.engine.QueryConfiguration;
 import org.wcs.smart.r.engine.REngine;
 import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.r.model.RQuery;
@@ -81,6 +79,7 @@ public class RunPage extends EditorPart {
 	
 	private QueryListComposite queryList;
 	private RScriptEditor parent;
+	private HeaderComposite header;
 	
 	public RunPage(RScriptEditor parent) {
 		this.parent = parent;
@@ -116,38 +115,24 @@ public class RunPage extends EditorPart {
 	}
 
 	void updateQuery(RQuery query) {
-		JSONObject items = new JSONObject();
-		items.put("p", txtParameters.getText());
-		
-		JSONArray array = new JSONArray();
-		for (QueryConfiguration cc : queryList.getQueries()) {
-			JSONObject jquery = new JSONObject();
-			
-			jquery.put("t", cc.getQuery().getTypeKey());
-			jquery.put("u", UuidUtils.uuidToString(cc.getQuery().getUuid()));
-			jquery.put("e", cc.getQueryExporter().getId());
-			jquery.put("d", cc.getDateFilter().asString());
-			
-			array.add(jquery);
-		}
-		items.put("q",array);
-		query.setConfiguration(items.toJSONString());
+		query.setConfiguration(RQuery.toConfigurationString(txtParameters.getText(), queryList.getQueries()));
 	}
 	
 	private void parse(RQuery query) throws ParseException {
 		JSONParser jsonParser = new JSONParser();
 		JSONObject items = (JSONObject) jsonParser.parse(query.getConfiguration());
 		
-		String params = (String)items.get("p");
+		String params = (String)items.get(RQuery.PARAM_JSONKEY);
 		txtParameters.setText(params);
-		JSONArray queries = (JSONArray)items.get("q");
+		JSONArray queries = (JSONArray)items.get(RQuery.QUERY_JSONKEY);
+
 		for (Object q : queries.toArray()) {
 			JSONObject item = (JSONObject)q;
 			
-			String typeKey = (String) item.get("t");
-			UUID qUuid = UuidUtils.stringToUuid((String)item.get("u"));
-			String eFormat = (String) item.get("e");
-			String dates = (String)item.get("d");
+			String typeKey = (String) item.get(RQuery.QTYPE_JSONKEY);
+			UUID qUuid = UuidUtils.stringToUuid((String)item.get(RQuery.QUUID_JSONKEY));
+			String eFormat = (String) item.get(RQuery.QEXPORT_JSONKEY);
+			String dates = (String)item.get(RQuery.QDATE_JSON_KEY);
 			
 			IQueryType qType = QueryTypeManager.INSTANCE.findQueryType(typeKey);
 			DateFilter dFilter = null;
@@ -161,8 +146,9 @@ public class RunPage extends EditorPart {
 			try(Session session = HibernateManager.openSession()){
 				dbquery = QueryHibernateManager.getInstance().findQuery(session, qUuid, qType);
 			}
-			if (dbquery != null) queryList.addQuery(dbquery, dFilter, eFormat);
+			if (dbquery != null) queryList.addQuery(dbquery, dFilter, eFormat, false);
 		}
+		queryList.updateList();
 		
 	}
 	void executeScript() {
@@ -171,6 +157,11 @@ public class RunPage extends EditorPart {
 		engine.execute();
 		
 	}
+	
+	String getName() {
+		return header.getText();
+	}
+	
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
@@ -178,9 +169,16 @@ public class RunPage extends EditorPart {
 		mainForm = toolkit.createForm(parent);
 		mainForm.getBody().setLayout(new GridLayout());
 		
+		header = new HeaderComposite(mainForm.getBody(), toolkit, mainForm.getFont(), mainForm.getForeground());
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		header.addListener(SWT.Selection, e->{
+			RunPage.this.parent.updateName(e.text);
+		});
+		
 		Composite main = toolkit.createComposite(mainForm.getBody(), SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		
 		Label l = toolkit.createLabel(main, Messages.RunPage_Parameters);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
@@ -194,6 +192,7 @@ public class RunPage extends EditorPart {
 		
 		queryList = new QueryListComposite(main);
 		queryList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		queryList.addListener(SWT.Selection, e->RunPage.this.parent.setDirty(true));
 		
 		DropTarget dtarget = new DropTarget(queryList, DND.DROP_MOVE);
 		dtarget.setTransfer(new Transfer[] { LocalSelectionTransfer.getTransfer() });
@@ -255,20 +254,17 @@ public class RunPage extends EditorPart {
 
 	public void update() {
 		if (parent.getQuery() != null) {
-			mainForm.setText(parent.getQuery().getName());
-			mainForm.setImage(RPlugIn.getDefault().getImageRegistry().get(RPlugIn.ICON_R));
-			
+			header.setText(parent.getQuery().getName());
 			try {
 				parse(parent.getQuery());
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
 		}else {
 			RScript script = parent.getScript();
-			mainForm.setText(script.getName());
-			mainForm.setImage(RPlugIn.getDefault().getImageRegistry().get(RPlugIn.ICON_R));
+			header.setText(script.getName());
+//			mainForm.setImage(RPlugIn.getDefault().getImageRegistry().get(RPlugIn.ICON_R));
 			txtParameters.setText(script.getDefaultParameters());
 		}
 	}
