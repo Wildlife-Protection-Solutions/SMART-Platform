@@ -28,9 +28,11 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.e4.ui.services.internal.events.EventBroker;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.r.RPlugIn;
+import org.wcs.smart.r.RScriptManager;
 
 /**
  * Manage R script handler
@@ -49,6 +51,8 @@ public class ShowRScriptHandler {
 			Dialog d = (Dialog)RScriptListDialog.class.getDeclaredConstructor(Shell.class).newInstance(activeShell);
 			ContextInjectionFactory.inject(d, context);
 			d.open();
+			
+			context.get(EventBroker.class).post(RScriptManager.R_SCRIPT, null);
 		}catch (Exception ex){
 			RPlugIn.displayLog(ex.getMessage(), ex);
 		}

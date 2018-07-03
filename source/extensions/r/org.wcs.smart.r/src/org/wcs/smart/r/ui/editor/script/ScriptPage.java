@@ -100,10 +100,24 @@ public class ScriptPage extends EditorPart {
 		
 		if (RScriptManager.INSTANCE.canEditScript()) {
 			Composite header = new Composite(main, SWT.NONE);
-			header.setLayout(new GridLayout(2, false));
+			header.setLayout(new GridLayout(3, false));
 			((GridLayout)header.getLayout()).marginWidth = 0;
 			((GridLayout)header.getLayout()).marginHeight = 0;
 			header.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			
+			Hyperlink lnkRefresh = toolkit.createHyperlink(header, Messages.ScriptPage_ReloadLink, SWT.NONE);
+			lnkRefresh.setToolTipText(Messages.ScriptPage_ReloadTooltip);
+			lnkRefresh.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			lnkRefresh.addHyperlinkListener(new IHyperlinkListener() {
+				@Override
+				public void linkExited(HyperlinkEvent e) {}
+				@Override
+				public void linkEntered(HyperlinkEvent e) {}
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					update();
+				}
+			});
 			
 			Hyperlink lnkEdit = toolkit.createHyperlink(header, Messages.ScriptPage_showlink, SWT.NONE);
 			lnkEdit.setToolTipText(Messages.ScriptPage_showtooltip);
@@ -115,7 +129,7 @@ public class ScriptPage extends EditorPart {
 				public void linkEntered(HyperlinkEvent e) {}
 				@Override
 				public void linkActivated(HyperlinkEvent e) {
-					AttachmentUtil.launch(RScriptManager.INSTANCE.getScriptPath(ScriptPage.this.parent.getScript()).getParent().toFile());
+					AttachmentUtil.launch(RScriptManager.INSTANCE.getScriptPath(ScriptPage.this.parent.getQuery().getScript()).getParent().toFile());
 				}
 			});
 			
@@ -129,7 +143,7 @@ public class ScriptPage extends EditorPart {
 				public void linkEntered(HyperlinkEvent e) {}
 				@Override
 				public void linkActivated(HyperlinkEvent e) {
-					AttachmentUtil.launch(RScriptManager.INSTANCE.getScriptPath(ScriptPage.this.parent.getScript()).toFile());
+					AttachmentUtil.launch(RScriptManager.INSTANCE.getScriptPath(ScriptPage.this.parent.getQuery().getScript()).toFile());
 				}
 			});
 		}
@@ -146,7 +160,7 @@ public class ScriptPage extends EditorPart {
 	
 	public void update() {
 		txtScript.setText(""); //$NON-NLS-1$
-		Path fileToRead = RScriptManager.INSTANCE.getScriptPath(parent.getScript());
+		Path fileToRead = RScriptManager.INSTANCE.getScriptPath(parent.getQuery().getScript());
 		if (fileToRead == null || !Files.exists(fileToRead)) {
 			txtScript.setText(Messages.ScriptPage_NotFound);
 		}else {

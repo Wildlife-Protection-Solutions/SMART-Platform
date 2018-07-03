@@ -87,34 +87,17 @@ public class HeaderComposite extends Composite {
 		lblType.setText(Messages.HeaderComposite_QueryType);
 		super.layout();
 	}
-	
-	
+		
 	private void createComposite(Font headerFont, Color headerColor, FormToolkit toolkit) {
-		GridLayout gl = new GridLayout(4, false);
+		GridLayout gl = new GridLayout(3, false);
 		gl.marginHeight = 0;
 		gl.verticalSpacing = 0;
 		setLayout(gl);
-		lblType = toolkit.createLabel(this, "");  //$NON-NLS-1$
-		lblType.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 4, 1));
-		FontData[] fd = lblType.getFont().getFontData();
-		fd[0].setHeight(fd[0].getHeight()-1);
-		final Font f = new Font(lblType.getDisplay(), fd[0]);
-		lblType.setFont(f);
-		lblType.addDisposeListener(new DisposeListener() {
-			
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				f.dispose();
-			}
-		});
 		
 		Label img = toolkit.createLabel(this,""); //$NON-NLS-1$
 		img.setImage(RPlugIn.getDefault().getImageRegistry().get(RPlugIn.ICON_R));
-		
-		Label lblSummary = toolkit.createLabel(this, Messages.HeaderComposite_HeaderPart);
-		lblSummary.setForeground(headerColor);
-		lblSummary.setFont(headerFont);
-		
+		img.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
 		final Composite it = toolkit.createComposite(this);
 		it.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -198,6 +181,22 @@ public class HeaderComposite extends Composite {
 			public void mouseDoubleClick(MouseEvent e) {
 			}
 		});
+		
+		lblType = toolkit.createLabel(this, "");  //$NON-NLS-1$
+		lblType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		FontData[] fd = lblType.getFont().getFontData();
+		fd[0].setHeight(fd[0].getHeight()-1);
+		final Font f = new Font(lblType.getDisplay(), fd[0]);
+		lblType.setFont(f);
+		lblType.addDisposeListener(new DisposeListener() {
+			
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				f.dispose();
+			}
+		});
+		
+		
 	}
 	
 	private boolean validateName(String name){
@@ -219,7 +218,4 @@ public class HeaderComposite extends Composite {
 		}
 	}
 	
-	public String getText() {
-		return name;
-	}
 }

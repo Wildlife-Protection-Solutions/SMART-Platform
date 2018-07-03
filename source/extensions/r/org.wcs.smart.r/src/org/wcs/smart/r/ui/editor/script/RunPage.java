@@ -29,6 +29,7 @@ import java.util.UUID;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
@@ -44,8 +45,11 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
@@ -62,7 +66,7 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.r.engine.REngine;
 import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.r.model.RQuery;
-import org.wcs.smart.r.model.RScript;
+import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -76,6 +80,7 @@ public class RunPage extends EditorPart {
 	
 	private Form mainForm; 
 	private Text txtParameters;
+	private Label txtScriptName;
 	
 	private QueryListComposite queryList;
 	private RScriptEditor parent;
@@ -119,6 +124,7 @@ public class RunPage extends EditorPart {
 	}
 	
 	private void parse(RQuery query) throws ParseException {
+		if (query.getConfiguration() == null || query.getConfiguration().isEmpty()) return;
 		JSONParser jsonParser = new JSONParser();
 		JSONObject items = (JSONObject) jsonParser.parse(query.getConfiguration());
 		
@@ -153,13 +159,17 @@ public class RunPage extends EditorPart {
 	}
 	void executeScript() {
 		parent.showResults();
-		REngine engine = new REngine(parent.getScript(), queryList.getQueries(),txtParameters.getText(),parent.createPage2OutputStream());
+		REngine engine = new REngine(parent.getQuery().getScript(), queryList.getQueries(),txtParameters.getText(),parent.createPage2OutputStream());
 		engine.execute();
 		
 	}
 	
-	String getName() {
-		return header.getText();
+	private void translate() {
+		TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(mainForm.getShell(), RunPage.this.parent.getQuery());
+		if (dialog.open() == Window.OK) {
+			RunPage.this.parent.updateName( RunPage.this.parent.getQuery().getName() );
+			header.setText(RunPage.this.parent.getQuery().getName());
+		}
 	}
 	
 	@Override
@@ -169,7 +179,15 @@ public class RunPage extends EditorPart {
 		mainForm = toolkit.createForm(parent);
 		mainForm.getBody().setLayout(new GridLayout());
 		
-		header = new HeaderComposite(mainForm.getBody(), toolkit, mainForm.getFont(), mainForm.getForeground());
+		Composite top = toolkit.createComposite(mainForm.getBody(), SWT.NONE);
+		top.setLayout(new GridLayout(2, false));
+		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)top.getLayout()).marginWidth = 0;
+		((GridLayout)top.getLayout()).marginHeight = 0;
+		
+		header = new HeaderComposite(top, toolkit, mainForm.getFont(), mainForm.getForeground()) {
+			
+		};
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		header.addListener(SWT.Selection, e->{
 			RunPage.this.parent.updateName(e.text);
@@ -179,8 +197,34 @@ public class RunPage extends EditorPart {
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		Composite scriptName = toolkit.createComposite(main, SWT.NONE);
+		scriptName.setLayout(new GridLayout(3, false));
+		scriptName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false,false));
+		((GridLayout)scriptName.getLayout()).marginWidth = 0;
+		((GridLayout)scriptName.getLayout()).marginHeight = 0;
 		
-		Label l = toolkit.createLabel(main, Messages.RunPage_Parameters);
+
+		Label l = toolkit.createLabel(scriptName, Messages.RunPage_RScriptLabel);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		txtScriptName = toolkit.createLabel(scriptName, ""); //$NON-NLS-1$
+		txtScriptName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Hyperlink translate = toolkit.createHyperlink(scriptName, Messages.HeaderComposite_translateLink, SWT.NONE);
+		translate.addHyperlinkListener(new IHyperlinkListener() {
+			@Override
+			public void linkExited(HyperlinkEvent e) { }
+			@Override
+			public void linkEntered(HyperlinkEvent e) { }
+			
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				translate();
+			}
+		});
+		translate.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
+		
+		l = toolkit.createLabel(main, Messages.RunPage_Parameters);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		txtParameters = toolkit.createText(main, "", SWT.V_SCROLL | SWT.WRAP); //$NON-NLS-1$
@@ -253,20 +297,13 @@ public class RunPage extends EditorPart {
 	
 
 	public void update() {
-		if (parent.getQuery() != null) {
-			header.setText(parent.getQuery().getName());
-			try {
-				parse(parent.getQuery());
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-			
-		}else {
-			RScript script = parent.getScript();
-			header.setText(script.getName());
-//			mainForm.setImage(RPlugIn.getDefault().getImageRegistry().get(RPlugIn.ICON_R));
-			txtParameters.setText(script.getDefaultParameters());
-		}
+		txtScriptName.setText(parent.getQuery().getScript().getName());
+		header.setText(parent.getQuery().getName());
+		try {
+			parse(parent.getQuery());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}		
 	}
 	
 	@Override

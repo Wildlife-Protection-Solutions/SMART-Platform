@@ -10,6 +10,7 @@ public class Messages extends NLS {
 	public static String HeaderComposite_NameToLongMessage;
 	public static String HeaderComposite_NameToLongTitle;
 	public static String HeaderComposite_QueryType;
+	public static String HeaderComposite_translateLink;
 	public static String QueryListComposite_DataFilterLabel;
 	public static String QueryListComposite_ExportLabel;
 	public static String QueryListComposite_Message1;
@@ -86,6 +87,7 @@ public class Messages extends NLS {
 	public static String RScriptView_RQueryLabel;
 	public static String RScriptView_RScirptLabel;
 	public static String RunPage_Parameters;
+	public static String RunPage_RScriptLabel;
 	public static String RunPage_RunButton;
 	public static String RunPage_ScriptName;
 	public static String RunRScriptHandler_ErrorTitle;
@@ -96,6 +98,8 @@ public class Messages extends NLS {
 	public static String ScriptPage_edittooltip;
 	public static String ScriptPage_NotFound;
 	public static String ScriptPage_ReadError;
+	public static String ScriptPage_ReloadLink;
+	public static String ScriptPage_ReloadTooltip;
 	public static String ScriptPage_showlink;
 	public static String ScriptPage_showtooltip;
 	static {

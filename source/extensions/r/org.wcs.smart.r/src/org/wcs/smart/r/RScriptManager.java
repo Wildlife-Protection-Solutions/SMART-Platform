@@ -45,6 +45,7 @@ public enum RScriptManager {
 	public static final String R_NEW = "R_SCRIPT/NEW"; //$NON-NLS-1$
 	public static final String R_EDIT = "R_SCRIPT/EDIT"; //$NON-NLS-1$
 	public static final String R_DELETE = "R_SCRIPT/DELETE"; //$NON-NLS-1$
+	public static final String R_SCRIPT = "R_SCRIPT/SCRIPTS"; //$NON-NLS-1$
 	
 	public static final String RSCRIPT_DIR = "rscripts"; //$NON-NLS-1$
 	
