@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.upgrade.v600;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -177,7 +178,7 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 	private void encryptFilestoreData(Connection c) throws Exception {
 		//here we are encrypting all attachment files
 		String[] subDirs = new String[]
-				{"incidents", "intelligence", "intelligence2\\attachments", "patrol", "survey"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				{"incidents", "intelligence", "intelligence2" + File.separator + "attachments", "patrol", "survey"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		String query = "SELECT uuid FROM smart.conservation_area"; //$NON-NLS-1$
 		
 		Path tempDir = Paths.get(SmartContext.INSTANCE.getFilestoreLocation())
