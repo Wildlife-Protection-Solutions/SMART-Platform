@@ -311,7 +311,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		reg.put(CLEAR_STYLE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/clearstyle.png")); //$NON-NLS-1$
 		
 		reg.put(CLEAR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/clear.png")); //$NON-NLS-1$
-		reg.put(RUN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/run_query.png")); //$NON-NLS-1$
+		reg.put(RUN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/bullet_go.png")); //$NON-NLS-1$
 		super.initializeImageRegistry(reg);
 		
 	}
