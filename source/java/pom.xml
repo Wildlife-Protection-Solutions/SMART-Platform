@@ -330,6 +330,10 @@
 				<module>../extensions/event/org.wcs.smart.event.i2</module>
 				<module>../extensions/event/org.wcs.smart.event.i2.feature</module>
 				
+				<module>../extensions/r/org.wcs.smart.r</module>
+				<module>../extensions/r/org.wcs.smart.r.core.feature</module>
+				<module>../extensions/r/org.wcs.smart.r.feature</module>
+				
 			</modules>
 		</profile>
 		<profile>
