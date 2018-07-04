@@ -407,6 +407,12 @@
     			<version>${smart.version}</version>
 		</dependency>
 		
+		<dependency>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.r</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		
 		<!-- JTS -->
 		<dependency>
     			<groupId>com.vividsolutions</groupId>

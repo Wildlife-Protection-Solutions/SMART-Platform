@@ -218,6 +218,8 @@ import org.wcs.smart.query.common.model.WaypointQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.StyledQuery;
+import org.wcs.smart.r.model.RQuery;
+import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.ReportQuery;
@@ -436,7 +438,10 @@ public enum SmartTable {
 	EVENT_ACTION(EAction.class, null),
 	EVENT_FILTER(EFilter.class, null),
 	EVENT_ACTIONEVENT(EActionEvent.class, ".action.conservationArea"),
-	EVENT_ACTIONPARAMETERVALUE(EActionParameterValue.class, ".id.action.conservationArea")
+	EVENT_ACTIONPARAMETERVALUE(EActionParameterValue.class, ".id.action.conservationArea"),
+	
+	R_QUERY(RQuery.class, null),
+	R_SCRIPT(RScript.class, null)
 	;
 	
 	public Class<?> hibernateClass;
