@@ -336,6 +336,34 @@ public class CreateEntityActionType implements IActionType {
 				}
 				newEntity.getAttributes().add(idvalue);
 			}
+			
+			
+			if (newEntity.getEntityType().getIdAttribute().getType() == IntelAttribute.AttributeType.TEXT) {
+				//if it's a text attribute make sure it is unique.  We do not ensure uniqueness for
+				//other attribute types
+				String baseName = newEntity.getIdAttributeAsText();
+								
+				int loop = 0;
+				String id = baseName;
+				while(loop < 5000) {
+					id = baseName + (loop > 0 ? " " + loop : ""); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					Long cnt = (Long) session.createQuery("SELECT count(*) FROM IntelEntityAttributeValue where stringValue = :it and id.attribute = :attribute and id.entity.entityType = :type and id.entity.conservationArea = :ca") //$NON-NLS-1$
+						.setParameter("attribute", newEntity.getEntityType().getIdAttribute()) //$NON-NLS-1$
+						.setParameter("it", id) //$NON-NLS-1$
+						.setParameter("type", newEntity.getEntityType()) //$NON-NLS-1$
+						.setParameter("ca", newEntity.getConservationArea()).uniqueResult(); //$NON-NLS-1$
+					if (cnt == 0) break;
+					loop++;
+				}
+				for (IntelEntityAttributeValue v : newEntity.getAttributes() ) {
+					if (v.getAttribute().equals(newEntity.getEntityType().getIdAttribute())) {
+						v.setStringValue(id);
+						break;
+					}
+				}
+			}
+			
 			try{
 				session.beginTransaction();
 				for (IntelEntityAttachment a : newEntity.getEntityAttachments()) {
@@ -346,7 +374,6 @@ public class CreateEntityActionType implements IActionType {
 			}catch (Exception ex) {
 				EventPlugIn.log(ex.getMessage(), ex);
 				return;
-				
 			}
 		}
 		
