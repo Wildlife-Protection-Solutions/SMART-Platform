@@ -5,7 +5,7 @@
       version="6.0.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="6.0.0.qualifier">
+      license-feature-version="6.0.1.qualifier">
 
    <description>
       The Indonesian translations for the Ecological Records Indonesian plugin.
