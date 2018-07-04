@@ -282,6 +282,9 @@
    <feature url="features/org.wcs.smart.intelligence.feature.nl_zh_6.0.0.jar" id="org.wcs.smart.intelligence.feature.nl_zh" version="6.0.0">
       <category name="intelligence"/>
    </feature>
+   <feature url="features/org.wcs.smart.r.feature_6.0.0.qualifier.jar" id="org.wcs.smart.r.feature" version="6.0.0.qualifier">
+      <category name="r"/>
+   </feature>
    <category-def name="intelligence" label="SMART Intelligence Plug-in">
       <description>
          The SMART Intelligence plug-in contains the choice of two intelligence modules that allows users to organize, maintain and query intelligence information. Intelligence information may have been gathered by earlier patrols, or may have been received from external sources. Intelligence information may be useful to Conservation Area managers when they plan future patrols.
@@ -340,6 +343,11 @@
    <category-def name="events" label="SMART Triggers Plug-in">
       <description>
          The SMART Triggers plug-in is designed to work with the Profiles plug-in.  It allows users to automatically create new records in their Profiles system when particular types of observation data are imported into SMART. This allows users to automatically update their Profiles tracking system as soon as any relevant data is entered into SMART. Data that will trigger the system can come from any of the data inputs: patrol data, field sensors, independent incidents or ecological monitoring missions.
+      </description>
+   </category-def>
+   <category-def name="r" label="R Scripts Plug-in">
+      <description>
+         The SMART R Script plug-in supports the use of R within the SMART Desktop environment.  R Scripts can be imported into and run from within SMART using the results from queries as parameters to the scripts.
       </description>
    </category-def>
 </site>

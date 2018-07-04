@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.r.ui.view.script;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -335,6 +336,10 @@ public class RScriptView {
 					scripts.add(new UuidItem(Type.SCRIPT, s.getName(),s.getUuid()));
 				}
 			}
+			
+			Collections.sort(queries);
+			Collections.sort(scripts);
+			
 			Display.getDefault().syncExec(()->{
 				itemViewer.setInput(Collections.emptyList());
 				itemViewer.refresh();
@@ -355,15 +360,20 @@ public class RScriptView {
 	
 	private enum Type{QUERY, SCRIPT};
 
-	private class UuidItem {
+	private class UuidItem implements Comparable<UuidItem>{
 		String name;
 		UUID uuid;
 		Type type;
+		
 		public UuidItem(Type type, String name, UUID uuid) {
 			this.name = name;
 			this.type = type;
 			this.uuid = uuid;
-			
+		}
+		
+		@Override
+		public int compareTo(UuidItem o) {
+			return Collator.getInstance().compare(name,  ((UuidItem)o).name);
 		}
 	}
 }

@@ -73,7 +73,7 @@
 		<module>../extensions/asset/org.wcs.smart.asset.query.report/pom-shared.xml</module>
 		
 		<module>../extensions/event/org.wcs.smart.event/pom-shared.xml</module>
-
+		<module>../extensions/r/org.wcs.smart.r/pom-shared.xml</module>
 	</modules>
  
 	<build>

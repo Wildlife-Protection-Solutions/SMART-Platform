@@ -21,9 +21,17 @@
  */
 package org.wcs.smart.r.engine;
 
+import java.util.List;
+
+import javax.persistence.Transient;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
+import org.wcs.smart.r.model.RQuery;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query configuration for r script
@@ -53,5 +61,33 @@ public class QueryConfiguration {
 	
 	public DateFilter getDateFilter() {
 		return this.dateFilter;
+	}
+	
+	/**
+	 * Converts to configuration string to be stored with query
+	 * 
+	 * @param param
+	 * @param queries
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@Transient
+	public static String toConfigurationString(String param, List<QueryConfiguration> queries) {
+		JSONObject items = new JSONObject();
+		items.put(RQuery.PARAM_JSONKEY, param);
+		
+		JSONArray array = new JSONArray();
+		for (QueryConfiguration cc : queries) {
+			JSONObject jquery = new JSONObject();
+			
+			jquery.put(RQuery.QTYPE_JSONKEY, cc.getQuery().getTypeKey());
+			jquery.put(RQuery.QUUID_JSONKEY, UuidUtils.uuidToString(cc.getQuery().getUuid()));
+			jquery.put(RQuery.QEXPORT_JSONKEY, cc.getQueryExporter().getId());
+			jquery.put(RQuery.QDATE_JSON_KEY, cc.getDateFilter().asString());
+			
+			array.add(jquery);
+		}
+		items.put(RQuery.QUERY_JSONKEY,array);
+		return items.toJSONString();
 	}
 }

@@ -35,6 +35,11 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 
+/**
+ * R Script object 
+ * @author Emily
+ *
+ */
 @Entity
 @Table(name="smart.r_script")
 public class RScript extends NamedItem {

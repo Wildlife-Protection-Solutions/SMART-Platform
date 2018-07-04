@@ -50,15 +50,14 @@ public class DeleteCaHandler implements ICaDeleteHandler {
 	
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
-		//TODO: delete all r plugin specific data from the conservation area
 		
 		monitor.subTask("removing R plugin data"); //$NON-NLS-1$
 		
-		Query<?>  q = session.createQuery("delete from RScriptParameter sa where sa.script in (from RScript a where conservationArea = :ca)"); //$NON-NLS-1$
+		Query<?>  q = session.createQuery("DELETE from RQuery where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		q = session.createQuery("delete from RScript a where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createQuery("DELETE from RScript where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();		
 	}

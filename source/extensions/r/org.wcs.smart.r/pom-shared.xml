@@ -10,15 +10,15 @@
 	
 	<modelVersion>4.0.0</modelVersion>
 	
-	<artifactId>org.wcs.smart.r</artifactId>
+	<artifactId>org.wcs.smart.core.r</artifactId>
 	<name>SMART R Module</name>
 	<packaging>bundle</packaging>
 	
 	<dependencies>
 		<dependency>
-    			<groupId>org.wcs.smart.core</groupId>
-    			<artifactId>org.wcs.smart.core.core</artifactId>
-    			<version>${smart.version}</version>
+    		<groupId>org.wcs.smart.core</groupId>
+    		<artifactId>org.wcs.smart.core.core</artifactId>
+    		<version>${smart.version}</version>
 		</dependency>
 	</dependencies>	
 </project>

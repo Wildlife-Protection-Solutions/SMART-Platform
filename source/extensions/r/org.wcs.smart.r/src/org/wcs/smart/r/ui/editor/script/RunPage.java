@@ -63,6 +63,7 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.r.engine.QueryConfiguration;
 import org.wcs.smart.r.engine.REngine;
 import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.r.model.RQuery;
@@ -120,7 +121,7 @@ public class RunPage extends EditorPart {
 	}
 
 	void updateQuery(RQuery query) {
-		query.setConfiguration(RQuery.toConfigurationString(txtParameters.getText(), queryList.getQueries()));
+		query.setConfiguration(QueryConfiguration.toConfigurationString(txtParameters.getText(), queryList.getQueries()));
 	}
 	
 	private void parse(RQuery query) throws ParseException {

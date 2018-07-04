@@ -173,5 +173,11 @@
          </view>
       </perspectiveExtension>
    </extension>
+   <extension
+         point="org.wcs.smart.caFilestoreDir">
+      <FilestoreDirectory
+            directory="rscripts">
+      </FilestoreDirectory>
+   </extension>
 
 </plugin>

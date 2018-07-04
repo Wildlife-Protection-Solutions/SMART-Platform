@@ -195,7 +195,7 @@ public class UploadCaEngine {
 					progress.setWorkRemaining(0);
 				}
 			}catch(Exception ex){
-				throw new Exception(Messages.UploadCaEngine_ConfigureError + ex.getMessage(), ex);
+				throw new Exception(Messages.UploadCaEngine_ConfigureError + (ex.getMessage() == null ? "" : ex.getMessage()), ex);
 			}
 			
 			Display.getDefault().syncExec(new Runnable(){
