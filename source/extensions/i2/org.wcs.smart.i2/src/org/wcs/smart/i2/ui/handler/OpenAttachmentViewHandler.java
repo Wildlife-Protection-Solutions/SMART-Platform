@@ -55,22 +55,27 @@ public class OpenAttachmentViewHandler {
 
 	public void execute(IntelAttachment attachment, IEclipseContext context){
 		Image rawImage = null;
-		try{
-			Path p = EncryptUtils.decryptAttachment(attachment);
-			try {
-				rawImage = new Image(Display.getDefault(), p.toString());
-			}finally {
-				if (p != null) {
-					try {
-						Files.delete(p);
-					}catch (Exception ex) {
-						
+		if (attachment.getUuid() == null) {
+			//not yet saved and encrypted
+			rawImage = new Image(Display.getDefault(), attachment.getCopyFromLocation().toPath().toString());
+		}else {
+			try{
+				Path p = EncryptUtils.decryptAttachment(attachment);
+				try {
+					rawImage = new Image(Display.getDefault(), p.toString());
+				}finally {
+					if (p != null) {
+						try {
+							Files.delete(p);
+						}catch (Exception ex) {
+							
+						}
 					}
 				}
+			}catch (Exception ex){
+				MessageDialog.openError(context.get(Shell.class), Messages.OpenAttachmentViewHandler_InvalidTitle, Messages.OpenAttachmentViewHandler_InvalidMsg);
+				return;
 			}
-		}catch (Exception ex){
-			MessageDialog.openError(context.get(Shell.class), Messages.OpenAttachmentViewHandler_InvalidTitle, Messages.OpenAttachmentViewHandler_InvalidMsg);
-			return;
 		}
 		
 		try{
