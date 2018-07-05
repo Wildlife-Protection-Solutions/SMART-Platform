@@ -106,7 +106,15 @@ public class ApiAuthorizationFilter implements Filter {
 					((HttpServletResponse)response).sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.InvalidUuid", request.getLocale())); //$NON-NLS-1$
 					return;
 				}
-				link.setOwnerUsername( ((SmartUser)session.get(SmartUser.class, link.getOwnerUuid())).getUsername() );
+				UUID useruuid = link.getPermissionUserUuid();
+				if (useruuid == null) useruuid = link.getOwnerUuid();
+				
+				SmartUser user = (SmartUser)session.get(SmartUser.class, useruuid);
+				if (user == null) {
+					((HttpServletResponse)response).sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkExpired", request.getLocale())); //$NON-NLS-1$
+					return;
+				}
+				link.setPermissionUsername( user.getUsername() );
 			}finally{
 				session.getTransaction().commit();
 			}
@@ -123,7 +131,7 @@ public class ApiAuthorizationFilter implements Filter {
 					if(link.getAllowedIp() == null || link.getAllowedIp().isEmpty() || link.getAllowedIp().equals(userip)){
 						//Fill out the username with the link creator. This allows the Query Api to re-check if this user still has access to the query, or if it was revoked, which should revoke all links that user created.
 						
-						UserRoleRequestWrapper wrappedRequest = new UserRoleRequestWrapper(link.getOwnerUsername(), r);
+						UserRoleRequestWrapper wrappedRequest = new UserRoleRequestWrapper(link.getPermissionUsername(), r);
 						
 						// pass the wrapped request along the filter chain
 						chain.doFilter(wrappedRequest, response);

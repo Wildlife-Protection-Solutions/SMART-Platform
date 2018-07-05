@@ -40,6 +40,7 @@ import javax.persistence.Transient;
 public class SharedLink extends ConnectUuidItem{
 	
 	private UUID ownerUuid;
+	private UUID permissionUserUuid;
 	private UUID caUuid;
 	private Timestamp expiresAt;
 	private Timestamp dateCreated;
@@ -50,6 +51,11 @@ public class SharedLink extends ConnectUuidItem{
 	@Transient
 	private int expiresAfter; //for json objects in minutes
 	
+	@Transient
+	public String permissionUsername;	//the username of the permission user
+	@Transient
+	public String ownerUsername;	//the username of the creator of this link
+	
 	
 	@Column(name="allowed_ip")
 	public String getAllowedIp() {
@@ -59,16 +65,20 @@ public class SharedLink extends ConnectUuidItem{
 		this.allowedIp = allowedIp;
 	}
 	
-	@Transient
-	public String ownerUsername;
-	
-	
 	@Column(name="owner_uuid")
 	public UUID getOwnerUuid() {
 		return ownerUuid;
 	}
 	public void setOwnerUuid(UUID ownerUuid) {
 		this.ownerUuid = ownerUuid;
+	}
+	
+	@Column(name="permissionuser_uuid")
+	public UUID getPermissionUserUuid() {
+		return permissionUserUuid;
+	}
+	public void setPermissionUserUuid(UUID permissionUserUuid) {
+		this.permissionUserUuid = permissionUserUuid;
 	}
 	
 	@Column(name="expires_at")
@@ -110,6 +120,14 @@ public class SharedLink extends ConnectUuidItem{
 	}
 	public void setConservationArea(UUID caUuid) {
 		this.caUuid = caUuid;
+	}
+	
+	@Transient
+	public String getPermissionUsername(){
+		return this.permissionUsername;
+	}
+	public void setPermissionUsername(String permissionUsername){
+		this.permissionUsername = permissionUsername;
 	}
 	
 	@Transient

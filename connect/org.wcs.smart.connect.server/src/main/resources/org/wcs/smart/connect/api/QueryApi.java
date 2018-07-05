@@ -284,11 +284,11 @@ public class QueryApi extends HttpServlet{
 	
 	private QueryResult executeCoreQuery(Query query, String cafilter, DateFilter df, String srid, String format, String delimiter, String sortColumnName, QueryApi.Direction sortDirectionInt, Session s) throws Exception {
 		IQueryResult result = null;
-		
 		if (query == null){
 			//query not found
 			return new QueryResult(Response.status(Status.NOT_FOUND).build());
 		}
+		UUID queryUuid = query.getUuid();	//we clone the query below but do not clone the original uuid so we want to track that here
 		if (!QueryManager.INSTANCE.supportsDateField(query.getTypeKey(), df.getDateFieldOption())){
 			return new QueryResult(createErrorResponse(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("QueryApi.InvalidDateFilterForQueryType", SmartUtils.getRequestLocale(request)), df.getDateFieldOption().getGuiName(request.getLocale()), query.getTypeKey()))); //$NON-NLS-1$
 		}
@@ -304,7 +304,7 @@ public class QueryApi extends HttpServlet{
 		String name = request.getUserPrincipal().getName();
 			
 		//check for permission to this query for this user.
-		if (!SecurityManager.INSTANCE.canAccess(s, name, QueryAction.RUNQUERY_KEY,  query.getUuid())){
+		if (!SecurityManager.INSTANCE.canAccess(s, name, QueryAction.RUNQUERY_KEY,  queryUuid)){
 			if (SecurityManager.INSTANCE.canAccess(s, name, QueryAction.RUNQUERY_KEY, query.getConservationArea().getUuid())){
 				//access is OK since they have access to All Queries in this CA.
 			}else{

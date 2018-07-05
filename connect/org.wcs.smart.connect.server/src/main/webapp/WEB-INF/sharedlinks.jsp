@@ -48,6 +48,7 @@
 		<div class="table-cell smart-table-cell"><fmt:message key="sharedlinks.link" /></div>
 		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('allowedIp')"><fmt:message key="sharedlinks.allowedip" /></a></div>
 		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('ownerUsername')"><fmt:message key="sharedlinks.createdby"/></a></div>
+		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('permissionUsername')"><fmt:message key="sharedlinks.permissionuser"/></a></div>
 		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('expiresAt')"><fmt:message key="sharedlinks.expiresat" /></a></div>
 		<div class="table-cell smart-table-cell"></div>
 	</div>
@@ -59,7 +60,7 @@
 <%@include file="footer.jsp" %>
 
 
-<div id="SharedLinksDialog" style="display: none;" class="level2dialog">
+<div id="SharedLinksDialog" style="display: none; width:425px;" class="level2dialog">
   <div class="dialog-title"><fmt:message key="sharedlinks.maketoken" /></div>
   	<div id="sharedlinkform" style="text-align: right">
      		
@@ -80,7 +81,11 @@
 								<option value=-1><fmt:message key="sharedlinks.custom"/></option>
 							</select>
 						   </td>
-						   <td><input id="expiresAfter" type="number" name="expiresAfter" value=60 style='width:65px' min="0" max="2147483647" disabled> <fmt:message key="query.numminutes2"/></td>
+						   <td><input id="expiresAfter" type="number" name="expiresAfter" value=60 style="width:4em" min="0" max="2147483647" disabled> <fmt:message key="query.numminutes2"/></td>
+						  </tr>
+						  <tr>
+						   <td ><fmt:message key="sharedlinks.permissionuserrestrict"/></td>
+						   <td colspan=2><select id="linkUser" style="width:100%" > </select></td>
 						  </tr>
 						  <tr>
 						   <td ><fmt:message key="sharedlinks.sourceip"/></td>
@@ -88,6 +93,9 @@
 						  </tr>
 						  <tr>
 						   <td colspan=3><fmt:message key="sharedlinks.sourceip2"/></td>
+						  </tr>
+						  <tr>
+						   <td colspan=3><span id="linkusermsg"></span></td>
 						  </tr>
 						  <tr>
 						   <td colspan=3 align="center"><input id="createtokenbutton" class="close button" type="button" value="<fmt:message key="query.creatbutton"/>" /></td>

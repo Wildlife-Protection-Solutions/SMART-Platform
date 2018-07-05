@@ -25,4 +25,8 @@ CREATE TRIGGER trg_qa_routine AFTER INSERT OR UPDATE OR DELETE ON smart.r_script
 CREATE TRIGGER trg_qa_routine AFTER INSERT OR UPDATE OR DELETE ON smart.r_query	FOR EACH ROW execute procedure connect.trg_changelog_common();
 
 
+alter table connect.shared_links add column permissionuser_uuid uuid ;
+ALTER TABLE connect.shared_links ADD FOREIGN KEY (permissionuser_uuid) REFERENCES connect.users(uuid) ON DELETE CASCADE ;
+
+
 update connect.connect_version set version = '6.0.1';				

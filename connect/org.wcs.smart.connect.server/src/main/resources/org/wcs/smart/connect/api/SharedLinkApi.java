@@ -115,6 +115,12 @@ public class SharedLinkApi extends HttpServlet{
 		}
 	}
 	
+	private String getUserName(UUID uuid, Session session) {
+		if (uuid == null) return ""; //$NON-NLS-1$
+		SmartUser user = session.get(SmartUser.class, uuid);
+		if (user == null) return ""; //$NON-NLS-1$
+		return user.getUsername();
+	}
 	
 	/**
 	 * <p>List all Shared Links</p>
@@ -128,7 +134,6 @@ public class SharedLinkApi extends HttpServlet{
 	@GET
     @Path("/")
     public List<SharedLink> getSharedLinks(){
-		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -136,7 +141,8 @@ public class SharedLinkApi extends HttpServlet{
 				//admins can see all shared links
 				List<SharedLink> links =  QueryFactory.buildQuery(s, SharedLink.class).list();
 				for (SharedLink l : links){
-					l.setOwnerUsername( ((SmartUser)s.get(SmartUser.class, l.getOwnerUuid())).getUsername() );
+					l.setPermissionUsername(getUserName(l.getPermissionUserUuid(), s));
+					l.setOwnerUsername(  getUserName(l.getOwnerUuid(), s) );
 				}
 				return links;
 			}
@@ -152,7 +158,8 @@ public class SharedLinkApi extends HttpServlet{
 					List<SharedLink> temp = QueryFactory.buildQuery(s, SharedLink.class, "conservationArea", caUuid).list();  //$NON-NLS-1$
 					for(SharedLink t : temp){//add all shared links from this CA
 						links.add(t);
-						t.setOwnerUsername( ((SmartUser)s.get(SmartUser.class, t.getOwnerUuid())).getUsername() );
+						t.setPermissionUsername(getUserName(t.getPermissionUserUuid(), s));
+						t.setOwnerUsername(  getUserName(t.getOwnerUuid(), s) );
 					}
 				}
 				//add links for tokens without CA, but for which they are the owner
@@ -162,7 +169,8 @@ public class SharedLinkApi extends HttpServlet{
 						new Object[] {"ownerUuid", HibernateManager.getUser(s, request.getUserPrincipal().getName()).getUuid()}).list();  //$NON-NLS-1$
 				for(SharedLink t : temp){//add all shared links from this CA
 					links.add(t);
-					t.setOwnerUsername( ((SmartUser)s.get(SmartUser.class, t.getOwnerUuid())).getUsername() );
+					t.setPermissionUsername(getUserName(t.getPermissionUserUuid(), s));
+					t.setOwnerUsername(  getUserName(t.getOwnerUuid(), s) );
 				}
 				return links;
 			}

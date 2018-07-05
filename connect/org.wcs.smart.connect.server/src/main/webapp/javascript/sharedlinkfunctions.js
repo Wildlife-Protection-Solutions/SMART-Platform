@@ -33,8 +33,12 @@ function createSharedLink(){
 function createToken(){
 	var expiresAfter = document.getElementById("expiresAfter").value;
 	var allowedIp = document.getElementById("allowedIp").value;
-	var jsonData = {"expiresAfter": expiresAfter, "allowedIp": allowedIp}
 	
+	var userItem = document.getElementById("linkUser");
+	var useruuid = userItem.options[userItem.selectedIndex].value;
+	
+	var 	jsonData = {"expiresAfter": expiresAfter, "allowedIp": allowedIp, "permissionUserUuid": useruuid};	
+		
 	var oReq = new XMLHttpRequest();
 	oReq.onload = tokenCreated;
 	oReq.open("POST", SHAREDLINKURL + "token/", true);

@@ -1,4 +1,6 @@
 var SHAREDLINKURL = "../api/sharedlink/";
+var USERSURL = "../api/connectuser/";
+var ADMINURL = "../api/connectuser/iscurrentuseradmin/";
 
 var lastSorted;
 var links = {};
@@ -7,6 +9,7 @@ var links = {};
 window.onload = function(){
 	menuCheckOnload();
 	refreshLinkList();
+	refreshUsersList();
 	
 	document.getElementById("opentokendialog").onclick = function(){
 		displayDialog('SharedLinksDialog','main');
@@ -40,7 +43,7 @@ function confirmdeletelink(){
 	
 	var uuid = this.dataset.uuid;
 	
-	displayConfirmDialog("Delete Shared Link", i18n("sharedlinks.areyousuredelete") + uuid + "?"  , function(){
+	displayConfirmDialog(i18n("sharedlinks.areyousuredeletetitle"), i18n("sharedlinks.areyousuredelete") + uuid + "?"  , function(){
 		hideInfo();
 		
 		var oReq = new XMLHttpRequest();
@@ -119,7 +122,7 @@ function createLinkTable(){
  		
  		var date = new Date(links[i].expiresAt);
  		var row = tableCreateRow(parent,
- 				[null, links[i].url, links[i].allowedIp, links[i].ownerUsername, date.toString() , null], 
+ 				[null, links[i].url, links[i].allowedIp, links[i].ownerUsername, links[i].permissionUsername, date.toString() , null], 
  				"linkrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		row.dataset.uuid = links[i].uuid;
@@ -134,13 +137,13 @@ function createLinkTable(){
 	 		aTag1.setAttribute('style', "text-decoration:none");
 	 		aTag1.setAttribute('target',"_blank");
 	 		aTag1.innerHTML = resolve(openlink);
-	 		aTag1.title="Open Link in New Tab"
+	 		aTag1.title=i18n("sharedlinks.openinnewtabtitle");
 	 		row.childNodes[0].appendChild(aTag1);
  		}
  		
  		var deleteicon = document.createElement("a");
  		deleteicon.className="deleteca delete-icon";
- 		deleteicon.title="Delete Shared Link";
+ 		deleteicon.title=i18n("sharedlinks.deletesharedlinktitle");
  		deleteicon.dataset.uuid = links[i].uuid;
  		deleteicon.onclick = confirmdeletelink;
  		deleteicon.href="";
@@ -196,4 +199,78 @@ function dynamicSort(property) {
     		return 1
     	}
     }
+}
+
+
+function refreshUsersList(){
+	var oReq = new XMLHttpRequest();
+ 	oReq.onload = refreshUsersListCallback1;
+ 	oReq.open("Get", ADMINURL, true);
+ 	oReq.send();
+
+}
+
+function refreshUsersListCallback1(){
+	if (this.status != 200) {
+		var msg = i18n("sharedlink.error") + ": ";
+		if (this.status == 401){
+			msg += i18n("sharedlink.unauthorized");
+		}
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	if (this.responseText.toUpperCase() == "TRUE"){
+		//clear current table
+		var object = document.getElementById("linkUser");
+		for (var i = 0; i < object.children.length; i++){
+			var ele = object.childen[i];
+			ele.parentElement.removeChild(ele);
+		}
+		
+		document.getElementById("linkusermsg").innerHTML = i18n("sharedlinks.permissionoptional")
+		var oReq = new XMLHttpRequest();
+		oReq.onload = refreshUsersListCallback2;
+		oReq.open("Get", USERSURL, true);
+		oReq.send();
+		
+	}else{
+		var object = document.getElementById("linkUser");
+		object.parentElement.parentElement.parentElement.removeChild(object.parentElement.parentElement);
+		
+		document.getElementById("linkusermsg").innerHTML = i18n("sharedlinks.caadminpermissiononly");
+		
+	}
+}
+	
+function refreshUsersListCallback2(){
+	if (this.status != 200) {
+		var msg = i18n("sharedlink.error") + ": ";
+		if (this.status == 401){
+			msg += i18n("sharedlink.unauthorized");
+		}
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	
+ 	users = JSON.parse(this.responseText);
+ 	var root = document.getElementById("linkUser");
+ 	
+ 	var option = document.createElement("option");
+	option.innerHTML = "";
+	root.appendChild(option);
+	
+	for (var i = 0; i < users.length; i ++){
+		var option = document.createElement("option");
+		option.value = users[i].uuid;
+		option.innerHTML = users[i].username;
+		root.appendChild(option);
+	}
 }
