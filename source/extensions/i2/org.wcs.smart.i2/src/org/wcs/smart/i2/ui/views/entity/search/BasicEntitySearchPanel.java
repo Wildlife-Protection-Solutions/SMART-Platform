@@ -218,7 +218,7 @@ public class BasicEntitySearchPanel extends Composite {
 			}
 
 			types.add(0, BASIC_ALLTYPES_OP);
-			Display.getDefault().syncExec(new Runnable() {
+			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
 					cmbEntityType.setInput(types);

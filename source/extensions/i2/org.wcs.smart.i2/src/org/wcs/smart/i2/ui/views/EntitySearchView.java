@@ -174,7 +174,7 @@ public class EntitySearchView {
 		}
 		@Override
 		protected  void searchesLoaded(List<SearchProxy> queries) {
-			Display.getDefault().syncExec(()->{
+			Display.getDefault().asyncExec(()->{
 				cmbSavedSearch.setInput(queries);
 				cmbSavedSearch.setSelection(lastSelection);
 				if(cmbSavedSearch.getSelection().isEmpty() && !queries.isEmpty()){
@@ -198,7 +198,7 @@ public class EntitySearchView {
 		
 		@Override
 		public void afterSearch(IntelSearchResult searchResult, IProgressMonitor monitor) {
-			Display.getDefault().syncExec(new Runnable(){
+			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
 					entityList.setEntities(searchResult);
@@ -210,7 +210,7 @@ public class EntitySearchView {
 		@Override
 		public void onError(Exception ex) {
 			Intelligence2PlugIn.log(ex.getMessage(), ex);
-			Display.getDefault().syncExec(new Runnable(){
+			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
 					entityList.setSearchError(ex);

@@ -74,7 +74,7 @@ public class RelationshipGraphFilterComposite extends Composite {
 	private LoadEntityTypeJob entityTypeJob = new LoadEntityTypeJob() {
 		@Override
 		protected void processData(List<IntelEntityType> types) {
-			Display.getDefault().syncExec(new Runnable() {
+			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
 					cmbEntityTypes.setInput(types);
@@ -89,7 +89,7 @@ public class RelationshipGraphFilterComposite extends Composite {
 	private LoadRelationshipTypeJob relationshipTypeJob = new LoadRelationshipTypeJob() {
 		@Override
 		protected void processData(List<IntelRelationshipType> types) {
-			Display.getDefault().syncExec(new Runnable() {
+			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
 					cmbRelationTypes.setInput(types);

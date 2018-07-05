@@ -511,7 +511,7 @@ public class BasicRecordSearchPanel extends Composite {
 			}
 			srcs.sort((a,b)->Collator.getInstance().compare(((IntelRecordSource)a).getName(), ((IntelRecordSource)b).getName()));
 			srcs.add(0, ""); //$NON-NLS-1$
-			Display.getDefault().syncExec(()->{
+			Display.getDefault().asyncExec(()->{
 				
 				((RecordSourceLabelProvider)(cmbSource.getLabelProvider())).disposeImages();
 				cmbSource.setInput(srcs);

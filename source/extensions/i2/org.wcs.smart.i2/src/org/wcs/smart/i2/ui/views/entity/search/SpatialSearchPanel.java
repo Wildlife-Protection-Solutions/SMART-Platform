@@ -415,7 +415,7 @@ public class SpatialSearchPanel extends Composite{
 					a.getEntityType().getName();
 				});
 			}
-			Display.getDefault().syncExec(()->{
+			Display.getDefault().asyncExec(()->{
 				cmbEntityTypeFilters.setInput(filterOptions);
 			});
 			
