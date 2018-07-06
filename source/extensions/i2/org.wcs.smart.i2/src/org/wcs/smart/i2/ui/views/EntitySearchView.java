@@ -671,7 +671,7 @@ public class EntitySearchView {
 	
 	@Inject
 	@Optional
-	private void entityTypesModified(@UIEventTopic(IntelEvents.ENTITY_TYPE_ALL) IntelEntityType type){
+	private void entityTypesModified(@UIEventTopic(IntelEvents.ENTITY_TYPE_ALL) Object data){
 		basicPanel.refresh();
 		allPanel.refresh(searchDelay);
 		doSearch(null, searchDelay);

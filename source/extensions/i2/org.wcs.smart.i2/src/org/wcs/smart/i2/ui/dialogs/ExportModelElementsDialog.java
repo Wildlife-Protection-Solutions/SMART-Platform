@@ -195,7 +195,7 @@ public class ExportModelElementsDialog extends TitleAreaDialog{
 						}else {
 							//import data
 							XmlToIntelData importer = new XmlToIntelData(exportCa);
-							importer.importXmlData(outFile, progress.split(1));
+							importer.importXmlData(outFile, progress.split(1), null);
 						}
 					} catch (OperationCanceledException ex) {
 						getShell().getDisplay().syncExec(()->MessageDialog.openInformation(getShell(), EXPORT_DIALOG_TITLE, Messages.ExportModelElementsDialog_ExportCanceled));

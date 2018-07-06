@@ -39,6 +39,7 @@ import javax.xml.bind.Unmarshaller;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
@@ -50,6 +51,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -95,7 +97,7 @@ public class XmlToIntelData {
 		this.ca = ca;
 	}
 	
-	public void importXmlData(Path zipFile, IProgressMonitor monitor) throws IOException {
+	public void importXmlData(Path zipFile, IProgressMonitor monitor, IEventBroker eventBroker) throws IOException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.XmlToIntelData_conversiontask, 10);
 		warnings = new ArrayList<>();
 		rootPath = Files.createTempDirectory("smart." + System.nanoTime()); //$NON-NLS-1$
@@ -117,7 +119,7 @@ public class XmlToIntelData {
 			}
 			
 			try (Session session = HibernateManager.openSession()){
-				toIntelData(data, session, progress.split(9));
+				toIntelData(data, session, eventBroker, progress.split(9));
 			}
 		}finally{
 			//clean up
@@ -137,7 +139,7 @@ public class XmlToIntelData {
 		return o.getValue();
 	}
 	
-	private void toIntelData(IntelligenceData data, Session session, IProgressMonitor monitor) {
+	private void toIntelData(IntelligenceData data, Session session,  IEventBroker eventBroker, IProgressMonitor monitor) {
 		SubMonitor progress = SubMonitor.convert(monitor, 7);
 		
 		this.session = session;
@@ -295,7 +297,11 @@ public class XmlToIntelData {
 		Display.getDefault().syncExec(()->{
 			MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.XmlToIntelData_NothingImported, sb.toString());
 		});
-
+		if (eventBroker == null) return;
+		
+		if (entities.size() > 0) { eventBroker.post(IntelEvents.ENTITY_TYPE_NEW, entities); }
+		if (relationshipTypes.size() > 0) { eventBroker.post(IntelEvents.RELATION_TYPE_NEW, relationshipTypes); }
+		if (recordSources.size() > 0) { eventBroker.post(IntelEvents.RECORD_SOURCE_ALL, recordSources); }
 	}
 	
 	
