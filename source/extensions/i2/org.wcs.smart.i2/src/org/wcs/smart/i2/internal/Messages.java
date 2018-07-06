@@ -1011,6 +1011,7 @@ public class Messages extends NLS {
 	public static String LocationListComposite_ObsColumn;
 	public static String LocationListComposite_ObsLabel;
 	public static String LocationListComposite_TimeColumn;
+	public static String MenuHandler_QueryMenuPostfix;
 	public static String NewEntityDialog_DuplicateIdMsg;
 	public static String NewEntityDialog_EntityTypeLabel;
 	public static String NewEntityDialog_ErrorDialogTitle;

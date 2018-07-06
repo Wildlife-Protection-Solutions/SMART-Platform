@@ -1,5 +1,6 @@
 package org.wcs.smart.i2;
 
+import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -12,6 +13,7 @@ import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelConfigurationOption;
 
 /**
@@ -50,7 +52,11 @@ public class MenuHandler implements ILoginHandler {
     		for (MMenuElement i : c.getChildren()) {
     			if (i.getElementId().equals("org.wcs.smart.i2.menu.main")) { //$NON-NLS-1$
     				i.setLabel(op.getValue());
-    			}
+    			}else if (i.getElementId().equals("org.wcs.smart.menu.query.newquery.i2queries")) { //$NON-NLS-1$
+    				i.setLabel(MessageFormat.format(Messages.MenuHandler_QueryMenuPostfix, op.getValue()));
+    			}else if (i.getElementId().equals("org.wcs.smart.menu.query.createquery.i2queries")) { //$NON-NLS-1$
+    				i.setLabel(MessageFormat.format(Messages.MenuHandler_QueryMenuPostfix, op.getValue()));
+    			}		
     		}
     	}
 	}
