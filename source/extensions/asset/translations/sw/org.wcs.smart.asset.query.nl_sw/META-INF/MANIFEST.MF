@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: SMART Swahili Field Sensor Query Fragment
-Bundle-SymbolicName: org.wcs.smart.asset.query.nl_sw
-Bundle-Version: 6.0.0
-Fragment-Host: org.wcs.smart.asset.query;bundle-version="6.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-Vendor: org.wcs.smart
