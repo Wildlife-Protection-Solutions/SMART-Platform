@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: CyberTracker Data Queue Processor Karen Fragment
-Bundle-SymbolicName: org.wcs.smart.connect.dataqueue.cybertracker.nl_kar
-Bundle-Version: 6.0.0
-Fragment-Host: org.wcs.smart.connect.dataqueue.cybertracker;bundle-version="6.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-Vendor: org.wcs.smart
