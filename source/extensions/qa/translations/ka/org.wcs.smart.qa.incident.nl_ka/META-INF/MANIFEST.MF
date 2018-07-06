@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: SMART Georgian QA Incident Fragment
-Bundle-SymbolicName: org.wcs.smart.qa.incident.nl_ka
-Bundle-Version: 6.0.0
-Fragment-Host: org.wcs.smart.qa.incident;bundle-version="6.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-Vendor: org.wcs.smart
