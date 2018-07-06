@@ -29,4 +29,7 @@ alter table connect.shared_links add column permissionuser_uuid uuid ;
 ALTER TABLE connect.shared_links ADD FOREIGN KEY (permissionuser_uuid) REFERENCES connect.users(uuid) ON DELETE CASCADE ;
 
 
+update connect.connect_plugin_version set version = '6.0.1' where plugin_id = 'org.wcs.smart';
+update connect.ca_plugin_version set version = '6.0.1' where plugin_id = 'org.wcs.smart';
+
 update connect.connect_version set version = '6.0.1';				
