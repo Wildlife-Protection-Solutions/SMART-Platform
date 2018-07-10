@@ -23,13 +23,13 @@ public class CreateTranslationPack {
 			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations",
 			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event\\translations",
 			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2\\translations",
-			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa\\translations",	
-	};
-	
-	public static final String[] OTHER_FOLDERS = new String[] {
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa\\translations",
 			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\cybertracker\\translations",
 			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\entity\\translations",
+			
+//			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r\\translations",
 	};
+	
 	
 	public static final String OUT = "C:\\temp\\SMART\\" + LANGUAGE;
 			
@@ -37,9 +37,7 @@ public class CreateTranslationPack {
 		Path out = Paths.get(OUT);
 		Files.createDirectories(out);
 		for (String folder : SOURCE_FOLDERS) {
-			Path path = Paths.get(folder).resolve(LANGUAGE);
-			
-			try(DirectoryStream<Path> stream = Files.newDirectoryStream(path)){
+			try(DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(folder))){
 				for (Path p : stream) {
 					if (!Files.isDirectory(p)) continue;
 					//copy folder to temp dir
@@ -63,7 +61,10 @@ public class CreateTranslationPack {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				Path toFile = target.resolve( source.relativize(file) );
-				Files.copy(file, toFile);
+				
+				if (toFile.getFileName().toString().contains("_" + LANGUAGE + ".")) {
+					Files.copy(file, toFile);
+				}
 				return FileVisitResult.CONTINUE;
 			}
 
@@ -87,6 +88,12 @@ public class CreateTranslationPack {
 
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+				if (dir.getFileName().toString().equalsIgnoreCase(".settings") ||
+						(dir.getFileName().toString().equalsIgnoreCase("bin")) ||
+						(dir.getFileName().toString().equalsIgnoreCase("target")) ) {
+						FileUtils.deleteDirectory(dir.toFile());
+						return FileVisitResult.SKIP_SUBTREE;
+					}
 				return FileVisitResult.CONTINUE;
 			}
 
@@ -128,16 +135,11 @@ public class CreateTranslationPack {
 					Files.delete(dir);
 					return FileVisitResult.SKIP_SUBTREE;
 				}
-				if (dir.getFileName().toString().equalsIgnoreCase(".settings")) {
-					FileUtils.deleteDirectory(dir.toFile());
-					return FileVisitResult.SKIP_SUBTREE;
-				}
 				return FileVisitResult.CONTINUE;
 			}
 
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				
 				return FileVisitResult.CONTINUE;
 			}
 

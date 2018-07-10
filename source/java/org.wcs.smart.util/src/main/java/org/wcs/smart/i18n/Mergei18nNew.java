@@ -7,6 +7,9 @@ import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,10 +23,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 /**
- * 2018: this is based on the "OLD" format where we had one language pack per language per
- * plugin.  This was updated to one language pack for all languages per plugin.  For
- * the new stuff see Mergei18nNew.java 
- *  
  * Matches i18n resource property files in fragments with the
  * default property file and removes any no longer used key/value pairs.  It
  * will also add missing key/value pairs (with the value using the
@@ -33,7 +32,7 @@ import org.apache.commons.io.filefilter.IOFileFilter;
  *
  */
 @SuppressWarnings("nls")
-public class Mergei18n {
+public class Mergei18nNew {
 
     public static final String IN_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\java",
     	
@@ -64,6 +63,8 @@ public class Mergei18n {
 //		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
     };
 	
+    public static final String[] LANGUAGES =  new String[] {"es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
+    
     public static final String LINE_SEP = "\n";
 
     public static final String NATIVE2ASCII = "C:\\Java\\jdk1.6.0_38\\bin\\native2ascii.exe";
@@ -125,58 +126,33 @@ public class Mergei18n {
      * Processes a base file, looking for matching i18n files
      * and merging matched files.
      */
-    private void processFile(File f, String stransDir) throws Exception {
-        File transDir = new File(stransDir);
-
-        int index = f.getCanonicalPath().indexOf("org.wcs.smart");
-        String pluginName = f.getCanonicalPath().substring(index);
+    private void processFile(File enFile, String stransDir) throws Exception {
+       
+        int index = enFile.getCanonicalPath().indexOf("org.wcs.smart");
+        String pluginName = enFile.getCanonicalPath().substring(index);
         index = pluginName.indexOf(File.separator);
         pluginName = pluginName.substring(0, index);
-        String pathName = f.getCanonicalPath().substring(f.getCanonicalPath().indexOf(pluginName) + pluginName.length());
-        File transFile = new File(pathName);
+        String pathName = enFile.getCanonicalPath().substring(enFile.getCanonicalPath().indexOf(pluginName) + pluginName.length());
+        
+        Path transFile = Paths.get(pathName);
 
-
-        List<File> filesList = new ArrayList<File>();
-
-        final String matchDir = pluginName + ".nl_sw";  /*ADD _XX if you want to search for a specific language */
-        for (File flangDir : transDir.listFiles()){
-            if (!flangDir.isDirectory()){
-                continue;
-            }
+        final String matchDir = pluginName + ".nl";
+        
+        
+        Path translationsPath = Paths.get(stransDir + File.separator + matchDir + File.separator + pathName).getParent();
+        
+        int index2 = transFile.getFileName().toString().lastIndexOf('.');
+        final String prefix = transFile.getFileName().toString().substring(0, index2);
+        final String postfix = transFile.getFileName().toString().substring(index2 + 1);
             
-            if (flangDir.getName().startsWith(matchDir)){
-            	filesList.add(flangDir);
-            }
-            
-            File[] transToMerge = flangDir.listFiles(new FilenameFilter(){
+        for (String langCode : LANGUAGES) {
+        	Path toMerge = translationsPath.resolve(prefix + "_" + langCode + "." + postfix);
 
-                @Override
-                public boolean accept(File arg0, String name) {
-                    return name.startsWith(matchDir);
-                }});
-            for(File tmp : transToMerge){
-                filesList.add(tmp);
-            }
-            if (flangDir.getName().startsWith(matchDir)){
-            	filesList.add(flangDir);
-            }
-        }
-
-        for (File ft : filesList){
-            String langCode = ft.getName().substring(ft.getName().indexOf('_')+1);
-            int index2 = transFile.getName().lastIndexOf('.');
-            final String prefix = transFile.getName().substring(0, index2);
-            final String postfix = transFile.getName().substring(index2 + 1);
-            File toMerge = new File(ft.getCanonicalPath()+  transFile.getParent()  + File.separator + prefix + "_" + langCode + "." + postfix);
-
-//            System.out.println(f.toString());
-//            System.out.println(toMerge.toString());
-
-            if (!f.exists() || !toMerge.exists()){
-                System.err.println("Error either source or target file does not exists. " + f.toString() + "  |  " + toMerge.toString());
-            }else{
-                mergeFile(f, toMerge);
-            }
+        	if (!enFile.exists() || !Files.exists(toMerge)){
+           		System.err.println("Error either source or target file does not exists. " + enFile.toString() + "  |  " + toMerge.toString());
+           	}else{
+           		mergeFile(enFile, toMerge.toFile());
+           	}
         }
     }
 
@@ -212,9 +188,9 @@ public class Mergei18n {
             changes = true;
         }
 
-        if (changes){
-            writeFile(targetFile, target);
-        }
+//        if (changes){
+//            writeFile(targetFile, target);
+//        }
     }
 
 
@@ -272,7 +248,7 @@ public class Mergei18n {
     }
 
     public static void main(String args[]) {
-        Mergei18n util = new Mergei18n();
+        Mergei18nNew util = new Mergei18nNew();
         try{
         	for (int i = 0; i < IN_DIR.length; i ++){
         		util.findFiles(IN_DIR[i], TRANS_DIR[i]);
