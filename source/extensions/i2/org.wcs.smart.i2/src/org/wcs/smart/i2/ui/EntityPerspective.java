@@ -29,6 +29,7 @@ import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView;
 import org.wcs.smart.i2.ui.views.RecordsView;
+import org.wcs.smart.i2.ui.views.WorkingSetView;
 
 /**
  * Data assesment perspective 
@@ -62,6 +63,11 @@ public class EntityPerspective implements IPerspectiveFactory {
 			left.addView(RecordsView.ID);
 			left.addPlaceholder(RecordNarrativeView.ID);
 			layout.getViewLayout(RecordsView.ID).setCloseable(false);
+		}
+		
+		if (IntelSecurityManager.INSTANCE.canViewWorkingSets()){
+			left.addView(WorkingSetView.ID);
+			layout.getViewLayout(WorkingSetView.ID).setCloseable(false);
 		}
 			
 	}
