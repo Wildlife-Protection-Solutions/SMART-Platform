@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Composite;
+import org.json.simple.JSONObject;
 
 public interface IPackageContribution {
 
@@ -23,7 +24,9 @@ public interface IPackageContribution {
 	public PackageUpdates packageFiles(IProgressMonitor monitor) throws IOException;
 
 	public class PackageUpdates {
-		List<Path> filesToAdd = new ArrayList<>();
+		private List<Path> filesToAdd = new ArrayList<>();
+		private String metadataKey = null;
+		private JSONObject metadataValue = null;
 		
 		public void addFile(Path path) {
 			filesToAdd.add(path);
@@ -32,6 +35,18 @@ public interface IPackageContribution {
 		public List<Path> getAddedFiles(){
 			return this.filesToAdd;
 		}
+	
 		
+		public String getProjectMetadataKey(){
+			return metadataKey;
+		}
+		public JSONObject getProjectMetdata() {
+			return metadataValue;
+		}
+		
+		public void setProjectMetadata(String key, JSONObject value) {
+			this.metadataKey = key;
+			this.metadataValue = value;
+		}
 	}
 }

@@ -1,5 +1,6 @@
 package org.wcs.smart.cybertracker.incident;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -26,6 +27,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -38,7 +42,10 @@ import org.wcs.smart.ui.properties.DialogConstants;
 
 public class IncidentPackageContribution implements IPackageContribution{
 
-	public static final String INCIDENT_FILE = "incident_model.xml";
+	public static final String INCIDENT_MODEL_FILE = "incident_model.xml";
+	public static final String INCIDENT_METADATA_FILE = "incident_metadata.json";
+	
+	public static final String INCIDENT_RESOURCE_ID = "incident"; //$NON-NLS-1$
 	
 	private static Object DATAMODEL = new Object();
 	
@@ -140,7 +147,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 		}
 		
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
-		Path incidentFile = tempDir.resolve(INCIDENT_FILE);
+		Path incidentFile = tempDir.resolve(INCIDENT_MODEL_FILE);
 		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convert(cm, monitor);
 		try(OutputStream out = Files.newOutputStream(incidentFile)){
 			try {
@@ -151,8 +158,25 @@ public class IncidentPackageContribution implements IPackageContribution{
 		}
 		updates.addFile(incidentFile);
 		
+		Path metadataFile = tempDir.resolve(INCIDENT_METADATA_FILE);
+		createIncidentJson(metadataFile);
+		updates.addFile(metadataFile);
+		
+		
+		JSONObject metadata = new JSONObject();
+		metadata.put("decoder","sourceparser_smartconfigurabledatamodel"); //$NON-NLS-1$ //$NON-NLS-2$
+		metadata.put("definition",incidentFile.getFileName().toString()); //$NON-NLS-1$
+		metadata.put("metadata", metadataFile.getFileName().toString()); //$NON-NLS-1$
+		updates.setProjectMetadata("incident", metadata);
 		return updates;
 		
 	}
 
+	private void createIncidentJson(Path incidentJson) throws IOException {
+		JSONArray metadataScreens = new JSONArray();
+		metadataScreens.add(CtJsonExportUtils.createDataType(INCIDENT_RESOURCE_ID));
+		try(BufferedWriter fw = Files.newBufferedWriter(incidentJson)){
+			fw.write(metadataScreens.toJSONString());
+		}
+	}
 }

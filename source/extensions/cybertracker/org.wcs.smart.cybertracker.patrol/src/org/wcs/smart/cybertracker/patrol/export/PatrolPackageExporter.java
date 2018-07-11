@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -106,11 +107,15 @@ public enum PatrolPackageExporter {
 				}
 				
 				List<File> toIncludeInZip = new ArrayList<>();
+				HashMap<String, JSONObject> projectAdditions = new HashMap<>();
 				for (IPackageContribution.PackageUpdates update : updates) {
 					for (Path p : update.getAddedFiles()) {
 						Path moveTo = tempDir.resolve(p.getFileName().toString());
 						Files.move(p, moveTo);
 						toIncludeInZip.add(moveTo.toFile());
+					}
+					if (update.getProjectMetadataKey() != null) {
+						projectAdditions.put(update.getProjectMetadataKey(), update.getProjectMetdata());
 					}
 					//TODO: delete temporary files
 				}
@@ -155,7 +160,7 @@ public enum PatrolPackageExporter {
 				
 				sub.split(1);
 				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile(cm, logo, mapfiles, projectFile);
+				writeProjectFile(cm, logo, mapfiles, projectFile, metadataFile, projectAdditions);
 				toIncludeInZip.add(projectFile.toFile());
 				
 				ZipUtil.createZip(toIncludeInZip.toArray(new File[toIncludeInZip.size()]), exportFile.toFile(), sub.split(1));
@@ -170,8 +175,8 @@ public enum PatrolPackageExporter {
 		}
 	}
 	
-	private void writeProjectFile(ConfigurableModel cm, Path logoFile, Path mapfiles, Path outputFile) throws IOException {
-		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, mapfiles, outputFile);
+	private void writeProjectFile(ConfigurableModel cm, Path logoFile, Path mapfiles, Path outputFile, Path metadataFile, HashMap<String, JSONObject> projectAdditions) throws IOException {
+		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, mapfiles, outputFile, metadataFile, projectAdditions);
 	}
 	
 	private void profileToJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, Session session, Path outputFile) throws IOException {

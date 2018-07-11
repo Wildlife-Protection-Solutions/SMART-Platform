@@ -30,7 +30,9 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
@@ -177,16 +179,21 @@ public class CtJsonExportUtils {
 		return profileObj.toJSONString();
 	}
 
-	public static void writeProjectJson(String projectName, String cmFile, Path logoFile, Path mapFilesDir, Path outputFile) throws IOException {
+	public static void writeProjectJson(String projectName, String cmFile, Path logoFile, Path mapFilesDir, Path outputFile, Path metadataFilename, HashMap<String, JSONObject> projectAdditions) throws IOException {
 		JSONObject projectJSON = new JSONObject();
 		projectJSON.put("projectName",projectName); //$NON-NLS-1$
 		projectJSON.put("decoder","sourceparser_smartconfigurabledatamodel"); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("source",Messages.CtJsonExportUtils_SmartCtSource); //$NON-NLS-1$
 		projectJSON.put("definition",cmFile); //$NON-NLS-1$
+		projectJSON.put("metadata", metadataFilename.getFileName().toString()); //$NON-NLS-1$
 		projectJSON.put("creation_date",new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date())); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("logo", (logoFile == null || !Files.exists(logoFile)) ? null : logoFile.getFileName().toString()); //$NON-NLS-1$
 		projectJSON.put("mapfiles", (mapFilesDir == null ) ? null : mapFilesDir.getFileName().toString()); //$NON-NLS-1$
-		
+		if(projectAdditions != null) {
+			for (Entry<String, JSONObject> e : projectAdditions.entrySet()) {
+				projectJSON.put(e.getKey(), e.getValue());
+			}
+		}
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
 			fw.write(projectJSON.toJSONString());
 		}

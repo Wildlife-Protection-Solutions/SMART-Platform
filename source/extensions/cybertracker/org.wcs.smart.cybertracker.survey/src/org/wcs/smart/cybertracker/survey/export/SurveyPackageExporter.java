@@ -139,7 +139,7 @@ public enum SurveyPackageExporter {
 				
 				sub.split(1);
 				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile(modelToExport, logo, mapfiles, projectFile);
+				writeProjectFile(modelToExport, logo, mapfiles, projectFile, metadataFile);
 				toIncludeInZip.add(projectFile.toFile());
 				
 				ZipUtil.createZip(toIncludeInZip.toArray(new File[toIncludeInZip.size()]), exportFile.toFile(), sub.split(1));
@@ -181,8 +181,8 @@ public enum SurveyPackageExporter {
 		}
 	}
 
-	private void writeProjectFile(ConfigurableModel cm, Path logoFile, Path mapFileDir, Path outputFile) throws IOException {
-		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, mapFileDir, outputFile);
+	private void writeProjectFile(ConfigurableModel cm, Path logoFile, Path mapFileDir, Path outputFile, Path metadataFile) throws IOException {
+		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, mapFileDir, outputFile, metadataFile, null);//TODO:
 	}
 	
 }
