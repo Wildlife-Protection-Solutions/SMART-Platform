@@ -91,6 +91,7 @@ public abstract class RelationshipGraphLoadDataJob extends Job {
 		try (Session s = HibernateManager.openSession()) {
 			for (IntelEntity e : roots) {
 				IntelEntity tmp = (IntelEntity) s.get(IntelEntity.class, e.getUuid());
+				if (tmp == null) continue;	//not found; probably deleted
 				entities.add(tmp);
 			}
 

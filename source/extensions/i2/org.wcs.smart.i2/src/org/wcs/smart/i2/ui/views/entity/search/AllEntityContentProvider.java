@@ -670,6 +670,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				int cnt = 0;
 				while(cnt < pageSize) {
 					Object[] data = results.get();
+					if (data == null) break;
 					EntityTableRowItem item = asRowItem(data, session);
 					final int index = startIndex + cnt;
 					Display.getDefault().syncExec(()->{
@@ -689,7 +690,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		
 		private EntityTableRowItem asRowItem(Object[] rowdata, Session session) {
 			//entity_uuid , i_primary_id , i_entity_type_name
-			
+
 			UUID entityUuid = UuidUtils.byteToUUID((byte[])rowdata[0]);
 			String id = (String)rowdata[1];
 			String type = (String)rowdata[2];

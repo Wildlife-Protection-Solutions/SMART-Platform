@@ -231,7 +231,7 @@ public class AllPanel extends Composite {
 		String toLoad = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(getPreferenceStoreKey());
 		if (toLoad != null && !toLoad.isEmpty()) {
 			AllEntitySearch load = AllEntitySearch.parse(toLoad, Collections.singleton(SmartDB.getCurrentConservationArea()));
-			if (load != null && (load.getQueryColumns() != null || load.getFilterString().isEmpty())) {
+			if (load != null && (load.getQueryColumns() != null || !load.getFilterString().isEmpty())) {
 				//if load is not empty; then load it and display filter panel
 				this.entitySearch = load;
 				searchPanel.initPanel(load.getFilterString());
