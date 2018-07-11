@@ -1074,7 +1074,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 				
 			}
 		});
-		deleteItem.setEnabled(getEditMode() && IntelSecurityManager.INSTANCE.canDeleteEntity());
+		
+		if (IntelSecurityManager.INSTANCE.canDeleteEntity() && IntelSecurityManager.INSTANCE.canEditEntity()){
+			deleteItem.setEnabled(getEditMode());	
+		}else if (IntelSecurityManager.INSTANCE.canDeleteEntity()  ) {
+			deleteItem.setEnabled(true);
+		}else{
+			deleteItem.setEnabled(false);
+		}
 		
 		wsetItem = new ToolItem(buttonBar, SWT.PUSH);
 		wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
@@ -1173,7 +1180,15 @@ public class EntityEditor extends EditorPart implements MapPart{
 		}
 		this.isEditMode = isEdit;
 		if (entity != null) initControl();
-		if (deleteItem != null && !deleteItem.isDisposed()) deleteItem.setEnabled(isEdit && IntelSecurityManager.INSTANCE.canDeleteEntity());
+		if (deleteItem != null && !deleteItem.isDisposed()) {
+			if (IntelSecurityManager.INSTANCE.canDeleteEntity() && IntelSecurityManager.INSTANCE.canEditEntity()){
+				deleteItem.setEnabled(isEdit);	
+			}else if (IntelSecurityManager.INSTANCE.canDeleteEntity()  ) {
+				deleteItem.setEnabled(true);
+			}else{
+				deleteItem.setEnabled(false);
+			}
+		}
 		if (editItem != null && !editItem.isDisposed()) editItem.setSelection(isEdit);
 		if (lnkNewRecord != null && !lnkNewRecord.isDisposed()){
 			if (isEdit) {

@@ -45,6 +45,7 @@ public enum IntelSecurityManager {
 		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
 				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelViewRecordsUserLevel.INSTANCE) ||
 				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelEditRecordUserLevel.INSTANCE) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelDeleteRecordUserLevel.INSTANCE) ||
 				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelReadOnlyUserLevel.INSTANCE);
 				
 	}
@@ -57,7 +58,9 @@ public enum IntelSecurityManager {
 		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
 				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelViewEntityUserLevel.INSTANCE) ||
 				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelEditEntityUserLevel.INSTANCE) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDeleteEntityUserLevel.INSTANCE) ||
 				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelReadOnlyUserLevel.INSTANCE);
+		
 	}
 	
 	/**

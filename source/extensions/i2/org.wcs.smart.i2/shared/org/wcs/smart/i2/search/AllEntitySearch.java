@@ -104,10 +104,13 @@ public class AllEntitySearch implements IIntelEntitySearch {
 		String[] bits = searchString.split(IntelEntitySearch.SEPARATOR);
 		if (!bits[0].equals(IntelEntitySearch.Type.ALL.key)) return null;
 		
-		if (bits.length != 3) return null;
+		if ( bits.length != 3 && bits.length != 2 ) return null;
 		
 		String filter = bits[1];
-		String columns = bits[2];
+		String columns = ""; //$NON-NLS-1$
+		if (bits.length == 3) {
+			columns = bits[2];
+		}
 		Set<String> cols = null;
 		if (!columns.equals("<null>,")){ //$NON-NLS-1$
 			cols = new HashSet<>();

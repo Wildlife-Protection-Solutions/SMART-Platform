@@ -96,6 +96,7 @@ import org.wcs.smart.i2.ui.views.entity.search.AllEntityContentProvider.EntityTa
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.E3Utils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.ibm.icu.text.MessageFormat;
 
@@ -113,7 +114,7 @@ public class AllPanel extends Composite {
 	/*
 	 * Preference store key for the last entity search run
 	 */
-	private static final String LAST_SEARCH_KEY = "org.wcs.smart.i2.ui.views.entity.search.all"; //$NON-NLS-1$
+	private static final String LAST_SEARCH_KEY_PREFIX = "org.wcs.smart.i2.ui.views.entity.search.all"; //$NON-NLS-1$
 	
 	@Inject
 	private IEclipseContext context;
@@ -154,7 +155,7 @@ public class AllPanel extends Composite {
 				//save current search to preference store to reload when application is restarted
 				entitySearch.setFilterString(getFilterString());
 				String toSave = entitySearch.serialize();	
-				Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(LAST_SEARCH_KEY, toSave);
+				Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(getPreferenceStoreKey(), toSave);
 			}
 			
 		});
@@ -162,6 +163,10 @@ public class AllPanel extends Composite {
 		createContents();
 	}
 
+	private String getPreferenceStoreKey() {
+		return LAST_SEARCH_KEY_PREFIX + "." + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
+	}
+	
 	private void createContents() {
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;
@@ -223,14 +228,13 @@ public class AllPanel extends Composite {
 		
 		//only do search when this panel is viewed
 		boolean showHide = false;
-		String toLoad = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(LAST_SEARCH_KEY);
+		String toLoad = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(getPreferenceStoreKey());
 		if (toLoad != null && !toLoad.isEmpty()) {
 			AllEntitySearch load = AllEntitySearch.parse(toLoad, Collections.singleton(SmartDB.getCurrentConservationArea()));
-			if (load != null && load.getQueryColumns() != null && !load.getFilterString().isEmpty()) {
+			if (load != null && (load.getQueryColumns() != null || load.getFilterString().isEmpty())) {
 				//if load is not empty; then load it and display filter panel
 				this.entitySearch = load;
 				searchPanel.initPanel(load.getFilterString());
-				
 				showHide = true;
 			}
 		}

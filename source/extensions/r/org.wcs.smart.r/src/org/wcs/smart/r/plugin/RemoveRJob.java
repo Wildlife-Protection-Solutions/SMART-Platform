@@ -88,12 +88,13 @@ public class RemoveRJob extends Job {
 	private void uninstall(Session session){
 		//to drop and the label tables (objects that extend NamedItem or NamedKeyItem)
 		String[] TABLES = new String[]{	
-			"r_script_runparameter", //$NON-NLS-1$
+			"r_query", //$NON-NLS-1$
 			"r_script" //$NON-NLS-1$
 		};
 		
 		String[] LABELTABLES = new String[]{
-			"r_script" //$NON-NLS-1$
+			"r_script", //$NON-NLS-1$
+			"r_query" //$NON-NLS-1$
 		};
 		
 		//drop labels

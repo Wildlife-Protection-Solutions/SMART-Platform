@@ -86,12 +86,18 @@ public class RecordButtonToolbar extends Composite{
 		if (IntelSecurityManager.INSTANCE.canEditWorkingSet()) wsetItem.setEnabled(enable);
 	}
 	
-	public void setEditMode(boolean editMode){	
-		if (!IntelSecurityManager.INSTANCE.canEditRecord()) return;
-		if (editItem.isDisposed()) return;
-		editItem.setSelection(editMode);
+	public void setEditMode(boolean editMode){
+		if (editItem.isDisposed() || deleteItem.isDisposed()) return;
+		
+		if (IntelSecurityManager.INSTANCE.canEditRecord()) {
+			editItem.setSelection(editMode);
+		}else {
+			editItem.setSelection(false);
+		}
 		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
 			deleteItem.setEnabled(editMode);		
+		}else {
+			deleteItem.setEnabled(false);
 		}
 	}
 	
@@ -191,8 +197,10 @@ public class RecordButtonToolbar extends Composite{
 				(new DeleteRecordHandler()).deleteRecords(Collections.singleton(recordEditor.getRecord()), recordEditor.getContext());
 			}
 		});
-		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
+		if (IntelSecurityManager.INSTANCE.canDeleteRecord() && IntelSecurityManager.INSTANCE.canEditRecord()){
 			deleteItem.setEnabled(recordEditor.getEditMode());	
+		}else if (IntelSecurityManager.INSTANCE.canDeleteRecord()  ) {
+			deleteItem.setEnabled(true);
 		}else{
 			deleteItem.setEnabled(false);
 		}
