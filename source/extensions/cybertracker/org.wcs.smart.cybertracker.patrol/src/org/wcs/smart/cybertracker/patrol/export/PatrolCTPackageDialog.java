@@ -55,6 +55,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -62,6 +63,8 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.export.IPackageContribution;
+import org.wcs.smart.cybertracker.export.PackageContributionManager;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
@@ -101,8 +104,11 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 	
 	private CyberTrackerPropertiesProfile cmDefaultProfile = null;
 	
+	private List<IPackageContribution> contributions = null;
+	
     public PatrolCTPackageDialog(Shell parentShell) {
 		super(parentShell);
+		this.contributions = PackageContributionManager.INSTANCE.getContributionItems();
 	}
 
     public void okPressed() {
@@ -148,7 +154,18 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
-						SubMonitor progress = SubMonitor.convert(monitor, Messages.PatrolCTPackageDialog_TaskName, selectedDataModel == null ? 1 : 2);
+						SubMonitor progress = SubMonitor.convert(monitor, Messages.PatrolCTPackageDialog_TaskName, selectedDataModel == null ? 2 : 3);
+						
+						//process contributions
+						List<IPackageContribution.PackageUpdates> updates = new ArrayList<>();
+						SubMonitor work = progress.split(1);
+						if (contributions != null) {
+							for (IPackageContribution cc : contributions) {
+								IPackageContribution.PackageUpdates update = cc.packageFiles(work);
+								if (update != null) updates.add(update);
+							}
+						}
+						
 						ConfigurableModel toExport = null;
 						if (selectedDataModel != null) {
 							//convert data model to configurable model
@@ -160,7 +177,8 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 						}else {
 							toExport = selectedModel;
 						}
-						PatrolPackageExporter.INSTANCE.exportPackage(toExport, selectedProfile, fMapDirectory, exportFile, progress.split(1));
+						PatrolPackageExporter.INSTANCE.exportPackage(toExport, selectedProfile, fMapDirectory, exportFile, updates, progress.split(1));
+						
 						Display.getDefault().syncExec(()->{
 							MessageDialog.openInformation(getShell(), Messages.PatrolCTPackageDialog_CompleteTitle, MessageFormat.format(Messages.PatrolCTPackageDialog_CompleteMsg,exportFile.toString()));	
 						});
@@ -226,19 +244,23 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 		Composite composite = (Composite) super.createDialogArea(parent);
 		
 		Composite main = new Composite(composite, SWT.NONE);
-		main.setLayout(new GridLayout(3, false));
+		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
+		Group g = new Group(main, SWT.NONE);
+		g.setLayout(new GridLayout(3, false));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		g.setText("Patrol Configuration");
 		
-		Label outputFile = new Label(main, SWT.NONE);
+		Label outputFile = new Label(g, SWT.NONE);
 		outputFile.setText(Messages.PatrolCTPackageDialog_FileLbl);
 		
-		txtOutputFile = new Text(main, SWT.BORDER);
+		txtOutputFile = new Text(g, SWT.BORDER);
 		txtOutputFile.setText(""); //$NON-NLS-1$
 		txtOutputFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtOutputFile.addListener(SWT.Modify, e->validate());
 		
-		Button btnBrowse = new Button(main, SWT.PUSH);
+		Button btnBrowse = new Button(g, SWT.PUSH);
 		btnBrowse.setText("..."); //$NON-NLS-1$
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnBrowse.addListener(SWT.Selection, e->{
@@ -252,10 +274,10 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 			txtOutputFile.setText(file);
 		});
 		
-		Label modelLabel = new Label(main, SWT.NONE);
+		Label modelLabel = new Label(g, SWT.NONE);
 		modelLabel.setText(Messages.PatrolCTPackageDialog_CmLbl);
 		
-		modelViewer = new ComboViewer(main, SWT.READ_ONLY);
+		modelViewer = new ComboViewer(g, SWT.READ_ONLY);
 		modelViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		((GridData)modelViewer.getControl().getLayoutData()).widthHint = 100;
 		modelViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -289,10 +311,10 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 		});
 
 		
-		Label lblProfile = new Label(main, SWT.NONE);
+		Label lblProfile = new Label(g, SWT.NONE);
 		lblProfile.setText(Messages.PatrolCTPackageDialog_CtProfileLbl);
 
-		profileViewer = new ComboViewer(main, SWT.READ_ONLY);
+		profileViewer = new ComboViewer(g, SWT.READ_ONLY);
 		profileViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		profileViewer.setContentProvider(ArrayContentProvider.getInstance());
 		profileViewer.setLabelProvider(new CtProfileLabelProvider());
@@ -311,16 +333,16 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 		});
 		
 		
-		Label mapFileDir = new Label(main, SWT.NONE);
+		Label mapFileDir = new Label(g, SWT.NONE);
 		mapFileDir.setText(Messages.PatrolCTPackageDialog_MapDirectoryLabel);
 		mapFileDir.setToolTipText(Messages.PatrolCTPackageDialog_MapDirectoryTooltip);
 		
-		txtMapDirectory = new Text(main, SWT.BORDER);
+		txtMapDirectory = new Text(g, SWT.BORDER);
 		txtMapDirectory.setText(""); //$NON-NLS-1$
 		txtMapDirectory.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtMapDirectory.addListener(SWT.Modify, e->validate());
 		
-		Button btnBrowse2 = new Button(main, SWT.PUSH);
+		Button btnBrowse2 = new Button(g, SWT.PUSH);
 		btnBrowse2.setText("..."); //$NON-NLS-1$
 		btnBrowse2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnBrowse2.addListener(SWT.Selection, e->{
@@ -331,6 +353,13 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 			if (dir == null) return;
 			txtMapDirectory.setText(dir);
 		});
+		
+		if (contributions != null) {
+			for (IPackageContribution cc : contributions) {
+				Composite part = cc.createUi(main);
+				part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			}
+		}
 		
 		setTitle(Messages.PatrolCTPackageDialog_ShellTitle);
 		setMessage(Messages.PatrolCTPackageDialog_ShellMsg);

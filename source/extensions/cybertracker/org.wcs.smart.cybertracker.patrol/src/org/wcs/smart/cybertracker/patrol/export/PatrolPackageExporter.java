@@ -43,6 +43,7 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
+import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -92,7 +93,7 @@ public enum PatrolPackageExporter {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void exportPackage(ConfigurableModel cm, CyberTrackerPropertiesProfile profile, Path mapDirectory, Path exportFile, IProgressMonitor monitor) throws Exception{
+	public void exportPackage(ConfigurableModel cm, CyberTrackerPropertiesProfile profile, Path mapDirectory, Path exportFile, List<IPackageContribution.PackageUpdates> updates, IProgressMonitor monitor) throws Exception{
 		
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.PatrolPackageExporter_TaskName, 7);
 		
@@ -105,6 +106,14 @@ public enum PatrolPackageExporter {
 				}
 				
 				List<File> toIncludeInZip = new ArrayList<>();
+				for (IPackageContribution.PackageUpdates update : updates) {
+					for (Path p : update.getAddedFiles()) {
+						Path moveTo = tempDir.resolve(p.getFileName().toString());
+						Files.move(p, moveTo);
+						toIncludeInZip.add(moveTo.toFile());
+					}
+					//TODO: delete temporary files
+				}
 				
 				Path cmFile = tempDir.resolve(CM_MODEL_FILE);
 				org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convert(modelToExport, sub.split(1));
