@@ -362,6 +362,10 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 		}
 	}
 	
+	@Override
+	public boolean isResizable() {
+		return true;
+	}
 
 	private void loadData() {		
 		String text = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_FILE_KEY);
