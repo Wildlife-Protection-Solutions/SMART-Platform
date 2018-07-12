@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -61,6 +62,8 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.export.IPackageContribution;
+import org.wcs.smart.cybertracker.export.PackageContributionManager;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
@@ -98,8 +101,12 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 	
 	private CyberTrackerPropertiesProfile cmDefaultProfile = null;
 	
+	private List<IPackageContribution> contributions = null;
+	
     public SurveyCTPackageDialog(Shell parentShell) {
 		super(parentShell);
+		this.contributions = PackageContributionManager.INSTANCE.getContributionItems();
+
 	}
 
     public void okPressed() {
@@ -140,8 +147,20 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 				
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.SurveyCTPackageDialog_ExportTaskName, 2);
+					
 					try {
-						SurveyPackageExporter.INSTANCE.exportPackage(selectedDesign, selectedProfile, fMapDirectory, exportFile, monitor);
+						//process contributions
+						List<IPackageContribution.PackageContribution> updates = new ArrayList<>();
+						SubMonitor work = progress.split(1);
+						if (contributions != null) {
+							for (IPackageContribution cc : contributions) {
+								IPackageContribution.PackageContribution update = cc.packageFiles(work);
+								if (update != null) updates.add(update);
+							}
+						}
+						
+						SurveyPackageExporter.INSTANCE.exportPackage(selectedDesign, selectedProfile, fMapDirectory, exportFile, updates, progress.split(1));
 						Display.getDefault().syncExec(()->{
 							MessageDialog.openInformation(getShell(), Messages.SurveyCTPackageDialog_ExportDoneTitle, MessageFormat.format(Messages.SurveyCTPackageDialog_ExportDoneMessage,exportFile.toString()));	
 						});
@@ -158,13 +177,11 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 			});
 		} catch (Exception e) {
 			CyberTrackerPlugIn.displayError(Messages.SurveyCTPackageDialog_ErrorTitle, Messages.SurveyCTPackageDialog_ExportErrorMsg + e.getMessage(), e);
+			return;
 		}	
-		
-		
+		super.okPressed();	
     }
-    
-    
-    
+      
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 	 */
@@ -300,6 +317,13 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 			if (dir == null) return;
 			txtMapDirectory.setText(dir);
 		});
+		
+		if (contributions != null) {
+			for (IPackageContribution cc : contributions) {
+				Composite part = cc.createUi(main, "survey"); //$NON-NLS-1$
+				if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			}
+		}
 		
 		setTitle(Messages.SurveyCTPackageDialog_ShellTitle);
 		setMessage(Messages.SurveyCTPackageDialog_ShellMsg);

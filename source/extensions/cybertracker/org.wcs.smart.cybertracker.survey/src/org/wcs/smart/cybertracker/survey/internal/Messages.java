@@ -112,6 +112,7 @@ public class Messages extends NLS {
 	public static String SurveyCTPackageDialog_ExportDoneMessage;
 	public static String SurveyCTPackageDialog_ExportDoneTitle;
 	public static String SurveyCTPackageDialog_ExportErrorMsg;
+	public static String SurveyCTPackageDialog_ExportTaskName;
 	public static String SurveyCTPackageDialog_FileDialogTitle;
 	public static String SurveyCTPackageDialog_FileLabel;
 	public static String SurveyCTPackageDialog_FileRequired;

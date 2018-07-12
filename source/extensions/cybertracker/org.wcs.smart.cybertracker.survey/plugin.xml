@@ -91,6 +91,10 @@
             commandId="org.wcs.smart.cybertracker.survey.export"
             icon="images/etool16/export.png">
       </image>
+      <image
+            commandId="org.wcs.smart.cybertracker.survey.export.package"
+            icon="images/etool16/export.png">
+      </image>
    </extension>
    <extension
          point="org.wcs.smart.cybertracker.datasource">

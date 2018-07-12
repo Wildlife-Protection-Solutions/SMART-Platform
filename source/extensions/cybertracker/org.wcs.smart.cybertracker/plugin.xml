@@ -230,6 +230,10 @@
             commandId="org.wcs.smart.cybertracker.imageprocessingop"
             icon="images/etool16/camera.png">
       </image>
+      <image
+            commandId="org.wcs.smart.cybertracker.json.import"
+            icon="images/etool16/import.png">
+      </image>
    </extension>
    <extension
          point="org.wcs.smart.caTemplateCloner">

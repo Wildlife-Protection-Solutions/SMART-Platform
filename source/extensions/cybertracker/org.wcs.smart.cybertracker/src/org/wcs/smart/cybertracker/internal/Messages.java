@@ -365,6 +365,7 @@ public class Messages extends NLS {
 	public static String ManageProfilesDialog_LoadProfileList_Task;
 	public static String ManageProfilesDialog_Message;
 	public static String ManageProfilesDialog_Title;
+	public static String PackageContributionManager_LoadingError;
 	public static String PatrolScreens_Begin_GPSRequiredMessage;
 	public static String PatrolScreens_Confirm;
 	public static String PatrolScreens_Exit_Title;

@@ -94,7 +94,7 @@ public enum PatrolPackageExporter {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void exportPackage(ConfigurableModel cm, CyberTrackerPropertiesProfile profile, Path mapDirectory, Path exportFile, List<IPackageContribution.PackageUpdates> updates, IProgressMonitor monitor) throws Exception{
+	public void exportPackage(ConfigurableModel cm, CyberTrackerPropertiesProfile profile, Path mapDirectory, Path exportFile, List<IPackageContribution.PackageContribution> updates, IProgressMonitor monitor) throws Exception{
 		
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.PatrolPackageExporter_TaskName, 7);
 		
@@ -108,7 +108,7 @@ public enum PatrolPackageExporter {
 				
 				List<File> toIncludeInZip = new ArrayList<>();
 				HashMap<String, JSONObject> projectAdditions = new HashMap<>();
-				for (IPackageContribution.PackageUpdates update : updates) {
+				for (IPackageContribution.PackageContribution update : updates) {
 					for (Path p : update.getAddedFiles()) {
 						Path moveTo = tempDir.resolve(p.getFileName().toString());
 						Files.move(p, moveTo);
@@ -117,7 +117,6 @@ public enum PatrolPackageExporter {
 					if (update.getProjectMetadataKey() != null) {
 						projectAdditions.put(update.getProjectMetadataKey(), update.getProjectMetdata());
 					}
-					//TODO: delete temporary files
 				}
 				
 				Path cmFile = tempDir.resolve(CM_MODEL_FILE);
@@ -171,7 +170,9 @@ public enum PatrolPackageExporter {
 			} catch (IOException e) {
 				CyberTrackerPlugIn.log("Error cleaning up directory after exporting ct patrol package", e); //$NON-NLS-1$
 			}
-			
+			for (IPackageContribution.PackageContribution update : updates) {
+				update.cleanUp();
+			}
 		}
 	}
 	

@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.cybertracker.export;
 
 import java.util.ArrayList;
@@ -8,12 +29,22 @@ import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 
+/**
+ * Tools for managing cybertracker export package contributions.
+ *  
+ * @author Emily
+ *
+ */
 public enum PackageContributionManager {
 	
 	INSTANCE;
 	
-	public static final String EXT_ID = "org.wcs.smart.cybertracker.export.package.contribution";
+	public static final String EXT_ID = "org.wcs.smart.cybertracker.export.package.contribution"; //$NON-NLS-1$
 	
+	/**
+	 * Find all contributions registered in the system
+	 * @return
+	 */
 	public List<IPackageContribution> getContributionItems(){
 		List<IPackageContribution>  items = new ArrayList<>();
 		
@@ -25,7 +56,7 @@ public enum PackageContributionManager {
 					items.add(ext);
 				}
 			}catch (Exception ex){
-				SmartPlugIn.displayLog("Error loading export package contributions", ex);
+				SmartPlugIn.displayLog(Messages.PackageContributionManager_LoadingError, ex);
 			}
 		}
 		return items;

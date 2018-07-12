@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,9 +38,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
+import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -82,7 +85,7 @@ public enum SurveyPackageExporter {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void exportPackage(SurveyDesign design, CyberTrackerPropertiesProfile profile, Path mapDirectory, Path exportFile, IProgressMonitor monitor) throws Exception{
+	public void exportPackage(SurveyDesign design, CyberTrackerPropertiesProfile profile, Path mapDirectory, Path exportFile, List<IPackageContribution.PackageContribution> contributions, IProgressMonitor monitor) throws Exception{
 		
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.SurveyPackageExporter_TaskName, 7);
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
@@ -98,6 +101,19 @@ public enum SurveyPackageExporter {
 				}
 				
 				List<File> toIncludeInZip = new ArrayList<>();
+				
+				//contribution files
+				HashMap<String, JSONObject> projectAdditions = new HashMap<>();
+				for (IPackageContribution.PackageContribution update : contributions) {
+					for (Path p : update.getAddedFiles()) {
+						Path moveTo = tempDir.resolve(p.getFileName().toString());
+						Files.move(p, moveTo);
+						toIncludeInZip.add(moveTo.toFile());
+					}
+					if (update.getProjectMetadataKey() != null) {
+						projectAdditions.put(update.getProjectMetadataKey(), update.getProjectMetdata());
+					}
+				}
 				
 				Path cmFile = tempDir.resolve(CM_MODEL_FILE);
 				org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convert(modelToExport, sub.split(1));
@@ -139,7 +155,7 @@ public enum SurveyPackageExporter {
 				
 				sub.split(1);
 				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile(modelToExport, logo, mapfiles, projectFile, metadataFile);
+				writeProjectFile(modelToExport, logo, mapfiles, projectFile, metadataFile, projectAdditions);
 				toIncludeInZip.add(projectFile.toFile());
 				
 				ZipUtil.createZip(toIncludeInZip.toArray(new File[toIncludeInZip.size()]), exportFile.toFile(), sub.split(1));
@@ -150,7 +166,9 @@ public enum SurveyPackageExporter {
 			} catch (IOException e) {
 				CyberTrackerPlugIn.log("Error deleting temp directory creating during ct survey package export.", e); //$NON-NLS-1$
 			}
-			
+			for (IPackageContribution.PackageContribution update : contributions) {
+				update.cleanUp();
+			}
 		}
 	}
 	
@@ -181,8 +199,8 @@ public enum SurveyPackageExporter {
 		}
 	}
 
-	private void writeProjectFile(ConfigurableModel cm, Path logoFile, Path mapFileDir, Path outputFile, Path metadataFile) throws IOException {
-		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, mapFileDir, outputFile, metadataFile, null);//TODO:
+	private void writeProjectFile(ConfigurableModel cm, Path logoFile, Path mapFileDir, Path outputFile, Path metadataFile, HashMap<String, JSONObject> projectAdditions) throws IOException {
+		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, mapFileDir, outputFile, metadataFile, projectAdditions);
 	}
 	
 }

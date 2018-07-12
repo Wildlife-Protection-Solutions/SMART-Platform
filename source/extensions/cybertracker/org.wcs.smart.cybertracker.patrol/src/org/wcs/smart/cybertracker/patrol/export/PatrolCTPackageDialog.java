@@ -157,11 +157,11 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 						SubMonitor progress = SubMonitor.convert(monitor, Messages.PatrolCTPackageDialog_TaskName, selectedDataModel == null ? 2 : 3);
 						
 						//process contributions
-						List<IPackageContribution.PackageUpdates> updates = new ArrayList<>();
+						List<IPackageContribution.PackageContribution> updates = new ArrayList<>();
 						SubMonitor work = progress.split(1);
 						if (contributions != null) {
 							for (IPackageContribution cc : contributions) {
-								IPackageContribution.PackageUpdates update = cc.packageFiles(work);
+								IPackageContribution.PackageContribution update = cc.packageFiles(work);
 								if (update != null) updates.add(update);
 							}
 						}
@@ -195,8 +195,9 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 			});
 		} catch (Exception e) {
 			CyberTrackerPlugIn.displayError(Messages.PatrolCTPackageDialog_ErrorTitle, Messages.PatrolCTPackageDialog_ErrorMsg + e.getMessage(), e);
+			return;
 		}	
-		
+		super.okPressed();
 		
     }
     
@@ -250,7 +251,7 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 		Group g = new Group(main, SWT.NONE);
 		g.setLayout(new GridLayout(3, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		g.setText("Patrol Configuration");
+		g.setText(Messages.PatrolCTPackageDialog_PatrolConfigurationLabel);
 		
 		Label outputFile = new Label(g, SWT.NONE);
 		outputFile.setText(Messages.PatrolCTPackageDialog_FileLbl);
@@ -356,8 +357,8 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 		
 		if (contributions != null) {
 			for (IPackageContribution cc : contributions) {
-				Composite part = cc.createUi(main);
-				part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+				Composite part = cc.createUi(main, "patrol"); //$NON-NLS-1$
+				if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			}
 		}
 		
