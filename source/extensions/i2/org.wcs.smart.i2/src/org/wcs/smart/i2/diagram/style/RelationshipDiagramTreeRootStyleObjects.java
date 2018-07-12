@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.i2.diagram.style;
 
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 
 /**
@@ -43,5 +46,19 @@ public enum RelationshipDiagramTreeRootStyleObjects {
 
 	public String getGuiName() {
 		return this.displayName;
+	}
+	
+	public Image getImage() {
+		switch (this) {
+		case DEFAULT:
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STYLE_ICON);
+		case ENTITY_TYPE:
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY);
+		case RELATIONSIP_TYPE:
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RELATIONSHIP);
+		case ROOT:
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ROOTENTITY);
+		}
+		return null;
 	}
 }

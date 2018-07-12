@@ -62,6 +62,10 @@ public class RelationshipDiagramStyledObjectsLabelProvider extends LabelProvider
 		if (element instanceof IntelRelationshipType) {
 			return relationshipLabelProvider.getImage(element);
 		}
+		if (element instanceof RelationshipDiagramTreeRootStyleObjects) {
+			RelationshipDiagramTreeRootStyleObjects styleObj = (RelationshipDiagramTreeRootStyleObjects) element;
+			return styleObj.getImage();
+		}
 		return super.getImage(element);
 	}
 

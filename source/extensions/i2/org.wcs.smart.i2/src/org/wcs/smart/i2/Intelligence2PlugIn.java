@@ -55,6 +55,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_ATTRIBUTE_GROUP = "org.wcs.smart.i2.icon.attribute.group"; //$NON-NLS-1$
 	public static final String ICON_ATTRIBUTE_GROUP_NEW = "org.wcs.smart.i2.icon.attribute.group.new"; //$NON-NLS-1$
 	public static final String ICON_ENTITY = "org.wcs.smart.i2.icon.entity"; //$NON-NLS-1$
+	public static final String ICON_ROOTENTITY = "org.wcs.smart.i2.icon.rootentity"; //$NON-NLS-1$
 	public static final String ICON_ENTITY_QUERY = "org.wcs.smart.i2.icon.query"; //$NON-NLS-1$
 	public static final String ICON_ENTITY_QUERY_NEW = "org.wcs.smart.i2.icon.query.new"; //$NON-NLS-1$
 	public static final String ICON_ENTITY_NEW = "org.wcs.smart.i2.icon.entity.new"; //$NON-NLS-1$
@@ -107,6 +108,8 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		super.initializeImageRegistry(reg);
 		
 		reg.put(ICON_ENTITY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entity.png")); //$NON-NLS-1$);
+		reg.put(ICON_ROOTENTITY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/rootentity.png")); //$NON-NLS-1$);
+
 		reg.put(ICON_ENTITY_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entity_add.png")); //$NON-NLS-1$);
 		reg.put(ICON_RECORD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/script.png")); //$NON-NLS-1$);
 		reg.put(ICON_RECORD_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/script_add.png")); //$NON-NLS-1$);
