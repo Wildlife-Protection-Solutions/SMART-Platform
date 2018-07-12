@@ -23,6 +23,7 @@ package org.wcs.smart.dataentry.model.xml;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -161,7 +162,7 @@ public class CmSmartToXmlConverter {
 		if(monitor.isCanceled()) return;
 		for (CmAttributeTreeNode cmNode : cmList) {
 			TreeNodeType xmlNode = new TreeNodeType();
-			setNames(xmlNode.getName(), cmNode.getNames(), cmNode.getDmTreeNode().getNames(), llookup);
+			setNames(xmlNode.getName(), cmNode.getNames(), cmNode.getDmTreeNode() == null ? Collections.emptySet() :  cmNode.getDmTreeNode().getNames(), llookup);
 			xmlNode.setIsActive(cmNode.getIsActive());
 			if (cmNode.getDmTreeNode() == null){
 				xmlNode.setKeyRef(null);
