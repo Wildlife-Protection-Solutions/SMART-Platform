@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.editors.record;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -195,7 +196,7 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 		
 		// create table
 		if (isMulti){
-			Table ttable = new Table(popup, SWT.CHECK | SWT.V_SCROLL);
+			Table ttable = new Table(popup, SWT.CHECK | SWT.V_SCROLL | SWT.MULTI);
 			table = new CheckboxTableViewer(ttable){
 				@Override
 				public Object[] getCheckedElements() {
@@ -215,6 +216,20 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 					}
 					checkChanged = true;				
 				}
+			});
+			table.getControl().addListener(SWT.KeyDown, e->{
+				if (e.keyCode != SWT.SPACE) return;
+				if (table.getSelection().isEmpty()) return;
+				
+				Object item = table.getStructuredSelection().getFirstElement();
+				if (item == null) return;
+				boolean value = ((CheckboxTableViewer)table).getChecked( item );
+				for (Iterator<?> iterator = table.getStructuredSelection().iterator(); iterator.hasNext();) {
+					Object tp = (Object) iterator.next();
+					((CheckboxTableViewer)table).setChecked(tp, !value);
+				}
+				e.doit = false;
+				
 			});
 		}else{
 			table = new ListViewer(popup, SWT.V_SCROLL);

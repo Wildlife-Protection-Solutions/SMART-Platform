@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.event.ui;
 
+import java.util.Iterator;
+
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -94,7 +96,7 @@ public class OptionCheckBoxDropDown extends CheckBoxDropDown{
 		}
 		
 		// create table
-		table = CheckboxTableViewer.newCheckList(popup, SWT.V_SCROLL);
+		table = CheckboxTableViewer.newCheckList(popup, SWT.V_SCROLL | SWT.MULTI);
 		table.getControl().setEnabled(false);
 		table.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((CheckboxTableViewer)table).addCheckStateListener(new ICheckStateListener() {
@@ -103,7 +105,20 @@ public class OptionCheckBoxDropDown extends CheckBoxDropDown{
 				checkChanged = true;				
 			}
 		});
-		
+		table.getControl().addListener(SWT.KeyDown, e->{
+			if (e.keyCode != SWT.SPACE) return;
+			if (table.getSelection().isEmpty()) return;
+			
+			Object item = table.getStructuredSelection().getFirstElement();
+			if (item == null) return;
+			boolean value = ((CheckboxTableViewer)table).getChecked( item );
+			for (Iterator<?> iterator = table.getStructuredSelection().iterator(); iterator.hasNext();) {
+				Object tp = (Object) iterator.next();
+				((CheckboxTableViewer)table).setChecked(tp, !value);
+			}
+			e.doit = false;
+			
+		});
 		if (labelProvider != null) table.setLabelProvider(labelProvider);
 		if (contentProvider != null) table.setContentProvider(contentProvider);
 		if (input != null) table.setInput(input);
