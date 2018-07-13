@@ -95,7 +95,7 @@ public class CsvExporter {
 				,delimiter)) {
 				
 				IProjectionProvider prj = ProjectionUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
-				List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
+				List<QueryColumn> cols = results.getQueryColumns(query, l, session, prj);
 				
 				//headers
 				String[] data = new String[cols.size()];

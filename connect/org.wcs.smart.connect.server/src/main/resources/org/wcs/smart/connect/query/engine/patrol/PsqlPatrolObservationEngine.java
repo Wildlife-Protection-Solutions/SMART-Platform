@@ -79,6 +79,12 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 		locale = (Locale) params.get(Locale.class.getName());
 		session = (Session) params.get(Session.class.getName());
 		
+		boolean uuids = false; 
+		if (params.containsKey(AbstractQueryEngine.INCLUDE_UUID_PARAMETER)) {
+			uuids = (boolean) params.get(AbstractQueryEngine.INCLUDE_UUID_PARAMETER);
+		}
+		final boolean includeUuids = uuids;
+		
 		queryDataTable = createTempTableName();
 		return session.doReturningWork(new ReturningWork<PatrolObservationQueryResult>() {
 			@Override
@@ -107,7 +113,7 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 					}
 					c.commit();
 					
-					return new PatrolObservationQueryResult(PsqlPatrolObservationEngine.this, itemcnt);
+					return new PatrolObservationQueryResult(PsqlPatrolObservationEngine.this, itemcnt, includeUuids);
 				}catch (Exception ex){
 					c.rollback();
 					logger.log(Level.SEVERE, ex.getMessage(), ex);

@@ -107,6 +107,11 @@ import org.wcs.smart.util.UuidUtils;
  */
 public abstract class AbstractQueryEngine implements IQueryEngine {
 	
+	/**
+	 * Parameter key for providing if uuids should be included in query export results
+	 */
+	public static final String INCLUDE_UUID_PARAMETER = "org.wcs.smart.includeUuids"; //$NON-NLS-1$
+	
 	protected final Logger logger = Logger.getLogger(AbstractQueryEngine.class.getName());
 	
 	protected Map<String, Object> currentParameters = new HashMap<String, Object>();

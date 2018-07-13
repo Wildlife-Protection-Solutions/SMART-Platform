@@ -27,11 +27,13 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.api.QueryApi.Direction;
@@ -40,6 +42,7 @@ import org.wcs.smart.connect.query.columns.QueryColumnUtils;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.ITablePagedQueryResultSet;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
@@ -79,6 +82,11 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	 * @throws Exception
 	 */
 	public abstract Geometry createGeometry(IResultItem item) throws Exception;
+	
+	public List<QueryColumn> getQueryColumns(SimpleQuery query, Locale l, Session session, IProjectionProvider prj){
+			List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
+			return cols;
+	}
 	
 	/**
 	 * Creates a feature id for the given row in the result set

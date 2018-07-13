@@ -71,6 +71,7 @@ import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
+import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.CsvExporter;
 import org.wcs.smart.connect.query.engine.GeoJsonExporter;
 import org.wcs.smart.connect.query.engine.GridQueryResults;
@@ -172,14 +173,20 @@ public class QueryApi extends HttpServlet{
 			@QueryParam("cafilter") String cafilter,
 			@QueryParam("sortcolumn") String sortColumnName,
 			@QueryParam("sortdirection") String sortDirection,
-			@QueryParam("srid") String srid) throws SQLException{
+			@QueryParam("srid") String srid,
+			@QueryParam("includeuuids") String strIncludeUuids) throws SQLException{
 
 		UUID uuid = UuidUtils.stringToUuid(queryUuid);
 		QueryApi.Direction sortDirectionInt = QueryApi.Direction.UP;
 		if(sortDirection != null && (sortDirection.toLowerCase().equals("descending") || sortDirection.toLowerCase().equals("desc") ) ){  //$NON-NLS-1$//$NON-NLS-2$
 				sortDirectionInt = QueryApi.Direction.DOWN;
 		}
-		
+		Boolean includeUuids = false;
+		if (strIncludeUuids != null) {
+			if (strIncludeUuids.trim().toUpperCase().equals("TRUE")) {
+				includeUuids = true;
+			}
+		}
 		Date startDate = null;
 		Date endDate = null;
 		if (start != null){
@@ -225,7 +232,7 @@ public class QueryApi extends HttpServlet{
 			Query query = QueryManager.INSTANCE.findQuery(uuid, s);
 			if (query != null) {
 				validateDateFilter(query.getTypeKey(), filter);
-				QueryResult results = executeCoreQuery(query, cafilter, df, srid, format, delimiter,  sortColumnName, sortDirectionInt, s);
+				QueryResult results = executeCoreQuery(query, cafilter, df, srid, format, delimiter,  sortColumnName, sortDirectionInt, includeUuids, s);
 				result = results.result;
 				return results.response;
 			}else {
@@ -282,7 +289,7 @@ public class QueryApi extends HttpServlet{
 		}
 	}
 	
-	private QueryResult executeCoreQuery(Query query, String cafilter, DateFilter df, String srid, String format, String delimiter, String sortColumnName, QueryApi.Direction sortDirectionInt, Session s) throws Exception {
+	private QueryResult executeCoreQuery(Query query, String cafilter, DateFilter df, String srid, String format, String delimiter, String sortColumnName, QueryApi.Direction sortDirectionInt, boolean includeUuids, Session s) throws Exception {
 		IQueryResult result = null;
 		if (query == null){
 			//query not found
@@ -324,7 +331,7 @@ public class QueryApi extends HttpServlet{
 		HashMap<String, Object> params = new HashMap<String, Object>();
 		params.put(Session.class.getName(), s);
 		params.put(Locale.class.getName(), request.getLocale());
-			
+		params.put(AbstractQueryEngine.INCLUDE_UUID_PARAMETER, includeUuids);
 		result = engine.executeQuery(query, params);
 			
 		ProjectionProvider prjProvider = null;
