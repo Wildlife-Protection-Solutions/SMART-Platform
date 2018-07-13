@@ -87,5 +87,11 @@
             id="org.wcs.smart.event.ca.clone">
       </templateCloner>
    </extension>
+   <extension
+         point="org.wcs.smart.changeLogInstaller">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.event.plugin.ChangeTrackerInstaller">
+      </ChangeLogTracker>
+   </extension>
 
 </plugin>
