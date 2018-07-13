@@ -118,7 +118,7 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 						itemcnt = rs.getInt(1);
 					}
 					c.commit();	
-					return new EntityWaypointQueryResult(PsqlEntityWaypointEngine.this, itemcnt);
+					return new EntityWaypointQueryResult(PsqlEntityWaypointEngine.this, itemcnt, getIncludeUuids(parameters));
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);

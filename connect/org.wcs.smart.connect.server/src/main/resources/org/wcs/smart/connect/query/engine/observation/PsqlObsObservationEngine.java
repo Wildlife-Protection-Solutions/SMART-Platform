@@ -126,7 +126,7 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 				}
 				c.commit();
 				
-				return new ObsObservationQueryResult(PsqlObsObservationEngine.this, itemcnt);
+				return new ObsObservationQueryResult(PsqlObsObservationEngine.this, itemcnt, getIncludeUuids(parameters));
 			}
 		});
 	}

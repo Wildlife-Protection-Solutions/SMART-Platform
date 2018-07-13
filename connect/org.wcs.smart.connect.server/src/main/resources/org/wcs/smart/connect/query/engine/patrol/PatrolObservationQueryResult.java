@@ -63,18 +63,14 @@ public class PatrolObservationQueryResult extends AbstractDbFeatureResultSet {
 		setItemCount(itemcnt);
 	}
 	
+	@Override
 	public List<QueryColumn> getQueryColumns(SimpleQuery query, Locale l, Session session, IProjectionProvider prj){
 		List<QueryColumn> cols = super.getQueryColumns(query, l, session, prj);
 		if (!includeUuids) return cols;
 		
-		QueryColumn obsUuidCol = new QueryColumn("Observation UUID", "obsuuid", QueryColumn.ColumnType.STRING) {
-
+		QueryColumn obsUuidCol = new QueryColumn(getObservationColumnName(l), OBS_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
 			@Override
-			public QueryColumn clone() {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
+			public QueryColumn clone() { return this; }
 			@Override
 			public Object getValue(IResultItem item) {
 				if (((PatrolQueryResultItem)item).getObservationUuid() == null) return ""; //$NON-NLS-1$
@@ -82,14 +78,9 @@ public class PatrolObservationQueryResult extends AbstractDbFeatureResultSet {
 			}
 			
 		};
-		QueryColumn wpUuidCol = new QueryColumn("Waypoint UUID", "wpuuid", QueryColumn.ColumnType.STRING) {
-
+		QueryColumn wpUuidCol = new QueryColumn(getWaypointColumnName(l), WP_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
 			@Override
-			public QueryColumn clone() {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
+			public QueryColumn clone() { return this; }
 			@Override
 			public Object getValue(IResultItem item) {
 				if (((PatrolQueryResultItem)item).getWaypointUuid() == null) return ""; //$NON-NLS-1$
@@ -102,7 +93,7 @@ public class PatrolObservationQueryResult extends AbstractDbFeatureResultSet {
 		cols.add(wpUuidCol);
 		
 		return cols;
-}
+	}
 	
 	
 	@Override

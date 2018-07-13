@@ -141,7 +141,7 @@ public class AssetWaypointEngine extends AssetQueryEngine {
 					}
 					c.commit();
 					
-					return new AssetWaypointResult(AssetWaypointEngine.this, itemcnt);
+					return new AssetWaypointResult(AssetWaypointEngine.this, itemcnt, getIncludeUuids(parameters));
 				}catch (Exception ex){
 					c.rollback();
 					logger.log(Level.SEVERE, ex.getMessage(), ex);

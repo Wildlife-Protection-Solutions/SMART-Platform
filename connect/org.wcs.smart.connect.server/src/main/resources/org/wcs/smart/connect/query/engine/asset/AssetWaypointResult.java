@@ -26,13 +26,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -40,12 +45,31 @@ import com.vividsolutions.jts.geom.Geometry;
 public class AssetWaypointResult extends AbstractDbFeatureResultSet {
 
 	protected AssetQueryEngine engine;
+	private boolean includeUuids;
 	
-	public AssetWaypointResult(AssetWaypointEngine engine, int itemcnt){
+	public AssetWaypointResult(AssetWaypointEngine engine, int itemcnt, boolean includeUuids){
 		this.engine = engine;
+		this.includeUuids = includeUuids;
 		setItemCount(itemcnt);
 	}
 	
+	@Override
+	public List<QueryColumn> getQueryColumns(SimpleQuery query, Locale l, Session session, IProjectionProvider prj){
+		List<QueryColumn> cols = super.getQueryColumns(query, l, session, prj);
+		if (!includeUuids) return cols;
+		QueryColumn wpUuidCol = new QueryColumn(getWaypointColumnName(l), WP_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
+			@Override
+			public QueryColumn clone() { return this; }
+			@Override
+			public Object getValue(IResultItem item) {
+				if (((AssetQueryResultItem)item).getWaypointUuid() == null) return ""; //$NON-NLS-1$
+				return UuidUtils.uuidToString( ((AssetQueryResultItem)item).getWaypointUuid());
+			}
+		};
+		cols.add(wpUuidCol);
+		
+		return cols;
+	}
 	
 	@Override
 	public Geometry createGeometry(IResultItem rs) throws Exception {

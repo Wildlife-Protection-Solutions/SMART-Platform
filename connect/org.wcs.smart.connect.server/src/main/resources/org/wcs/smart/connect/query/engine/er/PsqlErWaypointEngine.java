@@ -132,7 +132,7 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 					}
 					
 					c.commit();
-					return new ErWaypointQueryResult(PsqlErWaypointEngine.this, itemcnt);
+					return new ErWaypointQueryResult(PsqlErWaypointEngine.this, itemcnt, getIncludeUuids(parameters));
 					
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);

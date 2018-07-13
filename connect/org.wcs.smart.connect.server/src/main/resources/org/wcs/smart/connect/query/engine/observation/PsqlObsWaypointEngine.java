@@ -124,7 +124,7 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 					filterer.dropTemporaryTables(c);
 				}
 				c.commit();
-				return new ObsWaypointQueryResult(PsqlObsWaypointEngine.this, itemcnt);
+				return new ObsWaypointQueryResult(PsqlObsWaypointEngine.this, itemcnt, getIncludeUuids(parameters));
 			}
 		});
 	}

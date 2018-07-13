@@ -127,7 +127,7 @@ public class AssetObservationEngine extends AssetQueryEngine {
 					}
 					c.commit();
 					
-					return new AssetObservationResult(AssetObservationEngine.this, itemcnt);
+					return new AssetObservationResult(AssetObservationEngine.this, itemcnt, getIncludeUuids(parameters));
 				}catch (Exception ex){
 					c.rollback();
 					logger.log(Level.SEVERE, ex.getMessage(), ex);

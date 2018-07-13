@@ -239,6 +239,19 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	}
 	
 	/**
+	 * Searches the parameters for the include uuids flag and returns true or false
+	 * based on the false value 
+	 * 
+	 * @param params
+	 * @return
+	 */
+	protected boolean getIncludeUuids(HashMap<String,Object> params) { 
+		if (params.containsKey(AbstractQueryEngine.INCLUDE_UUID_PARAMETER)) {
+			return (boolean) params.get(AbstractQueryEngine.INCLUDE_UUID_PARAMETER);
+		}
+		return false;
+	}
+	/**
 	 * 
 	 * @return the active session if set; null otherwise
 	 */

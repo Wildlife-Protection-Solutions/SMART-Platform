@@ -106,8 +106,8 @@ public class GeoJsonExporter {
 					StringWriter writer = new StringWriter();
 					StringWriter crsWriter = new StringWriter();
 
-					List<QueryColumn> columns = query.computeQueryColumns(l, session, prjProvider);
-					SimpleFeatureType type = DataUtilities.createType("smartqueryresults", results.getFeatureSchemaDef(columns, false)); //$NON-NLS-1$
+					List<QueryColumn> columns = results.getQueryColumns(query, l, session, prjProvider);
+					SimpleFeatureType type = DataUtilities.createType("smartqueryresults", results.getFeatureSchemaDef(columns, false, false)); //$NON-NLS-1$
 					ArrayList<SimpleFeature> features = new ArrayList<SimpleFeature>();
 					
 					IQueryResultSetIterator<? extends IResultItem> itemiterator = results.iterator(500, session);

@@ -146,7 +146,6 @@ public class QueryApi extends HttpServlet{
 	 * 
 	 * @param queryuuid		provided in the URL, the uuid of the query requested
 	 * @param format	requested format, not all options makes sense for all query types: csv, shp, tif, geojson
-	 * @param srid		srid that any spatial data results should be returned in
 	 * @param start_date	start date of query, in the form yyyy-MM-dd
 	 * @param end_date	end date of query, in the form yyyy-MM-dd
 	 * @param date_filter	date field type, not all make sense for all queries: waypointdate, patrolstart, patrolend, missiontrackdate, missionstartdate, missionenddate, intellreceiveddate
@@ -158,48 +157,49 @@ public class QueryApi extends HttpServlet{
 	 * 						NOTE: you will get an error, "{"status": 500, "error:": "Error executing query: ERROR: column "abc" does not exist Position: 52"} if the provided column is not supported, change the sortcolumn parameter and try again.
 	 * @param sortdirection set this to "descending" (or "desc") to get reverse order, otherwise you will get ascending order by default.  eg: &sortdirection=descending 
 	 * 			This parameter will be ignored if provided without a sortcolumn.
-	 * @param srid	the requested output projection SRID. The default is 4326 (WGS84, standard Lat/long coordinates). This parameter is ignored if the 'format' is not geojson or shp. (Note: for google map's projection you must use the official srid of 3857, 900913 doesn't work. 
+	 * @param srid	the requested output projection SRID. The default is 4326 (WGS84, standard Lat/long coordinates). This parameter is ignored if the 'format' is not geojson or shp. (Note: for google map's projection you must use the official srid of 3857, 900913 doesn't work.
+	 * @param includeuuids optional; if "true" then the observation uuid and waypoint uuid are include in the results if appropriate for the query type; otherwise this parameter is ignored 
 	 * @return the results of the query, format is whatever is selected using the format parameter.
 	 * @throws SQLException 
 	 */
 	@GET
     @Path("/{queryuuid}")
-	public Response getQueryResults(@PathParam("queryuuid") String queryUuid, 
+	public Response getQueryResults(@PathParam("queryuuid") String queryuuid, 
 			@QueryParam("format") String format,
-			@QueryParam("start_date") String start,
-			@QueryParam("end_date") String end,
-			@QueryParam("date_filter") String filter,
+			@QueryParam("start_date") String start_date,
+			@QueryParam("end_date") String end_date,
+			@QueryParam("date_filter") String date_filter,
 			@QueryParam("delimiter") String delimiter,
 			@QueryParam("cafilter") String cafilter,
-			@QueryParam("sortcolumn") String sortColumnName,
-			@QueryParam("sortdirection") String sortDirection,
+			@QueryParam("sortcolumn") String sortcolumn,
+			@QueryParam("sortdirection") String sortdirection,
 			@QueryParam("srid") String srid,
-			@QueryParam("includeuuids") String strIncludeUuids) throws SQLException{
+			@QueryParam("includeuuids") String includeuuids) throws SQLException{
 
-		UUID uuid = UuidUtils.stringToUuid(queryUuid);
+		UUID uuid = UuidUtils.stringToUuid(queryuuid);
 		QueryApi.Direction sortDirectionInt = QueryApi.Direction.UP;
-		if(sortDirection != null && (sortDirection.toLowerCase().equals("descending") || sortDirection.toLowerCase().equals("desc") ) ){  //$NON-NLS-1$//$NON-NLS-2$
+		if(sortdirection != null && (sortdirection.toLowerCase().equals("descending") || sortdirection.toLowerCase().equals("desc") ) ){  //$NON-NLS-1$//$NON-NLS-2$
 				sortDirectionInt = QueryApi.Direction.DOWN;
 		}
 		Boolean includeUuids = false;
-		if (strIncludeUuids != null) {
-			if (strIncludeUuids.trim().toUpperCase().equals("TRUE")) {
+		if (includeuuids != null) {
+			if (includeuuids.trim().toUpperCase().equals("TRUE")) { //$NON-NLS-1$
 				includeUuids = true;
 			}
 		}
 		Date startDate = null;
 		Date endDate = null;
-		if (start != null){
+		if (start_date != null){
 			try{
-				startDate = SmartUtils.parseDate(start);
+				startDate = SmartUtils.parseDate(start_date);
 			}catch (Exception ex){
 				return createErrorResponse(Status.BAD_REQUEST, Messages.getString("QueryApi.StartDateError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 		}
 		
-		if (end != null){
+		if (end_date != null){
 			try{
-				endDate = SmartUtils.parseDate(end);
+				endDate = SmartUtils.parseDate(end_date);
 			}catch (Exception ex){
 				return createErrorResponse(Status.BAD_REQUEST, Messages.getString("QueryApi.EndDateError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
@@ -209,7 +209,7 @@ public class QueryApi extends HttpServlet{
 			delimiter = ","; //$NON-NLS-1$
 		}
 		
-		IDateFieldFilter dateField = QueryManager.INSTANCE.findDateField(filter);
+		IDateFieldFilter dateField = QueryManager.INSTANCE.findDateField(date_filter);
 		IDateFilter dfilter = null;
 		if (startDate == null && endDate == null){
 			dfilter = AllDatesFilter.INSTANCE; 
@@ -231,15 +231,15 @@ public class QueryApi extends HttpServlet{
 		try {
 			Query query = QueryManager.INSTANCE.findQuery(uuid, s);
 			if (query != null) {
-				validateDateFilter(query.getTypeKey(), filter);
-				QueryResult results = executeCoreQuery(query, cafilter, df, srid, format, delimiter,  sortColumnName, sortDirectionInt, includeUuids, s);
+				validateDateFilter(query.getTypeKey(), date_filter);
+				QueryResult results = executeCoreQuery(query, cafilter, df, srid, format, delimiter,  sortcolumn, sortDirectionInt, includeUuids, s);
 				result = results.result;
 				return results.response;
 			}else {
 				AbstractIntelQuery query2 = QueryManager.INSTANCE.findIntelQuery(uuid, s);
 				if (query2 == null)  throw new SmartConnectException(Status.BAD_REQUEST, "Query not found."); //$NON-NLS-1$
-				validateDateFilter(query2.getTypeKey(), filter);
-				QueryResult results = executeAdvIntelQuery(query2, cafilter, df, srid, format, delimiter,  sortColumnName, sortDirectionInt, s);
+				validateDateFilter(query2.getTypeKey(), date_filter);
+				QueryResult results = executeAdvIntelQuery(query2, cafilter, df, srid, format, delimiter,  sortcolumn, sortDirectionInt, s);
 				result = results.result;
 				return results.response;
 			}

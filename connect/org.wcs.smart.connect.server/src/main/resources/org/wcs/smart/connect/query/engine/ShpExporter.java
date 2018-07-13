@@ -120,8 +120,8 @@ public class ShpExporter {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				try{
-					List<QueryColumn> columns = query.computeQueryColumns(l, session, prj);
-					SimpleFeatureType type = DataUtilities.createType("smartqueryresults", results.getFeatureSchemaDef(columns, false)); //$NON-NLS-1$
+					List<QueryColumn> columns = results.getQueryColumns(query, l, session, prj);
+					SimpleFeatureType type = DataUtilities.createType("smartqueryresults", results.getFeatureSchemaDef(columns, false, true)); //$NON-NLS-1$
 					ArrayList<SimpleFeature> features = new ArrayList<SimpleFeature>();
 					IQueryResultSetIterator<? extends IResultItem> itemiterator = results.iterator(500, session);
 					for (Iterator<IResultItem> iterator = itemiterator; iterator.hasNext();) {

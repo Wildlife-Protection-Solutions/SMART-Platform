@@ -150,7 +150,7 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 					}
 					c.commit();
 					
-					return new EntityObservationQueryResult(PsqlEntityObservationEngine.this, itemcnt);
+					return new EntityObservationQueryResult(PsqlEntityObservationEngine.this, itemcnt, getIncludeUuids(parameters));
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);

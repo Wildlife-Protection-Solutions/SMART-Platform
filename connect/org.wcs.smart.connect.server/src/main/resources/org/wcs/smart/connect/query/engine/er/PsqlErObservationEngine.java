@@ -137,7 +137,7 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 						itemcnt = rs.getInt(1);
 					}
 					c.commit();
-					return new ErObservationQueryResult(PsqlErObservationEngine.this, itemcnt); 
+					return new ErObservationQueryResult(PsqlErObservationEngine.this, itemcnt, getIncludeUuids(parameters)); 
 				}catch(Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);

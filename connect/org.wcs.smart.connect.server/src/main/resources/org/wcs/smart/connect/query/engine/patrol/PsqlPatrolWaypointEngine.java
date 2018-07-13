@@ -127,7 +127,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 					}
 					c.commit();
 					
-					return new PatrolWaypointQueryResult(PsqlPatrolWaypointEngine.this, itemcnt);
+					return new PatrolWaypointQueryResult(PsqlPatrolWaypointEngine.this, itemcnt, getIncludeUuids(parameters));
 				}catch (Exception ex){
 					c.rollback();
 					logger.log(Level.SEVERE, ex.getMessage(), ex);

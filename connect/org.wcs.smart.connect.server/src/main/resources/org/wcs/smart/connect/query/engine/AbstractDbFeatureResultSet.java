@@ -37,6 +37,7 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.api.QueryApi.Direction;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.columns.QueryColumnUtils;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
@@ -67,6 +68,9 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	
 	public static final String MULTI_LINESTRING_GEOM_TYPE = "MultiLineString"; //$NON-NLS-1$
 		
+	public static final String OBS_UUID_COL_KEY = "obsuuid"; //$NON-NLS-1$
+	public static final String WP_UUID_COL_KEY = "wpuuid"; //$NON-NLS-1$
+	
 	protected GeometryFactory gf = new GeometryFactory();
 	protected boolean isDisposed = false;
 	protected int itemCount;
@@ -83,6 +87,35 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	 */
 	public abstract Geometry createGeometry(IResultItem item) throws Exception;
 	
+	/**
+	 * Waypoint UUID  column name
+	 * 
+	 * @param l
+	 * @return
+	 */
+	public String getWaypointColumnName(Locale l) {
+		return  Messages.getString("AbstractDbFeatureResultSet.WpColumnName", l); //$NON-NLS-1$
+	}
+	
+	/**
+	 * Observation UUID column name
+	 * 
+	 * @param l
+	 * @return
+	 */
+	public String getObservationColumnName(Locale l) {
+		return  Messages.getString("AbstractDbFeatureResultSet.ObsUuidColumnName", l); //$NON-NLS-1$
+	}
+	
+	/**
+	 * Load the query columns for a simple query 
+	 * 
+	 * @param query
+	 * @param l
+	 * @param session
+	 * @param prj
+	 * @return
+	 */
 	public List<QueryColumn> getQueryColumns(SimpleQuery query, Locale l, Session session, IProjectionProvider prj){
 			List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
 			return cols;
@@ -152,10 +185,10 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	 * @param supportsTime
 	 * @return
 	 */
-	public String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
+	public String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime, boolean forShape){
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:" + getGeometryType() + ":srid=4326,fid:String"); //$NON-NLS-1$ //$NON-NLS-2$
-		String colDef = QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, true);
+		String colDef = QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape);
 		sb.append(colDef);
 		return sb.toString();
 	}
