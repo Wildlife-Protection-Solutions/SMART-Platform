@@ -28,7 +28,8 @@ CREATE TRIGGER trg_qa_routine AFTER INSERT OR UPDATE OR DELETE ON smart.r_query	
 alter table connect.shared_links add column permissionuser_uuid uuid ;
 ALTER TABLE connect.shared_links ADD FOREIGN KEY (permissionuser_uuid) REFERENCES connect.users(uuid) ON DELETE CASCADE ;
 
-
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.r', '1.0');
+ 
 update connect.connect_plugin_version set version = '6.0.1' where plugin_id = 'org.wcs.smart';
 update connect.ca_plugin_version set version = '6.0.1' where plugin_id = 'org.wcs.smart';
 

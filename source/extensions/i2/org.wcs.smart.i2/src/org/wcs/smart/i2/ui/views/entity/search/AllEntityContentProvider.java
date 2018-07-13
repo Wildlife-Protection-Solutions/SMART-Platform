@@ -605,6 +605,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		private TableViewer viewer;
 		private EntityTableData data;
 		
+		
 		public LoadDataJob( int startIndex , TableViewer viewer, EntityTableData data) {
 			super(Messages.AllEntityContentProvider_LoadingDataJobName);
 			this.startIndex = startIndex;
@@ -673,7 +674,10 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 					if (data == null) break;
 					EntityTableRowItem item = asRowItem(data, session);
 					final int index = startIndex + cnt;
+					if (monitor.isCanceled() || index >= this.data.currentCount) return Status.CANCEL_STATUS;
+					//input has changed; cancel job
 					Display.getDefault().syncExec(()->{
+						if (index >= this.data.currentCount) return;	
 						if(viewer.getControl().isDisposed()) return;
 						viewer.replace(item, index);
 					});

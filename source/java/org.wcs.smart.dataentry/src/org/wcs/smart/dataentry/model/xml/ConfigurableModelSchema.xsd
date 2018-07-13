@@ -71,12 +71,15 @@ elementFormDefault="qualified">
     	</sequence>
     	<attribute name="categoryKey" type="string"></attribute>
     	<attribute name="categoryHkey" type="string"></attribute>
-        <attribute name="dmUuid" type="string"></attribute>
-        <attribute name="photoAllowed" type="boolean"></attribute>
+    	<attribute name="dmUuid" type="string"></attribute>
+    	<attribute name="photoAllowed" type="boolean"></attribute>
     	<attribute name="photoRequired" type="boolean"></attribute>
     	<attribute name="displayMode" type="string"></attribute>
     	<attribute name="imageFile" type="string"></attribute>
-    	<attribute name="id" type="string"></attribute>
+    	<attribute name="id" type="string"></attribute>
+
+    	<attribute name="collectMultipleObs" type="boolean"></attribute>
+    	<attribute name="useSingleGpsPoint" type="boolean"></attribute>
     </complexType>
 
     <complexType name="NameType">

@@ -137,25 +137,27 @@ public class CreateEntityActionType implements IActionType {
 			
 			//copy attachments for entity
 			newEntity.setEntityAttachments(new ArrayList<>());
-			for (ObservationAttachment aa : data.getAttachments()){
-				try {
-					aa.computeFileLocation(session);
-				}catch (Exception ex) {
-					EventPlugIn.log(ex.getMessage(), ex);
-					continue;
+			if (data.getAttachments() != null) {
+				for (ObservationAttachment aa : data.getAttachments()){
+					try {
+						aa.computeFileLocation(session);
+					}catch (Exception ex) {
+						EventPlugIn.log(ex.getMessage(), ex);
+						continue;
+					}
+					
+					IntelAttachment ie = new IntelAttachment();
+					ie.setConservationArea(ca);
+					ie.setCopyFromLocation(aa.getAttachmentFile());
+					ie.setFilename(aa.getFilename());
+					ie.setDateCreated(new Date());
+					ie.setCreatedBy(SmartDB.getCurrentEmployee());
+					
+					IntelEntityAttachment iea = new IntelEntityAttachment();
+					iea.setAttachment(ie);
+					iea.setEntity(newEntity);
+					newEntity.getEntityAttachments().add(iea);
 				}
-				
-				IntelAttachment ie = new IntelAttachment();
-				ie.setConservationArea(ca);
-				ie.setCopyFromLocation(aa.getAttachmentFile());
-				ie.setFilename(aa.getFilename());
-				ie.setDateCreated(new Date());
-				ie.setCreatedBy(SmartDB.getCurrentEmployee());
-				
-				IntelEntityAttachment iea = new IntelEntityAttachment();
-				iea.setAttachment(ie);
-				iea.setEntity(newEntity);
-				newEntity.getEntityAttachments().add(iea);
 			}
 				
 			//map entity attributes using mappings specified 
@@ -229,63 +231,65 @@ public class CreateEntityActionType implements IActionType {
 				}else if (em.getType() == Type.DM) {
 					//map to observation value
 					add = false;
-					for (WaypointObservationAttribute wo : data.getAttributes()) {
-						if (!wo.getAttribute().equals(em.getDataModelAttribute())) continue;
-					
-						switch(iattribute.getType()) {
-						case BOOLEAN:
-							if (wo.getNumberValue() == null) break;
-							add = true;
-							avalue.setNumberValue(wo.getNumberValue());
-							break;
-						case DATE:
-							if (wo.getDateValue() == null) break;
-							add = true;
-							avalue.setDateValue(wo.getDateValue());
-							break;
-						case EMPLOYEE:
-							//not supported (no employee data model attributes)
-							add = false;
-							break;
-						case LIST:
-							String dmKey = wo.getAttributeListItem().getKeyId();
-							String iKey = null;
-							for (Entry<String,String> listmappings : em.getListItemMappings().entrySet()) {
-								if (listmappings.getValue().equalsIgnoreCase(dmKey)) {
-									iKey = listmappings.getKey();
-									break;
-								}
-							}
-							if (iKey == null) break;
-							
-							IntelAttributeListItem li = null;
-							for (IntelAttributeListItem ii : iattribute.getAttributeList()) {
-								if (ii.getKeyId().equalsIgnoreCase(iKey)) {
-									li = ii;
-									break;
-								}
-							}
-							if (li == null) break;
-							add = true;
-							avalue.setAttributeListItem(li);
-							break;
-						case NUMERIC:
-							if (wo.getNumberValue() == null) break;
-							add = true;
-							avalue.setNumberValue(wo.getNumberValue());
-							break;
-						case POSITION:
-							//not supported (no position data model attributes)
-							add = false;
-							break;
-						case TEXT:
-							if (wo.getStringValue() == null) break;
-							add = true;
-							avalue.setStringValue(wo.getStringValue());
-							break;
-						}
-						break;
+					if (data.getAttributes() != null) {
+						for (WaypointObservationAttribute wo : data.getAttributes()) {
+							if (!wo.getAttribute().equals(em.getDataModelAttribute())) continue;
 						
+							switch(iattribute.getType()) {
+							case BOOLEAN:
+								if (wo.getNumberValue() == null) break;
+								add = true;
+								avalue.setNumberValue(wo.getNumberValue());
+								break;
+							case DATE:
+								if (wo.getDateValue() == null) break;
+								add = true;
+								avalue.setDateValue(wo.getDateValue());
+								break;
+							case EMPLOYEE:
+								//not supported (no employee data model attributes)
+								add = false;
+								break;
+							case LIST:
+								String dmKey = wo.getAttributeListItem().getKeyId();
+								String iKey = null;
+								for (Entry<String,String> listmappings : em.getListItemMappings().entrySet()) {
+									if (listmappings.getValue().equalsIgnoreCase(dmKey)) {
+										iKey = listmappings.getKey();
+										break;
+									}
+								}
+								if (iKey == null) break;
+								
+								IntelAttributeListItem li = null;
+								for (IntelAttributeListItem ii : iattribute.getAttributeList()) {
+									if (ii.getKeyId().equalsIgnoreCase(iKey)) {
+										li = ii;
+										break;
+									}
+								}
+								if (li == null) break;
+								add = true;
+								avalue.setAttributeListItem(li);
+								break;
+							case NUMERIC:
+								if (wo.getNumberValue() == null) break;
+								add = true;
+								avalue.setNumberValue(wo.getNumberValue());
+								break;
+							case POSITION:
+								//not supported (no position data model attributes)
+								add = false;
+								break;
+							case TEXT:
+								if (wo.getStringValue() == null) break;
+								add = true;
+								avalue.setStringValue(wo.getStringValue());
+								break;
+							}
+							break;
+							
+						}
 					}
 				}
 				if (add) {

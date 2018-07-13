@@ -128,7 +128,7 @@ public class QueryResultSetIterator<T extends IResultItem> implements IQueryResu
 	@Override
 	public void close() throws IOException {
 		closeResultSet();
-		if (!sessionProvided){
+		if (!sessionProvided && session != null){
 			session.close();
 			session = null;
 		}
