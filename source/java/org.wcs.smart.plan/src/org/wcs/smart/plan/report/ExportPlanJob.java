@@ -63,10 +63,12 @@ public class ExportPlanJob extends Job {
 	
 	private UUID planUuid;
 	private File outputFile;
+	private int dpi;
 	
 	public ExportPlanJob(UUID planUuid) {
 		super(Messages.ExportPlanJob_JobName);
 		this.planUuid = planUuid;
+		this.dpi = Display.getDefault().getDPI().x;
 	}
 
 	@Override
@@ -135,7 +137,7 @@ public class ExportPlanJob extends Job {
 							SmartDB.getCurrentConservationArea(),
 							SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
 							ReportEngineManager.getBirtReportEngine(), 
-							options, session, reportParameters);
+							options, session, reportParameters, dpi);
 				}
 			}catch (Exception ex){
 				SmartPlanPlugIn.displayLog(Messages.ExportPlanJob_ErrorExportingPlan + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$

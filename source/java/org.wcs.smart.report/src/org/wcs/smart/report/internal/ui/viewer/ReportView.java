@@ -53,6 +53,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
@@ -90,7 +91,8 @@ public class ReportView implements IReportListener{
 	private Browser browser;
 	private Report report;
 	private HashMap<String, Object> selectedParams;
-
+	private int dpi = Display.getDefault().getDPI().x;
+	
 	@Inject private MPart part;
 
 	private Path imageDirectory;
@@ -130,7 +132,7 @@ public class ReportView implements IReportListener{
 							SmartReportRunner.INSTANCE.runReport(report,
 								SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
 								ReportEngineManager.getBirtReportEngine(), 
-								options, s, selectedParams, tempReportDocument);
+								options, s, selectedParams, tempReportDocument, dpi);
 						}finally {
 							s.getTransaction().rollback();
 						}

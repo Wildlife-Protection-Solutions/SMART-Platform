@@ -20,9 +20,8 @@ ALTER TABLE smart.r_script ADD FOREIGN KEY (creator_uuid) REFERENCES smart.emplo
 ALTER TABLE smart.r_query ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
 ALTER TABLE smart.r_query ADD FOREIGN KEY (script_uuid) REFERENCES smart.r_script(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
 
-CREATE TRIGGER trg_qa_routine AFTER INSERT OR UPDATE OR DELETE ON smart.r_script	FOR EACH ROW execute procedure connect.trg_changelog_common();
-				
-CREATE TRIGGER trg_qa_routine AFTER INSERT OR UPDATE OR DELETE ON smart.r_query	FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_qa_routine AFTER INSERT OR UPDATE OR DELETE ON smart.r_script FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_qa_routine AFTER INSERT OR UPDATE OR DELETE ON smart.r_query FOR EACH ROW execute procedure connect.trg_changelog_common();
 
 
 alter table connect.shared_links add column permissionuser_uuid uuid ;

@@ -99,7 +99,7 @@ public class ExportReportEngine {
 	 * @param outputFormat output format
 	 * @param exporter the report exportor
 	 */
-	private static void exportReports(List<Report> reports, File directory, File file, EmitterInfo outputFormat, IReportExporter exporter){
+	private static void exportReports(List<Report> reports, File directory, File file, EmitterInfo outputFormat, IReportExporter exporter, int dpi){
 		if (exporter == null && outputFormat == null){
 			return;
 		}
@@ -151,7 +151,7 @@ public class ExportReportEngine {
 			
 			Job rr = null;
 			if (outputFormat != null){
-				rr = new RunReportJob(reports.get(i), outputFile, outputFormat, params);
+				rr = new RunReportJob(reports.get(i), outputFile, outputFormat, params, dpi);
 			}else if (exporter != null){
 				rr = new ExportReportJob(reports.get(i), outputFile, exporter, params);
 			}
@@ -173,8 +173,8 @@ public class ExportReportEngine {
 	 * @param file the full path file to output to; only valid is reports.size() == 1
 	 * @param outputFormat output format
 	 */
-	public static void exportReports(List<Report> reports, File directory, File file, EmitterInfo outputFormat){
-		exportReports(reports, directory, file, outputFormat, null);
+	public static void exportReports(List<Report> reports, File directory, File file, EmitterInfo outputFormat, int dpi){
+		exportReports(reports, directory, file, outputFormat, null, dpi);
 	}
 	
 	/**
@@ -185,8 +185,8 @@ public class ExportReportEngine {
 	 * @param file the full path file to output to; only valid is reports.size() == 1
 	 * @param outputFormat output format
 	 */
-	public static void exportReports(List<Report> reports, File directory, File file, IReportExporter exporter){
-		exportReports(reports, directory, file, null, exporter);
+	public static void exportReports(List<Report> reports, File directory, File file, IReportExporter exporter, int dpi){
+		exportReports(reports, directory, file, null, exporter, dpi);
 		
 	}
 	

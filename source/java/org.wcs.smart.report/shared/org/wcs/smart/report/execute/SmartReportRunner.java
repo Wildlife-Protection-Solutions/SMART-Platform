@@ -72,7 +72,7 @@ public enum SmartReportRunner {
 	 */
 	public void runReport(Report report, String currentUser, IReportEngine engine, IRenderOption options, 
 			Session session, HashMap<String, Object> reportParameters,
-			Path renderFile) throws Exception{
+			Path renderFile, int defaultDpi) throws Exception{
 		
 		File reportFile = new File(report.getConservationArea().getFileDataStoreLocation()
 				+ File.separator
@@ -85,25 +85,27 @@ public enum SmartReportRunner {
 		runTask.setParameterValues(reportParameters);
 		runTask.getAppContext().put(BirtConstants.CA_PARAM, report.getConservationArea());
 		runTask.getAppContext().put(BirtConstants.SESSION_PARAM, session);
-		
+		runTask.getAppContext().put(BirtConstants.DEFAULT_DPI_PARAM, defaultDpi);
 		if (Files.exists(renderFile)) Files.delete(renderFile);
 		runTask.run(renderFile.toAbsolutePath().toString());
 		runTask.close();
 		
-		renderFile(engine, options, renderFile, report.getConservationArea(), session);
+		renderFile(engine, options, renderFile, report.getConservationArea(), defaultDpi, session);
 	}
 	
 	/**
 	 * Renders a report document file to an output format
 	 * @throws EngineException 
 	 */
-	public void renderFile(IReportEngine engine, IRenderOption options, Path reportDoc, ConservationArea ca, Session session) throws EngineException {
+	public void renderFile(IReportEngine engine, IRenderOption options, Path reportDoc, ConservationArea ca, int defaultDpi, Session session) throws EngineException {
 		IReportDocument reportDocument = engine.openReportDocument(reportDoc.toAbsolutePath().toString());
 		try {
 			IRenderTask task = engine.createRenderTask(reportDocument);
 			try {
 				task.getAppContext().put(BirtConstants.CA_PARAM, ca);
 				task.getAppContext().put(BirtConstants.SESSION_PARAM, session);
+				task.getAppContext().put(BirtConstants.DEFAULT_DPI_PARAM, defaultDpi);
+				
 				task.setRenderOption(options);
 				task.render();
 			}finally {
@@ -124,13 +126,13 @@ public enum SmartReportRunner {
 	 * @throws Exception
 	 */
 	public void runReport(Report report, String currentUser, IReportEngine engine, IRenderOption options, 
-			Session session, HashMap<String, Object> reportParameters) throws Exception{
+			Session session, HashMap<String, Object> reportParameters, int defaultDpi) throws Exception{
 		
 		File reportFile = new File(report.getConservationArea().getFileDataStoreLocation()
 				+ File.separator
 				+ Report.REPORT_DIR + File.separator + report.getFilename());
 		
-		runFile(reportFile, report.getConservationArea(), currentUser, engine, options, session, reportParameters);
+		runFile(reportFile, report.getConservationArea(), currentUser, engine, options, session, reportParameters, defaultDpi);
 	}
 	
 
@@ -146,13 +148,14 @@ public enum SmartReportRunner {
 	 */
 	@SuppressWarnings("unchecked")
 	public void runFile(File file, ConservationArea ca, String currentUser, IReportEngine engine, IRenderOption options, 
-			Session session, HashMap<String, Object> reportParameters) throws Exception{
+			Session session, HashMap<String, Object> reportParameters, int defaultDpi) throws Exception{
 		
 		IReportRunnable design = engine.openReportDesign(file.getAbsolutePath());
 		IRunAndRenderTask task = new SmartRunAndRender((ReportEngine) engine, design, ca, currentUser);
 		try{
 			task.getAppContext().put(BirtConstants.CA_PARAM, ca);
 			task.getAppContext().put(BirtConstants.SESSION_PARAM, session);
+			task.getAppContext().put(BirtConstants.DEFAULT_DPI_PARAM, defaultDpi);
 			task.setRenderOption(options);
 			task.setParameterValues(reportParameters);
 			task.run();
@@ -175,7 +178,7 @@ public enum SmartReportRunner {
 	 */
 	@SuppressWarnings("unchecked")
 	public void runFile(InputStream is, ConservationArea ca, String currentUser, IReportEngine engine, IRenderOption options, 
-			Session session, HashMap<String, Object> reportParameters) throws Exception{
+			Session session, HashMap<String, Object> reportParameters, int defaultDpi) throws Exception{
 		
 		IReportRunnable design = engine.openReportDesign(is);
 		IRunAndRenderTask task = new SmartRunAndRender((ReportEngine) engine, design, ca, currentUser);
@@ -183,6 +186,8 @@ public enum SmartReportRunner {
 		try{
 			task.getAppContext().put(BirtConstants.CA_PARAM, ca);
 			task.getAppContext().put(BirtConstants.SESSION_PARAM, session);
+			task.getAppContext().put(BirtConstants.DEFAULT_DPI_PARAM, defaultDpi);
+			
 			task.setRenderOption(options);
 			task.setParameterValues(reportParameters);
 			task.run();

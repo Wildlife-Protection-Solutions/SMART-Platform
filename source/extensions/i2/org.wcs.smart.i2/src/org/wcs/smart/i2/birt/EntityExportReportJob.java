@@ -150,6 +150,13 @@ public class EntityExportReportJob extends Job {
 			}
 		}
 		
+		//get default dpi
+		final int[] currentdpi = new int[] {96};
+		Display.getDefault().syncExec(()->{
+			currentdpi[0] = Display.getDefault().getDPI().x;
+			
+		});
+		
 		IRenderOption options = new RenderOption();
 		try(FileOutputStream fout = new FileOutputStream(outputFile.toFile())){
 			
@@ -170,6 +177,7 @@ public class EntityExportReportJob extends Job {
 				try{
 					task.getAppContext().put(BirtConstants.CA_PARAM, SmartDB.getCurrentConservationArea());
 					task.getAppContext().put(BirtConstants.SESSION_PARAM, session);
+					task.getAppContext().put(BirtConstants.DEFAULT_DPI_PARAM, currentdpi[0]);
 					task.setRenderOption(options);
 					task.setParameterValues(reportParameters);
 					task.run();

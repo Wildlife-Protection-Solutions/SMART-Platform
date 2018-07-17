@@ -37,7 +37,7 @@ public class MapConfiguration {
 	private List<QueryLayer> results;
 	private List<Throwable> exceptions;
 	
-	public MapConfiguration(){
+	public MapConfiguration(int defaultdpi){
 		results = new ArrayList<QueryLayer>();
 		exceptions = new ArrayList<Throwable>();
 	}

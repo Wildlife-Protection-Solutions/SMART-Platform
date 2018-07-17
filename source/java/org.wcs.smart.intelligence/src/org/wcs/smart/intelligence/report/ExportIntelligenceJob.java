@@ -57,10 +57,12 @@ public class ExportIntelligenceJob extends Job {
 	
 	private UUID uuid;
 	private File outputFile;
-
+	private int dpi;
+	
 	public ExportIntelligenceJob(UUID uuid) {
 		super(Messages.ExportIntelligenceJob_Title);
 		this.uuid = uuid;
+		this.dpi = Display.getDefault().getDPI().x;
 	}
 
 	@Override
@@ -99,7 +101,7 @@ public class ExportIntelligenceJob extends Job {
 							SmartDB.getCurrentConservationArea(), 
 							SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
 							ReportEngineManager.getBirtReportEngine(),
-							options, session, reportParameters);
+							options, session, reportParameters, dpi);
 					
 				}
 			} catch (Exception ex) {

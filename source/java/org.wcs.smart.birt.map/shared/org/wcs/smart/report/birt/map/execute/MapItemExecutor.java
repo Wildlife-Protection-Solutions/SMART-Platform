@@ -61,7 +61,6 @@ import org.eclipse.birt.report.model.api.DesignElementHandle;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -146,6 +145,8 @@ public class MapItemExecutor implements IReportItemExecutor{
 	private List<IRasterCreator> creators;
 	
 	private IForeignContent content = null;
+	private int defaultDpi = 96;
+	
 	@Override
 	public void setModelObject(Object handle) {
 		if ( handle instanceof ExtendedItemHandle ){
@@ -156,6 +157,10 @@ public class MapItemExecutor implements IReportItemExecutor{
 	@Override
 	public void setContext(IExecutorContext context) {
 		this.context = context;
+		Integer dpi = (Integer) context.getAppContext().get(BirtConstants.DEFAULT_DPI_PARAM);
+		if (dpi != null) {
+			defaultDpi = dpi;
+		}
 	}
 
 	@Override
@@ -248,7 +253,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 	protected byte[] executeQuery( ) throws Exception {
 		cleanUp = new ArrayList<File>();
 		
-		MapConfiguration configuration = new MapConfiguration();
+		MapConfiguration configuration = new MapConfiguration(96);
 		
 		DesignElementHandle elementHandle = modelHandle.getContainer();
 		SmartMapItem mapItem = (SmartMapItem) modelHandle.getReportItem();
@@ -511,13 +516,8 @@ public class MapItemExecutor implements IReportItemExecutor{
 		List<Layer> maplayers = ((Map)renderedMap).getLayersInternal();
 		
 		//scale style to match map dpi settings (scales symbols and fonts)
-		final int[] currentdpi = new int[] {96};
-		Display.getDefault().syncExec(()->{
-			currentdpi[0] = Display.getDefault().getDPI().x;
-			
-		});
 		int newdpi = mapItem.getDPI();
-		double scale = newdpi / (double)currentdpi[0];
+		double scale = newdpi / (double)defaultDpi;
 		for (Layer l : maplayers) {
 			for (StyleEntry cc : l.getStyleBlackboard().getContent()) {
 				if ( cc.getStyle() != null && cc.getStyle() instanceof Style) {

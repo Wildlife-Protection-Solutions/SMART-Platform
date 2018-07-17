@@ -119,6 +119,7 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 		final List<Report> selectedReports = page1.getSelectedReports();
 		boolean toCa = page1.exportToConservationArea();
 		final List<ConservationArea> cas = page2.getConservationAreasToExport();
+		int dpi = Display.getDefault().getDPI().x;
 		
 		if (!toCa){
 			if (isMultiple){
@@ -131,9 +132,9 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 				//export reports
 				try {
 					if (isMultiple){
-						ExportReportEngine.exportReports(selectedReports, outputLocation, null, outputFormat);
+						ExportReportEngine.exportReports(selectedReports, outputLocation, null, outputFormat, dpi);
 					}else{
-						ExportReportEngine.exportReports(selectedReports, null, outputLocation, outputFormat);
+						ExportReportEngine.exportReports(selectedReports, null, outputLocation, outputFormat, dpi);
 					}
 				} catch (Exception e) {
 					ReportPlugIn.displayLog(ERROR_MSG + e.getLocalizedMessage(), e);
@@ -144,9 +145,9 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 				IReportExporter rexporter = (IReportExporter) exporter.getExporter();
 				try {
 					if (isMultiple){
-						ExportReportEngine.exportReports(selectedReports, outputLocation, null, rexporter);
+						ExportReportEngine.exportReports(selectedReports, outputLocation, null, rexporter, dpi);
 					}else{
-						ExportReportEngine.exportReports(selectedReports, null, outputLocation, rexporter);
+						ExportReportEngine.exportReports(selectedReports, null, outputLocation, rexporter, dpi);
 					}
 				} catch (Exception e) {
 					ReportPlugIn.displayLog(ERROR_MSG + e.getLocalizedMessage(), e);
@@ -162,7 +163,7 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					exportToConservationArea(monitor, selectedReports, cas);
+					exportToConservationArea(monitor, selectedReports, cas, dpi);
 					
 				}
 			});
@@ -173,7 +174,7 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 		return true;
 	}
 
-	private void exportToConservationArea(IProgressMonitor monitor, List<Report> selectedReports, List<ConservationArea> cas){
+	private void exportToConservationArea(IProgressMonitor monitor, List<Report> selectedReports, List<ConservationArea> cas, int dpi){
 		//export to ca
 		File tempDir;
 		try {
@@ -225,7 +226,7 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 				}
 				caInfo.add(MessageFormat.format(Messages.ExportReportWizard_ImportComplete, ca.getNameLabel(), incnt, selectedReports.size() ));
 			}
-			ExportReportEngine.exportReports(selectedReports, tempDir, null, defexporter);
+			ExportReportEngine.exportReports(selectedReports, tempDir, null, defexporter, dpi);
 			
 			errors.add(0, ""); //$NON-NLS-1$
 			for (String info : caInfo){

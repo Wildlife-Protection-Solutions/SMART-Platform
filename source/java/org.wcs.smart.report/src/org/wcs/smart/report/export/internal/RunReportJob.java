@@ -57,6 +57,7 @@ public class RunReportJob extends Job {
 	private EmitterInfo info = null;
 	private Report report;
 	private HashMap<String, Object> reportParameters = null; 
+	private int dpi;
 	
 	/**
 	 * Creates a new job
@@ -66,7 +67,7 @@ public class RunReportJob extends Job {
 	 * @param info output format info
 	 * @param reportParams report parameters
 	 */
-	public RunReportJob(Report report, File file, EmitterInfo info, HashMap<String, Object> reportParams){
+	public RunReportJob(Report report, File file, EmitterInfo info, HashMap<String, Object> reportParams, int defaultDpi){
 		super(MessageFormat.format(Messages.RunReportJob_JobName, new Object[]{report.getName()}));
 		
 		this.report = report;
@@ -74,6 +75,7 @@ public class RunReportJob extends Job {
 		this.outputFile = file;
 		this.info = info;
 		this.reportParameters = reportParams;
+		this.dpi = defaultDpi;
 		
 	}
 		
@@ -101,7 +103,7 @@ public class RunReportJob extends Job {
 						SmartReportRunner.INSTANCE.runReport(report,
 							SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
 							ReportEngineManager.getBirtReportEngine(), 
-							options, s, reportParameters);
+							options, s, reportParameters, this.dpi);
 					}finally {
 						s.getTransaction().rollback();
 					}
