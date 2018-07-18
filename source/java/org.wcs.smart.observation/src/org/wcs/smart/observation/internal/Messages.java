@@ -190,6 +190,10 @@ public class Messages extends NLS {
 	public static String WaypointInfoView_DateTimeLabel;
 
 	public static String WaypointInfoView_DetailsHidden;
+	public static String WaypointInfoView_LastUpdated1;
+
+	public static String WaypointInfoView_LastUpdated2;
+
 	public static String WaypointInfoView_LoadingThumbnails;
 	public static String WaypointInfoView_UpdateJobName;
 	public static String WaypointInfoView_WaypointIdLabel;

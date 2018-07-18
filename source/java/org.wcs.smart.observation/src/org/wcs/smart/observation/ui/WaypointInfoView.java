@@ -141,8 +141,8 @@ public class WaypointInfoView {
 				s.beginTransaction();
 				try{
 					currentWp = (Waypoint) s.get(Waypoint.class, selectedWaypointUuid);	//reload waypoint to get latest info
-					if (currentWp.getLastModifiedBy() != null) currentWp.getLastModifiedBy().getGender();
 					if (currentWp != null) {
+						if (currentWp.getLastModifiedBy() != null) currentWp.getLastModifiedBy().getGender();
 						if (currentWp.getObservations() != null) {
 							for (WaypointObservation wo : currentWp.getObservations()) {
 								DisplayData dd = new DisplayData();
@@ -429,9 +429,9 @@ public class WaypointInfoView {
 			String data = null;
 			int width = infoSection.getBounds().width;
 			if (wp.getLastModifiedBy() != null) {
-				data = MessageFormat.format("Last updated by {0} on {1}", SmartLabelProvider.getShortLabel(wp.getLastModifiedBy()), DateFormat.getDateTimeInstance().format(wp.getLastModified()));
+				data = MessageFormat.format(Messages.WaypointInfoView_LastUpdated1, SmartLabelProvider.getShortLabel(wp.getLastModifiedBy()), DateFormat.getDateTimeInstance().format(wp.getLastModified()));
 			}else {
-				data = MessageFormat.format("Last updated on {1}", DateFormat.getDateTimeInstance().format(wp.getLastModified()));
+				data = MessageFormat.format(Messages.WaypointInfoView_LastUpdated2, DateFormat.getDateTimeInstance().format(wp.getLastModified()));
 			}
 			Label l = toolkit.createLabel(parent, data, SWT.WRAP);
 			l.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
