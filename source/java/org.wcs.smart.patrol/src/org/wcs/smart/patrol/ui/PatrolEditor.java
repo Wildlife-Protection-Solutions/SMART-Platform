@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWT;
@@ -606,15 +607,25 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	}
 	
 	/**
+	 * Saves the collection of waypoints, with the provided job change
+	 * listeners (can be null)
+	 * 
+	 * @param waypoints
+	 * @param onComplete added to the job, run once the save is complete; can be null
+	 */
+	public void save(Collection<PatrolWaypoint> waypoints, IJobChangeListener onComplete) {
+		SaveWaypointJob saveWaypointJob = new SaveWaypointJob();
+		saveWaypointJob.setWaypoints(waypoints);
+		if (onComplete != null) saveWaypointJob.addJobChangeListener(onComplete);
+		saveWaypointJob.schedule();
+	}
+	/**
 	 * Saves the collection of waypoints.
 	 * 
 	 * @param waypoints
 	 */
-	public Job save(Collection<PatrolWaypoint> waypoints) {
-		SaveWaypointJob saveWaypointJob = new SaveWaypointJob();
-		saveWaypointJob.setWaypoints(waypoints);
-		saveWaypointJob.schedule();
-		return saveWaypointJob;
+	public void save(Collection<PatrolWaypoint> waypoints) {
+		save(waypoints, null);
 	}
 	
 	/**

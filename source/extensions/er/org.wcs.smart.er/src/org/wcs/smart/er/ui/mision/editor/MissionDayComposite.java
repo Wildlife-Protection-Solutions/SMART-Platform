@@ -173,7 +173,9 @@ public class MissionDayComposite {
 		SAMPLING_UNIT(Messages.MissionDayComposite_SamplingUnit, 4),
 		OBSERVATION(Messages.MissionDayComposite_Observation, 4),
 		COMMENT(Messages.MissionDayComposite_Comment, 3),
-		ATTACHMENTS(Messages.MissionDayComposite_Attachment, 3);
+		ATTACHMENTS(Messages.MissionDayComposite_Attachment, 3),
+		LAST_MODIFIED(Messages.MissionDayComposite_LastModified_ColumnLabel, 3),
+		LAST_MODIFIED_BY(Messages.MissionDayComposite_LastModifiedBy_ColumnLabel, 3);
 
 		protected String guiName;
 		protected int weight;
@@ -968,6 +970,12 @@ public class MissionDayComposite {
 				return element.getMissionTrack().getId();
 			}
 			return Messages.MissionDayComposite_None;
+		} else if (column == OtColumn.LAST_MODIFIED) {
+			if (element.getWaypoint().getLastModified() == null) return ""; //$NON-NLS-1$
+			return DateFormat.getDateTimeInstance().format(element.getWaypoint().getLastModified());
+		} else if (column == OtColumn.LAST_MODIFIED_BY) {
+			if (element.getWaypoint().getLastModifiedBy() == null) return ""; //$NON-NLS-1$
+			return SmartLabelProvider.getShortLabel(element.getWaypoint().getLastModifiedBy());
 		}
 
 		return ""; //$NON-NLS-1$
@@ -1003,6 +1011,11 @@ public class MissionDayComposite {
 				return samplingUnitEditor.getIndex(element.getMissionTrack());
 			}
 			return samplingUnitEditor.getIndex(null);
+		} else if (column == OtColumn.LAST_MODIFIED) {
+			return wp.getLastModified();
+		} else if (column == OtColumn.LAST_MODIFIED_BY) {
+			if (wp.getLastModifiedBy() == null) return ""; //$NON-NLS-1$
+			return SmartLabelProvider.getShortLabel(wp.getLastModifiedBy());
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -1011,20 +1024,25 @@ public class MissionDayComposite {
 		Waypoint waypoint = element.getWaypoint();
 		boolean needSave = false;
 		if (column == OtColumn.ID) {
+			if (waypoint.getId() == ((Integer)value).intValue()) return; //no change
 			waypoint.setId((Integer)value);
 			needSave = true;
 		} else if (column == OtColumn.EAST) {
+			if (waypoint.getX() == ((Double)value).doubleValue()) return; //no change
 			waypoint.setX((Double)value);
 			needSave = true;
 		} else if (column == OtColumn.NORTH) {
+			if (waypoint.getY() == ((Double)value).doubleValue()) return; //no change 
 			waypoint.setY((Double)value);
 			needSave = true;
 		} else if (column == OtColumn.TIME) {
 			if (value instanceof Date){
+				if (SharedUtils.isSameDate(waypoint.getDateTime(), ((Date)value))) return; //no change
 				waypoint.setDateTime(SmartUtils.combineDateTime(missionDay.getDate(), new Time(((Date)value).getTime())));
 				needSave = true;
 			}
 		} else if (column == OtColumn.DIRECTION) {
+			if (waypoint.getDirection() == value) return; //no change
 			needSave = true;
 			if (value == null){
 				waypoint.setDirection(null);
@@ -1032,6 +1050,7 @@ public class MissionDayComposite {
 				waypoint.setDirection(( (Double)value).floatValue());
 			}
 		} else if (column == OtColumn.DISTANCE) {
+			if (waypoint.getDistance() == value) return; //no change
 			if (value == null){
 				waypoint.setDistance(null);
 			}else{
@@ -1042,6 +1061,7 @@ public class MissionDayComposite {
 			//updated in cell editor
 			needSave = false;
 		} else if (column == OtColumn.COMMENT) {
+			if (waypoint.getComment() != null && waypoint.getComment().equals((String)value)) return; //no change;
 			waypoint.setComment((String)value);
 			needSave = true;
 		} else if (column == OtColumn.ATTACHMENTS) {
@@ -1053,12 +1073,15 @@ public class MissionDayComposite {
 			if (value instanceof Integer) {
 				Object x = samplingUnitEditor.getSamplingUnit((Integer)value);
 				if (x == null){
+					if (element.getSamplingUnit() == null && element.getMissionTrack() == null) return; //no change
 					element.setSamplingUnit(null);
 					element.setMissionTrack(null);
 				}else if (x instanceof SamplingUnit){
+					if (element.getSamplingUnit() == x && element.getMissionTrack() == null) return; //no change
 					element.setSamplingUnit((SamplingUnit) x);
 					element.setMissionTrack(null);
 				}else if (x instanceof MissionTrack){
+					if (element.getSamplingUnit() == null && element.getMissionTrack() == x) return; //no change
 					element.setSamplingUnit(null);
 					element.setMissionTrack((MissionTrack) x);
 				}
@@ -1179,6 +1202,8 @@ public class MissionDayComposite {
 
 		@Override
 		protected boolean canEdit(Object element) {
+			if (column == OtColumn.LAST_MODIFIED) return false;
+			if (column == OtColumn.LAST_MODIFIED_BY) return false;
 			if (MissionDayComposite.this.editor.getMissionEditor().canEdit() != null){
 				return false;
 			}

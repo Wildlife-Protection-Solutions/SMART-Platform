@@ -310,5 +310,11 @@
          </adapter>
       </factory>
    </extension>
+   <extension
+         point="org.wcs.smart.hibernate.libs.interceptor">
+      <integrator
+            class="org.wcs.smart.observation.WaypointHibernateIntegrator">
+      </integrator>
+   </extension>
 
 </plugin>

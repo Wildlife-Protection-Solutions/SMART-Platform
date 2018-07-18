@@ -22,6 +22,7 @@
 package org.wcs.smart.observation.ui;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -75,6 +76,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.util.SmartUtils;
 
@@ -139,6 +141,7 @@ public class WaypointInfoView {
 				s.beginTransaction();
 				try{
 					currentWp = (Waypoint) s.get(Waypoint.class, selectedWaypointUuid);	//reload waypoint to get latest info
+					if (currentWp.getLastModifiedBy() != null) currentWp.getLastModifiedBy().getGender();
 					if (currentWp != null) {
 						if (currentWp.getObservations() != null) {
 							for (WaypointObservation wo : currentWp.getObservations()) {
@@ -292,17 +295,18 @@ public class WaypointInfoView {
 					}
 					
 			
+					compThumbnails = toolkit.createComposite(infoSection.getBody());
+					compThumbnails.setLayout(new GridLayout());
+					compThumbnails.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					if (showImages && lcurrentWp != null && lcurrentWp.getAttachments() != null && lcurrentWp.getAttachments().size() > 1){
-						compThumbnails = toolkit.createComposite(infoSection.getBody());
-						compThumbnails.setLayout(new GridLayout());
 						toolkit.createLabel(compThumbnails, Messages.WaypointInfoView_LoadingThumbnails); 
-					}else{
-						compThumbnails = null;
 					}
 					
 					if (!showImages) {
 						createHiddenLabels();						
 					}
+					
+					createLastModifiedLabel(infoSection.getBody(), lcurrentWp);
 					
 					infoSection.getBody().pack();
 					infoSection.getBody().layout();
@@ -338,17 +342,11 @@ public class WaypointInfoView {
 					public void run() {
 						if (lblWaypointId.isDisposed()) return ;
 					
-						//display of loading label
-						if (compThumbnails != null) compThumbnails.dispose();
-					
 						for (ThumbnailComposite c : obsThumbs){
 							c.createThumbs();
 						}
-						compThumbnails = toolkit.createComposite(infoSection.getBody(), SWT.NONE);
-						GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-						compThumbnails.setLayoutData(gd);
-				
-						compThumbnails.setLayout(new GridLayout());
+						for (Control c : compThumbnails.getChildren()) c.dispose();
+						
 						for (Thumbnail nail : thumbnails){
 							Composite parent = toolkit.createComposite(compThumbnails);
 							nail.createThumbnail(parent);
@@ -399,12 +397,13 @@ public class WaypointInfoView {
 						
 						compThumbnails.addListener(SWT.Resize, resize);
 						compThumbnails.layout(true);
+						
 						infoSection.getBody().pack();
 						infoSection.getBody().layout();
 						infoSection.reflow(true);
 						lblWaypointId.getParent().layout();
 					
-
+						
 					}
 				});
 			}
@@ -424,6 +423,19 @@ public class WaypointInfoView {
 			l.setFont(f);
 			l.addListener(SWT.Dispose, e->f.dispose());
 			l.setForeground(l.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
+		}
+		
+		private void createLastModifiedLabel(Composite parent, Waypoint wp) {
+			String data = null;
+			int width = infoSection.getBounds().width;
+			if (wp.getLastModifiedBy() != null) {
+				data = MessageFormat.format("Last updated by {0} on {1}", SmartLabelProvider.getShortLabel(wp.getLastModifiedBy()), DateFormat.getDateTimeInstance().format(wp.getLastModified()));
+			}else {
+				data = MessageFormat.format("Last updated on {1}", DateFormat.getDateTimeInstance().format(wp.getLastModified()));
+			}
+			Label l = toolkit.createLabel(parent, data, SWT.WRAP);
+			l.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
+			((GridData)l.getLayoutData()).widthHint = width;
 		}
 		
 	};

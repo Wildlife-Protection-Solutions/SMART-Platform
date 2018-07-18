@@ -124,6 +124,9 @@ public class IncidentSummaryPage extends EditorPart {
 	private Label lblLocation;
 	private Text txtDistance;
 	private Text txtDirection;
+	private Label lblLastModified;
+//	private Label lblLastModifiedBy;
+	
 	private ListViewer attachments;
 	private TreeViewer dataViewer  = null;
 	
@@ -194,6 +197,14 @@ public class IncidentSummaryPage extends EditorPart {
 				this.txtComments.setText(incident.getComment());
 			}
 		
+			StringBuilder sb = new StringBuilder();
+			if (incident.getLastModifiedBy() != null) {
+				sb.append(MessageFormat.format(Messages.IncidentSummaryPage_LastModified1, SmartLabelProvider.getShortLabel(incident.getLastModifiedBy()), DateFormat.getDateTimeInstance().format(incident.getLastModified())));
+			}else {
+				sb.append(MessageFormat.format(Messages.IncidentSummaryPage_LastModified2, DateFormat.getDateTimeInstance().format(incident.getLastModified())));
+			}
+			this.lblLastModified.setText(sb.toString());
+			
 			this.txtIncidentId.setText(String.valueOf(incident.getId()));
 			this.txtDate.setText(DateFormat.getDateInstance().format(incident.getDateTime()));
 			this.txtTime.setText(DateFormat.getTimeInstance().format(incident.getDateTime()));
@@ -379,12 +390,14 @@ public class IncidentSummaryPage extends EditorPart {
 		l = toolkit.createLabel(right, "**" + Messages.IncidentSummaryPage_ObservationAttachmentsLabel); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
 		
-		Section observationSection = toolkit.createSection(frmSummary.getBody(), Section.TITLE_BAR   );
+		Section observationSection = toolkit.createSection(frmSummary.getBody(), Section.TITLE_BAR);
 		observationSection.setText(Messages.IncidentSummaryPage_ObservationLabel);
 		observationSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+		
 		Composite observationTableComp = toolkit.createComposite(observationSection);
 		observationTableComp.setLayout(new GridLayout(1, false));
+		((GridLayout)observationTableComp.getLayout()).marginWidth = 0;
+		((GridLayout)observationTableComp.getLayout()).marginHeight = 0;
 		observationSection.setClient(observationTableComp);
 		
 		Tree dataTree = new Tree(observationTableComp, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
@@ -527,9 +540,14 @@ public class IncidentSummaryPage extends EditorPart {
 			}
 		});
 		
+		Composite bottomComp = toolkit.createComposite(observationTableComp);
+		bottomComp.setLayout(new GridLayout(2, false));
+		((GridLayout)bottomComp.getLayout()).marginWidth = 0;
+		((GridLayout)bottomComp.getLayout()).marginHeight = 0;
+		bottomComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		if (canEdit == null){
-			Button btnEdit = toolkit.createButton(observationTableComp, Messages.IncidentSummaryPage_EditButtonName, SWT.PUSH);
+			Button btnEdit = toolkit.createButton(bottomComp, Messages.IncidentSummaryPage_EditButtonName, SWT.PUSH);
 			btnEdit.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -543,9 +561,13 @@ public class IncidentSummaryPage extends EditorPart {
 					editIncident(null);
 				}
 			});
-			
 		}
-		
+		lblLastModified = toolkit.createLabel(bottomComp, ""); //$NON-NLS-1$
+		if (canEdit != null) {
+			lblLastModified.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false, 2, 1));	
+		}else {
+			lblLastModified.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
+		}
 		Menu observationMenu = new Menu(dataViewer.getControl());
 		
 		MenuItem editItem = new MenuItem(observationMenu, SWT.PUSH);

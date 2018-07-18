@@ -71,7 +71,7 @@ public class WaypointAttributeTable {
 	
 	private List<RowItem> rows;
 	private int lastSelection;
-	
+
 	private Color selectionColor = null;
 	private Color mouseOverColor = null;
 	
@@ -126,6 +126,7 @@ public class WaypointAttributeTable {
 			addItem.addListener(SWT.Selection, e->addObservation());
 			
 		}
+		
 		parent.layout(true, true);
 	}
 	

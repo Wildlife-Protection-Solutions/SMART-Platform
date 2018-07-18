@@ -122,6 +122,8 @@ public class Messages extends NLS {
 	public static String AssetDataPanel_ImportAttachmentMenu;
 	public static String AssetDataPanel_ImportAttachmentSaveError;
 	public static String AssetDataPanel_LastLabel;
+	public static String AssetDataPanel_LastUpdated1;
+	public static String AssetDataPanel_LastUpdated2;
 	public static String AssetDataPanel_LocationsOption;
 	public static String AssetDataPanel_loadwpJobName;
 	public static String AssetDataPanel_MergeConfigrm;

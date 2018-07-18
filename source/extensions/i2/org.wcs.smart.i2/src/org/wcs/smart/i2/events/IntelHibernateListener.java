@@ -53,7 +53,6 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 			IIntelAuditItem item = (IIntelAuditItem) event.getEntity();
 			
 			Date now = new Date();
-			
 			if (item.getCreatedBy() == null){
     			item.setCreatedBy(SmartDB.getCurrentEmployee());
     			item.setDateCreated(now);

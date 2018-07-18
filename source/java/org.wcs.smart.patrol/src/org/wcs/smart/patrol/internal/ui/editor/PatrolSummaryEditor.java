@@ -899,7 +899,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			cs[0].getParent().layout(true, true);
 			
 			txtTransport.setText(patrol.getFirstLeg().getType().getName());
-			txtMandate.setText(patrol.getFirstLeg().getMandate().getName());
+			if (patrol.getFirstLeg().getMandate() != null) txtMandate.setText(patrol.getFirstLeg().getMandate().getName());
 			
 			editEmployee.setVisible(true);
 			multiLegTextlbl.setVisible(false);

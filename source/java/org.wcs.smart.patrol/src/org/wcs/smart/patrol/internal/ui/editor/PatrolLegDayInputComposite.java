@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -212,10 +213,17 @@ public class PatrolLegDayInputComposite {
 	
 	
 	protected enum OtColumn {
-		ID(Messages.PatrolLegDayInputComposite_WaypointID_ColumnHeader, 1), EAST(Messages.PatrolLegDayInputComposite_Longitude_ColumnHeader, 2), NORTH(Messages.PatrolLegDayInputComposite_Latitude_ColumnHeader, 2), TIME(
-				Messages.PatrolLegDayInputComposite_Time_ColumnHeader, 2), DIRECTION(Messages.PatrolLegDayInputComposite_Direction_ColumnHeader, 1), DISTANCE(Messages.PatrolLegDayInputComposite_Distance_ColumnHeader, 1), OBSERVATION(
-				Messages.PatrolLegDayInputComposite_Observation_ColumnHeader, 4), COMMENT(Messages.PatrolLegDayInputComposite_Comment_ColumnHeader, 3), ATTACHMENTS(
-				Messages.PatrolLegDayInputComposite_Attachment_ColumnHeader, 3);
+		ID(Messages.PatrolLegDayInputComposite_WaypointID_ColumnHeader, 1), 
+		EAST(Messages.PatrolLegDayInputComposite_Longitude_ColumnHeader, 2), 
+		NORTH(Messages.PatrolLegDayInputComposite_Latitude_ColumnHeader, 2), 
+		TIME(Messages.PatrolLegDayInputComposite_Time_ColumnHeader, 2), 
+		DIRECTION(Messages.PatrolLegDayInputComposite_Direction_ColumnHeader, 1), 
+		DISTANCE(Messages.PatrolLegDayInputComposite_Distance_ColumnHeader, 1), 
+		OBSERVATION(Messages.PatrolLegDayInputComposite_Observation_ColumnHeader, 4), 
+		COMMENT(Messages.PatrolLegDayInputComposite_Comment_ColumnHeader, 3), 
+		ATTACHMENTS(Messages.PatrolLegDayInputComposite_Attachment_ColumnHeader, 3),
+		LAST_MODIFIED(Messages.PatrolLegDayInputComposite_LastUpdated_ColumnHeader, 3),
+		LAST_MODIFIED_BY(Messages.PatrolLegDayInputComposite_LastUpdatedBy_ColumnHeader, 3);
 
 		protected String guiName;
 		protected int weight;
@@ -283,12 +291,14 @@ public class PatrolLegDayInputComposite {
 			data.setWaypoints(new ArrayList<PatrolWaypoint>());
 		}
 		observationTable.setInput(data.getWaypoints());
+		observationTable.getTable().setVisible(false);
 		for (int i = 0; i < observationTable.getTable().getColumnCount(); i ++) {
 			observationTable.getTable().getColumn(i).pack();
 			if (observationTable.getTable().getColumn(i).getWidth() > 200) {
 				observationTable.getTable().getColumn(i).setWidth(200);
 			}
 		}
+		observationTable.getTable().setVisible(true);
 		observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -297,15 +307,14 @@ public class PatrolLegDayInputComposite {
 					boolean enabled = !((IStructuredSelection)observationTable.getSelection()).isEmpty();
 					btnDeleteWaypoint.setEnabled(enabled);
 					mnuDelete.setEnabled(enabled);
+					mnuEdit.setEnabled(enabled);
 					
 					if (patrolLegDate.getPatrolLeg().getPatrol().getLegs().size() > 1 || patrolLegDate.getPatrolLeg().getPatrolLegDays().size() > 1){
 						btnMoveWaypoint.setEnabled(enabled);
 						mnuMove.setEnabled(enabled);
-						mnuEdit.setEnabled(enabled);
 					}else{
 						btnMoveWaypoint.setEnabled(false);
 						mnuMove.setEnabled(false);
-						mnuEdit.setEnabled(false);
 					}
 				}
 			}
@@ -936,27 +945,34 @@ public class PatrolLegDayInputComposite {
 		Waypoint waypoint = ((PatrolWaypoint)element).getWaypoint();
 		boolean needSave = false;
 		if (column == OtColumn.ID) {
+			if (waypoint.getId() == ((Integer)value).intValue()) return; //no change
 			waypoint.setId((Integer)value);
 			needSave = true;
 		} else if (column == OtColumn.EAST) {
+			if (waypoint.getX() == ((Double)value).doubleValue()) return; // no change
 			waypoint.setX((Double)value);
 			needSave = true;
 		} else if (column == OtColumn.NORTH) {
+			if (waypoint.getY() == ((Double)value).doubleValue()) return; // no change
 			waypoint.setY((Double)value);
 			needSave = true;
 		} else if (column == OtColumn.TIME) {
-			if (value instanceof Date){ 
+			if (value instanceof Date){
+				if (SharedUtils.isSameTime(waypoint.getDateTime(), ((Date)value))) return; //no change
 				waypoint.setDateTime(SmartUtils.combineDateTime(patrolLegDate.getDate(), new Time(((Date)value).getTime())));
 				needSave = true;
 			}
 		} else if (column == OtColumn.DIRECTION) {
+			if (waypoint.getDirection() == value) return; //no change
 			needSave = true;
 			if (value == null){
+				
 				waypoint.setDirection(null);
 			}else{
 				waypoint.setDirection(( (Double)value).floatValue());
 			}
 		} else if (column == OtColumn.DISTANCE) {
+			if (waypoint.getDistance() == value) return; //no change
 			if (value == null){
 				waypoint.setDistance(null);
 			}else{
@@ -967,6 +983,7 @@ public class PatrolLegDayInputComposite {
 			//updated in cell editor
 			needSave = false;
 		} else if (column == OtColumn.COMMENT) {
+			if (waypoint.getComment().equals((String)value)) return; //no change;
 			waypoint.setComment((String)value);
 			needSave = true;
 		} else if (column == OtColumn.ATTACHMENTS) {
@@ -976,13 +993,33 @@ public class PatrolLegDayInputComposite {
 			//updated in cell editor
 		}
 		if (needSave){
-			editor.getPatrolEditor().save(Collections.singleton((PatrolWaypoint)element));
-			if (column == OtColumn.EAST || column == OtColumn.NORTH){
-				//update map
-				editor.getPatrolEditor().getMap().getRenderManager().refresh(null);
-			}
+			IJobChangeListener listener = new IJobChangeListener() {
+				@Override
+				public void sleeping(IJobChangeEvent event) { }
+				@Override
+				public void scheduled(IJobChangeEvent event) { }
+				@Override
+				public void running(IJobChangeEvent event) { }
+				@Override
+				public void awake(IJobChangeEvent event) { }
+				@Override
+				public void aboutToRun(IJobChangeEvent event) { }
+				
+				@Override
+				public void done(IJobChangeEvent event) {
+					if (column == OtColumn.EAST || column == OtColumn.NORTH){
+						//update map
+						editor.getPatrolEditor().getMap().getRenderManager().refresh(null);
+					}
+					Display.getDefault().asyncExec(()->observationTable.refresh());
+				}
+
+			};
+			editor.getPatrolEditor().save(Collections.singleton((PatrolWaypoint)element), listener);
+			
+		}else {
+			observationTable.refresh();
 		}
-		observationTable.refresh();
 		
 	}
 	
@@ -1010,6 +1047,11 @@ public class PatrolLegDayInputComposite {
 			return wp.getComment();
 		} else if (column == OtColumn.ATTACHMENTS) {
 			return wp;
+		} else if (column == OtColumn.LAST_MODIFIED) {
+			return wp.getLastModified();
+		} else if (column == OtColumn.LAST_MODIFIED_BY) {
+			if (wp.getLastModifiedBy() == null) return ""; //$NON-NLS-1$
+			return SmartLabelProvider.getShortLabel(wp.getLastModifiedBy());
 		}
 	
 		return ""; //$NON-NLS-1$
@@ -1068,6 +1110,12 @@ public class PatrolLegDayInputComposite {
 			} else {
 				return MessageFormat.format(Messages.PatrolLegDayInputComposite_AttachmentColumnLabel, new Object[]{wpCnt});
 			}
+		} else if (column == OtColumn.LAST_MODIFIED) {
+			if (wp.getLastModified() == null) return ""; //$NON-NLS-1$
+			return DateFormat.getDateTimeInstance().format(wp.getLastModified());
+		} else if (column == OtColumn.LAST_MODIFIED_BY) {
+			if (wp.getLastModifiedBy() == null) return ""; //$NON-NLS-1$
+			return SmartLabelProvider.getShortLabel(wp.getLastModifiedBy());
 		}
 
 		return ""; //$NON-NLS-1$
@@ -1133,7 +1181,25 @@ public class PatrolLegDayInputComposite {
 			
 			patrolLegDate.getWaypoints().add(wp);
 			
-			editor.getPatrolEditor().save(Collections.singleton(wp));
+			IJobChangeListener listener = new IJobChangeListener() {
+				@Override
+				public void sleeping(IJobChangeEvent event) { }
+				@Override
+				public void scheduled(IJobChangeEvent event) { }
+				@Override
+				public void running(IJobChangeEvent event) { }
+				@Override
+				public void awake(IJobChangeEvent event) { }
+				@Override
+				public void aboutToRun(IJobChangeEvent event) { }
+				@Override
+				public void done(IJobChangeEvent event) {
+					Display.getDefault().asyncExec(()->observationTable.refresh());
+				}
+
+			};
+			
+			editor.getPatrolEditor().save(Collections.singleton(wp), listener);
 			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);
 		}
 	}
@@ -1231,6 +1297,9 @@ public class PatrolLegDayInputComposite {
 		 */
 		@Override
 		protected boolean canEdit(Object element) {
+			if (column == OtColumn.LAST_MODIFIED) return false;
+			if (column == OtColumn.LAST_MODIFIED_BY) return false;
+			
 			if (PatrolLegDayInputComposite.this.editor.getPatrolEditor().canEdit() != null){
 				return false;
 			}

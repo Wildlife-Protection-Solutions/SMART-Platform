@@ -42,6 +42,7 @@ import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.hibernate.annotations.BatchSize;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Category;
 
@@ -64,6 +65,9 @@ public class Waypoint extends UuidItem {
 	private Double x;
 	private Double y;
 	private Date dateTime;
+	
+	private Date lastModifiedDate;
+	private Employee lastModifiedBy;
 	
 	private Float direction;
 	private Float distance;
@@ -122,6 +126,41 @@ public class Waypoint extends UuidItem {
 		this.y = y;
 	}
 
+	@Column(name="last_modified")
+	public Date getLastModified() {
+		return lastModifiedDate;
+	}
+
+	/**
+	 * @param the last modified date time
+	 */
+	public void setLastModified(Date modifiedDateTime) {
+		this.lastModifiedDate = modifiedDateTime;
+	}
+	
+	/**
+	 * Get the last modified by. This can be null for waypoints that
+	 * have not been modified/added since this was added to the model (version 6.1.0)
+	 * 
+	 * @return last_modified_by
+	 */
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="last_modified_by", referencedColumnName="uuid")
+	public Employee getLastModifiedBy() {
+		return this.lastModifiedBy;
+	}
+	
+	/**
+	 * Set the created_by.
+	 * 
+	 * @param createdBy
+	 *            created_by
+	 */
+	public void setLastModifiedBy(Employee lastModifiedBy) {
+		this.lastModifiedBy = lastModifiedBy;
+	}
+	
 	@Column(name="datetime")
 	public Date getDateTime() {
 		return dateTime;

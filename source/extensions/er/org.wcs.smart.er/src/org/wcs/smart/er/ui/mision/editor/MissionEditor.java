@@ -490,7 +490,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	}
 	
 	/**
-	 * Saves the collection of waypoints.
+	 * Saves the collection of waypoints. Locks UI until save job is finished
 	 * 
 	 * @param waypoints
 	 */

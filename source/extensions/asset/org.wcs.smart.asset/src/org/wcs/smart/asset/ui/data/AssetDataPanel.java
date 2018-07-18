@@ -109,6 +109,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.ui.AttachmentPropertiesDialog;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -619,7 +620,7 @@ public abstract class AssetDataPanel {
 					
 					Waypoint wp = session.get(Waypoint.class, waypointsToDisplay.get(i));
 					if (wp == null) continue;
-					
+					if (wp.getLastModifiedBy() != null) SmartLabelProvider.getShortLabel(wp.getLastModifiedBy());
 					List<AssetWaypoint> aws = session.createQuery("FROM AssetWaypoint WHERE id.waypoint.uuid = :uuid", AssetWaypoint.class) //$NON-NLS-1$
 							.setParameter("uuid", waypointsToDisplay.get(i)) //$NON-NLS-1$
 							.list();
@@ -1497,7 +1498,7 @@ public abstract class AssetDataPanel {
 			((GridLayout)spacer.getLayout()).marginWidth = 0;
 			((GridLayout)spacer.getLayout()).marginHeight = 3;
 			
-			Composite detailsPart = toolkit.createComposite(spacer);
+			Composite detailsPart = toolkit.createComposite(spacer, SWT.NONE);
 			detailsPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			detailsPart.setLayout(new GridLayout());
 			((GridLayout)detailsPart.getLayout()).verticalSpacing = 1;
@@ -1505,7 +1506,7 @@ public abstract class AssetDataPanel {
 			((GridLayout)detailsPart.getLayout()).marginHeight = 1;
 			detailsPart.setData(COLOR, false);
 			
-			Composite attributes = toolkit.createComposite(detailsPart);
+			Composite attributes = toolkit.createComposite(detailsPart, SWT.NONE);
 			attributes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			attributes.setLayout(new GridLayout());
 			((GridLayout)detailsPart.getLayout()).verticalSpacing = 1;
@@ -1519,7 +1520,15 @@ public abstract class AssetDataPanel {
 			waypointComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)waypointComment.getLayoutData()).widthHint = detailsPart.getBounds().width;
 			
-
+			String lastModified = null;
+			if (waypoint.getWaypoint().getLastModifiedBy() != null) {
+				lastModified = MessageFormat.format(Messages.AssetDataPanel_LastUpdated1, SmartLabelProvider.getShortLabel(waypoint.getWaypoint().getLastModifiedBy()), DateFormat.getDateTimeInstance().format(waypoint.getWaypoint().getLastModified()));
+			}else {
+				lastModified = MessageFormat.format(Messages.AssetDataPanel_LastUpdated2, DateFormat.getDateTimeInstance().format(waypoint.getWaypoint().getLastModified()));
+			}
+			Label lastModifiedLabel = toolkit.createLabel(spacer, lastModified);
+			lastModifiedLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
+			
 			if (isEdit) {
 				clickListener = e->{
 					switch(e.type) {

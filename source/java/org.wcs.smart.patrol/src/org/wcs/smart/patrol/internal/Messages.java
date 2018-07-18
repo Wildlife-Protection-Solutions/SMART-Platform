@@ -379,6 +379,8 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_ImportWaypointsLabel;
 	public static String PatrolLegDayInputComposite_InvalidRestMinutes_DialogMessage1;
 	public static String PatrolLegDayInputComposite_InvalidTotalHoursPatrolled;
+	public static String PatrolLegDayInputComposite_LastUpdated_ColumnHeader;
+	public static String PatrolLegDayInputComposite_LastUpdatedBy_ColumnHeader;
 	public static String PatrolLegDayInputComposite_Latitude_ColumnHeader;
 	public static String PatrolLegDayInputComposite_Longitude_ColumnHeader;
 	public static String PatrolLegDayInputComposite_MoveWaypoint_Button;
