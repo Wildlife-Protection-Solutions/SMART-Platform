@@ -137,6 +137,8 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ob_observer","varchar(512)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"wp_lastmodifiedbyname","varchar(512)"}, //$NON-NLS-1$ //$NON-NLS-2$
+
 		};
 		
 		for (int i = 0; i < columnsToAdd.length; i ++){
@@ -146,6 +148,9 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 		}
 		//ca details
 		populateCaDetails(c, queryDataTable, "p_ca_uuid",query); //$NON-NLS-1$
+		
+		//last modified
+		populatedLastModifiedName(c, session, queryDataTable);
 		
 		//add observers
 		StringBuilder sql = new StringBuilder();
@@ -216,6 +221,8 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid "); //$NON-NLS-1$
@@ -237,6 +244,8 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 		sql.append("wp_distance real,"); //$NON-NLS-1$
 		sql.append("wp_time timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
+		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
+		sql.append("wp_lastmodifiedby uuid,"); //$NON-NLS-1$
 		sql.append("ob_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_observer_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid uuid"); //$NON-NLS-1$

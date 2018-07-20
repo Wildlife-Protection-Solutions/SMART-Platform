@@ -55,6 +55,8 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 			case LOCATION: return Messages.getString("AssetQueryLabelProvider.LocationsColumnName", l); //$NON-NLS-1$
 			case STATION: return Messages.getString("AssetQueryLabelProvider.StationsColumnName", l); //$NON-NLS-1$
 			case INCIDENT_LENGTH: return Messages.getString("AssetQueryLabelProvider.IncidentLengthColumnName", l); //$NON-NLS-1$
+			case WAYPOINT_LASTMODIFIED: return Messages.getString("AssetQueryLabelProvider.LastModifiedColumnName", l); //$NON-NLS-1$
+			case WAYPOINT_LASTMODIFIEDBY: return Messages.getString("AssetQueryLabelProvider.LastModifiedByColumnName", l); //$NON-NLS-1$
 			}
 		}
 		if (item instanceof AssetValueOption){

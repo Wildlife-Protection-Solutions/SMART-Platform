@@ -69,6 +69,8 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case WAYPOINT_DISTANCE: return Messages.getString("PatrolQueryLabelProvider.WPDistance", l); //$NON-NLS-1$
 			case WAYPOINT_COMMENT: return Messages.getString("PatrolQueryLabelProvider.WPComment", l); //$NON-NLS-1$
 			case WAYPOINT_OBSERVER: return Messages.getString("PatrolQueryLabelProvider.Observer", l); //$NON-NLS-1$
+			case WAYPOINT_LASTMODIFIED: return Messages.getString("PatrolQueryLabelProvider.LastModifiedColumn", l); //$NON-NLS-1$
+			case WAYPOINT_LASTMODIFIEDBY: return Messages.getString("PatrolQueryLabelProvider.LastModifiedByColumn", l); //$NON-NLS-1$
 			}
 		}
 		if (item instanceof PatrolValueOption){

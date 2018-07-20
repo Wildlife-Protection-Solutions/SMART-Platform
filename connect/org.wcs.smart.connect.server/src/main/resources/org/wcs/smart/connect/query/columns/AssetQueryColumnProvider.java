@@ -77,15 +77,7 @@ public class AssetQueryColumnProvider implements IAssetQueryColumnProvider{
 				if (add){
 					QueryColumn toAdd = new FixedQueryColumn(item, Locale.getDefault());
 					cols.add(toAdd);
-						
-					if (item == FixedQueryColumn.FixedColumns.WAYPOINT_ID ||
-							item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME ||
-							item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT ||
-							item == FixedQueryColumn.FixedColumns.WAYPOINT_X ||
-							item == FixedQueryColumn.FixedColumns.WAYPOINT_Y ||
-							item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
-							item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
-					}
+
 				}
 			}
 			for (QueryColumn qc : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(query))){
@@ -107,15 +99,6 @@ public class AssetQueryColumnProvider implements IAssetQueryColumnProvider{
 			if (add){
 				QueryColumn toAdd = new FixedQueryColumn(item, Locale.getDefault());
 				cols.add(toAdd);
-					
-				if (item == FixedQueryColumn.FixedColumns.WAYPOINT_ID ||
-						item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME ||
-						item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT ||
-						item == FixedQueryColumn.FixedColumns.WAYPOINT_X ||
-						item == FixedQueryColumn.FixedColumns.WAYPOINT_Y ||
-						item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
-						item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
-				}
 			}
 		}
 		return cols.toArray(new QueryColumn[cols.size()]);

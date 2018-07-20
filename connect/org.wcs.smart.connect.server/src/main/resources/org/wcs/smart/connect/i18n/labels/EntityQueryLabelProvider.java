@@ -49,6 +49,8 @@ public class EntityQueryLabelProvider implements IEntityQueryLabelProvider {
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE) return Messages.getString("EntityQueryLabelProvider.Distance", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT) return Messages.getString("EntityQueryLabelProvider.comment", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER) return Messages.getString("EntityQueryLabelProvider.Observer", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED) return Messages.getString("EntityQueryLabelProvider.LastModifiedColumn", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY) return Messages.getString("EntityQueryLabelProvider.LastModifiedByColumn", l); //$NON-NLS-1$
 		
 		return null;
 	}

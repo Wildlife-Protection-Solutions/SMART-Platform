@@ -157,7 +157,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 		data.add(createGeometry(item));
 		data.add(createId(item));  
 		
-		int i = 0;
+		int i = 2;
 		for (QueryColumn qc : columns){
 			if (qc.isVisible()){
 				Object x = getValue(item, qc, session);
@@ -168,10 +168,13 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 						x = 1;
 					}
 				}
-				if (qc.getType() == QueryColumn.ColumnType.TIME && 
-						ftype.getDescriptor(i++) .getType().getBinding().equals(String.class)
-						){
+				Class<?> bindingType = ftype.getDescriptor(i).getType().getBinding();
+				i++;
+				if (qc.getType() == QueryColumn.ColumnType.TIME &&  bindingType.equals(String.class)){
 					x = DateFormat.getTimeInstance().format((Date)x);
+				}else if (qc.getType() == QueryColumn.ColumnType.DATETIME && bindingType.equals(String.class)){
+					//this is a datetime object which needs to be converted to a string
+					x = DateFormat.getDateTimeInstance().format((Date)x);
 				}
 				data.add(x);
 			}

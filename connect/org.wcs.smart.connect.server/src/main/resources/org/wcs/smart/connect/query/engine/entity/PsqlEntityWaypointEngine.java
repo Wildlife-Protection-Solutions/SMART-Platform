@@ -135,6 +135,7 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"wp_lastmodifiedbyname","varchar(512)"}, //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		for (int i = 0; i < columnsToAdd.length; i ++){
 			String sql = "ALTER TABLE " + queryDataTable + " ADD "+ columnsToAdd[i][0] + " " + columnsToAdd[i][1]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -143,6 +144,7 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 		}
 
 		populateCaDetails(c, queryDataTable,"p_ca_uuid", query); //$NON-NLS-1$
+		populatedLastModifiedName(c, session, queryDataTable);
 	}
 
 	@Override
@@ -158,7 +160,9 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".direction, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Waypoint.class) + ".wp_comment "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by "); //$NON-NLS-1$
 		return sql.toString();
 	}
 
@@ -175,7 +179,9 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 		sql.append("wp_direction real,"); //$NON-NLS-1$
 		sql.append("wp_distance real,"); //$NON-NLS-1$
 		sql.append("wp_time timestamp,"); //$NON-NLS-1$
-		sql.append("wp_comment varchar(4096)"); //$NON-NLS-1$
+		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
+		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
+		sql.append("wp_lastmodifiedby uuid"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}

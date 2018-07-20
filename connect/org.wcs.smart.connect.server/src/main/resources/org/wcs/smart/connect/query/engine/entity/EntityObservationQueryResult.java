@@ -347,6 +347,8 @@ public class EntityObservationQueryResult extends AbstractDbFeatureResultSet {
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
 		it.setWaypointObserver(rs.getString("ob_observer")); //$NON-NLS-1$
 		it.setObservationUuid((UUID)rs.getObject("ob_uuid")); //$NON-NLS-1$
+		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
+		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		
 		//build categories
 		List<String> categories = new ArrayList<String>();

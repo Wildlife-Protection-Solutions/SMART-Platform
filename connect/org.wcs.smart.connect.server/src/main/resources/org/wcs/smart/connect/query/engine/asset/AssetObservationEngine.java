@@ -166,6 +166,7 @@ public class AssetObservationEngine extends AssetQueryEngine {
 				{"incident_length","integer"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"wp_lastmodifiedbyname","varchar(512)"}, //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		
 		for (int i = 0; i < columnsToAdd.length; i ++){
@@ -245,8 +246,10 @@ public class AssetObservationEngine extends AssetQueryEngine {
 			updatePs.executeBatch();
 		}
 		
+		
 		//ca information
 		populateCaDetails(c, queryDataTable,"wp_ca_uuid", query); //$NON-NLS-1$
+		populatedLastModifiedName(c, session, queryDataTable);
 		
 		populateTemporaryTableCategory(c, session, caFilter, queryDataTable);
 		populateAdditionalWpoaTable(c, queryDataTable + "_list", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -283,6 +286,8 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid "); //$NON-NLS-1$
@@ -301,6 +306,8 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		sql.append("wp_distance double precision,"); //$NON-NLS-1$
 		sql.append("wp_date timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
+		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
+		sql.append("wp_lastmodifiedby uuid,"); //$NON-NLS-1$
 		sql.append("wp_ca_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid uuid"); //$NON-NLS-1$
@@ -327,6 +334,9 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		it.setStation(rs.getString("asset_station")); //$NON-NLS-1$
 		it.setLocations(rs.getString("asset_location")); //$NON-NLS-1$
 		it.setIncidentLength(rs.getInt("incident_length")); //$NON-NLS-1$
+		
+		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
+		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		
 		UUID t = (UUID)rs.getObject("ob_uuid"); //$NON-NLS-1$
 		it.setObservationUuid(t); 

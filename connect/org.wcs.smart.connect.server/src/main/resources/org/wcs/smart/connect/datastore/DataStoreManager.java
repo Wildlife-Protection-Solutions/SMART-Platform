@@ -142,7 +142,7 @@ public enum DataStoreManager {
 	 * @return the root filestore location
 	 */
 	public File getRootDirectory(){
-		return new File(datastoreLocation);
+		return new File(datastoreLocation);		
 	}
 	
 	/**

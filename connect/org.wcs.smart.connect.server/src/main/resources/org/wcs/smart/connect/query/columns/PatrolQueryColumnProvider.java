@@ -145,6 +145,8 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		if (QueryColumnUtils.trackObserver(ops)){
 			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER,l));
 		}
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY,l));
 		
 		for (QueryColumn qc : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(q))){
 			keys.add(qc);
@@ -183,6 +185,8 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE,l));
 		}
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY,l));
 		
 		return keys;
 	}

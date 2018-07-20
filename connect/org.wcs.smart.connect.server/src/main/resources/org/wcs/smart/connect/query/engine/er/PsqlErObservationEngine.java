@@ -159,7 +159,9 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"surveydesign_name","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ob_observer", "varchar(512)"}, //$NON-NLS-1$ //$NON-NLS-2$
-				{"mission_leader", "varchar(256)"} //$NON-NLS-1$ //$NON-NLS-2$
+				{"mission_leader", "varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"wp_lastmodifiedbyname","varchar(512)"}, //$NON-NLS-1$ //$NON-NLS-2$
+
 		};
 		
 		for (int i = 0; i < columnsToAdd.length; i ++){
@@ -172,7 +174,10 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 		
 		//ca information
 		populateCaDetails(c, queryDataTable, "ca_uuid", query); //$NON-NLS-1$
-
+		
+		//last modified
+		populatedLastModifiedName(c, session, queryDataTable);
+		
 		//add observers
 		StringBuilder sqla = new StringBuilder();
 		sqla.append("SELECT DISTINCT ob_observer_uuid FROM "); //$NON-NLS-1$
@@ -252,6 +257,8 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid "); //$NON-NLS-1$
@@ -291,7 +298,9 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 		sql.append("wp_distance real,"); //$NON-NLS-1$
 		sql.append("wp_date timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
-
+		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
+		sql.append("wp_lastmodifiedby uuid,"); //$NON-NLS-1$
+		
 		sql.append("ob_uuid UUID,"); //$NON-NLS-1$
 		sql.append("ob_observer_uuid UUID,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid UUID"); //$NON-NLS-1$

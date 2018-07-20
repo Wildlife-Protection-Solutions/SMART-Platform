@@ -170,6 +170,8 @@ public class AssetWaypointEngine extends AssetQueryEngine {
 			{"incident_length","integer"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"wp_lastmodifiedbyname","varchar(512)"}, //$NON-NLS-1$ //$NON-NLS-2$
+
 		};
 	
 		for (int i = 0; i < columnsToAdd.length; i ++){
@@ -251,6 +253,7 @@ public class AssetWaypointEngine extends AssetQueryEngine {
 		
 		//ca information
 		populateCaDetails(c, queryDataTable, "wp_ca_uuid",query); //$NON-NLS-1$
+		populatedLastModifiedName(c, session, queryDataTable);
 	}
 
 	@Override
@@ -265,6 +268,8 @@ public class AssetWaypointEngine extends AssetQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid "); //$NON-NLS-1$
 		return sql.toString();
 	}
@@ -281,6 +286,8 @@ public class AssetWaypointEngine extends AssetQueryEngine {
 		sql.append("wp_distance double precision,"); //$NON-NLS-1$
 		sql.append("wp_date timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
+		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
+		sql.append("wp_lastmodifiedby uuid,"); //$NON-NLS-1$
 		sql.append("wp_ca_uuid uuid "); //$NON-NLS-1$
 
 		sql.append(")"); //$NON-NLS-1$
@@ -304,6 +311,8 @@ public class AssetWaypointEngine extends AssetQueryEngine {
 		it.setStation(rs.getString("asset_station")); //$NON-NLS-1$
 		it.setLocations(rs.getString("asset_location")); //$NON-NLS-1$
 		it.setIncidentLength(rs.getInt("incident_length")); //$NON-NLS-1$
+		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
+		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		return it;
 	}
 	

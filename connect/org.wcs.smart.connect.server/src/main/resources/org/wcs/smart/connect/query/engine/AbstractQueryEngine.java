@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.query.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -834,6 +835,45 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		}
 	}
 	
+	/**
+	 * Populate the last modified by column
+	 * @param c
+	 * @param queryDataTable
+	 */
+	protected void populatedLastModifiedName(Connection c, Session session, String queryDataTable) throws SQLException{
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT DISTINCT wp_lastmodifiedby FROM "); //$NON-NLS-1$
+		sql.append(queryDataTable);
+		logger.finest(sql.toString());
+				
+		StringBuilder sb = new StringBuilder();
+		sb.append("UPDATE "); //$NON-NLS-1$
+		sb.append( queryDataTable );
+		sb.append(" SET wp_lastmodifiedbyname = ? WHERE wp_lastmodifiedby = ?"); //$NON-NLS-1$
+		logger.finest(sql.toString());
+		
+		PreparedStatement lastmodified = c.prepareStatement(sb.toString());
+		int cnt = 0;
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())){
+			while (rs.next()) {
+				UUID uuid = (UUID) rs.getObject(1);
+				if (uuid == null) continue;
+				String name = getEmployeeName(uuid, session);
+					
+				if (name != null) {
+					lastmodified.setString(1, name);
+					lastmodified.setObject(2,  uuid);
+					lastmodified.addBatch();
+					cnt++;
+					if (cnt >= 100){
+						lastmodified.executeBatch();
+						cnt = 0;
+					}
+				}
+			}
+			lastmodified.executeBatch();
+		}
+	}
 	/**
 	 * For waypoint date filter fields return the field name for filtering. Can return null
 	 * if should use datetime from waypoint table.

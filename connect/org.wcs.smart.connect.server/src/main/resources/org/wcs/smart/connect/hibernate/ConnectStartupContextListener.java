@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.hibernate;
 
 import java.beans.Introspector;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
@@ -46,6 +47,7 @@ import javax.media.jai.JAI;
 import javax.media.jai.OperationRegistry;
 import javax.media.jai.RegistryElementDescriptor;
 import javax.media.jai.RegistryMode;
+import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -66,11 +68,35 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
+import org.hibernate.type.PostgresUUIDType;
+import org.hibernate.type.UUIDBinaryType;
 import org.locationtech.udig.catalog.internal.shp.ShpServiceExtension;
 import org.opengis.referencing.AuthorityFactory;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.asset.query.model.IAssetQueryColumnProvider;
 import org.wcs.smart.connect.apache.CleanUpJob;
 import org.wcs.smart.connect.apache.EnvironmentVariables;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
+import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.i18n.labels.AdvancedLabelProviderImpl;
+import org.wcs.smart.connect.i18n.labels.AssetLabelProvider;
+import org.wcs.smart.connect.i18n.labels.AssetQueryLabelProvider;
+import org.wcs.smart.connect.i18n.labels.EntityLabelProvider;
+import org.wcs.smart.connect.i18n.labels.EntityQueryLabelProvider;
+import org.wcs.smart.connect.i18n.labels.ErLabelProvider;
+import org.wcs.smart.connect.i18n.labels.GridQueryColumnLabelProvider;
+import org.wcs.smart.connect.i18n.labels.IncidentLabelProvider;
+import org.wcs.smart.connect.i18n.labels.IntelligenceLabelProvider;
+import org.wcs.smart.connect.i18n.labels.IntelligenceQueryLabelProvider;
+import org.wcs.smart.connect.i18n.labels.ObservationQueryLabelProvider;
+import org.wcs.smart.connect.i18n.labels.OperatorLabelProvider;
+import org.wcs.smart.connect.i18n.labels.PatrolLabelProvider;
+import org.wcs.smart.connect.i18n.labels.PatrolQueryLabelProvider;
+import org.wcs.smart.connect.i18n.labels.PlanLabelProvider;
+import org.wcs.smart.connect.i18n.labels.QueryDateLabelProvider;
+import org.wcs.smart.connect.i18n.labels.SmartLabelProvider;
+import org.wcs.smart.connect.i18n.labels.SurveyQueryLabelProvider;
 import org.wcs.smart.connect.model.AbstractSmartAction;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertFilterDefault;
@@ -89,8 +115,47 @@ import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.model.StyleConfiguration;
 import org.wcs.smart.connect.model.WorkItem;
+import org.wcs.smart.connect.qa.QaErLabelProvider;
+import org.wcs.smart.connect.qa.QaIncidentLabelProvider;
+import org.wcs.smart.connect.qa.QaLabelProvider;
+import org.wcs.smart.connect.qa.QaPatrolLabelProvider;
+import org.wcs.smart.connect.query.PatrolContributionFinder;
+import org.wcs.smart.connect.query.WaypointSourceEngine;
+import org.wcs.smart.connect.query.columns.AssetQueryColumnProvider;
+import org.wcs.smart.connect.query.columns.EntityQueryColumnProvider;
+import org.wcs.smart.connect.query.columns.IntelligenceQueryColumnProvider;
+import org.wcs.smart.connect.query.columns.ObservationQueryColumnProvider;
+import org.wcs.smart.connect.query.columns.PatrolQueryColumnProvider;
+import org.wcs.smart.connect.query.columns.SurveyQueryColumnProvider;
+import org.wcs.smart.connect.query.engine.i2.IntelConnectionFactory;
+import org.wcs.smart.connect.query.engine.i2.QueryEngineFactory;
 import org.wcs.smart.connect.report.BirtEngine;
+import org.wcs.smart.connect.report.SmartServiceLabelProvider;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
+import org.wcs.smart.entity.IEntityLabelProvider;
+import org.wcs.smart.entity.query.IEntityQueryColumnProvider;
+import org.wcs.smart.entity.query.IEntityQueryLabelProvider;
+import org.wcs.smart.er.model.IErLabelProvider;
+import org.wcs.smart.er.query.ISurveyQueryLabelProvider;
+import org.wcs.smart.er.query.model.ISurveyQueryColumnProvider;
+import org.wcs.smart.i2.IQueryEngineFactory;
+import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
+import org.wcs.smart.incident.IIncidentLabelProvider;
+import org.wcs.smart.intelligence.IIntelligenceLabelProvider;
+import org.wcs.smart.intelligence.query.IIntelligenceQueryColumnProvider;
+import org.wcs.smart.intelligence.query.IIntelligenceQueryLabelProvider;
+import org.wcs.smart.observation.model.IWaypointSourceEngine;
+import org.wcs.smart.observation.query.model.columns.IObservationQueryColumnProvider;
+import org.wcs.smart.observation.query.view.IObservationQueryLabelProvider;
+import org.wcs.smart.patrol.model.IPatrolLabelProvider;
+import org.wcs.smart.patrol.query.ext.IPatrolContributionFinder;
+import org.wcs.smart.patrol.query.model.IPatrolQueryColumnProvider;
+import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
+import org.wcs.smart.plan.IPlanLabelProvider;
+import org.wcs.smart.query.model.IGridQueryColumnLabelProvider;
+import org.wcs.smart.query.model.filter.IOperatorLabelProvider;
+import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
+import org.wcs.smart.udig.catalog.smart.ISmartMapLabelProvider;
 
 /**
  * Web listener to configure the hibernate connection on start up and shut down.
@@ -296,7 +361,18 @@ public class ConnectStartupContextListener implements ServletContextListener{
 	
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-				
+		
+		
+		//configure file store
+		try{
+			DataStoreManager.INSTANCE.initDatastore();
+		}catch(NamingException ex){
+			throw new IllegalStateException("Cannot initialize datastore.", ex); //$NON-NLS-1$
+		}
+		SmartContext.INSTANCE.setFilestoreLocation(DataStoreManager.INSTANCE.getRootDirectory().getAbsolutePath());
+		SmartContext.INSTANCE.setTempFilestoreLocation((File)sce.getServletContext().getAttribute(ServletContext.TEMPDIR));
+		
+		//configure geotools properties
 		System.setProperty("org.eclipse.emf.common.util.ReferenceClearingQueue", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		System.setProperty("org.geotools.referencing.forceXY", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		System.setProperty(ShpServiceExtension.SHP_CHARSET_PARAM_NAME, StandardCharsets.UTF_8.name());
@@ -348,6 +424,9 @@ public class ConnectStartupContextListener implements ServletContextListener{
 			logger.log(Level.SEVERE, "Could not configure filestore watcher used for logging changes to filestore. " + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 		
+		//register SMART context classes
+		initSmartClasses(sce);
+		
 		//start executor for running background jobs
 		int numthreads = 1;
 		try{
@@ -374,4 +453,48 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		}
 	}
 
+	
+	private void initSmartClasses(ServletContextEvent arg0) {
+		SmartContext.INSTANCE.setClass(IEntityLabelProvider.class, new EntityLabelProvider());
+		SmartContext.INSTANCE.setClass(IEntityQueryLabelProvider.class, new EntityQueryLabelProvider());
+		SmartContext.INSTANCE.setClass(IErLabelProvider.class, new ErLabelProvider());
+		SmartContext.INSTANCE.setClass(IGridQueryColumnLabelProvider.class, new GridQueryColumnLabelProvider());
+		SmartContext.INSTANCE.setClass(IIntelligenceLabelProvider.class, new IntelligenceLabelProvider());
+		SmartContext.INSTANCE.setClass(IIntelligenceQueryLabelProvider.class, new IntelligenceQueryLabelProvider());
+		SmartContext.INSTANCE.setClass(IObservationQueryLabelProvider.class, new ObservationQueryLabelProvider());
+		SmartContext.INSTANCE.setClass(IOperatorLabelProvider.class, new OperatorLabelProvider());
+		SmartContext.INSTANCE.setClass(IPatrolLabelProvider.class, new PatrolLabelProvider());
+		SmartContext.INSTANCE.setClass(IQueryPatrolLabelProvider.class, new PatrolQueryLabelProvider());
+		SmartContext.INSTANCE.setClass(IPlanLabelProvider.class, new PlanLabelProvider());
+		SmartContext.INSTANCE.setClass(IQueryDateLabelProvider.class, new QueryDateLabelProvider());
+		SmartContext.INSTANCE.setClass(ICoreLabelProvider.class, new SmartLabelProvider());
+		SmartContext.INSTANCE.setClass(ISurveyQueryLabelProvider.class, new SurveyQueryLabelProvider());
+		SmartContext.INSTANCE.setClass(ISurveyQueryLabelProvider.class, new SurveyQueryLabelProvider());
+		SmartContext.INSTANCE.setClass(IIncidentLabelProvider.class, new IncidentLabelProvider());
+		
+		SmartContext.INSTANCE.setClass(IEntityQueryColumnProvider.class, new EntityQueryColumnProvider());
+		SmartContext.INSTANCE.setClass(IIntelligenceQueryColumnProvider.class, new IntelligenceQueryColumnProvider());
+		SmartContext.INSTANCE.setClass(IObservationQueryColumnProvider.class, new ObservationQueryColumnProvider());
+		SmartContext.INSTANCE.setClass(IPatrolQueryColumnProvider.class, new PatrolQueryColumnProvider());
+		SmartContext.INSTANCE.setClass(ISurveyQueryColumnProvider.class, new SurveyQueryColumnProvider());
+		SmartContext.INSTANCE.setClass(IPatrolContributionFinder.class, new PatrolContributionFinder());
+		SmartContext.INSTANCE.setClass(IWaypointSourceEngine.class, WaypointSourceEngine.INSTANCE);
+		SmartContext.INSTANCE.setClass(ISmartMapLabelProvider.class, new SmartServiceLabelProvider());
+		
+		SmartContext.INSTANCE.setClass(org.wcs.smart.qa.er.ILabelProvider.class, new QaErLabelProvider());
+		SmartContext.INSTANCE.setClass(org.wcs.smart.qa.ILabelProvider.class, new QaLabelProvider());
+		SmartContext.INSTANCE.setClass(org.wcs.smart.qa.patrol.ILabelProvider.class, new QaPatrolLabelProvider());
+		SmartContext.INSTANCE.setClass(org.wcs.smart.qa.incident.ILabelProvider.class, new QaIncidentLabelProvider());
+		
+		SmartContext.INSTANCE.setClass(org.wcs.smart.i2.IIntelligenceLabelProvider.class, new AdvancedLabelProviderImpl());
+		
+		SmartContext.INSTANCE.setClass(org.wcs.smart.asset.ui.IQueryAssetLabelProvider.class, new AssetQueryLabelProvider());
+		SmartContext.INSTANCE.setClass(org.wcs.smart.asset.IAssetLabelProvider.class, new AssetLabelProvider());
+		SmartContext.INSTANCE.setClass(IAssetQueryColumnProvider.class, new AssetQueryColumnProvider());
+		
+		SmartContext.INSTANCE.setClass(IConnectionFactory.class, new IntelConnectionFactory());
+		
+		SmartContext.INSTANCE.setClass(UUIDBinaryType.class, PostgresUUIDType.INSTANCE);
+		SmartContext.INSTANCE.setClass(IQueryEngineFactory.class, new QueryEngineFactory());		
+	}
 }

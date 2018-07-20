@@ -276,6 +276,9 @@ public class QueryColumnUtils {
 			if (columns.get(i).getType() == ColumnType.TIME && !supportsTime){
 				//time is not supported so convert to string
 				sb.append(ColumnType.TIME_STR.geotoolsType);
+			}else if (columns.get(i).getType() == ColumnType.DATETIME && !supportsTime) {
+				//datetime is not supported so convert to string
+				sb.append(ColumnType.TIME_STR.geotoolsType);
 			}else{
 				sb.append(columns.get(i).getType().geotoolsType);
 			}
