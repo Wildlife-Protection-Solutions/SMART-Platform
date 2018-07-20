@@ -44,7 +44,7 @@ public class Upgrader600To601 implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(final IProgressMonitor monitor) throws Exception {
-		monitor.beginTask("Upgrading from 6.0.0 to 6.0.1", 1);
+		monitor.beginTask(Messages.Upgrader600To601_TaskName, 1);
 		thrownException = null;
 		try(Session s = HibernateManager.openSession()){
 			s.doWork(new Work() {
@@ -57,7 +57,7 @@ public class Upgrader600To601 implements IDatabaseUpgrader {
 						c.setAutoCommit(true);
 						s.getTransaction().commit();
 					} catch (final Exception e) {
-						thrownException = new Exception("Error upgrading from 6.0.0 to 6.0.1", e);
+						thrownException = new Exception(Messages.Upgrader600To601_Error, e);
 					}
 				}
 			});

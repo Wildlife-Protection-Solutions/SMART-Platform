@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
@@ -43,7 +44,7 @@ public class Upgrader601To610 implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(final IProgressMonitor monitor) throws Exception {
-		monitor.beginTask("Upgrading from 6.0.1 to 6.1.0", 1);
+		monitor.beginTask(Messages.Upgrader601To610_TastName, 1);
 		thrownException = null;
 		try(Session s = HibernateManager.openSession()){
 			s.doWork(new Work() {
@@ -56,7 +57,7 @@ public class Upgrader601To610 implements IDatabaseUpgrader {
 						c.setAutoCommit(true);
 						s.getTransaction().commit();
 					} catch (final Exception e) {
-						thrownException = new Exception("Error upgrading from 6.0.1 to 6.1.0", e);
+						thrownException = new Exception(Messages.Upgrader601To610_Error, e);
 					}
 				}
 			});
