@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.birt.feature"
       label="SMART Birt Feature"
-      version="6.0.1.qualifier"
+      version="6.1.0.qualifier"
       provider-name="org.wcs.smart">
 
    <description>

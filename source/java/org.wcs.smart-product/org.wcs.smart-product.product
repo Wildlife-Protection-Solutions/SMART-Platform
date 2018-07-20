@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="SMART" uid="smartapp" id="org.wcs.smart.smart" application="org.wcs.smart.product" version="6.0.0" useFeatures="true" includeLaunchers="true">
+<product name="SMART" uid="smartapp" id="org.wcs.smart.smart" application="org.wcs.smart.product" version="6.1.0" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="./images/nl/en/about.png"/>
