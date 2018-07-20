@@ -2,11 +2,11 @@
 <feature
       id="org.wcs.smart.connect.dataqueue.core.feature"
       label="SMART Connect Data Queue Module"
-      version="6.0.1.qualifier"
+      version="6.1.0.qualifier"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart.connect.dataqueue"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="6.0.1.qualifier">
+      license-feature-version="6.1.0.qualifier">
 
    <description>
       Adds support for SMART Connect Data Queue processing.
