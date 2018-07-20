@@ -12,14 +12,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.hibernate.Session;
 import org.wcs.smart.asset.query.internal.Messages;
-import org.wcs.smart.asset.query.model.observation.FixedQueryColumn.FixedColumns;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.events.IWaypointEventListener;
 import org.wcs.smart.observation.events.WaypointEventManager;
@@ -50,10 +47,8 @@ public class AssetQueryColumnCache {
 	}
 	
 	private volatile QueryColumn[] queryColumns = null;
-	private volatile QueryColumn[] AssetQueryColumns = null;
 	private volatile QueryColumn[] waypointQueryColumns = null;
 	
-	private final Object ASSETLOCK = new Object();
 	private final Object OBSERVATIONLOCK = new Object();
 	private final Object WAYPOINTLOCK = new Object();
 	
@@ -62,7 +57,6 @@ public class AssetQueryColumnCache {
 			@Override
 			public void modified() {
 				queryColumns = null;
-				AssetQueryColumns = null;
 			}
 		});
 		
@@ -119,9 +113,7 @@ public class AssetQueryColumnCache {
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_X ||
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_Y ||
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY){
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
 							toAdd.setEdit(true);
 						}
 					}
@@ -212,9 +204,7 @@ public class AssetQueryColumnCache {
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_X ||
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_Y ||
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY){
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE ){
 							toAdd.setEdit(true);
 						}
 					}
@@ -234,81 +224,6 @@ public class AssetQueryColumnCache {
 		return  cloneColumns(waypointQueryColumns);
 	}
 
-	
-	/**
-	 * 
-	 * @return query columns available to a asset query based
-	 * on the asset options 
-	 */
-	
-	public  QueryColumn[] getAssetQueryColumns() {
-		
-		if (AssetQueryColumns != null){
-			return cloneColumns(AssetQueryColumns);
-		}
-		synchronized (ASSETLOCK) {
-			if (AssetQueryColumns != null){
-				return cloneColumns(AssetQueryColumns);
-			}
-			
-			Job j = new Job(Messages.QueryColumn_LoadingAssetColumnJobName){
-
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					//load from the database 
-					try(Session session = HibernateManager.openSession()){
-						session.beginTransaction();
-						try {
-							ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
-						
-							for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
-								FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
-								boolean add = true;
-								if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X||  
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_Y||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_DATE||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_ID||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME){
-									// do nothing, don't want these columns for asset queries
-									add = false;
-								}else{
-									if (item == FixedColumns.CA_ID || item == FixedColumns.CA_NAME){
-										add = SmartDB.isMultipleAnalysis();
-									}
-								}
-								if (add){
-									FixedQueryColumn c = new FixedQueryColumn(item, Locale.getDefault());
-
-									
-									cols.add(c);
-								}
-									
-							}
-	
-							AssetQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
-						
-						} finally {
-							if (session.getTransaction().isActive()){
-								session.getTransaction().rollback();
-							}
-						}
-					}
-					return Status.OK_STATUS;
-				}
-			};
-			j.schedule();
-			try{
-				j.join();
-			}catch (Exception ex){
-				throw new IllegalStateException(ex);
-			}
-		}
-		
-		return  cloneColumns(AssetQueryColumns);
-	}
 
 	private QueryColumn[] cloneColumns(QueryColumn[] cols){
 		QueryColumn[] copies = new QueryColumn[cols.length];

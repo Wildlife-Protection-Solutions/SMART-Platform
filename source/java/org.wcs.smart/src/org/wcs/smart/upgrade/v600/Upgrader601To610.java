@@ -83,7 +83,7 @@ public class Upgrader601To610 implements IDatabaseUpgrader {
 		}
 
 		/* VERSION UDATE */
-		String ssql = "update smart.db_version set version = '" + UpgradeEngine.UpgradeFromVersion.V601.toVersion + "' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$ //$NON-NLS-2$
+		String ssql = "update smart.db_version set version = '" + UpgradeEngine.UpgradeFromVersion.V610.toVersion + "' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$ //$NON-NLS-2$
 		c.createStatement().execute(ssql);
 		c.commit();
 	}
