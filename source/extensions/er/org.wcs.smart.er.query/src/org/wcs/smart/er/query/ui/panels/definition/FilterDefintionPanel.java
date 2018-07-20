@@ -208,7 +208,7 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 	public void initItems(QueryProxy q) throws Exception {
 		this.currentDesign = null;
 		super.initItems(q);
-		
+		if (q == null) return;
 		if (q.getQuery() instanceof ISurveyQuery){
 			final ISurveyQuery sq = (ISurveyQuery) q.getQuery();
 			

@@ -158,10 +158,14 @@ public abstract class Query extends NamedItem {
 	@Transient
 	public abstract String getTypeKey();
 	
-		
+	/**
+	 * 
+	 * @return the internal icon name associated with the query.  Can be overwritten by
+	 * subclasses. By default it is the type key appened with .png (ex. patrol.png)
+	 */
 	@Transient
 	public String getIconName() { 
-		return getTypeKey() + ".png";
+		return getTypeKey() + ".png"; //$NON-NLS-1$
 	}
 
 	/**

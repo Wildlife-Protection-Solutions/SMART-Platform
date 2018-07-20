@@ -235,7 +235,7 @@ public class PatrolQueryColumnCache {
 					}else if (item == FixedQueryColumn.FixedColumns.CA_ID || item == FixedQueryColumn.FixedColumns.CA_NAME){
 						add = SmartDB.isMultipleAnalysis();
 					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
-						add = false;
+						add = false; //observer is attached to an observation not a waypoint
 					}
 					if (add){
 						FixedQueryColumn toAdd = new FixedQueryColumn(item, Locale.getDefault());
@@ -305,7 +305,9 @@ public class PatrolQueryColumnCache {
 											item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE||
 											item == FixedQueryColumn.FixedColumns.WAYPOINT_ID||
 											item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME ||
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
+											item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER || 
+											item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED || 
+											item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED){
 									// do nothing, don't want these columns for patrol queries
 									add = false;
 								}else{

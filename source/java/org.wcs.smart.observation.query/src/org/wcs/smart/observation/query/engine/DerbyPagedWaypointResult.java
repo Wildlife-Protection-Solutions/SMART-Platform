@@ -48,12 +48,7 @@ import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import com.vividsolutions.jts.geom.Envelope;
 
 public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implements IDesktopPagedImageResultSet{
-	
-	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
-		 //NOTE: order is important as we don't want to change "patrolleg" to "pleg"
-		{"waypoint", "wp"} //$NON-NLS-1$ //$NON-NLS-2$
-	};
-	
+
 	private String queryTempTable;
 	private Envelope bounds = null;
 
@@ -125,13 +120,8 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {
 			String key = sortColumn.getKey();
-			if (sortColumn.getKey().equals(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey() )){
-				key = FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey();
-			}
-			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
-			for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
-				key = key.replace(data[0], data[1]);
-			}
+			key = FixedQueryColumn.getDbColumnName(key);
+			
 			if (sortColumn.getKey().equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
 				result = "order by CAST(r." + key + " as TIME)"; //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (sortColumn.getType() == ColumnType.STRING){

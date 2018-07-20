@@ -323,6 +323,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {
 			String key = sortColumn.getKey();
+			
 			key = FixedQueryColumn.getDbColumnName(key);
 			if (sortColumn.getKey().equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
 				result = "order by CAST(r." + key + " as TIME)"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -538,19 +539,19 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 				sb = new StringBuilder();
 				sb.append(" INSERT INTO "); //$NON-NLS-1$
 				sb.append(imageTempTable + "(attach_uuid) "); //$NON-NLS-1$
-				sb.append(" SELECT z.attach_uuid FROM ( ");
-				sb.append("SELECT c.uuid as attach_uuid, a.wp_time, a.wp_id " );
-				sb.append(" FROM ");
-				sb.append( queryTempTable + " a ");
-				sb.append(" JOIN ");
-				sb.append(" smart.observation_attachment c on a.ob_uuid = c.obs_uuid ");
-				sb.append( " UNION ");
-				sb.append("SELECT c.uuid as attach_uuid, a.wp_time, a.wp_id " );
-				sb.append(" FROM ");
-				sb.append( queryTempTable + " a ");
-				sb.append(" JOIN ");
-				sb.append(" smart.wp_attachments c on c.wp_uuid = a.wp_uuid ");
-				sb.append(" ) z ORDER BY z.wp_time desc, z.wp_id ");
+				sb.append(" SELECT z.attach_uuid FROM ( "); //$NON-NLS-1$
+				sb.append("SELECT c.uuid as attach_uuid, a.wp_time, a.wp_id " ); //$NON-NLS-1$
+				sb.append(" FROM "); //$NON-NLS-1$
+				sb.append( queryTempTable + " a "); //$NON-NLS-1$
+				sb.append(" JOIN "); //$NON-NLS-1$
+				sb.append(" smart.observation_attachment c on a.ob_uuid = c.obs_uuid "); //$NON-NLS-1$
+				sb.append( " UNION "); //$NON-NLS-1$
+				sb.append("SELECT c.uuid as attach_uuid, a.wp_time, a.wp_id " ); //$NON-NLS-1$
+				sb.append(" FROM "); //$NON-NLS-1$
+				sb.append( queryTempTable + " a "); //$NON-NLS-1$
+				sb.append(" JOIN "); //$NON-NLS-1$
+				sb.append(" smart.wp_attachments c on c.wp_uuid = a.wp_uuid "); //$NON-NLS-1$
+				sb.append(" ) z ORDER BY z.wp_time desc, z.wp_id "); //$NON-NLS-1$
 				s.createNativeQuery(sb.toString()).executeUpdate();
 				
 				sb = new StringBuilder();

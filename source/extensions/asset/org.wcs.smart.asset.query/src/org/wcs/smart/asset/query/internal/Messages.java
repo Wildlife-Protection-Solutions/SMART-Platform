@@ -76,6 +76,8 @@ public class Messages extends NLS {
 	public static String AssetQueryLabelProvider_AssetsColumnName;
 	public static String AssetQueryLabelProvider_AssetTypeFilterOption;
 	public static String AssetQueryLabelProvider_IncidentLengthColumnName;
+	public static String AssetQueryLabelProvider_LastModifiedByColumnName;
+	public static String AssetQueryLabelProvider_LastModifiedColumnName;
 	public static String AssetQueryLabelProvider_LocationsColumnName;
 	public static String AssetQueryLabelProvider_StationColumnName;
 	public static String AssetQueryLabelProvider_StationLocationFilterOptoin;

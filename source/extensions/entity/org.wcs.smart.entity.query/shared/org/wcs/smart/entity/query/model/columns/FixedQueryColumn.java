@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.entity.query.model.columns;
 
+import java.sql.Date;
 import java.sql.Time;
 import java.util.Locale;
 
@@ -61,7 +62,9 @@ public class FixedQueryColumn extends QueryColumn {
 		WAYPOINT_DIRECTION(ColumnType.NUMBER,"waypoint:direction"), //$NON-NLS-1$
 		WAYPOINT_DISTANCE(ColumnType.NUMBER,"waypoint:distance"), //$NON-NLS-1$
 		WAYPOINT_COMMENT(ColumnType.STRING,"waypoint:comment"), //$NON-NLS-1$
-		WAYPOINT_OBSERVER(ColumnType.STRING,"ob:observer");    //$NON-NLS-1$
+		WAYPOINT_OBSERVER(ColumnType.STRING,"ob:observer"),   //$NON-NLS-1$
+		WAYPOINT_LASTMODIFIED( ColumnType.DATETIME,"waypoint:modified"),   //$NON-NLS-1$
+		WAYPOINT_LASTMODIFIEDBY( ColumnType.STRING,"waypoint:modifiedby");   //$NON-NLS-1$
 		
 		private ColumnType type;
 		private String key;
@@ -118,7 +121,7 @@ public class FixedQueryColumn extends QueryColumn {
 			case WAYPOINT_COMMENT:
 				return item.getWaypointComment();
 			case WAYPOINT_DATE:
-				return item.getWpDateTime();
+				return new Date(item.getWpDateTime().getTime());
 			case WAYPOINT_DIRECTION:
 				return item.getWaypointDirection();
 			case WAYPOINT_DISTANCE:
@@ -135,6 +138,10 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getConservationAreaName();
 			case WAYPOINT_OBSERVER:
 				return item.getWaypointObserver();
+			case WAYPOINT_LASTMODIFIED:
+				return item.getLastModifiedDate();
+			case WAYPOINT_LASTMODIFIEDBY:
+				return item.getLastModifiedBy();
 			}
 		}
 		return null;
@@ -154,6 +161,10 @@ public class FixedQueryColumn extends QueryColumn {
 		if (key.equals(FixedColumns.WAYPOINT_DATE.getKey())) {
 			//both fixed columns are mapped to the same DB column
 			key = FixedColumns.WAYPOINT_TIME.getKey();
+		}else if (key.equals(FixedColumns.WAYPOINT_LASTMODIFIED.getKey() )){
+			key = "waypoint:lastmodified"; //$NON-NLS-1$
+		}else if (key.equals(FixedColumns.WAYPOINT_LASTMODIFIEDBY.getKey() )){
+			key = "waypoint:lastmodifiedbyname"; //$NON-NLS-1$
 		}
 		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {

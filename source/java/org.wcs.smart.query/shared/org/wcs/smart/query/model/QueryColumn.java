@@ -52,6 +52,7 @@ public abstract class QueryColumn implements Cloneable{
 		STRING("String", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		BOOLEAN("Integer", java.sql.Types.BOOLEAN), //$NON-NLS-1$
 		DATE("Date", java.sql.Types.DATE), //$NON-NLS-1$
+		DATETIME("Date", java.sql.Types.TIMESTAMP), //$NON-NLS-1$ 
 		TIME("Date", java.sql.Types.TIME), //$NON-NLS-1$
 		TIME_STR("String", java.sql.Types.VARCHAR); //$NON-NLS-1$
 		
@@ -228,6 +229,8 @@ public abstract class QueryColumn implements Cloneable{
 			}
 		} else if (type == ColumnType.DATE) {
 			return DateFormat.getDateInstance().format((Date) value);
+		} else if (type == ColumnType.DATETIME) {
+			return DateFormat.getDateTimeInstance().format((Date) value);
 		} else if (type == ColumnType.TIME) {
 			return DateFormat.getTimeInstance().format((Date) value);
 		} else if (type == ColumnType.STRING ||

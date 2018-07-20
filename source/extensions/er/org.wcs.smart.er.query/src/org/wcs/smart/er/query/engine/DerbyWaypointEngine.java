@@ -302,7 +302,8 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"surveydesign_name","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
-				{"mission_leader", "varchar(256)"} //$NON-NLS-1$ //$NON-NLS-2$
+				{"mission_leader", "varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"wp_lastmodifiedbyname", "varchar(512)"} //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		
 		for (int i = 0; i < columnsToAdd.length; i ++){
@@ -358,13 +359,14 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		sql.append(" WHERE "); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionMember.class));
 		sql.append(".is_leader"); //$NON-NLS-1$
-
 		
 		String updateSql = "UPDATE " + queryDataTable + " SET "; //$NON-NLS-1$ //$NON-NLS-2$
 		updateSql += "mission_leader = ? where mission_uuid = ?"; //$NON-NLS-1$
+		
 		QueryPlugIn.logSql(updateSql);
+		
 		PreparedStatement leaderSt = c.prepareStatement(updateSql);
-
+		
 		int cnt = 0;
 		QueryPlugIn.logSql(sql.toString());
 		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
@@ -386,6 +388,40 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 			}
 			leaderSt.executeBatch();
 		}
+		
+		//last modified
+		sql = new StringBuilder();
+		sql.append("SELECT DISTINCT wp_lastmodifiedby FROM "); //$NON-NLS-1$
+		sql.append(queryDataTable);
+		
+		String updateSql2 = "UPDATE " + queryDataTable + " SET "; //$NON-NLS-1$ //$NON-NLS-2$
+		updateSql2 += "wp_lastmodifiedbyname = ? where wp_lastmodifiedby = ?"; //$NON-NLS-1$
+		
+		QueryPlugIn.logSql(updateSql2);
+		PreparedStatement modifiedSt = c.prepareStatement(updateSql2);
+		cnt = 0;
+		QueryPlugIn.logSql(sql.toString());
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
+			while (rs.next()) {
+				byte[] uuid = rs.getBytes(1);
+				String name = getEmployeeName(UuidUtils.byteToUUID(uuid), session);
+
+				if (name != null) {
+					
+					modifiedSt.setString(1, name);
+					modifiedSt.setBytes(2, uuid);
+					modifiedSt.addBatch();
+
+					cnt++;
+					if (cnt >= 100) {
+						modifiedSt.executeBatch();
+						cnt = 0;
+					}
+				}
+			}
+			modifiedSt.executeBatch();
+		}
+		
 		progress.split(1);
 		progress.subTask(Messages.DerbyWaypointEngine_ProgressMissionProperties);
 		populateAdditionalMissionTable(c, session);
@@ -424,8 +460,9 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".direction, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Waypoint.class) + ".wp_comment "); //$NON-NLS-1$
-		
+		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by "); //$NON-NLS-1$
 		return sql.toString();
 	}
 
@@ -459,8 +496,9 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		sql.append("wp_direction real,"); //$NON-NLS-1$
 		sql.append("wp_distance real,"); //$NON-NLS-1$
 		sql.append("wp_date timestamp,"); //$NON-NLS-1$ 
-		sql.append("wp_comment varchar(4096)"); //$NON-NLS-1$
-		
+		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
+		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
+		sql.append("wp_lastmodifiedby char(16) for bit data"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}
@@ -496,6 +534,8 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
+		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
+		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		
 		return it;
 	}

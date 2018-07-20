@@ -119,7 +119,9 @@ public class AssetQueryColumnCache {
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_X ||
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_Y ||
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY){
 							toAdd.setEdit(true);
 						}
 					}
@@ -210,7 +212,9 @@ public class AssetQueryColumnCache {
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_X ||
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_Y ||
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY){
 							toAdd.setEdit(true);
 						}
 					}

@@ -23,6 +23,7 @@
 package org.wcs.smart.entity.query.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -155,6 +156,7 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"wp_lastmodifiedbyname", "varchar(512)"} //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		for (int i = 0; i < columnsToAdd.length; i ++){
 			String sql = "ALTER TABLE " + queryDataTable + " ADD "+ columnsToAdd[i][0] + " " + columnsToAdd[i][1]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -187,6 +189,37 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 			c.createStatement().executeUpdate(sql.toString());
 		}
 		
+		//populate last modified
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT DISTINCT wp_lastmodifiedby FROM "); //$NON-NLS-1$
+		sql.append(queryDataTable);
+		QueryPlugIn.logSql(sql.toString());
+		
+		String q2 = "UPDATE " + queryDataTable + " SET wp_lastmodifiedbyname = ? where wp_lastmodifiedby = ?"; //$NON-NLS-1$ //$NON-NLS-2$
+		QueryPlugIn.logSql(q2);
+		PreparedStatement modifiedSt = c.prepareStatement(q2);
+		
+		int cnt = 0;
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
+			while (rs.next()) {
+				byte[] uuid = rs.getBytes(1);
+				String name = getEmployeeName(UuidUtils.byteToUUID(uuid), session);
+
+				if (name != null) {
+					modifiedSt.setString(1, name);
+					modifiedSt.setBytes(2, uuid);
+					modifiedSt.addBatch();
+					
+					cnt++;
+					if (cnt >= 100) {
+						modifiedSt.executeBatch();
+						cnt = 0;
+					}
+				}
+			}
+			modifiedSt.executeBatch();
+		}
+		
 		//populating categories
 		progress.subTask(Messages.DerbyObservationEngine_Progress_CategoryData);
 		progress.setWorkRemaining(0);
@@ -205,7 +238,9 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".direction, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Waypoint.class) + ".wp_comment "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by "); //$NON-NLS-1$
 		return sql.toString();
 	}
 
@@ -222,7 +257,9 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 		sql.append("wp_direction real,"); //$NON-NLS-1$
 		sql.append("wp_distance real,"); //$NON-NLS-1$
 		sql.append("wp_time timestamp,"); //$NON-NLS-1$
-		sql.append("wp_comment varchar(4096)"); //$NON-NLS-1$
+		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
+		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
+		sql.append("wp_lastmodifiedby char(16) for bit data"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}
@@ -240,6 +277,8 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
+		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
+		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		
 		return it;
 	}

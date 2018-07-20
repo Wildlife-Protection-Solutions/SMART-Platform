@@ -143,6 +143,8 @@ public class SurveyQueryColumnManager {
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_OBSERVER, Locale.getDefault()));
 		}
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_LAST_MODIFIED, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_LAST_MODIFIED_BY, Locale.getDefault()));
 				
 		//mission property columns
 		Job j = new Job(Messages.SurveyQueryColumnManager_missionattributejobname){
@@ -209,7 +211,9 @@ public class SurveyQueryColumnManager {
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE, Locale.getDefault()));
 		}
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT, Locale.getDefault()));
-						
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_LAST_MODIFIED, Locale.getDefault()));
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_LAST_MODIFIED_BY, Locale.getDefault()));
+		
 		//mission property columns
 		Job j = new Job(Messages.SurveyQueryColumnManager_missionattributejobname){
 			@Override

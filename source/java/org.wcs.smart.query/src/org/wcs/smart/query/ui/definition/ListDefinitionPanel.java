@@ -516,7 +516,6 @@ public abstract class ListDefinitionPanel implements IDefinitionPanel{
 	public void initItems(QueryProxy q){
 		this.currentQuery = q;
 		clear();
-		this.addItems(q.getDropItems(getId()));
-		
+		if (q != null) this.addItems(q.getDropItems(getId()));
 	}
 }

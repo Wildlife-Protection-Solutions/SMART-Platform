@@ -210,6 +210,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 				{"p_pilot","varchar(164)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"wp_lastmodifiedbyname", "varchar(512)"} //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		for (int i = 0; i < columnsToAdd.length; i ++){
 			String sql = "ALTER TABLE " + queryDataTable + " ADD "+ columnsToAdd[i][0] + " " + columnsToAdd[i][1]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -240,16 +241,21 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 		sql.append(queryDataTable);
 		sql.append(" UNION SELECT DISTINCT plm_pilot FROM "); //$NON-NLS-1$
 		sql.append(queryDataTable);
+		sql.append(" UNION SELECT DISTINCT wp_lastmodifiedby FROM "); //$NON-NLS-1$
+		sql.append(queryDataTable);
 		QueryPlugIn.logSql(sql.toString());
 		
-		String updateSql = "UPDATE "+queryDataTable+" SET "; //$NON-NLS-1$ //$NON-NLS-2$
+		String updateSql = "UPDATE " + queryDataTable + " SET "; //$NON-NLS-1$ //$NON-NLS-2$
 		
 		String q1 = updateSql + "p_leader = ? where plm_leader = ?"; //$NON-NLS-1$
 		String q2 = updateSql + "p_pilot = ? where plm_pilot = ?"; //$NON-NLS-1$
+		String q3 = updateSql + "wp_lastmodifiedbyname = ? where wp_lastmodifiedby = ?"; //$NON-NLS-1$
 		QueryPlugIn.logSql(q1);
 		QueryPlugIn.logSql(q2);
+		QueryPlugIn.logSql(q3);
 		PreparedStatement leaderSt = c.prepareStatement(q1);
 		PreparedStatement pilotSt = c.prepareStatement(q2);
+		PreparedStatement lastmodifiedSt = c.prepareStatement(q3);
 		int cnt = 0;
 		try (ResultSet rs = c.createStatement().executeQuery(sql.toString())){
 			while (rs.next()) {
@@ -264,16 +270,23 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 					pilotSt.setString(1, name);
 					pilotSt.setBytes(2, uuid);
 					pilotSt.addBatch();
+					
+					lastmodifiedSt.setString(1, name);
+					lastmodifiedSt.setBytes(2, uuid);
+					lastmodifiedSt.addBatch();
+					
 					cnt++;
 					if (cnt >= 100){
 						pilotSt.executeBatch();
 						leaderSt.executeBatch();
+						lastmodifiedSt.executeBatch();
 						cnt = 0;
 					}
 				}
 			}
 			pilotSt.executeBatch();
 			leaderSt.executeBatch();
+			lastmodifiedSt.executeBatch();
 		}
 		
 		//ca information
@@ -331,6 +344,8 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 		sql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by, "); //$NON-NLS-1$
 //		sql.append(prefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 //		sql.append(prefix(WaypointObservation.class) + ".category_uuid, "); //$NON-NLS-1$
 
@@ -368,6 +383,8 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 		sql.append("wp_distance real,"); //$NON-NLS-1$
 		sql.append("wp_time timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
+		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
+		sql.append("wp_lastmodifiedby char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("plm_leader char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("plm_pilot char(16) for bit data"); //$NON-NLS-1$
 
@@ -404,7 +421,8 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-		
+		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
+		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		return it;
 	}
 	

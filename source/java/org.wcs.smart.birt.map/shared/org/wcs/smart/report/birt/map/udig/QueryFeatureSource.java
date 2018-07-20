@@ -115,7 +115,7 @@ public class QueryFeatureSource extends ContentFeatureSource {
 			}else if (type == DataType.BOOLEAN_TYPE){
 				maptype = "Integer"; //$NON-NLS-1$
 			}else if (type == DataType.JAVA_OBJECT_TYPE) {
-				maptype = "String";
+				maptype = "String"; //$NON-NLS-1$
 			}else{
 				Logger.getLogger(QueryFeatureSource.class.getName()).log(Level.SEVERE, "Query type not supported: " + type, (Exception)null); //$NON-NLS-1$
 				continue;

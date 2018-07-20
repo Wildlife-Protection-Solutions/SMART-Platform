@@ -49,7 +49,10 @@ public class EntityQueryLabelProvider implements IEntityQueryLabelProvider {
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE) return Messages.FixedQueryColumn_DistanceColumnName;
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT) return Messages.FixedQueryColumn_CommentColumnName;
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER) return Messages.FixedQueryColumn_ObserverColumnName;
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED) return Messages.EntityQueryLabelProvider_LastModifiedColumnName;
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY) return Messages.EntityQueryLabelProvider_LastModifiedByColumnName;
 		if (item == EntityQueryResultItem.WAYPOINT_GEOM_COLUMNKEY) return Messages.EntityQueryLabelProvider_GeometryFieldName;
+		
 		return null;
 	}
 }

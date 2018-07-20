@@ -24,6 +24,7 @@ package org.wcs.smart.observation.query.engine;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -698,6 +699,11 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 					case KEY:
 						key += rs.getString(rsindex++);
 						break;
+					case TIME:
+						key += DateFormat.getTimeInstance().format(rs.getDate(rsindex++));
+						break;
+				default:
+					break;
 				}
 				groupby[i] = key;
 			}

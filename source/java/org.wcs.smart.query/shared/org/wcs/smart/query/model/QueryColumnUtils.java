@@ -63,6 +63,10 @@ public abstract class QueryColumnUtils implements Cloneable{
 				descriptor.getType().getBinding().equals(String.class)){
 				//this is a datetime object which needs to be converted to a string
 				x = DateFormat.getTimeInstance().format((Date)x);
+		}else if (column.getType() == QueryColumn.ColumnType.DATETIME &&
+				descriptor.getType().getBinding().equals(String.class)){
+				//this is a datetime object which needs to be converted to a string
+				x = DateFormat.getDateTimeInstance().format((Date)x);
 		}
 		return x;
 	}
@@ -106,6 +110,9 @@ public abstract class QueryColumnUtils implements Cloneable{
 			sb.append(":"); //$NON-NLS-1$
 			if (columns.get(i).getType() == ColumnType.TIME && !supportsTime){
 				//time is not supported so convert to string
+				sb.append(ColumnType.TIME_STR.geotoolsType);
+			}else if (columns.get(i).getType() == ColumnType.DATETIME && !supportsTime) {
+				//datetime is not supported so convert to string
 				sb.append(ColumnType.TIME_STR.geotoolsType);
 			}else{
 				sb.append(columns.get(i).getType().geotoolsType);

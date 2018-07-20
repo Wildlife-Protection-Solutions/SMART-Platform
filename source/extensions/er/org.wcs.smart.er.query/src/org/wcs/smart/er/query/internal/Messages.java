@@ -288,6 +288,8 @@ public class Messages extends NLS {
 	public static String SurveyQueryValidator_SurveyDesignNotFound;
 	public static String SurveyQueryValidator_SurveyNotFound;
 	public static String SurveyQueryFactory_DefaultQueryName;
+	public static String SurveyQueryLabelProvider_LastModifiedByLabel;
+	public static String SurveyQueryLabelProvider_LastModifiedLabel;
 	public static String SurveySimpleQueryResultEditor_LoadSuJobName;
 	public static String SurveySummaryQueryType_QueryError;
 	public static String SurveySummaryQueryType_QueryTypeName;

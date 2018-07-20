@@ -55,7 +55,7 @@ public class QueryResultItemFeature {
 		List<Object> data = new ArrayList<Object>();
 		data.add(it.asGeometry(PatrolQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY));
 		data.add(it.getPatrolId() + "." + it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
-		int i = 0;
+		int i = 2;
 		for (QueryColumn c : columns){
 			if (c.isVisible()){
 				data.add(QueryColumnUtils.getValue(it, c, ftype.getDescriptor(i++)));

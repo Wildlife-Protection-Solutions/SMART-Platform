@@ -69,9 +69,37 @@ public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptab
 	private String[] observationCategory;
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	
+	private String lastModifiedBy;
+	private Date lastModified;
+	
 	private UUID observationUuid;
 	
 
+	/**
+	 * the waypoint last modified date
+	 * @param lastModified
+	 */
+	public void setLastModifiedDate(Date lastModified) {
+		this.lastModified = lastModified;
+	}
+	public Date getLastModifiedDate() {
+		return this.lastModified;
+	}
+	
+	/**
+	 * @param lastmodified employee uuid or null
+	 */
+	public void setLastModifiedBy(String lastModifiedBy){
+		this.lastModifiedBy = lastModifiedBy;
+	}
+	
+	/**
+	 * @return the last modified employee uuid or null
+	 */
+	public String getLastModifiedBy(){
+		return this.lastModifiedBy;
+	}
+	
 	/**
 	 * @param observationUuid the observation uuid
 	 */

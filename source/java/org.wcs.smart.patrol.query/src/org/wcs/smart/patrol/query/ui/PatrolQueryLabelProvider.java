@@ -74,6 +74,8 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case WAYPOINT_DISTANCE: return Messages.FixedQueryColumn_DistanceColumnName;
 			case WAYPOINT_COMMENT: return Messages.FixedQueryColumn_CommentColumnName;
 			case WAYPOINT_OBSERVER: return Messages.FixedQueryColumn_ObserverColumnName;
+			case WAYPOINT_LASTMODIFIED: return Messages.PatrolQueryLabelProvider_LastModified_ColumnName;
+			case WAYPOINT_LASTMODIFIEDBY: return Messages.PatrolQueryLabelProvider_LastModifiedBy_ColumnName;
 			}
 		}
 		if (item instanceof PatrolValueOption){

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.query.model;
 
+import java.sql.Date;
+import java.sql.Time;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
@@ -82,7 +84,9 @@ public class SurveyQueryColumn extends QueryColumn {
 		WAYPOINT_DIRECTION( ColumnType.NUMBER,"waypoint:direction"),  //$NON-NLS-1$
 		WAYPOINT_DISTANCE( ColumnType.NUMBER,"waypoint:distance"),  //$NON-NLS-1$
 		WAYPOINT_COMMENT( ColumnType.STRING,"waypoint:comment"),  //$NON-NLS-1$
-		WAYPOINT_OBSERVER( ColumnType.STRING, "waypoint:observer");   //$NON-NLS-1$
+		WAYPOINT_OBSERVER( ColumnType.STRING, "waypoint:observer"),   //$NON-NLS-1$
+		WAYPOINT_LAST_MODIFIED(ColumnType.DATETIME, "waypoint:modified"), //$NON-NLS-1$
+		WAYPOINT_LAST_MODIFIED_BY(ColumnType.STRING, "waypoint:modifiedby"); //$NON-NLS-1$
 		
 		private ColumnType type;
 		private String key;
@@ -144,14 +148,16 @@ public class SurveyQueryColumn extends QueryColumn {
 				case MISSION_LEADER: return item.getMissionLeader();
 				case SAMPLING_UNIT: return item.getSamplingUnitId();
 				case WAYPOINT_ID: return item.getWaypointId();
-				case WAYPOINT_DATE: return item.getWaypointDateTime();
-				case WAYPOINT_TIME: return item.getWaypointDateTime(); 
+				case WAYPOINT_DATE: return new Date(item.getWaypointDateTime().getTime());
+				case WAYPOINT_TIME: return new Time(item.getWaypointDateTime().getTime()); 
 				case WAYPOINT_X: return item.getWaypointX(getProjection()); 
 				case WAYPOINT_Y: return item.getWaypointY(getProjection()); 
 				case WAYPOINT_DIRECTION: return item.getWaypointDirection(); 
 				case WAYPOINT_DISTANCE: return item.getWaypointDistance(); 
 				case WAYPOINT_COMMENT: return item.getWaypointComment(); 
 				case WAYPOINT_OBSERVER: return item.getWaypointObserver();
+				case WAYPOINT_LAST_MODIFIED: return item.getLastModifiedDate();
+				case WAYPOINT_LAST_MODIFIED_BY: return item.getLastModifiedBy();
 				default: return null;
 			}
 		}else if (queryResultItem instanceof MissionTrackResultItem){
@@ -193,6 +199,10 @@ public class SurveyQueryColumn extends QueryColumn {
 		if (FixedColumns.WAYPOINT_OBSERVER.getKey().equals(key)) {
 			//specific case (need this to fix column sorting and filtering based on value)
 			return "ob_observer"; //$NON-NLS-1$
+		}else if (key.equals(FixedColumns.WAYPOINT_LAST_MODIFIED.getKey() )){
+			key = "waypoint:lastmodified"; //$NON-NLS-1$
+		}else if (key.equals(FixedColumns.WAYPOINT_LAST_MODIFIED_BY.getKey() )){
+			key = "waypoint:lastmodifiedbyname"; //$NON-NLS-1$
 		}
 		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {

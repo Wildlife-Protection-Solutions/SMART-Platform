@@ -51,6 +51,8 @@ public class ObservationQueryLabelProvider implements
 				case WAYPOINT_DISTANCE: return Messages.FixedQueryColumn_DistanceColumnName;
 				case WAYPOINT_COMMENT: return Messages.FixedQueryColumn_CommentColumnName;
 				case WAYPOINT_OBSERVER: return Messages.FixedQueryColumn_ObserverColumnName;
+				case WAYPOINT_LAST_MODIFIED: return Messages.ObservationQueryLabelProvider_LastModified_ColumnName;
+				case WAYPOINT_LAST_MODIFIED_BY: return Messages.ObservationQueryLabelProvider_LastModifiedBy_ColumnName;
 			}
 		}
 		return null;

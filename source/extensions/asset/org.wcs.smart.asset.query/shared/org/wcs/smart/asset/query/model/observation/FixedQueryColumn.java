@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.asset.query.model.observation;
 
+import java.sql.Date;
+import java.sql.Time;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
@@ -60,7 +62,10 @@ public class FixedQueryColumn extends QueryColumn {
 		WAYPOINT_Y(ColumnType.NUMBER, "waypoint:y"), //$NON-NLS-1$
 		WAYPOINT_DIRECTION(ColumnType.NUMBER,"waypoint:direction"), //$NON-NLS-1$
 		WAYPOINT_DISTANCE( ColumnType.NUMBER,"waypoint:distance"), //$NON-NLS-1$
-		WAYPOINT_COMMENT(ColumnType.STRING,"waypoint:comment"); //$NON-NLS-1$
+		WAYPOINT_COMMENT(ColumnType.STRING,"waypoint:comment"), //$NON-NLS-1$
+		
+		WAYPOINT_LASTMODIFIED( ColumnType.DATETIME,"waypoint:modified"),   //$NON-NLS-1$
+		WAYPOINT_LASTMODIFIEDBY( ColumnType.STRING,"waypoint:modifiedby");   //$NON-NLS-1$
 		
 		private ColumnType type;
 		private String key;
@@ -120,13 +125,13 @@ public class FixedQueryColumn extends QueryColumn {
 			case WAYPOINT_COMMENT:
 				return item.getWaypointComment();
 			case WAYPOINT_DATE:
-				return item.getWaypointDate();
+				return new Date(item.getWaypointDate().getTime());
 			case WAYPOINT_DIRECTION:
 				return item.getWaypointDirection();
 			case WAYPOINT_DISTANCE:
 				return item.getWaypointDistance();
 			case WAYPOINT_TIME:
-				return item.getWaypointDate();
+				return new Time(item.getWaypointDate().getTime());
 			case WAYPOINT_X:
 				return item.getWaypointX(getProjection());
 			case WAYPOINT_Y:
@@ -137,8 +142,10 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getConservationAreaName();
 			case INCIDENT_LENGTH:
 				return item.getIncidentLength();
-			default:
-				break;
+			case WAYPOINT_LASTMODIFIED:
+				return item.getLastModifiedDate();
+			case WAYPOINT_LASTMODIFIEDBY:
+				return item.getLastModifiedBy();
 			}
 		}
 		return ""; //$NON-NLS-1$
@@ -157,6 +164,13 @@ public class FixedQueryColumn extends QueryColumn {
 	
 	public static String getDbColumnName(String key) {
 		if (key.equals("waypoint:length")) return "incident_length"; //$NON-NLS-1$ //$NON-NLS-2$
+		
+		if (key.equals(FixedColumns.WAYPOINT_LASTMODIFIED.getKey() )){
+			key = "waypoint:lastmodified"; //$NON-NLS-1$
+		}else if (key.equals(FixedColumns.WAYPOINT_LASTMODIFIEDBY.getKey() )){
+			key = "waypoint:lastmodifiedbyname"; //$NON-NLS-1$
+		}
+		
 		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$
 		for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
 			key = key.replace(data[0], data[1]);

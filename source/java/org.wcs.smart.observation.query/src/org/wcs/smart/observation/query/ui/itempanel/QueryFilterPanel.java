@@ -190,16 +190,13 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 				input.put(GeneralTreeNode.KEY, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.OBSERVER});	
 			}else{
 				//only add observer if part of options
-				Session session = HibernateManager.openSession();
-				try{
+				try(Session session = HibernateManager.openSession()){
 					ObservationOptions options = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
 					if (options.getTrackObserver()){
 						input.put(GeneralTreeNode.KEY, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.OBSERVER});
 					}else{
 						input.put(GeneralTreeNode.KEY, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE});
 					}
-				}finally{
-					session.close();
 				}
 			}
 			

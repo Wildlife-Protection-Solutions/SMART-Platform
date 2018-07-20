@@ -68,6 +68,8 @@ public class SurveyQueryLabelProvider implements ISurveyQueryLabelProvider {
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE){ return Messages.SurveyQueryColumn_DistanceLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT){ return Messages.SurveyQueryColumn_CommentLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_OBSERVER){ return Messages.SurveyQueryColumn_ObserverLabel;}
+		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_LAST_MODIFIED){ return Messages.SurveyQueryLabelProvider_LastModifiedLabel;}
+		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_LAST_MODIFIED_BY){ return Messages.SurveyQueryLabelProvider_LastModifiedByLabel;}
 				
 		if (item == ValueItem.TRACK_LENGTH){ return Messages.MissionLegnthValueDropItem_TrackLengthLabel;}
 		if (item == ValueItem.MISSION_COUNT){ return Messages.MissionValueItem_NumberOfMissionsLabel;}

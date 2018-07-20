@@ -99,6 +99,8 @@ public class Messages extends NLS {
 	public static String EntityQueryDatabaseUpgrader_UpgradeTask;
 	public static String EntityQueryFilterPanel_GeneralItemsLabel;
 	public static String EntityQueryLabelProvider_GeometryFieldName;
+	public static String EntityQueryLabelProvider_LastModifiedByColumnName;
+	public static String EntityQueryLabelProvider_LastModifiedColumnName;
 	public static String EntityQueryValidator_EntityAttributeNotFound;
 	public static String EntityQueryValidator_EntityTypeNotFound;
 	public static String EntitySummaryItemPanel_GeneralItemsLabel;

@@ -66,13 +66,7 @@ import org.wcs.smart.util.SmartUtils;
 import com.vividsolutions.jts.geom.Envelope;
 
 public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implements IUpdateableResultSet, IWaypointUpdateableResultSet, ISearchabledResultSet, IDesktopPagedImageResultSet{
-	
-	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
-		 //NOTE: order is important as we don't want to change "patrolleg" to "pleg"
-		{"patrolleg", "pl"}, //$NON-NLS-1$ //$NON-NLS-2$
-		{"patrol", "p"}, //$NON-NLS-1$ //$NON-NLS-2$
-		{"waypoint", "wp"} //$NON-NLS-1$ //$NON-NLS-2$
-	};
+
 	private final static NullComparator NULL_COMPARATOR = new NullComparator(false);
 	
 	protected String queryTempTable;
@@ -156,10 +150,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {
 			String key = sortColumn.getKey();
-			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
-			for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
-				key = key.replace(data[0], data[1]);
-			}
+			key = FixedQueryColumn.getDbColumnName(key);
 			if (sortColumn.getType() == ColumnType.STRING){
 				result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$	
 			}else{

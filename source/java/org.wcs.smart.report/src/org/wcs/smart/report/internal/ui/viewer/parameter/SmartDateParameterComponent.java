@@ -207,20 +207,33 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 			if (op.getQueryKey().equals(AllDatesFilter.INSTANCE.getQueryKey())) {
 				params.put(SmartReportParameters.PARAM_START_DATE_KEY,
 						new java.sql.Date(-2208998272375l)); // JAN 01 1900
-
+				
+				params.put(SmartReportParameters.PARAM_END_DATE_KEY,
+						new java.sql.Date((new Date()).getTime() + 86400000));  // today plus 1 day
+				
 				try(Session session = HibernateManager.openSession()){
 					try {
 						session.beginTransaction();
 	
-						String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
+						String hql = "SELECT min(dateTime), max(dateTime) FROM Waypoint WHERE conservationArea = :ca"; //$NON-NLS-1$
 						Query<?> q = session.createQuery(hql);
 						q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 						List<?> data = q.list();
-						Date startdate = null;
-						if (data != null && data.size() >= 1 && data.get(0) != null) {
-							startdate = (java.sql.Timestamp) data.get(0);
-							params.put(SmartReportParameters.PARAM_START_DATE_KEY,
-									new java.sql.Date(startdate.getTime()));
+						
+						if (data != null && data.size() >= 1) {
+							Date startdate = (Date) ((Object[])data.get(0))[0];
+							if (startdate != null) {
+								params.put(SmartReportParameters.PARAM_START_DATE_KEY,
+									new java.sql.Date(startdate.getTime() - 86400000)); //subtract one day to ensure we get everything
+							}
+							
+							Date enddate = (Date) ((Object[])data.get(0))[1];
+							if (enddate != null) {
+								if (enddate.getTime() > ((java.sql.Date)params.get(SmartReportParameters.PARAM_END_DATE_KEY)).getTime()) {
+									params.put(SmartReportParameters.PARAM_END_DATE_KEY,
+										new java.sql.Date(enddate.getTime() + 86400000));  // last date plus 1 day to ensure we get everything
+								}
+							}
 						}
 	
 					} catch (Exception ex) {
@@ -233,10 +246,6 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 						}
 					}
 				}
-				// today + one day
-				// add one day just to make sure we get everything
-				params.put(SmartReportParameters.PARAM_END_DATE_KEY,
-						new java.sql.Date((new Date()).getTime() + 86400000)); 
 			} else {
 				throw new UnsupportedOperationException(
 						MessageFormat

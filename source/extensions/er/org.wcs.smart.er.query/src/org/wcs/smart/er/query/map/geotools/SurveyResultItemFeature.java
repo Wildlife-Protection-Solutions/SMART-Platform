@@ -53,7 +53,7 @@ import com.vividsolutions.jts.geom.LineString;
 public class SurveyResultItemFeature {
 
 	private static void addQueryColumnData(IResultItem it, SimpleFeatureType ftype, List<QueryColumn> columns, List<Object> data){
-		int i = 0;
+		int i = 2;
 		for (QueryColumn c : columns){
 			if (c.isVisible()){
 				data.add(QueryColumnUtils.getValue(it, c, ftype.getDescriptor(i++)));

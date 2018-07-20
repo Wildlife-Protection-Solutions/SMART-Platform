@@ -105,6 +105,9 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private String[] observationCategory;
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	
+	private String lastModifiedBy;
+	private Date lastModified;
+	
 	private UUID observationUuid;
 	private List<byte[]> tracks = null;
 	
@@ -128,6 +131,35 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 */
 	public UUID getObservationUuid(){
 		return this.observationUuid;
+	}
+	
+	/**
+	 * the waypoint last modified date
+	 * @param lastModified
+	 */
+	public void setLastModifiedDate(Date lastModified) {
+		this.lastModified = lastModified;
+	}
+	/**
+	 * 
+	 * @return the waypoint last modified date
+	 */
+	public Date getLastModifiedDate() {
+		return this.lastModified;
+	}
+	
+	/**
+	 * @param lastmodified employee uuid or null
+	 */
+	public void setLastModifiedBy(String lastModifiedBy){
+		this.lastModifiedBy = lastModifiedBy;
+	}
+	
+	/**
+	 * @return the last modified employee uuid or null
+	 */
+	public String getLastModifiedBy(){
+		return this.lastModifiedBy;
 	}
 	
 	/**

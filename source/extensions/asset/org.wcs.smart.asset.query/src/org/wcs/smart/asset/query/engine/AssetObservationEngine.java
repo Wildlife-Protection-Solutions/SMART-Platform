@@ -274,7 +274,7 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 	}
 	
 	private void populateTemporaryTableExtra(Connection c, Session session, IProgressMonitor monitor) throws SQLException {
-		SubMonitor progress = SubMonitor.convert(monitor, 27);
+		SubMonitor progress = SubMonitor.convert(monitor, 28);
 		
 		//NOTE: does 50 worked for monitor in total
 		String[][] columnsToAdd = new String[][]{
@@ -284,6 +284,7 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 				{"incident_length", "integer"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"wp_lastmodifiedbyname","varchar(512)"}, //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		
 		for (int i = 0; i < columnsToAdd.length; i ++){
@@ -397,7 +398,43 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
+		
+		//last modified
+		progress.split(1);
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT DISTINCT wp_lastmodifiedby FROM "); //$NON-NLS-1$
+		sql.append(queryDataTable);
+		QueryPlugIn.logSql(sql.toString());
 				
+		sb = new StringBuilder();
+		sb.append("UPDATE "); //$NON-NLS-1$
+		sb.append( queryDataTable );
+		sb.append(" SET wp_lastmodifiedbyname = ? WHERE wp_lastmodifiedby = ?"); //$NON-NLS-1$
+		QueryPlugIn.logSql(sb.toString());
+				
+		PreparedStatement lastmodified = c.prepareStatement(sb.toString());
+		int cnt = 0;
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())){
+			while (rs.next()) {
+				byte[] tmp = rs.getBytes(1);
+				if (tmp == null) continue;
+				UUID uuid = UuidUtils.byteToUUID(tmp);
+				String name = getEmployeeName(uuid, session);
+							
+				if (name != null) {
+					lastmodified.setString(1, name);
+					lastmodified.setBytes(2, UuidUtils.uuidToByte((UUID)uuid));
+					lastmodified.addBatch();
+					cnt++;
+					if (cnt >= 100){
+						lastmodified.executeBatch();
+						cnt = 0;
+					}
+				}
+			}
+			lastmodified.executeBatch();
+		}		
+		
 		//populating categories
 		progress.subTask(Messages.DerbyObservationEngine_Progress_CategoryData);
 		progress.split(6);
@@ -532,6 +569,8 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 		sql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid "); //$NON-NLS-1$
@@ -550,6 +589,8 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 		sql.append("wp_distance real,"); //$NON-NLS-1$
 		sql.append("wp_date timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
+		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
+		sql.append("wp_lastmodifiedby char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid char(16) for bit data"); //$NON-NLS-1$
@@ -577,6 +618,8 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 		it.setLocations(rs.getString("asset_location")); //$NON-NLS-1$
 		
 		it.setIncidentLength(rs.getInt("incident_length")); //$NON-NLS-1$
+		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
+		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		
 		byte[] t = rs.getBytes("ob_uuid"); //$NON-NLS-1$
 		if (t == null){

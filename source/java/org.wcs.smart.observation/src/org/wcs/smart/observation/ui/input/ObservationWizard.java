@@ -179,6 +179,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 				if (ob.getObserver() != null) {
 					ob.getObserver().getFamilyName();
 					ob.getObserver().getGivenName();
+					this.observer = ob.getObserver();
 				}
 			}
 			
@@ -484,6 +485,10 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 						session.saveOrUpdate(wo);
 						if (!wp.getObservations().contains(wo)) wp.getObservations().add(wo);
 					}
+				}
+				
+				for (WaypointObservation wo : wp.getObservations()) {
+					wo.setObserver(observer);
 				}
 				session.flush();
 				//commit changes

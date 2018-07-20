@@ -99,6 +99,9 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private HashMap<String, Object> missionProperties = new HashMap<String, Object>();
 	private HashMap<String, Object> suAttributes = new HashMap<String, Object>();
 	
+	private String lastModifiedBy;
+	private Date lastModified;
+	
 	private UUID observationUuid;
 	
 	private List<LineString> tracks;
@@ -115,6 +118,35 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 */
 	public UUID getObservationUuid(){
 		return this.observationUuid;
+	}
+	
+	/**
+	 * the waypoint last modified date
+	 * @param lastModified
+	 */
+	public void setLastModifiedDate(Date lastModified) {
+		this.lastModified = lastModified;
+	}
+	/**
+	 * 
+	 * @return the waypoint last modified date
+	 */
+	public Date getLastModifiedDate() {
+		return this.lastModified;
+	}
+	
+	/**
+	 * @param lastmodified employee uuid or null
+	 */
+	public void setLastModifiedBy(String lastModifiedBy){
+		this.lastModifiedBy = lastModifiedBy;
+	}
+	
+	/**
+	 * @return the last modified employee uuid or null
+	 */
+	public String getLastModifiedBy(){
+		return this.lastModifiedBy;
 	}
 	
 	/**

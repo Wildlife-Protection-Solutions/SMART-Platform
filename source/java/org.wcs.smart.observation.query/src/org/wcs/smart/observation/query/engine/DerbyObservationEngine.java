@@ -275,11 +275,12 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 	}
 	
 	private void populateTemporaryTableExtra(Connection c, Session session, IProgressMonitor monitor) throws SQLException {
-		SubMonitor progress = SubMonitor.convert(monitor, 35);
+		SubMonitor progress = SubMonitor.convert(monitor, 45);
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ob_observer","varchar(512)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"wp_lastmodifiedbyname","varchar(512)"}, //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		
 		for (int i = 0; i < columnsToAdd.length; i ++){
@@ -349,6 +350,44 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 			observerSt.executeBatch();
 		}
 		
+		//add last modified
+		progress.split(10);
+		progress.subTask(Messages.DerbyObservationEngine_Observers);
+		sql = new StringBuilder();
+		sql.append("SELECT DISTINCT wp_lastmodifiedby FROM "); //$NON-NLS-1$
+		sql.append(queryDataTable);
+		QueryPlugIn.logSql(sql.toString());
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("UPDATE "); //$NON-NLS-1$
+		sb.append( queryDataTable );
+		sb.append(" SET wp_lastmodifiedbyname = ? WHERE wp_lastmodifiedby = ?"); //$NON-NLS-1$
+		QueryPlugIn.logSql(sb.toString());
+		
+		PreparedStatement lastmodified = c.prepareStatement(sb.toString());
+		cnt = 0;
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())){
+			while (rs.next()) {
+				byte[] tmp = rs.getBytes(1);
+				if (tmp == null) continue;
+				UUID uuid = UuidUtils.byteToUUID(tmp);
+				String name = getEmployeeName(uuid, session);
+					
+				if (name != null) {
+					lastmodified.setString(1, name);
+					lastmodified.setBytes(2, UuidUtils.uuidToByte((UUID)uuid));
+					lastmodified.addBatch();
+					cnt++;
+					if (cnt >= 100){
+						lastmodified.executeBatch();
+						cnt = 0;
+					}
+				}
+			}
+			lastmodified.executeBatch();
+		}
+				
+				
 		//populating categories
 		progress.subTask(Messages.DerbyObservationEngine_Progress_CategoryData);
 		progress.split(10);
@@ -459,6 +498,8 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 		sql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid "); //$NON-NLS-1$
@@ -480,6 +521,8 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 		sql.append("wp_distance real,"); //$NON-NLS-1$
 		sql.append("wp_time timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
+		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
+		sql.append("wp_lastmodifiedby char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_observer_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid char(16) for bit data"); //$NON-NLS-1$
@@ -498,6 +541,8 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
 		it.setWpDateTime(rs.getTimestamp("wp_time")); //$NON-NLS-1$
+		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
+		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$

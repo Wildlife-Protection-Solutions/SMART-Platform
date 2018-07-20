@@ -133,6 +133,8 @@ public class Messages extends NLS {
 	public static String PatrolQueryEditorTableContent_QueryPropertiesLabel;
 	public static String PatrolQueryEditorTableContent_RunQueryLink;
 	public static String PatrolQueryLabelProvider_AgencyLabel;
+	public static String PatrolQueryLabelProvider_LastModified_ColumnName;
+	public static String PatrolQueryLabelProvider_LastModifiedBy_ColumnName;
 	public static String PatrolQueryLabelProvider_RankLabel;
 	public static String PatrolQueryLabelProvider_TotalActivePatrolHours;
 	public static String PatrolQueryMemoryResult_DeleteError;

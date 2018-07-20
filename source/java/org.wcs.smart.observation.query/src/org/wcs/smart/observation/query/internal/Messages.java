@@ -98,6 +98,8 @@ public class Messages extends NLS {
 	public static String DerbyGridEngine_Error_GridValueNotSupported;
 	public static String ObservationDropItemFactory_QueryItemNotSupported;
 	public static String ObservationGridQueryType_QueryName;
+	public static String ObservationQueryLabelProvider_LastModified_ColumnName;
+	public static String ObservationQueryLabelProvider_LastModifiedBy_ColumnName;
 	public static String ObservationQueryTemplateCloner_GridProgress;
 	public static String ObservationQueryTemplateCloner_IncidentProgress;
 	public static String ObservationQueryTemplateCloner_ObservationProgress;

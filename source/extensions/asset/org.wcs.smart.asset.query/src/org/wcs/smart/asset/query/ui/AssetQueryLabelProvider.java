@@ -55,6 +55,8 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 			case LOCATION: return Messages.AssetQueryLabelProvider_LocationsColumnName;
 			case STATION: return Messages.AssetQueryLabelProvider_StationColumnName;
 			case INCIDENT_LENGTH: return Messages.AssetQueryLabelProvider_IncidentLengthColumnName;
+			case WAYPOINT_LASTMODIFIED: return Messages.AssetQueryLabelProvider_LastModifiedColumnName;
+			case WAYPOINT_LASTMODIFIEDBY: return Messages.AssetQueryLabelProvider_LastModifiedByColumnName;
 			}
 		}
 		if (item instanceof AssetValueOption){
