@@ -41,6 +41,7 @@ import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -60,6 +61,7 @@ import org.wcs.smart.query.common.model.IUpdateableResultSet;
 import org.wcs.smart.query.common.ui.image.PagedImageQueryResults;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
@@ -274,22 +276,16 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 							}
 							break;
 						case WAYPOINT_DIRECTION:
-							if (value instanceof Double) {
-								float newValue = ((Double) value).floatValue();
-								if (NULL_COMPARATOR.compare(newValue, wp.getDirection()) != 0) {
-									change = true;
-									updateWaypointDirection(wp, newValue, s);
-								}
-							}
+							if (value == null && wp.getDirection() == null) break;
+							if (value != null && wp.getDirection() != null && ((Double)value).floatValue() == wp.getDirection()) break;
+							change = true;
+							updateWaypointDirection(wp, value == null ? null : ((Double)value).floatValue(), s);
 							break;
 						case WAYPOINT_DISTANCE:
-							if (value instanceof Double) {
-								float newValue = ((Double) value).floatValue();
-								if (NULL_COMPARATOR.compare(newValue, wp.getDistance()) != 0) {
-									change = true;
-									updateWaypointDistance(wp, newValue, s);
-								}
-							}
+							if (value == null && wp.getDistance() == null) break;
+							if (value != null && wp.getDistance() != null && ((Double)value).floatValue() == wp.getDistance()) break;
+							change = true;
+							updateWaypointDistance(wp, value == null ? null : ((Double)value).floatValue(), s);
 							break;
 						case WAYPOINT_ID:
 							if (value instanceof Integer) {
@@ -320,6 +316,11 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 						}
 					}
 				}
+				
+				if (change) {
+					s.flush();
+					updateLastModified(wp, s);
+				}
 				s.getTransaction().commit();
 			} catch (Exception ex) {
 				s.getTransaction().rollback();
@@ -337,6 +338,13 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		return false;
 	}
 	
+	protected void updateLastModified(Waypoint wp, Session s) {
+		NativeQuery<?> q = s.createNativeQuery("update " + queryTempTable + " SET wp_lastmodified = :lastmodified, wp_lastmodifiedbyname = :lastmodifiedby WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("lastmodified", wp.getLastModified()); //$NON-NLS-1$
+		q.setParameter("lastmodifiedby", SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee())); //$NON-NLS-1$
+		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
+		q.executeUpdate();
+	}
 	
 	private void updateWaypointPosition(Waypoint wp, double newX, double newY, Session session){
 		wp.setX(newX);
@@ -349,20 +357,20 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		q.executeUpdate();
 		
 	}
-	private void updateWaypointDistance(Waypoint wp, float newDistance, Session session){
+	private void updateWaypointDistance(Waypoint wp, Float newDistance, Session session){
 		wp.setDistance(newDistance);
 		
 		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_distance = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("id", newDistance); //$NON-NLS-1$
+		q.setParameter("id", newDistance, org.hibernate.type.FloatType.INSTANCE); //$NON-NLS-1$
 		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
-	private void updateWaypointDirection(Waypoint wp, float newDirection, Session session){
+	private void updateWaypointDirection(Waypoint wp, Float newDirection, Session session){
 		wp.setDirection(newDirection);
 		
 		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_direction = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("id", newDirection); //$NON-NLS-1$
+		q.setParameter("id", newDirection, org.hibernate.type.FloatType.INSTANCE); //$NON-NLS-1$
 		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();	
 	}

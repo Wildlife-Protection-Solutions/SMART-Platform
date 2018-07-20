@@ -49,7 +49,8 @@ import org.wcs.smart.query.ui.editor.IQueryEditor;
 public abstract class AbstractQueryColumnEditor extends EditingSupport {
 
 	private IntegerCellEditor integerCellEditor = null;
-	private DoubleCellEditor doubleCellEditor = null;
+	private DoubleCellEditor nullDoubleCellEditor = null;
+	private DoubleCellEditor notNullDoubleCellEditor = null;
 	private TextCellEditor textCellEdit = null;
 	private TimeCellEditor timeCellEditor = null;
 	private DateCellEditor dateCellEditor = null;;
@@ -117,11 +118,18 @@ public abstract class AbstractQueryColumnEditor extends EditingSupport {
 		return integerCellEditor;
 	}
 
-	protected CellEditor getDoubleCellEditor() {
-		if (doubleCellEditor == null) {
-			doubleCellEditor = CellEditorFactory.newDoubleCellEditor((Composite) getViewer().getControl());
+	protected CellEditor getDoubleCellEditor(boolean canNull) {
+		if (canNull) {
+			if (nullDoubleCellEditor == null) {
+				nullDoubleCellEditor = CellEditorFactory.newDoubleCellEditor((Composite) getViewer().getControl(), canNull);
+			}
+			return nullDoubleCellEditor;
+		}else {
+			if (notNullDoubleCellEditor == null) {
+				notNullDoubleCellEditor = CellEditorFactory.newDoubleCellEditor((Composite) getViewer().getControl(), canNull);
+			}
+			return notNullDoubleCellEditor;
 		}
-		return doubleCellEditor;
 	}
 
 	protected CellEditor getTextCellEditor() {

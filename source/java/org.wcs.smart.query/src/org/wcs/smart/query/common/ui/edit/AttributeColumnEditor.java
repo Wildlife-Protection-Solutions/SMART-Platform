@@ -62,7 +62,7 @@ public class AttributeColumnEditor extends AbstractQueryColumnEditor {
 		case LIST:
 			return getListCellEditor();
 		case NUMERIC:
-			return getDoubleCellEditor();
+			return getDoubleCellEditor(true);
 		case TEXT:
 			return getTextCellEditor();
 		case TREE:

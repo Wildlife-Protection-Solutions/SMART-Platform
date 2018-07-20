@@ -44,17 +44,17 @@ public class WaypointColumnEditor extends AbstractQueryColumnEditor {
 		case WAYPOINT_COMMENT:
 			return getTextCellEditor();
 		case WAYPOINT_DIRECTION:
-			return getDoubleCellEditor();
+			return getDoubleCellEditor(true);
 		case WAYPOINT_DISTANCE:
-			return getDoubleCellEditor();
+			return getDoubleCellEditor(true);
 		case WAYPOINT_ID:
 			return getIntegerCellEditor();
 		case WAYPOINT_TIME:
 			return getTimeCellEditor();
 		case WAYPOINT_X:
-			return getDoubleCellEditor();
+			return getDoubleCellEditor(false);
 		case WAYPOINT_Y:
-			return getDoubleCellEditor();
+			return getDoubleCellEditor(false);
 		default:
 			return null;
 		}

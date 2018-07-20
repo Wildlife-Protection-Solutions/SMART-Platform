@@ -467,7 +467,11 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 				}
 				break;
 			case NUMERIC:
-				if (newValue instanceof Double){
+				if (newValue == null && toUpdate.getNumberValue() == null) break;
+				if (newValue == null) {
+					toUpdate.setNumberValue(null);
+					updated = true;
+				}else if (newValue instanceof Double){
 					Double newDouble = (Double)newValue;
 					if (toUpdate.getNumberValue() != newDouble){
 						toUpdate.setNumberValue(newDouble);
@@ -562,6 +566,9 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 					queryUpdate.setParameter("uuid", observationUuid); //$NON-NLS-1$
 					queryUpdate.executeUpdate();
 				}
+				
+				s.flush();
+				updateLastModified(wp, s);
 				s.getTransaction().commit();
 				
 			}catch(Exception ex){
@@ -597,6 +604,7 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 					wp.getObservations().add(wo);
 					wo.setWaypoint(wp);
 					s.save(wo);
+					
 				}else{
 					wo = (WaypointObservation) s.get(WaypointObservation.class, newOb.getUuid());
 					if (wo == null) return false;
@@ -672,6 +680,10 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 					}
 				}
 				
+				
+				s.flush();
+				updateLastModified(wo.getWaypoint(), s);
+				
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();
@@ -685,6 +697,7 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 		Patrol p = null;
 		WaypointObservation wpo = null;
 		boolean change = false;
+		if (item.getObservationUuid() == null) return false;
 		
 		try(Session s = HibernateManager.openSession()){
 			s.getTransaction().begin();
@@ -700,6 +713,8 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 						change = updateAttribute(wpo, column.getAttributeId(), value, s);
 					}
 				}
+				s.flush();
+				updateLastModified(wpo.getWaypoint(), s);
 				s.getTransaction().commit();
 			} catch (Exception ex) {
 				s.getTransaction().rollback();

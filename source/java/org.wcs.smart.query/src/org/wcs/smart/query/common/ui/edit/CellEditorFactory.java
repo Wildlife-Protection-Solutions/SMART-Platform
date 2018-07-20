@@ -61,8 +61,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class CellEditorFactory {
 	
-	public static DoubleCellEditor newDoubleCellEditor(Composite parent) {
-		return new DoubleCellEditor(parent);
+	public static DoubleCellEditor newDoubleCellEditor(Composite parent, boolean canNull) {
+		return new DoubleCellEditor(parent, canNull);
 	}
 
 	public static IntegerCellEditor newIntegerCellEditor(Composite parent) {
