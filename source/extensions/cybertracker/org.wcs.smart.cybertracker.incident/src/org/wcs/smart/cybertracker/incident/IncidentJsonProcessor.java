@@ -25,6 +25,7 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -67,6 +68,9 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 
 	@Override
 	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
+		//for this build we don't process anything
+		if (true) return Collections.emptyList();
+		
 		newIncidents = new HashSet<>();
 		
 		

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.wcs.smart.cybertracker.incident.feature"
+      label="SMART Cybertracker Independent Incident Support"
+      version="6.1.0.qualifier"
+      provider-name="org.wcs.smart"
+      license-feature="org.wcs.smart.license.feature"
+      license-feature-version="6.1.0.qualifier">
+
+   <description>
+      Adds support for collecting Independent Incidents within a patrol or survey using Cybertracker enabled
+devices.
+   </description>
+
+   <copyright>
+      Copyright (c): 2012, 2013 Wildlife Conservation Society
+   </copyright>
+
+   <requires>
+      <import feature="org.wcs.smart.cybertracker.feature" version="6.1.0.qualifier"/>
+   </requires>
+
+   <plugin
+         id="org.wcs.smart.cybertracker.incident"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
