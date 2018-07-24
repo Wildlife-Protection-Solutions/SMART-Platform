@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.cybertracker.incident.feature"
-      label="SMART Cybertracker Independent Incident Support"
+      label="Core SMART Cybertracker Independent Incident Support"
       version="6.1.0.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
