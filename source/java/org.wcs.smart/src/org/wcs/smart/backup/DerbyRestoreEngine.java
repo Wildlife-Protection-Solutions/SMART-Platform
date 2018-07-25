@@ -72,7 +72,7 @@ public class DerbyRestoreEngine {
 	 * <p>Prompts the user as required.</p>
 	 * 
 	 * <p>A backup can be restored if:</p>
-	 * <li> there are no conservation areas in the database (empty database)</li>
+	 * <li> there are no conservation areas (except ccaa) in the database (empty database)</li>
 	 * <li>the user enters a username/password that is an admin user in one of the 
 	 * conservation areas in the database.</li>
 	 * 
@@ -81,7 +81,7 @@ public class DerbyRestoreEngine {
 	 */
 	public static boolean validateUserRestore(Shell currentShell) {
 		// a backup can be restored if:
-		// 1. there are no conservation areas
+		// 1. there are no conservation areas (except ccaa)
 		// 2. the user is an admin user in at least one conservation area (we
 		// don't care which one).
 
@@ -92,7 +92,7 @@ public class DerbyRestoreEngine {
 			CriteriaQuery<Long> cq = cb.createQuery(Long.class);
 			Root<ConservationArea> root = cq.from(ConservationArea.class);
 			cq.select(cb.count(root));
-			cq.where(cb.equal(root.get("uuid"), ConservationArea.MULTIPLE_CA)); //$NON-NLS-1$
+			cq.where(cb.notEqual(root.get("uuid"), ConservationArea.MULTIPLE_CA)); //$NON-NLS-1$
 			Long cnt = session.createQuery(cq).getSingleResult();
 			
 			if (cnt == 0) {
