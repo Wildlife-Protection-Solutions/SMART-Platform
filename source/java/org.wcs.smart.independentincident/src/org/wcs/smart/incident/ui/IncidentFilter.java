@@ -171,7 +171,7 @@ public class IncidentFilter {
 			str.append(")"); //$NON-NLS-1$
 		}
 		
-		str.append("ORDER BY i.dateTime desc"); //$NON-NLS-1$
+		str.append("ORDER BY i.dateTime desc, i.id"); //$NON-NLS-1$
 		
 		Query<?> query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		query.setParameter("source", IndepedentIncidentSource.KEY); //$NON-NLS-1$
