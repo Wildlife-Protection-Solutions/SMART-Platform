@@ -75,8 +75,6 @@ public class CyberTrackerStartupJob extends Job {
 		return Status.OK_STATUS;
 	}
 
-	
-	
 	private void checkFolderAndRegistry(List<ConservationArea> caList) {
 		if (caList == null)
 			return;
