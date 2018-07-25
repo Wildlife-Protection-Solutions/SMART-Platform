@@ -141,6 +141,18 @@
             allPopups="true"
             locationURI="popup:org.wcs.smart.observation.ui.incidientView">
          <command
+               commandId="org.wcs.smart.incident.open"
+               style="push">
+         </command>
+         <command
+               commandId="org.wcs.smart.incident.new"
+               style="push">
+         </command>
+         <separator
+               name="org.wcs.smart.independentincident.separator1"
+               visible="true">
+         </separator>
+         <command
                commandId="org.wcs.smart.incident.delete"
                mnemonic="%delete.command.mnemomic"
                style="push"
@@ -239,11 +251,11 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.incident.new"
-            name="%new.command.name">
+            name="%command.newincident.name">
       </command>
       <command
             id="org.wcs.smart.incident.delete"
-            name="%dekete.command.name">
+            name="%command.deleteincident.name">
       </command>
       <command
             id="org.wcs.smart.independentincident.filter"
@@ -256,6 +268,10 @@
       <command
             id="org.wcs.smart.independentincident.import"
             name="%import.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.incident.open"
+            name="%command.openincident.name">
       </command>
    </extension>
    <extension
@@ -344,6 +360,28 @@
                   property="org.wcs.smart.caSingle">
             </test>
          </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.incident.ui.OpenIncidentHandler$OpenIncidentHandlerWrapper"
+            commandId="org.wcs.smart.incident.open">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="or">
+                  <instanceof
+                        value="org.wcs.smart.incident.ui.IncidentEditorInput">
+                  </instanceof>
+               </iterate>
+            </with>
+         </enabledWhen>
       </handler>
    </extension>
    <extension

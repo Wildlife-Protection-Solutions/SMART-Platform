@@ -21,13 +21,19 @@
  */
 package org.wcs.smart.incident.ui;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -37,27 +43,56 @@ import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
 /**
- * Edit incident handler
+ * Open incident handler
  * @author Emily
  *
  */
 public class OpenIncidentHandler {
 
 	public static final String UUID_PARAM = "incidentUuid"; //$NON-NLS-1$
+	
+	public void openIncident(@Optional @Named(UUID_PARAM) UUID incidentUuid, MWindow activeWindow){
+		openIncident(incidentUuid, null, activeWindow);
+	}
+	
 	@Execute
 	public void openIncident(@Optional @Named(UUID_PARAM) UUID incidentUuid,
-			MWindow activeWindow){
-		if (incidentUuid == null) return;
+			ESelectionService selectionService, MWindow activeWindow){
+		
+		List<UUID> incidents = new ArrayList<>();
+	
+		if (incidentUuid == null) {
+			if (selectionService == null) return;
+			if (!(selectionService.getSelection() instanceof IStructuredSelection)) return;
+			for (Iterator<?> iterator = ((IStructuredSelection)selectionService.getSelection()).iterator(); iterator.hasNext();) {
+				Object type = (Object) iterator.next();
+				if (type instanceof UUID) {
+					incidents.add((UUID)type);
+				}else if (type instanceof IncidentEditorInput) {
+					incidents.add(((IncidentEditorInput)type).getUuid());
+				}	
+			}
+		}else {
+			incidents.add(incidentUuid);
+		}
 		
 		//get the context here as this is not pure e4
 		(new ShowFieldDataPerspective()).execute(IndIncidentListView.ID, activeWindow);
 		
-		try {
-			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-			IWorkbenchPage page = window.getActivePage();
-			page.openEditor(new IncidentEditorInput(incidentUuid), IncidentEditor.ID);
-		} catch (PartInitException e) {
-			IncidentPlugIn.displayLog(Messages.OpenIncidentHandler_IncidentOpenError + e.getLocalizedMessage(), e);
+		for (UUID iUuid : incidents) {
+			try {
+				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				IWorkbenchPage page = window.getActivePage();
+				page.openEditor(new IncidentEditorInput(iUuid), IncidentEditor.ID);
+			} catch (PartInitException e) {
+				IncidentPlugIn.displayLog(Messages.OpenIncidentHandler_IncidentOpenError + e.getLocalizedMessage(), e);
+			}
+		}
+	}
+	
+	public static class OpenIncidentHandlerWrapper extends DIHandler<OpenIncidentHandler>{
+		public OpenIncidentHandlerWrapper(){
+			super(OpenIncidentHandler.class);
 		}
 	}
 }
