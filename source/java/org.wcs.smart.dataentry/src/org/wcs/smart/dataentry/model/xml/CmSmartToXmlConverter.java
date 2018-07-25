@@ -23,6 +23,7 @@ package org.wcs.smart.dataentry.model.xml;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -131,13 +132,19 @@ public class CmSmartToXmlConverter {
 	private static void processCmAttributeConfigs(ConfigurableModel cm,
 			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
 			HashMap<String, Language> llookup, Session session, IProgressMonitor monitor) {
-		if(cm.getUuid() == null) return;
-		
-		List<CmAttributeConfig> configs = QueryFactory.buildQuery(session, CmAttributeConfig.class, "model", cm).list(); //$NON-NLS-1$
+		Collection<CmAttributeConfig> configs = Collections.emptyList();
+		if (cm.getUuid() == null) {
+			//if there is no uuid; then we just use what is in the cm 
+			configs = cm.getDefaultConfigs().values();
+		}else {
+			configs = QueryFactory.buildQuery(session, CmAttributeConfig.class, "model", cm).list(); //$NON-NLS-1$
+		}
 		for (CmAttributeConfig config : configs) {
 			CmAttributeConfigType xmlConfig = new CmAttributeConfigType();
 			setNames(xmlConfig.getName(), config.getNames(), null, llookup);
-			xmlConfig.setId(config.getUuid().toString());
+			if (config.getUuid() != null) {
+				xmlConfig.setId(config.getUuid().toString());
+			}
 			xmlConfig.setIsDefault(config.isDefault());
 			if (config.getDisplayMode() != null) {
 				xmlConfig.setDisplayMode(config.getDisplayMode().name());
@@ -176,7 +183,9 @@ public class CmSmartToXmlConverter {
 				xmlNode.setDisplayMode(cmNode.getDisplayMode().name());
 			}
 			xmlNode.setImageFile(getImageFileRef(cmNode));
-			xmlNode.setId(cmNode.getUuid().toString()); //this will allow to reference this item in extradata
+			if (cmNode.getUuid() != null) {
+				xmlNode.setId(cmNode.getUuid().toString()); //this will allow to reference this item in extradata
+			}
 			processCmTreeNodes(cmNode.getChildren(), xmlNode.getChildren(), llookup, monitor);
 			xmlList.add(xmlNode);
 		}
@@ -197,7 +206,9 @@ public class CmSmartToXmlConverter {
 				xmlNode.setDmUuid(toString(cmNode.getListItem().getUuid()));
 			}
 			xmlNode.setImageFile(getImageFileRef(cmNode));
-			xmlNode.setId(cmNode.getUuid().toString()); //this will allow to reference this item in extradata
+			if (cmNode.getUuid() != null) {
+				xmlNode.setId(cmNode.getUuid().toString()); //this will allow to reference this item in extradata
+			}
 			xmlList.add(xmlNode);
 		}
 	}
