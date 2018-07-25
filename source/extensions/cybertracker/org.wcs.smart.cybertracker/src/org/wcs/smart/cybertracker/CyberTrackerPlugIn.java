@@ -43,7 +43,8 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 
 	public static final String DB_VERSION_3_0 = "3.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_4_0 = "4.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_4_0; //current active version
+	public static final String DB_VERSION_5_0 = "5.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_5_0; //current active version
 	
 	//image registry key for cybertracker dialog image
 	public static final String CT_WIZARD_BANNER = "org.wcs.smart.cybertracker.wizban"; //$NON-NLS-1$

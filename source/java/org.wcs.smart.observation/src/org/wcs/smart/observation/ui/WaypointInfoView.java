@@ -301,27 +301,26 @@ public class WaypointInfoView {
 					if (showImages && lcurrentWp != null && lcurrentWp.getAttachments() != null && lcurrentWp.getAttachments().size() > 1){
 						toolkit.createLabel(compThumbnails, Messages.WaypointInfoView_LoadingThumbnails); 
 					}
-					
-					if (!showImages) {
-						createHiddenLabels();						
-					}
-					
-					createLastModifiedLabel(infoSection.getBody(), lcurrentWp);
+
+					createHiddenLabels();
 					
 					infoSection.getBody().pack();
 					infoSection.getBody().layout();
 					infoSection.reflow(true);
+					
+					createLastModifiedLabel(infoSection.getBody(), lcurrentWp);
+					infoSection.getBody().layout();
+					
 					lblWaypointId.getParent().layout();
 					
 					
-
-				}	
+				}
 			});
 			
 			
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			
-
+			
 				
 			if (!showImages) return Status.OK_STATUS;
 			//load thumbnails
@@ -335,7 +334,7 @@ public class WaypointInfoView {
 			}
 			
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-			if (thumbnails.size() > 0 || obsThumbs.size() > 0){
+			
 				//update thumbnails
 				infoSection.getDisplay().asyncExec(new Runnable(){
 					@Override
@@ -381,7 +380,7 @@ public class WaypointInfoView {
 								
 								infoSection.getBody().layout(true);
 								
-								int width = compThumbnails.getSize().x - infoSection.getVerticalBar().getSize().x;
+								int width = compThumbnails.getSize().x - infoSection.getVerticalBar().getSize().x-5;
 								int cols = (int)Math.floor(width / 100.0);
 								compThumbnails.setLayout(new GridLayout(cols, false));
 								for (ThumbnailComposite c : obsThumbs){
@@ -393,7 +392,6 @@ public class WaypointInfoView {
 								infoSection.reflow(true);
 							}
 						};
-						createHiddenLabels();
 						
 						compThumbnails.addListener(SWT.Resize, resize);
 						compThumbnails.layout(true);
@@ -406,7 +404,7 @@ public class WaypointInfoView {
 						
 					}
 				});
-			}
+			
 			return Status.OK_STATUS;
 		}
 		
@@ -427,15 +425,36 @@ public class WaypointInfoView {
 		
 		private void createLastModifiedLabel(Composite parent, Waypoint wp) {
 			String data = null;
-			int width = infoSection.getBounds().width;
+			int width = infoSection.getBounds().width-30;
 			if (wp.getLastModifiedBy() != null) {
 				data = MessageFormat.format(Messages.WaypointInfoView_LastUpdated1, SmartLabelProvider.getShortLabel(wp.getLastModifiedBy()), DateFormat.getDateTimeInstance().format(wp.getLastModified()));
 			}else {
 				data = MessageFormat.format(Messages.WaypointInfoView_LastUpdated2, DateFormat.getDateTimeInstance().format(wp.getLastModified()));
 			}
 			Label l = toolkit.createLabel(parent, data, SWT.WRAP);
-			l.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
+			l.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, false));
 			((GridData)l.getLayoutData()).widthHint = width;
+			FontData fd = l.getFont().getFontData()[0];
+			fd.setStyle(SWT.ITALIC);
+			Font ff = new Font(parent.getDisplay(), fd);
+			
+			l.setFont(ff);
+			l.setForeground(parent.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
+			
+			Listener resizeListener = e->{
+				((GridData)l.getLayoutData()).widthHint = infoSection.getBounds().width-30;	
+				infoSection.reflow(true);
+				infoSection.getBody().layout();
+			};
+			
+
+			l.addListener(SWT.Dispose, e->{
+				ff.dispose();
+				infoSection.removeListener(SWT.Resize,  resizeListener);
+			});
+			
+			infoSection.addListener(SWT.Resize, resizeListener);
+			
 		}
 		
 	};

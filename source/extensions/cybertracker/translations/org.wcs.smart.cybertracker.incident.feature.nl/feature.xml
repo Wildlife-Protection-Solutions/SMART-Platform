@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.wcs.smart.cybertracker.patrol.feature.nl"
-      label="SMART Patrol CyberTracker Language Pack"
-      version="6.0.0"
+      id="org.wcs.smart.cybertracker.incident.feature.nl"
+      label="SMART Cybertracker Independent Incident Language Pack"
+      version="6.1.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
       license-feature-version="6.1.0.qualifier">
 
+
    <description>
-      Translations for the Cybertracker patrol plugin.
+      Translations for the Cybertracker incident plugin.
    </description>
 
    <copyright>
@@ -16,19 +17,10 @@
    </copyright>
 
    <plugin
-         id="org.wcs.smart.cybertracker.patrol.nl"
+         id="org.wcs.smart.cybertracker.incident.nl"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.cybertracker.nl"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
          unpack="false"/>
 
 </feature>

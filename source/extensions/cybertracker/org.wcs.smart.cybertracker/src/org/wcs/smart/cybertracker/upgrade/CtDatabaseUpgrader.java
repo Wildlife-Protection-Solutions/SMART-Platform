@@ -78,7 +78,27 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_3_0)) {
 			CtDatabaseUpgrader30To40 upgrader30To40 = new CtDatabaseUpgrader30To40();
 			upgrader30To40.upgrade(session);
+			update40to50(session);
 		}
+		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_4_0)) {
+			update40to50(session);
+		}
+	}
+	
+	private static void update40to50(Session session) {
+		String[] sql = new String[] {
+				"CREATE TABLE smart.ct_incident_link (uuid char(16) for bit data not null, ct_group_id char(16) for bit data not null, wp_uuid char(16) for bit data not null, last_cnt integer not null, primary key (uuid))", //$NON-NLS-1$		
+				"ALTER TABLE smart.ct_incident_link ADD CONSTRAINT ct_incident_link_wp_uuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
+				"GRANT ALL PRIVILEGES ON smart.ct_incident_link to data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_incident_link to manager", //$NON-NLS-1$
+		};
+		
+		for (String s : sql) {
+			session.createNativeQuery(s).executeUpdate();
+		}
+		
+		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_5_0, session);
 	}
 
 }

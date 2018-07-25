@@ -35,6 +35,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
@@ -98,9 +99,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 						((Waypoint)source).equals(incident) ) ||
 						(source instanceof IncidentEditorInput &&
 								(((IncidentEditorInput)source).getUuid().equals(incident.getUuid())))) {
-					
-					reloadIncident();
-					
+					Display.getDefault().asyncExec(()->reloadIncident());
 				}
 						
 			}else if (eventType == IncidentEventManager.INCIDENT_DELETED){

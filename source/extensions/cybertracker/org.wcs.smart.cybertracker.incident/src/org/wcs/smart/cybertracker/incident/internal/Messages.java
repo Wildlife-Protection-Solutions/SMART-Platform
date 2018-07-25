@@ -4,6 +4,14 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.incident.internal.messages"; //$NON-NLS-1$
+	public static String IncidentJsonProcessor_CanceledMsg;
+	public static String IncidentJsonProcessor_CreatedLabel;
+	public static String IncidentJsonProcessor_ModifiedLabel;
+	public static String IncidentJsonProcessor_NotificationError;
+	public static String IncidentJsonProcessor_NotificationError2;
+	public static String IncidentJsonProcessor_ParseError;
+	public static String IncidentJsonProcessor_WaringsTitle;
+	public static String IncidentJsonProcessor_WarningsMessage;
 	public static String IncidentPackageContribution_CmModelLabel;
 	public static String IncidentPackageContribution_CollectIncidentsOp;
 	public static String IncidentPackageContribution_ConfigurationGroupLablel;

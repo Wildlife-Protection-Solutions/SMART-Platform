@@ -298,6 +298,32 @@ public class JsonCtParser {
 		return new Coordinate(x,y);
 		
 	}
+	
+	/**
+	 * Returns the value of the SMART_ObsCounter field or null
+	 * if field does not exist
+	 * @return
+	 */
+	public Integer parseObservationCounter(JSONObject sighting) throws Exception{
+		//Validate counter
+		if (!sighting.containsKey(ScreensUtil.RESULT_OBSERVATION_COUNTER)){
+			//no observation counter; we cannot process this
+			return null;
+		}
+		Integer observationCounter = null;
+		Object o = sighting.get(ScreensUtil.RESULT_OBSERVATION_COUNTER);
+		if (o instanceof Integer) {
+			observationCounter = (Integer)o;
+		}else if (o instanceof Double) {
+			observationCounter = ((Double)o).intValue();
+		}else if (o instanceof Number) {
+			observationCounter = ((Number)o).intValue();
+		}else {
+			throw new Exception("Invalid value for observation counter: " + o.toString()); //$NON-NLS-1$
+		}
+		return observationCounter;
+	}
+	
 	/**
 	 * Creates a waypoint from the JSON feature object
 	 * 

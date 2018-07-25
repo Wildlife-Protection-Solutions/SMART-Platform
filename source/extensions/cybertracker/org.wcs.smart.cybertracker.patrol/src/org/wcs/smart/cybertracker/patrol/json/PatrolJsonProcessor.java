@@ -137,24 +137,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					continue;
 				}
 				
-				//Validate counter
-				if (!sighting.containsKey(ScreensUtil.RESULT_OBSERVATION_COUNTER)){
-					//no observation counter; we cannot process this
-					continue;
-				}
-				Integer observationCounter = null;
-				Object o = sighting.get(ScreensUtil.RESULT_OBSERVATION_COUNTER);
-				if (o instanceof Integer) {
-					observationCounter = (Integer)o;
-				}else if (o instanceof Double) {
-					observationCounter = ((Double)o).intValue();
-				}else if (o instanceof Number) {
-					observationCounter = ((Number)o).intValue();
-				}else {
-					throw new Exception("Invalid value for observation counter: " + o.toString()); //$NON-NLS-1$
-				}
-				
-				
+				Integer observationCounter = parser.parseObservationCounter(sighting);
+				if (observationCounter == null) continue;
+								
 				//read cybertracker patrol id and convert to uuid
 				String ctPatrolId = (String) sighting.get(ScreensUtil.RESULT_ID);
 				UUID ctPatrolUuid = UuidUtils.stringToUuid(ctPatrolId);

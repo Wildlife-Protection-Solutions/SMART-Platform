@@ -79,6 +79,8 @@ public class ScreensUtil {
 	public static final String RESULT_PAUSED = COMMON_PREFIX + "Paused"; //$NON-NLS-1$
 	
 	public static final String RESULT_OBSERVATION_COUNTER = COMMON_PREFIX + "ObsCounter"; //$NON-NLS-1$
+	
+	public static final String RESULT_SIGHTINGGROUPID = COMMON_PREFIX + "SightingGroupId"; //$NON-NLS-1$
 
 	protected ScreensObjectFactory screensFactory;
 	protected CyberTrackerUtil ctUtil;

@@ -202,6 +202,11 @@
             class="org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile"
             supportsCcaa="false">
       </class>
+      <class
+            ca_property=".waypoint.conservationArea"
+            class="org.wcs.smart.cybertracker.model.CtIncidentLink"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
