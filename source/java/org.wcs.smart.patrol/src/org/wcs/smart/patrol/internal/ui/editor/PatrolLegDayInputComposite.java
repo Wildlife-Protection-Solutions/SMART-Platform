@@ -983,8 +983,14 @@ public class PatrolLegDayInputComposite {
 			//updated in cell editor
 			needSave = false;
 		} else if (column == OtColumn.COMMENT) {
-			if (waypoint.getComment().equals((String)value)) return; //no change;
-			waypoint.setComment((String)value);
+			
+			if (waypoint.getComment() == null && (value == null || ((String)value).trim().isEmpty())) return;
+			if (waypoint.getComment() != null && waypoint.getComment().equals((String)value)) return; //no change;
+			if (((String)value).trim().isEmpty()) {
+				waypoint.setComment(null);
+			}else {
+				waypoint.setComment((String)value);
+			}
 			needSave = true;
 		} else if (column == OtColumn.ATTACHMENTS) {
 			if (value != null){
