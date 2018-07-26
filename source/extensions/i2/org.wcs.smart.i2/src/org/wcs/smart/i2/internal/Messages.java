@@ -1411,6 +1411,7 @@ public class Messages extends NLS {
 	public static String RelationshipGraphComposite_LayoutAlogorithm_Sugiyama;
 	public static String RelationshipGraphComposite_Layout;
 	public static String RelationshipGraphComposite_LayoutAlogorithm_Tree;
+	public static String RelationshipGraphComposite_Settings;
 	public static String RelationshipGraphComposite_Style;
 	public static String RelationshipGraphContentProvider_LoadDataError;
 	public static String RelationshipGraphEditor_Name;

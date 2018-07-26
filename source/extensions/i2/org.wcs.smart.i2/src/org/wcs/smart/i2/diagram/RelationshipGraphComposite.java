@@ -57,7 +57,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Section;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLabelProvider;
@@ -190,9 +193,20 @@ public class RelationshipGraphComposite extends Composite {
 	}
 
 	private void createContent(Composite parent) {
-		Composite topCmp = toolkit.createComposite(parent, SWT.NONE);
+		Section topSection = toolkit.createSection(parent, Section.TWISTIE | Section.TITLE_BAR | Section.EXPANDED);
+		topSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		topSection.addExpansionListener(new ExpansionAdapter() {
+			@Override
+			public void expansionStateChanged(ExpansionEvent e) {
+				topSection.getParent().layout(true, true);
+			}
+		});
+		topSection.setText(Messages.RelationshipGraphComposite_Settings);
+		
+		Composite topCmp = toolkit.createComposite(topSection, SWT.NONE);
 		topCmp.setLayout(new GridLayout(2, false));
 		topCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		topSection.setClient(topCmp);
 
 		cmpFilter = new RelationshipGraphFilterComposite(topCmp);
 		
