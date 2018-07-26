@@ -804,6 +804,7 @@ public class Messages extends NLS {
 	public static String FolderCreateEditDialog_Title;
 	public static String FolderTreeDropListener_SaveJob_Error;
 	public static String FolderTreeDropListener_SaveJob_Title;
+	public static String FontSelector_Button_Select;
 	public static String GpsBabelPreferencePage_CouldNotUpdate;
 	public static String GpsBabelPreferencePage_FileNotFound;
 	public static String GpsBabelPreferencePage_ProgramLocLabel;
