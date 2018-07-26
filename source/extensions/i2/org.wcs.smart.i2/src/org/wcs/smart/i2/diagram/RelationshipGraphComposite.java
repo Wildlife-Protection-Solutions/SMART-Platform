@@ -21,20 +21,32 @@
  */
 package org.wcs.smart.i2.diagram;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.gef.layout.ILayoutAlgorithm;
+import org.eclipse.gef.layout.algorithms.HorizontalShiftAlgorithm;
 import org.eclipse.gef.layout.algorithms.RadialLayoutAlgorithm;
+import org.eclipse.gef.layout.algorithms.SpaceTreeLayoutAlgorithm;
+import org.eclipse.gef.layout.algorithms.SpringLayoutAlgorithm;
+import org.eclipse.gef.layout.algorithms.SugiyamaLayoutAlgorithm;
+import org.eclipse.gef.layout.algorithms.TreeLayoutAlgorithm;
 import org.eclipse.gef.zest.fx.jface.ZestContentViewer;
 import org.eclipse.gef.zest.fx.jface.ZestFxJFaceModule;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -65,17 +77,20 @@ import org.wcs.smart.ui.properties.DialogConstants;
  *
  */
 public class RelationshipGraphComposite extends Composite {
-
+	
 	private FormToolkit toolkit;
 
 	private RelationshipGraphFilterComposite cmpFilter;
 	private ComboViewer cmbStyle;
+	private ComboViewer cmbLayout;
 	private ZestContentViewer graphViewer;
 	private RelationshipGraphLabelProvider graphLabelProvider;
 	private RelationshipGraphContentProvider graphContentProvider;
 	
 	private IntelEntity[] roots;
 
+	private ILayoutAlgorithm defaultLayoutAlogorithm;
+	private Map<ILayoutAlgorithm, String> layoutAlgorithms;
 
 	private EventHandler styleHandler = new EventHandler() {
 		@Override
@@ -154,12 +169,24 @@ public class RelationshipGraphComposite extends Composite {
 
 	public RelationshipGraphComposite(Composite parent, FormToolkit toolkit) {
 		super(parent, SWT.NONE);
+		initLayoutAlgorithms();
 		this.toolkit = toolkit;
 		GridLayout layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = layout.verticalSpacing = 0;
 		this.setLayout(layout);
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		createContent(this);
+	}
+
+	private void initLayoutAlgorithms() {
+		defaultLayoutAlogorithm = new RadialLayoutAlgorithm();
+		layoutAlgorithms = new HashMap<>();
+		layoutAlgorithms.put(defaultLayoutAlogorithm, Messages.RelationshipGraphComposite_LayoutAlogorithm_Radial);
+		layoutAlgorithms.put(new SpringLayoutAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_Spring);
+		layoutAlgorithms.put(new TreeLayoutAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_Tree);
+		layoutAlgorithms.put(new SugiyamaLayoutAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_Sugiyama);
+		layoutAlgorithms.put(new SpaceTreeLayoutAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_SpaceTree);
+		layoutAlgorithms.put(new HorizontalShiftAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_HorizontalShift);
 	}
 
 	private void createContent(Composite parent) {
@@ -169,14 +196,14 @@ public class RelationshipGraphComposite extends Composite {
 
 		cmpFilter = new RelationshipGraphFilterComposite(topCmp);
 		
-		Composite styleCmp = toolkit.createComposite(topCmp, SWT.NONE);
-		styleCmp.setLayout(new GridLayout(2, false));
-		styleCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)styleCmp.getLayoutData()).minimumWidth = 200; //NOTE: need this to fix layout issues caused by CheckBoxDropDown located in RelationshipGraphFilterComposite
+		Composite rightCmp = toolkit.createComposite(topCmp, SWT.NONE);
+		rightCmp.setLayout(new GridLayout(2, false));
+		rightCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)rightCmp.getLayoutData()).minimumWidth = 200; //NOTE: need this to fix layout issues caused by CheckBoxDropDown located in RelationshipGraphFilterComposite
 		
-		toolkit.createLabel(styleCmp, Messages.RelationshipGraphComposite_Style);
+		toolkit.createLabel(rightCmp, Messages.RelationshipGraphComposite_Style);
 
-		cmbStyle = new ComboViewer(styleCmp, SWT.READ_ONLY | SWT.BORDER);
+		cmbStyle = new ComboViewer(rightCmp, SWT.READ_ONLY | SWT.BORDER);
 		cmbStyle.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbStyle.setContentProvider(ArrayContentProvider.getInstance());
 		cmbStyle.setLabelProvider(new RelationshipDiagramStyleLabelProvider());
@@ -194,6 +221,32 @@ public class RelationshipGraphComposite extends Composite {
 			}
 		});
 
+		toolkit.createLabel(rightCmp, Messages.RelationshipGraphComposite_Layout);
+
+		cmbLayout = new ComboViewer(rightCmp, SWT.READ_ONLY | SWT.BORDER);
+		cmbLayout.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbLayout.setContentProvider(ArrayContentProvider.getInstance());
+		cmbLayout.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				return layoutAlgorithms.get(element);
+			}
+		});
+		List<Entry<ILayoutAlgorithm, String>> algEntries = new ArrayList<>(layoutAlgorithms.entrySet());
+		Collections.sort(algEntries, (e1, e2) -> e1.getValue().compareTo(e2.getValue()));
+		cmbLayout.setInput(algEntries.stream().map(e -> e.getKey()).toArray());
+		cmbLayout.setSelection(new StructuredSelection(defaultLayoutAlogorithm));
+		cmbLayout.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				IStructuredSelection selection = (IStructuredSelection) cmbLayout.getStructuredSelection();
+				if (selection != null && !selection.isEmpty()) {
+					graphViewer.setLayoutAlgorithm((ILayoutAlgorithm)selection.getFirstElement());
+					graphViewer.refresh();
+				}
+			}
+		});
+		
 		Composite mainCmp = new Composite(parent, SWT.NONE);
 		StackLayout stackLayout = new StackLayout();
 		stackLayout.marginHeight = stackLayout.marginWidth = 0;
@@ -215,7 +268,7 @@ public class RelationshipGraphComposite extends Composite {
 		graphViewer.createControl(graphCmp, SWT.NONE);
 		graphViewer.setContentProvider(graphContentProvider);
 		graphViewer.setLabelProvider(graphLabelProvider);
-		graphViewer.setLayoutAlgorithm(new RadialLayoutAlgorithm());
+		graphViewer.setLayoutAlgorithm(defaultLayoutAlogorithm);
 
 		cmpFilter.addFilterChangeListener(new IRelationshipGraphFilterChangeListener() {
 			@Override
