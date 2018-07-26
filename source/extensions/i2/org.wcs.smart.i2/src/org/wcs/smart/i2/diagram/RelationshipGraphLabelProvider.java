@@ -27,9 +27,13 @@ import java.util.Map;
 import org.eclipse.gef.zest.fx.ZestProperties;
 import org.eclipse.gef.zest.fx.jface.IGraphAttributesProvider;
 import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
@@ -51,7 +55,7 @@ import org.wcs.smart.ui.Thumbnail;
  * @since 6.0.0
  *
  */
-public class RelationshipGraphLabelProvider extends LabelProvider implements IGraphAttributesProvider, IColorProvider {
+public class RelationshipGraphLabelProvider extends LabelProvider implements IGraphAttributesProvider, IColorProvider, IFontProvider {
 	
 	private RelationshipGraphContentProvider graphContentProvider;
 	private RelationshipDiagramStyle style;
@@ -152,13 +156,21 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 	@Override
 	public Map<String, Object> getEdgeAttributes(Object sourceNode, Object targetNode) {
 		Map<String, Object> attributes = new HashMap<>();
-		attributes.put(ZestProperties.TARGET_DECORATION__E, new javafx.scene.shape.Polygon(0, 0, 10, 3, 10, -3));
 		IntelEntityRelationship r = getRelationship(sourceNode, targetNode);
 		if (r != null && style != null) {
 			RelationshipDiagramEdgeStyleOptions options = getEdgeOptions(r);
+
+			switch (options.getStyle()) {
+			case LINE: break;
+			case ARROW:
+				attributes.put(ZestProperties.TARGET_DECORATION__E, new javafx.scene.shape.Polygon(0, 0, 10, 3, 10, -3));
+				break;
+			}
+			
 			String color = options.getColorAsString();
 			attributes.put(ZestProperties.TARGET_DECORATION_CSS_STYLE__E, "-fx-stroke: "+color+"; -fx-fill: "+color+";"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			attributes.put(ZestProperties.CURVE_CSS_STYLE__E, "-fx-stroke: "+color+";"); //$NON-NLS-1$ //$NON-NLS-2$
+			
 			if (options.isShowLabel()) {
 				attributes.put(ZestProperties.LABEL__NE, r.getRelationshipType().getName());
 			}
@@ -189,6 +201,15 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 	public Color getBackground(Object element) {
 		if (style != null) {
 			return getNodeOptions(element).getBackgroudColor();
+		}
+		return null;
+	}
+
+	@Override
+	public Font getFont(Object element) {
+		if (style != null) {
+			FontData fd = getNodeOptions(element).getFontData();
+			return fd != null ? new Font(Display.getCurrent(), fd) : null;
 		}
 		return null;
 	}

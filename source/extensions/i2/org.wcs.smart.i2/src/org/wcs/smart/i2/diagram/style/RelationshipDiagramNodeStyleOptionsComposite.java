@@ -32,12 +32,15 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.common.control.ColorSelector;
 import org.wcs.smart.common.control.ColorSelector.IColorSelectionChangeListener;
+import org.wcs.smart.common.control.FontSelector;
+import org.wcs.smart.common.control.FontSelector.IFontSelectionChangeListener;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions.ImageSizeOption;
@@ -50,13 +53,14 @@ import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions.ImageSizeOptio
  *
  */
 public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
-	
+
 	private RelationshipDiagramNodeStyleOptions options;
-	
+
 	private ComboViewer cmbImageSize;
 	private ColorSelector csBackgroundColor;
 	private ColorSelector csForegroundColor;
-	
+	private FontSelector fontSelector;
+
 	private boolean fireListeners = true;
 	private List<INodeStyleOptionsChangeListener> listeners = new ArrayList<>();
 
@@ -67,22 +71,23 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		createContent(this);
 	}
-	
+
 	public void setSourceOptions(RelationshipDiagramNodeStyleOptions options) {
 		this.options = options;
 		if (options != null) {
 			fireListeners = false;
 			cmbImageSize.setSelection(new StructuredSelection(options.getImageSize()));
 			csBackgroundColor.setColor(options.getBackgroudColor());
+			fontSelector.setFontData(options.getFontData());
 			csForegroundColor.setColor(options.getForegroundColor());
 			fireListeners = true;
 		}
 	}
-	
+
 	private void createContent(Composite parent) {
 		Label lblImageSize = new Label(parent, SWT.NONE);
 		lblImageSize.setText(Messages.RelationshipDiagramNodeStyleOptionsComposite_ImageSize);
-		
+
 		cmbImageSize = new ComboViewer(this, SWT.READ_ONLY | SWT.BORDER);
 		cmbImageSize.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		cmbImageSize.setContentProvider(ArrayContentProvider.getInstance());
@@ -101,7 +106,7 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 
 		Label lblBackgroundColor = new Label(parent, SWT.NONE);
 		lblBackgroundColor.setText(Messages.RelationshipDiagramNodeStyleOptionsComposite_BackgroundColor);
-		
+
 		csBackgroundColor = new ColorSelector(parent);
 		csBackgroundColor.addColorSelectionChangeListener(new IColorSelectionChangeListener() {
 			@Override
@@ -113,9 +118,23 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 			}
 		});
 
+		Label lblFont = new Label(parent, SWT.NONE);
+		lblFont.setText(Messages.RelationshipDiagramNodeStyleOptionsComposite_Font);
+		
+		fontSelector = new FontSelector(parent);
+		fontSelector.addFontSelectionChangeListener(new IFontSelectionChangeListener() {
+			@Override
+			public void fontSelectionChanged(FontData fontData) {
+				if (options != null && fireListeners) {
+					options.setFontData(fontData);
+					fireOptionsChanged(options);
+				}
+			}
+		});
+
 		Label lblForegroundColor = new Label(parent, SWT.NONE);
 		lblForegroundColor.setText(Messages.RelationshipDiagramNodeStyleOptionsComposite_ForegroundColor);
-		
+
 		csForegroundColor = new ColorSelector(parent);
 		csForegroundColor.addColorSelectionChangeListener(new IColorSelectionChangeListener() {
 			@Override
@@ -126,16 +145,17 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 				}
 			}
 		});
+
 	}
 
-	public void addOptionsChangeListener(INodeStyleOptionsChangeListener listener) {
-		listeners.add(listener);
-	}
-	
-	private void fireOptionsChanged(RelationshipDiagramNodeStyleOptions ops) {
-		for (INodeStyleOptionsChangeListener l : listeners) {
-			l.optionsChanged(ops);
+		public void addOptionsChangeListener(INodeStyleOptionsChangeListener listener) {
+			listeners.add(listener);
 		}
-	}
 
-}
+		private void fireOptionsChanged(RelationshipDiagramNodeStyleOptions ops) {
+			for (INodeStyleOptionsChangeListener l : listeners) {
+				l.optionsChanged(ops);
+			}
+		}
+
+	}

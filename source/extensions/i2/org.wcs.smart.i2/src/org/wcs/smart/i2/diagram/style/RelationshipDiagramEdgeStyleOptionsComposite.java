@@ -24,6 +24,12 @@ package org.wcs.smart.i2.diagram.style;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -37,6 +43,7 @@ import org.wcs.smart.common.control.ColorSelector;
 import org.wcs.smart.common.control.ColorSelector.IColorSelectionChangeListener;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
+import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions.EdgeStyle;
 
 /**
  * Composite containing controls to manage edge style options for relationship diagram.
@@ -50,6 +57,7 @@ public class RelationshipDiagramEdgeStyleOptionsComposite extends Composite {
 	private RelationshipDiagramEdgeStyleOptions options;
 
 	private ColorSelector csEdgeColor;
+	private ComboViewer cbEdgeStyle;
 	private Button btnShowLabel;
 
 	private boolean fireListeners = true;
@@ -68,6 +76,7 @@ public class RelationshipDiagramEdgeStyleOptionsComposite extends Composite {
 		if (options != null) {
 			fireListeners = false;
 			csEdgeColor.setColor(options.getColor());
+			cbEdgeStyle.setSelection(new StructuredSelection(options.getStyle()));
 			btnShowLabel.setSelection(options.isShowLabel());
 			fireListeners = true;
 		}
@@ -87,7 +96,27 @@ public class RelationshipDiagramEdgeStyleOptionsComposite extends Composite {
 				}
 			}
 		});
-
+		
+		Label lblEdgeStyle = new Label(parent, SWT.NONE);
+		lblEdgeStyle.setText(Messages.RelationshipDiagramEdgeStyleOptionsComposite_Style);
+		
+		cbEdgeStyle = new ComboViewer(parent, SWT.READ_ONLY);
+		cbEdgeStyle.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		cbEdgeStyle.setContentProvider(ArrayContentProvider.getInstance());
+ 		cbEdgeStyle.setInput(EdgeStyle.values());
+		cbEdgeStyle.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				if (options != null && fireListeners) {
+					IStructuredSelection sel = (IStructuredSelection) cbEdgeStyle.getSelection();
+					if (sel != null && !sel.isEmpty()) {
+						options.setStyle((EdgeStyle)sel.getFirstElement());
+						fireOptionsChanged(options);
+					}
+				}
+			}
+		});
+		
 		Label lblShowLabel = new Label(parent, SWT.NONE);
 		lblShowLabel.setText(Messages.RelationshipDiagramEdgeStyleOptionsComposite_ShowLabel);
 		

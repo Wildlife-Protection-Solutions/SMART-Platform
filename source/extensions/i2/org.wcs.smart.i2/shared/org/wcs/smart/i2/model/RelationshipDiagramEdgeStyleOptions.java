@@ -22,9 +22,11 @@
 package org.wcs.smart.i2.model;
 
 import org.eclipse.swt.graphics.Color;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.util.ColorUtil;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
@@ -38,6 +40,23 @@ public class RelationshipDiagramEdgeStyleOptions {
 
 	private static final String SHOW_LABEL_KEY = "showLabel"; //$NON-NLS-1$
 	private static final String COLOR_KEY = "color"; //$NON-NLS-1$
+	private static final String STYLE_KEY = "style"; //$NON-NLS-1$
+	
+	public enum EdgeStyle {
+		LINE(Messages.RelationshipDiagramEdgeStyleOptions_EdgeStyle_Line),
+		ARROW(Messages.RelationshipDiagramEdgeStyleOptions_EdgeStyle_Arrow);
+		
+		private String guiName;
+
+		private EdgeStyle(String guiName) {
+			this.guiName = guiName;
+		}
+		
+		@Override
+		public String toString() {
+			return guiName;
+		}
+	}
 	
 	private JsonObject json;
 
@@ -75,4 +94,13 @@ public class RelationshipDiagramEdgeStyleOptions {
 		json.addProperty(SHOW_LABEL_KEY, showLabel);
 	}
 	
+	public EdgeStyle getStyle() {
+		JsonElement e = json.get(STYLE_KEY);
+		return e != null ? EdgeStyle.valueOf(e.getAsString()) : EdgeStyle.values()[0];
+	}
+	
+	public void setStyle(EdgeStyle style) {
+		json.addProperty(STYLE_KEY, style.name());
+	}
+
 }

@@ -1363,8 +1363,11 @@ public class Messages extends NLS {
 	public static String RelationshipDiagramDefaultStyleComposite_EdgeGroup_Title;
 	public static String RelationshipDiagramDefaultStyleComposite_NodeGroup_Title;
 	public static String RelationshipDiagramEdgeStyleComposite_Override;
+	public static String RelationshipDiagramEdgeStyleOptions_EdgeStyle_Arrow;
+	public static String RelationshipDiagramEdgeStyleOptions_EdgeStyle_Line;
 	public static String RelationshipDiagramEdgeStyleOptionsComposite_Color;
 	public static String RelationshipDiagramEdgeStyleOptionsComposite_ShowLabel;
+	public static String RelationshipDiagramEdgeStyleOptionsComposite_Style;
 	public static String RelationshipDiagramManager_DefaultStyleSaveError;
 	public static String RelationshipDiagramManager_DeleteError;
 	public static String RelationshipDiagramManager_SaveError;
@@ -1372,6 +1375,7 @@ public class Messages extends NLS {
 	public static String RelationshipDiagramManager_Task_Save;
 	public static String RelationshipDiagramNodeStyleComposite_Override;
 	public static String RelationshipDiagramNodeStyleOptionsComposite_BackgroundColor;
+	public static String RelationshipDiagramNodeStyleOptionsComposite_Font;
 	public static String RelationshipDiagramNodeStyleOptionsComposite_ForegroundColor;
 	public static String RelationshipDiagramNodeStyleOptionsComposite_ImageSize;
 	public static String RelationshipDiagramStyleEditDialog_Button_Translate;

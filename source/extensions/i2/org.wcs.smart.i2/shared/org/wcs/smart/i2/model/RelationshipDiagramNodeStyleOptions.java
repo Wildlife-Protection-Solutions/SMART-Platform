@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.i2.model;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.FontData;
 import org.wcs.smart.util.ColorUtil;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
@@ -39,6 +42,7 @@ public class RelationshipDiagramNodeStyleOptions {
 	private static final String FG_COLOR_KEY = "foregroundColor"; //$NON-NLS-1$
 	private static final String BG_COLOR_KEY = "backgroundColor"; //$NON-NLS-1$
 	private static final String IMAGE_SIZE_KEY = "imageSize"; //$NON-NLS-1$
+	private static final String FONT_DATA_KEY = "fontData"; //$NON-NLS-1$
 	
 	/**
 	 * The supported image sizes.
@@ -63,6 +67,8 @@ public class RelationshipDiagramNodeStyleOptions {
 			return size;
 		}
 	}
+	
+	private static final FontData DEFAULT_FONT_DATA = new FontData("Segoe UI", 10, SWT.NORMAL); //$NON-NLS-1$
 
 	private JsonObject json;
 
@@ -112,4 +118,17 @@ public class RelationshipDiagramNodeStyleOptions {
 		json.addProperty(FG_COLOR_KEY, ColorUtil.color2HexStr(color));
 	}
 	
+	public FontData getFontData() {
+		JsonElement el = json.get(FONT_DATA_KEY);
+		if (el != null) {
+			String fdStr = el.getAsString();
+			FontData fd = new FontData(fdStr);
+			return fd;
+		}
+		return DEFAULT_FONT_DATA;
+	}
+	public void setFontData(FontData fontData) {
+		json.addProperty(FONT_DATA_KEY, fontData.toString());
+	}
+
 }
