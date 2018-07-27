@@ -57,6 +57,8 @@ import org.wcs.smart.ui.Thumbnail;
  */
 public class RelationshipGraphLabelProvider extends LabelProvider implements IGraphAttributesProvider, IColorProvider, IFontProvider {
 	
+	private static final int TOOLTIP_TRUNCATE_LENGTH = 100;
+	
 	private RelationshipGraphContentProvider graphContentProvider;
 	private RelationshipDiagramStyle style;
 	
@@ -147,6 +149,10 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 					text = attributeLabelProvider.getText(v);
 					break;
 				}
+			}
+			//truncate long values
+			if (text.length() > TOOLTIP_TRUNCATE_LENGTH + 5) {
+				text = text.substring(0, TOOLTIP_TRUNCATE_LENGTH) + "..."; //$NON-NLS-1$
 			}
 			sb.append(text);
 		}
