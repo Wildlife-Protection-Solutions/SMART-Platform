@@ -1385,6 +1385,7 @@ public class Messages extends NLS {
 	public static String RelationshipDiagramStyleEditDialog_ErrorDialog_Title;
 	public static String RelationshipDiagramStyleEditDialog_LoadingStyle_Error;
 	public static String RelationshipDiagramStyleEditDialog_LoadingStyle_Task;
+	public static String RelationshipDiagramStyleEditDialog_RootNode_Info;
 	public static String RelationshipDiagramStyleEditDialog_StyleName;
 	public static String RelationshipDiagramStyleEditDialog_StyleName_MaxLength_Error;
 	public static String RelationshipDiagramStyleEditDialog_StyleName_Tooltip;

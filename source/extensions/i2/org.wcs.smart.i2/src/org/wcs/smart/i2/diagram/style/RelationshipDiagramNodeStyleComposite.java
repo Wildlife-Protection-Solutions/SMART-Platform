@@ -72,7 +72,7 @@ public class RelationshipDiagramNodeStyleComposite extends Composite {
 		setSourceOptions(newOptions);
 	}
 
-	private void createContent(Composite parent) {
+	protected void createContent(Composite parent) {
 		btnOverride = new Button(parent, SWT.CHECK);
 		btnOverride.setText(Messages.RelationshipDiagramNodeStyleComposite_Override);
 		btnOverride.addSelectionListener(new SelectionListener() {

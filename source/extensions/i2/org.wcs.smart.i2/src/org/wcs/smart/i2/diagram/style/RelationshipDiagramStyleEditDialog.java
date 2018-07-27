@@ -271,7 +271,21 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 			}
 		});
 		
-		nodeRootComposite = new RelationshipDiagramNodeStyleComposite(infoInnerPanel);
+		nodeRootComposite = new RelationshipDiagramNodeStyleComposite(infoInnerPanel) {
+			@Override
+			protected void createContent(Composite parent) {
+				Label lbl = new Label(parent, SWT.WRAP);
+				lbl.setText(Messages.RelationshipDiagramStyleEditDialog_RootNode_Info);
+				GridData layoutData = new GridData(SWT.FILL, SWT.FILL, false, false);
+				layoutData.widthHint = 100;
+				lbl.setLayoutData(layoutData);
+				
+				Label separator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
+			    separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				
+				super.createContent(parent);
+			}
+		};
 		nodeRootComposite.addOptionsChangeListener(new INodeStyleOptionsChangeListener() {
 			@Override
 			public void optionsChanged(RelationshipDiagramNodeStyleOptions options) {
