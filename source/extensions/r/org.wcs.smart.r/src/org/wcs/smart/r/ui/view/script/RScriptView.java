@@ -84,6 +84,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class RScriptView {
 
 	public static final String ID = "org.wcs.smart.r.view.rscripts"; //$NON-NLS-1$
@@ -211,10 +212,8 @@ public class RScriptView {
 		itemViewer.getControl().setMenu(mnu);
 		
 		mnu.addMenuListener(new MenuListener() {
-			
 			@Override
 			public void menuShown(MenuEvent e) {
-				// TODO Auto-generated method stub
 				for (MenuItem mi : mnu.getItems()) mi.dispose();
 				
 				Object x = itemViewer.getStructuredSelection().getFirstElement();

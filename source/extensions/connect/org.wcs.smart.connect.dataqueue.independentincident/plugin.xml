@@ -6,9 +6,5 @@
       <processor
             class="org.wcs.smart.connect.dataqueue.incident.IncidentProcessor">
       </processor>
-      <datatype
-            key="INCIDENT_XML">
-      </datatype>
    </extension>
-
 </plugin>

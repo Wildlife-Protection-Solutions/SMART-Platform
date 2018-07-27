@@ -45,7 +45,7 @@ public enum ProcessorManager {
 	
 	// static list of available processors
 	private List<IItemProcessor> processors = null;
-	private List<String> datatypes = null;
+	
 	//list of progress listeners
 	private List<IDataQueueProgressListener> listeners = new ArrayList<IDataQueueProgressListener>();
 	
@@ -56,21 +56,17 @@ public enum ProcessorManager {
 		
 		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
 		ArrayList<IItemProcessor> items = new ArrayList<IItemProcessor>();
-		ArrayList<String> types = new ArrayList<>();
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IItemProcessor.EXTENSION_ID);
 		for (IConfigurationElement e : config) {
 			try{
 				if (e.getName().equals("processor")) { //$NON-NLS-1$
 					items.add((IItemProcessor)e.createExecutableExtension("class")); //$NON-NLS-1$
-				}else if (e.getName().equals("datatype")) { //$NON-NLS-1$
-					types.add(e.getAttribute("key")); //$NON-NLS-1$
 				}
 			}catch (Exception ex){
 				ConnectDataQueuePlugin.log(ex.getMessage(), ex);
 			}
 		}
 		processors = items;
-		datatypes = types;
 		return processors;
 	}
 	

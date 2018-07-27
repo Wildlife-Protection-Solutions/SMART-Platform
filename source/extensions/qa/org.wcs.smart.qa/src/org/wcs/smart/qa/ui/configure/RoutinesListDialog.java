@@ -496,6 +496,10 @@ public class RoutinesListDialog extends TitleAreaDialog {
 				IQaRoutineType type = r.getRoutineType();
 				if (type == null) return Messages.RoutinesListDialog_Undefined;
 				return type.getName(Locale.getDefault());
+			case DESC:
+				return r.getDescription();
+			case PARAMETERS:
+				return ""; //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 	}

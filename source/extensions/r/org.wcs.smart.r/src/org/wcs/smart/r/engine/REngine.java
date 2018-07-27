@@ -105,8 +105,8 @@ public class REngine {
 	private Job executeJob = new Job(Messages.REngine_JobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			List<Path> queryFiles = new ArrayList<>();
 			try {
-				List<Path> queryFiles = new ArrayList<>();
 				for (QueryConfiguration query : queryConfigs) {
 					writeString(MessageFormat.format(Messages.REngine_QueryName, query.getQuery().getName()));
 					writeString(MessageFormat.format(Messages.REngine_DateFilter, query.getDateFilter().asString()));
@@ -141,7 +141,7 @@ public class REngine {
 					queryFiles.add(p);
 					HashMap<String, Object> parameters = new HashMap<>();
 					
-					//TODO: delete temporary query files after run
+					//we don't delete these until smart is re-run; that way users can use them for debugging if desired
 					query.getQueryExporter().export(query.getQuery(), results, p.toFile(), parameters, new NullProgressMonitor());
 					writeString(Messages.REngine_ExportFile + p.toString());
 					writeString("-----------------------------------------------------------------------------------------------"); //$NON-NLS-1$
@@ -184,6 +184,8 @@ public class REngine {
 					RPlugIn.log(e.getMessage(), e);
 				}
 			}
+			
+
 			return Status.OK_STATUS;
 		}
 		

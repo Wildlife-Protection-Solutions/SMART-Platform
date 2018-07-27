@@ -41,11 +41,12 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 	}
 
 	@Override
-	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		//TODO: clone the conservation area configurations you want 
+	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {		
 		//copied into the new conservation area; engine provides
 		//details about old and new conservation area mappings between
 		//old object uuids and new object uuid for some objects (data model objects etc)
+
+		//we do not clone anything for the r plugin at this time
 	}
 
 }

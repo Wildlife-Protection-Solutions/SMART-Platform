@@ -20,7 +20,6 @@
          <sequence>
             <choice>
                <element ref="processor" minOccurs="1" maxOccurs="unbounded"/>
-               <element ref="datatype" minOccurs="0" maxOccurs="unbounded"/>
             </choice>
          </sequence>
          <attribute name="point" type="string" use="required">
@@ -60,18 +59,6 @@
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.connect.dataqueue.process.IItemProcessor"/>
                </appinfo>
-            </annotation>
-         </attribute>
-      </complexType>
-   </element>
-
-   <element name="datatype">
-      <complexType>
-         <attribute name="key" type="string" use="required">
-            <annotation>
-               <documentation>
-                  The data type key. This value will be stored in the database for the data queue processor items.
-               </documentation>
             </annotation>
          </attribute>
       </complexType>

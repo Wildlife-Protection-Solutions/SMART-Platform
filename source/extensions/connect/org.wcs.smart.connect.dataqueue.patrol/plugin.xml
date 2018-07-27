@@ -6,9 +6,6 @@
       <processor
             class="org.wcs.smart.connect.dataqueue.patrol.PatrolDataQueueProcessor">
       </processor>
-      <datatype
-            key="PATROL_XML">
-      </datatype>
    </extension>
    <extension
          point="org.wcs.smart.connect.dataqueue.processorOption">

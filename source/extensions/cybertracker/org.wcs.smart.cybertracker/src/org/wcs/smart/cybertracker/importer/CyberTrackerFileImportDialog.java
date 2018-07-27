@@ -123,7 +123,7 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 		});
 
 		Link lnkOp = new Link(opComp, SWT.NONE);
-		lnkOp.setText("<a>" + "Open Archive Folder..." + "</a>");
+		lnkOp.setText("<a>" + Messages.CyberTrackerFileImportDialog_OpenArchiveFolderOp + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		lnkOp.addListener(SWT.Selection,e->{
 			Desktop diapi = Desktop.getDesktop();
 			try {
