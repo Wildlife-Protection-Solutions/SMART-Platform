@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.model;
 
 import org.eclipse.swt.graphics.Color;
-import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.util.ColorUtil;
 
 import com.google.gson.Gson;
@@ -43,19 +42,8 @@ public class RelationshipDiagramEdgeStyleOptions {
 	private static final String STYLE_KEY = "style"; //$NON-NLS-1$
 	
 	public enum EdgeStyle {
-		LINE(Messages.RelationshipDiagramEdgeStyleOptions_EdgeStyle_Line),
-		ARROW(Messages.RelationshipDiagramEdgeStyleOptions_EdgeStyle_Arrow);
-		
-		private String guiName;
-
-		private EdgeStyle(String guiName) {
-			this.guiName = guiName;
-		}
-		
-		@Override
-		public String toString() {
-			return guiName;
-		}
+		LINE,
+		ARROW;
 	}
 	
 	private JsonObject json;

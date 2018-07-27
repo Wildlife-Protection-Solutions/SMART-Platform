@@ -28,6 +28,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -41,6 +42,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.common.control.ColorSelector;
 import org.wcs.smart.common.control.ColorSelector.IColorSelectionChangeListener;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions.EdgeStyle;
@@ -104,6 +106,12 @@ public class RelationshipDiagramEdgeStyleOptionsComposite extends Composite {
 		cbEdgeStyle.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		cbEdgeStyle.setContentProvider(ArrayContentProvider.getInstance());
  		cbEdgeStyle.setInput(EdgeStyle.values());
+ 		cbEdgeStyle.setLabelProvider(new LabelProvider() {
+ 			@Override
+ 			public String getText(Object element) {
+ 				return IntelligenceLabelProviderImpl.getEdgeStyleName((EdgeStyle)element);
+ 			}
+ 		});
 		cbEdgeStyle.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

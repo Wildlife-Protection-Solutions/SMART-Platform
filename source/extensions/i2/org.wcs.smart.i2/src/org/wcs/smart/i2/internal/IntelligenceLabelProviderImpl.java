@@ -54,14 +54,15 @@ import org.wcs.smart.i2.birt.record.location.RecordLocationDatasetResultSetMetad
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
+import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
 import org.wcs.smart.i2.query.export.CsvRecordQueryExporter;
 import org.wcs.smart.i2.query.export.ShpRecordQueryExporter;
-import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
+import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.ui.SmartLabelProvider;
 
@@ -74,6 +75,15 @@ import org.wcs.smart.ui.SmartLabelProvider;
 public class IntelligenceLabelProviderImpl implements
 		IIntelligenceLabelProvider {
 
+	public static String getEdgeStyleName(RelationshipDiagramEdgeStyleOptions.EdgeStyle style) {
+		switch(style) {
+			case ARROW: return Messages.RelationshipDiagramEdgeStyleOptions_EdgeStyle_Arrow;
+			case LINE: return Messages.RelationshipDiagramEdgeStyleOptions_EdgeStyle_Line;
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
+	
 	public String getDataSourceProductName(String dataSetType, Locale l){
 		if (dataSetType.equals(RecordDataset.DATASET_TYPE)){
 			return Messages.IntelligenceLabelProviderImpl_RecordDatasetName;
