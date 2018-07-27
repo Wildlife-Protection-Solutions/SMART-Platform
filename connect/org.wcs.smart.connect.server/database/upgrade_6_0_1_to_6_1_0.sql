@@ -14,8 +14,7 @@ CREATE TABLE smart.ct_incident_link (
 );		
 
 ALTER TABLE smart.ct_incident_link ADD FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
-				
--- CONNECT ACCOUNT -- 
+				 
 CREATE OR REPLACE FUNCTION connect.trg_ct_incident_link() RETURNS trigger AS $$
 	DECLARE
 	ROW RECORD;
