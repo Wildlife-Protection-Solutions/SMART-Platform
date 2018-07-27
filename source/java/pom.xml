@@ -415,8 +415,8 @@
 				<module>../extensions/qa/translations/org.wcs.smart.qa.nl</module>
 				<module>../extensions/qa/translations/org.wcs.smart.qa.patrol.nl</module>
 
-				
-							
+				<module>../extensions/r/translations/org.wcs.smart.r.nl</module>
+				<module>../extensions/r/translations/org.wcs.smart.r.feature.nl</module>		
 			</modules>
 		</profile>
 	</profiles>
