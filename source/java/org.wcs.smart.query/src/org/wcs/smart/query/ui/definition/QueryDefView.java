@@ -95,9 +95,20 @@ public class QueryDefView  {
 				if (qpart.getQueryProxy() != current){
 					setQuery(qpart.getQueryProxy());
 					return;
+				}else {
+					return;
 				}
 			}
-			setQuery(null);
+			
+			//clear definition area if displaying a non-query in the editor area
+			if (part.getCurSharedRef() != null &&  E3Utils.isEditorArea(part.getCurSharedRef().getParent()) ) {
+				setQuery(null);
+				return;
+			}
+			if (part.getParent() != null && E3Utils.isEditorArea(part.getParent())) {
+				setQuery(null);
+				return;
+			}
 		}
 		
 		@Override
@@ -223,7 +234,7 @@ public class QueryDefView  {
 			}else{
 				//update the query
 				getSourceProvider().setQueryValid(true, null);
-				current.getQueryType().updateQueryDefinition(current.getQuery(), currentPanel.getDefinitionPanels());				
+				current.getQueryType().updateQueryDefinition(current.getQuery(), currentPanel.getDefinitionPanels());
 			}
 		}
 	}
