@@ -75,7 +75,9 @@ public class Upgrader601To610 implements IDatabaseUpgrader {
 				"ALTER TABLE smart.waypoint ADD COLUMN last_modified timestamp", //$NON-NLS-1$
 				"UPDATE smart.waypoint SET last_modified = datetime", //$NON-NLS-1$
 				"ALTER TABLE smart.waypoint ALTER COLUMN last_modified SET NOT NULL", //$NON-NLS-1$
-				"ALTER TABLE smart.waypoint ADD COLUMN last_modified_by char(16) for bit data" //$NON-NLS-1$
+				"ALTER TABLE smart.waypoint ADD COLUMN last_modified_by char(16) for bit data", //$NON-NLS-1$
+				"GRANT EXECUTE ON FUNCTION smart.trackintersects TO ANALYST", //$NON-NLS-1$
+				"GRANT EXECUTE ON FUNCTION smart.trackintersects TO MANAGER", //$NON-NLS-1$
 		};
 
 		for (String s : sql) {

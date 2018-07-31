@@ -44,7 +44,7 @@ public class Mergei18nNew {
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa",
-//		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
 		
 		
     };
@@ -60,7 +60,7 @@ public class Mergei18nNew {
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa\\translations",
-//		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
     };
 	
     public static final String[] LANGUAGES =  new String[] {"es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
@@ -168,9 +168,9 @@ public class Mergei18nNew {
         for (Entry<String, String> e : source.entrySet()){
             if (!target.containsKey(e.getKey())){
                 //System.out.println("add: " + e.getKey());
-                target.put(e.getKey(), e.getValue());
+//                target.put(e.getKey(), e.getValue());
                 //target.put(e.getKey(), "**NEW**" + e.getValue());
-                changes = true;
+//                changes = true;
             }
         }
 
@@ -188,9 +188,9 @@ public class Mergei18nNew {
             changes = true;
         }
 
-//        if (changes){
-//            writeFile(targetFile, target);
-//        }
+        if (changes){
+            writeFile(targetFile, target);
+        }
     }
 
 
