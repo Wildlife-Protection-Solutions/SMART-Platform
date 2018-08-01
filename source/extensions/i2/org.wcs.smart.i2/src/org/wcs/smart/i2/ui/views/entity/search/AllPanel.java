@@ -334,6 +334,7 @@ public class AllPanel extends Composite {
 	 */
 	//must be called from display thread
 	private void createTable(EntityTableData data, AllEntityContentProvider provider) {
+		if (tableComposite.isDisposed()) return;
 		for (Control c : tableComposite.getChildren()) c.dispose();
 
 		

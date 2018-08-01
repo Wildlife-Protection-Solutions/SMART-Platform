@@ -529,6 +529,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				Display.getDefault().syncExec(()->{
 					//clear viewer and refresh
 					loaded.clear();
+					if (data == null) return;
 					for (int i = 0; i < data.currentCount; i ++) viewer.clear(i);
 					data.currentCount = icount;
 					viewer.setItemCount(icount);
