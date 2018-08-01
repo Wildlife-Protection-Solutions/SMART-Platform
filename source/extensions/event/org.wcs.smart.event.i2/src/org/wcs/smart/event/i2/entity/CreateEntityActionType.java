@@ -160,6 +160,9 @@ public class CreateEntityActionType implements IActionType {
 				}
 			}
 				
+			if (!newEntity.getEntityAttachments().isEmpty()) {
+				newEntity.setPrimaryAttachment(newEntity.getEntityAttachments().get(0).getAttachment());
+			}
 			//map entity attributes using mappings specified 
 			newEntity.setAttributes(new ArrayList<>());
 			for (EntityMapping em : mappings) {
