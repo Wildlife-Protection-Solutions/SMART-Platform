@@ -108,16 +108,23 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)parent.getLayout()).marginHeight = 0;
 		
+		if (boldFont == null){
+			FontData boldFontData= parent.getFont().getFontData()[0];
+			boldFontData.setStyle(SWT.BOLD); 
+			boldFont = new Font(parent.getDisplay(), boldFontData);
+		}
+		
 		if (getWizardLocal().getTrackObserver()){
 			Composite observerComp = new Composite(parent, SWT.NONE);
-			observerComp.setLayout(new GridLayout(2, false));
+			observerComp.setLayout(new GridLayout());
 			((GridLayout)observerComp.getLayout()).marginHeight = 0;
 			observerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			Label l = new Label(observerComp, SWT.NONE);
 			l.setText(Messages.ObservationSummaryWizardPage_ObserverLabel);
 			l.setFont(boldFont);
-		
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)l.getLayoutData()).verticalIndent = 5;
 		
 			employeeViewer = new ComboViewer(
 				new Combo(observerComp,SWT.FLAT | SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY));
@@ -180,6 +187,8 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			final Composite entryComp = new Composite(main, SWT.NONE);
 			entryComp.setLayout(new GridLayout(1, false));
 			entryComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)entryComp.getLayoutData()).verticalIndent = 5;
+			
 			((GridLayout)entryComp.getLayout()).marginWidth = 0;
 			((GridLayout)entryComp.getLayout()).marginHeight = 0;
 			
@@ -192,11 +201,6 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 //			entryComp.pack();
 		
 			Label lbl = new Label(lblComp, SWT.WRAP);
-			if (boldFont == null){
-				FontData boldFontData= lbl.getFont().getFontData()[0];
-				boldFontData.setStyle(SWT.BOLD); 
-				boldFont = new Font(lbl.getDisplay(), boldFontData);
-			}
 			lbl.setFont(boldFont);
 			lbl.setText(SmartUtils.formatStringForLabel(c.getFullCategoryName()));
 			lbl.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -309,7 +313,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			}); 
 				
 			
-			new Label(entryComp, SWT.NONE);
+//			new Label(entryComp, SWT.NONE);
 		}
 		
 		setTitle(Messages.ObservationSummaryWizardPage_PageTitle);
