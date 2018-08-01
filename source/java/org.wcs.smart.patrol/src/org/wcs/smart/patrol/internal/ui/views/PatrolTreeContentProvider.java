@@ -197,10 +197,10 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 					}
 					monthEl.getChildren().add(new TreeElement(p, month));
 				}
-				result.sort((a,b)->{
+				result.sort((a,b)->{					
 					Integer y1 = Integer.valueOf(((DateGroupBy)a.getObject()).getYear());
 					Integer y2 = Integer.valueOf(((DateGroupBy)b.getObject()).getYear());
-					if (y1 != y2) return -1 * y1.compareTo(y2);
+					if (y1.intValue() != y2.intValue()) return -1 * y1.compareTo(y2);
 					
 					Integer m1 = Integer.valueOf(((DateGroupBy)a.getObject()).getMonth());
 					Integer m2 = Integer.valueOf(((DateGroupBy)b.getObject()).getMonth());
