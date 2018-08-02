@@ -198,6 +198,11 @@ public class RelationshipGraphFilterComposite extends Composite {
 		relationshipTypeJob.schedule();
 	}
 
+	void setFilterDepth(int depth) {
+		filterData.setDepth(depth);
+		cmbDepth.setSelection(new StructuredSelection(depth));
+	}
+	
 	@Override
 	public void dispose() {
 		super.dispose();

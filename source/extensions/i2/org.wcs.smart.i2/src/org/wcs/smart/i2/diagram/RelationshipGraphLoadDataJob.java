@@ -90,6 +90,7 @@ public abstract class RelationshipGraphLoadDataJob extends Job {
 		
 		try (Session s = HibernateManager.openSession()) {
 			for (IntelEntity e : roots) {
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 				IntelEntity tmp = (IntelEntity) s.get(IntelEntity.class, e.getUuid());
 				if (tmp == null) continue;	//not found; probably deleted
 				entities.add(tmp);
@@ -97,11 +98,13 @@ public abstract class RelationshipGraphLoadDataJob extends Job {
 
 			rootEntities = new ArrayList<>(entities);
 			for (IntelEntity e : rootEntities) {
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 				extractRelations(s, entities, relationships, e, fd, fd.getDepth()-1);
 			}
 			
 			//load required lazy data
 			for (IntelEntity e : entities) {
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 				e.getEntityType().getAttributes().size();
 				for (IntelEntityTypeAttribute a : e.getEntityType().getAttributes()) {
 					a.getAttribute().getNames().size();
@@ -130,6 +133,7 @@ public abstract class RelationshipGraphLoadDataJob extends Job {
 			}
 		}
 		
+		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		GraphData graphData = new GraphData(rootEntities, entities, relationships);
 		processData(graphData);
 

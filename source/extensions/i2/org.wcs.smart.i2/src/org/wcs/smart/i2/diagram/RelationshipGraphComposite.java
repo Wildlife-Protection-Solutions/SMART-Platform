@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -63,6 +64,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLabelProvider;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleListLoadJob;
 import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLoadJob;
@@ -71,6 +74,7 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Composite that contains controls related to relationship graph visualization.
@@ -81,6 +85,10 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class RelationshipGraphComposite extends Composite {
 	
+	private static final String PREFERENCE_DEPTH_KEY            = "org.wcs.smart.i2.diagram.filter.depth."; //$NON-NLS-1$
+	private static final String PREFERENCE_STYLE_KEY            = "org.wcs.smart.i2.diagram.filter.style."; //$NON-NLS-1$
+	private static final String PREFERENCE_LAYOUT_ALGORITHM_KEY = "org.wcs.smart.i2.diagram.filter.layoutalgorithm."; //$NON-NLS-1$
+
 	private FormToolkit toolkit;
 
 	private RelationshipGraphFilterComposite cmpFilter;
@@ -229,6 +237,10 @@ public class RelationshipGraphComposite extends Composite {
 				loadStyleJob.cancel();
 				RelationshipDiagramStyle st = (RelationshipDiagramStyle)selection.getFirstElement();
 				if (st != null) {
+					String id = getPreferencesId();
+					if (id != null && !id.isEmpty()) {
+						Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(PREFERENCE_STYLE_KEY + id, UuidUtils.uuidToString(st.getUuid()));
+					}
 					loadStyleJob.setUuid(st.getUuid());
 					loadStyleJob.schedule();
 				}
@@ -255,7 +267,12 @@ public class RelationshipGraphComposite extends Composite {
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection selection = (IStructuredSelection) cmbLayout.getStructuredSelection();
 				if (selection != null && !selection.isEmpty()) {
-					graphViewer.setLayoutAlgorithm((ILayoutAlgorithm)selection.getFirstElement());
+					ILayoutAlgorithm layoutAlgorithm = (ILayoutAlgorithm) selection.getFirstElement();
+					graphViewer.setLayoutAlgorithm(layoutAlgorithm);
+					String id = getPreferencesId();
+					if (id != null && !id.isEmpty()) {
+						Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(PREFERENCE_LAYOUT_ALGORITHM_KEY + id, layoutAlgorithm.getClass().getCanonicalName());
+					}
 					graphViewer.refresh();
 				}
 			}
@@ -287,6 +304,10 @@ public class RelationshipGraphComposite extends Composite {
 		cmpFilter.addFilterChangeListener(new IRelationshipGraphFilterChangeListener() {
 			@Override
 			public void filterChanged(RelationshipGraphFilterData filterData) {
+				String id = getPreferencesId();
+				if (id != null && !id.isEmpty()) {
+					Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(PREFERENCE_DEPTH_KEY + id, filterData.getDepth());
+				}
 				refreshGraphContent();
 			}
 		});
@@ -302,6 +323,7 @@ public class RelationshipGraphComposite extends Composite {
 
 	public void setInput(IntelEntity... entity) {
 		roots = entity;
+		applyPreferences();
 		refreshGraphContent();
 	}
 
@@ -312,6 +334,10 @@ public class RelationshipGraphComposite extends Composite {
 		IStructuredSelection selection = (IStructuredSelection) cmbStyle.getStructuredSelection();
 		Object selObj = selection.getFirstElement();
 		cmbStyle.setInput(newStyles);
+		if (selObj == null) {
+			String id = getPreferencesId();
+			applyPreferenceStyle(id);
+		}
 		if (!newStyles.contains(selObj)) {
 			selObj = newStyles.get(0);
 		}
@@ -323,6 +349,59 @@ public class RelationshipGraphComposite extends Composite {
 		loadGraphDataJob.setRoots(roots);
 		loadGraphDataJob.setFilterData(cmpFilter.getFilterData());
 		loadGraphDataJob.schedule();
+	}
+
+	private void applyPreferences() {
+		String id = getPreferencesId();
+		applyPreferenceDepth(id);
+		applyPreferenceLayoutAlgorithm(id);
+		applyPreferenceStyle(id);
+	}
+
+	private void applyPreferenceDepth(String id) {
+		if (id == null || id.isEmpty()) return;
+		int depth = Intelligence2PlugIn.getDefault().getPreferenceStore().getInt(PREFERENCE_DEPTH_KEY + id);
+		if (depth != 0) {
+			cmpFilter.setFilterDepth(depth);
+		}
+	}
+
+	private void applyPreferenceLayoutAlgorithm(String id) {
+		if (id == null || id.isEmpty()) return;
+		String layoutAlgClass = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(PREFERENCE_LAYOUT_ALGORITHM_KEY + id);
+		if (layoutAlgClass != null && !layoutAlgClass.isEmpty()) {
+			for (ILayoutAlgorithm layoutAlgorithm : layoutAlgorithms.keySet()) {
+				if (layoutAlgClass.equals(layoutAlgorithm.getClass().getCanonicalName())) {
+					cmbLayout.setSelection(new StructuredSelection(layoutAlgorithm));
+					return;
+				}
+			}
+		}
+	}
+
+	private void applyPreferenceStyle(String id) {
+		if (id == null || id.isEmpty()) return;
+		String styleUuidStr = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(PREFERENCE_STYLE_KEY + id);
+		if (styleUuidStr != null && !styleUuidStr.isEmpty()) {
+			Object input = cmbStyle.getInput();
+			if (input instanceof List<?>) {
+				List<?> styleList = (List<?>) input;
+				UUID styleUuid = UuidUtils.stringToUuid(styleUuidStr);
+				for (Object obj : styleList) {
+					if (obj instanceof UuidItem) {
+						UuidItem style = (UuidItem) obj;
+						if (styleUuid.equals(style.getUuid())) {
+							cmbStyle.setSelection(new StructuredSelection(style));
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private String getPreferencesId() {
+		return roots != null && roots.length == 1 && roots[0].getUuid() != null ? UuidUtils.uuidToString(roots[0].getUuid()) : null;
 	}
 	
 	@Override
