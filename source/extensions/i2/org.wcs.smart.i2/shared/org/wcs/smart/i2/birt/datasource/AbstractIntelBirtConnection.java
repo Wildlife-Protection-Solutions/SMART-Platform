@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
+import org.eclipse.birt.report.engine.api.impl.EngineTask;
 import org.eclipse.birt.report.engine.api.impl.RunAndRenderTask;
 import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
@@ -156,7 +157,13 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 		}
 		return null;
 	}
+
 	
+	private Path getWorkingDirectory() {
+		Object x = appContext.get(BirtConstants.WORKING_DIRECTORY);
+		if (x instanceof Path) return (Path)x;
+		return null;
+	}
 	/**
 	 * 
 	 * @return the image output directory supplied in the app context.  Will
@@ -164,9 +171,9 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 	 */
 	protected Path getImageOutputDirectory() {
 		Object randrtask = appContext.get("EngineTask"); //$NON-NLS-1$
-		if (randrtask == null || !(randrtask instanceof RunAndRenderTask)) return null;
-		
-		RunAndRenderTask task = (RunAndRenderTask)randrtask;
+		if (randrtask == null || !(randrtask instanceof EngineTask)) return getWorkingDirectory();
+		EngineTask task = (EngineTask)randrtask;
+		if (task.getRenderOption() == null) return getWorkingDirectory();
 		Object x = task.getRenderOption().getOption(HTMLRenderOption.IMAGE_DIRECTROY);
 		if (x instanceof File) {
 			return ((File) x).toPath();
@@ -175,7 +182,7 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 		}else if (x instanceof Path) {
 			return (Path)x;
 		}
-		return null;
+		return getWorkingDirectory();
 		
 	}
 	
@@ -232,7 +239,15 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 	public void close() throws OdaException {
 		closeSession();
 		m_isOpen = false;
-		cleanUpAttachmentFiles(attachmentFiles);
+		//we cannot cleanup attachments until after the report is rendered
+		//if we run BIRT as separate run and render tasks in html
+		Object randrtask = appContext.get("EngineTask"); //$NON-NLS-1$
+		if (randrtask == null || !(randrtask instanceof EngineTask)) return;
+		EngineTask task = (EngineTask)randrtask;
+		if (task.getRenderOption() == null) return;
+		Object x = task.getRenderOption().getOption(HTMLRenderOption.IMAGE_DIRECTROY);
+		if ( x == null ) cleanUpAttachmentFiles(attachmentFiles);
+			
 	}
 
 	/**

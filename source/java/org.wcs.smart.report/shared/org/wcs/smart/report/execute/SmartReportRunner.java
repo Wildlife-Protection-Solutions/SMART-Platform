@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 
 import org.eclipse.birt.report.engine.api.EngineException;
+import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderTask;
 import org.eclipse.birt.report.engine.api.IReportDocument;
@@ -74,11 +75,17 @@ public enum SmartReportRunner {
 			Session session, HashMap<String, Object> reportParameters,
 			Path renderFile, int defaultDpi) throws Exception{
 		
+		if (Files.exists(renderFile)) Files.delete(renderFile);
+		
 		File reportFile = new File(report.getConservationArea().getFileDataStoreLocation()
 				+ File.separator
 				+ Report.REPORT_DIR + File.separator + report.getFilename());
-		
 
+		//temporary directory for decrypted attachments
+		Object temp = options.getOption(HTMLRenderOption.IMAGE_DIRECTROY);
+		Path workingDirectory = null;
+		if (temp != null && temp instanceof Path) workingDirectory = (Path) temp;
+		
 		IReportRunnable reportRunnable = engine.openReportDesign(reportFile.getAbsolutePath());
 		
 		IRunTask runTask = engine.createRunTask(reportRunnable);
@@ -86,11 +93,12 @@ public enum SmartReportRunner {
 		runTask.getAppContext().put(BirtConstants.CA_PARAM, report.getConservationArea());
 		runTask.getAppContext().put(BirtConstants.SESSION_PARAM, session);
 		runTask.getAppContext().put(BirtConstants.DEFAULT_DPI_PARAM, defaultDpi);
-		if (Files.exists(renderFile)) Files.delete(renderFile);
+		if (workingDirectory != null) runTask.getAppContext().put(BirtConstants.WORKING_DIRECTORY, workingDirectory);
 		runTask.run(renderFile.toAbsolutePath().toString());
 		runTask.close();
-		
+
 		renderFile(engine, options, renderFile, report.getConservationArea(), defaultDpi, session);
+		
 	}
 	
 	/**
@@ -105,7 +113,6 @@ public enum SmartReportRunner {
 				task.getAppContext().put(BirtConstants.CA_PARAM, ca);
 				task.getAppContext().put(BirtConstants.SESSION_PARAM, session);
 				task.getAppContext().put(BirtConstants.DEFAULT_DPI_PARAM, defaultDpi);
-				
 				task.setRenderOption(options);
 				task.render();
 			}finally {
