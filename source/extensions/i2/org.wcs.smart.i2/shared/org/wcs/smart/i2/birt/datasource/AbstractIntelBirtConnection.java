@@ -241,6 +241,7 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 		m_isOpen = false;
 		//we cannot cleanup attachments until after the report is rendered
 		//if we run BIRT as separate run and render tasks in html
+		if (appContext == null) return;
 		Object randrtask = appContext.get("EngineTask"); //$NON-NLS-1$
 		if (randrtask == null || !(randrtask instanceof EngineTask)) return;
 		EngineTask task = (EngineTask)randrtask;
