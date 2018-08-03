@@ -14,7 +14,7 @@
    </configIni>
 
    <launcherArgs>
-      <vmArgs>-Xmx1024M -Dosgi.parentClassloader=ext -Dorg.eclipse.emf.ecore.plugin.EcorePlugin.doNotLoadResourcesPlugin=true  -XX:MaxPermSize=250M -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass -Dosgi.framework.extensions=org.eclipse.fx.osgi
+      <vmArgs>-Xmx1024M -Dosgi.parentClassloader=ext -Dorg.eclipse.emf.ecore.plugin.EcorePlugin.doNotLoadResourcesPlugin=true  -XX:MaxPermSize=250M -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass -Dosgi.framework.extensions=org.eclipse.equinox.transforms.hook,org.eclipse.fx.osgi
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts -Djava.awt.headless=true
       </vmArgsMac>
@@ -33,6 +33,7 @@
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>
