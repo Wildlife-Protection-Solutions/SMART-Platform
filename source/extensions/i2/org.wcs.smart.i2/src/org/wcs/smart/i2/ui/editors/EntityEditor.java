@@ -782,7 +782,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 
 		compRelationshipDiagram = toolkit.createComposite(tabPart, SWT.NONE);
 		compRelationshipDiagram.setLayout(new GridLayout());
-		graphComposite = new RelationshipGraphComposite(compRelationshipDiagram, toolkit);
+		graphComposite = new RelationshipGraphComposite(compRelationshipDiagram, toolkit, this);
 		
 		tabList.setContent(new Composite[]{compMap,  compRecords, compRelationships, compRelationshipDiagram}, tabPart);
 		tabList.selectTab(0);

@@ -57,6 +57,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -89,6 +92,7 @@ public class RelationshipGraphComposite extends Composite {
 	private static final String PREFERENCE_STYLE_KEY            = "org.wcs.smart.i2.diagram.filter.style."; //$NON-NLS-1$
 	private static final String PREFERENCE_LAYOUT_ALGORITHM_KEY = "org.wcs.smart.i2.diagram.filter.layoutalgorithm."; //$NON-NLS-1$
 
+	private IEditorPart parentEditor;
 	private FormToolkit toolkit;
 
 	private RelationshipGraphFilterComposite cmpFilter;
@@ -99,6 +103,8 @@ public class RelationshipGraphComposite extends Composite {
 	private RelationshipGraphContentProvider graphContentProvider;
 	
 	private IntelEntity[] roots;
+	private IRelationshipGraphData graphDelayedInput;
+	private boolean graphDelayedRefresh;
 
 	private ILayoutAlgorithm defaultLayoutAlogorithm;
 	private Map<ILayoutAlgorithm, String> layoutAlgorithms;
@@ -125,7 +131,7 @@ public class RelationshipGraphComposite extends Composite {
 		}
 		
 		private void processList(List<?> entities) {
-			Object input = graphViewer.getInput();
+			Object input = graphDelayedInput != null ? graphDelayedInput : graphViewer.getInput();
 			if (input instanceof IRelationshipGraphData) {
 				IRelationshipGraphData graphData = (IRelationshipGraphData) input;
 				Set<?> eSet = new HashSet<>(Arrays.asList(graphData.getEntities()));
@@ -144,7 +150,7 @@ public class RelationshipGraphComposite extends Composite {
 				@Override
 				public void run() {
 					if (!RelationshipGraphComposite.this.isDisposed()) {
-						graphViewer.setInput(graphData);
+						delayedUpdateGraph(graphData, false);
 					}
 				}		
 			});
@@ -171,15 +177,49 @@ public class RelationshipGraphComposite extends Composite {
 				public void run() {
 					if (!RelationshipGraphComposite.this.isDisposed()) {
 						graphLabelProvider.setStyle(style);
-						graphViewer.refresh();
+						delayedUpdateGraph(null, true);
 					}
 				}		
 			});
 		}
 	};
 
-	public RelationshipGraphComposite(Composite parent, FormToolkit toolkit) {
+	private IPartListener2 partListener = new IPartListener2() {
+		
+		@Override
+		public void partActivated(IWorkbenchPartReference partRef) {
+			if (partRef.getPart(false) == parentEditor) {
+				delayedUpdateGraph(graphDelayedInput, graphDelayedRefresh);
+			}
+		}
+
+		@Override
+		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partVisible(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partOpened(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partInputChanged(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partHidden(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partDeactivated(IWorkbenchPartReference partRef) {}
+		
+		@Override
+		public void partClosed(IWorkbenchPartReference partRef) {}
+		
+	};
+	
+	
+	public RelationshipGraphComposite(Composite parent, FormToolkit toolkit, IEditorPart parentEditor) {
 		super(parent, SWT.NONE);
+		this.parentEditor = parentEditor;
 		initLayoutAlgorithms();
 		this.toolkit = toolkit;
 		GridLayout layout = new GridLayout();
@@ -273,7 +313,7 @@ public class RelationshipGraphComposite extends Composite {
 					if (id != null && !id.isEmpty()) {
 						Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(PREFERENCE_LAYOUT_ALGORITHM_KEY + id, layoutAlgorithm.getClass().getCanonicalName());
 					}
-					graphViewer.refresh();
+					delayedUpdateGraph(null, true);
 				}
 			}
 		});
@@ -318,7 +358,8 @@ public class RelationshipGraphComposite extends Composite {
 		IEventBroker eventBroker = context.get(IEventBroker.class);
 		eventBroker.subscribe(IntelEvents.GRAPH_STYLESET_CHANGED, styleHandler);
 		eventBroker.subscribe(IntelEvents.ENTITY_ALL, entityHandler);
-		
+
+		parentEditor.getSite().getPage().addPartListener(partListener);
 	}
 
 	public void setInput(IntelEntity... entity) {
@@ -343,12 +384,34 @@ public class RelationshipGraphComposite extends Composite {
 		}
 		cmbStyle.setSelection(new StructuredSelection(selObj));
 	}
+
+	private void delayedUpdateGraph(IRelationshipGraphData input, boolean refresh) {
+		IEditorPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+		if (part == parentEditor) {
+			//graph is in active editor and we need to set input right away
+			graphDelayedInput = null; //reset as it is not relevant
+			graphDelayedRefresh = false;
+			if (input != null) {
+				graphViewer.setInput(input);
+			} else if (refresh) {
+				graphViewer.refresh();
+			}
+		} else {
+			//graph is in non-active editor and can delay update for graph input
+			if (input != null) {
+				graphDelayedInput = input;
+			}
+			graphDelayedRefresh = graphDelayedRefresh || refresh;
+		}
+	}
 	
 	private void refreshGraphContent() {
 		loadGraphDataJob.cancel();
-		loadGraphDataJob.setRoots(roots);
-		loadGraphDataJob.setFilterData(cmpFilter.getFilterData());
-		loadGraphDataJob.schedule();
+		if (!this.isDisposed()) {
+			loadGraphDataJob.setRoots(roots);
+			loadGraphDataJob.setFilterData(cmpFilter.getFilterData());
+			loadGraphDataJob.schedule();
+		}
 	}
 
 	private void applyPreferences() {
@@ -407,6 +470,7 @@ public class RelationshipGraphComposite extends Composite {
 	@Override
 	public void dispose() {
 		super.dispose();
+		parentEditor.getSite().getPage().removePartListener(partListener);
 		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
 		IEventBroker eventBroker = context.get(IEventBroker.class);
 		eventBroker.unsubscribe(styleHandler);

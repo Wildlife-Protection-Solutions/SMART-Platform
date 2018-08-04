@@ -113,7 +113,7 @@ public class RelationshipGraphEditor extends EditorPart {
 			parent.setLayout(layout);
 			parent.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_GREEN));
 
-			graphComposite = new RelationshipGraphComposite(parent, new FormToolkit(Display.getCurrent()));
+			graphComposite = new RelationshipGraphComposite(parent, new FormToolkit(Display.getCurrent()), this);
 			
 			//part.get
 			EventHandler handler = new EventHandler() {
