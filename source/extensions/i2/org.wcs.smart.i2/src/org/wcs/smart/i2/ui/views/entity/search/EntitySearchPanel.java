@@ -432,6 +432,7 @@ public abstract class EntitySearchPanel extends Composite {
 							entities = QueryFactory.buildQuery(s,IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
 							entities.forEach(ent->ent.getName());
 						}
+						entities.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 						Display.getDefault().syncExec(()->{if (!attributeTable.getControl().isDisposed()) attributeTable.setInput(entities);});
 						return Status.OK_STATUS;
 					}
