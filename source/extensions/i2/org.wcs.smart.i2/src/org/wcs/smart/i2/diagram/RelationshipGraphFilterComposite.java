@@ -92,6 +92,7 @@ public class RelationshipGraphFilterComposite extends Composite {
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
+					if (cmbRelationTypes.isDisposed()) return;
 					cmbRelationTypes.setInput(types);
 					cmbRelationTypes.setValue(types);
 					filterData.setRelationshipTypes(types);

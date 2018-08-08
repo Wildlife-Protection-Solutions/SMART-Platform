@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.birt;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,10 +38,14 @@ import org.eclipse.birt.report.model.api.elements.structures.OdaDataSetParameter
 import org.eclipse.birt.report.model.elements.OdaDataSet;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.osgi.service.event.EventHandler;
 import org.wcs.smart.birt.BirtSmartUtils;
 import org.wcs.smart.birt.ui.IReportEditorManager;
 import org.wcs.smart.birt.ui.RCPMultiPageReportEditor;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
+import org.wcs.smart.i2.event.IntelEvents;
 
 /**
  * Manager for entity report editor.
@@ -52,7 +57,18 @@ public class IntelReportEditorManager implements IReportEditorManager{
 
 
 	private RCPMultiPageReportEditor editor;
+	private IEventBroker eventBroker;
 	
+	@SuppressWarnings("unchecked")
+	private EventHandler deleteTypeHandler = e->{
+		Object data = e.getProperty(IEventBroker.DATA);
+		if (data.equals(getEditorInputLocal().getEntityType())) {
+			editor.closeEditor(false);	
+		}else if (data instanceof Collection<?>) {
+			((Collection) data).forEach(obj -> { if (obj.equals(getEditorInputLocal().getEntityType())) editor.closeEditor(false);});
+		}
+		
+	};
 //	private static final Set<String> SUPPORTED_DATASETS = new HashSet<String>();
 //	static{
 //		SUPPORTED_DATASETS.add(EntityLocationAttributeDataset.DATASET_TYPE);
@@ -197,6 +213,7 @@ public class IntelReportEditorManager implements IReportEditorManager{
 	public void dispose() {
 		editor.getModel().removeListener(nameChangeListener);
 		editor = null;
+		if (eventBroker != null) eventBroker.unsubscribe(deleteTypeHandler);
 	}
 
 	@Override
@@ -212,6 +229,10 @@ public class IntelReportEditorManager implements IReportEditorManager{
 	@Override
 	public void init(RCPMultiPageReportEditor editor) {
 		this.editor = editor;
+		
+		eventBroker = ((IEclipseContext) editor.getSite().getService(IEclipseContext.class)).get(IEventBroker.class);
+		eventBroker.subscribe(IntelEvents.ENTITY_TYPE_DELETE, deleteTypeHandler);
+		
 	}
 
 	private IntelEntityTypeEditorInput getEditorInputLocal(){

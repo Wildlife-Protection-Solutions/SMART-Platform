@@ -593,12 +593,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 			public void handleEvent(org.osgi.service.event.Event event) {
 				Object data = event.getProperty(IEventBroker.DATA);
 				if (data != null ){
-					if (data.equals(entity)){
+					if (data.equals(entity) || data.equals(entity.getEntityType())){
 						closeEditor();
 					}else if (data instanceof Collection){
 						Collection<?> items = (Collection<?>) data;
 						items.forEach(x->{
-							if (x.equals(entity))getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(EntityEditor.this, false);
+							if (x.equals(entity) || x.equals(entity.getEntityType())) getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(EntityEditor.this, false);
 						});
 					}
 				}
@@ -607,6 +607,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		};
 		eventHandles.add(handler);
 		eventBroker.subscribe(IntelEvents.ENTITY_DELETE, handler);
+		eventBroker.subscribe(IntelEvents.ENTITY_TYPE_DELETE, handler);
 		
 		
 		
