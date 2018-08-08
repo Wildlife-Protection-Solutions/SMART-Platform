@@ -88,7 +88,6 @@ import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntitySearch;
-import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.search.AllEntitySearch;
 import org.wcs.smart.i2.search.BasicEntitySearch;
@@ -117,12 +116,6 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 @SuppressWarnings("restriction")
 public class EntitySearchView {
-
-	/**
-	 * Context location of entity search results.  This will return the list currently
-	 * displayed in the view; NOT ALL the search results.  It returns List<IntelEntity>.
-	 */
-	public static final String ENTITY_SEARCH_RESULTS_KEY = "org.wcs.smart.i2.entity.search"; //$NON-NLS-1$
 	
 	public static final String ID = "org.wcs.smart.i2.view.entitysearch"; //$NON-NLS-1$
 	
@@ -225,7 +218,13 @@ public class EntitySearchView {
 		super();
 	}
 
-	public List<IntelEntity> getEntities(){
+	/**
+	 * Gets a list of current entities.
+	 */
+	public List<? extends Object> getEntities(){
+		if (outerStack.topControl == allPanel) {
+			return allPanel.getEntities(50);
+		}
 		return this.entityList.getEntities();
 	}
 	

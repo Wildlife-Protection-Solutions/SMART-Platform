@@ -489,6 +489,10 @@ public class AllPanel extends Composite {
 		dragSource.addDragListener(listener);
 	}
 	
+	public List<Object> getEntities(int limit){
+		return ((AllEntityContentProvider)entityTable.getContentProvider()).getAllDataItems(limit);
+	}
+	
 	public List<EntityTableRowItem> getCurrentSelection(){
 		ArrayList<EntityTableRowItem> selections = new ArrayList<>();
 		if (entityTable == null || entityTable.getTable().isDisposed()) return selections;
@@ -501,6 +505,7 @@ public class AllPanel extends Composite {
 		}
 		return selections;
 	}
+	
 	public List<IntelEntity> getCurrentEntities(){
 		List<IntelEntity> ies = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
@@ -772,6 +777,7 @@ public class AllPanel extends Composite {
 		protected IStatus run(IProgressMonitor monitor) {
 			needsRefresh = false;
 			AllEntityContentProvider provider = new AllEntityContentProvider();
+			
 			EntityTableData data = provider.generateData();
 			provider.addListener(e->{
 				EntityTableData thisdata = (EntityTableData)e.data;

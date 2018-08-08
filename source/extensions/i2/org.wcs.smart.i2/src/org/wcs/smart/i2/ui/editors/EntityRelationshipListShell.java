@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -48,6 +50,7 @@ import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.ui.SmartShellDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Shell dialog for relating entities
@@ -79,12 +82,16 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 		entityOptions = Collections.singletonList(Messages.EntityRelationshipListShell_NoEntitiesFound);
 		
 		if (this.context != null) {
-			@SuppressWarnings("unchecked")
-			List<IntelEntity> entities = (List<IntelEntity>)context.get(EntitySearchView.ENTITY_SEARCH_RESULTS_KEY);
-			if (entities != null) {
-				entityOptions = new ArrayList<>();
-				entities.forEach(e->entityOptions.add(e));
+			MPart part = context.get(EPartService.class).findPart(EntitySearchView.ID);			
+			if (part != null) {
+				EntitySearchView view  = (EntitySearchView) E3Utils.getSourceObject(part);
+				List<? extends Object> entities = view.getEntities();
+				if (entities != null) {
+					entityOptions = new ArrayList<>();
+					entities.forEach(e->entityOptions.add(e));
+				}
 			}
+			
 		}
 	}
 	
@@ -135,6 +142,8 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 								);
 							}
 						}).schedule(0);
+					}else {
+						types.setInput(new Object[] {});
 					}
 					
 				}

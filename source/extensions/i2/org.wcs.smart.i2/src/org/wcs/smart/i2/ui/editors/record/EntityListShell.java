@@ -32,6 +32,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -60,6 +62,7 @@ import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.ui.SmartShellDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Dialog shell for listing entities.  First list displays all entities in most recent search,
@@ -90,7 +93,6 @@ public class EntityListShell extends SmartShellDialog {
 		this.editor = editor;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void createContents(Composite parent){
 		Composite owner = new Composite(parent, SWT.NONE);
@@ -145,8 +147,14 @@ public class EntityListShell extends SmartShellDialog {
 		allItems.add(ALL_ENTITIES);
 		if (IntelSecurityManager.INSTANCE.canCreateEntity()) allItems.add(NEW_ENTITY);
 		
-		if (editor.getContext() != null && editor.getContext().get(EntitySearchView.ENTITY_SEARCH_RESULTS_KEY) != null){
-			allItems.addAll((List<IntelEntity>) editor.getContext().get(EntitySearchView.ENTITY_SEARCH_RESULTS_KEY));
+		if (editor.getContext() != null) {
+			
+			MPart part = editor.getContext().get(EPartService.class).findPart(EntitySearchView.ID);
+			if (part != null) {
+				EntitySearchView view  = (EntitySearchView) E3Utils.getSourceObject(part);
+				List<? extends Object> entities = view.getEntities();
+				allItems.addAll(entities);
+			}
 		}
 		
 		tblSearchEntityList.setInput(allItems);	

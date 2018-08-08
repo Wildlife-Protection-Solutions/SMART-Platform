@@ -38,6 +38,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -46,6 +48,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.RelationshipDiagramManager;
@@ -131,6 +135,35 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 			}
 		});
 
+		Menu mnu = new Menu(stylesViewer.getControl());
+		
+		MenuItem miAdd = new MenuItem(mnu, SWT.PUSH);
+		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miAdd.addListener(SWT.Selection, e->createNewStyle());
+		
+		MenuItem miEdit = new MenuItem(mnu, SWT.PUSH);
+		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		miEdit.addListener(SWT.Selection, e->editCurrentStyle());
+		
+		MenuItem miDelete = new MenuItem(mnu, SWT.PUSH);
+		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDelete.addListener(SWT.Selection, e->createNewStyle());
+		
+		mnu.addMenuListener(new MenuListener() {
+			@Override
+			public void menuHidden(MenuEvent e) {}
+			@Override
+			public void menuShown(MenuEvent e) {
+				miDelete.setEnabled(!stylesViewer.getSelection().isEmpty());
+				miEdit.setEnabled(!stylesViewer.getSelection().isEmpty());
+			}
+		});
+		stylesViewer.getControl().setMenu(mnu);
+		
+		
 		Composite btnCmp = new Composite(main, SWT.NONE);
 		btnCmp.setLayout(new GridLayout(1, false));
 		btnCmp.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));

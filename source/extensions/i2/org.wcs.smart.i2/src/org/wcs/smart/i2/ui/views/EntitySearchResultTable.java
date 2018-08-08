@@ -346,11 +346,8 @@ public class EntitySearchResultTable extends Composite {
 			core.addListener(SWT.Resize, event -> {
 				sc.setMinSize(main.computeSize(sc.getClientArea().width, SWT.DEFAULT));
 			});
-			createMenu(main);
-			
-			
+			createMenu(main);	
 		}
-		context.getParent().set(EntitySearchView.ENTITY_SEARCH_RESULTS_KEY, getEntities());
 		layout(true);
 	}
 	

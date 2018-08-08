@@ -75,7 +75,6 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 	 */
 	public static final String DB_NAME_NAME = "smart.i_entity_view"; //$NON-NLS-1$
 	
-	
 	public static final String COL_ENTITY_TYPE_NAME = "i_entity_type_name"; //$NON-NLS-1$
 	
 	private TableViewer viewer;
@@ -172,7 +171,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				}
 				
 				Integer count = (Integer) session.createNativeQuery("SELECT count(*) FROM " + DB_NAME_NAME).uniqueResult(); //$NON-NLS-1$
-				
+
 				session.getTransaction().commit();
 				
 				//create results
@@ -458,8 +457,9 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 						try {
 							StringBuilder sb = new StringBuilder();
 							sb.append("UPDATE " + DB_NAME_NAME + " SET filter = true"); //$NON-NLS-1$ //$NON-NLS-2$
-							session.createNativeQuery(sb.toString())
-							.executeUpdate();
+							
+							session.createNativeQuery(sb.toString()).executeUpdate();
+							
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -542,7 +542,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		};
 		j.schedule();
 	}
-	
+
 	/**
 	 * 
 	 * @return uuids of all entities that match the current filter
@@ -561,6 +561,31 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			}
 		}
 		return allUuids;
+	}
+	
+	public List<Object> getAllDataItems(int maxlimit){
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT entity_uuid FROM "); //$NON-NLS-1$
+		sb.append(DB_NAME_NAME);
+		sb.append(" WHERE filter = true fetch first "); //$NON-NLS-1$
+		sb.append(maxlimit);
+		sb.append(" rows only "); //$NON-NLS-1$
+		
+		List<Object> items = new ArrayList<>();
+		try(Session session = HibernateManager.openSession()){
+			List<?> rows = session.createNativeQuery(sb.toString()).list();
+			for (Object x : rows) {
+				UUID i = UuidUtils.byteToUUID((byte[])x);
+				IntelEntity entity = session.get(IntelEntity.class, i);
+				if (entity == null) continue;
+				entity.getIdAttributeAsText();
+				items.add(entity);
+			}
+		}
+		if (items.size() == maxlimit) {
+			items.add("..."); //$NON-NLS-1$
+		}
+		return items;
 	}
 	
 	/**
