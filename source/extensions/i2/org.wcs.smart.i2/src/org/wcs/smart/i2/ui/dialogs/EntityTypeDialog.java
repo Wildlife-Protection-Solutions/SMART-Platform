@@ -135,6 +135,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	private Button btnEdit;
 	private Button btnMoveUp;
 	private Button btnMoveDown;
+	private Button btnEditTemplate;
 	
 	private ControlDecoration cdList;
 	private ControlDecoration cdId;
@@ -183,6 +184,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	protected void okPressed() {
 		boolean isNew = type.getUuid() == null;
 		boolean attributesModified = false;
+		
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
@@ -246,6 +248,33 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				}
 				s.flush();
 				s.getTransaction().commit();
+				
+
+				
+				if (isNew && type.getBirtTemplate() == null) {
+					//create BIRT Template -> 
+					//this can be slow; do it in a progress monitor dialog
+					ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+					pmd.run(false, false, new IRunnableWithProgress() {
+						@Override
+						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+							try {
+								IntelReportManager.INSTANCE.generateTemplate(type);
+								s.beginTransaction();
+								try {
+									s.saveOrUpdate(type);
+									s.getTransaction().commit();
+								}catch (Exception ex) {
+									throw ex;
+								}
+							}catch (Exception ex) {
+								throw new InvocationTargetException(ex);
+							}
+						}
+					});
+					
+				}
+				
 			}catch (Exception ex){
 				if (s.getTransaction().isActive())s.getTransaction().rollback();
 				Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
@@ -254,6 +283,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		}
 		if (isNew){
 			broker.send(IntelEvents.ENTITY_TYPE_NEW, type);
+			btnEditTemplate.setEnabled(true);
 		}else{
 			broker.send(IntelEvents.ENTITY_TYPE_MODIFIED, type);
 			if (attributesModified){
@@ -381,19 +411,21 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		l.setText(type.getBirtTemplate() == null ? Messages.EntityTypeDialog_NotConfiguredLabel : type.getBirtTemplate());
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
-		Button btnEditTemplate = new Button(parent, SWT.PUSH);
+		btnEditTemplate = new Button(parent, SWT.PUSH);
 		btnEditTemplate.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEditTemplate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnEditTemplate.addSelectionListener(new SelectionAdapter() {
-			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				cancelPressed();
 				getParentShell().close();
 				IntelReportManager.INSTANCE.editTemplate(type);
-			}
-			
+			}	
 		});
+		if (type.getUuid() == null) {
+			btnEditTemplate.setEnabled(false);
+			l.setToolTipText(Messages.EntityTypeDialog_SaveRequired);
+		}
 		
 		l = new Label(parent, SWT.NONE);
 		l.setText(Messages.EntityTypeDialog_AttributesLabel);

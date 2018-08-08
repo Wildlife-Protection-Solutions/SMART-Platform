@@ -522,6 +522,7 @@ public class Messages extends NLS {
 	public static String EntityTypeDialog_RemoveDialogMsg;
 	public static String EntityTypeDialog_RemoveDialogTitle;
 	public static String EntityTypeDialog_SaveError;
+	public static String EntityTypeDialog_SaveRequired;
 	public static String EntityTypeDialog_Title;
 	public static String EntityTypeDialog_WarningDialogMsg;
 	public static String EntityTypeDialog_WarningsDialogTitle;
@@ -947,6 +948,7 @@ public class Messages extends NLS {
 	public static String IntelReportManager_EntityRecordDatasetName;
 	public static String IntelReportManager_EntityRelationshipDatasetName;
 	public static String IntelReportManager_EntitySearchesDatasetName;
+	public static String IntelReportManager_NotSaved;
 	public static String IntelReportManager_RecordAttachmentsDatasetName;
 	public static String IntelReportManager_RecordAttributeDatasetName;
 	public static String IntelReportManager_RecordDatasetName;

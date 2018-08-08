@@ -253,51 +253,63 @@ public enum IntelReportManager {
 	}
 	
 	/**
+	 * Generates a new plan template.  The entity type object provided
+	 * must have a uuid and must have all the attributes loaded.
+	 * 
+	 * @param entityType
+	 * @throws Exception
+	 */
+	public void generateTemplate(IntelEntityType entityType) throws Exception {
+		if (entityType.getUuid() == null) throw new IllegalStateException("Cannot generate BIRT template for an entity type that has not been saved."); //$NON-NLS-1$
+		
+		if (entityType.getBirtTemplate() == null){
+			//create a new template for entity type
+			String file = entityType.getKeyId() + "." + UuidUtils.uuidToString(entityType.getUuid()) +  IReportEditorContants.DESIGN_FILE_EXTENTION; //$NON-NLS-1$
+			entityType.setBirtTemplate(file);
+		}
+			
+		Path p = getEntityTemplate(entityType);
+		if (!Files.exists(p.getParent())){
+			Files.createDirectories(p.getParent());
+		}
+		
+		if (!Files.exists(p)){
+			//load up the entity type and create the file
+			EntityReportGenerator.INSTANCE.generateReport(entityType, p);
+		}
+	}
+	
+	/**
 	 * Edits the plan template
 	 * @param event
 	 */
 	public void editTemplate(IntelEntityType entityType){
-		try{
-			if (entityType.getBirtTemplate() == null){
-				//create a new template for entity type
-				String file = entityType.getKeyId() + "." + UuidUtils.uuidToString(entityType.getUuid()) +  IReportEditorContants.DESIGN_FILE_EXTENTION; //$NON-NLS-1$
-				try(Session s = HibernateManager.openSession()){
-					s.beginTransaction();
-					try{
-						entityType = (IntelEntityType) s.get(IntelEntityType.class, entityType.getUuid());
-						entityType.setBirtTemplate(file);
-						s.getTransaction().commit();
-					}catch (Exception ex){
-						s.getTransaction().rollback();
-						Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.IntelReportManager_EditError, entityType.getName(),  ex.getMessage()), ex);
-					}
-				}
+		if (entityType.getUuid() == null) {
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.IntelReportManager_NotSaved,  entityType.getName()), null);
+			return;
+		}
+		try {
+			try(Session s = HibernateManager.openSession()){
+				entityType = (IntelEntityType) s.get(IntelEntityType.class, entityType.getUuid());
+				if (entityType.getAttributes() != null){
+					entityType.getAttributes().forEach((a) ->a.getAttribute().getName());
+				}	
 			}
+		
+			generateTemplate(entityType);
 			
-			Path p = getEntityTemplate(entityType);
-			if (!Files.exists(p.getParent())){
-				Files.createDirectories(p.getParent());
-			}
-			if (!Files.exists(p)){
-				try(Session s = HibernateManager.openSession()){
-					s.beginTransaction();
-					try{
-					
-						entityType = (IntelEntityType) s.get(IntelEntityType.class, entityType.getUuid());
-						if (entityType.getAttributes() != null){
-							entityType.getAttributes().forEach((a) ->a.getAttribute().getName());
-						}
-						s.getTransaction().commit();
-					}catch (Exception ex){
-						s.getTransaction().rollback();
-						Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.IntelReportManager_EditError, entityType.getName(),  ex.getMessage()), ex);
-					}
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try {
+					s.saveOrUpdate(entityType);
+					s.getTransaction().commit();
+				}catch (Exception ex) {
+					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.IntelReportManager_EditError,  entityType.getName(), ex.getMessage()), ex);
 				}
-				EntityReportGenerator.INSTANCE.generateReport(entityType, p);
 			}
-
+		
 			PlatformUI.getWorkbench().showPerspective(IntelEntityReportPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-			IntelEntityTypeEditorInput input = new IntelEntityTypeEditorInput(p.toFile(), entityType);
+			IntelEntityTypeEditorInput input = new IntelEntityTypeEditorInput(getEntityTemplate(entityType).toFile(), entityType);
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog("Error opening entity printing template. Try refreshing datasets, if error persists you can reset the template by right-clicking and selecting reset for the intelligence type in the Intelligence Templates View." + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
