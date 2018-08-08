@@ -148,6 +148,10 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			"create table smart.i_config_option (uuid char(16) for bit data, ca_uuid char(16) for bit data not null, keyid varchar(32000) not null, value varchar(32000), unique(ca_uuid, keyid), primary key (uuid))", //$NON-NLS-1$
 			"ALTER TABLE smart.i_config_option ADD CONSTRAINT intelconfigopcauuid FOREIGN KEY (ca_uuid) REFERENCES SMART.conservation_area(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 			
+			"GRANT SELECT on smart.i_config_option TO manager",
+			"GRANT SELECT on smart.i_config_option TO data_entry",
+			"GRANT SELECT on smart.i_config_option TO analyst",
+			
 			//employee attribute option
 			"ALTER TABLE smart.i_entity_attribute_value add column employee_uuid char(16) for bit data", //$NON-NLS-1$
 			"ALTER TABLE smart.i_entity_relationship_attribute_value add column employee_uuid char(16) for bit data", //$NON-NLS-1$
