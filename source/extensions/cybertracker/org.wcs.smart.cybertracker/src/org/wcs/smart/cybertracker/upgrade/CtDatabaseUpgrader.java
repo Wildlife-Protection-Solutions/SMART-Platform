@@ -92,6 +92,7 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 				
 				"GRANT ALL PRIVILEGES ON smart.ct_incident_link to data_entry", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.ct_incident_link to manager", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_incident_link to analyst", //$NON-NLS-1$ (for cleanup)
 				"GRANT DELETE ON smart.ct_incident_link to login", //$NON-NLS-1$
 				"GRANT SELECT ON smart.ct_incident_link to login", //$NON-NLS-1$
 				"GRANT SELECT (uuid) ON smart.waypoint to login", //$NON-NLS-1$
