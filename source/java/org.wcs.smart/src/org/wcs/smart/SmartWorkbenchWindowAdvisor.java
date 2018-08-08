@@ -64,6 +64,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.startup.EncryptCleanUp;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Smart Workbench Window Advisor.
@@ -210,12 +211,16 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
 			@Override
 			public void partHidden(IWorkbenchPartReference partRef) {
-				if (partRef.getPart(false) instanceof MapPart){
-					IViewPart infoView = partRef.getPage().findView(InfoView2.VIEW_ID);
-					if (infoView != null){
-						partRef.getPage().hideView(infoView);
-					}
-				}
+				//hide the info view when the mappart is closed
+				//EG: this causes problems when the info view is dragged into the editor area so we removed it and deal
+				//with this case in the perspectivetracker
+//				if (partRef.getPart(false) instanceof MapPart){
+//					IViewPart infoView = partRef.getPage().findView(InfoView2.VIEW_ID);
+//					if (infoView != null){
+//						((InfoView2)infoView).get
+//						partRef.getPage().hideView(infoView);
+//					}
+//				}
 			}
 
 			@Override

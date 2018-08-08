@@ -24,12 +24,14 @@ package org.wcs.smart;
 import java.util.Collection;
 import java.util.HashMap;
 
+import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PerspectiveAdapter;
+import org.locationtech.udig.project.ui.internal.LayersView;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -81,6 +83,21 @@ public class PerspectiveEditorListener extends PerspectiveAdapter {
 					}else{
 						p.setVisible(false);
 						p.setCloseable(false);
+					}
+				}
+				
+				//if p is in the editor area and not an editor then close it
+				if (! (E3Utils.isCompatibilityEditor(p) || p.getTags().contains(PerspectiveEditorTracker.EDITOR_TAG))) {
+					//check the parent; if it's the editor area then we close this
+					boolean close = false;
+					MUIElement e = p;
+					while(e != null && !close) {
+						close = E3Utils.isEditorArea(e);
+						e = e.getCurSharedRef();
+					}
+					if (close) {
+						if (p.getElementId().equals(LayersView.ID))  p.getTags().remove(EPartService.REMOVE_ON_HIDE_TAG);
+						partService.hidePart(p);
 					}
 				}
 			}
