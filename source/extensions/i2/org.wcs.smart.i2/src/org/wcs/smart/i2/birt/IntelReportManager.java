@@ -142,6 +142,17 @@ public enum IntelReportManager {
 	}
 	
 	/**
+	 * Cleans the entity type name to remove any nonalphanumeric characters 
+	 * 
+	 * @param entityType
+	 * @return
+	 */
+	//ticket #2530
+	public String generateBirtName(IntelEntityType entityType) {
+		return entityType.getName().replaceAll("[^a-zA-Z0-9 ]", ""); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	/**
 	 * Returns the dataset name for the given entity type and dataset
 	 * id.
 	 * 
@@ -150,18 +161,19 @@ public enum IntelReportManager {
 	 * @return
 	 */
 	public String getName(IntelEntityType entityType, String dataSetId){
+		String eTypeName = generateBirtName(entityType);
 		if (dataSetId.equals(EntityDataset.DATASET_TYPE)){
-			return entityType.getName();
+			return eTypeName;
 		}else if (dataSetId.equals(EntityLocationAttributeDataset.DATASET_TYPE)){
-			return MessageFormat.format(Messages.IntelReportManager_EntityPositionAttributeDatasetName, entityType.getName());
+			return MessageFormat.format(Messages.IntelReportManager_EntityPositionAttributeDatasetName, eTypeName);
 		}else if (dataSetId.equals(EntityLocationDataset.DATASET_TYPE)){
-			return MessageFormat.format(Messages.IntelReportManager_EntityLocationDataSetName, entityType.getName());
+			return MessageFormat.format(Messages.IntelReportManager_EntityLocationDataSetName, eTypeName);
 		}else if (dataSetId.equals(EntityRelationDataset.DATASET_TYPE)){
-			return MessageFormat.format(Messages.IntelReportManager_EntityRelationshipDatasetName, entityType.getName());
+			return MessageFormat.format(Messages.IntelReportManager_EntityRelationshipDatasetName, eTypeName);
 		}else if (dataSetId.equals(EntityAttachmentDataset.DATASET_TYPE)){
-			return MessageFormat.format(Messages.IntelReportManager_EntityAttachmentsDatasetName, entityType.getName());
+			return MessageFormat.format(Messages.IntelReportManager_EntityAttachmentsDatasetName, eTypeName);
 		}else if (dataSetId.equals(EntityRecordDataset.DATASET_TYPE)){
-			return MessageFormat.format(Messages.IntelReportManager_EntityRecordDatasetName, entityType.getName());
+			return MessageFormat.format(Messages.IntelReportManager_EntityRecordDatasetName, eTypeName);
 		}else if (dataSetId.equals(RecordDataset.DATASET_TYPE)){
 			return Messages.IntelReportManager_RecordDatasetName;
 		}else if (dataSetId.equals(RecordAttributeDataset.DATASET_TYPE)){

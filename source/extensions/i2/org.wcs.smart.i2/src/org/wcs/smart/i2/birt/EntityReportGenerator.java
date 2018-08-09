@@ -113,7 +113,7 @@ public enum EntityReportGenerator {
 		ReportDesignHandle rdh = session.createDesign(file.toFile().getAbsolutePath());
 		ModelOdaAdapter modelAdapter = new ModelOdaAdapter();
 		try {
-			rdh.setTitle(entityType.getName());
+			rdh.setTitle(IntelReportManager.INSTANCE.generateBirtName(entityType));
 		} catch (SemanticException e) {
 			//lets just consume this 
 		}
