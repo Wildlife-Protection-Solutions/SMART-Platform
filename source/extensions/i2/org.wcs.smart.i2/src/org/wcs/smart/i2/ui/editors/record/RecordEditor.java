@@ -390,6 +390,9 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				deleteEntityLocationLinks.clear();
 				locationsToDelete.clear();
 				summaryPage.clearLists();
+				
+				((RecordEditorInput)getEditorInput()).setName(record.getTitle());
+				
 			}catch (Exception ex){
 				s.getTransaction().rollback();
 				Intelligence2PlugIn.displayLog(Messages.RecordEditor_SaveError + ex.getMessage(), ex);

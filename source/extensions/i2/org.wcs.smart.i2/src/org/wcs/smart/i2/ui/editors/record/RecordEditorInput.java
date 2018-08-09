@@ -44,6 +44,8 @@ public class RecordEditorInput implements IEditorInput{
 	private UUID sourceUuid;
 	private IntelRecord.Status status;
 	
+	private boolean initMode;
+	
 	public RecordEditorInput(String name, UUID uuid, Date date, UUID sourceUuid, IntelRecord.Status status){
 		this.name = name;
 		this.uuid = uuid;
@@ -97,6 +99,10 @@ public class RecordEditorInput implements IEditorInput{
 		return null;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 	@Override
 	public String getName() {
 		return name;
@@ -130,7 +136,7 @@ public class RecordEditorInput implements IEditorInput{
 		return super.hashCode();
 	}
 
-	private boolean initMode;
+	
 	public boolean getIsEditable(){
 		return this.initMode;
 	}

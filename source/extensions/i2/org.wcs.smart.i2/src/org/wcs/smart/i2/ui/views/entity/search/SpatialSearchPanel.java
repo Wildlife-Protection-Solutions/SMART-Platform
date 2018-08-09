@@ -67,6 +67,7 @@ import org.hibernate.query.Query;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntitySearch;
@@ -361,6 +362,8 @@ public class SpatialSearchPanel extends Composite{
 		};
 		eventBroker.subscribe(UIEvents.UIElement.TOPIC_WIDGET, onPartClose);
 
+		EventHandler recordRenameHandler = e->cmbLocations.refresh();
+		eventBroker.subscribe(IntelEvents.RECORD_MODIFIED, recordRenameHandler);
 		
 		IPartListener partListener = new IPartListener() {
 			
@@ -391,6 +394,7 @@ public class SpatialSearchPanel extends Composite{
 		addListener(SWT.Dispose, e->{
 			eventBroker.unsubscribe(refresh);
 			eventBroker.unsubscribe(onPartClose);
+			eventBroker.unsubscribe(recordRenameHandler);
 			partService.removePartListener(partListener);
 		});
 		
