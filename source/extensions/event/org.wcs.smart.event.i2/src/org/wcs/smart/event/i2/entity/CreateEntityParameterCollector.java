@@ -23,8 +23,10 @@ package org.wcs.smart.event.i2.entity;
 
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -86,6 +88,9 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 	private List<Attribute> dmAttributes;
 	
 	private IntelEntityType lastSelection = null;
+	
+	private Composite warningSection = null;
+	private Label warningLabel = null;
 	
 	public CreateEntityParameterCollector() {
 		modifyListeners = new ArrayList<>();
@@ -156,6 +161,33 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 
 	@Override
 	public String validate() {
+		Set<String> entityAttributeKeys = new HashSet<>();
+		Set<String> duplicates = new HashSet<>();
+		for (EntityMapping mm : mappings) {
+			String keyId = mm.getEntityAttribute().getKeyId();
+			if (entityAttributeKeys.contains(keyId)) {
+				duplicates.add(mm.getEntityAttribute().getName());
+			}
+			entityAttributeKeys.add(keyId);
+		}
+		
+		if (!duplicates.isEmpty()) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(Messages.CreateEntityParameterCollector_MultipleMappings);
+			for (String d : duplicates) {
+				sb.append(d);
+				sb.append(", "); //$NON-NLS-1$
+			}
+			sb.deleteCharAt(sb.length()-1);
+			sb.deleteCharAt(sb.length()-1);
+			
+			warningLabel.setText(sb.toString());
+			warningSection.setVisible(true);
+		}else {
+			warningLabel.setText(""); //$NON-NLS-1$
+			warningSection.setVisible(false);
+		}
+		
 		return null;
 	}
 
@@ -293,6 +325,20 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		btnMoveDown.addListener(SWT.Selection, e->move(1));
 		btnMoveDown.setEnabled(false);
 		
+		warningSection = new Composite(main, SWT.NONE);
+		warningSection.setLayout(new GridLayout(2, false));
+		warningSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridLayout)warningSection.getLayout()).marginWidth = 0;
+		((GridLayout)warningSection.getLayout()).marginHeight = 0;
+		warningSection.setVisible(false);
+		
+		l = new Label(warningSection, SWT.NONE);
+		l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+		
+		warningLabel = new Label(warningSection, SWT.WRAP);
+		warningLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)warningLabel.getLayoutData()).widthHint = 100;
+		warningLabel.setText(""); //$NON-NLS-1$
 		
 		cmbEntityType.addSelectionChangedListener(e->{
 			btnAdd.setEnabled(cmbEntityType.getStructuredSelection().getFirstElement() instanceof IntelEntityType);

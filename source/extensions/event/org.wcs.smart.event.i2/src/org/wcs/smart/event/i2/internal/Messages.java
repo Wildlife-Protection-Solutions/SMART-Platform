@@ -25,6 +25,7 @@ public class Messages extends NLS {
 	public static String CreateEntityParameterCollector_FixedOp;
 	public static String CreateEntityParameterCollector_loadingJobName;
 	public static String CreateEntityParameterCollector_MappingsLable;
+	public static String CreateEntityParameterCollector_MultipleMappings;
 	public static String CreateEntityParameterCollector_PositionLabel;
 	public static String CreateEntityParameterCollector_UpButton;
 	public static String CreateRecordParameterCollector_JobName;

@@ -308,7 +308,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 				dAttribute.getAttributeList().forEach(a->a.getName());
 			}
 			
-			//TODO: clear mappings if different attribute
+			//clear mappings if different attribute
 			List<ListItemMapping> itemMappings = (List<ListItemMapping>) tblList.getInput();
 			Attribute existingAttribute = null;
 			for (ListItemMapping m : itemMappings) {
