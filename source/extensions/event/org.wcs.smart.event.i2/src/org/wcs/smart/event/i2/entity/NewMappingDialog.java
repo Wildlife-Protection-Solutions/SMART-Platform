@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -302,51 +301,35 @@ public class NewMappingDialog extends TitleAreaDialog {
 		});
 		
 		cmbDmAttribute.addSelectionChangedListener(e->{
-			IntelAttribute iAttribute = ((IntelEntityTypeAttribute) cmbIntelAttribute.getStructuredSelection().getFirstElement()).getAttribute();
 			Attribute dAttribute = (Attribute) cmbDmAttribute.getStructuredSelection().getFirstElement();
-		
-			if (iAttribute.getType() != IntelAttribute.AttributeType.LIST) {
-				tblList.setInput(Collections.emptyList());
-				return;
-			}else {
-				List<ListItemMapping> itemMappings = new ArrayList<>();
-				try(Session s = HibernateManager.openSession()){
-					dAttribute = s.get(Attribute.class, dAttribute.getUuid());
-					dAttribute.getAttributeList().forEach(a->a.getName());
-				}
-				for (IntelAttributeListItem iItem : iAttribute.getAttributeList()) {
-					ListItemMapping mp = new ListItemMapping();
-					mp.iItem = iItem;
-					itemMappings.add(mp);
-			
-					String dmKey = iItem.getKeyId();
-					if (mapping != null) {
-						dmKey = null;
-						for (Entry<String,String> items : mapping.getListItemMappings().entrySet()) {
-							if (items.getKey().equals(iItem.getKeyId())) {
-								dmKey = items.getValue();
-								break;
-							}
-						}
-					}
-					for (AttributeListItem i : dAttribute.getAttributeList()) {
-						if (i.getKeyId().equals(dmKey)) {
-							mp.dmItem = i;
-							break;
-						}
-					}
-					
-				}
-				itemMappings.sort((a,b)->Collator.getInstance().compare(a.iItem.getName(), b.iItem.getName()));
-				tblList.setInput(itemMappings);
-				tblList.refresh();
-				for (TableColumn tc : tblList.getTable().getColumns()) tc.pack();
-				List<Object> items = new ArrayList<>();
-				items.add(""); //$NON-NLS-1$
-				items.addAll(dAttribute.getAttributeList());
-				cellEditor.setInput(items);
-				
+			if (dAttribute == null) return;
+			try(Session s = HibernateManager.openSession()){
+				dAttribute = s.get(Attribute.class, dAttribute.getUuid());
+				dAttribute.getAttributeList().forEach(a->a.getName());
 			}
+			
+			//TODO: clear mappings if different attribute
+			List<ListItemMapping> itemMappings = (List<ListItemMapping>) tblList.getInput();
+			Attribute existingAttribute = null;
+			for (ListItemMapping m : itemMappings) {
+				if (m.dmItem != null) {
+					existingAttribute = m.dmItem.getAttribute();
+					break;
+				}
+			}
+			if (!dAttribute.equals(existingAttribute)) {
+				itemMappings.forEach(z->z.dmItem = null);
+				tblList.refresh();	
+			}
+			
+			if (dAttribute.getType() != Attribute.AttributeType.LIST) {
+				cellEditor.setInput(Collections.emptyList());
+				return;
+			}
+			List<Object> items = new ArrayList<>();
+			items.add(""); //$NON-NLS-1$
+			items.addAll(dAttribute.getAttributeList());
+			cellEditor.setInput(items);
 			
 		});
 		
@@ -438,6 +421,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 				cmbDmAttribute.setSelection(new StructuredSelection(mapping.getDataModelAttribute()));
 				configureFixedValue();
 				configureDm();
+			
 			}else if (mapping.getType() == Type.FIXED) {
 				btnDm.setSelection(false);
 				btnFixed.setSelection(true);
@@ -451,8 +435,30 @@ public class NewMappingDialog extends TitleAreaDialog {
 				btnObsPosition.setSelection(true);
 				configureFixedValue();
 				configureDm();
-				
 			}
+			
+			
+			List<ListItemMapping> mappings = (List<ListItemMapping>) tblList.getInput();
+			if (mappings != null) {
+				Attribute dAttribute = mapping.getDataModelAttribute();
+				if (dAttribute != null) {
+					try(Session s = HibernateManager.openSession()){
+						dAttribute = s.get(Attribute.class, dAttribute.getUuid());
+						dAttribute.getAttributeList().forEach(a->a.getName());
+					}	
+				}
+				
+				for (ListItemMapping mi : mappings) {
+					String diKey = mapping.getListItemMappings().get(mi.iItem.getKeyId());
+					for (AttributeListItem ii : dAttribute.getAttributeList()) {
+						if (ii.getKeyId().equals(diKey)) {
+							mi.dmItem = ii;
+							break;
+						}
+					}
+				}
+			}
+			tblList.refresh();
 		}
 		
 		setTitle(type.getName());
@@ -532,6 +538,7 @@ public class NewMappingDialog extends TitleAreaDialog {
 		Object x = cmpDmMap.getData(ATTRIBUTE_KEY);
 		if (x != null && x == ea.getAttribute()) return;
 		tblList.getTable().setVisible(ea.getAttribute().getType() == AttributeType.LIST);
+		cellEditor.setInput(Collections.emptyList());
 		
 		cmpDmMap.setData(ATTRIBUTE_KEY, ea.getAttribute());
 		List<Attribute> filtered = new ArrayList<>();
@@ -564,6 +571,44 @@ public class NewMappingDialog extends TitleAreaDialog {
 		}
 		cmbDmAttribute.setInput(filtered);
 		setEnabled(cmpDmMap, btnDm.getSelection());
+		
+		IntelAttribute iAttribute = ea.getAttribute();
+		if (iAttribute.getType() != IntelAttribute.AttributeType.LIST) {
+			tblList.setInput(Collections.emptyList());
+		}else {
+			Attribute dAttribute = (Attribute) cmbDmAttribute.getStructuredSelection().getFirstElement();
+			if (dAttribute != null) {
+				try(Session s = HibernateManager.openSession()){
+					dAttribute = s.get(Attribute.class, dAttribute.getUuid());
+					dAttribute.getAttributeList().forEach(a->a.getName());
+				}	
+			}
+			
+			List<ListItemMapping> itemMappings = new ArrayList<>();
+			
+			for (IntelAttributeListItem iItem : iAttribute.getAttributeList()) {
+				ListItemMapping mp = new ListItemMapping();
+				mp.iItem = iItem;
+				itemMappings.add(mp);
+		
+				String dmKey = iItem.getKeyId();
+				if (dAttribute != null) {
+					for (AttributeListItem i : dAttribute.getAttributeList()) {
+						if (i.getKeyId().equals(dmKey)) {
+							mp.dmItem = i;
+							break;
+						}
+					}
+				}
+			}
+			itemMappings.sort((a,b)->Collator.getInstance().compare(a.iItem.getName(), b.iItem.getName()));
+			tblList.setInput(itemMappings);
+			tblList.refresh();
+			for (TableColumn tc : tblList.getTable().getColumns()) {
+				tc.pack();
+				if (tc.getWidth() > 200) tc.setWidth(200);
+			}
+		}
 	}
 
 	private void setEnabled(Control c, boolean enabled) {
