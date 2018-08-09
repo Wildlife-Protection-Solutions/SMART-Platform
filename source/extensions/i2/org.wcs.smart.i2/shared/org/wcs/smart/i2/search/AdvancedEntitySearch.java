@@ -24,15 +24,15 @@ package org.wcs.smart.i2.search;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -51,6 +51,7 @@ import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Advanced entity search implementation
@@ -144,14 +145,13 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 			return results;
 		}else{
 			Long now = System.nanoTime();
-			Query<?> q = null;
+			List<?> uuids = null;
 			try{
-				q = parseQueryString(session, locale);
+				uuids = runQueryString(session, locale);
 			}catch (Exception ex){
 				throw new Exception(MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(Error.PARSE_ERROR, locale), ex.getMessage())  ,ex);
 			}
 			try{
-				List<?> uuids = q.list();
 				int totalCount = uuids.size();
 				List<IntelSearchResultItem> items = new ArrayList<>(Math.min(totalCount, maxResultCnt));
 				for (int i = 0; i < uuids.size(); i ++){
@@ -179,38 +179,194 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	}
 
 	
-	private Query<?> parseQueryString(Session session, Locale locale) throws Exception{
+	private List<UUID> runQueryString(Session session, Locale locale) throws Exception{
 		String stokens[] = searchString.split("\\|"); //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
+		sb.append("DROP TABLE qt_temp");  //$NON-NLS-1$
+		try {
+			session.createNativeQuery(sb.toString()).executeUpdate();
+		}catch (Exception ex) {}
 		
-		sb.append("SELECT DISTINCT ie.uuid "); //$NON-NLS-1$
-		sb.append(" FROM IntelEntity ie  JOIN ie.entityType t "); //$NON-NLS-1$
+		sb = new StringBuilder();
+		sb.append(" CREATE TABLE qt_temp (entity_uuid char(16) for bit data, entity_type_key varchar(128) )"); //$NON-NLS-1$
+		session.createNativeQuery(sb.toString()).executeUpdate();
 		
+		
+		sb = new StringBuilder();
+		sb.append("INSERT INTO qt_temp (entity_uuid, entity_type_key ) ");  //$NON-NLS-1$
+		sb.append(" SELECT DISTINCT ie.uuid, t.keyid "); //$NON-NLS-1$
+		sb.append(" FROM smart.i_entity ie join smart.i_entity_type t on ie.entity_type_uuid = t.uuid  WHERE ie.ca_uuid in ( :cauuids ) "); //$NON-NLS-1$
+		
+		List<byte[]> uuids = this.cas.stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList()); 
+		session.createNativeQuery(sb.toString())
+			.setParameterList("cauuids", uuids)	 //$NON-NLS-1$
+			.executeUpdate();
+		
+
 		HashSet<String> usedKeys = new HashSet<String>();
 		for (String t : stokens){
+			
+			if (t.startsWith(ENTITYTYPE_KEY + " ")){ //$NON-NLS-1$
+				String[] bits = t.split(" "); //$NON-NLS-1$
+				String entityTypeKey = bits[2];
+				
+				if (!usedKeys.contains(entityTypeKey)){
+					usedKeys.add(entityTypeKey);
+					
+					sb = new StringBuilder();
+					sb.append("ALTER TABLE qt_temp ADD COLUMN e_");  //$NON-NLS-1$
+					sb.append(entityTypeKey);
+					sb.append(" boolean default false");  //$NON-NLS-1$
+					
+					session.createNativeQuery(sb.toString()).executeUpdate();
+					
+					sb = new StringBuilder();
+					sb.append("UPDATE qt_temp SET e_" );  //$NON-NLS-1$
+					sb.append(entityTypeKey);
+					sb.append(" = true WHERE entity_uuid IN (");  //$NON-NLS-1$
+					sb.append(" SELECT t.entity_uuid FROM qt_temp t WHERE t.entity_type_key = :key)");  //$NON-NLS-1$
+					
+					session.createNativeQuery(sb.toString())
+						.setParameter("key", entityTypeKey)  //$NON-NLS-1$
+						.executeUpdate();
+
+				}
+			}
+		}
+		
+		usedKeys = new HashSet<String>();
+		for (String t : stokens){
+			
 			if (t.startsWith(ATTRIBUTE_KEY + ":")){ //$NON-NLS-1$
 				String[] qbits = t.split(" "); //$NON-NLS-1$
 				String[] bits = qbits[0].split(":"); //$NON-NLS-1$
 				String attributeKey = bits[2].split("=")[0]; //$NON-NLS-1$
 				if (!usedKeys.contains(attributeKey)){
 					usedKeys.add(attributeKey);
-					sb.append (" LEFT JOIN ie.attributes a_" + attributeKey + " LEFT JOIN a_" + attributeKey + ".id.attribute at_" + attributeKey + " with at_" + attributeKey + ".keyId = '" + attributeKey + "' "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-					if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.LIST.key)){
-						sb.append(" LEFT JOIN a_" + attributeKey + ".attributeListItem li_" + attributeKey); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					
+					sb = new StringBuilder();
+					sb.append("ALTER TABLE qt_temp ADD COLUMN a_");  //$NON-NLS-1$
+					sb.append(attributeKey);
+					sb.append(" boolean DEFAULT FALSE");  //$NON-NLS-1$
+					 
+					session.createNativeQuery(sb.toString()).executeUpdate();
+					
+					sb = new StringBuilder();
+					sb.append("UPDATE qt_temp SET a_" );  //$NON-NLS-1$
+					sb.append(attributeKey);
+					sb.append(" = true WHERE entity_uuid IN (");  //$NON-NLS-1$
+					
+					String atype = bits[1];
+					
+					if (atype.equalsIgnoreCase(IntelAttribute.AttributeType.BOOLEAN.key)){
+						sb.append("SELECT t.entity_uuid");  //$NON-NLS-1$
+						sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid ");  //$NON-NLS-1$
+						sb.append(" join smart.i_attribute a on a.uuid = v.attribute_uuid and a.keyId = :attributeKey ");  //$NON-NLS-1$
+						sb.append(" WHERE v.double_value > 0.5 ");  //$NON-NLS-1$
+						sb.append(")"); //$NON-NLS-1$
+						
+						session.createNativeQuery(sb.toString())
+							.setParameter("attributeKey", attributeKey)  //$NON-NLS-1$
+							.executeUpdate();
+						
+					}else if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.TEXT.key)){
+						sb.append("SELECT t.entity_uuid"); //$NON-NLS-1$
+						sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid ");  //$NON-NLS-1$
+						sb.append(" join smart.i_attribute a on a.uuid = v.attribute_uuid and a.keyId = :attributeKey ");  //$NON-NLS-1$
+						sb.append(" WHERE LOWER(v.string_value)  ");  //$NON-NLS-1$
+						
+						int startIndex = t.indexOf(qbits[2], qbits[0].length());
+						String strValue = t.substring(startIndex).trim();
+						String value = SharedUtils.stripQuotes(strValue).toLowerCase();
+						if (qbits[1].equalsIgnoreCase(Operator.STR_EQUALS.getKey())){
+							sb.append(" = "); //$NON-NLS-1$
+						}else if (qbits[1].equalsIgnoreCase(Operator.STR_CONTAINS.getKey())){
+							sb.append(" like "); //$NON-NLS-1$
+							value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
+						}else if (qbits[1].equalsIgnoreCase(Operator.STR_NOTCONTAINS.getKey())){
+							sb.append(" not like "); //$NON-NLS-1$
+							value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
+						}
+						sb.append(" :value "); //$NON-NLS-1$
+						sb.append(")");  //$NON-NLS-1$
+						
+						session.createNativeQuery(sb.toString())
+							.setParameter("attributeKey", attributeKey)  //$NON-NLS-1$
+							.setParameter("value", value)  //$NON-NLS-1$
+							.executeUpdate();
+						
+					}else if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.NUMERIC.key)){
+						sb.append("SELECT t.entity_uuid"); //$NON-NLS-1$
+						sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid "); //$NON-NLS-1$
+						sb.append(" join smart.i_attribute a on a.uuid = v.attribute_uuid and a.keyId = :attributeKey "); //$NON-NLS-1$
+						sb.append(" WHERE v.double_value ");  //$NON-NLS-1$
+						sb.append(qbits[1]);
+						sb.append(" :value ");  //$NON-NLS-1$
+						sb.append(")");  //$NON-NLS-1$
+						
+						session.createNativeQuery(sb.toString())
+							.setParameter("attributeKey", attributeKey)  //$NON-NLS-1$
+							.setParameter("value", Double.parseDouble(qbits[2]))  //$NON-NLS-1$
+							.executeUpdate(); 
+			
+					}else if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.DATE.key)){
+						sb.append("SELECT t.entity_uuid"); //$NON-NLS-1$
+						sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid "); //$NON-NLS-1$
+						sb.append(" join smart.i_attribute a on a.uuid = v.attribute_uuid and a.keyId = :attributeKey "); //$NON-NLS-1$
+						sb.append(" WHERE v.string_value is not null and cast(v.string_value as date )"); //$NON-NLS-1$
+						
+						if (qbits[1].equalsIgnoreCase(Operator.BETWEEN.getKey())){
+							sb.append(" between "); //$NON-NLS-1$
+						}else if (qbits[1].equalsIgnoreCase(Operator.NOT_BETWEEN.getKey())){
+							sb.append(" not between "); //$NON-NLS-1$
+						}else{
+							throw new Exception(MessageFormat.format("Operator {0} not supported for date filter", qbits[2])); //$NON-NLS-1$
+						}
+						
+						sb.append(" :date1 and :date2 "); //$NON-NLS-1$ 
+						sb.append(")"); //$NON-NLS-1$
+						
+						Date d1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(qbits[2]);
+						Date d2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(qbits[4]);
+						
+						Calendar cal = Calendar.getInstance();
+						cal.setTimeInMillis(d2.getTime());
+						cal.set(Calendar.SECOND, 59);
+						cal.set(Calendar.MINUTE, 59);
+						cal.set(Calendar.HOUR_OF_DAY, 23);
+						
+						session.createNativeQuery(sb.toString())
+							.setParameter("date1", d1) //$NON-NLS-1$
+							.setParameter("date2", cal.getTime()) //$NON-NLS-1$
+							.setParameter("attributeKey", attributeKey) //$NON-NLS-1$
+							.executeUpdate();
+			
+					}else if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.LIST.key)){
+						
+						sb.append("SELECT t.entity_uuid"); //$NON-NLS-1$
+						sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid ");  //$NON-NLS-1$
+						sb.append(" join smart.i_attribute a on a.uuid = v.attribute_uuid and a.keyId = :attributeKey ");  //$NON-NLS-1$
+						sb.append(" join smart.i_attribute_list_item li on li.uuid = v.list_item_uuid ");  //$NON-NLS-1$
+						sb.append(" WHERE v.li.keyid = :keyId");  //$NON-NLS-1$
+						sb.append(" ) "); //$NON-NLS-1$
+
+						String listKey = qbits[2];
+						session.createNativeQuery(sb.toString())
+							.setParameter("attributeKey", attributeKey) //$NON-NLS-1$
+							.setParameter("keyId", listKey) //$NON-NLS-1$
+							.executeUpdate();
+					}else{
+						throw new Exception(MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(Error.ATTRIBUTE_TYPE_NOT_SUPPORTED, locale), bits[1]));
 					}
 				}
 			}
 		}
 		
-		
-		int pcnt = 0;
-		HashMap<String, Object> params = new HashMap<>();
-		
+		sb = new StringBuilder();
+		sb.append(" SELECT entity_uuid FROM qt_temp "); //$NON-NLS-1$
 		sb.append(" WHERE "); //$NON-NLS-1$
-		sb.append(" ie.conservationArea in (:ca) AND ( "); //$NON-NLS-1$
-		params.put("ca", this.cas); //$NON-NLS-1$
-		
 		for (String t : stokens){
 			t = t.trim();
 			if (t.equalsIgnoreCase(Operator.AND.getKey())){
@@ -223,100 +379,39 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				sb.append(" ( "); //$NON-NLS-1$
 			}else if (t.equalsIgnoreCase(Operator.BRACKET_CLOSE.getKey())){
 				sb.append(" ) "); //$NON-NLS-1$
-			}else if (t.startsWith(ENTITYTYPE_KEY)){
+			}else if (t.startsWith(ENTITYTYPE_KEY + " ")){ //$NON-NLS-1$
 				String[] bits = t.split(" "); //$NON-NLS-1$
-				String pname = "p" + (pcnt++); //$NON-NLS-1$
-				sb.append(" t.keyId = :" + pname); //$NON-NLS-1$
-				params.put(pname, bits[2]);
+				String entityTypeKey = bits[2];
+				sb.append("e_"); //$NON-NLS-1$
+				sb.append( entityTypeKey );
+				sb.append(" = true "); //$NON-NLS-1$
 			}else if (t.startsWith(ATTRIBUTE_KEY + ":")){ //$NON-NLS-1$
 				String[] qbits = t.split(" "); //$NON-NLS-1$
 				String[] bits = qbits[0].split(":"); //$NON-NLS-1$
-				if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.BOOLEAN.key)){
-					String attributeKey = bits[2];
-					sb.append(" (  at_" + attributeKey + ".keyId = '" + attributeKey + "' AND a_" + attributeKey + ".numberValue  > 0.5 ) "); //at_" + attributeKey + ".keyId = '" + attributeKey + "' AND //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-				}else if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.TEXT.key)){
-					String attributeKey = bits[2];
-					sb.append(" ( at_" + attributeKey + ".keyId = '" + attributeKey + "' AND LOWER(a_" + attributeKey + ".stringValue) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-					
-					int startIndex = t.indexOf(qbits[2], qbits[0].length());
-					String strValue = t.substring(startIndex).trim();
-					String value = SharedUtils.stripQuotes(strValue).toLowerCase();
-					if (qbits[1].equalsIgnoreCase(Operator.STR_EQUALS.getKey())){
-						sb.append(" = "); //$NON-NLS-1$
-					}else if (qbits[1].equalsIgnoreCase(Operator.STR_CONTAINS.getKey())){
-						sb.append(" like "); //$NON-NLS-1$
-						value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
-					}else if (qbits[1].equalsIgnoreCase(Operator.STR_NOTCONTAINS.getKey())){
-						sb.append(" not like "); //$NON-NLS-1$
-						value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
-					}
-					
-					String pname = "p" + (pcnt++); //$NON-NLS-1$
-					sb.append(" :" + pname + " "); //$NON-NLS-1$ //$NON-NLS-2$
-					params.put(pname, value);
-					
-					sb.append(" ) "); //$NON-NLS-1$
-					
-				}else if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.NUMERIC.key)){
-					String attributeKey = bits[2];
-					sb.append(" ( at_" + attributeKey + ".keyId = '" + attributeKey + "' AND a_" + attributeKey + ".numberValue  "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-					sb.append(qbits[1]); //operator
-					String pname = "p" + (pcnt++); //$NON-NLS-1$
-					sb.append(" :" + pname + " "); //$NON-NLS-1$ //$NON-NLS-2$
-					params.put(pname, Double.parseDouble(qbits[2]));
-					sb.append(" ) "); //$NON-NLS-1$
-					
-					
-				}else if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.DATE.key)){
-					String attributeKey = bits[2];
-					String pname1 = "p" + (pcnt++); //$NON-NLS-1$
-					String pname2 = "p" + (pcnt++); //$NON-NLS-1$
-					
-					sb.append(" ( at_" + attributeKey + ".keyId = '" + attributeKey + "' AND a_" + attributeKey + ".stringValue is not null AND  cast(a_" + attributeKey + ".stringValue as date) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-					
-					if (qbits[1].equalsIgnoreCase(Operator.BETWEEN.getKey())){
-						sb.append(" between "); //$NON-NLS-1$
-					}else if (qbits[1].equalsIgnoreCase(Operator.NOT_BETWEEN.getKey())){
-						sb.append(" not between "); //$NON-NLS-1$
-					}else{
-						throw new Exception(MessageFormat.format("Operator {0} not supported for date filter", qbits[2])); //$NON-NLS-1$
-					}
-					sb.append(" :" + pname1 + " AND :" + pname2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					Date d1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(qbits[2]);
-					Date d2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(qbits[4]);
-							
-					params.put(pname1, d1);
-					params.put(pname2, d2);
-					
-				}else if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.LIST.key)){
-					String attributeKey = bits[2];
-					String listKey = qbits[2];
-					sb.append(" ( at_" + attributeKey + ".keyId = '" + attributeKey + "' AND li_" + attributeKey + ".keyId = "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-					
-					String pname = "p" + (pcnt++); //$NON-NLS-1$
-					sb.append(" :" + pname + " "); //$NON-NLS-1$ //$NON-NLS-2$
-					params.put(pname, listKey);
-					sb.append(" ) "); //$NON-NLS-1$
-				}else{
-					throw new Exception(MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(Error.ATTRIBUTE_TYPE_NOT_SUPPORTED, locale), bits[1]));
-				}
+				String attributeKey = bits[2];
+				sb.append("( a_"); //$NON-NLS-1$
+				sb.append( attributeKey );
+				sb.append(" = true ) "); //$NON-NLS-1$
 			}else{
 				throw new Exception(MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(Error.TOKEN_NOT_SUPPORTED, locale), t));
-				
 			}
 		}
-		sb.append(" ) "); //$NON-NLS-1$
 		
-		//System.out.println(sb.toString());
-		Query<?> q = session.createQuery(sb.toString());
-		for (Entry<String,Object> param : params.entrySet()){
-			if (param.getValue() instanceof Collection) {
-				q.setParameterList(param.getKey(), (Collection<?>)param.getValue());
-			}else {
-				q.setParameter(param.getKey(), param.getValue());
-			}
+		//query results
+		List<?> items = session.createNativeQuery(sb.toString()).list();
+		List<UUID> entities = new ArrayList<>();
+		for (Object x : items) {
+			byte[] bb = (byte[])x;
+			UUID eUuid = UuidUtils.byteToUUID(bb);
+			entities.add(eUuid);
 		}
-		return q;
+		
+		try {
+			//drop results table
+			session.createNativeQuery("DROP TABLE qt_temp").executeUpdate(); //$NON-NLS-1$
+		}catch (Exception ex) {}
+		
+		return entities;
 		
 	}
 }

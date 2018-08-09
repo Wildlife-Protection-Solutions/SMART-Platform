@@ -80,7 +80,7 @@ public enum Operator {
 	/**
 	 * The not between operator
 	 */
-	NOT_BETWEEN("not between"), //$NON-NLS-1$
+	NOT_BETWEEN("notbetween"), //$NON-NLS-1$
 	
 	/**
 	 * Boolean and operator

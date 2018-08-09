@@ -65,7 +65,12 @@ public abstract class EntitySearchJob extends Job{
 			
 			IntelSearchResult entities = null; 
 			try(Session s = HibernateManager.openSession()){
-				entities = search.doSearch(s, Locale.getDefault(), progress.split(1));
+				s.beginTransaction();
+				try {
+					entities = search.doSearch(s, Locale.getDefault(), progress.split(1));
+				} finally {
+					s.getTransaction().rollback();
+				}
 			}catch (OperationCanceledException ex) {
 				throw ex;
 			}catch (Exception ex){
