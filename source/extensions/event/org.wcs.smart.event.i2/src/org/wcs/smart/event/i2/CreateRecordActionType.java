@@ -135,6 +135,8 @@ public class CreateRecordActionType implements IActionType {
 		EActionParameterValue titleParam = action.findParameter(TitleParameter.INSTANCE.getKey());
 		if (titleParam != null) {
 			newRecord.setTitle(titleParam.getParameterValue());
+		}else {
+			newRecord.setTitle(""); //$NON-NLS-1$
 		}
 		newRecord.setAttachments(new ArrayList<>());
 		
