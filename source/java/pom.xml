@@ -224,6 +224,7 @@
 				<module>org.wcs.smart.udig-feature</module>
 				<module>org.wcs.smart.target</module>
 				<module>org.wcs.smart.p2</module>
+				<module>org.wcs.smart.dom.events</module>
 				<module>org.wcs.smart.udig.catalog.image.auxxml</module>
         			<module>org.wcs.smart.udig.customization</module>
         			<module>org.wcs.smart.birt</module>

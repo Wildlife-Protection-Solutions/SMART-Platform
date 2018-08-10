@@ -21,8 +21,13 @@
  */
 package org.wcs.smart.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Time;
 import java.text.MessageFormat;
 import java.util.Calendar;
@@ -39,10 +44,16 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.apache.batik.transcoder.TranscoderException;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.PNGTranscoder;
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.widgets.DateTime;
@@ -752,5 +763,28 @@ public class SmartUtils {
 	private static int blend(int v1, int v2, int ratio) {
 		int b = (ratio * v1 + (100 - ratio) * v2) / 100;
 		return Math.min(255, b);
+	}
+	
+	
+	/**
+	 * Reads an svg file into an SWT image. User must correctly display of the image
+	 * when done with it.
+	 * 
+	 * @param display
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 * @throws TranscoderException
+	 */
+	public static Image readSvg(Display display, Path file) throws IOException, TranscoderException {
+		PNGTranscoder transcoder = new PNGTranscoder();
+		try(Reader reader = Files.newBufferedReader(file)){
+			TranscoderInput input = new TranscoderInput(reader);
+			try(ByteArrayOutputStream bout = new ByteArrayOutputStream()){
+				TranscoderOutput output = new TranscoderOutput(bout);
+				transcoder.transcode(input, output);
+				return new Image(display, new ByteArrayInputStream(bout.toByteArray()));
+			}
+		}
 	}
 }

@@ -239,15 +239,20 @@ public class CaInfoComposite extends Composite {
 					img = new Image(cIcon.getDisplay(), file.toString());
 					cIcon.setData(IMAGE_KEY,  img);
 				}catch (Exception ex) {
-					
 				}
-				
+				if (img == null && file.toString().endsWith(".svg")) { //$NON-NLS-1$
+					//try svg reader
+					try {
+						img = SmartUtils.readSvg(cIcon.getDisplay(), file);
+						cIcon.setData(IMAGE_KEY,  img);
+					}catch (Exception ex) { }
+				}
 			}
 			
 			if (img != null) {
 				e.gc.setBackground(cIcon.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 				e.gc.fillRectangle(0, 0, cIcon.getBounds().width, cIcon.getBounds().height);
-				e.gc.drawImage(img, 0, 0, img.getBounds().width, img.getBounds().height, 0,0,cIcon.getBounds().width-1, cIcon.getBounds().height-1);
+				e.gc.drawImage(img,0, 0, img.getBounds().width, img.getBounds().height, 1,1,cIcon.getBounds().width-2, cIcon.getBounds().height-2);
 			}else if (file != null) {
 				
 				e.gc.setBackground(cIcon.getDisplay().getSystemColor(SWT.COLOR_WHITE));

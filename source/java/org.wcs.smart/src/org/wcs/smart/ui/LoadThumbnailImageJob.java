@@ -114,7 +114,18 @@ public class LoadThumbnailImageJob extends Job {
 						return;
 					}
 	
-					Image rawImage = new Image(Display.getDefault(), file.getAbsolutePath());
+					Image rawImage = null;
+					try{
+						rawImage = new Image(Display.getDefault(), file.getAbsolutePath());
+					}catch (Exception ex) {
+						//add support for svg
+						if (file.getAbsolutePath().toLowerCase().endsWith(".svg")) { //$NON-NLS-1$
+							try {
+								rawImage = SmartUtils.readSvg(Display.getDefault(), file.toPath());
+							}catch (Exception ex2) {
+							}
+						}
+					}
 	
 					// scale image
 					Rectangle bounds = rawImage.getBounds();
@@ -135,7 +146,6 @@ public class LoadThumbnailImageJob extends Job {
 					rawImage.dispose();
 	
 					// transform based on exif orientation data
-					
 					Transform imageTransform = SmartUtils.getExifImageTransform(file, thumbnailSize, thumbnailSize);
 					if (imageTransform != null) {
 						Image image3 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
