@@ -273,7 +273,7 @@ public class EventProcessingJob extends Job {
 					
 				case TREE:
 					String treeNodeKey = afilter.getValue().toString();
-					if (attributeValue.getAttributeListItem() != null && attributeValue.getAttributeTreeNode().getHkey().equalsIgnoreCase(treeNodeKey.trim())) {
+					if (attributeValue.getAttributeTreeNode() != null && attributeValue.getAttributeTreeNode().getHkey().equalsIgnoreCase(treeNodeKey.trim())) {
 						equation.add(Boolean.TRUE);
 					}else {
 						equation.add(Boolean.FALSE);
