@@ -113,7 +113,7 @@ public class CreateRecordActionType implements IActionType {
 		sb.append("\n"); //$NON-NLS-1$
 		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg3, (new SimpleDateFormat("MMM dd, yyyy HH:mm:ss")).format(data.getWaypoint().getDateTime()))); //$NON-NLS-1$
 		sb.append("\n"); //$NON-NLS-1$
-		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg4, data.getWaypoint().getComment()));
+		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg4, data.getWaypoint().getComment() == null ? "" : data.getWaypoint().getComment())); //$NON-NLS-1$
 		sb.append("\n"); //$NON-NLS-1$
 		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg5, data.getCategory().getName()));
 		sb.append("\n"); //$NON-NLS-1$
