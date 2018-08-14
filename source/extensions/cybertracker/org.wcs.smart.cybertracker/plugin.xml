@@ -106,6 +106,29 @@
                   name="org.wcs.smart.cybertracker2.separator.import"
                   visible="true">
             </separator>
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                  </or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
+            </visibleWhen>
          </menu>
       </menuContribution>
       <menuContribution
