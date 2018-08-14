@@ -41,7 +41,45 @@
             <command
                   commandId="org.wcs.smart.qa.routines.list"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <or>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                  </or>
+               </and>
+            </visibleWhen>
          </menu>
       </menuContribution>
    </extension>

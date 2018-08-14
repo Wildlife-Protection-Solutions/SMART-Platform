@@ -78,6 +78,8 @@ public class Upgrader601To610 implements IDatabaseUpgrader {
 				"ALTER TABLE smart.waypoint ADD COLUMN last_modified_by char(16) for bit data", //$NON-NLS-1$
 				"GRANT EXECUTE ON FUNCTION smart.trackintersects TO ANALYST", //$NON-NLS-1$
 				"GRANT EXECUTE ON FUNCTION smart.trackintersects TO MANAGER", //$NON-NLS-1$
+				
+				"GRANT ALL PRIVILEGES ON smart.qa_routine_parameter TO admin,manage,data_entry", //$NON-NLS-1$
 		};
 
 		for (String s : sql) {
