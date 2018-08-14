@@ -205,8 +205,52 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			"GRANT ALL PRIVILEGES ON smart.i_diagram_relationship_type_style to data_entry", //$NON-NLS-1$
 			"GRANT ALL PRIVILEGES ON smart.i_diagram_relationship_type_style to manager", //$NON-NLS-1$
 			"GRANT ALL PRIVILEGES ON smart.i_diagram_relationship_type_style to analyst", //$NON-NLS-1$
-			"GRANT SELECT ON smart.i_diagram_relationship_type_style to login" //$NON-NLS-1$
+			"GRANT SELECT ON smart.i_diagram_relationship_type_style to login", //$NON-NLS-1$
 			
+			//these permissions are to support the events plugin
+			//i put them here to keep it easier to manage
+			"GRANT ALL PRIVILEGES ON smart.I_RECORD TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_RECORD_ATTACHMENT TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_RECORD_ATTRIBUTE_VALUE TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_RECORD_ATTRIBUTE_VALUE_LIST TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ENTITY TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ENTITY_ATTACHMENT TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ENTITY_ATTRIBUTE_VALUE TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ENTITY_LOCATION TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ENTITY_RECORD TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ENTITY_RELATIONSHIP TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ENTITY_RELATIONSHIP_ATTRIBUTE_VALUE TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ATTACHMENT TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_LOCATION TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_OBSERVATION TO data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_OBSERVATION_ATTRIBUTE TO data_entry", //$NON-NLS-1$
+			"GRANT SELECT ON smart.i_recordsource to data_entry", //$NON-NLS-1$
+			"GRANT SELECT ON smart.i_attribute to data_entry", //$NON-NLS-1$
+			"GRANT SELECT ON smart.I_ATTRIBUTE_LIST_ITEM to data_entry", //$NON-NLS-1$
+			"grant select on smart.i_entity_type to data_entry", //$NON-NLS-1$
+			"grant select on smart.I_ENTITY_TYPE_ATTRIBUTE to data_entry", //$NON-NLS-1$
+			"grant select on smart.I_ENTITY_TYPE_ATTRIBUTE_GROUP to data_entry", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_RECORD TO manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_RECORD_ATTACHMENT TO manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_RECORD_ATTRIBUTE_VALUE TO manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_RECORD_ATTRIBUTE_VALUE_LIST TO manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ENTITY TO manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ENTITY_ATTACHMENT TO manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ENTITY_ATTRIBUTE_VALUE TO manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ENTITY_LOCATION TO manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ENTITY_RECORD TO manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ENTITY_RELATIONSHIP TO manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ENTITY_RELATIONSHIP_ATTRIBUTE_VALUE TO manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_ATTACHMENT TO manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_LOCATION TO manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_OBSERVATION TO manager", //$NON-NLS-1$
+			"GRANT ALL PRIVILEGES ON smart.I_OBSERVATION_ATTRIBUTE TO manager", //$NON-NLS-1$
+			"GRANT SELECT ON smart.i_recordsource to manager", //$NON-NLS-1$
+			"GRANT SELECT ON smart.i_attribute to manager", //$NON-NLS-1$
+			"GRANT SELECT ON smart.I_ATTRIBUTE_LIST_ITEM to maanger", //$NON-NLS-1$
+			"grant select on smart.i_entity_type to manager", //$NON-NLS-1$
+			"grant select on smart.I_ENTITY_TYPE_ATTRIBUTE to manager", //$NON-NLS-1$
+			"grant select on smart.I_ENTITY_TYPE_ATTRIBUTE_GROUP to manager", //$NON-NLS-1$
 		};
 		
 		for (String s : sql) {
