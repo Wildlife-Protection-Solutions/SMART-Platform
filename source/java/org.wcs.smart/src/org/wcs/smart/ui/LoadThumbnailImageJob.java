@@ -126,7 +126,8 @@ public class LoadThumbnailImageJob extends Job {
 							}
 						}
 					}
-	
+					if (rawImage == null) return;
+					
 					// scale image
 					Rectangle bounds = rawImage.getBounds();
 					int x = 0, y = 0, width = 0, height = 0;
