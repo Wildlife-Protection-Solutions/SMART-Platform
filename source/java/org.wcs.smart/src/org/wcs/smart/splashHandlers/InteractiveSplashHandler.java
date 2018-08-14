@@ -26,16 +26,19 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -74,6 +77,7 @@ import org.wcs.smart.ui.ConservationAreaLabelProvider;
 import org.wcs.smart.ui.internal.startup.InitializeDialog;
 import org.wcs.smart.ui.internal.startup.StartUpAdvancedDialog;
 import org.wcs.smart.ui.internal.startup.StartUpDialog;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * 
@@ -83,6 +87,10 @@ import org.wcs.smart.ui.internal.startup.StartUpDialog;
  * 
  */
 public class InteractiveSplashHandler extends AbstractSplashHandler {
+	
+	private static final String LAST_CA_KEY = "LAST_CA"; //$NON-NLS-1$
+	private static final String CA_PREF_NODE = "org.wcs.smart.userLoginCaPref"; //$NON-NLS-1$
+	
 	
 	private final static int F_COLUMN_COUNT = 2;
 	
@@ -162,13 +170,10 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 			cmbUserName.select(0);
 			txtPassword.setFocus();
 		} else {
-			//TODO: remove smart/smart before build
-//			cmbUserName.setText("smart"); //$NON-NLS-1$
 			cmbUserName.setFocus();
 		}
 		//TODO: remove smart/smart before build
 //		txtPassword.setText("smart"); //$NON-NLS-1$
-		
 		doEventLoop();
 	}
 	
@@ -273,6 +278,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 				if (SmartStartUp.login(ca, username, password)) {
 					fAuthenticated = true;
 					new UserLoginInfo(username).writeToStore();
+					ConfigurationScope.INSTANCE.getNode(CA_PREF_NODE).put(LAST_CA_KEY, UuidUtils.uuidToString(ca.getUuid()));
+					ConfigurationScope.INSTANCE.getNode(CA_PREF_NODE).flush();
 				} else {
 					progressLabel.setText(Messages.InteractiveSplashHandler_Error_AuthenticationFailure);
 				}
@@ -510,12 +517,32 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 						});
 					}
 					
+					String cauuid = ConfigurationScope.INSTANCE.getNode(CA_PREF_NODE).get(LAST_CA_KEY, null);
+					UUID caUuid = null;
+					if (cauuid != null) {
+						try {
+							caUuid = UuidUtils.stringToUuid(cauuid);
+						}catch (Exception ex) {
+							
+						}
+					}
+					
+					final UUID thisUuid = caUuid;
+					
 					InteractiveSplashHandler.this.parent.getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
 							if (cas != null && cas.size() > 0){
 								cmvConservationArea.setInput(cas);
 								cmvConservationArea.getCombo().select(0);
+								if (thisUuid != null) {
+									for (Object ca : cas) {
+										if (ca instanceof ConservationArea && ((ConservationArea)ca).getUuid().equals(thisUuid)) {
+											cmvConservationArea.setSelection(new StructuredSelection(ca));
+											break;
+										}
+									}
+								}
 								enableControls(true);
 								progressLabel.setText(""); //$NON-NLS-1$
 								
