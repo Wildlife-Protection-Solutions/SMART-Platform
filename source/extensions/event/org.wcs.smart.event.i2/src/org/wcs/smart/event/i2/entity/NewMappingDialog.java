@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -116,6 +117,14 @@ public class NewMappingDialog extends TitleAreaDialog {
 		}
 		if (btnDm.getSelection()) {
 			type = EntityMapping.Type.DM;
+			
+			
+			Attribute dmAttribute = (Attribute)cmbDmAttribute.getStructuredSelection().getFirstElement();
+			if (dmAttribute == null) {
+				MessageDialog.openInformation(getParentShell(), Messages.NewMappingDialog_WarningTitle, Messages.NewMappingDialog_WarningMsg);
+				return;
+			}
+				
 		}
 		if (btnObsPosition.getSelection()) {
 			type = EntityMapping.Type.POSITION;

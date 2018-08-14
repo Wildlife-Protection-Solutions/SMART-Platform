@@ -42,6 +42,8 @@ public class Messages extends NLS {
 	public static String NewMappingDialog_Message;
 	public static String NewMappingDialog_PositionLabel;
 	public static String NewMappingDialog_Title;
+	public static String NewMappingDialog_WarningMsg;
+	public static String NewMappingDialog_WarningTitle;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
