@@ -38,6 +38,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
@@ -111,9 +112,8 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 		} catch (Exception e) {
 			throw new OdaException(e);
 		}
-		
-		
-		this.m_currentRowId = 0;
+	
+		this.m_currentRowId = -1;
 	}
 	
 	
@@ -182,6 +182,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 */
 	public String getString(int index) throws OdaException {
 		lastRowItem = getCurrentItem(index);
+		if (lastRowItem instanceof NamedItem) return ((NamedItem)lastRowItem).getName();
 		if (lastRowItem == null) return ""; //$NON-NLS-1$
 		return lastRowItem.toString();
 	}

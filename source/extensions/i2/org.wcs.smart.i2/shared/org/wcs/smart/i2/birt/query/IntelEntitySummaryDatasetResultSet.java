@@ -82,7 +82,7 @@ public class IntelEntitySummaryDatasetResultSet implements IResultSet {
 		}
 		
 		
-		this.m_currentRowId = 0;
+		this.m_currentRowId = -1;
 	}
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getMetaData()
