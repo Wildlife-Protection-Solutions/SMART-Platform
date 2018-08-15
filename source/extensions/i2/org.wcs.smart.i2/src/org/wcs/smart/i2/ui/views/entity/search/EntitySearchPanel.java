@@ -232,11 +232,11 @@ public abstract class EntitySearchPanel extends Composite {
 			}else if (p.equalsIgnoreCase(Operator.NOT.getKey())){
 				toAdd.add(createNotDropItem());
 			}else if (p.equalsIgnoreCase(Operator.AND.getKey())){
-				OptionDropItem di = OptionDropItem.createAndOrDropItem();
+				OptionDropItem di = OptionDropItem.createAndOrDropItem(true);
 				di.setInitialValue(Operator.AND.getKey());
 				toAdd.add(di);
 			}else if (p.equalsIgnoreCase(Operator.OR.getKey())){
-				OptionDropItem di = OptionDropItem.createAndOrDropItem();
+				OptionDropItem di = OptionDropItem.createAndOrDropItem(true);
 				di.setInitialValue(Operator.OR.getKey());
 				toAdd.add(di);
 			}else if (p.startsWith(AdvancedEntitySearch.ENTITYTYPE_KEY)){
@@ -483,7 +483,7 @@ public abstract class EntitySearchPanel extends Composite {
 			di = new TextDropItem(a.getName(), key);
 			break;
 		case DATE:
-			di = new DateDropItem(a.getName(), key);
+			di = new DateDropItem(a.getName(), key, true);
 			break;
 		case LIST:
 			String[] names = new String[a.getAttributeList().size()];
@@ -492,13 +492,13 @@ public abstract class EntitySearchPanel extends Composite {
 				names[i] = a.getAttributeList().get(i).getName();
 				keys[i] = a.getAttributeList().get(i).getKeyId();
 			}
-			di = new OptionDropItem(a.getName(), key, names, keys);
+			di = new OptionDropItem(a.getName(), key, names, keys, true);
 			break;
 		case NUMERIC:
-			di = new TextBoxDropItem(a.getName(), key, InputType.NUMERIC);
+			di = new TextBoxDropItem(a.getName(), key, InputType.NUMERIC, true);
 			break;
 		case TEXT:
-			di = new TextBoxDropItem(a.getName(), key, InputType.TEXT);
+			di = new TextBoxDropItem(a.getName(), key, InputType.TEXT, true);
 			break;
 		default:
 			break;
@@ -533,7 +533,7 @@ public abstract class EntitySearchPanel extends Composite {
 			return new ErrorDropItem(e.getMessage());
 		}
 		
-		OptionDropItem dropItem = new OptionDropItem(Messages.AdvancedEntitySearchPanel_EntityTypeOptionDropItemName, AdvancedEntitySearch.ENTITYTYPE_KEY, values[0], values[1]);
+		OptionDropItem dropItem = new OptionDropItem(Messages.AdvancedEntitySearchPanel_EntityTypeOptionDropItemName, AdvancedEntitySearch.ENTITYTYPE_KEY, values[0], values[1], true);
 		if (entityTypeKey != null){
 			dropItem.setInitialValue(entityTypeKey);
 		}

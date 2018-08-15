@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.i2.query.Operator;
-import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * Drop item that displays a combo box where users can select
@@ -48,8 +47,8 @@ import org.wcs.smart.i2.security.IntelSecurityManager;
  */
 public class OptionDropItem extends DropItem {
 
-	public static OptionDropItem createAndOrDropItem(){
-		return new OptionDropItem(new String[]{Operator.AND.getLabel(Locale.getDefault()), Operator.OR.getLabel(Locale.getDefault())}, new String[]{Operator.AND.getKey(), Operator.OR.getKey()});
+	public static OptionDropItem createAndOrDropItem(boolean canEdit){
+		return new OptionDropItem(new String[]{Operator.AND.getLabel(Locale.getDefault()), Operator.OR.getLabel(Locale.getDefault())}, new String[]{Operator.AND.getKey(), Operator.OR.getKey()}, canEdit);
 	}
 	private Option[] options;
 	
@@ -59,13 +58,16 @@ public class OptionDropItem extends DropItem {
 	private String label;
 	private String key;
 	
-	public OptionDropItem(String[] labels, String[] queryPart){
-		this(null, null, labels, queryPart);
+	private boolean canEdit;
+	
+	public OptionDropItem(String[] labels, String[] queryPart, boolean canEdit){
+		this(null, null, labels, queryPart, canEdit);
 	}
 	
-	public OptionDropItem(String label, String key, String[] labels, String[] queryPart){
+	public OptionDropItem(String label, String key, String[] labels, String[] queryPart, boolean canEdit){
 		this.label = label;
 		this.key = key;
+		this.canEdit = canEdit;
 		options = new Option[labels.length];
 		for (int i= 0; i < labels.length; i ++){
 			options[i] = new Option(labels[i], queryPart[i]);
@@ -153,7 +155,7 @@ public class OptionDropItem extends DropItem {
 			currentOption = options[0];
 		}
 		
-		combo.getControl().setEnabled(IntelSecurityManager.INSTANCE.canEditQuery());
+		combo.getControl().setEnabled(canEdit);
 		
 		combo.setSelection(new StructuredSelection(currentOption));
 		initDrag(combo.getControl());

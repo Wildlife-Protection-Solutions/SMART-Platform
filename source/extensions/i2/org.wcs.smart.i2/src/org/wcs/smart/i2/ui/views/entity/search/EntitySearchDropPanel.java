@@ -181,7 +181,7 @@ public class EntitySearchDropPanel implements IDefinitionPanel {
 				}
 			}
 			if (addBoolean){
-				OptionDropItem it = OptionDropItem.createAndOrDropItem();
+				OptionDropItem it = OptionDropItem.createAndOrDropItem(true);
 				it.setInitialValue(Operator.OR.getKey());
 				it.createWidget(this, dropTargetContent);
 				items.add(it);	

@@ -44,7 +44,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
-import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.util.SmartUtils;
 
 public class DateDropItem extends DropItem {
@@ -61,9 +60,12 @@ public class DateDropItem extends DropItem {
 	private Date currentValue2;
 	private Operator currentOperator;
 
-	public DateDropItem(String text, String queryKey) {
+	private boolean canEdit;
+	
+	public DateDropItem(String text, String queryKey, boolean canEdit) {
 		this.text = text;
 		this.queryKey = queryKey;
+		this.canEdit = canEdit;
 	}
 	
 
@@ -169,9 +171,9 @@ public class DateDropItem extends DropItem {
 				}
 			}});
 		
-		operators.getControl().setEnabled(IntelSecurityManager.INSTANCE.canEditQuery());
-		dtime1.setEnabled(IntelSecurityManager.INSTANCE.canEditQuery());
-		dtime2.setEnabled(IntelSecurityManager.INSTANCE.canEditQuery());
+		operators.getControl().setEnabled(canEdit);
+		dtime1.setEnabled(canEdit);
+		dtime2.setEnabled(canEdit);
 		
 		initDrag(main);
 		initDrag(lblAttribute);

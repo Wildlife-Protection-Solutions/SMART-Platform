@@ -50,7 +50,6 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.InternalQueryManager;
-import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.editors.query.FilterDefinitionPanel;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
@@ -77,6 +76,8 @@ public class AttributeTreeDropItem extends DropItem {
 	protected AttributeTreeNode currentSelection = null;
 	private Object input = Collections.singletonList(DialogConstants.LOADING_TEXT);
 	private TreeDropDownViewer treeviewer = null;
+	
+	private boolean canEdit;
 	
 	/*
 	 * Job to load the attribute list options
@@ -129,10 +130,11 @@ public class AttributeTreeDropItem extends DropItem {
 	};
 
 
-	public AttributeTreeDropItem(String text, String queryKey, String attributeKey) {
+	public AttributeTreeDropItem(String text, String queryKey, String attributeKey, boolean canEdit) {
 		this.queryKey = queryKey;
 		this.attributeKey = attributeKey;
 		this.text = text;
+		this.canEdit = canEdit;
 	}
 	
 	
@@ -211,7 +213,7 @@ public class AttributeTreeDropItem extends DropItem {
 				showTree();
 			}
 		});
-		btnEdit.setEnabled(IntelSecurityManager.INSTANCE.canEditQuery());
+		btnEdit.setEnabled(canEdit);
 		if (currentSelection != null){
 			lblitem.setText( formatStringForLabel(currentSelection.getName()));
 		}else{

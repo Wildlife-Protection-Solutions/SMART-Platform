@@ -40,6 +40,7 @@ import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.views.query.dropitem.AttributeTreeDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
@@ -143,12 +144,12 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 			//not attribute; this is definities a category
 			return new DropItem[]{new TextDropItem(dropItemName, queryKey)};
 		}
-		
+		boolean canEdit = IntelSecurityManager.INSTANCE.canEditQuery();
 		switch(type){
 		case BOOLEAN:
 			return new DropItem[]{new TextDropItem(dropItemName, queryKey)};
 		case DATE:
-			return new DropItem[]{new DateDropItem(dropItemName, queryKey)};
+			return new DropItem[]{new DateDropItem(dropItemName, queryKey, canEdit)};
 		case LIST:
 			final List<String> labels = new ArrayList<String>();
 			final List<String> keys = new ArrayList<String>();
@@ -179,14 +180,14 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 				Intelligence2PlugIn.displayLog(Messages.DataModelTreeFilterItem_ErrorMsg, e);
 			}
 			
-			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]))};
+			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit)};
 			
 		case NUMERIC:
-			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.NUMERIC)};
+			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.NUMERIC, canEdit)};
 		case TEXT:
-			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.TEXT)};
+			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.TEXT, canEdit)};
 		case TREE:
-			return new DropItem[]{new AttributeTreeDropItem(dropItemName, queryKey, attributeKey)};
+			return new DropItem[]{new AttributeTreeDropItem(dropItemName, queryKey, attributeKey, canEdit)};
 		default:
 			break;
 			

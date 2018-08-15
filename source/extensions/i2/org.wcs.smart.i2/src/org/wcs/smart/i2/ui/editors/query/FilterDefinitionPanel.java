@@ -251,7 +251,7 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 				}
 			}
 			if (addBoolean){
-				DropItem it = OptionDropItem.createAndOrDropItem();
+				DropItem it = OptionDropItem.createAndOrDropItem(IntelSecurityManager.INSTANCE.canEditQuery());
 				it.createWidget(this, dropTargetContent);
 				items.add(it);	
 			}

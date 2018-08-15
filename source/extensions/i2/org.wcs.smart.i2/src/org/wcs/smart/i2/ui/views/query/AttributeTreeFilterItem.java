@@ -45,6 +45,7 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
@@ -116,6 +117,7 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 	
 	@Override
 	public DropItem[] asDropItem() {
+		boolean canEdit = IntelSecurityManager.INSTANCE.canEditQuery();
 		if (type == null) {
 			//entity type attribute
 			final List<String> labels = new ArrayList<String>();
@@ -146,14 +148,13 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 			} catch (InterruptedException e) {
 				Intelligence2PlugIn.displayLog(Messages.AttributeTreeFilterItem_ErrorMsg, e);
 			}
-			
-			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]))};
+			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit)};
 		}
 		switch(type){
 		case BOOLEAN:
 			return new DropItem[]{new TextDropItem(dropItemName, queryKey)};
 		case DATE:
-			return new DropItem[]{new DateDropItem(dropItemName, queryKey)};
+			return new DropItem[]{new DateDropItem(dropItemName, queryKey, canEdit)};
 		case LIST:
 			final List<String> labels = new ArrayList<String>();
 			final List<String> keys = new ArrayList<String>();
@@ -181,7 +182,7 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 				Intelligence2PlugIn.displayLog(Messages.AttributeTreeFilterItem_ErrorMsg, e);
 			}
 			
-			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]))};
+			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit)};
 		case EMPLOYEE:
 			final List<String> elabels = new ArrayList<String>();
 			final List<String> ekeys = new ArrayList<String>();
@@ -211,11 +212,11 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 				Intelligence2PlugIn.displayLog(Messages.AttributeTreeFilterItem_employeeNotFound, e);
 			}
 			
-			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, elabels.toArray(new String[elabels.size()]), ekeys.toArray(new String[ekeys.size()]))};
+			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, elabels.toArray(new String[elabels.size()]), ekeys.toArray(new String[ekeys.size()]), canEdit)};
 		case NUMERIC:
-			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.NUMERIC)};
+			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.NUMERIC, canEdit)};
 		case TEXT:
-			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.TEXT)};
+			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.TEXT, canEdit)};
 		}
 		return null;
 	}

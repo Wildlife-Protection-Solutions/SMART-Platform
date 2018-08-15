@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.i2.query.Operator;
-import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * Drop item that displays a text box where the user can enter 
@@ -59,15 +58,18 @@ public class TextBoxDropItem extends DropItem {
 	private Operator currentOperator;
 	private String currentValue;
 	
+	private boolean canEdit;
+	
 	/**
 	 * Creates a new are drop item that has 
 	 * single text field label
 	 * 
 	 */
-	public TextBoxDropItem(String name, String queryKeyPart, InputType type){
+	public TextBoxDropItem(String name, String queryKeyPart, InputType type, boolean canEdit){
 		this.name = name;
 		this.queryKeyPart = queryKeyPart;
 		this.type = type;
+		this.canEdit = canEdit;
 	}
 	
 	/**
@@ -154,8 +156,8 @@ public class TextBoxDropItem extends DropItem {
 			value.setText(currentValue);
 		}
 		
-		operators.getControl().setEnabled(IntelSecurityManager.INSTANCE.canEditQuery());
-		value.setEnabled(IntelSecurityManager.INSTANCE.canEditQuery());
+		operators.getControl().setEnabled(canEdit);
+		value.setEnabled(canEdit);
 	}
 
 }

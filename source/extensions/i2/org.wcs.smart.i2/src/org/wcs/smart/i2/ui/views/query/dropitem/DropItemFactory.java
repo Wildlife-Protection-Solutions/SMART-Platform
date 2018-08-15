@@ -68,6 +68,7 @@ import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.NotFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.query.observation.filter.RecordSourceFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.ui.views.query.RecordAttributeFilterItem;
@@ -99,10 +100,15 @@ public class DropItemFactory {
 		if (part == null ) return Collections.emptyList();
 		return (new DropItemFactory(session)).generateDropItems(part);
 	}
+	
 	private Session session;
 	
 	private DropItemFactory(Session session){
 		this.session = session;
+	}
+	
+	private boolean canEdit() {
+		return IntelSecurityManager.INSTANCE.canEditQuery();
 	}
 	
 	public List<DropItem> generateDropItems(ValuePart part){
@@ -303,7 +309,7 @@ public class DropItemFactory {
 	public List<DropItem> generateDropItem(BooleanFilter filter){
 		ArrayList<DropItem> items = new ArrayList<DropItem>();
 		items.addAll(generateDropItems(filter.getFilter1()));
-		OptionDropItem booleanOp = OptionDropItem.createAndOrDropItem();
+		OptionDropItem booleanOp = OptionDropItem.createAndOrDropItem(canEdit());
 		booleanOp.setInitialValue(filter.getOperator().getKey());
 		items.add(booleanOp);
 		items.addAll(generateDropItems(filter.getFilter2()));
@@ -376,20 +382,20 @@ public class DropItemFactory {
 				labels.add(e.getIdAttributeAsText());
 				keys.add(UuidUtils.uuidToString( e.getUuid() ));
 			}
-			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]));
+			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit());
 			item.setInitialValue(filter.getKeyValue());
 			return Collections.singletonList(item);
 		}else {
 			if (filter.getAttributeType() == IntelAttribute.AttributeType.NUMERIC){
-				TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.NUMERIC);
+				TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.NUMERIC, canEdit());
 				item.setInitialValue(filter.getOperator(), filter.getNumberValue().toString());
 				return Collections.singletonList(item);
 			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.TEXT){
-				TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.TEXT);
+				TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.TEXT, canEdit());
 				item.setInitialValue(filter.getOperator(), filter.getStringValue());
 				return Collections.singletonList(item);
 			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.DATE){
-				DateDropItem item = new DateDropItem(name, queryKeyPart);
+				DateDropItem item = new DateDropItem(name, queryKeyPart, canEdit());
 				item.setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
 				return Collections.singletonList(item);
 			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.BOOLEAN){
@@ -409,7 +415,7 @@ public class DropItemFactory {
 						keys.add(i.getKeyId());
 					}
 				}
-				OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]));
+				OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit());
 				item.setInitialValue(filter.getKeyValue());
 				return Collections.singletonList(item);
 			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.EMPLOYEE){
@@ -424,7 +430,7 @@ public class DropItemFactory {
 					labels.add(SmartLabelProvider.getFullLabel(e));
 					keys.add(UuidUtils.uuidToString(e.getUuid()));
 				}
-				OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]));
+				OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit());
 				item.setInitialValue(filter.getKeyValue());
 				return Collections.singletonList(item);
 			}
@@ -455,15 +461,15 @@ public class DropItemFactory {
 		String name = IntelQueryColumnProvider.generateName(ia, type);
 		
 		if (filter.getAttributeType() == IntelAttribute.AttributeType.NUMERIC){
-			TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.NUMERIC);
+			TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.NUMERIC, canEdit());
 			item.setInitialValue(filter.getOperator(), filter.getNumberValue().toString());
 			return Collections.singletonList(item);
 		}else if (filter.getAttributeType() == IntelAttribute.AttributeType.TEXT){
-			TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.TEXT);
+			TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.TEXT, canEdit());
 			item.setInitialValue(filter.getOperator(), filter.getStringValue());
 			return Collections.singletonList(item);
 		}else if (filter.getAttributeType() == IntelAttribute.AttributeType.DATE){
-			DateDropItem item = new DateDropItem(name, queryKeyPart);
+			DateDropItem item = new DateDropItem(name, queryKeyPart, canEdit());
 			item.setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
 			return Collections.singletonList(item);
 		}else if (filter.getAttributeType() == IntelAttribute.AttributeType.BOOLEAN){
@@ -483,7 +489,7 @@ public class DropItemFactory {
 					keys.add(i.getKeyId());
 				}
 			}
-			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]));
+			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit());
 			item.setInitialValue(filter.getKeyValue());
 			return Collections.singletonList(item);
 		}else if (filter.getAttributeType() == IntelAttribute.AttributeType.EMPLOYEE){
@@ -498,7 +504,7 @@ public class DropItemFactory {
 				labels.add(SmartLabelProvider.getFullLabel(e));
 				keys.add(UuidUtils.uuidToString(e.getUuid()));
 			}
-			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]));
+			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit());
 			item.setInitialValue(filter.getKeyValue());
 			return Collections.singletonList(item);
 		}
@@ -538,15 +544,15 @@ public class DropItemFactory {
 		String name = IntelQueryColumnProvider.generateName(attribute, category);
 		
 		if (filter.getAttributeType() == Attribute.AttributeType.NUMERIC){
-			TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.NUMERIC);
+			TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.NUMERIC, canEdit());
 			item.setInitialValue(filter.getOperator(), filter.getNumberValue().toString());
 			return Collections.singletonList(item);
 		}else if (filter.getAttributeType() == Attribute.AttributeType.TEXT){
-			TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.TEXT);
+			TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.TEXT, canEdit());
 			item.setInitialValue(filter.getOperator(), filter.getStringValue());
 			return Collections.singletonList(item);
 		}else if (filter.getAttributeType() == Attribute.AttributeType.DATE){
-			DateDropItem item = new DateDropItem(name, queryKeyPart);
+			DateDropItem item = new DateDropItem(name, queryKeyPart, canEdit());
 			item.setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
 			return Collections.singletonList(item);
 		}else if (filter.getAttributeType() == Attribute.AttributeType.BOOLEAN){
@@ -564,7 +570,7 @@ public class DropItemFactory {
 					keys.add(i.getKeyId());
 				}
 			}
-			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]));
+			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit());
 			item.setInitialValue(filter.getKeyValue());
 			return Collections.singletonList(item);
 		}else if (filter.getAttributeType() == Attribute.AttributeType.TREE){
@@ -584,7 +590,7 @@ public class DropItemFactory {
 				return Collections.singletonList(di);
 			}
 			
-			AttributeTreeDropItem item = new AttributeTreeDropItem(name, queryKeyPart, attribute.getKeyId());
+			AttributeTreeDropItem item = new AttributeTreeDropItem(name, queryKeyPart, attribute.getKeyId(), canEdit());
 			item.setInitialValue(treeNode);
 			return Collections.singletonList(item);
 		}

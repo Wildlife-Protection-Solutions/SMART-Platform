@@ -30,6 +30,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
@@ -56,17 +57,19 @@ public class RecordAttributeFilterItem extends BasicTreeFilterItem {
 
 	@Override
 	public DropItem[] asDropItem() {
+		boolean canEdit = IntelSecurityManager.INSTANCE.canEditQuery();
+		
 		if (type == RecordAttributeFilter.FixedAttribute.STATUS) {
 			String[] names = new String[IntelRecord.Status.values().length];
 			String[] keys = new String[IntelRecord.Status.values().length];
 			for (int i = 0; i < IntelRecord.Status.values().length; i ++) {
 				names[i] = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IntelRecord.Status.values()[i], Locale.getDefault());
 				keys[i] = IntelRecord.Status.values()[i].name();
-			}
-			OptionDropItem di = new OptionDropItem(getName(), type.getKey(), names, keys);
+			}	
+			OptionDropItem di = new OptionDropItem(getName(), type.getKey(), names, keys, canEdit);
 			return new DropItem[] {di};
 		}else if (type == RecordAttributeFilter.FixedAttribute.DATE) {
-			DateDropItem di = new DateDropItem(getName(), type.getKey());
+			DateDropItem di = new DateDropItem(getName(), type.getKey(), canEdit);
 			return new DropItem[] {di};
 		}
 		
