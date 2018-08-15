@@ -86,7 +86,6 @@ public class EntityAttachmentParameterMetadata implements IParameterMetaData{
 
 	@Override
 	public int isNullable(int param) throws OdaException {
-		if (param == 1) return parameterNoNulls;
-		return parameterNullableUnknown;
+		return parameterNullable;
 	}
 }

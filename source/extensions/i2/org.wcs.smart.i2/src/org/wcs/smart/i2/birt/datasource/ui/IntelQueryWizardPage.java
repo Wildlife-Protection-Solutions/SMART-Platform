@@ -403,7 +403,8 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 
 			for (ParameterDefinition param : paramDesign
 					.getParameterDefinitions()) {
-				param.setDefaultScalarValue(Messages.IntelQueryWizardPage_linktoreport1);
+//				param.setDefaultScalarValue(Messages.IntelQueryWizardPage_linktoreport1);
+				param.setDefaultScalarValue(null);
 			}
 		}
 	}

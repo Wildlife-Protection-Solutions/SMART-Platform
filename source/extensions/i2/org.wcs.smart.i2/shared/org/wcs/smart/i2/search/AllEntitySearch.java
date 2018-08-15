@@ -57,6 +57,7 @@ public class AllEntitySearch implements IIntelEntitySearch {
 	
 	@Override
 	public IntelSearchResult doSearch(Session session, Locale locale, IProgressMonitor monitor) throws Exception {
+		//used in birt reports
 		throw new OperationNotSupportedException(""); //$NON-NLS-1$
 	}
 

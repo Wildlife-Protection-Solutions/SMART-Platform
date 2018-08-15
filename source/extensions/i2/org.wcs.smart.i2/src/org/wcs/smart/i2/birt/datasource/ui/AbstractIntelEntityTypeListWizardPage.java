@@ -32,9 +32,7 @@ import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.design.DataSetDesign;
-import org.eclipse.datatools.connectivity.oda.design.DataSetParameters;
 import org.eclipse.datatools.connectivity.oda.design.DesignFactory;
-import org.eclipse.datatools.connectivity.oda.design.ParameterDefinition;
 import org.eclipse.datatools.connectivity.oda.design.ResultSetColumns;
 import org.eclipse.datatools.connectivity.oda.design.ResultSetDefinition;
 import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSessionUtil;
@@ -414,27 +412,24 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 	private void updateParameterDesign(IParameterMetaData paramMd,
 			DataSetDesign dataSetDesign) throws OdaException {
 		
-		DataSetParameters paramDesign = DesignSessionUtil
-				.toDataSetParametersDesign(
-						paramMd,
-						DesignSessionUtil
-								.toParameterModeDesign(IParameterMetaData.parameterModeIn));
-
-		// no exception in conversion; go ahead and assign to specified
-		// dataSetDesign
-		dataSetDesign.setParameters(paramDesign);
-		if (paramDesign == null)
-			return; // no parameter definitions; done with update
+		//the parameters were originally added to support export to pdf
+		//by default; we don't want to add the parameters to these 
+		//datasets.  Users can add them manually if they know what they are
+		//https://app.assembla.com/spaces/smart-cs/tickets/2552
 		
-		paramDesign.setDerivedMetaData(true);
-
-		if (paramDesign.getParameterDefinitions().size() > 0) {
-
-			for (ParameterDefinition param : paramDesign.getParameterDefinitions()) {
-				param.setDefaultScalarValue(Messages.AbstractIntelEntityTypeListWizardPage_LinkParameter1);
-				
-			}
-		}
+//		DataSetParameters paramDesign = DesignSessionUtil
+//				.toDataSetParametersDesign( paramMd, DesignSessionUtil.toParameterModeDesign(IParameterMetaData.parameterModeIn));
+//
+//		// no exception in conversion; go ahead and assign to specified
+//		// dataSetDesign
+//		dataSetDesign.setParameters(paramDesign);
+//		if (paramDesign == null) return; // no parameter definitions; done with update
+//		paramDesign.setDerivedMetaData(true);
+//		if (paramDesign.getParameterDefinitions().size() > 0) {
+//			for (ParameterDefinition param : paramDesign.getParameterDefinitions()) {
+//				param.setDefaultScalarValue(Messages.AbstractIntelEntityTypeListWizardPage_LinkParameter1);
+//			}
+//		}
 	}
 
 	/**
