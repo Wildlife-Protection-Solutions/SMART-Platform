@@ -183,10 +183,14 @@ public class Messages extends NLS {
 	public static String EditTreeDialog_NoPropertiesToDisplay;
 	public static String EditTreeDialog_TreeNodeProperties;
 	public static String ImageSelectionControl_AllImages;
+	public static String ImageSelectionControl_BetaCtFormat;
 	public static String ImageSelectionControl_BitmapFiles;
 	public static String ImageSelectionControl_Button_Clear;
 	public static String ImageSelectionControl_Button_Load;
 	public static String ImageSelectionControl_JpegFiles;
+	public static String ImageSelectionControl_png;
+	public static String ImageSelectionControl_pngsvg;
+	public static String ImageSelectionControl_svg;
 	public static String ListAttributeInfoComposite_Button_Edit;
 	public static String ListAttributeInfoComposite_Button_Revert;
 	public static String ListAttributeInfoComposite_Config_Create;

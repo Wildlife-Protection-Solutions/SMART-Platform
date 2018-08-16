@@ -120,12 +120,6 @@ public class EditListDialog extends TitleAreaDialog{
 		
 		Composite container = new Composite(main, SWT.NONE);
 		GridLayout cgd = new GridLayout(1, false);
-		cgd.marginBottom=0;
-		cgd.marginHeight = 0;
-		cgd.marginLeft = 0;
-		cgd.marginRight = 0;
-		cgd.marginTop = 0;
-		cgd.marginWidth = 0;
 		container.setLayout(cgd);
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -352,8 +346,10 @@ public class EditListDialog extends TitleAreaDialog{
 		GridLayout imgLayout = new GridLayout(2, false);
 		imgLayout.marginHeight = imgLayout.marginWidth = 0;
 		imgCmp.setLayout(imgLayout);
-		imgCmp.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
+		imgCmp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
 		org.eclipse.swt.widgets.Label imgLbl = new org.eclipse.swt.widgets.Label(imgCmp, SWT.NONE);
+		imgLbl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
 		imgLbl.setText(Messages.EditListDialog_Image);
 		imageControl = new ImageSelectionControl(imgCmp, new IImageContentProvider() {
 			@Override
@@ -370,10 +366,12 @@ public class EditListDialog extends TitleAreaDialog{
 						session.evict(cmNode);
 						session.saveOrUpdate(cmNode);
 					}
-					imageControl.redrawCanvas();
+					imageControl.updateImage();
 				}
 			}
 		});
+		imageControl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		imageControl.setEnabled(false);
 	}
 	
 	
@@ -415,7 +413,8 @@ public class EditListDialog extends TitleAreaDialog{
 		nameTable.getTable().setEnabled(dmNode != null);
 		btnEnable.setEnabled(dmNode != null);
 		updateEnableButtonText();
-		imageControl.redrawCanvas();
+		
+		imageControl.updateImage();
 	}
 	
 	private void updateEnableButtonText(){
@@ -457,6 +456,8 @@ public class EditListDialog extends TitleAreaDialog{
 					currentNode = currentCmNode.getListItem();
 				}
 				EditListDialog.this.setCurrentSelection(currentNode, currentCmNode);
+				
+				imageControl.setEnabled(true);
 			}
 		});
 		

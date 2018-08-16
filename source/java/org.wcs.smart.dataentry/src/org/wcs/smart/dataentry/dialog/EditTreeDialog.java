@@ -572,7 +572,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 						session.evict(cmNode);
 						session.saveOrUpdate(cmNode);
 					}
-					imageControl.redrawCanvas();
+					imageControl.updateImage();
 				}
 			}
 		});
@@ -608,7 +608,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		updateDisplayModeControl();
 		imageControl.setVisible(cmNode != null && isSingleElement);
 		imgControlLabel.setVisible(cmNode != null && isSingleElement);
-		imageControl.redrawCanvas();
+		imageControl.updateImage();
 		
 		boolean noPropsVisible = !nameTableVisible && !nodeConfigCmpVisible;
 		lblNoTreeProps.setVisible(noPropsVisible);

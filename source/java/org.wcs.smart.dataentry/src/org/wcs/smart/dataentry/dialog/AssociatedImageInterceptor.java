@@ -209,15 +209,34 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 			File to = new File(imgObject.getImagePersistenceLocation());
 			
 			if (from == null || from.equals(IImageAssociatedObject.NULL_FILE)) {
-				//image was cleared
-				if (to.exists()) {
-					try {
-						to.delete();
-					} catch (Exception ex) {
-						SmartPlugIn.log("Could not delete cleared file: " + to.toString(), ex); //$NON-NLS-1$
+				//find all files that start with "to" and delete them
+				//(changed for 6.1 when we support multiple image formats)
+				for (File file : to.getParentFile().listFiles()) {
+					if (file.getName().startsWith(to.getName() + ".")) { //$NON-NLS-1$
+						try {
+							file.delete();
+						}catch (Exception ex) {
+							SmartPlugIn.log("Could not delete cleared file: " + to.toString(), ex); //$NON-NLS-1$	
+						}
 					}
 				}
 			} else if (from.exists() && !from.equals(to)) {
+				//delete any existing files for this node before copying over new files 
+				//from 6.1 to support image formats
+				String fName = to.getName();
+				int index = fName.lastIndexOf('.');
+				fName = fName.substring(0, index);
+				
+				for (File file : to.getParentFile().listFiles()) {
+					if (file.getName().startsWith(fName + ".")) { //$NON-NLS-1$
+						try {
+							file.delete();
+						}catch (Exception ex) {
+							SmartPlugIn.log("Could not delete cleared file: " + to.toString(), ex); //$NON-NLS-1$	
+						}
+					}
+				}
+				
 				try {
 					FileUtils.copyFile(from, to);
 				} catch (IOException e) {
@@ -227,7 +246,7 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 			
 			//reset img object file.  If we copy into the system this call will
 			//reset the object reference to the file copied in
-			imgObject.setImageFile(null);
+			imgObject.resetImageFile();
 		}
 	}
 }

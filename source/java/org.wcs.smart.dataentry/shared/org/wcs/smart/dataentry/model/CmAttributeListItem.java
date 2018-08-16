@@ -22,6 +22,7 @@
 package org.wcs.smart.dataentry.model;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -52,7 +53,8 @@ public class CmAttributeListItem extends NamedItem implements IImageAssociatedOb
 	private CmAttributeConfig config;
 	private int listOrder;
 	private File imageFile;
-
+	private String extension; //image name extension
+	
 	@Column(name="is_active")
 	public boolean getIsActive() {
 		return isActive;
@@ -87,19 +89,66 @@ public class CmAttributeListItem extends NamedItem implements IImageAssociatedOb
 		this.listOrder = listOrder;
 	}
 	
+
+	@Column(name="imagetype")
+	public String getExtension() {
+		return this.extension;
+	}
+	public void setExtension(String extension) {
+		this.extension = extension;
+	}
+	
 	@Transient
 	@Override
 	public File getImageFile() {
 		return imageFile != null ? imageFile : new File(getImagePersistenceLocation());
 	}
+
+	
+	@Transient
+	@Override
+	public void resetImageFile() {
+		this.imageFile = null;
+	}
+	
 	@Transient
 	@Override
 	public void setImageFile(File file) {
 		imageFile = file;
+		if (imageFile == null) {
+			setExtension(null);
+		}else {
+			String fileName = imageFile.getName();
+			int index = fileName.lastIndexOf('.');
+			if (index >= 0) {
+				setExtension(fileName.substring(index+1));
+			}else {
+				setExtension(""); //$NON-NLS-1$
+			}
+		}
 	}
+
+	
 	@Transient
 	@Override
 	public String getImagePersistenceLocation() {
-		return getConfig().getModel().getFileDataStoreLocation() + File.separator + "li_img1_" + UuidUtils.getDirectoryPath(getUuid()) + ".jpg"; //$NON-NLS-1$ //$NON-NLS-2$
+		//filename
+		StringBuilder sb = new StringBuilder();
+		sb.append("li_img1_"); //$NON-NLS-1$
+		sb.append(UuidUtils.getDirectoryPath(getUuid()));
+		if (getExtension() == null) {
+			sb.append(".jpg"); // for backwards compatibility; prior to 6.1 it was assumed the image format was jpg //$NON-NLS-1$
+		}else if (getExtension().isEmpty()) {
+			//image was cleared
+		}else {
+			sb.append("."); //$NON-NLS-1$
+			sb.append(getExtension());
+		}		
+		//path
+		String filename = Paths.get(getConfig().getModel().getFileDataStoreLocation())
+			.resolve(sb.toString())
+			.toString();
+		
+		return filename;
 	}
 }

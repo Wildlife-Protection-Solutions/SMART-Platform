@@ -22,6 +22,7 @@
 package org.wcs.smart.dataentry.model;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,6 +63,7 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	private boolean useSingleGpsPoint = false;
 	private DisplayMode displayMode;
 	private File imageFile;
+	private String extension; //image name extension
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
@@ -171,6 +173,14 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 		this.displayMode = displayMode;
 	}
 
+	@Column(name="imagetype")
+	public String getExtension() {
+		return this.extension;
+	}
+	public void setExtension(String extension) {
+		this.extension = extension;
+	}
+	
 	@Transient
 	public boolean isGroup() {
 		return category == null;
@@ -181,14 +191,55 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	public File getImageFile() {
 		return imageFile != null ? imageFile : new File(getImagePersistenceLocation());
 	}
+	
+	@Transient
+	@Override
+	public void resetImageFile() {
+		this.imageFile = null;
+	}
+	
 	@Transient
 	@Override
 	public void setImageFile(File file) {
 		imageFile = file;
+		//TODO: figure out how to delete old files if extension has change - if
+		//extension is the same then the file will be overwritten and this
+		//is not a problem
+		if (imageFile == null) {
+			setExtension(null);
+		}else {
+			String fileName = imageFile.getName();
+			int index = fileName.lastIndexOf('.');
+			if (index >= 0) {
+				setExtension(fileName.substring(index+1));
+			}else {
+				setExtension(""); //$NON-NLS-1$
+			}
+		}
 	}
+	
 	@Transient
 	@Override
 	public String getImagePersistenceLocation() {
-		return getModel().getFileDataStoreLocation() + File.separator + "cn_img1_" + UuidUtils.getDirectoryPath(getUuid()) + ".jpg"; //$NON-NLS-1$ //$NON-NLS-2$
+		//filename
+		StringBuilder sb = new StringBuilder();
+		sb.append("cn_img1_"); //$NON-NLS-1$
+		sb.append(UuidUtils.getDirectoryPath(getUuid()));
+		if (getExtension() == null) {
+			sb.append(".jpg"); // for backwards compatibility; prior to 6.1 it was assumed the image format was jpg //$NON-NLS-1$
+		}else if (getExtension().isEmpty()) {
+			//image was cleared
+		}else {
+			sb.append("."); //$NON-NLS-1$
+			sb.append(getExtension());
+		}
+		
+		
+		//path
+		String filename = Paths.get(getModel().getFileDataStoreLocation())
+			.resolve(sb.toString())
+			.toString();
+		
+		return filename;
 	}
 }

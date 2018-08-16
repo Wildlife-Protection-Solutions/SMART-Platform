@@ -80,6 +80,11 @@ public class Upgrader601To610 implements IDatabaseUpgrader {
 				"GRANT EXECUTE ON FUNCTION smart.trackintersects TO MANAGER", //$NON-NLS-1$
 				
 				"GRANT ALL PRIVILEGES ON smart.qa_routine_parameter TO admin,manage,data_entry", //$NON-NLS-1$
+				
+				//for support of svg/png images in configurable model
+				"ALTER TABLE smart.cm_node add column imagetype varchar(32)",  //$NON-NLS-1$
+				"ALTER TABLE smart.cm_attribute_list add column imagetype varchar(32)",  //$NON-NLS-1$
+				"ALTER TABLE smart.cm_attribute_tree_node add column imagetype varchar(32)",  //$NON-NLS-1$
 		};
 
 		for (String s : sql) {

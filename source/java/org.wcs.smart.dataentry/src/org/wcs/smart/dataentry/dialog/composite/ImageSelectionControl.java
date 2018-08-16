@@ -22,6 +22,8 @@
 package org.wcs.smart.dataentry.dialog.composite;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
@@ -34,10 +36,15 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Control that allows to select a single image for provided object.
@@ -46,12 +53,14 @@ import org.wcs.smart.dataentry.model.IImageAssociatedObject;
  * @since 4.0.0
  */
 public class ImageSelectionControl extends Composite {
-	
-	private static final int HEIGHT = 90;
-	private static final int WIDTH  = 150;
 
+	//preference for last image filter used
+	private static final String IMG_FILTER_PREFKEY = "org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.imagefilter"; //$NON-NLS-1$
+	
 	private IImageContentProvider contentProvider;
 	private Canvas canvas;
+	private Label lblWarnText;
+	private Composite warningArea;
 	
 	public ImageSelectionControl(Composite parent, IImageContentProvider contentProvider) {
 		super(parent, SWT.NONE);
@@ -59,6 +68,43 @@ public class ImageSelectionControl extends Composite {
 		initControls();
 	}
 
+	@Override
+	public void setEnabled(boolean isEnabled) {
+		super.setEnabled(isEnabled);
+		
+		List<Control> kids = new ArrayList<>();
+		for (Control c : this.getChildren()) kids.add(c);
+		
+		while(kids.size() > 0) {
+			Control c = kids.remove(0);
+			c.setEnabled(isEnabled);
+			if (c instanceof Composite) {
+				for (Control kk : ((Composite)c).getChildren()) {
+					kids.add(kk);
+				}
+			}
+		}
+	}
+	
+	public void updateImage() {
+		canvas.redraw();
+		warningArea.setVisible(false);
+		lblWarnText.setText(""); //$NON-NLS-1$
+
+		File file = contentProvider.getImageFile();
+		if (file != null && file.exists() && file.isFile()) {
+			
+			if (file.getName().endsWith(".svg") || file.getName().endsWith(".png")) { //$NON-NLS-1$ //$NON-NLS-2$
+				lblWarnText.setText(Messages.ImageSelectionControl_BetaCtFormat);
+				warningArea.setVisible(true);
+			}
+		}
+		warningArea.getParent().getParent().layout(true);
+		
+		canvas.setToolTipText(file == null ? "" : file.getName()); //$NON-NLS-1$
+	}
+	
+	
 	private void initControls() {
 		GridLayout gd = new GridLayout(2, false);
 		gd.marginBottom=0;
@@ -68,22 +114,52 @@ public class ImageSelectionControl extends Composite {
 		gd.marginTop = 0;
 		gd.marginWidth = 0;
 		this.setLayout(gd);
-		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-		int h = HEIGHT;
-		int w = WIDTH;
-		canvas = new Canvas(this, SWT.NONE);
+		int h = 100;
+		int w = h;
+		
+		canvas = new Canvas(this, SWT.BORDER);
 		GridData canvasLayoutData = new GridData(w, h);
-//		canvasLayoutData.horizontalSpan = 1;
+		
 		canvas.setLayoutData(canvasLayoutData);
 		canvas.addPaintListener(new PaintListener() {
 			@Override
 			public void paintControl(PaintEvent e) {
+				
 				File file = contentProvider.getImageFile();
 				if (file != null && file.exists() && file.isFile()) {
-					Image image = new Image(Display.getDefault(), file.getAbsolutePath());
-					e.gc.drawImage(image, 0, 0, image.getBounds().width, image.getBounds().height, 0, 0, w, h);
-					image.dispose();
+					Image image = null;
+					try {
+						image = new Image(Display.getDefault(), file.getAbsolutePath());
+					}catch (Exception ex) {
+						try {
+							image = SmartUtils.readSvg(getDisplay(), file.toPath()); 
+						}catch (Exception ex2) {
+						}
+					}
+					if (image == null) return;
+					try {
+						double scale = 1;
+						if (image.getBounds().width > image.getBounds().height) {
+							scale = (double)image.getBounds().width / w;
+						}else {
+							scale = (double)image.getBounds().height / h;
+						}
+						int width = (int)( image.getBounds().width/scale);
+						int height = (int) (image.getBounds().height/scale);
+						
+						int xoffset = 0;
+						int yoffset = 0;
+						if (width < w) {
+							xoffset = (w - width)/2;
+						}
+						if (height < h) {
+							yoffset = (h - height)/2;
+						}
+						e.gc.drawImage(image, 0, 0, image.getBounds().width, image.getBounds().height, xoffset, yoffset, width, height);
+					}finally {
+						image.dispose();
+					}
 				}
 			}
 		});
@@ -97,7 +173,7 @@ public class ImageSelectionControl extends Composite {
 		bgd.marginTop = 0;
 		bgd.marginWidth = 0;
 		btnCmp.setLayout(bgd);
-		btnCmp.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
+		btnCmp.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
 		
 		
 		Button buttonLoad = new Button(btnCmp, SWT.PUSH);
@@ -111,16 +187,31 @@ public class ImageSelectionControl extends Composite {
 						"*.bmp;*.jpg;*.jpeg", //$NON-NLS-1$
 						"*.bmp", //$NON-NLS-1$
 						"*.jpg;*.jpeg", //$NON-NLS-1$
+						"*.png;*.svg", //$NON-NLS-1$
+						"*.png", //$NON-NLS-1$
+						"*.svg", //$NON-NLS-1$
+						
 				});
 				fd.setFilterNames(new String[] {
 						Messages.ImageSelectionControl_AllImages,
 						Messages.ImageSelectionControl_BitmapFiles,
-						Messages.ImageSelectionControl_JpegFiles
+						Messages.ImageSelectionControl_JpegFiles,
+						Messages.ImageSelectionControl_pngsvg,
+						Messages.ImageSelectionControl_png,
+						Messages.ImageSelectionControl_svg
 				});
+				
+				int lastIndex = DataentryPlugIn.getDefault().getPreferenceStore().getInt(IMG_FILTER_PREFKEY);
+				fd.setFilterIndex(lastIndex);
+				
 				String f = fd.open();
 				if (f != null) {
 					contentProvider.setImageFile(new File(f));
-					redrawCanvas();
+					updateImage();
+					
+					//save preference
+					int filterIndex = fd.getFilterIndex();
+					DataentryPlugIn.getDefault().getPreferenceStore().setValue(IMG_FILTER_PREFKEY, filterIndex);
 				}
 			}
 		});
@@ -132,14 +223,26 @@ public class ImageSelectionControl extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				contentProvider.setImageFile(IImageAssociatedObject.NULL_FILE); //we cannot use null, as null indicates that we need to load a value
-				redrawCanvas();
+				updateImage();
 			}
 		});
+		
+		warningArea = new Composite(this, SWT.NONE);
+		warningArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		warningArea.setLayout(new GridLayout(2, false));
+		
+		Label lblWarnImg = new Label(warningArea, SWT.NONE);
+		lblWarnImg.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+		lblWarnImg.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		
+		lblWarnText = new Label(warningArea, SWT.WRAP);
+		lblWarnText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)lblWarnText.getLayoutData()).widthHint = w;
+		lblWarnText.setText(""); //$NON-NLS-1$
+		
+		warningArea.setVisible(false);
 	}
 	
-	public void redrawCanvas() {
-		canvas.redraw();
-	}
 
 	/**
 	 * Interface should be implemented by any object that want to use this control.

@@ -100,5 +100,11 @@
             icon="images/icons16/configmodel.png">
       </image>
    </extension>
+   <extension
+         point="org.wcs.smart.caFilestoreDir">
+      <FilestoreDirectory
+            directory="dataentry">
+      </FilestoreDirectory>
+   </extension>
 
 </plugin>

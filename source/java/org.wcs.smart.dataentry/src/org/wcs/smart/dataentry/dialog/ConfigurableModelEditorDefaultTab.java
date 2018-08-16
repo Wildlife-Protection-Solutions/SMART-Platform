@@ -83,6 +83,8 @@ import org.wcs.smart.ui.properties.LanguageViewer;
  */
 public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEditorTabContent {
 
+	private static final String MENU_ITEM_KEY = "MENU_ITEM"; //$NON-NLS-1$
+
 	public static enum ControlButton {
 		ADD_GROUP(Messages.AbstractInfoComposite_Button_AddGroup),
 		ADD_CATEGORY(Messages.AbstractInfoComposite_Button_AddCategory), 
@@ -212,7 +214,7 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 					doControlButtonPress(cbtn);
 				}
 			});
-			btn.setData("MENU_ITEM", mi);
+			btn.setData(MENU_ITEM_KEY, mi);
 			btn.setEnabled(false);
 			dialog.setButtonLayoutData(btn);
 			controlButtons.put(cbtn,btn);
@@ -356,7 +358,7 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 			}
 		}
 		for (Button btn : controlButtons.values()){
-			((MenuItem)btn.getData("MENU_ITEM")).setEnabled(btn.isEnabled());
+			((MenuItem)btn.getData(MENU_ITEM_KEY)).setEnabled(btn.isEnabled());
 		}
 	}
 

@@ -58,6 +58,11 @@ public interface IImageAssociatedObject {
 	public void setImageFile(File file);
 	
 	/**
+	 * Clears the cached image file
+	 */
+	public void resetImageFile();
+	
+	/**
 	 * This is the location where the image file should be saved to.
 	 * 
 	 * @return

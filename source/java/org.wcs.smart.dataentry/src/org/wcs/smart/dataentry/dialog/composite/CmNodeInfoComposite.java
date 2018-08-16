@@ -115,7 +115,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
 			public void sourceObjectChanged(Object newObject, Language language) {
-				imageControl.redrawCanvas();
+				imageControl.updateImage();
 			}
 		});
 		
@@ -124,6 +124,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	private void addImageRow(Composite container) {
 		Label label = new Label(container, SWT.NONE);
 		label.setText(Messages.CmNodeInfoComposite_Image);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		imageControl = new ImageSelectionControl(container, new IImageContentProvider() {
 			@Override
@@ -143,6 +144,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 				fireModelChanged();
 			}
 		});
+		imageControl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 	}
 	
 	private void createCategoryControls() {
@@ -254,7 +256,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 						btnSingleGpsPoint.setSelection(getUseSingleGpsPointValue(n));
 						btnSingleGpsPoint.setEnabled(isUseSingleGpsPointEnabled(n));
 					}
-					imageControl.redrawCanvas();
+					imageControl.updateImage();
 					CmNodeInfoComposite.this.layout(true, true);
 				}
 			}
