@@ -45,7 +45,11 @@ public class OpenRecordHandler {
 	public void openRecord(RecordEditorInput input, boolean editMode){
 		try {
 			String pId = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
-			if (IntelSecurityManager.INSTANCE.canEditRecord() || IntelSecurityManager.INSTANCE.canCreateRecord()) {
+			if (IntelSecurityManager.INSTANCE.canEditRecord() ) {
+				//can edit record
+				input.setIsInitEditable(pId.equals(IntelDataAssessmentPerspective.ID) || pId.equals(EntityPerspective.ID) || editMode);
+			}else if (IntelSecurityManager.INSTANCE.canCreateRecord() && input.getRecord().getUuid() == null) {
+				//can create record and this is a new record
 				input.setIsInitEditable(pId.equals(IntelDataAssessmentPerspective.ID) || pId.equals(EntityPerspective.ID) || editMode);
 			}else {
 				input.setIsInitEditable(false);
