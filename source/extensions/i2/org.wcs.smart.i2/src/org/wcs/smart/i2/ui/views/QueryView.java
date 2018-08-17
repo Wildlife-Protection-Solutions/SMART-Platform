@@ -673,7 +673,7 @@ public class QueryView {
 				proxyItems.addAll(items3.stream().map(t->new QueryProxy(t.getName(), t.getUuid(), IntelEntityRecordQuery.KEY)).collect(Collectors.toList()));
 			}
 
-			proxyItems.sort((a,b)-> Collator.getInstance().compare(a.getName(), b.getName()));
+			proxyItems.sort((a,b)-> Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 			Display.getDefault().syncExec(() ->{
 				queryList.setInput(proxyItems);
 			});

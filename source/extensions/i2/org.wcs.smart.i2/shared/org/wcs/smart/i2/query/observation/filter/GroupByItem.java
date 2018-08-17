@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.query.observation.filter;
 
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -53,7 +55,8 @@ public class GroupByItem {
 	
 	public static enum GroupByType{
 		ENTITYTYPE ("entitytype_gb"), //$NON-NLS-1$
-		ATTRIBUTE ("e_attribute_gb"); //$NON-NLS-1$
+		ATTRIBUTE ("e_attribute_gb"), //$NON-NLS-1$
+		SYSTEM(SystemAttributeFilter.SA_KEY);
 		
 		String key;
 		GroupByType(String key) {
@@ -90,6 +93,25 @@ public class GroupByItem {
 			}
 			return new GroupByItem(GroupByType.ENTITYTYPE, ops);
 		}
+		if (bits[0].equals(SystemAttributeFilter.SA_KEY)) {
+			String stype = bits[1];
+			String sattribute = bits[2];
+			String dateFilter = bits[3];
+			
+			SystemAttributeFilter.Type type = SystemAttributeFilter.Type.valueOf(stype.toUpperCase());
+			if (type == null || type == SystemAttributeFilter.Type.RECORD) throw new IllegalStateException(MessageFormat.format("System attribute group by of type {0} not supported", stype)); //$NON-NLS-1$
+			
+			SystemAttributeFilter.SystemAttribute attribute = SystemAttributeFilter.SystemAttribute.valueOf(sattribute.toUpperCase());
+			if (attribute == null) throw new IllegalStateException(MessageFormat.format("System attribute group by of {0} not supported", sattribute)); //$NON-NLS-1$
+			
+			DateOption op = null;
+			for (DateOption key : DateOption.values()) {
+				if (key.getKey().equals(dateFilter)) op = key;
+			}
+			if (op == null) throw new IllegalStateException("Invalid date option: " + dateFilter); //$NON-NLS-1$
+			return new GroupByItem(attribute, type, op);
+		}
+		
 		if (bits[0].equals(GroupByType.ATTRIBUTE.getKey())) {
 			String attributeType = bits[1];
 			String attributeKey = bits[2];
@@ -149,6 +171,9 @@ public class GroupByItem {
 	private Area.AreaType areaKey;
 	private GroupByType type;
 	
+	private SystemAttributeFilter.SystemAttribute systemAttribute;
+	private SystemAttributeFilter.Type systemType;
+	
 	public GroupByItem(GroupByType type, List<String> options) {
 		this.type = type;
 		this.optionKeys = options;
@@ -167,6 +192,13 @@ public class GroupByItem {
 	
 	public GroupByItem(GroupByType type, String attributeKey, IntelAttribute.AttributeType attributeType, String entityTypeKey, DateOption op) {
 		this(type, attributeKey, attributeType, entityTypeKey);
+		this.dateOption = op;
+	}
+	
+	public GroupByItem(SystemAttributeFilter.SystemAttribute attribute, SystemAttributeFilter.Type type, DateOption op) {
+		this.type = GroupByType.SYSTEM;
+		this.systemAttribute = attribute;
+		this.systemType = type; 
 		this.dateOption = op;
 	}
 
@@ -196,6 +228,13 @@ public class GroupByItem {
 	}
 	public IntelAttribute.AttributeType getAttributeType(){
 		return this.attributeType;
+	}
+	
+	public SystemAttributeFilter.SystemAttribute getSystemAttribute(){
+		return systemAttribute;
+	}
+	public SystemAttributeFilter.Type getSystemType(){
+		return systemType;
 	}
 	
 	public List<ListItem> getAllOptions(Session session, IQueryItemProvider itemProvider, LocalDate[] dateRange, Locale l) {
@@ -259,68 +298,78 @@ public class GroupByItem {
 					items.add(new ListItem(i.getType().name() + "_" + i.getKeyId(), name, fullName)); //$NON-NLS-1$
 				}
 			}else if (attributeType == AttributeType.DATE) {
-				if (dateRange == null || dateRange[0] == null || dateRange[1] == null) return items;
-				
-				if (dateOption == DateOption.YEAR) {
-					int startYear = dateRange[0].getYear();
-					int endYear = dateRange[1].getYear();
-					while(startYear <= endYear) {
-						String name = String.valueOf(startYear);
-						String fullName = name;
-						if (entityType != null) {
-							fullName = name + " [" + intelAttribute.getName() + ": " + entityType + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						}else {
-							fullName = name + " [" + intelAttribute.getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
-						}
-						items.add(new ListItem(name, name, fullName));
-						startYear ++;
-					}
-				}else if (dateOption == DateOption.MONTH) {
-					LocalDate start = LocalDate.of(dateRange[0].getYear(), dateRange[0].getMonth(), 1);
-					LocalDate end = LocalDate.of(dateRange[1].getYear(), dateRange[1].getMonth(), 1);
-					
-					DateTimeFormatter keyFormatter = DateTimeFormatter.ofPattern("yyyy-M"); //$NON-NLS-1$
-					DateTimeFormatter nameFormatter = DateTimeFormatter.ofPattern("MMM, yyyy"); //$NON-NLS-1$
-					
-					while(start.isBefore(end) || start.isEqual(end)) {
-						String key = start.format(keyFormatter);
-						
-						String name = start.format(nameFormatter);
-						String fullName = name;
-						if (entityType != null) {
-							fullName = name + " [" + intelAttribute.getName() + ": " + entityType + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						}else {
-							fullName = name + " [" + intelAttribute.getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
-						}
-						items.add(new ListItem(key, name, fullName));
-						
-						start = start.plusMonths(1);
-					}
-					
-				}else if (dateOption == DateOption.DAY) {
-					LocalDate start = LocalDate.from(dateRange[0]);
-					LocalDate end = dateRange[1];
-					DateTimeFormatter keyFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); //$NON-NLS-1$
-					DateTimeFormatter nameFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy"); //$NON-NLS-1$
-					
-					while(start.isBefore(end) || start.isEqual(end)) {
-						String key = start.format(keyFormatter);
-						String name = start.format(nameFormatter);
-						String fullName = name;
-						if (entityType != null) {
-							fullName = name + " [" + intelAttribute.getName() + ": " + entityType + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						}else {
-							fullName = name + " [" + intelAttribute.getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
-						}
-						items.add(new ListItem(key, name, fullName));
-						start = start.plusDays(1);
-					}
-				}
+				return getDateOptions(dateRange, entityType, intelAttribute.getName());
 			}
 			return items;
 		}
 		
+		if (type == GroupByType.SYSTEM) {
+			return getDateOptions(dateRange, null,  SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(systemType, l));
+		}
 		return Collections.emptyList();
 		
+	}
+	
+	private List<ListItem> getDateOptions(LocalDate[] dateRange, String entityType, String attributeName) {
+		List<ListItem> items = new ArrayList<>();
+
+		if (dateRange == null || dateRange[0] == null || dateRange[1] == null) return items;
+		
+		if (dateOption == DateOption.YEAR) {
+			int startYear = dateRange[0].getYear();
+			int endYear = dateRange[1].getYear();
+			while(startYear <= endYear) {
+				String name = String.valueOf(startYear);
+				String fullName = name;
+				if (entityType != null) {
+					fullName = name + " [" + attributeName + ": " + entityType + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}else {
+					fullName = name + " [" + attributeName + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				items.add(new ListItem(name, name, fullName));
+				startYear ++;
+			}
+		}else if (dateOption == DateOption.MONTH) {
+			LocalDate start = LocalDate.of(dateRange[0].getYear(), dateRange[0].getMonth(), 1);
+			LocalDate end = LocalDate.of(dateRange[1].getYear(), dateRange[1].getMonth(), 1);
+			
+			DateTimeFormatter keyFormatter = DateTimeFormatter.ofPattern("yyyy-M"); //$NON-NLS-1$
+			DateTimeFormatter nameFormatter = DateTimeFormatter.ofPattern("MMM, yyyy"); //$NON-NLS-1$
+			
+			while(start.isBefore(end) || start.isEqual(end)) {
+				String key = start.format(keyFormatter);
+				
+				String name = start.format(nameFormatter);
+				String fullName = name;
+				if (entityType != null) {
+					fullName = name + " [" + attributeName + ": " + entityType + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}else {
+					fullName = name + " [" + attributeName + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				items.add(new ListItem(key, name, fullName));
+				
+				start = start.plusMonths(1);
+			}
+			
+		}else if (dateOption == DateOption.DAY) {
+			LocalDate start = LocalDate.from(dateRange[0]);
+			LocalDate end = dateRange[1];
+			DateTimeFormatter keyFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); //$NON-NLS-1$
+			DateTimeFormatter nameFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy"); //$NON-NLS-1$
+			
+			while(start.isBefore(end) || start.isEqual(end)) {
+				String key = start.format(keyFormatter);
+				String name = start.format(nameFormatter);
+				String fullName = name;
+				if (entityType != null) {
+					fullName = name + " [" + attributeName + ": " + entityType + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}else {
+					fullName = name + " [" + attributeName + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				items.add(new ListItem(key, name, fullName));
+				start = start.plusDays(1);
+			}
+		}
+		return items;
 	}
 }

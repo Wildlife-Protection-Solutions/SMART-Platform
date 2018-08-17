@@ -62,6 +62,7 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.NotFilter;
 import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart.ValueOption;
 import org.wcs.smart.util.UuidUtils;
 
@@ -221,8 +222,24 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 				groupBySql.append(","); //$NON-NLS-1$
 			}
 			cnt++;
-			
-			if (groupBy.getGroupByType() == GroupByType.ENTITYTYPE) {
+			if (groupBy.getGroupByType() == GroupByType.SYSTEM) {
+				String columnName = groupBy.getSystemType().name().toLowerCase() + "_" + groupBy.getSystemAttribute().name().toLowerCase(); //$NON-NLS-1$
+				GroupByItem.DateOption dateOp = groupBy.getDateOption();
+				switch(dateOp) {
+					case DAY:
+						selectSql.append(columnName+ " as c_" + cnt); //$NON-NLS-1$
+						groupBySql.append(columnName);
+						break;
+					case MONTH:
+						selectSql.append("cast(date_part('year', " + columnName + ") as char(4)) || '-' || trim(cast(date_part('month', " + columnName + ") as char(2))) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						groupBySql.append("cast(date_part('year', " + columnName + ") as char(4)) || '-' || trim(cast(date_part('month', " + columnName + ") as char(2))) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$				
+						break;
+					case YEAR:
+						selectSql.append("cast(date_part('year', " + columnName + ") as char(4)) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$
+						groupBySql.append("cast(date_part('year', " + columnName + ") as char(4)) "); //$NON-NLS-1$ //$NON-NLS-2$
+						break;
+				}
+			}else if (groupBy.getGroupByType() == GroupByType.ENTITYTYPE) {
 				selectSql.append("entity_type_key as c_" + cnt); //$NON-NLS-1$
 				groupBySql.append("entity_type_key"); //$NON-NLS-1$
 			}else if(groupBy.getGroupByType() == GroupByType.ATTRIBUTE) {
@@ -233,18 +250,18 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 				if (groupBy.getAttributeType() == AttributeType.DATE) {
 					GroupByItem.DateOption dateOp = groupBy.getDateOption();
 					switch(dateOp) {
-						case DAY:
-							selectSql.append(columnName+ " as c_" + cnt); //$NON-NLS-1$
-							groupBySql.append(columnName);
-							break;
-						case MONTH:
-							selectSql.append("cast(year(" + columnName + ") as char(4)) || '-' || trim(cast(month(" + columnName + ") as char(2))) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							groupBySql.append("cast(year(" + columnName + ") as char(4)) || '-' || trim(cast(month(" + columnName + ") as char(2)))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							break;
-						case YEAR:
-							selectSql.append("year(" + columnName + ") as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$
-							groupBySql.append("year(" + columnName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-							break;
+					case DAY:
+						selectSql.append(columnName+ " as c_" + cnt); //$NON-NLS-1$
+						groupBySql.append(columnName);
+						break;
+					case MONTH:
+						selectSql.append("cast(date_part('year', " + columnName + ") as char(4)) || '-' || trim(cast(date_part('month', " + columnName + ") as char(2))) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						groupBySql.append("cast(date_part('year', " + columnName + ") as char(4)) || '-' || trim(cast(date_part('month', " + columnName + ") as char(2))) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$				
+						break;
+					case YEAR:
+						selectSql.append("cast(date_part('year', " + columnName + ") as char(4)) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$
+						groupBySql.append("cast(date_part('year', " + columnName + ") as char(4)) "); //$NON-NLS-1$ //$NON-NLS-2$
+						break;
 					}
 					
 				}else if (groupBy.getAttributeType() == AttributeType.LIST) {
@@ -345,22 +362,36 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		
 		dataTable = new DataTable(obsTable);
 		
+		String created = SystemAttributeFilter.Type.ENTITY.name().toLowerCase() + "_" + SystemAttributeFilter.SystemAttribute.DATE_CREATED.name().toLowerCase(); //$NON-NLS-1$
+		String modified = SystemAttributeFilter.Type.ENTITY.name().toLowerCase() + "_" + SystemAttributeFilter.SystemAttribute.DATE_MODIFIED.name().toLowerCase(); //$NON-NLS-1$
+		
+		
 		//create table
 		StringBuilder sb = new StringBuilder();
 		sb.append("CREATE TABLE "); //$NON-NLS-1$
 		sb.append(obsTable);
-		sb.append(" (entity_uuid uuid, entity_type_key varchar(128))"); //$NON-NLS-1$
+		sb.append(" (entity_uuid uuid, entity_type_key varchar(128),"); //$NON-NLS-1$
+		sb.append(created);
+		sb.append(" date, "); //$NON-NLS-1$
+		sb.append(modified);
+		sb.append(" date )"); //$NON-NLS-1$
 		
 		logme(sb);
 		session.createNativeQuery(sb.toString()).executeUpdate();
 		dataTable.addColumn("entity_uuid",  "uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		dataTable.addColumn("entity_type_key",  "varchar(128)"); //$NON-NLS-1$ //$NON-NLS-2$
+		dataTable.addColumn(created, "date"); //$NON-NLS-1$
+		dataTable.addColumn(modified, "date"); //$NON-NLS-1$
 		
 		sb = new StringBuilder();
 		sb.append("INSERT INTO "); //$NON-NLS-1$
 		sb.append(obsTable);
-		sb.append("(entity_uuid, entity_type_key) "); //$NON-NLS-1$
-		sb.append("SELECT a.uuid, b.keyid FROM "); //$NON-NLS-1$
+		sb.append("(entity_uuid, entity_type_key, "); //$NON-NLS-1$
+		sb.append(created);
+		sb.append(","); //$NON-NLS-1$
+		sb.append(modified);
+		sb.append(" ) "); //$NON-NLS-1$
+		sb.append("SELECT a.uuid, b.keyid, a.date_created, a.date_modified FROM "); //$NON-NLS-1$
 		sb.append(" smart.i_entity a join smart.i_entity_type b on a.entity_type_uuid = b.uuid "); //$NON-NLS-1$
 		sb.append(" WHERE b.ca_uuid in (:cauuids)"); //$NON-NLS-1$
 		
@@ -431,12 +462,25 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		
 		for (GroupByItem item : allItems) {
 			String attributeKey = item.getAttributeKey();
-			if (attributeKey == null) continue;
-			if (processed.contains(attributeKey)) continue;
-			if (item.getAttributeType() != IntelAttribute.AttributeType.DATE) continue;
 			
-			String columnName = attributeToColumnKey.get(attributeKey);
-				
+			String columnName = null;
+			
+			if (item.getGroupByType() == GroupByType.SYSTEM) {
+				if (item.getSystemType() == SystemAttributeFilter.Type.ENTITY) {
+					columnName = item.getSystemType().name().toLowerCase() + "_" + item.getSystemAttribute().name().toLowerCase(); //$NON-NLS-1$
+					}else {
+					continue;
+				}
+			}else if (attributeKey == null) {
+				continue;
+			}else if (processed.contains(attributeKey)) {
+				continue;
+			}else if (item.getAttributeType() != IntelAttribute.AttributeType.DATE) {
+				continue;
+			}else {
+				columnName = attributeToColumnKey.get(attributeKey);
+			}
+			
 			StringBuilder sb = new StringBuilder();
 			sb.append("SELECT min("); //$NON-NLS-1$
 			sb.append(columnName);
@@ -601,6 +645,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		sb.append(dataTable.tableName + " a"); //$NON-NLS-1$
 		
 		final boolean[] requiresEntityType = new boolean[] {false};
+		final boolean[] requiresEntity = new boolean[] {false};
 		queryFilter.accept(new IFilterVisitor() {
 			
 			@Override
@@ -617,12 +662,18 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 						return;
 					}
 				}
+				if (filter instanceof SystemAttributeFilter && ((SystemAttributeFilter)filter).getType() == SystemAttributeFilter.Type.ENTITY) {
+					requiresEntity[0] = true;
+				}
+				
 			}
 		});
 		
-		if (requiresEntityType[0]) {
+		if (requiresEntity[0] || requiresEntityType[0]) {
 			sb.append(" JOIN smart.i_entity e on e.uuid = a.entity_uuid "); //$NON-NLS-1$
-			sb.append(" JOIN smart.i_entity_type t ON e.entity_type_uuid = t.uuid "); //$NON-NLS-1$
+			if (requiresEntityType[0]) {	
+				sb.append(" JOIN smart.i_entity_type t ON e.entity_type_uuid = t.uuid "); //$NON-NLS-1$
+			}
 		}
 		
 		sb.append(" WHERE "); //$NON-NLS-1$
@@ -653,7 +704,23 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	 * @throws Exception
 	 */
 	private void processFilter(IQueryFilter queryFilter, StringBuilder whereSql, HashMap<String,Object> parameters) throws Exception {
-		if (queryFilter instanceof BooleanFilter) {
+		if (queryFilter instanceof SystemAttributeFilter) {
+			
+			SystemAttributeFilter f = (SystemAttributeFilter)queryFilter;
+			if (f.getType() == SystemAttributeFilter.Type.ENTITY) {
+				String columnName = null;
+				if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.DATE_CREATED) {
+					columnName = "e.date_created"; //$NON-NLS-1$
+				}else if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.DATE_MODIFIED) {
+					columnName = "e.date_modified"; //$NON-NLS-1$
+				}
+				whereSql.append(SqlGenerator.generateDateClause(f.getDateValues(), columnName));
+
+			}else if (f.getType() == SystemAttributeFilter.Type.RECORD) {
+				throw new IllegalStateException("Group by record dates is not supported for entity summary queries"); //$NON-NLS-1$
+			}
+			
+		}else if (queryFilter instanceof BooleanFilter) {
 			BooleanFilter f = (BooleanFilter)queryFilter;
 			processFilter(f.getFilter1(), whereSql, parameters);
 			whereSql.append( SqlGenerator.operatorToSql(f.getOperator()) );

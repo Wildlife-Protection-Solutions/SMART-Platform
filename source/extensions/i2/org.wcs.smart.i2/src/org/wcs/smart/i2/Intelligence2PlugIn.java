@@ -93,6 +93,9 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_QUERY_ENTITYSUM = "org.wcs.smart.i2.query.entitysum"; //$NON-NLS-1$
 	public static final String ICON_QUERY_ENTITYRECORD = "org.wcs.smart.i2.query.entityrecord"; //$NON-NLS-1$
 	
+	public static final String ICON_SYSTEM_DATEATTRIBUTE = "org.wcs.smart.i2.query.systemdateattribute"; //$NON-NLS-1$
+	public static final String ICON_OPERATOR = "org.wcs.smart.i2.query.operator"; //$NON-NLS-1$
+	
 	// The shared instance
 	private static Intelligence2PlugIn plugin;
 
@@ -155,6 +158,8 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		
 		reg.put(ICON_CONFIGURE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/configure.png")); //$NON-NLS-1$
 
+		reg.put(ICON_SYSTEM_DATEATTRIBUTE,  imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/system_attribute_date.png")); //$NON-NLS-1$
+		reg.put(ICON_OPERATOR,  imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/operator.png")); //$NON-NLS-1$
 	}
 	
 	/*

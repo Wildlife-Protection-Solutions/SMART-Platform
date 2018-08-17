@@ -60,6 +60,7 @@ import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
 import org.wcs.smart.i2.query.export.CsvRecordQueryExporter;
 import org.wcs.smart.i2.query.export.ShpRecordQueryExporter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 
@@ -263,6 +264,17 @@ public class AdvancedLabelProviderImpl implements
 		
 		if (item == FixedAttribute.DATE) return Messages.getString("AdvancedLabelProviderImpl.RecordDateAttributeName", l); //$NON-NLS-1$
 		if (item == FixedAttribute.STATUS) return Messages.getString("AdvancedLabelProviderImpl.RecordSourceAttributeName", l); //$NON-NLS-1$
+		
+		
+		if (item instanceof SystemAttributeFilter.Type) {
+			switch ((SystemAttributeFilter.Type)item) {
+			case ENTITY:
+				return Messages.getString("AdvancedLabelProviderImpl.EntityLabel", l); //$NON-NLS-1$
+			case RECORD:
+				return Messages.getString("AdvancedLabelProviderImpl.RecordLabel", l); //$NON-NLS-1$
+			
+			}
+		}
 		return ""; //$NON-NLS-1$
 	}
 

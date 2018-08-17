@@ -133,21 +133,25 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int RATTRIBUTE_KEY_ENTITY = 65;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 66;
+  int SYSTEM_ATT_KEY = 66;
   /** RegularExpression Id. */
-  int DATE_GB_KEY = 67;
+  int QUERY_SPLITTER = 67;
   /** RegularExpression Id. */
-  int ENTITYTYPE_GB = 68;
+  int DATE_GB_KEY = 68;
   /** RegularExpression Id. */
-  int EATTRIBUTE_GB_KEY_POSITION = 69;
+  int ENTITYTYPE_GB = 69;
   /** RegularExpression Id. */
-  int EATTRIBUTE_GB_KEY_DATE = 70;
+  int EATTRIBUTE_GB_KEY_POSITION = 70;
   /** RegularExpression Id. */
-  int EATTRIBUTE_GB_KEY_LIST = 71;
+  int EATTRIBUTE_GB_KEY_DATE = 71;
   /** RegularExpression Id. */
-  int EATTRIBUTE_GB_KEY_EMPLOYEE = 72;
+  int EATTRIBUTE_GB_KEY_LIST = 72;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 73;
+  int EATTRIBUTE_GB_KEY_EMPLOYEE = 73;
+  /** RegularExpression Id. */
+  int SYSTEM_ATT_KEY_GB = 74;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 75;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -220,6 +224,7 @@ public interface ParserConstants {
     "<RATTRIBUTE_KEY_LIST>",
     "<RATTRIBUTE_KEY_EMPLOYEE>",
     "<RATTRIBUTE_KEY_ENTITY>",
+    "<SYSTEM_ATT_KEY>",
     "\"|\"",
     "<DATE_GB_KEY>",
     "<ENTITYTYPE_GB>",
@@ -227,6 +232,7 @@ public interface ParserConstants {
     "<EATTRIBUTE_GB_KEY_DATE>",
     "<EATTRIBUTE_GB_KEY_LIST>",
     "<EATTRIBUTE_GB_KEY_EMPLOYEE>",
+    "<SYSTEM_ATT_KEY_GB>",
     "<QUOTED_STRING>",
   };
 

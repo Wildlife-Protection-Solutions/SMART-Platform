@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.views.query;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
@@ -102,6 +103,11 @@ public class FilterTreeLabelProvider extends LabelProvider implements IColorProv
 					return img;
 				}
 			}
+		}
+		
+		if (element instanceof SystemAttributeFilterItem) {
+			ImageDescriptor id = ((SystemAttributeFilterItem)element).getImage();
+			if (id != null) id.createImage();
 		}
 		return null;
 	}

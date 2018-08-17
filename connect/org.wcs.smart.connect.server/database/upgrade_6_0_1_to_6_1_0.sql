@@ -33,6 +33,13 @@ BEGIN
 END$$ LANGUAGE 'plpgsql';
 CREATE TRIGGER trg_ct_incident_link AFTER INSERT OR UPDATE OR DELETE ON smart.ct_incident_link FOR EACH ROW execute procedure connect.trg_ct_incident_link();
 
+
+--support for svg images
+ALTER TABLE smart.cm_node add column imagetype varchar(32);
+ALTER TABLE smart.cm_attribute_list add column imagetype varchar(32);
+ALTER TABLE smart.cm_attribute_tree_node add column imagetype varchar(32);
+
+
 update connect.connect_plugin_version set version = '5.0' where plugin_id = 'org.wcs.smart.cybertracker';
 update connect.ca_plugin_version set version = '5.0' where plugin_id = 'org.wcs.smart.cybertracker';
 

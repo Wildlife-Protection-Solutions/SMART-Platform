@@ -62,6 +62,7 @@ import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
 import org.wcs.smart.i2.query.export.CsvRecordQueryExporter;
 import org.wcs.smart.i2.query.export.ShpRecordQueryExporter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -79,6 +80,26 @@ public class IntelligenceLabelProviderImpl implements
 		switch(style) {
 			case ARROW: return Messages.RelationshipDiagramEdgeStyleOptions_EdgeStyle_Arrow;
 			case LINE: return Messages.RelationshipDiagramEdgeStyleOptions_EdgeStyle_Line;
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
+	public static String getName(SystemAttributeFilter.SystemAttribute attribute) {
+		switch (attribute) {
+		case DATE_CREATED:
+			return Messages.EntitySearchPanel_DateCreatedFilter;
+		case DATE_MODIFIED:
+			return Messages.EntitySearchPanel_DataModifiedFilter;
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
+	public static String getName(SystemAttributeFilter.Type type) {
+		switch (type) {
+		case ENTITY:
+			return Messages.IntelligenceLabelProviderImpl_EntityLabel;
+		case RECORD:
+			return Messages.IntelligenceLabelProviderImpl_RecordLabel;
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -291,6 +312,9 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == FixedAttribute.DATE) return Messages.IntelligenceLabelProviderImpl_RecordDateLabel;
 		if (item == FixedAttribute.STATUS) return Messages.IntelligenceLabelProviderImpl_RecordStatusLabel;
 		
+		if (item instanceof SystemAttributeFilter.Type) {
+			return getName((SystemAttributeFilter.Type)item);
+		}
 		return ""; //$NON-NLS-1$
 	}
 	

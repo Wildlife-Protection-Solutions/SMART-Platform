@@ -215,6 +215,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 		this.query = clone;
 		initUiField();
 		setDirty(false);
+		
 	}
 
 	@Override
@@ -416,6 +417,8 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 		stackPanel.layout(true);
 		String queryString = summaryPanel.getQueryPart();
 		query.setQueryString(queryString);
+		
+		runJob.setQuery(query);
 		runJob.schedule();
 	}
 	

@@ -114,6 +114,7 @@ public class Messages extends NLS {
 	public static String AttributeMappingWizardPage1_YPositionValue;
 	public static String AttributeTreeFilterItem_employeeNotFound;
 	public static String AttributeTreeFilterItem_ErrorMsg;
+	public static String AttributeTreeFilterItem_PositionAttributesNotSupported;
 	public static String AttributeTreeNodeDMAdvisor_AttributeAssocatedObs;
 	public static String AttributeValueLabelProvider_ErrorLabel;
 	public static String BasicRecordSearchPanel_AddToWsMenuItem;
@@ -417,6 +418,11 @@ public class Messages extends NLS {
 	public static String EntityReportGenerator_RelationshipHeader;
 	public static String EntitySearchJob_JobName;
 	public static String EntitySearchJob_TaskName;
+	public static String EntitySearchPanel_DataModifiedFilter;
+	public static String EntitySearchPanel_DateCreatedFilter;
+	public static String EntitySearchPanel_InvalidDates;
+	public static String EntitySearchPanel_SystemFilterNotSupported;
+	public static String EntitySearchPanel_SystemFilters;
 	public static String EntitySearchResultTable_AddToRecordMenuItem;
 	public static String EntitySearchResultTable_AddToWsMenuItem;
 	public static String EntitySearchResultTable_CompareErrorDialogTitle;
@@ -482,6 +488,7 @@ public class Messages extends NLS {
 	public static String EntitySummaryContentProvider_FiltersTreeNode;
 	public static String EntitySummaryContentProvider_GroupByTreeNode;
 	public static String EntitySummaryContentProvider_NotNode;
+	public static String EntitySummaryContentProvider_OperatorsNode;
 	public static String EntitySummaryContentProvider_ValuesTreeNode;
 	public static String EntityToXml_compresssubtask;
 	public static String EntityToXml_ConvertingEntitiesSubTask;
@@ -769,6 +776,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_EntityAttachmentRsPathColumn;
 	public static String IntelligenceLabelProviderImpl_EntityDatasetName;
 	public static String IntelligenceLabelProviderImpl_EntityIdColumnName;
+	public static String IntelligenceLabelProviderImpl_EntityLabel;
 	public static String IntelligenceLabelProviderImpl_EntityLocaitonAttributeDatasetName;
 	public static String IntelligenceLabelProviderImpl_EntityLocationDsName;
 	public static String IntelligenceLabelProviderImpl_EntityLocationRsAttributeGeomtryColumn;
@@ -842,6 +850,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_RecordEntitiesRsEntityUUIDColumn;
 	public static String IntelligenceLabelProviderImpl_RecordEntitiesRsRecordUuidColumn;
 	public static String IntelligenceLabelProviderImpl_RecordInProgressLabel;
+	public static String IntelligenceLabelProviderImpl_RecordLabel;
 	public static String IntelligenceLabelProviderImpl_RecordLocationRsCommentColumn;
 	public static String IntelligenceLabelProviderImpl_RecordLocationRsDateColumn;
 	public static String IntelligenceLabelProviderImpl_RecordLocationRsGeometryColumn;

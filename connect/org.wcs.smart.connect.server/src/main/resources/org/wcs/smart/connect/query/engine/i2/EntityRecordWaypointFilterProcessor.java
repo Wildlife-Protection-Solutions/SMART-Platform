@@ -53,6 +53,7 @@ import org.wcs.smart.i2.query.observation.filter.NotFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
 import org.wcs.smart.i2.query.observation.filter.RecordSourceFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -99,30 +100,6 @@ public class EntityRecordWaypointFilterProcessor {
 	public String processFilter() throws Exception{
 		
 		try {
-			final int[] filtercnt = new int[]{0};
-			if(filter != null){	
-				//get filter count for progress monitor
-				filter.accept(new IFilterVisitor() {
-					@Override
-					public void visitElement(IQueryFilter filter) {
-						if (visitorException != null) return;
-						try{
-							if (filter instanceof AreaFilter || 
-								filter instanceof DataModelFilter ||
-								filter instanceof EntityFilter ||
-								filter instanceof EntityTypeFilter ||
-								filter instanceof RecordSourceFilter ||
-								filter instanceof RecordAttributeFilter ||
-								filter instanceof IntelAttributeFilter){
-								filtercnt[0] = filtercnt[0]+1;
-							}
-						}catch(Exception e){
-							visitorException = e;
-						}
-					}
-				});
-			}
-		
 			//1. - Observation Query Filter
 			//create a table of all entities using date filter
 			String entityTable = SqlGenerator.createTempTableName();
@@ -237,6 +214,10 @@ public class EntityRecordWaypointFilterProcessor {
 							}else if (filter instanceof RecordAttributeFilter) {
 								String columnName = createColumn(filter);
 								addFilterColumn((RecordAttributeFilter) filter, entityTable, tempTable, columnName);
+								switchTables(tempTable, entityTable, true, false, s);
+							}else if (filter instanceof SystemAttributeFilter) {
+								String columnName = createColumn(filter);
+								addFilterColumn((SystemAttributeFilter)filter, entityTable, tempTable, columnName);
 								switchTables(tempTable, entityTable, true, false, s);
 							}
 						}catch(Exception e){
@@ -667,7 +648,7 @@ if (filter.getFixedAttribute() != null) {
 			
 		}else if (filter.getAttributeType() != null) {
 			IntelAttribute attribute = itemProvider.getAttribute(filter.getAttributeKey(), s);
-			if (attribute == null) throw new Exception(MessageFormat.format("Intel attribute with key {0} not found.", filter.getAttributeKey()));
+			if (attribute == null) throw new Exception(MessageFormat.format("Intel attribute with key {0} not found.", filter.getAttributeKey())); //$NON-NLS-1$
 		
 			IntelAttributeListItem listItem = null;
 			if (filter.getAttributeType() == AttributeType.LIST && filter.getKeyValue() != null){
@@ -679,7 +660,7 @@ if (filter.getFixedAttribute() != null) {
 							break;
 						}
 					}
-					if (listItem == null) throw new Exception(MessageFormat.format("Intel attribute list item with key {0} not found.", filter.getAttributeKey()));
+					if (listItem == null) throw new Exception(MessageFormat.format("Intel attribute list item with key {0} not found.", filter.getAttributeKey())); //$NON-NLS-1$
 				}
 			}
 			
@@ -692,7 +673,7 @@ if (filter.getFixedAttribute() != null) {
 						e = null;
 					}
 					if (e == null) {
-						throw new Exception(MessageFormat.format("Employee with identifier {0} not found.", filter.getKeyValue()));
+						throw new Exception(MessageFormat.format("Employee with identifier {0} not found.", filter.getKeyValue())); //$NON-NLS-1$
 					}
 					employee = e;
 				}
@@ -752,7 +733,7 @@ if (filter.getFixedAttribute() != null) {
 				sql.append(" v.string_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
 
 			}else {
-				throw new Exception(MessageFormat.format("Filter for attribute type {0} not supported.", filter.getAttributeType().name())) ;
+				throw new Exception(MessageFormat.format("Filter for attribute type {0} not supported.", filter.getAttributeType().name())) ; //$NON-NLS-1$
 			}
 			logString(sql.toString());
 			logString(filter.getRecordSourceKey());
@@ -870,7 +851,7 @@ if (filter.getFixedAttribute() != null) {
 	private void addFilterColumn(IntelAttributeFilter filter, String obsTable, String tempTable, String columnName) throws Exception{
 		
 		IntelAttribute attribute = itemProvider.getAttribute(filter.getAttributeKey(), s);
-		if (attribute == null) throw new Exception(MessageFormat.format("Intel attribute with key {0} not found.", filter.getAttributeKey()));
+		if (attribute == null) throw new Exception(MessageFormat.format("Intel attribute with key {0} not found.", filter.getAttributeKey())); //$NON-NLS-1$
 		
 		IntelAttributeListItem listItem = null;
 		if (filter.getAttributeType() == AttributeType.LIST && filter.getKeyValue() != null){
@@ -882,7 +863,7 @@ if (filter.getFixedAttribute() != null) {
 						break;
 					}
 				}
-				if (listItem == null) throw new Exception(MessageFormat.format("Intel attribute list item {0} not found.", filter.getAttributeKey()));
+				if (listItem == null) throw new Exception(MessageFormat.format("Intel attribute list item {0} not found.", filter.getAttributeKey())); //$NON-NLS-1$
 			}
 		}
 		
@@ -895,7 +876,7 @@ if (filter.getFixedAttribute() != null) {
 					e = null;
 				}
 				if (e == null) {
-					throw new Exception(MessageFormat.format("No employee with identifier {0} found.", filter.getKeyValue())) ;
+					throw new Exception(MessageFormat.format("No employee with identifier {0} found.", filter.getKeyValue())) ; //$NON-NLS-1$
 				}
 				employee = e;
 			}
@@ -1053,7 +1034,7 @@ if (filter.getFixedAttribute() != null) {
 		query.setParameter("type", filter.getType().name()); //$NON-NLS-1$
 		
 		Object x = query.uniqueResult();
-		if (x == null) throw new Exception(MessageFormat.format("Area with key {0} not found.", filter.getKey()));
+		if (x == null) throw new Exception(MessageFormat.format("Area with key {0} not found.", filter.getKey())); //$NON-NLS-1$
 		UUID areaUuid = null;
 		if (x instanceof UUID){
 			areaUuid = (UUID) x;
@@ -1130,4 +1111,90 @@ if (filter.getFixedAttribute() != null) {
 		}
 	}
 	
+	private void addFilterColumn(SystemAttributeFilter filter, String obsTable, String tempTable, String columnName) throws Exception{
+		
+		String t2 = SqlGenerator.createTempTableName();
+		StringBuilder sql = new StringBuilder();
+		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
+		sql.append ("(entity_uuid uuid) "); //$NON-NLS-1$
+		logString(sql.toString());
+		s.createNativeQuery(sql.toString()).executeUpdate();
+		
+		
+		if (filter.getType() == SystemAttributeFilter.Type.RECORD) {
+			sql = new StringBuilder();
+			sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
+			sql.append(" SELECT distinct a.entity_uuid "); //$NON-NLS-1$
+			sql.append( "FROM " + obsTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" JOIN smart.i_entity_record er on er.entity_uuid = a.entity_uuid "); //$NON-NLS-1$
+			sql.append(" JOIN smart.i_record r on r.uuid = er.record_uuid "); //$NON-NLS-1$
+			
+			sql.append(" WHERE "); //$NON-NLS-1$
+			
+			if (filter.getAttribute() == SystemAttributeFilter.SystemAttribute.DATE_CREATED) {
+				sql.append(" cast( r.date_created as date) "); //$NON-NLS-1$
+			}else if (filter.getAttribute() == SystemAttributeFilter.SystemAttribute.DATE_MODIFIED) {
+				sql.append(" cast( r.last_modified_date as date) "); //$NON-NLS-1$
+			}
+			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
+			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
+		
+			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
+			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
+			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
+			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
+			
+		
+			logString(sql.toString());
+			query.executeUpdate();
+			
+		}else if (filter.getType() == SystemAttributeFilter.Type.ENTITY) {
+			
+		
+			sql = new StringBuilder();
+			sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
+			sql.append(" SELECT distinct e.uuid "); //$NON-NLS-1$
+			sql.append( "FROM " + obsTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" JOIN smart.i_entity e on e.uuid = a.entity_uuid "); //$NON-NLS-1$
+			sql.append(" WHERE "); //$NON-NLS-1$
+			
+			if (filter.getAttribute() == SystemAttributeFilter.SystemAttribute.DATE_CREATED) {
+				sql.append(" cast (e.date_created as date) "); //$NON-NLS-1$
+			}else if (filter.getAttribute() == SystemAttributeFilter.SystemAttribute.DATE_MODIFIED) {
+				sql.append(" cast( e.date_modified as date) "); //$NON-NLS-1$
+			}
+			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
+			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
+		
+			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
+			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
+			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
+			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
+			
+		
+			logString(sql.toString());
+			query.executeUpdate();
+		
+		}
+		
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("entity_uuid_tmp") + " on " + t2 + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		logString(sql.toString());
+		s.createNativeQuery(sql.toString()).executeUpdate();
+		
+		sql = new StringBuilder();
+		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
+		sql.append(" SELECT a.*, CASE WHEN b.entity_uuid is null then null else true end "); //$NON-NLS-1$
+		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		logString(sql.toString());
+		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		query.executeUpdate();
+		
+		sql = new StringBuilder();
+		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
+		logString(sql.toString());
+		s.createNativeQuery(sql.toString()).executeUpdate();
+	}
 }

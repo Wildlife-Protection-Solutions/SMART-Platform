@@ -58,10 +58,12 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -69,6 +71,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
@@ -96,6 +99,7 @@ public abstract class EntitySearchPanel extends Composite {
 	private enum FilterOption{
 		ENTITY_TYPE(Messages.AdvancedEntitySearchPanel_EntityTypeFilterLabel),
 		ENTITY_ATTRIBUTE_TYPE(Messages.AdvancedEntitySearchPanel_AttributeFilterLabel),
+		SYSTEM_ENTITY_ATTRIBUTE(Messages.EntitySearchPanel_SystemFilters),
 		NOT(Operator.NOT.getLabel(Locale.getDefault())),
 		BRACKET(Messages.AdvancedEntitySearchPanel_bracketsFilterLabel);
 		
@@ -239,6 +243,31 @@ public abstract class EntitySearchPanel extends Composite {
 				OptionDropItem di = OptionDropItem.createAndOrDropItem(true);
 				di.setInitialValue(Operator.OR.getKey());
 				toAdd.add(di);
+			}else if (p.startsWith(SystemAttributeFilter.SA_KEY)){
+				String[] bits = p.split(" ")[0].split(":"); //$NON-NLS-1$ //$NON-NLS-2$
+				
+				
+
+				
+				SystemAttributeFilter.SystemAttribute sa = SystemAttributeFilter.SystemAttribute.valueOf(bits[2].toUpperCase());
+				if (sa == null) {
+					toAdd.add(new ErrorDropItem(MessageFormat.format(Messages.EntitySearchPanel_SystemFilterNotSupported, bits[2])));
+				}else {
+				
+					String[] queryParts = p.split(" "); //$NON-NLS-1$
+					DropItem di = new DateDropItem(getName(sa), queryParts[0], true);
+					Operator op = Operator.parse(queryParts[1]);
+					try {
+						Date d1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR )).parse(queryParts[2]);
+						Date d2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR )).parse(queryParts[4]);
+						((DateDropItem)di).setInitialValue(op, d1, d2);
+						toAdd.add(di);
+					}catch (Exception ex) {
+						toAdd.add(new ErrorDropItem(MessageFormat.format(Messages.EntitySearchPanel_InvalidDates, queryParts[2], queryParts[4])));
+					}
+				}
+				
+				
 			}else if (p.startsWith(AdvancedEntitySearch.ENTITYTYPE_KEY)){
 				String entityTypeKey = p.split("=")[1].trim(); //$NON-NLS-1$
 				toAdd.add(createEntityTypeDropItem(entityTypeKey));				
@@ -371,6 +400,9 @@ public abstract class EntitySearchPanel extends Composite {
 				
 				@Override
 				public String getText(Object element){
+					if (element instanceof SystemAttributeFilter.SystemAttribute) {
+						return getName((SystemAttributeFilter.SystemAttribute)element);
+					}
 					if (element instanceof IntelEntityType){
 						return typeLabelProvider.getText(element);
 					}
@@ -382,6 +414,16 @@ public abstract class EntitySearchPanel extends Composite {
 				
 				@Override
 				public Image getImage(Object element){
+					if (element instanceof SystemAttributeFilter.SystemAttribute) {
+						switch ((SystemAttributeFilter.SystemAttribute)element) {
+						case DATE_CREATED:
+						case DATE_MODIFIED:
+							return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_DATE_ICON);
+						default:
+							break;
+						
+						}
+					}
 					if (element instanceof IntelEntityType){
 						return typeLabelProvider.getImage(element);
 					}
@@ -405,6 +447,8 @@ public abstract class EntitySearchPanel extends Composite {
 						di = createEntityTypeDropItem(((IntelEntityType)x).getKeyId());
 					}else if (x instanceof IntelAttribute){
 						di = createAttributeDropItem((IntelAttribute)x);
+					}else if (x instanceof SystemAttributeFilter.SystemAttribute) {
+						di = createSystemAttributeDropItem((SystemAttributeFilter.SystemAttribute)x);
 					}
 					if (di != null){
 						searchPanel.addItem(di);
@@ -467,6 +511,9 @@ public abstract class EntitySearchPanel extends Composite {
 					j.schedule();
 				}
 				break;
+			case SYSTEM_ENTITY_ATTRIBUTE:
+				attributeTable.setInput(SystemAttributeFilter.SystemAttribute.values());
+				
 			default:
 				break;
 			
@@ -474,6 +521,14 @@ public abstract class EntitySearchPanel extends Composite {
 		}
 	}
 	
+	private DropItem createSystemAttributeDropItem(SystemAttributeFilter.SystemAttribute attribute){
+		String key = SystemAttributeFilter.SA_KEY + ":" + IntelAttribute.AttributeType.DATE + ":" + attribute.name().toLowerCase();  //$NON-NLS-1$ //$NON-NLS-2$
+		return new DateDropItem(getName(attribute), key, true);
+	}
+	
+	private String getName(SystemAttributeFilter.SystemAttribute attribute) {
+		return IntelligenceLabelProviderImpl.getName(attribute);
+	}
 	
 	private DropItem createAttributeDropItem(IntelAttribute a){
 		DropItem di = null;
@@ -557,4 +612,5 @@ public abstract class EntitySearchPanel extends Composite {
 	private TextOperatorDropItem createCloseBracketDropItem(){
 		return new TextOperatorDropItem(Operator.BRACKET_CLOSE);
 	}
+	
 }

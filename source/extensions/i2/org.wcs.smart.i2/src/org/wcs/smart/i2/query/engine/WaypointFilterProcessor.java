@@ -52,6 +52,8 @@ import org.wcs.smart.i2.query.observation.filter.IFilterVisitor;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.NotFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -102,6 +104,7 @@ public class WaypointFilterProcessor {
 							filter instanceof DataModelFilter ||
 							filter instanceof EntityFilter ||
 							filter instanceof EntityTypeFilter ||
+							filter instanceof SystemAttributeFilter ||
 							filter instanceof IntelAttributeFilter){
 							filtercnt[0] = filtercnt[0]+1;
 						}
@@ -210,6 +213,10 @@ public class WaypointFilterProcessor {
 						}else if (filter instanceof IntelAttributeFilter){
 							String columnName = createColumn(filter);
 							addFilterColumn((IntelAttributeFilter) filter, obsTable, tempTable, columnName);
+							SqlGenerator.switchTables(tempTable, obsTable, true, false, s);
+						}else if (filter instanceof SystemAttributeFilter) {
+							String columnName = createColumn(filter);
+							addFilterColumn((SystemAttributeFilter)filter, obsTable, tempTable, columnName);
 							SqlGenerator.switchTables(tempTable, obsTable, true, false, s);
 						}
 							
@@ -767,6 +774,94 @@ public class WaypointFilterProcessor {
 		s.createNativeQuery(sql.toString()).executeUpdate();
 	}
 	
+	private void addFilterColumn(SystemAttributeFilter filter, String obsTable, String tempTable, String columnName) throws Exception{
+		
+		String t2 = SqlGenerator.createTempTableName();
+		StringBuilder sql = new StringBuilder();
+		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
+		sql.append ("(location_uuid char(16) for bit data) "); //$NON-NLS-1$
+		logString(sql.toString());
+		s.createNativeQuery(sql.toString()).executeUpdate();
+		
+		
+		if (filter.getType() == SystemAttributeFilter.Type.RECORD) {
+			sql = new StringBuilder();
+			sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
+			sql.append(" SELECT distinct a.location_uuid "); //$NON-NLS-1$
+			sql.append( "FROM " + obsTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" JOIN smart.i_record r on r.location_uuid = a.location_uuid "); //$NON-NLS-1$
+			
+			sql.append(" WHERE "); //$NON-NLS-1$
+			
+			if (filter.getAttribute() == SystemAttribute.DATE_CREATED) {
+				sql.append(" cast( r.date_created as date) "); //$NON-NLS-1$
+			}else if (filter.getAttribute() == SystemAttribute.DATE_MODIFIED) {
+				sql.append(" cast( r.last_modified_date as date) "); //$NON-NLS-1$
+			}
+			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
+			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
+		
+			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
+			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
+			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
+			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
+			
+		
+			logString(sql.toString());
+			query.executeUpdate();
+			
+		}else if (filter.getType() == SystemAttributeFilter.Type.ENTITY) {
+			
+		
+			sql = new StringBuilder();
+			sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
+			sql.append(" SELECT distinct el.location_uuid "); //$NON-NLS-1$
+			sql.append( "FROM " + obsTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" JOIN smart.i_entity_location el on el.location_uuid = a.location_uuid "); //$NON-NLS-1$
+			sql.append(" JOIN smart.i_entity e on e.uuid = el.entity_uuid "); //$NON-NLS-1$
+			
+			sql.append(" WHERE "); //$NON-NLS-1$
+			
+			if (filter.getAttribute() == SystemAttribute.DATE_CREATED) {
+				sql.append(" cast (e.date_created as date) "); //$NON-NLS-1$
+			}else if (filter.getAttribute() == SystemAttribute.DATE_MODIFIED) {
+				sql.append(" cast( e.date_modified as date) "); //$NON-NLS-1$
+			}
+			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
+			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
+		
+			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
+			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
+			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
+			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
+			
+		
+			logString(sql.toString());
+			query.executeUpdate();
+		
+		}
+		
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		logString(sql.toString());
+		s.createNativeQuery(sql.toString()).executeUpdate();
+		
+		sql = new StringBuilder();
+		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
+		sql.append(" SELECT a.*, CASE WHEN b.location_uuid is null then null else true end "); //$NON-NLS-1$
+		sql.append(" FROM " + obsTable + " a LEFT JOIN " + t2 + " b on a.location_uuid = b.location_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		logString(sql.toString());
+		NativeQuery<?> query = s.createNativeQuery(sql.toString());
+		query.executeUpdate();
+		
+		sql = new StringBuilder();
+		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
+		logString(sql.toString());
+		s.createNativeQuery(sql.toString()).executeUpdate();
+	}
+
 	private void logString(String string){
 		SqlGenerator.logString(string);
 	}

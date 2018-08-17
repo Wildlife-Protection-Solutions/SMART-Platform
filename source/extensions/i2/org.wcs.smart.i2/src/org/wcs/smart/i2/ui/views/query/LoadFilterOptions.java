@@ -64,6 +64,7 @@ import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 
 /**
  * Job for loading roots for filter tree
@@ -92,6 +93,7 @@ public class LoadFilterOptions extends Job {
 			if (query.getTypeKey().equals(IntelEntityRecordQuery.KEY)) {
 				roots.add(loadRecords(s));
 				roots.add(loadRecordAttributes(s));
+				
 				BasicTreeFilterItem opRoot = new BasicTreeFilterItem(Messages.LoadFilterOptions_EntityObservationsNode);
 				opRoot.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DATA_MODEL_ICON));
 				roots.add(opRoot);
@@ -113,14 +115,9 @@ public class LoadFilterOptions extends Job {
 
 	private FilterTreeItem loadOperators(){
 		BasicTreeFilterItem opRoot = new BasicTreeFilterItem(Messages.LoadFilterOptions_OperatorsLabel);
-		Operator[] ops = new Operator[]{
-				Operator.NOT,
-				Operator.BRACKETS
-		};
-		for (Operator o : ops){
-			OperatorTreeFilterItem item = new OperatorTreeFilterItem(o);
-			opRoot.addChild(item);
-		}
+		opRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_OPERATOR));
+		opRoot.addChild(new OperatorTreeFilterItem(Operator.NOT));
+		opRoot.addChild(new OperatorTreeFilterItem(Operator.BRACKETS));
 		return opRoot;
 	}
 	
@@ -172,6 +169,7 @@ public class LoadFilterOptions extends Job {
 		
 		return dataModelItem;
 	}
+
 	
 	private FilterTreeItem loadAttributes(Session session){
 		AttributeHeaderFilterItem attributeRoots = new AttributeHeaderFilterItem(Messages.LoadFilterOptions_EntityAttributeFilterLabel, false);
@@ -182,6 +180,12 @@ public class LoadFilterOptions extends Job {
 			AttributeTreeFilterItem item = new AttributeTreeFilterItem(a, true, false);
 			attributeRoots.addChild(item);
 		}
+		
+		SystemAttributeFilterItem dateCreated = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.DATE_CREATED, SystemAttributeFilter.Type.ENTITY);
+		SystemAttributeFilterItem dateModified = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.DATE_MODIFIED, SystemAttributeFilter.Type.ENTITY);
+		
+		attributeRoots.addChild(dateCreated);
+		attributeRoots.addChild(dateModified);
 		
 		return attributeRoots;
 	}
@@ -272,6 +276,11 @@ public class LoadFilterOptions extends Job {
 		
 		RecordAttributeFilterItem statusFilter = new RecordAttributeFilterItem(RecordAttributeFilter.FixedAttribute.STATUS);
 		recordSourceRoot.addChild(statusFilter);
+		
+		SystemAttributeFilterItem dateCreated = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.DATE_CREATED, SystemAttributeFilter.Type.RECORD);
+		SystemAttributeFilterItem dateModified = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.DATE_MODIFIED, SystemAttributeFilter.Type.RECORD);
+		recordSourceRoot.addChild(dateCreated);
+		recordSourceRoot.addChild(dateModified);
 		
 		return recordSourceRoot;
 	}

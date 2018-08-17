@@ -49,6 +49,7 @@ import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
+import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
@@ -217,6 +218,8 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.NUMERIC, canEdit)};
 		case TEXT:
 			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.TEXT, canEdit)};
+		case POSITION:
+			return new DropItem[] {new ErrorDropItem(Messages.AttributeTreeFilterItem_PositionAttributesNotSupported)};
 		}
 		return null;
 	}

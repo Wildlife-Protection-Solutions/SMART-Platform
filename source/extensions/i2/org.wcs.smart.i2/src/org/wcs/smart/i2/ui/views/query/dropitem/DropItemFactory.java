@@ -68,10 +68,12 @@ import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.NotFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
-import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.query.observation.filter.RecordSourceFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.views.query.RecordAttributeFilterItem;
+import org.wcs.smart.i2.ui.views.query.SystemAttributeFilterItem;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
@@ -118,8 +120,14 @@ public class DropItemFactory {
 	public List<DropItem> generateDropItems(GroupByPart part){
 		List<DropItem> allItems = new ArrayList<>();
 		for (GroupByItem i : part.getItems()) {
-			
-			if (i.getGroupByType() == GroupByItem.GroupByType.ENTITYTYPE) {
+			if (i.getGroupByType() == GroupByItem.GroupByType.SYSTEM) {
+				
+				SystemAttributeGroupByDropItem di = new SystemAttributeGroupByDropItem( i.getSystemAttribute() );
+				di.setDateOption(i.getDateOption());
+				
+				return Collections.singletonList(di);
+				
+			}else if (i.getGroupByType() == GroupByItem.GroupByType.ENTITYTYPE) {
 				EntityTypeGroupByDropItem di = new EntityTypeGroupByDropItem();
 				for (String entityTypeKey : i.getFilterOptions()) {
 					IntelEntityType type = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityType(entityTypeKey, session);
@@ -242,6 +250,9 @@ public class DropItemFactory {
 		if (filter.getClass().equals(RecordAttributeFilter.class))
 			return generateDropItem((RecordAttributeFilter)filter);
 		
+		if (filter.getClass().equals(SystemAttributeFilter.class)){
+			return generateDropItem((SystemAttributeFilter)filter);
+		}
 		ErrorDropItem error = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_FilterTypeNotSupported, filter.getClass().getName()));
 		return Collections.singletonList(error);
 	}
@@ -324,6 +335,11 @@ public class DropItemFactory {
 		return items;
 	}
 	
+	public List<DropItem> generateDropItem(SystemAttributeFilter filter){
+		DropItem di = new SystemAttributeFilterItem(filter.getAttribute(), filter.getType()).asDropItem()[0];
+		((DateDropItem)di).setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
+		return Collections.singletonList(di);
+	}
 	
 	public List<DropItem> generateDropItem(RecordAttributeFilter filter){
 		if (filter.getFixedAttribute() != null) {

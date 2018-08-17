@@ -49,6 +49,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -206,8 +207,69 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		
 		int cnt = 0;
 		for (String t : stokens){
-			
-			if (t.startsWith(ENTITYTYPE_KEY + " ")){ //$NON-NLS-1$
+			if (t.startsWith(SystemAttributeFilter.SA_KEY)) {
+				String[] bits = t.split(" "); //$NON-NLS-1$
+				String systemKey = bits[0].split(":")[2]; //$NON-NLS-1$
+				SystemAttributeFilter.SystemAttribute attribute = SystemAttributeFilter.SystemAttribute.valueOf(systemKey.toUpperCase());
+				if (attribute == null) {
+					throw new Exception(MessageFormat.format("System attribute with key {0} not supported.", systemKey)); //$NON-NLS-1$
+				}
+				
+				String columnName = "sa_" + attribute.name().toLowerCase() + cnt; //$NON-NLS-1$
+				cnt++;
+				
+				sb = new StringBuilder();
+				sb.append("ALTER TABLE qt_temp ADD COLUMN ");  //$NON-NLS-1$
+				sb.append(columnName);
+				sb.append(" boolean default false");  //$NON-NLS-1$
+					
+				session.createNativeQuery(sb.toString()).executeUpdate();
+				
+				String column = ""; //$NON-NLS-1$
+				switch (attribute) {
+					case DATE_CREATED:
+						column = "date_created"; //$NON-NLS-1$
+						break;
+					case DATE_MODIFIED:
+						column = "date_modified"; //$NON-NLS-1$
+						break;
+				}
+				sb = new StringBuilder();
+				sb.append("UPDATE qt_temp SET " );  //$NON-NLS-1$
+				sb.append(columnName);
+				sb.append(" = true WHERE entity_uuid IN (");  //$NON-NLS-1$
+				sb.append("SELECT t.entity_uuid"); //$NON-NLS-1$
+				sb.append(" FROM qt_temp t join smart.i_entity e on t.entity_uuid = e.uuid "); //$NON-NLS-1$
+				sb.append(" WHERE e." + column); //$NON-NLS-1$
+					
+				if (bits[1].equalsIgnoreCase(Operator.BETWEEN.getKey())){
+					sb.append(" between "); //$NON-NLS-1$
+				}else if (bits[1].equalsIgnoreCase(Operator.NOT_BETWEEN.getKey())){
+					sb.append(" not between "); //$NON-NLS-1$
+				}else{
+					throw new Exception(MessageFormat.format("Operator {0} not supported for date filter", bits[2])); //$NON-NLS-1$
+				}
+					
+				sb.append(" :date1 and :date2 "); //$NON-NLS-1$ 
+				sb.append(" )" ); //$NON-NLS-1$
+					
+				Date d1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(bits[2]);
+				Date d2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(bits[4]);
+					
+				Calendar cal = Calendar.getInstance();
+				cal.setTimeInMillis(d2.getTime());
+				cal.set(Calendar.SECOND, 59);
+				cal.set(Calendar.MINUTE, 59);
+				cal.set(Calendar.HOUR_OF_DAY, 23);
+					
+				
+				session.createNativeQuery(sb.toString())
+					.setParameter("date1", d1) //$NON-NLS-1$
+					.setParameter("date2", cal.getTime()) //$NON-NLS-1$
+					.executeUpdate();
+				
+				where.append(" " + columnName +" ");  //$NON-NLS-1$//$NON-NLS-2$
+			}else if (t.startsWith(ENTITYTYPE_KEY + " ")){ //$NON-NLS-1$
 				String[] bits = t.split(" "); //$NON-NLS-1$
 				String entityTypeKey = bits[2];
 				

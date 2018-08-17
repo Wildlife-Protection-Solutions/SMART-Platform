@@ -50,18 +50,21 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.InternalQueryManager;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.views.QueryView;
 import org.wcs.smart.i2.ui.views.query.dropitem.AttributeGroupByDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.EntityTypeGroupByDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.SystemAttributeGroupByDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextOperatorDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.ValueDropItem;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -98,7 +101,9 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 	 */
 	private enum SubRootNode{
 		ENTITY_TYPE_ITEM(Messages.EntitySummaryContentProvider_EntityTypesTreeNode),
-		ATTRIBUTE_ITEM(Messages.EntitySummaryContentProvider_AttributeTreeNode);
+		ATTRIBUTE_ITEM(Messages.EntitySummaryContentProvider_AttributeTreeNode),
+		OPERATORS(Messages.EntitySummaryContentProvider_OperatorsNode);
+		
 		String guiName;
 		
 		SubRootNode(String name){
@@ -109,12 +114,13 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 	/*
 	 * not node
 	 */
-	private enum NotNode{
-		NOT(Messages.EntitySummaryContentProvider_NotNode);
+	private enum OperatorNode{
+		NOT(Messages.EntitySummaryContentProvider_NotNode),
+		BRACKETS("( )"); //$NON-NLS-1$
 		
 		String guiName;
 		
-		NotNode(String name){
+		OperatorNode(String name){
 			this.guiName = name;
 		}
 	}
@@ -253,6 +259,8 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 				}
 			}else if (item == SubRootNode.ENTITY_TYPE_ITEM) {
 				return Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY);
+			}else if (item == SubRootNode.OPERATORS) {
+				return Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_OPERATOR);
 			}else if (item == SubRootNode.ATTRIBUTE_ITEM) {
 				if (source == RootNode.GROUP_BY_OPTION) {
 					return SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.ATTRIBUTE_LIST_ICON);	
@@ -284,7 +292,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 				items.add(new TreeNode((RootNode)item, SubRootNode.ENTITY_TYPE_ITEM, SubRootNode.ENTITY_TYPE_ITEM.guiName));
 				items.add(new TreeNode((RootNode)item, SubRootNode.ATTRIBUTE_ITEM, SubRootNode.ATTRIBUTE_ITEM.guiName));
 				if (item == RootNode.FILTER_OPTION) {
-					items.add(new TreeNode(RootNode.FILTER_OPTION, NotNode.NOT,  NotNode.NOT.guiName));
+					items.add(new TreeNode((RootNode)item, SubRootNode.OPERATORS, SubRootNode.OPERATORS.guiName));
 				}
 				return items;
 			}
@@ -305,6 +313,14 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 				return nodes;
 			}
 			
+			if (item == SubRootNode.OPERATORS) {
+				List<FilterTreeItem> items = new ArrayList<>();
+				items.add(new TreeNode(RootNode.FILTER_OPTION, OperatorNode.NOT,  OperatorNode.NOT.guiName));
+				items.add(new TreeNode(RootNode.FILTER_OPTION, OperatorNode.BRACKETS,  OperatorNode.BRACKETS.guiName));
+				return items;
+			}
+			
+			
 			if (item == SubRootNode.ATTRIBUTE_ITEM) {
 				HashSet<String> keys = new HashSet<>();
 				
@@ -319,6 +335,14 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 						}
 					}
 				}
+				
+				TreeNode tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.DATE_CREATED, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.DATE_CREATED));
+				tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_SYSTEM_DATEATTRIBUTE));
+				nodes.add(tn);
+				
+				tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.DATE_MODIFIED, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.DATE_MODIFIED));
+				tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_SYSTEM_DATEATTRIBUTE));
+				nodes.add(tn);
 				
 				return nodes;
 			}
@@ -366,12 +390,19 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 						return new DropItem[] {new AttributeGroupByDropItem((IntelAttribute)item)};
 					}
 				}
+				if (item instanceof SystemAttributeFilter.SystemAttribute) {
+					return new DropItem[] {new SystemAttributeGroupByDropItem((SystemAttributeFilter.SystemAttribute)item)};
+				}
 			}
 			if (source == RootNode.VALUE_OPTION && item instanceof ValuePart.ValueOption) {
 				return new DropItem[] { new ValueDropItem((ValuePart.ValueOption) item) };
 			}
-			if (item == NotNode.NOT) {
+			if (item == OperatorNode.NOT) {
 				return new DropItem[] { new TextOperatorDropItem(Operator.NOT) };
+			}
+			if (item == OperatorNode.BRACKETS) {
+				return new DropItem[] { new TextOperatorDropItem(Operator.BRACKET_OPEN), 
+									new TextOperatorDropItem(Operator.BRACKET_CLOSE) };
 			}
 			if (source == RootNode.FILTER_OPTION) {
 				if (item instanceof IntelEntityType) {
@@ -380,8 +411,11 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 					return (new AttributeTreeFilterItem( ((IntelAttribute)item), true, false)).asDropItem();
 				}else if (item instanceof IntelEntityTypeAttribute) {
 					return (new AttributeTreeFilterItem( ((IntelEntityTypeAttribute)item))).asDropItem();
+				}else if (item instanceof SystemAttributeFilter.SystemAttribute) {
+					return (new SystemAttributeFilterItem((SystemAttributeFilter.SystemAttribute)item, SystemAttributeFilter.Type.ENTITY)).asDropItem();
 				}
 			}
+			
 			return null;
 		}
 		
