@@ -35,6 +35,7 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.i2.entity.EntityMapping.Type;
 import org.wcs.smart.event.i2.internal.Messages;
@@ -56,7 +57,6 @@ import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
-import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
@@ -137,29 +137,34 @@ public class CreateEntityActionType implements IActionType {
 			
 			//copy attachments for entity
 			newEntity.setEntityAttachments(new ArrayList<>());
+			List<ISmartAttachment> attachmentsToCopy = new ArrayList<>();
 			if (data.getAttachments() != null) {
-				for (ObservationAttachment aa : data.getAttachments()){
-					try {
-						aa.computeFileLocation(session);
-					}catch (Exception ex) {
-						EventPlugIn.log(ex.getMessage(), ex);
-						continue;
-					}
-					
-					IntelAttachment ie = new IntelAttachment();
-					ie.setConservationArea(ca);
-					ie.setCopyFromLocation(aa.getAttachmentFile());
-					ie.setFilename(aa.getFilename());
-					ie.setDateCreated(new Date());
-					ie.setCreatedBy(SmartDB.getCurrentEmployee());
-					
-					IntelEntityAttachment iea = new IntelEntityAttachment();
-					iea.setAttachment(ie);
-					iea.setEntity(newEntity);
-					newEntity.getEntityAttachments().add(iea);
-				}
+				attachmentsToCopy.addAll(data.getAttachments());
 			}
+			if (data.getWaypoint() != null && data.getWaypoint().getAttachments() != null) {
+				attachmentsToCopy.addAll(data.getWaypoint().getAttachments());
+			}
+			for (ISmartAttachment aa : attachmentsToCopy) {
+				try {
+					aa.computeFileLocation(session);
+				} catch (Exception ex) {
+					EventPlugIn.log(ex.getMessage(), ex);
+					continue;
+				}
 				
+				IntelAttachment ie = new IntelAttachment();
+				ie.setConservationArea(ca);
+				ie.setCopyFromLocation(aa.getAttachmentFile());
+				ie.setFilename(aa.getFilename());
+				ie.setDateCreated(new Date());
+				ie.setCreatedBy(SmartDB.getCurrentEmployee());
+				
+				IntelEntityAttachment iea = new IntelEntityAttachment();
+				iea.setAttachment(ie);
+				iea.setEntity(newEntity);
+				newEntity.getEntityAttachments().add(iea);
+			}
+			
 			if (!newEntity.getEntityAttachments().isEmpty()) {
 				newEntity.setPrimaryAttachment(newEntity.getEntityAttachments().get(0).getAttachment());
 			}
