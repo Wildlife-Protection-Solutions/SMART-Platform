@@ -48,7 +48,12 @@ public class OpenStationLocationHandler {
 	}
 	
 	public void openStationLocation(AssetStationLocation location){
-		StationLocationEditorInput input = new StationLocationEditorInput(location.getUuid(),  location.getId());
+		StationLocationEditorInput input = new StationLocationEditorInput(location.getUuid(),  location.getId(), false);
+		openStationLocation(input);
+	}
+	
+	public void openStationLocation(AssetStationLocation location, boolean isNew){
+		StationLocationEditorInput input = new StationLocationEditorInput(location.getUuid(),  location.getId(), isNew);
 		openStationLocation(input);
 	}
 }

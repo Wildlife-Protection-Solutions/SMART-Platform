@@ -546,14 +546,14 @@ public class AssetListView {
 		IStructuredSelection selection = (IStructuredSelection)lstStations.getSelection();
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object station = (Object) iterator.next();
-			if (station instanceof AssetStation) openStation((AssetStation)station);
+			if (station instanceof AssetStation) openStation((AssetStation)station, false);
 			if (station instanceof AssetStationLocation) (new OpenStationLocationHandler()).openStationLocation(((AssetStationLocation)station));
 		}
 	}
 	
-	private void openStation(AssetStation station) {
+	private void openStation(AssetStation station, boolean isNew) {
 		IEclipseContext ctx = context.createChild();
-		ctx.set(OpenStationHandler.STATION_PARAM, new StationEditorInput(station.getUuid(), station.getId()));
+		ctx.set(OpenStationHandler.STATION_PARAM, new StationEditorInput(station.getUuid(), station.getId(), isNew));
 		ContextInjectionFactory.invoke(new OpenStationHandler(), Execute.class, ctx);
 	}
 	
@@ -565,7 +565,7 @@ public class AssetListView {
 		ContextInjectionFactory.inject(dialog, context);
 		dialog.open();
 		if (newStation.getUuid() != null) {
-			openStation(newStation);
+			openStation(newStation, true);
 		}
 	}
 	
@@ -582,7 +582,7 @@ public class AssetListView {
 		ContextInjectionFactory.inject(dialog, context);
 		dialog.open();
 		if (newLocation.getUuid() != null) {
-			(new OpenStationLocationHandler()).openStationLocation(newLocation);
+			(new OpenStationLocationHandler()).openStationLocation(newLocation, true);
 		}
 	}
 	
@@ -714,6 +714,8 @@ public class AssetListView {
 	
 	private Job loadAssetsJob = new Job(Messages.AssetListView_loadingAssetsJobName) {
 
+		private boolean first = true;
+		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Asset> assets = new ArrayList<>();
@@ -748,7 +750,12 @@ public class AssetListView {
 				if (lstAssets != null && !lstAssets.getControl().isDisposed()){
 					Object[] expanded = lstAssets.getExpandedElements();
 					lstAssets.setInput(assets);
-					lstAssets.setExpandedElements(expanded);
+					if (first) {
+						lstAssets.expandAll();
+						first = false;
+					} else {
+						lstAssets.setExpandedElements(expanded);
+					}
 				}
 			});
 			return Status.OK_STATUS;
@@ -758,6 +765,7 @@ public class AssetListView {
 	
 	private Job loadStationsJob = new Job(Messages.AssetListView_loadingstationsJobName) {
 
+		private boolean first = true;
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<AssetStation> stations = new ArrayList<>();
@@ -784,7 +792,12 @@ public class AssetListView {
 				if (lstStations != null && !lstStations.getControl().isDisposed()){
 					Object[] elements = lstStations.getExpandedElements();
 					lstStations.setInput(mappings);
-					lstStations.setExpandedElements(elements);
+					if (first) {
+						lstStations.expandAll();
+						first = false;
+					} else {
+						lstStations.setExpandedElements(elements);
+					}
 				}
 			});
 			return Status.OK_STATUS;

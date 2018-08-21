@@ -39,9 +39,26 @@ public class AssetEditorInput implements IEditorInput {
 	private UUID assetUuid;
 	private String assetId;
 	
+	private boolean showProperties = false;
+	
 	public AssetEditorInput(UUID assetUuid, String assetId) {
 		this.assetId = assetId;
 		this.assetUuid = assetUuid;
+	}
+	
+	/**
+	 * 
+	 * @param assetUuid
+	 * @param assetId
+	 * @param showProperties true if the properties page should be displayed initially
+	 */
+	public AssetEditorInput(UUID assetUuid, String assetId, boolean showProperties) {
+		this(assetUuid, assetId);
+		this.showProperties = showProperties;
+	}
+	
+	public boolean showProperties() {
+		return this.showProperties;
 	}
 	
 	public UUID getAssetUuid() {

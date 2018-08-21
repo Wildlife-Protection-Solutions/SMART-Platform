@@ -152,6 +152,7 @@ public class StationLocationDetailsPage {
 	}
 	
 	public void initializeAttributes(AssetStationLocation location) {
+		if (location == null) return;
 		linkStn.setText(location.getStation().getId());
 		linkStn.setData(STATION_DATA_KEY, location.getStation());
 		

@@ -455,7 +455,11 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		sectionBody.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		//create initial panel
-		headerSection.selectPanel(0);
+		if (((StationLocationEditorInput)getEditorInput()).showProperties()) {
+			headerSection.selectPanel(2);
+		} else {
+			headerSection.selectPanel(0);
+		}
 		
 		createEventHandlers();
 		initData();
@@ -536,7 +540,7 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		getSite().getWorkbenchWindow().getPartService().removePartListener(partlistener);
 		super.dispose();
 		
-		if (this.currentPage.getMapViewer() != null) this.currentPage.getMapViewer().dispose();
+		if (this.currentPage != null && this.currentPage.getMapViewer() != null) this.currentPage.getMapViewer().dispose();
 		
 		ApplicationGIS.getToolManager().setCurrentEditor(null);
 		

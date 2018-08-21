@@ -168,7 +168,7 @@ public class AssetPropertyPage {
 	}
 	
 	public void initializeAttributes(Asset asset) {
-		
+		if (asset == null) return;
 		for (Control c : attributePanel.getChildren()) c.dispose();
 		fieldEditors = new ArrayList<>();
 		

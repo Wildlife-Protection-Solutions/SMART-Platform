@@ -134,7 +134,7 @@ public class StationDetailsPage {
 	}
 	
 	public void initializeAttributes(AssetStation station) {
-
+		if (station == null) return;
 		tmpLocationAttribute.setNumberValue(station.getX());
 		tmpLocationAttribute.setNumberValue2(station.getY());
 		

@@ -143,7 +143,7 @@ public class NewAssetHandler {
 		Asset newAsset = createAsset(assetId, type);
 		if (newAsset != null) {
 			//open editor
-			AssetEditorInput in = new AssetEditorInput(newAsset.getUuid(), newAsset.getId());
+			AssetEditorInput in = new AssetEditorInput(newAsset.getUuid(), newAsset.getId(), true);
 			(new OpenAssetHandler()).openAsset(in);
 			context.get(IEventBroker.class).post(AssetEvents.ASSET_NEW, Collections.singleton(newAsset));
 		}

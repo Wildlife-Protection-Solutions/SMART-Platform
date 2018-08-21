@@ -38,10 +38,20 @@ public class StationLocationEditorInput implements IEditorInput {
 
 	private UUID locationUuid;
 	private String locationId;
+	private boolean showProperties = false;
 	
 	public StationLocationEditorInput(UUID locationUuid, String locationId) {
 		this.locationId = locationId;
 		this.locationUuid = locationUuid;
+	}
+	
+	public StationLocationEditorInput(UUID locationUuid, String locationId, boolean showProperties) {
+		this(locationUuid, locationId);
+		this.showProperties = showProperties;
+	}
+	
+	public boolean showProperties() {
+		return this.showProperties;
 	}
 	
 	public UUID getStationLocationUuid() {
