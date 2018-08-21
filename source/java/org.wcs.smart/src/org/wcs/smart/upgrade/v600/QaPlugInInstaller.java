@@ -29,6 +29,8 @@ public class QaPlugInInstaller {
 				"GRANT ALL PRIVILEGES ON smart.qa_error TO admin,manager",
 				"GRANT SELECT ON smart.qa_routine TO data_entry,analyst",
 				"GRANT SELECT ON smart.qa_error TO data_entry,analyst",
+				
+				"GRANT ALL PRIVILEGES ON smart.qa_routine_parameter TO admin,manager,data_entry",
 		};
 		
 		for (String s : sql){
