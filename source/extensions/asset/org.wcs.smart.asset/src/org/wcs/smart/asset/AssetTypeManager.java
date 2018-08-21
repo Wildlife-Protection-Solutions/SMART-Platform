@@ -108,17 +108,17 @@ public enum AssetTypeManager {
 		q.executeUpdate();
 		
 		//delete all asset type attributes
-		q = session.createQuery("delete from AssetTypeAttribute WHERE id.assetType = :type)"); //$NON-NLS-1$
+		q = session.createQuery("delete from AssetTypeAttribute WHERE id.assetType = :type"); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		//delete all asset type deployment attributes
-		q = session.createQuery("delete from AssetTypeDeploymentAttribute WHERE id.assetType = :type)"); //$NON-NLS-1$
+		q = session.createQuery("delete from AssetTypeDeploymentAttribute WHERE id.assetType = :type"); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		//delete all assets
-		q = session.createQuery("delete from Asset WHERE assetType = :type)"); //$NON-NLS-1$
+		q = session.createQuery("delete from Asset WHERE assetType = :type"); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();
 		
