@@ -149,6 +149,18 @@ public class DataImportPage {
 		this.view = null;
 	}
 	
+	public void addFiles() {
+		FileDialog fd = new FileDialog(Display.getDefault().getActiveShell(), SWT.MULTI | SWT.OPEN);
+		if (fd.open() == null) return;
+		List<Path> paths = new ArrayList<>();
+		for (String file : fd.getFileNames()) {
+			Path temp = Paths.get(fd.getFilterPath(), file);
+			paths.add(temp);
+		}
+		processFiles(paths);
+	}
+	
+	
 	public void createPage(Composite parent) {
 		rowColors = new Color[] {
 				new Color(parent.getDisplay(), 179, 225, 210),
@@ -185,14 +197,7 @@ public class DataImportPage {
 		itemAdd.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_FILE));
 		itemAdd.setToolTipText(Messages.DataImportPage_addTooltip);
 		itemAdd.addListener(SWT.Selection, e->{
-			FileDialog fd = new FileDialog(Display.getDefault().getActiveShell(), SWT.MULTI | SWT.OPEN);
-			if (fd.open() == null) return;
-			List<Path> paths = new ArrayList<>();
-			for (String file : fd.getFileNames()) {
-				Path temp = Paths.get(fd.getFilterPath(), file);
-				paths.add(temp);
-			}
-			processFiles(paths);
+			addFiles();
 		});
 		
 		itemDelete = new ToolItem(tb, SWT.PUSH);

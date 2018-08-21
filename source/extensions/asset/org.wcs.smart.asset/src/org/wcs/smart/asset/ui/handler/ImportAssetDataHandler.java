@@ -33,6 +33,7 @@ import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.ui.views.data.DataImporterInput;
 import org.wcs.smart.asset.ui.views.data.DataImporterView;
+import org.wcs.smart.asset.ui.views.data.DataImporterInput.Page;
 import org.wcs.smart.observation.ui.FieldDataPerspective;
 
 /**
@@ -48,7 +49,7 @@ public class ImportAssetDataHandler {
 	public void execute(IEclipseContext context) {
 		(new org.wcs.smart.ui.ShowPerspectiveHandler()).execute(FieldDataPerspective.ID, context.get(MWindow.class));
 		
-		DataImporterInput input = new DataImporterInput();
+		DataImporterInput input = new DataImporterInput(Page.IMPORT);
 		try {			
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, DataImporterView.ID);
 		} catch (PartInitException e) {

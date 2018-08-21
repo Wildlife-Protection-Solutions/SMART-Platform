@@ -33,7 +33,16 @@ import org.wcs.smart.asset.internal.Messages;
  */
 public class DataImporterInput implements IEditorInput{
 
-	public DataImporterInput() {
+	public enum Page{IMPORT, REVIEW};
+	
+	private Page page;
+	
+	public DataImporterInput(Page page) {
+		this.page = page;
+	}
+	
+	public Page getPage() {
+		return this.page;
 	}
 	
 	@Override
