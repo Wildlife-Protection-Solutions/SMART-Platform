@@ -54,7 +54,7 @@ import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.inout.AssetLocationCsvImporter;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
-import org.wcs.smart.asset.model.AssetStationAttribute;
+import org.wcs.smart.asset.model.AssetStationLocationAttribute;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -222,8 +222,8 @@ public class LocationMappingPage extends WizardPage{
 		
 		List<AssetAttribute> attributes = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			List<AssetStationAttribute> stnAttributes = QueryFactory.buildQuery(session, AssetStationAttribute.class, new Object[] {"attribute.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
-			for (AssetStationAttribute a : stnAttributes) {
+			List<AssetStationLocationAttribute> stnAttributes = QueryFactory.buildQuery(session, AssetStationLocationAttribute.class, new Object[] {"attribute.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+			for (AssetStationLocationAttribute a : stnAttributes) {
 				attributes.add(a.getAttribute());
 				a.getAttribute().getName();
 				a.getAttribute().getAttributeList().forEach( l -> {l.getNames().size();l.getKeyId();});

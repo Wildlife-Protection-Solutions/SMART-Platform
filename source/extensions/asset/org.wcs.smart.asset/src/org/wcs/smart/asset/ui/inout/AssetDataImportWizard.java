@@ -25,7 +25,10 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.jface.dialogs.IPageChangedListener;
+import org.eclipse.jface.dialogs.PageChangedEvent;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.wcs.smart.asset.internal.Messages;
 
 /**
@@ -93,8 +96,18 @@ public class AssetDataImportWizard extends Wizard{
 		if (getContainer().getCurrentPage() == locationPage) {
 			return locationPage.doFinish();
 		}
+		
+		
 		return false;
 		
+	}
+	
+	/**
+	 * The type of data being imported
+	 * @return
+	 */
+	public Type getType() {
+		return typePage.getType();
 	}
 
 	public void addPages() {
@@ -118,6 +131,16 @@ public class AssetDataImportWizard extends Wizard{
 		addPage(assetPage);
 		addPage(stationPage);
 		addPage(locationPage);
+		
+		((WizardDialog)getContainer()).addPageChangedListener(new IPageChangedListener() {
+			
+			@Override
+			public void pageChanged(PageChangedEvent event) {
+				if (event.getSelectedPage() == filePage) {
+					filePage.pageShown();
+				}
+			}
+		});
 	}
 	
 	

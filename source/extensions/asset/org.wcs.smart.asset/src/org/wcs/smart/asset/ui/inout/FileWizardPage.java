@@ -56,9 +56,16 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.internal.Messages;
+import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
+import org.wcs.smart.asset.model.AssetStationAttribute;
+import org.wcs.smart.asset.model.AssetStationLocationAttribute;
+import org.wcs.smart.asset.model.AssetTypeAttribute;
+import org.wcs.smart.asset.ui.inout.AssetDataImportWizard.Type;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -74,9 +81,11 @@ public class FileWizardPage extends WizardPage {
 	private Text txtFile;
 	private DelimiterCombo cmbDelimeter;
 	private Button btnSkipFirst;
+	private Label llDateFormat;
 	private ComboViewer cmbDateFormat;
 	private ComboViewer cmbProjection;
 	private boolean isValid = true;
+	private Composite fileComp;
 	
 	protected FileWizardPage() {
 		super("FILE_PAGE"); //$NON-NLS-1$
@@ -101,6 +110,7 @@ public class FileWizardPage extends WizardPage {
 	}
 	
 	public String getDateTimeFormat() {
+		if (cmbDateFormat.getControl().isDisposed()) return "d-M-y"; //$NON-NLS-1$
 		return cmbDateFormat.getCombo().getText();
 	}
 	
@@ -112,6 +122,84 @@ public class FileWizardPage extends WizardPage {
 		return isValid;
 	}
 	
+	public void pageShown() {
+		boolean hasDate = true;
+		if ( ((AssetDataImportWizard) getWizard()).getType() == Type.STATION_CSV  ) {
+			//lets see if it's valid
+			hasDate = false;
+			try(Session session = HibernateManager.openSession()){
+				List<AssetStationAttribute> stnAttributes = QueryFactory.buildQuery(session, AssetStationAttribute.class, new Object[] {"attribute.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+				for (AssetStationAttribute a : stnAttributes) {
+					if (a.getAttribute().getType() == AttributeType.DATE) {
+						hasDate = true;
+						break;
+					}
+				}
+			}
+		}else if ( ((AssetDataImportWizard) getWizard()).getType() == Type.LOCATION_CSV ) {
+			hasDate = false;
+			try(Session session = HibernateManager.openSession()){
+				List<AssetStationLocationAttribute> stnAttributes = QueryFactory.buildQuery(session, AssetStationLocationAttribute.class, new Object[] {"attribute.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+				for (AssetStationLocationAttribute a : stnAttributes) {
+					if (a.getAttribute().getType() == AttributeType.DATE) {
+						hasDate = true;
+						break;
+					}
+				}
+			}
+		}else if ( ((AssetDataImportWizard) getWizard()).getType() == Type.ASSET_CSV ) {
+			hasDate = false;
+			try(Session session = HibernateManager.openSession()){
+				List<AssetTypeAttribute> stnAttributes = QueryFactory.buildQuery(session, AssetTypeAttribute.class, new Object[] {"id.attribute.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+				for (AssetTypeAttribute a : stnAttributes) {
+					if (a.getAttribute().getType() == AttributeType.DATE) {
+						hasDate = true;
+						break;
+					}
+				}
+			}
+		}
+		if (!hasDate) {
+			if (!cmbDateFormat.getControl().isDisposed()) {
+				cmbDateFormat.getControl().dispose();
+				llDateFormat.dispose();
+			}
+			txtFile.getParent().getParent().layout(true);
+			
+		}else {
+			if (cmbDateFormat.getControl().isDisposed()) {
+				createDateFormatControl();
+				llDateFormat.moveBelow(btnSkipFirst);
+				cmbDateFormat.getCombo().moveBelow(llDateFormat);
+			}
+			txtFile.getParent().getParent().layout(true);		}
+	}
+	
+	private void createDateFormatControl() {
+		llDateFormat = new Label(fileComp, SWT.NONE);
+		llDateFormat.setText(Messages.FileWizardPage_DateFormatLabel);
+		llDateFormat.setToolTipText(Messages.FileWizardPage_DateFormatTooltip);
+		llDateFormat.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		
+		cmbDateFormat = new ComboViewer(fileComp, SWT.DROP_DOWN);
+		cmbDateFormat.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		cmbDateFormat.setContentProvider(ArrayContentProvider.getInstance());
+		cmbDateFormat.setLabelProvider(new LabelProvider());
+		String[] dateFormats = new String[]{
+				DateTimeFormatterBuilder.getLocalizedDateTimePattern(FormatStyle.MEDIUM, null, IsoChronology.INSTANCE, Locale.getDefault()),
+				DateTimeFormatterBuilder.getLocalizedDateTimePattern(FormatStyle.SHORT, null, IsoChronology.INSTANCE, Locale.getDefault()),
+				"d/M/y", //$NON-NLS-1$
+				"d-M-y", //$NON-NLS-1$
+				"M/d/y", //$NON-NLS-1$
+				"M-d-y", //$NON-NLS-1$
+				"y/M/d", //$NON-NLS-1$
+				"y-M-d" //$NON-NLS-1$
+		};
+		cmbDateFormat.setInput(dateFormats);
+		cmbDateFormat.setSelection(new StructuredSelection(dateFormats[0]));
+		cmbDateFormat.getCombo().addListener(SWT.Modify, e-> {validate(); getWizard().getContainer().updateButtons();});
+	}
 	@Override
 	public IWizardPage getNextPage() {
 		AssetDataImportWizard w = (AssetDataImportWizard) getWizard();
@@ -148,12 +236,14 @@ public class FileWizardPage extends WizardPage {
 			AssetPlugIn.getDefault().getPreferenceStore().setValue(PREFERENCE_DIR_KEY, p.toString());
 		}
 		
-    	try{
-    		DateTimeFormatter.ofPattern(cmbDateFormat.getCombo().getText());
-    	}catch (Exception ex){
-    		setErrorMessage(Messages.FileWizardPage_DateTimeRequired);
-    		isValid = false;
-    	}
+		if (!cmbDateFormat.getControl().isDisposed()) {
+	    	try{
+	    		DateTimeFormatter.ofPattern(cmbDateFormat.getCombo().getText());
+	    	}catch (Exception ex){
+	    		setErrorMessage(Messages.FileWizardPage_DateTimeRequired);
+	    		isValid = false;
+	    	}
+		}
     	 
     	Object x= cmbProjection.getStructuredSelection().getFirstElement();
     	if ( x == null || !(x instanceof Projection)){
@@ -170,7 +260,7 @@ public class FileWizardPage extends WizardPage {
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Composite fileComp = new Composite(main, SWT.NONE);
+		fileComp = new Composite(main, SWT.NONE);
 		fileComp.setLayout(new GridLayout(3, false));
 		fileComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -212,28 +302,7 @@ public class FileWizardPage extends WizardPage {
 		btnSkipFirst.setSelection(true);
 		btnSkipFirst.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		
-		l = new Label(fileComp, SWT.NONE);
-		l.setText(Messages.FileWizardPage_DateFormatLabel);
-		l.setToolTipText(Messages.FileWizardPage_DateFormatTooltip);
-		
-		cmbDateFormat = new ComboViewer(fileComp, SWT.DROP_DOWN);
-		cmbDateFormat.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		cmbDateFormat.setContentProvider(ArrayContentProvider.getInstance());
-		cmbDateFormat.setLabelProvider(new LabelProvider());
-		String[] dateFormats = new String[]{
-				DateTimeFormatterBuilder.getLocalizedDateTimePattern(FormatStyle.MEDIUM, null, IsoChronology.INSTANCE, Locale.getDefault()),
-				DateTimeFormatterBuilder.getLocalizedDateTimePattern(FormatStyle.SHORT, null, IsoChronology.INSTANCE, Locale.getDefault()),
-				"d/M/y", //$NON-NLS-1$
-				"d-M-y", //$NON-NLS-1$
-				"M/d/y", //$NON-NLS-1$
-				"M-d-y", //$NON-NLS-1$
-				"y/M/d", //$NON-NLS-1$
-				"y-M-d" //$NON-NLS-1$
-		};
-		cmbDateFormat.setInput(dateFormats);
-		cmbDateFormat.setSelection(new StructuredSelection(dateFormats[0]));
-		cmbDateFormat.getCombo().addListener(SWT.Modify, e-> {validate(); getWizard().getContainer().updateButtons();});
+		createDateFormatControl();
 		
 		l = new Label(fileComp, SWT.NONE);
 		l.setText(Messages.FileWizardPage_ProjectionLabel);
