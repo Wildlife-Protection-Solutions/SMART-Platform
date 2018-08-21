@@ -91,6 +91,7 @@ TOKEN :
 | < NOT_CONTAINS : "notcontains" >
 | < STREQUALS : "equals" >
 | < BETWEEN : "between" >
+| < NOTBETWEEN : "notbetween" >
 }
 
 TOKEN : /* Numeric Constants */
@@ -960,8 +961,7 @@ Operator DateOp() :
   (
    < BETWEEN > {fulltoken = token.image;}
   |
-  	< K_NOT > {fulltoken = token.image;}
-  	< BETWEEN > {fulltoken = fulltoken + " " + token.image;}
+  	< NOTBETWEEN > {fulltoken = token.image;}
  )
   {
     return Operator.parse(fulltoken);
