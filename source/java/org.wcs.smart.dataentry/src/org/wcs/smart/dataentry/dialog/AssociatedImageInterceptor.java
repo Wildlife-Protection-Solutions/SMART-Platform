@@ -24,6 +24,7 @@ package org.wcs.smart.dataentry.dialog;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -211,6 +212,13 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 			if (from == null || from.equals(IImageAssociatedObject.NULL_FILE)) {
 				//find all files that start with "to" and delete them
 				//(changed for 6.1 when we support multiple image formats)
+				if (!to.getParentFile().exists()) {
+					try {
+						Files.createDirectories(to.getParentFile().toPath());
+					} catch (IOException e) {
+						SmartPlugIn.log(e.getMessage(), e);
+					}
+				}
 				for (File file : to.getParentFile().listFiles()) {
 					if (file.getName().startsWith(to.getName() + ".")) { //$NON-NLS-1$
 						try {
@@ -227,6 +235,13 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 				int index = fName.lastIndexOf('.');
 				fName = fName.substring(0, index);
 				
+				if (!to.getParentFile().exists()) {
+					try {
+						Files.createDirectories(to.getParentFile().toPath());
+					} catch (IOException e) {
+						SmartPlugIn.log(e.getMessage(), e);
+					}
+				}
 				for (File file : to.getParentFile().listFiles()) {
 					if (file.getName().startsWith(fName + ".")) { //$NON-NLS-1$
 						try {
