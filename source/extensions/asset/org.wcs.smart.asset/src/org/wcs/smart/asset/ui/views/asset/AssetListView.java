@@ -746,8 +746,9 @@ public class AssetListView {
 			
 			Display.getDefault().syncExec(()->{
 				if (lstAssets != null && !lstAssets.getControl().isDisposed()){
+					Object[] expanded = lstAssets.getExpandedElements();
 					lstAssets.setInput(assets);
-					lstAssets.expandAll();
+					lstAssets.setExpandedElements(expanded);
 				}
 			});
 			return Status.OK_STATUS;
@@ -781,9 +782,9 @@ public class AssetListView {
 			for (List<AssetStationLocation> allassets : mappings.values()) allassets.sort((a,b)->Collator.getInstance().compare(a.getId(), b.getId()));
 			Display.getDefault().syncExec(()->{
 				if (lstStations != null && !lstStations.getControl().isDisposed()){
+					Object[] elements = lstStations.getExpandedElements();
 					lstStations.setInput(mappings);
-					lstStations.expandAll();
-					lstStations.refresh();
+					lstStations.setExpandedElements(elements);
 				}
 			});
 			return Status.OK_STATUS;
