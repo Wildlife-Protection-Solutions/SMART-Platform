@@ -107,7 +107,11 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 	private List<PatrolTransportType> getTransportTypes(ConservationArea ca, Session session) {
 		session.beginTransaction();
 		try{
-			return QueryFactory.buildQuery(session, PatrolTransportType.class, new Object[] {"conservationArea", ca}).getResultList(); //$NON-NLS-1$
+			List<PatrolTransportType> tt = QueryFactory.buildQuery(session, PatrolTransportType.class, new Object[] {"conservationArea", ca}).getResultList(); //$NON-NLS-1$
+			tt.forEach(t->{
+				t.getNames().size();
+			});
+			return tt;
 		}finally{
 			session.getTransaction().rollback();
 		}
