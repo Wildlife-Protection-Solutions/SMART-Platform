@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.asset.ui.views.data;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -314,6 +315,8 @@ public class StationAssetSelectionDialog extends Dialog{
 				).list());
 				assets.forEach(a->a.getAssetType().getName());
 			}
+			
+			assets.sort((a,b)->Collator.getInstance().compare(a.getId(), b.getId()));
 			 
 			Display.getDefault().syncExec(()->{
 				cmbAsset.setInput(assets);

@@ -619,7 +619,11 @@ public abstract class AssetDataPanel {
 				for(int i = startIndex; i < Math.min(startIndex + pageSize,  waypointsToDisplay.size()); i ++) {
 					
 					Waypoint wp = session.get(Waypoint.class, waypointsToDisplay.get(i));
-					if (wp == null) continue;
+					if (wp == null) {
+						//deleted - need to add deleted item
+						waypoints.add(new AssetWaypointMapping(null, Collections.emptyList()));						
+						continue;
+					}
 					if (wp.getLastModifiedBy() != null) SmartLabelProvider.getShortLabel(wp.getLastModifiedBy());
 					List<AssetWaypoint> aws = session.createQuery("FROM AssetWaypoint WHERE id.waypoint.uuid = :uuid", AssetWaypoint.class) //$NON-NLS-1$
 							.setParameter("uuid", waypointsToDisplay.get(i)) //$NON-NLS-1$
@@ -1330,6 +1334,8 @@ public abstract class AssetDataPanel {
 		}
 		
 		public void populateHeaderLabel() {
+			if (waypoint.getWaypoint() == null) return ;
+			
 			StringBuilder sb = new StringBuilder();
 			sb.append(DateFormat.getDateTimeInstance().format(waypoint.getWaypoint().getDateTime()));
 			sb.append(" ("); //$NON-NLS-1$
@@ -1371,6 +1377,10 @@ public abstract class AssetDataPanel {
 			((GridLayout)item.getLayout()).verticalSpacing = 0;
 			bgColor = item.getBackground();
 			
+			if (waypoint.getWaypoint() == null) {
+				hideAndDisable(Messages.AssetDataPanel_DeletedLabel);
+				return item;
+			}
 			if (!waypoint.hasDirty() && hideOnValidate) {
 				hideAndDisable(Messages.AssetDataPanel_ValidatedLabel);
 				return item;
