@@ -1416,9 +1416,10 @@ public class Messages extends NLS {
 	public static String RelationshipDiagramTreeRootStyleObjects_EntityType;
 	public static String RelationshipDiagramTreeRootStyleObjects_RelationshipType;
 	public static String RelationshipDiagramTreeRootStyleObjects_RootNode;
+	public static String RelationshipGraphComposite_LayoutAlogorithm_Box;
+	public static String RelationshipGraphComposite_LayoutAlogorithm_Grid;
 	public static String RelationshipGraphComposite_LayoutAlogorithm_HorizontalShift;
 	public static String RelationshipGraphComposite_LayoutAlogorithm_Radial;
-	public static String RelationshipGraphComposite_LayoutAlogorithm_SpaceTree;
 	public static String RelationshipGraphComposite_LayoutAlogorithm_Spring;
 	public static String RelationshipGraphComposite_LayoutAlogorithm_Sugiyama;
 	public static String RelationshipGraphComposite_Layout;

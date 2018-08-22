@@ -35,11 +35,13 @@ import java.util.UUID;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.gef.layout.ILayoutAlgorithm;
+import org.eclipse.gef.layout.algorithms.BoxLayoutAlgorithm;
+import org.eclipse.gef.layout.algorithms.GridLayoutAlgorithm;
 import org.eclipse.gef.layout.algorithms.HorizontalShiftAlgorithm;
 import org.eclipse.gef.layout.algorithms.RadialLayoutAlgorithm;
-import org.eclipse.gef.layout.algorithms.SpaceTreeLayoutAlgorithm;
 import org.eclipse.gef.layout.algorithms.SpringLayoutAlgorithm;
 import org.eclipse.gef.layout.algorithms.SugiyamaLayoutAlgorithm;
+import org.eclipse.gef.layout.algorithms.SugiyamaLayoutAlgorithm.Direction;
 import org.eclipse.gef.layout.algorithms.TreeLayoutAlgorithm;
 import org.eclipse.gef.zest.fx.jface.ZestContentViewer;
 import org.eclipse.gef.zest.fx.jface.ZestFxJFaceModule;
@@ -233,10 +235,11 @@ public class RelationshipGraphComposite extends Composite {
 		defaultLayoutAlogorithm = new RadialLayoutAlgorithm();
 		layoutAlgorithms = new HashMap<>();
 		layoutAlgorithms.put(defaultLayoutAlogorithm, Messages.RelationshipGraphComposite_LayoutAlogorithm_Radial);
+		layoutAlgorithms.put(new BoxLayoutAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_Box);
+		layoutAlgorithms.put(new GridLayoutAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_Grid);
 		layoutAlgorithms.put(new SpringLayoutAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_Spring);
 		layoutAlgorithms.put(new TreeLayoutAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_Tree);
-		layoutAlgorithms.put(new SugiyamaLayoutAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_Sugiyama);
-		layoutAlgorithms.put(new SpaceTreeLayoutAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_SpaceTree);
+		layoutAlgorithms.put(new SugiyamaLayoutAlgorithm(Direction.VERTICAL, new SugiyamaLayoutAlgorithm.DFSLayerProvider()), Messages.RelationshipGraphComposite_LayoutAlogorithm_Sugiyama);
 		layoutAlgorithms.put(new HorizontalShiftAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_HorizontalShift);
 	}
 
