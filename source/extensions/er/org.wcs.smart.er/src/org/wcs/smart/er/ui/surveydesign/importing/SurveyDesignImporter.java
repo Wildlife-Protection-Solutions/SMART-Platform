@@ -401,23 +401,10 @@ public class SurveyDesignImporter {
 		//mission properties
 		SurveyDesignImporter im = new SurveyDesignImporter();
 		im.importMissionProperties(session, clone, toCopy);
-		for (MissionProperty mp : clone.getMissionProperties()){
-			if (mp.getAttribute().getUuid() == null){
-				session.save(mp.getAttribute());
-			}
-		}
-		session.flush();
 		
 		//sampling unit attributes
 		im.importSamplingUnitAttributes(session, clone, toCopy);
-		for (SurveyDesignSamplingUnitAttribute att: clone.getSamplingUnitAttributes()){
-			if (att.getSamplingUnitAttribute().getUuid() == null){
-				session.save(att.getSamplingUnitAttribute());
-			}
-		}
-		session.flush();
-		
-		
+			
 		//survey design properties
 		clone.setProperties(new ArrayList<SurveyDesignProperty>());
 		if (clone.getProperties() != null){
