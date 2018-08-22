@@ -200,6 +200,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	 * @param object
 	 */
 	public void setValue(Collection<?> objects){
+		if (txtInfo.isDisposed()) return;
 		txtInfo.setData(objects);
 		txtInfo.setText(getTextLabel(objects));
 	}
