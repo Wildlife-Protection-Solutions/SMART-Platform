@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,41 +75,45 @@ public class FileMetadataReader {
 	private static void readExifMetadata(Path file, FileProxy fileInfo) throws ImageProcessingException, IOException {
 		Metadata metadata = ImageMetadataReader.readMetadata(file.toFile());
 		
+		Date gpsDateTime = null;
 		for (Directory directory : metadata.getDirectoriesOfType(GpsDirectory.class)) {
 			GeoLocation geoLocation = ((GpsDirectory)directory).getGeoLocation();
 			if (geoLocation != null){
-				Date dateTime = ((GpsDirectory) directory).getGpsDate();
-				
+				gpsDateTime = ((GpsDirectory) directory).getGpsDate();
 				fileInfo.setPosition(geoLocation.getLongitude(), geoLocation.getLatitude());
-				fileInfo.setImageDate(dateTime);
 			}			
 		}
 		
 		//check other directories for a date
+		Date dateDigit = null;
 		if (fileInfo.getImageDate() == null) {
 			for (Directory directory : metadata.getDirectoriesOfType(ExifSubIFDDirectory.class)) {
-				Date orig = ((ExifSubIFDDirectory)directory).getDateOriginal();
+				Date orig = ((ExifSubIFDDirectory)directory).getDateOriginal(TimeZone.getDefault());
 				if (orig != null) {
 					fileInfo.setImageDate(orig);
 					break;
 				}
-				Date digit = ((ExifSubIFDDirectory)directory).getDateDigitized();
-				if (digit != null) {
-					fileInfo.setImageDate(digit);
-					break;
-				}
+				dateDigit = ((ExifSubIFDDirectory)directory).getDateDigitized(TimeZone.getDefault());
+				
 			}
 		}
 		if (fileInfo.getImageDate() == null) {
+			fileInfo.setImageDate(dateDigit);
+		}
+		
+		if (fileInfo.getImageDate() == null) {
 			for (Directory directory : metadata.getDirectoriesOfType(ExifIFD0Directory.class)) {
-				Date date = directory.getDate(ExifDirectoryBase.TAG_DATETIME);
+				Date date = directory.getDate(ExifDirectoryBase.TAG_DATETIME, TimeZone.getDefault());
 				if (date != null) {
 					fileInfo.setImageDate(date);
 				}
-					
 			}
 		}
 			
+		if (fileInfo.getImageDate() == null) {
+			//use gps date/time
+			fileInfo.setImageDate(gpsDateTime);
+		}
 	}
 	
 	/**
