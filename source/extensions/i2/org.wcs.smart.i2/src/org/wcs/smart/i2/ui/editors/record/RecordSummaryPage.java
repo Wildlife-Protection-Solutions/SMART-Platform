@@ -638,6 +638,9 @@ public class RecordSummaryPage extends EditorPart{
 				
 				toolkit.createLabel(parent, Messages.RecordSummaryPage_SmartSourceLabel);
 				Hyperlink lnkSmartSource = toolkit.createHyperlink(parent, name, SWT.NONE);
+				lnkSmartSource.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				((GridData)lnkSmartSource.getLayoutData()).widthHint = 100;
+				
 				lnkSmartSource .addHyperlinkListener(new HyperlinkAdapter() {
 					@Override
 					public void linkActivated(HyperlinkEvent e) {
