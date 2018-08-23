@@ -119,6 +119,7 @@ public class Messages extends NLS {
 	public static String AssetDataPanel_editwptooltip;
 	public static String AssetDataPanel_ExtractNewIncidentMenu;
 	public static String AssetDataPanel_FirstLabel;
+	public static String AssetDataPanel_HideOtherImages;
 	public static String AssetDataPanel_ImportAttachmentMenu;
 	public static String AssetDataPanel_ImportAttachmentSaveError;
 	public static String AssetDataPanel_LastLabel;
@@ -146,6 +147,7 @@ public class Messages extends NLS {
 	public static String AssetDataPanel_RemoveAttachmentsTitle;
 	public static String AssetDataPanel_saveerror;
 	public static String AssetDataPanel_SaveError;
+	public static String AssetDataPanel_ShowOtherImages;
 	public static String AssetDataPanel_StationsOption;
 	public static String AssetDataPanel_TooManyStations;
 	public static String AssetDataPanel_ValidateAllMnu;
