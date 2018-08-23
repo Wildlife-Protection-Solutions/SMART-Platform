@@ -336,7 +336,9 @@ public class RecordDescriptionPage extends EditorPart{
 		for (Listener l : ls){
 			txt.removeListener(SWT.Modify, l);
 		}
+		
 		txt.setText(text);
+		
 		for (Listener l : ls){
 			txt.addListener(SWT.Modify, l);
 		}

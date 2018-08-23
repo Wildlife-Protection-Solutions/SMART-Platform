@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -116,11 +117,13 @@ import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.SmartSection;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
+import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Summary Page for record editor.
@@ -618,6 +621,35 @@ public class RecordSummaryPage extends EditorPart{
 
 	}
 	
+	private void createDataSourceLabel(Composite parent) {
+		if (recordEditor.getRecord().getSmartSource() != null) {
+			
+			String key = recordEditor.getRecord().getSmartSource();
+			int first = key.indexOf(':');
+			int second = key.indexOf(':', first+1);
+			
+			try {
+				String type = key.substring(0, first);
+				String wpuuid = key.substring(first + 1, second);
+				String name = key.substring(second + 1);
+				if (name.length() == 0) name = "link"; //$NON-NLS-1$
+				
+				UUID wpUuid = UuidUtils.stringToUuid(wpuuid);
+				
+				toolkit.createLabel(parent, Messages.RecordSummaryPage_SmartSourceLabel);
+				Hyperlink lnkSmartSource = toolkit.createHyperlink(parent, name, SWT.NONE);
+				lnkSmartSource .addHyperlinkListener(new HyperlinkAdapter() {
+					@Override
+					public void linkActivated(HyperlinkEvent e) {
+						WaypointSourceEngine.INSTANCE.findUiProvider(type).findAndShow(wpUuid);
+					}
+				});
+			}catch (Exception ex) {
+				
+			}
+		}
+	}
+	
 	/*
 	 * configures controls for record attributes
 	 */
@@ -641,7 +673,7 @@ public class RecordSummaryPage extends EditorPart{
 			kid.dispose();
 		}
 		editorFields = new HashMap<IntelRecordSourceAttribute, Object>();
-		
+
 		Label sepl = toolkit.createLabel(srcAttributePanel, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 		sepl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -658,8 +690,10 @@ public class RecordSummaryPage extends EditorPart{
 		((GridLayout)content.getLayout()).marginWidth = 5;
 		((GridLayout)content.getLayout()).marginHeight = 0;
 		
-		HashMap<IntelRecordAttributeValue, Label> readOnlyLabels = new HashMap<>();
+		createDataSourceLabel(content);
 		
+		HashMap<IntelRecordAttributeValue, Label> readOnlyLabels = new HashMap<>();
+				
 		for (IntelRecordSourceAttribute a : source.getAttributes()){
 			String name = getName(a);
 			IntelRecordAttributeValue v = findAttributeValue(a);

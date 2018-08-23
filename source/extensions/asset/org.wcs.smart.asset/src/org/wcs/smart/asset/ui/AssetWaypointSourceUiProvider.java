@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.asset.ui;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
@@ -54,13 +55,14 @@ public class AssetWaypointSourceUiProvider implements
 		
 		AssetStation station = null;
 		try(Session s = HibernateManager.openSession()){
-			pw = QueryFactory.buildQuery(s, AssetWaypoint.class, "waypoint.uuid", waypointUuid).uniqueResult(); //$NON-NLS-1$
-			if (pw == null){
+			List<AssetWaypoint> aws = QueryFactory.buildQuery(s, AssetWaypoint.class, "waypoint.uuid", waypointUuid).list(); //$NON-NLS-1$
+			if (aws.isEmpty()) {
 				MessageDialog.openError(Display.getDefault().getActiveShell(),
 						ERROR_STR, 
 						Messages.AssetWaypointSourceUiProvider_WpNotfound);
 				return;
 			}
+			pw = aws.get(0);
 			station = pw.getAssetDeployment().getStationLocation().getStation();
 			//lazy load station uuid/id
 			station.getUuid().equals(null);

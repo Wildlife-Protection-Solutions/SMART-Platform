@@ -39,10 +39,14 @@ ALTER TABLE smart.cm_node add column imagetype varchar(32);
 ALTER TABLE smart.cm_attribute_list add column imagetype varchar(32);
 ALTER TABLE smart.cm_attribute_tree_node add column imagetype varchar(32);
 
+--smart source for records
+alter table smart.i_record ADD COLUMN smart_source varchar(2048);
+
+update connect.connect_plugin_version set version = '4.0' where plugin_id = 'org.wcs.smart.i2';
+update connect.ca_plugin_version set version = '4.0' where plugin_id = 'org.wcs.smart.i2';
 
 update connect.connect_plugin_version set version = '5.0' where plugin_id = 'org.wcs.smart.cybertracker';
 update connect.ca_plugin_version set version = '5.0' where plugin_id = 'org.wcs.smart.cybertracker';
-
 
 update connect.connect_plugin_version set version = '6.1.0' where plugin_id = 'org.wcs.smart';
 update connect.ca_plugin_version set version = '6.1.0' where plugin_id = 'org.wcs.smart';

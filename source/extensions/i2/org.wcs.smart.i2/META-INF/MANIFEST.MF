@@ -35,7 +35,8 @@ Require-Bundle: org.eclipse.ui.workbench,
  org.eclipse.gef.zest.fx;bundle-version="5.0.1",
  org.eclipse.gef.zest.fx.jface;bundle-version="5.0.2",
  org.eclipse.gef.fx;bundle-version="5.0.1",
- org.eclipse.gef.fx.swt;bundle-version="5.0.2"
+ org.eclipse.gef.fx.swt;bundle-version="5.0.2",
+ org.wcs.smart.observation;bundle-version="6.1.0"
 Export-Package: org.wcs.smart.i2,
  org.wcs.smart.i2.event,
  org.wcs.smart.i2.model,

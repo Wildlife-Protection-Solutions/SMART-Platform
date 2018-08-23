@@ -28,6 +28,7 @@ public class Messages extends NLS {
 	public static String CreateEntityParameterCollector_MultipleMappings;
 	public static String CreateEntityParameterCollector_PositionLabel;
 	public static String CreateEntityParameterCollector_UpButton;
+	public static String CreateRecordActionType_WaypointIdLabel;
 	public static String CreateRecordParameterCollector_JobName;
 	public static String CreateRecordParameterCollector_SourceLabel;
 	public static String CreateRecordParameterCollector_TitleLabel;

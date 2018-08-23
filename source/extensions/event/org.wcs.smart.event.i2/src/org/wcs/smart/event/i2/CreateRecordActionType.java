@@ -54,10 +54,12 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -109,6 +111,8 @@ public class CreateRecordActionType implements IActionType {
 		StringBuilder sb = new StringBuilder();
 		sb.append(MessageFormat.format( Messages.AdvIntelLabelProvider_CreateActionTypeMsg1, action.getId(), filter.getId()));
 		sb.append("\n\n"); //$NON-NLS-1$
+		sb.append(MessageFormat.format(Messages.CreateRecordActionType_WaypointIdLabel, data.getWaypoint().getId()));
+		sb.append("\n"); //$NON-NLS-1$
 		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg2, data.getWaypoint().getSourceId()));
 		sb.append("\n"); //$NON-NLS-1$
 		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg3, (new SimpleDateFormat("MMM dd, yyyy HH:mm:ss")).format(data.getWaypoint().getDateTime()))); //$NON-NLS-1$
@@ -131,6 +135,7 @@ public class CreateRecordActionType implements IActionType {
 		newRecord.setPrimaryDate(data.getWaypoint().getDateTime());
 		newRecord.setStatus(IntelRecord.Status.NEW);
 		
+
 		EActionParameterValue sourceParam = action.findParameter(SourceParameter.INSTANCE.getKey());
 		EActionParameterValue titleParam = action.findParameter(TitleParameter.INSTANCE.getKey());
 		if (titleParam != null) {
@@ -168,6 +173,10 @@ public class CreateRecordActionType implements IActionType {
 		location.getObservations().add(io);
 		
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
+			
+			String srcLabel = WaypointSourceEngine.INSTANCE.getSource(data.getWaypoint().getSourceId()).getSourceLabel(data.getWaypoint(), session, l);
+			newRecord.setSmartSource(data.getWaypoint().getSourceId() + ":" + UuidUtils.uuidToString( data.getWaypoint().getUuid()) + ":" + srcLabel); //$NON-NLS-1$ //$NON-NLS-2$
+			
 			if(data.getAttachments() != null) {
 				for (ObservationAttachment a : data.getAttachments()) {
 					try {

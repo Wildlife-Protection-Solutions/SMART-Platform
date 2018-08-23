@@ -22,14 +22,15 @@
 package org.wcs.smart.er.model;
 
 import java.io.File;
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
@@ -109,4 +110,29 @@ public class SurveyWaypointSource implements IWaypointSource{
 		return sb.toString();
 	}
 
+	@Override
+	public String getSourceLabel(Object source, Session session, Locale l) {
+		Waypoint wp = (Waypoint) source;
+		String mid = ""; //$NON-NLS-1$
+		
+		try(StatelessSession temp = session.getSessionFactory().openStatelessSession()){
+			Query<?> q = temp.createQuery("SELECT m.id from Mission m join m.missionDays md join md.waypoints wp where wp.id.waypoint = :wp "); //$NON-NLS-1$
+			q.setParameter("wp", wp); //$NON-NLS-1$
+			List<?> pws = q.list();
+			if (pws.size() > 0){
+				mid = (String) pws.get(0);
+			}
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(getName(l));
+		sb.append(": "); //$NON-NLS-1$
+		sb.append(mid);
+		sb.append(" ("); //$NON-NLS-1$
+		sb.append(wp.getId());
+		sb.append(" - "); //$NON-NLS-1$
+		sb.append(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, l).format(wp.getDateTime()));
+		sb.append(")"); //$NON-NLS-1$
+		return sb.toString();		
+	}
 }

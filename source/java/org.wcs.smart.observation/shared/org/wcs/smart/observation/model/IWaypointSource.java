@@ -52,4 +52,16 @@ public interface IWaypointSource {
 	 * @return the location for sorting attachments associated with the waypoint
 	 */
 	public String getDatastoreFileLocation(Object source, Session session) throws Exception;
+	
+	
+	/**
+	 * Returns a GUI label describing the source of
+	 * this waypoint.  For example for patrol it could say
+	 * Patrol ID: <PID> (Waypoint: <WPID> <DateTime>)
+	 * 
+	 * @param source the waypoint or other source object for finding the location
+	 * @return
+	 */
+	public String getSourceLabel(Object source, Session session, Locale l);
+
 }

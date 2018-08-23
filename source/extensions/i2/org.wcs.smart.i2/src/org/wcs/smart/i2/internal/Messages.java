@@ -1291,6 +1291,7 @@ public class Messages extends NLS {
 	public static String RecordSummaryPage_ObservationsTabName;
 	public static String RecordSummaryPage_PrimaryDateLabel;
 	public static String RecordSummaryPage_ScratchpadLink;
+	public static String RecordSummaryPage_SmartSourceLabel;
 	public static String RecordSummaryPage_scratchpadtooltip;
 	public static String RecordSummaryPage_SourceLabel;
 	public static String RecordSummaryPage_StatusLabel;
