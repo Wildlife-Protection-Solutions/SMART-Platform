@@ -2610,6 +2610,9 @@
             class="org.wcs.smart.i2.security.IntelEditRecordUserLevel">
       </SMARTUserLevel>
       <SMARTUserLevel
+            class="org.wcs.smart.i2.security.IntelEditRecordWithStatusUserLevel">
+      </SMARTUserLevel>
+      <SMARTUserLevel
             class="org.wcs.smart.i2.security.IntelCreateRecordUserLevel">
       </SMARTUserLevel>
       <SMARTUserLevel

@@ -49,6 +49,7 @@ public class PermissionTester extends PropertyTester {
 					IntelEditEntityUserLevel.INSTANCE,
 					IntelDeleteRecordUserLevel.INSTANCE,
 					IntelEditRecordUserLevel.INSTANCE,
+					IntelEditRecordWithStatusUserLevel.INSTANCE,
 					IntelReadOnlyUserLevel.INSTANCE,
 					IntelViewEntityUserLevel.INSTANCE,
 					IntelViewRecordsUserLevel.INSTANCE,
@@ -63,6 +64,7 @@ public class PermissionTester extends PropertyTester {
 					//UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDataEntryUserLevel.INSTANCE) ||
 					UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelCreateRecordUserLevel.INSTANCE) || 
 					UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelEditRecordUserLevel.INSTANCE) ||
+					UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelEditRecordWithStatusUserLevel.INSTANCE) ||
 					UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDeleteRecordUserLevel.INSTANCE);
 		case ENTITY_PERSPECTIVE:
 			intelUserLevels = new SmartUserLevel[] {
@@ -72,6 +74,7 @@ public class PermissionTester extends PropertyTester {
 					IntelEditEntityUserLevel.INSTANCE,
 					IntelDeleteEntityUserLevel.INSTANCE,
 					IntelEditRecordUserLevel.INSTANCE,
+					IntelEditRecordWithStatusUserLevel.INSTANCE,
 					IntelDeleteRecordUserLevel.INSTANCE,
 					IntelReadOnlyUserLevel.INSTANCE,
 					IntelViewEntityUserLevel.INSTANCE,

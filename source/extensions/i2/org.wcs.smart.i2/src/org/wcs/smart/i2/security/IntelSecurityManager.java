@@ -45,6 +45,7 @@ public enum IntelSecurityManager {
 		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
 				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelViewRecordsUserLevel.INSTANCE) ||
 				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelEditRecordUserLevel.INSTANCE) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelEditRecordWithStatusUserLevel.INSTANCE) ||
 				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelDeleteRecordUserLevel.INSTANCE) ||
 				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelReadOnlyUserLevel.INSTANCE);
 				
@@ -113,7 +114,8 @@ public enum IntelSecurityManager {
 	 */
 	public boolean canLinkLocationsToEntities(){
 		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) || 
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelEditRecordUserLevel.INSTANCE);
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelEditRecordUserLevel.INSTANCE) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelEditRecordWithStatusUserLevel.INSTANCE);
 	}
 	/**
 	 * Determine if the current user can edit entities records
@@ -184,8 +186,8 @@ public enum IntelSecurityManager {
 	 * @return
 	 */
 	public boolean canEditRecordStatus(){
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE);
-				//UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelEditRecordUserLevel.INSTANCE);
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
+			UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelEditRecordWithStatusUserLevel.INSTANCE);
 	}
 	
 	/**
@@ -196,7 +198,14 @@ public enum IntelSecurityManager {
 	 */
 	public boolean canEditRecord(){
 		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
-//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDataEntryUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelEditRecordUserLevel.INSTANCE);
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelEditRecordUserLevel.INSTANCE) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelEditRecordWithStatusUserLevel.INSTANCE);
+	}
+	
+	public boolean canAccessFieldData(){
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ANALYST) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  UserLevelManager.MANAGER)||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  UserLevelManager.DATA_ENTRY); 
 	}
 }

@@ -637,16 +637,24 @@ public class RecordSummaryPage extends EditorPart{
 				UUID wpUuid = UuidUtils.stringToUuid(wpuuid);
 				
 				toolkit.createLabel(parent, Messages.RecordSummaryPage_SmartSourceLabel);
-				Hyperlink lnkSmartSource = toolkit.createHyperlink(parent, name, SWT.NONE);
-				lnkSmartSource.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				((GridData)lnkSmartSource.getLayoutData()).widthHint = 100;
 				
-				lnkSmartSource .addHyperlinkListener(new HyperlinkAdapter() {
-					@Override
-					public void linkActivated(HyperlinkEvent e) {
-						WaypointSourceEngine.INSTANCE.findUiProvider(type).findAndShow(wpUuid);
-					}
-				});
+				if (IntelSecurityManager.INSTANCE.canAccessFieldData()) {
+				
+					Hyperlink lnkSmartSource = toolkit.createHyperlink(parent, name, SWT.NONE);
+					lnkSmartSource.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					((GridData)lnkSmartSource.getLayoutData()).widthHint = 100;
+					
+					lnkSmartSource .addHyperlinkListener(new HyperlinkAdapter() {
+						@Override
+						public void linkActivated(HyperlinkEvent e) {
+							WaypointSourceEngine.INSTANCE.findUiProvider(type).findAndShow(wpUuid);
+						}
+					});
+				}else {
+					Label ll = toolkit.createLabel(parent, name);
+					ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					((GridData)ll.getLayoutData()).widthHint = 100;
+				}
 			}catch (Exception ex) {
 				
 			}

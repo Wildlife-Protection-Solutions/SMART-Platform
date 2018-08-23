@@ -24,18 +24,18 @@ package org.wcs.smart.i2.security;
 import org.wcs.smart.ca.SmartUserLevel;
 
 /**
- * Permission to edit record but not status
+ * Permission to edit record including status
  *  
  * @author Emily
  *
  */
-public class IntelEditRecordUserLevel extends SmartUserLevel{
+public class IntelEditRecordWithStatusUserLevel extends SmartUserLevel {
 
-	public static final IntelEditRecordUserLevel INSTANCE = new IntelEditRecordUserLevel();
+public static final IntelEditRecordWithStatusUserLevel INSTANCE = new IntelEditRecordWithStatusUserLevel();
 	
-	private static final String KEY = "INTEL_RECORD_EDIT"; //$NON-NLS-1$
+	private static final String KEY = "INTEL_RECORD_EDIT_WITH_STATUS"; //$NON-NLS-1$
 	
-	public IntelEditRecordUserLevel() {
+	public IntelEditRecordWithStatusUserLevel() {
 		super(KEY);
 	}
 
