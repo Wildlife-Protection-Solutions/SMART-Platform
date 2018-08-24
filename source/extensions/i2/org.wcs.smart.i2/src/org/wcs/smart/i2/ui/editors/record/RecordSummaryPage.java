@@ -688,7 +688,7 @@ public class RecordSummaryPage extends EditorPart{
 		Label sepl = toolkit.createLabel(srcAttributePanel, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 		sepl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		if (source == null) return;
+		
 		
 		ScrolledComposite sc = new ScrolledComposite(srcAttributePanel, SWT.V_SCROLL);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -703,95 +703,98 @@ public class RecordSummaryPage extends EditorPart{
 		
 		createDataSourceLabel(content);
 		
+		
 		HashMap<IntelRecordAttributeValue, Label> readOnlyLabels = new HashMap<>();
+		if (source != null) {		
+			for (IntelRecordSourceAttribute a : source.getAttributes()){
+				String name = getName(a);
+				IntelRecordAttributeValue v = findAttributeValue(a);
 				
-		for (IntelRecordSourceAttribute a : source.getAttributes()){
-			String name = getName(a);
-			IntelRecordAttributeValue v = findAttributeValue(a);
-			
-			if (recordEditor.getEditMode()){
-				if (recordEditor.getRecord().getAttributes() == null){
-					recordEditor.getRecord().setAttributes(new ArrayList<>());
-				}
-				if (a.getAttribute() != null){
-					AttributeFieldEditor af = new AttributeFieldEditor(content, a.getAttribute(), a.getIsMultiple(), name);
-					editorFields.put(a, af);					
-					if (v != null) af.initControl(v);
-					af.addSelectionListener(dirtyListener);
-					af.adapt(toolkit);
-					
-					if (a.getAttribute().getType() == IntelAttribute.AttributeType.POSITION){
-						//modify position attributes we need to update map
-						af.addSelectionListener(new SelectionAdapter() {	
-							@Override
-							public void widgetSelected(SelectionEvent event) {
-								IntelRecordAttributeValue tmp = new IntelRecordAttributeValue();
-								tmp.setAttribute(a);
-								af.updateValue(tmp);
-								recordEditor.getMapPage().updateLocationAttribute(tmp);
-							}
-						});
+				if (recordEditor.getEditMode()){
+					if (recordEditor.getRecord().getAttributes() == null){
+						recordEditor.getRecord().setAttributes(new ArrayList<>());
 					}
-					
-					if (af.getTextAttributeControl() != null) {
-						af.getTextAttributeControl().addListener(SWT.Resize, e->{
-							sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+					if (a.getAttribute() != null){
+						AttributeFieldEditor af = new AttributeFieldEditor(content, a.getAttribute(), a.getIsMultiple(), name);
+						editorFields.put(a, af);					
+						if (v != null) af.initControl(v);
+						af.addSelectionListener(dirtyListener);
+						af.adapt(toolkit);
+						
+						if (a.getAttribute().getType() == IntelAttribute.AttributeType.POSITION){
+							//modify position attributes we need to update map
+							af.addSelectionListener(new SelectionAdapter() {	
+								@Override
+								public void widgetSelected(SelectionEvent event) {
+									IntelRecordAttributeValue tmp = new IntelRecordAttributeValue();
+									tmp.setAttribute(a);
+									af.updateValue(tmp);
+									recordEditor.getMapPage().updateLocationAttribute(tmp);
+								}
+							});
+						}
+						
+						if (af.getTextAttributeControl() != null) {
+							af.getTextAttributeControl().addListener(SWT.Resize, e->{
+								sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+							});
+						}
+					}else{
+						Label l = toolkit.createLabel(content, name + ":"); //$NON-NLS-1$
+						l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+	
+						Composite tmp  = toolkit.createComposite(content, SWT.NONE);
+						tmp.setLayout(new GridLayout(2, false));
+						((GridLayout)tmp.getLayout()).marginWidth = 0;
+						((GridLayout)tmp.getLayout()).marginHeight = 0;
+						tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+						
+						EntityCheckboxDropDownViewer editor = new EntityCheckboxDropDownViewer(tmp, a.getEntityType(), a.getIsMultiple());
+						editorFields.put(a, editor);
+						if (v != null) editor.initControl(v.getAttributeListItems());
+						editor.addSelectionChangedListener(dirtyListener2);
+						editor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+						toolkit.adapt(editor);
+						
+						Hyperlink link = toolkit.createHyperlink(tmp, Messages.RecordSummaryPage_linkentitesLabel, SWT.NONE);
+						link.setToolTipText(Messages.RecordSummaryPage_linkentitiestooltip);
+						link.addHyperlinkListener(new HyperlinkAdapter() {
+							@Override
+							public void linkActivated(HyperlinkEvent e) {
+								for (Object x : editor.getCheckObjects()){
+									if (x instanceof EntityCheckboxDropDownViewer.EntityItem){
+										IntelEntity tmp = new IntelEntity();
+										tmp.setUuid(((EntityCheckboxDropDownViewer.EntityItem) x).uuid);
+										recordEditor.linkEntity(tmp);
+									}
+								}
+								
+							}
 						});
 					}
 				}else{
+					String value = ""; //$NON-NLS-1$
+					if (v != null){
+						value = v.getAttributeValueAsString(Locale.getDefault(), crs);
+					}
+					
 					Label l = toolkit.createLabel(content, name + ":"); //$NON-NLS-1$
-					l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-
-					Composite tmp  = toolkit.createComposite(content, SWT.NONE);
-					tmp.setLayout(new GridLayout(2, false));
-					((GridLayout)tmp.getLayout()).marginWidth = 0;
-					((GridLayout)tmp.getLayout()).marginHeight = 0;
-					tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 					
-					EntityCheckboxDropDownViewer editor = new EntityCheckboxDropDownViewer(tmp, a.getEntityType(), a.getIsMultiple());
-					editorFields.put(a, editor);
-					if (v != null) editor.initControl(v.getAttributeListItems());
-					editor.addSelectionChangedListener(dirtyListener2);
-					editor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-					toolkit.adapt(editor);
-					
-					Hyperlink link = toolkit.createHyperlink(tmp, Messages.RecordSummaryPage_linkentitesLabel, SWT.NONE);
-					link.setToolTipText(Messages.RecordSummaryPage_linkentitiestooltip);
-					link.addHyperlinkListener(new HyperlinkAdapter() {
-						@Override
-						public void linkActivated(HyperlinkEvent e) {
-							for (Object x : editor.getCheckObjects()){
-								if (x instanceof EntityCheckboxDropDownViewer.EntityItem){
-									IntelEntity tmp = new IntelEntity();
-									tmp.setUuid(((EntityCheckboxDropDownViewer.EntityItem) x).uuid);
-									recordEditor.linkEntity(tmp);
-								}
-							}
-							
+					l = toolkit.createLabel(content,value);
+					l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+					if (v != null){
+						if (a.isListAttribute()){
+							readOnlyLabels.put(v, l);
 						}
-					});
-				}
-			}else{
-				String value = ""; //$NON-NLS-1$
-				if (v != null){
-					value = v.getAttributeValueAsString(Locale.getDefault(), crs);
-				}
-				
-				Label l = toolkit.createLabel(content, name + ":"); //$NON-NLS-1$
-				l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-				
-				l = toolkit.createLabel(content,value);
-				l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-				if (v != null){
-					if (a.isListAttribute()){
-						readOnlyLabels.put(v, l);
 					}
 				}
 			}
+			if (!recordEditor.getEditMode()){
+				loadListAttribute(readOnlyLabels);
+			}
 		}
-		if (!recordEditor.getEditMode()){
-			loadListAttribute(readOnlyLabels);
-		}
+
 		sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		srcAttributePanel.layout(true, true);
 	}

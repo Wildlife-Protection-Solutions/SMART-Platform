@@ -80,8 +80,10 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_1)){
 			upgradeV1toV2(session);
 			upgradeV2toV3(session);
+			upgradeV3toV4(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_2)){
 			upgradeV2toV3(session);
+			upgradeV3toV4(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_3)){
 			upgradeV3toV4(session);
 		}
