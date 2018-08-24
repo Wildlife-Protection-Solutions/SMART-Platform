@@ -1,6 +1,7 @@
 #POWERSHELL SCRIPT for cleaning up builds and copying in additional dependencies
 
 #if you have problems downloading files remove the disableP2Mirrors option
+mvn clean install -Pwindows,core,plugins,languagepacks -Dtycho.disableP2Mirrors=true
 #mvn clean install -Pwindows,core,plugins -Dtycho.disableP2Mirrors=true
 #mvn clean install -Pallplatforms,core,plugins -Dtycho.disableP2Mirrors=true
 #mvn clean install -Pallplatforms,core,plugins,languagepacks -Dtycho.disableP2Mirrors=true

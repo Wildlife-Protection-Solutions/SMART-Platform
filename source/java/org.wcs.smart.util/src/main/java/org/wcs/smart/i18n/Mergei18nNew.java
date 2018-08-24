@@ -3,7 +3,6 @@ package org.wcs.smart.i18n;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -60,7 +59,7 @@ public class Mergei18nNew {
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa\\translations",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r\\translations",
     };
 	
     public static final String[] LANGUAGES =  new String[] {"es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
@@ -169,7 +168,7 @@ public class Mergei18nNew {
             if (!target.containsKey(e.getKey())){
                 //System.out.println("add: " + e.getKey());
 //                target.put(e.getKey(), e.getValue());
-                //target.put(e.getKey(), "**NEW**" + e.getValue());
+//                target.put(e.getKey(), "**NEW**" + e.getValue());
 //                changes = true;
             }
         }
@@ -199,9 +198,9 @@ public class Mergei18nNew {
      */
     private HashMap<String, String> readFile(File f) throws Exception {
         Properties prop = new Properties();
-        FileReader fr = new FileReader(f);
-        prop.load(fr);
-        fr.close();
+        try(FileReader fr = new FileReader(f)){
+        	prop.load(fr);
+        }
 
         HashMap<String, String> results = new HashMap<String, String>();
         for (Object s : prop.keySet()){
@@ -221,9 +220,9 @@ public class Mergei18nNew {
             properties.put(key, values.get(key));
         }
 
-        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f.toString() + ".temp"), StandardCharsets.UTF_8);
-        properties.store(writer, "Auto generated from conversion file on " + DateFormat.getDateTimeInstance().format(new Date()));
-        writer.close();
+        try(OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f.toString() + ".temp"), StandardCharsets.UTF_8)){
+        	properties.store(writer, "Auto generated from conversion file on " + DateFormat.getDateTimeInstance().format(new Date()));
+        }
 
         String cmd = "\"" + NATIVE2ASCII + "\" -encoding utf8 \"" + f.toString() + ".temp\" " + f.toString();
         System.out.println(cmd);
@@ -234,17 +233,7 @@ public class Mergei18nNew {
         while(is.read() != -1){}
 
         ((new File(f.toString() + ".temp"))).delete();
-//        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8);
-//        writer.write("#Auto generated from conversion files on " + DateFormat.getDateTimeInstance().format(new Date()));
-//        writer.write(Packagei18n.LINE_SEP);
-//        TreeSet<String> keys = new TreeSet<String>(values.keySet());
-//        for (String key : keys){
-//            String value = values.get(key);
-//            value = value.replaceAll("\\r\\n|\\r|\\n", "\\\\n");
-//            writer.write(key + "=" + ConversionUtils.nativeToAscii(value));
-//            writer.write(Packagei18n.LINE_SEP);
-//        }
-//        writer.close();
+
     }
 
     public static void main(String args[]) {
