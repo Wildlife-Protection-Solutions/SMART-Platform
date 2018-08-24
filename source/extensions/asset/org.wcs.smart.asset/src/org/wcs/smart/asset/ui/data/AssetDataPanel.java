@@ -1465,29 +1465,6 @@ public abstract class AssetDataPanel {
 				tt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 				((GridData)tt.getLayoutData()).widthHint = displaySettings.getIconSize().getSize()*2+20;
 			}else {
-				List<ISmartAttachment> assetFiles = new ArrayList<>();
-				List<ISmartAttachment> otherFiles = new ArrayList<>();
-				
-				HashMap<ISmartAttachment,String> otherAssets = new HashMap<>();
-				if (waypoint.getWaypoint().getAttachments() != null) {
-					for (AssetWaypoint aw : waypoint.getAssetLinks()) {
-						for (AssetWaypointAttachment a : aw.getAttachments()) {
-							if (aw.getAssetDeployment().getAsset().equals(asset)) {
-								assetFiles.add(a.getWaypointAttachment());
-							}else {
-								otherFiles.add(a.getWaypointAttachment());
-								otherAssets.put(a.getWaypointAttachment(), aw.getAssetDeployment().getAsset().getId());
-							}
-						}
-					}
-				}
-				if (waypoint.getWaypoint().getObservations() != null) {
-					waypoint.getWaypoint().getObservations().forEach(o->{
-						if (o.getAttachments() != null) {
-							o.getAttachments().forEach(a->otherFiles.add(a));
-						}
-					});
-				}
 				
 				imageTableComposite = toolkit.createComposite(wppart);
 				imageTableComposite.setLayout(new GridLayout());
@@ -1495,7 +1472,7 @@ public abstract class AssetDataPanel {
 				((GridLayout)imageTableComposite.getLayout()).marginWidth = 0;
 				((GridLayout)imageTableComposite.getLayout()).marginHeight = 0;
 				
-				createImageTable(false, assetFiles, otherFiles, otherAssets);
+				createImageTable(false);
 			}
 			
 
@@ -1588,8 +1565,34 @@ public abstract class AssetDataPanel {
 			return item;
 		}
 		
-		private void createImageTable(boolean includeAll, final List<ISmartAttachment> assetFiles, final List<ISmartAttachment> otherFiles, final HashMap<ISmartAttachment, String> otherAssets) {
+		private void createImageTable(boolean includeAll) {
+			
+			
 			for (Control c : imageTableComposite.getChildren()) c.dispose();
+			
+			List<ISmartAttachment> assetFiles = new ArrayList<>();
+			List<ISmartAttachment> otherFiles = new ArrayList<>();
+			
+			HashMap<ISmartAttachment,String> otherAssets = new HashMap<>();
+			if (waypoint.getWaypoint().getAttachments() != null) {
+				for (AssetWaypoint aw : waypoint.getAssetLinks()) {
+					for (AssetWaypointAttachment a : aw.getAttachments()) {
+						if (aw.getAssetDeployment().getAsset().equals(asset)) {
+							assetFiles.add(a.getWaypointAttachment());
+						}else {
+							otherFiles.add(a.getWaypointAttachment());
+							otherAssets.put(a.getWaypointAttachment(), aw.getAssetDeployment().getAsset().getId());
+						}
+					}
+				}
+			}
+			if (waypoint.getWaypoint().getObservations() != null) {
+				waypoint.getWaypoint().getObservations().forEach(o->{
+					if (o.getAttachments() != null) {
+						o.getAttachments().forEach(a->otherFiles.add(a));
+					}
+				});
+			}
 			
 			List<ISmartAttachment> allFiles = new ArrayList<>();
 			allFiles.addAll(assetFiles);
@@ -1614,7 +1617,7 @@ public abstract class AssetDataPanel {
 				lnk.addHyperlinkListener(new HyperlinkAdapter() {
 					@Override
 					public void linkActivated(HyperlinkEvent e) {
-						createImageTable(true, assetFiles, otherFiles, otherAssets);
+						createImageTable(true);
 						
 						resizeScroll();
 						item.layout(true,true);
@@ -1627,7 +1630,7 @@ public abstract class AssetDataPanel {
 				lnk.addHyperlinkListener(new HyperlinkAdapter() {
 					@Override
 					public void linkActivated(HyperlinkEvent e) {
-						createImageTable(false, assetFiles, otherFiles, otherAssets);
+						createImageTable(false);
 						
 						resizeScroll();
 						item.layout(true,true);
