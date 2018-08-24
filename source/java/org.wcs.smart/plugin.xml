@@ -1594,6 +1594,9 @@
       <FilestoreDirectory
             directory="maps">
       </FilestoreDirectory>
+      <FilestoreDirectory
+            directory="ca_icon">
+      </FilestoreDirectory>
    </extension>
    <extension
          point="org.locationtech.udig.project.layerInterceptor">
