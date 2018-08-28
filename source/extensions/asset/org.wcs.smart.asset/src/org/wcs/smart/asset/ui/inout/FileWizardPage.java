@@ -136,6 +136,7 @@ public class FileWizardPage extends WizardPage {
 					}
 				}
 			}
+			setTitle(Messages.StationMappingPage_Title);
 		}else if ( ((AssetDataImportWizard) getWizard()).getType() == Type.LOCATION_CSV ) {
 			hasDate = false;
 			try(Session session = HibernateManager.openSession()){
@@ -147,6 +148,7 @@ public class FileWizardPage extends WizardPage {
 					}
 				}
 			}
+			setTitle(Messages.LocationMappingPage_Title);
 		}else if ( ((AssetDataImportWizard) getWizard()).getType() == Type.ASSET_CSV ) {
 			hasDate = false;
 			try(Session session = HibernateManager.openSession()){
@@ -158,6 +160,7 @@ public class FileWizardPage extends WizardPage {
 					}
 				}
 			}
+			setTitle(Messages.AssetMappingPage_Title);
 		}
 		if (!hasDate) {
 			if (!cmbDateFormat.getControl().isDisposed()) {
@@ -172,7 +175,8 @@ public class FileWizardPage extends WizardPage {
 				llDateFormat.moveBelow(btnSkipFirst);
 				cmbDateFormat.getCombo().moveBelow(llDateFormat);
 			}
-			txtFile.getParent().getParent().layout(true);		}
+			txtFile.getParent().getParent().layout(true);		
+		}
 	}
 	
 	private void createDateFormatControl() {
@@ -324,7 +328,6 @@ public class FileWizardPage extends WizardPage {
 		cmbProjection.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbProjection.getCombo().addListener(SWT.Modify, e-> {validate(); getWizard().getContainer().updateButtons();});
 		
-		setTitle(Messages.FileWizardPage_Title);
 		setMessage(Messages.FileWizardPage_Message);
 		
 		setControl(main);
