@@ -90,6 +90,16 @@ public class UpgradeEngine {
 		
 	}
 	
+	private void uninstallChangeTracking(IProgressMonitor progress) throws Exception {
+		//uninstall all change log tracking
+		progress.subTask(Messages.UpgradeEngine_subprogress5);
+
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s);
+			s.getTransaction().commit();
+		}
+	}
 	/**
 	 * 
 	 * @param monitor progress monitor
@@ -115,6 +125,7 @@ public class UpgradeEngine {
 
 		upgradersRun.clear();
 		
+		boolean hasChangeTracking = true;
 		/* --- validate the core version; upgrade as required --- */
 		if (!expectedDbVersion.equals(newDbVersion)) {
 			Display.getDefault().syncExec(new Runnable(){
@@ -162,6 +173,10 @@ public class UpgradeEngine {
 				}
 			}
 			
+			if (hasChangeTracking) {
+				uninstallChangeTracking(progress);
+				hasChangeTracking = false;
+			}
 			SubMonitor sub1 = progress.split(1);
 			sub1.setWorkRemaining(UpgradeFromVersion.values().length * 2);
 			sub1.subTask(Messages.UpgradeEngine_subprogress2);
@@ -220,13 +235,9 @@ public class UpgradeEngine {
 		progress.worked(1);
 		
 		if (requiresUpgrades){
-			//uninstall all change log tracking
-			progress.subTask(Messages.UpgradeEngine_subprogress5);
-
-			try(Session s = HibernateManager.openSession()){
-				s.beginTransaction();
-				ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s);
-				s.getTransaction().commit();
+			if (hasChangeTracking) {
+				uninstallChangeTracking(progress);
+				hasChangeTracking = false;
 			}
 	
 			//run all installers/upgraders
@@ -240,14 +251,18 @@ public class UpgradeEngine {
 				upgrader.upgrade(sub.split(1));
 			}
 			
+			
+		}
+		if (!hasChangeTracking) {
 			//install change log tracking (if necessary)
+			progress.setWorkRemaining(2);
+			SubMonitor sub = progress.split(1);
 			sub.subTask(Messages.UpgradeEngine_subprogress6);
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				ChangeLogInstaller.INSTANCE.installChangeLogTracking(s);
 				s.getTransaction().commit();
 			}
-			sub.worked(1);
 		}
 		progress.worked(1);
 	}
