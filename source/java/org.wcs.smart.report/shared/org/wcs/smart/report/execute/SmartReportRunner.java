@@ -35,19 +35,13 @@ import org.eclipse.birt.report.engine.api.IReportDocument;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
-import org.eclipse.birt.report.engine.api.IRunTask;
 import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.hibernate.Session;
-import org.wcs.smart.SmartTimezoneWrapper;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.birt.SmartRenderTask;
 import org.wcs.smart.birt.SmartRunAndRender;
-import org.wcs.smart.birt.SmartRunTask;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.model.Report;
-
-import com.ibm.icu.util.TimeZone;
 
 /**
  * BIRT Report running.  This initailizes the required parameters for running
