@@ -143,6 +143,9 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 		String entityType = (String) rowData[columnNameToIndex.get("entity_type")+ 1]; //$NON-NLS-1$
 		item.setEntityTypeName(entityType);
 
+		item.setConservationAreaId((String)rowData[columnNameToIndex.get("ca_id") + 1]); //$NON-NLS-1$
+		item.setConservationAreaName((String)rowData[columnNameToIndex.get("ca_name") + 1]); //$NON-NLS-1$
+		
 		IntelEntity e = session.get(IntelEntity.class, item.getEntityUuid());
 		item.setEntityId(e.getIdAttributeAsText());
 		
@@ -205,6 +208,10 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 				return sql + "lower(record_title)" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.ENTITY_TYPE){
 				return sql + "lower(entity_type)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_ID){
+				return sql + "lower(ca_id)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_NAME){
+				return sql + "lower(ca_name)" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.ENTITY_ID){
 				session.beginTransaction();
 				try {

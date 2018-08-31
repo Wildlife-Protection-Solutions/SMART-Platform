@@ -239,6 +239,9 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 						groupBySql.append("cast(date_part('year', " + columnName + ") as char(4)) "); //$NON-NLS-1$ //$NON-NLS-2$
 						break;
 				}
+			}else if (groupBy.getGroupByType() == GroupByType.CA) {
+				selectSql.append("cast(ca_uuid as varchar ) as c_" + cnt); //$NON-NLS-1$
+				groupBySql.append("ca_uuid "); //$NON-NLS-1$
 			}else if (groupBy.getGroupByType() == GroupByType.ENTITYTYPE) {
 				selectSql.append("entity_type_key as c_" + cnt); //$NON-NLS-1$
 				groupBySql.append("entity_type_key"); //$NON-NLS-1$
@@ -269,7 +272,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 					groupBySql.append(columnName);
 					
 				}else if (groupBy.getAttributeType() == AttributeType.EMPLOYEE) {
-					selectSql.append(columnName + " as c_" + cnt); //$NON-NLS-1$
+					selectSql.append("cast(" + columnName + " as varchar ) "+ " as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					groupBySql.append(columnName);
 					
 				}else if (groupBy.getAttributeType() == AttributeType.POSITION) {
@@ -334,9 +337,12 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 				Object value = rowdata[column++];
 				
 				if (groupBy.getAttributeType() != null && groupBy.getAttributeType() == AttributeType.EMPLOYEE && value != null) {
-					value = UuidUtils.uuidToString( UuidUtils.byteToUUID((byte[])value) );
+					value = UuidUtils.uuidToString( UuidUtils.stringToUuid( (String)value ) );
 				}
 				
+				if (groupBy.getGroupByType() == GroupByType.CA) {
+					value = UuidUtils.uuidToString( UuidUtils.stringToUuid( (String)value ) );
+				}
 				if (value == null) {
 					value = ""; //$NON-NLS-1$
 				}
@@ -370,7 +376,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		StringBuilder sb = new StringBuilder();
 		sb.append("CREATE TABLE "); //$NON-NLS-1$
 		sb.append(obsTable);
-		sb.append(" (entity_uuid uuid, entity_type_key varchar(128),"); //$NON-NLS-1$
+		sb.append(" (entity_uuid uuid, entity_type_key varchar(128), ca_uuid uuid, "); //$NON-NLS-1$
 		sb.append(created);
 		sb.append(" date, "); //$NON-NLS-1$
 		sb.append(modified);
@@ -380,18 +386,19 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		session.createNativeQuery(sb.toString()).executeUpdate();
 		dataTable.addColumn("entity_uuid",  "uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		dataTable.addColumn("entity_type_key",  "varchar(128)"); //$NON-NLS-1$ //$NON-NLS-2$
+		dataTable.addColumn("ca_uuid",  "uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		dataTable.addColumn(created, "date"); //$NON-NLS-1$
 		dataTable.addColumn(modified, "date"); //$NON-NLS-1$
 		
 		sb = new StringBuilder();
 		sb.append("INSERT INTO "); //$NON-NLS-1$
 		sb.append(obsTable);
-		sb.append("(entity_uuid, entity_type_key, "); //$NON-NLS-1$
+		sb.append("(entity_uuid, entity_type_key, ca_uuid, "); //$NON-NLS-1$
 		sb.append(created);
 		sb.append(","); //$NON-NLS-1$
 		sb.append(modified);
 		sb.append(" ) "); //$NON-NLS-1$
-		sb.append("SELECT a.uuid, b.keyid, a.date_created, a.date_modified FROM "); //$NON-NLS-1$
+		sb.append("SELECT a.uuid, b.keyid, a.ca_uuid, a.date_created, a.date_modified  FROM "); //$NON-NLS-1$
 		sb.append(" smart.i_entity a join smart.i_entity_type b on a.entity_type_uuid = b.uuid "); //$NON-NLS-1$
 		sb.append(" WHERE b.ca_uuid in (:cauuids)"); //$NON-NLS-1$
 		
