@@ -53,7 +53,10 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 		LOC_GEOMTRY("loc:geom"), //$NON-NLS-1$
 		
 		ENTITY_ID("entity:id"),  //$NON-NLS-1$
-		ENTITY_TYPE("entity:type"); //$NON-NLS-1$
+		ENTITY_TYPE("entity:type"), //$NON-NLS-1$
+		
+		CA_ID ("ca:id"),  //$NON-NLS-1$
+		CA_NAME("ca:name");  //$NON-NLS-1$
 		
 		public String key;
 		Column(String key){
@@ -80,6 +83,10 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 				return ((EntityRecordQueryResultItem)item).getEnityId();
 			}else if (column == Column.ENTITY_TYPE) {
 				return ((EntityRecordQueryResultItem)item).getEnityTypeName();
+			}else if (column == Column.CA_ID) {
+				return ((EntityRecordQueryResultItem)item).getConservationAreaId();
+			}else if (column == Column.CA_NAME) {
+				return ((EntityRecordQueryResultItem)item).getConservationAreaName();
 			}
 			return null;
 		}
@@ -105,6 +112,10 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			return i.getRecordSource();
 		case RECORD_TITLE:
 			return i.getRecordTitle();
+		case CA_ID:
+			return i.getConservationAreaId();
+		case CA_NAME:
+			return i.getConservationAreaName();
 		default:
 		}
 		return null;
@@ -131,6 +142,8 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			case RECORD_TITLE:
 			case ENTITY_ID:
 			case ENTITY_TYPE:
+			case CA_NAME:
+			case CA_ID:
 				return (String)toFormat;
 			case RECORD_SOURCE:
 				return ((IntelRecordSource)toFormat).getName();

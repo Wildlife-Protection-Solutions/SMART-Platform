@@ -152,6 +152,9 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		
 		IntelObservationResultItem item = new IntelObservationResultItem();
 		
+		item.setConservationAreaId((String)rowData[columnNameToIndex.get("ca_id")]); //$NON-NLS-1$
+		item.setConservationAreaName((String)rowData[columnNameToIndex.get("ca_name")]); //$NON-NLS-1$
+		
 		item.setObservationUuid(asUuid(rowData[columnNameToIndex.get("observation_uuid")])); //$NON-NLS-1$
 		item.setLocationUuid(asUuid(rowData[columnNameToIndex.get("location_uuid")])); //$NON-NLS-1$
 		item.setRecordUuid(asUuid(rowData[columnNameToIndex.get("record_uuid")])); //$NON-NLS-1$
@@ -248,6 +251,10 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 				return sql + "record_status" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_TITLE){
 				return sql + "lower(record_title)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_ID){
+				return sql + "lower(ca_id)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_NAME){
+				return sql + "lower(ca_name)" + getSortDirectionSql(); //$NON-NLS-1$
 			}
 		}else if (sortColumn instanceof FilterQueryColumn){
 			String filterKey = ((FilterQueryColumn)sortColumn).getFilterKey();

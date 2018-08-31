@@ -166,6 +166,8 @@ public class Messages extends NLS {
 	public static String ConservationAreaCloner_SettingsSubTask;
 	public static String ConservationAreaCloner_SourceTypesSubTask;
 	public static String ConservationAreaCloner_TaskName;
+	public static String ConservationAreaGroupByDropItem_AllItems;
+	public static String ConservationAreaGroupByDropItem_CaGroupByLabel;
 	public static String CreateNewStyleOpDialog_BlankOp_Title;
 	public static String CreateNewStyleOpDialog_BlankOp_Tooltip;
 	public static String CreateNewStyleOpDialog_DefaultStyleName;
@@ -484,6 +486,7 @@ public class Messages extends NLS {
 	public static String EntitySearchView_SpatialSearchTooltip;
 	public static String EntitySearchView_unauthorized;
 	public static String EntitySummaryContentProvider_AttributeTreeNode;
+	public static String EntitySummaryContentProvider_ConservationAreaGroupByOp;
 	public static String EntitySummaryContentProvider_EntityTypesTreeNode;
 	public static String EntitySummaryContentProvider_FiltersTreeNode;
 	public static String EntitySummaryContentProvider_GroupByTreeNode;
@@ -761,6 +764,8 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_AnyLabel;
 	public static String IntelligenceLabelProviderImpl_BetweenLabel;
 	public static String IntelligenceLabelProviderImpl_BooleanAttributeName;
+	public static String IntelligenceLabelProviderImpl_CaIdColumnName;
+	public static String IntelligenceLabelProviderImpl_CaNameColumnName;
 	public static String IntelligenceLabelProviderImpl_CommentColumnLabel;
 	public static String IntelligenceLabelProviderImpl_ContainsLabel;
 	public static String IntelligenceLabelProviderImpl_CSVLabel;

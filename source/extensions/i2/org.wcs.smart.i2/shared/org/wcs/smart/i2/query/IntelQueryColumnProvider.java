@@ -132,16 +132,33 @@ public class IntelQueryColumnProvider {
 		List<IQueryColumn> columns = new ArrayList<>();
 		
 		// Fixed query columns
-		FixedQueryColumn.Column[] thiscolumns = new FixedQueryColumn.Column[]{
-			FixedQueryColumn.Column.RECORD_TITLE,
-			FixedQueryColumn.Column.RECORD_STATUS,
-			FixedQueryColumn.Column.RECORD_SOURCE,
-			FixedQueryColumn.Column.LOC_ID,
-			FixedQueryColumn.Column.LOC_DATE,
-			FixedQueryColumn.Column.LOC_TIME,
-			FixedQueryColumn.Column.LOC_COMMENT,
-			FixedQueryColumn.Column.LOC_GEOMTRY,
-		};
+		FixedQueryColumn.Column[] thiscolumns;
+		if (query.getConservationArea().getIsCcaa()) {
+			thiscolumns = new FixedQueryColumn.Column[]{
+					FixedQueryColumn.Column.CA_ID,
+					FixedQueryColumn.Column.CA_NAME,
+					FixedQueryColumn.Column.RECORD_TITLE,
+					FixedQueryColumn.Column.RECORD_STATUS,
+					FixedQueryColumn.Column.RECORD_SOURCE,
+					FixedQueryColumn.Column.LOC_ID,
+					FixedQueryColumn.Column.LOC_DATE,
+					FixedQueryColumn.Column.LOC_TIME,
+					FixedQueryColumn.Column.LOC_COMMENT,
+					FixedQueryColumn.Column.LOC_GEOMTRY,
+				};
+		}else {
+			thiscolumns = new FixedQueryColumn.Column[]{
+					FixedQueryColumn.Column.RECORD_TITLE,
+					FixedQueryColumn.Column.RECORD_STATUS,
+					FixedQueryColumn.Column.RECORD_SOURCE,
+					FixedQueryColumn.Column.LOC_ID,
+					FixedQueryColumn.Column.LOC_DATE,
+					FixedQueryColumn.Column.LOC_TIME,
+					FixedQueryColumn.Column.LOC_COMMENT,
+					FixedQueryColumn.Column.LOC_GEOMTRY,
+				};
+		}
+		
 		for (FixedQueryColumn.Column c : thiscolumns){
 			columns.add(new FixedQueryColumn(c, l));
 		}
@@ -206,10 +223,21 @@ public class IntelQueryColumnProvider {
 		List<IQueryColumn> columns = new ArrayList<>();
 		
 		// Fixed query columns
-		FixedQueryColumn.Column[] thiscolumns = new FixedQueryColumn.Column[]{
+		FixedQueryColumn.Column[] thiscolumns;
+		if (query.getConservationArea().getIsCcaa()) {
+			thiscolumns = new FixedQueryColumn.Column[]{
+					FixedQueryColumn.Column.CA_ID,
+					FixedQueryColumn.Column.CA_NAME,
+					FixedQueryColumn.Column.ENTITY_ID,
+					FixedQueryColumn.Column.ENTITY_TYPE,
+			};	
+		}else {
+			thiscolumns = new FixedQueryColumn.Column[]{
 				FixedQueryColumn.Column.ENTITY_ID,
 				FixedQueryColumn.Column.ENTITY_TYPE,
-		};
+			};
+		}
+		
 		for (FixedQueryColumn.Column c : thiscolumns){
 			columns.add(new FixedQueryColumn(c, l));
 		}

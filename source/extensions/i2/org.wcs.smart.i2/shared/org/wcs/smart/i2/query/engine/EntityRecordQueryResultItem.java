@@ -41,8 +41,27 @@ public class EntityRecordQueryResultItem implements IResultItem {
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	private HashMap<IQueryFilter, Boolean> filterValues = new HashMap<>(); 
 	
+	private String caId;
+	private String caName;
+	
 	public EntityRecordQueryResultItem(){
 		
+	}
+	
+	public void setConservationAreaId(String caId) {
+		this.caId = caId;
+	}
+	
+	public void setConservationAreaName(String name) {
+		this.caName = name;
+	}
+	
+	public String getConservationAreaId() {
+		return this.caId;
+	}
+	
+	public String getConservationAreaName() {
+		return this.caName;
 	}
 	
 	public void setEntityUuid(UUID entityUuid) {

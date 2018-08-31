@@ -170,6 +170,7 @@ TOKEN :
  | < QUERY_SPLITTER : "|" >
  | < DATE_GB_KEY : ( "day" | "month" | "year" ) >
  | < ENTITYTYPE_GB: "entitytype_gb:" (< DM_KEY > ":")*>
+ | < CA_GB: "ca_gb:" ( < DM_KEY > ":")*>
  | < EATTRIBUTE_GB_KEY_POSITION: "e_attribute_gb:p:"< DM_KEY >":"(< DM_KEY >)?":"(< AREA_TYPE_KEY >)":"(< DM_KEY > ":")*>
  | < EATTRIBUTE_GB_KEY_DATE: "e_attribute_gb:d:"< DM_KEY >":"(< DM_KEY >)?":"(< DATE_GB_KEY >)>
  | < EATTRIBUTE_GB_KEY_LIST: "e_attribute_gb:l:" < DM_KEY > ":" (< DM_KEY >)? ":" (< DM_KEY > ":")* >
@@ -272,6 +273,8 @@ GroupByItem GroupByItem() :
 		< EATTRIBUTE_GB_KEY_EMPLOYEE>
 		|
 		< ENTITYTYPE_GB >
+		|
+		< CA_GB >
 	)
 	{
 	  item = GroupByItem.parse(token.image );

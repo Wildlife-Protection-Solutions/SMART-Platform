@@ -196,7 +196,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 			{"str_sort", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"dbl_sort", "double"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"date_sort", "date"}, //$NON-NLS-1$ //$NON-NLS-2$
-			{"entity_id", "varchar(1024)"} //$NON-NLS-1$ //$NON-NLS-2$
+			{"entity_id", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		
 		StringBuilder sb = new StringBuilder();
@@ -249,6 +249,8 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		int columnIndex = 0;
 		columnNameToIndex.put("entity_uuid", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("entity_type_key", columnIndex++); //$NON-NLS-1$
+		columnNameToIndex.put("ca_id", columnIndex++); //$NON-NLS-1$
+		columnNameToIndex.put("ca_name", columnIndex++); //$NON-NLS-1$
 		for (Object[] v : filterToColumn){
 			columnNameToIndex.put((String)v[1], columnIndex++);
 		}

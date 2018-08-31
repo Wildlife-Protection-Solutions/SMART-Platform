@@ -34,6 +34,7 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -126,7 +127,17 @@ public class DropItemFactory {
 				di.setDateOption(i.getDateOption());
 				
 				return Collections.singletonList(di);
-				
+			}else if (i.getGroupByType() == GroupByItem.GroupByType.CA) {
+				ConservationAreaGroupByDropItem di = new ConservationAreaGroupByDropItem();
+				for (String caUuid : i.getFilterOptions()) {
+					for (ConservationArea ci : InternalQueryManager.INSTANCE.getQueryItemProvider().getConservationAreas()) {
+						if (ci.getUuid().equals(UuidUtils.stringToUuid(caUuid))) {
+							di.addConservationArea(ci);
+							break;
+						}
+					}
+				}
+				return Collections.singletonList(di);
 			}else if (i.getGroupByType() == GroupByItem.GroupByType.ENTITYTYPE) {
 				EntityTypeGroupByDropItem di = new EntityTypeGroupByDropItem();
 				for (String entityTypeKey : i.getFilterOptions()) {

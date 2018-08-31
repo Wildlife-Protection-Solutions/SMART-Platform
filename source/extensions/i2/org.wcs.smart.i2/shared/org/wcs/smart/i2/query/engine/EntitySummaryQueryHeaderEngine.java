@@ -119,6 +119,8 @@ public enum EntitySummaryQueryHeaderEngine {
 		String colkey = null;
 		if (item.getGroupByType() == GroupByType.ENTITYTYPE) {
 			colkey = "ET"; //$NON-NLS-1$
+		}else if (item.getGroupByType() == GroupByType.CA) {
+			colkey = "CA"; //$NON-NLS-1$
 		}else {
 			colkey = item.getAttributeKey();
 			if (item.getEntityTypeKey() != null) {

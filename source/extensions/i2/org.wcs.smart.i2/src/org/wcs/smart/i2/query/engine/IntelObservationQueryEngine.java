@@ -262,6 +262,8 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 		String[][] columns = new String[][]{
 			{"observation_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"location_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"ca_id", "varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"ca_name", "varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"record_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"record_source_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"record_status", "varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -270,7 +272,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 			{"loc_datetime", "timestamp"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"loc_comment", "varchar(4096)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"loc_geometry", "blob"}, //$NON-NLS-1$ //$NON-NLS-2$
-			{"category_uuid", "char(16) for bit data"} //$NON-NLS-1$ //$NON-NLS-2$
+			{"category_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		
 		String[][] sortColumns = new String[][]{
@@ -311,7 +313,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 		sb = new StringBuilder();
 		sb.append(" INSERT INTO " + newTable + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" ( " + insert.toString() + ")" ); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append("SELECT o.uuid, a.location_uuid, r.uuid, r.source_uuid, r.status, r.title, l.id, l.datetime, l.comment, l.geometry, o.category_uuid "); //$NON-NLS-1$
+		sb.append("SELECT o.uuid, a.location_uuid, a.ca_id, a.ca_name, r.uuid, r.source_uuid, r.status, r.title, l.id, l.datetime, l.comment, l.geometry, o.category_uuid "); //$NON-NLS-1$
 		sb.append(select);
 		sb.append(" FROM " + observationTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" JOIN smart.i_location l on a.location_uuid = l.uuid "); //$NON-NLS-1$
