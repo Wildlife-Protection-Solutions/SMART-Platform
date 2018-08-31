@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.query;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -266,6 +267,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		
 		List<IntelAttributeListItem> items = new ArrayList<>();
 		items.addAll(listItems.values());
+		items.sort((a,b) -> Collator.getInstance().compare(a.getKeyId(), b.getKeyId()));
 		return items;
 	}
 

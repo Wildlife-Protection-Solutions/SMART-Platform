@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.query;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -122,7 +123,14 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	@Override
 	public List<IntelAttributeListItem> getAttributeListItems(String attributeKey, Session session){
 		IntelAttribute a = getAttribute(attributeKey, session);
-		return a.getAttributeList();
+		ArrayList<IntelAttributeListItem> items = new ArrayList<>(a.getAttributeList());
+		items.sort((c,b)->{
+			if (c.getOrder() == b.getOrder()) {
+				return c.getKeyId().compareTo(b.getKeyId());
+			}
+			return Integer.compare(c.getOrder(), b.getOrder());
+		});
+		return items;
 	}
 	
 	private ConservationArea getCa() {
