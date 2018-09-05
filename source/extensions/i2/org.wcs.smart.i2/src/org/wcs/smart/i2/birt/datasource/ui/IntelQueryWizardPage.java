@@ -44,6 +44,9 @@ import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.query.observation.filter.GroupByItem;
+import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.IntelQueryLabelProvider;
 import org.wcs.smart.util.UuidUtils;
@@ -116,6 +119,7 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 				validateData();
 			}
 		});
+		
 		List<AbstractIntelQuery> queries = new ArrayList<>();
 		try(Session s = HibernateManager.openSession()){
 			queries.addAll( QueryFactory.buildQuery(s, IntelRecordObservationQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
@@ -225,12 +229,32 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 			isValid = selection instanceof AbstractIntelQuery;
 		}
 
-		if (isValid) {
-			setMessage(message);
-		} else {
+		if (!isValid) {
 			setMessage(Messages.IntelQueryWizardPage_queryRequired, ERROR);
 		}
 
+		//validate query
+		Object x = lstQueries.getStructuredSelection().getFirstElement();
+		if (x instanceof IntelEntitySummaryQuery) {
+			IntelEntitySummaryQuery q = (IntelEntitySummaryQuery)x;
+			try {
+				SumQueryDefinition def = IntelEntitySummaryQuery.parseQuery(q.getQueryString());
+				for (GroupByItem i : def.getColumnGroupByPart().getItems()) {
+					if (i.getDateOption() != null || i.getAttributeType() == AttributeType.DATE) {
+						setMessage(Messages.IntelQueryWizardPage_ColumnGroupByError, ERROR);
+						isValid = false;
+						break;
+					}
+				}
+			}catch (Exception ex) {
+				setMessage(ex.getMessage(), ERROR);
+				isValid = false;
+				
+			}
+			
+		}
+		
+		if (isValid) setMessage(message);
 		setPageComplete(isValid);
 	}
 

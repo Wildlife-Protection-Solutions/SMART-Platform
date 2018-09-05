@@ -931,6 +931,7 @@ public class Messages extends NLS {
 	public static String IntelQueryEditor_TabSectionsLabel;
 	public static String IntelQueryNameLabel_ErrorMsg;
 	public static String IntelQueryNameLabel_ErrorTitle;
+	public static String IntelQueryWizardPage_ColumnGroupByError;
 	public static String IntelQueryWizardPage_linktoreport1;
 	public static String IntelQueryWizardPage_message;
 	public static String IntelQueryWizardPage_queryRequired;
