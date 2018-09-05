@@ -78,7 +78,7 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	public List<Employee> getEmployees(Session session){
 		List<Employee> employees = QueryFactory.buildQuery(session, Employee.class, 
 				new Object[] {"conservationArea", getCa()}).list(); //$NON-NLS-1$
-		employees.sort((a,b)-> (a.getFamilyName() + a.getGivenName() + a.getId()).compareTo(b.getFamilyName() + b.getGivenName() + b.getId()));
+		employees.sort((a,b)-> (a.getGivenName() + a.getFamilyName() + a.getId()).compareTo(b.getGivenName() + b.getFamilyName() + b.getId()));
 		return employees;
 	}
 	

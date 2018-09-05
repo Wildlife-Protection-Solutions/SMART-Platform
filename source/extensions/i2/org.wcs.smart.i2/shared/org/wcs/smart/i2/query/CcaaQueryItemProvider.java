@@ -81,7 +81,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		List<Employee> employees = session.createQuery("FROM Employee WHERE conservationArea in (:cas)", Employee.class) //$NON-NLS-1$
 		.setParameterList("cas", getConservationAreas()) //$NON-NLS-1$
 		.list();
-		employees.sort((a,b)-> (a.getFamilyName() + a.getGivenName() + a.getId()).compareTo(b.getFamilyName() + b.getGivenName() + b.getId()));
+		employees.sort((a,b)-> (a.getGivenName() + a.getFamilyName() + a.getId()).compareTo(b.getGivenName() + b.getFamilyName() + b.getId()));
 		return employees;
 	}
 	
