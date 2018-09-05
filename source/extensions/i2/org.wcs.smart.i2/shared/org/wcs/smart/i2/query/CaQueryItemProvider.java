@@ -41,6 +41,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Single conservation area query item provider.  Works for a single
@@ -90,9 +91,11 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	
 	@Override
 	public List<Area> getAreas(Area.AreaType areaType, Session session){
-		return  QueryFactory.buildQuery(session, Area.class, 
+		List<Area> areas = QueryFactory.buildQuery(session, Area.class, 
 				new Object[] {"conservationArea", getCa()},  //$NON-NLS-1$
 				new Object[] {"type", areaType}).list(); //$NON-NLS-1$
+		areas.sort((a,b)-> (a.getKeyId() + UuidUtils.uuidToString(a.getUuid())).compareTo(b.getKeyId() + UuidUtils.uuidToString(b.getUuid())));
+		return areas;
 	}
 	
 	@Override

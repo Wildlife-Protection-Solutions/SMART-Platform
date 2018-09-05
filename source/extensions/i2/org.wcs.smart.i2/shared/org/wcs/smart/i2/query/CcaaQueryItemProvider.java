@@ -46,6 +46,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Multiple conservation area item provider for cross CCAA
@@ -151,6 +152,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 				.setParameter("ca",  getQueryConservationArea()) //$NON-NLS-1$
 				.setParameter("atype",  areaType) //$NON-NLS-1$
 				.list();
+		allAreas.sort((a,b)-> (a.getKeyId() + UuidUtils.uuidToString(a.getUuid())).compareTo(b.getKeyId() + UuidUtils.uuidToString(b.getUuid())));
 		return allAreas;
 	}
 	
