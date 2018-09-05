@@ -76,8 +76,10 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 
 	@Override
 	public List<Employee> getEmployees(Session session){
-		return QueryFactory.buildQuery(session, Employee.class, 
+		List<Employee> employees = QueryFactory.buildQuery(session, Employee.class, 
 				new Object[] {"conservationArea", getCa()}).list(); //$NON-NLS-1$
+		employees.sort((a,b)-> (a.getFamilyName() + a.getGivenName() + a.getId()).compareTo(b.getFamilyName() + b.getGivenName() + b.getId()));
+		return employees;
 	}
 	
 	@Override

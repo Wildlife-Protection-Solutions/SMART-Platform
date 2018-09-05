@@ -243,6 +243,7 @@ public class AttributeListPanel extends Composite {
 	private void sort() {
 		attribute.getAttributeList().sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		items.refresh();
+		modified();
 	}
 	
 	private void move(int direction) {
@@ -262,6 +263,7 @@ public class AttributeListPanel extends Composite {
 		attribute.getAttributeList().add(index, toMove);
 		
 		items.refresh();
+		modified();
 	}
 	
 	
