@@ -194,10 +194,12 @@ public class UpgradeEngine {
 					item.upgrade(sub.split(1));
 				}
 			}
+			sub1.done();
 		}
 		
 		/* --- validate & update plugins ---*/
 		boolean requiresUpgrades = false;
+		progress.setWorkRemaining(3);
 		progress.subTask(Messages.UpgradeEngine_subprogress3);
 		if (currentVersions != null) {
 			Map<String, String> backupVersions;
@@ -232,8 +234,8 @@ public class UpgradeEngine {
 				
 			}
 		}
-		progress.worked(1);
 		
+		progress.setWorkRemaining(2);
 		if (requiresUpgrades){
 			if (hasChangeTracking) {
 				uninstallChangeTracking(progress);
@@ -243,7 +245,7 @@ public class UpgradeEngine {
 			//run all installers/upgraders
 			progress.subTask(Messages.UpgradeEngine_pluginssubtask);
 			List<IDatabaseUpgrader> extensions = getExtensions();
-			progress.setWorkRemaining(extensions.size() + 1);
+			
 			SubMonitor sub = progress.split(1);
 			sub.setWorkRemaining(extensions.size() + 1);
 			for (IDatabaseUpgrader upgrader : extensions) {
@@ -253,9 +255,9 @@ public class UpgradeEngine {
 			
 			
 		}
+		progress.setWorkRemaining(1);
 		if (!hasChangeTracking) {
 			//install change log tracking (if necessary)
-			progress.setWorkRemaining(2);
 			SubMonitor sub = progress.split(1);
 			sub.subTask(Messages.UpgradeEngine_subprogress6);
 			try(Session s = HibernateManager.openSession()){
@@ -264,7 +266,7 @@ public class UpgradeEngine {
 				s.getTransaction().commit();
 			}
 		}
-		progress.worked(1);
+		progress.done();
 	}
 
 	/**

@@ -44,7 +44,7 @@ public class Upgrader601To610 implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(final IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.Upgrader601To610_TastName, 1);
+		monitor.subTask(Messages.Upgrader601To610_TastName);
 		thrownException = null;
 		try(Session s = HibernateManager.openSession()){
 			s.doWork(new Work() {

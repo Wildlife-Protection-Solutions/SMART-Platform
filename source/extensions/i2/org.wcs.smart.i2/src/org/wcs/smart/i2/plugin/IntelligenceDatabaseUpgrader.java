@@ -48,7 +48,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.IntelligenceDatabaseUpgrader_JobName, 1);
+		monitor.subTask(Messages.IntelligenceDatabaseUpgrader_JobName);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {

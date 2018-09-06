@@ -46,7 +46,7 @@ public class EntityQueryDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.EntityQueryDatabaseUpgrader_UpgradeTask, 1);
+		monitor.subTask(Messages.EntityQueryDatabaseUpgrader_UpgradeTask);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{

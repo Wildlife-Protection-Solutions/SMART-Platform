@@ -46,7 +46,7 @@ public class IntelligenceQueryDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.IntelligenceQueryDatabaseUpgrader_InstallStatu, 1);
+		monitor.subTask(Messages.IntelligenceQueryDatabaseUpgrader_InstallStatu);
 		try(Session session = HibernateManager.openSession()){
 			try{
 				session.beginTransaction();

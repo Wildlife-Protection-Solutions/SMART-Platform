@@ -42,7 +42,7 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.CtDatabaseUpgrader_UpgradeTask, 1);
+		monitor.subTask(Messages.CtDatabaseUpgrader_UpgradeTask);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {

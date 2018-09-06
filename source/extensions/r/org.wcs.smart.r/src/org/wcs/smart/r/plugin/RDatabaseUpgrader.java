@@ -43,7 +43,7 @@ public class RDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.RDatabaseUpgrader_UpgradeTaskName, 1);
+		monitor.subTask(Messages.RDatabaseUpgrader_UpgradeTaskName);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
