@@ -9,5 +9,5 @@
 	</parent>
 	<artifactId>org.wcs.smart.connect.dataqueue.independentincident.feature.nl</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<version>6.0.0</version>
+	<version>6.2.0</version>
 </project>

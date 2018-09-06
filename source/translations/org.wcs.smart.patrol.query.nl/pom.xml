@@ -9,5 +9,5 @@
 	</parent>
 	<artifactId>org.wcs.smart.patrol.query.nl</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>6.0.0</version>
+	<version>6.2.0</version>
 </project>

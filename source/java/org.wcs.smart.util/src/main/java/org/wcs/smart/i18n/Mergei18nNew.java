@@ -62,7 +62,8 @@ public class Mergei18nNew {
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r\\translations",
     };
 	
-    public static final String[] LANGUAGES =  new String[] {"es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
+//    public static final String[] LANGUAGES =  new String[] {"es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
+    public static final String[] LANGUAGES =  new String[] {"th"};
     
     public static final String LINE_SEP = "\n";
 
