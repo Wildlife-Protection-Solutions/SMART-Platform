@@ -190,6 +190,7 @@ public class Messages extends NLS {
 	public static String DownloadCaEngine_InvalidUser;
 	public static String DownloadCaEngine_TaskName;
 	public static String DownloadCaEngine_Timeout;
+	public static String DownloadCaEngine_VersionValidation;
 	public static String DownloadCaEngine_WaitSubTaskName;
 	public static String DownloadChangeLogDialog_Message;
 	public static String DownloadChangeLogDialog_Title;

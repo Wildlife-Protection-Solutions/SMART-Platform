@@ -50,6 +50,7 @@ import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.ui.UserNamePasswordDialog;
 import org.wcs.smart.user.UserLevelManager;
 
@@ -122,6 +123,18 @@ public class DownloadCaEngine {
 			
 			
 			Path p = connect.downloadFileFromUrl(downloadUrl, null, progress.split(1));
+			
+			
+			//start by validating the package
+			progress.subTask(Messages.DownloadCaEngine_VersionValidation);
+			HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+			try {
+				if (!CaImporter.validateCaImport(p.toFile())) {
+					return false;
+				}
+			}catch (Exception ex) {
+				throw ex;
+			}
 			
 			ConservationArea desktopCa = null;
 			try(Session s = HibernateManager.openSession()){

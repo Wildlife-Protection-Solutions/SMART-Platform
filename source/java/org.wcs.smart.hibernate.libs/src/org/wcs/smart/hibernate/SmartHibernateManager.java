@@ -105,6 +105,14 @@ public class SmartHibernateManager {
 	}
 	
 	/**
+	 * 
+	 * @return the current database user name
+	 */
+	public static String getCurrentUserName() {
+		return userName;
+	}
+	
+	/**
 	 * Creates a new session factory.
 	 * 
 	 */
