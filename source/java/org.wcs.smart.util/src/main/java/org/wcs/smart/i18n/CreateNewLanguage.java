@@ -11,95 +11,61 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+
 public class CreateNewLanguage {
 
 
 	//CT and entity extensions don't match the file structure and this tool won't work for those 
 	
-	public static final String COPY_FROM = "C:\\data\\SMART\\Source\\trunk\\source\\translations\\es";
-	public static final String COPY_TO = "C:\\data\\SMART\\Source\\trunk\\source\\translations\\sw";
+	public static final String ROOT_DIR = "C:\\data\\SMART\\Source\\trunk\\source";
 	
-//	public static final String COPY_FROM = "C:\\data\\SMART\\Source\\trunk\\source\\extensions\\asset\\translations\\es";
-//	public static final String COPY_TO = "C:\\data\\SMART\\Source\\trunk\\source\\extensions\\asset\\translations\\sw";
-	
-//	public static final String COPY_FROM = "C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect\\translations\\es";
-//	public static final String COPY_TO = "C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect\\translations\\sw";
-	
-//	public static final String COPY_FROM = "C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations\\es";
-//	public static final String COPY_TO = "C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations\\sw";
-	
-//	public static final String COPY_FROM = "C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event\\translations\\es";
-//	public static final String COPY_TO = "C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event\\translations\\sw";
-	
-//	public static final String COPY_FROM = "C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2\\translations\\es";
-//	public static final String COPY_TO = "C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2\\translations\\sw";
-	
-//	public static final String COPY_FROM = "C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa\\translations\\es";
-//	public static final String COPY_TO = "C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa\\translations\\sw";
+	public static final String NEW_LANG = "ar";  //arabic
 	
 	public static final String FROM = "es";
-	public static final String FROM_TEXT = "Spanish";
-	public static final String TO = "sw";
-	public static final String TO_TEXT = "Swahili";
 	
 	
 	public static void main(String[] args) throws Exception{
-		
 		CreateNewLanguage newLang = new CreateNewLanguage();
 		newLang.copyFile();
 		
 	}
 	
 	private void copyFile() throws Exception{
-		Path toPath = Paths.get(COPY_TO);
-		Path fromPath = Paths.get(COPY_FROM);
+		Path searchPath = Paths.get(ROOT_DIR);
 		
-		Files.walkFileTree(fromPath, new FileVisitor<Path>(){
+		Files.walkFileTree(searchPath, new FileVisitor<Path>(){
 	
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				Path newDir = toPath.resolve( fromPath.relativize(dir) );
-				
-				if (newDir.getFileName().toString().equalsIgnoreCase("bin") || newDir.getFileName().toString().equals("target")) {
+				if (dir.getFileName().toString().equalsIgnoreCase("bin") || dir.getFileName().toString().equals("target")) {
 					return FileVisitResult.SKIP_SUBTREE;
 				}
-				Files.createDirectories(newDir);
+				if (dir.getFileName().startsWith("org.wcs.smart") && !dir.getFileName().endsWith(".nl")) {
+					return FileVisitResult.SKIP_SUBTREE;
+				}
+				if (dir.getFileName().equals("es")) {
+					Path toDir = dir.getParent().resolve(NEW_LANG);
+					FileUtils.copyDirectory(dir.toFile(), toDir.toFile());
+				}
 				return FileVisitResult.CONTINUE;
 			}
 	
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				Path toFile = toPath.resolve( fromPath.relativize(file) );
-				Files.copy(file, toFile);
 				
-				if (toFile.getFileName().toString().equalsIgnoreCase("pom.xml") ||
-						toFile.getFileName().toString().equalsIgnoreCase(".project")
-						) {
-					updateFile(toFile);
-				}else if (toFile.getFileName().toString().equalsIgnoreCase("MANIFEST.MF") ||
-						toFile.getFileName().toString().equalsIgnoreCase("feature.xml")) {
-					updateFile(toFile);
-					updateFileText(toFile);
-					if (toFile.getFileName().toString().equalsIgnoreCase("feature.xml")) {
-						updateFeature(toFile);
-					}
-				}else if (toFile.getFileName().toString().startsWith("messages_" + FROM + ".properties")) {
-					Files.createFile(toFile.getParent().resolve("messages_" + TO + ".properties"));
-					Files.delete(toFile);
-				}else if (toFile.getFileName().toString().startsWith("plugin_" + FROM + ".properties")) {
-					Files.createFile(toFile.getParent().resolve("plugin_" + TO + ".properties"));
-					Files.delete(toFile);
-				}else if(toFile.getFileName().toString().startsWith("bundle_" + FROM + ".properties")) {
-					Files.createFile(toFile.getParent().resolve("bundle_" + TO + ".properties"));
-					Files.delete(toFile);
-				}else if(toFile.getFileName().toString().equalsIgnoreCase("build.properties")){
-					updateBuild(toFile);
-				}else {
-					String name = toFile.getFileName().toString();
-					if (name.contains("_" + FROM + ".")) {
-						name = name.replaceAll("_" + FROM + "\\.", "_" + TO + "\\.");
-						Files.move(toFile, toFile.getParent().resolve(name));
-					}
+				String fileName = file.getFileName().toString();
+				
+				if (fileName.equalsIgnoreCase("messages_es.properties")) {
+					Files.createFile(file.getParent().resolve("messages_" + NEW_LANG + ".properties"));
+				}else if (fileName.equalsIgnoreCase("bundle_es.properties")) {
+					Files.createFile(file.getParent().resolve("bundle_" + NEW_LANG + ".properties"));
+				}else if (fileName.equalsIgnoreCase("plugin_es.properties")) {
+					Files.createFile(file.getParent().resolve("bundle_" + NEW_LANG + ".properties"));
+				}else if (fileName.endsWith("_es.html")) {
+					String newfilename = fileName.substring(0, fileName.lastIndexOf("_es.html"));
+					newfilename = newfilename + "_" + NEW_LANG +".html";
+					Files.createFile(file.getParent().resolve(newfilename));
 				}
 				
 				return FileVisitResult.CONTINUE;
@@ -119,96 +85,8 @@ public class CreateNewLanguage {
 				
 		});
 		
-		//rename directories
-		Files.walkFileTree(toPath, new FileVisitor<Path>(){
-			
-			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				if (dir.toString().endsWith("nl_" + FROM)) {
-					Path newDir = dir.getParent().resolve(dir.getFileName().toString().replaceAll("nl_" + FROM, "nl_" + TO));
-					Files.move(dir, newDir);
-					return FileVisitResult.SKIP_SUBTREE;
-				}
-				return FileVisitResult.CONTINUE;
-			}
-	
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				//TODO: html files
-				return FileVisitResult.CONTINUE;
-			}
-	
-			@Override
-			public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-				if (exc != null) throw exc;
-				return FileVisitResult.CONTINUE;
-			}
-	
-			@Override
-			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-				if (exc != null) throw exc;
-				return FileVisitResult.CONTINUE;
-			}
-				
-		});
-
-		//specifically find help directory
-		Path help = toPath.resolve("org.wcs.smart.help.nl_" + TO).resolve("nl").resolve(FROM);
-		if (Files.exists(help)) {
-			Files.move(help, help.getParent().resolve(TO));
-		}
-	}
-	
-	private void updateFile(Path pomFile) throws IOException{
-		//read file and remove nl_es with nl_xx
-		List<String> lines = Files.readAllLines(pomFile);
 		
-		ArrayList<String> toWrite = new ArrayList<>();
-		for (String line : lines) {
-			//replace nl_es with nl_xx
-			line = line.replaceAll("nl_" + FROM, "nl_" + TO);
-			toWrite.add(line);
-		}
-		 Files.write(pomFile, toWrite, StandardCharsets.UTF_8);
 	}
 	
-	private void updateFileText(Path pomFile) throws IOException{
-		//read file and remove nl_es with nl_xx
-		List<String> lines = Files.readAllLines(pomFile);
-		
-		ArrayList<String> toWrite = new ArrayList<>();
-		for (String line : lines) {
-			//replace nl_es with nl_xx
-			line = line.replaceAll(FROM_TEXT, TO_TEXT);
-			toWrite.add(line);
-		}
-		 Files.write(pomFile, toWrite, StandardCharsets.UTF_8);
-	}
 	
-	private void updateBuild(Path buildFile) throws IOException{
-		//read file and remove nl_es with nl_xx
-		List<String> lines = Files.readAllLines(buildFile);
-		
-		ArrayList<String> toWrite = new ArrayList<>();
-		for (String line : lines) {
-			//replace nl_es with nl_xx
-			line = line.replaceAll("plugin_" + FROM, "plugin_" + TO);
-			toWrite.add(line);
-		}
-		 Files.write(buildFile, toWrite, StandardCharsets.UTF_8);
-	}
-
-	private void updateFeature(Path buildFile) throws IOException{
-		//read file and remove nl_es with nl_xx
-		List<String> lines = Files.readAllLines(buildFile);
-		
-		ArrayList<String> toWrite = new ArrayList<>();
-		for (String line : lines) {
-			//replace nl_es with nl_xx
-			line = line.replaceAll("nls_birt_" + FROM, "nls_birt_" + TO);
-			line = line.replaceAll("nls_eclipse_" + FROM, "nls_eclipse_" + TO);
-			toWrite.add(line);
-		}
-		 Files.write(buildFile, toWrite, StandardCharsets.UTF_8);
-	}
 }
