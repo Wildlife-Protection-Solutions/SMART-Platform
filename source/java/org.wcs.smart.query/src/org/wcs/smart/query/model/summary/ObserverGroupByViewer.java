@@ -65,7 +65,7 @@ public class ObserverGroupByViewer extends AbstractGroupByViewer<ObserverGroupBy
 				QueryPlugIn.displayLog(Messages.ObserverGroupBy_ErrorLoadingEmployees, ex);
 			}
 		}else{
-			List<Employee> es = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), session);
+			List<Employee> es = HibernateManager.getAllEmployees(SmartDB.getCurrentConservationArea(), session);
 			Collections.sort(es, new Comparator<Employee>() {
 				@Override
 				public int compare(Employee arg0, Employee arg1) {

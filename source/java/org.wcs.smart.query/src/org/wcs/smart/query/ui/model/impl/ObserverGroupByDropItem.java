@@ -74,7 +74,7 @@ public class ObserverGroupByDropItem extends DropItem implements IGroupByDropIte
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
-				List<Employee> e = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), s);
+				List<Employee> e = HibernateManager.getAllEmployees(SmartDB.getCurrentConservationArea(), s);
 				Collections.sort(e, new Comparator<Employee>() {
 					@Override
 					public int compare(Employee arg0, Employee arg1) {
@@ -82,7 +82,7 @@ public class ObserverGroupByDropItem extends DropItem implements IGroupByDropIte
 					}
 				});
 				for (Employee emp : e){
-					items.add(new ListItem(emp.getUuid(), getLabel(emp)));
+					items.add(new ListItem(emp.getUuid(), getLabel(emp), emp.isActive()));
 				}
 				
 			}catch (Exception ex){
