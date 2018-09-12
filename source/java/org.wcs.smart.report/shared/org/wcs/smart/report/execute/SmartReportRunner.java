@@ -35,11 +35,13 @@ import org.eclipse.birt.report.engine.api.IReportDocument;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
+import org.eclipse.birt.report.engine.api.IRunTask;
 import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.hibernate.Session;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.birt.SmartRenderTask;
 import org.wcs.smart.birt.SmartRunAndRender;
+import org.wcs.smart.birt.SmartRunTask;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.report.model.Report;
 
@@ -88,9 +90,6 @@ public enum SmartReportRunner {
 		
 		IReportRunnable reportRunnable = engine.openReportDesign(reportFile.getAbsolutePath());
 		
-		/*
-		 * This is not working for maps in grids
-		 *
 		IRunTask runTask = new SmartRunTask((ReportEngine)engine, reportRunnable, report.getConservationArea(), currentUser, options);
 		runTask.setParameterValues(reportParameters);
 		runTask.getAppContext().put(BirtConstants.CA_PARAM, report.getConservationArea());
@@ -102,21 +101,6 @@ public enum SmartReportRunner {
 		runTask.close();
 
 		renderFile(engine, options, renderFile, currentUser, report.getConservationArea(), defaultDpi, session);
-		*/
-		
-		IRunAndRenderTask task = new SmartRunAndRender((ReportEngine) engine, reportRunnable, report.getConservationArea(), currentUser);
-		try{
-			task.getAppContext().put(BirtConstants.CA_PARAM, report.getConservationArea());
-			task.getAppContext().put(BirtConstants.SESSION_PARAM, session);
-			task.getAppContext().put(BirtConstants.DEFAULT_DPI_PARAM, defaultDpi);
-			if (workingDirectory != null) task.getAppContext().put(BirtConstants.WORKING_DIRECTORY, workingDirectory);
-
-			task.setRenderOption(options);
-			task.setParameterValues(reportParameters);
-			task.run();
-		}finally{
-			task.close();
-		}
 	}
 	
 	/**
