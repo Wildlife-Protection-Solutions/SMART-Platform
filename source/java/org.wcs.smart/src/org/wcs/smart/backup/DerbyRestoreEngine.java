@@ -169,7 +169,7 @@ public class DerbyRestoreEngine {
 	 */
 	public static void restoreSystem(File backupFile, IProgressMonitor monitor)
 			throws Exception {
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyRestoreEngine_Progress_RestoringFile, 7);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyRestoreEngine_Progress_RestoringFile, 14);
 		if (!backupFile.exists()) {
 			throw new Exception(Messages.DerbyRestoreEngine_Error_NoBackupFile + " '" + backupFile.getAbsolutePath() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -285,7 +285,7 @@ public class DerbyRestoreEngine {
 		try{
 			SmartContext.INSTANCE.setFilestoreLocation(extractedFilestore.getAbsolutePath());
 			UpgradeEngine upgrader = new UpgradeEngine();
-			upgrader.upgradeSystem(progress.split(1), versions);
+			upgrader.upgradeSystem(progress.split(7), versions);
 			validateConfiguration(versions);
 			upgrader.postProcess(progress.split(1));
 		}catch (Exception ex){
@@ -313,8 +313,6 @@ public class DerbyRestoreEngine {
 		File dbFileBack = null;
 		File dataFileBack = null;
 		try {
-
-
 			dbFileBack = new File(dbFile.getParentFile().getCanonicalPath()
 					+ File.separator + dbFile.getName() + ".bak"); //$NON-NLS-1$
 			dataFileBack = new File(dataFile.getParentFile().getCanonicalPath()

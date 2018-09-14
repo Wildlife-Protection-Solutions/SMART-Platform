@@ -117,6 +117,9 @@ public class AdvancedLabelProviderImpl implements
 		if (item == FixedQueryColumn.Column.ENTITY_ID) return Messages.getString("AdvancedLabelProviderImpl.QueryColEntityId", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.Column.ENTITY_TYPE) return Messages.getString("AdvancedLabelProviderImpl.QueryColEntityTable", l); //$NON-NLS-1$
 		
+		if (item == FixedQueryColumn.Column.CA_ID) return Messages.getString("AdvancedLabelProviderImpl.CaIdColumn", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.Column.CA_NAME) return Messages.getString("AdvancedLabelProviderImpl.CaNameColumn", l); //$NON-NLS-1$
+
 		if (item == IntelRecord.Status.NEW) return Messages.getString("AdvancedLabelProviderImpl.IntelRecordStatusUnprocessed", l); //$NON-NLS-1$
 		if (item == IntelRecord.Status.PROCESSING) return Messages.getString("AdvancedLabelProviderImpl.IntelRecordStatusInProgress", l); //$NON-NLS-1$
 		if (item == IntelRecord.Status.COMPLETE) return Messages.getString("AdvancedLabelProviderImpl.IntelRecordStatusComplete", l); //$NON-NLS-1$

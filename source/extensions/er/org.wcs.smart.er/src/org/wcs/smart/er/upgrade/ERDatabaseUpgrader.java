@@ -42,7 +42,7 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.ERDatabaseUpgrader_UpgradeTask, 1);
+		monitor.subTask(Messages.ERDatabaseUpgrader_UpgradeTask);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{

@@ -636,7 +636,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		sb.append(" WHERE upper(code) = '" + locale.toString().toUpperCase() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		if (locale.toString().toUpperCase().endsWith(locale.getLanguage().toUpperCase())){
+		if (!locale.toString().toUpperCase().endsWith(locale.getLanguage().toUpperCase())){
 			sb.append(" UNION "); //$NON-NLS-1$
 			
 			sb.append(" SELECT "); //$NON-NLS-1$

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.query;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,6 +46,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Multiple conservation area item provider for cross CCAA
@@ -77,9 +79,11 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	
 	@Override
 	public List<Employee> getEmployees(Session session){
-		return session.createQuery("FROM Employee WHERE conservationArea in (:cas)", Employee.class) //$NON-NLS-1$
+		List<Employee> employees = session.createQuery("FROM Employee WHERE conservationArea in (:cas)", Employee.class) //$NON-NLS-1$
 		.setParameterList("cas", getConservationAreas()) //$NON-NLS-1$
 		.list();
+		employees.sort((a,b)-> (a.getGivenName() + a.getFamilyName() + a.getId()).compareTo(b.getGivenName() + b.getFamilyName() + b.getId()));
+		return employees;
 	}
 	
 	@Override
@@ -148,6 +152,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 				.setParameter("ca",  getQueryConservationArea()) //$NON-NLS-1$
 				.setParameter("atype",  areaType) //$NON-NLS-1$
 				.list();
+		allAreas.sort((a,b)-> (a.getKeyId() + UuidUtils.uuidToString(a.getUuid())).compareTo(b.getKeyId() + UuidUtils.uuidToString(b.getUuid())));
 		return allAreas;
 	}
 	
@@ -266,6 +271,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		
 		List<IntelAttributeListItem> items = new ArrayList<>();
 		items.addAll(listItems.values());
+		items.sort((a,b) -> Collator.getInstance().compare(a.getKeyId(), b.getKeyId()));
 		return items;
 	}
 

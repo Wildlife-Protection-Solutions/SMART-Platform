@@ -114,7 +114,6 @@ public enum WaypointSourceEngine implements IWaypointSourceEngine{
 				ObservationPlugIn.log("Error loading all waypoint sources", ex); //$NON-NLS-1$
 			}
 		}
-	}
-	
+	}	
 	
 }

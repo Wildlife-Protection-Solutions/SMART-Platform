@@ -230,7 +230,10 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 		clone.setNodeOrder(this.getNodeOrder());
 		clone.setParent(parent);
 		clone.setAttribute(clonedAttribute);
-		
+		if (newCa.equals(oldCa)) {
+			//if we are in the same CA then clone the icon reference
+			clone.setIcon(getIcon());
+		}
 		if (this.getChildren() != null){
 			clone.setChildren(new ArrayList<AttributeTreeNode>());
 			for (AttributeTreeNode node : this.getChildren()){
@@ -241,5 +244,6 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	
 		return clone;
 	}
+
 
 }

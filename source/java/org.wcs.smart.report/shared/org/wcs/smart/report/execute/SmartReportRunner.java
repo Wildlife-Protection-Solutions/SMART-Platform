@@ -39,7 +39,9 @@ import org.eclipse.birt.report.engine.api.IRunTask;
 import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.hibernate.Session;
 import org.wcs.smart.birt.BirtConstants;
+import org.wcs.smart.birt.SmartRenderTask;
 import org.wcs.smart.birt.SmartRunAndRender;
+import org.wcs.smart.birt.SmartRunTask;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.report.model.Report;
 
@@ -88,27 +90,28 @@ public enum SmartReportRunner {
 		
 		IReportRunnable reportRunnable = engine.openReportDesign(reportFile.getAbsolutePath());
 		
-		IRunTask runTask = engine.createRunTask(reportRunnable);
+		IRunTask runTask = new SmartRunTask((ReportEngine)engine, reportRunnable, report.getConservationArea(), currentUser, options);
 		runTask.setParameterValues(reportParameters);
 		runTask.getAppContext().put(BirtConstants.CA_PARAM, report.getConservationArea());
 		runTask.getAppContext().put(BirtConstants.SESSION_PARAM, session);
 		runTask.getAppContext().put(BirtConstants.DEFAULT_DPI_PARAM, defaultDpi);
+		
 		if (workingDirectory != null) runTask.getAppContext().put(BirtConstants.WORKING_DIRECTORY, workingDirectory);
 		runTask.run(renderFile.toAbsolutePath().toString());
 		runTask.close();
 
-		renderFile(engine, options, renderFile, report.getConservationArea(), defaultDpi, session);
-		
+		renderFile(engine, options, renderFile, currentUser, report.getConservationArea(), defaultDpi, session);
 	}
 	
 	/**
 	 * Renders a report document file to an output format
 	 * @throws EngineException 
 	 */
-	public void renderFile(IReportEngine engine, IRenderOption options, Path reportDoc, ConservationArea ca, int defaultDpi, Session session) throws EngineException {
+	public void renderFile(IReportEngine engine, IRenderOption options, Path reportDoc, String currentUser, ConservationArea ca, int defaultDpi, Session session) throws EngineException {
 		IReportDocument reportDocument = engine.openReportDocument(reportDoc.toAbsolutePath().toString());
 		try {
-			IRenderTask task = engine.createRenderTask(reportDocument);
+			IRenderTask task = new SmartRenderTask((ReportEngine)engine, reportDocument, ca, currentUser); 
+			
 			try {
 				task.getAppContext().put(BirtConstants.CA_PARAM, ca);
 				task.getAppContext().put(BirtConstants.SESSION_PARAM, session);

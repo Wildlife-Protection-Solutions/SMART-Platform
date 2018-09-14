@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,21 +45,34 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
+import org.apache.batik.dom.svg.SVGDOMImplementation;
+import org.apache.batik.dom.util.DocumentFactory;
+import org.apache.batik.dom.util.SAXDocumentFactory;
+import org.apache.batik.transcoder.SVGAbstractTranscoder;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
+import org.apache.batik.util.SVGConstants;
+import org.apache.batik.util.XMLResourceDescriptor;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.locationtech.udig.catalog.URLUtils;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -776,15 +790,83 @@ public class SmartUtils {
 	 * @throws IOException
 	 * @throws TranscoderException
 	 */
-	public static Image readSvg(Display display, Path file) throws IOException, TranscoderException {
+	public static Image readSvg(Display display, Path file, Integer size) throws IOException, TranscoderException {
 		PNGTranscoder transcoder = new PNGTranscoder();
+		if (size != null) {
+			transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_WIDTH, (float)size);
+			transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_HEIGHT, (float)size);
+		}
+		
 		try(Reader reader = Files.newBufferedReader(file)){
 			TranscoderInput input = new TranscoderInput(reader);
 			try(ByteArrayOutputStream bout = new ByteArrayOutputStream()){
 				TranscoderOutput output = new TranscoderOutput(bout);
 				transcoder.transcode(input, output);
-				return new Image(display, new ByteArrayInputStream(bout.toByteArray()));
+				Image img = new Image(display, new ByteArrayInputStream(bout.toByteArray()));
+				return img;
+			}
+		}catch (Exception ex) {
+			ex.printStackTrace();
+			throw ex;
+		}
+	}
+	public static Image readSvg(Display display, Path file) throws IOException, TranscoderException {
+		return readSvg(display, file, null);
+	}
+	
+	/**
+	 * 
+	 * @param size
+	 * @return
+	 */
+	public static Image getImage(Path file, int size) {
+		
+		if (file.getFileName().toString().endsWith(".svg")) {
+			try {
+				return readSvg(Display.getDefault(), file, size);
+			}catch (Exception ex) {
+				return null;
 			}
 		}
+		
+		Image rawImage = null;
+		try(InputStream is  = Files.newInputStream(file)){
+			rawImage = new Image(Display.getDefault(), is); 
+		}catch (Exception ex) {
+			return null;
+		}
+		
+		try {
+			Transform imageTransform = SmartUtils.getExifImageTransform(file.toFile(), size, size);
+			if (imageTransform != null) {
+				Image image3 = new Image(Display.getDefault(), size, size);
+				GC gc3 = new GC(image3);
+				gc3.setTransform(imageTransform);
+				gc3.drawImage(rawImage, 0, 0);
+				rawImage.dispose();
+				return image3;
+			}
+		}catch (Exception ex) {
+			
+		}
+	
+		Rectangle bounds = rawImage.getBounds();
+		int x = 0, y = 0, width = 0, height = 0;
+		if (bounds.width > bounds.height) {
+			width = size;
+			height = bounds.height * size / bounds.width;
+			y = (size - height) / 2;
+		} else {
+			height = size;
+			width = bounds.width * size / bounds.height;
+			x = (size - width) / 2;
+		}
+		// resize image
+		Image image2 = new Image(Display.getDefault(), size, size);
+		GC gc = new GC(image2);
+		gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);
+		rawImage.dispose();
+		return image2;
+		
 	}
 }

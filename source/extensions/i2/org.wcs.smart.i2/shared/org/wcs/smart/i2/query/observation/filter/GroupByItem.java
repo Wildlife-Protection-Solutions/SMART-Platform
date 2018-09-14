@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -56,7 +57,8 @@ public class GroupByItem {
 	public static enum GroupByType{
 		ENTITYTYPE ("entitytype_gb"), //$NON-NLS-1$
 		ATTRIBUTE ("e_attribute_gb"), //$NON-NLS-1$
-		SYSTEM(SystemAttributeFilter.SA_KEY);
+		SYSTEM(SystemAttributeFilter.SA_KEY),
+		CA("ca_gb"); //$NON-NLS-1$
 		
 		String key;
 		GroupByType(String key) {
@@ -93,6 +95,16 @@ public class GroupByItem {
 			}
 			return new GroupByItem(GroupByType.ENTITYTYPE, ops);
 		}
+		if (bits[0].equals(GroupByType.CA.getKey())) {
+			//remaining bits are keys
+			List<String> ops = new ArrayList<>();
+			for (int i = 1; i < bits.length; i ++) {
+				String keyId = bits[i].substring(1);
+				ops.add(keyId);
+			}
+			return new GroupByItem(GroupByType.CA, ops);
+		}
+		
 		if (bits[0].equals(SystemAttributeFilter.SA_KEY)) {
 			String stype = bits[1];
 			String sattribute = bits[2];
@@ -241,7 +253,14 @@ public class GroupByItem {
 		if(type == GroupByType.ENTITYTYPE) {
 			List<ListItem> items = new ArrayList<>();
 			for (IntelEntityType t : itemProvider.getEntityTypes(session)) {
-				items.add(new ListItem(t.getKeyId(), t.getName()));
+				items.add(new ListItem(t.getKeyId(), t.getName(), t.getName()));
+			}
+			return items;
+		}
+		if (type == GroupByType.CA) {
+			List<ListItem> items = new ArrayList<>();
+			for (ConservationArea ca : itemProvider.getConservationAreas()) {
+				items.add(new ListItem(UuidUtils.uuidToString(ca.getUuid()), ca.getNameLabel(), ca.getNameLabel()));
 			}
 			return items;
 		}

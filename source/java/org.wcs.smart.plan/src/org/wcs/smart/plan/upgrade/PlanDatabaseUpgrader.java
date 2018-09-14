@@ -42,7 +42,7 @@ public class PlanDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.PlanDatabaseUpgrader_UpgradeTask, 1);
+		monitor.subTask(Messages.PlanDatabaseUpgrader_UpgradeTask);
 		try(Session session = HibernateManager.openSession()) {
 			try{
 				session.beginTransaction();
@@ -51,7 +51,6 @@ public class PlanDatabaseUpgrader implements IDatabaseUpgrader {
 				String currentPluginVersion = versions.get(SmartPlanPlugIn.PLUGIN_ID);
 				
 				if (currentPluginVersion == null) {
-					monitor.subTask(Messages.PlanDatabaseUpgrader_UpgradeTask);
 					(new AddPlanJob()).installPlugin(session);
 				}else{
 					upgrade(currentPluginVersion, session);

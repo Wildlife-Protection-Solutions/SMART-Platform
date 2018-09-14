@@ -74,6 +74,7 @@ public class Parser implements ParserConstants {
         List<GroupByItem> items = new ArrayList<GroupByItem>();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ENTITYTYPE_GB:
+    case CA_GB:
     case EATTRIBUTE_GB_KEY_POSITION:
     case EATTRIBUTE_GB_KEY_DATE:
     case EATTRIBUTE_GB_KEY_LIST:
@@ -108,6 +109,7 @@ public class Parser implements ParserConstants {
   GroupByItem item;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ENTITYTYPE_GB:
+    case CA_GB:
     case EATTRIBUTE_GB_KEY_POSITION:
     case EATTRIBUTE_GB_KEY_DATE:
     case EATTRIBUTE_GB_KEY_LIST:
@@ -127,6 +129,9 @@ public class Parser implements ParserConstants {
         break;
       case ENTITYTYPE_GB:
         jj_consume_token(ENTITYTYPE_GB);
+        break;
+      case CA_GB:
+        jj_consume_token(CA_GB);
         break;
       default:
         jj_la1[3] = jj_gen;
@@ -907,7 +912,7 @@ public class Parser implements ParserConstants {
       jj_la1_1 = new int[] {0xffdfff00,0x0,0x0,0x0,0x0,0x0,0x0,0xffdfff00,0x7e00,0x6000,0xfc1f8000,0xc0,0x180000,0x88000000,0xc0,0xc0,0x4000000,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0xf,0xfc0,0x0,0x7c0,0xfc0,0x0,0x0,0xf,0x0,0x0,0xf,0x0,0x0,0x0,0x0,0x0,0x7,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0xf,0x1fc0,0x0,0xfc0,0x1fc0,0x0,0x0,0xf,0x0,0x0,0xf,0x0,0x0,0x0,0x0,0x0,0x7,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -1024,7 +1029,7 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[77];
+    boolean[] la1tokens = new boolean[78];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -1044,7 +1049,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 77; i++) {
+    for (int i = 0; i < 78; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

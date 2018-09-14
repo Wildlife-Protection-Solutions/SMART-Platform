@@ -184,7 +184,7 @@ public class ImageSelectionControl extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
 				fd.setFilterExtensions(new String[] {
-						"*.bmp;*.jpg;*.jpeg", //$NON-NLS-1$
+						"*.bmp;*.jpg;*.jpeg;*.png;*.svg", //$NON-NLS-1$
 						"*.bmp", //$NON-NLS-1$
 						"*.jpg;*.jpeg", //$NON-NLS-1$
 						"*.png;*.svg", //$NON-NLS-1$
@@ -193,7 +193,7 @@ public class ImageSelectionControl extends Composite {
 						
 				});
 				fd.setFilterNames(new String[] {
-						Messages.ImageSelectionControl_AllImages,
+						Messages.ImageSelectionControl_AllImages1,
 						Messages.ImageSelectionControl_BitmapFiles,
 						Messages.ImageSelectionControl_JpegFiles,
 						Messages.ImageSelectionControl_pngsvg,

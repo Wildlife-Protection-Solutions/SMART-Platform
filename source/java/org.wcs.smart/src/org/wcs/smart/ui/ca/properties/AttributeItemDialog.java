@@ -31,11 +31,14 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
+import org.wcs.smart.ui.internal.ca.properties.IconPanel;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -52,6 +55,7 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 	private List<? extends NamedKeyItem> siblings;
 	
 	private NameKeyComposite comp;
+	private IconPanel icon;
 	
 	/**
 	 * Creates anew dialog.
@@ -74,6 +78,13 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 	}
 
 
+	private void modified() {
+		boolean ok = comp.validate();
+		Button btn = getButton(IDialogConstants.OK_ID);
+		if (btn != null){
+			btn.setEnabled(!ok);
+		}
+	}
 	/**
 	 * @see org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
 	 */
@@ -91,15 +102,22 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 		comp.createControls(container, true, toUpdate.getKeyId() == null, new IChangeListener() {			
 			@Override
 			public void itemModified() {
-				boolean ok = comp.validate();
-				Button btn = getButton(IDialogConstants.OK_ID);
-				if (btn != null){
-					btn.setEnabled(!ok);
-				}
+				modified();
 			}
 		});
 		comp.initFields(toUpdate, siblings, lang);
 	
+		if (toUpdate instanceof DmObject) {
+			Label l = new Label(container, SWT.NONE);
+			l.setText("Icons:");
+			l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			
+			icon = new IconPanel(container, true);
+			icon.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			icon.setDmObject((DmObject) toUpdate);
+			icon.addListener(SWT.Selection, e->modified());
+		}
+		
 		setMessage(Messages.AttributeItemDialog_Dialog_Message1);
 		setTitle(Messages.AttributeItemDialog_Dialog_Title);
 		getShell().setText(Messages.AttributeItemDialog_Dialog_Title);
@@ -125,6 +143,9 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 		if (IDialogConstants.OK_ID == buttonId) {
 			setReturnCode(OK);
 			comp.updateFields(toUpdate);
+			if (icon != null) {
+				icon.updateDmObject((DmObject)toUpdate);
+			}
 		} else if (IDialogConstants.CANCEL_ID == buttonId) {
 			setReturnCode(CANCEL);
 		}

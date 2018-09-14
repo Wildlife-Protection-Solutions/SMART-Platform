@@ -1293,6 +1293,23 @@
             class="org.wcs.smart.LoginLogEntry"
             supportsCcaa="false">
       </class>
+      <class
+            ca_property=".icon.conservationArea"
+            class="org.wcs.smart.ca.icon.IconFile"
+            supportsCcaa="false">
+      </class>
+      <class
+            class="org.wcs.smart.ca.icon.IconFile"
+            supportsCcaa="false">
+      </class>
+      <class
+            class="org.wcs.smart.ca.icon.IconSet"
+            supportsCcaa="false">
+      </class>
+      <class
+            class="org.wcs.smart.ca.icon.Icon"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.locationtech.udig.project.ui.tool">
@@ -1569,6 +1586,11 @@
             id="org.wcs.smart.udig.preferenced.render"
             name="%prefpage.render.name">
       </page>
+      <page
+            class="org.wcs.smart.icon.ui.IconPreferencePage"
+            id="org.wcs.smart.icon"
+            name="Icon Preference Page">
+      </page>
    </extension>
    <extension
          point="org.eclipse.ui.exportWizards">
@@ -1593,6 +1615,9 @@
          point="org.wcs.smart.caFilestoreDir">
       <FilestoreDirectory
             directory="maps">
+      </FilestoreDirectory>
+      <FilestoreDirectory
+            directory="ca_icon">
       </FilestoreDirectory>
    </extension>
    <extension

@@ -165,6 +165,9 @@ public class MapItemExecutor implements IReportItemExecutor{
 
 	@Override
 	public void setParent(IReportItemExecutor parent) {
+		if (content != null) {
+			content.setParent(parent.getContent());
+		}
 		this.parent = parent;
 		
 	}
@@ -187,6 +190,9 @@ public class MapItemExecutor implements IReportItemExecutor{
 	@Override
 	public IContent execute() throws BirtException {
 		content = context.getReportContent().createForeignContent();
+		if (getParent() != null) {
+			content.setParent(getParent().getContent());
+		}
 		content.setRawType(IForeignContent.EXTERNAL_TYPE);
 		try {
 			content.setRawValue(executeQuery());

@@ -40,7 +40,7 @@ public class EventDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.EventDatabaseUpgrader_TaskName, 1);
+		monitor.subTask(Messages.EventDatabaseUpgrader_TaskName);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {

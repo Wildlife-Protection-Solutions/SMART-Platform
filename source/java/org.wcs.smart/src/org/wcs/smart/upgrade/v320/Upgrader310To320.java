@@ -61,7 +61,7 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 	@Override
 	public void upgrade(final IProgressMonitor monitor) throws Exception{
 		throwEx = null;
-		monitor.beginTask(Messages.Upgrader310To320_ProgressMessage,1);
+		monitor.subTask(Messages.Upgrader310To320_ProgressMessage);
 		try(Session s = HibernateManager.openSession()){
 			s.doWork(new Work() {
 				@Override
@@ -159,7 +159,7 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 	 * @param monitor
 	 */
 	public void postProcess(IProgressMonitor monitor) {
-		monitor.beginTask(Messages.Upgrader310To320_ProgressMessage, 1);
+		monitor.subTask(Messages.Upgrader310To320_ProgressMessage);
 		
 		try(final Session s = HibernateManager.openSession()){
 			/* Species Cleanup - ticket #1118 */

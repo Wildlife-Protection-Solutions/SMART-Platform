@@ -211,10 +211,11 @@ public class PatrolOptionData implements IPatrolOptionData{
 		}else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE || option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY){
 			items.addAll(PatrolQueryHibernateManager.getInstance().getActiveTransportTypes(session));
 		}else if (option == PatrolQueryOption.LEADER || option == PatrolQueryOption.PILOT || option == PatrolQueryOption.EMPLOYEE){
-			boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
-			List<Employee> employees = showInactive ?
-					PatrolHibernateManager.getAllEmployees(SmartDB.getCurrentConservationArea(), session) : 
-					PatrolHibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), session); 
+//			boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+//			List<Employee> employees = showInactive ?
+//					PatrolHibernateManager.getAllEmployees(SmartDB.getCurrentConservationArea(), session) : 
+//					PatrolHibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), session);
+			List<Employee> employees = PatrolHibernateManager.getAllEmployees(SmartDB.getCurrentConservationArea(), session);
 			for (Employee t : employees){
 				items.add(new ListItem(t.getUuid(), SmartLabelProvider.getShortLabel(t), t.isActive()));
 			}

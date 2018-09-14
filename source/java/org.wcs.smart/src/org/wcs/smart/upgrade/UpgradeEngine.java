@@ -41,6 +41,7 @@ import org.wcs.smart.upgrade.v500.Upgrader410To500;
 import org.wcs.smart.upgrade.v600.Upgrader500To600;
 import org.wcs.smart.upgrade.v600.Upgrader600To601;
 import org.wcs.smart.upgrade.v600.Upgrader601To610;
+import org.wcs.smart.upgrade.v600.Upgrader610To620;
 
 
 /**
@@ -70,7 +71,9 @@ public class UpgradeEngine {
 		V500("4.1.0", "5.0.0", Upgrader410To500.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V600("5.0.0", "6.0.0", Upgrader500To600.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V601("6.0.0", "6.0.1", Upgrader600To601.class), //$NON-NLS-1$ //$NON-NLS-2$
-		V610("6.0.1", "6.1.0", Upgrader601To610.class); //$NON-NLS-1$ //$NON-NLS-2$
+		V610("6.0.1", "6.1.0", Upgrader601To610.class), //$NON-NLS-1$ //$NON-NLS-2$
+		V620("6.1.0", "6.2.0", Upgrader610To620.class); //$NON-NLS-1$ //$NON-NLS-2$
+		
 		
 		public String fromVersion;
 		public String toVersion;
@@ -90,6 +93,16 @@ public class UpgradeEngine {
 		
 	}
 	
+	private void uninstallChangeTracking(IProgressMonitor progress) throws Exception {
+		//uninstall all change log tracking
+		progress.subTask(Messages.UpgradeEngine_subprogress5);
+
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s);
+			s.getTransaction().commit();
+		}
+	}
 	/**
 	 * 
 	 * @param monitor progress monitor
@@ -115,6 +128,7 @@ public class UpgradeEngine {
 
 		upgradersRun.clear();
 		
+		boolean hasChangeTracking = true;
 		/* --- validate the core version; upgrade as required --- */
 		if (!expectedDbVersion.equals(newDbVersion)) {
 			Display.getDefault().syncExec(new Runnable(){
@@ -162,6 +176,10 @@ public class UpgradeEngine {
 				}
 			}
 			
+			if (hasChangeTracking) {
+				uninstallChangeTracking(progress);
+				hasChangeTracking = false;
+			}
 			SubMonitor sub1 = progress.split(1);
 			sub1.setWorkRemaining(UpgradeFromVersion.values().length * 2);
 			sub1.subTask(Messages.UpgradeEngine_subprogress2);
@@ -179,10 +197,12 @@ public class UpgradeEngine {
 					item.upgrade(sub.split(1));
 				}
 			}
+			sub1.done();
 		}
 		
 		/* --- validate & update plugins ---*/
 		boolean requiresUpgrades = false;
+		progress.setWorkRemaining(3);
 		progress.subTask(Messages.UpgradeEngine_subprogress3);
 		if (currentVersions != null) {
 			Map<String, String> backupVersions;
@@ -217,22 +237,18 @@ public class UpgradeEngine {
 				
 			}
 		}
-		progress.worked(1);
 		
+		progress.setWorkRemaining(2);
 		if (requiresUpgrades){
-			//uninstall all change log tracking
-			progress.subTask(Messages.UpgradeEngine_subprogress5);
-
-			try(Session s = HibernateManager.openSession()){
-				s.beginTransaction();
-				ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s);
-				s.getTransaction().commit();
+			if (hasChangeTracking) {
+				uninstallChangeTracking(progress);
+				hasChangeTracking = false;
 			}
 	
 			//run all installers/upgraders
 			progress.subTask(Messages.UpgradeEngine_pluginssubtask);
 			List<IDatabaseUpgrader> extensions = getExtensions();
-			progress.setWorkRemaining(extensions.size() + 1);
+			
 			SubMonitor sub = progress.split(1);
 			sub.setWorkRemaining(extensions.size() + 1);
 			for (IDatabaseUpgrader upgrader : extensions) {
@@ -240,16 +256,20 @@ public class UpgradeEngine {
 				upgrader.upgrade(sub.split(1));
 			}
 			
+			
+		}
+		progress.setWorkRemaining(1);
+		if (!hasChangeTracking) {
 			//install change log tracking (if necessary)
+			SubMonitor sub = progress.split(1);
 			sub.subTask(Messages.UpgradeEngine_subprogress6);
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				ChangeLogInstaller.INSTANCE.installChangeLogTracking(s);
 				s.getTransaction().commit();
 			}
-			sub.worked(1);
 		}
-		progress.worked(1);
+		progress.done();
 	}
 
 	/**

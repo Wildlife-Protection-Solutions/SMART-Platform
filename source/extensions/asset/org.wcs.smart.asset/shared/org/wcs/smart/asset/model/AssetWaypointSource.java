@@ -22,9 +22,12 @@
 package org.wcs.smart.asset.model;
 
 import java.io.File;
+import java.text.DateFormat;
 import java.util.Locale;
 
 import org.hibernate.Session;
+import org.hibernate.StatelessSession;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.asset.IAssetLabelProvider;
 import org.wcs.smart.observation.model.IWaypointSource;
@@ -67,5 +70,35 @@ public class AssetWaypointSource implements IWaypointSource{
 		}
 	}
 
+	@Override
+	public String getSourceLabel(Object source, Session session, Locale l) {
+		Waypoint wp = (Waypoint) source;
+		String pid = ""; //$NON-NLS-1$
+		try(StatelessSession temp = session.getSessionFactory().openStatelessSession()){
 
+			StringBuilder sb = new StringBuilder();
+			sb.append("SELECT a.id FROM AssetDeployment d "); //$NON-NLS-1$
+			sb.append("join d.asset a join d.assetWaypoints aw "); //$NON-NLS-1$
+			sb.append(" WHERE aw.waypoint = :wp"); //$NON-NLS-1$
+			
+			Query<?> q = temp.createQuery( sb.toString() );
+			q.setParameter("wp", wp); //$NON-NLS-1$
+			for (Object aw : q.list()) {
+				if (!pid.isEmpty()) pid += ", "; //$NON-NLS-1$
+				pid += (String)aw;
+			}
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(getName(l));
+		sb.append(": "); //$NON-NLS-1$
+		sb.append(pid);
+		sb.append(" ("); //$NON-NLS-1$
+		sb.append(wp.getId());
+		sb.append(" - "); //$NON-NLS-1$
+		sb.append(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, l).format(wp.getDateTime()));
+		sb.append(")"); //$NON-NLS-1$
+		return sb.toString();
+	}
+	
 }

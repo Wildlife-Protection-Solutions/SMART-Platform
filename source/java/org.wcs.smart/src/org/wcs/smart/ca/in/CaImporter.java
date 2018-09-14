@@ -25,14 +25,19 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -81,8 +86,62 @@ public class CaImporter {
 	 * @throws Exception
 	 */
 	public static void importCa(File file, IProgressMonitor monitor) throws Exception{
+		if (!validateCaImport(file)) return;
 		CaImporter importer = new CaImporter();
 		importer.importCaFromFile(file, monitor);
+	}
+	
+	/**
+	 * 
+	 * Validates the Conesrvation Area version and the plugin versions
+	 * into the ca export file.  It will throw an exception if something doesn't match,
+	 * return false if the user answered no to continuing when prompted about 
+	 * missing plugins, or ture if everything is ok and the file can be imported. 
+	 * 
+	 * This requires the the current database username to be set to
+	 * ADMIN.
+	 * 
+	 * @param file the ca backup file
+	 * @return
+	 * @throws Exception
+	 */
+	public static boolean validateCaImport(File file) throws Exception{
+		
+		File temp = SmartUtils.createTemporaryDirectory();
+		try {		
+			//to validate we only need to unzip a few files to do validation the CA_INFO_FILENAME from the package
+			try(ZipFile archiveFile = new ZipFile(file)){
+				ZipArchiveEntry zipEntry = archiveFile.getEntry(ICaDataExportEngine.CA_INFO_FILENAME);
+				Path p = temp.toPath().resolve(ICaDataExportEngine.CA_INFO_FILENAME);
+				Files.createDirectories(p.getParent());
+				Files.copy(archiveFile.getInputStream(zipEntry), p);
+				
+				
+				String versionFile = PlugInConfigurationExporter.CONFIG_TABLE_NAME + ".dat"; //$NON-NLS-1$
+				Enumeration<ZipArchiveEntry> files = archiveFile.getEntries();
+				while(files.hasMoreElements()) {
+					ZipArchiveEntry e = files.nextElement();
+					if (e.getName().endsWith(versionFile)) {
+						p = temp.toPath().resolve(ICaDataExportEngine.DATABASE_DIR).resolve(versionFile);
+						Files.createDirectories(p.getParent());
+						Files.copy(archiveFile.getInputStream(e), p);
+						break;
+					}
+				}
+				
+			}
+
+			//validate
+			try(Session session = HibernateManager.openSession()){	
+				validateConservationAreaInfo(temp, session, false);
+				if (!validatePlugInConfiguration(temp, session)){
+					return false;
+				}
+			}
+		}finally {
+			FileUtils.deleteDirectory(temp);
+		}
+		return true;
 	}
 	
 	/**
@@ -113,14 +172,14 @@ public class CaImporter {
 		File dir = unzipFile(f);
 		
 		/* need to login as admin user to restore */
-		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
-		
+		if (!HibernateManager.getCurrentUserName().equals(DbUser.ADMIN.getUserName()))
+			HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		
 		try(Session session = HibernateManager.openSession()){
 			progress.worked(10);
 			
 			progress.subTask(Messages.CaImporter_Progress_ValidatingCaImport);
-			UUID cauuid = validateConservationAreaInfo(dir, session);
+			UUID cauuid = validateConservationAreaInfo(dir, session, true);
 			progress.worked(10);
 			
 			progress.subTask(Messages.CaImporter_ValidatingPluginProgressMessage);
@@ -212,15 +271,15 @@ public class CaImporter {
 	
 	/**
 	 * Reads the conservation area information and validates
-	 * that the conservation area does not exist in the
-	 * database.
+	 * that the conservation area versions.  If includeExistingCa is true it
+	 * also validates that the CA does not already exist in the database
 	 * 
 	 * @param dir directory for conservation area information file
 	 * @param session
 	 * @return conservation area uuid
 	 * @throws Exception
 	 */
-	private UUID validateConservationAreaInfo(File dir, Session session) throws Exception{
+	private static UUID validateConservationAreaInfo(File dir, Session session, boolean includeExistingCa) throws Exception{
 		File caInfo = new File(dir, ICaDataExportEngine.CA_INFO_FILENAME);
 		String dbVersion = Messages.SmartPlugIn_UnknownVersion;
 		UUID uuid = null;
@@ -242,7 +301,7 @@ public class CaImporter {
 			try{
 				uuid = UuidUtils.stringToUuid(cauuid);
 				ConservationArea existingCa = session.get(ConservationArea.class, uuid);
-				if (existingCa != null) {				
+				if (includeExistingCa && existingCa != null) {				
 					throw new Exception(MessageFormat.format(Messages.CaImporter_Error_CaAlreadyExists, new Object[]{name, id}));
 				}
 			}finally{	
@@ -278,7 +337,7 @@ public class CaImporter {
 	 * @param session
 	 * @throws Exception
 	 */
-	private boolean validatePlugInConfiguration(File dir, Session session) throws Exception{
+	private static boolean validatePlugInConfiguration(File dir, Session session) throws Exception{
 		File caInfo = new File(new File(dir, ICaDataExportEngine.DATABASE_DIR), PlugInConfigurationExporter.CONFIG_TABLE_NAME + ".dat"); //$NON-NLS-1$
 		
 		HashMap<String, String> versions = new HashMap<String, String>();

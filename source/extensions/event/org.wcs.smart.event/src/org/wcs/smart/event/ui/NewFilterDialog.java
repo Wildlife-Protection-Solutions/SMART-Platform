@@ -98,7 +98,10 @@ public class NewFilterDialog extends TitleAreaDialog {
 		public String getDatastoreFileLocation(Object source, Session session) throws Exception {
 			return null;
 		}
-		
+		@Override
+		public String getSourceLabel(Object source, Session session, Locale l) {
+			return ""; //$NON-NLS-1$
+		}
 	};
 	
 	public NewFilterDialog(Shell parentShell) {

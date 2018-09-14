@@ -171,7 +171,7 @@ public class AttachmentInterceptor extends SessionInterceptor {
     				}
     				to = new File(to.getParentFile(), basename + extension);
     			}
-    			if (encryptFiles) {
+    			if (encryptFiles && attachment.isEncrypted()) {
 	    			try {
 	    				EncryptUtils.encryptFile(attachment.getCopyFromLocation().toPath(), to.toPath(), attachment);
 	    			}catch (Exception ex) {

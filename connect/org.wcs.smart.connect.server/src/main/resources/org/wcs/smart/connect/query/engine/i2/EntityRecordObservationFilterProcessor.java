@@ -108,9 +108,13 @@ public class EntityRecordObservationFilterProcessor {
 					
 			StringBuilder tableColumns = new StringBuilder();
 			tableColumns.append("entity_uuid uuid, entity_type_key varchar(128)"); //$NON-NLS-1$
+			tableColumns.append(",ca_id varchar(8), ca_name varchar(256)"); //$NON-NLS-1$
+
 			List<String> tableColumnNames = new ArrayList<>();
 			tableColumnNames.add("entity_uuid"); //$NON-NLS-1$
 			tableColumnNames.add("entity_type_key"); //$NON-NLS-1$
+			tableColumnNames.add("ca_id"); //$NON-NLS-1$
+			tableColumnNames.add("ca_name"); //$NON-NLS-1$
 			
 			StringBuilder dataModelColumns = new StringBuilder();
 			dataModelColumns.append("entity_uuid uuid, obs_uuid uuid "); //$NON-NLS-1$
@@ -127,8 +131,9 @@ public class EntityRecordObservationFilterProcessor {
 					
 			sql = new StringBuilder();
 			sql.append("INSERT INTO " + entityTable); //$NON-NLS-1$
-			sql.append(" SELECT l.uuid, o.keyid FROM smart.i_entity l "); //$NON-NLS-1$
+			sql.append(" SELECT l.uuid, o.keyid, ca.id, ca.name  FROM smart.i_entity l "); //$NON-NLS-1$
 			sql.append(" JOIN smart.i_entity_type o on l.entity_type_uuid = o.uuid "); //$NON-NLS-1$
+			sql.append(" JOIN smart.conservation_area ca on l.ca_uuid = ca.uuid " ); //$NON-NLS-1$
 			sql.append( " WHERE "); //$NON-NLS-1$
 			sql.append(" l.ca_uuid in (:cas) "); //$NON-NLS-1$
 

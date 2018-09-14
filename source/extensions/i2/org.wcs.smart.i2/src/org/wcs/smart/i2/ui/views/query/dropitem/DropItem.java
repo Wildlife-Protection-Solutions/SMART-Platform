@@ -182,7 +182,7 @@ public abstract class DropItem {
 	 * @param comp control to register
 	 */
 	protected void initDrag(Control comp){
-		if (!IntelSecurityManager.INSTANCE.canEditEntity()) return;
+		if (!IntelSecurityManager.INSTANCE.canEditQuery()) return;
 		
 		DragSource dsource = new DragSource(comp, DND.DROP_MOVE);
 		dsource.setTransfer(IDefinitionPanel.DND_TYPES);

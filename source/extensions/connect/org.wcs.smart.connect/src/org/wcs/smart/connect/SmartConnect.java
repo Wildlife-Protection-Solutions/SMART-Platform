@@ -213,7 +213,7 @@ public class SmartConnect {
 					.build();
 			
 			ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
-		
+			
 			client = new ResteasyClientBuilder()
 				.httpEngine(engine)
 				.build();

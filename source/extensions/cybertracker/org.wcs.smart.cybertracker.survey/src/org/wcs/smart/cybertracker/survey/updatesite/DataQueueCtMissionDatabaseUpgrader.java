@@ -44,6 +44,7 @@ public class DataQueueCtMissionDatabaseUpgrader implements IDatabaseUpgrader {
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DataQueueCtMissionDatabaseUpgrader_UpgradeTask, 2);
+		progress.subTask( Messages.DataQueueCtMissionDatabaseUpgrader_UpgradeTask);
 		
 		//we need to ensure the mission table is installed first
 		(new ERDatabaseUpgrader()).upgrade(progress.split(1));

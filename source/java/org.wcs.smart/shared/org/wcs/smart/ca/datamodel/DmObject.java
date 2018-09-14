@@ -24,13 +24,17 @@ package org.wcs.smart.ca.datamodel;
 import java.util.HashSet;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.icon.Icon;
 
 /**
  * A Conservation Area data model object.  This represents
@@ -50,11 +54,26 @@ public class DmObject extends NamedKeyItem{
 	 */
 	public static final int MAX_NAME_LENGTH = 1024;
 
+	private Icon icon;
 	
 	protected DmObject(){
 		
 	}
 	
+	
+	/**
+	 * The icon associated with the data model element
+	 * @return
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="icon_uuid", referencedColumnName="uuid")
+	public Icon getIcon() {
+		return icon;
+	}
+	
+	public void setIcon(Icon icon) {
+		this.icon = icon;
+	}
 	
 	/**
 	 * Copys the key, name, and labels from the old object into the 

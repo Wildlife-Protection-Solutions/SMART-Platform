@@ -45,6 +45,7 @@ import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.model.IColumnAutoConfigQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
@@ -103,6 +104,11 @@ public class QueryColumnUtils {
 	 * @param query
 	 */
 	public static void filterQueryColumns(List<QueryColumn> columns, Query query){
+		
+		if (query instanceof IColumnAutoConfigQuery) {
+			//data only must be filtered later
+			if (((IColumnAutoConfigQuery)query).isShowDataColumnsOnly()) return;
+		}
 		if (query instanceof SimpleQuery){
 			SimpleQuery sq = (SimpleQuery)query;
 			

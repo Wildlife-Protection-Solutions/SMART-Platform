@@ -1286,6 +1286,8 @@ public abstract class AssetDataPanel {
 		
 		private Label waypointComment;
 		
+		private Composite imageTableComposite;
+		
 		public RowItem(AssetWaypointMapping waypoint) {
 			this.waypoint = waypoint;
 		}
@@ -1460,49 +1462,22 @@ public abstract class AssetDataPanel {
 				allFiles.addAll(assetFiles);
 				allFiles.addAll(otherFiles);
 				tt = new AttachmentTable(wppart, toolkit, getAttachmentTableMenu(), allFiles, displaySettings.getIconSize().getSize());
+				tt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+				((GridData)tt.getLayoutData()).widthHint = displaySettings.getIconSize().getSize()*2+20;
 			}else {
-				List<ISmartAttachment> assetFiles = new ArrayList<>();
-				List<ISmartAttachment> otherFiles = new ArrayList<>();
 				
-				HashMap<ISmartAttachment,String> otherAssets = new HashMap<>();
-				if (waypoint.getWaypoint().getAttachments() != null) {
-					for (AssetWaypoint aw : waypoint.getAssetLinks()) {
-						for (AssetWaypointAttachment a : aw.getAttachments()) {
-							if (aw.getAssetDeployment().getAsset().equals(asset)) {
-								assetFiles.add(a.getWaypointAttachment());
-							}else {
-								otherFiles.add(a.getWaypointAttachment());
-								otherAssets.put(a.getWaypointAttachment(), aw.getAssetDeployment().getAsset().getId());
-							}
-						}
-					}
-				}
-				if (waypoint.getWaypoint().getObservations() != null) {
-					waypoint.getWaypoint().getObservations().forEach(o->{
-						if (o.getAttachments() != null) {
-							o.getAttachments().forEach(a->otherFiles.add(a));
-						}
-					});
-				}
+				imageTableComposite = toolkit.createComposite(wppart);
+				imageTableComposite.setLayout(new GridLayout());
+				imageTableComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+				((GridLayout)imageTableComposite.getLayout()).marginWidth = 0;
+				((GridLayout)imageTableComposite.getLayout()).marginHeight = 0;
 				
-				List<ISmartAttachment> allFiles = new ArrayList<>();
-				allFiles.addAll(assetFiles);
-				allFiles.addAll(otherFiles);
-				
-				tt = new AttachmentTable(wppart, toolkit, getAttachmentTableMenu(), allFiles, displaySettings.getIconSize().getSize()) {
-					@Override
-					protected String getWatermark(ISmartAttachment file) {
-						if (otherFiles.contains(file)) {
-							return otherAssets.get(file);
-						}
-						return null;
-					}
-				};
+				createImageTable(false);
 			}
-			tt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-			((GridData)tt.getLayoutData()).widthHint = displaySettings.getIconSize().getSize()*2+20;
+			
+
 					
-			Composite spacer = toolkit.createComposite(wppart, SWT.NONE);
+			Composite spacer = toolkit.createComposite(wppart);
 			spacer.setLayout(new GridLayout());
 			spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			((GridLayout)spacer.getLayout()).marginWidth = 0;
@@ -1590,6 +1565,79 @@ public abstract class AssetDataPanel {
 			return item;
 		}
 		
+		private void createImageTable(boolean includeAll) {
+			
+			
+			for (Control c : imageTableComposite.getChildren()) c.dispose();
+			
+			List<ISmartAttachment> assetFiles = new ArrayList<>();
+			List<ISmartAttachment> otherFiles = new ArrayList<>();
+			
+			HashMap<ISmartAttachment,String> otherAssets = new HashMap<>();
+			if (waypoint.getWaypoint().getAttachments() != null) {
+				for (AssetWaypoint aw : waypoint.getAssetLinks()) {
+					for (AssetWaypointAttachment a : aw.getAttachments()) {
+						if (aw.getAssetDeployment().getAsset().equals(asset)) {
+							assetFiles.add(a.getWaypointAttachment());
+						}else {
+							otherFiles.add(a.getWaypointAttachment());
+							otherAssets.put(a.getWaypointAttachment(), aw.getAssetDeployment().getAsset().getId());
+						}
+					}
+				}
+			}
+			if (waypoint.getWaypoint().getObservations() != null) {
+				waypoint.getWaypoint().getObservations().forEach(o->{
+					if (o.getAttachments() != null) {
+						o.getAttachments().forEach(a->otherFiles.add(a));
+					}
+				});
+			}
+			
+			List<ISmartAttachment> allFiles = new ArrayList<>();
+			allFiles.addAll(assetFiles);
+			if (includeAll) allFiles.addAll(otherFiles);
+			
+			tt = new AttachmentTable(imageTableComposite, toolkit, getAttachmentTableMenu(), allFiles, displaySettings.getIconSize().getSize()) {
+				@Override
+				protected String getWatermark(ISmartAttachment file) {
+					if (otherFiles.contains(file)) {
+						return otherAssets.get(file);
+					}
+					return null;
+				}
+			};
+			tt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			((GridData)tt.getLayoutData()).widthHint = displaySettings.getIconSize().getSize() *2 + 20;
+			
+			if (!includeAll && !otherFiles.isEmpty()) {
+				Hyperlink lnk = toolkit.createHyperlink(imageTableComposite, Messages.AssetDataPanel_ShowOtherImages, SWT.NONE);
+				lnk.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+				((GridData)lnk.getLayoutData()).widthHint = 100;
+				lnk.addHyperlinkListener(new HyperlinkAdapter() {
+					@Override
+					public void linkActivated(HyperlinkEvent e) {
+						createImageTable(true);
+						
+						resizeScroll();
+						item.layout(true,true);
+					}
+				});
+			}else if (includeAll && !otherFiles.isEmpty()) {
+				Hyperlink lnk = toolkit.createHyperlink(imageTableComposite, Messages.AssetDataPanel_HideOtherImages, SWT.NONE);
+				lnk.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+				((GridData)lnk.getLayoutData()).widthHint = 100;
+				lnk.addHyperlinkListener(new HyperlinkAdapter() {
+					@Override
+					public void linkActivated(HyperlinkEvent e) {
+						createImageTable(false);
+						
+						resizeScroll();
+						item.layout(true,true);
+					}
+				});
+			}
+		}
 		
 		
 		public void resize(int totalWidth, DataDisplaySettings.IconSize iconSize) {

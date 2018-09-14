@@ -99,10 +99,14 @@ public class LoadThumbnailImageJob extends Job {
 					if (attachment.getCopyFromLocation() != null) {
 						file = attachment.getCopyFromLocation();
 					} else {
-						deleteMe = true;
 						try {
-							Path p = EncryptUtils.decryptAttachment(attachment);
-							if (p != null) file = p.toFile();		
+							if (attachment.isEncrypted()) {
+								deleteMe = true;
+								Path p = EncryptUtils.decryptAttachment(attachment);
+								if (p != null) file = p.toFile();
+							}else {
+								file = attachment.getAttachmentFile();
+							}
 						}catch (Exception ex) {
 							file = null;
 						}
@@ -113,18 +117,21 @@ public class LoadThumbnailImageJob extends Job {
 						// skip images > 200MB
 						return;
 					}
-	
+					if (file.getAbsolutePath().toString().endsWith(".svg")) { //$NON-NLS-1$
+						try {
+							image = SmartUtils.readSvg(Display.getDefault(), file.toPath(), thumbnailSize);
+							return ;
+						}catch (Throwable t) {
+							//eat this exception
+							t.printStackTrace();
+						}
+					}
+					
 					Image rawImage = null;
 					try{
 						rawImage = new Image(Display.getDefault(), file.getAbsolutePath());
 					}catch (Exception ex) {
-						//add support for svg
-						if (file.getAbsolutePath().toLowerCase().endsWith(".svg")) { //$NON-NLS-1$
-							try {
-								rawImage = SmartUtils.readSvg(Display.getDefault(), file.toPath());
-							}catch (Exception ex2) {
-							}
-						}
+						//eat this exception; probably not an image
 					}
 					if (rawImage == null) return;
 					
@@ -140,22 +147,21 @@ public class LoadThumbnailImageJob extends Job {
 						width = bounds.width * thumbnailSize / bounds.height;
 						x = (thumbnailSize - width) / 2;
 					}
-					// resize image
-					Image image2 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
-					GC gc = new GC(image2);
-					gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);
-					rawImage.dispose();
-	
-					// transform based on exif orientation data
+					
 					Transform imageTransform = SmartUtils.getExifImageTransform(file, thumbnailSize, thumbnailSize);
 					if (imageTransform != null) {
 						Image image3 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
 						GC gc3 = new GC(image3);
 						gc3.setTransform(imageTransform);
-						gc3.drawImage(image2, 0, 0);
-						image2.dispose();
+						gc3.drawImage(rawImage, 0, 0, rawImage.getBounds().width, rawImage.getBounds().height, x, y, width, height);
+						rawImage.dispose();
 						image = image3;
-					} else {
+					}else {
+						// resize image
+						Image image2 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
+						GC gc = new GC(image2);
+						gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);
+						rawImage.dispose();
 						image = image2;
 					}
 					

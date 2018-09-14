@@ -60,9 +60,29 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 	
 	private HashMap<IQueryFilter, Boolean> filterValues = new HashMap<>(); 
 	
+	private String caId;
+	private String caName;
+	
 	public IntelObservationResultItem(){
 		
 	}
+	
+	public void setConservationAreaId(String caId) {
+		this.caId = caId;
+	}
+	
+	public void setConservationAreaName(String name) {
+		this.caName = name;
+	}
+	
+	public String getConservationAreaId() {
+		return this.caId;
+	}
+	
+	public String getConservationAreaName() {
+		return this.caName;
+	}
+	
 	
 	public UUID getObservationUuid(){
 		return this.observationUuid;

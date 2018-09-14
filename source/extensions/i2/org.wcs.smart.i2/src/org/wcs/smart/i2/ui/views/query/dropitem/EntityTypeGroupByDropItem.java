@@ -62,7 +62,7 @@ public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropI
 	}
 	
 	public void addEntityType(IntelEntityType type) {
-		this.types.add(new ListItem(type.getKeyId(), type.getName()));
+		this.types.add(new ListItem(type.getKeyId(), type.getName(), type.getName()));
 		updateLabel();
 	}
 	

@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 public class Mergei18n {
 
-	public static final String[] languages = new String[]{"es"};
+	public static final String[] languages = new String[]{"th"};
 	
 	public static final String ROOT = "C:\\data\\SMART\\Source\\trunk\\connect\\org.wcs.smart.connect.server";
 	
@@ -83,14 +83,14 @@ public class Mergei18n {
 					}
 				}
 			}
-			/*
+			
 			for (String key : values.keySet()){
 				if (!writevalues.containsKey(key)){
 					System.out.println("adding:" + key);
 					writevalues.put(key, "**NEW**" + values.get(key));
 				}
 			}
-			*/
+			
 				
 			//write file
 			ArrayList<String> keys = new ArrayList<String>();
@@ -206,14 +206,14 @@ public class Mergei18n {
 					}
 				}
 			}
-			/*
+			
 			for (String key : values.keySet()){
 				if (!newvalues.containsKey(key)){
 					System.out.println("adding:" + key);
 					newvalues.put(key, "**NEW**" + values.get(key));
 				}
 			}
-			*/
+			
 				
 			//write file
 			ArrayList<String> keys = new ArrayList<String>();

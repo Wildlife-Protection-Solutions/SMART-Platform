@@ -48,7 +48,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.IntelligenceDatabaseUpgrader_JobName, 1);
+		monitor.subTask(Messages.IntelligenceDatabaseUpgrader_JobName);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
@@ -80,8 +80,12 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_1)){
 			upgradeV1toV2(session);
 			upgradeV2toV3(session);
+			upgradeV3toV4(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_2)){
 			upgradeV2toV3(session);
+			upgradeV3toV4(session);
+		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_3)){
+			upgradeV3toV4(session);
 		}
 	}
 	
@@ -260,4 +264,16 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_3, session);
 	}
 
+	private static void upgradeV3toV4(Session session) {
+		String[] sql = new String[]{
+				//primary date field
+				"alter table smart.i_record ADD COLUMN smart_source varchar(2048)", //$NON-NLS-1$
+		};
+		for (String s : sql){
+			session.createNativeQuery(s).executeUpdate();
+		}
+		
+		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_4, session);
+
+	}
 }

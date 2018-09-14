@@ -41,7 +41,7 @@ public class AssetQueryDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.AssetQueryDatabaseUpgrader_UpgradeTaskName, 1);
+		monitor.subTask(Messages.AssetQueryDatabaseUpgrader_UpgradeTaskName);
 		try(Session session = HibernateManager.openSession()){
 		
 			session.beginTransaction();

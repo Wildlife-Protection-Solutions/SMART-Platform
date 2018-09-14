@@ -44,7 +44,7 @@ public class ConnectDataQueueDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.ConnectDataQueueDatabaseUpgrader_TaskName, 1);
+		monitor.subTask(Messages.ConnectDataQueueDatabaseUpgrader_TaskName);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {

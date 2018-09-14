@@ -48,6 +48,7 @@ import org.hibernate.Session;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
@@ -62,6 +63,7 @@ import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.views.QueryView;
 import org.wcs.smart.i2.ui.views.query.dropitem.AttributeGroupByDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.ConservationAreaGroupByDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.EntityTypeGroupByDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.SystemAttributeGroupByDropItem;
@@ -102,7 +104,8 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 	private enum SubRootNode{
 		ENTITY_TYPE_ITEM(Messages.EntitySummaryContentProvider_EntityTypesTreeNode),
 		ATTRIBUTE_ITEM(Messages.EntitySummaryContentProvider_AttributeTreeNode),
-		OPERATORS(Messages.EntitySummaryContentProvider_OperatorsNode);
+		OPERATORS(Messages.EntitySummaryContentProvider_OperatorsNode),
+		CA(Messages.EntitySummaryContentProvider_ConservationAreaGroupByOp);
 		
 		String guiName;
 		
@@ -257,6 +260,8 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 					};
 					
 				}
+			}else if (item == SubRootNode.CA) {
+				return SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DATA_MODEL_ICON);
 			}else if (item == SubRootNode.ENTITY_TYPE_ITEM) {
 				return Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY);
 			}else if (item == SubRootNode.OPERATORS) {
@@ -294,6 +299,9 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 				if (item == RootNode.FILTER_OPTION) {
 					items.add(new TreeNode((RootNode)item, SubRootNode.OPERATORS, SubRootNode.OPERATORS.guiName));
 				}
+				if (item == RootNode.GROUP_BY_OPTION && SmartDB.isMultipleAnalysis()) {
+					items.add(new TreeNode((RootNode)item, SubRootNode.CA, SubRootNode.CA.guiName));
+				}
 				return items;
 			}
 			
@@ -305,7 +313,9 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 				return kids;
 			}
 			
-			
+			if (item == SubRootNode.CA) {
+				return null;
+			}
 			if (item == SubRootNode.ENTITY_TYPE_ITEM) {
 				List<FilterTreeItem> nodes = new ArrayList<>();
 				types.stream().sorted((a,b)-> Collator.getInstance().compare(a.getName(), b.getName())).forEach(n->nodes.add(new TreeNode(source, n, n.getName())));
@@ -396,6 +406,10 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 			}
 			if (source == RootNode.VALUE_OPTION && item instanceof ValuePart.ValueOption) {
 				return new DropItem[] { new ValueDropItem((ValuePart.ValueOption) item) };
+			}
+			if (item == SubRootNode.CA) {
+				//TODO:
+				return new DropItem[] { new ConservationAreaGroupByDropItem() };
 			}
 			if (item == OperatorNode.NOT) {
 				return new DropItem[] { new TextOperatorDropItem(Operator.NOT) };

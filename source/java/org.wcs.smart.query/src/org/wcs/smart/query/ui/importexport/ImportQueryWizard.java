@@ -302,6 +302,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 				//generate id
 				for (Query query : queries){
 					query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
+					
 					session.saveOrUpdate(query);
 				}
 				session.flush();

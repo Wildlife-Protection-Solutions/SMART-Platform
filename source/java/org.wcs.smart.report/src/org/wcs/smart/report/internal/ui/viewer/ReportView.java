@@ -174,7 +174,7 @@ public class ReportView implements IReportListener{
 			ReportPlugIn.log(e.getMessage(), e);
 		}
 		
-		if (tempReportDocument != null) {
+		if (tempReportDocument != null && Files.exists(tempReportDocument)) {
 			try {
 				Files.delete(tempReportDocument);
 			}catch (Exception ex) {

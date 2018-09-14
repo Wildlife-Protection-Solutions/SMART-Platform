@@ -24,7 +24,7 @@ package org.wcs.smart.i2.security;
 import org.wcs.smart.ca.SmartUserLevel;
 
 /**
- * Permission to edit record
+ * Permission to edit record but not status
  *  
  * @author Emily
  *

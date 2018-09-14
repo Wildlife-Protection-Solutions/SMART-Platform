@@ -74,6 +74,8 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	private String description;
 	private String comment;
 
+	private String smartSouce;
+	
 	private List<IntelEntityRecord> entities;
 	private List<IntelLocation> locations;
 	private List<IntelRecordAttachment> attachments;
@@ -325,4 +327,15 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	public void setRecordSource(IntelRecordSource source) {
 		this.source = source;
 	}
+	
+	@Column(name="smart_source")
+	public String getSmartSource() {
+		return this.smartSouce;
+	}
+	
+	public void setSmartSource(String smartSource) {
+		this.smartSouce = smartSource;
+	}
+	
+	
 }

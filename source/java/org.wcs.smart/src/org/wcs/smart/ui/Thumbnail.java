@@ -65,6 +65,8 @@ public class Thumbnail {
 	private boolean autoDispose;
 	private Composite thumbnailComposite;
 	
+	private String imageName;
+	
 	/*
 	 * double click listener to
 	 * open attachment
@@ -188,6 +190,10 @@ public class Thumbnail {
 		return this.thumbnailSize;
 	}
 	
+	public void setImageName(String name) {
+		this.imageName = name;
+	}
+	
 	void setImage(Image image) {
 		this.image = image;
 		latch.countDown();
@@ -220,11 +226,14 @@ public class Thumbnail {
 			fileName = ""; //$NON-NLS-1$
 		}else if (attachment.getCopyFromLocation() != null){
 			fileName = attachment.getCopyFromLocation().getName();
+		}else if (imageName != null) {
+			fileName = imageName;
 		}else{
 			fileName = attachment.getAttachmentFile().getName();
 		}
 		
 		final String filename = fileName;
+		
 		Listener listener = new Listener() {
 			public void handleEvent(Event e) {
 				switch (e.type) {

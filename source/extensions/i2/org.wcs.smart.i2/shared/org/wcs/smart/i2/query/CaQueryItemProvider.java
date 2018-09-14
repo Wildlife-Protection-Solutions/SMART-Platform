@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.query;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +41,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Single conservation area query item provider.  Works for a single
@@ -75,8 +77,10 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 
 	@Override
 	public List<Employee> getEmployees(Session session){
-		return QueryFactory.buildQuery(session, Employee.class, 
+		List<Employee> employees = QueryFactory.buildQuery(session, Employee.class, 
 				new Object[] {"conservationArea", getCa()}).list(); //$NON-NLS-1$
+		employees.sort((a,b)-> (a.getGivenName() + a.getFamilyName() + a.getId()).compareTo(b.getGivenName() + b.getFamilyName() + b.getId()));
+		return employees;
 	}
 	
 	@Override
@@ -87,9 +91,11 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	
 	@Override
 	public List<Area> getAreas(Area.AreaType areaType, Session session){
-		return  QueryFactory.buildQuery(session, Area.class, 
+		List<Area> areas = QueryFactory.buildQuery(session, Area.class, 
 				new Object[] {"conservationArea", getCa()},  //$NON-NLS-1$
 				new Object[] {"type", areaType}).list(); //$NON-NLS-1$
+		areas.sort((a,b)-> (a.getKeyId() + UuidUtils.uuidToString(a.getUuid())).compareTo(b.getKeyId() + UuidUtils.uuidToString(b.getUuid())));
+		return areas;
 	}
 	
 	@Override
@@ -122,7 +128,14 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	@Override
 	public List<IntelAttributeListItem> getAttributeListItems(String attributeKey, Session session){
 		IntelAttribute a = getAttribute(attributeKey, session);
-		return a.getAttributeList();
+		ArrayList<IntelAttributeListItem> items = new ArrayList<>(a.getAttributeList());
+		items.sort((c,b)->{
+			if (c.getOrder() == b.getOrder()) {
+				return c.getKeyId().compareTo(b.getKeyId());
+			}
+			return Integer.compare(c.getOrder(), b.getOrder());
+		});
+		return items;
 	}
 	
 	private ConservationArea getCa() {

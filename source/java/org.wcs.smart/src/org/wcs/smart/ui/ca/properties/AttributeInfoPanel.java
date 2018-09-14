@@ -28,9 +28,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -40,6 +42,7 @@ import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -48,6 +51,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -60,6 +64,9 @@ import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -83,11 +90,17 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.ca.icon.IconSet;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.internal.ca.properties.AttributeTree;
+import org.wcs.smart.ui.internal.ca.properties.IconPanel;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Composite panel that display and allows users to
@@ -101,6 +114,8 @@ public class AttributeInfoPanel extends Composite {
 	private static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
 	private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 
+	public static int LIST_ICON_SIZE = 16;
+	
 	private NameKeyComposite nameKeyValues;
 	
 	private Text txtMinValue;
@@ -139,7 +154,7 @@ public class AttributeInfoPanel extends Composite {
 	
 	private AttributeTree attTree = null;
 	private Session currentSession = null;
-	
+	private IconPanel iconPanel = null;
 	private boolean canEdit = false;
 	
 	/**
@@ -207,7 +222,15 @@ public class AttributeInfoPanel extends Composite {
 			chRequired.setEnabled(false);
 		}
 		
-
+		// icons
+		Label lblIcons= new Label(this, SWT.NONE);
+		lblIcons.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false, 1, 1));
+		lblIcons.setText("Icons:");
+		
+		iconPanel = new IconPanel(this, canEdit);
+		iconPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		iconPanel.addListener(SWT.Selection, e->validate());
+		
 		optionComposite = new Composite(this, SWT.NONE);
 		optionComposite.setLayout(new StackLayout());
 		optionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
@@ -313,7 +336,78 @@ public class AttributeInfoPanel extends Composite {
 		if (canEdit){
 			cdAttList = createDecoration(lstAttributeList.getControl());
 		}
-		lstAttributeList.setLabelProvider(new AttributeListLabelProvider());
+		
+		TableViewerColumn colEmpty = new TableViewerColumn(lstAttributeList, SWT.NONE);
+		colEmpty.getColumn().setWidth(0);
+		colEmpty.setLabelProvider(new ColumnLabelProvider() {
+			public String getText(Object element) {
+				return null;
+			}
+		});
+		TableViewerColumn colLabel = new TableViewerColumn(lstAttributeList, SWT.NONE);
+		colLabel.setLabelProvider(
+				new ColumnLabelProvider() {
+					AttributeListLabelProvider ll = new AttributeListLabelProvider();
+					List<Image> images = new ArrayList<>();
+					@Override
+					public String getText(Object element) {
+						return ll.getText(element);
+					}
+					@Override
+					public void dispose() {
+						super.dispose();
+						ll.dispose();
+					}
+					
+		});
+		
+		TableViewerColumn imageLabel = new TableViewerColumn(lstAttributeList, SWT.NONE);
+		
+		imageLabel.setLabelProvider(
+				new ColumnLabelProvider() {
+					List<Image> images = new ArrayList<>();
+					@Override
+					public String getText(Object element) {
+						return null;
+					}
+					
+					@Override
+					public Image getImage(Object element) {
+						if (element instanceof AttributeListItem) {
+							AttributeListItem li = (AttributeListItem)element;
+							if (li.getIcon() == null) return null;
+							
+							List<IconFile> files = li.getIcon().getFiles();
+							if (files.isEmpty()) return null;
+							
+							Image img = new Image(Display.getDefault(), (LIST_ICON_SIZE+5) * files.size(), LIST_ICON_SIZE);
+							images.add(img);
+							GC gc = new GC(img);
+							
+							for (int i = 0; i < files.size(); i++) {
+								IconFile ff = files.get(i);
+								try {
+									Image mm = SmartUtils.readSvg(getDisplay(), ff.getAttachmentFile().toPath(), LIST_ICON_SIZE);
+									gc.drawImage(mm, 0,0, LIST_ICON_SIZE,LIST_ICON_SIZE,i*(LIST_ICON_SIZE+5),0,LIST_ICON_SIZE,LIST_ICON_SIZE);
+									mm.dispose();
+								}catch(Throwable t) {
+									
+								}
+							}
+							gc.dispose();
+							return img;
+							
+						}
+						return null;
+					}
+					
+					@Override
+					public void dispose() {
+						super.dispose();
+						images.forEach(i->i.dispose());
+					}
+					
+		});
 		
 		if (canEdit){
 			nameKeyValues.langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -853,11 +947,14 @@ public class AttributeInfoPanel extends Composite {
 				for (AttributeListItem item : att.getAttributeList()){
 					AttributeListItem clone = item.clone(att, att.getConservationArea(), att.getConservationArea().getDefaultLanguage().getCode());
 					clone.setUuid(item.getUuid());
+					clone.setIcon(item.getIcon());
 					items.add(clone);
 				}
 				
 				attributeList = new ArrayList<NamedKeyItem>(items);
 				lstAttributeList.setInput(attributeList);
+				lstAttributeList.getTable().getColumn(1).pack();
+				lstAttributeList.getTable().getColumn(2).pack();
 
 			} else if (att.getType().equals(Attribute.AttributeType.TREE)) {
 				treeComposite.setVisible(false);
@@ -875,6 +972,8 @@ public class AttributeInfoPanel extends Composite {
 			//can edit
 			validate();
 		}
+		iconPanel.setDmObject(att);
+		layout(true);
 	}
 	
 	/*
@@ -926,6 +1025,7 @@ public class AttributeInfoPanel extends Composite {
 		nameKeyValues.updateFields(att);
 		att.setType(  (Attribute.AttributeType)((IStructuredSelection)cmbType.getSelection()).getFirstElement() );
 		att.setIsRequired(chRequired.getSelection());
+		iconPanel.updateDmObject(att);
 		if (att.getUuid() == null){
 			session.saveOrUpdate(att);
 		}
