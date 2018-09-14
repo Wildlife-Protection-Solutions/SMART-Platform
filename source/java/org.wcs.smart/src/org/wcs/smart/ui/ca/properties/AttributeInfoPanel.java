@@ -90,6 +90,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.datamodel.ITreeNodeVisitor;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -1026,8 +1027,12 @@ public class AttributeInfoPanel extends Composite {
 		att.setType(  (Attribute.AttributeType)((IStructuredSelection)cmbType.getSelection()).getFirstElement() );
 		att.setIsRequired(chRequired.getSelection());
 		iconPanel.updateDmObject(att);
+		
 		if (att.getUuid() == null){
 			session.saveOrUpdate(att);
+		}
+		if (att.getIcon() != null) {
+			session.saveOrUpdate(att.getIcon());
 		}
 		session.flush();
 		
@@ -1107,6 +1112,7 @@ public class AttributeInfoPanel extends Composite {
 			for (int i = 0; i < attributeList.size(); i ++){
 				AttributeListItem item = (AttributeListItem) attributeList.get(i);
 				
+				if (item.getIcon() != null) session.saveOrUpdate(item.getIcon());
 				item.setListOrder(i);
 				item.setAttribute(att);
 				
@@ -1171,6 +1177,12 @@ public class AttributeInfoPanel extends Composite {
 									thisAttribute.getTree().add(mergedNode);
 								}
 							}
+							ITreeNodeVisitor v = node-> {
+								if (node.getIcon() != null) session.saveOrUpdate(node.getIcon());
+								return true;
+							};
+							thisAttribute.getTree().forEach(n->n.accept(v));
+							
 							session.flush();
 						}
 					});

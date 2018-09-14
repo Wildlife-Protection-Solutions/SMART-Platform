@@ -41,6 +41,8 @@ import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
 
+import com.sun.org.apache.bcel.internal.classfile.Visitor;
+
 /**
  * An attribute tree node element.
  * 
@@ -246,4 +248,10 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	}
 
 
+	public void accept(ITreeNodeVisitor visitor) {
+		if (!visitor.visit(this)) return;
+		for (AttributeTreeNode kid : getChildren()) {
+			kid.accept(visitor);
+		}
+	}
 }

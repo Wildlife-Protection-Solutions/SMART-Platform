@@ -130,7 +130,7 @@ public class ShowDataModelPropertyPageHandler {
 					loadedSession = dialog.getSession();
 					dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), loadedSession);
 					
-					//load icons
+					//load all icons
 					List<DmObject> icons = new ArrayList<>();
 					icons.addAll(dm.getCategories());
 					icons.addAll(dm.getAttributes());
@@ -140,7 +140,7 @@ public class ShowDataModelPropertyPageHandler {
 							icon.getIcon().getName();
 							for (IconFile ff : icon.getIcon().getFiles()) {
 								ff.getIconSet().getName();
-								ff.getFilename();
+								ff.computeFileLocation(loadedSession);
 							}
 						}
 						if (icon instanceof Category) {

@@ -1,0 +1,125 @@
+package org.wcs.smart.ui.internal.ca.properties;
+
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.ui.Thumbnail;
+import org.wcs.smart.ui.properties.DialogConstants;
+
+public class IconPanel extends Composite {
+
+	private boolean canEdit = false;
+	
+	public IconPanel(Composite parent, boolean canEdit) {
+		super(parent, SWT.NONE);
+		this.canEdit = canEdit;
+		
+		setLayout(new GridLayout());
+		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginHeight = 0;
+	}
+	
+	private void fireSelectionListeners() {
+		Event evnt = new Event();
+		for (Listener l : getListeners(SWT.Selection)) {
+			l.handleEvent(evnt);
+		}
+	}
+
+	public void setDmObject(DmObject object) {
+		updateIcon(object.getIcon());
+	}
+	
+	private void updateIcon(Icon icon) {
+		for (Control c : getChildren()) c.dispose();
+		if (icon == null) {
+			Composite c = new Composite(this, SWT.NONE);
+			c.setLayout(new GridLayout(2, false));
+			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridLayout)c.getLayout()).marginWidth = 0;
+			((GridLayout)c.getLayout()).marginHeight = 0;
+			
+			Label l = new Label(c, SWT.NONE);
+			l.setText("(none)");
+			
+			if (canEdit) {
+				Link lnk = new Link(c, SWT.NONE);
+				lnk.setText("<a>" + DialogConstants.EDIT_LINK_TEXT + "</a>");
+				lnk.addListener(SWT.Selection, e->editIcons());
+			}
+			
+		}else {
+			
+			Composite c = new Composite(this, SWT.NONE);
+			c.setLayout(new GridLayout(2, false));
+			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridLayout)c.getLayout()).marginWidth = 0;
+			((GridLayout)c.getLayout()).marginHeight = 0;
+			
+			Label l = new Label(c, SWT.NONE);
+			l.setText(icon.getName() == null ? "" : icon.getName());
+			
+			if (canEdit) {
+				Link lnk = new Link(c, SWT.NONE);
+				lnk.setText("<a>" + DialogConstants.EDIT_LINK_TEXT + "</a>");
+				lnk.addListener(SWT.Selection, e->editIcons());
+			}
+			
+			Composite images = new Composite(this, SWT.NONE);
+			images.setLayout(new FillLayout());
+			((FillLayout)images.getLayout()).spacing = 10;
+			images.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			
+			for (IconFile file : icon.getFiles()) {
+				
+				Composite temp = new Composite(images, SWT.NONE);
+				temp.setLayout(new GridLayout());
+				((GridLayout)temp.getLayout()).marginWidth = 0;
+				((GridLayout)temp.getLayout()).marginHeight = 0;
+				
+				Thumbnail t = new Thumbnail(file, 50, true);
+				t.setImageName(icon.getName());
+				Composite cc = t.createThumbnail(temp, SWT.NONE);
+				cc.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
+				((GridData)cc.getLayoutData()).widthHint = 50;
+				((GridData)cc.getLayoutData()).heightHint = 50;
+				
+				l = new Label(temp, SWT.NONE);
+				l.setText(file.getIconSet().getName());
+				
+			}
+		}
+		this.layout(true);
+	}
+	public void updateDmObject(DmObject object) {
+		if(newIcon != null) {
+			object.setIcon(newIcon);
+		}
+	}
+	
+	private Icon newIcon = null;
+	
+	private void editIcons() {
+		IconSelectionDialog dialog = new IconSelectionDialog(getShell());
+		if (dialog.open() != Window.OK) return;
+
+		this.newIcon = dialog.getSelectedIcon();
+		updateIcon(newIcon);
+		fireSelectionListeners();
+	}
+	
+	public boolean validate() {
+		return true;
+	}
+}
