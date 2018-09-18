@@ -22,6 +22,7 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -41,6 +42,7 @@ import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.icon.Icon;
 
 /**
  * Conservation Area data model category object.
@@ -355,7 +357,7 @@ RETURNS NULL ON NULL INPUT;
 	 * @param clonedAttributes a list of cloned attributes to be used when associating attributes with a category
 	 * @return cloned cateogry
 	 */
-	public Category clone(ConservationArea newCa, Category parent, List<Attribute> clonedAttributes, String defaultLang){
+	public Category clone(ConservationArea newCa, Category parent, List<Attribute> clonedAttributes, Collection<Icon> iconSet, String defaultLang){
 		
 		Category clone = new Category();
 		clone.copyValues(this, newCa, defaultLang);
@@ -367,6 +369,7 @@ RETURNS NULL ON NULL INPUT;
 		clone.setIsMultiple(this.getIsMultiple());
 		clone.setParent(parent);
 		clone.updateHkey();
+		clone.updateIcon(this, iconSet);
 		
 		if (this.getAttributes() != null){
 			clone.setAttributes(new ArrayList<CategoryAttribute>());
@@ -389,7 +392,7 @@ RETURNS NULL ON NULL INPUT;
 		if (this.getChildren() != null){
 			clone.setChildren(new ArrayList<Category>());
 			for (Category child : getChildren()){
-				clone.getChildren().add(child.clone(newCa,clone, clonedAttributes, defaultLang));
+				clone.getChildren().add(child.clone(newCa,clone, clonedAttributes, iconSet, defaultLang));
 			}
 		}
 		
@@ -492,4 +495,11 @@ RETURNS NULL ON NULL INPUT;
 		}
 	}
 	
+	@Transient
+	public void accept(ICategoryVisitor visitor) {
+		if (!visitor.visit(this)) return;
+		for (Category kid : getChildren()){
+			kid.accept(visitor);
+		}
+	}
 }

@@ -404,6 +404,7 @@ public class Messages extends NLS {
 	public static String ConservationAreaManager_Progress_DeleteCa;
 	public static String ConservationAreaManager_Progress_RemoveFileStore;
 	public static String ConservationAreaManager_Progress_Restarting;
+	public static String ConservationAreaTemplateCloner_CloningIcons;
 	public static String ConservationAreaTemplateCloner_Progress_CopyAgencyRank;
 	public static String ConservationAreaTemplateCloner_Progress_CopyCaInfo;
 	public static String ConservationAreaTemplateCloner_Progress_CopyDataModel;

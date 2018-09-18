@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ca.datamodel;
 
+import java.util.Collection;
 import java.util.HashSet;
 
 import javax.persistence.Entity;
@@ -103,6 +104,23 @@ public class DmObject extends NamedKeyItem{
 						break;
 					}
 				}
+			}
+		}
+	}
+	
+	/**
+	 * Updates this object's icon with the icon from the icon set
+	 * that has the same key as the sourceObject
+	 * @param sourceObject
+	 * @param iconSet
+	 */
+	protected void updateIcon(DmObject sourceObject, Collection<Icon> iconSet) {
+		if (iconSet == null) return;
+		if (sourceObject.getIcon() == null) return;
+		for (Icon i : iconSet) {
+			if (i.getKeyId().equals(sourceObject.getIcon().getKeyId())) {
+				setIcon(i);
+				return;
 			}
 		}
 	}

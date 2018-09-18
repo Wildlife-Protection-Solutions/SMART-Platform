@@ -28,11 +28,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -66,7 +64,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -92,9 +89,6 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.ITreeNodeVisitor;
 import org.wcs.smart.ca.icon.IconFile;
-import org.wcs.smart.ca.icon.IconSet;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
@@ -946,7 +940,7 @@ public class AttributeInfoPanel extends Composite {
 				//create a cloned copy for working with
 				ArrayList<AttributeListItem> items = new ArrayList<AttributeListItem>();
 				for (AttributeListItem item : att.getAttributeList()){
-					AttributeListItem clone = item.clone(att, att.getConservationArea(), att.getConservationArea().getDefaultLanguage().getCode());
+					AttributeListItem clone = item.clone(att, att.getConservationArea(), null, att.getConservationArea().getDefaultLanguage().getCode());
 					clone.setUuid(item.getUuid());
 					clone.setIcon(item.getIcon());
 					items.add(clone);

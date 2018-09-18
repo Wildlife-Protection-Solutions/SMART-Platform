@@ -205,7 +205,7 @@ public class AttributeTree {
 								AttributeTree.this.attribute.getConservationArea(), 
 								null,
 								AttributeTree.this.attribute.getConservationArea().getDefaultLanguage().getCode(),
-								null, true);
+								null, true, null);
 							cloned.setIcon(node.getIcon());
 							clonedroots.add(cloned);
 						}catch (Exception ex){

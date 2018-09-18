@@ -23,6 +23,7 @@ package org.wcs.smart.ca.datamodel;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,6 +46,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -427,7 +429,7 @@ public class DataModel extends SimpleDataModel{
 		DataModelManager.INSTANCE.fireChangeListeners();
 		
 	}
-	
+
 	
 	/**
 	 * Creates a copy of the current data model for the
@@ -437,10 +439,11 @@ public class DataModel extends SimpleDataModel{
 	 * @param defaultLang may be null otherwise the language from the
 	 * original data model labels to use for the labels of the
 	 * default language of the new conservation area
+	 * @param icons set of icons associated with the new conservation area - can be null
 	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor. Accepts null, indicating that no progress should be
 	 * @return the cloned data model
 	 */
-	public DataModel clone(ConservationArea newCa, String defaultLang, IProgressMonitor monitor){
+	public DataModel clone(ConservationArea newCa, String defaultLang, Collection<Icon> icons, IProgressMonitor monitor){
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DataModel_ProgressLabel, 2);
 		DataModel clone = new DataModel();
 		
@@ -461,7 +464,8 @@ public class DataModel extends SimpleDataModel{
 			clone.attributes = new ArrayList<Attribute>();
 			for (Attribute att: this.getAttributes()){
 				progress.subTask(Messages.DataModel_CloneAttributes2 + att.findName(ll));
-				clone.attributes.add(att.clone(newCa,defaultLang));
+				Attribute attributeClone = att.clone(newCa, icons, defaultLang);
+				clone.attributes.add(attributeClone);		
 			}
 		}
 		
@@ -471,7 +475,7 @@ public class DataModel extends SimpleDataModel{
 		progress.subTask(Messages.DataModel_CloneCategories);
 		for (Category cat: this.getCategories()){
 			progress.subTask(Messages.DataModel_CloneSubCategories + cat.findName(ll));
-			clone.categories.add(cat.clone(newCa, null, clone.attributes, defaultLang));
+			clone.categories.add(cat.clone(newCa, null, clone.attributes, icons, defaultLang));
 		}
 		progress.worked(1);
 		return clone;

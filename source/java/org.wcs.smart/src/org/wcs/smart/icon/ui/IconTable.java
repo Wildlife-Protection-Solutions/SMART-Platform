@@ -125,6 +125,13 @@ public class IconTable extends Composite implements Listener {
 		this(parent, style, null);
 	}
 	
+	@Override
+	public void setBackground(Color c) {
+		super.setBackground(c);
+		infoSection.setBackground(c);
+		if (thumb != null) thumb.setBackground(c);
+	}
+	
 	public IconTable(Composite parent, int style, IMenuCreator thumbMenu){
 		super(parent, style);
 		this.thumbMenu = thumbMenu;
@@ -196,6 +203,7 @@ public class IconTable extends Composite implements Listener {
 			if (infoSection == null || infoSection.isDisposed()) return;
 			thumb = new ThumbnailComposite(infoSection.getBody());
 			thumb.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			thumb.setBackground(getBackground());
 			infoSection.setOrigin(0, 0);
 			setSize();
 			layoutAttachments();
@@ -361,6 +369,7 @@ public class IconTable extends Composite implements Listener {
 				thumbNameComp.setToolTipText(t.file.getIcon().getName());
 				if (thumbMenu != null) thumbNameComp.setMenu(thumbMenu.createMenu(thumbNameComp));
 				thumbNameComp.setData(t);
+				thumbNameComp.setBackground(thumb.getBackground());
 				thumbNameComp.addDisposeListener(new DisposeListener() {					
 					@Override
 					public void widgetDisposed(DisposeEvent e) {

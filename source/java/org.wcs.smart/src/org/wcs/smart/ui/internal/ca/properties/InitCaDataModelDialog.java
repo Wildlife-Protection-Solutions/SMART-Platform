@@ -352,7 +352,8 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 							}
 						}
 						
-						dm = dmToClone.clone(ca, code, progress.split(1));
+						//TODO: potentially load icons here
+						dm = dmToClone.clone(ca, code, null, progress.split(1));
 						
 					}else if (isBlank){
 						progress = SubMonitor.convert(monitor);

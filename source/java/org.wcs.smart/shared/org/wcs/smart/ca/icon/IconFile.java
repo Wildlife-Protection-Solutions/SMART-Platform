@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -101,19 +102,31 @@ public class IconFile extends ISmartAttachment{
 	}
 	
 	@Transient
+	public boolean isSystemIcon() {
+		return getFilename().startsWith("platform:/plugin");
+	}
+	
+	@Transient
 	@Override
 	public File getAttachmentFile(){
-		String filename = getFilename();
-		if (filename.startsWith("platform:/plugin")) {
+		if (isSystemIcon()) {
 			try {
 				//TODO: manage this directory				
-				URL url = new URL(filename);
-				Path temp = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve("ICONDIR").resolve(UuidUtils.uuidToString(getUuid()) + ".svg");
-				if (!Files.exists(temp.getParent())) Files.createDirectories(temp.getParent());
-				if (Files.exists(temp)) return temp.toFile();
+				URL url = new URL(getFilename());
+				Path temp = null;
+				if (getUuid() != null) {
+					temp = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve("ICONDIR").resolve(UuidUtils.uuidToString(getUuid()) + ".svg");
+					if (!Files.exists(temp.getParent())) Files.createDirectories(temp.getParent());
+					if (Files.exists(temp)) return temp.toFile();
+				}else {
+					temp = Files.createTempFile("smart", "icon.svg");
+					
+					temp.toFile().deleteOnExit();//TODO:
+				}
+				
 			
 				try(InputStream inputStream = url.openConnection().getInputStream()){
-					Files.copy(inputStream, temp);
+					Files.copy(inputStream, temp, StandardCopyOption.REPLACE_EXISTING);
 					return temp.toFile();
 				}
 				

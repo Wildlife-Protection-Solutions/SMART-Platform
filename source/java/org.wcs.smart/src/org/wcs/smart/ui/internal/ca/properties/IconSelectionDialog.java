@@ -1,5 +1,6 @@
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,8 +14,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -37,9 +38,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.DataModelManager;
-import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
@@ -53,6 +52,11 @@ public class IconSelectionDialog extends TitleAreaDialog {
 
 	private static final int SIZE = 32;
 	
+	public static enum Type {
+		SELECT,
+		NEW,
+		EDIT
+	}
 	private Composite stackPanel;
 	
 	private Composite iconLibraryPanel;
@@ -68,113 +72,184 @@ public class IconSelectionDialog extends TitleAreaDialog {
 	private HashMap<IconSet, Label> imports;
 	private List<Icon> icons;
 	
-	public IconSelectionDialog(Shell parentShell) {
+	private Type type;
+	
+	private List<IconSet> activeSets;
+	
+	public IconSelectionDialog(Shell parentShell, Type type, List<IconSet> activeSets) {
 		super(parentShell);
+		this.type = type;
+		this.activeSets = activeSets;
+	}
+	
+	public IconSelectionDialog(Shell parentShell, Type type) {
+		this(parentShell, type, null);
 	}
 
+	public IconSelectionDialog(Shell parentShell, Icon toUpdate, List<IconSet> activeSets) {
+		this(parentShell, Type.EDIT, activeSets);
+		selectedIcon = toUpdate;
+	}
+	
+	public IconSelectionDialog(Shell parentShell, Icon toUpdate) {
+		this(parentShell, toUpdate, null);
+	}
 
 	public Icon getSelectedIcon() {
 		return this.selectedIcon;
 	}
 	@Override
 	public void okPressed(){
-		this.selectedIcon = null;
-		if (btnLibrary.getSelection()) {
-			Object x = tblIcons.getStructuredSelection().getFirstElement();
-			if (x instanceof Icon) {
-				selectedIcon = (Icon)x;
+		if (type == Type.SELECT) {
+			this.selectedIcon = null;
+			if (btnLibrary.getSelection()) {
+				Object x = tblIcons.getStructuredSelection().getFirstElement();
+				if (x instanceof Icon) {
+					selectedIcon = (Icon)x;
+				}
+			}else if (btnImport.getSelection()) {
+				Icon icon = createIcon();
+				//only create icon if at least one file is selected
+				if (icon.getFiles().isEmpty()) {
+					MessageDialog.openError(getShell(), "Icon", "At least one icon must be provided.");
+					return;
+				}
+				selectedIcon = icon;
 			}
-		}else if (btnImport.getSelection()) {
+		}else if (type == Type.NEW) {
+			this.selectedIcon = null;
+			Icon icon = createIcon();
+			//only create icon if at least one file is selected
+			if (icon.getFiles().isEmpty()) {
+				MessageDialog.openError(getShell(), "Icon", "At least one icon must be provided.");
+				return;
+			}
+			selectedIcon = icon;
+		}else if (type == Type.EDIT) {
+			//TODO:
+			selectedIcon.setName(txtName.getText());
+			selectedIcon.updateName(SmartDB.getCurrentLanguage(), txtName.getText());
 			
-			String name = txtName.getText().trim();
-			if (name.isEmpty()) name = "SMART Icon";
-			
-			Icon icon = new Icon();
-			icon.setConservationArea(SmartDB.getCurrentConservationArea());
-			icon.setKeyId(  DataModelManager.INSTANCE.generateKey(name, icons) );
-			icon.setName(name);
-			icon.updateName(SmartDB.getCurrentLanguage(), name);
-			icon.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
-			icon.setFiles(new ArrayList<>());
 			for (Entry<IconSet, Label> item : imports.entrySet()) {
 				if (item.getValue().getData("PATH") == null) continue;
 				Path file = (Path)item.getValue().getData("PATH");
 				
-				IconFile f = new IconFile();
-				f.setIcon(icon);
+				IconFile f = selectedIcon.getIconFile(item.getKey());
+				if (f != null) {
+					if (getIconFile(f).equals(file.toFile())) continue;
+					
+					selectedIcon.getFiles().remove(f);
+				}
+					
+				f = new IconFile();
+				f.setIcon(selectedIcon);
 				f.setIconSet(item.getKey());
 				f.setCopyFromLocation(file.toFile());
 				f.setFilename(file.getFileName().toString());
+				f.setCopyFromLocation(file.toFile());
+				f.setFilename(file.getFileName().toString());
 				
-				icon.getFiles().add(f);
+				selectedIcon.getFiles().add(f);
 			}
-			
-			//only create icon if at least one file is selected
-			if (!icon.getFiles().isEmpty()) selectedIcon = icon;
-			
 		}
 		super.okPressed();
+	}
+	
+	private File getIconFile(IconFile f) {
+		if (f.getCopyFromLocation() != null) return f.getCopyFromLocation();
+		return f.getAttachmentFile();
+	}
+	
+	private Icon createIcon() {
+		String name = txtName.getText().trim();
+		if (name.isEmpty()) name = "SMART Icon";
+		
+		Icon icon = new Icon();
+		icon.setConservationArea(SmartDB.getCurrentConservationArea());
+		icon.setKeyId(  DataModelManager.INSTANCE.generateKey(name, icons) );
+		icon.setName(name);
+		icon.updateName(SmartDB.getCurrentLanguage(), name);
+		icon.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
+		icon.setFiles(new ArrayList<>());
+		for (Entry<IconSet, Label> item : imports.entrySet()) {
+			if (item.getValue().getData("PATH") == null) continue;
+			Path file = (Path)item.getValue().getData("PATH");
+			
+			IconFile f = new IconFile();
+			f.setIcon(icon);
+			f.setIconSet(item.getKey());
+			f.setCopyFromLocation(file.toFile());
+			f.setFilename(file.getFileName().toString());
+			
+			icon.getFiles().add(f);
+		}
+		return icon;
 	}
 	
 	@Override
 	public Control createDialogArea(Composite parent){
 		parent = (Composite)super.createDialogArea(parent);
 		
-		List<IconSet> sets = new ArrayList<>();
-		try(Session s = HibernateManager.openSession()){
-			sets.addAll(QueryFactory.buildQuery(s, IconSet.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
-			sets.forEach(set->{
-				set.getName();
-				set.getUuid().equals(null);
-			});
+		if (activeSets == null) {
+			activeSets = new ArrayList<>();
+			try(Session s = HibernateManager.openSession()){
+				activeSets.addAll(QueryFactory.buildQuery(s, IconSet.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				activeSets.forEach(set->{
+					set.getName();
+					set.getUuid().equals(null);
+				});
+			}
 		}
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		
-		Label l = new Label(main, SWT.NONE);
-		l.setText("Icon Source:");
-		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		
-		Composite btn = new Composite(main, SWT.NONE);
-		btn.setLayout(new GridLayout());
-		btn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridLayout)btn.getLayout()).marginWidth = 0;
-		((GridLayout)btn.getLayout()).marginHeight = 0;
-		
-		btnLibrary = new Button(btn, SWT.RADIO);
-		btnLibrary.setText("SMART Icon");
-		btnLibrary.setSelection(true);
-		
-		btnImport = new Button(btn, SWT.RADIO);
-		btnImport.setText("Import New Icon");
-		
-		l = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		if (type == Type.SELECT) {
+			Label l = new Label(main, SWT.NONE);
+			l.setText("Icon Source:");
+			l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+			
+			Composite btn = new Composite(main, SWT.NONE);
+			btn.setLayout(new GridLayout());
+			btn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridLayout)btn.getLayout()).marginWidth = 0;
+			((GridLayout)btn.getLayout()).marginHeight = 0;
+			
+			btnLibrary = new Button(btn, SWT.RADIO);
+			btnLibrary.setText("SMART Icon");
+			btnLibrary.setSelection(true);
+			
+			btnImport = new Button(btn, SWT.RADIO);
+			btnImport.setText("Import New Icon");
+			
+			l = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			
+			btnLibrary.addListener(SWT.Selection, e->{
+				((StackLayout)stackPanel.getLayout()).topControl = iconLibraryPanel;
+				stackPanel.layout();	
+			});
+			
+			btnImport.addListener(SWT.Selection, e->{
+				((StackLayout)stackPanel.getLayout()).topControl = importPanel;
+				stackPanel.layout();	
+			});
+		}
 		
 		stackPanel = new Composite(main, SWT.NONE);
 		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		stackPanel.setLayout(new StackLayout());
 		
-		iconLibraryPanel = createLibraryComposite(stackPanel, sets);
+		iconLibraryPanel = createLibraryComposite(stackPanel, activeSets);
+		importPanel = createImportComposite(stackPanel, activeSets);
 		
-		importPanel = createImportComposite(stackPanel, sets);
-		
-		((StackLayout)stackPanel.getLayout()).topControl = iconLibraryPanel;
-		stackPanel.layout();
-		
-		
-		btnLibrary.addListener(SWT.Selection, e->{
+		if (type == Type.SELECT) {
 			((StackLayout)stackPanel.getLayout()).topControl = iconLibraryPanel;
-			stackPanel.layout();	
-		});
-		
-		btnImport.addListener(SWT.Selection, e->{
+		}else {
 			((StackLayout)stackPanel.getLayout()).topControl = importPanel;
-			stackPanel.layout();	
-		});
+		}
+		stackPanel.layout();
 		
 		loadDataJob.schedule();
 		
@@ -195,7 +270,10 @@ public class IconSelectionDialog extends TitleAreaDialog {
 		
 		txtName = new Text(panel, SWT.BORDER);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-	
+		if (selectedIcon != null) {
+			txtName.setText(selectedIcon.getName());
+		}
+		
 		imports = new HashMap<>();
 		for (IconSet s : sets) {
 			l = new Label(panel, SWT.NONE);
@@ -252,6 +330,22 @@ public class IconSelectionDialog extends TitleAreaDialog {
 					}
 				}
 			});
+			
+			if (selectedIcon != null) {
+				IconFile f = selectedIcon.getIconFile(s);
+				if (f != null) {
+					File file = getIconFile(f);
+					imageLabel.setData("PATH", file.toPath());
+					try {
+						Image i = SmartUtils.readSvg(getShell().getDisplay(), file.toPath(), SIZE);
+						imageLabel.setText("");
+						imageLabel.setImage(i);
+					} catch (Exception e1) {
+						imageLabel.setText("Error");
+						imageLabel.setToolTipText(e1.getMessage());
+					}
+				}
+			}
 		}
 		
 		return panel;

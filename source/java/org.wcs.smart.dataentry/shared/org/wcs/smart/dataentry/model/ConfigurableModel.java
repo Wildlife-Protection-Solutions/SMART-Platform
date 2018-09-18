@@ -45,6 +45,7 @@ import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.util.UuidUtils;
 
 
@@ -59,7 +60,8 @@ public class ConfigurableModel extends NamedItem {
     private ConservationArea conservationArea;
 	private DisplayMode displayMode; //display mode for the root nodes
     private List<CmNode> nodes; //the root nodes for the data model
-
+    private IconSet iconSet;
+    
 	private Map<Attribute, CmAttributeConfig> defaultConfigs;
 	
 	private boolean instantGps = false;
@@ -73,6 +75,16 @@ public class ConfigurableModel extends NamedItem {
 
     public void setConservationArea(ConservationArea conservationArea) {
         this.conservationArea = conservationArea;
+    }
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="iconset_uuid", referencedColumnName="uuid")
+	public IconSet getIconSet() {
+        return iconSet;
+    }
+
+    public void setIconSet(IconSet iconSet) {
+        this.iconSet = iconSet;
     }
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="model", orphanRemoval=true, cascade={CascadeType.ALL})

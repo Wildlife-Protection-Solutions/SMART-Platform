@@ -1,20 +1,24 @@
 package org.wcs.smart.icon.ui;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ILazyContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -27,12 +31,15 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.ToolBar;
@@ -41,16 +48,20 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
-import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.NameKeyDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.internal.ca.properties.IconSelectionDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
+
+import com.ibm.icu.text.Collator;
 
 public class IconPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -65,6 +76,12 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 	
 	private Composite iconComp;
 	private TableViewer tblIcons;
+	
+	
+	private List<Action> actions = new ArrayList<>();
+	private List<Path> toDeleteFiles = new ArrayList<>();
+	
+	private Object templateIconSet;
 	
 	public IconPreferencePage() {
 	}
@@ -82,6 +99,42 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 
 	}
 
+    @Override
+	public boolean performOk() {
+    	System.out.println("Perform ok");
+    	try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
+    		session.beginTransaction();
+    		try {
+    			for (Action a : actions) {
+    				a.preformAction(session);
+    				session.flush();
+    			}
+    			
+	    		session.getTransaction().commit();
+	    		actions.clear();
+	    		//setValid(false);
+	    		
+	    		for (Path p : toDeleteFiles) {
+	    			try {
+	    				Files.delete(p);
+	    			}catch (Exception ex) {
+	    				SmartPlugIn.log(ex.getMessage(),  ex);
+	    			}
+	    		}
+	    		toDeleteFiles.clear();
+    		}catch (Exception ex) {
+    			SmartPlugIn.log(ex.getMessage(), ex);
+    			session.getTransaction().rollback();
+    			throw ex;
+    		}
+    	}catch (Exception ex) {
+    		//TODO:
+    		SmartPlugIn.displayError(ex.getMessage(), ex);
+    		return false;
+    	}
+        return true;
+    }
+    
 	@Override
 	protected Control createContents(Composite parent) {
 		Composite main = new Composite(parent, SWT.BORDER);
@@ -119,11 +172,11 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		for (Control c : iconComp.getChildren()) c.dispose();
 		
 		Composite panel = new Composite(iconComp, SWT.NONE);
-		panel.setLayout(new GridLayout());
+		panel.setLayout(new GridLayout(2, false));
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		
-		tblIcons = new TableViewer(panel, SWT.FULL_SELECTION | SWT.SINGLE | SWT.BORDER | SWT.VIRTUAL);
+		tblIcons = new TableViewer(panel, SWT.FULL_SELECTION | SWT.MULTI | SWT.BORDER | SWT.VIRTUAL);
 		tblIcons.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblIcons.setContentProvider(new ILazyContentProvider() {
 			List<?> data;
@@ -177,8 +230,15 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 				public Image getImage(Object element) {
 					if (element instanceof Icon) {
 						IconFile ff = ((Icon)element).getIconFile(s);
+						if (ff == null) return null;
 						try {
-							return SmartUtils.readSvg(getShell().getDisplay(), ff.getAttachmentFile().toPath(), SIZE);
+							File f = null;
+							if (ff.getCopyFromLocation() != null) {
+								f = ff.getCopyFromLocation();
+							}else {
+								f = ff.getAttachmentFile();
+							}
+							return SmartUtils.readSvg(getShell().getDisplay(), f.toPath(), SIZE);
 						}catch (Throwable t) {
 							
 						}
@@ -193,7 +253,91 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		tblIcons.setUseHashlookup(true);
 		tblIcons.setInput(icons);
 		
+
+		ToolBar tb = new ToolBar(panel,  SWT.VERTICAL);
+		tb.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+		
+		ToolItem addIcon = new ToolItem(tb, SWT.PUSH);
+		addIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		addIcon.addListener(SWT.Selection, e->addIcon());
+		addIcon.setToolTipText("add new icon");
+		
+		ToolItem editIcon = new ToolItem(tb, SWT.PUSH);
+		editIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		editIcon.addListener(SWT.Selection, e->editIcon());
+		editIcon.setToolTipText("edit icon");
+		
+		ToolItem deleteIcon = new ToolItem(tb, SWT.PUSH);
+		deleteIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		deleteIcon.addListener(SWT.Selection, e->deleteIcons());
+		deleteIcon.setToolTipText("delete icon");
+		
+		Menu tmp = new Menu(tblIcons.getControl());
+		
+		MenuItem miAddIcon = new MenuItem(tmp, SWT.PUSH);
+		miAddIcon.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miAddIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miAddIcon.addListener(SWT.Selection, e->addIcon());
+		
+		MenuItem miEditIcon = new MenuItem(tmp, SWT.PUSH);
+		miEditIcon.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		miEditIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		miEditIcon.addListener(SWT.Selection, e->editIcon());
+		
+		MenuItem miDeleteIcon = new MenuItem(tmp, SWT.PUSH);
+		miDeleteIcon.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		miDeleteIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDeleteIcon.addListener(SWT.Selection, e->deleteIcons());
+		
+		tblIcons.getControl().setMenu(tmp);
+		
 		iconComp.layout(true);
+	}
+	
+	private void editIcon() {
+		//TODO:
+		Object x = tblIcons.getStructuredSelection().getFirstElement();
+		if (!(x instanceof Icon)) return;
+		Icon toEdit = (Icon)x;
+		
+		IconSelectionDialog dialog = new IconSelectionDialog(getShell(), toEdit, sets);
+		if (dialog.open() != Window.OK) return;
+		actions.add(Action.createSaveAction(toEdit));
+		tblIcons.refresh();
+		selectIconSet(true);
+	}
+	
+	private void addIcon() {
+		IconSelectionDialog dialog = new IconSelectionDialog(getShell(), IconSelectionDialog.Type.NEW, sets);
+		if (dialog.open() != Window.OK) return;
+		
+		Icon icon = dialog.getSelectedIcon();
+		if (icon == null) return;
+		actions.add(Action.createSaveAction(icon));
+		icons.add(icon);
+		tblIcons.setItemCount(icons.size());
+		tblIcons.refresh();
+		selectIconSet(true);
+	}
+	
+	private void deleteIcons() {
+		if (tblIcons == null || tblIcons.getControl().isDisposed()) return;
+		List<Icon> toDelete = new ArrayList<>();
+		
+		for (Iterator<?> iterator = tblIcons.getStructuredSelection().iterator(); iterator.hasNext();) {
+			Object x = iterator.next();
+			if (x instanceof Icon) toDelete.add((Icon) x);			
+		}
+		if (toDelete.isEmpty()) return;
+		
+		if (!MessageDialog.openConfirm(getShell(), "Delete",  MessageFormat.format("Are you sure you want to delete the {0} selected icons?", toDelete.size()))) return;
+		
+		
+		toDelete.forEach(e->actions.add(Action.createDeleteAction(e)));
+		icons.removeAll(toDelete);
+		tblIcons.setItemCount(icons.size());
+		tblIcons.refresh();
+		selectIconSet(true);
 	}
 	
 	private Composite createSetTab(Composite parent) {
@@ -204,7 +348,7 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		top.setLayout(new GridLayout(2, false));
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		lstIconsets = new ListViewer(top, SWT.BORDER);
+		lstIconsets = new ListViewer(top, SWT.BORDER | SWT.V_SCROLL);
 		lstIconsets.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)lstIconsets.getControl().getLayoutData()).heightHint = 100;
 		lstIconsets.setContentProvider(ArrayContentProvider.getInstance());
@@ -223,53 +367,76 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		tiAdd.setToolTipText("create a new icon set");
 		tiAdd.addListener(SWT.Selection, e->addIconSet());
 		
+		ToolItem tiEdit = new ToolItem(tools, SWT.PUSH);
+		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		tiEdit.setToolTipText("edit icon set name");
+		tiEdit.addListener(SWT.Selection, e->editIconSet());
+		
 		ToolItem tiDelete = new ToolItem(tools, SWT.PUSH);
 		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		tiDelete.setToolTipText("delete a new icon set");
 		tiDelete.addListener(SWT.Selection, e->deleteIconSet());
 		
 		imageTable = new IconTable(top, SWT.BORDER);
+		imageTable.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		imageTable.setThumbnailSize(50);
 		imageTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
 		lstIconsets.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				Object item = lstIconsets.getStructuredSelection().getFirstElement();
-				if (item == null) return;
-				if (!(item instanceof IconSet)) return;
-				
-				final IconSet iset = (IconSet)item;
-				Job j = new Job("loading icons") {
-
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-						List<IconFile> files = new ArrayList<>();
-						try(Session session = HibernateManager.openSession()){
-							files.addAll(QueryFactory.buildQuery(session,  IconFile.class, new Object[] {"iconSet", iset}).list());
-							files.forEach(f->{
-								f.getIcon().getName();
-								f.computeFileLocation(session);
-							});
-						}
-						
-						Display.getDefault().asyncExec(()->{
-							imageTable.setAttachments(files);
-						});
-						return Status.OK_STATUS;
-					}
-					
-				};
-				j.schedule();
+				selectIconSet(false);
 			}
 		});
 		
+		Menu tmp = new Menu(lstIconsets.getControl());
 		
+		MenuItem miAdd = new MenuItem(tmp, SWT.PUSH);
+		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miAdd.addListener(SWT.Selection, e->addIconSet());
+		
+		MenuItem meEdit = new MenuItem(tmp, SWT.PUSH);
+		meEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		meEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		meEdit.addListener(SWT.Selection, e->editIconSet());
+		
+		MenuItem miDelete = new MenuItem(tmp, SWT.PUSH);
+		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDelete.addListener(SWT.Selection, e->deleteIconSet());
+		
+		lstIconsets.getControl().setMenu(tmp);
 		
 		return main;
 	}
 
-	
+	private void selectIconSet(boolean refresh) {
+		Object item = lstIconsets.getStructuredSelection().getFirstElement();
+		if (item == null) return;
+		if (!(item instanceof IconSet)) return;
+		
+		if (!refresh && item.equals(lstIconsets.getData("CURRENT"))) return;
+		lstIconsets.setData("CURRENT", item);
+		final IconSet iset = (IconSet)item;
+		Job j = new Job("loading icons") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				List<IconFile> files = new ArrayList<>();
+				for (Icon c : icons) {
+					IconFile iconfile = c.getIconFile(iset);
+					if (iconfile != null) files.add(iconfile);
+				}
+				Display.getDefault().asyncExec(()->{
+					imageTable.setAttachments(files);
+				});
+				return Status.OK_STATUS;
+			}
+			
+		};
+		j.schedule();
+	}
 	private void addIconSet() {
 		if (sets == null) return;
 		List<IconSet> allSets = new ArrayList<>();
@@ -289,20 +456,75 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 			protected String getTitle(){
 				return "New Icon Set";
 			}
+			
+			public Point getInitialSize(){
+				return new Point(400, 250);
+			}
+			
+			@Override
+			protected Control createDialogArea(Composite parent) {
+				Composite u = (Composite)super.createDialogArea(parent);
+				
+				Composite addTo = (Composite) u.getChildren()[0];
+				
+				Label l = new Label(addTo, SWT.NONE);
+				l.setText("Template Icon Set:");
+				
+				ComboViewer cmbViewer = new ComboViewer(addTo, SWT.DROP_DOWN | SWT.READ_ONLY);
+				cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+				cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
+				cmbViewer.setLabelProvider(new LabelProvider() {
+					public String getText(Object element) {
+						if (element instanceof IconSet) return ((IconSet) element).getName();
+						return super.getText(element);
+					}
+				});
+				List<Object> ins = new ArrayList<>();
+				ins.add("");
+				ins.addAll(sets);
+				cmbViewer.setInput(ins);
+				
+				templateIconSet = null;
+				cmbViewer.addSelectionChangedListener(e->templateIconSet=cmbViewer.getStructuredSelection().getFirstElement());
+				return u;
+			}
 		};
 		
-		if (dialog.open() == Window.OK) {
-			try(Session session = HibernateManager.openSession()){
-				session.beginTransaction();
-				session.saveOrUpdate(newIconSet);
-				session.getTransaction().commit();
-				
-				sets.add(newIconSet);
-				lstIconsets.refresh();
-			}catch (Exception ex) {
-				SmartPlugIn.displayLog("Unable to add icon set: " + ex.getMessage(),  ex);
+		if (dialog.open() != Window.OK) return;
+		
+		actions.add(Action.createSaveAction(newIconSet));
+			
+		if (templateIconSet != null && templateIconSet instanceof IconSet) {
+			for (Icon icon : icons) {
+				IconFile copyIcon = icon.getIconFile((IconSet) templateIconSet);
+				if (copyIcon != null) {
+					IconFile newfile = new IconFile();
+					newfile.setIcon(icon);
+					newfile.setIconSet(newIconSet);
+					try {
+						if (copyIcon.isSystemIcon()) {
+							newfile.setFilename(copyIcon.getFilename());
+						}else {
+							Path temp = Files.createTempFile("smart", "icon");
+							Files.copy(copyIcon.getAttachmentFile().toPath(), temp);
+							newfile.setCopyFromLocation(temp.toFile());
+							newfile.setFilename(copyIcon.getFilename());
+							
+							toDeleteFiles.add(temp);
+						}
+						icon.getFiles().add(newfile);
+					}catch (Exception ex) {
+						//TODO:
+						ex.printStackTrace();
+					}
+					actions.add(Action.createSaveAction(icon));
+				}
 			}
 		}
+			
+		sets.add(newIconSet);
+		lstIconsets.refresh();
+		createIconTable(sets, icons);
 	}
 	
 	private void deleteIconSet() {
@@ -311,25 +533,51 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		if (!(item instanceof IconSet)) return;
 		IconSet set = (IconSet)item;
 		
-		try(Session session = HibernateManager.openSession()){
-			session.beginTransaction();
-			
-			session.createQuery("DELETE FROM IconFile WHERE iconSet = :set")
-				.setParameter("set",  set)
-				.executeUpdate();
-			
-			session.delete(set);
-			
-			session.getTransaction().commit();
-			
-			sets.remove(set);
-			lstIconsets.refresh();
-		}catch (Exception ex) {
-			SmartPlugIn.displayLog(MessageFormat.format("Unable to delete icon set {0}: {1}", set.getName(), ex.getMessage()), ex);
+		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the icon set {0}?", set.getName()))) return;
+		
+		for (Icon i : icons) {
+			IconFile f = i.getIconFile(set);
+			if (f != null) {
+				i.getFiles().remove(f);
+			}
 		}
+		actions.add(Action.createDeleteAction(set));
+		
+		
+		sets.remove(set);
+		lstIconsets.refresh();
+		createIconTable(sets, icons);
 	}
 	
 
+	private void editIconSet() {
+		if (sets == null) return;
+		List<IconSet> allSets = new ArrayList<>();
+		allSets.addAll( sets );
+		for (String fixed : IconSet.FIXED_KEYS) {
+			IconSet t1 = new IconSet();
+			t1.setKeyId(fixed);
+			allSets.add(t1);
+		}
+		
+		Object item = lstIconsets.getStructuredSelection().getFirstElement();
+		if (item == null) return;
+		if (!(item instanceof IconSet)) return;
+		IconSet toEdit = (IconSet)item;
+		
+		NameKeyDialog<IconSet> dialog = new NameKeyDialog<IconSet>(getShell(), toEdit, allSets){
+			@Override
+			protected String getTitle(){
+				return "Edit Icon Set";
+			}
+		};
+		
+		if (dialog.open() != Window.OK) return;
+		actions.add(Action.createSaveAction(toEdit));
+		
+		lstIconsets.refresh();
+		createIconTable(sets, icons);
+	}
 	
 	private Job loadJob = new Job("loading icon sets") {
 
@@ -342,9 +590,14 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 				sets.addAll(QueryFactory.buildQuery(session, IconSet.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
 				icons.addAll(QueryFactory.buildQuery(session, Icon.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
 				
-				icons.forEach(f->f.getFiles().forEach(c->c.computeFileLocation(session)));
+				icons.forEach(f->{
+					f.getFiles().forEach(c->c.computeFileLocation(session));
+					f.getNames().size();
+				});
+				sets.forEach(s->s.getNames().size());
 			}
 			
+			icons.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 			
 			Display.getDefault().asyncExec(()->{
 				lstIconsets.setInput(sets);
@@ -360,4 +613,36 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		}
 		
 	};
+	
+	private static class Action{
+		public enum Type{
+			SAVE,
+			DELETE
+		}
+		
+		public static Action createDeleteAction(UuidItem object) {
+			return new Action(Type.DELETE, object);
+		}
+		
+		public static Action createSaveAction(UuidItem object) {
+			return new Action(Type.SAVE, object);
+		}
+		
+		private Type type;
+		private UuidItem object;
+		
+		private Action (Type type, UuidItem object) {
+			this.type = type;
+			this.object = object;
+		}
+		
+		public void preformAction(Session session) { 
+			if (type == Type.SAVE) {
+				session.saveOrUpdate(object);
+			}else if (type == Type.DELETE) {
+				if (object.getUuid() == null) return;
+				session.delete(object);
+			}
+		}
+	}
 }

@@ -45,6 +45,7 @@ public class Icon extends NamedKeyItem{
 	public IconFile getIconFile(IconSet set) {
 		if (getFiles() == null) return null;
 		for (IconFile f : getFiles()) {
+			if (f.getIconSet() == set) return f;
 			if (f.getIconSet().equals(set)) return f;
 		}
 		return null;

@@ -111,7 +111,7 @@ public class IconPanel extends Composite {
 	private Icon newIcon = null;
 	
 	private void editIcons() {
-		IconSelectionDialog dialog = new IconSelectionDialog(getShell());
+		IconSelectionDialog dialog = new IconSelectionDialog(getShell(), IconSelectionDialog.Type.SELECT);
 		if (dialog.open() != Window.OK) return;
 
 		this.newIcon = dialog.getSelectedIcon();
