@@ -445,6 +445,9 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						if (dataFolder != null && dataFolder.exists() && dataFolder.isDirectory()) {
 							toZip.addAll(Arrays.asList(dataFolder.listFiles()));
 						}
+						//we don't add the data model icons here as they are not required
+						//for importing the configurable model
+						
 						ZipUtil.createZip(toZip.toArray(new File[toZip.size()]), f, monitor);
 						if (monitor.isCanceled()) return;
 						

@@ -14,30 +14,39 @@ elementFormDefault="qualified">
     		<element name="name" type="smrt:NameType"
     			maxOccurs="unbounded" minOccurs="1">
     		</element>
-    		<element name="nodes" type="smrt:NodeTypeList"
-    			maxOccurs="1" minOccurs="0">
+    		<element name="nodes" type="smrt:NodeTypeList" maxOccurs="1"
+    			minOccurs="0">
     		</element>
-    		<element name="listItems" type="smrt:AttributeListItemTypeList"
-    			maxOccurs="1" minOccurs="0">
+    		<element name="listItems"
+    			type="smrt:AttributeListItemTypeList" maxOccurs="1"
+    			minOccurs="0">
     		</element>
-    		<element name="treeNodes" type="smrt:AttributeTreeNodeTypeList"
-    			maxOccurs="1" minOccurs="0">
+    		<element name="treeNodes"
+    			type="smrt:AttributeTreeNodeTypeList" maxOccurs="1"
+    			minOccurs="0">
     		</element>
-    		<element name="defaultTrees" type="smrt:AttributeCmTreeNodeTypeList"
-    			maxOccurs="1" minOccurs="0">
+    		<element name="defaultTrees"
+    			type="smrt:AttributeCmTreeNodeTypeList" maxOccurs="1"
+    			minOccurs="0">
     		</element>
-    		<element name="defaultLists" type="smrt:AttributeCmListItemTypeList"
-    			maxOccurs="1" minOccurs="0">
+    		<element name="defaultLists"
+    			type="smrt:AttributeCmListItemTypeList" maxOccurs="1"
+    			minOccurs="0">
     		</element>
-    		<element name="setting" type="smrt:CmDmAttributeSettingsTypeList"
-    			maxOccurs="1" minOccurs="0">
+    		<element name="setting"
+    			type="smrt:CmDmAttributeSettingsTypeList" maxOccurs="1"
+    			minOccurs="0">
     		</element>
-    		<element name="attributeConfig" type="smrt:CmAttributeConfigType" maxOccurs="unbounded" minOccurs="0"/>
-    		<element name="extraData" type="smrt:CmExtraDataType" maxOccurs="unbounded" minOccurs="0"/>
+    		<element name="attributeConfig"
+    			type="smrt:CmAttributeConfigType" maxOccurs="unbounded"
+    			minOccurs="0" />
+    		<element name="extraData" type="smrt:CmExtraDataType"
+    			maxOccurs="unbounded" minOccurs="0" />
     	</sequence>
     	<attribute name="displayMode" type="string"></attribute>
-    	<attribute name="instantGps" type="boolean"/>
-    	<attribute name="photoFirst" type="boolean"/>
+    	<attribute name="instantGps" type="boolean" />
+    	<attribute name="photoFirst" type="boolean" />
+    	<attribute name="iconSet" type="string"></attribute>
     </complexType>
 
     <complexType name="LanguageListType">
@@ -74,12 +83,13 @@ elementFormDefault="qualified">
     	<attribute name="dmUuid" type="string"></attribute>
     	<attribute name="photoAllowed" type="boolean"></attribute>
     	<attribute name="photoRequired" type="boolean"></attribute>
-    	<attribute name="displayMode" type="string"></attribute>
-    	<attribute name="imageFile" type="string"></attribute>
+    	<attribute name="displayMode" type="string"></attribute>
     	<attribute name="id" type="string"></attribute>
 
     	<attribute name="collectMultipleObs" type="boolean"></attribute>
     	<attribute name="useSingleGpsPoint" type="boolean"></attribute>
+        <attribute name="imageFile" type="string"></attribute>
+        <attribute name="isCustomImage" type="boolean"></attribute>
     </complexType>
 
     <complexType name="NameType">
@@ -129,8 +139,15 @@ elementFormDefault="qualified">
 
     	<attribute name="required" type="boolean">
     		<annotation>
-    			<documentation>This value represents the data model attribute required flag.  Required cannot be specified for individual data model nodes.</documentation>
-    		</annotation></attribute>
+    			<documentation>
+    				This value represents the data model attribute
+    				required flag. Required cannot be specified for
+    				individual data model nodes.
+    			</documentation>
+    		</annotation>
+    	</attribute>
+    	<attribute name="imageFile" type="string"></attribute>
+    	<attribute name="isCustomImage" type="boolean"></attribute>
     </complexType>
 
     <complexType name="AttributeOptionType">
@@ -181,13 +198,15 @@ elementFormDefault="qualified">
     		</element>
     	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>
-        <attribute name="keyRef" type="string"></attribute>
+    	<attribute name="keyRef" type="string"></attribute>
     	<attribute name="hkeyRef" type="string"></attribute>
-        <attribute name="dmUuid" type="string"></attribute>
-        <attribute name="isActive" type="boolean"></attribute>
-    	<attribute name="displayMode" type="string"></attribute>
-    	<attribute name="imageFile" type="string"></attribute>
-    	<attribute name="id" type="string"></attribute>
+    	<attribute name="dmUuid" type="string"></attribute>
+    	<attribute name="isActive" type="boolean"></attribute>
+    	<attribute name="displayMode" type="string"></attribute>
+    	<attribute name="id" type="string"></attribute>
+
+        <attribute name="imageFile" type="string"></attribute>
+        <attribute name="isCustomImage" type="boolean"></attribute>
     </complexType>
 
     <complexType name="AttributeCmListItemTypeList">
@@ -204,10 +223,12 @@ elementFormDefault="qualified">
     	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>
     	<attribute name="keyRef" type="string"></attribute>
-        <attribute name="dmUuid" type="string"></attribute>
-        <attribute name="isActive" type="boolean"></attribute>
-    	<attribute name="imageFile" type="string"></attribute>
-    	<attribute name="id" type="string"></attribute>
+    	<attribute name="dmUuid" type="string"></attribute>
+    	<attribute name="isActive" type="boolean"></attribute>
+    	<attribute name="id" type="string"></attribute>
+
+        <attribute name="imageFile" type="string"></attribute>
+        <attribute name="isCustomImage" type="boolean"></attribute>
     </complexType>
 
     <complexType name="CmDmAttributeSettingsTypeList">

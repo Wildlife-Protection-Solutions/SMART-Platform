@@ -36,11 +36,7 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -74,10 +70,8 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 
 	private TreeEditorField<AttributeTreeNode> defaultValueTreeField;
 	private TreeViewer attributeTreeViewer;
-	private Button btnDeleteConfig;
 	
 	private Object lastSelection;
-
 	private ConfigurableModelEditDialog dialog;
 
 	/**
@@ -102,7 +96,6 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 		
 		createConfigSelectionControl(container);
 		createTreeControl(container);
-		createTreeButtons(container);
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
@@ -127,7 +120,7 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 					attributeTreeViewer.setInput(getSourceObject());
 					attributeTreeViewer.expandToLevel(2);
 				}
-				btnDeleteConfig.setEnabled(!getSourceObject().getConfig().isDefault());
+				tiDeleteConfig.setEnabled(!getSourceObject().getConfig().isDefault());
 				attributeTreeViewer.refresh(true);
 				
 				lastSelection = getSourceObject();
@@ -209,108 +202,61 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 		attributeTreeViewer.setContentProvider(new CmAttributeTreeContentProvider(false, false));
 	}
 
-	private void createTreeButtons(Composite container) {
-		Composite btnCompisite = new Composite(container, SWT.NONE);
-		GridLayout gd = new GridLayout(3, false);
-		gd.marginBottom = 0;
-		gd.marginHeight = 0;
-		gd.marginLeft = 0;
-		gd.marginRight = 0;
-		gd.marginTop = 0;
-		gd.marginWidth = 0;
-		btnCompisite.setLayout(gd);
-		btnCompisite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+
+	@Override
+	protected void addConfiguration() {
+		CmAttributeConfig cfg = CmAttributeConfig.createConfig(getModel(), getSourceObject().getAttribute(), false);
+		CmAttributeConfigUtil.assignCustomName(cfg, getSourceObject());
+		getSourceObject().setConfig(cfg);
+
+		EditTreeDialog dlg = new EditTreeDialog(getShell(), getSourceObject(), dialog.getSession());
+		dlg.open();
 		
-		createAddTreeButton(btnCompisite);
-		createEditTreeButton(btnCompisite);
-		createDeleteTreeButton(btnCompisite);
-		createRevertToDmButton(btnCompisite);
+		applyNewConig(cfg);
+		
+		fireModelChanged();
 	}
 
-	private void createAddTreeButton(Composite container) {
-		Button btnAdd = new Button(container, SWT.PUSH);
-		btnAdd.setText(Messages.TreeAttributeInfoComposite_Config_Create);
-		btnAdd.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 1, 1));
-
-		btnAdd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				CmAttributeConfig cfg = CmAttributeConfig.createConfig(getModel(), getSourceObject().getAttribute(), false);
-				CmAttributeConfigUtil.assignCustomName(cfg, getSourceObject());
-				getSourceObject().setConfig(cfg);
-
-				EditTreeDialog dlg = new EditTreeDialog(getShell(), getSourceObject(), dialog.getSession());
-				dlg.open();
-				
-				applyNewConig(cfg);
-				
-				fireModelChanged();
-			}
-		});
-	}
 
 	@Override
 	protected void handleConfigViewerSelectionChanged() {
-		btnDeleteConfig.setEnabled(!getSourceObject().getConfig().isDefault());
+		tiDeleteConfig.setEnabled(!getSourceObject().getConfig().isDefault());
 		attributeTreeViewer.setInput(getSourceObject());
 		attributeTreeViewer.expandToLevel(2);
 		attributeTreeViewer.refresh();
 	}
 	
-	private void createEditTreeButton(Composite container) {
-		Button btnEdit = new Button(container, SWT.PUSH);
-		btnEdit.setText(Messages.TreeAttributeInfoComposite_RenameButton);
-		btnEdit.setLayoutData(new GridData(SWT.END, SWT.FILL, false, false, 1, 1));
-
-		btnEdit.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (MessageDialog.openConfirm(getShell(), Messages.TreeAttributeInfoComposite_WarnTitle, Messages.TreeAttributeInfoComposite_WarnConfigMessage)) {
-					EditTreeDialog dlg = new EditTreeDialog(getShell(), getSourceObject(), dialog.getSession());
-					dlg.open();
-					
-					refreshConfigViewer();
-					attributeTreeViewer.refresh();
-					fireModelChanged();
-				}
-			}
-		});
-	}
-
-	private void createDeleteTreeButton(Composite container) {
-		btnDeleteConfig = new Button(container, SWT.PUSH);
-		btnDeleteConfig.setText(Messages.TreeAttributeInfoComposite_Config_Delete);
-		btnDeleteConfig.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-
-		btnDeleteConfig.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				removeConfig(getSourceObject().getConfig());
-			}
-		});
+	@Override
+	protected void editConfiguration() {
+		if (MessageDialog.openConfirm(getShell(), Messages.TreeAttributeInfoComposite_WarnTitle, Messages.TreeAttributeInfoComposite_WarnConfigMessage)) {
+			EditTreeDialog dlg = new EditTreeDialog(getShell(), getSourceObject(), dialog.getSession());
+			dlg.open();
+			
+			refreshConfigViewer();
+			attributeTreeViewer.refresh();
+			fireModelChanged();
+		}
 	}
 	
-	private void createRevertToDmButton(Composite container) {
-		Button btnRevert = new Button(container, SWT.PUSH);
-		btnRevert.setText(Messages.TreeAttributeInfoComposite_Button_Revert);
-		btnRevert.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 3, 1));
-
-		btnRevert.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (MessageDialog.openConfirm(getShell(), Messages.TreeAttributeInfoComposite_ConfirmRevert_Title, Messages.TreeAttributeInfoComposite_ConfirmRevert_Message)) {
-					CmAttribute cmAttr = getSourceObject();
-					CmAttributeConfig cfg = cmAttr.getConfig();
-					List<CmAttributeTreeNode> newList = cfg.isDefault() ? CmDefaultTreesUtil.buildDefaultTree(cfg, cmAttr.getAttribute()) : CmCustomTreesUtil.buildCustomTree(cfg, cmAttr.getAttribute());
-					cfg.getTree().clear();
-					cfg.getTree().addAll(newList);
-					
-					attributeTreeViewer.refresh();
-					fireModelChanged();
-				}
-			}
-		});
+	@Override
+	protected void deleteConfiguration() {
+		removeConfig(getSourceObject().getConfig());
 	}
+	
+	@Override
+	public void revertConfiguration() {
+		if (MessageDialog.openConfirm(getShell(), Messages.TreeAttributeInfoComposite_ConfirmRevert_Title, Messages.TreeAttributeInfoComposite_ConfirmRevert_Message)) {
+			CmAttribute cmAttr = getSourceObject();
+			CmAttributeConfig cfg = cmAttr.getConfig();
+			List<CmAttributeTreeNode> newList = cfg.isDefault() ? CmDefaultTreesUtil.buildDefaultTree(cfg, cmAttr.getAttribute()) : CmCustomTreesUtil.buildCustomTree(cfg, cmAttr.getAttribute());
+			cfg.getTree().clear();
+			cfg.getTree().addAll(newList);
+			
+			attributeTreeViewer.refresh();
+			fireModelChanged();
+		}
+	}
+	
 
 	/**
 	 * 	Load lazy tree data

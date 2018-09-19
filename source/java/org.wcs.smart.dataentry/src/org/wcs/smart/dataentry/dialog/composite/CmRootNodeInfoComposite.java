@@ -56,6 +56,7 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 
+	private static final String NONE = Messages.CmRootNodeInfoComposite_NoneOption;
 	private CmRootNode rootNode;
 
 	private Button btnInstantGps;
@@ -77,7 +78,7 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 		createDisplayModeControls(container);
 
 		Label l = new Label(container, SWT.NONE);
-		l.setText("Icon Set:");
+		l.setText(Messages.CmRootNodeInfoComposite_IconSetOption);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		cmbIconSet = new ComboViewer(container, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -89,6 +90,17 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 				return super.getText(element);
 			}
 		});
+		
+		List<Object> sets = new ArrayList<>();
+		sets.add(NONE);
+		try(Session session = HibernateManager.openSession()){
+			List<IconSet> items = QueryFactory.buildQuery(session, IconSet.class, 
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+			items.forEach(e->e.getName());
+			sets.addAll(items);
+		}
+		cmbIconSet.setInput(sets);
+		cmbIconSet.setSelection(new StructuredSelection(NONE));
 		cmbIconSet.addSelectionChangedListener(e->{
 			Object x = cmbIconSet.getStructuredSelection().getFirstElement();
 			if (x instanceof IconSet) {
@@ -98,16 +110,6 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 			}
             fireModelChanged();
 		});
-		List<Object> sets = new ArrayList<>();
-		String none = "(None)";
-		sets.add(none);
-		try(Session session = HibernateManager.openSession()){
-			List<IconSet> items = QueryFactory.buildQuery(session, IconSet.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
-			items.forEach(e->e.getName());
-			sets.addAll(items);
-		}
-		cmbIconSet.setInput(sets);
-		cmbIconSet.setSelection(new StructuredSelection(none));
 		
         Label lblInstantGps = new Label(container, SWT.NONE);
         lblInstantGps.setText(Messages.CmRootNodeInfoComposite_InstantGps);
@@ -144,7 +146,11 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
                 	btnPhotoFirst.setSelection(cm.isPhotoFirst());
                 }
                 if (cmbIconSet != null) {
-                	cmbIconSet.setSelection(new StructuredSelection(cm.getIconSet()));
+                	if (cm.getIconSet() != null) {
+                		cmbIconSet.setSelection(new StructuredSelection(cm.getIconSet()));
+                	}else {
+                		cmbIconSet.setSelection(new StructuredSelection(NONE));
+                	}
                 }
             }
         });

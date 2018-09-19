@@ -60,12 +60,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.dataentry.dialog.composite.CmTreeLabelProvider;
 import org.wcs.smart.dataentry.dialog.composite.DisplayModeComboViewer;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl;
@@ -106,6 +110,8 @@ public class EditTreeDialog extends TitleAreaDialog {
 	private CmAttributeTreeNode cmNode;
 	
 	private Button btnEnable;
+	private MenuItem miEnable;
+	private MenuItem addItem;
 	private Button btnAddSubNodes;
 	private Button btnAdd;
 	private Button btnRemove;
@@ -146,6 +152,16 @@ public class EditTreeDialog extends TitleAreaDialog {
 				addToConfigurableTree();
 			}
 		});
+		
+		Menu m1 = new Menu(dmTreeViewer.getControl());
+		
+		addItem = new MenuItem(m1, SWT.PUSH);
+		addItem.setText(Messages.EditTreeDialog_AddNodeButton);
+		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		addItem.addListener(SWT.Selection, e->addToConfigurableTree());
+		addItem.setEnabled(false);
+		
+		dmTreeViewer.getControl().setMenu(m1);
 		
 		Group middle = new Group(comp, SWT.NONE);
 		middle.setLayout(new GridLayout());
@@ -199,23 +215,30 @@ public class EditTreeDialog extends TitleAreaDialog {
 		btnEnable.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				boolean enable = true;
-				if (btnEnable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT)){
-					enable = false;
-				}
-				IStructuredSelection selection = (IStructuredSelection) itemViewer.getSelection();
-				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-					Object type = iterator.next();
-					if (type instanceof CmAttributeTreeNode){
-						enableItem((CmAttributeTreeNode)type, enable);
-					}
-				}
-				itemViewer.refresh();
-				updateEnableButtonText();
+				enable();
 			}
 		});
 		
 		itemViewer = createItemViewer(middle);
+		
+		Menu mnu = new Menu(itemViewer.getControl());
+		
+		MenuItem mi = new MenuItem(mnu, SWT.PUSH);
+		mi.setText(Messages.EditTreeDialog_AddGroup);
+		mi.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		mi.addListener(SWT.Selection, e->addGroupItem());
+		
+		MenuItem miDelete = new MenuItem(mnu, SWT.PUSH);
+		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDelete.addListener(SWT.Selection, e->deleteItems());
+		
+		miEnable = new MenuItem(mnu, SWT.PUSH);
+		miEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+		miEnable.addListener(SWT.Selection, e->enable());
+		miEnable.setEnabled(false);
+		
+		itemViewer.getControl().setMenu(mnu);
 		
 		Composite btnPanel = new Composite(middle, SWT.NONE);
 		GridLayout gla = new GridLayout(3, false);
@@ -239,6 +262,22 @@ public class EditTreeDialog extends TitleAreaDialog {
 		return parent;
 	}
 
+	private void enable() {
+		boolean enable = true;
+		if (btnEnable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT)){
+			enable = false;
+		}
+		IStructuredSelection selection = (IStructuredSelection) itemViewer.getSelection();
+		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+			Object type = iterator.next();
+			if (type instanceof CmAttributeTreeNode){
+				enableItem((CmAttributeTreeNode)type, enable);
+			}
+		}
+		itemViewer.refresh();
+		updateEnableButtonText();
+	}
+	
 	private void createTopControls(Composite parent) {
 		Composite cmpTop = new Composite(parent, SWT.NONE);
 		GridLayout gd = new GridLayout(2, false);
@@ -353,15 +392,14 @@ public class EditTreeDialog extends TitleAreaDialog {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				boolean isEmpty = tree.getSelection().isEmpty();
-				if (isEmpty){
-					btnAdd.setEnabled(false);
-					return;
-				}
 				btnAdd.setEnabled(false);
+				addItem.setEnabled(false);
+				boolean isEmpty = tree.getSelection().isEmpty();
+				if (isEmpty) return;
 				for (Iterator<?> it = ((IStructuredSelection)tree.getSelection()).iterator(); it.hasNext();){
 					if (it.next() instanceof AttributeTreeNode){
 						btnAdd.setEnabled(true);
+						addItem.setEnabled(true);
 						return;
 					}
 				}
@@ -541,7 +579,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		GridLayout layout = new GridLayout(2, false);
 		layout.marginHeight = layout.marginWidth = 0;
 		containerCmp.setLayout(layout);
-		containerCmp.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
+		containerCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		org.eclipse.swt.widgets.Label label = new org.eclipse.swt.widgets.Label(containerCmp, SWT.NONE);
 		label.setText(Messages.EditTreeDialog_DisplayMode);
@@ -557,10 +595,27 @@ public class EditTreeDialog extends TitleAreaDialog {
 		
 		imgControlLabel = new org.eclipse.swt.widgets.Label(containerCmp, SWT.NONE);
 		imgControlLabel.setText(Messages.EditTreeDialog_Image);
+		imgControlLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		imageControl = new ImageSelectionControl(containerCmp, new IImageContentProvider() {
 			@Override
+			public boolean isCustom() {
+				if (cmNode == null) return true;
+				return cmNode.hasCustomImage();
+			}
+			
+			@Override
+			public boolean hasDataModel() {
+				return true;
+			}
+			@Override
 			public File getImageFile() {
-				return cmNode != null ? cmNode.getImageFile() : null;
+				if (cmNode == null) return null;
+				if (cmNode.hasCustomImage()) return cmNode.getImageFile();
+				if (cmNode.getDmTreeNode() == null) return null;
+				if (cmNode.getDmTreeNode().getIcon() == null) return null;
+				IconFile iconFile = cmNode.getDmTreeNode().getIcon().getIconFile(attribute.getNode().getModel().getIconSet());
+				if (iconFile == null) return null;
+				return iconFile.getAttachmentFile();
 			}
 
 			@Override
@@ -576,6 +631,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 				}
 			}
 		});
+		imageControl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		return containerCmp;
 	}
 	
@@ -598,6 +654,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		changeLayoutDataExclude(nameTable.getTable(), !nameTableVisible);
 		
 		btnEnable.setEnabled(cmNode != null);
+		miEnable.setEnabled(cmNode != null);
 		btnRemove.setEnabled(cmNode != null);
 		updateEnableButtonText();
 		
@@ -658,8 +715,10 @@ public class EditTreeDialog extends TitleAreaDialog {
 	private void updateEnableButtonText(){
 		if (this.cmNode == null || this.cmNode.getIsActive()){
 			btnEnable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+			miEnable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 		}else{
 			btnEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+			miEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 		}
 	}
 

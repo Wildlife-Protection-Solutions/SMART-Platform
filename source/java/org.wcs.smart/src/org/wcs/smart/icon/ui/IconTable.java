@@ -48,8 +48,8 @@ import org.wcs.smart.util.SmartUtils;
 
 
 /**
- * Table for displaying list of attachments.
- * '
+ * Table for displaying a collection of icon files
+ * 
  * @author Emily
  *
  */

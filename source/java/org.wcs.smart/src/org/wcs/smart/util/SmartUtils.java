@@ -45,17 +45,11 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
-import org.apache.batik.dom.svg.SVGDOMImplementation;
-import org.apache.batik.dom.util.DocumentFactory;
-import org.apache.batik.dom.util.SAXDocumentFactory;
 import org.apache.batik.transcoder.SVGAbstractTranscoder;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
-import org.apache.batik.util.SVGConstants;
-import org.apache.batik.util.XMLResourceDescriptor;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.io.FileUtils;
@@ -69,10 +63,6 @@ import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.locationtech.udig.catalog.URLUtils;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -618,6 +608,28 @@ public class SmartUtils {
 			smartName = "object"; //$NON-NLS-1$
 		}
 		return smartName;
+	}
+	
+	/**
+	 * Get the filename part of a file
+	 * @param part
+	 * @return
+	 */
+	public static String getFilenameWithoutExtension(String part) {
+		int index = part.lastIndexOf('.');
+		if (index < 0) return ""; //$NON-NLS-1$
+		return part.substring(0,index);
+	}
+	
+	/**
+	 * Get the extension part of the file
+	 * @param part
+	 * @return
+	 */
+	public static String getFilenameExtension(String part) {
+		int index = part.lastIndexOf('.');
+		if (index < 0) return ""; //$NON-NLS-1$
+		return part.substring(index+1);
 	}
 	
 	public static String replaceAll(String toReplace, String search, String replace){

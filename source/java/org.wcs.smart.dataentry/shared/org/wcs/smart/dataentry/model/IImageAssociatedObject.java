@@ -41,6 +41,13 @@ public interface IImageAssociatedObject {
 	public UUID getUuid();
 	
 	/**
+	 * Identifies if the node has a custom image or uses an underlying
+	 * datamodel image
+	 * @return
+	 */
+	public boolean hasCustomImage();
+	
+	/**
 	 * The image file name.  If setImageFile is called this will return
 	 * the file set; otherwise it will return the file described 
 	 * in getImagePersistenceLocation.  setImageFile(null) will cause this to return

@@ -48,7 +48,8 @@ public class CmAttributeOption extends UuidItem {
 	public static final String ID_FLATTEN_TREE = "FLATTEN_TREE"; //$NON-NLS-1$
 	public static final String ID_NUMERIC = "NUMERIC"; //$NON-NLS-1$
 	public static final String ID_ENTER_ONCES = "ENTER_ONCE"; //$NON-NLS-1$
-	
+	public static final String ID_IMAGE_EXT = "IMAGE"; //$NON-NLS-1$
+
 	public static enum EnterOnceType {
 		NONE,//Messages.CmAttributeOption_EnterOnceType_NONE),
 		START,//Messages.CmAttributeOption_EnterOnceType_START),
@@ -150,5 +151,4 @@ public class CmAttributeOption extends UuidItem {
 	public void setUuidValue(UUID uuidValue) {
 		this.uuidValue = uuidValue;
 	}
-	
 }

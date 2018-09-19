@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -38,6 +41,8 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
@@ -50,6 +55,7 @@ import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.DisplayMode;
 
 /**
  * Info composite for {@link CmNode}
@@ -60,20 +66,16 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 public class CmNodeInfoComposite extends AbstractInfoComposite {
 	
 	private Session session;
-
 	private CmNode node;
 
 	private Label lblCategory;
-	private Label lblKey;
-
 	private Button btnPhoto;
 	private Button btnPhotoRequired;
 	private Button btnCollectMultiple;
 	private Button btnSingleGpsPoint;
-	private boolean isGroup;
-	
 	private ImageSelectionControl imageControl;
 	
+	private boolean isGroup;
 	private List<CmAttributeConfig> deletedConfigs;
 	
 	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup, List<CmAttributeConfig> deletedConfigs) {
@@ -128,8 +130,32 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		
 		imageControl = new ImageSelectionControl(container, new IImageContentProvider() {
 			@Override
+			public boolean isCustom() {
+				if (getSourceObject() == null) return true;
+				return getSourceObject().hasCustomImage();
+			}
+			
+			@Override
+			public boolean hasDataModel() {
+				if (getSourceObject() == null) return false;
+				if (getSourceObject().getCategory() != null) return true;
+				return false;
+			}
+			
+			@Override
 			public File getImageFile() {
-				return getSourceObject().getImageFile();
+				if (getSourceObject().hasCustomImage()) {
+					return getSourceObject().getImageFile();
+				}
+				
+				CmNode cmNode = getSourceObject();
+				if (cmNode.getCategory() == null) return null;
+				Icon i = cmNode.getCategory().getIcon();
+				if (i == null) return null;
+				IconFile iconfile = i.getIconFile(getModel().getIconSet());
+				if (iconfile == null) return null;
+				return iconfile.getAttachmentFile();
+				
 			}
 			
 			@Override
@@ -160,14 +186,11 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		((GridData)lblCategory.getLayoutData()).widthHint = 100;
 		
 		label = new Label(container, SWT.NONE);
-		label.setText(Messages.CmNodeInfoComposite_Key);
-		lblKey = new Label(container, SWT.NONE);
-		lblKey.setText(""); //$NON-NLS-1$
-
-		label = new Label(container, SWT.NONE);
-		label.setText(Messages.CmNodeInfoComposite_PhotoAllowed);
-		label.setToolTipText(Messages.CmNodeInfoComposite_photoOptionTooltip);
+		label.setText(Messages.CmNodeInfoComposite_OptionsSection);
+		
 		btnPhoto = new Button(container, SWT.CHECK);
+		btnPhoto.setText(Messages.CmNodeInfoComposite_PhotoAllowed);
+		btnPhoto.setToolTipText(Messages.CmNodeInfoComposite_photoOptionTooltip);
 		btnPhoto.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -179,9 +202,10 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 
 		
 		label = new Label(container, SWT.NONE);
-		label.setText(Messages.CmNodeInfoComposite_PhotoRequired);
-		label.setToolTipText(Messages.CmNodeInfoComposite_photoRequiredTooltip);
+		
 		btnPhotoRequired = new Button(container, SWT.CHECK);
+		btnPhotoRequired.setText(Messages.CmNodeInfoComposite_PhotoRequired);
+		btnPhotoRequired.setToolTipText(Messages.CmNodeInfoComposite_photoRequiredTooltip);
 		btnPhotoRequired.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -191,9 +215,10 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		});
 		
 		label = new Label(container, SWT.NONE);
-		label.setText(Messages.CmNodeInfoComposite_CollectMultiplObservations);
-		label.setToolTipText(Messages.CmNodeInfoComposite_CollectMultiplObservationsTooltip);
+
 		btnCollectMultiple = new Button(container, SWT.CHECK);
+		btnCollectMultiple.setText(Messages.CmNodeInfoComposite_CollectMultiplObservations);
+		btnCollectMultiple.setToolTipText(Messages.CmNodeInfoComposite_CollectMultiplObservationsTooltip);
 		btnCollectMultiple.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -219,14 +244,28 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 
 		
 		label = new Label(container, SWT.NONE);
-		label.setText(Messages.CmNodeInfoComposite_RecordSingleGpsPoint);
-		label.setToolTipText(Messages.CmNodeInfoComposite_RecordSingleGpsPointTooltip);
+
 		btnSingleGpsPoint = new Button(container, SWT.CHECK);
+		btnSingleGpsPoint.setText(Messages.CmNodeInfoComposite_RecordSingleGpsPoint);
+		btnSingleGpsPoint.setToolTipText(Messages.CmNodeInfoComposite_RecordSingleGpsPointTooltip);
 		btnSingleGpsPoint.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				getSourceObject().setUseSingleGpsPoint(btnSingleGpsPoint.getSelection());
 				fireModelChanged();
+			}
+		});
+		
+		
+		label = new Label(container, SWT.NONE);
+		label.setText(Messages.EditListDialog_DisplayMode);
+		
+		DisplayModeComboViewer modeViewer = new DisplayModeComboViewer(container);
+		modeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		modeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				node.setDisplayMode(modeViewer.getSelectedDisplayMode());
 			}
 		});
 		
@@ -240,8 +279,6 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 				if (!isGroup) {
 					if (lblCategory != null)
 						lblCategory.setText(n.getCategory().getFullCategoryName(language));
-					if (lblKey != null)
-						lblKey.setText(n.getCategory().getKeyId());
 					if (btnPhoto != null) {
 						btnPhoto.setSelection(getPhotoAllowedValue(n));
 						btnPhoto.setEnabled(isPhotoAllowedEnabled(n));
@@ -256,6 +293,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 						btnSingleGpsPoint.setSelection(getUseSingleGpsPointValue(n));
 						btnSingleGpsPoint.setEnabled(isUseSingleGpsPointEnabled(n));
 					}
+					modeViewer.setSelection(new StructuredSelection(node.getDisplayMode() != null ? node.getDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
 					imageControl.updateImage();
 					CmNodeInfoComposite.this.layout(true, true);
 				}

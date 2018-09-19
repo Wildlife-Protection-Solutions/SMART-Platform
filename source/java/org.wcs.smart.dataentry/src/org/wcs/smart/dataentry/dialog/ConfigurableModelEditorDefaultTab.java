@@ -29,11 +29,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.jface.util.LocalSelectionTransfer;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -51,13 +48,11 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite.IModelChangedListener;
@@ -273,11 +268,11 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		attributeComposites = new HashMap<AttributeType, CmAttributeInfoComposite>();
 		CmAttributeInfoComposite attrComposite;
 
-		attrComposite = new NumericAttributeInfoComposite(infoInnerPanel, model);
+		attrComposite = new NumericAttributeInfoComposite(infoInnerPanel, model, dialog.getSession());
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.NUMERIC, attrComposite);
 		
-		attrComposite = new TextAttributeInfoComposite(infoInnerPanel, model);
+		attrComposite = new TextAttributeInfoComposite(infoInnerPanel, model, dialog.getSession());
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TEXT, attrComposite);
 
@@ -289,11 +284,11 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TREE, attrComposite);
 
-		attrComposite = new BooleanAttributeInfoComposite(infoInnerPanel, model);
+		attrComposite = new BooleanAttributeInfoComposite(infoInnerPanel, model, dialog.getSession());
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.BOOLEAN, attrComposite);
 
-		attrComposite = new DateAttributeInfoComposite(infoInnerPanel, model);
+		attrComposite = new DateAttributeInfoComposite(infoInnerPanel, model, dialog.getSession());
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.DATE, attrComposite);
 		

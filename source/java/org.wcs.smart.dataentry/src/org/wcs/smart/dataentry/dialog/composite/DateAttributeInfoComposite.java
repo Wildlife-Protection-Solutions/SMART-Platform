@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
@@ -60,8 +61,8 @@ public class DateAttributeInfoComposite extends CmAttributeInfoComposite {
 	 * @param model
 	 * @param session
 	 */
-	public DateAttributeInfoComposite(Composite parent, ConfigurableModel model) {
-		super(parent, model);
+	public DateAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
+		super(parent, model, session);
 	}
 
 	/* (non-Javadoc)

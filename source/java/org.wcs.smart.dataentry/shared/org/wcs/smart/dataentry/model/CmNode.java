@@ -188,6 +188,14 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 
 	@Transient
 	@Override
+	public boolean hasCustomImage() {
+		if (this.extension == null) return false;
+		if (this.extension.isEmpty()) return false;
+		return true;
+	}
+	
+	@Transient
+	@Override
 	public File getImageFile() {
 		return imageFile != null ? imageFile : new File(getImagePersistenceLocation());
 	}

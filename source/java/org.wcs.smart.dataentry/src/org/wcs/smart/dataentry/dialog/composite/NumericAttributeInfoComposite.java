@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
@@ -52,8 +53,8 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 
-	public NumericAttributeInfoComposite(Composite parent, ConfigurableModel model) {
-		super(parent, model);
+	public NumericAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
+		super(parent, model, session);
 	}
 
 	@Override

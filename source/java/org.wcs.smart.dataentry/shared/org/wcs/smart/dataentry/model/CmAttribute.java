@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +44,7 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.model.CmAttributeOption.EnterOnceType;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * @author elitvin
@@ -49,7 +52,7 @@ import org.wcs.smart.dataentry.model.CmAttributeOption.EnterOnceType;
  */
 @Entity
 @Table(name = "smart.cm_attribute")
-public class CmAttribute extends NamedItem {
+public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 
 	private CmNode node;
 	private Attribute attribute;
@@ -58,6 +61,9 @@ public class CmAttribute extends NamedItem {
 	
 	private CmAttributeConfig config = null;
 
+	@Transient
+	private File imageFile;
+	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="node_uuid", referencedColumnName="uuid")
 	public CmNode getNode() {
@@ -163,6 +169,88 @@ public class CmAttribute extends NamedItem {
 	@Transient
 	public DisplayMode getConfigDisplayMode() {
 		return getConfig().getDisplayMode();
+	}
+	
+	/**
+	 * 
+	 * @return the extension value of the file name representing the image
+	 */
+	@Transient
+	public String getImageFileExtension() {
+		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_IMAGE_EXT);
+		if (option == null) return null;
+		return option.getStringValue();
+	}
+	
+	@Transient
+	@Override
+	public boolean hasCustomImage() {
+		if (getImageFileExtension() == null || getImageFileExtension().isEmpty()) return false;
+		return true;
+	}
+	
+	@Transient
+	@Override
+	public File getImageFile() {
+		if (imageFile != null) return imageFile;
+		return new File(getImagePersistenceLocation()); 
+	}
+	
+	@Transient
+	@Override
+	public void setImageFile(File file) {
+		this.imageFile = file;
+		//TODO: figure out how to delete old files if extension has change - if
+		//extension is the same then the file will be overwritten and this
+		//is not a problem
+		if (file == null) {
+			getCmAttributeOptions().put(CmAttributeOption.ID_IMAGE_EXT, null);
+		}else {
+			String fileName = file.getName();
+			int index = fileName.lastIndexOf('.');
+			if (index >= 0) {
+				CmAttributeOption op = getCmAttributeOptions().get(CmAttributeOption.ID_IMAGE_EXT);
+				if (op == null) {
+					op = new CmAttributeOption();
+					op.setOptionId(CmAttributeOption.ID_IMAGE_EXT);
+					op.setCmAttribute(this);
+					getCmAttributeOptions().put(CmAttributeOption.ID_IMAGE_EXT, op);
+				}	
+				op.setStringValue(fileName.substring(index+1));
+			}else {
+				getCmAttributeOptions().remove(CmAttributeOption.ID_IMAGE_EXT);
+			}
+		}
+	}
+	
+	@Override
+	@Transient
+	public String getImagePersistenceLocation() {
+		//filename
+		StringBuilder sb = new StringBuilder();
+		sb.append("cn_img1_"); //$NON-NLS-1$
+		sb.append(UuidUtils.getDirectoryPath(getUuid()));
+		if (getImageFileExtension() == null) {
+			sb.append(".jpg"); // for backwards compatibility; prior to 6.1 it was assumed the image format was jpg //$NON-NLS-1$
+		}else if (getImageFileExtension().isEmpty()) {
+			//image was cleared
+		}else {
+			sb.append("."); //$NON-NLS-1$
+			sb.append(getImageFileExtension());
+		}
+		
+		
+		//path
+		String filename = Paths.get(getNode().getModel().getFileDataStoreLocation())
+			.resolve(sb.toString())
+			.toString();
+		
+		return filename;
+	}
+	
+	@Override
+	public void resetImageFile() {
+		this.imageFile = null;
 	}
 
 }
