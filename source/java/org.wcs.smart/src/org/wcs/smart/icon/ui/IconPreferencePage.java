@@ -22,11 +22,13 @@
 package org.wcs.smart.icon.ui;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -78,30 +80,37 @@ import org.wcs.smart.common.control.NameKeyDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.properties.IconSelectionDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
 import com.ibm.icu.text.Collator;
 
+/**
+ * Preference page for managing SMART icon sets and icons
+ * @author Emily
+ *
+ */
 public class IconPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+
+	private static final String CURRENT_SET_KEY = "CURRENT"; //$NON-NLS-1$
 
 	private static final int SIZE = 50;
 	
 	private ListViewer lstIconsets;
 	private IconTable imageTable;
 	
-	
-	private List<IconSet> sets = null;
-	private List<Icon> icons = null;
-	
 	private Composite iconComp;
 	private TableViewer tblIcons;
-	
 	
 	private List<Action> actions = new ArrayList<>();
 	private List<Path> toDeleteFiles = new ArrayList<>();
 	
+	private List<IconSet> sets = null;
+	private List<Icon> icons = null;
+	
+	//for creating new icon set from template
 	private Object templateIconSet;
 	
 	public IconPreferencePage() {
@@ -122,7 +131,6 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 
     @Override
 	public boolean performOk() {
-    	System.out.println("Perform ok");
     	try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
     		session.beginTransaction();
     		try {
@@ -133,7 +141,6 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
     			
 	    		session.getTransaction().commit();
 	    		actions.clear();
-	    		//setValid(false);
 	    		
 	    		for (Path p : toDeleteFiles) {
 	    			try {
@@ -149,8 +156,7 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
     			throw ex;
     		}
     	}catch (Exception ex) {
-    		//TODO:
-    		SmartPlugIn.displayError(ex.getMessage(), ex);
+    		SmartPlugIn.displayError(MessageFormat.format(Messages.IconPreferencePage_SaveError,ex.getMessage()), ex);
     		return false;
     	}
         return true;
@@ -165,11 +171,11 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		TabItem itemSets = new TabItem(tabs, SWT.NONE);
-		itemSets.setText("Icon Sets");
+		itemSets.setText(Messages.IconPreferencePage_IconSetsTab);
 		itemSets.setControl(createSetTab(tabs));
 		
 		TabItem itemIcons = new TabItem(tabs, SWT.NONE);
-		itemIcons.setText("Icons");
+		itemIcons.setText(Messages.IconPreferencePage_IconsTab);
 		iconComp = createIconsTab(tabs);
 		itemIcons.setControl(iconComp);
 
@@ -193,11 +199,31 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		for (Control c : iconComp.getChildren()) c.dispose();
 		
 		Composite panel = new Composite(iconComp, SWT.NONE);
-		panel.setLayout(new GridLayout(2, false));
+		panel.setLayout(new GridLayout());
+		((GridLayout)panel.getLayout()).marginWidth = 0;
+		((GridLayout)panel.getLayout()).marginHeight = 0;
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		
-		tblIcons = new TableViewer(panel, SWT.FULL_SELECTION | SWT.MULTI | SWT.BORDER | SWT.VIRTUAL);
+		ToolBar tb = new ToolBar(panel,  SWT.HORIZONTAL);
+		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		
+		ToolItem addIcon = new ToolItem(tb, SWT.PUSH);
+		addIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		addIcon.addListener(SWT.Selection, e->addIcon());
+		addIcon.setToolTipText(Messages.IconPreferencePage_addicontooltip);
+		
+		ToolItem editIcon = new ToolItem(tb, SWT.PUSH);
+		editIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		editIcon.addListener(SWT.Selection, e->editIcon());
+		editIcon.setToolTipText(Messages.IconPreferencePage_editicontooltip);
+		
+		ToolItem deleteIcon = new ToolItem(tb, SWT.PUSH);
+		deleteIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		deleteIcon.addListener(SWT.Selection, e->deleteIcons());
+		deleteIcon.setToolTipText(Messages.IconPreferencePage_deleteicontooltip);
+		
+		tblIcons = new TableViewer(panel, SWT.FULL_SELECTION | SWT.MULTI | SWT.VIRTUAL);
 		tblIcons.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblIcons.setContentProvider(new ILazyContentProvider() {
 			List<?> data;
@@ -221,7 +247,7 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		tblIcons.getTable().setLinesVisible(false);
 		
 		TableViewerColumn emptycolumn = new TableViewerColumn(tblIcons, SWT.NONE);
-		emptycolumn.getColumn().setText("");
+		emptycolumn.getColumn().setText(""); //$NON-NLS-1$
 		emptycolumn.getColumn().setWidth(0);
 		emptycolumn.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
@@ -231,7 +257,7 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		
 		
 		TableViewerColumn colName = new TableViewerColumn(tblIcons, SWT.NONE);
-		colName.getColumn().setText("Name");
+		colName.getColumn().setText(Messages.IconPreferencePage_NameColumn);
 		colName.getColumn().setWidth(150);
 		colName.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
@@ -245,10 +271,21 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 			TableViewerColumn colIcon = new TableViewerColumn(tblIcons, SWT.NONE);
 			colIcon.getColumn().setText(s.getName());
 			colIcon.setLabelProvider(new ColumnLabelProvider() {
+				private HashMap<Icon,Image> images = new HashMap<>();
+				
+				@Override
 				public String getText(Object element) {
 					return null;
 				}
+				
+				@Override
+				public void dispose() {
+					super.dispose();
+					images.values().forEach(e->e.dispose());
+				}
+				@Override
 				public Image getImage(Object element) {
+					if (images.containsKey(element))  return images.get(element);
 					if (element instanceof Icon) {
 						IconFile ff = ((Icon)element).getIconFile(s);
 						if (ff == null) return null;
@@ -259,7 +296,9 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 							}else {
 								f = ff.getAttachmentFile();
 							}
-							return SmartUtils.readSvg(getShell().getDisplay(), f.toPath(), SIZE);
+							Image img = SmartUtils.getImage(f.toPath(),SIZE);
+							images.put((Icon)element, img);
+							return img;
 						}catch (Throwable t) {
 							
 						}
@@ -273,26 +312,7 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		tblIcons.setItemCount(icons.size());
 		tblIcons.setUseHashlookup(true);
 		tblIcons.setInput(icons);
-		
 
-		ToolBar tb = new ToolBar(panel,  SWT.VERTICAL);
-		tb.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
-		
-		ToolItem addIcon = new ToolItem(tb, SWT.PUSH);
-		addIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		addIcon.addListener(SWT.Selection, e->addIcon());
-		addIcon.setToolTipText("add new icon");
-		
-		ToolItem editIcon = new ToolItem(tb, SWT.PUSH);
-		editIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		editIcon.addListener(SWT.Selection, e->editIcon());
-		editIcon.setToolTipText("edit icon");
-		
-		ToolItem deleteIcon = new ToolItem(tb, SWT.PUSH);
-		deleteIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		deleteIcon.addListener(SWT.Selection, e->deleteIcons());
-		deleteIcon.setToolTipText("delete icon");
-		
 		Menu tmp = new Menu(tblIcons.getControl());
 		
 		MenuItem miAddIcon = new MenuItem(tmp, SWT.PUSH);
@@ -316,7 +336,6 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 	}
 	
 	private void editIcon() {
-		//TODO:
 		Object x = tblIcons.getStructuredSelection().getFirstElement();
 		if (!(x instanceof Icon)) return;
 		Icon toEdit = (Icon)x;
@@ -351,7 +370,7 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		}
 		if (toDelete.isEmpty()) return;
 		
-		if (!MessageDialog.openConfirm(getShell(), "Delete",  MessageFormat.format("Are you sure you want to delete the {0} selected icons?", toDelete.size()))) return;
+		if (!MessageDialog.openConfirm(getShell(), Messages.IconPreferencePage_DeleteTitle,  MessageFormat.format(Messages.IconPreferencePage_DeleteMsg, toDelete.size()))) return;
 		
 		
 		toDelete.forEach(e->actions.add(Action.createDeleteAction(e)));
@@ -375,7 +394,15 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		lstIconsets.setContentProvider(ArrayContentProvider.getInstance());
 		lstIconsets.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
-				if (element instanceof IconSet) return ((IconSet) element).getName();
+				if (element instanceof IconSet) {
+					IconSet s = (IconSet)element;
+					StringBuilder sb = new StringBuilder();
+					sb.append(s.getName());
+					if (s.getIsDefault()) {
+						sb.append(Messages.IconPreferencePage_DefaultLabel);
+					}
+					return sb.toString();
+				}
 				return super.getText(element);
 			}
 		});
@@ -385,22 +412,21 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		tools.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 		ToolItem tiAdd = new ToolItem(tools, SWT.PUSH);
 		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		tiAdd.setToolTipText("create a new icon set");
+		tiAdd.setToolTipText(Messages.IconPreferencePage_newiconsettooltip);
 		tiAdd.addListener(SWT.Selection, e->addIconSet());
 		
 		ToolItem tiEdit = new ToolItem(tools, SWT.PUSH);
 		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		tiEdit.setToolTipText("edit icon set name");
+		tiEdit.setToolTipText(Messages.IconPreferencePage_editiconsettooltip);
 		tiEdit.addListener(SWT.Selection, e->editIconSet());
 		
 		ToolItem tiDelete = new ToolItem(tools, SWT.PUSH);
 		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiDelete.setToolTipText("delete a new icon set");
+		tiDelete.setToolTipText(Messages.IconPreferencePage_deleteiconsettooltip);
 		tiDelete.addListener(SWT.Selection, e->deleteIconSet());
 		
 		imageTable = new IconTable(top, SWT.BORDER);
 		imageTable.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-		imageTable.setThumbnailSize(50);
 		imageTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
 		lstIconsets.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -416,12 +442,16 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		miAdd.addListener(SWT.Selection, e->addIconSet());
+		new MenuItem(tmp, SWT.SEPARATOR);
+		MenuItem miSetDefault = new MenuItem(tmp, SWT.PUSH);
+		miSetDefault.setText(Messages.IconPreferencePage_MakeDefault);
+		miSetDefault.addListener(SWT.Selection, e->setDefault());
 		
 		MenuItem meEdit = new MenuItem(tmp, SWT.PUSH);
 		meEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		meEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		meEdit.addListener(SWT.Selection, e->editIconSet());
-		
+		new MenuItem(tmp, SWT.SEPARATOR);
 		MenuItem miDelete = new MenuItem(tmp, SWT.PUSH);
 		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
@@ -432,32 +462,41 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		return main;
 	}
 
+	private void setDefault() {
+		Object item = lstIconsets.getStructuredSelection().getFirstElement();
+		if (item == null) return;
+		if (!(item instanceof IconSet)) return;
+		sets.forEach(e->{
+			if (e.equals(item)) {
+				if (!e.getIsDefault()) {
+					e.setIsDefault(true);
+					actions.add(Action.createSaveAction(e));
+				}
+			}else if (e.getIsDefault()) {
+				e.setIsDefault(false);
+				actions.add(Action.createSaveAction(e));
+			}
+		});
+		lstIconsets.refresh();
+	}
+	
 	private void selectIconSet(boolean refresh) {
 		Object item = lstIconsets.getStructuredSelection().getFirstElement();
 		if (item == null) return;
 		if (!(item instanceof IconSet)) return;
 		
-		if (!refresh && item.equals(lstIconsets.getData("CURRENT"))) return;
-		lstIconsets.setData("CURRENT", item);
-		final IconSet iset = (IconSet)item;
-		Job j = new Job("loading icons") {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				List<IconFile> files = new ArrayList<>();
-				for (Icon c : icons) {
-					IconFile iconfile = c.getIconFile(iset);
-					if (iconfile != null) files.add(iconfile);
-				}
-				Display.getDefault().asyncExec(()->{
-					imageTable.setAttachments(files);
-				});
-				return Status.OK_STATUS;
-			}
-			
-		};
-		j.schedule();
+		if (!refresh && item.equals(lstIconsets.getData(CURRENT_SET_KEY))) return;
+		lstIconsets.setData(CURRENT_SET_KEY, item);
+		
+		List<IconFile> files = new ArrayList<>();
+		for (Icon c : icons) {
+			IconFile iconfile = c.getIconFile((IconSet)item);
+			if (iconfile != null) files.add(iconfile);
+		}
+		imageTable.setAttachments(files);
 	}
+	
+	
 	private void addIconSet() {
 		if (sets == null) return;
 		List<IconSet> allSets = new ArrayList<>();
@@ -475,7 +514,7 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		NameKeyDialog<IconSet> dialog = new NameKeyDialog<IconSet>(getShell(), newIconSet, allSets){
 			@Override
 			protected String getTitle(){
-				return "New Icon Set";
+				return Messages.IconPreferencePage_NewIconDialogTitle;
 			}
 			
 			public Point getInitialSize(){
@@ -489,7 +528,7 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 				Composite addTo = (Composite) u.getChildren()[0];
 				
 				Label l = new Label(addTo, SWT.NONE);
-				l.setText("Template Icon Set:");
+				l.setText(Messages.IconPreferencePage_TemplateIconLabel);
 				
 				ComboViewer cmbViewer = new ComboViewer(addTo, SWT.DROP_DOWN | SWT.READ_ONLY);
 				cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -501,7 +540,7 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 					}
 				});
 				List<Object> ins = new ArrayList<>();
-				ins.add("");
+				ins.add(""); //$NON-NLS-1$
 				ins.addAll(sets);
 				cmbViewer.setInput(ins);
 				
@@ -526,8 +565,10 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 						if (copyIcon.isSystemIcon()) {
 							newfile.setFilename(copyIcon.getFilename());
 						}else {
-							Path temp = Files.createTempFile("smart", "icon");
-							Files.copy(copyIcon.getAttachmentFile().toPath(), temp);
+							Path temp = Files.createTempFile("smart", "icon"); //$NON-NLS-1$ //$NON-NLS-2$
+							try(OutputStream out = Files.newOutputStream(temp)){
+								Files.copy(copyIcon.getAttachmentFile().toPath(), out);
+							}
 							newfile.setCopyFromLocation(temp.toFile());
 							newfile.setFilename(copyIcon.getFilename());
 							
@@ -535,14 +576,15 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 						}
 						icon.getFiles().add(newfile);
 					}catch (Exception ex) {
-						//TODO:
-						ex.printStackTrace();
+						SmartPlugIn.displayLog(MessageFormat.format(Messages.IconPreferencePage_CopyError,  icon.getName()), ex);
 					}
 					actions.add(Action.createSaveAction(icon));
 				}
 			}
 		}
-			
+		if (sets.isEmpty()) {
+			newIconSet.setIsDefault(true);
+		}
 		sets.add(newIconSet);
 		lstIconsets.refresh();
 		createIconTable(sets, icons);
@@ -554,7 +596,7 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		if (!(item instanceof IconSet)) return;
 		IconSet set = (IconSet)item;
 		
-		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the icon set {0}?", set.getName()))) return;
+		if (!MessageDialog.openConfirm(getShell(), Messages.IconPreferencePage_DeleteDialogTitle, MessageFormat.format(Messages.IconPreferencePage_DeleteSetMsg, set.getName()))) return;
 		
 		for (Icon i : icons) {
 			IconFile f = i.getIconFile(set);
@@ -564,8 +606,11 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		}
 		actions.add(Action.createDeleteAction(set));
 		
-		
 		sets.remove(set);
+		if (set.isDefault() && !sets.isEmpty()) {
+			sets.get(0).setIsDefault(true);
+		}
+		
 		lstIconsets.refresh();
 		createIconTable(sets, icons);
 	}
@@ -589,7 +634,7 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		NameKeyDialog<IconSet> dialog = new NameKeyDialog<IconSet>(getShell(), toEdit, allSets){
 			@Override
 			protected String getTitle(){
-				return "Edit Icon Set";
+				return Messages.IconPreferencePage_EditIconDialogTitle;
 			}
 		};
 		
@@ -600,7 +645,7 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		createIconTable(sets, icons);
 	}
 	
-	private Job loadJob = new Job("loading icon sets") {
+	private Job loadJob = new Job(Messages.IconPreferencePage_LoadJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -608,8 +653,8 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 			icons = new ArrayList<>();
 			
 			try(Session session = HibernateManager.openSession()){
-				sets.addAll(QueryFactory.buildQuery(session, IconSet.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
-				icons.addAll(QueryFactory.buildQuery(session, Icon.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				sets.addAll(QueryFactory.buildQuery(session, IconSet.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
+				icons.addAll(QueryFactory.buildQuery(session, Icon.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 				
 				icons.forEach(f->{
 					f.getFiles().forEach(c->c.computeFileLocation(session));

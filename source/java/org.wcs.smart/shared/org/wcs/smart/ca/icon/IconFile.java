@@ -41,6 +41,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -124,9 +125,8 @@ public class IconFile extends ISmartAttachment{
 	@Override
 	public void computeFileLocation(Session session) {
 		if (attachmentFile != null) return;
-		String filename = getFilename();
-		if (filename.startsWith(PLATFORM_IMAGE)) return;
-		attachmentFile = Paths.get(getConservationArea().getFileDataStoreLocation()).resolve(ICON_DIR).resolve(filename).toFile();
+		if (isSystemIcon()) return;
+		attachmentFile = Paths.get(getConservationArea().getFileDataStoreLocation()).resolve(ICON_DIR).resolve(getFilename()).toFile();
 	}
 	
 	@Transient
@@ -139,18 +139,18 @@ public class IconFile extends ISmartAttachment{
 	public File getAttachmentFile(){
 		if (isSystemIcon()) {
 			try {
-				//TODO: manage this directory				
+				//extract to a local temp directory
 				URL url = new URL(getFilename());
 				Path temp = null;
+				String ext = SmartUtils.getFilenameExtension(getFilename());
 				if (getUuid() != null) {
-					temp = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve("ICONDIR").resolve(UuidUtils.uuidToString(getUuid()) + ".svg");
-					if (!Files.exists(temp.getParent())) Files.createDirectories(temp.getParent());
+					temp = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(ICON_DIR).resolve(UuidUtils.uuidToString(getUuid()) + "." + ext); //$NON-NLS-1$
 					if (Files.exists(temp)) return temp.toFile();
+					if (!Files.exists(temp.getParent())) Files.createDirectories(temp.getParent());
 				}else {
-					temp = Files.createTempFile("smart", "icon.svg");
-					
-					temp.toFile().deleteOnExit();//TODO:
+					temp = Files.createTempFile("smart", "." + ext); //$NON-NLS-1$ //$NON-NLS-2$
 				}
+				temp.toFile().deleteOnExit();
 				
 			
 				try(InputStream inputStream = url.openConnection().getInputStream()){

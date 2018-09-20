@@ -440,6 +440,6 @@ public class CmSmartToXmlConverter {
 	}
 	
 	private static String findFileName(String cmFileName, String dmIconFileName) {
-		return SmartUtils.getFilenameWithoutExtension(cmFileName) + "." + SmartUtils.getFilenameExtension(dmIconFileName);
+		return SmartUtils.getFilenameWithoutExtension(cmFileName) + "." + SmartUtils.getFilenameExtension(dmIconFileName); //$NON-NLS-1$
 	}
 }

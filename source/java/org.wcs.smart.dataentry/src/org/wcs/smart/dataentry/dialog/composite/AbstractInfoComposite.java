@@ -54,6 +54,8 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
@@ -222,6 +224,14 @@ public abstract class AbstractInfoComposite extends Composite {
 		addToParent(node);
 	}
 	
+	private void loadFiles(Icon i, Session s) {
+		if (i == null) return;
+		for (IconFile file : i.getFiles()) {
+			file.computeFileLocation(s);
+			file.getIconSet().equals(null);
+		}
+	}
+	
 	/**
 	 * Handles the add datamodel category
 	 */
@@ -251,15 +261,20 @@ public abstract class AbstractInfoComposite extends Composite {
 								s.saveOrUpdate(c);
 								while(c2 != null){
 									c2.getNames().size();
+									loadFiles(c2.getIcon(), s);
+									
 									for (CategoryAttribute ca : c2.getAttributes(true)){
 										ca.getAttribute().getNames().size();
+										loadFiles(ca.getAttribute().getIcon(), s);
+										
 										if (ca.getAttribute().getAggregations()!= null) ca.getAttribute().getAggregations().size();
 										if (ca.getAttribute().getActiveListItems() != null){
 											for (AttributeListItem li : ca.getAttribute().getActiveListItems()){
 												li.getNames().size();
+												loadFiles(li.getIcon(), s);
 											}
 										}
-										visitTreeNodes(ca.getAttribute().getActiveTreeNodes());
+										visitTreeNodes(ca.getAttribute().getActiveTreeNodes(),s);
 									}
 									c2 = c2.getParent();
 								}
@@ -270,11 +285,12 @@ public abstract class AbstractInfoComposite extends Composite {
 						monitor.done();
 						
 					}
-					private void visitTreeNodes(List<AttributeTreeNode> nodes){
+					private void visitTreeNodes(List<AttributeTreeNode> nodes, Session s){
 						if (nodes == null) return;
 						for (AttributeTreeNode n : nodes){
+							loadFiles(n.getIcon(), s);
 							n.getNames().size();
-							visitTreeNodes(n.getActiveChildren());
+							visitTreeNodes(n.getActiveChildren(),s );
 						}
 					}
 				});

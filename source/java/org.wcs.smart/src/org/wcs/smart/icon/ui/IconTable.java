@@ -31,20 +31,19 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.wcs.smart.ca.icon.IconFile;
-import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.ui.Thumbnail;
-import org.wcs.smart.util.SmartUtils;
 
 
 /**
@@ -59,20 +58,10 @@ public class IconTable extends Composite implements Listener {
 	
 	private ScrolledForm infoSection;
 	
-	private IMenuCreator thumbMenu;
-	
-	private Color selectionColor = null;
-	private Color mouseOverColor = null;
-	private Color backgroundColor = null;
-	private Color selectionBorderColor = null;
-
 	private int currentIndex = 0;
 	private int pageSize = 5;
-	private int thumbnailSize = 150;
+	private int thumbnailSize = 50;
 	
-	private Composite spacer = null;
-	
-	private int numColumns = 1;
 	private List<IconFile> attachments;
 	
 	private Job loadImagesJob = new Job("loading images") { //$NON-NLS-1$
@@ -91,10 +80,6 @@ public class IconTable extends Composite implements Listener {
 				final boolean[] needmore = new boolean[] {false};
 				
 				Display.getDefault().syncExec(()->{
-					if (spacer != null) {
-						spacer.dispose();
-						spacer = null;
-					}
 					thumb.addFiles(items);
 					thumb.createThumbs();
 					getParent().layout(true, true);
@@ -113,42 +98,16 @@ public class IconTable extends Composite implements Listener {
 		}		
 	};
 	
-	public IconTable(Composite parent, IMenuCreator thumbMenu){
-		this(parent, SWT.NONE, thumbMenu);
-	}
 	
-	public IconTable(Composite parent){
-		this(parent, SWT.NONE);
-	}
 	
 	public IconTable(Composite parent, int style){
-		this(parent, style, null);
-	}
-	
-	@Override
-	public void setBackground(Color c) {
-		super.setBackground(c);
-		infoSection.setBackground(c);
-		if (thumb != null) thumb.setBackground(c);
-	}
-	
-	public IconTable(Composite parent, int style, IMenuCreator thumbMenu){
 		super(parent, style);
-		this.thumbMenu = thumbMenu;
+		
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;
 		((GridLayout)getLayout()).marginHeight = 0;
 		
-		selectionColor = SmartUtils.getListSelectedColor(getDisplay());
-		mouseOverColor = SmartUtils.getListSelectedColor(getDisplay());
-		selectionBorderColor = getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION);
-		addListener(SWT.Dispose, e->{
-			selectionColor.dispose();
-			mouseOverColor.dispose();
-			selectionBorderColor.dispose();
-		});
-		
-		infoSection = new ScrolledForm(this, SWT.V_SCROLL | SWT.H_SCROLL | SWT.VERTICAL);
+		infoSection = new ScrolledForm(this, SWT.V_SCROLL);
 		infoSection.setExpandHorizontal(true);
 		infoSection.setExpandVertical(true);
 		infoSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -164,10 +123,10 @@ public class IconTable extends Composite implements Listener {
 		addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
-				if (thumb != null && thumb.thumbs != null){
-					for (IconTable.ThumbnailComposite.ThumbInfo t : thumb.thumbs){
-						if (t.thumb != null) t.thumb.disposeImage();
-					}
+				if (thumb == null) return;
+				if (thumb.thumbs == null) return;
+				for (IconTable.ThumbnailComposite.ThumbInfo t : thumb.thumbs){
+					if (t.thumb != null) t.thumb.disposeImage();
 				}
 			}
 		});
@@ -175,17 +134,8 @@ public class IconTable extends Composite implements Listener {
 			if (thumb == null) return;
 			scheduleLoadJob();
 		});
-		
-		createMenu();
 	}
 
-	private void createMenu() {
-		
-	}
-	public void setThumbnailSize(int size) {
-		this.thumbnailSize = size;
-		setAttachments(attachments);
-	}
 	
 	/**
 	 * Set the results to display 
@@ -205,8 +155,11 @@ public class IconTable extends Composite implements Listener {
 			thumb.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			thumb.setBackground(getBackground());
 			infoSection.setOrigin(0, 0);
-			setSize();
+			
 			layoutAttachments();
+			
+		    resize();
+		   
 		});
 	}
 	
@@ -215,8 +168,8 @@ public class IconTable extends Composite implements Listener {
 		if (event == null || event.type == SWT.Resize){
 			if (infoSection == null || infoSection.isDisposed()) return;
 			if (thumb != null){
-				setSize();
 				layoutAttachments();
+				resize();
 			}
 		}
 	}
@@ -227,7 +180,6 @@ public class IconTable extends Composite implements Listener {
 	 */
 	private void scheduleLoadJob() {
 		if (needsToLoad()) {
-			//TODO: the might be finished before we are done here.
 			if (loadImagesJob.getState() != Job.RUNNING) loadImagesJob.schedule();
 		}
 	}
@@ -238,39 +190,25 @@ public class IconTable extends Composite implements Listener {
 	private boolean needsToLoad() {
 		if (attachments == null) return false;
 		if (currentIndex > attachments.size()) return false;
-		int spaces = thumb.getChildren().length % numColumns;
-		boolean more = infoSection.getSize().y + infoSection.getVerticalBar().getSelection() >= thumb.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-		boolean more2 = infoSection.getSize().y + infoSection.getVerticalBar().getSelection() >= thumb.computeSize(SWT.DEFAULT, SWT.DEFAULT).y - thumbnailSize && spaces != 0;
-		return more || more2;
+		int y = infoSection.getSize().y + infoSection.getVerticalBar().getSelection();
+		int columns = infoSection.getClientArea().width / (thumbnailSize + ((RowLayout)thumb.getLayout()).spacing);
+		int rows = y  / (thumbnailSize + ((RowLayout)thumb.getLayout()).spacing) + 1;
+		return columns * rows > currentIndex;
 	}
 	
-	private void setSize() {
-		int width = infoSection.getSize().x - infoSection.getVerticalBar().getSize().x;	
-		int cols = (int)Math.floor(width / (thumbnailSize + 5 ));  //5 margin between images
-		if (cols < 1) cols = 1;
-		numColumns = cols;
-		thumb.updateLayout(cols);
-		thumb.layout(true);
+	private void resize() {
+		Rectangle r = infoSection.getClientArea();
 		
-		if (attachments != null) {
-			int rows = (int)Math.ceil(attachments.size() / (double)cols);
-			int y = (thumbnailSize + 5)* (rows);
-			int heightRequired = y;
-			
-			if (spacer != null) {
-				spacer.dispose();
-				spacer = null;
-			}
-			
-			if (heightRequired > thumb.getSize().y) {
-				spacer = new Composite(infoSection.getBody(), SWT.BORDER);
-				spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-				spacer.setVisible(true);
-				((GridData)spacer.getLayoutData()).heightHint = heightRequired - thumb.getSize().y;
-			}
-			infoSection.reflow(true);
-		}
+		Point p = thumb.computeSize(r.width, SWT.DEFAULT);
+		
+		int columns = infoSection.getClientArea().width / (thumbnailSize + ((RowLayout)thumb.getLayout()).spacing);
+		int rows = attachments.size() / columns + 1;
+		int height = rows * ( thumbnailSize + ((RowLayout)thumb.getLayout()).spacing) + ((RowLayout)thumb.getLayout()).spacing;
+		p.y = height;
+		thumb.setSize(p);
+	    infoSection.setMinSize(p);
 	}
+
 	
 	/*
 	 * layout attachments
@@ -280,127 +218,44 @@ public class IconTable extends Composite implements Listener {
 	}
 	
 	/*
-	 * get selected attachments
-	 */
-	public List<ISmartAttachment> getSelection(){
-		List<ISmartAttachment> sel = new ArrayList<ISmartAttachment>();
-		for (ThumbnailComposite.ThumbInfo t : thumb.thumbs){
-			if (t.isSelected) sel.add(t.file);
-		}
-		return sel;
-	}
-	
-	/**
-	 * adds a listener to given control and all children
-	 * @param parent
-	 * @param listener
-	 * @param eventTypes
-	 */
-	private static void cascadeAdd(Control parent, Listener listener, int... eventTypes){
-		List<Control> controls = new ArrayList<Control>();
-		controls.add(parent);
-		while(!controls.isEmpty()){
-			Control c = controls.remove(0);
-			
-			for (int e: eventTypes){
-				c.addListener(e, listener);
-			}
-			
-			if (c instanceof Composite){
-				for (Control kid : ((Composite)c).getChildren()){
-					controls.add(kid);
-				}
-			}
-		}
-	}
-	
-	private void fireSelectionEvent() {
-		Event swtEvent = new Event();
-		swtEvent.widget = this;
-		this.notifyListeners(SWT.Selection, swtEvent);
-	}
-	
-	/*
 	 * A composite for thumbnails
 	 */
 	private class ThumbnailComposite extends Composite  {
 		private List<ThumbInfo> thumbs;
-		private ThumbInfo lastHover = null; 
-//		private AttachmentTooltipShell shell;
 		
 		public ThumbnailComposite(Composite parent){
 			super(parent, SWT.NONE);
-			GridLayout gl = new GridLayout();
-			gl.marginWidth = gl.marginHeight = 0;
-			setLayout(gl);
-			
-			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			addListener(SWT.MouseUp, e->clearSelection());
+			setLayout(new RowLayout());
+			((RowLayout)getLayout()).wrap = true;
 		}
 
-		public void updateLayout(int numCols){
-			GridLayout gl = new GridLayout(numCols, false);
-			gl.marginWidth = gl.marginHeight = 0;
-			setLayout(gl);
-		}
 		
 		public void addFiles(List<IconFile> fileNames) {
-			if (thumbs == null){
-				thumbs = new ArrayList<IconTable.ThumbnailComposite.ThumbInfo>();
-			}
-			for (IconFile a : fileNames){
-				thumbs.add(new ThumbInfo(a));
-			}
-			int index = 0;
-			for(ThumbInfo t : thumbs){
-				t.index = index++;
-			}	
+			if (thumbs == null) thumbs = new ArrayList<IconTable.ThumbnailComposite.ThumbInfo>();
+			for (IconFile a : fileNames)thumbs.add(new ThumbInfo(a));
 		}
 		
 		private void createThumbs(){
 			if (thumbs == null) return;
 			if (isDisposed()) return;
+			
 			for (ThumbInfo t : thumbs){
 				if (t.thumbGui != null) continue;
 				Composite parent = new Composite(this, SWT.NONE);
-				parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+				parent.setLayoutData(new RowData(thumbnailSize, thumbnailSize));
 				if (t.thumb == null) t.createThumb();
 				Composite thumbNameComp = t.thumb.createThumbnail(parent, SWT.NONE);
 				thumbNameComp.setToolTipText(t.file.getIcon().getName());
-				if (thumbMenu != null) thumbNameComp.setMenu(thumbMenu.createMenu(thumbNameComp));
 				thumbNameComp.setData(t);
 				thumbNameComp.setBackground(thumb.getBackground());
-				thumbNameComp.addDisposeListener(new DisposeListener() {					
-					@Override
-					public void widgetDisposed(DisposeEvent e) {
-						thumbNameComp.setMenu(null);
-					}
-				});
 				t.thumbGui = thumbNameComp;
-
-				cascadeAdd(thumbNameComp,t, SWT.MouseEnter,SWT.MouseExit, SWT.MouseDown, SWT.MouseUp, SWT.MouseMove, SWT.Paint, SWT.MouseHover);
 			}
 		}
 		
-
-		private void clearSelection(){
-			if (thumbs == null) return;
-			for (ThumbInfo c : thumbs){
-				c.isSelected = false;
-				c.colorAll();
-			}
-			fireSelectionEvent();
-		}
-		
-		private class ThumbInfo implements Listener{
-			private static final String LAST_SELECTION_INDEX_KEY = "last_selection_index"; //$NON-NLS-1$
+		private class ThumbInfo { 
 			IconFile file;
 			Thumbnail thumb;
 			Composite thumbGui;
-			
-			boolean isSelected;
-			boolean mouseOver;
-			int index;
 			
 			public ThumbInfo(IconFile file){
 				this.file = file;
@@ -413,119 +268,6 @@ public class IconTable extends Composite implements Listener {
 					
 				}
 			}
-			
-			private void colorAll(){
-				if (backgroundColor == null){
-					backgroundColor = thumbGui.getBackground();
-				}
-				Color color = null;
-				if(isSelected){
-					color = selectionColor;
-				}else{
-					if (mouseOver){
-						color = mouseOverColor;
-					}else{
-						color = backgroundColor;
-					}
-				}
-				List<Control> kids = new ArrayList<Control>();
-				kids.add(thumbGui);
-				while(!kids.isEmpty()){
-					Control c = kids.remove(0);
-					if (c == null) continue;
-					c.setBackground(color);
-					if (c instanceof Composite){
-						for (Control cc : ((Composite)c).getChildren()){
-							kids.add(cc);
-						}
-					}
-				}
-			}
-			
-			@Override
-			public void handleEvent(Event event) {
-				if (event.type == SWT.MouseEnter){
-					mouseOver = true;
-					colorAll();
-					thumbGui.redraw();
-				}else if (event.type == SWT.MouseExit){
-					mouseOver = false;
-					colorAll();
-					thumbGui.redraw();
-				}else if (event.type == SWT.MouseMove){
-				}else if (event.type == SWT.MouseDown){
-					if (event.stateMask == 0 && !isSelected) changeSelection(event);
-				}else if (event.type == SWT.MouseUp){
-					changeSelection(event);
-				}else if (event.type == SWT.Paint){
-					if (mouseOver){					
-						event.gc.setForeground(selectionBorderColor);
-						event.gc.setLineWidth(4);
-						event.gc.drawRectangle(0, 0, thumbGui.getClientArea().width, thumbGui.getClientArea().height);
-					}else if (isSelected){
-						event.gc.setForeground(getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION));
-						event.gc.setLineWidth(4);
-						event.gc.drawRectangle(0, 0, thumbGui.getClientArea().width, thumbGui.getClientArea().height);
-					}else{
-						event.gc.setForeground(getDisplay().getSystemColor(SWT.COLOR_WIDGET_BORDER));
-						event.gc.setLineWidth(2);
-						event.gc.drawRectangle(0, 0, thumbGui.getClientArea().width, thumbGui.getClientArea().height);
-					}
-//				}else if (event.type == SWT.MouseHover) {
-//					if (this != lastHover || shell.isDisposed()) {
-//						getShell().getDisplay().asyncExec(()->{
-//							//EG: running this in async exec makes it work nicely on mac
-//							if (resultSet instanceof IDesktopPagedImageResultSet) {
-//								shell = new AttachmentTooltipShell(getShell(), (IDesktopPagedImageResultSet)resultSet, file);
-//								shell.open(thumbGui.toDisplay(event.x+10, event.y));
-//								lastHover = this;
-//							}
-//						});
-//					}
-				}
-			}
-			
-			private void changeSelection(Event event){
-				Integer lastSelection = (Integer) getParent().getData(LAST_SELECTION_INDEX_KEY);
-				if (lastSelection == null) lastSelection = 0;
-				getParent().setData(LAST_SELECTION_INDEX_KEY, index);
-				
-				if ((event.stateMask & SWT.CTRL) != 0){
-					if (event.button == 1) isSelected = !isSelected;
-				}else if ((event.stateMask & SWT.SHIFT) != 0){
-					boolean newSelection = !isSelected;
-					//clearSelection();
-					int from = lastSelection;
-					int to = index;
-					if (index < lastSelection){
-						from = index;
-						to = lastSelection;
-					}
-					for (int i = from; i <= to; i ++){
-						if (i == index){
-							thumbs.get(i).isSelected = true;
-						}else{
-							thumbs.get(i).isSelected = newSelection;		
-						}
-						thumbs.get(i).colorAll();
-					}
-					
-				}else{
-					if (event.button == 1){
-						clearSelection();
-					}else if (!isSelected){
-						clearSelection();
-					}
-					isSelected = true;
-				}
-				colorAll();
-				fireSelectionEvent();
-			}
 		}
-	}
-
-	
-	public interface IMenuCreator{
-		public Menu createMenu(Composite composite);
 	}
 }

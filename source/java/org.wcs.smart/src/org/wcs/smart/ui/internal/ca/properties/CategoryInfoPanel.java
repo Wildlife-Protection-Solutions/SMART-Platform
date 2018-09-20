@@ -92,7 +92,7 @@ public class CategoryInfoPanel extends Composite {
 		}
 		
 		Label ll = new Label(this, SWT.NONE);
-		ll.setText("Icons:");
+		ll.setText(Messages.CategoryInfoPanel_IconLabel);
 		ll.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		
 		iconPanel = new IconPanel(this, canEdit);
@@ -127,7 +127,7 @@ public class CategoryInfoPanel extends Composite {
 	}
 	
 	public boolean validate(){
-		return nameKeyFields.validate() && iconPanel.validate();
+		return nameKeyFields.validate();
 	}
 	
 }

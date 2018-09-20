@@ -52,6 +52,7 @@ import org.locationtech.udig.catalog.rasterings.AbstractRasterService;
 import org.locationtech.udig.catalog.rasterings.AbstractRasterServiceInfo;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.locationtech.udig.style.sld.SLDContent;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.raster.GridMetadata;
 import org.wcs.smart.map.raster.RasterBuilder;
@@ -409,8 +410,7 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 	 * Removes all rester files that were created in the temporal directory
 	 */
 	private void cleanTemporaryDirectory() {
-		
-		File tempDirectory = QueryPlugIn.getDefault().getQueryTempDirectory();
+		File tempDirectory = SmartContext.INSTANCE.getTempFilestoreLocation();
 		if(tempDirectory.exists()){
 			if(this.rasterFile != null && this.rasterFile.exists()){
 				final String[] fullName = this.rasterFile.getName().split("[.]");				 //$NON-NLS-1$

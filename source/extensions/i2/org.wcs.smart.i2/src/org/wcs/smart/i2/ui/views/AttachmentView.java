@@ -145,9 +145,13 @@ public class AttachmentView {
 			
 	        Image newImage = new Image(Display.getDefault(), newWidth, newHeight);
 			GC gc3 = new GC(newImage);
-			gc3.setTransform(exifTransform);
-			gc3.drawImage(rawImage, 0,0);
-			rawImage.dispose();
+			try {
+				gc3.setTransform(exifTransform);
+				gc3.drawImage(rawImage, 0,0);
+			}finally {
+				gc3.dispose();
+				rawImage.dispose();
+			}
 			rawImage = newImage;
 		}
 		

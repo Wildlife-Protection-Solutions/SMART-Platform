@@ -793,7 +793,7 @@ public class SmartUtils {
 	
 	
 	/**
-	 * Reads an svg file into an SWT image. User must correctly display of the image
+	 * Reads an svg file into an SWT image. User must correctly dispose of the image
 	 * when done with it.
 	 * 
 	 * @param display
@@ -822,18 +822,19 @@ public class SmartUtils {
 			throw ex;
 		}
 	}
-	public static Image readSvg(Display display, Path file) throws IOException, TranscoderException {
-		return readSvg(display, file, null);
-	}
+	
 	
 	/**
-	 * 
-	 * @param size
+	 * Converts the file to an image of the given size.  Works for svg as well as png etc.
+	 * Users must dispose of image when done with it.
+	 * Assumes svg files are identified by ".svg" extension
+	 * @param file 
+	 * @param size can be null in which case image is not resized
 	 * @return
 	 */
-	public static Image getImage(Path file, int size) {
+	public static Image getImage(Path file, Integer size) {
 		
-		if (file.getFileName().toString().endsWith(".svg")) {
+		if (file.getFileName().toString().endsWith(".svg")) { //$NON-NLS-1$
 			try {
 				return readSvg(Display.getDefault(), file, size);
 			}catch (Exception ex) {
@@ -848,20 +849,35 @@ public class SmartUtils {
 			return null;
 		}
 		
+		
 		try {
-			Transform imageTransform = SmartUtils.getExifImageTransform(file.toFile(), size, size);
+			//check fo exif metadata for transform
+			int newWidth = rawImage.getBounds().width;
+			int newHeight = rawImage.getBounds().height;
+			if (size != null) {
+				newWidth = size;
+				newHeight = size;
+			}
+			Transform imageTransform = SmartUtils.getExifImageTransform(file.toFile(), newWidth, newHeight);
 			if (imageTransform != null) {
-				Image image3 = new Image(Display.getDefault(), size, size);
+				Image image3 = new Image(Display.getDefault(), newWidth, newHeight);
 				GC gc3 = new GC(image3);
-				gc3.setTransform(imageTransform);
-				gc3.drawImage(rawImage, 0, 0);
-				rawImage.dispose();
+				try {
+					gc3.setTransform(imageTransform);
+					gc3.drawImage(rawImage, 0, 0);
+				}finally {
+					gc3.dispose();
+					rawImage.dispose();
+				}
 				return image3;
 			}
 		}catch (Exception ex) {
 			
 		}
-	
+		
+		if (size == null) return rawImage;
+		
+		//resize
 		Rectangle bounds = rawImage.getBounds();
 		int x = 0, y = 0, width = 0, height = 0;
 		if (bounds.width > bounds.height) {
@@ -876,8 +892,12 @@ public class SmartUtils {
 		// resize image
 		Image image2 = new Image(Display.getDefault(), size, size);
 		GC gc = new GC(image2);
-		gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);
-		rawImage.dispose();
+		try {
+			gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);
+		}finally {
+			gc.dispose();
+			rawImage.dispose();
+		}
 		return image2;
 		
 	}

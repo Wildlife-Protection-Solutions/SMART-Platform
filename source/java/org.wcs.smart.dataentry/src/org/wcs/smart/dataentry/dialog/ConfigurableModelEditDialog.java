@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.TabItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -92,6 +93,9 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 			this.model = (ConfigurableModel)session.get(ConfigurableModel.class, cm.getUuid());	
 		}else{
 			this.model = cm;
+			if (cm.getIconSet() != null) {
+				cm.setIconSet((IconSet)session.merge(cm.getIconSet()));
+			}
 		}
 		this.clonedFrom = clonedFrom;
 		this.original2CloneItemMap = o2iMap;

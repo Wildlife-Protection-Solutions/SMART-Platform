@@ -25,6 +25,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,6 +60,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
@@ -66,13 +68,32 @@ import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
+/**
+ * Dialog for selecting a SMART icon.  Can either select an 
+ * existing icon or add a new one.
+ * 
+ * @author Emily
+ *
+ */
 public class IconSelectionDialog extends TitleAreaDialog {
 
+	private static final String PATH_KEY = "PATH"; //$NON-NLS-1$
+
+	private static final String DIR_PREF_KEY = "org.wcs.smart.ui.internal.ca.properties.IconSelectionDialog.dir"; //$NON-NLS-1$
+	
 	private static final int SIZE = 32;
 	
+	/**
+	 * The type of dialog.  SELECT allows uses to select
+	 * an icon from the existing set (or add a new one), NEW allows users to create
+	 * a new icon, EDIT allows users to edit an existing icon
+	 * @author Emily
+	 *
+	 */
 	public static enum Type {
 		SELECT,
 		NEW,
@@ -132,7 +153,7 @@ public class IconSelectionDialog extends TitleAreaDialog {
 				Icon icon = createIcon();
 				//only create icon if at least one file is selected
 				if (icon.getFiles().isEmpty()) {
-					MessageDialog.openError(getShell(), "Icon", "At least one icon must be provided.");
+					MessageDialog.openError(getShell(), Messages.IconSelectionDialog_DialogTitle, Messages.IconSelectionDialog_IconRequiredMsg);
 					return;
 				}
 				selectedIcon = icon;
@@ -142,18 +163,17 @@ public class IconSelectionDialog extends TitleAreaDialog {
 			Icon icon = createIcon();
 			//only create icon if at least one file is selected
 			if (icon.getFiles().isEmpty()) {
-				MessageDialog.openError(getShell(), "Icon", "At least one icon must be provided.");
+				MessageDialog.openError(getShell(), Messages.IconSelectionDialog_DialogTitle, Messages.IconSelectionDialog_IconRequiredMsg);
 				return;
 			}
 			selectedIcon = icon;
 		}else if (type == Type.EDIT) {
-			//TODO:
 			selectedIcon.setName(txtName.getText());
 			selectedIcon.updateName(SmartDB.getCurrentLanguage(), txtName.getText());
 			
 			for (Entry<IconSet, Label> item : imports.entrySet()) {
-				if (item.getValue().getData("PATH") == null) continue;
-				Path file = (Path)item.getValue().getData("PATH");
+				if (item.getValue().getData(PATH_KEY) == null) continue;
+				Path file = (Path)item.getValue().getData(PATH_KEY);
 				
 				IconFile f = selectedIcon.getIconFile(item.getKey());
 				if (f != null) {
@@ -183,7 +203,7 @@ public class IconSelectionDialog extends TitleAreaDialog {
 	
 	private Icon createIcon() {
 		String name = txtName.getText().trim();
-		if (name.isEmpty()) name = "SMART Icon";
+		if (name.isEmpty()) name = Messages.IconSelectionDialog_DefaultName;
 		
 		Icon icon = new Icon();
 		icon.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -193,8 +213,8 @@ public class IconSelectionDialog extends TitleAreaDialog {
 		icon.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
 		icon.setFiles(new ArrayList<>());
 		for (Entry<IconSet, Label> item : imports.entrySet()) {
-			if (item.getValue().getData("PATH") == null) continue;
-			Path file = (Path)item.getValue().getData("PATH");
+			if (item.getValue().getData(PATH_KEY) == null) continue;
+			Path file = (Path)item.getValue().getData(PATH_KEY);
 			
 			IconFile f = new IconFile();
 			f.setIcon(icon);
@@ -214,7 +234,7 @@ public class IconSelectionDialog extends TitleAreaDialog {
 		if (activeSets == null) {
 			activeSets = new ArrayList<>();
 			try(Session s = HibernateManager.openSession()){
-				activeSets.addAll(QueryFactory.buildQuery(s, IconSet.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				activeSets.addAll(QueryFactory.buildQuery(s, IconSet.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 				activeSets.forEach(set->{
 					set.getName();
 					set.getUuid().equals(null);
@@ -228,7 +248,7 @@ public class IconSelectionDialog extends TitleAreaDialog {
 		
 		if (type == Type.SELECT) {
 			Label l = new Label(main, SWT.NONE);
-			l.setText("Icon Source:");
+			l.setText(Messages.IconSelectionDialog_SourceOp);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 			
 			Composite btn = new Composite(main, SWT.NONE);
@@ -238,11 +258,11 @@ public class IconSelectionDialog extends TitleAreaDialog {
 			((GridLayout)btn.getLayout()).marginHeight = 0;
 			
 			btnLibrary = new Button(btn, SWT.RADIO);
-			btnLibrary.setText("SMART Icon");
+			btnLibrary.setText(Messages.IconSelectionDialog_SmartSrc);
 			btnLibrary.setSelection(true);
 			
 			btnImport = new Button(btn, SWT.RADIO);
-			btnImport.setText("Import New Icon");
+			btnImport.setText(Messages.IconSelectionDialog_NewSrc);
 			
 			l = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
@@ -262,7 +282,10 @@ public class IconSelectionDialog extends TitleAreaDialog {
 		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		stackPanel.setLayout(new StackLayout());
 		
-		iconLibraryPanel = createLibraryComposite(stackPanel, activeSets);
+		if (type == Type.SELECT) {
+			iconLibraryPanel = createLibraryComposite(stackPanel, activeSets);
+			loadDataJob.schedule();
+		}
 		importPanel = createImportComposite(stackPanel, activeSets);
 		
 		if (type == Type.SELECT) {
@@ -272,11 +295,11 @@ public class IconSelectionDialog extends TitleAreaDialog {
 		}
 		stackPanel.layout();
 		
-		loadDataJob.schedule();
 		
-		setMessage("Select an new icon ");
-		setTitle("SMART Icon");
-		getShell().setText("SMART Icon");
+		
+		setMessage(Messages.IconSelectionDialog_DialogMsg);
+		setTitle(Messages.IconSelectionDialog_DialogTitle2);
+		getShell().setText(Messages.IconSelectionDialog_DialogTitle2);
 		return parent;
 	}
 	
@@ -286,7 +309,7 @@ public class IconSelectionDialog extends TitleAreaDialog {
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(panel, SWT.NONE);
-		l.setText("Icon Name:");
+		l.setText(Messages.IconSelectionDialog_NameLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtName = new Text(panel, SWT.BORDER);
@@ -298,7 +321,7 @@ public class IconSelectionDialog extends TitleAreaDialog {
 		imports = new HashMap<>();
 		for (IconSet s : sets) {
 			l = new Label(panel, SWT.NONE);
-			l.setText(s.getName() + ":");
+			l.setText(s.getName() + ":"); //$NON-NLS-1$
 			l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			
 			Composite temp = new Composite(panel, SWT.NONE);
@@ -309,7 +332,7 @@ public class IconSelectionDialog extends TitleAreaDialog {
 			
 			Label imageLabel = new Label(temp, SWT.NONE);
 			imports.put(s, imageLabel);
-			imageLabel.setText("");
+			imageLabel.setText(Messages.IconSelectionDialog_15);
 			imageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			((GridData)imageLabel.getLayoutData()).heightHint = SIZE;
 			((GridData)imageLabel.getLayoutData()).widthHint = SIZE;
@@ -317,12 +340,12 @@ public class IconSelectionDialog extends TitleAreaDialog {
 				if (imageLabel.getImage() != null) imageLabel.getImage().dispose();
 			});
 			Button btnImport = new Button(temp, SWT.NONE);
-			btnImport.setText("...");
+			btnImport.setText("..."); //$NON-NLS-1$
 			btnImport.addListener(SWT.Selection, e->{
 				Path p = selectFile();
 				if (p == null) return;
 				updateName(p);
-				imageLabel.setData("PATH", p);
+				imageLabel.setData(PATH_KEY, p);
 				if (imageLabel.getImage() != null) {
 					//dispose of existing image
 					Image i = imageLabel.getImage();
@@ -331,8 +354,8 @@ public class IconSelectionDialog extends TitleAreaDialog {
 				}
 				Image i = null;
 				try {
-					i = SmartUtils.readSvg(getShell().getDisplay(), p, SIZE);
-					imageLabel.setText("");
+					i = SmartUtils.getImage(p, SIZE);
+					imageLabel.setText(""); //$NON-NLS-1$
 					imageLabel.setImage(i);
 				} catch (Exception e1) {
 					imageLabel.setText(p.getFileName().toString());
@@ -342,8 +365,8 @@ public class IconSelectionDialog extends TitleAreaDialog {
 				//update others
 				for (Label iLabel : imports.values()) {
 					if (iLabel == imageLabel) continue;
-					if (iLabel.getData("PATH") != null || iLabel.getImage() != null) continue;
-					iLabel.setData("PATH", p);
+					if (iLabel.getData(PATH_KEY) != null || iLabel.getImage() != null) continue;
+					iLabel.setData(PATH_KEY, p);
 					if (i == null ) {
 						iLabel.setText(p.getFileName().toString());
 					}else {
@@ -356,13 +379,13 @@ public class IconSelectionDialog extends TitleAreaDialog {
 				IconFile f = selectedIcon.getIconFile(s);
 				if (f != null) {
 					File file = getIconFile(f);
-					imageLabel.setData("PATH", file.toPath());
+					imageLabel.setData(PATH_KEY, file.toPath());
 					try {
-						Image i = SmartUtils.readSvg(getShell().getDisplay(), file.toPath(), SIZE);
-						imageLabel.setText("");
+						Image i = SmartUtils.getImage(file.toPath(), SIZE);
+						imageLabel.setText(""); //$NON-NLS-1$
 						imageLabel.setImage(i);
 					} catch (Exception e1) {
-						imageLabel.setText("Error");
+						imageLabel.setText(Messages.IconSelectionDialog_IconError);
 						imageLabel.setToolTipText(e1.getMessage());
 					}
 				}
@@ -408,7 +431,7 @@ public class IconSelectionDialog extends TitleAreaDialog {
 		});
 		
 		TableViewerColumn emptycolumn = new TableViewerColumn(tblIcons, SWT.NONE);
-		emptycolumn.getColumn().setText("");
+		emptycolumn.getColumn().setText(""); //$NON-NLS-1$
 		emptycolumn.getColumn().setWidth(0);
 		emptycolumn.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
@@ -418,7 +441,7 @@ public class IconSelectionDialog extends TitleAreaDialog {
 		
 		
 		TableViewerColumn colName = new TableViewerColumn(tblIcons, SWT.NONE);
-		colName.getColumn().setText("Name");
+		colName.getColumn().setText(Messages.IconSelectionDialog_NameColumn);
 		colName.getColumn().setWidth(150);
 		colName.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
@@ -432,14 +455,25 @@ public class IconSelectionDialog extends TitleAreaDialog {
 			TableViewerColumn colIcon = new TableViewerColumn(tblIcons, SWT.NONE);
 			colIcon.getColumn().setText(s.getName());
 			colIcon.setLabelProvider(new ColumnLabelProvider() {
+				private HashMap<Icon,Image> images = new HashMap<>();
+				@Override
 				public String getText(Object element) {
 					return null;
 				}
+				@Override
+				public void dispose() {
+					super.dispose();
+					images.values().forEach(e->e.dispose());
+				}
+				@Override
 				public Image getImage(Object element) {
+					if (images.containsKey(element))  return images.get(element);
 					if (element instanceof Icon) {
 						IconFile ff = ((Icon)element).getIconFile(s);
 						try {
-							return SmartUtils.readSvg(getShell().getDisplay(), ff.getAttachmentFile().toPath(), SIZE);
+							Image img = SmartUtils.getImage(ff.getAttachmentFile().toPath(), SIZE);
+							images.put((Icon)element, img);
+							return img;
 						}catch (Throwable t) {
 							
 						}
@@ -468,16 +502,21 @@ public class IconSelectionDialog extends TitleAreaDialog {
 	
 	private Path selectFile() {
 		FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
-		fd.setFilterExtensions(new String[] {"*.svg","*.png","*.*"});
-		fd.setFilterNames(new String[] {"SVG (*.svg)", "PNG (*.png)", "All Files (*.*)"});
+		fd.setFilterExtensions(new String[] {"*.svg","*.png","*.*"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		fd.setFilterNames(new String[] {Messages.IconSelectionDialog_svgFile, Messages.IconSelectionDialog_pngFile, Messages.IconSelectionDialog_allFile});
 		
-		//TODO: save previous path?
+		String start = SmartPlugIn.getDefault().getPreferenceStore().getString(DIR_PREF_KEY);
+		if (start != null) {
+			fd.setFilterPath(start);
+		}
+
 		String file = fd.open();
 		if (file == null) return null;
 		Path p = Paths.get(file);
+		try {
+			SmartPlugIn.getDefault().getPreferenceStore().putValue(DIR_PREF_KEY, p.getParent().toString());
+		}catch (Exception ex) {}
 		if (!Files.exists(p)) return null;
-		
-		
 		return p;
 	}
 	
@@ -493,13 +532,13 @@ public class IconSelectionDialog extends TitleAreaDialog {
 		return true;
 	}
 
-	private Job loadDataJob = new Job("load icons") {
+	private Job loadDataJob = new Job("load icons") { //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Icon> thisicons = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				thisicons.addAll(QueryFactory.buildQuery(session, Icon.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				thisicons.addAll(QueryFactory.buildQuery(session, Icon.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 				for (Icon ii : thisicons) {
 					ii.getFiles().forEach(ff->{
 						ff.computeFileLocation(session);
@@ -507,7 +546,9 @@ public class IconSelectionDialog extends TitleAreaDialog {
 					});
 				}
 			}
+			thisicons.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 			icons = thisicons;
+			
 			Display.getDefault().syncExec(()->{
 				tblIcons.setItemCount(thisicons.size());
 				tblIcons.setInput(thisicons);

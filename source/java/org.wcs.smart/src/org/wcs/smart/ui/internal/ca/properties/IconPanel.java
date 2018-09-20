@@ -23,9 +23,9 @@ package org.wcs.smart.ui.internal.ca.properties;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
@@ -35,12 +35,20 @@ import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Icon panel for adding icons to data model items
+ * 
+ * @author Emily
+ *
+ */
 public class IconPanel extends Composite {
 
 	private boolean canEdit = false;
+	private Icon newIcon = null;
 	
 	public IconPanel(Composite parent, boolean canEdit) {
 		super(parent, SWT.NONE);
@@ -72,14 +80,13 @@ public class IconPanel extends Composite {
 			((GridLayout)c.getLayout()).marginHeight = 0;
 			
 			Label l = new Label(c, SWT.NONE);
-			l.setText("(none)");
+			l.setText(Messages.IconPanel_NoIconLabel);
 			
 			if (canEdit) {
 				Link lnk = new Link(c, SWT.NONE);
-				lnk.setText("<a>" + DialogConstants.EDIT_LINK_TEXT + "</a>");
+				lnk.setText("<a>" + DialogConstants.EDIT_LINK_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 				lnk.addListener(SWT.Selection, e->editIcons());
 			}
-			
 		}else {
 			
 			Composite c = new Composite(this, SWT.NONE);
@@ -89,19 +96,21 @@ public class IconPanel extends Composite {
 			((GridLayout)c.getLayout()).marginHeight = 0;
 			
 			Label l = new Label(c, SWT.NONE);
-			l.setText(icon.getName() == null ? "" : icon.getName());
+			l.setText(icon.getName() == null ? "" : icon.getName()); //$NON-NLS-1$
 			
 			if (canEdit) {
 				Link lnk = new Link(c, SWT.NONE);
-				lnk.setText("<a>" + DialogConstants.EDIT_LINK_TEXT + "</a>");
+				lnk.setText("<a>" + DialogConstants.EDIT_LINK_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 				lnk.addListener(SWT.Selection, e->editIcons());
 			}
 			
 			Composite images = new Composite(this, SWT.NONE);
-			images.setLayout(new FillLayout());
-			((FillLayout)images.getLayout()).spacing = 10;
+			images.setLayout(new RowLayout());
+			((RowLayout)images.getLayout()).spacing = 10;
+			((RowLayout)images.getLayout()).wrap = true;
 			images.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-			
+			((GridData)images.getLayoutData()).widthHint = images.getClientArea().width;
+
 			for (IconFile file : icon.getFiles()) {
 				
 				Composite temp = new Composite(images, SWT.NONE);
@@ -117,19 +126,21 @@ public class IconPanel extends Composite {
 				((GridData)cc.getLayoutData()).heightHint = 50;
 				
 				l = new Label(temp, SWT.NONE);
-				l.setText(file.getIconSet().getName());
-				
+				l.setText(file.getIconSet().getName());				
 			}
 		}
 		this.layout(true);
 	}
+	
+	/**
+	 * Updates the datamodel icon 
+	 * @param object
+	 */
 	public void updateDmObject(DmObject object) {
 		if(newIcon != null) {
 			object.setIcon(newIcon);
 		}
 	}
-	
-	private Icon newIcon = null;
 	
 	private void editIcons() {
 		IconSelectionDialog dialog = new IconSelectionDialog(getShell(), IconSelectionDialog.Type.SELECT);
@@ -138,9 +149,5 @@ public class IconPanel extends Composite {
 		this.newIcon = dialog.getSelectedIcon();
 		updateIcon(newIcon);
 		fireSelectionListeners();
-	}
-	
-	public boolean validate() {
-		return true;
 	}
 }

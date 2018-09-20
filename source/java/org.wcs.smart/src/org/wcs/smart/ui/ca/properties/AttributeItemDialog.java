@@ -109,13 +109,16 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 	
 		if (toUpdate instanceof DmObject) {
 			Label l = new Label(container, SWT.NONE);
-			l.setText("Icons:");
+			l.setText(Messages.AttributeItemDialog_IconLabel);
 			l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			
 			icon = new IconPanel(container, true);
 			icon.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			icon.setDmObject((DmObject) toUpdate);
-			icon.addListener(SWT.Selection, e->modified());
+			icon.addListener(SWT.Selection, e->{
+				modified();
+				container.layout(true);
+			});
 		}
 		
 		setMessage(Messages.AttributeItemDialog_Dialog_Message1);

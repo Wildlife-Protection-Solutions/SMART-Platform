@@ -296,7 +296,7 @@ public class AttributeTree {
 		viewer.getTree().setLinesVisible(false);
 		
 		TreeViewerColumn labelColumn = new TreeViewerColumn(viewer, SWT.NONE);
-		labelColumn.getColumn().setText("Tree Node");
+		labelColumn.getColumn().setText(Messages.AttributeTree_TreeNodeColumn);
 		labelColumn.getColumn().setWidth(150);
 		labelColumn.setLabelProvider(new ColumnLabelProvider() {
 			
@@ -312,9 +312,11 @@ public class AttributeTree {
 		});
 		
 		TreeViewerColumn iconColumn = new TreeViewerColumn(viewer, SWT.NONE);
-		iconColumn.getColumn().setText("Icon");
+		iconColumn.getColumn().setText(Messages.AttributeTree_IconColumn);
 		iconColumn.setLabelProvider(new ColumnLabelProvider() {
-			HashMap<Icon, Image> images = new HashMap<>();
+			
+			private HashMap<Icon, Image> images = new HashMap<>();
+			
 			@Override
 			public String getText(Object element) {
 				return null;
@@ -323,28 +325,29 @@ public class AttributeTree {
 			@Override
 			public Image getImage(Object element) {
 				if (element instanceof AttributeTreeNode) {
-					//TODO: make a shared label provider for icon
 					AttributeTreeNode li = (AttributeTreeNode)element;
 					if (li.getIcon() == null) return null;
 					if (images.containsKey(li.getIcon())) return images.get(li.getIcon());
 					List<IconFile> files = li.getIcon().getFiles();
 					if (files.isEmpty()) return null;
 					
+					//combine all files into a single image 
 					Image img = new Image(Display.getDefault(), (AttributeInfoPanel.LIST_ICON_SIZE+5) * files.size(), AttributeInfoPanel.LIST_ICON_SIZE);
 					images.put(li.getIcon(), img);
 					GC gc = new GC(img);
-					
-					for (int i = 0; i < files.size(); i++) {
-						IconFile ff = files.get(i);
-						try {
-							Image mm = SmartUtils.readSvg(viewer.getControl().getDisplay(), ff.getAttachmentFile().toPath(), AttributeInfoPanel.LIST_ICON_SIZE);
-							gc.drawImage(mm, 0,0, AttributeInfoPanel.LIST_ICON_SIZE,AttributeInfoPanel.LIST_ICON_SIZE,i*(AttributeInfoPanel.LIST_ICON_SIZE+5),0,AttributeInfoPanel.LIST_ICON_SIZE,AttributeInfoPanel.LIST_ICON_SIZE);
-							mm.dispose();
-						}catch(Throwable t) {
-							
+					try {
+						for (int i = 0; i < files.size(); i++) {
+							IconFile ff = files.get(i);
+							Image mm = SmartUtils.getImage(ff.getAttachmentFile().toPath(), AttributeInfoPanel.LIST_ICON_SIZE);
+							try {
+								gc.drawImage(mm, 0,0, AttributeInfoPanel.LIST_ICON_SIZE,AttributeInfoPanel.LIST_ICON_SIZE,i*(AttributeInfoPanel.LIST_ICON_SIZE+5),0,AttributeInfoPanel.LIST_ICON_SIZE,AttributeInfoPanel.LIST_ICON_SIZE);
+							}finally {
+								mm.dispose();
+							}
 						}
+					}finally {
+						gc.dispose();
 					}
-					gc.dispose();
 					return img;
 					
 				}

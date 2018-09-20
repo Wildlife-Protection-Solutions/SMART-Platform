@@ -33,11 +33,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWTException;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.graphics.Transform;
-import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.internal.Messages;
@@ -117,54 +113,7 @@ public class LoadThumbnailImageJob extends Job {
 						// skip images > 200MB
 						return;
 					}
-					if (file.getAbsolutePath().toString().endsWith(".svg")) { //$NON-NLS-1$
-						try {
-							image = SmartUtils.readSvg(Display.getDefault(), file.toPath(), thumbnailSize);
-							return ;
-						}catch (Throwable t) {
-							//eat this exception
-							t.printStackTrace();
-						}
-					}
-					
-					Image rawImage = null;
-					try{
-						rawImage = new Image(Display.getDefault(), file.getAbsolutePath());
-					}catch (Exception ex) {
-						//eat this exception; probably not an image
-					}
-					if (rawImage == null) return;
-					
-					// scale image
-					Rectangle bounds = rawImage.getBounds();
-					int x = 0, y = 0, width = 0, height = 0;
-					if (bounds.width > bounds.height) {
-						width = thumbnailSize;
-						height = bounds.height * thumbnailSize / bounds.width;
-						y = (thumbnailSize - height) / 2;
-					} else {
-						height = thumbnailSize;
-						width = bounds.width * thumbnailSize / bounds.height;
-						x = (thumbnailSize - width) / 2;
-					}
-					
-					Transform imageTransform = SmartUtils.getExifImageTransform(file, thumbnailSize, thumbnailSize);
-					if (imageTransform != null) {
-						Image image3 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
-						GC gc3 = new GC(image3);
-						gc3.setTransform(imageTransform);
-						gc3.drawImage(rawImage, 0, 0, rawImage.getBounds().width, rawImage.getBounds().height, x, y, width, height);
-						rawImage.dispose();
-						image = image3;
-					}else {
-						// resize image
-						Image image2 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
-						GC gc = new GC(image2);
-						gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);
-						rawImage.dispose();
-						image = image2;
-					}
-					
+					image = SmartUtils.getImage(file.toPath(), thumbnailSize);
 				}finally {
 					if (deleteMe && file != null) {
 						try {

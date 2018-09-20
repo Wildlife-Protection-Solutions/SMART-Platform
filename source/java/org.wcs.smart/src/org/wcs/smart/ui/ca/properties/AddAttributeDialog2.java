@@ -27,10 +27,8 @@ import java.util.Collection;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -96,20 +94,8 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 	public Control createDialogArea(Composite parent){
 		Composite myparent = (Composite) super.createDialogArea(parent);
 		myparent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		//Create an outer composite for spacing
-		ScrolledComposite scrolled = new ScrolledComposite(myparent, SWT.V_SCROLL | SWT.H_SCROLL );
-		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));				
-		// always show the focus control
-		scrolled.setShowFocusedControl(true);
-		scrolled.setExpandHorizontal(true);
-		scrolled.setExpandVertical(true);
-		
-		Composite composite = new Composite(scrolled, SWT.NONE);
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		composite.setLayout(new GridLayout(1, false));
 
-
-		attributePanel = new AttributeInfoPanel(composite, SWT.NONE, 
+		attributePanel = new AttributeInfoPanel(myparent, SWT.NONE, 
 				true, toUpdate.getKeyId() == null, currentSession);
 		
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true,true);
@@ -134,9 +120,6 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 		
 		attributePanel.setAttribute(toUpdate, siblings, defaultLang);
 		
-		scrolled.setContent(composite);
-		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
 		if (toUpdate.getKeyId() == null){
 			getShell().setText(Messages.AddAttributeDialog2_DialogTitle);
 			setMessage(Messages.AddAttributeDialog2_New_DialogMessage);
@@ -146,7 +129,7 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 			setMessage(MessageFormat.format(Messages.AddAttributeDialog2_Edit_DialogMessage2, new Object[]{toUpdate.getName()}));
 			setTitle(Messages.AddAttributeDialog2_EditAttribute_DialogTitle);
 		}
-		return composite;
+		return myparent;
 	}
 	
 	@Override
@@ -168,6 +151,7 @@ public class AddAttributeDialog2 extends TitleAreaDialog {
 	public Point getInitialSize(){
 		Point p = super.getInitialSize();
 		p.x = Math.min(p.x, 550);
+		p.y = Math.min(p.y, 750);
 		return p;
 	}
 	/*

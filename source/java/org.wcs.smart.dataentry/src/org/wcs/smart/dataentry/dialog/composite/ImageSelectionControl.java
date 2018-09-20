@@ -41,7 +41,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.SmartPlugIn;
@@ -158,8 +157,6 @@ public class ImageSelectionControl extends Composite {
 		gd.marginWidth = 0;
 		this.setLayout(gd);
 
-		int h = 64;
-		int w = h;
 		
 		cmbType = new ComboViewer(this, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
@@ -171,9 +168,9 @@ public class ImageSelectionControl extends Composite {
 		});
 		cmbType.setInput(Type.values());
 		
-		
+		int size = 64;
 		canvas = new Canvas(this, SWT.BORDER);
-		GridData canvasLayoutData = new GridData(w, h);
+		GridData canvasLayoutData = new GridData(size, size);
 		canvasLayoutData.verticalAlignment = SWT.TOP;
 		
 		canvas.setLayoutData(canvasLayoutData);
@@ -183,35 +180,10 @@ public class ImageSelectionControl extends Composite {
 				
 				File file = contentProvider.getImageFile();
 				if (file != null && file.exists() && file.isFile()) {
-					Image image = null;
+					
+					Image image = SmartUtils.getImage(file.toPath(), size);
 					try {
-						image = new Image(Display.getDefault(), file.getAbsolutePath());
-					}catch (Exception ex) {
-						try {
-							image = SmartUtils.readSvg(getDisplay(), file.toPath()); 
-						}catch (Exception ex2) {
-						}
-					}
-					if (image == null) return;
-					try {
-						double scale = 1;
-						if (image.getBounds().width > image.getBounds().height) {
-							scale = (double)image.getBounds().width / w;
-						}else {
-							scale = (double)image.getBounds().height / h;
-						}
-						int width = (int)( image.getBounds().width/scale);
-						int height = (int) (image.getBounds().height/scale);
-						
-						int xoffset = 0;
-						int yoffset = 0;
-						if (width < w) {
-							xoffset = (w - width)/2;
-						}
-						if (height < h) {
-							yoffset = (h - height)/2;
-						}
-						e.gc.drawImage(image, 0, 0, image.getBounds().width, image.getBounds().height, xoffset, yoffset, width, height);
+						e.gc.drawImage(image, 0, 0, size, size, 0, 0, size, size);
 					}finally {
 						image.dispose();
 					}
@@ -297,7 +269,7 @@ public class ImageSelectionControl extends Composite {
 		
 		lblWarnText = new Label(warningArea, SWT.WRAP);
 		lblWarnText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)lblWarnText.getLayoutData()).widthHint = w;
+		((GridData)lblWarnText.getLayoutData()).widthHint = size;
 		lblWarnText.setText(""); //$NON-NLS-1$
 		
 		warningArea.setVisible(false);

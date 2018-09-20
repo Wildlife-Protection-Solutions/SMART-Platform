@@ -50,11 +50,14 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelFactory.ConfigurableModelCloneResult;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Dialog for creating new configurable model.
@@ -209,7 +212,18 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 		original2CloneItemMap = null;
 		switch (option) {
 		case BLANK:
-			return ConfigurableModelFactory.createBlankModel(name);
+			ConfigurableModel cm = ConfigurableModelFactory.createBlankModel(name);
+			try(Session session = HibernateManager.openSession()){
+				List<IconSet> defaults = QueryFactory.buildQuery(session, IconSet.class,
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"isDefault", true}).list(); //$NON-NLS-1$
+				
+				if (!defaults.isEmpty()) {
+					cm.setIconSet(defaults.get(0));
+					cm.getIconSet().getUuid().equals(null);
+				}
+			}
+			return cm;
 		case CM:
 		{
 			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
@@ -218,7 +232,7 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try(Session s = HibernateManager.openSession()){
 						ConfigurableModel m = (ConfigurableModel) s.get(ConfigurableModel.class, cmTemplate.getUuid());
-						ConfigurableModelCloneResult cloneResult = ConfigurableModelFactory.createConfigurableModelClone(m, name, monitor);
+						ConfigurableModelCloneResult cloneResult = ConfigurableModelFactory.createConfigurableModelClone(m, name, s, monitor);
 						initModel = cloneResult.getModelClone();
 						original2CloneItemMap = cloneResult.getOriginal2CloneItemMap();
 					}

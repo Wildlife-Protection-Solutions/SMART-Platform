@@ -35,6 +35,7 @@ import javax.persistence.criteria.Root;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
@@ -155,8 +156,7 @@ public class ConservationAreaTemplateCloner implements
 						Files.createDirectories(to.getParent());
 						Files.copy(from, to);
 					} catch (IOException e) {
-						//TODO:
-						e.printStackTrace();
+						SmartPlugIn.log(e.getMessage(), e);
 					}
 				}
 			}

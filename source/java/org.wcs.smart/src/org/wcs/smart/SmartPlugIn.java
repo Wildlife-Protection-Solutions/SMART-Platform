@@ -21,6 +21,7 @@
  */
 package org.wcs.smart;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -61,6 +62,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	
 	// The shared instance
 	private static SmartPlugIn plugin;
+	
+	/**
+	 * Location for raster query files to be placed
+	 */
+	private static final String DATASTORE_TEMP_FOLDER = "tempfiles"; //$NON-NLS-1$
 	
     /**
      * Identifies the error overlay image.
@@ -289,8 +295,17 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		SmartContext.INSTANCE.setClass(ICoreLabelProvider.class, new SmartLabelProvider());
 		SmartContext.INSTANCE.setFilestoreLocation(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
 		
+		File tempDir = new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE), DATASTORE_TEMP_FOLDER);
+		SmartContext.INSTANCE.setTempFilestoreLocation(tempDir);
+				
+
 		SmartContext.INSTANCE.setClass(IDatabaseConnectionProvider.class, new DesktopSessionProvider());
 		SmartContext.INSTANCE.setClass(ISmartMapLabelProvider.class, new DesktopSmartServiceLabelProvider());
+		
+		//clean up temp dir
+		TempDirCleanUpJob cleanUp = new TempDirCleanUpJob();
+		cleanUp.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
+		cleanUp.schedule();
 	}
 
 	public static void initializeDatabase(){
