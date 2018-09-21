@@ -42,9 +42,6 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name="smart.iconset")
 public class IconSet extends NamedKeyItem{
 
-	//these are the default icons set keys
-	public static final String[] FIXED_KEYS = new String[] {"black", "line", "color"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	
 	private ConservationArea ca;
 	private boolean isDefaut;
 	

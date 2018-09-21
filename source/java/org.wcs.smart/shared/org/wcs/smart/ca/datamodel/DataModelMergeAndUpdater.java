@@ -160,6 +160,8 @@ public class DataModelMergeAndUpdater {
 		source.setIsActive(target.getIsActive());
 		source.setIsMultiple(target.getIsMultiple());
 		source.setCategoryOrder(target.getCategoryOrder());
+		if (target.getIcon() != null) source.setIcon(target.getIcon());
+		
 		mergeNames(source, target);
 		
 		if (target.getAttributes() != null){
@@ -215,6 +217,7 @@ public class DataModelMergeAndUpdater {
 		newSource.setCategoryOrder(target.getCategoryOrder());
 		newSource.setChildren(new ArrayList<Category>());
 		newSource.setAttributes(new ArrayList<CategoryAttribute>());
+		newSource.setIcon(target.getIcon());
 		return newSource;
 	}
 	
@@ -248,6 +251,7 @@ public class DataModelMergeAndUpdater {
 				newSource.setKeyId(targetAttribute.getKeyId());
 				newSource.setType(targetAttribute.getType());
 				newSource.setConservationArea(sourceDm.getConservationArea());
+				newSource.setIcon(targetAttribute.getIcon());
 				sourceDm.getAttributes().add(newSource);
 				mergeAttribute(newSource, targetAttribute);
 			}
@@ -266,7 +270,7 @@ public class DataModelMergeAndUpdater {
 		}
 		mergeNames(source, target);
 		source.setIsRequired(target.getIsRequired());
-		
+		if (target.getIcon() != null) source.setIcon(target.getIcon());
 		if (source.getType() == AttributeType.NUMERIC){
 			if (target.getMinValue() != null){
 				source.setMinValue(target.getMinValue());
@@ -338,6 +342,7 @@ public class DataModelMergeAndUpdater {
 		mergeNames(source, target);
 		source.setIsActive(target.getIsActive());
 		source.setNodeOrder(target.getNodeOrder());
+		if (target.getIcon() != null) source.setIcon(target.getIcon());
 		
 		//process kids
 		if (target.getChildren() != null){
@@ -358,6 +363,7 @@ public class DataModelMergeAndUpdater {
 					AttributeTreeNode newSourceKid = createNewTreeNode(targetKid);
 					newSourceKid.setAttribute(source.getAttribute());
 					newSourceKid.setParent(source);
+					newSourceKid.setIcon(source.getIcon());
 					source.getChildren().add(newSourceKid);
 					mergeTreeNodes(newSourceKid, targetKid);	
 				}
@@ -375,6 +381,7 @@ public class DataModelMergeAndUpdater {
 		newSourceKid.setHkey(targetNode.getHkey());
 		newSourceKid.setChildren(new ArrayList<AttributeTreeNode>());
 		newSourceKid.setNodeOrder(targetNode.getNodeOrder());
+		newSourceKid.setIcon(targetNode.getIcon());
 		return newSourceKid;
 	}
 	
@@ -397,6 +404,7 @@ public class DataModelMergeAndUpdater {
 				AttributeListItem item = new AttributeListItem();
 				item.setAttribute(source);
 				item.setKeyId(targetItem.getKeyId());
+				item.setIcon(source.getIcon());
 				mergeListItem(item, targetItem);
 				source.getAttributeList().add(item);
 			}
@@ -409,7 +417,7 @@ public class DataModelMergeAndUpdater {
 	private void mergeListItem(AttributeListItem source, AttributeListItem target){
 		if (!source.getKeyId().equals(target.getKeyId())) return;
 		if (!source.getAttribute().getKeyId().equals(target.getAttribute().getKeyId())) return;
-		
+		if (target.getIcon() != null) source.setIcon(target.getIcon());
 		mergeNames(source, target);
 		source.setListOrder(target.getListOrder());
 		source.setIsActive(target.getIsActive());

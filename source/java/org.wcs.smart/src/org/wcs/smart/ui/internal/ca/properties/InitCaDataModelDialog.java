@@ -59,12 +59,15 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
 import org.wcs.smart.ui.ConservationAreaLabelProvider;
 import org.wcs.smart.ui.internal.ca.LanguageSelectionDialog;
+
 
 /**
  * Dialog page for initializing the data model.
@@ -153,6 +156,15 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 		return comp;
 	}
 
+	private List<Icon> getIcons(){
+		List<Icon> icons = new ArrayList<>();
+		try(Session s = HibernateManager.openSession()){
+			icons.addAll(QueryFactory.buildQuery(s, Icon.class,
+					new Object[] {"conservationArea", ca}).list()); //$NON-NLS-1$
+		}
+		return icons;
+	}
+	
 	private void createImportXml(Composite comp,
 			SelectionListener validateListener) {
 		GridLayout layout;
@@ -193,8 +205,9 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 									throws InvocationTargetException,
 									InterruptedException {
 								try {
+									
 									DataModelXmlToSmartConverter converter =  new DataModelXmlToSmartConverter();
-									dm = converter.convert(f, ca, true);
+									dm = converter.convert(f, ca, getIcons(), true);
 								} catch (Exception ex) {
 									SmartPlugIn
 											.displayLog(Messages.InitCaDataModelDialog_Error_CouldNotReadXml + "\n\n" + ex.getMessage(), //$NON-NLS-1$
@@ -293,7 +306,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						try {
 							try {
 								DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();
-								dm = converter.convert(is, ca, true);
+								dm = converter.convert(is, ca, getIcons(), true);
 							} finally {
 								is.close();
 							}
@@ -352,8 +365,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 							}
 						}
 						
-						//TODO: potentially load icons here
-						dm = dmToClone.clone(ca, code, null, progress.split(1));
+						dm = dmToClone.clone(ca, code, getIcons(), progress.split(1));
 						
 					}else if (isBlank){
 						progress = SubMonitor.convert(monitor);

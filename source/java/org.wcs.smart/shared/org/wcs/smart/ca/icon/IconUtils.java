@@ -24,8 +24,30 @@ package org.wcs.smart.ca.icon;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 
 public class IconUtils {
+	
+	//these are the default icons set keys
+	public static enum FixedIconSet{
+		BLACK("black", "Black and White"),  //$NON-NLS-1$//$NON-NLS-2$
+		LINE("line", "Outline Only"),  //$NON-NLS-1$//$NON-NLS-2$
+		COLOR("color", "Full Color");  //$NON-NLS-1$//$NON-NLS-2$
+		
+		public String key;
+		public String name;
+		
+		private FixedIconSet(String key, String name) {
+			this.key = key;
+			this.name = name;
+		}
+		
+	}
+	
+	
 	/**
 	 * This table contains an array of elements where
 	 * 0 - icon key
@@ -295,6 +317,79 @@ public class IconUtils {
 				pscat.setObject(3, cauuid);
 				pscat.executeUpdate();
 			}
+		}
+	}
+	
+	/**
+	 * Creates the default icon sets.
+	 * 
+	 */
+	/*
+	 *  * 0 - icon key
+	 * 1 - icon name
+	 * 2 - black icon reference
+	 * 3 - line icon reference
+	 * 4 - color icon reference
+	 * 5 - data model mappings (comma separated)
+	 */
+	public static void createDefaultIconSet(Session session, ConservationArea ca) {
+		IconSet blackIs = new IconSet();
+		blackIs.setConservationArea(ca);
+		blackIs.setIsDefault(false);
+		blackIs.setKeyId(FixedIconSet.BLACK.key);
+		blackIs.setName(FixedIconSet.BLACK.name);
+		blackIs.updateName(ca.getDefaultLanguage(), FixedIconSet.BLACK.name);
+		session.save(blackIs);
+		
+		IconSet colorIs = new IconSet();
+		colorIs.setConservationArea(ca);
+		colorIs.setIsDefault(true);
+		colorIs.setKeyId(FixedIconSet.COLOR.key);
+		colorIs.setName(FixedIconSet.COLOR.name);
+		colorIs.updateName(ca.getDefaultLanguage(), FixedIconSet.COLOR.name);
+		session.save(colorIs);
+		
+		IconSet lineIs = new IconSet();
+		lineIs.setConservationArea(ca);
+		lineIs.setIsDefault(false);
+		lineIs.setKeyId(FixedIconSet.LINE.key);
+		lineIs.setName(FixedIconSet.LINE.name);
+		lineIs.updateName(ca.getDefaultLanguage(), FixedIconSet.LINE.name);
+		session.save(lineIs);
+		
+		for (String[] row : SMART_ICON_MAPPING) {
+			String iconKey = row[0];
+			String name = row[1];
+			String black = row[2];
+			String line = row[3];
+			String color = row[4];
+			
+			Icon i = new Icon();
+			i.setConservationArea(ca);
+			i.setKeyId(iconKey);
+			i.setName(name);
+			i.updateName(ca.getDefaultLanguage(), name);
+			i.setFiles(new ArrayList<>());
+			
+			IconFile file1 = new IconFile();
+			file1.setFilename(black);
+			file1.setIcon(i);
+			file1.setIconSet(blackIs);
+			i.getFiles().add(file1);
+			
+			IconFile file2 = new IconFile();
+			file2.setFilename(line);
+			file2.setIcon(i);
+			file2.setIconSet(lineIs);
+			i.getFiles().add(file2);
+			
+			IconFile file3 = new IconFile();
+			file3.setFilename(color);
+			file3.setIcon(i);
+			file3.setIconSet(colorIs);
+			i.getFiles().add(file3);
+			
+			session.save(i);
 		}
 	}
 }

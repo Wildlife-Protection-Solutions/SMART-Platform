@@ -84,6 +84,7 @@ public class IconSelectionDialog extends TitleAreaDialog {
 	private static final String PATH_KEY = "PATH"; //$NON-NLS-1$
 
 	private static final String DIR_PREF_KEY = "org.wcs.smart.ui.internal.ca.properties.IconSelectionDialog.dir"; //$NON-NLS-1$
+	private static final String EXT_PREF_KEY = "org.wcs.smart.ui.internal.ca.properties.IconSelectionDialog.ext"; //$NON-NLS-1$
 	
 	private static final int SIZE = 32;
 	
@@ -509,12 +510,15 @@ public class IconSelectionDialog extends TitleAreaDialog {
 		if (start != null) {
 			fd.setFilterPath(start);
 		}
+		int index = SmartPlugIn.getDefault().getPreferenceStore().getInt(EXT_PREF_KEY);
+		fd.setFilterIndex(index);
 
 		String file = fd.open();
 		if (file == null) return null;
 		Path p = Paths.get(file);
 		try {
 			SmartPlugIn.getDefault().getPreferenceStore().putValue(DIR_PREF_KEY, p.getParent().toString());
+			SmartPlugIn.getDefault().getPreferenceStore().putValue(EXT_PREF_KEY, String.valueOf(fd.getFilterIndex()));
 		}catch (Exception ex) {}
 		if (!Files.exists(p)) return null;
 		return p;

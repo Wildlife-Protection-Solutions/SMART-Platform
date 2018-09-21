@@ -277,37 +277,40 @@ public class ImageSelectionControl extends Composite {
 	
 
 	private void selectImage() {
-		FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
-		fd.setFilterExtensions(new String[] {
-				"*.bmp;*.jpg;*.jpeg;*.png;*.svg", //$NON-NLS-1$
-				"*.bmp", //$NON-NLS-1$
-				"*.jpg;*.jpeg", //$NON-NLS-1$
-				"*.png;*.svg", //$NON-NLS-1$
-				"*.png", //$NON-NLS-1$
-				"*.svg", //$NON-NLS-1$
-				
-		});
-		fd.setFilterNames(new String[] {
-				Messages.ImageSelectionControl_AllImages1,
-				Messages.ImageSelectionControl_BitmapFiles,
-				Messages.ImageSelectionControl_JpegFiles,
-				Messages.ImageSelectionControl_pngsvg,
-				Messages.ImageSelectionControl_png,
-				Messages.ImageSelectionControl_svg
-		});
 		
-		int lastIndex = DataentryPlugIn.getDefault().getPreferenceStore().getInt(IMG_FILTER_PREFKEY);
-		fd.setFilterIndex(lastIndex);
-		
-		String f = fd.open();
-		if (f != null) {
-			contentProvider.setImageFile(new File(f));
-			updateImage();
-			
-			//save preference
-			int filterIndex = fd.getFilterIndex();
-			DataentryPlugIn.getDefault().getPreferenceStore().setValue(IMG_FILTER_PREFKEY, filterIndex);
-		}
+		ImageSelectionDialog dialog = new ImageSelectionDialog(getShell());
+		dialog.open();
+//		FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
+//		fd.setFilterExtensions(new String[] {
+//				"*.bmp;*.jpg;*.jpeg;*.png;*.svg", //$NON-NLS-1$
+//				"*.bmp", //$NON-NLS-1$
+//				"*.jpg;*.jpeg", //$NON-NLS-1$
+//				"*.png;*.svg", //$NON-NLS-1$
+//				"*.png", //$NON-NLS-1$
+//				"*.svg", //$NON-NLS-1$
+//				
+//		});
+//		fd.setFilterNames(new String[] {
+//				Messages.ImageSelectionControl_AllImages1,
+//				Messages.ImageSelectionControl_BitmapFiles,
+//				Messages.ImageSelectionControl_JpegFiles,
+//				Messages.ImageSelectionControl_pngsvg,
+//				Messages.ImageSelectionControl_png,
+//				Messages.ImageSelectionControl_svg
+//		});
+//		
+//		int lastIndex = DataentryPlugIn.getDefault().getPreferenceStore().getInt(IMG_FILTER_PREFKEY);
+//		fd.setFilterIndex(lastIndex);
+//		
+//		String f = fd.open();
+//		if (f != null) {
+//			contentProvider.setImageFile(new File(f));
+//			updateImage();
+//			
+//			//save preference
+//			int filterIndex = fd.getFilterIndex();
+//			DataentryPlugIn.getDefault().getPreferenceStore().setValue(IMG_FILTER_PREFKEY, filterIndex);
+//		}
 	}
 	/**
 	 * Interface should be implemented by any object that want to use this control.

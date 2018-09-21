@@ -78,9 +78,11 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
+import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
@@ -536,9 +538,15 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.DataModelPropertyPage_TaskName, 2);
 					try{
 						
+						List<Icon> icons = new ArrayList<>();
+						
+						icons.addAll(QueryFactory.buildQuery(session, Icon.class,
+								new Object[] {"conservationArea", currentCa}).list()); //$NON-NLS-1$
+						
+						
 						progress.subTask(Messages.DataModelPropertyPage_Progress1);
 						DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();
-						DataModel targetDm = converter.convert(f, currentCa, false);
+						DataModel targetDm = converter.convert(f, currentCa, icons, false);
 						progress.worked(1);
 						
 						List<String> warnings = new ArrayList<>();

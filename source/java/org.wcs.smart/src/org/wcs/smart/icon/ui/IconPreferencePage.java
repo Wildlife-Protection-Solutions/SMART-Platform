@@ -75,6 +75,8 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
+import org.wcs.smart.ca.icon.IconUtils;
+import org.wcs.smart.ca.icon.IconUtils.FixedIconSet;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.NameKeyDialog;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -501,9 +503,9 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		if (sets == null) return;
 		List<IconSet> allSets = new ArrayList<>();
 		allSets.addAll( sets );
-		for (String fixed : IconSet.FIXED_KEYS) {
+		for (FixedIconSet fixed : IconUtils.FixedIconSet.values()) {
 			IconSet t1 = new IconSet();
-			t1.setKeyId(fixed);
+			t1.setKeyId(fixed.key);
 			allSets.add(t1);
 		}
 		
@@ -620,9 +622,9 @@ public class IconPreferencePage extends PreferencePage implements IWorkbenchPref
 		if (sets == null) return;
 		List<IconSet> allSets = new ArrayList<>();
 		allSets.addAll( sets );
-		for (String fixed : IconSet.FIXED_KEYS) {
+		for (FixedIconSet fixed : IconUtils.FixedIconSet.values()) {
 			IconSet t1 = new IconSet();
-			t1.setKeyId(fixed);
+			t1.setKeyId(fixed.key);
 			allSets.add(t1);
 		}
 		

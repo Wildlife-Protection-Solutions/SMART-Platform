@@ -71,6 +71,7 @@ import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.export.TableInfo;
+import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.user.UserLevelManager;
@@ -559,6 +560,10 @@ public class HibernateManager extends SmartHibernateManager{
 				prj.setDefinition(crs.toWKT());
 				prj.setIsDefault(true);
 				s.save(prj);
+				
+				//create icons
+				IconUtils.createDefaultIconSet(s, newCa);
+				s.flush();
 				
 				//fire extension points
 				List<ICaCreateHandler> extensions = getCreateExtensions();

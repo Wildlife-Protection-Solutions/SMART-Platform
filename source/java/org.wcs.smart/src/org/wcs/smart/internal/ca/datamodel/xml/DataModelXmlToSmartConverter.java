@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,6 +50,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
+import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.LanguageSelectionDialog;
 
@@ -72,15 +74,16 @@ public class DataModelXmlToSmartConverter {
 	 * datamodel file.
 	 * 
 	 * @param file The xml data model
+	 * @param icons set of icons to map xml items to can be null 
 	 * @return SMART db datamodel
 	 * 
 	 * @throws JAXBException
 	 * @throws ParseException
 	 * @throws IOException 
 	 */
-	public DataModel convert(File file, ConservationArea targetCa, boolean synchronizeLang) throws JAXBException, ParseException, IOException {
+	public DataModel convert(File file, ConservationArea targetCa, Collection<Icon> icons, boolean synchronizeLang) throws JAXBException, ParseException, IOException {
 		try(FileInputStream is = new FileInputStream(file)){
-			return convert(is, targetCa, synchronizeLang);
+			return convert(is, targetCa, icons, synchronizeLang);
 		}
 	}
 	
@@ -110,6 +113,7 @@ public class DataModelXmlToSmartConverter {
 	 * </p> 
 	 * @param is input stream of xml data model
 	 * @param targetCa conservation area
+	 * @param icons set of icons to map xml items to can be null 
 	 * @param syncLanguages if the languages of the data model and conservation should be synchronized
 	 * @return data model generated from xml data model
 	 * 
@@ -117,13 +121,13 @@ public class DataModelXmlToSmartConverter {
 	 * @throws JAXBException
 	 * @throws ParseException
 	 */
-	public DataModel convert(InputStream is, ConservationArea targetCa, boolean syncLanguages) throws JAXBException, ParseException {
+	public DataModel convert(InputStream is, ConservationArea targetCa, Collection<Icon> icons, boolean syncLanguages) throws JAXBException, ParseException {
 		this.targetCa = targetCa;
 		useAsDefault = null;	
 
 		//this converts without a conservation area
 		DataModelXmlToSimpleDataModelConverter cc = new DataModelXmlToSimpleDataModelConverter();
-		SimpleDataModel sdm = cc.convert(is, Locale.getDefault());
+		SimpleDataModel sdm = cc.convert(is, icons, Locale.getDefault());
 		
 		//get aggregations
 		aggs = DataModel.getAggregations();

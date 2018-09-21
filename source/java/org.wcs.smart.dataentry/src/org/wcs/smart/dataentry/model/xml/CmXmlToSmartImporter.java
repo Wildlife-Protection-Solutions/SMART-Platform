@@ -352,7 +352,11 @@ public class CmXmlToSmartImporter {
 			node.setParent(parent);
 			node.setNodeOrder(result.size());
 			node.setDisplayMode(getDisplayMode(xmlNode.getDisplayMode()));
-			if (xmlNode.isIsCustomImage()) node.setImageFile(findFile(xmlNode.getImageFile()));
+			
+			if ( (xmlNode.isIsCustomImage() == null || xmlNode.isIsCustomImage() == Boolean.TRUE) && xmlNode.getImageFile() != null) {
+				node.setImageFile(findFile(xmlNode.getImageFile()));
+			}
+			
 			addToDataMap(xmlNode.getId(), node);
 			node.setChildren(processCmTreeNodes(cfg, dmAttribute, node, xmlNode.getChildren(), monitor));
 			if (monitor.isCanceled()) return null;
@@ -372,7 +376,9 @@ public class CmXmlToSmartImporter {
 			item.setIsActive(xmlNode.isIsActive());
 			item.setListItem(fetchAttributeListItem(xmlNode.getKeyRef(), dmAttribute));
 			item.setListOrder(result.size());
-			if (xmlNode.isIsCustomImage()) item.setImageFile(findFile(xmlNode.getImageFile()));
+			if ( (xmlNode.isIsCustomImage() == null || xmlNode.isIsCustomImage() == Boolean.TRUE) && xmlNode.getImageFile() != null) {
+				item.setImageFile(findFile(xmlNode.getImageFile()));
+			}
 			addToDataMap(xmlNode.getId(), item);
 			if (monitor.isCanceled()) return null;
 			result.add(item);
@@ -401,7 +407,10 @@ public class CmXmlToSmartImporter {
 			cmNode.setChildren(processCmNodes(xmlNode.getNode(), cm, cmNode, monitor));
 			cmNode.setCmAttributes(processAttributes(xmlNode.getAttribute(), cmNode, monitor));
 			cmNode.setDisplayMode(getDisplayMode(xmlNode.getDisplayMode()));
-			if (xmlNode.isIsCustomImage()) cmNode.setImageFile(findFile(xmlNode.getImageFile()));
+			
+			if ( (xmlNode.isIsCustomImage() == null || xmlNode.isIsCustomImage() == Boolean.TRUE) && xmlNode.getImageFile() != null) {
+				cmNode.setImageFile(findFile(xmlNode.getImageFile()));
+			}
 			
 			addToDataMap(xmlNode.getId(), cmNode);
 			
@@ -429,8 +438,10 @@ public class CmXmlToSmartImporter {
 			cmAttr.setAttribute(dmAttribute);
 			cmAttr.setOrder(i);
 			cmAttr.setCmAttributeOptions(processAttributeOptions(xmlAttr.getOption(), cmAttr));
-			if (xmlAttr.isIsCustomImage()) cmAttr.setImageFile(findFile(xmlAttr.getImageFile()));
-
+			if ( (xmlAttr.isIsCustomImage() == null || xmlAttr.isIsCustomImage() == Boolean.TRUE) && xmlAttr.getImageFile() != null) {
+				cmAttr.setImageFile(findFile(xmlAttr.getImageFile()));
+			}
+			
 			if (xmlAttr.getConfigId() != null) {
 				cmAttr.setConfig(configLookup.get(xmlAttr.getConfigId()));
 			} else {

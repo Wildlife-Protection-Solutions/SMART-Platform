@@ -827,22 +827,33 @@ public class SmartUtils {
 			return null;
 		}
 		
+		//resize/scale
+		Rectangle bounds = rawImage.getBounds();
+		
+		int sizeW = size == null ? bounds.width : size;
+		int sizeH = size == null ? bounds.height : size;
+		
+		int x = 0, y = 0, width = 0, height = 0;
+		if (bounds.width > bounds.height) {
+			width = sizeW;
+			height = bounds.height * sizeW / bounds.width;
+			y = (sizeW - height) / 2;
+		} else {
+			height = sizeH;
+			width = bounds.width * sizeH / bounds.height;
+			x = (sizeH - width) / 2;
+		}
+		
 		
 		try {
 			//check fo exif metadata for transform
-			int newWidth = rawImage.getBounds().width;
-			int newHeight = rawImage.getBounds().height;
-			if (size != null) {
-				newWidth = size;
-				newHeight = size;
-			}
-			Transform imageTransform = SmartUtils.getExifImageTransform(file.toFile(), newWidth, newHeight);
-			if (imageTransform != null) {
-				Image image3 = new Image(Display.getDefault(), newWidth, newHeight);
+			Transform imageTransform = SmartUtils.getExifImageTransform(file.toFile(), sizeW, sizeH);
+		 	if (imageTransform != null) {
+				Image image3 = new Image(Display.getDefault(), sizeW, sizeH);
 				GC gc3 = new GC(image3);
 				try {
 					gc3.setTransform(imageTransform);
-					gc3.drawImage(rawImage, 0, 0);
+					gc3.drawImage(rawImage, 0, 0, rawImage.getBounds().width, rawImage.getBounds().height, x, y, width, height);
 				}finally {
 					gc3.dispose();
 					rawImage.dispose();
@@ -854,21 +865,9 @@ public class SmartUtils {
 		}
 		
 		if (size == null) return rawImage;
-		
-		//resize
-		Rectangle bounds = rawImage.getBounds();
-		int x = 0, y = 0, width = 0, height = 0;
-		if (bounds.width > bounds.height) {
-			width = size;
-			height = bounds.height * size / bounds.width;
-			y = (size - height) / 2;
-		} else {
-			height = size;
-			width = bounds.width * size / bounds.height;
-			x = (size - width) / 2;
-		}
+				
 		// resize image
-		Image image2 = new Image(Display.getDefault(), size, size);
+		Image image2 = new Image(Display.getDefault(), sizeW, sizeH);
 		GC gc = new GC(image2);
 		try {
 			gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);

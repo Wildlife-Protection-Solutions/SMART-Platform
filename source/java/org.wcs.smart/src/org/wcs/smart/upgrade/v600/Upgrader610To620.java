@@ -129,38 +129,38 @@ public class Upgrader610To620 implements IDatabaseUpgrader {
 				
 				byte[] lineuuid = DerbyUtils.createUuid();
 				psiconset.setBytes(1, lineuuid);
-				psiconset.setString(2, "line"); //$NON-NLS-1$
+				psiconset.setString(2, IconUtils.FixedIconSet.LINE.key);
 				psiconset.setBytes(3, cuuid);
 				psiconset.setBoolean(4, false);
 				psiconset.addBatch();
 				
 				pslabel.setBytes(1, luuid);
 				pslabel.setBytes(2, lineuuid);
-				pslabel.setString(3, "Outline Only"); //$NON-NLS-1$
+				pslabel.setString(3, IconUtils.FixedIconSet.LINE.name); 
 				pslabel.addBatch();
 				
 				byte[] blackuuid = DerbyUtils.createUuid();
 				psiconset.setBytes(1, blackuuid);
-				psiconset.setString(2, "black"); //$NON-NLS-1$
+				psiconset.setString(2, IconUtils.FixedIconSet.BLACK.key);
 				psiconset.setBytes(3, cuuid);
 				psiconset.setBoolean(4, false);
 				psiconset.addBatch();
 				
 				pslabel.setBytes(1, luuid);
 				pslabel.setBytes(2, blackuuid);
-				pslabel.setString(3, "Black and White"); //$NON-NLS-1$
+				pslabel.setString(3, IconUtils.FixedIconSet.BLACK.name);
 				pslabel.addBatch();
 				
 				byte[] coloruuid = DerbyUtils.createUuid();
 				psiconset.setBytes(1, coloruuid);
-				psiconset.setString(2, "color"); //$NON-NLS-1$
+				psiconset.setString(2, IconUtils.FixedIconSet.COLOR.key);
 				psiconset.setBytes(3, cuuid);
 				psiconset.setBoolean(4, true);
 				psiconset.addBatch();
 				
 				pslabel.setBytes(1, luuid);
 				pslabel.setBytes(2, coloruuid);
-				pslabel.setString(3, "Full Color"); //$NON-NLS-1$
+				pslabel.setString(3, IconUtils.FixedIconSet.COLOR.name); 
 				pslabel.addBatch();
 				
 				psiconset.executeBatch();
