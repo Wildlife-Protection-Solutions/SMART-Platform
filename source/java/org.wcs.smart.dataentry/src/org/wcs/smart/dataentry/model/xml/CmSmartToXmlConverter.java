@@ -62,7 +62,7 @@ import org.wcs.smart.dataentry.model.xml.generated.NodeTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.TreeNodeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -440,6 +440,6 @@ public class CmSmartToXmlConverter {
 	}
 	
 	private static String findFileName(String cmFileName, String dmIconFileName) {
-		return SmartUtils.getFilenameWithoutExtension(cmFileName) + "." + SmartUtils.getFilenameExtension(dmIconFileName); //$NON-NLS-1$
+		return SharedUtils.getFilenameWithoutExtension(cmFileName) + "." + SharedUtils.getFilenameExtension(dmIconFileName); //$NON-NLS-1$
 	}
 }

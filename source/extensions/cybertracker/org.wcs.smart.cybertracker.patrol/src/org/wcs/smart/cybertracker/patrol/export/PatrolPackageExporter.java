@@ -65,7 +65,7 @@ import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -195,7 +195,7 @@ public enum PatrolPackageExporter {
 		if (file != null) {
 			Path fromPath = file.getAttachmentFile().toPath();
 			String fileName = cmObject.getImageFile().getName();
-			Path toPath = tempDir.resolve(SmartUtils.getFilenameWithoutExtension(fileName) + "." + SmartUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
+			Path toPath = tempDir.resolve(SharedUtils.getFilenameWithoutExtension(fileName) + "." + SharedUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
 			Files.copy(fromPath, toPath);
 			if (!toIncludeInZip.contains(toPath.toFile())) toIncludeInZip.add(toPath.toFile());
 		}

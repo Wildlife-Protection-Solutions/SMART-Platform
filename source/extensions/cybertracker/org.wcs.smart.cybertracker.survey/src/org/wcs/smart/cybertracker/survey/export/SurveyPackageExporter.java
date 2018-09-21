@@ -60,7 +60,7 @@ import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.meta.MissionScreenOptionMeta;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.ZipUtil;
 
 /**
@@ -190,7 +190,7 @@ public enum SurveyPackageExporter {
 		if (file != null) {
 			Path fromPath = file.getAttachmentFile().toPath();
 			String fileName = cmObject.getImageFile().getName();
-			Path toPath = tempDir.resolve(SmartUtils.getFilenameWithoutExtension(fileName) + "." + SmartUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
+			Path toPath = tempDir.resolve(SharedUtils.getFilenameWithoutExtension(fileName) + "." + SharedUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
 			Files.copy(fromPath, toPath);
 			if (!toIncludeInZip.contains(toPath.toFile())) toIncludeInZip.add(toPath.toFile());
 		}

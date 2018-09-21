@@ -41,7 +41,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.attachment.ISmartAttachment;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -142,7 +142,7 @@ public class IconFile extends ISmartAttachment{
 				//extract to a local temp directory
 				URL url = new URL(getFilename());
 				Path temp = null;
-				String ext = SmartUtils.getFilenameExtension(getFilename());
+				String ext = SharedUtils.getFilenameExtension(getFilename());
 				if (getUuid() != null) {
 					temp = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(ICON_DIR).resolve(UuidUtils.uuidToString(getUuid()) + "." + ext); //$NON-NLS-1$
 					if (Files.exists(temp)) return temp.toFile();

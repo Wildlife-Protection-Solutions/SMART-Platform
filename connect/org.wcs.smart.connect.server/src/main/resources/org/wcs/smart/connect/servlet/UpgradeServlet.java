@@ -49,6 +49,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -115,10 +116,10 @@ public class UpgradeServlet extends HttpServlet {
 				if (filestoreVersion.equals("5.0.0")) { //$NON-NLS-1$
 					upgrade500to600(s);
 					upgrade600to620(s);
-				}else if (filestoreVersion.equals("6.0.0")) {
+				}else if (filestoreVersion.equals("6.0.0")) { //$NON-NLS-1$
 					upgrade600to620(s);
 				}else {
-					throw new Exception("Invalid filestore version - cannot perform upgrade");
+					throw new Exception("Invalid filestore version - cannot perform upgrade"); //$NON-NLS-1$
 				}
 				
 				//update filestore version
@@ -467,7 +468,7 @@ public class UpgradeServlet extends HttpServlet {
 		}
 	}
 	
-	private void createIcons(Connection c) {
+	private void createIcons(Connection c) throws SQLException {
 		PreparedStatement psiconset = c.prepareStatement("INSERT INTO smart.iconset (uuid, keyid, ca_uuid, is_default) VALUES (?, ?, ?, ?)");		 //$NON-NLS-1$
 		PreparedStatement pslabel = c.prepareStatement("INSERT INTO smart.i18n_label(language_uuid, element_uuid, value) VALUES(?, ?, ?)"); //$NON-NLS-1$
 		PreparedStatement psicon = c.prepareStatement("INSERT INTO smart.icon(uuid, keyid, ca_uuid) VALUES(?, ?, ?)"); //$NON-NLS-1$
@@ -574,7 +575,7 @@ public class UpgradeServlet extends HttpServlet {
 					
 					
 					//update data model items
-					IconUtils.upgradeDataModel(c, iconuuid, icon[5]);
+					IconUtils.upgradeDataModel(c, iconuuid, icon[5], cuuid);
 				}
 				
 			}

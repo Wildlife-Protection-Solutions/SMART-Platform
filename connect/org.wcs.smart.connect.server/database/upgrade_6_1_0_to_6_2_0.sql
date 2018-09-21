@@ -59,7 +59,7 @@ BEGIN
  
  	INSERT INTO connect.change_log 
  		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, wp.CA_UUID 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, iset.CA_UUID 
  		FROM smart.iconset iset WHERE iset.uuid = ROW.iconset_uuid;
  RETURN ROW;
 END$$ LANGUAGE 'plpgsql';
@@ -72,4 +72,4 @@ update connect.connect_plugin_version set version = '6.2.0' where plugin_id = 'o
 update connect.ca_plugin_version set version = '6.2.0' where plugin_id = 'org.wcs.smart';
 
 update connect.connect_version set version = '6.2.0';		
-update connect.connect_version set filestore_version = '6.2.0';
+--dont via upgrade script; update connect.connect_version set filestore_version = '6.2.0';
