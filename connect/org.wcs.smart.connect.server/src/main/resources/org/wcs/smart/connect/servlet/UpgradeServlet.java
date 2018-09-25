@@ -47,7 +47,9 @@ import javax.ws.rs.core.Response.Status;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.icon.IconUtils;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -113,6 +115,11 @@ public class UpgradeServlet extends HttpServlet {
 				
 				if (filestoreVersion.equals("5.0.0")) { //$NON-NLS-1$
 					upgrade500to600(s);
+					upgrade600to620(s);
+				}else if (filestoreVersion.equals("6.0.0")) { //$NON-NLS-1$
+					upgrade600to620(s);
+				}else {
+					throw new Exception("Invalid filestore version - cannot perform upgrade"); //$NON-NLS-1$
 				}
 				
 				//update filestore version
@@ -167,6 +174,19 @@ public class UpgradeServlet extends HttpServlet {
 		
 	}
 	
+	private void upgrade600to620(Session s) {
+		s.doWork(new Work() {
+
+			@Override
+			public void execute(Connection c) throws SQLException {
+				try {
+					createIcons(c);
+				}catch (Exception ex) {
+					throw new SQLException (ex);
+				}
+			}
+		});
+	}
 	
 	/**
 	 * Here we encrypt all files in the filestore including other plugins
@@ -446,5 +466,120 @@ public class UpgradeServlet extends HttpServlet {
 		try (ResultSet rs = ps.executeQuery()) {
 			return rs.next() ? (UUID)rs.getObject(1) : null;
 		}
+	}
+	
+	private void createIcons(Connection c) throws SQLException {
+		PreparedStatement psiconset = c.prepareStatement("INSERT INTO smart.iconset (uuid, keyid, ca_uuid, is_default) VALUES (?, ?, ?, ?)");		 //$NON-NLS-1$
+		PreparedStatement pslabel = c.prepareStatement("INSERT INTO smart.i18n_label(language_uuid, element_uuid, value) VALUES(?, ?, ?)"); //$NON-NLS-1$
+		PreparedStatement psicon = c.prepareStatement("INSERT INTO smart.icon(uuid, keyid, ca_uuid) VALUES(?, ?, ?)"); //$NON-NLS-1$
+		PreparedStatement psiconfile = c.prepareStatement("INSERT INTO smart.iconfile(uuid, icon_uuid, iconset_uuid, filename) VALUES(?, ?, ?, ?)"); //$NON-NLS-1$
+
+		
+		//create default icon sets
+		//NOTE: We cannot use hibernate objects here - this may cause issues in the future
+		try(ResultSet rs = c.createStatement().executeQuery("SELECT uuid FROM smart.conservation_area")){ //$NON-NLS-1$
+			while(rs.next()) {
+				UUID cuuid = (UUID)rs.getObject(1);
+				if (cuuid.equals(ConservationArea.MULTIPLE_CA)) continue;
+				
+				PreparedStatement ps = c.prepareStatement("SELECT uuid FROM smart.language WHERE ca_uuid = ? and isdefault"); //$NON-NLS-1$
+				ps.setObject(1, cuuid);
+				
+				UUID luuid = null;
+				try(ResultSet rs2 = ps.executeQuery()){
+					if (!rs2.next()) continue; //no default language for this ca; skip
+					luuid = (UUID)rs2.getObject(1);
+				}
+				
+				if (luuid == null) continue; 
+				
+				UUID lineuuid = createUuid(c);
+				psiconset.setObject(1, lineuuid);
+				psiconset.setString(2, "line"); //$NON-NLS-1$
+				psiconset.setObject(3, cuuid);
+				psiconset.setBoolean(4, false);
+				psiconset.addBatch();
+				
+				pslabel.setObject(1, luuid);
+				pslabel.setObject(2, lineuuid);
+				pslabel.setString(3, "Outline Only"); //$NON-NLS-1$
+				pslabel.addBatch();
+				
+				UUID blackuuid = createUuid(c);
+				psiconset.setObject(1, blackuuid);
+				psiconset.setString(2, "black"); //$NON-NLS-1$
+				psiconset.setObject(3, cuuid);
+				psiconset.setBoolean(4, false);
+				psiconset.addBatch();
+				
+				pslabel.setObject(1, luuid);
+				pslabel.setObject(2, blackuuid);
+				pslabel.setString(3, "Black and White"); //$NON-NLS-1$
+				pslabel.addBatch();
+				
+				UUID coloruuid =createUuid(c);
+				psiconset.setObject(1, coloruuid);
+				psiconset.setString(2, "color"); //$NON-NLS-1$
+				psiconset.setObject(3, cuuid);
+				psiconset.setBoolean(4, true);
+				psiconset.addBatch();
+				
+				pslabel.setObject(1, luuid);
+				pslabel.setObject(2, coloruuid);
+				pslabel.setString(3, "Full Color"); //$NON-NLS-1$
+				pslabel.addBatch();
+				
+				psiconset.executeBatch();
+				pslabel.executeBatch();
+				
+				
+				for (String[] icon : IconUtils.SMART_ICON_MAPPING) {
+					
+					UUID iconuuid = createUuid(c);
+					
+					psicon.setObject(1, iconuuid);
+					psicon.setString(2, icon[0]);
+					psicon.setObject(3, cuuid);
+					psicon.addBatch();
+					
+					pslabel.setObject(1, luuid);
+					pslabel.setObject(2, iconuuid);
+					pslabel.setString(3, icon[1]);
+					pslabel.addBatch();
+					
+					UUID fileuuid = createUuid(c);
+					psiconfile.setObject(1, fileuuid);
+					psiconfile.setObject(2, iconuuid);
+					psiconfile.setObject(3, blackuuid);
+					psiconfile.setString(4, icon[2]);
+					psiconfile.addBatch();
+					
+					fileuuid = createUuid(c);
+					psiconfile.setObject(1, fileuuid);
+					psiconfile.setObject(2, iconuuid);
+					psiconfile.setObject(3, lineuuid);
+					psiconfile.setString(4, icon[3]);
+					psiconfile.addBatch();
+					
+					fileuuid = createUuid(c);
+					psiconfile.setObject(1, fileuuid);
+					psiconfile.setObject(2, iconuuid);
+					psiconfile.setObject(3, coloruuid);
+					psiconfile.setString(4, icon[4]);
+					psiconfile.addBatch();
+					
+					
+					psicon.executeBatch();
+					pslabel.executeBatch();
+					psiconfile.executeBatch();
+					
+					
+					//update data model items
+					IconUtils.upgradeDataModel(c, iconuuid, icon[5], cuuid);
+				}
+				
+			}
+		}
+
 	}
 }

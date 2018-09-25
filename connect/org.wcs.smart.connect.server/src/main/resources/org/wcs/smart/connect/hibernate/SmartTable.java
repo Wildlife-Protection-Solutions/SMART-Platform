@@ -70,6 +70,9 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.connect.cybertracker.model.ConnectCtProperties;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
@@ -443,7 +446,11 @@ public enum SmartTable {
 	EVENT_ACTIONPARAMETERVALUE(EActionParameterValue.class, ".id.action.conservationArea"),
 	
 	R_QUERY(RQuery.class, null),
-	R_SCRIPT(RScript.class, null)
+	R_SCRIPT(RScript.class, null),
+	
+	ICON(Icon.class, null),
+	ICONSET(IconSet.class, null),
+	ICONFILE(IconFile.class, ".iconSet.conservationArea"),
 	;
 	
 	public Class<?> hibernateClass;
