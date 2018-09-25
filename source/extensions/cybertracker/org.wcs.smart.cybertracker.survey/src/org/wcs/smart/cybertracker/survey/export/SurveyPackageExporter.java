@@ -40,12 +40,19 @@ import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
+import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeListItem;
+import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.IImageAssociatedObject;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
@@ -53,6 +60,7 @@ import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.meta.MissionScreenOptionMeta;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.ZipUtil;
 
 /**
@@ -129,6 +137,9 @@ public enum SurveyPackageExporter {
 					toIncludeInZip.addAll(Arrays.asList(dataFolder.listFiles()));
 				}
 				
+				//include data model image files that are part of configurable model node
+				includeDmIcons(modelToExport, toIncludeInZip, tempDir);
+				
 				//include ca logo
 				Path logo = design.getConservationArea().getLogo();
 				if (logo != null && Files.exists(logo)) {
@@ -168,6 +179,74 @@ public enum SurveyPackageExporter {
 			}
 			for (IPackageContribution.PackageContribution update : contributions) {
 				update.cleanUp();
+			}
+		}
+	}
+	
+
+	private void processFile(DmObject object, IImageAssociatedObject cmObject, ConfigurableModel cm, 
+			List<File> toIncludeInZip, Path tempDir) throws IOException {
+		IconFile file = object.getIcon().getIconFile(cm.getIconSet());
+		if (file != null) {
+			Path fromPath = file.getAttachmentFile().toPath();
+			String fileName = cmObject.getImageFile().getName();
+			Path toPath = tempDir.resolve(SharedUtils.getFilenameWithoutExtension(fileName) + "." + SharedUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
+			Files.copy(fromPath, toPath);
+			if (!toIncludeInZip.contains(toPath.toFile())) toIncludeInZip.add(toPath.toFile());
+		}
+	}
+	
+	
+	private void includeDmIcons(ConfigurableModel cm, List<File> toIncludeInZip, Path tempDir) throws IOException {
+		List<Object> toProcess = new ArrayList<>();
+		toProcess.addAll(cm.getNodes());
+		List<Object> processed = new ArrayList<>();
+		while(!toProcess.isEmpty()) {
+			Object objectNode = toProcess.remove(0);
+			if (processed.contains(objectNode)) continue;
+			processed.add(objectNode);
+			
+			if (objectNode instanceof IImageAssociatedObject) {
+				CmNode node = (CmNode)objectNode;
+				toProcess.addAll(node.getChildren());
+				
+				if (!node.hasCustomImage() && node.getCategory() != null && node.getCategory().getIcon() != null ) {
+					processFile(node.getCategory(), node, cm, toIncludeInZip, tempDir);
+				}
+				if (node.getCmAttributes() != null) {
+					toProcess.addAll(node.getCmAttributes());
+				}
+			}else if (objectNode instanceof CmAttribute) {
+				CmAttribute node = (CmAttribute)objectNode;
+				
+				if (!node.hasCustomImage() && node.getAttribute() != null && node.getAttribute().getIcon() != null ) {
+					processFile(node.getAttribute(), node, cm, toIncludeInZip, tempDir);
+				}
+				
+				
+				if (node.getCurrentList() != null) {
+					toProcess.addAll(node.getCurrentList());
+				}
+				if (node.getCurrentTree() != null) {
+					toProcess.addAll(node.getCurrentTree());
+				}
+			}else if (objectNode instanceof CmAttributeListItem) {
+				CmAttributeListItem node = (CmAttributeListItem)objectNode;
+				
+				if (!node.hasCustomImage() && node.getListItem() != null && node.getListItem().getIcon() != null ) {
+					processFile(node.getListItem(), node, cm, toIncludeInZip, tempDir);
+				}
+			}else if (objectNode instanceof CmAttributeTreeNode) {
+				CmAttributeTreeNode node = (CmAttributeTreeNode)objectNode;
+				
+				if (!node.hasCustomImage() && node.getDmTreeNode() != null && node.getDmTreeNode().getIcon() != null ) {
+					processFile(node.getDmTreeNode(), node, cm, toIncludeInZip, tempDir);
+				}
+				
+				
+				if (node.getChildren() != null) {
+					toProcess.addAll(node.getChildren());
+				}
 			}
 		}
 	}

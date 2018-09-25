@@ -101,15 +101,17 @@ public class AnimatedGif extends Canvas {
 		public void run() {
 			if (AnimatedGif.this.isDisposed()) return;
 			GC gc = new GC(AnimatedGif.this);
-		    
-			Image img = images[index];
-			if (img == null){
-				ImageData idata = data[index];
-				img = new Image(getDisplay(), idata);
-				images[index] = img;
-			}
-	        gc.drawImage(img, data[index].x, data[index].y);
-	        
+		    try {
+				Image img = images[index];
+				if (img == null){
+					ImageData idata = data[index];
+					img = new Image(getDisplay(), idata);
+					images[index] = img;
+				}
+		        gc.drawImage(img, data[index].x, data[index].y);
+		    }finally {
+		    	gc.dispose();
+		    }
 			index ++;
 			if (index >= data.length) index = 0;
 		}
