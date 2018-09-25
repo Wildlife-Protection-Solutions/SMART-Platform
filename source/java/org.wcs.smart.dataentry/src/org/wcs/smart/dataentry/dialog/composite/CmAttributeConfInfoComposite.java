@@ -35,8 +35,12 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
@@ -59,13 +63,14 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 	private ComboViewer configViewer;
 	private ConfigurableModelEditDialog dialog;
 	private List<CmAttributeConfig> deletedConfigs = null;
+	protected ToolItem tiDeleteConfig;
 	/**
 	 * @param parent
 	 * @param model
 	 * @param session
 	 */
 	public CmAttributeConfInfoComposite(Composite parent, ConfigurableModelEditDialog dialog, List<CmAttributeConfig> deletedConfigs) {
-		super(parent, dialog.getModel());
+		super(parent, dialog.getModel(), dialog.getSession());
 		this.dialog = dialog;
 		this.deletedConfigs = deletedConfigs;
 	}
@@ -92,8 +97,14 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 		label.setText(Messages.CmAttributeConfInfoComposite_Configuration_Label);
 		label.setToolTipText(Messages.CmAttributeConfInfoComposite_Configuration_Tooltip);
 		
-		configViewer = new ComboViewer(container, SWT.READ_ONLY);
-		configViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		Composite temp = new Composite(container, SWT.NONE);
+		temp.setLayout(new GridLayout(2, false));
+		((GridLayout)temp.getLayout()).marginWidth = 0;
+		((GridLayout)temp.getLayout()).marginHeight = 0;
+		temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		configViewer = new ComboViewer(temp, SWT.READ_ONLY);
+		configViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		configViewer.setContentProvider(ArrayContentProvider.getInstance());
 		configViewer.setLabelProvider(new CmAttributeConfigLabelProvider());
 		configViewer.addSelectionChangedListener(new ISelectionChangedListener(){
@@ -113,6 +124,30 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 				}
 			}
 		});
+		
+		ToolBar tb  =  new ToolBar(temp, SWT.HORIZONTAL | SWT.FLAT);
+		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		
+		ToolItem newConfig = new ToolItem(tb, SWT.PUSH);
+		newConfig.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		newConfig.setToolTipText(Messages.CmAttributeConfInfoComposite_createConfigTooltip);
+		newConfig.addListener(SWT.Selection, e->addConfiguration());
+
+		ToolItem editConfig = new ToolItem(tb, SWT.PUSH);
+		editConfig.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		editConfig.setToolTipText(Messages.CmAttributeConfInfoComposite_editConfigTooltip);
+		editConfig.addListener(SWT.Selection, e->editConfiguration());
+		
+		tiDeleteConfig = new ToolItem(tb, SWT.PUSH);
+		tiDeleteConfig.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDeleteConfig.setToolTipText(Messages.CmAttributeConfInfoComposite_deleteConfigTooltip);
+		tiDeleteConfig.addListener(SWT.Selection, e->deleteConfiguration());
+		
+		ToolItem revertConfig = new ToolItem(tb, SWT.PUSH);
+		revertConfig.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		revertConfig.setToolTipText(Messages.CmAttributeConfInfoComposite_revertConfigTooltip);
+		revertConfig.addListener(SWT.Selection, e->revertConfiguration());
+
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
@@ -179,6 +214,23 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 	}	
 	
 	protected abstract void handleConfigViewerSelectionChanged();
+	
+	/**
+	 * Add a new configuration
+	 */
+	protected abstract void addConfiguration();
+	/**
+	 * Delete selected configuration
+	 */
+	protected abstract void deleteConfiguration();
+	/**
+	 * Edit current configuration
+	 */
+	protected abstract void editConfiguration();
+	/**
+	 * Reset current configuration
+	 */
+	protected abstract void revertConfiguration();
 
 	/**
 	 * 	Comparator for {@link CmAttributeConfig}

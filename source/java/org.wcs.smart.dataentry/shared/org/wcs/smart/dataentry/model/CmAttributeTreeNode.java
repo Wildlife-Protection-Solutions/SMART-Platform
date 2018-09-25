@@ -138,6 +138,15 @@ public class CmAttributeTreeNode extends NamedItem implements IImageAssociatedOb
 		this.displayMode = displayMode;
 	}
 	
+	
+	@Transient
+	@Override
+	public boolean hasCustomImage() {
+		if (this.extension == null) return false;
+		if (this.extension.isEmpty()) return false;
+		return true;
+	}
+	
 	@Transient
 	@Override
 	public File getImageFile() {

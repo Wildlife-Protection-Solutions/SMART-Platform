@@ -40,6 +40,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.dataentry.dialog.AssociatedImageInterceptor;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -90,6 +91,15 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		clone.setDisplayMode(cm.getDisplayMode());
 		clone.setInstantGps(cm.isInstantGps());
 		clone.setPhotoFirst(cm.isPhotoFirst());
+		
+		//look for iconset in new ca
+		if (clone.getIconSet() != null) {
+			IconSet caIconSet = QueryFactory.buildQuery(engine.getSession(), IconSet.class, 
+					new Object[] {"conservationArea", engine.getNewCa()}, //$NON-NLS-1$
+					new Object[] {"keyId", clone.getIconSet().getKeyId()}).uniqueResult(); //$NON-NLS-1$
+			clone.setIconSet(caIconSet);
+		}
+		
 		engine.copyLabels(cm, clone);
 		engine.getSession().saveOrUpdate(clone);
 		

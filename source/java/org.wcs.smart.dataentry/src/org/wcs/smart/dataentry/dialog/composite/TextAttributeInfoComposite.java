@@ -32,6 +32,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
@@ -54,8 +55,8 @@ public class TextAttributeInfoComposite extends CmAttributeInfoComposite {
 	 * @param model
 	 * @param session
 	 */
-	public TextAttributeInfoComposite(Composite parent, ConfigurableModel model) {
-		super(parent, model);
+	public TextAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
+		super(parent, model, session);
 	}
 
 	/* (non-Javadoc)

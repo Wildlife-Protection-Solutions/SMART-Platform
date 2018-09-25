@@ -21,13 +21,20 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.NamedItemLabelProvider;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Label provider for configurable model list item which looks for
@@ -37,6 +44,8 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
  *
  */
 public class CmListItemLabelProvider extends NamedItemLabelProvider implements IColorProvider{
+	
+	private List<Image> images = new ArrayList<>();
 	
 	@Override
 	public String getText(Object element) {
@@ -56,6 +65,33 @@ public class CmListItemLabelProvider extends NamedItemLabelProvider implements I
 		return super.getText(element);
 	}
 
+	@Override
+	public void dispose() {
+		super.dispose();
+		images.forEach(e->e.dispose());
+	}
+	
+	@Override
+	public Image getImage(Object element) {
+		CmAttributeListItem node = getListItem(element);
+		if (node != null){
+			File f = node.getImageFile();
+			if (!f.exists()) {
+				if (node.getListItem().getIcon() == null) return null;
+				IconFile icon = node.getListItem().getIcon().getIconFile(node.getConfig().getModel().getIconSet());
+				if (icon != null) {
+					f = icon.getAttachmentFile();
+				}
+			}
+			if (f == null) return null;
+			Image img = SmartUtils.getImage(f.toPath(), 16);
+			if (img != null) {
+				images.add(img);
+				return img;
+			}
+		}
+		return null;
+	}
 
 	private CmAttributeListItem getListItem(Object element){
 		if (element instanceof CmAttributeListItem) {

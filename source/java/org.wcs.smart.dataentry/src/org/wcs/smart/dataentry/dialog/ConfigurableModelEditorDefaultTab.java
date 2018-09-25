@@ -268,11 +268,11 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		attributeComposites = new HashMap<AttributeType, CmAttributeInfoComposite>();
 		CmAttributeInfoComposite attrComposite;
 
-		attrComposite = new NumericAttributeInfoComposite(infoInnerPanel, model);
+		attrComposite = new NumericAttributeInfoComposite(infoInnerPanel, model, dialog.getSession());
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.NUMERIC, attrComposite);
 		
-		attrComposite = new TextAttributeInfoComposite(infoInnerPanel, model);
+		attrComposite = new TextAttributeInfoComposite(infoInnerPanel, model, dialog.getSession());
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TEXT, attrComposite);
 
@@ -284,11 +284,11 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TREE, attrComposite);
 
-		attrComposite = new BooleanAttributeInfoComposite(infoInnerPanel, model);
+		attrComposite = new BooleanAttributeInfoComposite(infoInnerPanel, model, dialog.getSession());
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.BOOLEAN, attrComposite);
 
-		attrComposite = new DateAttributeInfoComposite(infoInnerPanel, model);
+		attrComposite = new DateAttributeInfoComposite(infoInnerPanel, model, dialog.getSession());
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.DATE, attrComposite);
 		

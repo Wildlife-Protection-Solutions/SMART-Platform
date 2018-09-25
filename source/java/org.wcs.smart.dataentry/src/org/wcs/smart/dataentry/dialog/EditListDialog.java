@@ -60,6 +60,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
@@ -67,6 +69,7 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.dataentry.dialog.composite.CmListItemLabelProvider;
 import org.wcs.smart.dataentry.dialog.composite.DisplayModeComboViewer;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl;
@@ -99,8 +102,9 @@ public class EditListDialog extends TitleAreaDialog{
 	private CmAttributeListItem cmNode;
 	
 	private Button btnEnable;
+	private MenuItem miEnable; 
 	private ImageSelectionControl imageControl;
-	
+	private TableViewer listViewer ;
 	private Session session;
 	
 	public EditListDialog(Shell parentShell, CmAttribute attribute, Session session) {
@@ -156,6 +160,14 @@ public class EditListDialog extends TitleAreaDialog{
 		btnPanel.setLayout(gla);
 		btnPanel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER,false, false));
 		
+		Menu listMenu = new Menu(itemViewer.getControl());
+		
+		miEnable = new MenuItem(listMenu, SWT.PUSH);
+		miEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+		miEnable.setEnabled(false);
+		miEnable.addListener(SWT.Selection, e->enable());
+		itemViewer.getControl().setMenu(listMenu);
+		
 		btnEnable = new Button(btnPanel, SWT.PUSH);
 		GridData gd = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
 		gd.verticalIndent = 2;
@@ -166,20 +178,7 @@ public class EditListDialog extends TitleAreaDialog{
 		btnEnable.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				boolean enable = true;
-				if (btnEnable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT)){
-					enable = false;
-				}
-				IStructuredSelection selection = (IStructuredSelection) itemViewer.getSelection();
-				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-					Object type = iterator.next();
-					if (type instanceof NamedItem){
-						enableItem((NamedItem)type, enable);
-					}
-					
-				}				
-				itemViewer.refresh();
-				updateEnableButtonText();
+				enable();
 			}
 		});
 		super.setButtonLayoutData(btnEnable);
@@ -200,6 +199,23 @@ public class EditListDialog extends TitleAreaDialog{
 		return main;
 	}
 
+	private void enable() {
+		boolean enable = true;
+		if (btnEnable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT)){
+			enable = false;
+		}
+		IStructuredSelection selection = (IStructuredSelection) itemViewer.getSelection();
+		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+			Object type = iterator.next();
+			if (type instanceof NamedItem){
+				enableItem((NamedItem)type, enable);
+			}
+			
+		}				
+		itemViewer.refresh();
+		updateEnableButtonText();
+	}
+	
 	private void createTopControls(Composite parent) {
 		Composite cmpTop = new Composite(parent, SWT.NONE);
 		GridLayout gd = new GridLayout(2, false);
@@ -353,8 +369,24 @@ public class EditListDialog extends TitleAreaDialog{
 		imgLbl.setText(Messages.EditListDialog_Image);
 		imageControl = new ImageSelectionControl(imgCmp, new IImageContentProvider() {
 			@Override
+			public boolean isCustom() {
+				if (cmNode == null) return false;
+				return cmNode.hasCustomImage();
+			}
+			@Override
+			public boolean hasDataModel() {
+				return true;
+			}
+			
+			@Override
 			public File getImageFile() {
-				return cmNode != null ? cmNode.getImageFile() : null;
+				if (cmNode == null) return null;
+				if (cmNode.hasCustomImage()) return cmNode.getImageFile();
+				if (cmNode.getListItem() == null) return null;
+				if (cmNode.getListItem().getIcon() == null) return null;
+				IconFile iconFile = cmNode.getListItem().getIcon().getIconFile(attribute.getNode().getModel().getIconSet());
+				if (iconFile == null) return null;
+				return iconFile.getAttachmentFile();
 			}
 
 			@Override
@@ -367,6 +399,7 @@ public class EditListDialog extends TitleAreaDialog{
 						session.saveOrUpdate(cmNode);
 					}
 					imageControl.updateImage();
+					listViewer.refresh();
 				}
 			}
 		});
@@ -412,6 +445,7 @@ public class EditListDialog extends TitleAreaDialog{
 		
 		nameTable.getTable().setEnabled(dmNode != null);
 		btnEnable.setEnabled(dmNode != null);
+		miEnable.setEnabled(dmNode != null);
 		updateEnableButtonText();
 		
 		imageControl.updateImage();
@@ -421,8 +455,10 @@ public class EditListDialog extends TitleAreaDialog{
 
 		if (this.cmNode == null || this.cmNode.getIsActive()){
 			btnEnable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+			miEnable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 		}else{
 			btnEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+			miEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 		}
 	}
 	
@@ -436,7 +472,7 @@ public class EditListDialog extends TitleAreaDialog{
 		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)tableComp.getLayoutData()).heightHint = 300;
 		
-		final TableViewer listViewer = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
+		listViewer = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
 		listViewer.setLabelProvider(new CmListItemLabelProvider());
 		listViewer.setInput(attribute.getCurrentList());

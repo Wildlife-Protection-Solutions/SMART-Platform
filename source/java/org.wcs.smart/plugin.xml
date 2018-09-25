@@ -612,6 +612,18 @@
                </visibleWhen>
             </command>
             <command
+                  commandId="org.wcs.smart.command.ca.iconset.show"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+               </visibleWhen>
+            </command>
+            <command
                   commandId="org.wcs.smart.command.ca.datamodel.show"
                   icon="images/icons/etool16/data_model.png"
                   label="%datamodel.command.label"
@@ -975,6 +987,10 @@
             id="org.wcs.smart.command.logoflogins"
             name="%logoflogins.command.name">
       </command>
+      <command
+            id="org.wcs.smart.command.ca.iconset.show"
+            name="Manage Icon Sets...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -1153,6 +1169,16 @@
             class="org.wcs.smart.ui.internal.userlog.ShowLoginLogDialog$ShowUserLogDialogHandlerWrapper"
             commandId="org.wcs.smart.command.logoflogins">
       </handler>
+      <handler
+            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowIconsetPropertyPageHandler$ShowIconsetPropertyPageHandlerWrapper"
+            commandId="org.wcs.smart.command.ca.iconset.show">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+      </handler>
    </extension>
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
@@ -1291,6 +1317,23 @@
       </class>
       <class
             class="org.wcs.smart.LoginLogEntry"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".icon.conservationArea"
+            class="org.wcs.smart.ca.icon.IconFile"
+            supportsCcaa="false">
+      </class>
+      <class
+            class="org.wcs.smart.ca.icon.IconFile"
+            supportsCcaa="false">
+      </class>
+      <class
+            class="org.wcs.smart.ca.icon.IconSet"
+            supportsCcaa="false">
+      </class>
+      <class
+            class="org.wcs.smart.ca.icon.Icon"
             supportsCcaa="false">
       </class>
    </extension>
@@ -1596,6 +1639,9 @@
       </FilestoreDirectory>
       <FilestoreDirectory
             directory="ca_icon">
+      </FilestoreDirectory>
+      <FilestoreDirectory
+            directory="icons">
       </FilestoreDirectory>
    </extension>
    <extension

@@ -33,11 +33,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWTException;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.graphics.Transform;
-import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.internal.Messages;
@@ -99,10 +95,14 @@ public class LoadThumbnailImageJob extends Job {
 					if (attachment.getCopyFromLocation() != null) {
 						file = attachment.getCopyFromLocation();
 					} else {
-						deleteMe = true;
 						try {
-							Path p = EncryptUtils.decryptAttachment(attachment);
-							if (p != null) file = p.toFile();		
+							if (attachment.isEncrypted()) {
+								deleteMe = true;
+								Path p = EncryptUtils.decryptAttachment(attachment);
+								if (p != null) file = p.toFile();
+							}else {
+								file = attachment.getAttachmentFile();
+							}
 						}catch (Exception ex) {
 							file = null;
 						}
@@ -113,52 +113,7 @@ public class LoadThumbnailImageJob extends Job {
 						// skip images > 200MB
 						return;
 					}
-	
-					Image rawImage = null;
-					try{
-						rawImage = new Image(Display.getDefault(), file.getAbsolutePath());
-					}catch (Exception ex) {
-						//add support for svg
-						if (file.getAbsolutePath().toLowerCase().endsWith(".svg")) { //$NON-NLS-1$
-							try {
-								rawImage = SmartUtils.readSvg(Display.getDefault(), file.toPath());
-							}catch (Exception ex2) {
-							}
-						}
-					}
-					if (rawImage == null) return;
-					
-					// scale image
-					Rectangle bounds = rawImage.getBounds();
-					int x = 0, y = 0, width = 0, height = 0;
-					if (bounds.width > bounds.height) {
-						width = thumbnailSize;
-						height = bounds.height * thumbnailSize / bounds.width;
-						y = (thumbnailSize - height) / 2;
-					} else {
-						height = thumbnailSize;
-						width = bounds.width * thumbnailSize / bounds.height;
-						x = (thumbnailSize - width) / 2;
-					}
-					// resize image
-					Image image2 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
-					GC gc = new GC(image2);
-					gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);
-					rawImage.dispose();
-	
-					// transform based on exif orientation data
-					Transform imageTransform = SmartUtils.getExifImageTransform(file, thumbnailSize, thumbnailSize);
-					if (imageTransform != null) {
-						Image image3 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
-						GC gc3 = new GC(image3);
-						gc3.setTransform(imageTransform);
-						gc3.drawImage(image2, 0, 0);
-						image2.dispose();
-						image = image3;
-					} else {
-						image = image2;
-					}
-					
+					image = SmartUtils.getImage(file.toPath(), thumbnailSize);
 				}finally {
 					if (deleteMe && file != null) {
 						try {

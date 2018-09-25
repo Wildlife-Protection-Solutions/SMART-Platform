@@ -229,10 +229,15 @@ public class OnOffButton extends Canvas{
 			final boolean changed) {
 		this.checkWidget();
 
+		Point yes = null;
+		Point no = null;
 		GC gc = new GC(this);
-
-		Point yes = gc.textExtent(yesText);
-		Point no = gc.textExtent(noText);
+		try {
+			yes = gc.textExtent(yesText);
+			no = gc.textExtent(noText);
+		}finally {
+			gc.dispose();
+		}
 
 		int x = Math.max(yes.x, no.x);
 		int y = Math.max(yes.y, no.y);

@@ -32,6 +32,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -56,8 +57,8 @@ public class BooleanAttributeInfoComposite extends CmAttributeInfoComposite {
 	 * @param model
 	 * @param session
 	 */
-	public BooleanAttributeInfoComposite(Composite parent, ConfigurableModel model) {
-		super(parent, model);
+	public BooleanAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
+		super(parent, model, session);
 	}
 
 	/* (non-Javadoc)

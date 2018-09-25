@@ -69,7 +69,8 @@ public class AttachmentInterceptor extends SessionInterceptor {
 	/**
 	 * 
 	 * In most cases users should use AttachmentInterceptor().  There are only a few special cases
-	 * when copying files within the filestore that this option should be used.
+	 * when copying files within the filestore that this option should be used.  Attachments that are 
+	 * identified as not encryptable (see attachment.isEncrypted()) will never be encrypted irregardless of this setting 
 	 * 
 	 * @param encryptFiles if the files are encrypted when they are copied from the source location
 	 */
@@ -171,7 +172,7 @@ public class AttachmentInterceptor extends SessionInterceptor {
     				}
     				to = new File(to.getParentFile(), basename + extension);
     			}
-    			if (encryptFiles) {
+    			if (encryptFiles && attachment.isEncrypted()) {
 	    			try {
 	    				EncryptUtils.encryptFile(attachment.getCopyFromLocation().toPath(), to.toPath(), attachment);
 	    			}catch (Exception ex) {

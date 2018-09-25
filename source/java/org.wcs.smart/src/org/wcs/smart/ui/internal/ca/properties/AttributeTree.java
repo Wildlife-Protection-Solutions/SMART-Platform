@@ -27,6 +27,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -39,11 +40,13 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.LocalSelectionTransfer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.jface.window.Window;
@@ -55,12 +58,16 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
@@ -71,6 +78,8 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.ca.properties.AttributeInfoPanel;
@@ -78,6 +87,7 @@ import org.wcs.smart.ui.ca.properties.AttributeItemDialog;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Class that creates an attribute tree viewer for
@@ -97,7 +107,7 @@ public class AttributeTree {
 	private AttributeInfoPanel info;
 	
 	private List<AttributeTreeNode> deletedNodes = new ArrayList<AttributeTreeNode>();
-	
+	private AttributeTreeLabelProvider labelProvider = new AttributeTreeLabelProvider();
 	
 	public AttributeTree(AttributeInfoPanel info, boolean isEditable){
 		this.isEditable = isEditable;
@@ -134,7 +144,7 @@ public class AttributeTree {
 	}
 	
 	public void refresh(Language newLanguage){
-		((AttributeTreeLabelProvider)viewer.getLabelProvider()).setLanguage(newLanguage);
+		labelProvider.setLanguage(newLanguage);
 		viewer.refresh();
 	}
 	/**
@@ -195,7 +205,8 @@ public class AttributeTree {
 								AttributeTree.this.attribute.getConservationArea(), 
 								null,
 								AttributeTree.this.attribute.getConservationArea().getDefaultLanguage().getCode(),
-								null, true);
+								null, true, null);
+							cloned.setIcon(node.getIcon());
 							clonedroots.add(cloned);
 						}catch (Exception ex){
 							if (!currentSession.isOpen() || monitor.isCanceled()){
@@ -261,7 +272,7 @@ public class AttributeTree {
 	
 				@Override
 				protected boolean isLeafMatch(Viewer viewer, Object element) {
-					String labelText = ((AttributeTreeLabelProvider) ((TreeViewer) viewer).getLabelProvider()).getText(element);
+					String labelText = labelProvider.getText(element);
 					if (labelText == null) {
 						return false;
 					}
@@ -269,23 +280,88 @@ public class AttributeTree {
 				}
 				
 			};
-			FilteredTree fTree = new FilteredTree(comp, SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL, patternFilter, true);
+			FilteredTree fTree = new FilteredTree(comp, SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION, patternFilter, true);
 			viewer = fTree.getViewer();
 		}else{
-			viewer = new TreeViewer(comp, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+			viewer = new TreeViewer(comp, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		}
-		
-		if (!isEditable){
-			viewer.setContentProvider(new AttributeTreeContentProvider(false, false));
-		}else{
-			viewer.setContentProvider(new AttributeTreeContentProvider(false, true));
-		}
-		viewer.setLabelProvider(new AttributeTreeLabelProvider());
+
+		viewer.setContentProvider(new AttributeTreeContentProvider(false, false));
 		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,true));
 		((GridData)viewer.getTree().getLayoutData()).heightHint = 80;
 		((GridData)viewer.getTree().getLayoutData()).widthHint = 100;
 		viewer.setAutoExpandLevel(2);
 		viewer.setInput(LOADING);
+		viewer.getTree().setHeaderVisible(true);
+		viewer.getTree().setLinesVisible(false);
+		
+		TreeViewerColumn labelColumn = new TreeViewerColumn(viewer, SWT.NONE);
+		labelColumn.getColumn().setText(Messages.AttributeTree_TreeNodeColumn);
+		labelColumn.getColumn().setWidth(150);
+		labelColumn.setLabelProvider(new ColumnLabelProvider() {
+			
+			@Override
+			public String getText(Object element) {
+				return labelProvider.getText(element);
+			}
+			@Override
+			public void dispose() {
+				super.dispose();
+				labelProvider.dispose();
+			}
+		});
+		
+		TreeViewerColumn iconColumn = new TreeViewerColumn(viewer, SWT.NONE);
+		iconColumn.getColumn().setText(Messages.AttributeTree_IconColumn);
+		iconColumn.setLabelProvider(new ColumnLabelProvider() {
+			
+			private HashMap<Icon, Image> images = new HashMap<>();
+			
+			@Override
+			public String getText(Object element) {
+				return null;
+			}
+			
+			@Override
+			public Image getImage(Object element) {
+				if (element instanceof AttributeTreeNode) {
+					AttributeTreeNode li = (AttributeTreeNode)element;
+					if (li.getIcon() == null) return null;
+					if (images.containsKey(li.getIcon())) return images.get(li.getIcon());
+					List<IconFile> files = li.getIcon().getFiles();
+					if (files.isEmpty()) return null;
+					
+					//combine all files into a single image 
+					Image img = new Image(Display.getDefault(), (AttributeInfoPanel.LIST_ICON_SIZE+5) * files.size(), AttributeInfoPanel.LIST_ICON_SIZE);
+					images.put(li.getIcon(), img);
+					GC gc = new GC(img);
+					try {
+						for (int i = 0; i < files.size(); i++) {
+							IconFile ff = files.get(i);
+							Image mm = SmartUtils.getImage(ff.getAttachmentFile().toPath(), AttributeInfoPanel.LIST_ICON_SIZE);
+							try {
+								gc.drawImage(mm, 0,0, AttributeInfoPanel.LIST_ICON_SIZE,AttributeInfoPanel.LIST_ICON_SIZE,i*(AttributeInfoPanel.LIST_ICON_SIZE+5),0,AttributeInfoPanel.LIST_ICON_SIZE,AttributeInfoPanel.LIST_ICON_SIZE);
+							}finally {
+								mm.dispose();
+							}
+						}
+					}finally {
+						gc.dispose();
+					}
+					return img;
+					
+				}
+				return null;
+			}
+			
+			@Override
+			public void dispose() {
+				super.dispose();
+				images.values().forEach(i->i.dispose());
+			}
+		});
+		iconColumn.getColumn().setWidth(32);
+		
 		
 		if (isEditable){
 			int operations = DND.DROP_MOVE;
@@ -300,7 +376,7 @@ public class AttributeTree {
 			final Button btnAdd = new Button(buttonPanel, SWT.NONE);
 			btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 			btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-			btnAdd.setEnabled(false);
+			btnAdd.setEnabled(true);
 			btnAdd.setToolTipText(Messages.AttributeTree_AddButton_Tooltip);
 			btnAdd.addSelectionListener(new SelectionAdapter(){
 				@Override
@@ -317,7 +393,7 @@ public class AttributeTree {
 			btnEdit.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					editItem(viewer, ((AttributeTreeLabelProvider)viewer.getLabelProvider()).getLanguage() );
+					editItem(viewer, labelProvider.getLanguage() );
 				}
 			});
 			
@@ -346,7 +422,7 @@ public class AttributeTree {
 				public void widgetSelected(SelectionEvent e){
 					List<AttributeTreeNode> nodes = (List<AttributeTreeNode>) viewer.getInput();
 					List<AttributeTreeNode> toSort = new ArrayList<AttributeTreeNode>();
-					Language lang = ((AttributeTreeLabelProvider)viewer.getLabelProvider()).getLanguage();
+					Language lang = labelProvider.getLanguage();
 					
 					sortNodes(nodes, lang);
 					toSort.addAll(nodes);
@@ -429,14 +505,33 @@ public class AttributeTree {
 				}
 			});
 			
+			Menu tmp = new Menu(viewer.getControl());
+			MenuItem miAdd = new MenuItem(tmp, SWT.PUSH);
+			miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+			miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			miAdd.addListener(SWT.Selection, e->addItem(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+			
+			MenuItem miEdit = new MenuItem(tmp, SWT.PUSH);
+			miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+			miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+			miEdit.addListener(SWT.Selection, e->editItem(viewer, labelProvider.getLanguage() ));
+			
+			MenuItem miDelete = new MenuItem(tmp, SWT.PUSH);
+			miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			miDelete.addListener(SWT.Selection, e->deleteNodes());
+			
+			viewer.getControl().setMenu(tmp);
+			
 			viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
 					if (viewer.getSelection().isEmpty()){
-						btnAdd.setEnabled(false);
 						btnEdit.setEnabled(false);
 						btnDisable.setEnabled(false);
 						btnDelete.setEnabled(false);
+						miDelete.setEnabled(false);
+						miEdit.setEnabled(false);
 						return;
 					}
 					Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
@@ -444,12 +539,14 @@ public class AttributeTree {
 						btnEdit.setEnabled(false);
 						btnDisable.setEnabled(false);
 						btnDelete.setEnabled(false);
-						btnAdd.setEnabled(true);
+						miDelete.setEnabled(false);
+						miEdit.setEnabled(false);
 					}else if (x instanceof AttributeTreeNode){
 						btnEdit.setEnabled(true);
 						btnDisable.setEnabled(true);
 						btnDelete.setEnabled(true);
-						btnAdd.setEnabled(true);
+						miDelete.setEnabled(true);
+						miEdit.setEnabled(true);
 						if (((AttributeTreeNode)x).getIsActive()){
 							btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 						}else{
@@ -479,7 +576,7 @@ public class AttributeTree {
 	private void deleteNodes() {
 		
 		final ArrayList<AttributeTreeNode> toDelete = new ArrayList<AttributeTreeNode>();
-		Language currentLang = ((AttributeTreeLabelProvider)viewer.getLabelProvider()).getLanguage();
+		Language currentLang = labelProvider.getLanguage();
 		for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
 			if (x instanceof AttributeTreeNode){
@@ -657,10 +754,11 @@ public class AttributeTree {
 	 */
 	private void addItem(Language currentLanguage){
 		Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
-		if (x instanceof AttributeTreeContentProvider.RootNode || x instanceof AttributeTreeNode){
+		
+		if (x == null || x instanceof AttributeTreeContentProvider.RootNode || x instanceof AttributeTreeNode){
 			List<? extends DmObject> siblings = null;
 			AttributeTreeNode parent = null;
-			if (x instanceof AttributeTreeContentProvider.RootNode){
+			if (x == null || x instanceof AttributeTreeContentProvider.RootNode){
 				siblings = getRootNodes();
 			}else{
 				siblings = ((AttributeTreeNode)x).getChildren();
@@ -687,7 +785,7 @@ public class AttributeTree {
 				getRootNodes().add(it);
 				it.setIsActive(true);
 			}
-			viewer.setExpandedState(x, true);
+			if (x != null) viewer.setExpandedState(x, true);
 			
 			
 			if (siblings == null){
@@ -706,6 +804,9 @@ public class AttributeTree {
 	 */
 	private void refreshTree() {
 		viewer.refresh();
+		
+		viewer.getTree().getColumn(0).pack();
+		viewer.getTree().getColumn(1).pack();
 	}
 	
 	public interface AttributeTreeChangeListener{

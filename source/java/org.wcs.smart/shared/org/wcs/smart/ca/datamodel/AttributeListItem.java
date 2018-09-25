@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ca.datamodel;
 
+import java.util.Collection;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -30,6 +32,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.icon.Icon;
 
 /**
  * Attribute list item for attributes of type list.
@@ -106,15 +109,13 @@ public class AttributeListItem extends DmObject{
 	 * @param oldCa the conservation area of the object being cloned 
 	 * @return a cloned attribute list item
 	 */
-	public AttributeListItem clone(Attribute newAtt, ConservationArea oldCa, String defaultLang){
+	public AttributeListItem clone(Attribute newAtt, ConservationArea oldCa, Collection<Icon> iconSet, String defaultLang){
 		AttributeListItem clone = new AttributeListItem();
-
 		clone.copyValues(this, newAtt.getConservationArea(), defaultLang);
 		clone.setAttribute(newAtt);
 		clone.setIsActive(this.isActive);
-		
 		clone.setListOrder(this.getListOrder());
-		
+		clone.updateIcon(this, iconSet);
 		return clone;
 		
 	}

@@ -1,940 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <DataModel xmlns="http://www.smartconservationsoftware.org/xml/1.0/datamodel">
     <languages>
-        <language code="en"/>
         <language code="ka"/>
+        <language code="en"/>
     </languages>
     <attributes>
-        <attribute key="ageofsign" isrequired="false" type="LIST">
-            <names language_code="en" value="Age of Sign"/>
-            <names language_code="ka" value="ნიშანის სიძველე"/>
-            <values key="fresh" isactive="true">
-                <names language_code="en" value="Fresh"/>
-                <names language_code="ka" value="ახალი"/>
-            </values>
-            <values key="recent" isactive="true">
-                <names language_code="en" value="Recent"/>
-                <names language_code="ka" value="არც ისე დიდი ხნის"/>
-            </values>
-            <values key="old" isactive="true">
-                <names language_code="en" value="Old"/>
-                <names language_code="ka" value="ძველი"/>
-            </values>
-            <values key="veryold" isactive="true">
-                <names language_code="en" value="Very old"/>
-                <names language_code="ka" value="ძალიან ძველი"/>
-            </values>
-            <values key="unknown" isactive="true">
-                <names language_code="en" value="Unknown"/>
-                <names language_code="ka" value="უცნობია"/>
-            </values>
-        </attribute>
-        <attribute key="species" isrequired="false" type="TREE">
-            <names language_code="en" value="Species"/>
-            <names language_code="ka" value="სახეობა"/>
-        </attribute>
-        <attribute key="threat" isrequired="false" type="TREE">
-            <names language_code="en" value="Threat"/>
-            <names language_code="ka" value="საფრთხე"/>
-            <tree key="residentialcommercialdevelopment" isactive="true">
-                <names language_code="en" value="Residential &amp; Commercial Development"/>
-                <names language_code="ka" value="საცხოვრებელი და კომერციული განვითარება"/>
-                <children key="housingurbanareas" isactive="true">
-                    <names language_code="en" value="Housing &amp; Urban Areas"/>
-                    <names language_code="ka" value="საცხოვრებელი და ურბანული ტერიტორიები"/>
-                </children>
-                <children key="commericalindustrialareas" isactive="true">
-                    <names language_code="en" value="Commercial &amp; Industrial Areas"/>
-                    <names language_code="ka" value="კომერციული და ინდუსტრიული ტერიტორიები"/>
-                </children>
-                <children key="tourismrecreationareas" isactive="true">
-                    <names language_code="en" value="Tourism &amp; Recreation Areas"/>
-                    <names language_code="ka" value="ტურიზმის და რეკრეაციის ტერიტორიები"/>
-                </children>
-            </tree>
-            <tree key="agricultureaquaculture" isactive="true">
-                <names language_code="en" value="Agriculture &amp; Aquaculture"/>
-                <names language_code="ka" value="სოფლის მეურნეობა და წყლის მეურნეობა (აკვაკულტურა)"/>
-                <children key="annualperennialnontimbercrops" isactive="true">
-                    <names language_code="en" value="Annual &amp; Perennial Non-Timber Crops"/>
-                    <names language_code="ka" value="ერთწლიანი და მრავალწლიანი დარგული კულტურები"/>
-                </children>
-                <children key="woodpulpplantations" isactive="true">
-                    <names language_code="en" value="Wood &amp; Pulp Plantations"/>
-                    <names language_code="ka" value="ხის პლანტაციები"/>
-                </children>
-                <children key="livestockfarmingranching" isactive="true">
-                    <names language_code="en" value="Livestock Farming &amp; Ranching"/>
-                    <names language_code="ka" value="მეცხოველეობა"/>
-                </children>
-                <children key="marinefreshwateraquaculture" isactive="true">
-                    <names language_code="en" value="Marine &amp; Freshwater Aquaculture"/>
-                    <names language_code="ka" value="ზღვისა და მტკნარი წყლის აკვაკულტურა"/>
-                </children>
-            </tree>
-            <tree key="energyproductionmining" isactive="true">
-                <names language_code="en" value="Energy Production &amp; Mining"/>
-                <names language_code="ka" value="ენერგიის წარმოება და სამთო მრეწველობა"/>
-                <children key="oilgasdrlling" isactive="true">
-                    <names language_code="en" value="Oil &amp; Gas Drilling"/>
-                    <names language_code="ka" value="ნავთობისა და გაზის ბურღვა"/>
-                </children>
-                <children key="miningquarrying" isactive="true">
-                    <names language_code="en" value="Mining &amp; Quarrying"/>
-                    <names language_code="ka" value="სამთო სამრეწველო მოპოვების საქმიანობები"/>
-                </children>
-                <children key="renewableenergy" isactive="true">
-                    <names language_code="en" value="Renewable Energy"/>
-                    <names language_code="ka" value="განახლებადი ენერგია"/>
-                </children>
-            </tree>
-            <tree key="transportationservicecorridors" isactive="true">
-                <names language_code="en" value="Transportation &amp; Service Corridors"/>
-                <names language_code="ka" value="ტრანსპორტირება და მომსახურების კორიდორები"/>
-                <children key="roadsrailroads" isactive="true">
-                    <names language_code="en" value="Roads &amp; Railroads"/>
-                    <names language_code="ka" value="გზები და რკინისგზები"/>
-                </children>
-                <children key="utilityservicelines" isactive="true">
-                    <names language_code="en" value="Utility &amp; Service Lines"/>
-                    <names language_code="ka" value="კომუნალური და მომსახურების ხაზები"/>
-                </children>
-                <children key="shippinglanes" isactive="true">
-                    <names language_code="en" value="Shipping Lanes"/>
-                    <names language_code="ka" value="გადაზიდვის ბილიკები"/>
-                </children>
-                <children key="flightpaths" isactive="true">
-                    <names language_code="en" value="Flight Paths"/>
-                </children>
-                <children key="horsetrail" isactive="true">
-                    <names language_code="en" value="Horse Trail"/>
-                    <names language_code="ka" value="ცხენის ბილიკი"/>
-                </children>
-            </tree>
-            <tree key="biologicalresourceuse" isactive="true">
-                <names language_code="en" value="Biological Resource Use"/>
-                <names language_code="ka" value="ბიოლოგიური რესურსების გამოყენება"/>
-                <children key="huntingcollectingterrestrialanimals" isactive="true">
-                    <names language_code="en" value="Hunting &amp; Collecting Terrestrial Animals"/>
-                    <names language_code="ka" value="ნადირობა"/>
-                </children>
-                <children key="gatheringterrestrialplants" isactive="true">
-                    <names language_code="en" value="Gathering Terrestrial Plants"/>
-                    <names language_code="ka" value="ტყის არამერქნული პროდუქტების შეგროვება"/>
-                </children>
-                <children key="loggingwoodharvesting" isactive="true">
-                    <names language_code="en" value="Logging &amp; Wood Harvesting"/>
-                    <names language_code="ka" value="ხე-ტყის ჭრა"/>
-                </children>
-                <children key="fishingharvestingaquaticresources" isactive="true">
-                    <names language_code="en" value="Fishing &amp; Harvesting Aquatic Resources"/>
-                    <names language_code="ka" value="თევზაობა და წყლის რესურსების მოპოვება"/>
-                </children>
-            </tree>
-            <tree key="naturalsystemmodifications" isactive="true">
-                <names language_code="en" value="Natural System Modifications"/>
-                <names language_code="ka" value="ბუნებრივი სისტემის ცვლილებები"/>
-                <children key="firefiresuppression" isactive="true">
-                    <names language_code="en" value="Fire &amp; Fire Suppression"/>
-                </children>
-                <children key="damswatermanagementuse" isactive="true">
-                    <names language_code="en" value="Dams &amp; Water Management/Use"/>
-                    <names language_code="ka" value="კაშხალი და წყლის მენეჯმენტი / გამოყენება"/>
-                </children>
-                <children key="otherecosystemmodifications" isactive="true">
-                    <names language_code="en" value="Other Ecosystem Modifications"/>
-                    <names language_code="ka" value="ეკოსისტემების სხვა ცვლილებები"/>
-                </children>
-            </tree>
-            <tree key="invasiveotherproblematicspeciesgenes" isactive="true">
-                <names language_code="en" value="Invasive &amp; Other Problematic Species &amp; Genes"/>
-                <names language_code="ka" value="ინვაზიური და სხვა პრობლემატური სახეობები და გენები"/>
-                <children key="invasivenonnativealienspecies" isactive="true">
-                    <names language_code="en" value="Invasive Non-Native/Alien Species"/>
-                    <names language_code="ka" value="ინვაზიური არა-ადგილობრივი / უცხოური სახეობები"/>
-                </children>
-                <children key="problematicnativespecies" isactive="true">
-                    <names language_code="en" value="Problematic Native Species"/>
-                    <names language_code="ka" value="პრობლემატური ადგილობრივი სახეობები"/>
-                </children>
-                <children key="introducedgeneticmaterial" isactive="true">
-                    <names language_code="en" value="Introduced Genetic Material"/>
-                    <names language_code="ka" value="შემოტანილი გენეტიკური მასალა"/>
-                </children>
-            </tree>
-            <tree key="pollution" isactive="true">
-                <names language_code="en" value="Pollution"/>
-                <names language_code="ka" value="დაბინძურება"/>
-                <children key="householdsewageurbanwastewater" isactive="true">
-                    <names language_code="en" value="Household Sewage &amp; Urban Waste Water"/>
-                    <names language_code="ka" value="საყოფაცხოვრებო კანალიზაცია და ურბანული ნარჩენების წყალი"/>
-                </children>
-                <children key="industrialmilitaryeffluents" isactive="true">
-                    <names language_code="en" value="Industrial &amp; Military Effluents"/>
-                    <names language_code="ka" value="სამრეწველო და სამხედრო საქმიანობა"/>
-                </children>
-                <children key="agriculturalforestryeffluents" isactive="true">
-                    <names language_code="en" value="Agricultural &amp; Forestry Effluents"/>
-                    <names language_code="ka" value="სასოფლო-სამეურნეო და სატყეო მეურნეობები"/>
-                </children>
-                <children key="garbagesolidwaste" isactive="true">
-                    <names language_code="en" value="Garbage &amp; Solid Waste"/>
-                    <names language_code="ka" value="ნაგავი და მყარი ნარჩენები"/>
-                </children>
-                <children key="airbornepollutants" isactive="true">
-                    <names language_code="en" value="Air-Borne Pollutants"/>
-                    <names language_code="ka" value="ჰაერის დაბინძურება"/>
-                </children>
-                <children key="excessenergy" isactive="true">
-                    <names language_code="en" value="Excess Energy"/>
-                    <names language_code="ka" value="ჭარბი ენერგია"/>
-                </children>
-            </tree>
-            <tree key="climatechangesevereweather" isactive="true">
-                <names language_code="en" value="Climate Change &amp; Severe Weather"/>
-                <names language_code="ka" value="კლიმატური ცვლილებები და მკაცრი ამინდი"/>
-                <children key="habitatshiftingalteration" isactive="true">
-                    <names language_code="en" value="Habitat Shifting &amp; Alteration"/>
-                    <names language_code="ka" value="ჰაბიტატების მონაცვლეობა და ცვლილება"/>
-                </children>
-                <children key="droughts" isactive="true">
-                    <names language_code="en" value="Droughts"/>
-                    <names language_code="ka" value="გვალვები"/>
-                </children>
-                <children key="temperatureextremes" isactive="true">
-                    <names language_code="en" value="Temperature Extremes"/>
-                </children>
-                <children key="stormsflooding" isactive="true">
-                    <names language_code="en" value="Storms &amp; Flooding"/>
-                    <names language_code="ka" value="წვიმა და წყალდიდობა"/>
-                </children>
-            </tree>
-        </attribute>
-        <attribute key="typeofpollution" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Pollution"/>
-            <values key="garbage" isactive="true">
-                <names language_code="en" value="Garbage"/>
-            </values>
-            <values key="chemical" isactive="true">
-                <names language_code="en" value="Chemical"/>
-            </values>
-            <values key="biological" isactive="true">
-                <names language_code="en" value="Biological"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-            <values key="unknown" isactive="true">
-                <names language_code="en" value="Unknown"/>
-            </values>
-        </attribute>
-        <attribute key="numberofpeople" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Number of People"/>
-        </attribute>
-        <attribute key="meshsize" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Mesh Size"/>
-        </attribute>
-        <attribute key="issecured" isrequired="false" type="BOOLEAN">
-            <names language_code="en" value="Is Secured"/>
-        </attribute>
-        <attribute key="numberofweaponsequipment" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Number of Weapons &amp; Equipment"/>
-        </attribute>
-        <attribute key="numberoftransportation" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Number of Transportation"/>
-        </attribute>
-        <attribute key="numberofadultmales" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Number of Adult Males"/>
-            <names language_code="ka" value="ზრდასრული მამრის რაოდენობა"/>
-        </attribute>
-        <attribute key="actiontaken_people" isrequired="false" type="LIST">
-            <names language_code="en" value="Action Taken - People"/>
-            <values key="observedonly" isactive="true">
-                <names language_code="en" value="Observed Only"/>
-            </values>
-            <values key="unsuccessfulpursuit" isactive="true">
-                <names language_code="en" value="Unsuccessful Pursuit"/>
-            </values>
-            <values key="arrested" isactive="true">
-                <names language_code="en" value="Arrested"/>
-            </values>
-            <values key="verbalwarning" isactive="true">
-                <names language_code="en" value="Verbal Warning"/>
-            </values>
-            <values key="writtenwarning" isactive="true">
-                <names language_code="en" value="Written Warning"/>
-            </values>
-        </attribute>
-        <attribute key="actiontaken_landclearning" isrequired="false" type="LIST">
+        <attribute key="actiontaken_landclearning" isrequired="false" type="LIST" iconkey="action_taken">
             <names language_code="en" value="Action Taken - Land Clearning"/>
-            <values key="observedonly" isactive="true">
+            <values key="observedonly" isactive="true" iconkey="observed_only">
                 <names language_code="en" value="Observed Only"/>
             </values>
-            <values key="destroyedcrops" isactive="true">
+            <values key="destroyedcrops" isactive="true" iconkey="destroyed">
                 <names language_code="en" value="Destroyed Crops"/>
-            </values>
-        </attribute>
-        <attribute key="actiontaken_items" isrequired="false" type="LIST">
-            <names language_code="en" value="Action Taken - Items"/>
-            <values key="observedonly" isactive="true">
-                <names language_code="en" value="Observed Only"/>
-            </values>
-            <values key="confiscated" isactive="true">
-                <names language_code="en" value="Confiscated"/>
-            </values>
-            <values key="destroyed" isactive="true">
-                <names language_code="en" value="Destroyed"/>
-            </values>
-            <values key="heardonly" isactive="true">
-                <names language_code="en" value="Heard Only"/>
-            </values>
-        </attribute>
-        <attribute key="areaburnedha" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Area Burned ha"/>
-        </attribute>
-        <attribute key="actiontakenmp" isrequired="false" type="LIST">
-            <names language_code="en" value="Action Taken - Camp"/>
-            <values key="observedonly" isactive="true">
-                <names language_code="en" value="Observed Only"/>
-            </values>
-            <values key="destroyed" isactive="true">
-                <names language_code="en" value="Destroyed"/>
-            </values>
-        </attribute>
-        <attribute key="quantity" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Quantity"/>
-        </attribute>
-        <attribute key="positiontype" isrequired="false" type="LIST">
-            <names language_code="en" value="Position Type"/>
-            <names language_code="ka" value="პოზიციის ტიპი"/>
-            <values key="start" isactive="true">
-                <names language_code="en" value="Patrol Start"/>
-                <names language_code="ka" value="პატრულირების დაწყება"/>
-            </values>
-            <values key="end" isactive="true">
-                <names language_code="en" value="Patrol End"/>
-                <names language_code="ka" value="პატრულირების დასრულება"/>
-            </values>
-            <values key="patrolcamp" isactive="true">
-                <names language_code="en" value="Patrol Camp"/>
-                <names language_code="ka" value="პატრულირების ბანაკი"/>
-            </values>
-            <values key="stop" isactive="true">
-                <names language_code="en" value="Stop"/>
-                <names language_code="ka" value="გაჩერება"/>
-            </values>
-            <values key="restart" isactive="true">
-                <names language_code="en" value="Restart"/>
-                <names language_code="ka" value="ხელახლა დაწყება"/>
-            </values>
-        </attribute>
-        <attribute key="weightkg" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Weight kg"/>
-            <names language_code="ka" value="წონა კგ"/>
-        </attribute>
-        <attribute key="partremoved3" isrequired="false" type="LIST">
-            <names language_code="en" value="Part Missing 3"/>
-            <values key="skin" isactive="true">
-                <names language_code="en" value="Skin"/>
-            </values>
-            <values key="meat" isactive="true">
-                <names language_code="en" value="Meat"/>
-            </values>
-            <values key="tusk" isactive="true">
-                <names language_code="en" value="Tusk"/>
-            </values>
-            <values key="hornorantler" isactive="true">
-                <names language_code="en" value="Horn or Antler"/>
-            </values>
-            <values key="fin" isactive="true">
-                <names language_code="en" value="Fin"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="lengthofnetmeters" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Length of Net meters"/>
-        </attribute>
-        <attribute key="phonenumber" isrequired="false" type="TEXT">
-            <qa_regex></qa_regex>
-            <names language_code="en" value="Phone Number"/>
-        </attribute>
-        <attribute key="partremoved1" isrequired="false" type="LIST">
-            <names language_code="en" value="Part Missing 1"/>
-            <values key="skin" isactive="true">
-                <names language_code="en" value="Skin"/>
-            </values>
-            <values key="meat" isactive="true">
-                <names language_code="en" value="Meat"/>
-            </values>
-            <values key="tusk" isactive="true">
-                <names language_code="en" value="Tusk"/>
-            </values>
-            <values key="hornorantler" isactive="true">
-                <names language_code="en" value="Horn or Antler"/>
-            </values>
-            <values key="fin" isactive="true">
-                <names language_code="en" value="Fin"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="partremoved2" isrequired="false" type="LIST">
-            <names language_code="en" value="Part Missing 2"/>
-            <values key="skin" isactive="true">
-                <names language_code="en" value="Skin"/>
-            </values>
-            <values key="meat" isactive="true">
-                <names language_code="en" value="Meat"/>
-            </values>
-            <values key="tusk" isactive="true">
-                <names language_code="en" value="Tusk"/>
-            </values>
-            <values key="hornorantler" isactive="true">
-                <names language_code="en" value="Horn or Antler"/>
-            </values>
-            <values key="fin" isactive="true">
-                <names language_code="en" value="Fin"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="status" isrequired="false" type="LIST">
-            <names language_code="en" value="Status"/>
-            <values key="abandoned" isactive="true">
-                <names language_code="en" value="Abandoned"/>
-            </values>
-            <values key="active" isactive="true">
-                <names language_code="en" value="Active"/>
-            </values>
-            <values key="inactive" isactive="true">
-                <names language_code="en" value="InActive"/>
-            </values>
-            <values key="unknown" isactive="true">
-                <names language_code="en" value="Unknown"/>
-            </values>
-        </attribute>
-        <attribute key="causeofdeath" isrequired="false" type="TREE">
-            <names language_code="en" value="Cause of Death"/>
-            <names language_code="ka" value="სიკვდილის მიზეზი"/>
-            <tree key="natural" isactive="true">
-                <names language_code="en" value="Natural"/>
-                <children key="disease" isactive="true">
-                    <names language_code="en" value="Disease"/>
-                </children>
-                <children key="oldage" isactive="true">
-                    <names language_code="en" value="Old Age"/>
-                </children>
-                <children key="accident" isactive="true">
-                    <names language_code="en" value="Accident"/>
-                    <children key="runoverbyvehicle" isactive="true">
-                        <names language_code="en" value="Run over by vehicle"/>
-                    </children>
-                    <children key="drowned" isactive="true">
-                        <names language_code="en" value="Drowned"/>
-                    </children>
-                    <children key="electrocuted" isactive="true">
-                        <names language_code="en" value="Electrocuted"/>
-                    </children>
-                </children>
-                <children key="predation" isactive="true">
-                    <names language_code="en" value="Predation"/>
-                </children>
-            </tree>
-            <tree key="legal" isactive="true">
-                <names language_code="en" value="Legal"/>
-                <children key="sporthunting" isactive="true">
-                    <names language_code="en" value="Sport Hunting"/>
-                </children>
-                <children key="problemanimalcontrol" isactive="true">
-                    <names language_code="en" value="Problem Animal Control"/>
-                </children>
-                <children key="culling" isactive="true">
-                    <names language_code="en" value="Culling"/>
-                </children>
-            </tree>
-            <tree key="illegal" isactive="true">
-                <names language_code="en" value="Illegal"/>
-                <children key="gunshot" isactive="true">
-                    <names language_code="en" value="Gunshot"/>
-                </children>
-                <children key="trapping" isactive="true">
-                    <names language_code="en" value="Trapping"/>
-                </children>
-                <children key="traditionalweapons" isactive="true">
-                    <names language_code="en" value="Traditional Weapons"/>
-                </children>
-                <children key="poisoning" isactive="true">
-                    <names language_code="en" value="Poisoning"/>
-                </children>
-            </tree>
-            <tree key="unknown" isactive="true">
-                <names language_code="en" value="Unknown"/>
-            </tree>
-        </attribute>
-        <attribute key="typeoftrap" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Trap"/>
-            <values key="pittrap" isactive="true">
-                <names language_code="en" value="Pit Trap"/>
-            </values>
-            <values key="wiresnare" isactive="true">
-                <names language_code="en" value="Wire Snare"/>
-            </values>
-            <values key="jawtrap" isactive="true">
-                <names language_code="en" value="Jaw Trap"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="peoplearmed" isrequired="false" type="LIST">
-            <names language_code="en" value="People Armed"/>
-            <values key="armed" isactive="true">
-                <names language_code="en" value="Armed"/>
-            </values>
-            <values key="unarmed" isactive="true">
-                <names language_code="en" value="Unarmed"/>
-            </values>
-            <values key="unknown" isactive="true">
-                <names language_code="en" value="Unknown"/>
-            </values>
-        </attribute>
-        <attribute key="typeofanimalpart" isrequired="false" type="TREE">
-            <names language_code="en" value="Type of Animal Part"/>
-            <tree key="wholeanimal" isactive="true">
-                <names language_code="en" value="Whole Animal"/>
-                <children key="smoked" isactive="true">
-                    <names language_code="en" value="Smoked"/>
-                </children>
-                <children key="fresh" isactive="true">
-                    <names language_code="en" value="Fresh"/>
-                </children>
-            </tree>
-            <tree key="meat" isactive="true">
-                <names language_code="en" value="Meat"/>
-                <children key="smoked" isactive="true">
-                    <names language_code="en" value="Smoked"/>
-                </children>
-                <children key="fresh" isactive="true">
-                    <names language_code="en" value="Fresh"/>
-                </children>
-            </tree>
-            <tree key="tusksorcanines" isactive="true">
-                <names language_code="en" value="Tusks or Canines"/>
-            </tree>
-            <tree key="hornsorantlers" isactive="true">
-                <names language_code="en" value="Horns or Antlers"/>
-            </tree>
-            <tree key="bones" isactive="true">
-                <names language_code="en" value="Bones"/>
-            </tree>
-            <tree key="gallbladder" isactive="true">
-                <names language_code="en" value="Gall Bladder"/>
-            </tree>
-            <tree key="stomach" isactive="true">
-                <names language_code="en" value="Stomach"/>
-            </tree>
-            <tree key="skin" isactive="true">
-                <names language_code="en" value="Skin"/>
-            </tree>
-            <tree key="skull" isactive="true">
-                <names language_code="en" value="Skull"/>
-            </tree>
-            <tree key="paw" isactive="true">
-                <names language_code="en" value="Paw"/>
-            </tree>
-        </attribute>
-        <attribute key="typeofdomesticanimal" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Domestic Animal"/>
-            <values key="dog" isactive="true">
-                <names language_code="en" value="Dog"/>
-            </values>
-            <values key="cat" isactive="true">
-                <names language_code="en" value="Cat"/>
-            </values>
-            <values key="elephant" isactive="true">
-                <names language_code="en" value="Elephant"/>
-            </values>
-            <values key="goat" isactive="true">
-                <names language_code="en" value="Goat"/>
-            </values>
-            <values key="cow" isactive="true">
-                <names language_code="en" value="Cow"/>
-            </values>
-            <values key="buffalo" isactive="true">
-                <names language_code="en" value="Buffalo"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="typeofhumansign" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Human Sign"/>
-            <values key="trail" isactive="true">
-                <names language_code="en" value="Trail"/>
-            </values>
-            <values key="footprint" isactive="true">
-                <names language_code="en" value="Footprint"/>
-            </values>
-            <values key="machetecut" isactive="true">
-                <names language_code="en" value="Machete Cut"/>
-            </values>
-            <values key="litter" isactive="true">
-                <names language_code="en" value="Litter"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="typeofcuttingtool" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Cutting Tool"/>
-            <values key="chainsaw" isactive="true">
-                <names language_code="en" value="Chainsaw"/>
-            </values>
-            <values key="machete" isactive="true">
-                <names language_code="en" value="Machete"/>
-            </values>
-            <values key="knife" isactive="true">
-                <names language_code="en" value="Knife"/>
-            </values>
-            <values key="axe" isactive="true">
-                <names language_code="en" value="Axe"/>
-            </values>
-            <values key="handsaw" isactive="true">
-                <names language_code="en" value="Handsaw"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="manufacturer" isrequired="false" type="TEXT">
-            <qa_regex></qa_regex>
-            <names language_code="en" value="Manufacturer"/>
-        </attribute>
-        <attribute key="caliber" isrequired="false" type="LIST">
-            <names language_code="en" value="Caliber"/>
-            <values key="c556" isactive="true">
-                <names language_code="en" value="5 56"/>
-            </values>
-            <values key="c762" isactive="true">
-                <names language_code="en" value="7 62"/>
-            </values>
-            <values key="guage12" isactive="true">
-                <names language_code="en" value="12 gauge"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="typeofforestproduct" isrequired="false" type="LIST">
-            <aggregations aggregation="sum"/>
-            <names language_code="en" value="Type of Forest Product"/>
-            <values key="honey" isactive="true">
-                <names language_code="en" value="Honey"/>
-            </values>
-            <values key="mushroom" isactive="true">
-                <names language_code="en" value="Mushroom"/>
-            </values>
-            <values key="orchid" isactive="true">
-                <names language_code="en" value="Orchid"/>
-            </values>
-            <values key="ratan" isactive="true">
-                <names language_code="en" value="Ratan"/>
-            </values>
-            <values key="bamboo" isactive="true">
-                <names language_code="en" value="Bamboo"/>
-            </values>
-            <values key="caterpiller" isactive="true">
-                <names language_code="en" value="Caterpiller"/>
-            </values>
-            <values key="wildfruit" isactive="true">
-                <names language_code="en" value="Wild Fruit"/>
-            </values>
-            <values key="medicinalplants" isactive="true">
-                <names language_code="en" value="Medicinal Plants"/>
-            </values>
-            <values key="latax" isactive="true">
-                <names language_code="en" value="Latex"/>
-            </values>
-            <values key="resin" isactive="true">
-                <names language_code="en" value="Resin"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="placeoforigin" isrequired="false" type="LIST">
-            <names language_code="en" value="Place of Origin"/>
-            <values key="villagea" isactive="true">
-                <names language_code="en" value="Village A"/>
-            </values>
-            <values key="villageb" isactive="true">
-                <names language_code="en" value="Village B"/>
-            </values>
-        </attribute>
-        <attribute key="sex" isrequired="false" type="LIST">
-            <names language_code="en" value="Sex"/>
-            <names language_code="ka" value="სქესი"/>
-            <values key="female" isactive="true">
-                <names language_code="en" value="Female"/>
-                <names language_code="ka" value="მდედრი"/>
-            </values>
-            <values key="male" isactive="true">
-                <names language_code="en" value="Male"/>
-                <names language_code="ka" value="მამრი"/>
-            </values>
-            <values key="unknown" isactive="true">
-                <names language_code="en" value="Unknown"/>
-                <names language_code="ka" value="უცნობია"/>
-            </values>
-        </attribute>
-        <attribute key="numberofyoung" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Number of Young"/>
-            <names language_code="ka" value="ახალგაზრდების რაოდენობა"/>
-        </attribute>
-        <attribute key="numberofbags" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Number of Bags"/>
-        </attribute>
-        <attribute key="sheltertype" isrequired="false" type="LIST">
-            <names language_code="en" value="Shelter Type"/>
-            <values key="groundhide" isactive="true">
-                <names language_code="en" value="Ground Hide"/>
-            </values>
-            <values key="treehide" isactive="true">
-                <names language_code="en" value="Tree Hide"/>
-            </values>
-            <values key="camp" isactive="true">
-                <names language_code="en" value="Camp"/>
-            </values>
-            <values key="unknown" isactive="true">
-                <names language_code="en" value="Unknown"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="figfruit" isrequired="false" type="LIST">
-            <names language_code="en" value="Fruiting Status"/>
-            <names language_code="ka" value="ხილის მდგომარეობა"/>
-            <values key="ripe" isactive="true">
-                <names language_code="en" value="Ripe"/>
-                <names language_code="ka" value="მწიფე"/>
-            </values>
-            <values key="unripe" isactive="true">
-                <names language_code="en" value="Unripe"/>
-                <names language_code="ka" value="დაუმწიფებელი"/>
-            </values>
-            <values key="nofruit" isactive="true">
-                <names language_code="en" value="No Fruit"/>
-                <names language_code="ka" value="ხილი არ არის"/>
-            </values>
-        </attribute>
-        <attribute key="registrationnumber" isrequired="false" type="TEXT">
-            <qa_regex></qa_regex>
-            <names language_code="en" value="Registration Number"/>
-        </attribute>
-        <attribute key="serialnumber" isrequired="false" type="TEXT">
-            <qa_regex></qa_regex>
-            <names language_code="en" value="Serial Number"/>
-        </attribute>
-        <attribute key="infraction" isrequired="false" type="LIST">
-            <names language_code="en" value="Infraction"/>
-            <names language_code="ka" value="დარღვევები"/>
-            <values key="huntinginprotectedarea" isactive="true">
-                <names language_code="en" value="Hunting In Protected Area"/>
-                <names language_code="ka" value="ნადირობა დაცულ ტერიტორიაზე"/>
-            </values>
-            <values key="illegalentry" isactive="true">
-                <names language_code="en" value="Illegal Entry"/>
-                <names language_code="ka" value="არალეგალური შესვლა"/>
-            </values>
-            <values key="possessionoffireamrs" isactive="true">
-                <names language_code="en" value="Possession of Firearms"/>
-                <names language_code="ka" value="ცეცხლსასროლი იარაღის ფლობა"/>
-            </values>
-            <values key="possessionofwildlife" isactive="true">
-                <names language_code="en" value="Possession of Wildlife"/>
-                <names language_code="ka" value="მონადირებული გარეული ცხოველი"/>
-            </values>
-            <values key="none" isactive="true">
-                <names language_code="en" value="None"/>
-                <names language_code="ka" value="არცერთი"/>
-            </values>
-        </attribute>
-        <attribute key="sheltercapacity" isrequired="false" type="LIST">
-            <names language_code="en" value="Shelter Capacity"/>
-            <values key="small" isactive="true">
-                <names language_code="en" value="Small"/>
-            </values>
-            <values key="medium" isactive="true">
-                <names language_code="en" value="Medium"/>
-            </values>
-            <values key="large" isactive="true">
-                <names language_code="en" value="Large"/>
-            </values>
-        </attribute>
-        <attribute key="ageofanimalcarcass" isrequired="false" type="LIST">
-            <names language_code="en" value="Age of Animal Carcass"/>
-            <names language_code="ka" value="ცხოველის ჩონჩხის სიძველე"/>
-            <values key="fresh" isactive="true">
-                <names language_code="en" value="Fresh"/>
-                <names language_code="ka" value="ახალი"/>
-            </values>
-            <values key="recent" isactive="true">
-                <names language_code="en" value="Recent"/>
-                <names language_code="ka" value="არც თუ ისე დიდი ხნის"/>
-            </values>
-            <values key="old" isactive="true">
-                <names language_code="en" value="Old"/>
-                <names language_code="ka" value="ძველი"/>
-            </values>
-            <values key="veryold" isactive="true">
-                <names language_code="en" value="Very Old"/>
-                <names language_code="ka" value="ძალიან ძველი"/>
-            </values>
-            <values key="unknown" isactive="true">
-                <names language_code="en" value="Unknown"/>
-                <names language_code="ka" value="უცნობია"/>
-            </values>
-        </attribute>
-        <attribute key="isactive" isrequired="false" type="BOOLEAN">
-            <names language_code="en" value="Is Active"/>
-        </attribute>
-        <attribute key="numberofdomesticanimals" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Number of Domestic Animals"/>
-        </attribute>
-        <attribute key="typeoffirearm" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Firearm"/>
-            <values key="semiautomatic" isactive="true">
-                <names language_code="en" value="Semi Automatic"/>
-            </values>
-            <values key="shotgun" isactive="true">
-                <names language_code="en" value="Shotgun"/>
-            </values>
-            <values key="muzzleloader" isactive="true">
-                <names language_code="en" value="Muzzle Loader"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="numberoflogs" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Number of Logs"/>
-        </attribute>
-        <attribute key="typeoffishingequipment" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Fishing Equipment"/>
-            <values key="rod" isactive="true">
-                <names language_code="en" value="Rod"/>
-            </values>
-            <values key="net" isactive="true">
-                <names language_code="en" value="Net"/>
-            </values>
-            <values key="fishtrap" isactive="true">
-                <names language_code="en" value="Fish Trap"/>
-            </values>
-            <values key="spears" isactive="true">
-                <names language_code="en" value="Spears"/>
-            </values>
-            <values key="electricrod" isactive="true">
-                <names language_code="en" value="Electric rod"/>
-            </values>
-            <values key="dynamite" isactive="true">
-                <names language_code="en" value="Dynamite"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
             </values>
         </attribute>
         <attribute key="treespecies_timber" isrequired="false" type="LIST">
@@ -952,34 +29,673 @@
                 <names language_code="en" value="Unknown"/>
             </values>
         </attribute>
-        <attribute key="infrastructuresize" isrequired="false" type="LIST">
-            <names language_code="en" value="Infrastructure Size"/>
-            <values key="small" isactive="true">
-                <names language_code="en" value="Small"/>
-            </values>
-            <values key="medium" isactive="true">
-                <names language_code="en" value="Medium"/>
-            </values>
-            <values key="large" isactive="true">
-                <names language_code="en" value="Large"/>
-            </values>
-        </attribute>
-        <attribute key="numberofplanks" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
+        <attribute key="numberofadultfemales" isrequired="false" type="NUMERIC" iconkey="adult_female">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
-            <names language_code="en" value="Number of Planks"/>
+            <names language_code="ka" value="ზრდასრული მდედრის რაოდენობა"/>
+            <names language_code="en" value="Number of Adult Females"/>
         </attribute>
-        <attribute key="typeofpoison" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Poison"/>
-            <values key="chemical" isactive="true">
+        <attribute key="typeofpollution" isrequired="false" type="LIST" iconkey="type">
+            <names language_code="en" value="Type of Pollution"/>
+            <values key="garbage" isactive="true" iconkey="garbage">
+                <names language_code="en" value="Garbage"/>
+            </values>
+            <values key="chemical" isactive="true" iconkey="chemical">
                 <names language_code="en" value="Chemical"/>
             </values>
-            <values key="natural" isactive="true">
+            <values key="biological" isactive="true">
+                <names language_code="en" value="Biological"/>
+            </values>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
+            </values>
+            <values key="unknown" isactive="true" iconkey="unknown">
+                <names language_code="en" value="Unknown"/>
+            </values>
+        </attribute>
+        <attribute key="typeofcuttingtool" isrequired="false" type="LIST" iconkey="type">
+            <names language_code="en" value="Type of Cutting Tool"/>
+            <values key="chainsaw" isactive="true" iconkey="chainsaw">
+                <names language_code="en" value="Chainsaw"/>
+            </values>
+            <values key="machete" isactive="true" iconkey="machete">
+                <names language_code="en" value="Machete"/>
+            </values>
+            <values key="knife" isactive="true" iconkey="knife">
+                <names language_code="en" value="Knife"/>
+            </values>
+            <values key="axe" isactive="true" iconkey="axe">
+                <names language_code="en" value="Axe"/>
+            </values>
+            <values key="handsaw" isactive="true" iconkey="handsaw">
+                <names language_code="en" value="Handsaw"/>
+            </values>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
+            </values>
+        </attribute>
+        <attribute key="actiontakenrcass" isrequired="false" type="LIST" iconkey="action_taken">
+            <names language_code="en" value="Action Taken - Carcass"/>
+            <values key="confiscated" isactive="true" iconkey="confiscated_1">
+                <names language_code="en" value="Confiscated"/>
+            </values>
+            <values key="destroyed" isactive="true" iconkey="destroyed">
+                <names language_code="en" value="Destroyed"/>
+            </values>
+            <values key="collected" isactive="true" iconkey="collected">
+                <names language_code="en" value="Collected"/>
+            </values>
+            <values key="leftatscene" isactive="true" iconkey="left_at_scene">
+                <names language_code="en" value="Left At Scene"/>
+            </values>
+        </attribute>
+        <attribute key="typeoftrap" isrequired="false" type="LIST">
+            <names language_code="en" value="Type of Trap"/>
+            <values key="pittrap" isactive="true" iconkey="pit_trap">
+                <names language_code="en" value="Pit Trap"/>
+            </values>
+            <values key="wiresnare" isactive="true" iconkey="wire_snare2">
+                <names language_code="en" value="Wire Snare"/>
+            </values>
+            <values key="jawtrap" isactive="true" iconkey="jaw_trap">
+                <names language_code="en" value="Jaw Trap"/>
+            </values>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
+            </values>
+        </attribute>
+        <attribute key="meshsize" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Mesh Size"/>
+        </attribute>
+        <attribute key="haswater" isrequired="false" type="BOOLEAN">
+            <names language_code="en" value="Has Water"/>
+        </attribute>
+        <attribute key="typeoffirearm" isrequired="false" type="LIST">
+            <names language_code="en" value="Type of Firearm"/>
+            <values key="semiautomatic" isactive="true" iconkey="semi_automatic">
+                <names language_code="en" value="Semi Automatic"/>
+            </values>
+            <values key="shotgun" isactive="true" iconkey="shotgun">
+                <names language_code="en" value="Shotgun"/>
+            </values>
+            <values key="muzzleloader" isactive="true" iconkey="muzzle_loader">
+                <names language_code="en" value="Muzzle Loader"/>
+            </values>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
+            </values>
+        </attribute>
+        <attribute key="numberofbundles" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Number of Bundles"/>
+        </attribute>
+        <attribute key="ammunitiontype" isrequired="false" type="LIST">
+            <names language_code="en" value="Type of Ammunition"/>
+            <values key="typea" isactive="true">
+                <names language_code="en" value="Type A"/>
+            </values>
+            <values key="typeb" isactive="true">
+                <names language_code="en" value="Type B"/>
+            </values>
+        </attribute>
+        <attribute key="numberofanimalpartsorbushmeat" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Number of Animal Parts or Bushmeat"/>
+        </attribute>
+        <attribute key="typeofrockormineral" isrequired="false" type="LIST" iconkey="type">
+            <names language_code="en" value="Type of Rock or Mineral"/>
+            <values key="gold" isactive="true" iconkey="gold">
+                <names language_code="en" value="Gold"/>
+            </values>
+            <values key="boulders" isactive="true" iconkey="boulders">
+                <names language_code="en" value="Boulders"/>
+            </values>
+            <values key="diamonds" isactive="true" iconkey="diamonds">
+                <names language_code="en" value="Diamonds"/>
+            </values>
+            <values key="sand" isactive="true" iconkey="sand">
+                <names language_code="en" value="Sand"/>
+            </values>
+            <values key="clay" isactive="true" iconkey="clay">
+                <names language_code="en" value="Clay"/>
+            </values>
+            <values key="gravel" isactive="true" iconkey="gravel">
+                <names language_code="en" value="Gravel"/>
+            </values>
+            <values key="fossil" isactive="true" iconkey="fossil">
+                <names language_code="en" value="Fossil"/>
+            </values>
+        </attribute>
+        <attribute key="volumeofpoisonliters" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Volume of Poison liters"/>
+        </attribute>
+        <attribute key="typeofequipment" isrequired="false" type="LIST" iconkey="type">
+            <names language_code="en" value="Type of Equipment"/>
+            <values key="tents" isactive="true" iconkey="tent">
+                <names language_code="en" value="Tents"/>
+            </values>
+            <values key="cookingpot" isactive="true" iconkey="cooking_pot">
+                <names language_code="en" value="Cooking Pot"/>
+            </values>
+            <values key="tarp" isactive="true" iconkey="tarp">
+                <names language_code="en" value="Tarp"/>
+            </values>
+            <values key="object" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
+            </values>
+        </attribute>
+        <attribute key="typeoftraditionalweapon" isrequired="false" type="LIST" iconkey="type">
+            <names language_code="en" value="Type of Traditional Weapon"/>
+            <values key="bows" isactive="true" iconkey="bow">
+                <names language_code="en" value="Bows"/>
+            </values>
+            <values key="spear" isactive="true" iconkey="spear">
+                <names language_code="en" value="Spear"/>
+            </values>
+            <values key="slingshot" isactive="true">
+                <names language_code="en" value="Slingshot"/>
+            </values>
+            <values key="club" isactive="true" iconkey="club">
+                <names language_code="en" value="Club"/>
+            </values>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
+            </values>
+        </attribute>
+        <attribute key="serialnumber" isrequired="false" type="TEXT">
+            <qa_regex></qa_regex>
+            <names language_code="en" value="Serial Number"/>
+        </attribute>
+        <attribute key="stakestodrymeat" isrequired="false" type="BOOLEAN">
+            <names language_code="en" value="Stakes to Dry Meat"/>
+        </attribute>
+        <attribute key="sheltertype" isrequired="false" type="LIST" iconkey="camp_type">
+            <names language_code="en" value="Shelter Type"/>
+            <values key="groundhide" isactive="true" iconkey="ground_hide">
+                <names language_code="en" value="Ground Hide"/>
+            </values>
+            <values key="treehide" isactive="true" iconkey="tree_hide">
+                <names language_code="en" value="Tree Hide"/>
+            </values>
+            <values key="camp" isactive="true" iconkey="camp">
+                <names language_code="en" value="Camp"/>
+            </values>
+            <values key="unknown" isactive="true" iconkey="unknown">
+                <names language_code="en" value="Unknown"/>
+            </values>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
+            </values>
+        </attribute>
+        <attribute key="typeofforestproduct" isrequired="false" type="LIST" iconkey="type">
+            <names language_code="en" value="Type of Forest Product"/>
+            <values key="honey" isactive="true" iconkey="honey">
+                <names language_code="en" value="Honey"/>
+            </values>
+            <values key="mushroom" isactive="true" iconkey="mushroom">
+                <names language_code="en" value="Mushroom"/>
+            </values>
+            <values key="orchid" isactive="true" iconkey="orchid">
+                <names language_code="en" value="Orchid"/>
+            </values>
+            <values key="ratan" isactive="true" iconkey="ratan">
+                <names language_code="en" value="Ratan"/>
+            </values>
+            <values key="bamboo" isactive="true" iconkey="bamboo">
+                <names language_code="en" value="Bamboo"/>
+            </values>
+            <values key="caterpiller" isactive="true" iconkey="caterpillar">
+                <names language_code="en" value="Caterpiller"/>
+            </values>
+            <values key="wildfruit" isactive="true" iconkey="wild_fruit">
+                <names language_code="en" value="Wild Fruit"/>
+            </values>
+            <values key="medicinalplants" isactive="true" iconkey="medicinal_plants">
+                <names language_code="en" value="Medicinal Plants"/>
+            </values>
+            <values key="latax" isactive="true">
+                <names language_code="en" value="Latex"/>
+            </values>
+            <values key="resin" isactive="true" iconkey="resin">
+                <names language_code="en" value="Resin"/>
+            </values>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
+            </values>
+        </attribute>
+        <attribute key="figfruit" isrequired="false" type="LIST">
+            <names language_code="en" value="Fruiting Status"/>
+            <names language_code="ka" value="ხილის მდგომარეობა"/>
+            <values key="ripe" isactive="true">
+                <names language_code="en" value="Ripe"/>
+                <names language_code="ka" value="მწიფე"/>
+            </values>
+            <values key="unripe" isactive="true">
+                <names language_code="en" value="Unripe"/>
+                <names language_code="ka" value="დაუმწიფებელი"/>
+            </values>
+            <values key="nofruit" isactive="true">
+                <names language_code="ka" value="ხილი არ არის"/>
+                <names language_code="en" value="No Fruit"/>
+            </values>
+        </attribute>
+        <attribute key="sizeofclearingha" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Size of Clearing ha"/>
+        </attribute>
+        <attribute key="numberoftransportation" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Number of Transportation"/>
+        </attribute>
+        <attribute key="numberofbags" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Number of Bags"/>
+        </attribute>
+        <attribute key="typeofdomesticanimal" isrequired="false" type="LIST" iconkey="type">
+            <names language_code="en" value="Type of Domestic Animal"/>
+            <values key="dog" isactive="true" iconkey="dog">
+                <names language_code="en" value="Dog"/>
+            </values>
+            <values key="cat" isactive="true" iconkey="cat">
+                <names language_code="en" value="Cat"/>
+            </values>
+            <values key="elephant" isactive="true" iconkey="elephant">
+                <names language_code="en" value="Elephant"/>
+            </values>
+            <values key="goat" isactive="true" iconkey="goat">
+                <names language_code="en" value="Goat"/>
+            </values>
+            <values key="cow" isactive="true" iconkey="cow">
+                <names language_code="en" value="Cow"/>
+            </values>
+            <values key="buffalo" isactive="true" iconkey="buffalo">
+                <names language_code="en" value="Buffalo"/>
+            </values>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
+            </values>
+        </attribute>
+        <attribute key="typeofanimalpart" isrequired="false" type="TREE" iconkey="trophy_type">
+            <names language_code="en" value="Type of Animal Part"/>
+            <tree key="wholeanimal" isactive="true" iconkey="whole_animal">
+                <names language_code="en" value="Whole Animal"/>
+                <children key="smoked" isactive="true" iconkey="smoked">
+                    <names language_code="en" value="Smoked"/>
+                </children>
+                <children key="fresh" isactive="true" iconkey="fresh">
+                    <names language_code="en" value="Fresh"/>
+                </children>
+            </tree>
+            <tree key="meat" isactive="true">
+                <names language_code="en" value="Meat"/>
+                <children key="smoked" isactive="true" iconkey="smoked">
+                    <names language_code="en" value="Smoked"/>
+                </children>
+                <children key="fresh" isactive="true" iconkey="fresh">
+                    <names language_code="en" value="Fresh"/>
+                </children>
+            </tree>
+            <tree key="tusksorcanines" isactive="true" iconkey="canines">
+                <names language_code="en" value="Tusks or Canines"/>
+            </tree>
+            <tree key="hornsorantlers" isactive="true" iconkey="antlers">
+                <names language_code="en" value="Horns or Antlers"/>
+            </tree>
+            <tree key="bones" isactive="true">
+                <names language_code="en" value="Bones"/>
+            </tree>
+            <tree key="gallbladder" isactive="true" iconkey="gall_bladder">
+                <names language_code="en" value="Gall Bladder"/>
+            </tree>
+            <tree key="stomach" isactive="true">
+                <names language_code="en" value="Stomach"/>
+            </tree>
+            <tree key="skin" isactive="true" iconkey="skin">
+                <names language_code="en" value="Skin"/>
+            </tree>
+            <tree key="skull" isactive="true">
+                <names language_code="en" value="Skull"/>
+            </tree>
+            <tree key="paw" isactive="true" iconkey="paws">
+                <names language_code="en" value="Paw"/>
+            </tree>
+        </attribute>
+        <attribute key="volumeofcutpieces" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Volume of Cut Pieces m3"/>
+        </attribute>
+        <attribute key="status" isrequired="false" type="LIST" iconkey="status">
+            <names language_code="en" value="Status"/>
+            <values key="abandoned" isactive="true" iconkey="abandoned">
+                <names language_code="en" value="Abandoned"/>
+            </values>
+            <values key="active" isactive="true" iconkey="active">
+                <names language_code="en" value="Active"/>
+            </values>
+            <values key="inactive" isactive="true" iconkey="inactive">
+                <names language_code="en" value="InActive"/>
+            </values>
+            <values key="unknown" isactive="true" iconkey="unknown">
+                <names language_code="en" value="Unknown"/>
+            </values>
+        </attribute>
+        <attribute key="partremoved2" isrequired="false" type="LIST">
+            <names language_code="en" value="Part Missing 2"/>
+            <values key="skin" isactive="true" iconkey="skin">
+                <names language_code="en" value="Skin"/>
+            </values>
+            <values key="meat" isactive="true">
+                <names language_code="en" value="Meat"/>
+            </values>
+            <values key="tusk" isactive="true" iconkey="tusks">
+                <names language_code="en" value="Tusk"/>
+            </values>
+            <values key="hornorantler" isactive="true" iconkey="horns">
+                <names language_code="en" value="Horn or Antler"/>
+            </values>
+            <values key="fin" isactive="true">
+                <names language_code="en" value="Fin"/>
+            </values>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
+            </values>
+        </attribute>
+        <attribute key="partremoved1" isrequired="false" type="LIST">
+            <names language_code="en" value="Part Missing 1"/>
+            <values key="skin" isactive="true" iconkey="skin">
+                <names language_code="en" value="Skin"/>
+            </values>
+            <values key="meat" isactive="true">
+                <names language_code="en" value="Meat"/>
+            </values>
+            <values key="tusk" isactive="true" iconkey="tusks">
+                <names language_code="en" value="Tusk"/>
+            </values>
+            <values key="hornorantler" isactive="true" iconkey="horns">
+                <names language_code="en" value="Horn or Antler"/>
+            </values>
+            <values key="fin" isactive="true">
+                <names language_code="en" value="Fin"/>
+            </values>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
+            </values>
+        </attribute>
+        <attribute key="typeofinfrastructure" isrequired="false" type="LIST" iconkey="type">
+            <names language_code="en" value="Type of Infrastructure"/>
+            <values key="road" isactive="true" iconkey="road">
+                <names language_code="en" value="Road"/>
+            </values>
+            <values key="sawmill" isactive="true" iconkey="sawmill">
+                <names language_code="en" value="Sawmill"/>
+            </values>
+            <values key="mine" isactive="true" iconkey="mine">
+                <names language_code="en" value="Mine"/>
+            </values>
+            <values key="dock" isactive="true" iconkey="dock">
+                <names language_code="en" value="Dock"/>
+            </values>
+            <values key="bridge" isactive="true" iconkey="bridge">
+                <names language_code="en" value="Bridge"/>
+            </values>
+            <values key="extractiveindustrybasecamp" isactive="true" iconkey="extractive_industry_basecamp">
+                <names language_code="en" value="Extractive Industry Basecamp"/>
+            </values>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
+            </values>
+        </attribute>
+        <attribute key="partremoved3" isrequired="false" type="LIST">
+            <names language_code="en" value="Part Missing 3"/>
+            <values key="skin" isactive="true" iconkey="skin">
+                <names language_code="en" value="Skin"/>
+            </values>
+            <values key="meat" isactive="true">
+                <names language_code="en" value="Meat"/>
+            </values>
+            <values key="tusk" isactive="true" iconkey="tusks">
+                <names language_code="en" value="Tusk"/>
+            </values>
+            <values key="hornorantler" isactive="true" iconkey="horns">
+                <names language_code="en" value="Horn or Antler"/>
+            </values>
+            <values key="fin" isactive="true">
+                <names language_code="en" value="Fin"/>
+            </values>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
+            </values>
+        </attribute>
+        <attribute key="ageofanimal" isrequired="false" type="LIST" iconkey="age_of_animal">
+            <names language_code="en" value="Age of Animal"/>
+            <names language_code="ka" value="ცხოველის ასაკი"/>
+            <values key="adult" isactive="true" iconkey="adult">
+                <names language_code="en" value="Adult"/>
+                <names language_code="ka" value="ზრდასრული"/>
+            </values>
+            <values key="subadult" isactive="true" iconkey="sub_adult">
+                <names language_code="en" value="Sub-Adult"/>
+                <names language_code="ka" value="ზრდასრულზე პატარა"/>
+            </values>
+            <values key="juvenile" isactive="true" iconkey="juvenile">
+                <names language_code="ka" value="არასრულწლოვანი"/>
+                <names language_code="en" value="Juvenile"/>
+            </values>
+            <values key="unknown" isactive="true" iconkey="unknown">
+                <names language_code="en" value="Unknown"/>
+                <names language_code="ka" value="უცნობია"/>
+            </values>
+        </attribute>
+        <attribute key="actiontakenmp" isrequired="false" type="LIST" iconkey="action">
+            <names language_code="en" value="Action Taken - Camp"/>
+            <values key="observedonly" isactive="true" iconkey="observed_only">
+                <names language_code="en" value="Observed Only"/>
+            </values>
+            <values key="destroyed" isactive="true" iconkey="destroyed">
+                <names language_code="en" value="Destroyed"/>
+            </values>
+        </attribute>
+        <attribute key="numberofyoung" isrequired="false" type="NUMERIC" iconkey="young">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Number of Young"/>
+            <names language_code="ka" value="ახალგაზრდების რაოდენობა"/>
+        </attribute>
+        <attribute key="isactive" isrequired="false" type="BOOLEAN">
+            <names language_code="en" value="Is Active"/>
+        </attribute>
+        <attribute key="numberofadultmales" isrequired="false" type="NUMERIC" iconkey="adult_male">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="ka" value="ზრდასრული მამრის რაოდენობა"/>
+            <names language_code="en" value="Number of Adult Males"/>
+        </attribute>
+        <attribute key="phonenumber" isrequired="false" type="TEXT">
+            <qa_regex></qa_regex>
+            <names language_code="en" value="Phone Number"/>
+        </attribute>
+        <attribute key="sheltercapacity" isrequired="false" type="LIST" iconkey="capacity">
+            <names language_code="en" value="Shelter Capacity"/>
+            <values key="small" isactive="true" iconkey="small">
+                <names language_code="en" value="Small"/>
+            </values>
+            <values key="medium" isactive="true" iconkey="med">
+                <names language_code="en" value="Medium"/>
+            </values>
+            <values key="large" isactive="true" iconkey="large">
+                <names language_code="en" value="Large"/>
+            </values>
+        </attribute>
+        <attribute key="ageofsign" isrequired="false" type="LIST" iconkey="age_of_sign">
+            <names language_code="en" value="Age of Sign"/>
+            <names language_code="ka" value="ნიშანის სიძველე"/>
+            <values key="fresh" isactive="true">
+                <names language_code="en" value="Fresh"/>
+                <names language_code="ka" value="ახალი"/>
+            </values>
+            <values key="recent" isactive="true">
+                <names language_code="en" value="Recent"/>
+                <names language_code="ka" value="არც ისე დიდი ხნის"/>
+            </values>
+            <values key="old" isactive="true">
+                <names language_code="ka" value="ძველი"/>
+                <names language_code="en" value="Old"/>
+            </values>
+            <values key="veryold" isactive="true">
+                <names language_code="en" value="Very old"/>
+                <names language_code="ka" value="ძალიან ძველი"/>
+            </values>
+            <values key="unknown" isactive="true">
+                <names language_code="ka" value="უცნობია"/>
+                <names language_code="en" value="Unknown"/>
+            </values>
+        </attribute>
+        <attribute key="actiontaken_liveanimals" isrequired="false" type="LIST" iconkey="action_taken">
+            <names language_code="en" value="Action Taken - Live Animals"/>
+            <values key="confiscated" isactive="true" iconkey="confiscated_1">
+                <names language_code="en" value="Confiscated"/>
+            </values>
+            <values key="destroyed" isactive="true" iconkey="destroyed">
+                <names language_code="en" value="Destroyed"/>
+            </values>
+            <values key="observedonly" isactive="true" iconkey="observed_only">
+                <names language_code="en" value="Observed Only"/>
+            </values>
+            <values key="released" isactive="true">
+                <names language_code="en" value="Released"/>
+            </values>
+        </attribute>
+        <attribute key="issecured" isrequired="false" type="BOOLEAN">
+            <names language_code="en" value="Is Secured"/>
+        </attribute>
+        <attribute key="units" isrequired="false" type="LIST">
+            <names language_code="en" value="Units"/>
+            <values key="m3" isactive="true">
+                <names language_code="en" value="m3"/>
+            </values>
+            <values key="kg" isactive="true">
+                <names language_code="en" value="kg"/>
+            </values>
+            <values key="meter" isactive="true">
+                <names language_code="en" value="meter"/>
+            </values>
+            <values key="bags" isactive="true">
+                <names language_code="en" value="bags"/>
+            </values>
+            <values key="bundles" isactive="true">
+                <names language_code="en" value="bundles"/>
+            </values>
+            <values key="pieces" isactive="true">
+                <names language_code="en" value="pieces"/>
+            </values>
+        </attribute>
+        <attribute key="typeofsaltlick" isrequired="false" type="LIST">
+            <names language_code="en" value="Type of Salt Lick"/>
+            <names language_code="ka" value="სამარილის ტიპი"/>
+            <values key="landbased" isactive="true">
+                <names language_code="en" value="Land Based"/>
+                <names language_code="ka" value="მიწაზე"/>
+            </values>
+            <values key="waterbased" isactive="true">
+                <names language_code="ka" value="წყალში"/>
+                <names language_code="en" value="Water Based"/>
+            </values>
+        </attribute>
+        <attribute key="lengthofnetmeters" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Length of Net meters"/>
+        </attribute>
+        <attribute key="actiontaken_people" isrequired="false" type="LIST">
+            <names language_code="en" value="Action Taken - People"/>
+            <values key="observedonly" isactive="true" iconkey="observed_only">
+                <names language_code="en" value="Observed Only"/>
+            </values>
+            <values key="unsuccessfulpursuit" isactive="true">
+                <names language_code="en" value="Unsuccessful Pursuit"/>
+            </values>
+            <values key="arrested" isactive="true" iconkey="arrested">
+                <names language_code="en" value="Arrested"/>
+            </values>
+            <values key="verbalwarning" isactive="true" iconkey="verbal_warning">
+                <names language_code="en" value="Verbal Warning"/>
+            </values>
+            <values key="writtenwarning" isactive="true" iconkey="written_warning">
+                <names language_code="en" value="Written Warning"/>
+            </values>
+        </attribute>
+        <attribute key="manufacturer" isrequired="false" type="TEXT">
+            <qa_regex></qa_regex>
+            <names language_code="en" value="Manufacturer"/>
+        </attribute>
+        <attribute key="personage" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+                <MaxValue>100.0</MaxValue>
+            </qa_minmax>
+            <names language_code="en" value="Person Age"/>
+        </attribute>
+        <attribute key="infraction" isrequired="false" type="LIST">
+            <names language_code="en" value="Infraction"/>
+            <names language_code="ka" value="დარღვევები"/>
+            <values key="huntinginprotectedarea" isactive="true">
+                <names language_code="en" value="Hunting In Protected Area"/>
+                <names language_code="ka" value="ნადირობა დაცულ ტერიტორიაზე"/>
+            </values>
+            <values key="illegalentry" isactive="true">
+                <names language_code="ka" value="არალეგალური შესვლა"/>
+                <names language_code="en" value="Illegal Entry"/>
+            </values>
+            <values key="possessionoffireamrs" isactive="true">
+                <names language_code="en" value="Possession of Firearms"/>
+                <names language_code="ka" value="ცეცხლსასროლი იარაღის ფლობა"/>
+            </values>
+            <values key="possessionofwildlife" isactive="true">
+                <names language_code="ka" value="მონადირებული გარეული ცხოველი"/>
+                <names language_code="en" value="Possession of Wildlife"/>
+            </values>
+            <values key="none" isactive="true">
+                <names language_code="en" value="None"/>
+                <names language_code="ka" value="არცერთი"/>
+            </values>
+        </attribute>
+        <attribute key="placeoforigin" isrequired="false" type="LIST" iconkey="place_of_origin">
+            <names language_code="en" value="Place of Origin"/>
+            <values key="villagea" isactive="true">
+                <names language_code="en" value="Village A"/>
+            </values>
+            <values key="villageb" isactive="true">
+                <names language_code="en" value="Village B"/>
+            </values>
+        </attribute>
+        <attribute key="typeofpoison" isrequired="false" type="LIST" iconkey="type">
+            <names language_code="en" value="Type of Poison"/>
+            <values key="chemical" isactive="true" iconkey="chemical">
+                <names language_code="en" value="Chemical"/>
+            </values>
+            <values key="natural" isactive="true" iconkey="natural">
                 <names language_code="en" value="Natural"/>
             </values>
             <values key="other" isactive="true">
@@ -989,151 +705,75 @@
                 <names language_code="en" value="Unknown"/>
             </values>
         </attribute>
-        <attribute key="numberofbundles" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Number of Bundles"/>
-        </attribute>
-        <attribute key="volumeofcutpieces" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Volume of Cut Pieces m3"/>
-        </attribute>
-        <attribute key="typeofinfrastructure" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Infrastructure"/>
-            <values key="road" isactive="true">
-                <names language_code="en" value="Road"/>
-            </values>
-            <values key="sawmill" isactive="true">
-                <names language_code="en" value="Sawmill"/>
-            </values>
-            <values key="mine" isactive="true">
-                <names language_code="en" value="Mine"/>
-            </values>
-            <values key="dock" isactive="true">
-                <names language_code="en" value="Dock"/>
-            </values>
-            <values key="bridge" isactive="true">
-                <names language_code="en" value="Bridge"/>
-            </values>
-            <values key="extractiveindustrybasecamp" isactive="true">
-                <names language_code="en" value="Extractive Industry Basecamp"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="nameornames" isrequired="false" type="TEXT">
-            <qa_regex></qa_regex>
-            <names language_code="en" value="Name or Names"/>
-        </attribute>
-        <attribute key="treespecies_fruitnut" isrequired="false" type="LIST">
-            <names language_code="en" value="Fruit or Nut Tree Species"/>
-            <names language_code="ka" value="ხილის ან კაკლის ხის სახეობები"/>
-            <values key="fig" isactive="true">
-                <names language_code="en" value="Fig"/>
-                <names language_code="ka" value="ლეღვი"/>
-            </values>
-        </attribute>
-        <attribute key="typeofequipment" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Equipment"/>
-            <values key="tents" isactive="true">
-                <names language_code="en" value="Tents"/>
-            </values>
-            <values key="cookingpot" isactive="true">
-                <names language_code="en" value="Cooking Pot"/>
-            </values>
-            <values key="tarp" isactive="true">
-                <names language_code="en" value="Tarp"/>
-            </values>
-            <values key="object" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="personage" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-                <MaxValue>100.0</MaxValue>
-            </qa_minmax>
-            <names language_code="en" value="Person Age"/>
-        </attribute>
-        <attribute key="typeoftraditionalweapon" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Traditional Weapon"/>
-            <values key="bows" isactive="true">
-                <names language_code="en" value="Bows"/>
-            </values>
-            <values key="spear" isactive="true">
-                <names language_code="en" value="Spear"/>
-            </values>
-            <values key="slingshot" isactive="true">
-                <names language_code="en" value="Slingshot"/>
-            </values>
-            <values key="club" isactive="true">
-                <names language_code="en" value="Club"/>
-            </values>
-            <values key="other" isactive="true">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="actiontakenrcass" isrequired="false" type="LIST">
-            <names language_code="en" value="Action Taken - Carcass"/>
-            <values key="confiscated" isactive="true">
-                <names language_code="en" value="Confiscated"/>
-            </values>
-            <values key="destroyed" isactive="true">
-                <names language_code="en" value="Destroyed"/>
-            </values>
-            <values key="collected" isactive="true">
-                <names language_code="en" value="Collected"/>
-            </values>
-            <values key="leftatscene" isactive="true">
-                <names language_code="en" value="Left At Scene"/>
-            </values>
-        </attribute>
-        <attribute key="nationalidnumber" isrequired="false" type="TEXT">
-            <qa_regex></qa_regex>
-            <names language_code="en" value="National ID Number"/>
-        </attribute>
-        <attribute key="sizeofclearingha" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Size of Clearing ha"/>
-        </attribute>
-        <attribute key="numberofagesexunknown" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Number of Age or Sex Unknown"/>
-            <names language_code="ka" value="ასაკის და სქესის რაოდენობა უცნობია"/>
-        </attribute>
         <attribute key="numberofstumps" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
             <names language_code="en" value="Number of Stumps"/>
+        </attribute>
+        <attribute key="numberofweaponsequipment" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Number of Weapons &amp; Equipment"/>
+        </attribute>
+        <attribute key="infrastructuresize" isrequired="false" type="LIST" iconkey="infrastructure_size">
+            <names language_code="en" value="Infrastructure Size"/>
+            <values key="small" isactive="true" iconkey="small">
+                <names language_code="en" value="Small"/>
+            </values>
+            <values key="medium" isactive="true" iconkey="med">
+                <names language_code="en" value="Medium"/>
+            </values>
+            <values key="large" isactive="true" iconkey="large">
+                <names language_code="en" value="Large"/>
+            </values>
+        </attribute>
+        <attribute key="weightkg" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Weight kg"/>
+            <names language_code="ka" value="წონა კგ"/>
+        </attribute>
+        <attribute key="typeoftransportation" isrequired="false" type="LIST">
+            <names language_code="en" value="Type of Transportation"/>
+            <values key="raft" isactive="true" iconkey="raft">
+                <names language_code="en" value="Raft"/>
+            </values>
+            <values key="motorbike" isactive="true" iconkey="motorbike">
+                <names language_code="en" value="Motorbike"/>
+            </values>
+            <values key="cart" isactive="true" iconkey="cart">
+                <names language_code="en" value="Cart"/>
+            </values>
+            <values key="car" isactive="true" iconkey="car">
+                <names language_code="en" value="Car"/>
+            </values>
+            <values key="boat" isactive="true" iconkey="boat">
+                <names language_code="en" value="Boat"/>
+            </values>
+            <values key="bicycle" isactive="true" iconkey="bicycle">
+                <names language_code="en" value="Bicycle"/>
+            </values>
+            <values key="truck" isactive="true" iconkey="truck">
+                <names language_code="en" value="Truck"/>
+            </values>
+            <values key="horse" isactive="true" iconkey="horse">
+                <names language_code="en" value="Horse"/>
+            </values>
+            <values key="camel" isactive="true" iconkey="camel">
+                <names language_code="en" value="Camel"/>
+            </values>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
+            </values>
+        </attribute>
+        <attribute key="numberofplanks" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Number of Planks"/>
         </attribute>
         <attribute key="cropplanted" isrequired="false" type="LIST">
             <names language_code="en" value="Crop Planted"/>
@@ -1172,129 +812,236 @@
             </values>
         </attribute>
         <attribute key="numberofcarcasses" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
             <names language_code="en" value="Number of Carcasses"/>
         </attribute>
-        <attribute key="numberofanimalpartsorbushmeat" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
+        <attribute key="quantity" isrequired="false" type="NUMERIC">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
-            <names language_code="en" value="Number of Animal Parts or Bushmeat"/>
+            <names language_code="en" value="Quantity"/>
         </attribute>
-        <attribute key="units" isrequired="false" type="LIST">
-            <names language_code="en" value="Units"/>
-            <values key="m3" isactive="true">
-                <names language_code="en" value="m3"/>
+        <attribute key="typeofhumansign" isrequired="false" type="LIST" iconkey="type_of_sign">
+            <names language_code="en" value="Type of Human Sign"/>
+            <values key="trail" isactive="true" iconkey="trail">
+                <names language_code="en" value="Trail"/>
             </values>
-            <values key="kg" isactive="true">
-                <names language_code="en" value="kg"/>
+            <values key="footprint" isactive="true" iconkey="footprint_2">
+                <names language_code="en" value="Footprint"/>
             </values>
-            <values key="meter" isactive="true">
-                <names language_code="en" value="meter"/>
+            <values key="machetecut" isactive="true" iconkey="machete_cut">
+                <names language_code="en" value="Machete Cut"/>
             </values>
-            <values key="bags" isactive="true">
-                <names language_code="en" value="bags"/>
+            <values key="litter" isactive="true" iconkey="litter">
+                <names language_code="en" value="Litter"/>
             </values>
-            <values key="bundles" isactive="true">
-                <names language_code="en" value="bundles"/>
-            </values>
-            <values key="pieces" isactive="true">
-                <names language_code="en" value="pieces"/>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
             </values>
         </attribute>
-        <attribute key="actiontaken_liveanimals" isrequired="false" type="LIST">
-            <names language_code="en" value="Action Taken - Live Animals"/>
-            <values key="confiscated" isactive="true">
-                <names language_code="en" value="Confiscated"/>
-            </values>
-            <values key="destroyed" isactive="true">
-                <names language_code="en" value="Destroyed"/>
-            </values>
-            <values key="observedonly" isactive="true">
-                <names language_code="en" value="Observed Only"/>
-            </values>
-            <values key="released" isactive="true">
-                <names language_code="en" value="Released"/>
-            </values>
+        <attribute key="causeofdeath" isrequired="false" type="TREE" iconkey="cause_of_death">
+            <names language_code="en" value="Cause of Death"/>
+            <names language_code="ka" value="სიკვდილის მიზეზი"/>
+            <tree key="natural" isactive="true">
+                <names language_code="en" value="Natural"/>
+                <children key="disease" isactive="true">
+                    <names language_code="en" value="Disease"/>
+                </children>
+                <children key="oldage" isactive="true">
+                    <names language_code="en" value="Old Age"/>
+                </children>
+                <children key="accident" isactive="true">
+                    <names language_code="en" value="Accident"/>
+                    <children key="runoverbyvehicle" isactive="true">
+                        <names language_code="en" value="Run over by vehicle"/>
+                    </children>
+                    <children key="drowned" isactive="true">
+                        <names language_code="en" value="Drowned"/>
+                    </children>
+                    <children key="electrocuted" isactive="true">
+                        <names language_code="en" value="Electrocuted"/>
+                    </children>
+                </children>
+                <children key="predation" isactive="true">
+                    <names language_code="en" value="Predation"/>
+                </children>
+            </tree>
+            <tree key="legal" isactive="true" iconkey="legal">
+                <names language_code="en" value="Legal"/>
+                <children key="sporthunting" isactive="true">
+                    <names language_code="en" value="Sport Hunting"/>
+                </children>
+                <children key="problemanimalcontrol" isactive="true">
+                    <names language_code="en" value="Problem Animal Control"/>
+                </children>
+                <children key="culling" isactive="true">
+                    <names language_code="en" value="Culling"/>
+                </children>
+            </tree>
+            <tree key="illegal" isactive="true" iconkey="illegal">
+                <names language_code="en" value="Illegal"/>
+                <children key="gunshot" isactive="true">
+                    <names language_code="en" value="Gunshot"/>
+                </children>
+                <children key="trapping" isactive="true">
+                    <names language_code="en" value="Trapping"/>
+                </children>
+                <children key="traditionalweapons" isactive="true">
+                    <names language_code="en" value="Traditional Weapons"/>
+                </children>
+                <children key="poisoning" isactive="true">
+                    <names language_code="en" value="Poisoning"/>
+                </children>
+            </tree>
+            <tree key="unknown" isactive="true">
+                <names language_code="en" value="Unknown"/>
+            </tree>
         </attribute>
-        <attribute key="numberofdryingracks" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Number of Drying Racks"/>
-        </attribute>
-        <attribute key="numberofadultfemales" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
-            <qa_minmax>
-                <MinValue>0.0</MinValue>
-            </qa_minmax>
-            <names language_code="en" value="Number of Adult Females"/>
-            <names language_code="ka" value="ზრდასრული მდედრის რაოდენობა"/>
-        </attribute>
-        <attribute key="stakestodrymeat" isrequired="false" type="BOOLEAN">
-            <names language_code="en" value="Stakes to Dry Meat"/>
-        </attribute>
-        <attribute key="ammunitiontype" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Ammunition"/>
-            <values key="typea" isactive="true">
-                <names language_code="en" value="Type A"/>
+        <attribute key="caliber" isrequired="false" type="LIST">
+            <names language_code="en" value="Caliber"/>
+            <values key="c556" isactive="true">
+                <names language_code="en" value="5 56"/>
             </values>
-            <values key="typeb" isactive="true">
-                <names language_code="en" value="Type B"/>
+            <values key="c762" isactive="true">
+                <names language_code="en" value="7 62"/>
             </values>
-        </attribute>
-        <attribute key="typeoftransportation" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Transportation"/>
-            <values key="raft" isactive="true">
-                <names language_code="en" value="Raft"/>
-            </values>
-            <values key="motorbike" isactive="true">
-                <names language_code="en" value="Motorbike"/>
-            </values>
-            <values key="cart" isactive="true">
-                <names language_code="en" value="Cart"/>
-            </values>
-            <values key="car" isactive="true">
-                <names language_code="en" value="Car"/>
-            </values>
-            <values key="boat" isactive="true">
-                <names language_code="en" value="Boat"/>
-            </values>
-            <values key="bicycle" isactive="true">
-                <names language_code="en" value="Bicycle"/>
-            </values>
-            <values key="truck" isactive="true">
-                <names language_code="en" value="Truck"/>
-            </values>
-            <values key="horse" isactive="true">
-                <names language_code="en" value="Horse"/>
-            </values>
-            <values key="camel" isactive="true">
-                <names language_code="en" value="Camel"/>
+            <values key="guage12" isactive="true">
+                <names language_code="en" value="12 gauge"/>
             </values>
             <values key="other" isactive="true">
                 <names language_code="en" value="Other"/>
             </values>
         </attribute>
-        <attribute key="haswater" isrequired="false" type="BOOLEAN">
-            <names language_code="en" value="Has Water"/>
+        <attribute key="numberoflogs" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Number of Logs"/>
+        </attribute>
+        <attribute key="sex" isrequired="false" type="LIST" iconkey="sex">
+            <names language_code="ka" value="სქესი"/>
+            <names language_code="en" value="Sex"/>
+            <values key="female" isactive="true" iconkey="female">
+                <names language_code="en" value="Female"/>
+                <names language_code="ka" value="მდედრი"/>
+            </values>
+            <values key="male" isactive="true" iconkey="male">
+                <names language_code="en" value="Male"/>
+                <names language_code="ka" value="მამრი"/>
+            </values>
+            <values key="unknown" isactive="true" iconkey="unknown">
+                <names language_code="ka" value="უცნობია"/>
+                <names language_code="en" value="Unknown"/>
+            </values>
+        </attribute>
+        <attribute key="ageofanimalcarcass" isrequired="false" type="LIST" iconkey="age_of_carcass">
+            <names language_code="ka" value="ცხოველის ჩონჩხის სიძველე"/>
+            <names language_code="en" value="Age of Animal Carcass"/>
+            <values key="fresh" isactive="true" iconkey="fresh">
+                <names language_code="ka" value="ახალი"/>
+                <names language_code="en" value="Fresh"/>
+            </values>
+            <values key="recent" isactive="true">
+                <names language_code="en" value="Recent"/>
+                <names language_code="ka" value="არც თუ ისე დიდი ხნის"/>
+            </values>
+            <values key="old" isactive="true">
+                <names language_code="ka" value="ძველი"/>
+                <names language_code="en" value="Old"/>
+            </values>
+            <values key="veryold" isactive="true">
+                <names language_code="ka" value="ძალიან ძველი"/>
+                <names language_code="en" value="Very Old"/>
+            </values>
+            <values key="unknown" isactive="true" iconkey="unknown">
+                <names language_code="ka" value="უცნობია"/>
+                <names language_code="en" value="Unknown"/>
+            </values>
+        </attribute>
+        <attribute key="treespecies_fruitnut" isrequired="false" type="LIST">
+            <names language_code="ka" value="ხილის ან კაკლის ხის სახეობები"/>
+            <names language_code="en" value="Fruit or Nut Tree Species"/>
+            <values key="fig" isactive="true">
+                <names language_code="ka" value="ლეღვი"/>
+                <names language_code="en" value="Fig"/>
+            </values>
+        </attribute>
+        <attribute key="registrationnumber" isrequired="false" type="TEXT" iconkey="registration_number">
+            <qa_regex></qa_regex>
+            <names language_code="en" value="Registration Number"/>
+        </attribute>
+        <attribute key="actiontaken_items" isrequired="false" type="LIST" iconkey="action_taken">
+            <names language_code="en" value="Action Taken - Items"/>
+            <values key="observedonly" isactive="true" iconkey="observed_only">
+                <names language_code="en" value="Observed Only"/>
+            </values>
+            <values key="confiscated" isactive="true" iconkey="confiscated_1">
+                <names language_code="en" value="Confiscated"/>
+            </values>
+            <values key="destroyed" isactive="true" iconkey="destroyed">
+                <names language_code="en" value="Destroyed"/>
+            </values>
+            <values key="heardonly" isactive="true" iconkey="heard">
+                <names language_code="en" value="Heard Only"/>
+            </values>
+        </attribute>
+        <attribute key="nameornames" isrequired="false" type="TEXT">
+            <qa_regex></qa_regex>
+            <names language_code="en" value="Name or Names"/>
+        </attribute>
+        <attribute key="peoplearmed" isrequired="false" type="LIST" iconkey="people_armed">
+            <names language_code="en" value="People Armed"/>
+            <values key="armed" isactive="true" iconkey="armed">
+                <names language_code="en" value="Armed"/>
+            </values>
+            <values key="unarmed" isactive="true" iconkey="unarmed">
+                <names language_code="en" value="Unarmed"/>
+            </values>
+            <values key="unknown" isactive="true" iconkey="unknown">
+                <names language_code="en" value="Unknown"/>
+            </values>
+        </attribute>
+        <attribute key="numberofdomesticanimals" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Number of Domestic Animals"/>
+        </attribute>
+        <attribute key="species" isrequired="false" type="TREE" iconkey="species">
+            <names language_code="en" value="Species"/>
+            <names language_code="ka" value="სახეობა"/>
+        </attribute>
+        <attribute key="areaburnedha" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Area Burned ha"/>
+        </attribute>
+        <attribute key="positiontype" isrequired="false" type="LIST">
+            <names language_code="ka" value="პოზიციის ტიპი"/>
+            <names language_code="en" value="Position Type"/>
+            <values key="start" isactive="true">
+                <names language_code="ka" value="პატრულირების დაწყება"/>
+                <names language_code="en" value="Patrol Start"/>
+            </values>
+            <values key="end" isactive="true">
+                <names language_code="en" value="Patrol End"/>
+                <names language_code="ka" value="პატრულირების დასრულება"/>
+            </values>
+            <values key="patrolcamp" isactive="true">
+                <names language_code="ka" value="პატრულირების ბანაკი"/>
+                <names language_code="en" value="Patrol Camp"/>
+            </values>
+            <values key="stop" isactive="true">
+                <names language_code="ka" value="გაჩერება"/>
+                <names language_code="en" value="Stop"/>
+            </values>
+            <values key="restart" isactive="true">
+                <names language_code="en" value="Restart"/>
+                <names language_code="ka" value="ხელახლა დაწყება"/>
+            </values>
         </attribute>
         <attribute key="methodadministration" isrequired="false" type="LIST">
             <names language_code="en" value="Method of Administration"/>
@@ -1317,82 +1064,240 @@
                 <names language_code="en" value="Unknown"/>
             </values>
         </attribute>
-        <attribute key="typeofrockormineral" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Rock or Mineral"/>
-            <values key="gold" isactive="true">
-                <names language_code="en" value="Gold"/>
-            </values>
-            <values key="boulders" isactive="true">
-                <names language_code="en" value="Boulders"/>
-            </values>
-            <values key="diamonds" isactive="true">
-                <names language_code="en" value="Diamonds"/>
-            </values>
-            <values key="sand" isactive="true">
-                <names language_code="en" value="Sand"/>
-            </values>
-            <values key="clay" isactive="true">
-                <names language_code="en" value="Clay"/>
-            </values>
-            <values key="gravel" isactive="true">
-                <names language_code="en" value="Gravel"/>
-            </values>
-            <values key="fossil" isactive="true">
-                <names language_code="en" value="Fossil"/>
-            </values>
+        <attribute key="nationalidnumber" isrequired="false" type="TEXT">
+            <qa_regex></qa_regex>
+            <names language_code="en" value="National ID Number"/>
         </attribute>
-        <attribute key="volumeofpoisonliters" isrequired="false" type="NUMERIC">
-            <aggregations aggregation="sum"/>
-            <aggregations aggregation="min"/>
-            <aggregations aggregation="max"/>
-            <aggregations aggregation="avg"/>
+        <attribute key="numberofagesexunknown" isrequired="false" type="NUMERIC">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
-            <names language_code="en" value="Volume of Poison liters"/>
+            <names language_code="en" value="Number of Age or Sex Unknown"/>
+            <names language_code="ka" value="ასაკის და სქესის რაოდენობა უცნობია"/>
         </attribute>
-        <attribute key="ageofanimal" isrequired="false" type="LIST">
-            <names language_code="en" value="Age of Animal"/>
-            <names language_code="ka" value="ცხოველის ასაკი"/>
-            <values key="adult" isactive="true">
-                <names language_code="en" value="Adult"/>
-                <names language_code="ka" value="ზრდასრული"/>
+        <attribute key="threat" isrequired="false" type="TREE">
+            <names language_code="ka" value="საფრთხე"/>
+            <names language_code="en" value="Threat"/>
+            <tree key="residentialcommercialdevelopment" isactive="true">
+                <names language_code="en" value="Residential &amp; Commercial Development"/>
+                <names language_code="ka" value="საცხოვრებელი და კომერციული განვითარება"/>
+                <children key="housingurbanareas" isactive="true">
+                    <names language_code="en" value="Housing &amp; Urban Areas"/>
+                    <names language_code="ka" value="საცხოვრებელი და ურბანული ტერიტორიები"/>
+                </children>
+                <children key="commericalindustrialareas" isactive="true">
+                    <names language_code="en" value="Commercial &amp; Industrial Areas"/>
+                    <names language_code="ka" value="კომერციული და ინდუსტრიული ტერიტორიები"/>
+                </children>
+                <children key="tourismrecreationareas" isactive="true">
+                    <names language_code="en" value="Tourism &amp; Recreation Areas"/>
+                    <names language_code="ka" value="ტურიზმის და რეკრეაციის ტერიტორიები"/>
+                </children>
+            </tree>
+            <tree key="agricultureaquaculture" isactive="true">
+                <names language_code="ka" value="სოფლის მეურნეობა და წყლის მეურნეობა (აკვაკულტურა)"/>
+                <names language_code="en" value="Agriculture &amp; Aquaculture"/>
+                <children key="annualperennialnontimbercrops" isactive="true">
+                    <names language_code="ka" value="ერთწლიანი და მრავალწლიანი დარგული კულტურები"/>
+                    <names language_code="en" value="Annual &amp; Perennial Non-Timber Crops"/>
+                </children>
+                <children key="woodpulpplantations" isactive="true">
+                    <names language_code="ka" value="ხის პლანტაციები"/>
+                    <names language_code="en" value="Wood &amp; Pulp Plantations"/>
+                </children>
+                <children key="livestockfarmingranching" isactive="true">
+                    <names language_code="ka" value="მეცხოველეობა"/>
+                    <names language_code="en" value="Livestock Farming &amp; Ranching"/>
+                </children>
+                <children key="marinefreshwateraquaculture" isactive="true">
+                    <names language_code="ka" value="ზღვისა და მტკნარი წყლის აკვაკულტურა"/>
+                    <names language_code="en" value="Marine &amp; Freshwater Aquaculture"/>
+                </children>
+            </tree>
+            <tree key="energyproductionmining" isactive="true">
+                <names language_code="ka" value="ენერგიის წარმოება და სამთო მრეწველობა"/>
+                <names language_code="en" value="Energy Production &amp; Mining"/>
+                <children key="oilgasdrlling" isactive="true">
+                    <names language_code="en" value="Oil &amp; Gas Drilling"/>
+                    <names language_code="ka" value="ნავთობისა და გაზის ბურღვა"/>
+                </children>
+                <children key="miningquarrying" isactive="true">
+                    <names language_code="en" value="Mining &amp; Quarrying"/>
+                    <names language_code="ka" value="სამთო სამრეწველო მოპოვების საქმიანობები"/>
+                </children>
+                <children key="renewableenergy" isactive="true">
+                    <names language_code="en" value="Renewable Energy"/>
+                    <names language_code="ka" value="განახლებადი ენერგია"/>
+                </children>
+            </tree>
+            <tree key="transportationservicecorridors" isactive="true">
+                <names language_code="en" value="Transportation &amp; Service Corridors"/>
+                <names language_code="ka" value="ტრანსპორტირება და მომსახურების კორიდორები"/>
+                <children key="roadsrailroads" isactive="true">
+                    <names language_code="en" value="Roads &amp; Railroads"/>
+                    <names language_code="ka" value="გზები და რკინისგზები"/>
+                </children>
+                <children key="utilityservicelines" isactive="true">
+                    <names language_code="en" value="Utility &amp; Service Lines"/>
+                    <names language_code="ka" value="კომუნალური და მომსახურების ხაზები"/>
+                </children>
+                <children key="shippinglanes" isactive="true">
+                    <names language_code="ka" value="გადაზიდვის ბილიკები"/>
+                    <names language_code="en" value="Shipping Lanes"/>
+                </children>
+                <children key="flightpaths" isactive="true">
+                    <names language_code="en" value="Flight Paths"/>
+                </children>
+                <children key="horsetrail" isactive="true">
+                    <names language_code="ka" value="ცხენის ბილიკი"/>
+                    <names language_code="en" value="Horse Trail"/>
+                </children>
+            </tree>
+            <tree key="biologicalresourceuse" isactive="true">
+                <names language_code="en" value="Biological Resource Use"/>
+                <names language_code="ka" value="ბიოლოგიური რესურსების გამოყენება"/>
+                <children key="huntingcollectingterrestrialanimals" isactive="true">
+                    <names language_code="en" value="Hunting &amp; Collecting Terrestrial Animals"/>
+                    <names language_code="ka" value="ნადირობა"/>
+                </children>
+                <children key="gatheringterrestrialplants" isactive="true">
+                    <names language_code="ka" value="ტყის არამერქნული პროდუქტების შეგროვება"/>
+                    <names language_code="en" value="Gathering Terrestrial Plants"/>
+                </children>
+                <children key="loggingwoodharvesting" isactive="true">
+                    <names language_code="ka" value="ხე-ტყის ჭრა"/>
+                    <names language_code="en" value="Logging &amp; Wood Harvesting"/>
+                </children>
+                <children key="fishingharvestingaquaticresources" isactive="true">
+                    <names language_code="ka" value="თევზაობა და წყლის რესურსების მოპოვება"/>
+                    <names language_code="en" value="Fishing &amp; Harvesting Aquatic Resources"/>
+                </children>
+            </tree>
+            <tree key="naturalsystemmodifications" isactive="true">
+                <names language_code="en" value="Natural System Modifications"/>
+                <names language_code="ka" value="ბუნებრივი სისტემის ცვლილებები"/>
+                <children key="firefiresuppression" isactive="true">
+                    <names language_code="en" value="Fire &amp; Fire Suppression"/>
+                </children>
+                <children key="damswatermanagementuse" isactive="true">
+                    <names language_code="en" value="Dams &amp; Water Management/Use"/>
+                    <names language_code="ka" value="კაშხალი და წყლის მენეჯმენტი / გამოყენება"/>
+                </children>
+                <children key="otherecosystemmodifications" isactive="true">
+                    <names language_code="ka" value="ეკოსისტემების სხვა ცვლილებები"/>
+                    <names language_code="en" value="Other Ecosystem Modifications"/>
+                </children>
+            </tree>
+            <tree key="invasiveotherproblematicspeciesgenes" isactive="true">
+                <names language_code="en" value="Invasive &amp; Other Problematic Species &amp; Genes"/>
+                <names language_code="ka" value="ინვაზიური და სხვა პრობლემატური სახეობები და გენები"/>
+                <children key="invasivenonnativealienspecies" isactive="true">
+                    <names language_code="en" value="Invasive Non-Native/Alien Species"/>
+                    <names language_code="ka" value="ინვაზიური არა-ადგილობრივი / უცხოური სახეობები"/>
+                </children>
+                <children key="problematicnativespecies" isactive="true">
+                    <names language_code="ka" value="პრობლემატური ადგილობრივი სახეობები"/>
+                    <names language_code="en" value="Problematic Native Species"/>
+                </children>
+                <children key="introducedgeneticmaterial" isactive="true">
+                    <names language_code="en" value="Introduced Genetic Material"/>
+                    <names language_code="ka" value="შემოტანილი გენეტიკური მასალა"/>
+                </children>
+            </tree>
+            <tree key="pollution" isactive="true">
+                <names language_code="ka" value="დაბინძურება"/>
+                <names language_code="en" value="Pollution"/>
+                <children key="householdsewageurbanwastewater" isactive="true">
+                    <names language_code="en" value="Household Sewage &amp; Urban Waste Water"/>
+                    <names language_code="ka" value="საყოფაცხოვრებო კანალიზაცია და ურბანული ნარჩენების წყალი"/>
+                </children>
+                <children key="industrialmilitaryeffluents" isactive="true">
+                    <names language_code="ka" value="სამრეწველო და სამხედრო საქმიანობა"/>
+                    <names language_code="en" value="Industrial &amp; Military Effluents"/>
+                </children>
+                <children key="agriculturalforestryeffluents" isactive="true">
+                    <names language_code="en" value="Agricultural &amp; Forestry Effluents"/>
+                    <names language_code="ka" value="სასოფლო-სამეურნეო და სატყეო მეურნეობები"/>
+                </children>
+                <children key="garbagesolidwaste" isactive="true">
+                    <names language_code="ka" value="ნაგავი და მყარი ნარჩენები"/>
+                    <names language_code="en" value="Garbage &amp; Solid Waste"/>
+                </children>
+                <children key="airbornepollutants" isactive="true">
+                    <names language_code="ka" value="ჰაერის დაბინძურება"/>
+                    <names language_code="en" value="Air-Borne Pollutants"/>
+                </children>
+                <children key="excessenergy" isactive="true">
+                    <names language_code="ka" value="ჭარბი ენერგია"/>
+                    <names language_code="en" value="Excess Energy"/>
+                </children>
+            </tree>
+            <tree key="climatechangesevereweather" isactive="true">
+                <names language_code="en" value="Climate Change &amp; Severe Weather"/>
+                <names language_code="ka" value="კლიმატური ცვლილებები და მკაცრი ამინდი"/>
+                <children key="habitatshiftingalteration" isactive="true">
+                    <names language_code="en" value="Habitat Shifting &amp; Alteration"/>
+                    <names language_code="ka" value="ჰაბიტატების მონაცვლეობა და ცვლილება"/>
+                </children>
+                <children key="droughts" isactive="true">
+                    <names language_code="ka" value="გვალვები"/>
+                    <names language_code="en" value="Droughts"/>
+                </children>
+                <children key="temperatureextremes" isactive="true">
+                    <names language_code="en" value="Temperature Extremes"/>
+                </children>
+                <children key="stormsflooding" isactive="true">
+                    <names language_code="en" value="Storms &amp; Flooding"/>
+                    <names language_code="ka" value="წვიმა და წყალდიდობა"/>
+                </children>
+            </tree>
+        </attribute>
+        <attribute key="typeoffishingequipment" isrequired="false" type="LIST" iconkey="type">
+            <names language_code="en" value="Type of Fishing Equipment"/>
+            <values key="rod" isactive="true" iconkey="rod">
+                <names language_code="en" value="Rod"/>
             </values>
-            <values key="subadult" isactive="true">
-                <names language_code="en" value="Sub-Adult"/>
-                <names language_code="ka" value="ზრდასრულზე პატარა"/>
+            <values key="net" isactive="true" iconkey="net">
+                <names language_code="en" value="Net"/>
             </values>
-            <values key="juvenile" isactive="true">
-                <names language_code="en" value="Juvenile"/>
-                <names language_code="ka" value="არასრულწლოვანი"/>
+            <values key="fishtrap" isactive="true" iconkey="fish_trap">
+                <names language_code="en" value="Fish Trap"/>
             </values>
-            <values key="unknown" isactive="true">
-                <names language_code="en" value="Unknown"/>
-                <names language_code="ka" value="უცნობია"/>
+            <values key="spears" isactive="true" iconkey="spears">
+                <names language_code="en" value="Spears"/>
+            </values>
+            <values key="electricrod" isactive="true" iconkey="electric_rod">
+                <names language_code="en" value="Electric rod"/>
+            </values>
+            <values key="dynamite" isactive="true" iconkey="dynamite">
+                <names language_code="en" value="Dynamite"/>
+            </values>
+            <values key="other" isactive="true" iconkey="other">
+                <names language_code="en" value="Other"/>
             </values>
         </attribute>
-        <attribute key="typeofsaltlick" isrequired="false" type="LIST">
-            <names language_code="en" value="Type of Salt Lick"/>
-            <names language_code="ka" value="სამარილის ტიპი"/>
-            <values key="landbased" isactive="true">
-                <names language_code="en" value="Land Based"/>
-                <names language_code="ka" value="მიწაზე"/>
-            </values>
-            <values key="waterbased" isactive="true">
-                <names language_code="en" value="Water Based"/>
-                <names language_code="ka" value="წყალში"/>
-            </values>
+        <attribute key="numberofpeople" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Number of People"/>
+        </attribute>
+        <attribute key="numberofdryingracks" isrequired="false" type="NUMERIC">
+            <qa_minmax>
+                <MinValue>0.0</MinValue>
+            </qa_minmax>
+            <names language_code="en" value="Number of Drying Racks"/>
         </attribute>
     </attributes>
     <categories>
-        <category key="humanactivity" ismultiple="true" isactive="true">
+        <category key="humanactivity" ismultiple="true" isactive="true" iconkey="human_activity">
             <names language_code="en" value="Human Activity"/>
             <names language_code="ka" value="ადამიანის საქმიანობა"/>
             <attribute isactive="true" attributekey="threat"/>
             <attribute isactive="true" attributekey="infraction"/>
-            <category key="people" ismultiple="true" isactive="true">
-                <names language_code="en" value="People"/>
+            <category key="people" ismultiple="true" isactive="true" iconkey="people_direct_observation">
                 <names language_code="ka" value="ხალხი - პირდაპირი დაკვირვება"/>
+                <names language_code="en" value="People"/>
                 <attribute isactive="true" attributekey="numberofpeople"/>
                 <attribute isactive="true" attributekey="actiontaken_people"/>
                 <attribute isactive="true" attributekey="peoplearmed"/>
@@ -1403,13 +1308,13 @@
                 <attribute isactive="true" attributekey="nationalidnumber"/>
                 <attribute isactive="true" attributekey="phonenumber"/>
             </category>
-            <category key="humansign" ismultiple="true" isactive="true">
+            <category key="humansign" ismultiple="true" isactive="true" iconkey="people_indirect_sign">
                 <names language_code="en" value="Human Sign"/>
                 <names language_code="ka" value="ხალხი - ირიბი ნიშანი"/>
                 <attribute isactive="true" attributekey="typeofhumansign"/>
                 <attribute isactive="true" attributekey="ageofsign"/>
             </category>
-            <category key="shelterorcamp" ismultiple="true" isactive="true">
+            <category key="shelterorcamp" ismultiple="true" isactive="true" iconkey="camp">
                 <names language_code="en" value="Shelter or Camp"/>
                 <names language_code="ka" value="ბანაკი"/>
                 <attribute isactive="true" attributekey="sheltertype"/>
@@ -1418,60 +1323,60 @@
                 <attribute isactive="true" attributekey="actiontakenmp"/>
                 <attribute isactive="true" attributekey="numberofdryingracks"/>
             </category>
-            <category key="weaponsequipment" ismultiple="true" isactive="true">
-                <names language_code="en" value="Weapons &amp; Equipment"/>
+            <category key="weaponsequipment" ismultiple="true" isactive="true" iconkey="equipment">
                 <names language_code="ka" value="ჩამორთმეული იარაღი და აღჭურვილობა"/>
+                <names language_code="en" value="Weapons &amp; Equipment"/>
                 <attribute isactive="true" attributekey="numberofweaponsequipment"/>
                 <attribute isactive="true" attributekey="actiontaken_items"/>
-                <category key="trap" ismultiple="true" isactive="true">
+                <category key="trap" ismultiple="true" isactive="true" iconkey="traps_snares">
                     <names language_code="en" value="Trap"/>
                     <attribute isactive="true" attributekey="isactive"/>
                     <attribute isactive="true" attributekey="typeoftrap"/>
                 </category>
-                <category key="firearmsammunition" ismultiple="true" isactive="true">
+                <category key="firearmsammunition" ismultiple="true" isactive="true" iconkey="firearms_ammunition">
                     <names language_code="en" value="Firearms &amp; Ammunition"/>
                     <attribute isactive="true" attributekey="caliber"/>
-                    <category key="firearms" ismultiple="true" isactive="true">
+                    <category key="firearms" ismultiple="true" isactive="true" iconkey="firearms">
                         <names language_code="en" value="Firearms"/>
                         <attribute isactive="true" attributekey="typeoffirearm"/>
                         <attribute isactive="true" attributekey="manufacturer"/>
                         <attribute isactive="true" attributekey="serialnumber"/>
                     </category>
-                    <category key="ammunition" ismultiple="true" isactive="true">
+                    <category key="ammunition" ismultiple="true" isactive="true" iconkey="ammunition">
                         <names language_code="en" value="Ammunition"/>
                         <attribute isactive="true" attributekey="ammunitiontype"/>
                     </category>
-                    <category key="spentcartridges" ismultiple="true" isactive="true">
+                    <category key="spentcartridges" ismultiple="true" isactive="true" iconkey="spent_cartridges">
                         <names language_code="en" value="Spent Cartridges"/>
                         <attribute isactive="true" attributekey="ammunitiontype"/>
                     </category>
                 </category>
-                <category key="cuttingtools" ismultiple="true" isactive="true">
+                <category key="cuttingtools" ismultiple="true" isactive="true" iconkey="cutting_tools">
                     <names language_code="en" value="Cutting Tools"/>
                     <attribute isactive="true" attributekey="typeofcuttingtool"/>
                 </category>
-                <category key="traditionalweapons" ismultiple="true" isactive="true">
+                <category key="traditionalweapons" ismultiple="true" isactive="true" iconkey="traditional_weapons">
                     <names language_code="en" value="Traditional Weapons"/>
                     <attribute isactive="true" attributekey="typeoftraditionalweapon"/>
                 </category>
-                <category key="fishingtools" ismultiple="true" isactive="true">
+                <category key="fishingtools" ismultiple="true" isactive="true" iconkey="fishing_tools">
                     <names language_code="en" value="Fishing Tools"/>
                     <attribute isactive="true" attributekey="typeoffishingequipment"/>
                     <attribute isactive="true" attributekey="meshsize"/>
                     <attribute isactive="true" attributekey="lengthofnetmeters"/>
                 </category>
-                <category key="equipment" ismultiple="true" isactive="true">
+                <category key="equipment" ismultiple="true" isactive="true" iconkey="equipment">
                     <names language_code="en" value="Equipment"/>
                     <attribute isactive="true" attributekey="typeofequipment"/>
                 </category>
-                <category key="poison" ismultiple="true" isactive="true">
+                <category key="poison" ismultiple="true" isactive="true" iconkey="poison">
                     <names language_code="en" value="Poison"/>
                     <attribute isactive="true" attributekey="typeofpoison"/>
                     <attribute isactive="true" attributekey="volumeofpoisonliters"/>
                     <attribute isactive="true" attributekey="methodadministration"/>
                 </category>
             </category>
-            <category key="transportation" ismultiple="true" isactive="true">
+            <category key="transportation" ismultiple="true" isactive="true" iconkey="transportation">
                 <names language_code="en" value="Transportation"/>
                 <names language_code="ka" value="ტრანსპორტირება"/>
                 <attribute isactive="true" attributekey="numberoftransportation"/>
@@ -1479,46 +1384,46 @@
                 <attribute isactive="true" attributekey="actiontaken_items"/>
                 <attribute isactive="true" attributekey="registrationnumber"/>
             </category>
-            <category key="timber" ismultiple="true" isactive="true">
-                <names language_code="en" value="Timber"/>
+            <category key="timber" ismultiple="true" isactive="true" iconkey="timber">
                 <names language_code="ka" value="ხის მასალა"/>
+                <names language_code="en" value="Timber"/>
                 <attribute isactive="true" attributekey="actiontaken_items"/>
                 <attribute isactive="true" attributekey="treespecies_timber"/>
                 <attribute isactive="true" attributekey="ageofsign"/>
-                <category key="logs" ismultiple="true" isactive="true">
+                <category key="logs" ismultiple="true" isactive="true" iconkey="logs">
                     <names language_code="en" value="Logs"/>
                     <attribute isactive="true" attributekey="numberoflogs"/>
                 </category>
-                <category key="firewood" ismultiple="true" isactive="true">
+                <category key="firewood" ismultiple="true" isactive="true" iconkey="firewood">
                     <names language_code="en" value="Firewood"/>
                     <attribute isactive="true" attributekey="numberofbundles"/>
                 </category>
-                <category key="cutpieces" ismultiple="true" isactive="true">
+                <category key="cutpieces" ismultiple="true" isactive="true" iconkey="cut_pieces">
                     <names language_code="en" value="Cut Pieces"/>
                     <attribute isactive="true" attributekey="volumeofcutpieces"/>
                 </category>
-                <category key="stump" ismultiple="true" isactive="true">
+                <category key="stump" ismultiple="true" isactive="true" iconkey="stump">
                     <names language_code="en" value="Stump"/>
                     <attribute isactive="true" attributekey="numberofstumps"/>
                 </category>
-                <category key="planks" ismultiple="true" isactive="true">
+                <category key="planks" ismultiple="true" isactive="true" iconkey="planks">
                     <names language_code="en" value="Planks"/>
                     <attribute isactive="true" attributekey="numberofplanks"/>
                 </category>
-                <category key="charcoal" ismultiple="true" isactive="true">
+                <category key="charcoal" ismultiple="true" isactive="true" iconkey="charcoal">
                     <names language_code="en" value="Charcoal"/>
                     <attribute isactive="true" attributekey="numberofbags"/>
                 </category>
             </category>
-            <category key="nontimberforestproducts" ismultiple="true" isactive="true">
-                <names language_code="en" value="Non Timber Forest Products"/>
+            <category key="nontimberforestproducts" ismultiple="true" isactive="true" iconkey="ntfps">
                 <names language_code="ka" value="ტყის არამერქნული პროდუქტები"/>
+                <names language_code="en" value="Non Timber Forest Products"/>
                 <attribute isactive="true" attributekey="typeofforestproduct"/>
                 <attribute isactive="true" attributekey="actiontaken_items"/>
                 <attribute isactive="true" attributekey="units"/>
                 <attribute isactive="true" attributekey="quantity"/>
             </category>
-            <category key="domesticanimals" ismultiple="true" isactive="true">
+            <category key="domesticanimals" ismultiple="true" isactive="true" iconkey="domestic_animals">
                 <names language_code="en" value="Domestic Animals"/>
                 <names language_code="ka" value="შიანური ცხოველები"/>
                 <attribute isactive="true" attributekey="typeofdomesticanimal"/>
@@ -1531,19 +1436,19 @@
                 <attribute isactive="true" attributekey="actiontaken_landclearning"/>
                 <attribute isactive="true" attributekey="cropplanted"/>
             </category>
-            <category key="fire" ismultiple="true" isactive="true">
+            <category key="fire" ismultiple="true" isactive="true" iconkey="fire">
                 <names language_code="en" value="Fire"/>
                 <names language_code="ka" value="ცეცხლი"/>
                 <attribute isactive="true" attributekey="areaburnedha"/>
             </category>
-            <category key="infrastructureandroads" ismultiple="true" isactive="true">
-                <names language_code="en" value="Infrastructure &amp; Roads"/>
+            <category key="infrastructureandroads" ismultiple="true" isactive="true" iconkey="infrastructure_roads">
                 <names language_code="ka" value="ინფრასტრუქტურა და გზები"/>
+                <names language_code="en" value="Infrastructure &amp; Roads"/>
                 <attribute isactive="true" attributekey="typeofinfrastructure"/>
                 <attribute isactive="true" attributekey="infrastructuresize"/>
                 <attribute isactive="true" attributekey="status"/>
             </category>
-            <category key="rocksminerals" ismultiple="true" isactive="true">
+            <category key="rocksminerals" ismultiple="true" isactive="true" iconkey="rocks_minerals">
                 <names language_code="en" value="Rocks &amp; Minerals"/>
                 <names language_code="ka" value="კლდეები და მინერალები"/>
                 <attribute isactive="true" attributekey="typeofrockormineral"/>
@@ -1551,19 +1456,19 @@
                 <attribute isactive="true" attributekey="quantity"/>
                 <attribute isactive="true" attributekey="units"/>
             </category>
-            <category key="pollution" ismultiple="true" isactive="true">
-                <names language_code="en" value="Pollution"/>
+            <category key="pollution" ismultiple="true" isactive="true" iconkey="pollution">
                 <names language_code="ka" value="დაბინძურება"/>
+                <names language_code="en" value="Pollution"/>
                 <attribute isactive="true" attributekey="typeofpollution"/>
             </category>
         </category>
-        <category key="animals" ismultiple="true" isactive="true">
-            <names language_code="en" value="Animals"/>
+        <category key="animals" ismultiple="true" isactive="true" iconkey="wildlife">
             <names language_code="ka" value="გარეული ცხოველები"/>
+            <names language_code="en" value="Animals"/>
             <attribute isactive="true" attributekey="infraction"/>
             <attribute isactive="true" attributekey="threat"/>
             <attribute isactive="true" attributekey="species"/>
-            <category key="liveanimals" ismultiple="true" isactive="true">
+            <category key="liveanimals" ismultiple="true" isactive="true" iconkey="wildlife_direct_observation">
                 <names language_code="en" value="Live animals"/>
                 <names language_code="ka" value="გარეული ცხოველი - პირდაპირი დაკვირვება"/>
                 <attribute isactive="true" attributekey="numberofadultmales"/>
@@ -1572,41 +1477,41 @@
                 <attribute isactive="true" attributekey="numberofagesexunknown"/>
                 <attribute isactive="true" attributekey="actiontaken_liveanimals"/>
             </category>
-            <category key="sign" ismultiple="true" isactive="true">
+            <category key="sign" ismultiple="true" isactive="true" iconkey="wildlife_indirect_sign">
                 <names language_code="en" value="Sign - Indirect Evidence"/>
                 <names language_code="ka" value="გარეული ცხოველი - ირიბი ნიშანი"/>
                 <attribute isactive="true" attributekey="ageofsign"/>
-                <category key="track" ismultiple="true" isactive="true">
+                <category key="track" ismultiple="true" isactive="true" iconkey="track">
                     <names language_code="en" value="Track"/>
                 </category>
-                <category key="dung" ismultiple="true" isactive="true">
-                    <names language_code="en" value="Dung"/>
+                <category key="dung" ismultiple="true" isactive="true" iconkey="dung">
                     <names language_code="ka" value="სუნი"/>
+                    <names language_code="en" value="Dung"/>
                 </category>
-                <category key="sound" ismultiple="true" isactive="true">
-                    <names language_code="en" value="Sound"/>
+                <category key="sound" ismultiple="true" isactive="true" iconkey="sound">
                     <names language_code="ka" value="ხმა"/>
+                    <names language_code="en" value="Sound"/>
                 </category>
-                <category key="nest" ismultiple="true" isactive="true">
-                    <names language_code="en" value="Nest"/>
+                <category key="nest" ismultiple="true" isactive="true" iconkey="nest">
                     <names language_code="ka" value="ბუდე, ბუნაგი"/>
+                    <names language_code="en" value="Nest"/>
                 </category>
-                <category key="feeding" ismultiple="true" isactive="true">
+                <category key="feeding" ismultiple="true" isactive="true" iconkey="feeding">
                     <names language_code="en" value="Feeding"/>
                     <names language_code="ka" value="კვების ადგილი"/>
                 </category>
-                <category key="scrape" ismultiple="true" isactive="true">
+                <category key="scrape" ismultiple="true" isactive="true" iconkey="scrape">
                     <names language_code="en" value="Scrape"/>
                     <names language_code="ka" value="ფახუკინს ხმა"/>
                 </category>
-                <category key="scent" ismultiple="true" isactive="true">
-                    <names language_code="en" value="Scent"/>
+                <category key="scent" ismultiple="true" isactive="true" iconkey="scent">
                     <names language_code="ka" value="სუნი"/>
+                    <names language_code="en" value="Scent"/>
                 </category>
             </category>
-            <category key="carcass" ismultiple="true" isactive="true">
-                <names language_code="en" value="Carcass"/>
+            <category key="carcass" ismultiple="true" isactive="true" iconkey="carcass">
                 <names language_code="ka" value="ჩონჩხი"/>
+                <names language_code="en" value="Carcass"/>
                 <attribute isactive="true" attributekey="causeofdeath"/>
                 <attribute isactive="true" attributekey="numberofcarcasses"/>
                 <attribute isactive="true" attributekey="ageofanimalcarcass"/>
@@ -1618,7 +1523,7 @@
                 <attribute isactive="true" attributekey="partremoved2"/>
                 <attribute isactive="true" attributekey="partremoved3"/>
             </category>
-            <category key="animalpartsandbushmeat" ismultiple="true" isactive="true">
+            <category key="animalpartsandbushmeat" ismultiple="true" isactive="true" iconkey="bushmeat">
                 <names language_code="en" value="Animal Parts and Bushmeat"/>
                 <attribute isactive="true" attributekey="typeofanimalpart"/>
                 <attribute isactive="true" attributekey="actiontakenrcass"/>
@@ -1630,8 +1535,8 @@
             <names language_code="en" value="Features"/>
             <names language_code="ka" value="მახასიათებლები"/>
             <category key="figtree" ismultiple="true" isactive="true">
-                <names language_code="en" value="Fruit or Nut Tree"/>
                 <names language_code="ka" value="ხილის ან კაკლის ხე"/>
+                <names language_code="en" value="Fruit or Nut Tree"/>
                 <attribute isactive="true" attributekey="treespecies_fruitnut"/>
                 <attribute isactive="true" attributekey="figfruit"/>
                 <attribute isactive="true" attributekey="species"/>
@@ -1643,8 +1548,8 @@
                 <attribute isactive="true" attributekey="species"/>
             </category>
             <category key="waterhole" ismultiple="true" isactive="true">
-                <names language_code="en" value="Water Hole"/>
                 <names language_code="ka" value="წყალში გასასვლელი (ხვრელი)"/>
+                <names language_code="en" value="Water Hole"/>
                 <attribute isactive="true" attributekey="haswater"/>
             </category>
         </category>

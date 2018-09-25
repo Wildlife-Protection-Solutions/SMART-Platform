@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.wcs.smart.core</groupId>
 		<artifactId>smart</artifactId>
-		<version>6.1.0-SNAPSHOT</version>
+		<version>6.2.0-SNAPSHOT</version>
 		<relativePath>../pom-shared.xml</relativePath>
 	</parent>
 	
@@ -14,6 +14,18 @@
 	<artifactId>org.wcs.smart.core.core</artifactId>
 	<name>SMART Core Module</name>
 	<packaging>bundle</packaging>
+
+	<build>
+    	<resources>
+			<resource>
+        		<directory>./</directory>
+        		<includes>
+        			<include>images/datamodel/**</include>
+        		</includes>
+      		</resource>      
+    	</resources>
+ 	</build>
+  
 
 	<dependencies>
 		<dependency>

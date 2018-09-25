@@ -245,14 +245,13 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		});
 
 		Composite compAddExisting = new Composite(composite, SWT.NONE);
-		compAddExisting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
-				true, 1, 1));
 		compAddExisting.setLayout(new GridLayout(2, false));
 		((GridLayout) compAddExisting.getLayout()).marginLeft = 20;
-
+		
+		compAddExisting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		lblSelectAttribute = new Label(compAddExisting, SWT.NONE);
-		lblSelectAttribute.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER,
-				false, false, 2, 1));
+		lblSelectAttribute.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		lblSelectAttribute.setBounds(0, 0, 58, 13);
 		lblSelectAttribute.setText(Messages.AddAttributeDialog1_SelectAttribute_Label);
 
@@ -337,7 +336,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 
 		final AttributeInfoPanel attributeInfo = new AttributeInfoPanel(
 				compAddExisting, SWT.NONE, false, false, session);
-		attributeInfo.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		attributeInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		checkboxTableViewer
 				.addSelectionChangedListener(new ISelectionChangedListener() {

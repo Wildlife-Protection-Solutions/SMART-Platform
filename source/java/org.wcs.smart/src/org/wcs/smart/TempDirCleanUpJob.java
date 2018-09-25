@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query;
+package org.wcs.smart;
 
 import java.io.File;
 
@@ -30,24 +30,24 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.internal.Messages;
 
 /**
- * Cleans up query temprary tables from the database.
+ * Cleans up query temporary tables from the database.
  * 
  * @author Emily
  *
  */
-public class QueryCleanUpJob extends Job{
+public class TempDirCleanUpJob extends Job{
 
-	public QueryCleanUpJob() {
-		super(Messages.QueryPlugIn_QueryCleanUpJobName);
+	public TempDirCleanUpJob() {
+		super(Messages.TempDirCleanUpJob_CleanJob);
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		//clean up queries directory
-		File dir = QueryPlugIn.getDefault().getQueryTempDirectory();
+		File dir = SmartContext.INSTANCE.getTempFilestoreLocation();
 		if (dir.exists() && dir.isDirectory()){
 			File[] toDel = dir.listFiles();
 			if (toDel != null){
@@ -65,7 +65,7 @@ public class QueryCleanUpJob extends Job{
 				q.executeUpdate();
 				session.getTransaction().commit();
 			}catch (Exception ex){
-				QueryPlugIn.log("Could not cleanup query temporary tables.", ex); //$NON-NLS-1$
+				SmartPlugIn.log("Could not cleanup query temporary tables.", ex); //$NON-NLS-1$
 			}finally{
 				if (session.getTransaction().isActive()) {
 					session.getTransaction().rollback();

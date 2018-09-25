@@ -106,6 +106,7 @@ public class DataModelSmartToXmlConverter {
 		ct.setIsactive(child.getIsActive());
 		ct.setIsmultiple(child.getIsMultiple());
 		ct.setKey(child.getKeyId());
+		if (child.getIcon() != null) ct.setIconkey(child.getIcon().getKeyId());
 		
 		if (child.getAttributes() != null){
 			for (CategoryAttribute map : child.getAttributes()){
@@ -137,6 +138,8 @@ public class DataModelSmartToXmlConverter {
 			AttributeType at = new AttributeType();
 			at.setIsrequired(att.getIsRequired());
 			at.setKey(att.getKeyId());
+			if (att.getIcon() != null) at.setIconkey(att.getIcon().getKeyId());
+			
 			if (att.getMaxValue() != null || att.getMinValue() != null){
 				MinMaxType mmt = new MinMaxType();	
 				mmt.setMaxValue(att.getMaxValue());
@@ -165,6 +168,7 @@ public class DataModelSmartToXmlConverter {
 					ListNode ln = new ListNode();
 					ln.setKey(item.getKeyId());
 					ln.setIsactive(item.getIsActive());
+					if (item.getIcon() != null) ln.setIconkey(item.getIcon().getKeyId());
 					setNames(ln.getNames(), item.getNames(), llookup);
 					
 					at.getValues().add(ln);
@@ -186,6 +190,7 @@ public class DataModelSmartToXmlConverter {
 		setNames(tnt.getNames(), node.getNames(), llookup);
 		tnt.setIsactive(node.getIsActive());
 		parentList.add(tnt);
+		if (node.getIcon() != null) tnt.setIconkey(node.getIcon().getKeyId());
 		
 		if (node.getChildren() != null) {
 			for (AttributeTreeNode child : node.getChildren()) {

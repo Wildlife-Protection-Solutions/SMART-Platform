@@ -50,6 +50,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.dialog.AssociatedImageInterceptor;
@@ -183,13 +184,20 @@ public class CmXmlToSmartImporter {
 				throw new IllegalStateException(Messages.CmXmlToSmartImporter_DefaultLanguage_Error);
 			}
 
+			
 			ConfigurableModel cm = new ConfigurableModel();
 			cm.setConservationArea(SmartDB.getCurrentConservationArea());
 			updateNames(cm, xmlCm.getName());
 			cm.setDisplayMode(getDisplayMode(xmlCm.getDisplayMode()));
 			cm.setInstantGps(xmlCm.isInstantGps());
 			cm.setPhotoFirst(xmlCm.isPhotoFirst());
-			
+			//icon set
+			if (xmlCm.getIconSet() != null && !xmlCm.getIconSet().isEmpty()) {
+				IconSet is = QueryFactory.buildQuery(session, IconSet.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"keyId", xmlCm.getIconSet()}).uniqueResult(); //$NON-NLS-1$
+				cm.setIconSet(is);
+			}
 			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingConfigs);
 			configLookup = loadAttributeConfigs(xmlCm.getAttributeConfig(), cm, monitor);
 			cm.setDefaultConfigs(configLookup.values().stream().filter(cfg -> cfg.isDefault()).collect(Collectors.toMap(CmAttributeConfig::getAttribute, Function.identity())));
@@ -344,7 +352,11 @@ public class CmXmlToSmartImporter {
 			node.setParent(parent);
 			node.setNodeOrder(result.size());
 			node.setDisplayMode(getDisplayMode(xmlNode.getDisplayMode()));
-			node.setImageFile(findFile(xmlNode.getImageFile()));
+			
+			if ( (xmlNode.isIsCustomImage() == null || xmlNode.isIsCustomImage() == Boolean.TRUE) && xmlNode.getImageFile() != null) {
+				node.setImageFile(findFile(xmlNode.getImageFile()));
+			}
+			
 			addToDataMap(xmlNode.getId(), node);
 			node.setChildren(processCmTreeNodes(cfg, dmAttribute, node, xmlNode.getChildren(), monitor));
 			if (monitor.isCanceled()) return null;
@@ -364,7 +376,9 @@ public class CmXmlToSmartImporter {
 			item.setIsActive(xmlNode.isIsActive());
 			item.setListItem(fetchAttributeListItem(xmlNode.getKeyRef(), dmAttribute));
 			item.setListOrder(result.size());
-			item.setImageFile(findFile(xmlNode.getImageFile()));
+			if ( (xmlNode.isIsCustomImage() == null || xmlNode.isIsCustomImage() == Boolean.TRUE) && xmlNode.getImageFile() != null) {
+				item.setImageFile(findFile(xmlNode.getImageFile()));
+			}
 			addToDataMap(xmlNode.getId(), item);
 			if (monitor.isCanceled()) return null;
 			result.add(item);
@@ -393,7 +407,11 @@ public class CmXmlToSmartImporter {
 			cmNode.setChildren(processCmNodes(xmlNode.getNode(), cm, cmNode, monitor));
 			cmNode.setCmAttributes(processAttributes(xmlNode.getAttribute(), cmNode, monitor));
 			cmNode.setDisplayMode(getDisplayMode(xmlNode.getDisplayMode()));
-			cmNode.setImageFile(findFile(xmlNode.getImageFile()));
+			
+			if ( (xmlNode.isIsCustomImage() == null || xmlNode.isIsCustomImage() == Boolean.TRUE) && xmlNode.getImageFile() != null) {
+				cmNode.setImageFile(findFile(xmlNode.getImageFile()));
+			}
+			
 			addToDataMap(xmlNode.getId(), cmNode);
 			
 			result.add(cmNode);
@@ -420,6 +438,10 @@ public class CmXmlToSmartImporter {
 			cmAttr.setAttribute(dmAttribute);
 			cmAttr.setOrder(i);
 			cmAttr.setCmAttributeOptions(processAttributeOptions(xmlAttr.getOption(), cmAttr));
+			if ( (xmlAttr.isIsCustomImage() == null || xmlAttr.isIsCustomImage() == Boolean.TRUE) && xmlAttr.getImageFile() != null) {
+				cmAttr.setImageFile(findFile(xmlAttr.getImageFile()));
+			}
+			
 			if (xmlAttr.getConfigId() != null) {
 				cmAttr.setConfig(configLookup.get(xmlAttr.getConfigId()));
 			} else {

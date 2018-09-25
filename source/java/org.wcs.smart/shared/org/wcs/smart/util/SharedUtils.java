@@ -119,4 +119,26 @@ public class SharedUtils {
 		}
 		return true;
 	}
+	
+	/**
+	 * Get the filename part of a file
+	 * @param part
+	 * @return
+	 */
+	public static String getFilenameWithoutExtension(String part) {
+		int index = part.lastIndexOf('.');
+		if (index < 0) return ""; //$NON-NLS-1$
+		return part.substring(0,index);
+	}
+	
+	/**
+	 * Get the extension part of the file
+	 * @param part
+	 * @return
+	 */
+	public static String getFilenameExtension(String part) {
+		int index = part.lastIndexOf('.');
+		if (index < 0) return ""; //$NON-NLS-1$
+		return part.substring(index+1);
+	}
 }

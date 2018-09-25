@@ -22,6 +22,8 @@
 package org.wcs.smart.ui.internal.ca.properties.handlers;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Named;
 
@@ -35,7 +37,12 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -122,6 +129,43 @@ public class ShowDataModelPropertyPageHandler {
 					I18nUtil.setCa(SmartDB.getCurrentConservationArea().getUuid());
 					loadedSession = dialog.getSession();
 					dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), loadedSession);
+					
+					//load all icons
+					List<DmObject> icons = new ArrayList<>();
+					icons.addAll(dm.getCategories());
+					icons.addAll(dm.getAttributes());
+					while(!icons.isEmpty()) {
+						DmObject icon = icons.remove(0);
+						if (icon.getIcon() != null) {
+							icon.getIcon().getName();
+							for (IconFile ff : icon.getIcon().getFiles()) {
+								ff.getIconSet().getName();
+								ff.computeFileLocation(loadedSession);
+							}
+						}
+						if (icon instanceof Category) {
+							Category c = (Category)icon;
+							if (c.getChildren() != null) {
+								icons.addAll (c.getChildren());
+							}
+						}
+						if (icon instanceof Attribute) {
+							Attribute a = (Attribute)icon;
+							if (a.getTree() != null) {
+								icons.addAll(a.getTree());
+							}
+							if (a.getAttributeList() != null) {
+								icons.addAll(a.getAttributeList());
+							}
+						}
+						if (icon instanceof AttributeTreeNode) {
+							AttributeTreeNode a = (AttributeTreeNode)icon;
+							if (a.getChildren() != null) {
+								icons.addAll(a.getChildren());
+							}
+						}
+					}
+					
 					monitor.done();					
 				}
 			});

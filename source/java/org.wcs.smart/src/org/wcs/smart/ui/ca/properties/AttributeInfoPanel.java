@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -40,6 +41,7 @@ import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -48,9 +50,11 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceEvent;
@@ -60,6 +64,8 @@ import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -71,6 +77,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -83,11 +90,15 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.datamodel.ITreeNodeVisitor;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.internal.ca.properties.AttributeTree;
+import org.wcs.smart.ui.internal.ca.properties.IconPanel;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Composite panel that display and allows users to
@@ -101,6 +112,8 @@ public class AttributeInfoPanel extends Composite {
 	private static final Color BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
 	private static final Color GRAY = Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
 
+	public static int LIST_ICON_SIZE = 16;
+	
 	private NameKeyComposite nameKeyValues;
 	
 	private Text txtMinValue;
@@ -139,8 +152,11 @@ public class AttributeInfoPanel extends Composite {
 	
 	private AttributeTree attTree = null;
 	private Session currentSession = null;
-	
+	private IconPanel iconPanel = null;
 	private boolean canEdit = false;
+	
+	private ScrolledComposite scroll;
+	private Composite main;
 	
 	/**
 	 * Creates a new attribute panel
@@ -157,14 +173,26 @@ public class AttributeInfoPanel extends Composite {
 		
 		this.currentSession = currentSession;
 		this.canEdit = canEdit;
-		setLayout(new GridLayout(3, false));
+		setLayout(new GridLayout());
+		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginHeight = 0;
+		
+		scroll = new ScrolledComposite(this, SWT.V_SCROLL);
+		scroll.setExpandHorizontal(true);
+		scroll.setExpandVertical(true);
+		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		main = new Composite(scroll, SWT.NONE);
+		main.setLayout(new GridLayout(3, false));
+		scroll.setContent(main);
+		
 		
 		/* Type */
-		Label lblNewLabel_2 = new Label(this, SWT.NONE);
+		Label lblNewLabel_2 = new Label(main, SWT.NONE);
 		lblNewLabel_2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblNewLabel_2.setText(Messages.AttributeInfoPanel_Type_Label);
 		
-		cmbType = new ComboViewer(this, SWT.SIMPLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbType = new ComboViewer(main, SWT.SIMPLE | SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbType.setLabelProvider(new LabelProvider(){
 			@Override
@@ -189,7 +217,7 @@ public class AttributeInfoPanel extends Composite {
 		
 		/* Name & Key */
 		nameKeyValues = new NameKeyComposite();
-		nameKeyValues.createControls(this, canEdit, createNew, new IChangeListener() {
+		nameKeyValues.createControls(main, canEdit, createNew, new IChangeListener() {
 			@Override
 			public void itemModified() {
 				validate();	
@@ -197,18 +225,29 @@ public class AttributeInfoPanel extends Composite {
 		});
 
 		/* required */
-		Label lblRequired = new Label(this, SWT.NONE);
+		Label lblRequired = new Label(main, SWT.NONE);
 		lblRequired.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblRequired.setText(Messages.AttributeInfoPanel_Required_Label);
 		
-		chRequired = new Button(this, SWT.CHECK);
+		chRequired = new Button(main, SWT.CHECK);
 		chRequired.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
 		if (!canEdit){
 			chRequired.setEnabled(false);
 		}
 		
-
-		optionComposite = new Composite(this, SWT.NONE);
+		// icons
+		Label lblIcons= new Label(main, SWT.NONE);
+		lblIcons.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false, 1, 1));
+		lblIcons.setText(Messages.AttributeInfoPanel_IconLabel);
+		
+		iconPanel = new IconPanel(main, canEdit);
+		iconPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		iconPanel.addListener(SWT.Selection, e->{
+			validate();
+			resize();
+		});
+		
+		optionComposite = new Composite(main, SWT.NONE);
 		optionComposite.setLayout(new StackLayout());
 		optionComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 		
@@ -313,7 +352,79 @@ public class AttributeInfoPanel extends Composite {
 		if (canEdit){
 			cdAttList = createDecoration(lstAttributeList.getControl());
 		}
-		lstAttributeList.setLabelProvider(new AttributeListLabelProvider());
+		
+		TableViewerColumn colEmpty = new TableViewerColumn(lstAttributeList, SWT.NONE);
+		colEmpty.getColumn().setWidth(0);
+		colEmpty.setLabelProvider(new ColumnLabelProvider() {
+			public String getText(Object element) {
+				return null;
+			}
+		});
+		TableViewerColumn colLabel = new TableViewerColumn(lstAttributeList, SWT.NONE);
+		colLabel.setLabelProvider(new ColumnLabelProvider() {
+					AttributeListLabelProvider ll = new AttributeListLabelProvider();
+					@Override
+					public String getText(Object element) {
+						return ll.getText(element);
+					}
+					@Override
+					public void dispose() {
+						super.dispose();
+						ll.dispose();
+					}
+					
+		});
+		
+		TableViewerColumn imageLabel = new TableViewerColumn(lstAttributeList, SWT.NONE);
+		
+		imageLabel.setLabelProvider(new ColumnLabelProvider() {
+					private HashMap<AttributeListItem, Image> images = new HashMap<>();
+					@Override
+					public String getText(Object element) {
+						return null;
+					}
+					
+					@Override
+					public Image getImage(Object element) {
+						if (element instanceof AttributeListItem) {
+							AttributeListItem li = (AttributeListItem)element;
+							if (images.containsKey(li)) return images.get(li);
+							
+							if (li.getIcon() == null) return null;
+							
+							List<IconFile> files = li.getIcon().getFiles();
+							if (files.isEmpty()) return null;
+							
+							//combine all icons into a single image
+							Image img = new Image(Display.getDefault(), (LIST_ICON_SIZE+5) * files.size(), LIST_ICON_SIZE);
+							images.put(li, img);
+							GC gc = new GC(img);
+							try {
+								for (int i = 0; i < files.size(); i++) {
+									IconFile ff = files.get(i);
+									Image mm = SmartUtils.getImage(ff.getAttachmentFile().toPath(), LIST_ICON_SIZE);
+									try {
+										gc.drawImage(mm, 0,0, LIST_ICON_SIZE,LIST_ICON_SIZE,i*(LIST_ICON_SIZE+5),0,LIST_ICON_SIZE,LIST_ICON_SIZE);
+									}finally{
+										mm.dispose();	
+									}
+								}
+							}finally {
+								gc.dispose();
+							}
+							return img;
+							
+						}
+						return null;
+					}
+					
+					@Override
+					public void dispose() {
+						super.dispose();
+						images.values().forEach(i->i.dispose());
+					}
+					
+		});
 		
 		if (canEdit){
 			nameKeyValues.langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -344,6 +455,7 @@ public class AttributeInfoPanel extends Composite {
 					it.setListOrder(attributeList.size());
 					attributeList.add(it);
 					lstAttributeList.refresh();
+					packColumns();
 					validate();
 				}
 			});
@@ -361,6 +473,7 @@ public class AttributeInfoPanel extends Composite {
 						return;
 					}
 					lstAttributeList.refresh();
+					packColumns();
 					validate();
 				}
 			});
@@ -584,9 +697,7 @@ public class AttributeInfoPanel extends Composite {
 		/*   Tree Attribute Options */
 		treeComposite = new Composite(optionComposite, SWT.NONE);
 		treeComposite.setLayout(new GridLayout(1, false));
-		treeComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
-		//treeComposite.setBounds(0, 0, 64, 64);
-		
+		treeComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));	
 		
 		if (canEdit){
 			attTree = new AttributeTree(AttributeInfoPanel.this, true);
@@ -628,8 +739,18 @@ public class AttributeInfoPanel extends Composite {
 		if (canEdit){
 			validate();
 		}
+		
+		scroll.setMinSize(main.computeSize(scroll.getClientArea().width, SWT.DEFAULT));
+		scroll.addListener(SWT.Resize, ss->{
+				resize();
+		});
 	}
 
+	private void resize() {
+		main.layout(true);
+		scroll.setMinSize(main.computeSize(scroll.getClientArea().width, SWT.DEFAULT));
+		
+	}
 	public NameKeyComposite getNameKeyComposite(){
 		return this.nameKeyValues;
 	}
@@ -851,13 +972,15 @@ public class AttributeInfoPanel extends Composite {
 				//create a cloned copy for working with
 				ArrayList<AttributeListItem> items = new ArrayList<AttributeListItem>();
 				for (AttributeListItem item : att.getAttributeList()){
-					AttributeListItem clone = item.clone(att, att.getConservationArea(), att.getConservationArea().getDefaultLanguage().getCode());
+					AttributeListItem clone = item.clone(att, att.getConservationArea(), null, att.getConservationArea().getDefaultLanguage().getCode());
 					clone.setUuid(item.getUuid());
+					clone.setIcon(item.getIcon());
 					items.add(clone);
 				}
 				
 				attributeList = new ArrayList<NamedKeyItem>(items);
 				lstAttributeList.setInput(attributeList);
+				packColumns();			
 
 			} else if (att.getType().equals(Attribute.AttributeType.TREE)) {
 				treeComposite.setVisible(false);
@@ -875,8 +998,17 @@ public class AttributeInfoPanel extends Composite {
 			//can edit
 			validate();
 		}
+		iconPanel.setDmObject(att);
+		resize();
 	}
 	
+	private void packColumns() {
+		for (int i = 1; i <= 2; i ++) {
+			TableColumn c = lstAttributeList.getTable().getColumn(i);
+			c.pack();
+			if (c.getWidth() < 10)c.setWidth(200);
+		}
+	}
 	/*
 	 * clears attribute list
 	 */
@@ -926,8 +1058,13 @@ public class AttributeInfoPanel extends Composite {
 		nameKeyValues.updateFields(att);
 		att.setType(  (Attribute.AttributeType)((IStructuredSelection)cmbType.getSelection()).getFirstElement() );
 		att.setIsRequired(chRequired.getSelection());
+		iconPanel.updateDmObject(att);
+		
 		if (att.getUuid() == null){
 			session.saveOrUpdate(att);
+		}
+		if (att.getIcon() != null) {
+			session.saveOrUpdate(att.getIcon());
 		}
 		session.flush();
 		
@@ -1007,6 +1144,7 @@ public class AttributeInfoPanel extends Composite {
 			for (int i = 0; i < attributeList.size(); i ++){
 				AttributeListItem item = (AttributeListItem) attributeList.get(i);
 				
+				if (item.getIcon() != null) session.saveOrUpdate(item.getIcon());
 				item.setListOrder(i);
 				item.setAttribute(att);
 				
@@ -1071,6 +1209,12 @@ public class AttributeInfoPanel extends Composite {
 									thisAttribute.getTree().add(mergedNode);
 								}
 							}
+							ITreeNodeVisitor v = node-> {
+								if (node.getIcon() != null) session.saveOrUpdate(node.getIcon());
+								return true;
+							};
+							thisAttribute.getTree().forEach(n->n.accept(v));
+							
 							session.flush();
 						}
 					});

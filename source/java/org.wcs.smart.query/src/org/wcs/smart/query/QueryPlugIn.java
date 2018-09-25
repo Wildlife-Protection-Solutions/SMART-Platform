@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -42,8 +41,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.ui.GridQueryColumnLabelProvider;
@@ -71,11 +68,6 @@ public class QueryPlugIn extends AbstractUIPlugin {
 
 	// The shared instance
 	private static QueryPlugIn plugin;
-
-	/**
-	 * Location for raster query files to be placed
-	 */
-	private static final String QUERY_TEMP_FOLDER = "query_temp"; //$NON-NLS-1$
 	
 	/**
 	 * The small 8x8 delete icon
@@ -231,10 +223,6 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	public QueryPlugIn() {
 	}
 
-	public File getQueryTempDirectory(){
-		return new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE), QUERY_TEMP_FOLDER);		
-	}
-	
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
@@ -246,18 +234,13 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		//add required listeners
 		ConservationAreaManager.getInstance().addDeleteHandler(new QueryCaDeleteHandler(),QueryCaDeleteHandler.EXECUTE_ORDER);
 		ConservationAreaManager.getInstance().addEmployeeListener(employeeListener);
-	
-		
-		QueryCleanUpJob cleanUp = new QueryCleanUpJob();
-		cleanUp.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
-		cleanUp.schedule();
 		
 		DefinitionPanelManager.createInstance();
 				
 		SmartContext.INSTANCE.setClass(IOperatorLabelProvider.class, new OperatorLabelProvider());
 		SmartContext.INSTANCE.setClass(IGridQueryColumnLabelProvider.class, new GridQueryColumnLabelProvider());
 		SmartContext.INSTANCE.setClass(IQueryDateLabelProvider.class, new QueryDateLabelProvider());
-		SmartContext.INSTANCE.setTempFilestoreLocation(QueryPlugIn.getDefault().getQueryTempDirectory());
+		
 	}
 
 	

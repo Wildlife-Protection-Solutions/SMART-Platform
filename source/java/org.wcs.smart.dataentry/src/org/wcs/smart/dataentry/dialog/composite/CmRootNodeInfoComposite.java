@@ -21,6 +21,13 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -29,12 +36,17 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Info composite for {@link CmRootNode}
@@ -44,11 +56,12 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 
+	private static final String NONE = Messages.CmRootNodeInfoComposite_NoneOption;
 	private CmRootNode rootNode;
 
 	private Button btnInstantGps;
 	private Button btnPhotoFirst;
-	
+	private ComboViewer cmbIconSet;
 	public CmRootNodeInfoComposite(Composite parent, ConfigurableModel model) {
 		super(parent, model);
 		createControls();
@@ -64,6 +77,40 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 		createDisplayNameControls(container);
 		createDisplayModeControls(container);
 
+		Label l = new Label(container, SWT.NONE);
+		l.setText(Messages.CmRootNodeInfoComposite_IconSetOption);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		cmbIconSet = new ComboViewer(container, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbIconSet.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbIconSet.setContentProvider(ArrayContentProvider.getInstance());
+		cmbIconSet.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				if (element instanceof IconSet) return ((IconSet)element).getName();
+				return super.getText(element);
+			}
+		});
+		
+		List<Object> sets = new ArrayList<>();
+		sets.add(NONE);
+		try(Session session = HibernateManager.openSession()){
+			List<IconSet> items = QueryFactory.buildQuery(session, IconSet.class, 
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+			items.forEach(e->e.getName());
+			sets.addAll(items);
+		}
+		cmbIconSet.setInput(sets);
+		cmbIconSet.setSelection(new StructuredSelection(NONE));
+		cmbIconSet.addSelectionChangedListener(e->{
+			Object x = cmbIconSet.getStructuredSelection().getFirstElement();
+			if (x instanceof IconSet) {
+				getSourceObject().getModel().setIconSet((IconSet)x);
+			}else {
+				getSourceObject().getModel().setIconSet(null);
+			}
+            fireModelChanged();
+		});
+		
         Label lblInstantGps = new Label(container, SWT.NONE);
         lblInstantGps.setText(Messages.CmRootNodeInfoComposite_InstantGps);
         lblInstantGps.setToolTipText(Messages.CmRootNodeInfoComposite_InstantGpsTooltip);
@@ -97,6 +144,13 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
                 }
                 if (btnPhotoFirst != null) {
                 	btnPhotoFirst.setSelection(cm.isPhotoFirst());
+                }
+                if (cmbIconSet != null) {
+                	if (cm.getIconSet() != null) {
+                		cmbIconSet.setSelection(new StructuredSelection(cm.getIconSet()));
+                	}else {
+                		cmbIconSet.setSelection(new StructuredSelection(NONE));
+                	}
                 }
             }
         });

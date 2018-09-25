@@ -235,18 +235,8 @@ public class CaInfoComposite extends Composite {
 			Image img = (Image) cIcon.getData(IMAGE_KEY);
 			Path file = (Path)cIcon.getData(FILE_KEY);
 			if (img == null && file != null) {
-				try {
-					img = new Image(cIcon.getDisplay(), file.toString());
-					cIcon.setData(IMAGE_KEY,  img);
-				}catch (Exception ex) {
-				}
-				if (img == null && file.toString().endsWith(".svg")) { //$NON-NLS-1$
-					//try svg reader
-					try {
-						img = SmartUtils.readSvg(cIcon.getDisplay(), file);
-						cIcon.setData(IMAGE_KEY,  img);
-					}catch (Exception ex) { }
-				}
+				img = SmartUtils.getImage(file, null);
+				cIcon.setData(IMAGE_KEY,  img);
 			}
 			
 			if (img != null) {

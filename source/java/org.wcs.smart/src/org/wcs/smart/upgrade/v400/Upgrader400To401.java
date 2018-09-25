@@ -74,7 +74,6 @@ public class Upgrader400To401 implements IDatabaseUpgrader {
 			"UPDATE smart.ca_projection set IS_DEFAULT = 'true' WHERE uuid IN (SELECT view_projection_uuid FROM smart.observation_options)",
 			"ALTER TABLE smart.observation_options DROP column view_projection_uuid",
 			
-			//TODO: need to configure triggers
 			//new compound query tables
 			"CREATE TABLE smart.compound_query(uuid char(16) for bit data not null, creator_uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, ca_filter varchar(32672), folder_uuid char(16) for bit data, shared boolean, id varchar(6), primary key (uuid))",
 			"CREATE TABLE smart.compound_query_layer(uuid char(16) for bit data not null, compound_query_uuid char(16) for bit data not null, query_uuid char(16) for bit data not null, query_type varchar(32), style long varchar, layer_order integer not null, date_filter varchar(256), primary key (uuid))",

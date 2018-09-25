@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import java.io.File;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -36,7 +38,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.dataentry.CmAttributeOptionLabelProvider;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
@@ -55,16 +60,17 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 
+	private Session session;
 	private CmAttribute attribute;
 
 	private Label lblAttribute;
-	private Label lblKey;
-	
 	private Label lblEnterOnces;
 	private ComboViewer enterOncesComboViewer;
+	private ImageSelectionControl imageSelection;
 	
-	public CmAttributeInfoComposite(Composite parent, ConfigurableModel model) {
+	public CmAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
 		super(parent, model);
+		this.session = session;
 		createControls();
 	}
 	
@@ -93,11 +99,6 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 		((GridData)lblAttribute.getLayoutData()).widthHint = 100;
 		lblAttribute.setText(""); //$NON-NLS-1$
 
-		label = new Label(container, SWT.NONE);
-		label.setText(Messages.CmAttributeInfoComposite_Key);
-		lblKey = new Label(container, SWT.NONE);
-		lblKey.setText(""); //$NON-NLS-1$
-		
 		lblEnterOnces = new Label(container, SWT.NONE);
 		lblEnterOnces.setText(Messages.CmAttributeInfoComposite_Option_EnableOnce);
 		lblEnterOnces.setToolTipText(Messages.CmAttributeInfoComposite_EnableOnce_Tooltip);
@@ -118,10 +119,7 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 						text += " (" + attr.getNode().getCategory().getFullCategoryName(language) + ")";  //$NON-NLS-1$//$NON-NLS-2$
 						lblAttribute.setText(text);
 					}
-					
-					if (lblKey != null)
-						lblKey.setText(attr.getAttribute().getKeyId());
-					
+
 					if (enterOncesComboViewer != null) {
 						setEnterOncesIncluded(attr.getNode().isCollectMultipleObservations());
 						CmAttributeOption op = attr.getCmAttributeOptions().get(CmAttributeOption.ID_ENTER_ONCES);
@@ -136,9 +134,59 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 			}
 		});
 
+		Label lImage = new Label(container, SWT.NONE);
+		lImage.setText(Messages.CmAttributeInfoComposite_ImageLabel);
+		lImage.setToolTipText(Messages.CmAttributeInfoComposite_ImageTooltip);
+		lImage.setLayoutData(new GridData(SWT.NONE, SWT.NONE, false, false));
+		
+		imageSelection = new ImageSelectionControl(container, new ImageSelectionControl.IImageContentProvider() {
+				@Override
+				public void setImageFile(File file) {
+					CmAttribute cmNode = getSourceObject();
+					cmNode.setImageFile(file);
+					if (cmNode.getUuid() != null) {
+						//need this logic to correctly trigger intercepter
+						session.evict(cmNode);
+						session.saveOrUpdate(cmNode);
+					}
+					fireModelChanged();
+				}
+				
+				@Override
+				public boolean isCustom() {
+					if (attribute == null) return true;
+					return attribute.hasCustomImage();
+				}
+				
+				@Override
+				public boolean hasDataModel() {
+					return true;
+				}
+				
+				@Override
+				public File getImageFile() {
+					if (isCustom()) {
+						return getSourceObject().getImageFile();
+					}
+					
+					CmAttribute cmNode = getSourceObject();
+					if (cmNode.getAttribute() == null) return null;
+					Icon i = cmNode.getAttribute().getIcon();
+					if (i == null) return null;
+					IconFile iconfile = i.getIconFile(getModel().getIconSet());
+					if (iconfile == null) return null;
+					return iconfile.getAttachmentFile();
+				}
+		});
+		imageSelection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		createTypeSpecificControls(container);
+
 	}
 
+	/**
+	 * Create controls specifi to the attribute type 
+	 * @param container
+	 */
 	protected abstract void createTypeSpecificControls(Composite container);
 
 	protected ComboViewer createEnterOnceControl(Composite parent) {
@@ -238,6 +286,7 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 	
 	public void setSourceObject(CmAttribute attribute, Language language) {
 		this.attribute = attribute;
+		imageSelection.updateImage();
 		fireSourceObjectChanged(attribute, language);
 	}
 

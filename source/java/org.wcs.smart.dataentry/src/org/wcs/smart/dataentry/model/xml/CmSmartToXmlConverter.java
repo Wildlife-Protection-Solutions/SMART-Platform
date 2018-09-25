@@ -37,6 +37,7 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -61,6 +62,7 @@ import org.wcs.smart.dataentry.model.xml.generated.NodeTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.TreeNodeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -74,13 +76,28 @@ public class CmSmartToXmlConverter {
 	
 	//EG: added support to export cm not in the database
 	/**
-	 * Configurable model can have a UUID or not.  If it has a uuid it will be reloaded from the database, otherwise
-	 * the object provided will be used.  This is support exporting the "original data model" to cybertracker.
+	 * Configurable Model can have a UUID or not.  If it has a UUID the model will be reloaded from the database, otherwise
+	 * the object provided will be used.  This was done to support exporting the "original data model" to cybertracker.
 	 * @param cm
+
 	 * @param monitor
 	 * @return
 	 */
 	public static org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel convert(ConfigurableModel cm, IProgressMonitor monitor) {
+		return convert(cm, false, monitor);
+	}
+	
+	/**
+	 * Configurable Model can have a UUID or not.  If it has a UUID the model will be reloaded from the database, otherwise
+	 * the object provided will be used.  This was done to support exporting the "original data model" to cybertracker.
+	 * @param cm
+	 * @param includeDmIcons - if set to true the imageFile will be populated for nodes 
+	 * that have a data model icon but not a custom icon. If false this attribute will not
+	 * be populated for these nodes 
+	 * @param monitor
+	 * @return
+	 */
+	public static org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel convert(ConfigurableModel cm, boolean includeDmIcon, IProgressMonitor monitor) {
 		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = new org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel();
 
 		try(Session session = HibernateManager.openSession()){
@@ -97,18 +114,20 @@ public class CmSmartToXmlConverter {
 				if (cm.getDisplayMode() != null) {
 					xml.setDisplayMode(cm.getDisplayMode().name());
 				}
+				
+				if (cm.getIconSet() != null) xml.setIconSet(cm.getIconSet().getKeyId());
 				xml.setInstantGps(cm.isInstantGps());
 				xml.setPhotoFirst(cm.isPhotoFirst());
 				monitor.worked(1);
 				if (monitor.isCanceled()) return null;
 				
 				monitor.subTask(Messages.CmSmartToXmlConverter_ProcessCmNodes);
-				processCmNodes(cm, xml, llookup, session, monitor);
+				processCmNodes(cm, xml, llookup, session, includeDmIcon, monitor);
 				monitor.worked(1);
 				if (monitor.isCanceled()) return null;
 				
 				monitor.subTask(Messages.CmSmartToXmlConverter_ProcessAttributeConfigs);
-				processCmAttributeConfigs(cm, xml, llookup, session, monitor);
+				processCmAttributeConfigs(cm, xml, llookup, session, includeDmIcon, monitor);
 				monitor.worked(1);
 				if (monitor.isCanceled()) return null;
 				
@@ -131,7 +150,7 @@ public class CmSmartToXmlConverter {
 
 	private static void processCmAttributeConfigs(ConfigurableModel cm,
 			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
-			HashMap<String, Language> llookup, Session session, IProgressMonitor monitor) {
+			HashMap<String, Language> llookup, Session session, boolean includeDmIcon, IProgressMonitor monitor) {
 		Collection<CmAttributeConfig> configs = Collections.emptyList();
 		if (cm.getUuid() == null) {
 			//if there is no uuid; then we just use what is in the cm 
@@ -152,8 +171,9 @@ public class CmSmartToXmlConverter {
 			xmlConfig.setAttributeKey(config.getAttribute().getKeyId());
 			xmlConfig.setAttributeUuid(toString(config.getAttribute().getUuid()));
 			
-			processCmListItems(config.getList(), xmlConfig.getListItem(), llookup, monitor);
-			processCmTreeNodes(config.getTree(), xmlConfig.getTreeNode(), llookup, monitor);
+			
+			processCmListItems(config.getList(), config.getModel(), xmlConfig.getListItem(), llookup, includeDmIcon, monitor);
+			processCmTreeNodes(config.getTree(), config.getModel(), xmlConfig.getTreeNode(), llookup, includeDmIcon, monitor);
 			
 			xml.getAttributeConfig().add(xmlConfig);
 		}
@@ -164,8 +184,8 @@ public class CmSmartToXmlConverter {
 		return UuidUtils.uuidToString(uuid);
 	}
 	
-	private static void processCmTreeNodes(List<CmAttributeTreeNode> cmList,
-			List<TreeNodeType> xmlList, HashMap<String, Language> llookup, IProgressMonitor monitor) {
+	private static void processCmTreeNodes(List<CmAttributeTreeNode> cmList, ConfigurableModel cm,
+			List<TreeNodeType> xmlList, HashMap<String, Language> llookup, boolean includeDmIcon, IProgressMonitor monitor) {
 		if(monitor.isCanceled()) return;
 		for (CmAttributeTreeNode cmNode : cmList) {
 			TreeNodeType xmlNode = new TreeNodeType();
@@ -182,17 +202,18 @@ public class CmSmartToXmlConverter {
 			if (cmNode.getDisplayMode() != null) {
 				xmlNode.setDisplayMode(cmNode.getDisplayMode().name());
 			}
-			xmlNode.setImageFile(getImageFileRef(cmNode));
+			xmlNode.setImageFile(getImageFileRef(cmNode, cm, includeDmIcon));
+			xmlNode.setIsCustomImage(isCustomIcon(cmNode));
 			if (cmNode.getUuid() != null) {
 				xmlNode.setId(cmNode.getUuid().toString()); //this will allow to reference this item in extradata
 			}
-			processCmTreeNodes(cmNode.getChildren(), xmlNode.getChildren(), llookup, monitor);
+			processCmTreeNodes(cmNode.getChildren(), cm, xmlNode.getChildren(), llookup, includeDmIcon, monitor);
 			xmlList.add(xmlNode);
 		}
 	}
 
-	private static void processCmListItems(List<CmAttributeListItem> cmList,
-			List<ListItemType> xmlList,	HashMap<String, Language> llookup, IProgressMonitor monitor) {
+	private static void processCmListItems(List<CmAttributeListItem> cmList, ConfigurableModel cm,
+			List<ListItemType> xmlList,	HashMap<String, Language> llookup, boolean includeDmIcon, IProgressMonitor monitor) {
 
 		if(monitor.isCanceled()) return;
 		for (CmAttributeListItem cmNode : cmList) {
@@ -205,7 +226,8 @@ public class CmSmartToXmlConverter {
 				xmlNode.setKeyRef(cmNode.getListItem().getKeyId());
 				xmlNode.setDmUuid(toString(cmNode.getListItem().getUuid()));
 			}
-			xmlNode.setImageFile(getImageFileRef(cmNode));
+			xmlNode.setImageFile(getImageFileRef(cmNode, cm, includeDmIcon));
+			xmlNode.setIsCustomImage(isCustomIcon(cmNode));
 			if (cmNode.getUuid() != null) {
 				xmlNode.setId(cmNode.getUuid().toString()); //this will allow to reference this item in extradata
 			}
@@ -215,19 +237,19 @@ public class CmSmartToXmlConverter {
 
 	private static void processCmNodes(ConfigurableModel cm,
 			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
-			HashMap<String, Language> llookup, Session session, IProgressMonitor monitor) {
+			HashMap<String, Language> llookup, Session session, boolean includeDmIcon, IProgressMonitor monitor) {
 
 		NodeTypeList ntl = new NodeTypeList();
 		xml.setNodes(ntl);
 		if (cm.getNodes() != null) {
 			for (CmNode node : cm.getNodes()){
-				processCmNode(node, ntl.getNode(), llookup, session, monitor);
+				processCmNode(node, ntl.getNode(), llookup, session, includeDmIcon, monitor);
 			}
 		}
 	}
 
 	private static void processCmNode(CmNode node, List<NodeType> xmlNodes,
-			HashMap<String, Language> llookup, Session session, IProgressMonitor monitor) {
+			HashMap<String, Language> llookup, Session session, boolean includeDmIcon, IProgressMonitor monitor) {
 
 		monitor.subTask(MessageFormat.format(Messages.CmSmartToXmlConverter_ProcessingNode, node.getName()));
 		NodeType nt = new NodeType();
@@ -242,7 +264,10 @@ public class CmSmartToXmlConverter {
 		if (node.getDisplayMode() != null) {
 			nt.setDisplayMode(node.getDisplayMode().name());
 		}
-		nt.setImageFile(getImageFileRef(node));
+		
+		nt.setImageFile(getImageFileRef(node, node.getModel(), includeDmIcon));
+		nt.setIsCustomImage(isCustomIcon(node));
+		
 		if (node.getUuid() != null) {
 			nt.setId(node.getUuid().toString()); //this will allow to reference this item in extradata
 		}
@@ -257,6 +282,9 @@ public class CmSmartToXmlConverter {
 				at.setAttributeKey(ca.getAttribute().getKeyId());
 				at.setDmUuid(toString(ca.getAttribute().getUuid()));
 				at.setRequired(ca.getAttribute().getIsRequired());
+				
+				at.setIsCustomImage(isCustomIcon(ca));
+				at.setImageFile(getImageFileRef(ca, node.getModel(), includeDmIcon));
 				
 				for (CmAttributeOption option : ca.getCmAttributeOptions().values()) {
 					AttributeOptionType aot = new AttributeOptionType();
@@ -304,7 +332,7 @@ public class CmSmartToXmlConverter {
 		
 		if (node.getChildren() != null) {
 			for (CmNode cn : node.getChildren()) {
-				processCmNode(cn, nt.getNode(), llookup, session, monitor);
+				processCmNode(cn, nt.getNode(), llookup, session, includeDmIcon, monitor);
 				if (monitor.isCanceled()) return;
 			}
 		}
@@ -367,9 +395,51 @@ public class CmSmartToXmlConverter {
 //		}
 	}
 
-	private static String getImageFileRef(IImageAssociatedObject obj) {
+	private static boolean isCustomIcon(IImageAssociatedObject obj) {
+		if (obj instanceof CmNode) return ((CmNode) obj).hasCustomImage();
+		if (obj instanceof CmAttribute) return ((CmAttribute) obj).hasCustomImage();
+		if (obj instanceof CmAttributeListItem) return ((CmAttributeListItem) obj).hasCustomImage();
+		if (obj instanceof CmAttributeTreeNode) return ((CmAttributeTreeNode) obj).hasCustomImage();
+		return false;
+	}
+	private static String getImageFileRef(IImageAssociatedObject obj, ConfigurableModel cm, boolean includeDmIcon) {
 		File file = obj.getImageFile();
-		return (file != null && file.exists()) ? file.getName() : null;
+		if (file == null) return null;
+		if (file.exists()) return file.getName();
+		
+		if (obj instanceof CmNode) {
+			CmNode node = (CmNode) obj;
+			if (node.getCategory() == null) return null;
+			if (node.getCategory().getIcon() == null) return null;
+			IconFile iconFile = node.getCategory().getIcon().getIconFile(cm.getIconSet());
+			if (iconFile == null) return null;
+			if (iconFile != null) return findFileName(file.getName(), iconFile.getFilename());
+		}else if (obj instanceof CmAttribute) {
+			CmAttribute node = (CmAttribute) obj;
+			if (node.getAttribute() == null) return null;
+			if (node.getAttribute().getIcon() == null) return null;
+			IconFile iconFile = node.getAttribute().getIcon().getIconFile(cm.getIconSet());
+			if (iconFile == null) return null;
+			if (iconFile != null) return findFileName(file.getName(), iconFile.getFilename());
+		}else if (obj instanceof CmAttributeListItem) {
+			CmAttributeListItem node = (CmAttributeListItem) obj;
+			if (node.getListItem() == null) return null;
+			if (node.getListItem().getIcon() == null) return null;
+			IconFile iconFile = node.getListItem().getIcon().getIconFile(cm.getIconSet());
+			if (iconFile == null) return null;
+			if (iconFile != null) return findFileName(file.getName(), iconFile.getFilename());
+		}else if (obj instanceof CmAttribute) {
+			CmAttributeTreeNode node = (CmAttributeTreeNode) obj;
+			if (node.getDmTreeNode() == null) return null;
+			if (node.getDmTreeNode().getIcon() == null) return null;
+			IconFile iconFile = node.getDmTreeNode().getIcon().getIconFile(cm.getIconSet());
+			if (iconFile == null) return null;
+			if (iconFile != null) return findFileName(file.getName(), iconFile.getFilename());
+		}
+		return null;
 	}
 	
+	private static String findFileName(String cmFileName, String dmIconFileName) {
+		return SharedUtils.getFilenameWithoutExtension(cmFileName) + "." + SharedUtils.getFilenameExtension(dmIconFileName); //$NON-NLS-1$
+	}
 }

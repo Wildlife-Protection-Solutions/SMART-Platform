@@ -137,4 +137,15 @@ public abstract class ISmartAttachment extends UuidItem{
 	 */
 	@Transient
 	public abstract ConservationArea getConservationArea();
+	
+	/**
+	 * If this attachment is encrypted.  By default this is true but for a few small
+	 * cases this might not be true.
+	 * 
+	 * @return true
+	 */
+	@Transient
+	public boolean isEncrypted() {
+		return true;
+	}
 }

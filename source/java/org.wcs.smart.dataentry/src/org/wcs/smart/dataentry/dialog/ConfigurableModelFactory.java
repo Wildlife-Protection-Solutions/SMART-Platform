@@ -40,6 +40,9 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
@@ -53,6 +56,7 @@ import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -81,7 +85,7 @@ public class ConfigurableModelFactory {
 	 * Creates a configurable model using another configurable model as a template.
 	 * @return
 	 */
-	public static ConfigurableModelCloneResult createConfigurableModelClone(ConfigurableModel cm, String name, IProgressMonitor monitor) {
+	public static ConfigurableModelCloneResult createConfigurableModelClone(ConfigurableModel cm, String name, Session session, IProgressMonitor monitor) {
 		monitor.beginTask(Messages.ConfigurableModelFactory_TaskName, 1);
 		
 		monitor.subTask(Messages.ConfigurableModelFactory_BlankCmTaskName);
@@ -89,6 +93,8 @@ public class ConfigurableModelFactory {
 		clone.setDisplayMode(cm.getDisplayMode());
 		clone.setInstantGps(cm.isInstantGps());
 		clone.setPhotoFirst(cm.isPhotoFirst());
+		clone.setIconSet(cm.getIconSet());
+		
 		ConfigurableModelCloneResult cloneResult = new ConfigurableModelCloneResult(clone);
 		Map<UUID, UuidItem> o2iMap = cloneResult.getOriginal2CloneItemMap();
 		o2iMap.put(cm.getUuid(), clone);
@@ -105,7 +111,7 @@ public class ConfigurableModelFactory {
 		
 		//clone nodes
 		for(CmNode kid : cm.getNodes()){
-			processNode(null, kid, clone, o2iMap, monitor);
+			processNode(null, kid, clone, o2iMap, session, monitor);
 		}
 		if (monitor.isCanceled()) return null;
 		monitor.subTask(Messages.ConfigurableModelFactory_ProcessDefaultConfigs);
@@ -147,6 +153,11 @@ public class ConfigurableModelFactory {
 		monitor.subTask(Messages.ConfigurableModelFactory_BlankCmTaskName);
 		ConfigurableModel init = createBlankModel(name);
 		
+		List<IconSet> defaults = QueryFactory.buildQuery(session, IconSet.class,
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+					new Object[] {"isDefault", true}).list(); //$NON-NLS-1$
+		if (!defaults.isEmpty()) init.setIconSet(defaults.get(0));
+		
 		DataModel dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
 		
 		int catCnt = 0;
@@ -160,7 +171,7 @@ public class ConfigurableModelFactory {
 		monitor.beginTask(Messages.ConfigurableModelFactory_TaskName, catCnt);
 		
 		for (Category c : dm.getActiveCategories()){
-			processCategory(c, null, init,monitor);
+			processCategory(c, null, init, session, monitor);
 			if (monitor.isCanceled()) return null;
 		}
 		
@@ -168,10 +179,11 @@ public class ConfigurableModelFactory {
 		return init;
 	}
 	
-	private static void processCategory(Category c, CmNode parent, ConfigurableModel model, IProgressMonitor monitor){
+	private static void processCategory(Category c, CmNode parent, ConfigurableModel model, Session session, IProgressMonitor monitor){
 		monitor.subTask(MessageFormat.format(Messages.ConfigurableModelFactory_ProgressMessage, c.getName()));
 		monitor.worked(1);
 		c.getFullCategoryName();
+		loadFiles(c.getIcon(), session);
 		if (monitor.isCanceled()) return;
 		
 		if (c.getActiveChildren().size() > 0){
@@ -193,7 +205,7 @@ public class ConfigurableModelFactory {
 			}
 			
 			for (Category kid : c.getActiveChildren()){
-				processCategory(kid, node, model, monitor);
+				processCategory(kid, node, model, session, monitor);
 			}
 		}else{
 			//this are leafs and can be added as such to model
@@ -222,7 +234,7 @@ public class ConfigurableModelFactory {
 				addAttributeDefaultValues(model, a);
 				cma.setConfig(model.getDefaultConfigs().get(a));
 				
-				loadAttributeInfo(a);
+				loadAttributeInfo(a, session);
 			}
 			if (parent == null){
 				node.setNodeOrder(model.getNodes().size()+1);
@@ -291,15 +303,24 @@ public class ConfigurableModelFactory {
 	}
 	
 	
-	private static void loadCategoryInfo(Category c){
+	private static void loadFiles(Icon i, Session s) {
+		if (i == null) return;
+		for (IconFile file : i.getFiles()) {
+			file.computeFileLocation(s);
+			file.getIconSet().equals(null);
+		}
+	}
+	
+	private static void loadCategoryInfo(Category c, Session session){
 		while(c != null){
 			c.getNames().size();
+			loadFiles(c.getIcon(), session);
 			c = c.getParent();
 		}
 	}
 	
 	//this is adopted copy from CmTemplateCloner
-	private static void processNode(CmNode clonedParent, CmNode toCopy, ConfigurableModel clonedModel, Map<UUID, UuidItem> o2iMap, IProgressMonitor monitor) {
+	private static void processNode(CmNode clonedParent, CmNode toCopy, ConfigurableModel clonedModel, Map<UUID, UuidItem> o2iMap, Session session, IProgressMonitor monitor) {
 		monitor.subTask(MessageFormat.format(Messages.ConfigurableModelFactory_ProcessCmNode, toCopy.getName()));
 		monitor.worked(1);
 		
@@ -319,14 +340,14 @@ public class ConfigurableModelFactory {
 		
 		if (toCopy.getCategory() != null){
 			clonedNode.setCategory(toCopy.getCategory());	
-			loadCategoryInfo(toCopy.getCategory());
+			loadCategoryInfo(toCopy.getCategory(), session);
 		}else{
 			clonedNode.setCategory(null);
 		}
 		o2iMap.put(toCopy.getUuid(), clonedNode);
 		
 		for (CmAttribute att : toCopy.getCmAttributes()){
-			CmAttribute clonedAtt = cloneAttribute(att, clonedModel, o2iMap);
+			CmAttribute clonedAtt = cloneAttribute(att, clonedModel, o2iMap, session);
 			clonedAtt.setNode(clonedNode);
 			clonedNode.getCmAttributes().add(clonedAtt);
 		}
@@ -341,11 +362,11 @@ public class ConfigurableModelFactory {
 		
 		//process kids
 		for (CmNode kid : toCopy.getChildren()){
-			processNode(clonedNode, kid, clonedModel, o2iMap, monitor);
+			processNode(clonedNode, kid, clonedModel, o2iMap, session, monitor);
 		}
 	}
 
-	private static CmAttribute cloneAttribute(CmAttribute attributeToClone, ConfigurableModel cm, Map<UUID, UuidItem> o2iMap) {
+	private static CmAttribute cloneAttribute(CmAttribute attributeToClone, ConfigurableModel cm, Map<UUID, UuidItem> o2iMap, Session session) {
 		CmAttribute clone = new CmAttribute();
 		
 		clone.setAttribute(attributeToClone.getAttribute());
@@ -363,7 +384,7 @@ public class ConfigurableModelFactory {
 		o2iMap.put(attributeToClone.getUuid(), clone);
 		clone.setConfig(cloneCmAttributeConfig(attributeToClone.getConfig(), cm, o2iMap));
 		
-		loadAttributeInfo(attributeToClone.getAttribute());
+		loadAttributeInfo(attributeToClone.getAttribute(), session);
 		return clone;
 	}
 
@@ -386,21 +407,23 @@ public class ConfigurableModelFactory {
 		return clone;
 	}
 	
-	private static void loadAttributeInfo(Attribute attribute){
+	private static void loadAttributeInfo(Attribute attribute, Session session){
 		attribute.getNames().size();
-		
+		loadFiles(attribute.getIcon(), session);
 		if (attribute.getActiveListItems() != null){
 			for (AttributeListItem i : attribute.getActiveListItems()){
 				i.getNames().size();
+				loadFiles(i.getIcon(), session);
 			}
 		}
-		loadTreeNodes(attribute.getActiveTreeNodes());
+		loadTreeNodes(attribute.getActiveTreeNodes(), session);
 	}
-	private static void loadTreeNodes(List<AttributeTreeNode> nodes){
+	private static void loadTreeNodes(List<AttributeTreeNode> nodes, Session session){
 		if (nodes == null) return;
 		for (AttributeTreeNode n : nodes){
 			n.getNames().size();
-			loadTreeNodes(n.getActiveChildren());
+			loadFiles(n.getIcon(), session);
+			loadTreeNodes(n.getActiveChildren(), session);
 		}
 	}
 	private static CmAttributeOption cloneOption(CmAttributeOption op) {

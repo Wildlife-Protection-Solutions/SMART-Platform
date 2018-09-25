@@ -23,6 +23,7 @@ package org.wcs.smart.ca.datamodel;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -45,6 +46,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.icon.Icon;
 
 /**
  * Conservation area data model attribute object
@@ -351,15 +353,19 @@ public class Attribute extends DmObject{
 	
 	/**
 	 * Clones an attribute.
+	 * 
 	 * @param newCa the new conservation area to associated with the attribute
+	 * @param iconSet the set of icons associated with the conservation area or null if none 
 	 * 
 	 * @return a cloned attribute 
 	 */
-	public Attribute clone(ConservationArea newCa, String defaultLang){
+	public Attribute clone(ConservationArea newCa, Collection<Icon> iconSet, String defaultLang){
 		Attribute clone = new Attribute();
 		clone.copyValues(this, newCa, defaultLang);
 		clone.setConservationArea(newCa);
 		clone.setIsRequired(this.isRequired);
+		clone.updateIcon(this, iconSet);
+		
 		if (this.maxValue != null){
 			clone.setMaxValue(this.maxValue.doubleValue());
 		}
@@ -378,14 +384,14 @@ public class Attribute extends DmObject{
 		if (this.getAttributeList() != null){
 			clone.attributeList = new ArrayList<AttributeListItem>();
 			for(AttributeListItem it : this.getAttributeList()){
-				clone.attributeList.add(it.clone(clone, this.ca,defaultLang));
+				clone.attributeList.add(it.clone(clone, this.ca, iconSet, defaultLang));
 			}
 		}
 		if (getTree() != null){
 			clone.rootTreeNodes = new ArrayList<AttributeTreeNode>();
 			for (Iterator<AttributeTreeNode> iterator = getTree().iterator(); iterator.hasNext();) {
 				AttributeTreeNode node = (AttributeTreeNode) iterator.next();
-				clone.rootTreeNodes.add(node.clone(newCa, this.ca, null,defaultLang, clone));
+				clone.rootTreeNodes.add(node.clone(newCa, this.ca, null,defaultLang, clone, iconSet));
 			}
 			
 		}

@@ -22,6 +22,7 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -40,6 +41,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.icon.Icon;
 
 /**
  * An attribute tree node element.
@@ -205,8 +207,8 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	 * @return a cloned attribute tree node
 	 */
 	public AttributeTreeNode clone(ConservationArea newCa, ConservationArea oldCa, AttributeTreeNode parent, 
-			String defaultLang,  Attribute clonedAttribute  ){
-		return clone(newCa, oldCa, parent, defaultLang, clonedAttribute, false);
+			String defaultLang,  Attribute clonedAttribute, Collection<Icon> iconSet  ){
+		return clone(newCa, oldCa, parent, defaultLang, clonedAttribute, false, iconSet);
 	}
 	/**
 	 * Clones the attribute tree node and children nodes
@@ -219,7 +221,7 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	 * @return
 	 */
 	public AttributeTreeNode clone(ConservationArea newCa, ConservationArea oldCa, AttributeTreeNode parent, 
-			String defaultLang,  Attribute clonedAttribute, boolean copyUuid  ){
+			String defaultLang,  Attribute clonedAttribute, boolean copyUuid, Collection<Icon> iconSet){
 		
 		AttributeTreeNode clone = new AttributeTreeNode();
 		clone.copyValues(this, newCa, defaultLang);
@@ -230,11 +232,15 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 		clone.setNodeOrder(this.getNodeOrder());
 		clone.setParent(parent);
 		clone.setAttribute(clonedAttribute);
-		
+		clone.updateIcon(this, iconSet);
+		if (newCa.equals(oldCa)) {
+			//if we are in the same CA then clone the icon reference
+			clone.setIcon(getIcon());
+		}
 		if (this.getChildren() != null){
 			clone.setChildren(new ArrayList<AttributeTreeNode>());
 			for (AttributeTreeNode node : this.getChildren()){
-				clone.getChildren().add(node.clone(newCa, oldCa, clone, defaultLang, clonedAttribute, copyUuid));
+				clone.getChildren().add(node.clone(newCa, oldCa, clone, defaultLang, clonedAttribute, copyUuid, iconSet));
 			}
 		}
 		clone.updateHkey();
@@ -242,4 +248,11 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 		return clone;
 	}
 
+	@Transient
+	public void accept(ITreeNodeVisitor visitor) {
+		if (!visitor.visit(this)) return;
+		for (AttributeTreeNode kid : getChildren()) {
+			kid.accept(visitor);
+		}
+	}
 }

@@ -50,6 +50,7 @@ public class CategoryInfoPanel extends Composite {
 	protected Button chMultiple;
 	private NameKeyComposite nameKeyFields;
 
+	private IconPanel iconPanel;
 	/**
 	 * Creates a new category information panel
 	 * @param parent
@@ -90,6 +91,13 @@ public class CategoryInfoPanel extends Composite {
 			});
 		}
 		
+		Label ll = new Label(this, SWT.NONE);
+		ll.setText(Messages.CategoryInfoPanel_IconLabel);
+		ll.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		
+		iconPanel = new IconPanel(this, canEdit);
+		iconPanel.addListener(SWT.Selection, e->validate());
+		iconPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 	}
 
 	/**
@@ -101,6 +109,9 @@ public class CategoryInfoPanel extends Composite {
 	public void setCategory(Category c, Collection<? extends NamedKeyItem> siblings, Language language){
 		nameKeyFields.initFields(c, siblings, language);
 		chMultiple.setSelection(c.getIsMultiple());
+		
+		iconPanel.setDmObject(c);
+		layout(true);
 	}
 	
 	/**
@@ -112,6 +123,7 @@ public class CategoryInfoPanel extends Composite {
 	public void updateCategory(Category c){
 		nameKeyFields.updateFields(c);
 		c.setIsMultiple(chMultiple.getSelection());
+		iconPanel.updateDmObject(c);
 	}
 	
 	public boolean validate(){

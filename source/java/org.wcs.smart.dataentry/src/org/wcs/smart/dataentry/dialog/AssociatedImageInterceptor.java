@@ -35,6 +35,7 @@ import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.hibernate.type.Type;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
@@ -120,6 +121,11 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 		handleDelete(node);
 		for (CmNode n : node.getChildren()) {
 			deleteCmNode(n);
+		}
+		if (node.getCmAttributes() != null) {
+			for (CmAttribute a : node.getCmAttributes()) {
+				handleDelete(a);
+			}
 		}
 	}
 	
