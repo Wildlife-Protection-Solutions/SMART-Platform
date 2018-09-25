@@ -104,7 +104,7 @@ public class EditListDialog extends TitleAreaDialog{
 	private Button btnEnable;
 	private MenuItem miEnable; 
 	private ImageSelectionControl imageControl;
-	
+	private TableViewer listViewer ;
 	private Session session;
 	
 	public EditListDialog(Shell parentShell, CmAttribute attribute, Session session) {
@@ -399,6 +399,7 @@ public class EditListDialog extends TitleAreaDialog{
 						session.saveOrUpdate(cmNode);
 					}
 					imageControl.updateImage();
+					listViewer.refresh();
 				}
 			}
 		});
@@ -471,7 +472,7 @@ public class EditListDialog extends TitleAreaDialog{
 		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)tableComp.getLayoutData()).heightHint = 300;
 		
-		final TableViewer listViewer = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
+		listViewer = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
 		listViewer.setLabelProvider(new CmListItemLabelProvider());
 		listViewer.setInput(attribute.getCurrentList());

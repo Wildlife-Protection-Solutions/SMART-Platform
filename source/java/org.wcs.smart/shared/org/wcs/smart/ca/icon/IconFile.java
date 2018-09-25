@@ -131,6 +131,7 @@ public class IconFile extends ISmartAttachment{
 	
 	@Transient
 	public boolean isSystemIcon() {
+		if (getCopyFromLocation() != null) return false;
 		return getFilename().startsWith(PLATFORM_IMAGE);
 	}
 	

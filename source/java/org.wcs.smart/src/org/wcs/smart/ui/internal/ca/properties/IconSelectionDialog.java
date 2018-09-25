@@ -22,7 +22,6 @@
 package org.wcs.smart.ui.internal.ca.properties;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.Collator;
@@ -45,6 +44,7 @@ import org.eclipse.jface.viewers.ILazyContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Image;
@@ -55,12 +55,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
@@ -68,6 +66,7 @@ import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.icon.ui.ImageSelectionDialog;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
@@ -83,9 +82,6 @@ public class IconSelectionDialog extends TitleAreaDialog {
 
 	private static final String PATH_KEY = "PATH"; //$NON-NLS-1$
 
-	private static final String DIR_PREF_KEY = "org.wcs.smart.ui.internal.ca.properties.IconSelectionDialog.dir"; //$NON-NLS-1$
-	private static final String EXT_PREF_KEY = "org.wcs.smart.ui.internal.ca.properties.IconSelectionDialog.ext"; //$NON-NLS-1$
-	
 	private static final int SIZE = 32;
 	
 	/**
@@ -502,26 +498,9 @@ public class IconSelectionDialog extends TitleAreaDialog {
 	}
 	
 	private Path selectFile() {
-		FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
-		fd.setFilterExtensions(new String[] {"*.svg","*.png","*.*"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		fd.setFilterNames(new String[] {Messages.IconSelectionDialog_svgFile, Messages.IconSelectionDialog_pngFile, Messages.IconSelectionDialog_allFile});
-		
-		String start = SmartPlugIn.getDefault().getPreferenceStore().getString(DIR_PREF_KEY);
-		if (start != null) {
-			fd.setFilterPath(start);
-		}
-		int index = SmartPlugIn.getDefault().getPreferenceStore().getInt(EXT_PREF_KEY);
-		fd.setFilterIndex(index);
-
-		String file = fd.open();
-		if (file == null) return null;
-		Path p = Paths.get(file);
-		try {
-			SmartPlugIn.getDefault().getPreferenceStore().putValue(DIR_PREF_KEY, p.getParent().toString());
-			SmartPlugIn.getDefault().getPreferenceStore().putValue(EXT_PREF_KEY, String.valueOf(fd.getFilterIndex()));
-		}catch (Exception ex) {}
-		if (!Files.exists(p)) return null;
-		return p;
+		ImageSelectionDialog dialog = new ImageSelectionDialog(getShell());
+		if (dialog.open() != Window.OK) return null;
+		return Paths.get(dialog.getImageFile());
 	}
 	
 	@Override

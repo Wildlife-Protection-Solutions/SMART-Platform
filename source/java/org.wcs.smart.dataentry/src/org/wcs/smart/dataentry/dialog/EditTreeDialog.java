@@ -627,6 +627,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 						session.evict(cmNode);
 						session.saveOrUpdate(cmNode);
 					}
+					itemViewer.refresh();
 					imageControl.updateImage();
 				}
 			}

@@ -22,6 +22,7 @@
 package org.wcs.smart.dataentry.dialog.composite;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -41,12 +43,11 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
+import org.wcs.smart.icon.ui.ImageSelectionDialog;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -56,9 +57,6 @@ import org.wcs.smart.util.SmartUtils;
  * @since 4.0.0
  */
 public class ImageSelectionControl extends Composite {
-
-	//preference for last image filter used
-	private static final String IMG_FILTER_PREFKEY = "org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.imagefilter"; //$NON-NLS-1$
 	
 	private enum Type {
 		DATAMODEL(Messages.ImageSelectionControl_DefaultIcon), 
@@ -209,7 +207,10 @@ public class ImageSelectionControl extends Composite {
 		buttonLoad.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				selectImage();
+				String imageFile = selectImage();
+				if (imageFile == null) return;
+				contentProvider.setImageFile(Paths.get(imageFile).toFile());
+				updateImage();
 			}
 		});
 
@@ -246,7 +247,10 @@ public class ImageSelectionControl extends Composite {
 					contentProvider.setImageFile(null);
 					updateImage();
 				}else if (type == Type.CUSTOM && lastSelection != Type.CUSTOM) {
-					selectImage();
+					String imageFile = selectImage();
+					if (imageFile == null) return;
+					contentProvider.setImageFile(Paths.get(imageFile).toFile());
+					updateImage();
 				}
 				lastSelection = type;
 				buttonLoad.setEnabled(type == Type.CUSTOM);
@@ -276,42 +280,14 @@ public class ImageSelectionControl extends Composite {
 	}
 	
 
-	private void selectImage() {
-		
+	private String selectImage() {
 		ImageSelectionDialog dialog = new ImageSelectionDialog(getShell());
-		dialog.open();
-//		FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
-//		fd.setFilterExtensions(new String[] {
-//				"*.bmp;*.jpg;*.jpeg;*.png;*.svg", //$NON-NLS-1$
-//				"*.bmp", //$NON-NLS-1$
-//				"*.jpg;*.jpeg", //$NON-NLS-1$
-//				"*.png;*.svg", //$NON-NLS-1$
-//				"*.png", //$NON-NLS-1$
-//				"*.svg", //$NON-NLS-1$
-//				
-//		});
-//		fd.setFilterNames(new String[] {
-//				Messages.ImageSelectionControl_AllImages1,
-//				Messages.ImageSelectionControl_BitmapFiles,
-//				Messages.ImageSelectionControl_JpegFiles,
-//				Messages.ImageSelectionControl_pngsvg,
-//				Messages.ImageSelectionControl_png,
-//				Messages.ImageSelectionControl_svg
-//		});
-//		
-//		int lastIndex = DataentryPlugIn.getDefault().getPreferenceStore().getInt(IMG_FILTER_PREFKEY);
-//		fd.setFilterIndex(lastIndex);
-//		
-//		String f = fd.open();
-//		if (f != null) {
-//			contentProvider.setImageFile(new File(f));
-//			updateImage();
-//			
-//			//save preference
-//			int filterIndex = fd.getFilterIndex();
-//			DataentryPlugIn.getDefault().getPreferenceStore().setValue(IMG_FILTER_PREFKEY, filterIndex);
-//		}
+		if (dialog.open() != Window.OK) return null;
+		String imageFile = dialog.getImageFile();
+		return imageFile;
 	}
+	
+	
 	/**
 	 * Interface should be implemented by any object that want to use this control.
 	 * It provides data to display and is called when new image was selected.

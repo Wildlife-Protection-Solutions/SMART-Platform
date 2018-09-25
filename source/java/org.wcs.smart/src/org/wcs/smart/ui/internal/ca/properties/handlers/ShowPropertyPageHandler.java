@@ -34,6 +34,7 @@ import org.wcs.smart.ui.internal.ca.properties.BasemapPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.CaPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.CcaaUserPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.EmployeePropertyPage;
+import org.wcs.smart.ui.internal.ca.properties.IconsetPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.ProjectionPropertyDialog;
 import org.wcs.smart.ui.internal.ca.properties.StationListPropertyPage;
 
@@ -70,6 +71,8 @@ public class ShowPropertyPageHandler {
 			dialog = new ProjectionPropertyDialog(activeShell);
 		}else if (page.equals(CcaaUserPropertyPage.class)){
 			dialog = new CcaaUserPropertyPage(activeShell);
+		}else if (page.equals(IconsetPropertyPage.class)){
+			dialog = new IconsetPropertyPage(activeShell);
 		}
 		if (dialog != null){
 			dialog.open();

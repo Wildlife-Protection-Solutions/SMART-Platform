@@ -26,7 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Time;
@@ -663,11 +663,10 @@ public class SmartUtils {
 		}
 	}
 
-	public static Transform getExifImageTransform(File file, int width, int height){
-		
+	public static Transform getExifImageTransform(InputStream is, int width, int height){
 		Metadata metadata = null;
 		try {
-			metadata = ImageMetadataReader.readMetadata(file.getAbsoluteFile());
+			metadata = ImageMetadataReader.readMetadata(is);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -721,6 +720,12 @@ public class SmartUtils {
 			return null;
 		}
 		return imageTransform;
+	}
+	
+	public static Transform getExifImageTransform(File file, int width, int height) throws IOException{
+		try(InputStream is = Files.newInputStream(file.toPath())){
+			return getExifImageTransform(is, width, height);
+		}
 	}
 	
 	/**
@@ -781,26 +786,29 @@ public class SmartUtils {
 	 * @throws TranscoderException
 	 */
 	public static Image readSvg(Display display, Path file, Integer size) throws IOException, TranscoderException {
-		PNGTranscoder transcoder = new PNGTranscoder();
-		if (size != null) {
-			transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_WIDTH, (float)size);
-			transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_HEIGHT, (float)size);
-		}
-		
-		try(Reader reader = Files.newBufferedReader(file)){
-			TranscoderInput input = new TranscoderInput(reader);
-			try(ByteArrayOutputStream bout = new ByteArrayOutputStream()){
-				TranscoderOutput output = new TranscoderOutput(bout);
-				transcoder.transcode(input, output);
-				Image img = new Image(display, new ByteArrayInputStream(bout.toByteArray()));
-				return img;
-			}
+		try(InputStream reader = Files.newInputStream(file)){
+			return readSvg(display, reader, size);
 		}catch (Exception ex) {
 			ex.printStackTrace();
 			throw ex;
 		}
 	}
 	
+	public static Image readSvg(Display display, InputStream is, Integer size) throws IOException, TranscoderException {
+		PNGTranscoder transcoder = new PNGTranscoder();
+		if (size != null) {
+			transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_WIDTH, (float)size);
+			transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_HEIGHT, (float)size);
+		}
+		
+		TranscoderInput input = new TranscoderInput(is);
+		try(ByteArrayOutputStream bout = new ByteArrayOutputStream()){
+			TranscoderOutput output = new TranscoderOutput(bout);
+			transcoder.transcode(input, output);
+			Image img = new Image(display, new ByteArrayInputStream(bout.toByteArray()));
+			return img;
+		}
+	}
 	
 	/**
 	 * Converts the file to an image of the given size.  Works for svg as well as png etc.
@@ -862,6 +870,84 @@ public class SmartUtils {
 			}
 		}catch (Exception ex) {
 			
+		}
+		
+		if (size == null) return rawImage;
+				
+		// resize image
+		Image image2 = new Image(Display.getDefault(), sizeW, sizeH);
+		GC gc = new GC(image2);
+		try {
+			gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);
+		}finally {
+			gc.dispose();
+			rawImage.dispose();
+		}
+		return image2;
+		
+	}
+	
+	
+	/**
+	 * Reads an image from a url resizing to the provided size.  If size
+	 * is null then the full image size is returned
+	 * 
+	 * @param url
+	 * @param size
+	 * @return
+	 */
+	public static Image getImage(URL url, Integer size) {
+		
+		if (url.toString().endsWith(".svg")) { //$NON-NLS-1$
+			try(InputStream is = url.openConnection().getInputStream()){
+				return readSvg(Display.getDefault(), is, size);
+			}catch (Exception ex) {
+				return null;
+			}
+		}
+		
+		Image rawImage = null;
+		try(InputStream is = url.openConnection().getInputStream()){
+			rawImage = new Image(Display.getDefault(), is); 
+		}catch (Exception ex) {
+			return null;
+		}
+		
+		//resize/scale
+		Rectangle bounds = rawImage.getBounds();
+		
+		int sizeW = size == null ? bounds.width : size;
+		int sizeH = size == null ? bounds.height : size;
+		
+		int x = 0, y = 0, width = 0, height = 0;
+		if (bounds.width > bounds.height) {
+			width = sizeW;
+			height = bounds.height * sizeW / bounds.width;
+			y = (sizeW - height) / 2;
+		} else {
+			height = sizeH;
+			width = bounds.width * sizeH / bounds.height;
+			x = (sizeH - width) / 2;
+		}
+		
+		//check fo exif metadata for transform
+		Transform imageTransform = null;
+		try(InputStream is = url.openConnection().getInputStream()){
+			imageTransform = SmartUtils.getExifImageTransform(is, sizeW, sizeH);
+		}catch (IOException ex) {
+			
+		}
+		if (imageTransform != null) {
+			Image image3 = new Image(Display.getDefault(), sizeW, sizeH);
+			GC gc3 = new GC(image3);
+			try {
+				gc3.setTransform(imageTransform);
+					gc3.drawImage(rawImage, 0, 0, rawImage.getBounds().width, rawImage.getBounds().height, x, y, width, height);
+			}finally {
+				gc3.dispose();
+				rawImage.dispose();
+			}
+			return image3;
 		}
 		
 		if (size == null) return rawImage;
