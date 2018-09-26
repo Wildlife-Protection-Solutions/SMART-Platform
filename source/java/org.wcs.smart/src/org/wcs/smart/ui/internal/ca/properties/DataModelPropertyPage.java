@@ -961,8 +961,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	private void editElement(){
 		Object o = getViewerSelection();
 		if (o instanceof Category){
+			Category cat = (Category)o;
 			try{
-				String canEdit = DataModelManager.INSTANCE.canEdit((Category)o, session);
+				String canEdit = DataModelManager.INSTANCE.canEdit(cat, session);
 				if (canEdit != null){
 					if (!MessageDialog.openQuestion(getShell(), Messages.DataModelPropertyPage_EditWarningTitle, Messages.DataModelPropertyPage_CategoryWarningMessage + "\n\n" + canEdit + "\n\n" + Messages.DataModelPropertyPage_ContinueLabel)){  //$NON-NLS-1$ //$NON-NLS-2$
 						return;
@@ -974,18 +975,25 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}
 			
 			List<Category> siblings = null;
-			if (((Category) o).getParent() != null){
-				siblings = ((Category) o).getParent().getChildren();
+			if (cat.getParent() != null){
+				siblings = cat.getParent().getChildren();
 			}else{
 				siblings = dataModel.getCategories();
 			}
-			CategoryDialogPage dd = new CategoryDialogPage(getShell(), (Category)o, siblings, getLanguage());
+			CategoryDialogPage dd = new CategoryDialogPage(getShell(), cat, siblings, getLanguage());
 			int ret = dd.open();
 			
 			if (ret == Window.CANCEL){
 				return;
 			}
-			if (((Category)o).getIcon() != null) session.saveOrUpdate(((Category)o).getIcon());
+			if (cat.getIcon() != null) {
+				if (cat.getIcon().getUuid() == null) {
+					session.save(cat.getIcon());
+				}else {
+					cat.setIcon((Icon)session.merge(cat.getIcon()));
+				}
+			}
+			session.flush();
 			refreshTree();
 		}else if (o instanceof CategoryAttribute){
 			try{

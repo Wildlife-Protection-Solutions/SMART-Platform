@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.ca.properties;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
 import java.text.MessageFormat;
@@ -28,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -91,6 +91,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.ITreeNodeVisitor;
+import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -378,7 +379,7 @@ public class AttributeInfoPanel extends Composite {
 		TableViewerColumn imageLabel = new TableViewerColumn(lstAttributeList, SWT.NONE);
 		
 		imageLabel.setLabelProvider(new ColumnLabelProvider() {
-					private HashMap<AttributeListItem, Image> images = new HashMap<>();
+					private List<Image> images = new ArrayList<>();
 					@Override
 					public String getText(Object element) {
 						return null;
@@ -388,8 +389,7 @@ public class AttributeInfoPanel extends Composite {
 					public Image getImage(Object element) {
 						if (element instanceof AttributeListItem) {
 							AttributeListItem li = (AttributeListItem)element;
-							if (images.containsKey(li)) return images.get(li);
-							
+						
 							if (li.getIcon() == null) return null;
 							
 							List<IconFile> files = li.getIcon().getFiles();
@@ -397,12 +397,18 @@ public class AttributeInfoPanel extends Composite {
 							
 							//combine all icons into a single image
 							Image img = new Image(Display.getDefault(), (LIST_ICON_SIZE+5) * files.size(), LIST_ICON_SIZE);
-							images.put(li, img);
+							images.add(img);
 							GC gc = new GC(img);
 							try {
 								for (int i = 0; i < files.size(); i++) {
 									IconFile ff = files.get(i);
-									Image mm = SmartUtils.getImage(ff.getAttachmentFile().toPath(), LIST_ICON_SIZE);
+									File f = null;
+									if (ff.getCopyFromLocation() != null) {
+										f = ff.getCopyFromLocation();
+									}else {
+										f = ff.getAttachmentFile();
+									}
+									Image mm = SmartUtils.getImage(f.toPath(), LIST_ICON_SIZE);
 									try {
 										gc.drawImage(mm, 0,0, LIST_ICON_SIZE,LIST_ICON_SIZE,i*(LIST_ICON_SIZE+5),0,LIST_ICON_SIZE,LIST_ICON_SIZE);
 									}finally{
@@ -421,7 +427,7 @@ public class AttributeInfoPanel extends Composite {
 					@Override
 					public void dispose() {
 						super.dispose();
-						images.values().forEach(i->i.dispose());
+						images.forEach(i->i.dispose());
 					}
 					
 		});
@@ -1064,7 +1070,11 @@ public class AttributeInfoPanel extends Composite {
 			session.saveOrUpdate(att);
 		}
 		if (att.getIcon() != null) {
-			session.saveOrUpdate(att.getIcon());
+			if (att.getIcon().getUuid() == null) {
+				session.save(att.getIcon());
+			}else {
+				att.setIcon((Icon)session.merge(att.getIcon()));
+			}
 		}
 		session.flush();
 		
@@ -1144,7 +1154,13 @@ public class AttributeInfoPanel extends Composite {
 			for (int i = 0; i < attributeList.size(); i ++){
 				AttributeListItem item = (AttributeListItem) attributeList.get(i);
 				
-				if (item.getIcon() != null) session.saveOrUpdate(item.getIcon());
+				if (item.getIcon() != null) {
+					if (item.getIcon().getUuid() == null) {
+						session.save(item.getIcon());
+					}else {
+						item.setIcon((Icon)session.merge(item.getIcon()));
+					}
+				}
 				item.setListOrder(i);
 				item.setAttribute(att);
 				
@@ -1239,7 +1255,16 @@ public class AttributeInfoPanel extends Composite {
 			}
 		}
 		if (node.getUuid() != null){
+			if (node.getIcon() != null) {
+				if (node.getIcon().getUuid() == null) {
+					session.save(node.getIcon());
+				}else {
+					node.setIcon((Icon)session.merge(node.getIcon()));
+				}
+			}
+			Icon icn = node.getIcon();
 			node = (AttributeTreeNode) session.merge(node);
+			node.setIcon(icn);
 		}else{
 			//newNode
 			DataModelManager.INSTANCE.fireAddListener(currentSession, node);

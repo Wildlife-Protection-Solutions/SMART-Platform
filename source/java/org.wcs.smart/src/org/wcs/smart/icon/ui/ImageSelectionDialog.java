@@ -29,6 +29,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -61,6 +63,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconUtils;
@@ -73,8 +76,7 @@ import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Dialog for selected an image from icon set, smart icon or a
- * seperator file.
+ * Dialog for selecting an image from icon set, smart icon or a file
  *  
  * @author Emily
  *
@@ -354,31 +356,36 @@ public class ImageSelectionDialog extends TitleAreaDialog {
 		iconTable.layout();
 	}
 	
-	
-	
 	private Job loadDataJob = new Job("load icons") { //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			Set<String> files = new HashSet<>();
 			
-			
 			try(Session session = HibernateManager.openSession()){
-				List<IconFile> icons = QueryFactory.buildQuery(session, IconFile.class, 
-						new Object[] {"iconSet.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
-				
-				for (IconFile file : icons) {
-					if (file.isSystemIcon()) {
-						files.add(file.getFilename());
-					}else {
-						file.computeFileLocation(session);
-						try {
-							files.add(file.getAttachmentFile().getAbsoluteFile().toURI().toURL().toString());
-						} catch (MalformedURLException e) {
-							e.printStackTrace();
+				session.doWork(new Work() {
+					@Override
+					public void execute(Connection c) throws SQLException {
+						c.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+						session.beginTransaction();
+						List<IconFile> icons = QueryFactory.buildQuery(session, IconFile.class, 
+								new Object[] {"iconSet.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+						
+						for (IconFile file : icons) {
+							if (file.isSystemIcon()) {
+								files.add(file.getFilename());
+							}else {
+								file.computeFileLocation(session);
+								try {
+									files.add(file.getAttachmentFile().getAbsoluteFile().toURI().toURL().toString());
+								} catch (MalformedURLException e) {
+									e.printStackTrace();
+								}
+							}
 						}
+						session.getTransaction().commit();
 					}
-				}
+				});
 			}
 			
 			for (String[] s : IconUtils.SMART_ICON_MAPPING) {

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
 import java.text.MessageFormat;
@@ -338,7 +339,13 @@ public class AttributeTree {
 					try {
 						for (int i = 0; i < files.size(); i++) {
 							IconFile ff = files.get(i);
-							Image mm = SmartUtils.getImage(ff.getAttachmentFile().toPath(), AttributeInfoPanel.LIST_ICON_SIZE);
+							File f = null;
+							if (ff.getCopyFromLocation() != null) {
+								f = ff.getCopyFromLocation();
+							}else {
+								f = ff.getAttachmentFile();
+							}
+							Image mm = SmartUtils.getImage(f.toPath(), AttributeInfoPanel.LIST_ICON_SIZE);
 							try {
 								gc.drawImage(mm, 0,0, AttributeInfoPanel.LIST_ICON_SIZE,AttributeInfoPanel.LIST_ICON_SIZE,i*(AttributeInfoPanel.LIST_ICON_SIZE+5),0,AttributeInfoPanel.LIST_ICON_SIZE,AttributeInfoPanel.LIST_ICON_SIZE);
 							}finally {

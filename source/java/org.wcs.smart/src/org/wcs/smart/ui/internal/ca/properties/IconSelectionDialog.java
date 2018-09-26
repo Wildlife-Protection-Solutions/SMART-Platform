@@ -24,6 +24,8 @@ package org.wcs.smart.ui.internal.ca.properties;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +61,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
@@ -521,18 +524,30 @@ public class IconSelectionDialog extends TitleAreaDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Icon> thisicons = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				thisicons.addAll(QueryFactory.buildQuery(session, Icon.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
-				for (Icon ii : thisicons) {
-					ii.getFiles().forEach(ff->{
-						ff.computeFileLocation(session);
-						session.get(IconSet.class, ff.getIconSet().getUuid());
-					});
+				session.doWork(new Work() {
+				@Override
+				public void execute(Connection c) throws SQLException {
+					c.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+					session.beginTransaction();
+					try {
+						thisicons.addAll(QueryFactory.buildQuery(session, Icon.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
+						for (Icon ii : thisicons) {
+							ii.getFiles().forEach(ff->{
+								ff.computeFileLocation(session);
+								session.get(IconSet.class, ff.getIconSet().getUuid());
+							});
+						}
+					}finally {
+						session.getTransaction().rollback();
+					}
 				}
+			});
 			}
 			thisicons.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 			icons = thisicons;
 			
 			Display.getDefault().syncExec(()->{
+				if (tblIcons.getControl().isDisposed()) return;
 				tblIcons.setItemCount(thisicons.size());
 				tblIcons.setInput(thisicons);
 				tblIcons.getTable().getColumn(1).pack();
