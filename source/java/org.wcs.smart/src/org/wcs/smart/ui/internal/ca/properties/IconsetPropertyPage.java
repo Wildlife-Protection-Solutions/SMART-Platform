@@ -599,8 +599,14 @@ public class IconsetPropertyPage extends TitleAreaDialog {
 							newfile.setFilename(copyIcon.getFilename());
 						}else {
 							Path temp = Files.createTempFile("smart", "icon"); //$NON-NLS-1$ //$NON-NLS-2$
+							File inputFile = null;
+							if (copyIcon.getCopyFromLocation() != null) {
+								inputFile = copyIcon.getCopyFromLocation();
+							}else {
+								inputFile = copyIcon.getAttachmentFile();
+							}
 							try(OutputStream out = Files.newOutputStream(temp)){
-								Files.copy(copyIcon.getAttachmentFile().toPath(), out);
+								Files.copy(inputFile.toPath(), out);
 							}
 							newfile.setCopyFromLocation(temp.toFile());
 							newfile.setFilename(copyIcon.getFilename());
