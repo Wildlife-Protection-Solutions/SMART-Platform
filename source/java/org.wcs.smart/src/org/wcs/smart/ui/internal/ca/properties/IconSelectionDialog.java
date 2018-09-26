@@ -109,7 +109,7 @@ public class IconSelectionDialog extends TitleAreaDialog {
 	private Button btnImport;
 	
 	private Icon selectedIcon;
-	private Text txtName;
+	private Text txtName, txtKey;
 	
 	private HashMap<IconSet, Label> imports;
 	private List<Icon> icons;
@@ -316,6 +316,19 @@ public class IconSelectionDialog extends TitleAreaDialog {
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		if (selectedIcon != null) {
 			txtName.setText(selectedIcon.getName());
+		}
+		
+		l = new Label(panel, SWT.NONE);
+		l.setText(Messages.IconSelectionDialog_LeyLabel);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		txtKey = new Text(panel, SWT.BORDER);
+		txtKey.setEnabled(false);
+		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		if (selectedIcon != null) {
+			txtKey.setText(selectedIcon.getKeyId());
+		}else {
+			txtKey.setText(Messages.IconSelectionDialog_SystemGenerated);
 		}
 		
 		imports = new HashMap<>();

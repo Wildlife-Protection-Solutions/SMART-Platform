@@ -287,7 +287,10 @@ public class IconsetPropertyPage extends TitleAreaDialog {
 		colName.getColumn().setWidth(150);
 		colName.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
-				if (element instanceof Icon) return ((Icon)element).getName();
+				if (element instanceof Icon) {
+					Icon icn = (Icon)element;
+					return icn.getName() + " (" + icn.getKeyId() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
 				return super.getText(element);
 			}
 		});

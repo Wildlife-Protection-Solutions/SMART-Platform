@@ -878,12 +878,14 @@ public class Messages extends NLS {
 	public static String IconSelectionDialog_DialogTitle2;
 	public static String IconSelectionDialog_IconError;
 	public static String IconSelectionDialog_IconRequiredMsg;
+	public static String IconSelectionDialog_LeyLabel;
 	public static String IconSelectionDialog_NameColumn;
 	public static String IconSelectionDialog_NameLabel;
 	public static String IconSelectionDialog_NewSrc;
 	public static String IconSelectionDialog_pngFile;
 	public static String IconSelectionDialog_SmartSrc;
 	public static String IconSelectionDialog_SourceOp;
+	public static String IconSelectionDialog_SystemGenerated;
 	public static String IconSelectionDialog_svgFile;
 	public static String IconsetPropertyPage_Closedialog;
 	public static String IconsetPropertyPage_CloseMessage;
