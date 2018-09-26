@@ -56,7 +56,7 @@ public class SettingsServlet extends HttpServlet{
 		List<StyleConfiguration> styles = null;
 		List<ConservationAreaInfo> cas = null;
 		List<AlertType> alertTypes = null;
-		
+		String connectVersion = ""; //$NON-NLS-1$
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
 		try{
@@ -67,7 +67,8 @@ public class SettingsServlet extends HttpServlet{
 			
 			styles = HibernateManager.getStyleConfigurations(session);
 			cas = HibernateManager.getConservationAreaInfos(session);
-			alertTypes = HibernateManager.getAlertTypes(session);
+			alertTypes = HibernateManager.getAlertTypes(session);			
+			connectVersion = (String) session.createNativeQuery("SELECT version FROM connect.connect_version").uniqueResult(); //$NON-NLS-1$			
 		}finally{
 			session.getTransaction().rollback();
 		}
@@ -81,7 +82,7 @@ public class SettingsServlet extends HttpServlet{
 
 		request.setAttribute("cas", cas); //$NON-NLS-1$
 		request.setAttribute("alertTypes", alertTypes); //$NON-NLS-1$
-		
+		request.setAttribute("connectversion", connectVersion); //$NON-NLS-1$
 		request.getRequestDispatcher("/WEB-INF/settings.jsp").forward(request, response); //$NON-NLS-1$
 		
 	}

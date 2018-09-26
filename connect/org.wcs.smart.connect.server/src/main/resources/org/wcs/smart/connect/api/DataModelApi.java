@@ -59,6 +59,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
+import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -128,15 +129,9 @@ public class DataModelApi extends HttpServlet{
 		String conservationAreas = conservationAreaParts.get(0).getBodyAsString();
 		String[] cabits = conservationAreas.split(","); //$NON-NLS-1$
 		
-		DataModelXmlToSimpleDataModelConverter cc = new DataModelXmlToSimpleDataModelConverter();
 		
 		SimpleDataModel sdm = null;
-		try(InputStream stream = new ByteArrayInputStream(dmXml.getBytes(StandardCharsets.UTF_8.name()))){
-			sdm = cc.convert(stream, Locale.getDefault());
-		}catch (Exception ex) {
-			logger.log(Level.SEVERE, ex.getMessage(), ex);
-			throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("DataModelApi_ReadError", SmartUtils.getRequestLocale(request)), ex.getMessage()), ex) ; //$NON-NLS-1$
-		}
+
 		List<String> allWarnings = new ArrayList<>();
 		
 		try(Session session = HibernateManager.getSession(context)){
@@ -148,6 +143,15 @@ public class DataModelApi extends HttpServlet{
 					ConservationArea ca = session.get(ConservationArea.class, caUuid);
 					if (ca == null) {
 						throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("DataModelApi_CaIdError", SmartUtils.getRequestLocale(request)), ca)); //$NON-NLS-1$
+					}
+
+					List<Icon> cmIcons = QueryFactory.buildQuery(session, Icon.class, new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+					try(InputStream stream = new ByteArrayInputStream(dmXml.getBytes(StandardCharsets.UTF_8.name()))){
+						DataModelXmlToSimpleDataModelConverter cc = new DataModelXmlToSimpleDataModelConverter();
+						sdm = cc.convert(stream, cmIcons, Locale.getDefault());
+					}catch (Exception ex) {
+						logger.log(Level.SEVERE, ex.getMessage(), ex);
+						throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("DataModelApi_ReadError", SmartUtils.getRequestLocale(request)), ex.getMessage()), ex) ; //$NON-NLS-1$
 					}
 					
 					CriteriaBuilder cb = session.getCriteriaBuilder();
