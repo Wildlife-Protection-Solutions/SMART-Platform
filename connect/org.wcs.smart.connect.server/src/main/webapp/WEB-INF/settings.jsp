@@ -28,7 +28,7 @@
     <div id="message" class="msgsection"></div>
    </div>
 
-<div><p style="padding-top:3px"">Connect Version: ${connectversion}</p></div>
+<div><p style="padding-top:3px""><fmt:message key="seetings.connectversion" />: ${connectversion}</p></div>
 <div class="overflow settingsTable">
 
 	<div class="block settings-header"><fmt:message key="settings.layerheader" /></div>
