@@ -233,7 +233,7 @@ public class FileWizardPage extends WizardPage {
 			isValid = false;
 		}else {
 			Path p = Paths.get(txtFile.getText());
-			if (!Files.isExecutable(p)) {
+			if (!Files.exists(p)) {
 				setErrorMessage(Messages.FileWizardPage_FileNotFound);
 				isValid = false;
 			}
