@@ -467,7 +467,6 @@ public class MapSettings {
 					SmartPlugIn.log(e.getMessage(),e);
 				}
 				
-				if (currentMap.getRenderManager() == null) return;	//map was closed
 				Layer llayer = (Layer)layer;
 				if (info == null){
 					llayer.setVisible(true);

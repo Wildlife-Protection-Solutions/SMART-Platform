@@ -338,7 +338,9 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			if (!existingTrees.contains(a)) {
 				//attribute is not present in CM anymore -> remove all related configurations
 				getModel().getDefaultConfigs().remove(a);
-				removeRelatedConfigs(a);
+				removeRelatedConfigs(a, node);
+				
+				
 			}
 		}
 		//remove default list mapping if present
@@ -347,18 +349,31 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			if (!existingLists.contains(a)) {
 				//attribute is not present in CM anymore -> remove all related configurations
 				getModel().getDefaultConfigs().remove(a);
-				removeRelatedConfigs(a);
+				removeRelatedConfigs(a, node);
 			}
 		}
 		fireModelChanged();
 	}
 
-	private void removeRelatedConfigs(Attribute a) {
+	private void removeRelatedConfigs(Attribute a, CmNode node) {
 		List<CmAttributeConfig> configs = DataentryHibernateManager.getCmAttributeConfigs(this.session, getModel(), a);
 		for (CmAttributeConfig cfg : configs) {
+			if (node.getCmAttributes().isEmpty()) continue;
+			//for hibernate
+			node.getCmAttributes().forEach(cma->{
+				if (cfg.equals(cma.getConfig())) {
+					cma.setConfig(null);
+				}
+			});
+			
 			this.session.delete(cfg);
 			this.deletedConfigs.add(cfg);
+
+			//for hibernate
+			if (cfg.getList() != null)cfg.getList().forEach(f->f.setConfig(null));
+			if (cfg.getTree() != null)cfg.getTree().forEach(f->f.setConfig(null));
 		}
+		
 	}
 	
 	private boolean isPhotoAllowedEnabled(CmNode node) {
