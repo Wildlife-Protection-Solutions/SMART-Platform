@@ -211,7 +211,7 @@ public enum PatrolPackageExporter {
 			if (processed.contains(objectNode)) continue;
 			processed.add(objectNode);
 			
-			if (objectNode instanceof IImageAssociatedObject) {
+			if (objectNode instanceof CmNode) {
 				CmNode node = (CmNode)objectNode;
 				toProcess.addAll(node.getChildren());
 				
