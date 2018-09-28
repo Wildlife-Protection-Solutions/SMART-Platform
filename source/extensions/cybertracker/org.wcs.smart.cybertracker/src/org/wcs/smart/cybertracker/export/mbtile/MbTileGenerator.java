@@ -191,29 +191,30 @@ public class MbTileGenerator {
 					for (int y = yMinTile; y <= yMaxTile; y += TILE_TO_RENDER_BUFFER) {
 						
 						//compute bounds for envelope
-						Envelope tenv = zz.getTile(x,y).getBoundsLatLong();
-//						Tile maxTile = zz.getTile(x+TILE_TO_RENDER_BUFFER, y+TILE_TO_RENDER_BUFFER);
-//						if (maxTile != null) {
-//							tenv.expandToInclude(maxTile.getBoundsLatLong());
-//						}else{
-//							Tile temp = new Tile(x+TILE_TO_RENDER_BUFFER, y+TILE_TO_RENDER_BUFFER, zz);
-//							tenv.expandToInclude(temp.getBoundsLatLong());
-//						}
-						
-						
-						for (int i = 0; i < TILE_TO_RENDER_BUFFER; i ++) {
-							for (int j = 0; j < TILE_TO_RENDER_BUFFER; j ++) {
-								Tile t = zz.getTile(x+i, y+j);
-								if (t != null) {
-									tenv.expandToInclude(t.getBoundsLatLong());
-								}else {
-									Tile temp = new Tile(x+i, y+j, zz);
-									tenv.expandToInclude(temp.getBoundsLatLong());
-								}
-							}
+						Envelope tenv1 = zz.getTile(x,y).getBoundsLatLong();
+						Tile maxTile = zz.getTile(x+TILE_TO_RENDER_BUFFER-1, y+TILE_TO_RENDER_BUFFER-1);
+						if (maxTile != null) {
+							tenv1.expandToInclude(maxTile.getBoundsLatLong());
+						}else{
+							Tile temp = new Tile(x+TILE_TO_RENDER_BUFFER-1, y+TILE_TO_RENDER_BUFFER-1, zz);
+							tenv1.expandToInclude(temp.getBoundsLatLong());
 						}
 						
-						ReferencedEnvelope revn = new ReferencedEnvelope(tenv,  SmartDB.DATABASE_CRS);
+//						Envelope tenv = zz.getTile(x,y).getBoundsLatLong();
+//						for (int i = 0; i < TILE_TO_RENDER_BUFFER; i ++) {
+//							for (int j = 0; j < TILE_TO_RENDER_BUFFER; j ++) {
+//								Tile t = zz.getTile(x+i, y+j);
+//								if (t != null) {
+//									tenv.expandToInclude(t.getBoundsLatLong());
+//								}else {
+//									Tile temp = new Tile(x+i, y+j, zz);
+//									tenv.expandToInclude(temp.getBoundsLatLong());
+//								}
+//							}
+//						}
+						
+//						System.out.println(tenv1 + ":" + tenv);
+						ReferencedEnvelope revn = new ReferencedEnvelope(tenv1,  SmartDB.DATABASE_CRS);
 						
 						gg.clearRect(0, 0, img.getWidth(), img.getHeight());
 						BoundsStrategy bnds = new BoundsStrategy(revn);
@@ -233,7 +234,8 @@ public class MbTileGenerator {
 								
 								writeTile(c, t, tileimage);
 								cnt++;
-								System.out.println(cnt + "/" + totalTiles);
+								//TODO: remove this
+//								System.out.println(cnt + "/" + totalTiles);
 								monitor.worked(1);
 								
 								//TODO: fix zooming - currently tiles are not correct
