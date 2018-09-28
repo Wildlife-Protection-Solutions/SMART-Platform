@@ -66,6 +66,7 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.PackageContributionManager;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
+import org.wcs.smart.cybertracker.export.mbtile.MapPackageContribution;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
@@ -109,6 +110,7 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
     public PatrolCTPackageDialog(Shell parentShell) {
 		super(parentShell);
 		this.contributions = PackageContributionManager.INSTANCE.getContributionItems();
+		this.contributions.add(0,  new MapPackageContribution());
 	}
 
     public void okPressed() {

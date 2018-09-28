@@ -156,7 +156,7 @@ public class ZoomLevel {
 	/*
 	 * converts lon/lat to a tile x and tile y
 	 */
-	private int[] toTile(double x, double y, int zoom) {
+	public static int[] toTile(double x, double y, int zoom) {
 		double lon = x;
 		double lat = y;
 

@@ -88,14 +88,27 @@ public class MbTileGenerator {
 	 * @return
 	 */
 	public int getTileCount(Envelope bounds, int minzoom, int maxzoom) {
-		Layer tmpLayer = new Layer("temp", bounds, minzoom, maxzoom); //$NON-NLS-1$
 		
 		int totaltiles = 0;
-		for (ZoomLevel z : tmpLayer.getZooms()) {
-			totaltiles += z.getTiles().size();
+		
+		for (int zoom = minzoom; zoom <= maxzoom; zoom ++) {
+			int[] minTile = ZoomLevel.toTile(bounds.getMinX(), bounds.getMinY(), zoom);
+			int[] maxTile = ZoomLevel.toTile(bounds.getMaxX(), bounds.getMaxY(), zoom);
+
+			int xtile = minTile[0];
+			int ytile = minTile[1];
+
+			int xtile2 = maxTile[0];
+			int ytile2 = maxTile[1];
+
+			int startx = xtile < 0 ? 0 : xtile;
+			int starty = ytile2 < 0 ? 0 : ytile2;
+			
+			int endx = (int) Math.min(xtile2, Math.pow(2, zoom));
+			int endy = (int) Math.min(ytile, Math.pow(2, zoom));
+			totaltiles += (endx - startx) * (endy - starty);
 		}
 		return totaltiles;
-		
 	}
 	
 	public int[] suggestZoomLevels(Envelope env) throws TransformException {
@@ -134,6 +147,7 @@ public class MbTileGenerator {
 		monitor.beginTask("Generating MBTiles", totalWork);
 		monitor.subTask("creating basemap");
 		
+		//TODO: set map to epsg 4326
 		MapSettings settings = MapSettings.getInstance(definition);
 		Map thisMap = ProjectFactory.eINSTANCE.createMap();
 		settings.applyTo(thisMap);
@@ -164,6 +178,9 @@ public class MbTileGenerator {
 			for(ZoomLevel zz : lyr.getZooms()) {
 				monitor.subTask("processing zoom: " + zz.getZoom());
 				
+				int totalTiles = zz.getTiles().size();
+				int cnt = 0;
+				
 				int xMinTile = zz.getMinTileX();
 				int xMaxTile = zz.getMaxTileX();
 				int yMinTile = zz.getMinTileY();
@@ -175,26 +192,26 @@ public class MbTileGenerator {
 						
 						//compute bounds for envelope
 						Envelope tenv = zz.getTile(x,y).getBoundsLatLong();
-						Tile maxTile = zz.getTile(x+TILE_TO_RENDER_BUFFER, y+TILE_TO_RENDER_BUFFER);
-						if (maxTile != null) {
-							tenv.expandToInclude(maxTile.getBoundsLatLong());
-						}else{
-							Tile temp = new Tile(x+TILE_TO_RENDER_BUFFER, y+TILE_TO_RENDER_BUFFER, zz);
-							tenv.expandToInclude(temp.getBoundsLatLong());
-						}
-						
-						
-//						for (int i = 0; i < TILE_TO_RENDER_BUFFER; i ++) {
-//							for (int j = 0; j < TILE_TO_RENDER_BUFFER; j ++) {
-//								Tile t = zz.getTile(x+i, y+j);
-//								if (t != null) {
-//									tenv.expandToInclude(t.getBoundsLatLong());
-//								}else {
-//									Tile temp = new Tile(x+i, y+j, zz);
-//									tenv.expandToInclude(temp.getBoundsLatLong());
-//								}
-//							}
+//						Tile maxTile = zz.getTile(x+TILE_TO_RENDER_BUFFER, y+TILE_TO_RENDER_BUFFER);
+//						if (maxTile != null) {
+//							tenv.expandToInclude(maxTile.getBoundsLatLong());
+//						}else{
+//							Tile temp = new Tile(x+TILE_TO_RENDER_BUFFER, y+TILE_TO_RENDER_BUFFER, zz);
+//							tenv.expandToInclude(temp.getBoundsLatLong());
 //						}
+						
+						
+						for (int i = 0; i < TILE_TO_RENDER_BUFFER; i ++) {
+							for (int j = 0; j < TILE_TO_RENDER_BUFFER; j ++) {
+								Tile t = zz.getTile(x+i, y+j);
+								if (t != null) {
+									tenv.expandToInclude(t.getBoundsLatLong());
+								}else {
+									Tile temp = new Tile(x+i, y+j, zz);
+									tenv.expandToInclude(temp.getBoundsLatLong());
+								}
+							}
+						}
 						
 						ReferencedEnvelope revn = new ReferencedEnvelope(tenv,  SmartDB.DATABASE_CRS);
 						
@@ -215,8 +232,13 @@ public class MbTileGenerator {
 								gc.drawImage(img, 0, 0, 256, 256, startx, starty, startx + 256, starty + 256, null);
 								
 								writeTile(c, t, tileimage);
-								
+								cnt++;
+								System.out.println(cnt + "/" + totalTiles);
 								monitor.worked(1);
+								
+								//TODO: fix zooming - currently tiles are not correct
+								//TODO: support this
+								if (monitor.isCanceled()) return;
 							}
 						}
 						psInsertTile.executeBatch();

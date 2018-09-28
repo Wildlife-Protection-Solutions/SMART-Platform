@@ -103,7 +103,7 @@ public enum PatrolPackageExporter {
 	 * @throws Exception
 	 */
 	public void exportPackage(ConfigurableModel cm, CyberTrackerPropertiesProfile profile, Path mapDirectory, Path exportFile, List<IPackageContribution.PackageContribution> updates, IProgressMonitor monitor) throws Exception{
-		
+		//TODO: support cancelling
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.PatrolPackageExporter_TaskName, 8);
 		
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
