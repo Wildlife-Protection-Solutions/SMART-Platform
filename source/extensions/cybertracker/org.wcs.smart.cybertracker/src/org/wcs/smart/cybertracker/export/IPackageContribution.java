@@ -75,7 +75,7 @@ public interface IPackageContribution {
 		private JSONObject metadataValue = null;
 		
 		public void addFile(Path path) {
-			filesToAdd.add(path);
+			if (!filesToAdd.contains(path)) filesToAdd.add(path);
 		}
 		
 		public List<Path> getAddedFiles(){

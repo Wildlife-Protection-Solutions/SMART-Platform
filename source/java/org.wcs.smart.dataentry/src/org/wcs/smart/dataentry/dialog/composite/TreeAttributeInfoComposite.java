@@ -258,6 +258,12 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 	}
 	
 
+	@Override
+	public void setSourceObject(CmAttribute attribute, Language language) {
+		super.setSourceObject(attribute, language);
+		this.attributeTreeViewer.refresh();
+	}
+	
 	/**
 	 * 	Load lazy tree data
 	 * 

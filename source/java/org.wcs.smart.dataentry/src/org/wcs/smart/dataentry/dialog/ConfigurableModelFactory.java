@@ -204,6 +204,14 @@ public class ConfigurableModelFactory {
 				parent.getChildren().add(node);
 			}
 			
+			if (c.getIcon() != null) {
+				IconFile iconfile = c.getIcon().getIconFile(model.getIconSet());
+				if (iconfile != null) {
+					//need to create a custom icon
+					node.setImageFile(iconfile.getAttachmentFile());
+				}
+			}
+			
 			for (Category kid : c.getActiveChildren()){
 				processCategory(kid, node, model, session, monitor);
 			}

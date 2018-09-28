@@ -37,6 +37,7 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -404,6 +405,24 @@ public class CmSmartToXmlConverter {
 	}
 	private static String getImageFileRef(IImageAssociatedObject obj, ConfigurableModel cm, boolean includeDmIcon) {
 		File file = obj.getImageFile();
+		if (obj.getUuid() == null) {
+			DmObject dm = null;
+			if (obj instanceof CmNode) {
+				if (((CmNode)obj).getCategory() == null) return null;
+				dm = ((CmNode)obj).getCategory();
+			}else if (obj instanceof CmAttribute) {
+				if (((CmAttribute)obj).getAttribute() == null) return null;
+				dm = ((CmAttribute)obj).getAttribute();
+			}else if (obj instanceof CmAttributeListItem) {
+				if (((CmAttributeListItem)obj).getListItem() == null) return null;
+				dm = ((CmAttributeListItem)obj).getListItem();
+			}else if (obj instanceof CmAttributeTreeNode) {
+				if (((CmAttributeTreeNode)obj).getDmTreeNode() == null) return null;
+				dm = ((CmAttributeTreeNode)obj).getDmTreeNode();
+			}
+			if (dm == null) return null;
+			file = new File( UuidUtils.uuidToString( dm.getUuid()) );
+		}
 		if (file == null) return null;
 		if (file.exists()) return file.getName();
 		

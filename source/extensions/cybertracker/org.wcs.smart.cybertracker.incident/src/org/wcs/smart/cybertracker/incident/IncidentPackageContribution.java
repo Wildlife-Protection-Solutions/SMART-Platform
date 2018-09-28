@@ -54,17 +54,25 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
+import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeListItem;
+import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.IImageAssociatedObject;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 public class IncidentPackageContribution implements IPackageContribution{
@@ -244,7 +252,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 		};
 		
 		
-		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convert(cm, monitor);
+		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convert(cm, true, monitor);
 		try(OutputStream out = Files.newOutputStream(incidentFile)){
 			try {
 				CmXmlManager.writeDataModel(xmlModel, out);
@@ -253,6 +261,15 @@ public class IncidentPackageContribution implements IPackageContribution{
 			}
 		}
 		updates.addFile(incidentFile);
+		
+		try(Session s = HibernateManager.openSession()){
+			ConfigurableModel tm = cm;
+			if (tm.getUuid() != null) {
+				tm = s.get(ConfigurableModel.class, cm.getUuid());
+			}
+			includeDmIcons(tm, updates, tempDir);	
+		}
+		
 		
 		Path metadataFile = tempDir.resolve(INCIDENT_METADATA_FILE);
 		createIncidentJson(metadataFile);
@@ -276,4 +293,77 @@ public class IncidentPackageContribution implements IPackageContribution{
 			fw.write(metadataScreens.toJSONString());
 		}
 	}
+	
+	private void includeDmIcons(ConfigurableModel cm, PackageContribution updates, Path tempDir) throws IOException {
+		List<Object> toProcess = new ArrayList<>();
+		toProcess.addAll(cm.getNodes());
+		List<Object> processed = new ArrayList<>();
+		while(!toProcess.isEmpty()) {
+			Object objectNode = toProcess.remove(0);
+			if (processed.contains(objectNode)) continue;
+			processed.add(objectNode);
+			
+			if (objectNode instanceof CmNode) {
+				CmNode node = (CmNode)objectNode;
+				toProcess.addAll(node.getChildren());
+				
+				if (!node.hasCustomImage() && node.getCategory() != null && node.getCategory().getIcon() != null ) {
+					processFile(node.getCategory(), node, cm, updates, tempDir);
+				}
+				if (node.getCmAttributes() != null) {
+					toProcess.addAll(node.getCmAttributes());
+				}
+			}else if (objectNode instanceof CmAttribute) {
+				CmAttribute node = (CmAttribute)objectNode;
+				
+				if (!node.hasCustomImage() && node.getAttribute() != null && node.getAttribute().getIcon() != null ) {
+					processFile(node.getAttribute(), node, cm, updates, tempDir);
+				}
+				
+				if (node.getCurrentList() != null) {
+					toProcess.addAll(node.getCurrentList());
+				}
+				if (node.getCurrentTree() != null) {
+					toProcess.addAll(node.getCurrentTree());
+				}
+			}else if (objectNode instanceof CmAttributeListItem) {
+				CmAttributeListItem node = (CmAttributeListItem)objectNode;
+				
+				if (!node.hasCustomImage() && node.getListItem() != null && node.getListItem().getIcon() != null ) {
+					processFile(node.getListItem(), node, cm, updates, tempDir);
+				}
+			}else if (objectNode instanceof CmAttributeTreeNode) {
+				CmAttributeTreeNode node = (CmAttributeTreeNode)objectNode;
+				
+				if (!node.hasCustomImage() && node.getDmTreeNode() != null && node.getDmTreeNode().getIcon() != null ) {
+					processFile(node.getDmTreeNode(), node, cm, updates, tempDir);
+				}
+				
+				
+				if (node.getChildren() != null) {
+					toProcess.addAll(node.getChildren());
+				}
+			}
+		}
+		
+	}
+	
+	private void processFile(DmObject object, IImageAssociatedObject cmObject, ConfigurableModel cm, 
+			PackageContribution updates, Path tempDir) throws IOException {
+		
+		IconFile file = object.getIcon().getIconFile(cm.getIconSet());
+		if (file != null) {
+			Path fromPath = file.getAttachmentFile().toPath();
+			String fileName = cmObject.getImageFile().getName();
+			if (cmObject.getUuid() == null) {
+				fileName = UuidUtils.uuidToString(object.getUuid());
+			}
+			Path toPath = tempDir.resolve(SharedUtils.getFilenameWithoutExtension(fileName) + "." + SharedUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
+			if (Files.exists(toPath)) return;
+			Files.copy(fromPath, toPath);
+			updates.addFile(toPath);
+		}
+	}
+	
+	
 }

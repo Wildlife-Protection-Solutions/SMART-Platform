@@ -195,7 +195,11 @@ public enum PatrolPackageExporter {
 		if (file != null) {
 			Path fromPath = file.getAttachmentFile().toPath();
 			String fileName = cmObject.getImageFile().getName();
+			if (cmObject.getUuid() == null) {
+				fileName = UuidUtils.uuidToString(object.getUuid());
+			}
 			Path toPath = tempDir.resolve(SharedUtils.getFilenameWithoutExtension(fileName) + "." + SharedUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
+			if (Files.exists(toPath)) return;
 			Files.copy(fromPath, toPath);
 			if (!toIncludeInZip.contains(toPath.toFile())) toIncludeInZip.add(toPath.toFile());
 		}

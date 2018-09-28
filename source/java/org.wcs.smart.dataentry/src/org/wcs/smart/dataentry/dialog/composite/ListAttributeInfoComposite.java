@@ -97,10 +97,7 @@ public class ListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 		createDefaultControl(container);
 		
 		createConfigSelectionControl(container);
-		
-		
-		
-		
+
 		Composite part = new Composite(container, SWT.NONE);
 		part.setLayout(new GridLayout(2, false));
 		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
@@ -298,6 +295,11 @@ public class ListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 		}
 	}
 	
+	@Override
+	public void setSourceObject(CmAttribute attribute, Language language) {
+		super.setSourceObject(attribute, language);
+		this.listViewer.refresh();
+	}
 	
 	private void updateListControl() {
 		((CmListItemLabelProvider)listViewer.getLabelProvider()).setLanguage(currentLanguage);

@@ -127,7 +127,7 @@ public class SharedUtils {
 	 */
 	public static String getFilenameWithoutExtension(String part) {
 		int index = part.lastIndexOf('.');
-		if (index < 0) return ""; //$NON-NLS-1$
+		if (index < 0) return part;
 		return part.substring(0,index);
 	}
 	
