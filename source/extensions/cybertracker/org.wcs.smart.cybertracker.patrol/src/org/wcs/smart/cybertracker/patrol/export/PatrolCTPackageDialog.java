@@ -52,7 +52,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
@@ -90,13 +89,10 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 	private static final String LAST_FILE_KEY = "PatrolCTPackageDialog.file"; //$NON-NLS-1$
 	private static final String LAST_CM_KEY = "PatrolCTPackageDialog.cm"; //$NON-NLS-1$
 	private static final String LAST_PROFILE_KEY ="PatrolCTPackageDialog.profile"; //$NON-NLS-1$
-	private static final String LAST_MAPDIR_KEY ="PatrolCTPackageDialog.mapdir"; //$NON-NLS-1$
 
-	
 	private ComboViewer modelViewer;
 	private ComboViewer profileViewer;
 	private Text txtOutputFile;
-	private Text txtMapDirectory;
 	
 	private CyberTrackerPropertiesProfile selectedProfile = null;
 	
@@ -115,10 +111,8 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 
     public void okPressed() {
     	String selectedFile = txtOutputFile.getText();
-    	String selectedMapDirectory = txtMapDirectory.getText();
     	
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_FILE_KEY, selectedFile);
-    	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_MAPDIR_KEY, selectedMapDirectory);
     	if (selectedModel != null) {
     		CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_CM_KEY, UuidUtils.uuidToString(selectedModel.getUuid()));
     	}else {
@@ -143,12 +137,8 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 				return;
 			}
 		}
-		
-		Path mapDirectory = null;
-		if (selectedMapDirectory != null && !selectedMapDirectory.trim().isEmpty()) {
-			mapDirectory = Paths.get(selectedMapDirectory);
-		}
-		final Path fMapDirectory = mapDirectory;
+
+		final boolean[] iscancel = new boolean[] {false};
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
 			pmd.run(true, true, new IRunnableWithProgress() {
@@ -167,6 +157,7 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 								if (update != null) updates.add(update);
 							}
 						}
+						progress.checkCanceled();
 						
 						ConfigurableModel toExport = null;
 						if (selectedDataModel != null) {
@@ -179,13 +170,15 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 						}else {
 							toExport = selectedModel;
 						}
-						PatrolPackageExporter.INSTANCE.exportPackage(toExport, selectedProfile, fMapDirectory, exportFile, updates, progress.split(1));
+						progress.checkCanceled();
+						PatrolPackageExporter.INSTANCE.exportPackage(toExport, selectedProfile, exportFile, updates, progress.split(1));
 						
 						Display.getDefault().syncExec(()->{
 							MessageDialog.openInformation(getShell(), Messages.PatrolCTPackageDialog_CompleteTitle, MessageFormat.format(Messages.PatrolCTPackageDialog_CompleteMsg,exportFile.toString()));	
 						});
 						
 					}catch(OperationCanceledException e) {
+						iscancel[0] = true;
 						Display.getDefault().syncExec(()->{
 							MessageDialog.openError(getShell(), Messages.PatrolCTPackageDialog_CancelledTitle, Messages.PatrolCTPackageDialog_CancelledMsg);	
 						});
@@ -199,8 +192,7 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 			CyberTrackerPlugIn.displayError(Messages.PatrolCTPackageDialog_ErrorTitle, Messages.PatrolCTPackageDialog_ErrorMsg + e.getMessage(), e);
 			return;
 		}	
-		super.okPressed();
-		
+		if (!iscancel[0]) super.okPressed();
     }
     
     
@@ -335,28 +327,6 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 			}
 		});
 		
-		
-		Label mapFileDir = new Label(g, SWT.NONE);
-		mapFileDir.setText(Messages.PatrolCTPackageDialog_MapDirectoryLabel);
-		mapFileDir.setToolTipText(Messages.PatrolCTPackageDialog_MapDirectoryTooltip);
-		
-		txtMapDirectory = new Text(g, SWT.BORDER);
-		txtMapDirectory.setText(""); //$NON-NLS-1$
-		txtMapDirectory.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtMapDirectory.addListener(SWT.Modify, e->validate());
-		
-		Button btnBrowse2 = new Button(g, SWT.PUSH);
-		btnBrowse2.setText("..."); //$NON-NLS-1$
-		btnBrowse2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnBrowse2.addListener(SWT.Selection, e->{
-			DirectoryDialog fd = new DirectoryDialog(getShell());
-			fd.setFilterPath(txtMapDirectory.getText());
-			fd.setText(Messages.PatrolCTPackageDialog_MapDirectoryDialogTitle);
-			String dir = fd.open();
-			if (dir == null) return;
-			txtMapDirectory.setText(dir);
-		});
-		
 		if (contributions != null) {
 			for (IPackageContribution cc : contributions) {
 				Composite part = cc.createUi(main, "patrol"); //$NON-NLS-1$
@@ -403,9 +373,6 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 		String text = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_FILE_KEY);
 		if (text != null) txtOutputFile.setText(text);
 
-		String mapdir = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_MAPDIR_KEY);
-		if (mapdir != null) txtMapDirectory.setText(mapdir);
-				
     	final String lastCmUuid = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_CM_KEY);
     	final String lastProfileUuid = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_PROFILE_KEY);
     	

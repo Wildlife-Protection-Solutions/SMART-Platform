@@ -72,12 +72,22 @@ public interface IPackageContribution {
 		
 		private List<Path> filesToAdd = new ArrayList<>();
 		private String metadataKey = null;
-		private JSONObject metadataValue = null;
+		private Object metadataValue = null;
 		
+		/**
+		 * Can be file or a directory. If a directory all subdirectories will
+		 * also be copied
+		 * @param path
+		 */
 		public void addFile(Path path) {
 			if (!filesToAdd.contains(path)) filesToAdd.add(path);
 		}
 		
+		/**
+		 * Paths can be files or directories.  If directory should copy
+		 * all sub directory/files
+		 * @return
+		 */
 		public List<Path> getAddedFiles(){
 			return this.filesToAdd;
 		}
@@ -86,11 +96,20 @@ public interface IPackageContribution {
 			return metadataKey;
 		}
 		
-		public JSONObject getProjectMetdata() {
+		/**
+		 * 
+		 * @return either JSONObject or String
+		 */
+		public Object getProjectMetdata() {
 			return metadataValue;
 		}
 		
 		public void setProjectMetadata(String key, JSONObject value) {
+			this.metadataKey = key;
+			this.metadataValue = value;
+		}
+		
+		public void setProjectMetadata(String key, String value) {
 			this.metadataKey = key;
 			this.metadataValue = value;
 		}

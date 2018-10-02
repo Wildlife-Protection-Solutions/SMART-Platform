@@ -86,6 +86,7 @@ import org.wcs.smart.report.birt.map.item.LayerItem;
 import org.wcs.smart.report.birt.map.item.LayerItemFactory;
 import org.wcs.smart.report.birt.map.item.SmartMapItem;
 import org.wcs.smart.ui.BasemapLabelProvider;
+import org.wcs.smart.ui.SelectBoundsMapDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 /**
@@ -444,7 +445,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		btnSetBounds.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				MapDialog md = new MapDialog(Display.getDefault().getActiveShell(), 
+				SelectBoundsMapDialog md = new SelectBoundsMapDialog(Display.getDefault().getActiveShell(), 
 						getSelectedBasemapUuid(), mapItem.getMapBounds());
 				if (md.open() != Window.OK){
 					return;

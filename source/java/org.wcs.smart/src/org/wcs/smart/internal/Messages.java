@@ -1006,6 +1006,12 @@ public class Messages extends NLS {
 	public static String LoginLogDialog_5;
 	public static String LoginLogDialog_6;
 	public static String LogOfLogins_Dialog_Title;
+	public static String MapDialog_CoordinatesLabel;
+	public static String MapDialog_DialogTitle;
+	public static String MapDialog_Error_SettingMapProjection;
+	public static String MapDialog_MapName;
+	public static String MapDialog_ResizeJobName;
+	public static String MapDialog_SetBounds_Button;
 	public static String MapComposite_Map_Name;
 	public static String MapComposite_MapResizeJob_Title;
 	public static String MapComposite_PointLayer_Add_Error;

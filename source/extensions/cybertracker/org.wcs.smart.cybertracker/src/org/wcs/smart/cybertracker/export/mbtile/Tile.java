@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.export.mbtile;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
@@ -70,18 +71,56 @@ public class Tile {
 	 * @return the tile bounds in lat long
 	 */
 	public Envelope getBoundsLatLong() {
+
 		double north = Math.toDegrees(Math.atan(Math.sinh( (Math.PI - (2.0 * Math.PI * tiley) / Math.pow(2.0, zoom.getZoom())) )));
 		double south = Math.toDegrees(Math.atan(Math.sinh( (Math.PI - (2.0 * Math.PI * (tiley + 1)) / Math.pow(2.0, zoom.getZoom())) )));
 		double west = tilex / Math.pow(2.0, zoom.getZoom()) * 360.0 - 180;
 		double east = (tilex + 1) / Math.pow(2.0, zoom.getZoom()) * 360.0 - 180;
+		
 		return new Envelope(west, east, south, north);
 	}
 
 	/**
-	 * 	
-	 * @return the wkt polygon representation of the tile bounds
+	 * 
+	 * @return the tile in spherical mercator
 	 */
-	public String asWkt() {
+	public Envelope getBoundsMercator() {
+		Envelope ee = getBoundsLatLong();
+		Envelope e = new Envelope(toMercator(ee.getMinX(), ee.getMinY()), toMercator(ee.getMaxX(), ee.getMaxY()));
+		return e;
+	}
+	
+	private Coordinate toMercator(double x, double y) {
+		x = 6378137.0 * Math.toRadians(x);
+		if (y <= -90 ) { 
+			y = Double.NEGATIVE_INFINITY;
+		}else if (y >= 90) {
+			y = Double.POSITIVE_INFINITY;
+		}else {
+			y = 6378137.0 * Math.log(
+			Math.tan((Math.PI * 0.25) + (0.5 * Math.toRadians(y))));
+		}
+		return new Coordinate(x,y);
+	}
+	
+	/**
+	 * 	
+	 * @return the wkt polygon representation of the tile bounds in lat/long
+	 */
+	public String asWktLatLong() {
+		Envelope e = getBoundsMercator();
+		return "POLYGON((" + e.getMinX() + " " + e.getMinY() + "," + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			e.getMinX() + " " + e.getMaxY() + "," + //$NON-NLS-1$ //$NON-NLS-2$
+			e.getMaxX() + " " + e.getMaxY() + "," + //$NON-NLS-1$ //$NON-NLS-2$
+			e.getMaxX() + " " + e.getMinY() + "," + //$NON-NLS-1$ //$NON-NLS-2$
+			e.getMinX() + " " + e.getMinY() + "))"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	/**
+	 * 	
+	 * @return the wkt polygon representation of the tile bounds in mercator
+	 */
+	public String asWktMercator() {
 		Envelope e = getBoundsLatLong();
 		return "POLYGON((" + e.getMinX() + " " + e.getMinY() + "," + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			e.getMinX() + " " + e.getMaxY() + "," + //$NON-NLS-1$ //$NON-NLS-2$

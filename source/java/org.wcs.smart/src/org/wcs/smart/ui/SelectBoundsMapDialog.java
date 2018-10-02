@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.birt.map.properties;
+package org.wcs.smart.ui;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.internal.command.navigation.ZoomCommand;
 import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
 import org.locationtech.udig.project.internal.render.RenderPackage;
 import org.locationtech.udig.project.internal.render.ViewportModel;
@@ -65,7 +66,7 @@ import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.report.birt.map.internal.Messages;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.ProjectionDialog;
@@ -84,7 +85,7 @@ import com.vividsolutions.jts.geom.Coordinate;
  * @author Emily
  *
  */
-public class MapDialog extends Dialog implements MapPart{
+public class SelectBoundsMapDialog extends Dialog implements MapPart{
 
 	private MapViewer viewer;
 	private Label lblCoordinates;
@@ -99,7 +100,7 @@ public class MapDialog extends Dialog implements MapPart{
 		}
 	};
 	
-	protected MapDialog(Shell parentShell, UUID basemapUuid, ReferencedEnvelope mapBounds) {
+	public SelectBoundsMapDialog(Shell parentShell, UUID basemapUuid, ReferencedEnvelope mapBounds) {
 		super(parentShell);
 		this.basemapUuid = basemapUuid;
 		this.bounds = mapBounds;
@@ -171,8 +172,7 @@ public class MapDialog extends Dialog implements MapPart{
 			@Override
 			public void done(IJobChangeEvent event) {
 				if (bounds == null) return;
-				getMap().getViewportModelInternal().setBounds(bounds);
-				getMap().getRenderManager().refresh(null);
+				getMap().sendCommandASync(new ZoomCommand(bounds));
 			}
 		});
 		layer.schedule();

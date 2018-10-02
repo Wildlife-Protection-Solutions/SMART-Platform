@@ -5,12 +5,7 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.report.birt.map.internal.messages"; //$NON-NLS-1$
 	public static String DatasetComobInputDialog_Error_NoDataset;
-	public static String MapDialog_CoordinatesLabel;
-	public static String MapDialog_DialogTitle;
-	public static String MapDialog_Error_SettingMapProjection;
-	public static String MapDialog_MapName;
-	public static String MapDialog_ResizeJobName;
-	public static String MapDialog_SetBounds_Button;
+	
 	public static String SmartLayersPage_AddLayer_DialogMessage;
 	public static String SmartLayersPage_AddLayer_DialogTitle;
 	public static String SmartLayersPage_addtooltip;

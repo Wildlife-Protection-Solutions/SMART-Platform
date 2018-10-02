@@ -33,6 +33,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 
 import javax.imageio.ImageIO;
 
@@ -40,15 +41,19 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
 import org.locationtech.udig.project.render.RenderException;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.ApplicationGIS.DrawMapParameter;
 import org.locationtech.udig.project.ui.BoundsStrategy;
 import org.locationtech.udig.project.ui.SelectionStyle;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.ca.BasemapDefinition;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.internal.settings.MapSettings;
 
@@ -72,6 +77,8 @@ public class MbTileGenerator {
 	
 	private static final int TILESIZE = 256;
 	private static final int TILE_TO_RENDER_BUFFER = 10;
+	
+	private PreparedStatement psInsertTile;
 	
 	public MbTileGenerator() {
 		
@@ -111,6 +118,11 @@ public class MbTileGenerator {
 		return totaltiles;
 	}
 	
+	/**
+	 * Suggests zoom levels for given envelope (in lat/long)
+	 * 
+	 * @return array of min and max suggested zoom level
+	 */
 	public int[] suggestZoomLevels(Envelope env) throws TransformException {
 		double ydistance = JTS.orthodromicDistance(new Coordinate(env.getMinX(), env.getMinY()), new Coordinate(env.getMinX(), env.getMaxY()), SmartDB.DATABASE_CRS);
 		double xdistance = JTS.orthodromicDistance(new Coordinate(env.getMinX(), env.getMinY()), new Coordinate(env.getMaxX(), env.getMinY()), SmartDB.DATABASE_CRS);
@@ -137,30 +149,43 @@ public class MbTileGenerator {
 		return new int[] {minzoom, maxzoom};
 	}
 	
-	
-	private PreparedStatement psInsertTile;
 
+	/**
+	 * Generate mbtiles 
+	 * @param outputPath output files
+	 * @param bounds bounds
+	 * @param minzoom minimum zoom level
+	 * @param maxzoom maximum zoom level
+	 * @param definition basemap definition
+	 * 
+	 * @param monitor
+	 * @throws Exception
+	 */
 	public void generateMbTiles(Path outputPath, ReferencedEnvelope bounds, int minzoom, int maxzoom, BasemapDefinition definition, IProgressMonitor monitor) throws Exception {
 
+		CoordinateReferenceSystem sphericalMercator = CRS.decode("EPSG:3857", true); //$NON-NLS-1$
+		
 		int totalWork = getTileCount(bounds, minzoom, maxzoom) + 2;
 				
-		monitor.beginTask("Generating MBTiles", totalWork);
-		monitor.subTask("creating basemap");
-		
-		//TODO: set map to epsg 4326
+		monitor.beginTask(Messages.MbTileGenerator_TaskName, totalWork);
+		monitor.subTask(Messages.MbTileGenerator_SubTask1);
+
+		//set map to spherical mercator
 		MapSettings settings = MapSettings.getInstance(definition);
 		Map thisMap = ProjectFactory.eINSTANCE.createMap();
-		settings.applyTo(thisMap);
-		monitor.worked(1);
-//		minzoom = 9;
-//		maxzoom = 13;
+		settings.applyTo(thisMap);		
+		thisMap.sendCommandSync(new ChangeCRSCommand(sphericalMercator));
 		
-		Layer lyr = new Layer("SMART Basemap", bounds, minzoom, maxzoom);
+		monitor.worked(1);
+//		minzoom = 1;
+//		maxzoom = 5;
+		
+		Layer lyr = new Layer(Messages.MbTileGenerator_LayerName, bounds, minzoom, maxzoom);
 		
 		try(Connection c = getDbConnection(outputPath)) {
-			c.createStatement().executeUpdate("BEGIN TRANSACTION");
+			c.createStatement().executeUpdate("BEGIN TRANSACTION"); //$NON-NLS-1$
 		
-			monitor.subTask("generating metadata");
+			monitor.subTask(Messages.MbTileGenerator_SubTask2);
 			//create & populated metadata table
 			createMetadata(c, lyr);
 
@@ -169,14 +194,12 @@ public class MbTileGenerator {
 			monitor.worked(1);
 			
 			//create images here 
-			BufferedImage img = new BufferedImage(TILE_TO_RENDER_BUFFER*TILESIZE,  TILE_TO_RENDER_BUFFER*TILESIZE, BufferedImage.TYPE_INT_RGB);
-			Graphics2D gg = img.createGraphics();
 			BufferedImage tileimage = new BufferedImage(256, 256, BufferedImage.TYPE_INT_RGB);
 			Graphics2D gc = tileimage.createGraphics();
 			
 			//populate tiles tables
 			for(ZoomLevel zz : lyr.getZooms()) {
-				monitor.subTask("processing zoom: " + zz.getZoom());
+				monitor.subTask(MessageFormat.format(Messages.MbTileGenerator_SubTask3, zz.getZoom()));
 				
 				int totalTiles = zz.getTiles().size();
 				int cnt = 0;
@@ -190,36 +213,24 @@ public class MbTileGenerator {
 				for (int x = xMinTile; x <= xMaxTile; x += TILE_TO_RENDER_BUFFER) {
 					for (int y = yMinTile; y <= yMaxTile; y += TILE_TO_RENDER_BUFFER) {
 						
-						//compute bounds for envelope
-						Envelope tenv1 = zz.getTile(x,y).getBoundsLatLong();
-						Tile maxTile = zz.getTile(x+TILE_TO_RENDER_BUFFER-1, y+TILE_TO_RENDER_BUFFER-1);
-						if (maxTile != null) {
-							tenv1.expandToInclude(maxTile.getBoundsLatLong());
-						}else{
-							Tile temp = new Tile(x+TILE_TO_RENDER_BUFFER-1, y+TILE_TO_RENDER_BUFFER-1, zz);
-							tenv1.expandToInclude(temp.getBoundsLatLong());
+						Tile minTile = zz.getTile(x, y);
+						Tile maxTile = zz.getTile(Math.min(xMaxTile, x + TILE_TO_RENDER_BUFFER - 1), Math.min(yMaxTile, y + TILE_TO_RENDER_BUFFER - 1));
+						
+						Envelope r1 = minTile.getBoundsMercator();
+						r1.expandToInclude(maxTile.getBoundsMercator());
+						
+						BufferedImage img = new BufferedImage((maxTile.getTileX() - minTile.getTileX()+1)*TILESIZE,  (maxTile.getTileY() - minTile.getTileY()+1)*TILESIZE, BufferedImage.TYPE_INT_RGB);
+						Graphics2D gg = img.createGraphics();
+
+						ReferencedEnvelope rr = new ReferencedEnvelope(r1,  sphericalMercator);
+						BoundsStrategy bnds = new BoundsStrategy(rr);
+						try {
+							DrawMapParameter params = new ApplicationGIS.DrawMapParameter(gg,  new Dimension(img.getWidth(),img.getHeight()), thisMap, bnds, 92, SelectionStyle.IGNORE, new NullProgressMonitor());
+							ApplicationGIS.drawMap(params);
+						}catch (Throwable t) {
+							
 						}
-						
-//						Envelope tenv = zz.getTile(x,y).getBoundsLatLong();
-//						for (int i = 0; i < TILE_TO_RENDER_BUFFER; i ++) {
-//							for (int j = 0; j < TILE_TO_RENDER_BUFFER; j ++) {
-//								Tile t = zz.getTile(x+i, y+j);
-//								if (t != null) {
-//									tenv.expandToInclude(t.getBoundsLatLong());
-//								}else {
-//									Tile temp = new Tile(x+i, y+j, zz);
-//									tenv.expandToInclude(temp.getBoundsLatLong());
-//								}
-//							}
-//						}
-						
-//						System.out.println(tenv1 + ":" + tenv);
-						ReferencedEnvelope revn = new ReferencedEnvelope(tenv1,  SmartDB.DATABASE_CRS);
-						
-						gg.clearRect(0, 0, img.getWidth(), img.getHeight());
-						BoundsStrategy bnds = new BoundsStrategy(revn);
-						DrawMapParameter params = new ApplicationGIS.DrawMapParameter(gg,  new Dimension(img.getWidth(),img.getHeight()), thisMap, bnds, 92, SelectionStyle.IGNORE, new NullProgressMonitor());
-						ApplicationGIS.drawMap(params);
+//						ImageIO.write(img, "png", new File("C:\\temp\\mbtiles\\overview_" + zz.getZoom() + "_" + x + "_" + y + ".png"));
 
 						for (int i = 0; i < TILE_TO_RENDER_BUFFER; i ++) {
 							for (int j = 0; j < TILE_TO_RENDER_BUFFER; j ++) {
@@ -234,12 +245,8 @@ public class MbTileGenerator {
 								
 								writeTile(c, t, tileimage);
 								cnt++;
-								//TODO: remove this
-//								System.out.println(cnt + "/" + totalTiles);
 								monitor.worked(1);
-								
-								//TODO: fix zooming - currently tiles are not correct
-								//TODO: support this
+								monitor.subTask(MessageFormat.format(Messages.MbTileGenerator_SubTask4, + zz.getZoom(), cnt, totalTiles ));
 								if (monitor.isCanceled()) return;
 							}
 						}
@@ -263,7 +270,7 @@ public class MbTileGenerator {
 		psInsertTile.setInt(3, y);
 		
 		try(ByteArrayOutputStream bout = new ByteArrayOutputStream()){
-//			ImageIO.write(img2, "png", new File("C:\\temp\\mbtiles\\abc_" + t.getZoom().getZoom() + "_" + t.getTileX() + "_" + t.getTileY() + ".png"));
+//			ImageIO.write(image, "png", new File("C:\\temp\\mbtiles\\abc_" + t.getZoom().getZoom() + "_" + t.getTileX() + "_" + t.getTileY() + ".png"));
 			ImageIO.write(image, "png", bout); //$NON-NLS-1$
 			psInsertTile.setBytes(4, bout.toByteArray());
 		}

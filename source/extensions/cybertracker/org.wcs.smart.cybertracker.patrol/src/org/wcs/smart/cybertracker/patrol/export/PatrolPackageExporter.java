@@ -102,7 +102,7 @@ public enum PatrolPackageExporter {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void exportPackage(ConfigurableModel cm, CyberTrackerPropertiesProfile profile, Path mapDirectory, Path exportFile, List<IPackageContribution.PackageContribution> updates, IProgressMonitor monitor) throws Exception{
+	public void exportPackage(ConfigurableModel cm, CyberTrackerPropertiesProfile profile, Path exportFile, List<IPackageContribution.PackageContribution> updates, IProgressMonitor monitor) throws Exception{
 		//TODO: support cancelling
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.PatrolPackageExporter_TaskName, 8);
 		
@@ -115,12 +115,20 @@ public enum PatrolPackageExporter {
 				}
 				
 				List<File> toIncludeInZip = new ArrayList<>();
-				HashMap<String, JSONObject> projectAdditions = new HashMap<>();
+				HashMap<String, Object> projectAdditions = new HashMap<>();
 				for (IPackageContribution.PackageContribution update : updates) {
 					for (Path p : update.getAddedFiles()) {
-						Path moveTo = tempDir.resolve(p.getFileName().toString());
-						Files.move(p, moveTo);
-						toIncludeInZip.add(moveTo.toFile());
+						if (Files.isDirectory(p)) {
+							Path dirPath = tempDir.resolve(p.getFileName().toString());
+							Files.createDirectory(dirPath);
+							Path mapfiles = CtJsonExportUtils.copyMapFiles(p, dirPath);
+							if (mapfiles != null) toIncludeInZip.add(mapfiles.toFile());
+							
+						}else {
+							Path moveTo = tempDir.resolve(p.getFileName().toString());
+							Files.move(p, moveTo);
+							toIncludeInZip.add(moveTo.toFile());
+						}
 					}
 					if (update.getProjectMetadataKey() != null) {
 						projectAdditions.put(update.getProjectMetadataKey(), update.getProjectMetdata());
@@ -163,16 +171,8 @@ public enum PatrolPackageExporter {
 				toIncludeInZip.add(profileFile.toFile());
 				
 				sub.split(1);
-				//copy map files
-				Path mapfiles = null;
-				if (mapDirectory != null) {
-					mapfiles = CtJsonExportUtils.copyMapFiles(mapDirectory, tempDir);
-					if (mapfiles != null) toIncludeInZip.add(mapfiles.toFile());
-				}
-				
-				sub.split(1);
 				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile(cm, logo, mapfiles, projectFile, metadataFile, projectAdditions);
+				writeProjectFile(cm, logo, projectFile, metadataFile, projectAdditions);
 				toIncludeInZip.add(projectFile.toFile());
 				
 				ZipUtil.createZip(toIncludeInZip.toArray(new File[toIncludeInZip.size()]), exportFile.toFile(), sub.split(1));
@@ -260,8 +260,8 @@ public enum PatrolPackageExporter {
 		}
 	}
 	
-	private void writeProjectFile(ConfigurableModel cm, Path logoFile, Path mapfiles, Path outputFile, Path metadataFile, HashMap<String, JSONObject> projectAdditions) throws IOException {
-		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, mapfiles, outputFile, metadataFile, projectAdditions);
+	private void writeProjectFile(ConfigurableModel cm, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
+		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
 	}
 	
 	private void profileToJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, Session session, Path outputFile) throws IOException {
