@@ -149,6 +149,7 @@ public enum IntelReportManager {
 	 */
 	//ticket #2530
 	public String generateBirtName(IntelEntityType entityType) {
+		if (entityType == null) return "";
 		return entityType.getName().replaceAll("[^a-zA-Z0-9 ]", ""); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	

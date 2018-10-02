@@ -246,7 +246,7 @@ public class XmlToIntelData {
 				if (!Files.exists(trg.getParent())) {
 					Files.createDirectories(trg.getParent());
 				}
-				Files.copy(src, trg, StandardCopyOption.REPLACE_EXISTING);
+				if (Files.exists(src)) Files.copy(src, trg, StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e1) {
 				copyErrors.add(Messages.XmlToIntelData_SourceCopyError);
 				Intelligence2PlugIn.log(e1.getMessage(), e1);
