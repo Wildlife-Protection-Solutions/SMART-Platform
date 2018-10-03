@@ -47,6 +47,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -109,6 +110,13 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 		this.contributions.add(0,  new MapPackageContribution());
 	}
 
+    @Override
+    public Point getInitialSize() {
+    	Point pnt = super.getInitialSize();
+    	if (pnt.x > 500) pnt.x = 500;
+    	return pnt;
+    }
+    
     public void okPressed() {
     	String selectedFile = txtOutputFile.getText();
     	

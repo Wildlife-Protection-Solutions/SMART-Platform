@@ -137,11 +137,12 @@ public class MbTileGenerator {
 		}
 		
 		int tilesRequired = (int)Math.ceil(totalmeters/1280);
-		
 		double unitsPerTile = dd / tilesRequired;
-		
 		int maxzoom = (int)Math.ceil( Math.log(360 / unitsPerTile) / Math.log(2) );
 		int minzoom = (int)Math.ceil( Math.log(360 / dd) / Math.log(2) );
+		
+		//ensure at least 3 zoom levels
+		if (maxzoom < minzoom + 3) maxzoom = minzoom + 3;
 		
 		if (minzoom < 1) minzoom = 0;
 		if (maxzoom > 20) maxzoom = 20;

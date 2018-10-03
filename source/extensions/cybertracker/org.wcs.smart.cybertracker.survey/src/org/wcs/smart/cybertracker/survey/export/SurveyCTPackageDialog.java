@@ -47,6 +47,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -54,6 +55,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -63,6 +65,7 @@ import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.PackageContributionManager;
+import org.wcs.smart.cybertracker.export.mbtile.MapPackageContribution;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
@@ -103,9 +106,16 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
     public SurveyCTPackageDialog(Shell parentShell) {
 		super(parentShell);
 		this.contributions = PackageContributionManager.INSTANCE.getContributionItems();
-
+		this.contributions.add(0,  new MapPackageContribution());
 	}
 
+    @Override
+    public Point getInitialSize() {
+    	Point pnt = super.getInitialSize();
+    	if (pnt.x > 500) pnt.x = 500;
+    	return pnt;
+    }
+    
     public void okPressed() {
     	String selectedFile = txtOutputFile.getText();
     	
@@ -214,19 +224,23 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 		Composite composite = (Composite) super.createDialogArea(parent);
 		
 		Composite main = new Composite(composite, SWT.NONE);
-		main.setLayout(new GridLayout(3, false));
+		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
+		Group g = new Group(main, SWT.NONE);
+		g.setText(Messages.SurveyCTPackageDialog_PropertiesGroup);
+		g.setLayout(new GridLayout(3, false));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label outputFile = new Label(main, SWT.NONE);
+		Label outputFile = new Label(g, SWT.NONE);
 		outputFile.setText(Messages.SurveyCTPackageDialog_FileLabel);
 		
-		txtOutputFile = new Text(main, SWT.BORDER);
+		txtOutputFile = new Text(g, SWT.BORDER);
 		txtOutputFile.setText(""); //$NON-NLS-1$
 		txtOutputFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtOutputFile.addListener(SWT.Modify, e->validate());
 		
-		Button btnBrowse = new Button(main, SWT.PUSH);
+		Button btnBrowse = new Button(g, SWT.PUSH);
 		btnBrowse.setText("..."); //$NON-NLS-1$
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnBrowse.addListener(SWT.Selection, e->{
@@ -240,10 +254,10 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 			txtOutputFile.setText(file);
 		});
 		
-		Label modelLabel = new Label(main, SWT.NONE);
+		Label modelLabel = new Label(g, SWT.NONE);
 		modelLabel.setText(Messages.SurveyCTPackageDialog_DesignLabel);
 		
-		designViewer = new ComboViewer(main, SWT.READ_ONLY);
+		designViewer = new ComboViewer(g, SWT.READ_ONLY);
 		designViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		((GridData)designViewer.getControl().getLayoutData()).widthHint = 100;
 		designViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -266,10 +280,10 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 		});
 
 		
-		Label lblProfile = new Label(main, SWT.NONE);
+		Label lblProfile = new Label(g, SWT.NONE);
 		lblProfile.setText(Messages.SurveyCTPackageDialog_ProfileLabel);
 
-		profileViewer = new ComboViewer(main, SWT.READ_ONLY);
+		profileViewer = new ComboViewer(g, SWT.READ_ONLY);
 		profileViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		profileViewer.setContentProvider(ArrayContentProvider.getInstance());
 		profileViewer.setLabelProvider(new CtProfileLabelProvider());

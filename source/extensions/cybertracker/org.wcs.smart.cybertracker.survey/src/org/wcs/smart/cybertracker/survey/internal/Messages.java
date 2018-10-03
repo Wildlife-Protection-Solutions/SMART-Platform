@@ -123,6 +123,7 @@ public class Messages extends NLS {
 	public static String SurveyCTPackageDialog_ProfileLabel;
 	public static String SurveyCTPackageDialog_ProfileLoadError;
 	public static String SurveyCTPackageDialog_ProfileRequired;
+	public static String SurveyCTPackageDialog_PropertiesGroup;
 	public static String SurveyCTPackageDialog_SelectDirectoryText;
 	public static String SurveyCTPackageDialog_ShellMsg;
 	public static String SurveyCTPackageDialog_ShellTitle;

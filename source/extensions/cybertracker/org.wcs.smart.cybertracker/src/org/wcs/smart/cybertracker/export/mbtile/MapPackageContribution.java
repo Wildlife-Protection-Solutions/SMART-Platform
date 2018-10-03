@@ -70,6 +70,7 @@ import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -110,7 +111,10 @@ public class MapPackageContribution implements IPackageContribution{
 	
 	private enum MapType{SMARTMAP, CUSTOM};
 	private MapType mapType = MapType.SMARTMAP;
-	
+	private Composite stackComposite;
+	private Composite smartComp, mapDirComp;
+	private Font boldFont, normalFont; 
+	private Link linkFile, linkSmart;
 	
 	@Override
 	public Composite createUi(Composite parent, String prefKey) {
@@ -120,36 +124,36 @@ public class MapPackageContribution implements IPackageContribution{
 		
 		mapComposite = new Group(parent, SWT.NONE);
 		mapComposite.setLayout(new GridLayout());
-		mapComposite.setText("Basemap Options");
+		mapComposite.setText(Messages.MapPackageContribution_BasemapOpsTitle);
 		
 		Composite top = new Composite(mapComposite, SWT.NONE);
 		top.setLayout(new GridLayout(2, false));
 		((GridLayout)top.getLayout()).marginWidth = 0;
 		((GridLayout)top.getLayout()).marginHeight = 0;
 		
-		Link linkSmart = new Link(top,  SWT.NONE);
-		linkSmart.setText("<a>" + "SMART Basemap" + "</a>");
+		linkSmart = new Link(top,  SWT.NONE);
+		linkSmart.setText("<a>" + Messages.MapPackageContribution_BasemapOp + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		Link linkFile = new Link(top,  SWT.NONE);
-		linkFile.setText("<a>" + "Custom Files" + "</a>");
+		linkFile = new Link(top,  SWT.NONE);
+		linkFile.setText("<a>" + Messages.MapPackageContribution_FilesOp + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		FontData boldFontData = linkFile.getFont().getFontData()[0];
 		boldFontData.setStyle(SWT.BOLD);
-		Font boldFont = new Font(top.getShell().getDisplay(), boldFontData);
+		boldFont = new Font(top.getShell().getDisplay(), boldFontData);
 		linkFile.addListener(SWT.Dispose, e->boldFont.dispose());
 		linkSmart.setFont(boldFont);
 		
-		Font normalFont = linkFile.getFont();
+		normalFont = linkFile.getFont();
 		
-		Composite outer = new Composite(mapComposite, SWT.NONE);
-		outer.setLayout(new StackLayout());
-		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		stackComposite = new Composite(mapComposite, SWT.NONE);
+		stackComposite.setLayout(new StackLayout());
+		stackComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite mapDirComp = new Composite(outer, SWT.NONE);
+		mapDirComp = new Composite(stackComposite, SWT.NONE);
 		mapDirComp.setLayout(new GridLayout(3, false));
 		
 		Label l = new Label(mapDirComp, SWT.NONE);
-		l.setText("Map Files Directory:");
+		l.setText(Messages.MapPackageContribution_MapFilesDir);
 		
 		txtMapDirectory = new Text(mapDirComp, SWT.BORDER);
 		txtMapDirectory.setText(""); //$NON-NLS-1$
@@ -162,18 +166,18 @@ public class MapPackageContribution implements IPackageContribution{
 		btnBrowse2.addListener(SWT.Selection, e->{
 			DirectoryDialog fd = new DirectoryDialog(parent.getShell());
 			fd.setFilterPath(txtMapDirectory.getText());
-			fd.setText("CyberTracker Map Files");
+			fd.setText(Messages.MapPackageContribution_CtFilesDialog);
 			String dir = fd.open();
 			if (dir == null) return;
 			txtMapDirectory.setText(dir);
 		});
 		
-		Composite smartComp = new Composite(outer, SWT.NONE);
+		smartComp = new Composite(stackComposite, SWT.NONE);
 		smartComp.setLayout(new GridLayout(2, false));
 		
 		linkFile.addListener(SWT.Selection, e->{
-				((StackLayout)outer.getLayout()).topControl = mapDirComp;
-				outer.layout();
+				((StackLayout)stackComposite.getLayout()).topControl = mapDirComp;
+				stackComposite.layout();
 				linkFile.setFont(boldFont);
 				linkSmart.setFont(normalFont);
 				top.layout();
@@ -181,8 +185,8 @@ public class MapPackageContribution implements IPackageContribution{
 				
 		});
 		linkSmart.addListener(SWT.Selection, e->{
-			((StackLayout)outer.getLayout()).topControl = smartComp;
-			outer.layout();
+			((StackLayout)stackComposite.getLayout()).topControl = smartComp;
+			stackComposite.layout();
 			linkFile.setFont(normalFont);
 			linkSmart.setFont(boldFont);
 			top.layout();
@@ -190,7 +194,7 @@ public class MapPackageContribution implements IPackageContribution{
 		});
 		
 		l = new Label(smartComp, SWT.NONE);
-		l.setText("Basemap:");
+		l.setText(Messages.MapPackageContribution_BasemapLabel);
 		
 		cmbBasemap = new ComboViewer(smartComp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbBasemap.setContentProvider(ArrayContentProvider.getInstance());
@@ -211,7 +215,7 @@ public class MapPackageContribution implements IPackageContribution{
 		});
 		
 		l = new Label(smartComp, SWT.NONE);
-		l.setText("Bounds:");
+		l.setText(Messages.MapPackageContribution_BoundsLabel);
 		enableControls.add(l);
 		
 		Composite bnds = new Composite(smartComp, SWT.NONE);
@@ -222,12 +226,12 @@ public class MapPackageContribution implements IPackageContribution{
 		
 		txtBounds = new Text(bnds, SWT.BORDER);
 		txtBounds.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtBounds.setText("<map extents>");
+		txtBounds.setText(Messages.MapPackageContribution_MapExtents);
 		txtBounds.setEditable(false);
 		enableControls.add(txtBounds);
 		
 		Button btnSelectBm = new Button(bnds, SWT.PUSH);
-		btnSelectBm.setText("...");
+		btnSelectBm.setText("..."); //$NON-NLS-1$
 		btnSelectBm.addListener(SWT.Selection, e->{
 			BasemapDefinition def = getBasemapSelection();
 			if (def == null) return;
@@ -245,7 +249,7 @@ public class MapPackageContribution implements IPackageContribution{
 		enableControls.add(btnSelectBm);
 		
 		l = new Label(smartComp, SWT.NONE);
-		l.setText("Zoom:");
+		l.setText(Messages.MapPackageContribution_ZoomLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		((GridData)l.getLayoutData()).verticalIndent = 3;
 		enableControls.add(l);
@@ -263,7 +267,7 @@ public class MapPackageContribution implements IPackageContribution{
 		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		l = new Label(left, SWT.NONE);
-		l.setText("Min:");
+		l.setText(Messages.MapPackageContribution_MinLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		enableControls.add(l);
 		
@@ -287,7 +291,7 @@ public class MapPackageContribution implements IPackageContribution{
 		enableControls.add(minBounds.getControl());
 		
 		l = new Label(left, SWT.NONE);
-		l.setText("Max:");
+		l.setText(Messages.MapPackageContribution_MaxLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		enableControls.add(l);
 		
@@ -318,49 +322,13 @@ public class MapPackageContribution implements IPackageContribution{
 		
 		warnLabel = new Label(zoomComp, SWT.WRAP);
 		warnLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		warnLabel.setText("");
+		warnLabel.setText(""); //$NON-NLS-1$
 		((GridData)warnLabel.getLayoutData()).widthHint = warnLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 		enableControls.add(warnLabel);
+		
+		initializeFromPreferences();
 		loadBm.schedule();
 		
-		
-		String type = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(TYPE_PREF_KEY);
-		if (type != null) {
-			mapType = MapType.valueOf(type);
-			if (mapType == MapType.SMARTMAP) {
-				((StackLayout)outer.getLayout()).topControl = smartComp;
-				linkSmart.setFont(boldFont);
-				linkFile.setFont(normalFont);
-				
-				ReferencedEnvelope ee = envFromString(CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(BOUNDS_PREF_KEY));
-				if (ee != null) {
-					txtBounds.setText(ee.toString());
-					txtBounds.setData(RE_KEY, ee);
-				}
-				
-				int minZoom = CyberTrackerPlugIn.getDefault().getPreferenceStore().getInt(MINZOOM_PREF_KEY);
-				if (minZoom > 0) {
-					minBounds.setSelection(new StructuredSelection(minZoom));
-				}
-				int maxZoom = CyberTrackerPlugIn.getDefault().getPreferenceStore().getInt(MAXZOOM_PREF_KEY);
-				if (maxZoom > 0) {
-					maxBounds.setSelection(new StructuredSelection(maxZoom));
-				}
-				checkTiles();
-			}else {
-				((StackLayout)outer.getLayout()).topControl = mapDirComp;
-				linkFile.setFont(boldFont);
-				linkSmart.setFont(normalFont);
-
-				String dir = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(FOLDER_PREF_KEY);
-				txtMapDirectory.setText(dir);
-			}
-			outer.layout();
-			top.layout();
-		}else {
-			((StackLayout)outer.getLayout()).topControl = smartComp;
-		}
-
 		return mapComposite;
 	}
 
@@ -440,21 +408,96 @@ public class MapPackageContribution implements IPackageContribution{
 
 		int tiles = generator.getTileCount(re, getMinZoom(), getMaxZoom());
 		if (tiles < 100_000) {
-			warnLabel.setText(MessageFormat.format("{0} tiles", tiles));
+			warnLabel.setText(MessageFormat.format(Messages.MapPackageContribution_TilesCnt, tiles));
 			warnImage.setVisible(false);
 		}else {
 			warnImage.setVisible(true);
-			warnLabel.setText(MessageFormat.format("{0} tiles.  Recommend reducing bounds or zoom levels", tiles));
+			warnLabel.setText(MessageFormat.format(Messages.MapPackageContribution_TilesWarnCnt, tiles));
 		}
 		mapComposite.getParent().layout(true);
 	}
 	
 	private void clearWarn() {
-		warnLabel.setText("");
+		warnLabel.setText(""); //$NON-NLS-1$
 		warnImage.setVisible(false);
 		mapComposite.getParent().layout(true);
 	}
 	
+	@SuppressWarnings("unchecked")
+	private void initializeFromPreferences() {
+		String type = getPreference(TYPE_PREF_KEY);
+		if (type != null && !type.trim().isEmpty()) {
+			mapType = MapType.valueOf(type);
+			
+			Object selection = null;
+			String bmUuid = getPreference(BASEMAP_PREF_KEY);
+			if (bmUuid != null && !bmUuid.trim().isEmpty()) {
+				selection = UuidUtils.stringToUuid(bmUuid);
+			}
+			if (cmbBasemap.getInput() instanceof List) {
+				List<Object> items = (List<Object>) cmbBasemap.getInput();
+				for (Object x : items) {
+					if (x instanceof BasemapDefinition && ((BasemapDefinition)x).getUuid().equals(selection)) {
+						selection = x;
+						break;
+					}
+				}
+				if (selection == null) selection = items.get(0);
+				cmbBasemap.setSelection(new StructuredSelection(selection));
+			}else {
+				cmbBasemap.setSelection(new StructuredSelection(cmbBasemap.getInput()));
+			}
+			
+			if (mapType == MapType.SMARTMAP) {
+				((StackLayout)stackComposite.getLayout()).topControl = smartComp;
+				linkSmart.setFont(boldFont);
+				linkFile.setFont(normalFont);
+				
+				ReferencedEnvelope ee = envFromString(getPreference(BOUNDS_PREF_KEY));
+				if (ee != null) {
+					txtBounds.setText(ee.toString());
+					txtBounds.setData(RE_KEY, ee);
+				}
+				
+				int minZoom = CyberTrackerPlugIn.getDefault().getPreferenceStore().getInt(getPreferenceKey(MINZOOM_PREF_KEY));
+				if (minZoom > 0) {
+					minBounds.setSelection(new StructuredSelection(minZoom));
+				}
+				int maxZoom = CyberTrackerPlugIn.getDefault().getPreferenceStore().getInt(getPreferenceKey(MAXZOOM_PREF_KEY));
+				if (maxZoom > 0) {
+					maxBounds.setSelection(new StructuredSelection(maxZoom));
+				}
+				checkTiles();
+			}else {
+				((StackLayout)stackComposite.getLayout()).topControl = mapDirComp;
+				linkFile.setFont(boldFont);
+				linkSmart.setFont(normalFont);
+
+				String dir = getPreference(FOLDER_PREF_KEY);
+				txtMapDirectory.setText(dir);
+			}
+			stackComposite.layout();
+			linkSmart.getParent().layout();
+		}else {
+			((StackLayout)stackComposite.getLayout()).topControl = smartComp;
+			if (cmbBasemap.getInput() instanceof List) {
+				Object selection = null;
+				List<Object> items = (List<Object>) cmbBasemap.getInput();
+				if (selection == null) selection = items.get(0);
+				cmbBasemap.setSelection(new StructuredSelection(selection));
+			}else {
+				cmbBasemap.setSelection(new StructuredSelection(cmbBasemap.getInput()));
+			}
+		}
+	}
+	
+	/*
+	 * Gets the given String preference from the preference store
+	 * 
+	 */
+	private String getPreference(String key) {
+		return CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(getPreferenceKey(key));
+	}
 	
 	/*
 	 * append the conservation area uuid to preference key so each conservation
@@ -464,41 +507,20 @@ public class MapPackageContribution implements IPackageContribution{
 		return key + "." + prefKey + "." + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
-	private Job loadBm = new Job("loading basemaps") {
+	private Job loadBm = new Job(Messages.MapPackageContribution_loadingJobname) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Object> items = new ArrayList<>();
-			
-			Object selection = null;
-			String bmUuid = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(BASEMAP_PREF_KEY);
-			if (bmUuid != null) {
-				selection = UuidUtils.stringToUuid(bmUuid);
-			}
-			
 			try(Session session = HibernateManager.openSession()){
 				items.addAll(
 						QueryFactory.buildQuery(session,  BasemapDefinition.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
-				
-				for (Object i : items) {
-					((BasemapDefinition)i).getName();
-					if (((BasemapDefinition)i).getUuid().equals(selection)) {
-						selection = (BasemapDefinition) i;
-					}
-				}
 			}
-			items.add(0, "(NONE)");
-			if (selection == null) {
-				selection = items.get(0);
-			}
-			
-			
-			final Object fselection = selection;
+			items.add(0, Messages.MapPackageContribution_NoBasemap);
 			Display.getDefault().asyncExec(()->{
 				cmbBasemap.setInput(items);
-				cmbBasemap.setSelection(new StructuredSelection(fselection));
-				//todo: we don't want to change min/max zoom settings or envelope
+				initializeFromPreferences();
 			});
 			
 			return Status.OK_STATUS;
@@ -508,16 +530,16 @@ public class MapPackageContribution implements IPackageContribution{
 	
 	private String envToString(ReferencedEnvelope env) {
 		if (!CRS.equalsIgnoreMetadata(env.getCoordinateReferenceSystem(), SmartDB.DATABASE_CRS)) {
-			SmartPlugIn.log("Can only save envelopes in lat/long", null);
-			return "";
+			SmartPlugIn.log("Can only save envelopes in lat/long", null); //$NON-NLS-1$
+			return ""; //$NON-NLS-1$
 		}
 		StringBuilder sb = new StringBuilder();
 		sb.append(env.getMinX());
-		sb.append(",");
+		sb.append(","); //$NON-NLS-1$
 		sb.append(env.getMaxX());
-		sb.append(",");
+		sb.append(","); //$NON-NLS-1$
 		sb.append(env.getMinY());
-		sb.append(",");
+		sb.append(","); //$NON-NLS-1$
 		sb.append(env.getMaxY());
 
 		return sb.toString();
@@ -526,7 +548,7 @@ public class MapPackageContribution implements IPackageContribution{
 	private ReferencedEnvelope envFromString(String string) {
 		if (string.trim().length() == 0) return null;
 		
-		String[] bits = string.split(",");
+		String[] bits = string.split(","); //$NON-NLS-1$
 		double minx = Double.valueOf(bits[0]);
 		double maxx = Double.valueOf(bits[1]);
 		double miny = Double.valueOf(bits[2]);
@@ -552,15 +574,15 @@ public class MapPackageContribution implements IPackageContribution{
 			}			
 		});
 		
-		CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(TYPE_PREF_KEY, mapType.name());
+		CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(TYPE_PREF_KEY), mapType.name());
 		
 		if (mapType == MapType.SMARTMAP) {
-			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(BASEMAP_PREF_KEY, UuidUtils.uuidToString( ((BasemapDefinition)data[0]).getUuid()) );
-			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(BOUNDS_PREF_KEY, envToString(((ReferencedEnvelope)data[3])));
-			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(MINZOOM_PREF_KEY, (int)data[1]);
-			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(MAXZOOM_PREF_KEY, (int)data[2]);
+			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(BASEMAP_PREF_KEY), UuidUtils.uuidToString( ((BasemapDefinition)data[0]).getUuid()) );
+			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(BOUNDS_PREF_KEY), envToString(((ReferencedEnvelope)data[3])));
+			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(MINZOOM_PREF_KEY), (int)data[1]);
+			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(MAXZOOM_PREF_KEY), (int)data[2]);
 		}else {
-			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(FOLDER_PREF_KEY, (String)data[0]);
+			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(FOLDER_PREF_KEY), (String)data[0]);
 		}
 		
 		if (data[0] == null) return new PackageContribution();
