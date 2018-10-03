@@ -529,6 +529,7 @@ public class MapPackageContribution implements IPackageContribution{
 	};
 	
 	private String envToString(ReferencedEnvelope env) {
+		if (env == null) return "";
 		if (!CRS.equalsIgnoreMetadata(env.getCoordinateReferenceSystem(), SmartDB.DATABASE_CRS)) {
 			SmartPlugIn.log("Can only save envelopes in lat/long", null); //$NON-NLS-1$
 			return ""; //$NON-NLS-1$
@@ -577,10 +578,22 @@ public class MapPackageContribution implements IPackageContribution{
 		CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(TYPE_PREF_KEY), mapType.name());
 		
 		if (mapType == MapType.SMARTMAP) {
-			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(BASEMAP_PREF_KEY), UuidUtils.uuidToString( ((BasemapDefinition)data[0]).getUuid()) );
+			if (data[0] == null) {
+				CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(BASEMAP_PREF_KEY), "" );
+			}else {
+				CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(BASEMAP_PREF_KEY), UuidUtils.uuidToString( ((BasemapDefinition)data[0]).getUuid()) );
+			}
 			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(BOUNDS_PREF_KEY), envToString(((ReferencedEnvelope)data[3])));
-			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(MINZOOM_PREF_KEY), (int)data[1]);
-			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(MAXZOOM_PREF_KEY), (int)data[2]);
+			if (data[1] == null) {
+				CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(MINZOOM_PREF_KEY), -1);
+			}else {
+				CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(MINZOOM_PREF_KEY), (int)data[1]);
+			}
+			if (data[2] == null) {
+				CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(MAXZOOM_PREF_KEY), -1);
+			}else {
+				CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(MAXZOOM_PREF_KEY), (int)data[2]);
+			}
 		}else {
 			CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(FOLDER_PREF_KEY), (String)data[0]);
 		}
