@@ -118,7 +118,8 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		
 		SashForm form = new SashForm(container, SWT.HORIZONTAL);
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+		((GridData)form.getLayoutData()).heightHint = 50;
+
 		modelListViewer = new TableViewer(form, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		modelListViewer.setLabelProvider(new ConfigurableModelLabelProvider());
 		modelListViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -138,7 +139,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		modelTreeViewer.setLabelProvider(new ConfigurableModelLabelProvider());
 		modelTreeViewer.setContentProvider(new ConfigurableModelTreeContentProvider(false));
 		modelTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+		((GridData)modelTreeViewer.getControl().getLayoutData()).heightHint = 100;
 		form.setWeights(new int[]{40,60});
 		
 		Composite buttonComposite = new Composite(container, SWT.NONE);
