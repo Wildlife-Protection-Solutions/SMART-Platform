@@ -36,13 +36,50 @@ public class Layer {
 	private List<ZoomLevel> zooms;
 	private Envelope env;
 	
+	private int[] minZoomMinTiles;
+	private int[] minZoomMaxTiles;
+	
+	private int minZoom;
+	private int maxZoom;
+	
 	public Layer(String name, Envelope bounds, int minZoom, int maxZoom) {
 		this.name = name;
 		this.env = bounds;
+		
+		this.minZoom = minZoom;
+		this.maxZoom = maxZoom;
+		
 		zooms = new ArrayList<>();
+		
+		int[] bndsminTile = ZoomLevel.toTile(bounds.getMinX(), bounds.getMinY(), minZoom);
+		int[] bndsmaxTile = ZoomLevel.toTile(bounds.getMaxX(), bounds.getMaxY(), minZoom);
+		
+		int xMinTile = bndsminTile[0];
+		int yMinTile = bndsminTile[1];
+		int xMaxTile = bndsmaxTile[0];
+		int yMaxTile = bndsmaxTile[1];
+
+		minZoomMinTiles = new int[] {xMinTile, yMinTile};
+		minZoomMaxTiles = new int[] {xMaxTile, yMaxTile};
+		
 		for (int zoom = minZoom; zoom <= maxZoom; zoom++) {
 			zooms.add(new ZoomLevel(this, zoom));
 		}
+	}
+	
+	/**
+	 * The x,y tiles representing the minimum tiles for the minimum zoom level 
+	 * @return
+	 */
+	public int[] getMinZoomMinTiles() {
+		return minZoomMinTiles;
+	}
+	/**
+	 * The x,y tiles representing the maximum tiles for the minimum zoom level 
+	 * @return
+	 */
+	public int[] getMinZoomMaxTiles() {
+		return minZoomMaxTiles;
 	}
 	
 	/**
@@ -66,7 +103,7 @@ public class Layer {
 	 * @return
 	 */
 	public int getMinZoom() {
-		return zooms.get(0).getZoom();
+		return minZoom;
 	}
 	
 	/**
@@ -74,7 +111,7 @@ public class Layer {
 	 * @return
 	 */
 	public int getMaxZoom() {
-		return zooms.get(zooms.size() - 1).getZoom();
+		return maxZoom;
 	}
 	
 	public List<ZoomLevel> getZooms(){

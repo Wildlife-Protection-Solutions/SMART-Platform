@@ -98,22 +98,18 @@ public class MbTileGenerator {
 		
 		int totaltiles = 0;
 		
+		int[] bndsminTile = ZoomLevel.toTile(bounds.getMinX(), bounds.getMinY(), minzoom);
+		int[] bndsmaxTile = ZoomLevel.toTile(bounds.getMaxX(), bounds.getMaxY(), minzoom);
+		
 		for (int zoom = minzoom; zoom <= maxzoom; zoom ++) {
-			int[] minTile = ZoomLevel.toTile(bounds.getMinX(), bounds.getMinY(), zoom);
-			int[] maxTile = ZoomLevel.toTile(bounds.getMaxX(), bounds.getMaxY(), zoom);
-
-			int xtile = minTile[0];
-			int ytile = minTile[1];
-
-			int xtile2 = maxTile[0];
-			int ytile2 = maxTile[1];
-
-			int startx = xtile < 0 ? 0 : xtile;
-			int starty = ytile2 < 0 ? 0 : ytile2;
 			
-			int endx = (int) Math.min(xtile2, Math.pow(2, zoom));
-			int endy = (int) Math.min(ytile, Math.pow(2, zoom));
-			totaltiles += (endx - startx) * (endy - starty);
+			int startx = bndsminTile[0] * (int)Math.pow(2,  (zoom - minzoom) );
+			int starty = bndsmaxTile[1] * (int)Math.pow(2,  (zoom - minzoom) );
+			
+			int endx = (bndsmaxTile[0] + 1) * (int)Math.pow(2,  (zoom - minzoom) ) - 1;
+			int endy = (bndsminTile[1] + 1)* (int)Math.pow(2,  (zoom - minzoom) ) - 1;
+			
+			totaltiles += (endx - startx + 1) * (endy - starty + 1);
 		}
 		return totaltiles;
 	}
@@ -182,7 +178,6 @@ public class MbTileGenerator {
 //		maxzoom = 5;
 		
 		Layer lyr = new Layer(Messages.MbTileGenerator_LayerName, bounds, minzoom, maxzoom);
-		
 		try(Connection c = getDbConnection(outputPath)) {
 			c.createStatement().executeUpdate("BEGIN TRANSACTION"); //$NON-NLS-1$
 		
@@ -228,23 +223,22 @@ public class MbTileGenerator {
 						try {
 							DrawMapParameter params = new ApplicationGIS.DrawMapParameter(gg,  new Dimension(img.getWidth(),img.getHeight()), thisMap, bnds, 92, SelectionStyle.IGNORE, new NullProgressMonitor());
 							ApplicationGIS.drawMap(params);
+							
 						}catch (Throwable t) {
 							
 						}
+						gg.dispose();
 //						ImageIO.write(img, "png", new File("C:\\temp\\mbtiles\\overview_" + zz.getZoom() + "_" + x + "_" + y + ".png"));
 
 						for (int i = 0; i < TILE_TO_RENDER_BUFFER; i ++) {
 							for (int j = 0; j < TILE_TO_RENDER_BUFFER; j ++) {
 								Tile t = zz.getTile(x+i, y+j);
 								if (t == null) continue;
-								
-								int startx = i * 256;
-								int starty = j * 256;
 							
 								gc.clearRect(0, 0, tileimage.getWidth(), tileimage.getHeight());
-								gc.drawImage(img, 0, 0, 256, 256, startx, starty, startx + 256, starty + 256, null);
-								
+								gc.drawImage(img, 0, 0, 256, 256, i * 256, j * 256, (i + 1) * 256, (j + 1) * 256, null);
 								writeTile(c, t, tileimage);
+								
 								cnt++;
 								monitor.worked(1);
 								monitor.subTask(MessageFormat.format(Messages.MbTileGenerator_SubTask4, + zz.getZoom(), cnt, totalTiles ));
@@ -256,7 +250,9 @@ public class MbTileGenerator {
 				}
 			}
 			c.createStatement().executeUpdate("COMMIT TRANSACTION"); //$NON-NLS-1$
+			gc.dispose();
 		}
+		
 		monitor.done();
 	}
 	

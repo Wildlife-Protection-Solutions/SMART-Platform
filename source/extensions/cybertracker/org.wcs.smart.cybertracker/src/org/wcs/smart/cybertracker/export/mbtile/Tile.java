@@ -71,13 +71,7 @@ public class Tile {
 	 * @return the tile bounds in lat long
 	 */
 	public Envelope getBoundsLatLong() {
-
-		double north = Math.toDegrees(Math.atan(Math.sinh( (Math.PI - (2.0 * Math.PI * tiley) / Math.pow(2.0, zoom.getZoom())) )));
-		double south = Math.toDegrees(Math.atan(Math.sinh( (Math.PI - (2.0 * Math.PI * (tiley + 1)) / Math.pow(2.0, zoom.getZoom())) )));
-		double west = tilex / Math.pow(2.0, zoom.getZoom()) * 360.0 - 180;
-		double east = (tilex + 1) / Math.pow(2.0, zoom.getZoom()) * 360.0 - 180;
-		
-		return new Envelope(west, east, south, north);
+		return Tile.getBoundsLatLong(tilex, tiley, zoom.getZoom());
 	}
 
 	/**
@@ -127,5 +121,14 @@ public class Tile {
 			e.getMaxX() + " " + e.getMaxY() + "," + //$NON-NLS-1$ //$NON-NLS-2$
 			e.getMaxX() + " " + e.getMinY() + "," + //$NON-NLS-1$ //$NON-NLS-2$
 			e.getMinX() + " " + e.getMinY() + "))"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	public static Envelope getBoundsLatLong(int tilex, int tiley, int zoom) {
+		double north = Math.toDegrees(Math.atan(Math.sinh( (Math.PI - (2.0 * Math.PI * tiley) / Math.pow(2.0, zoom)) )));
+		double south = Math.toDegrees(Math.atan(Math.sinh( (Math.PI - (2.0 * Math.PI * (tiley + 1)) / Math.pow(2.0, zoom)) )));
+		double west = tilex / Math.pow(2.0, zoom) * 360.0 - 180;
+		double east = (tilex + 1) / Math.pow(2.0, zoom) * 360.0 - 180;
+		
+		return new Envelope(west, east, south, north);
 	}
 }

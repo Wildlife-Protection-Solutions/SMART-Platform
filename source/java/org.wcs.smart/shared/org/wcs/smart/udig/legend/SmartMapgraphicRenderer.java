@@ -82,11 +82,15 @@ public class SmartMapgraphicRenderer extends RendererImpl implements
 					continue;
 				MapGraphic mg = l.getGeoResource().resolve(MapGraphic.class,
 						null);
-				MapGraphicContext mgContext = new MapGraphicContextImpl(l, copy);
-				if (mg instanceof LegendGraphic) {
-					(new LegendGraphicWriter()).draw(mgContext);
-				} else {
-					mg.draw(mgContext);
+				MapGraphicContextImpl mgContext = new MapGraphicContextImpl(l, copy);
+				try {
+					if (mg instanceof LegendGraphic) {
+						(new LegendGraphicWriter()).draw(mgContext);
+					} else {
+						mg.draw(mgContext);
+					}
+				}finally {
+					mgContext.dispose();
 				}
 			} catch (IOException e) {
 				exceptions.add(e);
@@ -118,14 +122,16 @@ public class SmartMapgraphicRenderer extends RendererImpl implements
 			try {
 				if (!l.getLayer().isVisible())
 					continue;
-				MapGraphic mg = l.getGeoResource().resolve(MapGraphic.class,
-						null);
-				MapGraphicContext mgContext = new MapGraphicContextImpl(l,
-						destination);
-				if (mg instanceof LegendGraphic) {
-					(new LegendGraphicWriter()).draw(mgContext);
-				} else {
-					mg.draw(mgContext);
+				MapGraphic mg = l.getGeoResource().resolve(MapGraphic.class, null);
+				MapGraphicContextImpl mgContext = new MapGraphicContextImpl(l, destination);
+				try {
+					if (mg instanceof LegendGraphic) {
+						(new LegendGraphicWriter()).draw(mgContext);
+					} else {
+						mg.draw(mgContext);
+					}
+				}finally {
+					mgContext.dispose();
 				}
 			} catch (IOException e) {
 				exceptions.add(e);

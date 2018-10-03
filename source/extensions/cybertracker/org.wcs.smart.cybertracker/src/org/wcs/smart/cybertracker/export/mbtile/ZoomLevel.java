@@ -44,22 +44,14 @@ public class ZoomLevel {
 		
 		tiles = new ArrayList<>();
 
-		Envelope bounds = layer.getBounds();
-
-		int[] minTile = toTile(bounds.getMinX(), bounds.getMinY(), zoom);
-		int[] maxTile = toTile(bounds.getMaxX(), bounds.getMaxY(), zoom);
-
-		int xtile = minTile[0];
-		int ytile = minTile[1];
-
-		int xtile2 = maxTile[0];
-		int ytile2 = maxTile[1];
-
-		int startx = xtile < 0 ? 0 : xtile;
-		int starty = ytile2 < 0 ? 0 : ytile2;
-
-		for (int x = startx; x <= Math.min(xtile2, Math.pow(2, zoom)); x++) {
-			for (int y = starty; y <= Math.min(ytile, Math.pow(2, zoom)); y++) {
+		int startx = layer.getMinZoomMinTiles()[0] * (int)Math.pow(2,  (zoom - layer.getMinZoom()) );
+		int starty = layer.getMinZoomMaxTiles()[1] * (int)Math.pow(2,  (zoom - layer.getMinZoom()) );
+		
+		int endx = (layer.getMinZoomMaxTiles()[0] + 1) * (int)Math.pow(2,  (zoom - layer.getMinZoom()) ) - 1;
+		int endy = (layer.getMinZoomMinTiles()[1] + 1)* (int)Math.pow(2,  (zoom - layer.getMinZoom()) ) - 1;
+		
+		for (int x = startx; x <= Math.min(endx, Math.pow(2, zoom)); x++) {
+			for (int y = starty; y <= Math.min(endy, Math.pow(2, zoom)); y++) {
 				Tile tile = new Tile(x, y, this);
 				tiles.add(tile);
 			}
