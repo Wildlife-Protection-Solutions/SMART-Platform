@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.udig.legend.ui.LegendGraphic;
 import org.locationtech.udig.mapgraphic.MapGraphic;
-import org.locationtech.udig.mapgraphic.MapGraphicContext;
 import org.locationtech.udig.mapgraphic.internal.MapGraphicContextImpl;
 import org.locationtech.udig.project.IBlackboard;
 import org.locationtech.udig.project.ILayer;
@@ -56,6 +55,9 @@ public class SmartMapgraphicRenderer extends RendererImpl implements
 	public static final String BLACKBOARD_IMAGE_KEY = "CACHED_IMAGE"; //$NON-NLS-1$
 	public static final String BLACKBOARD_IMAGE_BOUNDS_KEY = "CACHED_IMAGE_BOUNDS"; //$NON-NLS-1$
 
+	//track mapgraphic contexts so we can property dispose of them when renderer is disposed
+	private List<MapGraphicContextImpl> toDispose = new ArrayList<>();
+	
 	@Override
 	public String getName() {
 		return super.getName();
@@ -83,14 +85,11 @@ public class SmartMapgraphicRenderer extends RendererImpl implements
 				MapGraphic mg = l.getGeoResource().resolve(MapGraphic.class,
 						null);
 				MapGraphicContextImpl mgContext = new MapGraphicContextImpl(l, copy);
-				try {
-					if (mg instanceof LegendGraphic) {
-						(new LegendGraphicWriter()).draw(mgContext);
-					} else {
-						mg.draw(mgContext);
-					}
-				}finally {
-					mgContext.dispose();
+				toDispose.add(mgContext);
+				if (mg instanceof LegendGraphic) {
+					(new LegendGraphicWriter()).draw(mgContext);
+				} else {
+					mg.draw(mgContext);
 				}
 			} catch (IOException e) {
 				exceptions.add(e);
@@ -124,15 +123,13 @@ public class SmartMapgraphicRenderer extends RendererImpl implements
 					continue;
 				MapGraphic mg = l.getGeoResource().resolve(MapGraphic.class, null);
 				MapGraphicContextImpl mgContext = new MapGraphicContextImpl(l, destination);
-				try {
-					if (mg instanceof LegendGraphic) {
-						(new LegendGraphicWriter()).draw(mgContext);
-					} else {
-						mg.draw(mgContext);
-					}
-				}finally {
-					mgContext.dispose();
+				if (mg instanceof LegendGraphic) {
+					(new LegendGraphicWriter()).draw(mgContext);
+				} else {
+					mg.draw(mgContext);
 				}
+				toDispose.add(mgContext);
+
 			} catch (IOException e) {
 				exceptions.add(e);
 			} finally {
@@ -163,6 +160,13 @@ public class SmartMapgraphicRenderer extends RendererImpl implements
 		super.setContext(newContext);
 	}
 
+	@Override
+	public void dispose() {
+		toDispose.forEach(gc->gc.dispose());
+		toDispose.clear();
+		super.dispose();
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
