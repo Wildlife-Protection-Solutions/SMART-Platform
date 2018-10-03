@@ -208,6 +208,7 @@ public class Thumbnail {
 		if (thumbnailComposite != null) return thumbnailComposite.isDisposed();
 		return false;
 	}
+	
 	/**
 	 * Creates the thumbnail widget with given style using the given offset.  The 
 	 * offset is the number of pixel to offset the image from the edge 
@@ -216,10 +217,24 @@ public class Thumbnail {
 	 * @param parent
 	 */
 	public Composite createThumbnail(Composite parent, int offset, int style ){
+		return createThumbnail(parent, offset, style, true);
+	}
+	
+	/**
+	 * Creates the thumbnail widget with given style using the given offset.  The 
+	 * offset is the number of pixel to offset the image from the edge 
+	 * of the composite 
+	 * 
+	 * @param offset number of pixels to offset the image from the edge of the composite
+	 * @param style the composite style
+	 * @param open if thumbnail should open on double click
+	 * @param parent
+	 */
+	public Composite createThumbnail(Composite parent, int offset, int style, boolean open ){
 		thumbnailComposite = new Composite(parent, style);
 		thumbnailComposite.setLocation(0,0);
 		thumbnailComposite.setSize(thumbnailSize, thumbnailSize);
-		thumbnailComposite.addMouseListener(doubleClickListener);
+		if (open) thumbnailComposite.addMouseListener(doubleClickListener);
 		
 		String fileName = null;
 		if (attachment == null){

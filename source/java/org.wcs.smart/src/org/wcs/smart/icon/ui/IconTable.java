@@ -244,7 +244,7 @@ public class IconTable extends Composite implements Listener {
 				Composite parent = new Composite(this, SWT.NONE);
 				parent.setLayoutData(new RowData(thumbnailSize, thumbnailSize));
 				if (t.thumb == null) t.createThumb();
-				Composite thumbNameComp = t.thumb.createThumbnail(parent, SWT.NONE);
+				Composite thumbNameComp = t.thumb.createThumbnail(parent, 0, SWT.NONE, false);
 				thumbNameComp.setToolTipText(t.file.getIcon().getName());
 				thumbNameComp.setData(t);
 				thumbNameComp.setBackground(thumb.getBackground());
