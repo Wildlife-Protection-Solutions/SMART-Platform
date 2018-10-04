@@ -70,6 +70,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.dataentry.dialog.composite.CascadeDisplayModeListener;
 import org.wcs.smart.dataentry.dialog.composite.CmTreeLabelProvider;
 import org.wcs.smart.dataentry.dialog.composite.DisplayModeComboViewer;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl;
@@ -583,15 +584,12 @@ public class EditTreeDialog extends TitleAreaDialog {
 		
 		org.eclipse.swt.widgets.Label label = new org.eclipse.swt.widgets.Label(containerCmp, SWT.NONE);
 		label.setText(Messages.EditTreeDialog_DisplayMode);
+		
 		modeViewer = new DisplayModeComboViewer(containerCmp);
-		modeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		modeViewer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		modeViewer.addDisplayModeChangeListener(e->handleDisplayModeChanged());
 		modeViewer.setSelection(new StructuredSelection(attribute.getConfigDisplayMode() != null ? attribute.getConfigDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
-		modeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				handleDisplayModeChanged();
-			}
-		});
+		modeViewer.addCascadeListener(new CascadeDisplayModeListener(modeViewer, attribute));
 		
 		imgControlLabel = new org.eclipse.swt.widgets.Label(containerCmp, SWT.NONE);
 		imgControlLabel.setText(Messages.EditTreeDialog_Image);

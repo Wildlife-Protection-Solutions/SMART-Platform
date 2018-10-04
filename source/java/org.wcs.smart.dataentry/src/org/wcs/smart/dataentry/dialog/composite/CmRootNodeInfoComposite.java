@@ -62,6 +62,7 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 	private Button btnInstantGps;
 	private Button btnPhotoFirst;
 	private ComboViewer cmbIconSet;
+	
 	public CmRootNodeInfoComposite(Composite parent, ConfigurableModel model) {
 		super(parent, model);
 		createControls();

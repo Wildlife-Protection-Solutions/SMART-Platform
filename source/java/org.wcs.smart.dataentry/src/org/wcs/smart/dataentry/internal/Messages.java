@@ -17,6 +17,8 @@ public class Messages extends NLS {
 	public static String AbstractRenameDialog_DataModelColumnName;
 	public static String AbstractRenameDialog_LanguageColumnName;
 	public static String BooleanAttributeInfoComposite_defaultValueTooltip;
+	public static String CascadeDisplayModeListener_WarningMsg;
+	public static String CascadeDisplayModeListener_WarningTitle;
 	public static String CmAttributeConfig_Custom_Prefix;
 	public static String CmAttributeConfig_Default;
 	public static String CmAttributeConfInfoComposite_Configuration_Label;
@@ -166,6 +168,8 @@ public class Messages extends NLS {
 	public static String DatamodelCatecorySelectorDialog_Button_Add;
 	public static String DatamodelCatecorySelectorDialog_Message;
 	public static String DatamodelCatecorySelectorDialog_Title;
+	public static String DisplayModeComboViewer_cascadeButton;
+	public static String DisplayModeComboViewer_cascadeTooltip;
 	public static String DisplayModeLabelProvider_Image;
 	public static String DisplayModeLabelProvider_Text;
 	public static String DisplayModeLabelProvider_TextImage;

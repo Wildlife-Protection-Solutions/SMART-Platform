@@ -133,15 +133,11 @@ public class EditListDialog extends TitleAreaDialog{
 
 		org.eclipse.swt.widgets.Label label = new org.eclipse.swt.widgets.Label(upperConlrolsCmp, SWT.NONE);
 		label.setText(Messages.EditListDialog_DisplayMode);
-		final DisplayModeComboViewer modeViewer = new DisplayModeComboViewer(upperConlrolsCmp);
-		modeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		DisplayModeComboViewer modeViewer = new DisplayModeComboViewer(upperConlrolsCmp, false);
+		modeViewer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		modeViewer.addDisplayModeChangeListener(e->attribute.getConfig().setDisplayMode(modeViewer.getSelectedDisplayMode()));
 		modeViewer.setSelection(new StructuredSelection(attribute.getConfigDisplayMode() != null ? attribute.getConfigDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
-		modeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				attribute.getConfig().setDisplayMode(modeViewer.getSelectedDisplayMode());
-			}
-		});
 		
 		SashForm comp = new SashForm(container, SWT.HORIZONTAL);
 		comp.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));

@@ -33,8 +33,6 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -137,33 +135,33 @@ public abstract class AbstractInfoComposite extends Composite {
 		return tnc;
 	}
 	
+	
 	protected DisplayModeComboViewer createDisplayModeControls(Composite parent) {
 		Label label = new Label(parent, SWT.NONE);
 		label.setText(Messages.AbstractInfoComposite_DisplayMode);
-		final DisplayModeComboViewer modeViewer = new DisplayModeComboViewer(parent);
-		modeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		modeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				boolean fire = true;
-				DisplayMode mode = modeViewer.getSelectedDisplayMode();
-				Object obj = getSourceObject();
-				if (obj instanceof CmRootNode) {
-					CmRootNode r = (CmRootNode) obj;
-					fire = mode != r.model.getDisplayMode();
-					r.model.setDisplayMode(mode);
-				} else if (obj instanceof CmNode) {
-					CmNode m = (CmNode) obj;
-					fire = mode != m.getDisplayMode();
-					m.setDisplayMode(mode);
-				} else {
-					SmartPlugIn.log("Unexpected class in display mode combo viewer: " + obj.getClass(), null); //$NON-NLS-1$
-				}
-				if (fire) {
-					fireModelChanged();
-				}
+		
+		DisplayModeComboViewer modeViewer = new DisplayModeComboViewer(parent);
+		modeViewer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		modeViewer.addDisplayModeChangeListener(e->{
+			boolean fire = true;
+			DisplayMode mode = modeViewer.getSelectedDisplayMode();
+			Object obj = getSourceObject();
+			if (obj instanceof CmRootNode) {
+				CmRootNode r = (CmRootNode) obj;
+				fire = mode != r.model.getDisplayMode();
+				r.model.setDisplayMode(mode);
+			} else if (obj instanceof CmNode) {
+				CmNode m = (CmNode) obj;
+				fire = mode != m.getDisplayMode();
+				m.setDisplayMode(mode);
+			} else {
+				SmartPlugIn.log("Unexpected class in display mode combo viewer: " + obj.getClass(), null); //$NON-NLS-1$
+			}
+			if (fire) {
+				fireModelChanged();
 			}
 		});
+		modeViewer.addCascadeListener(new CascadeDisplayModeListener(modeViewer, this));
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override

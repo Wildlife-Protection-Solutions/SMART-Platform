@@ -25,8 +25,13 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.dataentry.DisplayModeLabelProvider;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.DisplayMode;
 
 /**
@@ -35,22 +40,53 @@ import org.wcs.smart.dataentry.model.DisplayMode;
  * @author elitvin
  * @since 4.0.0
  */
-public class DisplayModeComboViewer extends ComboViewer {
+public class DisplayModeComboViewer extends Composite {
+	
+	private ComboViewer cmbViewer;
+	private Button btnCascade;
 	
 	public DisplayModeComboViewer(Composite parent) {
+		this(parent, true);
+	}
+	
+	public DisplayModeComboViewer(Composite parent, boolean includeCascade) {
 		super(parent, SWT.READ_ONLY);
-		setContentProvider(ArrayContentProvider.getInstance());
-		setLabelProvider(new DisplayModeLabelProvider());
-		setInput(DisplayMode.values());
+		
+		setLayout(new GridLayout(includeCascade ? 2 : 1, false));
+		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginHeight = 0;
+		
+		cmbViewer = new ComboViewer(this, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
+		cmbViewer.setLabelProvider(new DisplayModeLabelProvider());
+		cmbViewer.setInput(DisplayMode.values());
+		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		if (includeCascade) {
+			btnCascade = new Button(this, SWT.PUSH);
+			btnCascade.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			btnCascade.setText(Messages.DisplayModeComboViewer_cascadeButton);
+			btnCascade.setToolTipText(Messages.DisplayModeComboViewer_cascadeTooltip);	
+		}
+		
+	}
+	
+	public void addDisplayModeChangeListener(Listener onChange) {
+		cmbViewer.getControl().addListener(SWT.Selection, onChange);
+	}
+	public void addCascadeListener(Listener onCascade) {
+		btnCascade.addListener(SWT.Selection, onCascade);
+	}
+	public void setSelection(IStructuredSelection selection) {
+		cmbViewer.setSelection(selection);
 	}
 	
 	public DisplayMode getSelectedDisplayMode() {
-		if (getSelection() instanceof IStructuredSelection) {
-			IStructuredSelection selection = (IStructuredSelection) getSelection();
-			if (!selection.isEmpty() && selection.getFirstElement() instanceof DisplayMode) {
-				return (DisplayMode) selection.getFirstElement();
-			}
+		IStructuredSelection selection = cmbViewer.getStructuredSelection();
+		if (!selection.isEmpty() && selection.getFirstElement() instanceof DisplayMode) {
+			return (DisplayMode) selection.getFirstElement();
 		}
+		
 		return DisplayMode.DEFAULT_DISPLAY_MODE;
 	}
 }

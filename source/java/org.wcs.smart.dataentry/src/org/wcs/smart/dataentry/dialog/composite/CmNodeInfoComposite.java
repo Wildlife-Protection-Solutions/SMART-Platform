@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -261,13 +259,9 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		label.setText(Messages.EditListDialog_DisplayMode);
 		
 		DisplayModeComboViewer modeViewer = new DisplayModeComboViewer(container);
-		modeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		modeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				node.setDisplayMode(modeViewer.getSelectedDisplayMode());
-			}
-		});
+		modeViewer.addDisplayModeChangeListener(e->node.setDisplayMode(modeViewer.getSelectedDisplayMode()));
+		modeViewer.addCascadeListener(new CascadeDisplayModeListener(modeViewer, this));
+		modeViewer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		addImageRow(container);
 
