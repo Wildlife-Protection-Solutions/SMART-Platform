@@ -227,6 +227,18 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
+		Composite warn = new Composite(main, SWT.BORDER);
+		warn.setLayout(new GridLayout(2, false));
+		warn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label lblwarnimage = new Label(warn, SWT.NONE);
+		lblwarnimage.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+		
+		lblwarnimage = new Label(warn, SWT.WRAP);
+		lblwarnimage.setText(Messages.SurveyCTPackageDialog_warning);
+		lblwarnimage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)lblwarnimage.getLayoutData()).widthHint = 200;
+		
 		Group g = new Group(main, SWT.NONE);
 		g.setText(Messages.SurveyCTPackageDialog_PropertiesGroup);
 		g.setLayout(new GridLayout(3, false));

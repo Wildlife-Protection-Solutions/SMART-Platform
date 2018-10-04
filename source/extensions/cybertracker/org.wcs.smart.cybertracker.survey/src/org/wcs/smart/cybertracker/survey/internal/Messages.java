@@ -127,6 +127,7 @@ public class Messages extends NLS {
 	public static String SurveyCTPackageDialog_SelectDirectoryText;
 	public static String SurveyCTPackageDialog_ShellMsg;
 	public static String SurveyCTPackageDialog_ShellTitle;
+	public static String SurveyCTPackageDialog_warning;
 	public static String SurveyCTPackageDialog_ZipFileLbl;
 	public static String SurveyJsonUtils_MemberNotFound;
 	public static String SurveyPackageExporter_CommentPageLabel;

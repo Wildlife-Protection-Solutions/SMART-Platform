@@ -137,6 +137,8 @@ public class Messages extends NLS {
 	public static String PatrolCTPackageDialog_ShellTitle;
 
 	public static String PatrolCTPackageDialog_TaskName;
+
+	public static String PatrolCTPackageDialog_warning;
 	public static String PatrolCTPackageDialog_WriteError;
 	public static String PatrolCTPackageDialog_ZipFileLbl;
 	public static String PatrolImporter_DuplicateMessage;
