@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.startup;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -363,6 +366,22 @@ public class SmartStartUp {
 			SmartPlugIn.displayLog(error, ex);
 			return false;
 		}
+		
+
+		//create filestore location
+		//done here so when we login the directory will be correct 
+		//registered with the connect filestorewatcher
+		//See ticket: #2597
+		Path caDir = Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation());
+		if (!Files.isExecutable(caDir)) {
+			try{
+				Files.createDirectory(caDir);
+			}catch (Exception ex) {
+				SmartPlugIn.displayError("Unable to create required filestore directory: " + caDir.toString(), ex);
+				return false;
+			}
+		}
+		
 		for (ILoginHandler h : handlers){
 			try{
 				h.onLogin();
