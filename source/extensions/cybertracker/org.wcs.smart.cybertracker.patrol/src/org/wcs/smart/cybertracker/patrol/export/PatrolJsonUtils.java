@@ -27,6 +27,7 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
@@ -55,7 +56,7 @@ public class PatrolJsonUtils {
 	 * @param session
 	 * @return
 	 */
-	public static CyberTrackerPatrol parsePatrolMetadata(JSONObject jsonDefaults, JSONObject jsonValues, Session session){
+	public static CyberTrackerPatrol parsePatrolMetadata(JSONObject jsonDefaults, JSONObject jsonValues, ConservationArea ca, Session session){
 		
 		if (jsonValues == null) jsonValues = new JSONObject();
 		
@@ -115,7 +116,7 @@ public class PatrolJsonUtils {
 		if (team != null && startsWith(team, JsonPatrolKey.TEAM.key)){
 			UUID uuid = UuidUtils.stringToUuid(team.substring(JsonPatrolKey.TEAM.key.length() + 1));
 			Team teamObj = (Team) session.get(Team.class, uuid);
-			if (teamObj == null){
+			if (teamObj == null || !teamObj.getConservationArea().equals(ca)){
 				ctPatrol.addWarning(PatrolMeta.TEAM, Messages.PatrolJsonUtils_TeamNotFound);
 			}
 			ctPatrol.setTeam(teamObj);
@@ -124,7 +125,7 @@ public class PatrolJsonUtils {
 		if (station != null && startsWith(station, JsonPatrolKey.STATION.key)){
 			UUID uuid = UuidUtils.stringToUuid(station.substring(JsonPatrolKey.STATION.key.length() + 1));
 			Station stationObj = (Station) session.get(Station.class, uuid);
-			if (stationObj == null){
+			if (stationObj == null || !stationObj.getConservationArea().equals(ca)){
 				ctPatrol.addWarning(PatrolMeta.STATION, Messages.PatrolJsonUtils_StationNotFound);
 			}
 			ctPatrol.setStation(stationObj);
@@ -133,7 +134,7 @@ public class PatrolJsonUtils {
 		if (mandate != null && startsWith(mandate, JsonPatrolKey.MANDATE.key)){
 			UUID uuid = UuidUtils.stringToUuid(mandate.substring(JsonPatrolKey.MANDATE.key.length() + 1));
 			PatrolMandate mandateObj = (PatrolMandate) session.get(PatrolMandate.class, uuid);
-			if (mandateObj == null){
+			if (mandateObj == null || !mandateObj.getConservationArea().equals(ca)){
 				ctPatrol.addWarning(PatrolMeta.MANDATE, Messages.PatrolJsonUtils_MandatenotFound);
 			}
 			ctPatrol.setMandate(mandateObj);
@@ -145,7 +146,7 @@ public class PatrolJsonUtils {
 		for (String member: members){
 			UUID uuid = UuidUtils.stringToUuid(member.substring(JsonKey.EMPLOYEE.key.length() + 1));
 			Employee employee = (Employee) session.get(Employee.class, uuid);
-			if (employee != null){
+			if (employee != null  && employee.getConservationArea().equals(ca)){
 				ctPatrol.getMembers().add(employee);
 			}else{
 				ctPatrol.addWarning(PatrolMeta.MEMBERS, Messages.PatrolJsonUtils_MemberNotFound);
@@ -162,7 +163,7 @@ public class PatrolJsonUtils {
 		if (ptransport != null && startsWith(ptransport, JsonPatrolKey.TRANSPORT_TYPE.key)){
 			UUID uuid = UuidUtils.stringToUuid(ptransport.substring(JsonPatrolKey.TRANSPORT_TYPE.key.length() + 1));
 			PatrolTransportType transportObj = (PatrolTransportType) session.get(PatrolTransportType.class, uuid);
-			if (transportObj == null){
+			if (transportObj == null || !transportObj.getConservationArea().equals(ca)){
 				ctPatrol.addError(PatrolMeta.TRANSPORT, Messages.PatrolJsonUtils_TTNotFound);
 			}else{
 				ctPatrol.setPatrolTransportType(transportObj);

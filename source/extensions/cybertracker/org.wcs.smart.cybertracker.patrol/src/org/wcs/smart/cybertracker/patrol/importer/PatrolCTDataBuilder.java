@@ -240,7 +240,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 
 	private void recordAfter400DefaultMetaValues(CyberTrackerPatrol ctPatrol, String v, Map<String, E> eMap, Session session) {
 		try {
-			CyberTrackerPatrol defaultValue = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(v), null, session);
+			CyberTrackerPatrol defaultValue = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(v), null, SmartDB.getCurrentConservationArea(), session);
 			
 			ctPatrol.setArmed(defaultValue.isArmed());
 			if (ctPatrol.getComment() == null) ctPatrol.setComment(defaultValue.getComment());

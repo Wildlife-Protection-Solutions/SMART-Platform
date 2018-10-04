@@ -192,6 +192,14 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				
 				//is this the end of the mission
 				boolean isMissionEnd = sighting.containsKey(SurveyScreensUtil.END_MISSION_KEY) ;
+				//new CT check
+				if (sighting.containsKey(JsonCtParser.OBSERVATION_TYPE_KEY)) {
+					String value = (String) sighting.get(JsonCtParser.OBSERVATION_TYPE_KEY);
+					if (value.trim().equalsIgnoreCase(JsonCtParser.OBSERVATION_TYPE_END_PATROL_KEY)) {
+						isMissionEnd = true;
+					}
+				}
+				
 				if (isMissionEnd){
 					//we want to find the patrol and update the end date
 					//add the position to the track, but do not create an observation 
@@ -222,14 +230,28 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				}
 				
 				//Parse the waypoint information 				
-				Waypoint wp = parser.createWaypoint(feature, session);
+				Waypoint wp = parser.createWaypoint(feature, SmartDB.getCurrentConservationArea(), session);
 				warnings.addAll(parser.getWarnings());
 				wp.setId(observationCounter);
 				wp.setSourceId(SurveyWaypointSource.KEY);
 				wp.setConservationArea(SmartDB.getCurrentConservationArea());
 				allSize = JsonCtParser.processImages(wp, allSize, session);
 				
-				if (sighting.containsKey(ScreensUtil.RESULT_PAUSED)){
+				
+				boolean noObservation = false;
+				//patrol paused; no observation; record only as track point
+				noObservation = sighting.containsKey(ScreensUtil.RESULT_PAUSED);
+				if (!noObservation) {
+					//check if this is the start of the patrol
+					if (sighting.containsKey(JsonCtParser.OBSERVATION_TYPE_KEY)) {
+						String value = (String) sighting.get(JsonCtParser.OBSERVATION_TYPE_KEY);
+						if (value.trim().equalsIgnoreCase(JsonCtParser.OBSERVATION_TYPE_START_PATROL_KEY)) {
+							noObservation = true;
+						}
+					}
+				}
+				
+				if (noObservation){
 					//patrol paused; no observation; record only as track point
 					if (link == null){
 						link = createMissionFromSighting(sighting, deviceId, ctMissionUuid, observationCounter, session);

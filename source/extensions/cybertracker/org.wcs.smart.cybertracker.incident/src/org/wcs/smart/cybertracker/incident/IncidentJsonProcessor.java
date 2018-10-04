@@ -132,7 +132,7 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 			
 			
 				//Parse the waypoint information 				
-				Waypoint parsedWp = parser.createWaypoint(feature, session);
+				Waypoint parsedWp = parser.createWaypoint(feature, SmartDB.getCurrentConservationArea(), session);
 				allSize = JsonCtParser.processImages(parsedWp, allSize, session);
 				
 				if (currentLink.getWaypoint() == null) {

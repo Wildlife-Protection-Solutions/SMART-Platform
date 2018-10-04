@@ -45,6 +45,7 @@ import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
@@ -105,7 +106,10 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 	//resize value for apply to all option
 	private Point allSize = null;
 	
+	private ConservationArea ca;
+	
 	public PatrolJsonProcessor() {
+		this.ca = SmartDB.getCurrentConservationArea();
 		warnings = new ArrayList<String>();
 	}
 
@@ -161,6 +165,12 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				
 				//is this the end of the patrol
 				boolean isPatrolEnd = sighting.containsKey(PatrolScreensUtil.END_PATROL_KEY) ;
+				if (sighting.containsKey(JsonCtParser.OBSERVATION_TYPE_KEY)) {
+					String value = (String) sighting.get(JsonCtParser.OBSERVATION_TYPE_KEY);
+					if (value.trim().equalsIgnoreCase(JsonCtParser.OBSERVATION_TYPE_END_PATROL_KEY)) {
+						isPatrolEnd = true;
+					}
+				}
 				if (isPatrolEnd){
 					//we want to find the patrol and update the end date
 					//add the position to the track, but do not create an observation 
@@ -194,15 +204,27 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				}
 				
 				//Parse the waypoint information 				
-				Waypoint wp = parser.createWaypoint(feature, session);
+				Waypoint wp = parser.createWaypoint(feature, ca, session);
 				warnings.addAll(parser.getWarnings());
 				wp.setId(observationCounter);
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 				wp.setConservationArea(SmartDB.getCurrentConservationArea());
 				allSize = JsonCtParser.processImages(wp, allSize, session);
 				
-				if (sighting.containsKey(ScreensUtil.RESULT_PAUSED)){
-					//patrol paused; no observation; record only as track point
+				boolean noObservation = false;
+				//patrol paused; no observation; record only as track point
+				noObservation = sighting.containsKey(ScreensUtil.RESULT_PAUSED);
+				if (!noObservation) {
+					//check if this is the start of the patrol
+					if (sighting.containsKey(JsonCtParser.OBSERVATION_TYPE_KEY)) {
+						String value = (String) sighting.get(JsonCtParser.OBSERVATION_TYPE_KEY);
+						if (value.trim().equalsIgnoreCase(JsonCtParser.OBSERVATION_TYPE_START_PATROL_KEY)) {
+							noObservation = true;
+						}
+					}
+				}
+				
+				if (noObservation){
 					if (link == null){
 						link = createPatrolFromSighing(sighting, deviceId, ctPatrolUuid, observationCounter, session);
 					}
@@ -213,8 +235,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					//update last observation count
 					link.setLastObservationCnt(observationCounter);
 					processedFeatures.add(feature);
-					continue;
-					
+					continue;				
 				}
 				
 				if (!sighting.containsKey(ScreensUtil.RESULT_NEW_WAYPOINT)){
@@ -490,9 +511,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 	
 	private CtPatrolLink createPatrolFromSighing(JSONObject sighting, String deviceId, UUID ctUuid, int observationCounter, Session session) throws Exception{
 		Patrol p = new Patrol();
-		p.setConservationArea(SmartDB.getCurrentConservationArea());
+		p.setConservationArea(ca);
 		String defaultValues = (String)sighting.get(PatrolScreensUtil.RESULT_DEFAULT_META_VALUES);
-		CyberTrackerPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, session);
+		CyberTrackerPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, ca, session);
 		
 		
 		String startDate = (String)sighting.get(ScreensUtil.RESULT_START_DATE);

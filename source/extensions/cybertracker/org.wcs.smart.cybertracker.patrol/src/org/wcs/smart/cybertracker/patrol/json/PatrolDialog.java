@@ -54,6 +54,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.hibernate.SmartDB;
@@ -130,8 +131,8 @@ public class PatrolDialog extends TitleAreaDialog {
 				}
 			}
 		}catch (Exception ex){
-			ex.printStackTrace();
-			MessageDialog.openWarning(getShell(), Messages.PatrolDialog_ErrorTitle, Messages.PatrolDialog_SaveErrors);
+			CyberTrackerPlugIn.log(ex.getMessage(), ex);
+			MessageDialog.openWarning(getShell(), Messages.PatrolDialog_ErrorTitle, Messages.PatrolDialog_SaveErrors + ":" + ex.getMessage()); //$NON-NLS-1$
 			super.cancelPressed();
 			return;
 		}

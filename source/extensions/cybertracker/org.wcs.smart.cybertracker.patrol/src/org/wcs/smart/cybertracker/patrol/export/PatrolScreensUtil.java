@@ -97,6 +97,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 	
 
 	public static final String END_PATROL_KEY = "SMART_EndPatrol"; //$NON-NLS-1$
+
 	
 	private static final String DATATYPE_PATROL = PatrolScreenOptionMeta.PATROL_RESOURCE_ID; 
 

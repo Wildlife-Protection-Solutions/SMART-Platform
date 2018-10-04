@@ -99,6 +99,14 @@ public class JsonCtParser {
 	private static final String JPEG_EXT = "jpeg"; //$NON-NLS-1$
 	private static final String PHOTO_KEY = "ct_photo"; //$NON-NLS-1$
 	
+	/*
+	 * These are keys for the new BETA CT Json format
+	 */
+	public static final String OBSERVATION_TYPE_KEY = "SMART_ObservationType"; //$NON-NLS-1$
+	public static final String OBSERVATION_TYPE_START_PATROL_KEY = "NewPatrol"; //$NON-NLS-1$
+	public static final String OBSERVATION_TYPE_OBSERVATION_KEY = "Observation"; //$NON-NLS-1$
+	public static final String OBSERVATION_TYPE_END_PATROL_KEY = "StopPatrol"; //$NON-NLS-1$
+	
 	public static List<JSONObject> parseFeaturesFromJsonString(String json) throws Exception{
 		JSONObject jsonData = null; 
 		try {
@@ -331,7 +339,7 @@ public class JsonCtParser {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public Waypoint createWaypoint(JSONObject feature, Session session) throws Exception{
+	public Waypoint createWaypoint(JSONObject feature, ConservationArea ca, Session session) throws Exception{
 		
 		warnings = new ArrayList<String>();
 		
@@ -433,7 +441,7 @@ public class JsonCtParser {
 		Category category = null;
 		if (categoryUuid != null ){
 			category = (Category) session.get(Category.class, UuidUtils.stringToUuid(categoryUuid));
-			if (category == null){
+			if (category == null || !category.getConservationArea().equals(ca)){
 				throw new Exception(MessageFormat.format(Messages.JsonCtParser_NoCateogyr, categoryUuid));
 			}
 		}else{
