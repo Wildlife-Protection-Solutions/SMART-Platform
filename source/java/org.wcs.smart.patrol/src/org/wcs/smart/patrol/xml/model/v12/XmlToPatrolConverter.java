@@ -248,24 +248,27 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		}
 		boolean found = false;
 		
-		session.beginTransaction();
-		List<PatrolTransportType> types =  null;
-		try{
-			types =  PatrolHibernateManager.getPatrolTransporationTypes(ca, session, patrol.getPatrolType());
-		}finally{
-			session.getTransaction().rollback();
-		}
-		
-		for (PatrolTransportType t: types){
-			if (t.equals(ttype)){
-				found = true;
-				break;
+		if (patrol.getPatrolType() != org.wcs.smart.patrol.model.PatrolType.Type.MIXED) {
+			//validate that the transportation type is valid for the patrol type
+			session.beginTransaction();
+			List<PatrolTransportType> types =  null;
+			try{
+				types =  PatrolHibernateManager.getPatrolTransporationTypes(ca, session, patrol.getPatrolType());
+			}finally{
+				session.getTransaction().rollback();
 			}
-		}
-		if (!found){
-			throw new Exception(MessageFormat.format(
-					Messages.XmlToPatrolConverter_Error_InvalidTransportType, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(),
-							patrol.getPatrolType().getGuiName(Locale.getDefault())}));
+			
+			for (PatrolTransportType t: types){
+				if (t.equals(ttype)){
+					found = true;
+					break;
+				}
+			}
+			if (!found){
+				throw new Exception(MessageFormat.format(
+						Messages.XmlToPatrolConverter_Error_InvalidTransportType, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(),
+								patrol.getPatrolType().getGuiName(Locale.getDefault())}));
+			}
 		}
 		leg.setType(ttype);
 		
@@ -699,14 +702,18 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 	private NamedItem findTransportationValue(String langCode, String value, org.wcs.smart.patrol.model.PatrolType.Type type){
 		
 		String sql = "SELECT c FROM Language a, Label b, PatrolTransportType c WHERE b.id.language = a.uuid " + //$NON-NLS-1$
-				"AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca and " + //$NON-NLS-1$
-				"c.patrolType = :patrolType"; //$NON-NLS-1$
-		
+				"AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca "; //$NON-NLS-1$
+		if (type != org.wcs.smart.patrol.model.PatrolType.Type.MIXED) {
+			sql += " and c.patrolType = :patrolType"; //$NON-NLS-1$"
+		}
+				
 		Query<?> query = session.createQuery(sql);
 		query.setParameter("cd", langCode); //$NON-NLS-1$
 		query.setParameter("value", value); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
-		query.setParameter("patrolType", type); //$NON-NLS-1$
+		if (type != org.wcs.smart.patrol.model.PatrolType.Type.MIXED) {
+			query.setParameter("patrolType", type); //$NON-NLS-1$
+		}
 		
 		List<?> results = query.list();
 		if (results.size() == 0){
