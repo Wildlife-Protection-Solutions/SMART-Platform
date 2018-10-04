@@ -64,6 +64,12 @@ public enum SmartContext {
 		pairs.put(FILESTORE_KEY, rootLocation);
 	}
 	
+	/**
+	 * A temporary working directory.  Files in this directory are not
+	 * included in system backups or CA exports (nor at they sync'd to Connect).
+	 * 
+	 * @return
+	 */
 	public File getTempFilestoreLocation(){
 		return new File(pairs.get(TEMP_FILESTORE_KEY));
 	}

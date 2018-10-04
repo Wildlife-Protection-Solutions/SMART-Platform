@@ -27,7 +27,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,6 +38,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -126,7 +129,12 @@ public class DerbyBackupEngine {
 					dirsToBackup = new File[]{filestore, database};
 				}
 			
-				if (ZipUtil.createZip(dirsToBackup, outputFile, progress.split(9))) {
+				//Exclude temp directory from backup 
+				//SmartContext.INSTANCE.getTempFilestoreLocation();			
+				Set<File> itemsToExclude = new HashSet<>();
+				itemsToExclude.add(SmartContext.INSTANCE.getTempFilestoreLocation());
+				
+				if (ZipUtil.createZip(dirsToBackup, outputFile, itemsToExclude, progress.split(9))) {
 					List<IBackupContributor> extensions = getBackupExtensions();
 					SubMonitor sub = progress.split(1);
 					sub.setWorkRemaining(extensions.size());

@@ -28,7 +28,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Set;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -52,6 +54,7 @@ public class ZipUtil {
 	 * on Windows and importing on MAC.
 	 */
 	public static final String DIR_PATH_SEPERATOR = "/"; //$NON-NLS-1$
+
 	/**
 	 * Creates a zip file collecting together
 	 * all the data in the provided directories.
@@ -66,6 +69,26 @@ public class ZipUtil {
 			File[] directories, 
 			File outputZipFile, 
 			IProgressMonitor monitor) throws IOException{
+		return createZip(directories, outputZipFile, Collections.emptySet(), monitor);
+	}
+	
+	/**
+	 * Creates a zip file collecting together
+	 * all the data in the provided directories.
+	 * 
+	 * @param directories directories to include in zip
+	 * @param outputZipFile output zip file name
+	 * @param itemsToExclude a set of files to exclude from the backup
+	 * @param monitor progress monitor the progress monitor to use for reporting 
+	 * progress to the user. It is the caller's responsibility to call done() on the given monitor
+	 * @return <code>true</code> if successful <code>false</code> if error
+	 * @throws IOException
+	 */
+	public static boolean createZip(
+			File[] directories, 
+			File outputZipFile, 
+			Set<File> itemsToExclude,			
+			IProgressMonitor monitor) throws IOException{
 
         SubMonitor progress = SubMonitor.convert(monitor, Messages.ZipUtil_Progress_CreatingZip, 100);
         progress.subTask(Messages.ZipUtil_Progress_CreatingZip);
@@ -75,7 +98,10 @@ public class ZipUtil {
             
             progress.setWorkRemaining(directories.length);
             for (int i = 0; i < directories.length; i ++){
-            	addFileToZip(tOut,directories[i].getAbsoluteFile(), "", progress.split(1)); //$NON-NLS-1$
+            	File f = directories[i];
+            	if (!itemsToExclude.contains(f)) {
+            		addFileToZip(tOut, directories[i].getAbsoluteFile(), "", itemsToExclude, progress.split(1)); //$NON-NLS-1$
+            	}
             }
             
         }
@@ -95,7 +121,10 @@ public class ZipUtil {
      */
     private static boolean addFileToZip(ZipArchiveOutputStream zOut, 
     		File path, 
-    		String base, IProgressMonitor monitor) throws IOException {
+    		String base, 
+			Set<File> itemsToExclude,
+			IProgressMonitor monitor) throws IOException {
+    	
     	SubMonitor progress = SubMonitor.convert(monitor, 1);
     	progress.subTask( Messages.ZipUtil_Progress_ProcessingFile + path.getAbsolutePath() );
     	try {
@@ -120,9 +149,11 @@ public class ZipUtil {
 	            if (children != null) {
 	            	progress.setWorkRemaining(children.length);
 	                for (File child : children) {
-	                    if (!addFileToZip(zOut, child, entryName + DIR_PATH_SEPERATOR, progress.split(1))){
-	                    	return false;
-	                    }
+	                	if (!itemsToExclude.contains(child)) {
+	                		if (!addFileToZip(zOut, child, entryName + DIR_PATH_SEPERATOR, itemsToExclude, progress.split(1))){
+	                			return false;
+	                		}
+	                	}
 	                }
 	            }else{
 	            	throw new IllegalStateException(MessageFormat.format(Messages.ZipUtil_BackupError, new Object[]{path.toString()}));
