@@ -1291,17 +1291,19 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		}
 		if (add){
-			relationships.add(newRelationship);
-			relationshipsToAdd.add(newRelationship);
-			setDirty(true);
-			((RelationshipContentProvider)relationshipTree.getContentProvider()).refresh();
+			
 			if (!newRelationship.getRelationshipType().getAttributes().isEmpty()){
 				//edit 
-				editRelationshipAttributes(newRelationship);
-			}else{
-				relationshipTree.refresh();
-				setDirty(true);
+				if (!editRelationshipAttributes(newRelationship)) {
+					return;
+				}
 			}
+			
+			relationships.add(newRelationship);
+			relationshipsToAdd.add(newRelationship);
+			((RelationshipContentProvider)relationshipTree.getContentProvider()).refresh();
+			relationshipTree.refresh();
+			setDirty(true);
 		}
 	}
 	
@@ -1552,12 +1554,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 		relationshipTree.getTree().setMenu(mnuRelationship.createMenu(relationshipTree.getTree()));
 	}
 
-	private void editRelationshipAttributes(IntelEntityRelationship relation){
+	private boolean editRelationshipAttributes(IntelEntityRelationship relation){
 		RelationshipAttributeDialog dialog = new RelationshipAttributeDialog(relationshipTree.getControl().getShell(), relation);
 		if (dialog.open() == Window.OK){
 			relationshipTree.refresh();
 			setDirty(true);
+			return true;
 		}
+		return false;
 	}
 	
 	private void createRecordsPanel(Composite parent){

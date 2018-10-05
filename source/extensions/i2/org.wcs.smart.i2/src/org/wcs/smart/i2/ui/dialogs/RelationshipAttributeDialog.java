@@ -174,8 +174,9 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 				});
 			}
 		}
-		getShell().layout(true, true);
+		
 		((ScrolledComposite)core.getParent()).setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		getShell().layout(true, true);
 	}
 	
 	@Override
