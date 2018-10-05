@@ -57,61 +57,61 @@
    <feature url="features/org.wcs.smart.r.feature_6.2.0.qualifier.jar" id="org.wcs.smart.r.feature" version="6.2.0.qualifier">
       <category name="r"/>
    </feature>
-   <feature url="features/org.wcs.smart.intelligence.feature.nl_6.0.0.jar" id="org.wcs.smart.intelligence.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.intelligence.feature.nl_6.2.0.jar" id="org.wcs.smart.intelligence.feature.nl" version="6.2.0">
       <category name="intelligence"/>
    </feature>
-   <feature url="features/org.wcs.smart.plan.feature.nl_6.0.0.jar" id="org.wcs.smart.plan.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.plan.feature.nl_6.2.0.jar" id="org.wcs.smart.plan.feature.nl" version="6.2.0">
       <category name="planning"/>
    </feature>
-   <feature url="features/org.wcs.smart.independentincident.feature.nl_6.0.0.jar" id="org.wcs.smart.independentincident.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.independentincident.feature.nl_6.2.0.jar" id="org.wcs.smart.independentincident.feature.nl" version="6.2.0">
       <category name="independentincident"/>
    </feature>
-   <feature url="features/org.wcs.smart.feature.nl_6.0.0.jar" id="org.wcs.smart.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.feature.nl_6.2.0.jar" id="org.wcs.smart.feature.nl" version="6.2.0">
       <category name="languagepacks"/>
    </feature>
-   <feature url="features/org.wcs.smart.entity.feature.nl_6.0.0.jar" id="org.wcs.smart.entity.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.entity.feature.nl_6.2.0.jar" id="org.wcs.smart.entity.feature.nl" version="6.2.0">
       <category name="entity"/>
    </feature>
-   <feature url="features/org.wcs.smart.er.feature.nl_6.0.0.jar" id="org.wcs.smart.er.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.er.feature.nl_6.2.0.jar" id="org.wcs.smart.er.feature.nl" version="6.2.0">
       <category name="ecologicalrecords"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.cybertracker.feature.nl_6.0.0.jar" id="org.wcs.smart.connect.cybertracker.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.connect.cybertracker.feature.nl_6.2.0.jar" id="org.wcs.smart.connect.cybertracker.feature.nl" version="6.2.0">
       <category name="connect"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.feature.nl_6.0.0.jar" id="org.wcs.smart.connect.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.connect.feature.nl_6.2.0.jar" id="org.wcs.smart.connect.feature.nl" version="6.2.0">
       <category name="connect"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl_6.0.0.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl_6.2.0.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl" version="6.2.0">
       <category name="cybertracker"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl_6.0.0.jar" id="org.wcs.smart.cybertracker.survey.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl_6.2.0.jar" id="org.wcs.smart.cybertracker.survey.feature.nl" version="6.2.0">
       <category name="cybertracker"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.feature.nl_6.0.0.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.feature.nl_6.2.0.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.feature.nl" version="6.2.0">
       <category name="connectdq"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.er.feature.nl_6.0.0.jar" id="org.wcs.smart.connect.dataqueue.er.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.connect.dataqueue.er.feature.nl_6.2.0.jar" id="org.wcs.smart.connect.dataqueue.er.feature.nl" version="6.2.0">
       <category name="connectdq"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.feature.nl_6.0.0.jar" id="org.wcs.smart.connect.dataqueue.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.connect.dataqueue.feature.nl_6.2.0.jar" id="org.wcs.smart.connect.dataqueue.feature.nl" version="6.2.0">
       <category name="connectdq"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.i2.feature.nl_6.0.0.jar" id="org.wcs.smart.connect.dataqueue.i2.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.connect.dataqueue.i2.feature.nl_6.2.0.jar" id="org.wcs.smart.connect.dataqueue.i2.feature.nl" version="6.2.0">
       <category name="connectdq"/>
    </feature>
-   <feature url="features/org.wcs.smart.connect.dataqueue.independentincident.feature.nl_6.0.0.jar" id="org.wcs.smart.connect.dataqueue.independentincident.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.connect.dataqueue.independentincident.feature.nl_6.2.0.jar" id="org.wcs.smart.connect.dataqueue.independentincident.feature.nl" version="6.2.0">
       <category name="connectdq"/>
    </feature>
-   <feature url="features/org.wcs.smart.asset.feature.nl_6.0.0.jar" id="org.wcs.smart.asset.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.asset.feature.nl_6.2.0.jar" id="org.wcs.smart.asset.feature.nl" version="6.2.0">
       <category name="asset"/>
    </feature>
-   <feature url="features/org.wcs.smart.i2.feature.nl_6.0.0.jar" id="org.wcs.smart.i2.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.i2.feature.nl_6.2.0.jar" id="org.wcs.smart.i2.feature.nl" version="6.2.0">
       <category name="profiles"/>
    </feature>
-   <feature url="features/org.wcs.smart.event.feature.nl_6.0.0.jar" id="org.wcs.smart.event.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.event.feature.nl_6.2.0.jar" id="org.wcs.smart.event.feature.nl" version="6.2.0">
       <category name="events"/>
    </feature>
-   <feature url="features/org.wcs.smart.event.i2.feature.nl_6.0.0.jar" id="org.wcs.smart.event.i2.feature.nl" version="6.0.0">
+   <feature url="features/org.wcs.smart.event.i2.feature.nl_6.2.0.jar" id="org.wcs.smart.event.i2.feature.nl" version="6.2.0">
       <category name="events"/>
    </feature>
    <feature url="features/org.wcs.smart.cybertracker.incident.feature_6.2.0.qualifier.jar" id="org.wcs.smart.cybertracker.incident.feature" version="6.2.0.qualifier">
