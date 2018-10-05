@@ -4,8 +4,8 @@
       label="SMART Plan Language Pack"
       version="6.2.0"
       provider-name="org.wcs.smart"
-       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="6.1.0.qualifier">
+      license-feature="org.wcs.smart.license.feature"
+      license-feature-version="6.2.0.qualifier">
 
    <description>
       Rranslations for the SMART Plan plugin.
