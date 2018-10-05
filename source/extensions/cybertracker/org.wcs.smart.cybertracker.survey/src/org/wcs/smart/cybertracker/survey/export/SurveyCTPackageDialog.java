@@ -120,8 +120,8 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
     	String selectedFile = txtOutputFile.getText();
     	
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_FILE_KEY, selectedFile);
-    	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_DESIGN_KEY, UuidUtils.uuidToString(selectedDesign.getUuid()));
-    	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_PROFILE_KEY, UuidUtils.uuidToString(selectedProfile.getUuid()));
+    	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(LAST_DESIGN_KEY), UuidUtils.uuidToString(selectedDesign.getUuid()));
+    	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(LAST_PROFILE_KEY), UuidUtils.uuidToString(selectedProfile.getUuid()));
     	
 
 		Path exportFile = Paths.get(selectedFile);
@@ -358,8 +358,8 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 		String text = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_FILE_KEY);
 		if (text != null) txtOutputFile.setText(text);
 		
-    	final String lastDesignUuid = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_DESIGN_KEY);
-    	final String lastProfileUuid = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_PROFILE_KEY);
+    	final String lastDesignUuid = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(getPreferenceKey(LAST_DESIGN_KEY));
+    	final String lastProfileUuid = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(getPreferenceKey(LAST_PROFILE_KEY));
     	
 		Job j = new Job("loading data") { //$NON-NLS-1$
 
@@ -402,5 +402,13 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 		};
 		j.setSystem(true);
 		j.schedule();
+	}
+	
+	/*
+	 * append the conservation area uuid to preference key so each conservation
+	 * area will have it's own preferences
+	 */
+	private String getPreferenceKey(String key) {
+		return key + "." + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
 	}
 }

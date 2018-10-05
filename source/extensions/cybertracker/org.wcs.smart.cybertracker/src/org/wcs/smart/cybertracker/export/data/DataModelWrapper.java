@@ -21,15 +21,25 @@
  */
 package org.wcs.smart.cybertracker.export.data;
 
+import java.util.UUID;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelFactory;
+import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
  * Class is a lazy wrapper around original datamodel
  * to allow exporting it to CyberTracker application.
+ * 
+ * WARNING: uuids are generated randomly for all nodes, attribute listitems and tree
+ * nodes. The new CT verion requires ID's for all nodes so after converting
+ * the data model we apply random uuids to all nodes, attributes, listitems and tree
+ * nodes.
  * 
  * @author elitvin
  * @since 2.0.0
@@ -48,8 +58,46 @@ public class DataModelWrapper {
 	public ConfigurableModel buildConfigurableModel(Session session, IProgressMonitor monitor) {
 		if (model == null) {
 			model = ConfigurableModelFactory.createModelFromDataModel(Messages.DataModelWrapper_Name, session, monitor);
+			assignIds(model);
 		}
 		return model;
 	}
 	
+	private void assignIds(ConfigurableModel model) {
+		model.getNodes().forEach(node->processNode(node));
+		
+	}
+	
+	private void processNode(CmNode node) {
+		if (node.getUuid() == null) node.setUuid(UUID.randomUUID());
+		
+		if (node.getCmAttributes() != null) {
+			node.getCmAttributes().forEach(a->processAttribute(a));
+		}
+		if (node.getChildren() != null) {
+			node.getChildren().forEach(kid->processNode(kid));
+		}
+	}
+	
+	private void processAttribute(CmAttribute attribute) {
+		if (attribute.getUuid() == null) attribute.setUuid(UUID.randomUUID());
+		if (attribute.getConfig() != null) attribute.getConfig().setUuid(UUID.randomUUID());
+		
+		if (attribute.getCurrentList() != null) {
+			attribute.getCurrentList().forEach(li->{
+				if (li.getUuid() == null) li.setUuid(UUID.randomUUID());
+			});
+		}
+		
+		if (attribute.getCurrentTree() != null) {
+			attribute.getCurrentTree().forEach(tr->processTreeNode(tr));
+		}
+	}
+	
+	private void processTreeNode(CmAttributeTreeNode tree) {
+		if (tree.getUuid() == null) tree.setUuid(UUID.randomUUID());
+		if (tree.getChildren() != null) {
+			tree.getChildren().forEach(kid->processTreeNode(kid));
+		}
+	}
 }

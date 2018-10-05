@@ -529,7 +529,7 @@ public class MapPackageContribution implements IPackageContribution{
 	};
 	
 	private String envToString(ReferencedEnvelope env) {
-		if (env == null) return "";
+		if (env == null) return ""; //$NON-NLS-1$
 		if (!CRS.equalsIgnoreMetadata(env.getCoordinateReferenceSystem(), SmartDB.DATABASE_CRS)) {
 			SmartPlugIn.log("Can only save envelopes in lat/long", null); //$NON-NLS-1$
 			return ""; //$NON-NLS-1$
@@ -579,7 +579,7 @@ public class MapPackageContribution implements IPackageContribution{
 		
 		if (mapType == MapType.SMARTMAP) {
 			if (data[0] == null) {
-				CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(BASEMAP_PREF_KEY), "" );
+				CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(BASEMAP_PREF_KEY), "" ); //$NON-NLS-1$
 			}else {
 				CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(BASEMAP_PREF_KEY), UuidUtils.uuidToString( ((BasemapDefinition)data[0]).getUuid()) );
 			}

@@ -122,11 +122,11 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
     	
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_FILE_KEY, selectedFile);
     	if (selectedModel != null) {
-    		CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_CM_KEY, UuidUtils.uuidToString(selectedModel.getUuid()));
+    		CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(LAST_CM_KEY), UuidUtils.uuidToString(selectedModel.getUuid()));
     	}else {
-    		CyberTrackerPlugIn.getDefault().getPreferenceStore().setToDefault(LAST_CM_KEY);
+    		CyberTrackerPlugIn.getDefault().getPreferenceStore().setToDefault(getPreferenceKey(LAST_CM_KEY));
     	}
-    	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_PROFILE_KEY, UuidUtils.uuidToString(selectedProfile.getUuid()));
+    	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(LAST_PROFILE_KEY), UuidUtils.uuidToString(selectedProfile.getUuid()));
     	
 
 		Path exportFile = Paths.get(selectedFile);
@@ -202,7 +202,6 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 		}	
 		if (!iscancel[0]) super.okPressed();
     }
-    
     
     
 	/**
@@ -393,8 +392,8 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 		String text = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_FILE_KEY);
 		if (text != null) txtOutputFile.setText(text);
 
-    	final String lastCmUuid = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_CM_KEY);
-    	final String lastProfileUuid = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_PROFILE_KEY);
+    	final String lastCmUuid = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(getPreferenceKey(LAST_CM_KEY));
+    	final String lastProfileUuid = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(getPreferenceKey(LAST_PROFILE_KEY));
     	
 		Job j = new Job("loading data") { //$NON-NLS-1$
 
@@ -435,5 +434,13 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 		};
 		j.setSystem(true);
 		j.schedule();
+	}
+	
+	/*
+	 * append the conservation area uuid to preference key so each conservation
+	 * area will have it's own preferences
+	 */
+	private String getPreferenceKey(String key) {
+		return key + "." + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
 	}
 }
