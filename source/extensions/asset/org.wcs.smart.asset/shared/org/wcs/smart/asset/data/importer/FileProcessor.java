@@ -57,6 +57,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import com.drew.lang.Rational;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
+import com.drew.metadata.Tag;
 
 /**
  * Asset file process or processing a collection of files.
@@ -559,9 +560,8 @@ public class FileProcessor {
 
 		Directory tag = (Directory) field.findValue(fileMetadata);
 		if (tag == null) return; //tag not found
-		
 		if (mapping.getMappedAssetProperty() != null) {
-			String tagvalue= tag.getString(field.getTagType());			
+			String tagvalue= tag.getDescription(field.getTagType());			
 			switch(mapping.getMappedAssetProperty()) {
 			case ASSET_ID:
 				if (p.getAsset() != null) return;	//we already have an asset from another mapping; do not try again
