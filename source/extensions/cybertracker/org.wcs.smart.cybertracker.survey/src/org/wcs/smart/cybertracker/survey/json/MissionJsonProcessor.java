@@ -539,6 +539,8 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		String defaultValues = (String)sighting.get(SurveyScreensUtil.RESULT_DEFAULT_META_VALUES);
 		CyberTrackerSurvey ct = SurveyJsonUtils.parseSurveyMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, session);
 		
+		if (ct.getSurveyDesign() == null) throw new Exception(MessageFormat.format("Survey design with key {0} not found.  Cannot import data.", ct.getSurveyDesignKey()));
+		
 		String startDate = (String)sighting.get(ScreensUtil.RESULT_START_DATE);
 		String startTime = (String)sighting.get(ScreensUtil.RESULT_START_TIME);
 		

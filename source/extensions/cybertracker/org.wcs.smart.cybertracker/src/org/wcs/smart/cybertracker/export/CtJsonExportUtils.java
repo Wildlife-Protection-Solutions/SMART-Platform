@@ -129,6 +129,7 @@ public class CtJsonExportUtils {
 	public static enum Type{
 		BOOLEAN,
 		TEXT,
+		NUMERIC,
 		SINGLE_CHOICE,
 		MULTI_CHOICE,
 		UUID,

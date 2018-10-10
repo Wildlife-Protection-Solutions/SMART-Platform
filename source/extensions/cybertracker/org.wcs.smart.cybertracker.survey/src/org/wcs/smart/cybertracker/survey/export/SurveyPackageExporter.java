@@ -38,11 +38,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
+import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
+import org.wcs.smart.cybertracker.export.CtJsonExportUtils.Type;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
@@ -56,10 +60,14 @@ import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
+import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.meta.MissionScreenOptionMeta;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
 /**
@@ -147,7 +155,7 @@ public enum SurveyPackageExporter {
 				
 				sub.split(1);
 				Path metadataFile = tempDir.resolve(PATROL_METADATA_FILE);
-				metadataToJson(modelToExport.getConservationArea(), session,  metadataFile);
+				metadataToJson(modelToExport.getConservationArea(), design, session,  metadataFile);
 				toIncludeInZip.add(metadataFile.toFile());
 				
 				sub.split(1);
@@ -197,7 +205,7 @@ public enum SurveyPackageExporter {
 			if (processed.contains(objectNode)) continue;
 			processed.add(objectNode);
 			
-			if (objectNode instanceof IImageAssociatedObject) {
+			if (objectNode instanceof CmNode) {
 				CmNode node = (CmNode)objectNode;
 				toProcess.addAll(node.getChildren());
 				
@@ -250,20 +258,37 @@ public enum SurveyPackageExporter {
 	
 	
 	@SuppressWarnings("unchecked")
-	private void metadataToJson(ConservationArea ca, Session session, Path outputFile) throws IOException {
+	private void metadataToJson(ConservationArea ca, SurveyDesign design, Session session, Path outputFile) throws IOException {
 		Map<MissionScreenOptionMeta, ScreenOption> options = SurveyHibernateManager.getMissionScreenOptions(ca, session);
 		
 		JSONArray metadataScreens = new JSONArray();
 		
+		//add mission attribute options
+		design = session.get(SurveyDesign.class,  design.getUuid());
+		for (MissionProperty prop : design.getMissionProperties()) {
+			MissionAttribute a = session.get(MissionAttribute.class, prop.getAttribute().getUuid());
+			//only supports number, text and list
+			if (prop.getAttribute().getType() == AttributeType.NUMERIC) {
+				metadataScreens.add(covertNumberProperty(a, session, ca));
+			}else if (prop.getAttribute().getType() == AttributeType.TEXT) {
+				metadataScreens.add(covertStringProperty(a, session, ca));
+			}else if (prop.getAttribute().getType() == AttributeType.LIST) {
+				metadataScreens.add(covertListProperty(a, session, ca));
+			}	
+		}
+				
 		metadataScreens.add(CtJsonExportUtils.convertStringOp(options.get(MissionScreenOptionMeta.COMMENT), MissionScreenOptionMeta.COMMENT.key, Messages.SurveyPackageExporter_CommentPageLabel, MissionScreenOptionMeta.COMMENT.isRequired(), session, ca)); 
 		metadataScreens.add(CtJsonExportUtils.convertEmployees(options.get(MissionScreenOptionMeta.MEMBERS), MissionScreenOptionMeta.MEMBERS.isRequired(), session, ca));
 		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(options.get(MissionScreenOptionMeta.LEADER), MissionScreenOptionMeta.LEADER.key, Messages.SurveyPackageExporter_LeaderPageLabel, MissionScreenOptionMeta.LEADER.isRequired(), session, ca)); 
 			
-		metadataScreens.add(CtJsonExportUtils.createDataType(MissionScreenOptionMeta.MISSION_RESOURCE_ID));
+		
+		
+		metadataScreens.add(CtJsonExportUtils.createDataType(SurveyScreensUtil.DATATYPE_SURVEY));
 		metadataScreens.add(CtJsonExportUtils.createPatrolId());
 		metadataScreens.add(CtJsonExportUtils.createStartDate());
 		metadataScreens.add(CtJsonExportUtils.createEndDate());
-		
+		metadataScreens.add(createSurveyDesign(design));
+				
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
 			fw.write(metadataScreens.toJSONString());
 		}
@@ -273,4 +298,65 @@ public enum SurveyPackageExporter {
 		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
 	}
 	
+	@SuppressWarnings("unchecked")
+	private JSONObject covertNumberProperty(MissionAttribute prop, Session session, ConservationArea ca) {
+		JSONObject objective = new JSONObject();
+		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.NUMERIC.name());
+		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY, prop.getName());
+		objective.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, false);
+		objective.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, true);
+		
+		JSONObject objectiveOp = new JSONObject();
+		objectiveOp.put(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX + prop.getKeyId(), objective);
+		return objectiveOp;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private JSONObject covertStringProperty(MissionAttribute prop, Session session, ConservationArea ca) {
+		JSONObject objective = new JSONObject();
+		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.TEXT.name());
+		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY, prop.getName());
+		objective.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, false);
+		objective.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, true);
+		
+		JSONObject objectiveOp = new JSONObject();
+		objectiveOp.put(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX + prop.getKeyId(), objective);
+		return objectiveOp;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private JSONObject covertListProperty(MissionAttribute prop, Session session, ConservationArea ca) {
+		JSONObject objective = new JSONObject();
+		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
+		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY, prop.getName());
+		objective.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, false);
+		objective.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, true);
+		
+		JSONArray optionOptions = new JSONArray();
+		
+		for (MissionAttributeListItem item : prop.getAttributeList()) {
+			JSONObject ttype = new JSONObject();
+			ttype.put("uuid", SurveyScreensUtil.JsonSurveyKey.MISSION_ATT_LIST.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(item.getUuid())); //$NON-NLS-1$
+			ttype.put("label", item.getName()); //$NON-NLS-1$
+			optionOptions.add(ttype);
+		}
+		objective.put(CtJsonExportUtils.JSON_OPTION_PROP_KEY, optionOptions);
+		
+		JSONObject objectiveOp = new JSONObject();
+		objectiveOp.put(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX + prop.getKeyId(), objective);
+		return objectiveOp;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private JSONObject createSurveyDesign(SurveyDesign design) {
+		JSONObject dataType = new JSONObject();
+		dataType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.TEXT.name());
+		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
+		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, false);
+		dataType.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, true);
+		dataType.put(CtJsonExportUtils.JSON_DEFAULT_PROP_KEY, design.getKeyId());
+		JSONObject typeOp = new JSONObject();
+		typeOp.put(SurveyScreensUtil.RESULT_SURVEY_DESIGN, dataType);
+		return typeOp;
+	}
 }
