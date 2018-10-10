@@ -57,7 +57,6 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import com.drew.lang.Rational;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
-import com.drew.metadata.Tag;
 
 /**
  * Asset file process or processing a collection of files.
