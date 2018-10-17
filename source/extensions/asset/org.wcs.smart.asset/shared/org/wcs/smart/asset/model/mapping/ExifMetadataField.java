@@ -79,7 +79,8 @@ public class ExifMetadataField implements IMetadataField{
 	 */
 	public ExifMetadataField(int tagType, String tagValue) {
 		this.tagType = tagType;
-		this.tagValue = tagValue.trim().isEmpty() ? null : tagValue;
+		if (tagValue != null)
+			this.tagValue = tagValue.trim().isEmpty() ? null : tagValue;
 	}
 	
 	/**

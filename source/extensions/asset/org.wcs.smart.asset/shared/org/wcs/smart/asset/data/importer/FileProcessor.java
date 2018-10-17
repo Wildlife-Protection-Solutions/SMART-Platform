@@ -588,7 +588,7 @@ public class FileProcessor {
 					add = true;
 				} else {
 					//only mapped to this category if the tag value matches the provided value
-					String exifTagValue = tag.getString(field.getTagType());
+					String exifTagValue = tag.getDescription(field.getTagType());
 					if (exifTagValue == null) return; //no value; not observation
 					if (field.getTagValue().trim().equalsIgnoreCase(exifTagValue.trim())) {
 						add = true;
@@ -627,7 +627,7 @@ public class FileProcessor {
 					}
 					woa.setDateValue(value);
 				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.LIST) {
-					String value = tag.getString(field.getTagType());
+					String value = tag.getDescription(field.getTagType());
 					if (mapping.getMappedListItem() != null) {
 						if (value.equalsIgnoreCase(field.getTagValue())) {
 							woa.setAttributeListItem(mapping.getMappedListItem());
@@ -657,7 +657,7 @@ public class FileProcessor {
 					}
 					
 				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.TREE) {
-					String value = tag.getString(field.getTagType());
+					String value = tag.getDescription(field.getTagType());
 					if (mapping.getMappedTreeNode() != null) {
 						if (value.equalsIgnoreCase(field.getTagValue())) {
 							woa.setAttributeTreeNode(mapping.getMappedTreeNode());
@@ -709,7 +709,7 @@ public class FileProcessor {
 					}
 					woa.setNumberValue(value);	
 				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.TEXT) {
-					String value = tag.getString(field.getTagType());
+					String value = tag.getDescription(field.getTagType());
 					woa.setStringValue(value);
 				}
 				
