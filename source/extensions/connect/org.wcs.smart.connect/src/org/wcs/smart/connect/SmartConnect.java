@@ -22,11 +22,16 @@
 package org.wcs.smart.connect;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -79,7 +84,6 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.api.ConnectClient;
 import org.wcs.smart.connect.api.io.IOUtils;
-import org.wcs.smart.connect.api.io.ProgressInputStream;
 import org.wcs.smart.connect.api.model.AlertType;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
@@ -650,8 +654,9 @@ public class SmartConnect {
 	}
 	
 	/**
-	 * Uploads a file to the given URL starting at the given byte.  This 
-	 * supports resuming upload
+	 * Uploads a file to the given URL starting at the given byte.  Files are uploaded
+	 * in chunks of 25,000,000bytes.  Exceptions are throw in an upload fails - this 
+	 * method does not retry uploads.
 	 * 
 	 * @param url the url to upload file to
 	 * @param f the file to upload
@@ -663,10 +668,34 @@ public class SmartConnect {
         
 		//retry handler set when creating client;
         ConnectClient service =  client.target(url).proxy(ConnectClient.class);
-		try(InputStream fis = new ProgressInputStream(Files.newInputStream(f), Files.size(f), monitor)){
-			fis.skip(startByte);
-			service.updateFile(fis);
-		}
+        
+        //upload data in chunks so we don't run into problems with
+        //uploading large files; it also better
+        //reflects the workload
+        //if this fails at anypoint it exits this loop so
+        //failures/retries should be done in a different loop
+        int chunkSize = 25_000_000;
+        long total = Files.size(f);
+        long count = startByte;
+        SubMonitor m = SubMonitor.convert(monitor);
+        
+        int worksize = (int)Math.ceil((double)total / chunkSize);
+        m.setWorkRemaining( worksize );
+        try(FileInputStream fs = new FileInputStream(f.toFile())){
+	        while( count < total) {
+	        	try(ByteArrayOutputStream bout = new ByteArrayOutputStream()){	        	
+		        	try(WritableByteChannel fout = Channels.newChannel(bout)){
+		        		fs.getChannel().transferTo(count, chunkSize, fout);
+		        	}	
+		        	try(InputStream fis = new ByteArrayInputStream(bout.toByteArray() )){
+		    			service.updateFile(fis);
+		    		}
+	        	}
+	        	m.worked(1);
+	        	count += chunkSize;
+	        	//System.out.println(count + "/" + total);
+	        }
+        }
 	}
 
 	private String processException (Throwable root){
