@@ -43,6 +43,7 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILazyContentProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -442,6 +443,38 @@ public class IconSelectionDialog extends TitleAreaDialog {
 				okPressed();
 			}
 		});
+		tblIcons.getTable().addListener(SWT.KeyDown, e->{
+			//scroll to first item that start with key e.character
+			Object in = tblIcons.getInput();
+			if (!(in instanceof List)) return;
+			List<?> c = (List<?>) in;
+			e.doit = false;
+			
+			Object selection = tblIcons.getStructuredSelection().getFirstElement();
+			
+			int startIndex = 0;
+			if (selection != null) {
+				int a = c.indexOf(selection);
+				if (a >= 0) startIndex = ( a + 1 ) % c.size();
+			}
+			
+			char toFind = Character.toLowerCase(e.character);
+			int index = startIndex;
+			while(true) {
+				Object item =  c.get(index);
+				if (item instanceof Icon) {
+					char cc = Character.toLowerCase( ((Icon) item).getName().charAt(0) );
+					if (toFind == cc) {
+						tblIcons.setSelection(new StructuredSelection(item), true);
+						return;
+					}
+				}
+				
+				index = (index + 1) % c.size();	
+				if (index == startIndex) break;
+			}
+		});
+		
 		
 		TableViewerColumn emptycolumn = new TableViewerColumn(tblIcons, SWT.NONE);
 		emptycolumn.getColumn().setText(""); //$NON-NLS-1$

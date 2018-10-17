@@ -1226,7 +1226,10 @@ public class AttributeInfoPanel extends Composite {
 								}
 							}
 							ITreeNodeVisitor v = node-> {
-								if (node.getIcon() != null) session.saveOrUpdate(node.getIcon());
+								if (node.getIcon() != null) {
+									Icon merged = (Icon) session.merge(node.getIcon());
+									node.setIcon(merged);
+								}
 								return true;
 							};
 							thisAttribute.getTree().forEach(n->n.accept(v));
