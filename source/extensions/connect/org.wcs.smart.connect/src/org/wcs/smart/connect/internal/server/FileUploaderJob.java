@@ -110,6 +110,8 @@ public abstract class FileUploaderJob extends Job {
 					if (checkServerStatus(serverStatus, progress.split(2))){
 						return ;
 					}
+				}catch(ProcessingTimeoutException ex) {
+					throw ex;
 				}catch (Throwable ex){
 					ConnectPlugIn.log(ex.getMessage(), ex);
 				}
@@ -150,7 +152,7 @@ public abstract class FileUploaderJob extends Job {
 	 * @throws Exception
 	 */
 	protected boolean checkServerStatus(WorkItemStatus serverStatus,
-			IProgressMonitor monitor) throws Exception{
+			IProgressMonitor monitor) throws ProcessingTimeoutException, Exception{
 		if (serverStatus == null) return false;
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.FileUploaderJob_StatusCheckSubTaskName, 1);
 	
@@ -167,7 +169,7 @@ public abstract class FileUploaderJob extends Job {
 			//upload was successful but we need to wait for processing
 			if (!waitProcessing(progress)){
 				//we waited 5 minutes and we do not know how to proceed
-				throw new Exception(
+				throw new ProcessingTimeoutException(
 						MessageFormat.format(
 								Messages.FileUploaderJob_ToLong, ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME.getIntegerValue(connect.getServer()) / (1000 *60.0) ));
 			}
