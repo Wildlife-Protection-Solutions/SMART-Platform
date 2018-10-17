@@ -91,7 +91,7 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 		if (node != null){
 			File f = node.getImageFile();
 			if (!f.exists()) {
-				if (node.getDmTreeNode().getIcon() == null) return null;
+				if (node.getDmTreeNode() == null || node.getDmTreeNode().getIcon() == null) return null;
 				IconFile icon = node.getDmTreeNode().getIcon().getIconFile(node.getConfig().getModel().getIconSet());
 				if (icon != null) {
 					f = icon.getAttachmentFile();

@@ -1320,11 +1320,7 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".icon.conservationArea"
-            class="org.wcs.smart.ca.icon.IconFile"
-            supportsCcaa="false">
-      </class>
-      <class
+            ca_property=".iconSet.conservationArea"
             class="org.wcs.smart.ca.icon.IconFile"
             supportsCcaa="false">
       </class>

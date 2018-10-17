@@ -78,6 +78,8 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
+import org.wcs.smart.ca.datamodel.ICategoryVisitor;
+import org.wcs.smart.ca.datamodel.ITreeNodeVisitor;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.WarningDialog;
@@ -569,12 +571,40 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							for (Attribute a : sourceDm.getAttributes()){
 								if (a.getUuid() == null){
 									session.save(a);
+									if (a.getIcon() != null) a.getIcon().getFiles().forEach(f->f.computeFileLocation(session));
+									
+									if (a.getAttributeList() != null) {
+										a.getAttributeList().forEach(li->{
+											if (li.getIcon() != null) li.getIcon().getFiles().forEach(f->f.computeFileLocation(session));
+										});
+									}
+									if (a.getTree() != null) {
+										a.getTree().forEach(n->{
+											n.accept(new ITreeNodeVisitor() {
+												@Override
+												public boolean visit(AttributeTreeNode node) {
+													if (node.getIcon() != null) node.getIcon().getFiles().forEach(f->f.computeFileLocation(session));
+													return true;
+												}
+												
+											});
+										});
+									}
 								}
 							}
 							for (Category c : sourceDm.getCategories()){
 								if (c.getUuid() == null){
 									session.save(c);
 								}
+								
+								c.accept(new ICategoryVisitor() {
+									
+									@Override
+									public boolean visit(Category category) {
+										if (category.getIcon() != null) category.getIcon().getFiles().forEach(f->f.computeFileLocation(session));
+										return true;
+									}
+								});
 							}
 						}
 						session.flush();
