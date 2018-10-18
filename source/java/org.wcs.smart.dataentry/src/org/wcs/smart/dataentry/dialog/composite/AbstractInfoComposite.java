@@ -222,7 +222,7 @@ public abstract class AbstractInfoComposite extends Composite {
 		addToParent(node);
 	}
 	
-	private void loadFiles(Icon i, Session s) {
+	protected void loadFiles(Icon i, Session s) {
 		if (i == null) return;
 		for (IconFile file : i.getFiles()) {
 			file.computeFileLocation(s);

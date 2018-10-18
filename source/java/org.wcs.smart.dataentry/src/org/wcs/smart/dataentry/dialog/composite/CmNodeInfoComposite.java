@@ -401,6 +401,13 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 
 	public void setSourceObject(CmNode node, Language currentLanguage) {
 		this.node = node;
+		
+		if (node.getCategory() != null) {
+			if (node.getCategory().getIcon() != null) {
+				loadFiles(node.getCategory().getIcon(), session);
+			}
+		}
+		
 		fireSourceObjectChanged(node, currentLanguage);
 	}
 }

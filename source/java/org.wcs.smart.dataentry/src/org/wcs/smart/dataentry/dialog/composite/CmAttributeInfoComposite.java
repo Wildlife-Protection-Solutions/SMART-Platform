@@ -22,6 +22,8 @@
 package org.wcs.smart.dataentry.dialog.composite;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -47,8 +49,10 @@ import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeOption.EnterOnceType;
+import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -286,6 +290,23 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 	
 	public void setSourceObject(CmAttribute attribute, Language language) {
 		this.attribute = attribute;
+		//load icon files as necessary
+		if (attribute.getAttribute().getIcon() != null) loadFiles(attribute.getAttribute().getIcon(), session);
+		if (attribute.getCurrentList() != null) {
+			for (CmAttributeListItem li : attribute.getCurrentList()) {
+				if (li.getListItem().getIcon() != null) loadFiles(li.getListItem().getIcon(), session);
+			}
+		}
+		if (attribute.getCurrentTree() != null) {
+			List<CmAttributeTreeNode> nodes = new ArrayList<>();
+			nodes.addAll(attribute.getCurrentTree());
+			while(!nodes.isEmpty()) {
+				CmAttributeTreeNode node = nodes.remove(0);
+				if (node.getDmTreeNode().getIcon() != null) loadFiles(node.getDmTreeNode().getIcon(), session);
+				if (node.getChildren() != null) nodes.addAll(node.getChildren());
+
+			}
+		}
 		imageSelection.updateImage();
 		fireSourceObjectChanged(attribute, language);
 	}
