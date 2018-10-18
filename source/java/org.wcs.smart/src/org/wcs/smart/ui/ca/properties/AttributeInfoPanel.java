@@ -1076,6 +1076,7 @@ public class AttributeInfoPanel extends Composite {
 				att.setIcon((Icon)session.merge(att.getIcon()));
 			}
 		}
+		
 		session.flush();
 		
 		if (att.getType().equals(Attribute.AttributeType.NUMERIC)){
@@ -1225,14 +1226,19 @@ public class AttributeInfoPanel extends Composite {
 									thisAttribute.getTree().add(mergedNode);
 								}
 							}
+							session.flush();
+							//icons
 							ITreeNodeVisitor v = node-> {
 								if (node.getIcon() != null) {
-									Icon merged = (Icon) session.merge(node.getIcon());
-									node.setIcon(merged);
+									if (node.getIcon().getUuid() != null) {
+										Icon merged = (Icon) session.merge(node.getIcon());
+										node.setIcon(merged);
+									}
 								}
 								return true;
 							};
 							thisAttribute.getTree().forEach(n->n.accept(v));
+						
 							
 							session.flush();
 						}
@@ -1257,21 +1263,14 @@ public class AttributeInfoPanel extends Composite {
 				kids.add(n);
 			}
 		}
-		if (node.getUuid() != null){
-			if (node.getIcon() != null) {
-				if (node.getIcon().getUuid() == null) {
-					session.save(node.getIcon());
-				}else {
-					node.setIcon((Icon)session.merge(node.getIcon()));
-				}
-			}
-			Icon icn = node.getIcon();
-			node = (AttributeTreeNode) session.merge(node);
-			node.setIcon(icn);
-		}else{
+
+		if (node.getUuid() == null) {
 			//newNode
 			DataModelManager.INSTANCE.fireAddListener(currentSession, node);
 			session.saveOrUpdate(node);
+		}
+		if (node.getIcon() != null && node.getIcon().getUuid() == null) {
+			session.save(node.getIcon());
 		}
 		
 		for ( org.wcs.smart.ca.Label l : node.getNames()){

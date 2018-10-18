@@ -71,10 +71,10 @@ public class ShowDataModelPropertyPageHandler {
 		try {
 			ppd.run();
 		} catch (Exception ex) {
-			if (loadedSession.getTransaction().isActive()){
-				loadedSession.getTransaction().rollback();
+			if (loadedSession != null) {
+				if (loadedSession.getTransaction().isActive()) loadedSession.getTransaction().rollback();
+				loadedSession.close();
 			}
-			loadedSession.close();
 			SmartPlugIn.displayLog(Messages.ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel, ex);
 			return;
 		}
