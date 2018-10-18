@@ -71,5 +71,5 @@ CREATE TRIGGER trg_iconfile AFTER INSERT OR UPDATE OR DELETE ON smart.iconfile F
 update connect.connect_plugin_version set version = '6.2.0' where plugin_id = 'org.wcs.smart';
 update connect.ca_plugin_version set version = '6.2.0' where plugin_id = 'org.wcs.smart';
 
-update connect.connect_version set version = '6.2.0';		
+update connect.connect_version set version = '6.2.0', last_updated = now();		
 --done via connect java upgrade script; update connect.connect_version set filestore_version = '6.2.0';
