@@ -369,6 +369,18 @@ public class AttributeTree {
 		});
 		iconColumn.getColumn().setWidth(32);
 		
+		if (!isEditable) {
+			Menu tmp = new Menu(viewer.getControl());
+			MenuItem miExpand = new MenuItem(tmp, SWT.PUSH);
+			miExpand.setText(Messages.AttributeTree_ExpandAll);
+			miExpand.addListener(SWT.Selection, e->viewer.expandAll());
+			
+			MenuItem miCollapse = new MenuItem(tmp, SWT.PUSH);
+			miCollapse.setText(Messages.AttributeTree_CollapseAll);
+			miCollapse.addListener(SWT.Selection, e->viewer.collapseAll());
+			
+			viewer.getControl().setMenu(tmp);
+		}
 		
 		if (isEditable){
 			int operations = DND.DROP_MOVE;
@@ -425,6 +437,7 @@ public class AttributeTree {
 			btnSort.setText(Messages.AttributeTree_SortAllButton);
 			btnSort.setToolTipText(Messages.AttributeTree_SortAllTooltip);
 			btnSort.addSelectionListener(new SelectionAdapter(){
+				@SuppressWarnings("unchecked")
 				@Override
 				public void widgetSelected(SelectionEvent e){
 					List<AttributeTreeNode> nodes = (List<AttributeTreeNode>) viewer.getInput();
@@ -527,6 +540,16 @@ public class AttributeTree {
 			miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 			miDelete.addListener(SWT.Selection, e->deleteNodes());
+			
+			new MenuItem(tmp, SWT.SEPARATOR);
+			
+			MenuItem miExpand = new MenuItem(tmp, SWT.PUSH);
+			miExpand.setText(Messages.AttributeTree_ExpandAll);
+			miExpand.addListener(SWT.Selection, e->viewer.expandAll());
+			
+			MenuItem miCollapse = new MenuItem(tmp, SWT.PUSH);
+			miCollapse.setText(Messages.AttributeTree_CollapseAll);
+			miCollapse.addListener(SWT.Selection, e->viewer.collapseAll());
 			
 			viewer.getControl().setMenu(tmp);
 			

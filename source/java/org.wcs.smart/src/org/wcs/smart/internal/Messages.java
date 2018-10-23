@@ -167,6 +167,7 @@ public class Messages extends NLS {
 	public static String AttributeItemDialog_Dialog_Title;
 	public static String AttributeItemDialog_IconLabel;
 	public static String AttributeTree_AddButton_Tooltip;
+	public static String AttributeTree_CollapseAll;
 	public static String AttributeTree_ConfirmDelete_DialogMessage1;
 	public static String AttributeTree_ConfirmDelete_DialogMessage2;
 	public static String AttributeTree_ConfirmDelete_DialogTitle;
@@ -177,6 +178,7 @@ public class Messages extends NLS {
 	public static String AttributeTree_DisableButton_ToolTip;
 	public static String AttributeTree_EditButton_Tooltip;
 	public static String AttributeTree_EnableAll_Tooltip;
+	public static String AttributeTree_ExpandAll;
 	public static String AttributeTree_GenericError;
 	public static String AttributeTree_IconColumn;
 	public static String AttributeTree_ImportButtonText;
@@ -848,6 +850,7 @@ public class Messages extends NLS {
 	public static String IconComposite_CouldNotReadFile;
 	public static String IconComposite_ImagesLbl;
 	public static String IconComposite_SelectFile;
+	public static String IconPanel_clearLabel;
 	public static String IconPanel_NoIconLabel;
 	public static String IconPreferencePage_addicontooltip;
 	public static String IconPreferencePage_CopyError;

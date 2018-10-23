@@ -46,6 +46,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
  *
  */
 public class IconPanel extends Composite {
+	
+	private static final int ICON_SIZE = 50;
 
 	private boolean canEdit = false;
 	private Icon newIcon = null;
@@ -87,6 +89,12 @@ public class IconPanel extends Composite {
 				lnk.setText("<a>" + DialogConstants.EDIT_LINK_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 				lnk.addListener(SWT.Selection, e->editIcons());
 			}
+			
+			//spacer for images
+			Composite images = new Composite(this, SWT.NONE);
+			images.setLayout(new GridLayout());
+			images.setLayoutData(new GridData());
+			((GridData)images.getLayoutData()).heightHint = ICON_SIZE;
 		}else {
 			
 			Composite c = new Composite(this, SWT.NONE);
@@ -99,9 +107,18 @@ public class IconPanel extends Composite {
 			l.setText(icon.getName() == null ? "" : icon.getName()); //$NON-NLS-1$
 			
 			if (canEdit) {
-				Link lnk = new Link(c, SWT.NONE);
+				Composite cc = new Composite(c, SWT.NONE);
+				cc.setLayout(new GridLayout(2, false));
+				((GridLayout)cc.getLayout()).marginWidth = 0;
+				((GridLayout)cc.getLayout()).marginHeight = 0;
+				
+				Link lnk = new Link(cc, SWT.NONE);
 				lnk.setText("<a>" + DialogConstants.EDIT_LINK_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 				lnk.addListener(SWT.Selection, e->editIcons());
+				
+				lnk = new Link(cc, SWT.NONE);
+				lnk.setText("<a>" + Messages.IconPanel_clearLabel + "</a>");  //$NON-NLS-1$ //$NON-NLS-2$
+				lnk.addListener(SWT.Selection, e->clearIcon());
 			}
 			
 			Composite images = new Composite(this, SWT.NONE);
@@ -118,12 +135,12 @@ public class IconPanel extends Composite {
 				((GridLayout)temp.getLayout()).marginWidth = 0;
 				((GridLayout)temp.getLayout()).marginHeight = 0;
 				
-				Thumbnail t = new Thumbnail(file, 50, true);
+				Thumbnail t = new Thumbnail(file, ICON_SIZE, true);
 				t.setImageName(icon.getName());
-				Composite cc = t.createThumbnail(temp, SWT.NONE);
+				Composite cc = t.createThumbnail(temp, 0, SWT.NONE, false);
 				cc.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
-				((GridData)cc.getLayoutData()).widthHint = 50;
-				((GridData)cc.getLayoutData()).heightHint = 50;
+				((GridData)cc.getLayoutData()).widthHint = ICON_SIZE;
+				((GridData)cc.getLayoutData()).heightHint = ICON_SIZE;
 				
 				l = new Label(temp, SWT.NONE);
 				l.setText(file.getIconSet().getName());				
@@ -139,7 +156,15 @@ public class IconPanel extends Composite {
 	public void updateDmObject(DmObject object) {
 		if(newIcon != null) {
 			object.setIcon(newIcon);
+		}else {
+			object.setIcon(null);
 		}
+	}
+	
+	private void clearIcon() {
+		this.newIcon = null;
+		updateIcon(newIcon);
+		fireSelectionListeners();
 	}
 	
 	private void editIcons() {

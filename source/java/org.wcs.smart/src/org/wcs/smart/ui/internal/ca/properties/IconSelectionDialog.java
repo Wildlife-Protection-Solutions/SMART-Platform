@@ -43,7 +43,6 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILazyContentProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -465,7 +464,8 @@ public class IconSelectionDialog extends TitleAreaDialog {
 				if (item instanceof Icon) {
 					char cc = Character.toLowerCase( ((Icon) item).getName().charAt(0) );
 					if (toFind == cc) {
-						tblIcons.setSelection(new StructuredSelection(item), true);
+						tblIcons.getTable().setSelection(index);
+						tblIcons.getTable().showSelection();
 						return;
 					}
 				}

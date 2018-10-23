@@ -1254,7 +1254,22 @@ public class AttributeInfoPanel extends Composite {
 	
 
 	private AttributeTreeNode updateAttributeTreeNode(Attribute newAttribute, AttributeTreeNode node, Session session){
+		
+		if (node.getIcon() != null && node.getIcon().getUuid() == null) {
+			session.save(node.getIcon());
+		}
+		
 		node.setAttribute(newAttribute);
+		if (node.getUuid() != null) {
+			
+		}else {
+			DataModelManager.INSTANCE.fireAddListener(currentSession, node);
+			session.saveOrUpdate(node);
+		}
+		
+		for ( org.wcs.smart.ca.Label l : node.getNames()){
+			l.setElement(node);
+		}
 		
 		List<AttributeTreeNode> kids = new ArrayList<AttributeTreeNode>();
 		if (node.getChildren() != null){
@@ -1264,19 +1279,7 @@ public class AttributeInfoPanel extends Composite {
 			}
 		}
 
-		if (node.getUuid() == null) {
-			//newNode
-			DataModelManager.INSTANCE.fireAddListener(currentSession, node);
-			session.saveOrUpdate(node);
-		}
-		if (node.getIcon() != null && node.getIcon().getUuid() == null) {
-			session.save(node.getIcon());
-		}
-		
-		for ( org.wcs.smart.ca.Label l : node.getNames()){
-			l.setElement(node);
-		}
-		
+		node = (AttributeTreeNode) session.merge(node);
 		node.getChildren().clear();
 		node.getChildren().addAll(kids);
 		
