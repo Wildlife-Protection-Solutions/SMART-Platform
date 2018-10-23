@@ -670,6 +670,20 @@
                id="org.wcs.smart.menu.help"
                label="%help.menu.label"
                mnemonic="%help.menu.mnemonic">
+            <separator
+                  name="org.wcs.smart.menu.help.separator2"
+                  visible="true">
+            </separator>
+             <command
+                  commandId="org.wcs.smart.errorlog.show"
+                  icon="images/icons/obj16/error_icon.png"
+                  label="%viewerrorlog.command.label"
+                  style="push">
+            </command>
+            <separator
+                  name="org.wcs.smart.menu.help.separator1"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.eclipse.ui.help.aboutAction"
                   icon="images/icons/smart16.gif"
@@ -989,7 +1003,11 @@
       </command>
       <command
             id="org.wcs.smart.command.ca.iconset.show"
-            name="Manage Icon Sets...">
+            name="%manageiconsets.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.errorlog.show"
+            name="%viewererrorlog.command.name">
       </command>
    </extension>
    <extension
@@ -1178,6 +1196,10 @@
                   property="org.wcs.smart.caSingle">
             </test>
          </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.ui.ViewErrorLogHandler$ViewErrorLogHandlerWrapper"
+            commandId="org.wcs.smart.errorlog.show">
       </handler>
    </extension>
    <extension

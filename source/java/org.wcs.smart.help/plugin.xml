@@ -14,7 +14,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.menu.help?before=org.eclipse.ui.help.aboutAction">
+            locationURI="menu:org.wcs.smart.menu.help?before=org.wcs.smart.menu.help.separator2">
          <separator
                name="org.wcs.smart.help.separator1"
                visible="true">
