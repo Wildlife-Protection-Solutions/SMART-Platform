@@ -89,6 +89,7 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 
 	private static final String LAST_FILE_KEY = "PatrolCTPackageDialog.file"; //$NON-NLS-1$
 	private static final String LAST_CM_KEY = "PatrolCTPackageDialog.cm"; //$NON-NLS-1$
+	private static final String DM_KEY = "DataModel"; //$NON-NLS-1$
 	private static final String LAST_PROFILE_KEY ="PatrolCTPackageDialog.profile"; //$NON-NLS-1$
 
 	private ComboViewer modelViewer;
@@ -124,7 +125,7 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
     	if (selectedModel != null) {
     		CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(LAST_CM_KEY), UuidUtils.uuidToString(selectedModel.getUuid()));
     	}else {
-    		CyberTrackerPlugIn.getDefault().getPreferenceStore().setToDefault(getPreferenceKey(LAST_CM_KEY));
+    		CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(LAST_CM_KEY), DM_KEY);
     	}
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(LAST_PROFILE_KEY), UuidUtils.uuidToString(selectedProfile.getUuid()));
     	
@@ -401,9 +402,10 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 			protected IStatus run(IProgressMonitor monitor) {
 				List<Object> modelList = new ArrayList<>();
 				List<CyberTrackerPropertiesProfile>  profiles = new ArrayList<>();
+				DataModelWrapper dm = new DataModelWrapper();
 				try(Session session = HibernateManager.openSession()){
 					modelList.addAll(DataentryHibernateManager.getConfigurableModels(session));
-					modelList.add(new DataModelWrapper());
+					modelList.add(dm);
 					
 					profiles.addAll(CyberTrackerHibernateManager.getPropertiesProfiles(session));
 				}
@@ -412,10 +414,12 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 					profileViewer.setInput(profiles);
 					modelViewer.setInput(modelList);
 					
-					if (lastCmUuid != null && !lastCmUuid.isEmpty()) {
+					if (lastCmUuid != null && !lastCmUuid.isEmpty() && lastCmUuid != DM_KEY) {
 						ConfigurableModel cm = new ConfigurableModel();
 						cm.setUuid(UuidUtils.stringToUuid(lastCmUuid));
 						modelViewer.setSelection(new StructuredSelection(cm));
+					}else if (lastCmUuid == DM_KEY) {
+						modelViewer.setSelection(new StructuredSelection(dm));
 					}else {
 						if (!modelList.isEmpty()) modelViewer.setSelection(new StructuredSelection(modelList.get(0)));	
 					}

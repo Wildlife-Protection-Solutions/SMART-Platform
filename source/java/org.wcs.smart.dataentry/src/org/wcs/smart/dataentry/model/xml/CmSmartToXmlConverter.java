@@ -447,7 +447,7 @@ public class CmSmartToXmlConverter {
 			IconFile iconFile = node.getListItem().getIcon().getIconFile(cm.getIconSet());
 			if (iconFile == null) return null;
 			if (iconFile != null) return findFileName(file.getName(), iconFile.getFilename());
-		}else if (obj instanceof CmAttribute) {
+		}else if (obj instanceof CmAttributeTreeNode) {
 			CmAttributeTreeNode node = (CmAttributeTreeNode) obj;
 			if (node.getDmTreeNode() == null) return null;
 			if (node.getDmTreeNode().getIcon() == null) return null;
