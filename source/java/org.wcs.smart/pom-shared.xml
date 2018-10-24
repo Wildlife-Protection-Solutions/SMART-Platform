@@ -21,6 +21,7 @@
         		<directory>./</directory>
         		<includes>
         			<include>images/datamodel/**</include>
+        			<include>plugin.xml</include>
         		</includes>
       		</resource>      
     	</resources>
