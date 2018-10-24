@@ -698,10 +698,10 @@
             <values key="natural" isactive="true" iconkey="natural">
                 <names language_code="en" value="Natural"/>
             </values>
-            <values key="other" isactive="true">
+            <values key="other" isactive="true" iconkey="other">
                 <names language_code="en" value="Other"/>
             </values>
-            <values key="unknown" isactive="true">
+            <values key="unknown" isactive="true" iconkey="unknown">
                 <names language_code="en" value="Unknown"/>
             </values>
         </attribute>
@@ -844,7 +844,7 @@
         <attribute key="causeofdeath" isrequired="false" type="TREE" iconkey="cause_of_death">
             <names language_code="en" value="Cause of Death"/>
             <names language_code="ka" value="სიკვდილის მიზეზი"/>
-            <tree key="natural" isactive="true">
+            <tree key="natural" isactive="true" iconkey="natural">
                 <names language_code="en" value="Natural"/>
                 <children key="disease" isactive="true">
                     <names language_code="en" value="Disease"/>
@@ -895,7 +895,7 @@
                     <names language_code="en" value="Poisoning"/>
                 </children>
             </tree>
-            <tree key="unknown" isactive="true">
+            <tree key="unknown" isactive="true" iconkey="unknown">
                 <names language_code="en" value="Unknown"/>
             </tree>
         </attribute>
