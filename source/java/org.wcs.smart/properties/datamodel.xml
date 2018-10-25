@@ -36,7 +36,7 @@
             <names language_code="ka" value="ზრდასრული მდედრის რაოდენობა"/>
             <names language_code="en" value="Number of Adult Females"/>
         </attribute>
-        <attribute key="typeofpollution" isrequired="false" type="LIST" iconkey="type">
+        <attribute key="typeofpollution" isrequired="false" type="LIST" iconkey="pollution">
             <names language_code="en" value="Type of Pollution"/>
             <values key="garbage" isactive="true" iconkey="garbage">
                 <names language_code="en" value="Garbage"/>
@@ -54,7 +54,7 @@
                 <names language_code="en" value="Unknown"/>
             </values>
         </attribute>
-        <attribute key="typeofcuttingtool" isrequired="false" type="LIST" iconkey="type">
+        <attribute key="typeofcuttingtool" isrequired="false" type="LIST" iconkey="cutting_tools">
             <names language_code="en" value="Type of Cutting Tool"/>
             <values key="chainsaw" isactive="true" iconkey="chainsaw">
                 <names language_code="en" value="Chainsaw"/>
@@ -90,7 +90,7 @@
                 <names language_code="en" value="Left At Scene"/>
             </values>
         </attribute>
-        <attribute key="typeoftrap" isrequired="false" type="LIST">
+        <attribute key="typeoftrap" isrequired="false" type="LIST" iconkey="traps_snares">
             <names language_code="en" value="Type of Trap"/>
             <values key="pittrap" isactive="true" iconkey="pit_trap">
                 <names language_code="en" value="Pit Trap"/>
@@ -114,7 +114,7 @@
         <attribute key="haswater" isrequired="false" type="BOOLEAN">
             <names language_code="en" value="Has Water"/>
         </attribute>
-        <attribute key="typeoffirearm" isrequired="false" type="LIST">
+        <attribute key="typeoffirearm" isrequired="false" type="LIST" iconkey="firearms">
             <names language_code="en" value="Type of Firearm"/>
             <values key="semiautomatic" isactive="true" iconkey="semi_automatic">
                 <names language_code="en" value="Semi Automatic"/>
@@ -135,7 +135,7 @@
             </qa_minmax>
             <names language_code="en" value="Number of Bundles"/>
         </attribute>
-        <attribute key="ammunitiontype" isrequired="false" type="LIST">
+        <attribute key="ammunitiontype" isrequired="false" type="LIST" iconkey="ammunition">
             <names language_code="en" value="Type of Ammunition"/>
             <values key="typea" isactive="true">
                 <names language_code="en" value="Type A"/>
@@ -150,7 +150,7 @@
             </qa_minmax>
             <names language_code="en" value="Number of Animal Parts or Bushmeat"/>
         </attribute>
-        <attribute key="typeofrockormineral" isrequired="false" type="LIST" iconkey="type">
+        <attribute key="typeofrockormineral" isrequired="false" type="LIST" iconkey="rocks_minerals">
             <names language_code="en" value="Type of Rock or Mineral"/>
             <values key="gold" isactive="true" iconkey="gold">
                 <names language_code="en" value="Gold"/>
@@ -180,7 +180,7 @@
             </qa_minmax>
             <names language_code="en" value="Volume of Poison liters"/>
         </attribute>
-        <attribute key="typeofequipment" isrequired="false" type="LIST" iconkey="type">
+        <attribute key="typeofequipment" isrequired="false" type="LIST" iconkey="equipment">
             <names language_code="en" value="Type of Equipment"/>
             <values key="tents" isactive="true" iconkey="tent">
                 <names language_code="en" value="Tents"/>
@@ -195,7 +195,7 @@
                 <names language_code="en" value="Other"/>
             </values>
         </attribute>
-        <attribute key="typeoftraditionalweapon" isrequired="false" type="LIST" iconkey="type">
+        <attribute key="typeoftraditionalweapon" isrequired="false" type="LIST" iconkey="traditional_weapons">
             <names language_code="en" value="Type of Traditional Weapon"/>
             <values key="bows" isactive="true" iconkey="bow">
                 <names language_code="en" value="Bows"/>
@@ -238,7 +238,7 @@
                 <names language_code="en" value="Other"/>
             </values>
         </attribute>
-        <attribute key="typeofforestproduct" isrequired="false" type="LIST" iconkey="type">
+        <attribute key="typeofforestproduct" isrequired="false" type="LIST" iconkey="ntfps">
             <names language_code="en" value="Type of Forest Product"/>
             <values key="honey" isactive="true" iconkey="honey">
                 <names language_code="en" value="Honey"/>
@@ -308,7 +308,7 @@
             </qa_minmax>
             <names language_code="en" value="Number of Bags"/>
         </attribute>
-        <attribute key="typeofdomesticanimal" isrequired="false" type="LIST" iconkey="type">
+        <attribute key="typeofdomesticanimal" isrequired="false" type="LIST" iconkey="domestic_animals">
             <names language_code="en" value="Type of Domestic Animal"/>
             <values key="dog" isactive="true" iconkey="dog">
                 <names language_code="en" value="Dog"/>
@@ -403,7 +403,7 @@
             <values key="skin" isactive="true" iconkey="skin">
                 <names language_code="en" value="Skin"/>
             </values>
-            <values key="meat" isactive="true">
+            <values key="meat" isactive="true" iconkey="fresh">
                 <names language_code="en" value="Meat"/>
             </values>
             <values key="tusk" isactive="true" iconkey="tusks">
@@ -424,7 +424,7 @@
             <values key="skin" isactive="true" iconkey="skin">
                 <names language_code="en" value="Skin"/>
             </values>
-            <values key="meat" isactive="true">
+            <values key="meat" isactive="true" iconkey="fresh">
                 <names language_code="en" value="Meat"/>
             </values>
             <values key="tusk" isactive="true" iconkey="tusks">
@@ -440,7 +440,7 @@
                 <names language_code="en" value="Other"/>
             </values>
         </attribute>
-        <attribute key="typeofinfrastructure" isrequired="false" type="LIST" iconkey="type">
+        <attribute key="typeofinfrastructure" isrequired="false" type="LIST" iconkey="infrastructure_roads">
             <names language_code="en" value="Type of Infrastructure"/>
             <values key="road" isactive="true" iconkey="road">
                 <names language_code="en" value="Road"/>
@@ -469,7 +469,7 @@
             <values key="skin" isactive="true" iconkey="skin">
                 <names language_code="en" value="Skin"/>
             </values>
-            <values key="meat" isactive="true">
+            <values key="meat" isactive="true" iconkey="fresh">
                 <names language_code="en" value="Meat"/>
             </values>
             <values key="tusk" isactive="true" iconkey="tusks">
@@ -628,7 +628,7 @@
             </qa_minmax>
             <names language_code="en" value="Length of Net meters"/>
         </attribute>
-        <attribute key="actiontaken_people" isrequired="false" type="LIST">
+        <attribute key="actiontaken_people" isrequired="false" type="LIST" iconkey="action_taken_people">
             <names language_code="en" value="Action Taken - People"/>
             <values key="observedonly" isactive="true" iconkey="observed_only">
                 <names language_code="en" value="Observed Only"/>
@@ -690,7 +690,7 @@
                 <names language_code="en" value="Village B"/>
             </values>
         </attribute>
-        <attribute key="typeofpoison" isrequired="false" type="LIST" iconkey="type">
+        <attribute key="typeofpoison" isrequired="false" type="LIST" iconkey="poison">
             <names language_code="en" value="Type of Poison"/>
             <values key="chemical" isactive="true" iconkey="chemical">
                 <names language_code="en" value="Chemical"/>
@@ -736,7 +736,7 @@
             <names language_code="en" value="Weight kg"/>
             <names language_code="ka" value="წონა კგ"/>
         </attribute>
-        <attribute key="typeoftransportation" isrequired="false" type="LIST">
+        <attribute key="typeoftransportation" isrequired="false" type="LIST" iconkey="type">
             <names language_code="en" value="Type of Transportation"/>
             <values key="raft" isactive="true" iconkey="raft">
                 <names language_code="en" value="Raft"/>
@@ -882,16 +882,16 @@
             </tree>
             <tree key="illegal" isactive="true" iconkey="illegal">
                 <names language_code="en" value="Illegal"/>
-                <children key="gunshot" isactive="true">
+                <children key="gunshot" isactive="true" iconkey="firearms">
                     <names language_code="en" value="Gunshot"/>
                 </children>
-                <children key="trapping" isactive="true">
+                <children key="trapping" isactive="true" iconkey="traps_snares">
                     <names language_code="en" value="Trapping"/>
                 </children>
-                <children key="traditionalweapons" isactive="true">
+                <children key="traditionalweapons" isactive="true" iconkey="traditional_weapons">
                     <names language_code="en" value="Traditional Weapons"/>
                 </children>
-                <children key="poisoning" isactive="true">
+                <children key="poisoning" isactive="true" iconkey="poison">
                     <names language_code="en" value="Poisoning"/>
                 </children>
             </tree>
@@ -1252,7 +1252,7 @@
                 </children>
             </tree>
         </attribute>
-        <attribute key="typeoffishingequipment" isrequired="false" type="LIST" iconkey="type">
+        <attribute key="typeoffishingequipment" isrequired="false" type="LIST" iconkey="fishing_tools">
             <names language_code="en" value="Type of Fishing Equipment"/>
             <values key="rod" isactive="true" iconkey="rod">
                 <names language_code="en" value="Rod"/>
