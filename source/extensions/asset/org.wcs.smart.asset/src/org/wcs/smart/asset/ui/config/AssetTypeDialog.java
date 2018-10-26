@@ -119,6 +119,8 @@ public class AssetTypeDialog extends TitleAreaDialog {
 	private List<AbstractAssetTypeAttributeMapping> assetAttributeList = new ArrayList<>();
 	private List<AbstractAssetTypeAttributeMapping> assetDeploymentList = new ArrayList<>();
 	
+	private boolean isInit = false;
+	
 	@Inject
 	private IEventBroker broker;
 	@Inject IEclipseContext context;
@@ -248,12 +250,13 @@ public class AssetTypeDialog extends TitleAreaDialog {
 	}
 	
 	private void modified(){
+		if (isInit) return;
 		boolean isError = false;
 		if (nameKeyInfo.validate()){
 			isError = true;
+		}else if (cutoffcd.isVisible()) {
+			isError = true;
 		}
-		if (cutoffcd.isVisible()) isError = true;
-		
 		getButton(IDialogConstants.OK_ID).setEnabled(!isError);
 	}
 	
@@ -666,6 +669,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 	
 	private void initFields(){
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		isInit = true;
 		try{
 		pmd.run(true, false, new IRunnableWithProgress() {
 			
@@ -718,7 +722,6 @@ public class AssetTypeDialog extends TitleAreaDialog {
 						treeDeployAttributes.setInput(assetDeploymentList);
 						
 						nameKeyInfo.initFields(type, assetTypeSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());					
-						getButton(IDialogConstants.OK_ID).setEnabled(type.getUuid() == null);
 						
 						treeAttributes.refresh();
 						treeDeployAttributes.refresh();
@@ -730,6 +733,8 @@ public class AssetTypeDialog extends TitleAreaDialog {
 		});
 		}catch (Exception ex){
 			AssetPlugIn.displayLog(MessageFormat.format(Messages.AssetTypeDialog_LoadingError, ex.getMessage()), ex);
+		}finally {
+			isInit = false;
 		}
 	}
 	
