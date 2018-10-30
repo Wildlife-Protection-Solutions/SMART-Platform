@@ -566,7 +566,7 @@
                 <names language_code="en" value="Very old"/>
                 <names language_code="ka" value="ძალიან ძველი"/>
             </values>
-            <values key="unknown" isactive="true">
+            <values key="unknown" isactive="true" iconkey="unknown">
                 <names language_code="ka" value="უცნობია"/>
                 <names language_code="en" value="Unknown"/>
             </values>
@@ -633,7 +633,7 @@
             <values key="observedonly" isactive="true" iconkey="observed_only">
                 <names language_code="en" value="Observed Only"/>
             </values>
-            <values key="unsuccessfulpursuit" isactive="true">
+            <values key="unsuccessfulpursuit" isactive="true" iconkey="unsuccessful_pursuit">
                 <names language_code="en" value="Unsuccessful Pursuit"/>
             </values>
             <values key="arrested" isactive="true" iconkey="arrested">
@@ -939,7 +939,7 @@
         <attribute key="ageofanimalcarcass" isrequired="false" type="LIST" iconkey="age_of_carcass">
             <names language_code="ka" value="ცხოველის ჩონჩხის სიძველე"/>
             <names language_code="en" value="Age of Animal Carcass"/>
-            <values key="fresh" isactive="true" iconkey="fresh">
+            <values key="fresh" isactive="true">
                 <names language_code="ka" value="ახალი"/>
                 <names language_code="en" value="Fresh"/>
             </values>
