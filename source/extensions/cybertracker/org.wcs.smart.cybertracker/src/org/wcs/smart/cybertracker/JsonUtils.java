@@ -94,15 +94,36 @@ public class JsonUtils {
 		return new ParseResult(defaultAttributes, warnings);
 	}
 
+	/**
+	 * Converts the value to an object.  Well return null if value
+	 * is null or value is not an instanceo of a String or Boolean
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static Boolean convertToBoolean(Object value) {
+		if (value == null) return null;
+		if (value instanceof Boolean) {
+			return (Boolean)value;
+		}else if (value instanceof String) {
+			return (Boolean.valueOf((String)value));
+		}
+		return null;
+	}
+		
 	public static boolean setAttributeValue(WaypointObservationAttribute toUpdate, Object value, Session session, List<String> warnings ) throws Exception{
 		Attribute att = toUpdate.getAttribute();
 	
 		if (att.getType() == AttributeType.BOOLEAN){
-			if (Boolean.valueOf((String)value)){
+			Boolean v = convertToBoolean(value);
+			if (v == null) {
+				//data type not supported
+				warnings.add(MessageFormat.format(Messages.JsonUtils_CannotConvertToBoolean, value.toString(), att.getName()));	
+			}else if (v) {
 				toUpdate.setNumberValue(1.0);
-			}else{
+			}else if (!v) {
 				toUpdate.setNumberValue(0.0);
-			}	
+			}
 		}else if (att.getType() == AttributeType.DATE){
 			Date date = null;
 			try {

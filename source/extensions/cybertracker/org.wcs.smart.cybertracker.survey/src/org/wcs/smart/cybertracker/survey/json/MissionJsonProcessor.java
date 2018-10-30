@@ -297,7 +297,14 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				}
 				
 				//Determine if this is a "Add to Last Waypoint" option
-				boolean addToLast = ((String)sighting.get(ScreensUtil.RESULT_NEW_WAYPOINT)).equalsIgnoreCase("false"); //$NON-NLS-1$
+				boolean addToLast = false;
+				Object v = sighting.get(ScreensUtil.RESULT_NEW_WAYPOINT);
+				Boolean isNew = JsonUtils.convertToBoolean(v);
+				if (isNew == null) {
+					addToLast = false;
+				}else {
+					addToLast = (isNew == false);
+				}
 				if (addToLast){
 					if (link == null){
 						//we have nothing to add this to; this is an error
@@ -539,7 +546,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		String defaultValues = (String)sighting.get(SurveyScreensUtil.RESULT_DEFAULT_META_VALUES);
 		CyberTrackerSurvey ct = SurveyJsonUtils.parseSurveyMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, session);
 		
-		if (ct.getSurveyDesign() == null) throw new Exception(MessageFormat.format("Survey design with key {0} not found.  Cannot import data.", ct.getSurveyDesignKey()));
+		if (ct.getSurveyDesign() == null) throw new Exception(MessageFormat.format(Messages.MissionJsonProcessor_SurveyDesignNotFound, ct.getSurveyDesignKey()));
 		
 		String startDate = (String)sighting.get(ScreensUtil.RESULT_START_DATE);
 		String startTime = (String)sighting.get(ScreensUtil.RESULT_START_TIME);

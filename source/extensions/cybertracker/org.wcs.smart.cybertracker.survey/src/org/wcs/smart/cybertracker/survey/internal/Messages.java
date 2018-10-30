@@ -43,6 +43,7 @@ public class Messages extends NLS {
 	public static String MissionJsonProcessor_MultipleAttributesFound;
 	public static String MissionJsonProcessor_ParseError;
 	public static String MissionJsonProcessor_SuNotFound;
+	public static String MissionJsonProcessor_SurveyDesignNotFound;
 	public static String MissionJsonProcessor_UserCancelled2;
 	public static String MissionJsonProcessor_UserCanclled;
 	public static String MissionJsonProcessor_WarningMsg;

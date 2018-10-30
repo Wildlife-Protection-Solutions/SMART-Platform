@@ -30,6 +30,7 @@ import org.json.simple.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.cybertracker.JsonUtils;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
 import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil.JsonPatrolKey;
@@ -65,10 +66,12 @@ public class PatrolJsonUtils {
 			ptransport = (String)jsonDefaults.get(PatrolScreenOptionMeta.TRANSPORT.key);	
 		}
 		
-		String armed = (String)jsonValues.get(PatrolScreenOptionMeta.ARMED.key);
-		if (armed == null){
-			armed = (String)jsonDefaults.get(PatrolScreenOptionMeta.ARMED.key);
+		Object armed = jsonValues.get(PatrolScreenOptionMeta.ARMED.key);
+		if (armed == null) {
+			armed = jsonDefaults.get(PatrolScreenOptionMeta.ARMED.key);
 		}
+		Boolean isArmed = JsonUtils.convertToBoolean(armed);
+		
 		String team = (String)jsonValues.get(PatrolScreenOptionMeta.TEAM.key);
 		if (team == null){
 			team = (String)jsonDefaults.get(PatrolScreenOptionMeta.TEAM.key);
@@ -110,7 +113,7 @@ public class PatrolJsonUtils {
 		}
 		CyberTrackerPatrol ctPatrol = new CyberTrackerPatrol(null, null);
 		if (armed != null){
-			ctPatrol.setArmed(Boolean.valueOf(armed));
+			ctPatrol.setArmed(isArmed == null ? false : isArmed);
 		}
 		
 		if (team != null && startsWith(team, JsonPatrolKey.TEAM.key)){

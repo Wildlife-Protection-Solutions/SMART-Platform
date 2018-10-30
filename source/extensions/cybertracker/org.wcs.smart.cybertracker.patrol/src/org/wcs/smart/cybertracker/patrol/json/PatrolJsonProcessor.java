@@ -268,7 +268,15 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				}
 				
 				//Determine if this is a "Add to Last Waypoint" option
-				boolean addToLast = ((String)sighting.get(ScreensUtil.RESULT_NEW_WAYPOINT)).equalsIgnoreCase("false"); //$NON-NLS-1$
+				boolean addToLast = false;
+				Object v = sighting.get(ScreensUtil.RESULT_NEW_WAYPOINT);
+				Boolean isNew = JsonUtils.convertToBoolean(v);
+				if (isNew == null) {
+					addToLast = false;
+				}else {
+					addToLast = (isNew == false);
+				}
+				
 				if (addToLast){
 					if (link == null){
 						//we have nothing to add this to; this is an error

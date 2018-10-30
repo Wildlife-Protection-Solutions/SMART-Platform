@@ -347,6 +347,7 @@ public class Messages extends NLS {
 	public static String ImageProcessingOpDialog_SizeRequired;
 	public static String ImageProcessingOpDialog_Title;
 	public static String JsonUtils_AttributeNotFound;
+	public static String JsonUtils_CannotConvertToBoolean;
 	public static String JsonUtils_CouldNotParseValue;
 	public static String JsonUtils_InvalidDate;
 	public static String JsonUtils_InvalidListAttribute;
