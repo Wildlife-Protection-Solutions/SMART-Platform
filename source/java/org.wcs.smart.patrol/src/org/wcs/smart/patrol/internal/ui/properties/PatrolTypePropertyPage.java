@@ -875,7 +875,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				if (element instanceof PatrolTransportType){
 					PatrolType type = (PatrolType)value;
 					PatrolTransportType toupdate = (PatrolTransportType)element;
-					
+					if (type.getTransportTypes() == null) type.setTransportTypes(new ArrayList<>());
 					if (!toupdate.getPatrolType().equals(type.getType())){
 						for (PatrolType pt : patrolTypes){
 							if (pt.getType().equals(toupdate.getPatrolType())) pt.getTransportTypes().remove(toupdate);
