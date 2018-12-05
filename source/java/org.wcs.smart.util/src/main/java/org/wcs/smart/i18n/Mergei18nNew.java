@@ -27,43 +27,43 @@ import org.apache.commons.io.filefilter.IOFileFilter;
  * will also add missing key/value pairs (with the value using the
  * English language).
  *
+ * Used for 6.2 and above, when all translations were merged into a single
+ * project file.
+ * 
  * @author Emily
  *
  */
 @SuppressWarnings("nls")
 public class Mergei18nNew {
 
-    public static final String IN_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\java",
-    	
-    	"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\asset",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\cybertracker",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\entity",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
-		
-		
+    public static final String IN_DIR[] = {
+    	"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\java",
+    	"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\asset",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\connect",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\cybertracker",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\entity",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\er",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\i2",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\event",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\qa",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\r",
     };
     
-    
-    public static final String TRANS_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\translations\\",
-    	
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\asset\\translations",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect\\translations",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\cybertracker\\translations",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\entity\\translations",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2\\translations",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event\\translations",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa\\translations",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r\\translations",
+    public static final String TRANS_DIR[] = {
+    	"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\translations\\",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\asset\\translations",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\connect\\translations",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\cybertracker\\translations",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\entity\\translations",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\er\\translations",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\i2\\translations",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\event\\translations",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\qa\\translations",
+		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\r\\translations",
     };
 	
-//    public static final String[] LANGUAGES =  new String[] {"es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
-    public static final String[] LANGUAGES =  new String[] {"ar"};
+//    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt"};
+    public static final String[] LANGUAGES =  new String[] {"pt"};
     
     public static final String LINE_SEP = "\n";
 
@@ -168,9 +168,9 @@ public class Mergei18nNew {
         for (Entry<String, String> e : source.entrySet()){
             if (!target.containsKey(e.getKey())){
                 //System.out.println("add: " + e.getKey());
-                target.put(e.getKey(), e.getValue());
-                //target.put(e.getKey(), "**NEW**" + e.getValue());
-                changes = true;
+//                target.put(e.getKey(), e.getValue());
+//                target.put(e.getKey(), "**NEW**" + e.getValue());
+//                changes = true;
             }
         }
 

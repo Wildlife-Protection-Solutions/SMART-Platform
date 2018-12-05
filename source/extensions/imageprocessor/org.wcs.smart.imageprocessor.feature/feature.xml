@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.wcs.smart.imageprocessor.feature"
+      label="Image Processor Feature"
+      version="6.2.1.qualifier"
+      provider-name="org.wcs.smart"
+      license-feature="org.wcs.smart.license.feature">
+
+   <description>
+      Provides and images resizing tool for waypoint attachments.
+   </description>
+
+   <copyright>
+      Copyright (c): 2018 Wildlife Conservation Society
+   </copyright>
+
+   <license url="http://www.example.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <plugin
+         id="org.wcs.smart.imageprocessor"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

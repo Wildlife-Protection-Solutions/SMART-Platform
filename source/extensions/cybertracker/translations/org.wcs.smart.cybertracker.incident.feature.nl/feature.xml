@@ -7,7 +7,6 @@
       license-feature="org.wcs.smart.license.feature"
       license-feature-version="6.2.0.qualifier">
 
-
    <description>
       Translations for the Cybertracker incident plugin.
    </description>
@@ -21,6 +20,7 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
+         fragment="true"
          unpack="false"/>
 
 </feature>

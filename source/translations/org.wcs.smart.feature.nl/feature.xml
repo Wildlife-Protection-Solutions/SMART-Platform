@@ -128,14 +128,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.wcs.smart.reporttable.nl"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.wcs.smart.report.birt.query.nl"
          download-size="0"
          install-size="0"
@@ -152,14 +144,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.wcs.smart.patrol.query.report.nl"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.wcs.smart.observation.nl"
          download-size="0"
          install-size="0"
@@ -169,14 +153,6 @@
 
    <plugin
          id="org.wcs.smart.observation.query.nl"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.observation.query.report.nl"
          download-size="0"
          install-size="0"
          version="0.0.0"

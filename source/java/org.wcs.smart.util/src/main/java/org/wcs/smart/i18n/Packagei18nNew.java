@@ -52,16 +52,19 @@ import org.apache.derby.iapi.services.io.FileUtil;
  * Packages all translations files for a given language into a single
  * folder, for zipping and providing to the users. 
  *  
+ * Used for 6.2 and above
  * 
  * @author egouge
  *
  */
 public class Packagei18nNew {
 
-	public static final String SOURCE_DIR = "C:\\data\\SMART\\Source\\trunk\\source\\";
+	public static final String SOURCE_DIR = "C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\";
 	public static final String OUT_DIR = "C:\\temp\\smarti18n\\";
 	
-	public static final String[] LANGUAGES = {"ar"};
+    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt"};
+
+//	public static final String[] LANGUAGES = {"ar"};
 	
 	public void doWork() throws Exception {
 		Path path = Paths.get(OUT_DIR);
