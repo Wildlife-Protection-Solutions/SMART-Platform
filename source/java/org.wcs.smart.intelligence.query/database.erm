@@ -89,7 +89,7 @@
 				<is_open_after_saved>true</is_open_after_saved>
 			</export_html_setting>
 			<export_image_setting>
-				<output_file_path></output_file_path>
+				<output_file_path>C:\data\SMART\Docs\6.2.tech\intelligence.query.png</output_file_path>
 				<category_dir_path></category_dir_path>
 				<with_category_image>true</with_category_image>
 				<is_open_after_saved>true</is_open_after_saved>
@@ -135,7 +135,7 @@
 			</connections>
 			<display>false</display>
 			<creation_date>2011-12-09 11:11:09</creation_date>
-			<updated_date>2016-08-09 16:21:54</updated_date>
+			<updated_date>2018-12-05 11:06:20</updated_date>
 			<model_property>
 				<name>Project Name</name>
 				<value></value>
@@ -178,9 +178,10 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
-			<logical_name>CA_FILTER</logical_name>
-			<physical_name>CA_FILTER</physical_name>
+			<logical_name>ca_filter</logical_name>
+			<physical_name>ca_filter</physical_name>
 			<type>varchar(n)</type>
 		</word>
 		<word>
@@ -193,9 +194,10 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
-			<logical_name>ca_filter</logical_name>
-			<physical_name>ca_filter</physical_name>
+			<logical_name>CA_FILTER</logical_name>
+			<physical_name>CA_FILTER</physical_name>
 			<type>varchar(n)</type>
 		</word>
 		<word>
@@ -208,6 +210,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>column_filter</logical_name>
 			<physical_name>column_filter</physical_name>
@@ -223,6 +226,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>folder_uuid</logical_name>
 			<physical_name>folder_uuid</physical_name>
@@ -238,6 +242,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>folder_uuid</logical_name>
 			<physical_name>folder_uuid</physical_name>
@@ -253,6 +258,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>id</logical_name>
 			<physical_name>id</physical_name>
@@ -268,6 +274,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>id</logical_name>
 			<physical_name>id</physical_name>
@@ -283,6 +290,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>QUERY_FILTER</logical_name>
 			<physical_name>QUERY_FILTER</physical_name>
@@ -298,6 +306,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>shared</logical_name>
 			<physical_name>shared</physical_name>
@@ -313,6 +322,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>shared</logical_name>
 			<physical_name>shared</physical_name>
@@ -328,6 +338,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description>&#x0D;&#x0A;</description>
 			<logical_name>style</logical_name>
 			<physical_name>style</physical_name>
@@ -343,6 +354,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>UUID</logical_name>
 			<physical_name>UUID</physical_name>
@@ -358,6 +370,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>uuid</logical_name>
 			<physical_name>uuid</physical_name>
@@ -373,6 +386,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>uuid</logical_name>
 			<physical_name>uuid</physical_name>
@@ -388,6 +402,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>uuid</logical_name>
 			<physical_name>uuid</physical_name>
@@ -598,7 +613,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>0</word_id>
+					<word_id>1</word_id>
 					<id>4</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -631,7 +646,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>3</word_id>
+					<word_id>4</word_id>
 					<id>5</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -697,7 +712,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>9</word_id>
+					<word_id>8</word_id>
 					<id>7</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -820,7 +835,7 @@
 			<connections>
 				<relation>
 					<id>2</id>
-					<source>2</source>
+					<source>3</source>
 					<target>1</target>
 						<source_xp>-1</source_xp>
 						<source_yp>-1</source_yp>
@@ -842,7 +857,7 @@
 				</relation>
 				<relation>
 					<id>3</id>
-					<source>3</source>
+					<source>2</source>
 					<target>1</target>
 						<source_xp>-1</source_xp>
 						<source_yp>-1</source_yp>
@@ -871,7 +886,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>13</word_id>
+					<word_id>14</word_id>
 					<id>10</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -906,7 +921,7 @@
 				<normal_column>
 					<id>11</id>
 					<referenced_column>18</referenced_column>
-					<relation>3</relation>
+					<relation>2</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>ca_uuid</logical_name>
@@ -940,7 +955,7 @@
 				<normal_column>
 					<id>12</id>
 					<referenced_column>17</referenced_column>
-					<relation>2</relation>
+					<relation>3</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>creator_uuid</logical_name>
@@ -972,7 +987,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>1</word_id>
+					<word_id>0</word_id>
 					<id>13</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1005,7 +1020,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>4</word_id>
+					<word_id>3</word_id>
 					<id>14</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1038,7 +1053,7 @@
 					</sequence>
 				</normal_column>
 				<normal_column>
-					<word_id>8</word_id>
+					<word_id>9</word_id>
 					<id>15</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1135,7 +1150,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>14</word_id>
+					<word_id>12</word_id>
 					<id>17</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1199,7 +1214,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>12</word_id>
+					<word_id>13</word_id>
 					<id>18</id>
 					<description></description>
 					<unique_key_name></unique_key_name>

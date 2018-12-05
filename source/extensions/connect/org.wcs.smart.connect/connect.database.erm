@@ -89,7 +89,7 @@
 				<is_open_after_saved>true</is_open_after_saved>
 			</export_html_setting>
 			<export_image_setting>
-				<output_file_path></output_file_path>
+				<output_file_path>C:\data\SMART\Docs\6.2.tech\connect_core.png</output_file_path>
 				<category_dir_path></category_dir_path>
 				<with_category_image>true</with_category_image>
 				<is_open_after_saved>true</is_open_after_saved>
@@ -135,7 +135,7 @@
 			</connections>
 			<display>false</display>
 			<creation_date>2011-12-09 11:11:09</creation_date>
-			<updated_date>2016-04-24 15:18:07</updated_date>
+			<updated_date>2018-12-05 10:43:54</updated_date>
 			<model_property>
 				<name>Project Name</name>
 				<value></value>
@@ -178,6 +178,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>action</logical_name>
 			<physical_name>action</physical_name>
@@ -193,6 +194,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>certificate</logical_name>
 			<physical_name>certificate</physical_name>
@@ -208,6 +210,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>connect_pass</logical_name>
 			<physical_name>connect_pass</physical_name>
@@ -223,6 +226,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>connect_user</logical_name>
 			<physical_name>connect_user</physical_name>
@@ -238,6 +242,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>datetime</logical_name>
 			<physical_name>datetime</physical_name>
@@ -253,6 +258,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>end_revision</logical_name>
 			<physical_name>end_revision</physical_name>
@@ -268,6 +274,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>filename</logical_name>
 			<physical_name>filename</physical_name>
@@ -283,6 +290,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>key1</logical_name>
 			<physical_name>key1</physical_name>
@@ -298,6 +306,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>key1_fieldname</logical_name>
 			<physical_name>key1_fieldname</physical_name>
@@ -313,6 +322,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>key2_fieldname</logical_name>
 			<physical_name>key2_fieldname</physical_name>
@@ -328,6 +338,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>key2_str</logical_name>
 			<physical_name>key2_str</physical_name>
@@ -343,6 +354,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>key2_uuid</logical_name>
 			<physical_name>key2_uuid</physical_name>
@@ -358,6 +370,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>localfile</logical_name>
 			<physical_name>localfile</physical_name>
@@ -373,6 +386,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>option_key</logical_name>
 			<physical_name>option_key</physical_name>
@@ -388,6 +402,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>revision</logical_name>
 			<physical_name>revision</physical_name>
@@ -403,6 +418,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>server_revision</logical_name>
 			<physical_name>server_revision</physical_name>
@@ -418,6 +434,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>source</logical_name>
 			<physical_name>source</physical_name>
@@ -433,6 +450,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>start_revision</logical_name>
 			<physical_name>start_revision</physical_name>
@@ -448,6 +466,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>status</logical_name>
 			<physical_name>status</physical_name>
@@ -463,6 +482,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>status</logical_name>
 			<physical_name>status</physical_name>
@@ -478,6 +498,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>status_url</logical_name>
 			<physical_name>status_url</physical_name>
@@ -493,6 +514,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>sync_type</logical_name>
 			<physical_name>sync_type</physical_name>
@@ -508,6 +530,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>tablename</logical_name>
 			<physical_name>tablename</physical_name>
@@ -523,6 +546,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>uploadurl</logical_name>
 			<physical_name>uploadurl</physical_name>
@@ -538,6 +562,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>url</logical_name>
 			<physical_name>url</physical_name>
@@ -553,6 +578,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>uuid</logical_name>
 			<physical_name>uuid</physical_name>
@@ -568,6 +594,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>uuid</logical_name>
 			<physical_name>uuid</physical_name>
@@ -583,6 +610,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>uuid</logical_name>
 			<physical_name>uuid</physical_name>
@@ -598,6 +626,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description>char(16) for bit data</description>
 			<logical_name>UUID</logical_name>
 			<physical_name>UUID</physical_name>
@@ -613,6 +642,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>value</logical_name>
 			<physical_name>value</physical_name>
@@ -628,6 +658,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>version</logical_name>
 			<physical_name>version</physical_name>
@@ -746,7 +777,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>27</word_id>
+					<word_id>26</word_id>
 					<id>1</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -1920,7 +1951,7 @@
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>26</word_id>
+					<word_id>27</word_id>
 					<id>27</id>
 					<description></description>
 					<unique_key_name></unique_key_name>

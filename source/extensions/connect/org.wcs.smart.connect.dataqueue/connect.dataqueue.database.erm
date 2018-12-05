@@ -89,7 +89,7 @@
 				<is_open_after_saved>true</is_open_after_saved>
 			</export_html_setting>
 			<export_image_setting>
-				<output_file_path></output_file_path>
+				<output_file_path>C:\data\SMART\Docs\6.2.tech\connect_dataqueue.png</output_file_path>
 				<category_dir_path></category_dir_path>
 				<with_category_image>true</with_category_image>
 				<is_open_after_saved>true</is_open_after_saved>
@@ -135,7 +135,7 @@
 			</connections>
 			<display>false</display>
 			<creation_date>2011-12-09 11:11:09</creation_date>
-			<updated_date>2016-02-10 15:35:52</updated_date>
+			<updated_date>2018-12-05 10:43:53</updated_date>
 			<model_property>
 				<name>Project Name</name>
 				<value></value>
@@ -178,6 +178,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>date_processed</logical_name>
 			<physical_name>date_processed</physical_name>
@@ -193,6 +194,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>error_message</logical_name>
 			<physical_name>error_message</physical_name>
@@ -208,6 +210,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>keyid</logical_name>
 			<physical_name>keyid</physical_name>
@@ -223,6 +226,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>local_file</logical_name>
 			<physical_name>local_file</physical_name>
@@ -238,6 +242,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>name</logical_name>
 			<physical_name>name</physical_name>
@@ -253,6 +258,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>queue_order</logical_name>
 			<physical_name>queue_order</physical_name>
@@ -268,6 +274,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>server_item_uuid</logical_name>
 			<physical_name>server_item_uuid</physical_name>
@@ -283,6 +290,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>status</logical_name>
 			<physical_name>status</physical_name>
@@ -298,6 +306,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>type</logical_name>
 			<physical_name>type</physical_name>
@@ -313,6 +322,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>uuid</logical_name>
 			<physical_name>uuid</physical_name>
@@ -328,6 +338,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description>char(16) for bit data</description>
 			<logical_name>UUID</logical_name>
 			<physical_name>UUID</physical_name>
@@ -343,6 +354,7 @@
 			<zerofill>false</zerofill>
 			<binary>false</binary>
 			<args></args>
+			<char_semantics>false</char_semantics>
 			<description></description>
 			<logical_name>value</logical_name>
 			<physical_name>value</physical_name>
