@@ -9,5 +9,5 @@
 	</parent>
 	<artifactId>org.wcs.smart.er.query.report.nl</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>6.2.0</version>
+	<version>6.2.1</version>
 </project>

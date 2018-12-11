@@ -210,6 +210,7 @@ public class PatrolLegTable {
 				}
 				return SmartLabelProvider.getFullLabel(pld.getLeader().getMember());
 			}else if (this.column == LegColumn.MANDATE){
+				if (pld.getMandate() == null) return ""; //$NON-NLS-1$
 				return pld.getMandate().getName();
 			}else if (this.column == LegColumn.ENDDATE){
 				return DATE_TIME_FORMAT.format( pld.getEndDate() );

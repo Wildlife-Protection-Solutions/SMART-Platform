@@ -50,9 +50,12 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hsqldb.lib.HashMap;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.IPatrolEditContribution;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -180,6 +183,29 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		patrolLegViewer.createTable(main);
 
 		
+		Menu mnu = new Menu(patrolLegViewer.getTable().getControl());
+		
+		MenuItem miEditLeg = new MenuItem(mnu, SWT.PUSH);
+		miEditLeg.setText(Messages.PatrolLegsComposite_EditLeg_Button);
+		miEditLeg.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		miEditLeg.addListener(SWT.Selection, e->editLeg());
+		miEditLeg.setEnabled(false);
+		
+		MenuItem miMergeLeg = new MenuItem(mnu, SWT.PUSH);
+		miMergeLeg.setText(Messages.PatrolLegsComposite_MergeLegs);
+		miMergeLeg.addListener(SWT.Selection, e->mergeLegs());
+		miMergeLeg.setEnabled(false);
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		MenuItem miDeleteLeg = new MenuItem(mnu, SWT.PUSH);
+		miDeleteLeg.setText(Messages.PatrolLegsComposite_RemoveLeg_Button);
+		miDeleteLeg.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDeleteLeg.addListener(SWT.Selection, e->deleteLeg());
+		miDeleteLeg.setEnabled(false);
+		
+		patrolLegViewer.getTable().getControl().setMenu(mnu);
+		
 		Composite buttonPanel = new Composite(main, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(7, false));
 		
@@ -251,10 +277,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		btnRemoveLeg.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
-				if (MessageDialog.openConfirm(getShell(), Messages.PatrolLegsComposite_DeleteLeg_ConfirmDialog_Title, Messages.PatrolLegsComposite_DeleteLeg_ConfirmDialog_Message)){
-					removeLeg();	
-				}
-				
+				deleteLeg();
 			}
 		});
 		
@@ -263,12 +286,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		btnEditLeg.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
-				PatrolLeg toEdit = (PatrolLeg)((IStructuredSelection)patrolLegViewer.getSelection()).getFirstElement();
-				EditPatrolLegDialog patrolLegDialog = new EditPatrolLegDialog(getShell(), toEdit, allEmployes, typeOps, mandateOps, patrolStartDate, patrolEndDate);
-				if (patrolLegDialog.open() == Window.OK){
-					sortAndRefresh();
-					fireChangeListeners();
-				}
+				editLeg();
 			}
 		});
 
@@ -278,22 +296,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		btnmergeLegs.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
-				IStructuredSelection selection = (IStructuredSelection)patrolLegViewer.getSelection();
-				ArrayList<PatrolLeg> toBeMerged = new ArrayList<PatrolLeg>(); 
-				Iterator<?> i = selection.iterator();
-			    while ( i.hasNext() ) {
-			    	toBeMerged.add( ((PatrolLeg)i.next()) );
-			    }
-				MergePatrolLegDialog patrolLegDialog = new MergePatrolLegDialog(getShell(), toBeMerged, typeOps, mandateOps);
-				if (patrolLegDialog.open() == Window.OK){
-					patrolLegDialog.getNewLeg().setPatrol(patrol);
-					legs.add(patrolLegDialog.getNewLeg());
-					for(PatrolLeg pld : toBeMerged){
-						legs.remove(pld);
-					}
-					sortAndRefresh();
-					fireChangeListeners();
-				}
+				mergeLegs();
 			}
 		});
 
@@ -335,8 +338,11 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				btnAddLeg.setEnabled(numSelected == 1);
 				btnSplit.setEnabled(numSelected == 1);
 				btnRemoveLeg.setEnabled((numSelected == 1) && legs.size() > 1);
+				miDeleteLeg.setEnabled((numSelected == 1) && legs.size() > 1);
 				btnEditLeg.setEnabled(numSelected == 1);
+				miEditLeg.setEnabled(numSelected == 1);
 				btnmergeLegs.setEnabled(numSelected > 1);
+				miMergeLeg.setEnabled(numSelected > 1);
 				if (btnMoveToNewPatrol != null) btnMoveToNewPatrol.setEnabled(numSelected > 0 && legs.size() > 1 && numSelected != legs.size());
 			}
 		});
@@ -347,11 +353,47 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		btnEditLeg.setEnabled( false );
 		btnChangeTransport.setEnabled(false);
 		btnmergeLegs.setEnabled(false);
+		miEditLeg.setEnabled(false);
+		miDeleteLeg.setEnabled(false);
 		if (btnMoveToNewPatrol != null) btnMoveToNewPatrol.setEnabled(false);
 		
 		return main;
 	}
 
+	private void mergeLegs() {
+		IStructuredSelection selection = (IStructuredSelection)patrolLegViewer.getSelection();
+		ArrayList<PatrolLeg> toBeMerged = new ArrayList<PatrolLeg>(); 
+		Iterator<?> i = selection.iterator();
+	    while ( i.hasNext() ) {
+	    	toBeMerged.add( ((PatrolLeg)i.next()) );
+	    }
+		MergePatrolLegDialog patrolLegDialog = new MergePatrolLegDialog(getShell(), toBeMerged, typeOps, mandateOps);
+		if (patrolLegDialog.open() == Window.OK){
+			patrolLegDialog.getNewLeg().setPatrol(patrol);
+			legs.add(patrolLegDialog.getNewLeg());
+			for(PatrolLeg pld : toBeMerged){
+				legs.remove(pld);
+			}
+			sortAndRefresh();
+			fireChangeListeners();
+		}
+	}
+	
+	private void editLeg() {
+		PatrolLeg toEdit = (PatrolLeg)((IStructuredSelection)patrolLegViewer.getSelection()).getFirstElement();
+		EditPatrolLegDialog patrolLegDialog = new EditPatrolLegDialog(getShell(), toEdit, allEmployes, typeOps, mandateOps, patrolStartDate, patrolEndDate);
+		if (patrolLegDialog.open() == Window.OK){
+			sortAndRefresh();
+			fireChangeListeners();
+		}
+	}
+	
+	private void deleteLeg() {
+		if (MessageDialog.openConfirm(getShell(), Messages.PatrolLegsComposite_DeleteLeg_ConfirmDialog_Title, Messages.PatrolLegsComposite_DeleteLeg_ConfirmDialog_Message)){
+			removeLeg();	
+		}
+	}
+	
 	private Shell getShell(){
 		return main.getShell();
 	}

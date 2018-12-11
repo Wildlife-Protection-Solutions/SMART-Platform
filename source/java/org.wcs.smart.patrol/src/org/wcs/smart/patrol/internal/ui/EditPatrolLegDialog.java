@@ -354,7 +354,8 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		});
 		cmb.setContentProvider(ArrayContentProvider.getInstance());
 		cmb.setInput( mandateOps );
-		cmb.setSelection(new StructuredSelection(editLeg.getMandate()));
+		if (editLeg.getMandate() != null)
+			cmb.setSelection(new StructuredSelection(editLeg.getMandate()));
 		cmb.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		return cmb;
 	}
