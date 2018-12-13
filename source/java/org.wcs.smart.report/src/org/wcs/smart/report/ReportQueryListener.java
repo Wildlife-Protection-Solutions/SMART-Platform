@@ -70,13 +70,12 @@ public class ReportQueryListener extends QueryListenerAdapter {
 				sb.append("}"); //$NON-NLS-1$
 				sb.append("\n"); //$NON-NLS-1$
 			}
-			if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(),
-					WARNING_DIALOGTITLE, 
-					MessageFormat.format(
-							Messages.ReportQueryListener_BeforeDelete_QueryUsedWarning1, new Object[]{sb.toString(), query.getName() + " [" + query.getId() + "]"}))){ //$NON-NLS-1$ //$NON-NLS-2$
-				return false;
-			}
-			return true;
+			
+			MessageDialog.openError(Display.getDefault().getActiveShell(), 
+					WARNING_DIALOGTITLE,
+					MessageFormat.format(Messages.ReportQueryListener_querydeleteerror, sb.toString(), query.getName() + " [" + query.getId() + "]")); //$NON-NLS-1$ //$NON-NLS-2$
+					 
+			return false;
 		}				
 	}
 

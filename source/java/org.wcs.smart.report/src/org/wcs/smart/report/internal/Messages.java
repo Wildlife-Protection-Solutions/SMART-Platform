@@ -184,7 +184,7 @@ public class Messages extends NLS {
 	public static String ReportParameterDialog_DialogTitle;
 	public static String ReportPlugIn_Error_DialogTitle;
 	public static String ReportPlugIn_Error_InitializingParams;
-	public static String ReportQueryListener_BeforeDelete_QueryUsedWarning1;
+	public static String ReportQueryListener_querydeleteerror;
 	public static String ReportQueryListener_Warning_DialogTitle;
 
 	public static String ReportTemplateCloner_CloneError;
