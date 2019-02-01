@@ -5,7 +5,7 @@
       version="6.2.0.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="6.2.0.qualifier">
+      license-feature-version="6.2.1.qualifier">
 
    <description>
       This plugin allows for tracking of intelligence related records

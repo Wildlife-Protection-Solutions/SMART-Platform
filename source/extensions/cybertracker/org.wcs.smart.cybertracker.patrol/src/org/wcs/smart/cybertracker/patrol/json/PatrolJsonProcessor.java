@@ -163,14 +163,57 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					if (link.getLastObservationCnt()  + 1 != observationCounter) continue;					
 				}
 				
+				//is the end of this leg and needs a new leg
 				//is this the end of the patrol
+				boolean changeLeg = false;
 				boolean isPatrolEnd = sighting.containsKey(PatrolScreensUtil.END_PATROL_KEY) ;
 				if (sighting.containsKey(JsonCtParser.OBSERVATION_TYPE_KEY)) {
 					String value = (String) sighting.get(JsonCtParser.OBSERVATION_TYPE_KEY);
 					if (value.trim().equalsIgnoreCase(JsonCtParser.OBSERVATION_TYPE_END_PATROL_KEY)) {
 						isPatrolEnd = true;
 					}
+					
+					if (value.trim().equalsIgnoreCase(JsonCtParser.OBSERVATION_TYPE_CHANGE_PATROL_KEY)) {
+						changeLeg = true;
+					}
 				}
+				
+				if (changeLeg) {
+					//end the current leg and start a new one
+					Date dt = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(JsonCtParser.DATETIME_KEY));
+					
+					if (link != null) {
+						//update the leg end time
+						PatrolLegDay pd = findLegDay(link.getPatrolLeg(), link.getPatrolLeg().getEndDate(), true, null, session);
+						pd.setEndTime(new Time(dt.getTime()));
+						
+						//start a new leg
+						String defaultValues = (String)sighting.get(PatrolScreensUtil.RESULT_DEFAULT_META_VALUES);
+						CyberTrackerPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, ca, session);
+						
+						Date startDateTime = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(JsonCtParser.DATETIME_KEY));						
+						PatrolLeg newLeg = addLegFromSighting(link.getPatrolLeg().getPatrol(), ct, sighting, deviceId, ctPatrolUuid, observationCounter, startDateTime, session);
+						//update the link; we started a new leg
+						
+						
+						//create a new link
+						if (!newPatrolLinks.values().contains(link)) {
+							CtPatrolLink oldLink = new CtPatrolLink();
+							oldLink.setCtUuid(UUID.randomUUID());//TOOD
+							oldLink.setPatrolLeg(link.getPatrolLeg());
+							oldLink.setDeviceId(link.getDeviceId());
+							oldLink.setLastObservationCnt(-1);
+							oldLink.setGroupStartTime(null);
+							session.save(oldLink);
+							
+						}
+						link.setPatrolLeg(newLeg);	
+						
+					}else {
+						throw new Exception("Change patrol observation type cannot be processed before the Start Patrol observation type."); //$NON-NLS-1$
+					}
+				}
+				
 				if (isPatrolEnd){
 					//we want to find the patrol and update the end date
 					//add the position to the track, but do not create an observation 
@@ -524,10 +567,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		CyberTrackerPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, ca, session);
 		
 		
-		String startDate = (String)sighting.get(ScreensUtil.RESULT_START_DATE);
-		String startTime = (String)sighting.get(ScreensUtil.RESULT_START_TIME);
-		
-		
+		String startDate = (String)sighting.get(ScreensUtil.RESULT_START_DATE);		
 		Date dStartDate = DATEFORMAT.parse(startDate);
 		p.setEndDate(dStartDate);
 		p.setStartDate(dStartDate);
@@ -539,12 +579,34 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		p.setStation(ct.getStation());
 		p.setTeam(ct.getTeam());
 		
+		String startTime = (String)sighting.get(ScreensUtil.RESULT_START_TIME);
+		Date startDateTime = SmartUtils.combineDateTime(dStartDate, TIMEFORMAT.parse(startTime));
+		
+		
+		PatrolLeg pl = addLegFromSighting(p, ct, sighting, deviceId, ctUuid, observationCounter, startDateTime, session);
+		
 		// create new leg and add members and set transport type
-		PatrolLeg pl = p.addLeg();
+		CtPatrolLink link = new CtPatrolLink();
+		link.setDeviceId(deviceId);
+		link.setCtUuid(ctUuid);
+		link.setLastObservationCnt(observationCounter);
+		link.setPatrolLeg(pl);
+		newPatrolLinks.put(ctUuid, link);
+		
+		return link;
+	}
+		
+	private PatrolLeg addLegFromSighting(Patrol patrol, CyberTrackerPatrol ct,			
+			JSONObject sighting,
+			String deviceId, UUID ctUuid, int observationCounter,
+			Date startDateTime,
+			Session session) throws Exception{
+
+		PatrolLeg pl = patrol.addLeg();
 		pl.setMandate(ct.getMandate());
 		pl.setPatrolLegDays(new ArrayList<PatrolLegDay>());
-		pl.setStartDate(SmartUtils.combineDateTime(dStartDate, TIMEFORMAT.parse(startTime)));
-		pl.setEndDate(SharedUtils.getDatePart(dStartDate, true));
+		pl.setStartDate(startDateTime);
+		pl.setEndDate(SharedUtils.getDatePart(pl.getStartDate(), true));
 		for (Employee member: ct.getMembers()){
 			PatrolLegMember item = pl.addPatrolLegMember(member);
 			if (ct.getPatrolType().requiresPilot()){
@@ -557,17 +619,11 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		
 		
 		//make a single patrol leg day for the start date and time
-		pl.createLegDays(session);		
+		pl.createLegDays(session);	
 		
-		CtPatrolLink link = new CtPatrolLink();
-		link.setDeviceId(deviceId);
-		link.setCtUuid(ctUuid);
-		link.setLastObservationCnt(observationCounter);
-		link.setPatrolLeg(p.getFirstLeg());
-		newPatrolLinks.put(ctUuid, link);
-		return link;
+		return pl;
 	}
-		
+	
 	private void addToExistingLeg(PatrolLeg addTo, Waypoint wp, Session session)
 			throws Exception {
 		

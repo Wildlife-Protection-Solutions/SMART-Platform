@@ -69,6 +69,13 @@ public class CtJsonExportUtils {
 	 */
 	public static final String JSON_REQUIRED_PROP_KEY = "isRequired"; //$NON-NLS-1$
 	
+
+	/**
+	 * JSON options key for representing if metaitem 
+	 * is a patrol attribute or leg attribute 
+	 */
+	public static final String JSON_FIXED_PROP_KEY = "isFixed"; //$NON-NLS-1$
+	
 	/**
 	 * JSON is visible property key
 	 */
@@ -291,11 +298,12 @@ public class CtJsonExportUtils {
 	 * @param ca
 	 * @return
 	 */
-	public static JSONObject convertStringOp(ScreenOption screenOption, String opKey, String opLabel, boolean isRequired, Session session, ConservationArea ca) {
+	public static JSONObject convertStringOp(ScreenOption screenOption, String opKey, String opLabel, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
 		objective.put(JSON_OPTION_TYPE_KEY, Type.TEXT.name());
 		objective.put(JSON_OPTION_LABEL_KEY, opLabel);
 		objective.put(JSON_REQUIRED_PROP_KEY, isRequired);
+		objective.put(JSON_FIXED_PROP_KEY, isFixed);
 		if (screenOption != null) {
 			objective.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible() && screenOption.getStringValue() != null) {
@@ -319,11 +327,12 @@ public class CtJsonExportUtils {
 	 * @return
 	 */
 	
-	public static JSONObject convertEmployees(ScreenOption screenOption, boolean isRequired, Session session, ConservationArea ca) {
+	public static JSONObject convertEmployees(ScreenOption screenOption, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
 		JSONObject optionType = new JSONObject();
 		optionType.put(JSON_OPTION_TYPE_KEY, Type.MULTI_CHOICE.name());
 		optionType.put(JSON_OPTION_LABEL_KEY, Messages.CtJsonExportUtils_EmployeePageLabel);
 		optionType.put(JSON_REQUIRED_PROP_KEY, isRequired);
+		optionType.put(JSON_FIXED_PROP_KEY, isFixed);
 		if (screenOption != null) {
 			optionType.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible()) {
@@ -356,12 +365,13 @@ public class CtJsonExportUtils {
 		return teamTypeOp;
 	}
 	
-	public static JSONObject convertLeaderPilot(ScreenOption screenOption, String opKey, String opLabel, boolean isRequired, Session session, ConservationArea ca) {
+	public static JSONObject convertLeaderPilot(ScreenOption screenOption, String opKey, String opLabel, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
 		objective.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
 		objective.put(JSON_OPTION_PARENT_KEY, JSON_EMPLOYEE_METADATA_KEY);
 		objective.put(JSON_OPTION_LABEL_KEY, opLabel);
 		objective.put(JSON_REQUIRED_PROP_KEY, isRequired);
+		objective.put(JSON_FIXED_PROP_KEY, isFixed);
 		if (screenOption != null) {
 			objective.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible() && screenOption.getUuidValue() != null) {
@@ -376,11 +386,12 @@ public class CtJsonExportUtils {
 		return objectiveOp;
 	}
 	
-	public static JSONObject convertKeyOptions(ScreenOption screenOption, Class<? extends NamedKeyItem> clazz, String screenKey, String opLabel, boolean isRequired, Session session, ConservationArea ca) {
+	public static JSONObject convertKeyOptions(ScreenOption screenOption, Class<? extends NamedKeyItem> clazz, String screenKey, String opLabel, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
 		JSONObject optionType = new JSONObject();
 		optionType.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
 		optionType.put(JSON_OPTION_LABEL_KEY, opLabel);
 		optionType.put(JSON_REQUIRED_PROP_KEY, isRequired);
+		optionType.put(JSON_FIXED_PROP_KEY, isFixed);
 		if (screenOption != null) {
 			optionType.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible()) {

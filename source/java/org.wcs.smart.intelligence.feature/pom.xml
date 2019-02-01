@@ -11,5 +11,5 @@
 
   <artifactId>org.wcs.smart.intelligence.feature</artifactId>
   <packaging>eclipse-feature</packaging>
-  <version>6.2.0-SNAPSHOT</version>
+  <version>6.2.1-SNAPSHOT</version>
 </project>

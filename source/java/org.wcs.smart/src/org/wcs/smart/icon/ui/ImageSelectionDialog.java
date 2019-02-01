@@ -31,10 +31,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -49,7 +50,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -83,6 +83,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ImageSelectionDialog extends TitleAreaDialog {
 
+	private static final String WIDGET_KEY = "WIDGET"; //$NON-NLS-1$
 	private static final String IMAGE_KEY = "IMAGE"; //$NON-NLS-1$
 	private static final String PATH_KEY = "PATH"; //$NON-NLS-1$
 	private static final String MOUSEIN_KEY = "MOUSEIN"; //$NON-NLS-1$
@@ -315,7 +316,7 @@ public class ImageSelectionDialog extends TitleAreaDialog {
 		return true;
 	}
 
-	private void createIconTable(List<String> paths) {
+	private void createIconTable(SortedMap<String, Set<String>> paths) {
 		for (Control c : iconTable.getChildren()) c.dispose();
 		
 		scroll = new ScrolledComposite(iconTable, SWT.V_SCROLL | SWT.BORDER);
@@ -333,22 +334,70 @@ public class ImageSelectionDialog extends TitleAreaDialog {
 		((RowLayout)core.getLayout()).marginHeight = 0;
 		
 		
-		for (String path : paths) {
-			Composite icon = new Composite(core, SWT.NONE);
-			icon.setLayoutData(new RowData(THUMB_SIZE, THUMB_SIZE));
-			icon.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		for (String name : paths.keySet()) {
+			Set<String> icons = paths.get(name);
 			
-			try {
-				icon.setData(PATH_KEY, new URL(path));
-			}catch (Exception ex) {
-				ex.printStackTrace();
+			for (String path : icons) {
+				Composite outer = new Composite(core, SWT.NONE);
+				outer.setLayout(new GridLayout());
+				outer.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				((GridLayout)outer.getLayout()).marginWidth = 4;
+				((GridLayout)outer.getLayout()).marginHeight = 4;
+				
+				Label l = new Label(outer, SWT.NONE);
+				l.setText(name);
+				l.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+				l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				
+				Composite icon = new Composite(outer, SWT.NONE);
+				icon.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				icon.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+				((GridData)icon.getLayoutData()).widthHint = THUMB_SIZE;
+				((GridData)icon.getLayoutData()).heightHint = THUMB_SIZE;
+				try {
+					icon.setData(PATH_KEY, new URL(path));
+					outer.setData(PATH_KEY, new URL(path));
+				}catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				icon.addListener(SWT.Paint, e->{
+					Widget w = e.widget;
+					Object img = w.getData(IMAGE_KEY);
+					if (img == null) {
+						URL url = (URL) w.getData(PATH_KEY);
+						if (url != null) {
+							img = SmartUtils.getImage(url, THUMB_SIZE - 4);
+							w.setData(IMAGE_KEY, img);
+						}
+					}
+					if (img != null) {
+						e.gc.drawImage((Image)img, 2, 2);
+					}
+				});
+				outer.setData(SELECTED_KEY,  false);
+				outer.setData(MOUSEIN_KEY,  false);
+				outer.addListener(SWT.Paint, itemListener);
+				outer.addListener(SWT.MouseEnter, itemListener);
+				outer.addListener(SWT.MouseExit, itemListener);
+				outer.addListener(SWT.MouseUp, itemListener);
+				outer.addListener(SWT.MouseDoubleClick, itemListener);
+				outer.setData(WIDGET_KEY, outer);
+				l.addListener(SWT.MouseEnter, itemListener);
+				l.addListener(SWT.MouseExit, itemListener);
+				l.addListener(SWT.MouseUp, itemListener);
+				l.addListener(SWT.MouseDoubleClick, itemListener);
+				l.setData(WIDGET_KEY, outer);
+				
+				icon.addListener(SWT.MouseEnter, itemListener);
+				icon.addListener(SWT.MouseExit, itemListener);
+				icon.addListener(SWT.MouseUp, itemListener);
+				icon.addListener(SWT.MouseDoubleClick, itemListener);
+				
+				icon.setData(WIDGET_KEY, outer);
+				
+				
+				
 			}
-			icon.setData(SELECTED_KEY,  false);
-			icon.setData(MOUSEIN_KEY,  false);
-			icon.addListener(SWT.Paint, itemListener);
-			icon.addListener(SWT.MouseEnter, itemListener);
-			icon.addListener(SWT.MouseExit, itemListener);
-			icon.addListener(SWT.MouseUp, itemListener);
 			
 		}
 		
@@ -360,7 +409,19 @@ public class ImageSelectionDialog extends TitleAreaDialog {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Set<String> files = new HashSet<>();
+			
+			SortedMap<String, Set<String>> files = new TreeMap<>();
+			
+			for (String[] s : IconUtils.SMART_ICON_MAPPING) {
+				Set<String> items = files.get(s[1]);
+				if (items == null) {
+					items = new HashSet<>();
+					files.put(s[1], items);
+				}
+				items.add(s[2]);
+				items.add(s[2]);
+				items.add(s[3]);
+			}
 			
 			try(Session session = HibernateManager.openSession()){
 				session.doWork(new Work() {
@@ -369,15 +430,23 @@ public class ImageSelectionDialog extends TitleAreaDialog {
 						c.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 						session.beginTransaction();
 						List<IconFile> icons = QueryFactory.buildQuery(session, IconFile.class, 
-								new Object[] {"iconSet.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+								new Object[] {"iconSet.conservationArea", SmartDB.getCurrentConservationArea()}) //$NON-NLS-1$
+								.list(); 
 						
 						for (IconFile file : icons) {
+							String name = file.getIcon().getName();
+							Set<String> items = files.get(name);
+							if (items == null) {
+								items = new HashSet<>();
+								files.put(name, items);
+							}
+							
 							if (file.isSystemIcon()) {
-								files.add(file.getFilename());
+								items.add(file.getFilename());
 							}else {
 								file.computeFileLocation(session);
 								try {
-									files.add(file.getAttachmentFile().getAbsoluteFile().toURI().toURL().toString());
+									items.add(file.getAttachmentFile().getAbsoluteFile().toURI().toURL().toString()); 
 								} catch (MalformedURLException e) {
 									e.printStackTrace();
 								}
@@ -388,17 +457,8 @@ public class ImageSelectionDialog extends TitleAreaDialog {
 				});
 			}
 			
-			for (String[] s : IconUtils.SMART_ICON_MAPPING) {
-				files.add(s[2]);
-				files.add(s[3]);
-				files.add(s[4]);
-			}
-			List<String> lfiles = new ArrayList<>();
-			lfiles.addAll(files);
-			lfiles.sort((a,b)->a.compareTo(b));
-			
 			Display.getDefault().syncExec(()->{
-				createIconTable(lfiles);
+				createIconTable(files);
 			});
 			
 			return Status.OK_STATUS;
@@ -411,32 +471,23 @@ public class ImageSelectionDialog extends TitleAreaDialog {
 		@Override
 		public void handleEvent(Event event) {
 			Widget w = event.widget;
-			
+			w = (Widget) w.getData(WIDGET_KEY);
+			if (w == null) return;
 			if (event.type == SWT.Paint) {
-				Object img = w.getData(IMAGE_KEY);
-				if (img == null) {
-					URL url = (URL) w.getData(PATH_KEY);
-					if (url != null) {
-						img = SmartUtils.getImage(url, THUMB_SIZE - 4);
-						w.setData(IMAGE_KEY, img);
-					}
-				}
-				if (img != null) {
-					event.gc.drawImage((Image)img, 2, 2);
-				}
-				
+				int width = ((Composite)w).getBounds().width;
+				int height = ((Composite)w).getBounds().height;
 				if ((boolean)event.widget.getData(SELECTED_KEY)) {
 					event.gc.setForeground(getShell().getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION));
 					event.gc.setLineWidth(2);
-					event.gc.drawRectangle(1, 1, THUMB_SIZE - 2, THUMB_SIZE - 2);
+					event.gc.drawRectangle(1, 1, width - 2, height - 2);
 				}else if ((boolean)event.widget.getData(MOUSEIN_KEY)) {
 					event.gc.setForeground(selectionColor);
 					event.gc.setLineWidth(2);
-					event.gc.drawRectangle(1, 1, THUMB_SIZE - 2, THUMB_SIZE - 2);
+					event.gc.drawRectangle(1, 1, width - 2, height - 2);
 				}else {
 					event.gc.setForeground(getShell().getDisplay().getSystemColor(SWT.COLOR_GRAY));
 					event.gc.setLineWidth(1);
-					event.gc.drawRectangle(0, 0, THUMB_SIZE - 1, THUMB_SIZE - 1);
+					event.gc.drawRectangle(0, 0, width - 1, height - 1);
 				}
 				
 			}else if (event.type == SWT.MouseEnter) {
@@ -458,6 +509,9 @@ public class ImageSelectionDialog extends TitleAreaDialog {
 				w.setData(SELECTED_KEY,  true);
 				((Composite)w).setBackground(highlightColor);
 				((Composite)w).redraw();	
+			}else if (event.type == SWT.MouseDoubleClick) {
+				w.setData(SELECTED_KEY,  true);
+				okPressed();
 			}
 		}
 		

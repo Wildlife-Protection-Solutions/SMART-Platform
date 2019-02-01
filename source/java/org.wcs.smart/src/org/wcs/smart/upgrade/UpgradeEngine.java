@@ -57,11 +57,12 @@ public class UpgradeEngine {
 	private static final String EXTENSION_ID = "org.wcs.smart.dbUpgrade"; //$NON-NLS-1$
 	
 	public enum UpgradeFromVersion {
-		V112("1.1.2", "2.0.0", Upgrader112To200.class), //$NON-NLS-1$ //$NON-NLS-2$
-		V200("2.0.0", "3.0.0", Upgrader200To300.class), //$NON-NLS-1$ //$NON-NLS-2$
-		V300("3.0.0", "3.0.2", Upgrader300To302.class), //$NON-NLS-1$ //$NON-NLS-2$
-		V302("3.0.2", "3.1.0", Upgrader302To310.class), //$NON-NLS-1$ //$NON-NLS-2$
-		V310("3.1.0", "3.2.0", Upgrader310To320.class), //$NON-NLS-1$ //$NON-NLS-2$
+//		V112("1.1.2", "2.0.0", Upgrader112To200.class), //$NON-NLS-1$ //$NON-NLS-2$
+//		V200("2.0.0", "3.0.0", Upgrader200To300.class), //$NON-NLS-1$ //$NON-NLS-2$
+//		V300("3.0.0", "3.0.2", Upgrader300To302.class), //$NON-NLS-1$ //$NON-NLS-2$
+//		V302("3.0.2", "3.1.0", Upgrader302To310.class), //$NON-NLS-1$ //$NON-NLS-2$
+//		V310("3.1.0", "3.2.0", Upgrader310To320.class), //$NON-NLS-1$ //$NON-NLS-2$
+		//SEE ticket 2707 - as of 6.2 we only support upgrading from 3.2
 		V320("3.2.0", "3.2.1", Upgrader320To321.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V330("3.2.1", "3.3.0", Upgrader321To330.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V331("3.3.0", "3.3.1", Upgrader330To331.class), //$NON-NLS-1$ //$NON-NLS-2$
@@ -131,6 +132,28 @@ public class UpgradeEngine {
 		boolean hasChangeTracking = true;
 		/* --- validate the core version; upgrade as required --- */
 		if (!expectedDbVersion.equals(newDbVersion)) {
+			
+			UpgradeFromVersion fromVersion = null;
+			for (UpgradeFromVersion v : UpgradeFromVersion.values()){
+				if (v.fromVersion.equals(newDbVersion)){
+					fromVersion = v;
+				}
+			}
+			
+			if (fromVersion == null) {
+//				Display.getDefault().syncExec(new Runnable(){
+//					@Override
+//					public void run() {
+//						MessageDialog.openError(
+//								Display.getDefault().getActiveShell(),
+//								Messages.UpgradeEngine_Error_Title,
+//								MessageFormat.format(Messages.UpgradeEngine_Error_Message1, newDbVersion, UpgradeFromVersion.V320.toVersion));
+//					}
+//				});
+				throw new Exception(MessageFormat.format(Messages.UpgradeEngine_Error_Message1, newDbVersion, UpgradeFromVersion.V320.toVersion));
+//				return;
+			}
+			
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
@@ -144,25 +167,7 @@ public class UpgradeEngine {
 				throw new Exception(Messages.UpgradeEngine_IncompatibleVersion);
 			}
 		
-			UpgradeFromVersion fromVersion = null;
-			for (UpgradeFromVersion v : UpgradeFromVersion.values()){
-				if (v.fromVersion.equals(newDbVersion)){
-					fromVersion = v;
-				}
-			}
 			
-			if (fromVersion == null) {
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						MessageDialog.openError(
-								Display.getDefault().getActiveShell(),
-								Messages.UpgradeEngine_Error_Title,
-								MessageFormat.format(Messages.UpgradeEngine_Error_Message, newDbVersion));
-					}
-				});
-				return;
-			}
 			
 			//find the index of the current from version; then
 			//run all upgrades from that index to upgrade to the 

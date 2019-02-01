@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.IQaDataProvider;
@@ -64,6 +65,8 @@ public enum ActionEngine {
 			for (IQaDataProvider p : providers){
 				for (QaActionInfo n : InternalExtensionManager.INSTANCE.getQaActions(p, context)){
 					if (n.getAction().getId().equals(actionId)){
+						//inject the newest context into the action bug #2703
+						ContextInjectionFactory.inject(n.getAction(), context);
 						changes = changes || n.getAction().doAction(actionItems);
 						break;
 					}

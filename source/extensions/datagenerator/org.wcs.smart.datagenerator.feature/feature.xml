@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.wcs.smart.datagenerator.feature"
+      label="SMART Patrol Demo Data Engine"
+      version="6.2.0.qualifier"
+      plugin="org.wcs.smart.datagenerator"
+	  license-feature="org.wcs.smart.license.feature"
+      license-feature-version="6.2.0.qualifier">
+
+   <description>
+      Provides tools for generating Patrol data for demonstration purposes or modifying existing data for demonstration purposes.
+   </description>
+
+   <copyright>
+      Copyright (c): 2019 Wildlife Conservation Society
+   </copyright>
+
+
+   <plugin
+         id="org.wcs.smart.datagenerator"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

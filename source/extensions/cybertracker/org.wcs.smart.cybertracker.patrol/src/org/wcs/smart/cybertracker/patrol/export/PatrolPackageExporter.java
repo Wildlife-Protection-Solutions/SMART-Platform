@@ -279,16 +279,16 @@ public enum PatrolPackageExporter {
 		
 		JSONArray metadataScreens = new JSONArray();
 		
-		metadataScreens.add(CtJsonExportUtils.convertKeyOptions(options.get(PatrolScreenOptionMeta.TRANSPORT), PatrolTransportType.class, PatrolScreenOptionMeta.TRANSPORT.key, Messages.PatrolPackageExporter_TransportTypePageLabel, PatrolScreenOptionMeta.TRANSPORT.isRequired(), session, ca));
+		metadataScreens.add(CtJsonExportUtils.convertKeyOptions(options.get(PatrolScreenOptionMeta.TRANSPORT), PatrolTransportType.class, PatrolScreenOptionMeta.TRANSPORT.key, Messages.PatrolPackageExporter_TransportTypePageLabel, PatrolScreenOptionMeta.TRANSPORT.isRequired(), false, session, ca));
 		metadataScreens.add(convertArmed(options.get(PatrolScreenOptionMeta.ARMED), session, ca));
-		metadataScreens.add(CtJsonExportUtils.convertKeyOptions(options.get(PatrolScreenOptionMeta.TEAM), Team.class, PatrolScreenOptionMeta.TEAM.key, Messages.PatrolPackageExporter_TeamPageLabel, PatrolScreenOptionMeta.TEAM.isRequired(), session, ca));
+		metadataScreens.add(CtJsonExportUtils.convertKeyOptions(options.get(PatrolScreenOptionMeta.TEAM), Team.class, PatrolScreenOptionMeta.TEAM.key, Messages.PatrolPackageExporter_TeamPageLabel, PatrolScreenOptionMeta.TEAM.isRequired(), PatrolScreenOptionMeta.TEAM.isFixed(), session, ca));
 		metadataScreens.add(convertStations(options.get(PatrolScreenOptionMeta.STATION), session, ca));
-		metadataScreens.add(CtJsonExportUtils.convertKeyOptions(options.get(PatrolScreenOptionMeta.MANDATE), PatrolMandate.class, PatrolScreenOptionMeta.MANDATE.key, Messages.PatrolPackageExporter_MandatePageLabel,PatrolScreenOptionMeta.MANDATE.isRequired(),  session, ca));
-		metadataScreens.add(CtJsonExportUtils.convertStringOp(options.get(PatrolScreenOptionMeta.OBJECTIVE), PatrolScreenOptionMeta.OBJECTIVE.key, Messages.PatrolPackageExporter_ObjectivePageLabel, PatrolScreenOptionMeta.OBJECTIVE.isRequired(), session, ca));
-		metadataScreens.add(CtJsonExportUtils.convertStringOp(options.get(PatrolScreenOptionMeta.COMMENT), PatrolScreenOptionMeta.COMMENT.key, Messages.PatrolPackageExporter_CommentPageLabel, PatrolScreenOptionMeta.COMMENT.isRequired(), session, ca));
-		metadataScreens.add(CtJsonExportUtils.convertEmployees(options.get(PatrolScreenOptionMeta.MEMBERS),PatrolScreenOptionMeta.MEMBERS.isRequired(), session, ca));
-		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(options.get(PatrolScreenOptionMeta.LEADER), PatrolScreenOptionMeta.LEADER.key, Messages.PatrolPackageExporter_LeaderPageLabel, PatrolScreenOptionMeta.LEADER.isRequired(), session, ca));
-		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(options.get(PatrolScreenOptionMeta.PILOT), PatrolScreenOptionMeta.PILOT.key, Messages.PatrolPackageExporter_PilotPageLabel, PatrolScreenOptionMeta.PILOT.isRequired(), session, ca));
+		metadataScreens.add(CtJsonExportUtils.convertKeyOptions(options.get(PatrolScreenOptionMeta.MANDATE), PatrolMandate.class, PatrolScreenOptionMeta.MANDATE.key, Messages.PatrolPackageExporter_MandatePageLabel,PatrolScreenOptionMeta.MANDATE.isRequired(), PatrolScreenOptionMeta.MANDATE.isFixed(), session, ca));
+		metadataScreens.add(CtJsonExportUtils.convertStringOp(options.get(PatrolScreenOptionMeta.OBJECTIVE), PatrolScreenOptionMeta.OBJECTIVE.key, Messages.PatrolPackageExporter_ObjectivePageLabel, PatrolScreenOptionMeta.OBJECTIVE.isRequired(), PatrolScreenOptionMeta.OBJECTIVE.isFixed(), session, ca));
+		metadataScreens.add(CtJsonExportUtils.convertStringOp(options.get(PatrolScreenOptionMeta.COMMENT), PatrolScreenOptionMeta.COMMENT.key, Messages.PatrolPackageExporter_CommentPageLabel, PatrolScreenOptionMeta.COMMENT.isRequired(), PatrolScreenOptionMeta.COMMENT.isFixed(), session, ca));
+		metadataScreens.add(CtJsonExportUtils.convertEmployees(options.get(PatrolScreenOptionMeta.MEMBERS),PatrolScreenOptionMeta.MEMBERS.isRequired(), PatrolScreenOptionMeta.MEMBERS.isFixed(), session, ca));
+		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(options.get(PatrolScreenOptionMeta.LEADER), PatrolScreenOptionMeta.LEADER.key, Messages.PatrolPackageExporter_LeaderPageLabel, PatrolScreenOptionMeta.LEADER.isRequired(), PatrolScreenOptionMeta.LEADER.isFixed(), session, ca));
+		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(options.get(PatrolScreenOptionMeta.PILOT), PatrolScreenOptionMeta.PILOT.key, Messages.PatrolPackageExporter_PilotPageLabel, PatrolScreenOptionMeta.PILOT.isRequired(), PatrolScreenOptionMeta.PILOT.isFixed(), session, ca));
 		metadataScreens.add(CtJsonExportUtils.createDataType(PatrolScreenOptionMeta.PATROL_RESOURCE_ID));
 		metadataScreens.add(CtJsonExportUtils.createPatrolId());
 		metadataScreens.add(CtJsonExportUtils.createStartDate());
@@ -305,6 +305,7 @@ public enum PatrolPackageExporter {
 		isArmed.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.BOOLEAN.name());
 		isArmed.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY, Messages.PatrolPackageExporter_ArmedPageLabel);
 		isArmed.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY,  PatrolScreenOptionMeta.ARMED.isRequired());
+		isArmed.put(CtJsonExportUtils.JSON_FIXED_PROP_KEY,  PatrolScreenOptionMeta.ARMED.isFixed());
 		if (armedOp != null) {
 			isArmed.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, armedOp.isVisible());
 			if (!armedOp.isVisible() && armedOp.getBooleanValue() != null) {
@@ -325,6 +326,7 @@ public enum PatrolPackageExporter {
 		stationType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.SINGLE_CHOICE.name());
 		stationType.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY, Messages.PatrolPackageExporter_StationFieldKey);
 		stationType.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY,  PatrolScreenOptionMeta.STATION.isRequired());
+		stationType.put(CtJsonExportUtils.JSON_FIXED_PROP_KEY,  PatrolScreenOptionMeta.STATION.isFixed());
 		if (stationOp != null) {
 			stationType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, stationOp.isVisible());
 			if (!stationOp.isVisible()) {

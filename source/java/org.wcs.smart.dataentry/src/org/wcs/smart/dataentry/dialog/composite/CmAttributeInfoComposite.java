@@ -302,7 +302,7 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 			nodes.addAll(attribute.getCurrentTree());
 			while(!nodes.isEmpty()) {
 				CmAttributeTreeNode node = nodes.remove(0);
-				if (node.getDmTreeNode().getIcon() != null) loadFiles(node.getDmTreeNode().getIcon(), session);
+				if (node.getDmTreeNode() != null && node.getDmTreeNode().getIcon() != null) loadFiles(node.getDmTreeNode().getIcon(), session);
 				if (node.getChildren() != null) nodes.addAll(node.getChildren());
 
 			}

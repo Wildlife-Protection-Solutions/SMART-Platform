@@ -145,14 +145,36 @@ public class PatrolDialog extends TitleAreaDialog {
 			throw new Exception(MessageFormat.format(Messages.PatrolDialog_DifferentType, newPatrol.getPatrolType().getGuiName(Locale.getDefault()), addToPatrol.getPatrolType().getGuiName(Locale.getDefault())));
 		}
 		
-		PatrolLeg toAdd= newPatrol.getFirstLeg();
-		addToPatrol.getLegs().add(toAdd);
-		toAdd.setPatrol(addToPatrol);
+		//add all legs
+		for (PatrolLeg toAdd : newPatrol.getLegs()) {
+			addToPatrol.getLegs().add(toAdd);
+			toAdd.setPatrol(addToPatrol);
+			
+			if (addToPatrol.getStartDate().after(toAdd.getStartDate())) {
+				addToPatrol.setStartDate(SharedUtils.getDatePart(toAdd.getStartDate(),false));
+			}
+			if (addToPatrol.getEndDate().before(toAdd.getEndDate())) {
+				addToPatrol.setEndDate(SharedUtils.getDatePart(toAdd.getEndDate(),false));
+			}
+		}
 		PatrolHibernateManager.savePatrol(addToPatrol, session, true);
 		
+		//create links
+		//create links for all new legs
+		for (PatrolLeg pl : newPatrol.getLegs()) {
+			if (pl == newPatrolLink.getPatrolLeg()) continue;
+			CtPatrolLink link = new CtPatrolLink();
+			link.setCtUuid(UUID.randomUUID());// TOOD
+			link.setPatrolLeg(pl);
+			link.setDeviceId(newPatrolLink.getDeviceId());
+			link.setLastObservationCnt(-1);
+			link.setGroupStartTime(null);
+			session.save(link);
+		}
+				
 		CtPatrolLink link = new CtPatrolLink();
 		link.setCtUuid(ctUuid);
-		link.setPatrolLeg(newPatrol.getFirstLeg());
+		link.setPatrolLeg(newPatrolLink.getPatrolLeg());
 		link.setDeviceId(newPatrolLink.getDeviceId());
 		link.setLastObservationCnt(newPatrolLink.getLastObservationCnt());
 		link.setGroupStartTime(newPatrolLink.getGroupStartTime());
@@ -174,9 +196,22 @@ public class PatrolDialog extends TitleAreaDialog {
 			}
 		}
 		PatrolHibernateManager.savePatrol(newPatrol, session, true);
+		
+		//create links for all new legs
+		for (PatrolLeg pl : newPatrol.getLegs()) {
+			if (pl == patrol.getPatrolLeg()) continue;
+			CtPatrolLink link = new CtPatrolLink();
+			link.setCtUuid(UUID.randomUUID());//TOOD
+			link.setPatrolLeg(pl);
+			link.setDeviceId(patrol.getDeviceId());
+			link.setLastObservationCnt(-1);
+			link.setGroupStartTime(null);
+			session.save(link);
+		}
+		
 		CtPatrolLink link = new CtPatrolLink();
 		link.setCtUuid(ctUuid);
-		link.setPatrolLeg(newPatrol.getFirstLeg());
+		link.setPatrolLeg(patrol.getPatrolLeg());
 		link.setDeviceId(patrol.getDeviceId());
 		link.setLastObservationCnt(patrol.getLastObservationCnt());
 		link.setGroupStartTime(patrol.getGroupStartTime());

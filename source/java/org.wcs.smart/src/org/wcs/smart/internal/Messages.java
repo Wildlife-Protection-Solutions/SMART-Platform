@@ -1316,7 +1316,7 @@ public class Messages extends NLS {
 	public static String TranslateSimpleListItemDialog_NameLabel;
 	public static String UpgradeEngine_Confirm_Message;
 	public static String UpgradeEngine_Confirm_Title;
-	public static String UpgradeEngine_Error_Message;
+	public static String UpgradeEngine_Error_Message1;
 	public static String UpgradeEngine_Error_Title;
 	public static String UpgradeEngine_IncompatibleVersion;
 	public static String UpgradeEngine_Plugin_Missing;

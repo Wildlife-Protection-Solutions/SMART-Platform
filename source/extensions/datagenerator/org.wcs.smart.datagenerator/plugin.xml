@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.wcs.smart.datagenerator.ui.DataGeneratorView$DataGeneratorViewWrapper"
+            icon="images/demopatrol.png"
+            id="org.wcs.smart.datagenerator.ui.datageneratorview"
+            name="Patrol Data Generator"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.datagenerator.show"
+            name="Generate Patrol Data...">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.datagenerator.ui.DataGeneratorHandler$DataGeneratorHandlerWrapper"
+            commandId="org.wcs.smart.datagenerator.show">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.patrol?before=org.wcs.smart.patrol.separator1">
+         <command
+               commandId="org.wcs.smart.datagenerator.show"
+               icon="images/demopatrol.png"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+               </and>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+
+</plugin>

@@ -43,6 +43,7 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "org.wcs.smart.intelligence"; //$NON-NLS-1$
 
 	//Version of Data Structures required for current implementation
+	public static final String DB_VERSION_30 = "3.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_31 = "3.1"; //$NON-NLS-1$
 	public static final String DB_VERSION_32 = "3.2"; //$NON-NLS-1$
 	public static final String DB_VERSION_40 = "4.0"; //$NON-NLS-1$

@@ -72,7 +72,12 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 	 * @param session in active transaction
 	 */
 	public static final void upgrade(String currentVersion, Session session){
-		if (currentVersion.equals(IntelligencePlugIn.DB_VERSION_31)){
+		if (currentVersion.equals(IntelligencePlugIn.DB_VERSION_30)){
+			upgradeV31ToV32(session);
+			upgradeV32ToV40(session);
+		}else if (currentVersion.equals(IntelligencePlugIn.DB_VERSION_31)){
+			//i don't  think there was ever a 31 version - I think this was a bug
+			//see ticket #2707.  I think we should upgrade from version 3.0
 			upgradeV31ToV32(session);
 			upgradeV32ToV40(session);
 		}else if (currentVersion.equals(IntelligencePlugIn.DB_VERSION_32)){

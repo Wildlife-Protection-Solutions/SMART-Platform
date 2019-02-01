@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/datageneratorconfiguration" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/datageneratorconfiguration">
+    <element name="DataGeneratorConfiguration"
+    	type="tns:DataGeneratorConfiguration">
+    </element>
+    
+    <complexType name="DataGeneratorConfiguration">
+    	<sequence>
+    		<element name="bounding_box" type="tns:BoundingBoxType"
+    			maxOccurs="1" minOccurs="1">
+    		</element>
+    		<element name="mappings" type="tns:ObservationMappingType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="number_of_patrols" type="int"></attribute>
+    	<attribute name="start_date" type="string"></attribute>
+    	<attribute name="end_date" type="string"></attribute>
+    	<attribute name="days_per_patrol_min" type="int"></attribute>
+    	<attribute name="days_per_patrol_max" type="int"></attribute>
+    	<attribute name="employees_per_patrol_min" type="int"></attribute>
+    	<attribute name="employees_per_patrol_max" type="int"></attribute>
+    	<attribute name="waypoints_per_day_min" type="int"></attribute>
+    	<attribute name="waypoints_per_day_max" type="int"></attribute>
+    	<attribute name="observations_per_waypoint_min" type="int"></attribute>
+    	<attribute name="observations_per_waypoint_max" type="int"></attribute>
+    </complexType>
+
+    <complexType name="BoundingBoxType">
+    	<attribute name="x_min" type="double"></attribute>
+    	<attribute name="y_min" type="double"></attribute>
+    	<attribute name="x_max" type="double"></attribute>
+    	<attribute name="y_max" type="double"></attribute>
+    	<attribute name="area_type" type="string"></attribute>
+    </complexType>
+
+    <complexType name="ObservationMappingType">
+    	<sequence>
+    		<element name="attributes" type="tns:AttributeType" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="category" type="string"></attribute>
+    	<attribute name="weight" type="int"></attribute>
+    </complexType>
+    
+    <complexType name="AttributeType">
+    	<attribute name="attribute" type="string"></attribute>
+    	<attribute name="mapping_type" type = "string"></attribute>
+    	<attribute name="double_value" type = "double"></attribute>
+    	<attribute name="string_value" type = "string"></attribute>
+    	
+    </complexType>
+</schema>

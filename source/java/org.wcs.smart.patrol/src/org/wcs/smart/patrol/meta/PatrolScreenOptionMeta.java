@@ -28,28 +28,42 @@ package org.wcs.smart.patrol.meta;
  */
 public enum PatrolScreenOptionMeta {
 
-	TRANSPORT("SMART_PatrolTransport", true), //$NON-NLS-1$
-	ARMED("SMART_Armed", true), //$NON-NLS-1$
-	STATION("SMART_Station", false), //$NON-NLS-1$
-	TEAM("SMART_Team", false), //$NON-NLS-1$
-	MANDATE("SMART_Mandate", true), //$NON-NLS-1$
-	OBJECTIVE("SMART_Objective", false), //$NON-NLS-1$
-	COMMENT("SMART_Comments", false), //$NON-NLS-1$
-	MEMBERS("SMART_Members", true), //$NON-NLS-1$
-	LEADER("SMART_Leader", true), //$NON-NLS-1$
-	PILOT("SMART_Pilot", false); //$NON-NLS-1$
+	TRANSPORT("SMART_PatrolTransport", true, false), //$NON-NLS-1$
+	ARMED("SMART_Armed", true, true), //$NON-NLS-1$
+	STATION("SMART_Station", false, true), //$NON-NLS-1$
+	TEAM("SMART_Team", false, true), //$NON-NLS-1$
+	MANDATE("SMART_Mandate", true, false), //$NON-NLS-1$
+	OBJECTIVE("SMART_Objective", false, true), //$NON-NLS-1$
+	COMMENT("SMART_Comments", false, true), //$NON-NLS-1$
+	MEMBERS("SMART_Members", true, false), //$NON-NLS-1$
+	LEADER("SMART_Leader", true, false), //$NON-NLS-1$
+	PILOT("SMART_Pilot", false, false); //$NON-NLS-1$
 	
 	public static final String PATROL_RESOURCE_ID = "patrol"; //$NON-NLS-1$
 	
 	public String key;
 	private boolean required;
+	private boolean fixed;
 	
-	PatrolScreenOptionMeta(String key, boolean required) {
+	PatrolScreenOptionMeta(String key, boolean required, boolean fixed) {
 		this.key = key;
 		this.required = required;
+		this.fixed = fixed;
 	}
 	
 	public boolean isRequired() {
 		return this.required;
+	}
+	
+	/**
+	 * If true then the item is an attribute of the patrol
+	 * and cannot be changed.  If false the item is an attribute
+	 * of a patrol leg and can be modified by the user during
+	 * the patrol
+	 * 
+	 * @return
+	 */
+	public boolean isFixed() {
+		return this.fixed;
 	}
 }
