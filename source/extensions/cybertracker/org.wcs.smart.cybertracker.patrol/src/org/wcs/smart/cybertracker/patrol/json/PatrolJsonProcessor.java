@@ -256,7 +256,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				
 				boolean noObservation = false;
 				//patrol paused; no observation; record only as track point
-				noObservation = sighting.containsKey(ScreensUtil.RESULT_PAUSED);
+				//same is true for NewPatrol or ChangePatrol observation type
+				noObservation = changeLeg || sighting.containsKey(ScreensUtil.RESULT_PAUSED);
 				if (!noObservation) {
 					//check if this is the start of the patrol
 					if (sighting.containsKey(JsonCtParser.OBSERVATION_TYPE_KEY)) {
