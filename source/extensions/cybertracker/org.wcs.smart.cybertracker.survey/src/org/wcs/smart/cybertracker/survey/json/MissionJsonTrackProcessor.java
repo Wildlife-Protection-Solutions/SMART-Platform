@@ -46,8 +46,8 @@ import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.SharedUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.LineString;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
 
 /**
  * For processing track log points.  This attempts to find a patrol
@@ -177,9 +177,9 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			MissionTrack lastTrack = null;
 			double lastTime = -1;
 			for (MissionTrack t: md.getTracks()){
-				if (lastTrack == null || lastTime < t.getLineString().getCoordinateN(t.getLineString().getNumPoints()-1).z){
+				if (lastTrack == null || lastTime < t.getLineString().getCoordinateN(t.getLineString().getNumPoints()-1).getZ()){
 					lastTrack = t;
-					lastTime = t.getLineString().getCoordinateN(t.getLineString().getNumPoints()-1).z;
+					lastTime = t.getLineString().getCoordinateN(t.getLineString().getNumPoints()-1).getZ();
 				}
 			}
 			
@@ -232,8 +232,8 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			double z = JsonTrackUtils.convertTimeToGMT(dt);
 			//see if point fits between existing track points
 			for (MissionTrack t : md.getTracks()){
-				double t1 = t.getLineString().getCoordinateN(0).z;
-				double t2 = t.getLineString().getCoordinateN(t.getLineString().getNumPoints()-1).z;
+				double t1 = t.getLineString().getCoordinateN(0).getZ();
+				double t2 = t.getLineString().getCoordinateN(t.getLineString().getNumPoints()-1).getZ();
 				if (t1 <= z && z <= t2){
 					addTo = t;
 					break;
@@ -243,7 +243,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 				//add to 
 				double lastTrack = -1;
 				for (MissionTrack t : md.getTracks()){
-					double t2 = t.getLineString().getCoordinateN(t.getLineString().getNumPoints()-1).z;
+					double t2 = t.getLineString().getCoordinateN(t.getLineString().getNumPoints()-1).getZ();
 					if (t2 > lastTrack){
 						lastTrack = t2;
 						addTo = t;

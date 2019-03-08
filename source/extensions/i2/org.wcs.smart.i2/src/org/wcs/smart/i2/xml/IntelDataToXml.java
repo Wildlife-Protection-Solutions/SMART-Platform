@@ -299,7 +299,7 @@ public class IntelDataToXml {
 	private void writeToFile(IntelligenceData data, Path xmlFile) throws JAXBException {
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Marshaller marshaller = context.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, new Boolean(true));
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		
 		ObjectFactory objFactor = new ObjectFactory();
 		

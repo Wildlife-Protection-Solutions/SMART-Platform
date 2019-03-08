@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Report Tables
 Bundle-SymbolicName: org.wcs.smart.reporttable;singleton:=true
-Bundle-Version: 6.2.0.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.reporttable.Activator
-Require-Bundle: org.wcs.smart,
- org.wcs.smart.patrol,
- org.wcs.smart.report.birt.query
+Require-Bundle: org.wcs.smart;bundle-version="[7.0.0,8.0.0)",
+ org.wcs.smart.patrol;bundle-version="[7.0.0,8.0.0)",
+ org.wcs.smart.report.birt.query;bundle-version="[7.0.0,8.0.0)"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: org.wcs.smart
+Automatic-Module-Name: org.wcs.smart.reporttable

@@ -27,11 +27,10 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKBReader;
 
 /**
  * A class to hold the results of a mission track 

@@ -39,6 +39,7 @@ import org.geotools.data.FeatureStore;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.styling.Style;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
@@ -59,8 +60,6 @@ import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.patrol.internal.Messages;
 import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Extends of edit waypoint dialog specific to editing patrol waypoints.

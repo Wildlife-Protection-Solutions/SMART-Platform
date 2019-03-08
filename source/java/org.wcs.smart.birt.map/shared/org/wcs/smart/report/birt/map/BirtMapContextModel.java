@@ -41,7 +41,7 @@ import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectPackage;
 import org.opengis.filter.Filter;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 /**
  * ContextModel responsible for holding on to layers for an BirtMap. No notifications

@@ -2,16 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: R Example PlugIn
 Bundle-SymbolicName: org.wcs.smart.r;singleton:=true
-Bundle-Version: 6.2.0.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.r.RPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
- org.wcs.smart.p2,
- org.wcs.smart.hibernate.libs,
- org.wcs.smart,
- org.wcs.smart.query
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+ org.wcs.smart.p2;bundle-version="[7.0.0,8.0.0)",
+ org.wcs.smart.query;bundle-version="[7.0.0,8.0.0)"
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: org.wcs.smart.r
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.r.model

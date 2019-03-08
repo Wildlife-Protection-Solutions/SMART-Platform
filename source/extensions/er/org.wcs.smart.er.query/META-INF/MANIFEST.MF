@@ -2,23 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ecological Records Query Plug-in
 Bundle-SymbolicName: org.wcs.smart.er.query;singleton:=true
-Bundle-Version: 6.2.0.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.er.query.ERQueryPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart.er,
- org.wcs.smart.hibernate.libs,
- org.wcs.smart.query,
- org.wcs.smart,
- org.wcs.smart.observation,
- org.eclipse.ui.forms,
- org.wcs.smart.p2,
- org.wcs.smart.dataentry,
- org.wcs.smart.observation.query;bundle-version="4.0.1"
+ org.wcs.smart.er;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.observation.query;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.eclipse.ui.forms
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: org.wcs.smart.er.query.engine,
  org.wcs.smart.er.query.filter,
  org.wcs.smart.er.query.map.udig,
  org.wcs.smart.er.query.model
 Bundle-Vendor: org.wcs.smart
+Automatic-Module-Name: org.wcs.smart.er.query

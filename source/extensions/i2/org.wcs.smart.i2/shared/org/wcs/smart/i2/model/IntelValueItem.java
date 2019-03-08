@@ -34,7 +34,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.map.GeometryFactoryProvider;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Class that contains "value" fields for classes that record attribute

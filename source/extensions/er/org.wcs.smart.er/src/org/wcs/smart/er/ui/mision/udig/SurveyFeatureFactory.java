@@ -24,6 +24,7 @@ package org.wcs.smart.er.ui.mision.udig;
 import org.geotools.data.DataUtilities;
 import org.geotools.feature.SchemaException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.locationtech.jts.geom.Coordinate;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -31,8 +32,6 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.UuidUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Feature factory for creating survey feature types and features.

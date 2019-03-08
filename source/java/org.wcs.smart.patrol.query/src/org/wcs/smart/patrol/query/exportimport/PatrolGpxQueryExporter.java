@@ -58,10 +58,10 @@ import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
 
 /**
  * GPX Query exporter for patrols.
@@ -159,7 +159,7 @@ public class PatrolGpxQueryExporter extends SimpleQueryExporter implements IQuer
 						wpt.setLon(new BigDecimal(coordinate.x));
 						wpt.setLat(new BigDecimal(coordinate.y));
 						
-						long timestamp = new Double(coordinate.z).longValue();
+						long timestamp = Double.valueOf(coordinate.getZ()).longValue();
 						GregorianCalendar c = new GregorianCalendar();
 						c.setTimeInMillis(timestamp);
 						wpt.setTime(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));

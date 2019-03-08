@@ -25,9 +25,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.ca.Area;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Configuration information for generating sample patrol data.

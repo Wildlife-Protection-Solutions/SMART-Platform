@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
@@ -64,8 +65,6 @@ import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.JobUtil;
 import org.wcs.smart.util.ReprojectUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Mission editor map page displaying tracks

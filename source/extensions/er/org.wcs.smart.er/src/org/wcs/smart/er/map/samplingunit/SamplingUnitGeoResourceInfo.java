@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.geotools.data.FeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.opengis.feature.Feature;
 import org.opengis.feature.FeatureVisitor;
@@ -39,8 +40,6 @@ import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit.GeometryType;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Georesource Information for a sampling unit georesource 

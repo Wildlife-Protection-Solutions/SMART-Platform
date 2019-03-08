@@ -39,7 +39,7 @@ import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.UuidUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Entity position attribute feature reader

@@ -2,21 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Plan PlugIn
 Bundle-SymbolicName: org.wcs.smart.plan;singleton:=true
-Bundle-Version: 6.2.0.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.plan.SmartPlanPlugIn
 Require-Bundle: org.eclipse.ui.forms,
  org.eclipse.datatools.connectivity.oda.design.ui,
  org.eclipse.birt.report.designer.ui.editors,
- org.locationtech.udig.style.sld,
- org.wcs.smart.birt,
- org.wcs.smart.patrol,
- org.wcs.smart.patrol.query,
- org.wcs.smart.query,
- org.wcs.smart.report.birt.query,
- org.wcs.smart.p2,
- org.wcs.smart.report
+ org.locationtech.udig.style.sld;bundle-version="3.0.0",
+ org.wcs.smart.p2;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.patrol.query;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.report.birt.query;bundle-version="[7.0.0,8.0.0)";visibility:=reexport
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: org.wcs.smart.plan,
  org.wcs.smart.plan.model
 Bundle-Vendor: org.wcs.smart
+Automatic-Module-Name: org.wcs.smart.plan

@@ -25,11 +25,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.UUID;
 
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.query.common.engine.IValueComputer;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.Tile;
-
-import com.vividsolutions.jts.geom.LineString;
 
 /**
  * Computes the number of missions or surveys in a cell.

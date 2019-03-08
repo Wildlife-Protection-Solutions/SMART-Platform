@@ -26,11 +26,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Query result item for storing intelligence record query results.
@@ -140,7 +139,7 @@ public class IntelligenceRecordResultItem implements IGeometryResultItem {
 	@Override
 	public Geometry asGeometry(String columnName) {
 		if (columnName.equals(GEOMCOLUMN_KEY)){
-			return GeometryFactoryProvider.getFactory().createMultiPoint(positions.toArray(new Coordinate[positions.size()]));
+			return GeometryFactoryProvider.getFactory().createMultiPointFromCoords(positions.toArray(new Coordinate[positions.size()]));
 		}
 		return null;
 	}

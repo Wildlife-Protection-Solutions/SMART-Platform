@@ -31,7 +31,7 @@ import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.util.GeometryUtils;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 /**
  * Georesource information for query results

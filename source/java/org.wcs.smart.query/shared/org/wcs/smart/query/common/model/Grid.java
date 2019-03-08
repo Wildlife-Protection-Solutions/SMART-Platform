@@ -29,8 +29,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.query.model.IGridQueryColumnLabelProvider;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geomgraph.Edge;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geomgraph.Edge;
 
 
 /**

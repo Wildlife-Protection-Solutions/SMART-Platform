@@ -45,7 +45,7 @@ import org.wcs.smart.query.common.ui.image.PagedImageQueryResults;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implements IDesktopPagedImageResultSet{
 

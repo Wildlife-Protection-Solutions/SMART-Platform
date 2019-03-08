@@ -29,7 +29,7 @@ import org.wcs.smart.query.common.engine.IValueComputer;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.Tile;
 
-import com.vividsolutions.jts.geom.LineString;
+import org.locationtech.jts.geom.LineString;
 
 /**
  * A value computer that computes
@@ -43,7 +43,7 @@ public class PatrolCntValueComputer implements IValueComputer<HashSet<Object>> {
 
 	
 	/**
-	 * @see org.wcs.smart.query.common.engine.IValueComputer#computeValue(java.lang.Object, org.org.wcs.smart.query.common.model.Tile, org.org.wcs.smart.query.common.model.Grid, com.vividsolutions.jts.geom.LineString)
+	 * @see org.wcs.smart.query.common.engine.IValueComputer#computeValue(java.lang.Object, org.org.wcs.smart.query.common.model.Tile, org.org.wcs.smart.query.common.model.Grid, org.locationtech.jts.geom.LineString)
 	 * 
 	 * @return a hashset that contains the hashcode patrol_uuid represented by the linestring
 	 * being processed

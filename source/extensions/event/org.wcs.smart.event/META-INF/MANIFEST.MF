@@ -2,17 +2,16 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Triggers PlugIn
 Bundle-SymbolicName: org.wcs.smart.event;singleton:=true
-Bundle-Version: 6.2.0.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.event.EventPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
  org.eclipse.swt,
- org.wcs.smart;visibility:=reexport,
- org.wcs.smart.observation;visibility:=reexport,
- org.wcs.smart.p2
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+ org.wcs.smart.observation;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.p2;bundle-version="[7.0.0,8.0.0)";visibility:=reexport
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.event,
  org.wcs.smart.event.model,
  org.wcs.smart.event.ui.model
+Automatic-Module-Name: org.wcs.smart.event

@@ -330,7 +330,7 @@ public class CreateEntityActionType implements IActionType {
 					Long cnt = QueryFactory.buildCountQuery(session, IntelEntity.class, 
 							new Object[] {"conservationArea", ca}, //$NON-NLS-1$
 							new Object[] {"entityType", newEntity.getEntityType()}); //$NON-NLS-1$
-					idvalue.setNumberValue(new Double(cnt+1));
+					idvalue.setNumberValue(Double.valueOf(cnt+1));
 					break;
 				case POSITION:
 					break;

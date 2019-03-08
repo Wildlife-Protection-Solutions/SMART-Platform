@@ -31,12 +31,11 @@ import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
+import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
-
-import com.vividsolutions.jts.geom.Envelope;
 /**
  * Paged result set for a sighting query results.
  * @author Emily

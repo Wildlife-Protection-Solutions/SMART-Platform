@@ -38,8 +38,8 @@ import org.wcs.smart.query.common.model.GeometrySummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.util.UuidUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 
 /**
  * Result set for a summary SMART query.

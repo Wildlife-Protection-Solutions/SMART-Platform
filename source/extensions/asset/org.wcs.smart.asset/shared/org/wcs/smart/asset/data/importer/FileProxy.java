@@ -34,6 +34,7 @@ import java.util.Set;
 
 import org.geotools.geometry.jts.JTS;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.IAssetLabelProvider;
@@ -45,8 +46,6 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.util.GeometryUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Wrapper around asset file to track details computed

@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.i2.internal.Messages;
@@ -60,8 +61,6 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.util.UuidUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Create new profile record action type

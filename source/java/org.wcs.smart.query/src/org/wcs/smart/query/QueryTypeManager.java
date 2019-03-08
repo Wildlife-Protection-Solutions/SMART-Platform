@@ -58,7 +58,7 @@ public enum QueryTypeManager {
 	private Map<IQueryType, Class<? extends IQueryEngine>> executors;
 
 	public IQueryEngine getQueryEngine(IQueryType type) throws Exception{
-		return executors.get(type).newInstance();
+		return executors.get(type).getDeclaredConstructor().newInstance();
 	}
 	
 	/**

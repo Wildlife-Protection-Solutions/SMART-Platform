@@ -5,17 +5,17 @@
 	
 	<groupId>org.wcs.smart.core</groupId>
   	<artifactId>smart</artifactId>
-		<version>6.2.0-SNAPSHOT</version>
+		<version>7.0.0-SNAPSHOT</version>
   	<packaging>pom</packaging>
   	
 	<properties>
-		<smart.version>6.1.0-SNAPSHOT</smart.version>
-        	<geotools.version>11.2</geotools.version>
-        	<jts.version>1.13</jts.version>
-        	<hibernate.version>5.2.10.Final</hibernate.version>
+		<smart.version>7.0.0-SNAPSHOT</smart.version>
+        	<geotools.version>21.0</geotools.version>
+        	<jts.version>1.16.0</jts.version>
+        	<hibernate.version>5.4.1.Final</hibernate.version>
         	<birt.version>4.6.0-20160607</birt.version>
         	<!--<birt.version>4.4.2</birt.version>-->
-        	<udig.version>2.0.1-SNAPSHOT</udig.version>
+        	<udig.version>3.0.0-SNAPSHOT</udig.version>
         	
         	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     	</properties>
@@ -130,18 +130,13 @@
 			<version>${hibernate.version}</version>
         	</dependency>
         	<dependency>
-    			<groupId>com.vividsolutions</groupId>
-    			<artifactId>jts</artifactId>
+    			<groupId>org.locationtech.jts</groupId>
+    			<artifactId>jts-core</artifactId>
     			<version>${jts.version}</version>
 			</dependency>
 		<dependency>
             		<groupId>org.geotools</groupId>
             		<artifactId>gt-referencing</artifactId>
-            		<version>${geotools.version}</version>
-        	</dependency>
-        	<dependency>
-            		<groupId>org.geotools</groupId>
-            		<artifactId>gt-api</artifactId>
             		<version>${geotools.version}</version>
         	</dependency>
 	</dependencies>

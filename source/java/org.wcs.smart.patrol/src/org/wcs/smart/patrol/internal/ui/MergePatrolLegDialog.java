@@ -57,13 +57,13 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.ui.SmartLabelProvider;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKBReader;
-import com.vividsolutions.jts.io.WKBWriter;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBReader;
+import org.locationtech.jts.io.WKBWriter;
 
 /**
  * Dialog for merging patrol legs.
@@ -451,7 +451,7 @@ public class MergePatrolLegDialog extends TitleAreaDialog{
 	private Coordinate getEarliestPoint(ArrayList<Coordinate> allPoints) {
 		Coordinate earliest = allPoints.get(0);
 		for(Coordinate c : allPoints){
-			if(c.z < earliest.z)earliest = c;
+			if(c.getZ() < earliest.getZ())earliest = c;
 		}
 		return earliest;
 	}

@@ -32,8 +32,8 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Projection;
-import org.wcs.smart.entity.map.EntityQueryDataSource;
 import org.wcs.smart.entity.map.EntityQueryDataSourceFeatureReader;
+import org.wcs.smart.entity.map.EntityQueryFeatureSource;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -64,7 +64,7 @@ public class SightingQueryShpExporter extends ShapeQueryExporter {
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType)
 			throws Exception {
-		return EntityQueryDataSource.createQuerySchema(queryColumns, false, true);
+		return EntityQueryFeatureSource.createQuerySchema(queryColumns, false, true);
 	}
 	
 	/* (non-Javadoc)

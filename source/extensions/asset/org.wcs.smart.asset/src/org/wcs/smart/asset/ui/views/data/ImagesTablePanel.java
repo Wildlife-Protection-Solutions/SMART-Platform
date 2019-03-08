@@ -36,6 +36,7 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+
 /**
  * Table of images imported grouped by incident.
  * 

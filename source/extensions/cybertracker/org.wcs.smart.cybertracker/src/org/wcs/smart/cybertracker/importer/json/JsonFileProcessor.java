@@ -293,7 +293,7 @@ public class JsonFileProcessor {
 		}
 		List<IJsonProcessor> copy = new ArrayList<IJsonProcessor>(jsonProcessors.size());
 		for (IJsonProcessor p : jsonProcessors){
-			copy.add(p.getClass().newInstance());
+			copy.add(p.getClass().getConstructor().newInstance());
 		}
 		return copy;
 	}

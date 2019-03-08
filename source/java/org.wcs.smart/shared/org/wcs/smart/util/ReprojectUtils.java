@@ -36,8 +36,8 @@ import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.map.GeometryFactoryProvider;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 
 /**
  * Database functions for reprojecting waypoints in 4326

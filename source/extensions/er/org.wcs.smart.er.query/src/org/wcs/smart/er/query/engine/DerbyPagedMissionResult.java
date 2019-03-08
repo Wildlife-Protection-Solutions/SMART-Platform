@@ -31,13 +31,12 @@ import java.util.Objects;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.engine.IResultItem;
-
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.io.WKBReader;
 
 /**
  * Paged result set for mission queries. 

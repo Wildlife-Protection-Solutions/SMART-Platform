@@ -34,6 +34,19 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.geometry.jts.JTS;
 import org.hibernate.Session;
+import org.locationtech.jts.algorithm.locate.IndexedPointInAreaLocator;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Location;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBReader;
+import org.locationtech.jts.operation.distance.DistanceOp;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
@@ -48,19 +61,6 @@ import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.model.QaRoutineParameter;
 import org.wcs.smart.qa.routine.ILocationRoutineData.Type;
 import org.wcs.smart.util.GeometryUtils;
-
-import com.vividsolutions.jts.algorithm.MCPointInRing;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKBReader;
-import com.vividsolutions.jts.operation.distance.DistanceOp;
 
 /**
  * A QA routine that validates position of geometry objects.
@@ -314,21 +314,21 @@ public class LocationRoutineType implements IQaRoutineType {
 	}
 	
 	private class ProcessedPolygon{
-		private MCPointInRing outer;
-		private List<MCPointInRing> inner;
+		private IndexedPointInAreaLocator outer;
+		private List<IndexedPointInAreaLocator> inner;
 		
 		public ProcessedPolygon(Polygon p){
-			outer = new MCPointInRing(GeometryFactoryProvider.getFactory().createLinearRing(p.getExteriorRing().getCoordinates()));
+			outer = new IndexedPointInAreaLocator(GeometryFactoryProvider.getFactory().createLinearRing(p.getExteriorRing().getCoordinates()));
 			inner = new ArrayList<>();
 			for (int i = 0; i < p.getNumInteriorRing(); i ++){
-				inner.add(new MCPointInRing(GeometryFactoryProvider.getFactory().createLinearRing(p.getInteriorRingN(i).getCoordinates())));
+				inner.add(new IndexedPointInAreaLocator(GeometryFactoryProvider.getFactory().createLinearRing(p.getInteriorRingN(i).getCoordinates())));
 			}
 		}
 		
 		public boolean isInside(Coordinate c){
-			if (outer.isInside(c)){
-				for (MCPointInRing i : inner){
-					if (i.isInside(c)) return false;
+			if (outer.locate(c) == Location.INTERIOR){
+				for (IndexedPointInAreaLocator i : inner){
+					if (i.locate(c) == Location.INTERIOR) return false;
 				}
 				return true;
 			}

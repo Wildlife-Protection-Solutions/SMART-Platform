@@ -33,7 +33,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.map.GeometryFactoryProvider;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * uDig tool for creating location polygons
@@ -58,12 +58,12 @@ public class DrawPointTool extends SimpleTool {
 		
 	
 		
-		com.vividsolutions.jts.geom.Point p = null;
+		org.locationtech.jts.geom.Point p = null;
 		String error = null;
 		try {
 			Coordinate pnt = getContext().getViewportModel().pixelToWorld(last.x, last.y);
 			p = GeometryFactoryProvider.getFactory().createPoint(pnt);
-			p = (com.vividsolutions.jts.geom.Point) JTS.transform(p, CRS.findMathTransform(getContext().getViewportModel().getCRS(), SmartDB.DATABASE_CRS));
+			p = (org.locationtech.jts.geom.Point) JTS.transform(p, CRS.findMathTransform(getContext().getViewportModel().getCRS(), SmartDB.DATABASE_CRS));
 			if (p.isEmpty() || !p.isSimple() || !p.isValid()){
 				error = Messages.DrawPointTool_InvalidPointMsg;
 			}

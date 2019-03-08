@@ -26,7 +26,7 @@ import java.util.UUID;
 
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Summary query result that include a single row group by

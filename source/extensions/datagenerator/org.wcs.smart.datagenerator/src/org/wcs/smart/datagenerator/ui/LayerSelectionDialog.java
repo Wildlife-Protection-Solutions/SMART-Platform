@@ -47,13 +47,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.datagenerator.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Dialog for selecting a layer for computing the new spatial location

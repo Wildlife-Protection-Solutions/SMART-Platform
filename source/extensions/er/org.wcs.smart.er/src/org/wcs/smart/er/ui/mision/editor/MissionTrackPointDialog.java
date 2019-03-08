@@ -27,6 +27,7 @@ import java.util.UUID;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Shell;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
@@ -34,8 +35,6 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.ui.map.TrackPointDialog;
-
-import com.vividsolutions.jts.geom.LineString;
 
 /**
  * Dialog for display tack points for a mission track.

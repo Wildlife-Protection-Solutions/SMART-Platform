@@ -33,7 +33,7 @@ import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 
-import com.vividsolutions.jts.io.ParseException;
+import org.locationtech.jts.io.ParseException;
 
 /**
  * Entity locations dataset results metadata

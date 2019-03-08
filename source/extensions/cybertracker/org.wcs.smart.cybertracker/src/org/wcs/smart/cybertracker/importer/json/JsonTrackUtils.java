@@ -30,8 +30,8 @@ import java.util.TimeZone;
 
 import org.wcs.smart.map.GeometryFactoryProvider;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.LineString;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
 
 /**
  * Track utilities.  Inserts a new point into the track sorting by the 
@@ -51,12 +51,12 @@ public class JsonTrackUtils {
 			c = new Coordinate[] {new Coordinate(pnt.x, pnt.y, z)};
 		}else{
 			c = track.getCoordinates();
-			if (c[0].x == c[1].x && c[0].y == c[1].y && c[0].z == c[1].z){
+			if (c[0].x == c[1].x && c[0].y == c[1].y && c[0].getZ() == c[1].getZ()){
 				//the first two points are the same so lets remove one
 				c = Arrays.copyOfRange(c, 1, c.length);		
 			}
 			for (Coordinate cd : c){
-				if (cd.x == pnt.x && cd.y == pnt.y && cd.z == z){
+				if (cd.x == pnt.x && cd.y == pnt.y && cd.getZ() == z){
 					//point already exists; do not duplicate it
 					return track;
 				}
@@ -67,7 +67,7 @@ public class JsonTrackUtils {
 		c[c.length-1] = new Coordinate(pnt.x, pnt.y, z);
 		
 		//sort
-		Arrays.sort(c, 0, c.length, (Coordinate c1, Coordinate c2) -> ((Double)c1.z).compareTo(c2.z));
+		Arrays.sort(c, 0, c.length, (Coordinate c1, Coordinate c2) -> ((Double)c1.getZ()).compareTo(c2.getZ()));
 
 		return (LineString)GeometryFactoryProvider.getFactory().createLineString(c);		
 	}
@@ -76,7 +76,7 @@ public class JsonTrackUtils {
 		List<Coordinate> all = new ArrayList<>();		
 		Arrays.stream(l1.getCoordinates()).forEach(c -> all.add(c));
 		Arrays.stream(l2.getCoordinates()).forEach(c -> all.add(c));	
-		all.sort((c1, c2) -> ((Double)c1.z).compareTo(c2.z) );
+		all.sort((c1, c2) -> ((Double)c1.getZ()).compareTo(c2.getZ()) );
 		return (LineString)GeometryFactoryProvider.getFactory().createLineString(all.toArray(new Coordinate[all.size()]));
 	}
 	

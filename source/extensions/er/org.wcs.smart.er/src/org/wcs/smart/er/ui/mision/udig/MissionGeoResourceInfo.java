@@ -26,6 +26,7 @@ import java.io.IOException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.opengis.feature.Feature;
 import org.opengis.feature.FeatureVisitor;
@@ -34,8 +35,6 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.internal.Messages;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Mission geo resource info 

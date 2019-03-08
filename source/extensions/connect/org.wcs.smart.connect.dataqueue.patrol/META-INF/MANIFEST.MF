@@ -2,13 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Data Queue Patrol Processor
 Bundle-SymbolicName: org.wcs.smart.connect.dataqueue.patrol;singleton:=true
-Bundle-Version: 6.2.0.qualifier
+Bundle-Version: 7.0.0.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.wcs.smart.connect.dataqueue,
  org.wcs.smart.patrol,
  org.wcs.smart,
  org.wcs.smart.connect
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.connect.dataqueue.patrol
+Automatic-Module-Name: org.wcs.smart.connect.dataqueue.patrol

@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Point;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
@@ -42,8 +43,6 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.ui.EntityLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.ReprojectUtils;
-
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * Creates a panel for displaying all

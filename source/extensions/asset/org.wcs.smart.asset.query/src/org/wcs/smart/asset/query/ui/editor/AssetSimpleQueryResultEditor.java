@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.project.render.IViewportModel;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
@@ -62,8 +63,6 @@ import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.ReprojectUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Editor for displaying query results.  The editor includes two pages

@@ -35,6 +35,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.swt.widgets.Display;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
@@ -44,15 +45,13 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.mision.editor.SaveMissionTracksJob;
 import org.wcs.smart.er.ui.mision.editor.SaveWaypointJob;
-import org.wcs.smart.observation.common.importwp.ObservationGPSDataImport;
 import org.wcs.smart.gpx.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
+import org.wcs.smart.observation.common.importwp.ObservationGPSDataImport;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
-
-import com.vividsolutions.jts.geom.LineString;
 
 /**
  * Class of utilities that support

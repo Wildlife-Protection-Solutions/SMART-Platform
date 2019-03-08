@@ -22,23 +22,24 @@
 package org.wcs.smart.geotools.data.smart;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-import org.geotools.data.AbstractDataStore;
-import org.geotools.data.DataUtilities;
-import org.geotools.data.FeatureReader;
-import org.geotools.feature.SchemaException;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
+import org.geotools.data.store.ContentDataStore;
+import org.geotools.data.store.ContentEntry;
+import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.feature.NameImpl;
+import org.opengis.feature.type.Name;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
-
 /**
  * Geotools data store for SMART area layers.
  * @author Emily
  * @since 1.0.0
  */
-public class SmartDataSource extends AbstractDataStore{
+public class SmartDataSource extends ContentDataStore{
 
 	private UUID ca = null;
 	private IDatabaseConnectionProvider connectionProvider;
@@ -53,38 +54,27 @@ public class SmartDataSource extends AbstractDataStore{
 		super.dispose();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.geotools.data.store.ContentDataStore#createTypeNames()
-	 */
+	public UUID getConservationArea() {
+		return this.ca;
+	}
+	public IDatabaseConnectionProvider getDbConnection() {
+		return this.connectionProvider;
+	}
 	@Override
-	public String[] getTypeNames()  {
-		String[] types = new String[Area.AreaType.values().length];
+	protected List<Name> createTypeNames() throws IOException {
+		List<Name> names = new ArrayList<Name>();
 		for (int i = 0; i < Area.AreaType.values().length; i ++){
-			types[i] = Area.AreaType.values()[i].name();
+			names.add(new NameImpl("smart." + Area.AreaType.values()[i].name(), Area.AreaType.values()[i].name() ));
 		}
-		return types;
+		
+		return names;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.geotools.data.AbstractDataStore#getFeatureReader(java.lang.String)
-	 */
 	@Override
-	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		return new SmartFeatureReader(ca, Area.AreaType.valueOf(typeName), getSchema(typeName), connectionProvider);
+	protected ContentFeatureSource createFeatureSource(ContentEntry entry)
+			throws IOException {
+		AreaType at = AreaType.valueOf(entry.getName().getLocalPart());
+		return new SmartFeatureSource(entry, at);
 	}
 
-	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
-	 */
-	@Override
-	public SimpleFeatureType getSchema(String typeName) throws IOException {
-		String spec = "the_geom:MultiPolygon:srid=4326,fid:String,name:String,key:String,uuid:String"; //$NON-NLS-1$
-		try {
-			SimpleFeatureType type =  DataUtilities.createType("smart." + typeName, spec); //$NON-NLS-1$
-			return type;
-		} catch (SchemaException e) {
-			throw new IOException(e);
-		}
-	}
 }

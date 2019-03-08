@@ -35,7 +35,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.ui.map.TrackPointDialog;
 
-import com.vividsolutions.jts.geom.LineString;
+import org.locationtech.jts.geom.LineString;
 
 /**
  * Dialog for display tack points for a patrol track.

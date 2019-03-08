@@ -224,7 +224,7 @@ public class QueryFormatOptionPage extends WizardPage {
 	public HashMap<IQueryExporter.ExportOption, Object> getOptions() throws Exception{
 		HashMap<IQueryExporter.ExportOption, Object> ops = new HashMap<>();
 		if (cmbDelimiter != null){
-			ops.put(IQueryExporter.ExportOption.DELIMITER, new Character(cmbDelimiter.getDelimiter()));
+			ops.put(IQueryExporter.ExportOption.DELIMITER, Character.valueOf(cmbDelimiter.getDelimiter()));
 		}
 		if (cmbProjection != null){
 			Projection p = getProjection();

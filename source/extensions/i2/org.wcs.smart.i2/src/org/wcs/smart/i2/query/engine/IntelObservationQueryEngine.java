@@ -58,8 +58,8 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
 import org.wcs.smart.util.UuidUtils;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.io.WKBReader;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.io.WKBReader;
 
 /**
  * Query engine for intelligence observation queries.

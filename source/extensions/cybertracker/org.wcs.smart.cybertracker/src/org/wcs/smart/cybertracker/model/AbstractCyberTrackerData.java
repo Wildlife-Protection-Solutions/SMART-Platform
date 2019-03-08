@@ -33,7 +33,7 @@ import org.wcs.smart.cybertracker.model.ImportError.ErrorType;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Common logic for majority of {@link ICyberTrackerData} implementations.

@@ -66,8 +66,8 @@ import org.wcs.smart.util.ReprojectUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 
 /**
  * Import entity engine for importing from csv file.

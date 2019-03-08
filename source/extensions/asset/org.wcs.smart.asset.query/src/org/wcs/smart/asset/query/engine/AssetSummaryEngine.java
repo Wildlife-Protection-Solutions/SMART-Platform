@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
@@ -94,8 +95,6 @@ import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.model.summary.ValuePart;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.UuidUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Query engine for executing summary

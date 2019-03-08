@@ -2,11 +2,11 @@
 <feature
       id="org.wcs.smart.i2.core.feature"
       label="SMART Profiles Module "
-      version="6.2.0.qualifier"
+      version="7.0.0.qualifier"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart.i2"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="6.2.0.qualifier">
+      license-feature-version="7.0.0.qualifier">
 
    <description>
       A profiles plugin for tracking records, entities
@@ -16,7 +16,55 @@ and relationships.
    <copyright>
       Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
-   
+
+   <includes
+         id="org.eclipse.gef.common"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.fx.core.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.fx.runtime.min.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.gef.mvc.fx"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.gef.geometry"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.gef.graph"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.gef.fx"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.gef.fx.swt"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.gef.layout"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.gef.zest.fx"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.gef.zest.fx.jface"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.gef.geometry.convert.fx"
+         version="0.0.0"/>
+
    <plugin
          id="org.wcs.smart.i2"
          download-size="0"

@@ -67,7 +67,7 @@ import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Editor for displaying query results.  The editor includes two pages

@@ -22,14 +22,14 @@
 package org.wcs.smart.patrol.geotools;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.geotools.data.AbstractDataStore;
-import org.geotools.data.FeatureReader;
-import org.geotools.feature.SchemaException;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.patrol.internal.Messages;
+import org.geotools.data.store.ContentDataStore;
+import org.geotools.data.store.ContentEntry;
+import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.feature.NameImpl;
+import org.opengis.feature.type.Name;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -37,23 +37,17 @@ import org.wcs.smart.patrol.model.Patrol;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolDataSource extends AbstractDataStore{
+public class PatrolDataSource extends ContentDataStore{
 
 	public static final String WAYPOINT_TYPE = "Waypoint"; //$NON-NLS-1$
 	public static final String TRACK_PART_TYPE = "Track"; //$NON-NLS-1$
 	
 	private Patrol patrol;
-	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
 	public PatrolDataSource(Patrol patrol){
 		this.patrol = patrol;
 	}
 
-	@Override
-	public void dispose(){
-		super.dispose();
-	}
-	
 	/**
 	 * updates the patrol object associated with the data source
 	 * @param patrol
@@ -62,43 +56,25 @@ public class PatrolDataSource extends AbstractDataStore{
 		this.patrol = patrol;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.geotools.data.store.ContentDataStore#createTypeNames()
-	 */
-	@Override
-	public String[] getTypeNames()  {
-		return new String[]{WAYPOINT_TYPE, TRACK_PART_TYPE};
+	public Patrol getPatrol() {
+		return this.patrol;
 	}
-	/* (non-Javadoc)
-	 * @see org.geotools.data.AbstractDataStore#getFeatureReader(java.lang.String)
-	 */
-	@Override
-	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		return new PatrolFeatureReader(this.patrol, typeName, getSchema(typeName));
-		//return new SmartFeatureReader(ca, Area.AreaType.valueOf(typeName), getSchema(typeName));
-	}
-
 	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
-	 */
 	@Override
-	public SimpleFeatureType getSchema(String typeName) throws IOException {
-		SimpleFeatureType type = schemas.get(typeName);
-		if (type == null){
-			try {
-				if (typeName.equals(WAYPOINT_TYPE)) {
-					type = PatrolFeatureFactory.createWaypointSchema();
-				} else if (typeName.equals(TRACK_PART_TYPE)) {
-					type = PatrolFeatureFactory.createTrackPartSchema();
-				}
-			}catch(SchemaException ex){
-				throw new IOException(Messages.PatrolDataSource_Error_CouldNoGenerateSchema + ex.getLocalizedMessage(), ex);
-			}
-			schemas.put(typeName, type);
-		}
-		return type;
+	protected List<Name> createTypeNames() throws IOException {
+		List<Name> names = new ArrayList<Name>();
+		names.add(new NameImpl(WAYPOINT_TYPE));
+		names.add(new NameImpl(TRACK_PART_TYPE));
+		return names;
 	}
+	
+
+	@Override
+	protected ContentFeatureSource createFeatureSource(ContentEntry entry)
+			throws IOException {
+		return new PatrolFeatureSource(entry);
+	}
+	
 
 
 }

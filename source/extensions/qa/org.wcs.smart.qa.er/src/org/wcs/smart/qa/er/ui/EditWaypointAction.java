@@ -27,15 +27,14 @@ import java.util.Locale;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.qa.er.internal.Messages;
 import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaError.Status;
 import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * Action implementation for editing waypoint positions.  Applicable

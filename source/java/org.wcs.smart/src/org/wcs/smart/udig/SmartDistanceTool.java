@@ -42,7 +42,7 @@ import org.locationtech.udig.project.ui.tool.SimpleTool;
 import org.locationtech.udig.ui.graphics.ViewportGraphics;
 import org.opengis.referencing.operation.TransformException;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Tool to compute the list between points.

@@ -32,7 +32,7 @@ import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.engine.EntityRecordQueryResultItem;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  * Collection of fixed query columns.

@@ -34,6 +34,7 @@ import java.util.Locale;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.NamedKeyItem;
@@ -56,8 +57,6 @@ import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Tool for importing entities.

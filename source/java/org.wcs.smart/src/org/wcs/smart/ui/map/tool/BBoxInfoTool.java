@@ -42,7 +42,7 @@ import org.locationtech.udig.tool.info.internal.InfoView2;
 import org.locationtech.udig.ui.graphics.ViewportGraphics;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider.InfoPoint;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * A tool that puts a BBOX Filter on the layer's Filter.  

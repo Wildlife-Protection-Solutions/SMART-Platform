@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="SMART" uid="smartapp" id="org.wcs.smart.smart" application="org.wcs.smart.product" version="6.2.0.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="SMART" uid="smartapp" id="org.wcs.smart.smart" application="org.wcs.smart.product" version="7.0.0.qualifier" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="./images/nl/en/about.png"/>
@@ -14,7 +14,7 @@
    </configIni>
 
    <launcherArgs>
-      <vmArgs>-Xmx1024M -Dosgi.parentClassloader=ext -Dorg.eclipse.emf.ecore.plugin.EcorePlugin.doNotLoadResourcesPlugin=true  -XX:MaxPermSize=250M -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass -Dosgi.framework.extensions=org.eclipse.equinox.transforms.hook,org.eclipse.fx.osgi
+      <vmArgs>-Xmx1024M -Dosgi.parentClassloader=ext -Dorg.eclipse.emf.ecore.plugin.EcorePlugin.doNotLoadResourcesPlugin=true  -Dosgi.framework.extensions=org.eclipse.equinox.transforms.hook,org.eclipse.fx.osgi
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts -Djava.awt.headless=true
       </vmArgsMac>
@@ -124,6 +124,7 @@ limitations under the License.
       <feature id="org.wcs.smart.feature"/>
       <feature id="org.eclipse.rcp"/>
       <feature id="org.eclipse.equinox.p2.extras.feature"/>
+      <feature id="org.eclipse.equinox.core.feature" version="1.7.0.v20181130-2106"/>
    </features>
 
    <configurations>
@@ -136,5 +137,12 @@ limitations under the License.
       <plugin id="org.eclipse.update.configurator" autoStart="true" startLevel="3" />
       <plugin id="org.wcs.smart.udig.customization" autoStart="true" startLevel="1" />
    </configurations>
+
+   <preferencesInfo>
+      <targetfile overwrite="false"/>
+   </preferencesInfo>
+
+   <cssInfo>
+   </cssInfo>
 
 </product>

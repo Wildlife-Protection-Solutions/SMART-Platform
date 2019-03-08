@@ -47,7 +47,7 @@ import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Map edit manager for moving waypoints on a patrol query 

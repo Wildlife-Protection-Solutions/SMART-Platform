@@ -5,7 +5,7 @@
       version="6.2.1"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="6.2.0.qualifier">
+      license-feature-version="7.0.0.qualifier">
 
    <description>
       Translations for the SMART Ecological Records plugin.

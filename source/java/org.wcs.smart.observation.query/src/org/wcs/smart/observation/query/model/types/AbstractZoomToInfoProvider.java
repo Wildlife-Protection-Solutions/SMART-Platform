@@ -40,7 +40,7 @@ import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.GeometryUtils;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  * Zoom to map query result command that will zoom the map in the current active

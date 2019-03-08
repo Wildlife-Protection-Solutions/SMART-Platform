@@ -369,7 +369,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		Query<?> q = session.createQuery(query);
 		q.setParameterList("cas", getConservationAreas()); //$NON-NLS-1$
 		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
-		q.setParameter("cnt", new Long(getConservationAreas().size())); //$NON-NLS-1$
+		q.setParameter("cnt", Long.valueOf(getConservationAreas().size())); //$NON-NLS-1$
 				
 		List<?> keys = q.list();
 		if (keys.size() == 0){
@@ -394,7 +394,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		Query<?> q = session.createQuery(query);
 		q.setParameterList("cas", getConservationAreas()); //$NON-NLS-1$
 		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
-		q.setParameter("cnt", new Long(getConservationAreas().size())); //$NON-NLS-1$
+		q.setParameter("cnt", Long.valueOf(getConservationAreas().size())); //$NON-NLS-1$
 		
 		List<String> hkeys = (List<String>) q.list();
 		if (hkeys.size() == 0){

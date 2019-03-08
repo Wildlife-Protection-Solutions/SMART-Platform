@@ -22,14 +22,15 @@
 package org.wcs.smart.er.ui.mision.udig;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.geotools.data.AbstractDataStore;
-import org.geotools.data.FeatureReader;
-import org.geotools.feature.SchemaException;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.er.internal.Messages;
+import org.geotools.data.store.ContentDataStore;
+import org.geotools.data.store.ContentEntry;
+import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.feature.NameImpl;
+import org.opengis.feature.type.Name;
+import org.wcs.smart.er.model.Mission;
 
 /**
  * Data source for mission observations and tracks.
@@ -38,12 +39,10 @@ import org.wcs.smart.er.internal.Messages;
  * @author elitvin
  *
  */
-public class MissionDataSource extends AbstractDataStore{
+public class MissionDataSource extends ContentDataStore{
 
 	public static final String MISSIONWAYPOINT_TYPE = "MissionPoint"; //$NON-NLS-1$
 	public static final String MISSIONTRACK_TYPE = "MissionTrack"; //$NON-NLS-1$
-	
-	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
 	private MissionService service;
 	
@@ -56,47 +55,23 @@ public class MissionDataSource extends AbstractDataStore{
 		super.dispose();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.geotools.data.store.ContentDataStore#createTypeNames()
-	 */
-	@Override
-	public String[] getTypeNames()  {
-		return new String[]{MISSIONWAYPOINT_TYPE, MISSIONTRACK_TYPE};
+	public Mission getMission() {
+		return service.getMissionRecord();
 	}
-	/* (non-Javadoc)
-	 * @see org.geotools.data.AbstractDataStore#getFeatureReader(java.lang.String)
-	 */
+	
 	@Override
-	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		if (typeName.equals(MISSIONWAYPOINT_TYPE)) {
-			return new MissionFeatureReader(this.service.getMissionRecord(), getSchema(typeName));
-		}else if (typeName.equals(MISSIONTRACK_TYPE)){
-			return new MissionTrackFeatureReader(this.service.getMissionRecord(), getSchema(typeName));
-		}
-		return null;
+	protected List<Name> createTypeNames() throws IOException {
+		List<Name> names = new ArrayList<>();
+		names.add(new NameImpl(MISSIONWAYPOINT_TYPE));
+		names.add(new NameImpl(MISSIONTRACK_TYPE));
+		return names;
 	}
 
-	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
-	 */
 	@Override
-	public SimpleFeatureType getSchema(String typeName) throws IOException {
-		SimpleFeatureType type = schemas.get(typeName);
-		if (type == null){
-			try {
-				if (typeName.equals(MISSIONWAYPOINT_TYPE)) {
-					type = SurveyFeatureFactory.createWaypointSchema();
-				}else if (typeName.equals(MISSIONTRACK_TYPE)){
-					type = SurveyFeatureFactory.createTrackSchema();
-				}
-			}catch(SchemaException ex){
-				throw new IOException(Messages.MissionDataSource_SchemaNotSupported + ex.getLocalizedMessage(), ex);
-			}
-			schemas.put(typeName, type);
-		}
-		return type;
+	protected ContentFeatureSource createFeatureSource(ContentEntry entry) throws IOException {
+		return new MissionFeatureSource(entry);
 	}
+	
 
 	
 }

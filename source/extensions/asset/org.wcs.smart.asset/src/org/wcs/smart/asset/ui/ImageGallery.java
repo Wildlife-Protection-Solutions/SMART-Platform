@@ -48,6 +48,7 @@ import org.wcs.smart.util.SmartUtils;
 
 import javafx.application.Platform;
 import javafx.embed.swt.FXCanvas;
+//import javafx.embed.swt.FXCanvas;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;

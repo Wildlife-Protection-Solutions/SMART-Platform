@@ -37,6 +37,9 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.referencing.GeodeticCalculator;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.model.Waypoint;
@@ -50,10 +53,6 @@ import org.wcs.smart.qa.model.QaRoutineParameter;
 import org.wcs.smart.qa.patrol.ILabelProvider;
 import org.wcs.smart.qa.patrol.ILabelProvider.Key;
 import org.wcs.smart.qa.routine.ValidationTask;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
 
 /**
  * A QA routine that validates speed for track and waypoints.
@@ -234,7 +233,7 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 		cal.setDestinationGeographicPoint(current.x, current.y);
 				
 		double distance = cal.getOrthodromicDistance(); //meters
-		double time = current.z - last.z; //milliseconds
+		double time = current.getZ() - last.getZ(); //milliseconds
 				
 		double speed = distance * 3600 / time ;
 		return speed;

@@ -33,6 +33,7 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Coordinate;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
@@ -40,8 +41,6 @@ import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Class that contains "value" fields for classes that record attribute

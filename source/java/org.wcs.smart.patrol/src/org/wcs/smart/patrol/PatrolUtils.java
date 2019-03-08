@@ -31,8 +31,8 @@ import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.TrackUtil;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.LineString;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
 
 /**
  * A set of utility classes.

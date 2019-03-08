@@ -2,19 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Intelligence Queries
 Bundle-SymbolicName: org.wcs.smart.intelligence.query;singleton:=true
-Bundle-Version: 6.2.0.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.intelligence.query.IntelligenceQueryPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart.query,
- org.wcs.smart,
- org.wcs.smart.intelligence,
- org.wcs.smart.patrol,
- org.wcs.smart.p2
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+ org.wcs.smart.query;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.intelligence;bundle-version="[7.0.0,8.0.0)";visibility:=reexport
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.intelligence.query,
  org.wcs.smart.intelligence.query.export;x-friends:="org.wcs.smart.connect.query.test",
  org.wcs.smart.intelligence.query.map.udig,
  org.wcs.smart.intelligence.query.model
 Bundle-Vendor: org.wcs.smart
+Automatic-Module-Name: org.wcs.smart.intelligence.query

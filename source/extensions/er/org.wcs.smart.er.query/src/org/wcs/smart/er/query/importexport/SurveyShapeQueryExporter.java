@@ -25,6 +25,7 @@ import org.geotools.data.DataUtilities;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.query.map.geotools.SurveyQueryDataSource;
+import org.wcs.smart.er.query.map.geotools.SurveyQueryFeatureSource;
 import org.wcs.smart.er.query.map.geotools.SurveyResultItemFeature;
 import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
@@ -76,13 +77,13 @@ public class SurveyShapeQueryExporter extends ShapeQueryExporter{
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{
 		if (queryType.getKey().equals(MissionQuery.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryDataSource.getTrackFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
+			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryFeatureSource.getTrackFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
 		}else if ( query.getTypeKey().equals(SurveyObservationQuery.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryDataSource.getWaypointFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
+			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryFeatureSource.getWaypointFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
 		}else if (query.getTypeKey().equals(SurveyWaypointQuery.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryDataSource.getWaypointFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
+			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryFeatureSource.getWaypointFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
 		}else if (query.getTypeKey().equals(MissionTrackQuery.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryDataSource.getTrackFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
+			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryFeatureSource.getTrackFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
 		}
 		return null;
 		

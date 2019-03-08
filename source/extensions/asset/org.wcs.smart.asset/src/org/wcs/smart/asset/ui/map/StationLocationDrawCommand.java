@@ -34,6 +34,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.GeodeticCalculator;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
 import org.locationtech.udig.ui.graphics.ViewportGraphics;
@@ -42,8 +43,6 @@ import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.hibernate.SmartDB;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Command for drawing stations and locations on a map.

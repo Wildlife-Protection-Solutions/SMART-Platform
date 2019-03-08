@@ -78,13 +78,13 @@ import org.wcs.smart.ui.map.TracksComposite;
 import org.wcs.smart.ui.map.tool.SplitTrackTool;
 import org.wcs.smart.util.GeometryUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.ParseException;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.io.ParseException;
 
 /**
  * Composite to display list of mission tracks.
@@ -126,8 +126,8 @@ public class PartolTracksComposite extends TracksComposite {
 					@Override
 					public int compare(TrackPart tp1, TrackPart tp2) {
 						try{
-							double z1 = tp1.getLineString().getCoordinateN(0).z;
-							double z2 = tp2.getLineString().getCoordinateN(0).z;
+							double z1 = tp1.getLineString().getCoordinateN(0).getZ();
+							double z2 = tp2.getLineString().getCoordinateN(0).getZ();
 							return Double.compare(z1, z2);
 						}catch (Exception ex){
 							return 0;
@@ -291,8 +291,8 @@ public class PartolTracksComposite extends TracksComposite {
 			@Override
 			public int compare(LineString o1, LineString o2) {
 				try{
-					double z1 = o1.getCoordinateN(0).z;
-					double z2 = o2.getCoordinateN(0).z;
+					double z1 = o1.getCoordinateN(0).getZ();
+					double z2 = o2.getCoordinateN(0).getZ();
 					return Double.compare(z1, z2);
 				}catch (Exception ex){
 					return 0;

@@ -35,6 +35,7 @@ import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
+import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.model.columns.EtAttributeQueryColumn;
@@ -55,8 +56,6 @@ import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.util.UuidUtils;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Wrapper for resulted temporary table which was build for particular query.

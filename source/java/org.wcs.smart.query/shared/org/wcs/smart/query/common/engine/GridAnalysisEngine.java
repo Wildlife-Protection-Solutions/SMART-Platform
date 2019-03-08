@@ -35,14 +35,14 @@ import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.Tile;
 import org.wcs.smart.util.GeometryUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geomgraph.Edge;
-import com.vividsolutions.jts.geomgraph.index.SegmentIntersector;
-import com.vividsolutions.jts.geomgraph.index.SimpleMCSweepLineIntersector;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geomgraph.Edge;
+import org.locationtech.jts.geomgraph.index.SegmentIntersector;
+import org.locationtech.jts.geomgraph.index.SimpleMCSweepLineIntersector;
 
 /**
  * Performs grid analysis on geometries

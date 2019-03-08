@@ -72,7 +72,7 @@ import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.EmployeeSelectorDialog;
 import org.wcs.smart.util.SmartUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Common logic for importing patrols and patrol legs.

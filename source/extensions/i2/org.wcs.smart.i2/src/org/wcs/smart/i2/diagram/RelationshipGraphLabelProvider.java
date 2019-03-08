@@ -169,7 +169,8 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 			switch (options.getStyle()) {
 			case LINE: break;
 			case ARROW:
-				attributes.put(ZestProperties.TARGET_DECORATION__E, new javafx.scene.shape.Polygon(0, 0, 10, 3, 10, -3));
+				attributes.put(ZestProperties.TARGET_DECORATION__E, 
+						new javafx.scene.shape.Polygon(0, 0, 10, 3, 10, -3));
 				break;
 			}
 			

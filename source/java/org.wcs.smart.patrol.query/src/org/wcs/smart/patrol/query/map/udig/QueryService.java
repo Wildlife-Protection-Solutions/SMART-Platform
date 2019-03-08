@@ -105,11 +105,15 @@ public class QueryService extends IService implements IQueryService {
 		for (IGeoResource member : resources(monitor)){
 			((QueryGeoResourceInfo)member.getInfo(monitor)).computeBounds((QueryGeoResource)member, monitor);
 		}
-		if (ds != null){
-			for (String name : ds.getTypeNames()){
-				ds.removeSchema(name);
-			}
-		}
+//		if (ds != null){
+//			members.clear();
+//			members = null;
+//			ds.dispose();
+//			ds = null;
+////			for (String name : ds.getTypeNames()){
+////				ds.removeSchema(name);
+////			}
+//		}
 	}	
 	
 	

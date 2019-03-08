@@ -43,7 +43,7 @@ import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.util.UuidUtils;
 
-import com.vividsolutions.jts.io.ParseException;
+import org.locationtech.jts.io.ParseException;
 
 /**
  * Smart entity location feature reader

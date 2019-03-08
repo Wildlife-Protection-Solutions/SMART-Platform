@@ -41,6 +41,7 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
+import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypointAttachment;
@@ -66,8 +67,6 @@ import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implements IUpdateableResultSet, IWaypointUpdateableResultSet, ISearchabledResultSet, IDesktopPagedImageResultSet{
 
