@@ -114,7 +114,7 @@ public class MenuItemsFilter implements Filter {
 				menuItems.add( new String[]{
 					Messages.getString(p.nameKey, l),
 					pathprefix + p.url,
-					styleAll, request.getServletContext().getContextPath() + "/css/images/" + p.imageFileName});
+					styleAll, request.getServletContext().getContextPath() + "/css/images/" + p.imageFileName}); //$NON-NLS-1$
 			}
 		}finally{
 			s.getTransaction().commit();

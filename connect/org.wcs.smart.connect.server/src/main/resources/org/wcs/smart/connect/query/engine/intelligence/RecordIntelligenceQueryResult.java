@@ -30,14 +30,13 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.WKBReader;
 /**
  * Result set of observation (all data) queries.
  * 

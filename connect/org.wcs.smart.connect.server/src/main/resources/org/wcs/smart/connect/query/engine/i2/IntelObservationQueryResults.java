@@ -37,6 +37,9 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.query.NativeQuery;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKBReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -60,10 +63,6 @@ import org.wcs.smart.i2.query.observation.filter.IColumnIdentifierProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.util.UuidUtils;
-
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKBReader;
 
 /**
  * Intelligence observation query results

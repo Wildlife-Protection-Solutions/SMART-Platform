@@ -31,6 +31,9 @@ import java.util.Locale;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.IProjectionProvider;
@@ -46,10 +49,6 @@ import org.wcs.smart.query.common.engine.ITablePagedQueryResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
-
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * Converts query results to a feature data source for writing

@@ -35,6 +35,7 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.query.NativeQuery;
+import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -51,8 +52,6 @@ import org.wcs.smart.i2.query.engine.EntityRecordQueryResultItem;
 import org.wcs.smart.i2.query.observation.filter.IColumnIdentifierProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.util.UuidUtils;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Intelligence observation query results

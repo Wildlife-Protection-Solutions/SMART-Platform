@@ -30,14 +30,13 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.io.WKBReader;
 
 /**
  * Result set of patrol waypoint queries.
