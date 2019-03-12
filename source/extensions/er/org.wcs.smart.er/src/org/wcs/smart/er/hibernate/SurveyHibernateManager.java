@@ -184,6 +184,7 @@ public class SurveyHibernateManager {
 				new Object[] {"resource", MissionScreenOptionMeta.MISSION_RESOURCE_ID}).getResultList(); //$NON-NLS-1$
 		Map<MissionScreenOptionMeta, ScreenOption> options = new HashMap<MissionScreenOptionMeta, ScreenOption>();
 		for (ScreenOption screenOption : results) {
+			screenOption.getUuidList().size();
 			try {
 				options.put(MissionScreenOptionMeta.valueOf(screenOption.getType()), screenOption);
 			} catch (IllegalArgumentException e) {

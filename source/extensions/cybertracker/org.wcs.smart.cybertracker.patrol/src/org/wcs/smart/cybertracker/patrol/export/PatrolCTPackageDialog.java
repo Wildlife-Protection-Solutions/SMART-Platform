@@ -414,7 +414,7 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 					profileViewer.setInput(profiles);
 					modelViewer.setInput(modelList);
 					
-					if (lastCmUuid != null && !lastCmUuid.isEmpty() && lastCmUuid != DM_KEY) {
+					if (lastCmUuid != null && !lastCmUuid.isEmpty() && !lastCmUuid.equalsIgnoreCase(DM_KEY)) {
 						ConfigurableModel cm = new ConfigurableModel();
 						cm.setUuid(UuidUtils.stringToUuid(lastCmUuid));
 						modelViewer.setSelection(new StructuredSelection(cm));

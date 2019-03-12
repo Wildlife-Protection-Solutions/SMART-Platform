@@ -431,8 +431,8 @@ public class DataGenerator implements IDataEngine{
 	private Object generateRandomValue(Attribute a) throws Exception {
 		switch(a.getType()) {
 		case BOOLEAN:
-			if (random.nextInt(100) < 50) return 1;
-			return -1;
+			if (random.nextInt(100) < 50) return Boolean.TRUE;
+			return Boolean.FALSE;
 		case DATE:
 			return new Date(  (new Date()).getTime() + (long)(random.nextDouble() * ((long)365 * 24 * 60 *60 *1000)) );
 		case LIST:

@@ -85,7 +85,11 @@ public class CtJsonExportUtils {
 	 * JSON default property key
 	 */
 	public static final String JSON_DEFAULT_PROP_KEY = "default"; //$NON-NLS-1$
-	
+	/**
+	 * JSON defaults property key
+	 * for multi-options (employees)
+	 */
+	public static final String JSON_DEFAULTS_PROP_KEY = "defaults"; //$NON-NLS-1$
 	/**
 	 * JSON options property key; for list options
 	 */
@@ -337,9 +341,11 @@ public class CtJsonExportUtils {
 			optionType.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible()) {
 				if (screenOption.getUuidList() != null) {
+					JSONArray defaultValues = new JSONArray();
 					for (ScreenOptionUuid defaultOp : screenOption.getUuidList()) {
-						optionType.put(JSON_DEFAULT_PROP_KEY, UuidUtils.uuidToString(defaultOp.getUuidValue()));
+						defaultValues.add(UuidUtils.uuidToString(defaultOp.getUuidValue()));
 					}
+					optionType.put(JSON_DEFAULTS_PROP_KEY, defaultValues);
 				}
 			}
 		}else {
@@ -375,7 +381,7 @@ public class CtJsonExportUtils {
 		if (screenOption != null) {
 			objective.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible() && screenOption.getUuidValue() != null) {
-				objective.put(JSON_DEFAULT_PROP_KEY, UuidUtils.uuidToString(screenOption.getUuid()));
+				objective.put(JSON_DEFAULT_PROP_KEY, UuidUtils.uuidToString(screenOption.getUuidValue()));
 			}
 		}else {
 			objective.put(JSON_ISVISIBILE_PROP_KEY, true);
