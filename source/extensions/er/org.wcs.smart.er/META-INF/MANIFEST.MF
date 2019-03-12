@@ -26,6 +26,8 @@ Export-Package: org.wcs.smart.er,
  org.wcs.smart.er.ui.mision.udig,
  org.wcs.smart.er.ui.surveydesign.editor,
  org.wcs.smart.er.upgrade,
- org.wcs.smart.er.xml
+ org.wcs.smart.er.xml,
+ org.wcs.smart.er.xml.model.missions,
+ org.wcs.smart.er.xml.model.surveydesign
 Bundle-Vendor: org.wcs.smart
 Automatic-Module-Name: org.wcs.smart.er

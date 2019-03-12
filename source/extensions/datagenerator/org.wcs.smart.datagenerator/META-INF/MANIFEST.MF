@@ -9,3 +9,4 @@ Bundle-Activator: org.wcs.smart.datagenerator.DataGeneratorPlugIn
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.wcs.smart.patrol;bundle-version="[7.0.0,8.0.0)"
 Automatic-Module-Name: org.wcs.smart.datagenerator
+Export-Package: org.wcs.smart.datagenerator.model.xml

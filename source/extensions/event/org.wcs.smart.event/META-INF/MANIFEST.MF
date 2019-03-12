@@ -13,5 +13,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.event,
  org.wcs.smart.event.model,
- org.wcs.smart.event.ui.model
+ org.wcs.smart.event.ui.model,
+ org.wcs.smart.event.xml.model
 Automatic-Module-Name: org.wcs.smart.event

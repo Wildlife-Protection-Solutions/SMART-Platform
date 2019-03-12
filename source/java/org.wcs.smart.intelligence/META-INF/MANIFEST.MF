@@ -19,6 +19,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: org.wcs.smart.intelligence,
  org.wcs.smart.intelligence.model,
  org.wcs.smart.intelligence.ui.handlers,
- org.wcs.smart.intelligence.updatesite
+ org.wcs.smart.intelligence.updatesite,
+ org.wcs.smart.intelligence.xml.model
 Bundle-Vendor: org.wcs.smart
 Automatic-Module-Name: org.wcs.smart.intelligence

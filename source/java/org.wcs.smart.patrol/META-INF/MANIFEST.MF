@@ -20,7 +20,9 @@ Export-Package: org.wcs.smart.patrol,
  org.wcs.smart.patrol.ui,
  org.wcs.smart.patrol.xml.external,
  org.wcs.smart.patrol.xml.in,
- org.wcs.smart.patrol.xml.model
+ org.wcs.smart.patrol.xml.model,
+ org.wcs.smart.patrol.xml.model.v11,
+ org.wcs.smart.patrol.xml.model.v12
 Bundle-Vendor: org.wcs.smart
 Import-Package: org.eclipse.birt.core.framework,
  org.locationtech.udig.mapgraphic.internal
