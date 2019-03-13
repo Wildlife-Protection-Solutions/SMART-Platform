@@ -51,7 +51,7 @@ import org.wcs.smart.patrol.ui.SaveWaypointJob;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
-import com.vividsolutions.jts.geom.LineString;
+import org.locationtech.jts.geom.LineString;
 
 /**
  * Class of utilities that support

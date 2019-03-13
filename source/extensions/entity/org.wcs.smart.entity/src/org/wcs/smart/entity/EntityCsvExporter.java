@@ -32,6 +32,7 @@ import java.util.Locale;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.FactoryException;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
@@ -50,8 +51,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
-
-import com.vividsolutions.jts.geom.Point;
 
 import au.com.bytecode.opencsv.CSVWriter;
 

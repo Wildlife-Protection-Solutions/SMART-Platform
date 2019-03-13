@@ -2,16 +2,19 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Profiles PlugIn
 Bundle-SymbolicName: org.wcs.smart.i2;singleton:=true
-Bundle-Version: 6.2.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Version: 7.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.ui.workbench,
  org.eclipse.core.runtime;bundle-version="3.10.0",
- org.wcs.smart,
  org.eclipse.nebula.widgets.tablecombo;bundle-version="1.0.0",
  org.eclipse.jface,
- org.locationtech.udig.catalog,
- org.wcs.smart.birt,
+ org.locationtech.udig.catalog;bundle-version="3.0.0",
+ org.wcs.smart;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.p2;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.birt.map;bundle-version="[7.0.0,8.0.0)",
+ org.wcs.smart.observation;bundle-version="[7.0.0,8.0.0)",
+ org.wcs.smart.birt;bundle-version="[7.0.0,8.0.0)",
  org.eclipse.birt.report.designer.ui.editors,
  org.eclipse.core.resources,
  org.eclipse.birt.report.model,
@@ -21,10 +24,7 @@ Require-Bundle: org.eclipse.ui.workbench,
  org.eclipse.datatools.connectivity.oda.design,
  org.eclipse.datatools.connectivity.oda.design.ui,
  org.eclipse.birt.report.engine,
- org.wcs.smart.birt.map;bundle-version="4.0.0",
  org.eclipse.birt.report.model.adapter.oda;bundle-version="4.4.1",
- org.wcs.smart.p2,
- org.wcs.smart.hibernate.libs,
  com.google.inject;bundle-version="3.0.0",
  com.google.guava;bundle-version="21.0.0",
  org.eclipse.gef.common;bundle-version="5.0.0",
@@ -35,8 +35,7 @@ Require-Bundle: org.eclipse.ui.workbench,
  org.eclipse.gef.zest.fx;bundle-version="5.0.1",
  org.eclipse.gef.zest.fx.jface;bundle-version="5.0.2",
  org.eclipse.gef.fx;bundle-version="5.0.1",
- org.eclipse.gef.fx.swt;bundle-version="5.0.2",
- org.wcs.smart.observation;bundle-version="6.1.0"
+ org.eclipse.gef.fx.swt;bundle-version="5.0.2"
 Export-Package: org.wcs.smart.i2,
  org.wcs.smart.i2.event,
  org.wcs.smart.i2.model,
@@ -44,8 +43,11 @@ Export-Package: org.wcs.smart.i2,
  org.wcs.smart.i2.security,
  org.wcs.smart.i2.ui.dialogs,
  org.wcs.smart.i2.xml,
+ org.wcs.smart.i2.xml.entity,
+ org.wcs.smart.i2.xml.model,
  org.wcs.smart.i2.xml.record
 Bundle-Activator: org.wcs.smart.i2.Intelligence2PlugIn
 Bundle-Vendor: org.wcs.smart
 Bundle-ClassPath: .,
  lib/java-string-similarity-1.1.0.jar
+Automatic-Module-Name: org.wcs.smart.i2

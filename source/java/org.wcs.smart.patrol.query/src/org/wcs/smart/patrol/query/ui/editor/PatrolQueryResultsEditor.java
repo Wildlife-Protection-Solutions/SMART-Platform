@@ -99,9 +99,9 @@ import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.ReprojectUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.operation.distance.DistanceOp;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.operation.distance.DistanceOp;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -685,7 +685,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 						MemoryQueryResult<PatrolQueryResultItem> results = (MemoryQueryResult<PatrolQueryResultItem>)r;
 						double distance = Double.POSITIVE_INFINITY;
 						PatrolQueryResultItem nearest = null;
-						com.vividsolutions.jts.geom.Point toTest = GeometryFactoryProvider.getFactory().createPoint(db);
+						org.locationtech.jts.geom.Point toTest = GeometryFactoryProvider.getFactory().createPoint(db);
 						for (PatrolQueryResultItem ri : results.getData()){
 							Geometry g = ri.asGeometry(PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);
 							if (g.getEnvelopeInternal().contains(db)){

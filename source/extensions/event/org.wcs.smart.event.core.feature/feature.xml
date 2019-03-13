@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.event.core.feature"
       label="SMART Triggers Module"
-      version="6.2.0.qualifier"
+      version="7.0.0.qualifier"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart.event"
       license-feature="org.wcs.smart.license.feature">

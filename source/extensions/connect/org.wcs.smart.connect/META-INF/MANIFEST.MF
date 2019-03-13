@@ -2,15 +2,16 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART CONNECT Tools
 Bundle-SymbolicName: org.wcs.smart.connect;singleton:=true
-Bundle-Version: 6.2.0.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.connect.ConnectPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart,
- org.wcs.smart.hibernate.libs,
- org.wcs.smart.p2,
- org.apache.commons.codec;bundle-version="1.6.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+ org.wcs.smart;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.p2;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.apache.commons.codec;bundle-version="1.6.0",
+ org.apache.httpcomponents.httpclient;bundle-version="4.5.5",
+ org.apache.httpcomponents.httpcore;bundle-version="4.4.9"
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: javax.ws.rs,
  javax.ws.rs.core,
@@ -50,3 +51,4 @@ Bundle-ClassPath: .,
  lib/validation-api-1.1.0.Final.jar
 Eclipse-BuddyPolicy: global
 Bundle-Vendor: org.wcs.smart
+Automatic-Module-Name: org.wcs.smart.connect

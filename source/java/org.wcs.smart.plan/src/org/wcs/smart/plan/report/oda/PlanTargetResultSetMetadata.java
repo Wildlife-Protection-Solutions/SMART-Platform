@@ -25,13 +25,12 @@ import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.model.SpatialPlanTarget;
 import org.wcs.smart.plan.model.SpatialPlanTargetPoint;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * SMART plan target result set metadata.
@@ -79,7 +78,7 @@ public class PlanTargetResultSetMetadata implements IResultSetMetaData {
 						for (SpatialPlanTargetPoint pnt : sp.getPoints()){
 							pnts[i++] = new Coordinate(pnt.getX(), pnt.getY()); 
 						}
-						return GeometryFactoryProvider.getFactory().createMultiPoint(pnts);
+						return GeometryFactoryProvider.getFactory().createMultiPointFromCoords(pnts);
 					}
 					return null;
 				case PLAN_END_DATE:

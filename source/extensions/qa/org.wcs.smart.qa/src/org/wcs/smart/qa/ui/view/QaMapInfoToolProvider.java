@@ -27,6 +27,11 @@ import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.data.simple.SimpleFeatureSource;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.operation.distance.DistanceOp;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.render.IViewportModel;
@@ -39,12 +44,6 @@ import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.map.QaErrorMemoryDatastore;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.util.ReprojectUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.operation.distance.DistanceOp;
 
 public class QaMapInfoToolProvider implements IInfoToolProvider {
 
@@ -118,12 +117,12 @@ public class QaMapInfoToolProvider implements IInfoToolProvider {
 			return null;
 		}
 		QaError nearest = null;
-		com.vividsolutions.jts.geom.Point toTest = GeometryFactoryProvider.getFactory().createPoint(db);
+		org.locationtech.jts.geom.Point toTest = GeometryFactoryProvider.getFactory().createPoint(db);
 		double distance = Double.MAX_VALUE;
 		
 		for (QaError result : editor.getResults()){
 			if (result.getGeometryObject() != null){
-				if ( (result.getGeometryObject() instanceof com.vividsolutions.jts.geom.Point) ||
+				if ( (result.getGeometryObject() instanceof org.locationtech.jts.geom.Point) ||
 						result.getGeometryObject().getEnvelopeInternal().contains(db)){
 					double d = result.getGeometryObject().distance(toTest);
 					if (d < distance){

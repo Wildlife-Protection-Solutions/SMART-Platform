@@ -2,13 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Smart Observation PlugIn
 Bundle-SymbolicName: org.wcs.smart.observation;singleton:=true
-Bundle-Version: 6.2.1.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.observation.ObservationPlugIn
 Bundle-Vendor: org.wcs.smart
-Require-Bundle: org.wcs.smart,
- org.eclipse.ui.forms,
- org.wcs.smart.dataentry
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.ui.forms,
+ org.wcs.smart.dataentry;bundle-version="[7.0.0,8.0.0)";visibility:=reexport
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.observation,
  org.wcs.smart.observation.common.importwp,
@@ -19,3 +18,4 @@ Export-Package: org.wcs.smart.observation,
  org.wcs.smart.observation.ui,
  org.wcs.smart.observation.ui.input
 Bundle-ClassPath: .
+Automatic-Module-Name: org.wcs.smart.observation

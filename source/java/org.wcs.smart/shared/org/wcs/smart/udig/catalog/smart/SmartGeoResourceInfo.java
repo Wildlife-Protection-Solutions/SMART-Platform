@@ -41,7 +41,7 @@ import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 /**
  * Georesource Information for a smart area resource 

@@ -25,6 +25,7 @@ import org.geotools.data.DataUtilities;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.entity.query.map.geotools.QueryDataSource;
+import org.wcs.smart.entity.query.map.geotools.QueryFeatureSource;
 import org.wcs.smart.entity.query.map.geotools.QueryResultItemFeature;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
@@ -61,7 +62,7 @@ public class EntityShapeQueryExporter extends ShapeQueryExporter{
 	}
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{
-		return DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, QueryDataSource.getFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
+		return DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, QueryFeatureSource.getFeatureSchemaDef(this.queryColumns, false, true)); //$NON-NLS-1$
 		
 	}
 		

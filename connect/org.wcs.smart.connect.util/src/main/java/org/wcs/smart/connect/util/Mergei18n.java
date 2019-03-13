@@ -121,7 +121,7 @@ public class Mergei18n {
 		
 		//read en file
 		Path p = Paths.get(enFile);
-		StringBuilder json = new StringBuilder();
+//		StringBuilder json = new StringBuilder();
 		
 		HashMap<String, String> values = new HashMap<>();
 		try(BufferedReader reader = Files.newBufferedReader(p)){

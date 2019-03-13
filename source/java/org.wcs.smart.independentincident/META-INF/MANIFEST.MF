@@ -2,17 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Independent Incident
 Bundle-SymbolicName: org.wcs.smart.independentincident;singleton:=true
-Bundle-Version: 6.2.0.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.incident.IncidentPlugIn
 Bundle-Vendor: org.wcs.smart
-Require-Bundle: org.wcs.smart,
- org.wcs.smart.observation;visibility:=reexport,
+Require-Bundle: org.wcs.smart.observation;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
  org.eclipse.ui.forms,
- org.locationtech.udig.style.sld,
+ org.locationtech.udig.style.sld;bundle-version="3.0.0",
  org.eclipse.help;bundle-version="3.5.100"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.incident,
  org.wcs.smart.incident.event,
  org.wcs.smart.incident.ui,
- org.wcs.smart.incident.xml
+ org.wcs.smart.incident.xml,
+ org.wcs.smart.incident.xml.model
+Automatic-Module-Name: org.wcs.smart.independentincident

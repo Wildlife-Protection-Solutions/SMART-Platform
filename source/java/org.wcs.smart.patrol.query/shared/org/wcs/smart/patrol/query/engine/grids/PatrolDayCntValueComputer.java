@@ -30,7 +30,7 @@ import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.Tile;
 import org.wcs.smart.util.UuidUtils;
 
-import com.vividsolutions.jts.geom.LineString;
+import org.locationtech.jts.geom.LineString;
 
 public class PatrolDayCntValueComputer implements IValueComputer<HashSet<Object>> {
 
@@ -41,7 +41,7 @@ public class PatrolDayCntValueComputer implements IValueComputer<HashSet<Object>
 	 * </p>
 	 * 
 	 * @return 1
-	 * @see org.wcs.smart.query.common.engine.IValueComputer#computeValue(java.lang.Object, org.org.wcs.smart.query.common.model.Tile, org.org.wcs.smart.query.common.model.Grid, com.vividsolutions.jts.geom.LineString)
+	 * @see org.wcs.smart.query.common.engine.IValueComputer#computeValue(java.lang.Object, org.org.wcs.smart.query.common.model.Tile, org.org.wcs.smart.query.common.model.Grid, org.locationtech.jts.geom.LineString)
 	 */
 	public HashSet<Object> computeValue(HashSet<Object> existingValue, Tile t, Grid gridDef,
 			LineString ls) {

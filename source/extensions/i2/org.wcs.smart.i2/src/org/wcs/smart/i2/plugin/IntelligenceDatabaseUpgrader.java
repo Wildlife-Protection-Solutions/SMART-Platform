@@ -55,7 +55,6 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				Map<String, String> versions = UpgradeEngine.getVersions(session);
 				if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
 				String currentPluginVersion = versions.get(Intelligence2PlugIn.PLUGIN_ID);
-				
 				if (currentPluginVersion == null) {
 					monitor.subTask(Messages.IntelligenceDatabaseUpgrader_TaskName);
 					(new AddIntelligenceJob()).installPlugin(session);

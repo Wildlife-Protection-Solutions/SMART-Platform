@@ -2,17 +2,16 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Query PlugIn
 Bundle-SymbolicName: org.wcs.smart.query;singleton:=true
-Bundle-Version: 6.2.0.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.query.QueryPlugIn
-Require-Bundle: org.wcs.smart,
- org.eclipse.ui.forms,
- org.locationtech.udig.catalog.rasterings;visibility:=reexport,
- org.wcs.smart.observation,
- org.locationtech.udig.style.sld,
- org.locationtech.udig.render.gridcoverage.basic;bundle-version="1.2.0",
- org.locationtech.udig.style;bundle-version="1.2.0"
+Require-Bundle: org.eclipse.ui.forms,
+ org.locationtech.udig.catalog.rasterings;bundle-version="3.0.0";visibility:=reexport,
+ org.wcs.smart.observation;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.locationtech.udig.style.sld;bundle-version="3.0.0",
+ org.locationtech.udig.render.gridcoverage.basic;bundle-version="3.0.0",
+ org.locationtech.udig.style;bundle-version="3.0.0"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: org.wcs.smart.query,
  org.wcs.smart.query.common.engine,
  org.wcs.smart.query.common.engine.visitors,
@@ -41,3 +40,4 @@ Export-Package: org.wcs.smart.query,
  org.wcs.smart.query.xml.model
 Eclipse-BuddyPolicy: global
 Bundle-Vendor: org.wcs.smart
+Automatic-Module-Name: org.wcs.smart.query

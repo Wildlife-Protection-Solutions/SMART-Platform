@@ -22,33 +22,32 @@
 package org.wcs.smart.entity.map;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
-import org.geotools.data.AbstractDataStore;
-import org.geotools.data.DataUtilities;
-import org.geotools.data.FeatureReader;
-import org.geotools.feature.SchemaException;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.entity.internal.Messages;
+import org.geotools.data.store.ContentDataStore;
+import org.geotools.data.store.ContentEntry;
+import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.feature.NameImpl;
+import org.opengis.feature.type.Name;
 import org.wcs.smart.entity.query.EntitySightingQuery;
-import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumnUtils;
 /**
  * Data source for entity sighting queries.
  * @author Emily
  *
  */
-public class EntityQueryDataSource extends AbstractDataStore{
+public class EntityQueryDataSource extends ContentDataStore{
 
 	public static final String TYPENAME = "ENTITY_QUERY"; //$NON-NLS-1$
 
-	private SimpleFeatureType featureSchema;
 	private EntitySightingQuery query;
-	
 	
 	public EntityQueryDataSource(EntitySightingQuery query){
 		this.query = query;
+	}
+	
+	public EntitySightingQuery getQuery() {
+		return this.query;
 	}
 	
 	@Override
@@ -57,53 +56,18 @@ public class EntityQueryDataSource extends AbstractDataStore{
 	}
 
 	public void refresh(EntitySightingQuery query){
-		this.query = query;
-		this.featureSchema = null;
+		removeEntry(new NameImpl(TYPENAME));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.geotools.data.store.ContentDataStore#createTypeNames()
-	 */
+
 	@Override
-	public String[] getTypeNames()  {
-		return new String[]{TYPENAME};
-	}
-	/* (non-Javadoc)
-	 * @see org.geotools.data.AbstractDataStore#getFeatureReader(java.lang.String)
-	 */
-	@Override
-	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		if (typeName.equals(TYPENAME)){
-			return new EntityQueryDataSourceFeatureReader(query, getSchema(typeName));
-		}
-		return null;
+	protected List<Name> createTypeNames() throws IOException {
+		return Collections.singletonList(new NameImpl(TYPENAME));
 	}
 
-	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
-	 */
 	@Override
-	public SimpleFeatureType getSchema(String typeName) throws IOException {
-		try{
-			if (typeName.equals(TYPENAME)){
-				if (featureSchema==null){
-					featureSchema = createQuerySchema(query.getQueryColumns(), true, false);
-				}
-				return featureSchema;
-			}
-			return null;
-		}catch (SchemaException ex){
-			throw new IOException(Messages.EntityQueryDataSource_SchemaError, ex);
-		}	
-	}
-	
-	public static SimpleFeatureType createQuerySchema(List<QueryColumn> columns, boolean supportsTime, boolean forShape) throws SchemaException {
-		StringBuilder sb = new StringBuilder();
-		sb.append("the_geom:Point:srid=4326,fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape));	
-		SimpleFeatureType type =  DataUtilities.createType(TYPENAME, sb.toString()); 
-		return type;
+	protected ContentFeatureSource createFeatureSource(ContentEntry entry) throws IOException {
+		return new EntityQueryFeatureSource(entry);
 	}
 }
 

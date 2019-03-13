@@ -52,7 +52,6 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
-import org.wcs.smart.query.QueryFilterConfigManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.ui.SmartLabelProvider;

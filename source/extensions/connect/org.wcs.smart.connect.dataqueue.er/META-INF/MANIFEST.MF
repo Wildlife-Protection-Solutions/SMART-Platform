@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Core SMART Connect Ecological Records (Survey) Processor
 Bundle-SymbolicName: org.wcs.smart.connect.dataqueue.er;singleton:=true
-Bundle-Version: 6.2.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.wcs.smart,
- org.wcs.smart.connect.dataqueue,
- org.wcs.smart.er
+Bundle-Version: 7.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Bundle: org.wcs.smart.connect.dataqueue;bundle-version="[7.0.0,8.0.0)",
+ org.wcs.smart.er;bundle-version="[7.0.0,8.0.0)"
 Bundle-Vendor: org.wcs.smart
+Automatic-Module-Name: org.wcs.smart.connect.dataqueue.er

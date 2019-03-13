@@ -61,13 +61,14 @@ import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.Query;
 import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.factory.GeoTools;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.IdentityTransform;
 import org.geotools.util.Range;
+import org.geotools.util.factory.GeoTools;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.ID;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
@@ -104,8 +105,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.map.GeometryFactoryProvider;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Map layer for rendering SMART Maps inside BIRT

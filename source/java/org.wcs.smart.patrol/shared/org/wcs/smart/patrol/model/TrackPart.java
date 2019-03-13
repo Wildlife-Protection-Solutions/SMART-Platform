@@ -23,8 +23,8 @@ package org.wcs.smart.patrol.model;
 
 import org.wcs.smart.util.UuidUtils;
 
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
 
 /**
  * Part of a {@link Track}. Represents a single {@link LineString} from a {@link MultiLineString} track.

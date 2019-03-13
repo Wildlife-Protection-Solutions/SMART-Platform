@@ -26,7 +26,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 /**
  * Interface for paging query results

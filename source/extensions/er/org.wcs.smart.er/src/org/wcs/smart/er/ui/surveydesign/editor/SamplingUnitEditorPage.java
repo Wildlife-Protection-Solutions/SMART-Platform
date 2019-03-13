@@ -68,6 +68,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.factory.CommonFactoryFinder;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
@@ -104,8 +105,6 @@ import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.JobUtil;
 import org.wcs.smart.util.UuidUtils;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Sampling unit editor page

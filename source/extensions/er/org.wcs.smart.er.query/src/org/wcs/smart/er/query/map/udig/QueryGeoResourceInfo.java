@@ -24,6 +24,7 @@ package org.wcs.smart.er.query.map.udig;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.locationtech.udig.catalog.IService;
 import org.opengis.feature.Feature;
@@ -36,8 +37,6 @@ import org.wcs.smart.er.query.map.geotools.SurveyQueryDataSource;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IPagedQuery;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Georesource information for survey queries

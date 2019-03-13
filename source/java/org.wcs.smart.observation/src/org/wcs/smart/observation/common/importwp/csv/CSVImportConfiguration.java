@@ -48,8 +48,8 @@ import org.wcs.smart.util.SmartUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 /**
  * 
  * Class for tracking CSV import configuration 

@@ -2,24 +2,24 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Intelligence PlugIn
 Bundle-SymbolicName: org.wcs.smart.intelligence;singleton:=true
-Bundle-Version: 6.2.1.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.intelligence.IntelligencePlugIn
 Require-Bundle: org.eclipse.ui.forms,
  org.locationtech.udig.style.sld,
  org.eclipse.birt.report.designer.ui.editors,
  org.eclipse.datatools.connectivity.oda.design.ui,
- org.wcs.smart.patrol,
- org.wcs.smart.query,
- org.wcs.smart.patrol.query,
- org.wcs.smart.birt,
- org.wcs.smart.p2,
- org.wcs.smart,
- org.wcs.smart.report,
- org.wcs.smart.birt.map
+ org.wcs.smart.patrol;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.query;bundle-version="[7.0.0,8.0.0)",
+ org.wcs.smart.patrol.query;bundle-version="[7.0.0,8.0.0)",
+ org.wcs.smart.p2;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.report;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.birt.map;bundle-version="[7.0.0,8.0.0)"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: org.wcs.smart.intelligence,
  org.wcs.smart.intelligence.model,
  org.wcs.smart.intelligence.ui.handlers,
- org.wcs.smart.intelligence.updatesite
+ org.wcs.smart.intelligence.updatesite,
+ org.wcs.smart.intelligence.xml.model
 Bundle-Vendor: org.wcs.smart
+Automatic-Module-Name: org.wcs.smart.intelligence

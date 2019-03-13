@@ -41,7 +41,7 @@ import org.opengis.geometry.BoundingBox;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.udig.style.SmartGridCellStyleContent;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Extension of a memory grid coverage renderer

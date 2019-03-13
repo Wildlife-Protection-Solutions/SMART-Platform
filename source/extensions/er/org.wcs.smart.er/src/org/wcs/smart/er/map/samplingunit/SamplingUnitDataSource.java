@@ -22,27 +22,16 @@
 package org.wcs.smart.er.map.samplingunit;
 
 import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.geotools.data.AbstractDataStore;
-import org.geotools.data.DataUtilities;
-import org.geotools.data.FeatureReader;
-import org.geotools.feature.SchemaException;
-import org.hibernate.Session;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.er.EcologicalRecordsPlugIn;
-import org.wcs.smart.er.internal.Messages;
+import org.geotools.data.store.ContentDataStore;
+import org.geotools.data.store.ContentEntry;
+import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.feature.NameImpl;
+import org.opengis.feature.type.Name;
 import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
-import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Data source for sampling units.  This will find
@@ -53,12 +42,10 @@ import org.wcs.smart.hibernate.HibernateManager;
  * @author Emily
  *
  */
-public class SamplingUnitDataSource extends AbstractDataStore{
+public class SamplingUnitDataSource extends ContentDataStore{
 
 	private SurveyDesign sd;
 	
-	private SimpleFeatureType tType;
-	private SimpleFeatureType pType;
 	
 	/**
 	 * Creates a new data source for the given survey design.
@@ -83,111 +70,21 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 	 */
 	public void update(SurveyDesign sd){
 		this.sd = sd;
-		this.tType = null;
-		this.pType = null;
-	}
-	
-	@Override
-	public String[] getTypeNames() throws IOException {
-		return new String[]{
-				GeometryType.PLOT.name(), 
-				GeometryType.TRANSECT.name()
-		};
-	}
 
-	@Override
-	public SimpleFeatureType getSchema(String typeName) throws IOException {
-		try{
-			if (typeName.equals(GeometryType.TRANSECT.name())){
-				if (tType == null){
-					tType = createType(typeName);
-				}
-				return tType;
-			}else if (typeName.equals(GeometryType.PLOT.name())){
-				if (pType == null){
-					pType = createType(typeName);
-				}
-				return pType;
-			}
-		}catch (SchemaException ex){
-			throw new IOException(ex);
-		}
-		throw new IOException(MessageFormat.format(Messages.SamplingUnitDataSource_TypeNotSupported, new Object[]{typeName}));
-	}
-
-	@Override
-	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(
-			String typeName) throws IOException {
-		return new SamplingUnitFeatureReader(sd, getSchema(typeName));
-	}
-
-	/**
-	 * Creates the survey feature type.
-	 */
-	private SimpleFeatureType createType(String typeName) throws SchemaException{
-		
-		SimpleFeatureType type =  DataUtilities.createType("smart." + typeName, //$NON-NLS-1$ 
-					getFeatureSchemaDef(typeName)); 
-		return type;
 	}
 	
 
-	private String getFeatureSchemaDef(final String typeName){
-		final StringBuilder sb = new StringBuilder();
-		Job j = new Job("build feature schema job"){ //$NON-NLS-1$
+	@Override
+	protected List<Name> createTypeNames() throws IOException {
+		List<Name> names = new ArrayList<>();
+		names.add(new NameImpl(GeometryType.PLOT.name()));
+		names.add(new NameImpl(GeometryType.TRANSECT.name()));
+		return names;
+	}
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try(Session s = HibernateManager.openSession()){
-					SurveyDesign lDesign = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
-					sb.append("the_geom:"); //$NON-NLS-1$
-					if (typeName.equals(GeometryType.PLOT.name())){
-						sb.append("Point:srid=4326"); //$NON-NLS-1$
-					}else if (typeName.equals(GeometryType.TRANSECT.name())){
-						sb.append("LineString:srid=4326"); //$NON-NLS-1$
-					}
-					sb.append(",fid:String,id:String"); //$NON-NLS-1$
-					HashSet<String> names = new HashSet<String>();
-					for (SurveyDesignSamplingUnitAttribute sua : lDesign.getSamplingUnitAttributes()){
-					
-						sb.append(","); //$NON-NLS-1$
-						String name = sua.getSamplingUnitAttribute().getName();
-						name = name.replaceAll(" ", "_");  //$NON-NLS-1$//$NON-NLS-2$
-						name = name.replaceAll("[^\\p{L}\\p{Nd}_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
-					
-						String tempname = name;
-						int cnt = 1;
-						while(names.contains(tempname)){
-							tempname = name + "_" + cnt; //$NON-NLS-1$
-							cnt++;
-						}
-					
-						sb.append(tempname);
-						sb.append(":"); //$NON-NLS-1$
-						if (sua.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
-							sb.append("Double"); //$NON-NLS-1$
-						}else if (sua.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
-							sb.append("String"); //$NON-NLS-1$
-						}else{
-							//this is not supported by we can try string
-							sb.append("String"); //$NON-NLS-1$
-						}
-					}
-					
-				}
-				return Status.OK_STATUS;
-			}
-			
-		};
-		
-		j.setSystem(true);
-		j.schedule();
-		try {
-			j.join();
-		} catch (InterruptedException e) {
-			EcologicalRecordsPlugIn.log("Error creating feature type for survey design sampling unit: " + sd.getKeyId() + "_" + typeName, e); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		return sb.toString();
+	@Override
+	protected ContentFeatureSource createFeatureSource(ContentEntry entry) throws IOException {
+		return new SamplingUnitFeatureSource(entry);
 	}
 	
 

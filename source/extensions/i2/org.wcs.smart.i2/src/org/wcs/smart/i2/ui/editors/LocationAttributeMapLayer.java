@@ -53,8 +53,8 @@ import org.wcs.smart.i2.model.IntelValueItem;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.UuidUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 
 /**
  * Manages a temporary udig layer for displaying position attributes on a map
@@ -140,7 +140,7 @@ public class LocationAttributeMapLayer {
 					transaction.commit();
 				}
 			} else {
-				final com.vividsolutions.jts.geom.Point p = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(number1, number2));
+				final org.locationtech.jts.geom.Point p = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(number1, number2));
 				if (store.getFeatures(f).size() == 0) {
 					// need to add the feature
 					try (Transaction transaction = new DefaultTransaction("addtransaction")) { //$NON-NLS-1$

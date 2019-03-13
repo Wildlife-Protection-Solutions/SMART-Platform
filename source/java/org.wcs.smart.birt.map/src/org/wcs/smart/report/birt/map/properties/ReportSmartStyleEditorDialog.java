@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.geotools.util.NullProgressListener;
+import org.geotools.data.util.NullProgressListener;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.style.sld.IStyleEditorPageContainer;
 import org.locationtech.udig.style.sld.editor.EditorPageManager;

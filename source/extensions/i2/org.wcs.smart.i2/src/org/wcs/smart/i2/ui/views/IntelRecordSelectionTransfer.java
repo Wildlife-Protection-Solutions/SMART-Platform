@@ -13,7 +13,7 @@ public class IntelRecordSelectionTransfer extends ByteArrayTransfer {
     // First attempt to create a UUID for the type name to make sure that
     // different Eclipse applications use different "types" of
     // <code>IntelRecordSelectionTransfer</code>
-    private static final String TYPE_NAME = "intel-record-selection-transfer-format" + (new Long(System.currentTimeMillis())).toString(); //$NON-NLS-1$;
+    private static final String TYPE_NAME = "intel-record-selection-transfer-format" + (Long.valueOf(System.currentTimeMillis())).toString(); //$NON-NLS-1$;
 
     private static final int TYPEID = registerType(TYPE_NAME);
 

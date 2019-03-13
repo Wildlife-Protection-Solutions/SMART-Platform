@@ -28,6 +28,7 @@ import java.util.Locale;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.model.Patrol;
@@ -38,8 +39,6 @@ import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaError.Status;
 import org.wcs.smart.qa.patrol.internal.Messages;
-
-import com.vividsolutions.jts.geom.LineString;
 
 /**
  * Action to open edit track dialog.

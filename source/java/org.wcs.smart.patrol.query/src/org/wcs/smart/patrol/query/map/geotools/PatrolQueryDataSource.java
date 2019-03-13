@@ -22,21 +22,18 @@
 package org.wcs.smart.patrol.query.map.geotools;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.geotools.data.AbstractDataStore;
-import org.geotools.data.DataUtilities;
-import org.geotools.data.FeatureReader;
-import org.geotools.feature.SchemaException;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
+import org.geotools.data.store.ContentDataStore;
+import org.geotools.data.store.ContentEntry;
+import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.feature.NameImpl;
+import org.opengis.feature.type.Name;
 import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumnUtils;
 
 /**
  * A geotools patrol query data source that 
@@ -46,7 +43,7 @@ import org.wcs.smart.query.model.QueryColumnUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class PatrolQueryDataSource extends AbstractDataStore{
+public class PatrolQueryDataSource extends ContentDataStore{
 
 	/**
 	 * waypoint query data source
@@ -54,10 +51,9 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 	public static final String PATROL_TYPE = "Patrol";  //$NON-NLS-1$
 	
 	private PatrolQuery query;
-	private List<QueryColumn> queryColumns;
-	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	private IProjectionProvider prjProvider;
-	
+	private List<QueryColumn> queryColumns;
+
 	/**
 	 * Creates a new data source from the give query.
 	 * 
@@ -68,6 +64,12 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 		this.prjProvider = prjProvider;
 	}
 
+	public List<QueryColumn> getColumns() {
+		return this.queryColumns;
+	}
+	public PatrolQuery getQuery() {
+		return this.query;
+	}
 	/**
 	 * @see org.geotools.data.AbstractDataStore#dispose()
 	 */
@@ -75,6 +77,7 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 	public void dispose(){
 		this.prjProvider = null;
 		this.queryColumns = null;
+		this.query = null;
 		super.dispose();
 	}
 
@@ -82,68 +85,17 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 	 * @see org.geotools.data.store.ContentDataStore#createTypeNames()
 	 */
 	@Override
-	public String[] getTypeNames()  {
-		return new String[]{PATROL_TYPE};
-	}
-	
-	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getFeatureReader(java.lang.String)
-	 */
-	@Override
-	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		return new PatrolQueryFeatureReader(this.query, getSchema(typeName), queryColumns);
+	protected List<Name> createTypeNames() throws IOException {
+		List<Name> names = new ArrayList<>();
+		names.add(new NameImpl(PATROL_TYPE));
+		return names;
 	}
 
-	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
-	 */
 	@Override
-	public void removeSchema(String typeName) throws IOException {
-		schemas.remove(typeName);
-	}
-	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
-	 */
-	@Override
-	public SimpleFeatureType getSchema(String typeName) throws IOException {
-		SimpleFeatureType type = schemas.get(typeName);
-		if (type == null){
-			try {
-				if (typeName.equals(PATROL_TYPE)) {
-					type = createPatrolSchema();
-				} 
-			}catch(SchemaException ex){
-				throw new IOException(Messages.PatrolQueryDataSource_SchemaError + ex.getLocalizedMessage(), ex);
-			}
-			schemas.put(typeName, type);
+	protected ContentFeatureSource createFeatureSource(ContentEntry entry) throws IOException {
+		if (this.queryColumns == null) {
+			this.queryColumns = query.computeQueryColumns(Locale.getDefault(),  null, prjProvider);
 		}
-		return type;
+		return new PatrolQueryFeatureSource(entry);
 	}
-
-	/**
-	 * Creates the simple feature type for the query
-	 * 
-	 * @return the simple feature type for the query
-	 * 
-	 * @throws SchemaException
-	 */
-	private SimpleFeatureType createPatrolSchema() throws SchemaException{
-		this.queryColumns = query.computeQueryColumns(Locale.getDefault(),  null, prjProvider);
-		SimpleFeatureType type =  DataUtilities.createType("smart." + PATROL_TYPE, getFeatureSchemaDef(queryColumns, true, false)); //$NON-NLS-1$
-		return type;
-	}
-	
-	
-	public static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime, boolean forShape){ 
-		StringBuilder sb = new StringBuilder();
-		sb.append("the_geom:MultiLineString:srid=4326"); //$NON-NLS-1$
-		sb.append(",fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape));
-		
-		return sb.toString();
-	}
-	
 }

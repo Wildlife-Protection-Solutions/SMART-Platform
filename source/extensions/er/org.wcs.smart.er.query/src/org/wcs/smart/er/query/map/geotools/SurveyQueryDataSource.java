@@ -22,23 +22,20 @@
 package org.wcs.smart.er.query.map.geotools;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.geotools.data.AbstractDataStore;
-import org.geotools.data.DataUtilities;
-import org.geotools.data.FeatureReader;
-import org.geotools.feature.SchemaException;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
+import org.geotools.data.store.ContentDataStore;
+import org.geotools.data.store.ContentEntry;
+import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.feature.NameImpl;
+import org.opengis.feature.type.Name;
 import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumnUtils;
 
 /**
  * Geotools data source for waypoint query.
@@ -46,7 +43,7 @@ import org.wcs.smart.query.model.QueryColumnUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class SurveyQueryDataSource extends AbstractDataStore{
+public class SurveyQueryDataSource extends ContentDataStore{
 
 	public static final String FEATURETYPE_PREFIX = "smart"; //$NON-NLS-1$
 	/**
@@ -67,7 +64,6 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	private SimpleQuery query;
 	private List<QueryColumn> cachedColumns;
 	private IProjectionProvider prjProvider;
-	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
 	/**
 	 * Creates a new data source from the give query.
@@ -89,114 +85,33 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 		this.cachedColumns = null;
 	}
 
-	/**
-	 * @see org.geotools.data.store.ContentDataStore#createTypeNames()
-	 */
+	public List<QueryColumn> getColumns(){
+		return this.cachedColumns;
+	}
+	
+	public SimpleQuery getQuery() {
+		return this.query;
+	}
+	
+
 	@Override
-	public String[] getTypeNames()  {
+	protected List<Name> createTypeNames() throws IOException {
+		List<Name> items = new ArrayList<>();
 		if (query instanceof MissionQuery || 
 			query instanceof MissionTrackQuery){
-			return new String[]{TRACKS_TYPE};
+			items.add(new NameImpl(TRACKS_TYPE));
 		}else{
-			return new String[]{WAYPOINT_TYPE, WAYPOINT_MISSION_TRACK_TYPE};
+			items.add(new NameImpl(WAYPOINT_TYPE));
+			items.add(new NameImpl(WAYPOINT_MISSION_TRACK_TYPE));
 		}
-	}
-	
-	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getFeatureReader(java.lang.String)
-	 */
-	@Override
-	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		if (typeName.equals(WAYPOINT_TYPE)){
-			return new SurveyFeatureReader(this.query, getSchema(typeName), cachedColumns);
-		}else if (typeName.equals(WAYPOINT_MISSION_TRACK_TYPE)){
-			return new MissionFeatureReader(this.query, getSchema(typeName), cachedColumns);
-		}else if (typeName.equals(TRACKS_TYPE)){
-			return new MissionFeatureReader(this.query, getSchema(typeName), cachedColumns);
-		}
-		return null;
+		return items;
+		
 	}
 
-	/**
-	 * @see org.geotools.data.AbstractDataStore#removeSchema(java.lang.String)
-	 */
 	@Override
-	public void removeSchema(String typeName) throws IOException {
-		schemas.remove(typeName);
-	}
-	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
-	 */
-	@Override
-	public SimpleFeatureType getSchema(String typeName) throws IOException {
-		SimpleFeatureType type = schemas.get(typeName);
-		if (type == null){
-			try {
-				if (typeName.equals(WAYPOINT_TYPE)) {
-					type = createWaypointSchema();
-				}else if (typeName.equals(WAYPOINT_MISSION_TRACK_TYPE)){
-					type = createMissionTrackSchema();
-				}else if (typeName.equals(TRACKS_TYPE)){
-					type = createTrackSchema();
-				}
-			}catch(SchemaException ex){
-				throw new IOException(Messages.SurveyObsQueryDataSource_SchemaError + ex.getLocalizedMessage(), ex);
-			}
-			schemas.put(typeName, type);
-		}
-		return type;
-	}
-
-	/**
-	 * Creates the simple feature type for the query
-	 * 
-	 * @return the simple feature type for the query
-	 * 
-	 * @throws SchemaException
-	 */
-	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		cachedColumns = query.computeQueryColumns(Locale.getDefault(),  null,  prjProvider);
-		SimpleFeatureType type =  DataUtilities.createType(FEATURETYPE_PREFIX + "." + WAYPOINT_TYPE, getWaypointFeatureSchemaDef(cachedColumns, true, false)); //$NON-NLS-1$
-		return type;
-	}
-	
-	private SimpleFeatureType createMissionTrackSchema() throws SchemaException{
-		cachedColumns = query.computeQueryColumns(Locale.getDefault(),  null,  prjProvider);
-		SimpleFeatureType type = DataUtilities.createType(FEATURETYPE_PREFIX + "." + WAYPOINT_MISSION_TRACK_TYPE, getMissionTrackFeatureSchemaDef()); //$NON-NLS-1$
-		return type;
-	}
-	
-	private SimpleFeatureType createTrackSchema() throws SchemaException{
-		cachedColumns = query.computeQueryColumns(Locale.getDefault(),  null,  prjProvider);
-		SimpleFeatureType type = DataUtilities.createType(FEATURETYPE_PREFIX + "." + TRACKS_TYPE, getTrackFeatureSchemaDef(cachedColumns, true, false)); //$NON-NLS-1$
-		return type;
-	}
-	
-	public static String getWaypointFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime, boolean forShape){
-		StringBuilder sb = new StringBuilder();
-		sb.append("the_geom:Point:srid=4326,fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape));
-		return sb.toString();
-	}
-	
-	public static String getTrackFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime, boolean forShape){
-		StringBuilder sb = new StringBuilder();
-		sb.append("the_geom:MultiLineString:srid=4326,fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape));
-		return sb.toString();
-	}
-	
-	public static String getMissionTrackFeatureSchemaDef(){
-		StringBuilder sb = new StringBuilder();
-		sb.append("geom:MultiLineString:srid=4326,"); //$NON-NLS-1$
-		sb.append("fid:String,"); //$NON-NLS-1$
-		sb.append("id:String,"); //$NON-NLS-1$
-		sb.append("start:Date,"); //$NON-NLS-1$
-		sb.append("end:Date,"); //$NON-NLS-1$
-		sb.append("comment:String"); //$NON-NLS-1$
-		return sb.toString();
+	protected ContentFeatureSource createFeatureSource(ContentEntry entry) throws IOException {
+		if (cachedColumns == null) cachedColumns = query.computeQueryColumns(Locale.getDefault(),  null,  prjProvider);
+		return new SurveyQueryFeatureSource(entry);
 	}
 	
 }

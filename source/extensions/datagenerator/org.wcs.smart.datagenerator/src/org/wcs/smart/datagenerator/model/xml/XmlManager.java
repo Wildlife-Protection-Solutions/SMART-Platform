@@ -36,6 +36,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -45,8 +46,6 @@ import org.wcs.smart.datagenerator.model.ObservationConfiguration;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Tools for reading and writing xml files to/from patrol configurations.  Warnings

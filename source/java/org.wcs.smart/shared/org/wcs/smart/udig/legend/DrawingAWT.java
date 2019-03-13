@@ -66,16 +66,16 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.style.GraphicalSymbol;
 import org.wcs.smart.map.GeometryFactoryProvider;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 
 /**
  * Drawing utility package that users only awt graphics.  Modelled
@@ -373,16 +373,16 @@ public final class DrawingAWT {
 	 * @return The geometry requested in the symbolizer, or the default geometry
 	 *         if none is specified
 	 */
-	private com.vividsolutions.jts.geom.Geometry findGeometry(
+	private org.locationtech.jts.geom.Geometry findGeometry(
 			SimpleFeature feature, Symbolizer symbolizer) {
 		String geomName = getGeometryPropertyName(symbolizer);
 		// get the geometry
-		com.vividsolutions.jts.geom.Geometry geometry;
+		org.locationtech.jts.geom.Geometry geometry;
 		if (geomName == null
 				|| feature.getType().getDescriptor(geomName) == null) {
 			geometry = (Geometry) feature.getDefaultGeometry();
 		} else {
-			geometry = (com.vividsolutions.jts.geom.Geometry) feature
+			geometry = (org.locationtech.jts.geom.Geometry) feature
 					.getAttribute(geomName);
 		}
 		if (geometry == null) {

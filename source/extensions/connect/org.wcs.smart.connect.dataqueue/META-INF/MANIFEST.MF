@@ -2,18 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CONNECT Processing Filestore Plugin
 Bundle-SymbolicName: org.wcs.smart.connect.dataqueue;singleton:=true
-Bundle-Version: 6.2.0.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart,
- org.wcs.smart.connect,
- org.wcs.smart.p2
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+ org.wcs.smart.connect;bundle-version="[7.0.0,8.0.0)"
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.connect.dataqueue,
  org.wcs.smart.connect.dataqueue.internal.server,
  org.wcs.smart.connect.dataqueue.model,
  org.wcs.smart.connect.dataqueue.process,
  org.wcs.smart.connect.dataqueue.ui
+Automatic-Module-Name: org.wcs.smart.connect.dataqueue

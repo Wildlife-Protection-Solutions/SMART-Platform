@@ -69,7 +69,7 @@ import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.JobUtil;
 import org.wcs.smart.util.ReprojectUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Page for the editor for displaying a map
@@ -274,11 +274,12 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 						try{
 							if (s.getTransaction().isActive()) s.getTransaction().rollback();
 						}catch (Exception ex2){
-							SmartPatrolPlugIn.displayLog(Messages.PatrolMapPageEditor_MoveErrorDb + ex.getMessage(), ex);
+							SmartPatrolPlugIn.displayLog(Messages.PatrolMapPageEditor_MoveErrorDb + ex.getMessage(), ex2);
 							return;
 						}
 						pw.getWaypoint().setX(origx);
 						pw.getWaypoint().setY(origy);
+						SmartPatrolPlugIn.displayLog(Messages.PatrolMapPageEditor_MoveErrorDb + ex.getMessage(), ex);
 					}
 				}
 				if (modified){

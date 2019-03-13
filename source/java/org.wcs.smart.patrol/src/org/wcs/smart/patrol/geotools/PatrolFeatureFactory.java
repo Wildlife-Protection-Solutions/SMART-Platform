@@ -35,7 +35,7 @@ import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.TrackPart;
 import org.wcs.smart.util.UuidUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 public class PatrolFeatureFactory {
 	

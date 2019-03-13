@@ -26,7 +26,7 @@ import java.util.List;
 
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
 /**

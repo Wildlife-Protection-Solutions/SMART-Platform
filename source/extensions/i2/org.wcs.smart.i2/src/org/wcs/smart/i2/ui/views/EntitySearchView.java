@@ -107,7 +107,7 @@ import org.wcs.smart.i2.ui.views.entity.search.SpatialSearchPanel;
 import org.wcs.smart.ui.TranslateNamesHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  * View for entity search and results

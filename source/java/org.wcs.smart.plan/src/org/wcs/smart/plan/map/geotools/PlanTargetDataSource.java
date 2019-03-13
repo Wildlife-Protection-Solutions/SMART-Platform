@@ -22,15 +22,14 @@
 package org.wcs.smart.plan.map.geotools;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.List;
 
-import org.geotools.data.AbstractDataStore;
-import org.geotools.data.DataUtilities;
-import org.geotools.data.FeatureReader;
-import org.geotools.feature.SchemaException;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.plan.internal.Messages;
+import org.geotools.data.store.ContentDataStore;
+import org.geotools.data.store.ContentEntry;
+import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.feature.NameImpl;
+import org.opengis.feature.type.Name;
 import org.wcs.smart.plan.model.Plan;
 
 /**
@@ -42,13 +41,12 @@ import org.wcs.smart.plan.model.Plan;
  * @author Emily
  * @since 1.0.0
  */
-public class PlanTargetDataSource extends AbstractDataStore{
+public class PlanTargetDataSource extends ContentDataStore{
 
 	public static final String PLAN_TARGET_TYPE = "PlanTarget"; //$NON-NLS-1$
 	
 	private Plan plan;
 	private Boolean subPlans;
-	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
 	public PlanTargetDataSource(Plan plan, Boolean subPlans){
 		this.plan = plan;
@@ -60,41 +58,11 @@ public class PlanTargetDataSource extends AbstractDataStore{
 		super.dispose();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.geotools.data.store.ContentDataStore#createTypeNames()
-	 */
 	@Override
-	public String[] getTypeNames()  {
-		return new String[]{PLAN_TARGET_TYPE};
+	public List<Name> createTypeNames(){
+		return Collections.singletonList(new NameImpl(PLAN_TARGET_TYPE));
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.geotools.data.AbstractDataStore#getFeatureReader(java.lang.String)
-	 */
-	@Override
-	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		return new PlanTargetFeatureReader(this.plan, subPlans, getSchema(typeName));
-	}
-
-	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
-	 */
-	@Override
-	public SimpleFeatureType getSchema(String typeName) throws IOException {
-		SimpleFeatureType type = schemas.get(typeName);
-		if (type == null){
-			try {
-				if (typeName.equals(PLAN_TARGET_TYPE)) {
-					type = createPlanTargetSchema();
-				}
-			}catch(SchemaException ex){
-				throw new IOException(Messages.PlanTargetDataSource_NotSupported + ex.getLocalizedMessage(), ex);
-			}
-			schemas.put(typeName, type);
-		}
-		return type;
-	}
 
 	public Plan getPlan(){
 		return this.plan;
@@ -104,10 +72,13 @@ public class PlanTargetDataSource extends AbstractDataStore{
 		this.plan = plan;
 	}
 	
-	private SimpleFeatureType createPlanTargetSchema() throws SchemaException{
-		String spec = "the_geom:Point:srid=4326,fid:String,targetName:String,targetSummary:String,targetStatusDescription:String,targetStatus:String,planId:String"; //$NON-NLS-1$
-		SimpleFeatureType type =  DataUtilities.createType("smart." + PLAN_TARGET_TYPE, spec); //$NON-NLS-1$
-		return type;
+	public boolean includeSubPlans() {
+		return this.subPlans;
+	}
+
+	@Override
+	protected ContentFeatureSource createFeatureSource(ContentEntry entry) throws IOException {
+		return new PlanTargetFeatureSource(entry);
 	}
 	
 }

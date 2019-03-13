@@ -45,7 +45,7 @@ import org.wcs.smart.gpx.xml.TrksegType;
 import org.wcs.smart.gpx.xml.WptType;
 import org.wcs.smart.internal.Messages;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Class of utilties that support

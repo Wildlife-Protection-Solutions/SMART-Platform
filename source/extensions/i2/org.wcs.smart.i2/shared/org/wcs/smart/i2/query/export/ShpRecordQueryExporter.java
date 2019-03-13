@@ -58,9 +58,9 @@ import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.i2.udig.query.FeatureGenerator;
 import org.wcs.smart.util.GeometryUtils;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 
 /**
  * Exports query results to shapefile 

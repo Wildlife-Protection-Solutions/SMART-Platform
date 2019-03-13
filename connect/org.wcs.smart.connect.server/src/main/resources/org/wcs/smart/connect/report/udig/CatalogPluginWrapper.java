@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.ICatalog;
 import org.locationtech.udig.catalog.ID;
@@ -49,8 +50,6 @@ import org.locationtech.udig.catalog.ServiceExtension;
 import org.locationtech.udig.catalog.internal.ResolveManager2;
 import org.locationtech.udig.core.internal.ExtensionPointProcessor;
 import org.locationtech.udig.core.internal.ExtensionPointUtil;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 public class CatalogPluginWrapper extends CatalogPlugin {
     /** Lock used to protect map of available services; for the last call? */

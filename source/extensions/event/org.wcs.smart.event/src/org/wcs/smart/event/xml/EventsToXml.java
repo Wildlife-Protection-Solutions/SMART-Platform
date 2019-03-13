@@ -69,7 +69,7 @@ public class EventsToXml {
 	public static void writeEventXml(org.wcs.smart.event.xml.model.Configuration evtConfig, OutputStream file) throws JAXBException, IOException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Marshaller marshaller = context.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, new Boolean(true));
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		
 		org.wcs.smart.event.xml.model.ObjectFactory objFactory = new org.wcs.smart.event.xml.model.ObjectFactory();
 		

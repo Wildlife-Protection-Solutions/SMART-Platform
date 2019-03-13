@@ -4,7 +4,7 @@
 
     <groupId>org.wcs.smart.datagenerator</groupId>
     <artifactId>smart-tycho</artifactId>
-    <version>6.2.0-SNAPSHOT</version>
+    <version>7.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     
     <description>
@@ -59,7 +59,7 @@
 					<artifact>
 						<groupId>org.wcs.smart</groupId>
 						<artifactId>org.wcs.smart.target</artifactId>
-						<version>6.2.0-SNAPSHOT</version>
+						<version>7.0.0-SNAPSHOT</version>
 					</artifact>
 				</target>
 				

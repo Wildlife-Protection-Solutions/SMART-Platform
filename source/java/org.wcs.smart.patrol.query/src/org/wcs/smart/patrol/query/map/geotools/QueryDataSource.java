@@ -22,23 +22,20 @@
 package org.wcs.smart.patrol.query.map.geotools;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.geotools.data.AbstractDataStore;
-import org.geotools.data.DataUtilities;
-import org.geotools.data.FeatureReader;
-import org.geotools.feature.SchemaException;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
+import org.geotools.data.store.ContentDataStore;
+import org.geotools.data.store.ContentEntry;
+import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.feature.NameImpl;
+import org.opengis.feature.type.Name;
 import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumnUtils;
 
 /**
  * Geotools data source for waypoint query.
@@ -46,7 +43,7 @@ import org.wcs.smart.query.model.QueryColumnUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class QueryDataSource extends AbstractDataStore{
+public class QueryDataSource extends ContentDataStore{
 
 	/**
 	 * waypoint query data source
@@ -54,11 +51,9 @@ public class QueryDataSource extends AbstractDataStore{
 	public static final String WAYPOINT_TYPE = "Waypoint"; //$NON-NLS-1$
 	
 	private SimpleQuery query;
-	private List<QueryColumn> columns;
 	private IProjectionProvider prjProvider;
-	
-	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
-	
+	private List<QueryColumn> columns;
+		
 	/**
 	 * Creates a new data source from the give query.
 	 * 
@@ -68,7 +63,6 @@ public class QueryDataSource extends AbstractDataStore{
 		this.query = query;
 		this.prjProvider = prjProvider;
 	}
-
 	
 	/**
 	 * Creates a new data source from the give query.
@@ -80,8 +74,12 @@ public class QueryDataSource extends AbstractDataStore{
 		this.prjProvider = prjProvider;
 	}
 	
-	public void reset(){
-		schemas.clear();
+	public SimpleQuery getQuery() {
+		return this.query;
+	}
+	
+	public List<QueryColumn> getColumns(){
+		return this.columns;
 	}
 	
 	/**
@@ -98,68 +96,18 @@ public class QueryDataSource extends AbstractDataStore{
 	 * @see org.geotools.data.store.ContentDataStore#createTypeNames()
 	 */
 	@Override
-	public String[] getTypeNames()  {
-		return new String[]{WAYPOINT_TYPE};
-	}
-	
-	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getFeatureReader(java.lang.String)
-	 */
-	@Override
-	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		return new QueryFeatureReader(this.query, getSchema(typeName), columns);
+	protected List<Name> createTypeNames() throws IOException {
+		List<Name> names = new ArrayList<>();
+		names.add(new NameImpl(WAYPOINT_TYPE));
+		return names;
 	}
 
-	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
-	 */
 	@Override
-	public void removeSchema(String typeName) throws IOException {
-		schemas.remove(typeName);
-	}
-	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
-	 */
-	@Override
-	public SimpleFeatureType getSchema(String typeName) throws IOException {
-		SimpleFeatureType type = schemas.get(typeName);
-		if (type == null){
-			try {
-				if (typeName.equals(WAYPOINT_TYPE)) {
-					type = createWaypointSchema();
-				} 
-			}catch(SchemaException ex){
-				throw new IOException(Messages.QueryDataSource_SchemaError + ex.getLocalizedMessage(), ex);
-			}
-			schemas.put(typeName, type);
+	protected ContentFeatureSource createFeatureSource(ContentEntry entry) throws IOException {
+		if (this.columns == null) {
+			this.columns = query.computeQueryColumns(Locale.getDefault(),  null, prjProvider);
 		}
-		return type;
-	}
-
-	/**
-	 * Creates the simple feature type for the query
-	 * 
-	 * @return the simple feature type for the query
-	 * 
-	 * @throws SchemaException
-	 */
-	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		this.columns = query.computeQueryColumns(Locale.getDefault(),  null, prjProvider);
-		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, getFeatureSchemaDef(columns, true, false)); //$NON-NLS-1$
-		return type;
-	}
-	
-	
-	public static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime, boolean forShape){
-		StringBuilder sb = new StringBuilder();
-		sb.append("the_geom:Point:srid=4326"); //$NON-NLS-1$
-		sb.append(",fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape));
-		return sb.toString();
-		
+		return new QueryFeatureSource(entry);
 	}
 	
 }

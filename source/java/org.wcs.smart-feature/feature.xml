@@ -2,10 +2,10 @@
 <feature
       id="org.wcs.smart.feature"
       label="SMART Feature"
-      version="6.2.0.qualifier"
+      version="7.0.0.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="6.2.0.qualifier">
+      license-feature-version="7.0.0.qualifier">
 
    <description url="http://www.smartconservationtools.org">
       The main SMART feature that includes all the core SMART modules.
@@ -36,51 +36,15 @@
          version="0.0.0"/>
 
    <includes
-         id="org.eclipse.gef"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.gef.fx"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.gef.geometry"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.gef.graph"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.gef.layout"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.gef.mvc.fx"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.gef.zest.fx"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.gef.zest.fx.jface"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.gef.common"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.gef.geometry.convert.fx"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.gef.fx.swt"
-         version="0.0.0"/>
-
-   <includes
          id="org.wcs.smart.license.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="openjfx.swt.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="openjfx.standard.feature"
          version="0.0.0"/>
 
    <plugin

@@ -2,14 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Quality Assurance PlugIn
 Bundle-SymbolicName: org.wcs.smart.qa;singleton:=true
-Bundle-Version: 6.2.1.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.qa.QaPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
- org.wcs.smart;visibility:=reexport,
- org.wcs.smart.observation;visibility:=reexport
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+ org.wcs.smart.observation;bundle-version="[7.0.0,8.0.0)";visibility:=reexport
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.qa,
  org.wcs.smart.qa.auto,
@@ -18,3 +16,4 @@ Export-Package: org.wcs.smart.qa,
  org.wcs.smart.qa.ui.configure,
  org.wcs.smart.qa.ui.routine,
  org.wcs.smart.qa.ui.view
+Automatic-Module-Name: org.wcs.smart.qa

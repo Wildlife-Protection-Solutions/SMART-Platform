@@ -22,15 +22,14 @@
 package org.wcs.smart.intelligence.map;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.List;
 
-import org.geotools.data.AbstractDataStore;
-import org.geotools.data.DataUtilities;
-import org.geotools.data.FeatureReader;
-import org.geotools.feature.SchemaException;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.intelligence.internal.Messages;
+import org.geotools.data.store.ContentDataStore;
+import org.geotools.data.store.ContentEntry;
+import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.feature.NameImpl;
+import org.opengis.feature.type.Name;
 import org.wcs.smart.intelligence.model.Intelligence;
 
 /**
@@ -39,60 +38,29 @@ import org.wcs.smart.intelligence.model.Intelligence;
  * @author Emily
  *
  */
-public class IntelligenceDataSource extends AbstractDataStore{
+public class IntelligenceDataSource extends ContentDataStore{
 
 	public static final String INTEL_TYPE = "IntelPoint"; //$NON-NLS-1$
 	
 	private Intelligence intelligence;
-	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
 	public IntelligenceDataSource(Intelligence intelligence){
 		this.intelligence = intelligence;
 	}
 
-	@Override
-	public void dispose(){
-		super.dispose();
+	public Intelligence getIntelligence() {
+		return this.intelligence;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.geotools.data.store.ContentDataStore#createTypeNames()
-	 */
+
 	@Override
-	public String[] getTypeNames()  {
-		return new String[]{INTEL_TYPE};
-	}
-	/* (non-Javadoc)
-	 * @see org.geotools.data.AbstractDataStore#getFeatureReader(java.lang.String)
-	 */
-	@Override
-	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		return new IntelligenceFeatureReader(this.intelligence, getSchema(typeName));
+	protected List<Name> createTypeNames() throws IOException {
+		return Collections.singletonList(new NameImpl(INTEL_TYPE));
 	}
 
-	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
-	 */
-	@Override
-	public SimpleFeatureType getSchema(String typeName) throws IOException {
-		SimpleFeatureType type = schemas.get(typeName);
-		if (type == null){
-			try {
-				if (typeName.equals(INTEL_TYPE)) {
-					type = createPointSchema();
-				}
-			}catch(SchemaException ex){
-				throw new IOException(Messages.IntelligenceDataSource_SchemaNotSupported + ex.getLocalizedMessage(), ex);
-			}
-			schemas.put(typeName, type);
-		}
-		return type;
-	}
 
-	private SimpleFeatureType createPointSchema() throws SchemaException{
-		String spec = "the_geom:Point:srid=4326,fid:String"; //$NON-NLS-1$
-		SimpleFeatureType type =  DataUtilities.createType("smart." + INTEL_TYPE, spec); //$NON-NLS-1$
-		return type;
+	@Override
+	protected ContentFeatureSource createFeatureSource(ContentEntry entry) throws IOException {
+		return new IntelligenceFeatureSource(entry);
 	}
 }

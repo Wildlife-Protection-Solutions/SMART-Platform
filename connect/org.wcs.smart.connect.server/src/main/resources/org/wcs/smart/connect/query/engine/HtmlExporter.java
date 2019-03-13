@@ -32,8 +32,6 @@ import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.connect.i18n.Messages;
-import org.wcs.smart.connect.query.engine.i2.ConnectIntelObservationResultItem;
-import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryResults;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.PagedResultSetIterator;

@@ -392,13 +392,12 @@ public enum QueryManager {
 	 * 
 	 * @param query
 	 * @return
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
+	 * @throws Exception
 	 */
-	public IQueryEngine findQueryEngine(Query query) throws InstantiationException, IllegalAccessException{
+	public IQueryEngine findQueryEngine(Query query) throws Exception{
 		for (IQueryEngine e : engines){
 			if (e.canExecute(query.getTypeKey())){
-				IQueryEngine engine = e.getClass().newInstance();
+				IQueryEngine engine = e.getClass().getDeclaredConstructor().newInstance();
 				return engine;
 			}
 		}
@@ -477,7 +476,7 @@ public enum QueryManager {
 	public int getCategoryDepth(Session session, ConservationAreaFilter caFilter) throws SQLException{
 		org.hibernate.query.Query<?> q = session.createQuery("Select hkey, length(hkey) - length(replace(hkey, '.', '')) as hkey_length, count(*) FROM  Category WHERE conservationArea.uuid IN (:cauuids) group by hkey having count(*) = :cnt order by length(hkey) - length(replace(hkey, '.', '')) desc"); //$NON-NLS-1$
 		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
-		q.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
+		q.setParameter("cnt", Long.valueOf(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 		q.setMaxResults(1);
 		Object[] x = (Object[])q.uniqueResult();
 		if (x == null) return 0;

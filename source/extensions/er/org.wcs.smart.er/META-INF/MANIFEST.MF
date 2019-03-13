@@ -2,21 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ecological Records Plug-in
 Bundle-SymbolicName: org.wcs.smart.er;singleton:=true
-Bundle-Version: 6.2.0.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.er.EcologicalRecordsPlugIn
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
- org.wcs.smart,
- org.wcs.smart.dataentry,
- org.wcs.smart.observation,
+ org.wcs.smart.observation;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.p2;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
  org.eclipse.ui.forms,
  org.eclipse.jface.databinding,
  org.eclipse.core.databinding.observable,
- org.locationtech.udig.style.sld,
- org.locationtech.udig.mapgraphic,
- org.wcs.smart.p2
+ org.locationtech.udig.style.sld;bundle-version="3.0.0",
+ org.locationtech.udig.mapgraphic;bundle-version="3.0.0"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: org.wcs.smart.er,
  org.wcs.smart.er.hibernate,
  org.wcs.smart.er.map,
@@ -29,5 +26,8 @@ Export-Package: org.wcs.smart.er,
  org.wcs.smart.er.ui.mision.udig,
  org.wcs.smart.er.ui.surveydesign.editor,
  org.wcs.smart.er.upgrade,
- org.wcs.smart.er.xml
+ org.wcs.smart.er.xml,
+ org.wcs.smart.er.xml.model.missions,
+ org.wcs.smart.er.xml.model.surveydesign
 Bundle-Vendor: org.wcs.smart
+Automatic-Module-Name: org.wcs.smart.er

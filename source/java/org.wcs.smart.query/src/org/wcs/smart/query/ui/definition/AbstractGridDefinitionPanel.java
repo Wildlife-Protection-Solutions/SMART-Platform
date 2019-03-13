@@ -24,7 +24,7 @@ package org.wcs.smart.query.ui.definition;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;

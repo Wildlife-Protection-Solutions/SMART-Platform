@@ -2,17 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Patrol CyberTracker
 Bundle-SymbolicName: org.wcs.smart.cybertracker.patrol;singleton:=true
-Bundle-Version: 6.2.1.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.cybertracker.patrol.PatrolCyberTrackerPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui.forms,
- org.wcs.smart,
- org.wcs.smart.dataentry,
- org.wcs.smart.p2,
- org.wcs.smart.cybertracker,
- org.wcs.smart.patrol
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+ org.wcs.smart.cybertracker;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.patrol;bundle-version="[7.0.0,8.0.0)";visibility:=reexport
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.cybertracker.patrol.export,
  org.wcs.smart.cybertracker.patrol.json,
  org.wcs.smart.cybertracker.patrol.model
+Automatic-Module-Name: org.wcs.smart.cybertracker.patrol

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.asset.IAssetLabelProvider;
 import org.wcs.smart.asset.model.AssetAttribute;
@@ -35,8 +36,6 @@ import org.wcs.smart.asset.model.AssetStationAttributeValue;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.map.GeometryFactoryProvider;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * BIRT table for displaying all asset stations in the system

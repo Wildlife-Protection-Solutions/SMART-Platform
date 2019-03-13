@@ -79,8 +79,7 @@ public class AddIntelligenceJob extends Job {
 			createTables(session);
 			currentVersion = Intelligence2PlugIn.DB_VERSION_1;
 		}
-		
-		IntelligenceDatabaseUpgrader.upgrade(Intelligence2PlugIn.DB_VERSION_1, session);
+		IntelligenceDatabaseUpgrader.upgrade(currentVersion, session);
 	}
 	
 	@SuppressWarnings("nls")

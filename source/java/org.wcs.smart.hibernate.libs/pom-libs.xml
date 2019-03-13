@@ -6,18 +6,18 @@
 	<parent>
 		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart</artifactId>
-		<version>6.0.0-SNAPSHOT</version>
+		<version>7.0.0-SNAPSHOT</version>
 		<relativePath>../pom-libs.xml</relativePath>
 	</parent>
 	
 	<name>SMART Hibernate Libraries Module</name>
 	<artifactId>org.wcs.smart.libs</artifactId>
   	<packaging>pom</packaging>
-	<version>6.0.0-SNAPSHOT</version>
+	<version>7.0.0-SNAPSHOT</version>
 		
 	<properties>
-		<hibernate.version>5.2.16.Final</hibernate.version>
-		<derby.version>10.14.1.0</derby.version>
+		<hibernate.version>5.4.1.Final</hibernate.version>
+		<derby.version>10.14.2.0</derby.version>
     	</properties>
     
 	<dependencies>
@@ -50,7 +50,7 @@
 		<dependency>
     			<groupId>com.mchange</groupId>
     			<artifactId>c3p0</artifactId>
-    			<version>0.9.5.2</version>
+    			<version>0.9.5.3</version>
 		</dependency>
 	</dependencies>
 </project>

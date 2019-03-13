@@ -450,7 +450,7 @@ public class XmlToEntity {
 		return newRelationships;
 	}
 	public <T extends IntelValueItem> T convertAttributeValue(Class<T> clazz, AttributeValue xmlValue) throws Exception {
-		T result = clazz.newInstance();
+		T result = clazz.getConstructor().newInstance();
 		if (xmlValue.getDoubleValue() != null) result.setNumberValue(xmlValue.getDoubleValue());
 		if (xmlValue.getDoubleValue2() != null) result.setNumberValue2(xmlValue.getDoubleValue2());
 		

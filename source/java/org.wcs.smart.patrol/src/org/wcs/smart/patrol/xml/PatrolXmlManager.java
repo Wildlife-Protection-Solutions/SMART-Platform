@@ -60,7 +60,7 @@ public class PatrolXmlManager {
 	public static void writeDataModel(org.wcs.smart.patrol.xml.model.v12.PatrolType patrol, OutputStream file) throws JAXBException, IOException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Marshaller marshaller = context.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, new Boolean(true));
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		
 		org.wcs.smart.patrol.xml.model.v12.ObjectFactory objFactor = new org.wcs.smart.patrol.xml.model.v12.ObjectFactory();
 		

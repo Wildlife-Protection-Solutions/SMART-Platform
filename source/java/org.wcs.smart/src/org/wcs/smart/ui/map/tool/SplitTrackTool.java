@@ -40,7 +40,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * A split tool for tracks.  You must set the finishCommand

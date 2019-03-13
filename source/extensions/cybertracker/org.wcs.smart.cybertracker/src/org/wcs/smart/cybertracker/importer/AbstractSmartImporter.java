@@ -78,7 +78,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.util.SharedUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Common smart importing logic.
@@ -885,7 +885,7 @@ public abstract class AbstractSmartImporter {
 	public static class CoordinateZComparator implements Comparator<Coordinate> {
 		@Override
 		public int compare(Coordinate o1, Coordinate o2) {
-			return ((Double) o1.z).compareTo((Double) o2.z);
+			return ((Double) o1.getZ()).compareTo((Double) o2.getZ());
 		}
 	}
 

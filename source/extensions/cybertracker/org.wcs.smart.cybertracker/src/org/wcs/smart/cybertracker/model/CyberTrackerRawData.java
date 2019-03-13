@@ -38,7 +38,7 @@ import org.wcs.smart.cybertracker.importer.AbstractSmartImporter.CoordinateZComp
 import org.wcs.smart.cybertracker.model.data.Data;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Raw data extracted from CyberTracker raw xml file.

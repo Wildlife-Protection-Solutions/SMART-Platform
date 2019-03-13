@@ -165,7 +165,7 @@ public class WaypointObservationAttribute {
 		clone.id.attribute.getType(); /*ensure attribute has been loaded*/
 		clone.listItem = listItem;
 		if (dValue != null){
-			clone.dValue = new Double(dValue);
+			clone.dValue = Double.valueOf(dValue);
 		}
 		clone.nodeItem = nodeItem;
 		if (sValue != null){

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.common.engine;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  * A query result item that includes at least one geometry column.

@@ -5,7 +5,7 @@
 
 	<groupId>org.wcs.smart.connect</groupId>
 	<artifactId>org.wcs.smart.connect</artifactId>
-	<version>6.2.0-SNAPSHOT</version>
+	<version>7.0.0-SNAPSHOT</version>
 	<name>SMART Connect</name>
 	<packaging>pom</packaging>
 	
@@ -15,12 +15,12 @@
 	</modules>
 	
 	<properties>
-		<smart.version>6.2.0-SNAPSHOT</smart.version>
-        	<geotools.version>14.1</geotools.version>
-        	<jts.version>1.13</jts.version>
-        	<hibernate.version>5.2.16.Final</hibernate.version>
-		<resteasy.version>3.5.1.Final</resteasy.version>
-		<udig.version>2.0.1-SNAPSHOT</udig.version>
+		<smart.version>7.0.0-SNAPSHOT</smart.version>
+        	<geotools.version>21.0</geotools.version>
+        	<jts.version>1.16.0</jts.version>
+        	<hibernate.version>5.4.1.Final</hibernate.version>
+		<resteasy.version>3.6.3.Final</resteasy.version>
+		<udig.version>3.0.0-SNAPSHOT</udig.version>
     	</properties>
 	
 	<repositories>

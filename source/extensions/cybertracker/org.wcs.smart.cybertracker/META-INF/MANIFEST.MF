@@ -2,15 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Cybertracker
 Bundle-SymbolicName: org.wcs.smart.cybertracker;singleton:=true
-Bundle-Version: 6.2.1.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.cybertracker.CyberTrackerPlugIn
 Require-Bundle: org.eclipse.ui.forms,
- org.wcs.smart,
- org.wcs.smart.dataentry,
- org.wcs.smart.p2,
- org.wcs.smart.observation
+ org.wcs.smart.dataentry;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.p2;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.observation;bundle-version="[7.0.0,8.0.0)";visibility:=reexport
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: org.wcs.smart.cybertracker,
  org.wcs.smart.cybertracker.export,
  org.wcs.smart.cybertracker.export.alert,
@@ -21,8 +20,11 @@ Export-Package: org.wcs.smart.cybertracker,
  org.wcs.smart.cybertracker.model,
  org.wcs.smart.cybertracker.model.data,
  org.wcs.smart.cybertracker.model.elements,
+ org.wcs.smart.cybertracker.model.filter,
+ org.wcs.smart.cybertracker.model.reports,
  org.wcs.smart.cybertracker.model.screens,
  org.wcs.smart.cybertracker.properties,
  org.wcs.smart.cybertracker.updatesite,
  org.wcs.smart.cybertracker.util
 Bundle-Vendor: org.wcs.smart
+Automatic-Module-Name: org.wcs.smart.cybertracker

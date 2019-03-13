@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.common.model;
 
-import com.vividsolutions.jts.geom.Envelope;
+import org.locationtech.jts.geom.Envelope;
 
 /**
  * Represents a tile in a grid.

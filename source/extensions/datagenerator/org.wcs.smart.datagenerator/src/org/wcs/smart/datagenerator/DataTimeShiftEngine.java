@@ -33,6 +33,8 @@ import javax.inject.Inject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -41,9 +43,6 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.LineString;
 
 /**
  * Shifts all patrol data in the database
@@ -96,7 +95,7 @@ public class DataTimeShiftEngine implements IDataEngine{
 								List<LineString> current = pld.getTrack().getLineStrings();
 								for (LineString ls : current) {
 									for (Coordinate c : ls.getCoordinates()) {
-										c.z = adjustDateTime(new Date( (new Double(c.z)).longValue() )).getTime();
+										c.setZ(adjustDateTime(new Date( (Double.valueOf(c.getZ())).longValue() )).getTime());
 									}
 								}
 								pld.getTrack().setLineStrings(current);

@@ -2,18 +2,16 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ecological Records Report Plug-in
 Bundle-SymbolicName: org.wcs.smart.er.query.report;singleton:=true
-Bundle-Version: 6.2.0.qualifier
+Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: org.wcs.smart.er.query.report.ERReportPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart.er.query,
- org.wcs.smart.report.birt.query,
- org.wcs.smart.query,
+ org.wcs.smart.er.query;bundle-version="[7.0.0,8.0.0)",
+ org.wcs.smart.report.birt.query;bundle-version="[7.0.0,8.0.0)",
+ org.wcs.smart.report;bundle-version="[7.0.0,8.0.0)",
  org.eclipse.datatools.connectivity.oda,
- org.wcs.smart,
- org.wcs.smart.report,
- org.wcs.smart.er,
- org.locationtech.udig.style.sld;bundle-version="2.0.0"
+ org.locationtech.udig.style.sld;bundle-version="3.0.0"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: org.wcs.smart
+Automatic-Module-Name: org.wcs.smart.er.query.report

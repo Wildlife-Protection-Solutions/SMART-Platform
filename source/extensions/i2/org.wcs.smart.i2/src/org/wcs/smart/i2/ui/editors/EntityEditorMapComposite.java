@@ -68,8 +68,9 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.geotools.data.FeatureSource;
 import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.legend.Glyph;
+import org.geotools.map.legend.Glyph;
 import org.hibernate.Session;
+import org.locationtech.jts.io.ParseException;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
@@ -104,8 +105,6 @@ import org.wcs.smart.udig.AddContentFilterLayersCommand;
 import org.wcs.smart.udig.ContentFilterLayerImpl;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
-
-import com.vividsolutions.jts.io.ParseException;
 
 /**
  * Entity map editor composite 
@@ -452,7 +451,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 				IntelLocation loc = getSelectedLocation();
 				if (loc == null) return;
 				try {
-					if (!(loc.getGeometry() instanceof com.vividsolutions.jts.geom.Point)) return;
+					if (!(loc.getGeometry() instanceof org.locationtech.jts.geom.Point)) return;
 				} catch (ParseException e1) {
 					Intelligence2PlugIn.log(e1.getMessage(),e1);
 					return;
@@ -476,14 +475,14 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 						
 						@Override
 						public void widgetSelected(SelectionEvent e) {
-							com.vividsolutions.jts.geom.Point p = null;
+							org.locationtech.jts.geom.Point p = null;
 							try{
 								IntelLocation loc = getSelectedLocation();
-								if (!(loc.getGeometry() instanceof com.vividsolutions.jts.geom.Point)){
+								if (!(loc.getGeometry() instanceof org.locationtech.jts.geom.Point)){
 									MessageDialog.openError(getShell(), Messages.EntityEditorMapComposite_UpdateAttributeErrorDialogTitle, Messages.EntityEditorMapComposite_UpdateAttributeErrorDialogMessage);
 									return;
 								}
-								p = (com.vividsolutions.jts.geom.Point) loc.getGeometry();
+								p = (org.locationtech.jts.geom.Point) loc.getGeometry();
 							}catch (Exception ex){
 								Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 								return;

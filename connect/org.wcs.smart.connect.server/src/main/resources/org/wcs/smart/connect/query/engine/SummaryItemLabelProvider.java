@@ -436,7 +436,7 @@ public class SummaryItemLabelProvider {
 				
 		q.setParameter("att", attributeKey); //$NON-NLS-1$
 		q.setParameter("level", level); //$NON-NLS-1$
-		q.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
+		q.setParameter("cnt", Long.valueOf(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 		return (List<String>)q.list();
 	}
@@ -457,7 +457,7 @@ public class SummaryItemLabelProvider {
 				Query<?> attquery = s.createQuery(query);
 				attquery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 				attquery.setParameter("attributeKey", item.getAttributeKey()); //$NON-NLS-1$
-				attquery.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
+				attquery.setParameter("cnt", Long.valueOf(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 				
 				//this gets the attribute name based on the requested locale name query 
 				String nameQueryHql = "SELECT a.value FROM Label a, AttributeListItem c where a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = :code1 then 1 else case when upper(a.id.language.code) = :code2 then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
@@ -859,12 +859,8 @@ public class SummaryItemLabelProvider {
 		PatrolQueryOptionType type = item.getOption().getType();
 		
 		String[] keys = item.getItems();
-		boolean sort = keys == null;
 		
 		CriteriaBuilder cb = s.getCriteriaBuilder();
-		
-		
-		
 		if (type == PatrolQueryOptionType.UUID){
 			
 			CriteriaQuery<?> c = cb.createQuery(item.getOption().getSourceClass());

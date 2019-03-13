@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.map;
 
-import com.vividsolutions.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.GeometryFactory;
 
 /**
  * Provider for {@link GeometryFactory}

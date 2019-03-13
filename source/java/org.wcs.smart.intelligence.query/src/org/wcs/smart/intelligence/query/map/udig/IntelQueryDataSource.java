@@ -22,17 +22,18 @@
 package org.wcs.smart.intelligence.query.map.udig;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import org.geotools.data.AbstractDataStore;
 import org.geotools.data.DataUtilities;
-import org.geotools.data.FeatureReader;
+import org.geotools.data.store.ContentDataStore;
+import org.geotools.data.store.ContentEntry;
+import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.feature.NameImpl;
 import org.geotools.feature.SchemaException;
-import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.intelligence.query.internal.Messages;
+import org.opengis.feature.type.Name;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
@@ -45,17 +46,12 @@ import org.wcs.smart.query.model.QueryColumnUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class IntelQueryDataSource extends AbstractDataStore{
+public class IntelQueryDataSource extends ContentDataStore{
 
-	/**
-	 * waypoint query data source
-	 */
 	public static final String INTEL_TYPE = "Intelligence";  //$NON-NLS-1$
 	
 	private IntelligenceRecordQuery query;
 	private List<QueryColumn> cachedColumns;
-	
-	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
 	/**
 	 * Creates a new data source from the give query.
@@ -75,51 +71,15 @@ public class IntelQueryDataSource extends AbstractDataStore{
 		this.cachedColumns = null;
 	}
 
-	/**
-	 * @see org.geotools.data.store.ContentDataStore#createTypeNames()
-	 */
-	@Override
-	public String[] getTypeNames()  {
-		return new String[]{INTEL_TYPE};
+	public IntelligenceRecordQuery getQuery() {
+		return this.query;
+	}
+	
+	public List<QueryColumn> getColumns(){
+		return this.cachedColumns;
 	}
 	
 	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getFeatureReader(java.lang.String)
-	 */
-	@Override
-	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
-		return new IntelQueryFeatureReader(this.query, getSchema(typeName), cachedColumns);
-	}
-
-	/**
-	 * @see org.geotools.data.AbstractDataStore#removeSchema(java.lang.String)
-	 */
-	@Override
-	public void removeSchema(String typeName) throws IOException {
-		schemas.remove(typeName);
-	}
-	
-	/**
-	 * @see org.geotools.data.AbstractDataStore#getSchema(java.lang.String)
-	 */
-	@Override
-	public SimpleFeatureType getSchema(String typeName) throws IOException {
-		SimpleFeatureType type = schemas.get(typeName);
-		if (type == null){
-			try {
-				if (typeName.equals(INTEL_TYPE)) {
-					cachedColumns = query.computeQueryColumns(Locale.getDefault(), null, null);
-					type = createIntelligenceRecordSchema(cachedColumns, false);
-				} 
-			}catch(SchemaException ex){
-				throw new IOException(Messages.IntelQueryDataSource_SchemaError + ex.getLocalizedMessage(), ex);
-			}
-			schemas.put(typeName, type);
-		}
-		return type;
-	}
-
 	/**
 	 * Creates the simple feature type for the intelligence record query
 	 * from list of query columns included in the query.
@@ -143,6 +103,19 @@ public class IntelQueryDataSource extends AbstractDataStore{
 		sb.append(",fid:String"); //$NON-NLS-1$
 		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime, forShape));
 		return sb.toString();
+	}
+
+	@Override
+	protected List<Name> createTypeNames() throws IOException {
+		if (cachedColumns == null) {
+			cachedColumns = query.computeQueryColumns(Locale.getDefault(), null, null);
+		}
+		return Collections.singletonList(new NameImpl(INTEL_TYPE));
+	}
+
+	@Override
+	protected ContentFeatureSource createFeatureSource(ContentEntry entry) throws IOException {
+		return new IntelQueryFeatureSource(entry);
 	}
 	
 }

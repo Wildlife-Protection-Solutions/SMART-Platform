@@ -37,7 +37,7 @@ import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.engine.IResultItem;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  * Zoom to provider for patrol data queries.

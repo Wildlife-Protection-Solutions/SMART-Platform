@@ -45,7 +45,7 @@ import org.wcs.smart.util.GeometryUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  * Exports query results to csv file.
