@@ -25,4 +25,8 @@ on Cybertracker.
          id="org.wcs.smart.cybertracker.survey.core.feature"
          version="0.0.0"/>
 
+   <requires>
+      <import feature="org.wcs.smart.er.feature" version="7.0.0.qualifier"/>
+   </requires>
+
 </feature>
