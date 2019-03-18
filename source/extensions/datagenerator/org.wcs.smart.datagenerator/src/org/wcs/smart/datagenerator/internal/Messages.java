@@ -26,6 +26,8 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.datagenerator.internal.messages"; //$NON-NLS-1$
 	public static String DataGenerator_AttributeTypeNotSupported;
+	public static String DataGenerator_PatrolMandatesRequired;
+	public static String DataGenerator_PatrolTypesRequired;
 	public static String DataGenerator_TaskName;
 	public static String DataGeneratorPlugIn_ErrordialogTitle;
 	public static String DataGeneratorRunnable_CanceledMessage;

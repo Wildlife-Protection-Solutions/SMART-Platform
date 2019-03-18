@@ -120,6 +120,9 @@ public class DataGenerator implements IDataEngine{
 			try {
 				loadPatrolMetadata(session, progress.split(1));
 				
+				if (types.isEmpty()) throw new Exception(Messages.DataGenerator_PatrolTypesRequired);
+				if (mandates.isEmpty()) throw new Exception(Messages.DataGenerator_PatrolMandatesRequired);
+				
 				for (int i = 0; i < config.getNumberOfPatrols(); i ++) {
 					Patrol p = generatePatrol(session, progress.split(1));
 					session.save(p);

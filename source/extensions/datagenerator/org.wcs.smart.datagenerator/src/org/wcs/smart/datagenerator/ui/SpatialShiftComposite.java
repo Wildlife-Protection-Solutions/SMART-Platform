@@ -474,10 +474,18 @@ public class SpatialShiftComposite  extends Composite{
 					.setParameter("source", PatrolWaypointSource.PATROL_WP_SOURCE_ID)  //$NON-NLS-1$
 					.uniqueResult();
 				
-				double minx = (double) data[0];
-				double miny = (double) data[1];
-				double maxx = (double) data[2];
-				double maxy = (double) data[3];
+				double minx = 0;
+				double miny = 0;
+				double maxx = 0;
+				double maxy = 0;
+				
+				if (data[0] != null) {
+					minx = (double) data[0];
+					miny = (double) data[1];
+					maxx = (double) data[2];
+					maxy = (double) data[3];	
+				}
+				
 				
 				env = new Envelope(minx,  maxx,  miny,  maxy);
 				

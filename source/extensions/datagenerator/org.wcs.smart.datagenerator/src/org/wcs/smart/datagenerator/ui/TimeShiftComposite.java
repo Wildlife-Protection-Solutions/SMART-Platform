@@ -189,8 +189,16 @@ public class TimeShiftComposite extends Composite{
 					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.uniqueResult();
 				
-				minDate = ((java.sql.Timestamp) data[0]).toLocalDateTime().toLocalDate();
-				maxDate = ((java.sql.Timestamp) data[1]).toLocalDateTime().toLocalDate();
+				if (data[0] != null) {
+					minDate = ((java.sql.Timestamp) data[0]).toLocalDateTime().toLocalDate();
+				}else {
+					minDate = LocalDate.now();
+				}
+				if (data[1] != null) {
+					maxDate = ((java.sql.Timestamp) data[1]).toLocalDateTime().toLocalDate();
+				}else {
+					maxDate = LocalDate.now();
+				}
 			}
 			
 			
