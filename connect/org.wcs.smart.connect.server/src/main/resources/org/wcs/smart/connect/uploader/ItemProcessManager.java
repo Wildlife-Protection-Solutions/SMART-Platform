@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.connect.cybertracker.CyberTrackerProcessor;
 import org.wcs.smart.connect.dataqueue.DataQueueProcessor;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.WorkItem;
@@ -48,6 +49,7 @@ public enum ItemProcessManager {
 		processors.add(new LoadCaProcessor());
 		processors.add(new SyncUploadCaProcessor());
 		processors.add(new DataQueueProcessor());
+		processors.add(new CyberTrackerProcessor());
 	};
 	
 	

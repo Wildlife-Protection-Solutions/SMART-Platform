@@ -87,7 +87,9 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
+import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
+import org.wcs.smart.cybertracker.survey.model.SurveyCtPackage;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
@@ -451,6 +453,10 @@ public enum SmartTable {
 	ICON(Icon.class, null),
 	ICONSET(IconSet.class, null),
 	ICONFILE(IconFile.class, ".iconSet.conservationArea"),
+	
+	PATROLCTPACKAGE(PatrolCtPackage.class, null),
+	SURVEYCTPACKAGE(SurveyCtPackage.class, null),
+	
 	;
 	
 	public Class<?> hibernateClass;

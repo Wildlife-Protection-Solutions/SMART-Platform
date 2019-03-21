@@ -1,0 +1,453 @@
+/* Copyright (C) 2019 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.connect.api;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+
+import org.hibernate.Session;
+import org.wcs.smart.connect.ConnectDatastore;
+import org.wcs.smart.connect.SmartUtils;
+import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
+import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.exceptions.SmartConnectException;
+import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.CyberTrackerPackage;
+import org.wcs.smart.connect.model.CyberTrackerPackage.Status;
+import org.wcs.smart.connect.model.WorkItem;
+import org.wcs.smart.connect.model.WorkItem.Type;
+import org.wcs.smart.connect.security.CaAction;
+import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.util.UuidUtils;
+
+/**
+ * API for listing, downloading and updating CyberTracker packages
+ * 
+ * @author Emily
+ *
+ */
+@Path(ConnectRESTApplication.PATH_SEPERATOR + CyberTracker.PATH)
+
+@Consumes({ MediaType.APPLICATION_JSON})
+@Produces({ MediaType.APPLICATION_JSON })
+public class CyberTracker extends HttpServlet{
+	
+	private static final long serialVersionUID = 1L;
+	
+	private static final String DATE_FORMAT = "yyyyMMddHHmmss"; //$NON-NLS-1$
+
+	public static final String PATH = "cybertracker"; //$NON-NLS-1$
+	public static final String CT_PACKAGE_LOCATION = "ctpackages"; //$NON-NLS-1$
+
+	private final Logger logger = Logger.getLogger(DataQueue.class.getName());
+	
+	@Context private ServletContext context;
+	@Context private HttpServletResponse response;
+	@Context private HttpServletRequest request;
+	@Context private HttpHeaders headers;
+	
+	/**
+	 * Lists all CyberTracker packages uploaded 
+	 * to the system that the current user has access
+	 * to view. Optionally the user can provide a cauuid as
+	 * a filter.
+	 * 
+	 * @return
+	 */
+	@GET
+    @Path("/")
+    public List<CyberTrackerPackageProxy> getPackages(@QueryParam("cauuid") String cauuid){
+		UUID caUuid = null;
+		try {
+			if (cauuid != null && !cauuid.trim().isEmpty()) {
+				caUuid = UUID.fromString(cauuid);
+			}
+		}catch (Exception ex){
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "The cauuid filter is not a valid uuid.");
+		}
+		List<CyberTrackerPackageProxy> proxies = new ArrayList<>();
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			
+			List<CyberTrackerPackage> items = QueryFactory.buildQuery(s, CyberTrackerPackage.class).getResultList();
+			
+			for (CyberTrackerPackage ca : items) {
+				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CaAction.VIEWCA_KEY, ca.getUuid())){
+					if (caUuid == null || caUuid.equals(ca.getConservationArea().getUuid())) {
+						proxies.add(ca.asProxy());
+					}
+				}
+			}
+		
+			
+			Collections.sort(proxies, (a,b)->{
+				if (a.getCaUuid().equals(b.getCaUuid())) return a.getName().compareToIgnoreCase(b.getName());
+				return a.getCaLabel().compareToIgnoreCase(b.getCaLabel());
+			});
+			
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+					"Could not list cybertracker packages", ex); //$NON-NLS-1$
+		}finally{
+			s.getTransaction().commit();
+		}
+		return proxies;
+	}
+
+	
+	
+	
+	/**
+	 * Deletes a cybertracker package from the system
+	 * 
+	 * @return
+	 */
+	@DELETE
+    @Path("/{uuid}")
+    public void deletePackage(@PathParam("uuid") String uuid){
+		UUID itemUuid = null;
+		try {
+			itemUuid = UUID.fromString(uuid);
+		}catch (Exception ex) {
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid package identifier.", ex); //$NON-NLS-1$
+		}
+		
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			
+			CyberTrackerPackage p = QueryFactory.buildQuery(s,  CyberTrackerPackage.class,
+					new Object[] {"ctPackageUuid", itemUuid}).getSingleResult(); //$NON-NLS-1$
+			if (p == null) {
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
+			}
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CaAction.VIEWCA_KEY, p.getUuid())){
+				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+			}
+			
+			WorkItem wi = s.get(WorkItem.class, p.getWorkItem());
+			if (wi != null) {
+				s.delete(wi);
+			}
+			
+			//TODO: clean up these files in the clean up code
+			//delete the file 
+			java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
+					.toPath().resolve(CT_PACKAGE_LOCATION).resolve(p.getFilename());
+			Files.delete(toDelete);
+			
+			s.delete(p);
+			s.getTransaction().commit();
+		}catch (SmartConnectException ex) {
+			s.getTransaction().rollback();
+			throw ex;
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+					"Could not list cybertracker packages", ex); //$NON-NLS-1$
+		}
+	}
+	
+	
+	/**
+	 * Gets the cybertracker package
+	 * 
+	 * 
+	 */
+	@GET
+    @Path("/packages/{uuid}")
+	public Response getCtPackage(@PathParam("uuid") String packageUuidstr){
+		UUID packageUuid = null;
+		
+		try{
+			packageUuid = UUID.fromString(packageUuidstr);
+		}catch (Exception ex) {
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid package uuid.");
+		}
+		java.nio.file.Path file = null;
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			CyberTrackerPackage ctpackage = QueryFactory.buildQuery(s, CyberTrackerPackage.class, 
+					"ctPackageUuid", packageUuid).uniqueResult(); //$NON-NLS-1$
+			if (ctpackage == null) {
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
+			}
+			file = DataStoreManager.INSTANCE.getRootDirectory()
+					.toPath().resolve(CT_PACKAGE_LOCATION).resolve(ctpackage.getFilename());
+		}finally {
+			s.getTransaction().commit();
+		}
+		
+		long size = 0;
+		if (file == null || !Files.exists(file)) {
+			logger.log(Level.SEVERE, "Cybertracker package file not found.");
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		try {
+			size = Files.size(file);
+		}catch (Exception ex) {
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		
+		final java.nio.file.Path ffile = file;
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream output) throws IOException {
+				try {
+					Files.copy(ffile, output);
+				} catch (Exception e) {
+					logger.log(Level.SEVERE, "Error writing to output stream." + e.getMessage(), e); //$NON-NLS-1$
+				}
+			}
+	    };
+		
+		return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM)
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName().toString() + "\"") //$NON-NLS-1$ //$NON-NLS-2$
+				.header(HttpHeaders.CONTENT_LENGTH, size)
+				.header("Accept-Ranges", "bytes") //$NON-NLS-1$ //$NON-NLS-2$
+				.build();
+	}
+	
+	/**
+	 * Gets the package details include the current revision
+	 * conservation area and other details.
+	 * 
+	 * 
+	 */
+	@GET
+    @Path("/{uuid}")
+	public CyberTrackerPackageProxy getPackage(@PathParam("uuid") String packageUuidstr){
+		UUID packageUuid = null;
+		
+		try{
+			packageUuid = UUID.fromString(packageUuidstr);
+		}catch (Exception ex) {
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid package uuid.");
+		}
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			CyberTrackerPackage ctpackage = QueryFactory.buildQuery(s, CyberTrackerPackage.class, 
+					"ctPackageUuid", packageUuid).uniqueResult(); //$NON-NLS-1$
+			if (ctpackage == null) {
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
+			}
+			
+			return ctpackage.asProxy();
+		}finally {
+			s.getTransaction().commit();
+		}
+	}
+	
+	
+	/**
+	 * <p>Creates a new package OR updates an existing package.</p>
+	 * 
+	 * <p>Returns the URL that can be used for uploading the cybertracker package:</p>
+	 * <p>URL: ../server/api/cybertracker/<UUID><br>
+	 * Call Type: POST<br>
+	 * 
+	 * Payload: a CyberTrackerPackageProxy object with the name, revision, and caUuid fields populated
+	 * The revision should be of the form <uuid>.<yyyyMMddHHmmss>
+	 * </p>
+	 *<pre>{
+	 *   "caUuid":"8f7fbe1b-201a-4ef4-bda8-14f5581e65ce",
+	 *   "name":"Team A Patrol Package"
+	 *   "revision": "8f7fbe1b201a4ef4bda814f5581e65ce.20190901083423"
+	 *}</pre>
+	 * 
+	 * @return the location of where to upload the file in the "location" header, in javascript you can get it like: oReq.getResponseHeader("location");
+	 * where oReq is the XMLHttpRequest object used to post this request.
+	 */
+	@POST
+    @Path("/{uuid}")
+	public String createPackage(@PathParam("uuid") String packageUuidstr, CyberTrackerPackageProxy proxy){
+		UUID packageUuid = null;
+		
+		try{
+			packageUuid = UUID.fromString(packageUuidstr);
+		}catch (Exception ex) {
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid package uuid.");
+		}
+		
+		if (proxy.getCaUuid() == null){
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Conservation area must be provided"); //$NON-NLS-1$
+		}
+		
+		//parse the revision number and make sure it is of the
+		//form <uuid>.<date>
+		int index = proxy.getVersion().indexOf('.');
+		if (index != 32) {
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid revision value.  Must be of the form <uuid>.<date>"); //$NON-NLS-1$
+		}
+		String uuid = proxy.getVersion().substring(0, 32);
+		try {
+			UuidUtils.stringToUuid(uuid);
+			SimpleDateFormat sdf = new SimpleDateFormat(ICtPackage.PACKAGE_DATE_FORMAT);
+			sdf.parse(proxy.getVersion().substring(33));
+		}catch (Exception ex) {
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid revision value.  Must be of the form <uuid>.<date>"); //$NON-NLS-1$
+		}
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			ConservationAreaInfo cainfo = s.get(ConservationAreaInfo.class, proxy.getCaUuid());
+			if (cainfo == null) throw new SmartConnectException(Response.Status.BAD_REQUEST, "Conservation area not found.");
+			
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CaAction.VIEWCA_KEY)) {
+				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+			}
+			
+			
+			if (cainfo.getStatus() == ConservationAreaInfo.Status.CCAA){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid conservation area"); //$NON-NLS-1$
+			}
+			
+			String lengthHeader = headers.getRequestHeader("X-Upload-Content-Length").get(0); //$NON-NLS-1$
+			if (lengthHeader == null){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length not set"); //$NON-NLS-1$
+			}
+			long totalBytes = -1;
+			try{
+				totalBytes = Long.parseLong(lengthHeader);
+			}catch (Exception ex){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length invalid value", ex); //$NON-NLS-1$
+			}
+			if (totalBytes <= 0){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length invalid value"); //$NON-NLS-1$
+			}
+
+			CyberTrackerPackage ctpackage = QueryFactory.buildQuery(s, CyberTrackerPackage.class, "ctPackageUuid", packageUuid).uniqueResult(); //$NON-NLS-1$
+			if (ctpackage == null) {
+				ctpackage = new CyberTrackerPackage();
+				ctpackage.setConservationArea(cainfo);
+				ctpackage.setCtPackageUuid(packageUuid);
+			}else {
+				if (ctpackage.getStatus() == Status.UPLOADING) {
+					throw new SmartConnectException(Response.Status.CONFLICT, "Package is already being uploaded by another system. Wait for completion of delete package from server and try again.");
+				}
+				if (!ctpackage.getConservationArea().equals(cainfo)) {
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, "Package already exists for a different Conservation Area.");
+				}
+				
+				//delete file
+				java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
+						.toPath().resolve(CT_PACKAGE_LOCATION).resolve(ctpackage.getFilename());
+				if (Files.exists(toDelete)) {
+					Files.delete(toDelete);	
+				}
+				
+				
+			}
+			ctpackage.setStatus(Status.UPLOADING);
+			ctpackage.setName(proxy.getName());
+			ctpackage.setUploadedDate(new Date());
+			ctpackage.setVersion(proxy.getVersion());
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append(UuidUtils.uuidToString(ctpackage.getCtPackageUuid()));
+			sb.append("."); //$NON-NLS-1$
+			sb.append(ctpackage.getVersion());
+			sb.append(".zip"); //$NON-NLS-1$
+			ctpackage.setFilename(sb.toString());
+			s.saveOrUpdate(ctpackage);
+			
+			WorkItem up = new WorkItem();
+			up.setLocale(request.getLocale());
+			up.setConservationAreaInfo(cainfo);
+			up.setStartTime(new Date());
+			up.setStatus(WorkItem.Status.UPLOADING);
+			up.setType(Type.UP_CTPACKAGE);
+			up.setTotalBytes(totalBytes);
+			up.setLocalFilename(ctpackage.getFilename()); 
+			s.save(up);
+			
+			ctpackage.setWorkItem(up.getUuid());
+
+			java.nio.file.Path p = Paths.get(CT_PACKAGE_LOCATION);
+			if (!Files.exists(p)) {
+				Files.createDirectories(p);
+			}
+
+			up.setLocalFilename(p.resolve(ctpackage.getFilename()).toString()); 
+			
+			s.saveOrUpdate(ctpackage);
+			s.saveOrUpdate(up);
+			
+			//we have a file to upload and we expect more
+			
+			response.setHeader(HttpHeaders.LOCATION, up.getStatusURL(request));
+			response.setHeader(HttpHeaders.CONTENT_LENGTH, "0"); //$NON-NLS-1$
+			
+			s.getTransaction().commit();
+		}catch (SmartConnectException ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(Messages.getString("ConservationAreas.UploadErr", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
+		}
+		return ""; //$NON-NLS-1$
+	}
+}

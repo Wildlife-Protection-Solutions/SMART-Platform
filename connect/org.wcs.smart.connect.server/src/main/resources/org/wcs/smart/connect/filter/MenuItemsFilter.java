@@ -65,7 +65,8 @@ public class MenuItemsFilter implements Filter {
 		QUEUE("MenuItemsFilter.DataQueueLabel", ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY, "dataq.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		USERS("MenuItemsFilter.AccountsLabel", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY, "users.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		CAUSERS("MenuItemsFilter.CaAccountsLabel", ConnectRESTApplication.SERVLET_PATH + "causers", CaAdminAccountAction.KEY, "users.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		SETTINGS("MenuItemsFilter.ConfigurationLabel", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY, "settings.png");   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		SETTINGS("MenuItemsFilter.ConfigurationLabel", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY, "settings.png"),   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		CT("Cybertracker", ConnectRESTApplication.SERVLET_PATH + "cybertracker", AdminAccountAction.KEY, "cybertracker.png");
 		
 		String nameKey;
 		String url;
