@@ -47,6 +47,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -96,6 +98,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 	
 	public CtPatrolPackageConfigurator() {
 		contributions = new ArrayList<>();
+		contributions.add(new PatrolMetadataPackageContribution());
 		for ( IPackageContribution c : PackageContributionManager.INSTANCE.getContributionItems()) {
 			if (c.getUiController() != null) contributions.add(c.getUiController());
 		}
@@ -107,9 +110,19 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		if (!(ctitem instanceof PatrolCtPackage)) throw new IllegalStateException("Incorrect package type for cybertracker patrol editor.");
 		this.ctpackage = (PatrolCtPackage) ctitem;
 	
-		Composite main = new Composite(parent, SWT.NONE);
+		
+		TabFolder tabs = new TabFolder(parent, SWT.NONE);
+		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tabs.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		TabItem mainTab = new TabItem(tabs, SWT.NONE);
+		mainTab.setText("Model Settings");
+		
+		Composite main = new Composite(tabs, SWT.NONE);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		mainTab.setControl(main);
 		
 		Group g = new Group(main, SWT.NONE);
 		g.setLayout(new GridLayout(2, false));
@@ -175,10 +188,27 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 			}
 		});
 		
+		
 		if (contributions != null) {
 			for (IPackageUiContribution cc : contributions) {
-				Composite part = cc.createUi(main, ctpackage, e->validate());
-				if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				if (!cc.isTab()) {
+					Composite part = cc.createUi(main, ctpackage, e->validate());
+					if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));	
+				}
+			}
+		}
+		
+		if (contributions != null) {
+			for (IPackageUiContribution cc : contributions) {
+				if (cc.isTab()) {
+					TabItem item = new TabItem(tabs, SWT.NONE);
+					item.setText(cc.getTabName());
+					Composite all = new Composite(tabs, SWT.NONE);
+					all.setLayout(new GridLayout());
+					item.setControl(all);
+					Composite part = cc.createUi(all, ctpackage, e->validate());
+					if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				}
 			}
 		}
 		

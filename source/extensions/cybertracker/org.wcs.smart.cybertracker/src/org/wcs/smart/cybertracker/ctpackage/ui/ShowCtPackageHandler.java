@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.cybertracker.ctpackage.ui;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.Dialog;
@@ -30,8 +32,9 @@ import org.eclipse.swt.widgets.Shell;
 public class ShowCtPackageHandler {
 
 		@Execute
-		public void execute (Shell shell) {
+		public void execute (Shell shell, IEclipseContext context) {
 			Dialog dialog = new ConfigurePackagesDialog(shell);
+			ContextInjectionFactory.inject(dialog, context.createChild());
 			dialog.open();
 		}
 

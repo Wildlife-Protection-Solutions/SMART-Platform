@@ -395,7 +395,7 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 					}
 	
 					try {
-						File generated = exporter.export(tempDir, getConfigurableModelProvider(), progress.split(1));
+						File generated = exporter.export(tempDir, getConfigurableModelProvider(), null, progress.split(1));
 						if (generated == null) {
 							return; //error is supposed to be tracked inside export call
 						}

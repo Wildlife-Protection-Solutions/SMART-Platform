@@ -31,6 +31,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -95,7 +96,7 @@ public class PatrolCtPackageManager implements ICtPackageManager {
 	
 	
 	@Override
-	public void buildPackage(ICtPackage ctpackage, Path output) throws IOException {
+	public void buildPackage(ICtPackage ctpackage, IEclipseContext context, Path output) throws IOException {
 		if (Files.exists(output)) {
 			Files.delete(output);
 		}
@@ -140,7 +141,7 @@ public class PatrolCtPackageManager implements ICtPackageManager {
 						}
 						ppackage.setConfigurableModel(toExport);
 						progress.checkCanceled();
-						PatrolPackageExporter.INSTANCE.exportPackage(ppackage, updates, output, progress.split(1));
+						PatrolPackageExporter.INSTANCE.exportPackage(ppackage, updates, output, context, progress.split(1));
 					}catch(OperationCanceledException e) {
 						iscancel[0] = true;
 						Display.getDefault().syncExec(()->{

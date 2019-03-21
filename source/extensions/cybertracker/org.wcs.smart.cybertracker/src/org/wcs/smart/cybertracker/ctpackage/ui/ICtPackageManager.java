@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -103,5 +104,5 @@ public interface ICtPackageManager {
 	 * @param output
 	 * @throws IOException
 	 */
-	public void buildPackage(ICtPackage ctpackage, Path output) throws IOException;
+	public void buildPackage(ICtPackage ctpackage, IEclipseContext context, Path output) throws IOException;
 }

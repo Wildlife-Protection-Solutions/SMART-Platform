@@ -21,9 +21,13 @@
  */
 package org.wcs.smart.connect.cybertracker.alert;
 
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.cybertracker.export.alert.IAlertProvider;
 import org.wcs.smart.cybertracker.export.alert.ICtConfigurationExtension;
 import org.wcs.smart.cybertracker.export.alert.IDataTargetProvider;
@@ -41,6 +45,9 @@ public class ConnectConfigurationExtension implements ICtConfigurationExtension 
 	private IDataTargetProvider dprovider;
 	private IAlertProvider aprovider;
 	private String[] connect = null;
+	
+	@Inject
+	private IEclipseContext context;
 	
 	@Override
 	public synchronized IAlertProvider getAlertProvider(ConfigurableModel model, Session session) {
@@ -65,18 +72,23 @@ public class ConnectConfigurationExtension implements ICtConfigurationExtension 
 	 */
 	public synchronized String[] getConnectData(){
 		if (connect == null){
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					ConnectAlertConfigDialog cd = new ConnectAlertConfigDialog(Display.getDefault().getActiveShell());
-					if (cd.open() != Window.CANCEL) {
-						connect = new String[]{cd.getServerUrl(), cd.getUsername(), cd.getPassword()};
-					}else{
-						//	could not configure for whatever reason;
-						connect = new String[]{};
+			if (context == null || context.get(SmartConnect.class) == null) {
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						ConnectAlertConfigDialog cd = new ConnectAlertConfigDialog(Display.getDefault().getActiveShell());
+						if (cd.open() != Window.CANCEL) {
+							connect = new String[]{cd.getServerUrl(), cd.getUsername(), cd.getPassword()};
+						}else{
+							//	could not configure for whatever reason;
+							connect = new String[]{};
+						}
 					}
-				}
-			});
+				});
+			}else {
+				SmartConnect sc = context.get(SmartConnect.class);
+				connect = new String[] {sc.getServer().getServerUrl(), sc.getUsername(), sc.getPassword()};
+			}
 		}
 		return connect;
 	}

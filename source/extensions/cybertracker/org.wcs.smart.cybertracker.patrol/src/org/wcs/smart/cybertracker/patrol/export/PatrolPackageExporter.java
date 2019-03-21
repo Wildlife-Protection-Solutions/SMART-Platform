@@ -36,6 +36,7 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -103,7 +104,7 @@ public enum PatrolPackageExporter {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void exportPackage(PatrolCtPackage ctPackage, List<IPackageContribution.PackageContribution> updates, Path exportFile, IProgressMonitor monitor) throws Exception{
+	public void exportPackage(PatrolCtPackage ctPackage, List<IPackageContribution.PackageContribution> updates, Path exportFile, IEclipseContext context, IProgressMonitor monitor) throws Exception{
 		PatrolCtPackage localpackage = (PatrolCtPackage)ctPackage;
 		//TODO: support cancelling
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.PatrolPackageExporter_TaskName, 8);
@@ -168,7 +169,7 @@ public enum PatrolPackageExporter {
 				
 				sub.split(1);
 				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
-				profileToJson(session.get(CyberTrackerPropertiesProfile.class, localpackage.getCtProfile().getUuid()), modelToExport, session, profileFile);
+				profileToJson(session.get(CyberTrackerPropertiesProfile.class, localpackage.getCtProfile().getUuid()), modelToExport, session, context, profileFile);
 				toIncludeInZip.add(profileFile.toFile());
 				
 				//get version number from output file
@@ -271,9 +272,9 @@ public enum PatrolPackageExporter {
 		CtJsonExportUtils.writeProjectJson(cm.getName(), version, CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
 	}
 	
-	private void profileToJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, Session session, Path outputFile) throws IOException {
+	private void profileToJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, Session session, IEclipseContext context, Path outputFile) throws IOException {
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
-			fw.write(CtJsonExportUtils.toJson(profile, cm, session));
+			fw.write(CtJsonExportUtils.toJson(profile, cm, context, session));
 		}
 	}
 	

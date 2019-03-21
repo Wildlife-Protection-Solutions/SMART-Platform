@@ -45,6 +45,7 @@ import javax.xml.bind.Marshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
@@ -168,7 +169,7 @@ public class CyberTrackerConfExporter {
 	 * @return
 	 * @throws Exception
 	 */
-	public File export(File destFolder, IConfigurableModelProvider cmProvider, IProgressMonitor monitor) throws Exception {
+	public File export(File destFolder, IConfigurableModelProvider cmProvider, IEclipseContext context, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.CyberTrackerExportHandler_TaskName, 100);
 		session = HibernateManager.openSession();
 		session.beginTransaction();
@@ -182,7 +183,7 @@ public class CyberTrackerConfExporter {
 			}
 
 			progress.subTask(Messages.CyberTrackerConfExporter_Progress_AlertsConfig);
-			alertDataProvider = new ConfigurationDataProvider(configurableModel, session);
+			alertDataProvider = new ConfigurationDataProvider(configurableModel, session, context);
 
 			elements = ElementsUtil.buildEmptyElements();
 			newWpResultId = new CyberTrackerId();

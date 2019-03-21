@@ -28,6 +28,7 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.List;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -48,8 +49,8 @@ public class ExportPackageToFileAction implements ICtExportAction {
 
 	
 	@Override
-	public void doAction(List<ICtPackage> ctpackages, Shell shell) {
-		exportLocal(ctpackages, shell);
+	public void doAction(List<ICtPackage> ctpackages, IEclipseContext context) {
+		exportLocal(ctpackages, context.get(Shell.class));
 	}
 
 	@Override

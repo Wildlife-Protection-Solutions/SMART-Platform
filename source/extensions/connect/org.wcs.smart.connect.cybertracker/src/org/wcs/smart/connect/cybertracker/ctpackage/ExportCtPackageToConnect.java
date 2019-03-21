@@ -27,6 +27,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
@@ -36,6 +37,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Image;
@@ -67,24 +69,29 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 	private int ok;
 	private int total;
 	
+	
 	@Override
-	public void doAction(List<ICtPackage> ctpackages, Shell shell) {
+	public void doAction(List<ICtPackage> ctpackages, IEclipseContext context) {
 		try {
-			
-			ConnectDialog cd = new ConnectDialog(shell, true){
-				@Override
-				protected Control createDialogArea(Composite parent) {
-					setTitle("Export Package To Connect");
-					getShell().setText("Export CyberTracker Package To Connect");
-					setMessage("Configure SMART Connect details for export");	
-					return super.createDialogArea(parent);
-				}	
-			};
-			if (cd.open() != Window.OK) {
-				return;
+			SmartConnect connect = context.get(SmartConnect.class);
+			if (connect == null) {
+				ConnectDialog cd = new ConnectDialog(context.get(Shell.class), true){
+					@Override
+					protected Control createDialogArea(Composite parent) {
+						setTitle("Export Package To Connect");
+						getShell().setText("Export CyberTracker Package To Connect");
+						setMessage("Configure SMART Connect details for export");	
+						return super.createDialogArea(parent);
+					}	
+				};
+				if (cd.open() != Window.OK) {
+					return;
+				}
+				
+				connect = cd.getConnection();
+				context.set(SmartConnect.class, connect);
 			}
 			
-			SmartConnect connect = cd.getConnection();
 			ResteasyClient client = connect.getClient();
 			ResteasyWebTarget target = client.target(connect.getServer().getServerUrl() + SmartConnect.API_URL);
 			CtConnectClient simple = target.proxy(CtConnectClient.class);
@@ -104,7 +111,7 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 				@Override
 				public void done(IJobChangeEvent event) { 
 					jobs.remove(event.getJob());
-					checkdone(shell);
+					checkdone(context.get(Shell.class));
 				}
 				
 				@Override

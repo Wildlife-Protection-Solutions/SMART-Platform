@@ -31,10 +31,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -86,9 +90,11 @@ public class ConfigurePackagesDialog extends TitleAreaDialog {
 	private Composite detailsSection;
 	private List<ICtPackagePropertyProvider> propertyproviders;
 	
+	@Inject
+	private IEclipseContext context;
+	
 	public ConfigurePackagesDialog(Shell parentShell) {
 		super(parentShell);
-		propertyproviders = CtPackageExtensionPointManager.INSTANCE.getPackageProperties();
 	}
 
 	@Override
@@ -111,6 +117,9 @@ public class ConfigurePackagesDialog extends TitleAreaDialog {
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
+		propertyproviders = CtPackageExtensionPointManager.INSTANCE.getPackageProperties();
+		propertyproviders.forEach(pp->ContextInjectionFactory.inject(pp, context));
+		
 		parent = (Composite) super.createDialogArea(parent);
 		parent = new Composite(parent, SWT.NONE);
 		parent.setLayout(new GridLayout());
@@ -155,8 +164,12 @@ public class ConfigurePackagesDialog extends TitleAreaDialog {
 		for (Column c : Column.values()) {
 			TableViewerColumn gc = new TableViewerColumn(tblViewer, SWT.NONE);
 			gc.setLabelProvider(new ColumnLabelProvider() {
+				@Override
 				public String getText(Object element) {
 					return c.getValue(element);
+				}
+				public Image getImage(Object element) {
+					return c.getImage(element); 
 				}
 			});
 			gc.getColumn().setText(c.guiName);
@@ -167,11 +180,13 @@ public class ConfigurePackagesDialog extends TitleAreaDialog {
 				if (!prop.showInSummaryTable()) continue;
 				TableViewerColumn gc = new TableViewerColumn(tblViewer, SWT.NONE);
 				gc.setLabelProvider(new ColumnLabelProvider() {
+					@Override
 					public String getText(Object element) {
 						if (element instanceof ICtPackage)
 							return prop.getValue((ICtPackage)element);
 						return super.getText(element);
 					}
+					
 				});
 				gc.getColumn().setText(prop.getName());
 				gc.getColumn().setWidth(200);
@@ -311,7 +326,7 @@ public class ConfigurePackagesDialog extends TitleAreaDialog {
 	private boolean exportPackages() {
 		ExportCtPackageManager mm = new ExportCtPackageManager(getShell());
 		try {
-			return mm.doExport(getSelection());
+			return mm.doExport(getSelection(), context);
 		} catch (IOException ex) {
 			CyberTrackerPlugIn.displayError("Error", "Error exporting CyberTracker packages: " + ex.getMessage(), ex);
 			return false;
@@ -375,12 +390,19 @@ public class ConfigurePackagesDialog extends TitleAreaDialog {
 			this.guiName = name;
 		}
 		
+		public Image getImage(Object x) {
+			if (this != TYPE) return null;
+			if (!(x instanceof ICtPackage)) return null;
+			ICtPackage pp = (ICtPackage)x;
+			return CtPackageExtensionPointManager.INSTANCE.findManager(pp).getTypeImage();
+		}
+		
 		public String getValue(Object x) {
 			if (!(x instanceof ICtPackage)) return "";
 			ICtPackage pp = (ICtPackage)x;
 			
 			if (this == NAME) return pp.getName();
-			if (this == TYPE) return pp.getTypeIdentifier();
+			if (this == TYPE) return "";//CtPackageExtensionPointManager.INSTANCE.findManager(pp).getTypeName();
 			if (this == PACKAGE_DATE) {
 				//search filestore for package and display date
 				try {

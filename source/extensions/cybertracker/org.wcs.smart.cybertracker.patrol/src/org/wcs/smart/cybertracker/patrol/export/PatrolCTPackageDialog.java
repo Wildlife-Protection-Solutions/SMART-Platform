@@ -193,7 +193,7 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 						ctpackage.setConfigurableModel(toExport);
 						
 						progress.checkCanceled();
-						PatrolPackageExporter.INSTANCE.exportPackage(ctpackage, updates,  exportFile, progress.split(1));
+						PatrolPackageExporter.INSTANCE.exportPackage(ctpackage, updates,  exportFile, null, progress.split(1));
 						
 						Display.getDefault().syncExec(()->{
 							MessageDialog.openInformation(getShell(), Messages.PatrolCTPackageDialog_CompleteTitle, MessageFormat.format(Messages.PatrolCTPackageDialog_CompleteMsg,exportFile.toString()));	

@@ -53,6 +53,14 @@ public interface IPackageUiContribution {
 	public String isValid();
 	
 	/**
+	 * If this contribution requires it's own tab
+	 * @return
+	 */
+	public default boolean isTab() { return false; }
+	
+	public default String getTabName() { return null; }
+	
+	/**
 	 * Updates the contents of the package with the settings on this page
 	 * @param ctpackage
 	 */

@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
@@ -55,7 +56,7 @@ public enum CtPackageExtensionPointManager {
 	
 	private HashMap<String, ICtPackageManager> managers = null;
 	
-	public Path createPackage(ICtPackage ctpackage) throws IOException {
+	public Path createPackage(ICtPackage ctpackage, IEclipseContext context) throws IOException {
 		SimpleDateFormat sdf = new SimpleDateFormat(ICtPackage.PACKAGE_DATE_FORMAT);
 		
 		Path root = ICyberTrackerConstants.getCyberTrackerPackageFolder(ctpackage.getConservationArea());
@@ -87,7 +88,7 @@ public enum CtPackageExtensionPointManager {
 		
 		Path output = ICyberTrackerConstants.getCyberTrackerPackageFolder(SmartDB.getCurrentConservationArea()).resolve(fname);
 		
-		findManager(ctpackage).buildPackage(ctpackage, output);
+		findManager(ctpackage).buildPackage(ctpackage, context, output);
 		
 		return output;
 	}

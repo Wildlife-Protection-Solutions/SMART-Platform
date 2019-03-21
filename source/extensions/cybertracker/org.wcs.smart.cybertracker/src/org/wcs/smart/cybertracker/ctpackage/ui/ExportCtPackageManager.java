@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
@@ -46,7 +47,7 @@ public class ExportCtPackageManager {
 		this.shell = parent;
 	}
 	
-	public boolean doExport(List<ICtPackage> toExport) throws IOException {
+	public boolean doExport(List<ICtPackage> toExport, IEclipseContext context) throws IOException {
 		
 		//if any one of these already has packages then first ask the user if they want to
 		//update/create the packages with SMART data or export the existing package data
@@ -77,23 +78,23 @@ public class ExportCtPackageManager {
 		
 		List<ICtPackage> towrite;
 		if (create) {
-			towrite = createPackages(toExport);
+			towrite = createPackages(toExport, context);
 		}else {
 			towrite = new ArrayList<>(toExport);
 		}
 		if (towrite.isEmpty()) return false;
 		for (ICtExportAction a : doActions) {
-			a.doAction(towrite, shell);
+			a.doAction(towrite, context);
 		}
 		return true;
 	}
 	
-	private List<ICtPackage> createPackages(List<ICtPackage> items){
+	private List<ICtPackage> createPackages(List<ICtPackage> items, IEclipseContext context){
 		List<ICtPackage> towrite = new ArrayList<>(items);
 		//create all the packages
 		for (ICtPackage p : items) {
 			try {
-				CtPackageExtensionPointManager.INSTANCE.createPackage(p);
+				CtPackageExtensionPointManager.INSTANCE.createPackage(p, context);
 			}catch (Throwable ex) {
 				towrite.remove(p);
 				CyberTrackerPlugIn.displayError("ERROR", MessageFormat.format("Error generating package {0}: {1}", p.getName(), ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage()), ex);

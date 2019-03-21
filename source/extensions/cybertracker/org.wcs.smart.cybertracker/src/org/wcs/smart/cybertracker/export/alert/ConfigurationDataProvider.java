@@ -26,6 +26,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
@@ -48,7 +50,7 @@ public class ConfigurationDataProvider {
 	private ConfigurableModel model;
 	private Session session;
 	
-	public ConfigurationDataProvider(ConfigurableModel model, Session session) {
+	public ConfigurationDataProvider(ConfigurableModel model, Session session, IEclipseContext context) {
 		this.model = model;
 		this.session = session;
 		
@@ -57,6 +59,7 @@ public class ConfigurationDataProvider {
 			try {
 				for (IConfigurationElement e : config) {
 					ICtConfigurationExtension ext = (ICtConfigurationExtension) e.createExecutableExtension("clazz"); //$NON-NLS-1$
+					ContextInjectionFactory.inject(ext, context);
 					providers.add(ext);
 				}
 			}catch (Exception ex){

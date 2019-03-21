@@ -36,6 +36,7 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -100,7 +101,7 @@ public enum SurveyPackageExporter {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void exportPackage(SurveyDesign design, CyberTrackerPropertiesProfile profile, Path exportFile, List<IPackageContribution.PackageContribution> contributions, IProgressMonitor monitor) throws Exception{
+	public void exportPackage(SurveyDesign design, CyberTrackerPropertiesProfile profile, Path exportFile, List<IPackageContribution.PackageContribution> contributions, IEclipseContext context, IProgressMonitor monitor) throws Exception{
 		
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.SurveyPackageExporter_TaskName, 7);
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
@@ -160,7 +161,7 @@ public enum SurveyPackageExporter {
 				
 				sub.split(1);
 				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
-				profileToJson(session.get(CyberTrackerPropertiesProfile.class, profile.getUuid()), modelToExport, session, profileFile);
+				profileToJson(session.get(CyberTrackerPropertiesProfile.class, profile.getUuid()), modelToExport, session, context, profileFile);
 				toIncludeInZip.add(profileFile.toFile());
 								
 				//get version number from output file
@@ -256,9 +257,9 @@ public enum SurveyPackageExporter {
 		}
 	}
 	
-	private void profileToJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, Session session, Path outputFile) throws IOException {
+	private void profileToJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, Session session, IEclipseContext context, Path outputFile) throws IOException {
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
-			fw.write(CtJsonExportUtils.toJson(profile, cm, session));
+			fw.write(CtJsonExportUtils.toJson(profile, cm, context, session));
 		}
 	}
 	

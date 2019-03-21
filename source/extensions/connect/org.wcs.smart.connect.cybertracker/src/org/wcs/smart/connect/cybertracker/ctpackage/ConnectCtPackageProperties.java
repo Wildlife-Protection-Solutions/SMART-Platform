@@ -30,10 +30,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -42,7 +45,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.cybertracker.ConnectCtPlugIn;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageProperty;
@@ -70,6 +72,9 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 	
 	private List<IPackagePropertyListener> listeners = new ArrayList<>();
 	private AtomicBoolean isScheduled = new AtomicBoolean(false);
+	
+	@Inject
+	private IEclipseContext context;
 	
 	public ConnectCtPackageProperties() {
 	}
@@ -127,21 +132,26 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (connect == null) {
-				Display.getDefault().syncExec(()->{
-					ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
-						@Override
-						protected Control createDialogArea(Composite parent) {
-							setTitle("CyberTracker Packages");
-							getShell().setText("CyberTracker Packages");
-							setMessage("Configure SMART Connect details");	
-							return super.createDialogArea(parent);
-						}	
-					};
-					
-					if (cd.open() == Window.OK) {
-						connect = cd.getConnection();
-					}
-				});
+				if (context == null || context.get(SmartConnect.class) == null) {
+					Display.getDefault().syncExec(()->{
+						ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
+							@Override
+							protected Control createDialogArea(Composite parent) {
+								setTitle("CyberTracker Packages");
+								getShell().setText("CyberTracker Packages");
+								setMessage("Configure SMART Connect details");	
+								return super.createDialogArea(parent);
+							}	
+						};
+						
+						if (cd.open() == Window.OK) {
+							connect = cd.getConnection();
+							if (context != null) context.set(SmartConnect.class, connect);
+						}
+					});
+				}else {
+					connect = context.get(SmartConnect.class);
+				}
 			}
 			if (connect == null) {
 				fireEvents();

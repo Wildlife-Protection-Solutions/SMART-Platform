@@ -31,6 +31,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -92,7 +93,7 @@ public class SurveyCtPackageManager implements ICtPackageManager {
 	
 	
 	@Override
-	public void buildPackage(ICtPackage ctpackage, Path output) throws IOException {
+	public void buildPackage(ICtPackage ctpackage, IEclipseContext context, Path output) throws IOException {
 		if (Files.exists(output)) {
 			Files.delete(output);
 		}
@@ -123,7 +124,7 @@ public class SurveyCtPackageManager implements ICtPackageManager {
 							}
 						}
 						
-						SurveyPackageExporter.INSTANCE.exportPackage(ppackage.getSurveyDesign(), ppackage.getCtProfile(), output, updates, progress.split(1));
+						SurveyPackageExporter.INSTANCE.exportPackage(ppackage.getSurveyDesign(), ppackage.getCtProfile(), output, updates, context, progress.split(1));
 					}catch(OperationCanceledException e) {
 						iscancel[0] = true;
 						Display.getDefault().syncExec(()->{

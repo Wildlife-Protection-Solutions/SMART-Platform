@@ -23,8 +23,8 @@ package org.wcs.smart.cybertracker.ctpackage.ui;
 
 import java.util.List;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 
 /**
@@ -40,7 +40,7 @@ public interface ICtExportAction {
 	/**
 	 * Performs the export action
 	 */
-	public void doAction(List<ICtPackage> ctpackage, Shell parent);
+	public void doAction(List<ICtPackage> ctpackage, IEclipseContext context);
 	
 	/**
 	 * 

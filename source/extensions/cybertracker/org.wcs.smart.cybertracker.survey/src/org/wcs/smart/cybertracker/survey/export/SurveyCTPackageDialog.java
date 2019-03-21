@@ -172,7 +172,7 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 							}
 						}
 						
-						SurveyPackageExporter.INSTANCE.exportPackage(selectedDesign, selectedProfile, exportFile, updates, progress.split(1));
+						SurveyPackageExporter.INSTANCE.exportPackage(selectedDesign, selectedProfile, exportFile, updates, null, progress.split(1));
 						Display.getDefault().syncExec(()->{
 							MessageDialog.openInformation(getShell(), Messages.SurveyCTPackageDialog_ExportDoneTitle, MessageFormat.format(Messages.SurveyCTPackageDialog_ExportDoneMessage,exportFile.toString()));	
 						});

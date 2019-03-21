@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -156,7 +157,7 @@ public class CtJsonExportUtils {
 	 * @param profile
 	 * @return
 	 */
-	public static String toJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, Session session) {
+	public static String toJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, IEclipseContext context, Session session) {
 		JSONObject profileObj = new JSONObject();
 		
 		for (ProfileOptionID option : ProfileOptionID.values()) {
@@ -172,7 +173,7 @@ public class CtJsonExportUtils {
 				profileObj.put(option.name(), opValue.getStringValue());
 			}
 		}
-		ConfigurationDataProvider connectProvider = new ConfigurationDataProvider(cm, session);
+		ConfigurationDataProvider connectProvider = new ConfigurationDataProvider(cm, session, context);
 		try {
 			DataTarget target = connectProvider.getDataTarget();
 			if (target != null) {

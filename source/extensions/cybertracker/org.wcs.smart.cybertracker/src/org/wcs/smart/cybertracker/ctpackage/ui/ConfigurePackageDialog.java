@@ -70,7 +70,7 @@ public class ConfigurePackageDialog extends TitleAreaDialog{
 		parent = new Composite(parent, SWT.NONE);
 		parent.setLayout(new GridLayout(1, false));
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+		parent.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		config = CtPackageExtensionPointManager.INSTANCE.findManager(toEdit).createConfigurator();
 		if (config == null) {
 			throw new IllegalStateException("Not package manager found for package type: " + toEdit.getTypeIdentifier());
