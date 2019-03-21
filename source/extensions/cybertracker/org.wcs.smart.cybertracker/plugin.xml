@@ -5,6 +5,7 @@
    <extension-point id="org.wcs.smart.cybertracker.alert" name="%extension-point.name.0" schema="schema/org.wcs.smart.cybertracker.alert.exsd"/>
    <extension-point id="org.wcs.smart.cybertracker.json.processor" name="Cybertracker JSON Processor" schema="schema/org.wcs.smart.cybertracker.json.processor.exsd"/>
    <extension-point id="org.wcs.smart.cybertracker.export.package.contribution" name="Export Package Contribution" schema="schema/org.wcs.smart.cybertracker.export.package.contribution.exsd"/>
+   <extension-point id="org.wcs.smart.cybertracker.ctpackage" name="Cybertracker Package Extensions" schema="schema/org.wcs.smart.cybertracker.ctpackage.exsd"/>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
@@ -102,6 +103,11 @@
                   label="%cybertracker.import.command.label"
                   style="push">
             </command>
+            <command
+                  commandId="org.wcs.smart.cybertracker.packages.show"
+                  label="Packages..."
+                  style="push">
+            </command>
             <separator
                   name="org.wcs.smart.cybertracker2.separator.import"
                   visible="true">
@@ -185,6 +191,10 @@
             id="org.wcs.smart.cybertracker.json.import"
             name="%command.json.name">
       </command>
+      <command
+            id="org.wcs.smart.cybertracker.packages.show"
+            name="Ct Packages">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -203,6 +213,10 @@
       <handler
             class="org.wcs.smart.cybertracker.importer.json.CyberTrackerJsonImportHandler$CyberTrackerJsonImportHandlerWrapper"
             commandId="org.wcs.smart.cybertracker.json.import">
+      </handler>
+      <handler
+            class="org.wcs.smart.cybertracker.ctpackage.ui.ShowCtPackageHandler$ShowCtPackageHandlerWrapper"
+            commandId="org.wcs.smart.cybertracker.packages.show">
       </handler>
    </extension>
    <extension

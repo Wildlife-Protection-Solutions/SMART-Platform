@@ -64,12 +64,14 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
+import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.export.PackageContributionManager;
-import org.wcs.smart.cybertracker.export.mbtile.MapPackageContribution;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
+import org.wcs.smart.cybertracker.survey.model.SurveyCtPackage;
+import org.wcs.smart.cybertracker.survey.ui.SurveyCtPackageManager;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesign.State;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
@@ -101,12 +103,14 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 	
 	private CyberTrackerPropertiesProfile cmDefaultProfile = null;
 	
-	private List<IPackageContribution> contributions = null;
+	private List<IPackageUiContribution> contributions = null;
 	
     public SurveyCTPackageDialog(Shell parentShell) {
 		super(parentShell);
-		this.contributions = PackageContributionManager.INSTANCE.getContributionItems();
-		this.contributions.add(0,  new MapPackageContribution());
+		contributions = new ArrayList<>();
+		for (IPackageContribution c : PackageContributionManager.INSTANCE.getContributionItems()) {
+			contributions.add(c.getUiController());
+		}
 	}
 
     @Override
@@ -140,6 +144,14 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 				return;
 			}
 		}
+		SurveyCtPackage ctpackage = (SurveyCtPackage) (new SurveyCtPackageManager()).createPackage();
+		ctpackage.setSurveyDesign(selectedDesign);
+		ctpackage.setCtProfile(selectedProfile);
+		for (IPackageUiContribution c : contributions) {
+			c.updatePackage(ctpackage);
+		}
+		
+		final boolean[] iscancel = new boolean[] {false};
 
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
@@ -154,8 +166,8 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 						List<IPackageContribution.PackageContribution> updates = new ArrayList<>();
 						SubMonitor work = progress.split(1);
 						if (contributions != null) {
-							for (IPackageContribution cc : contributions) {
-								IPackageContribution.PackageContribution update = cc.packageFiles(work);
+							for (IPackageContribution cc : PackageContributionManager.INSTANCE.getContributionItems()) {
+								IPackageContribution.PackageContribution update = cc.packageFiles(null, work);
 								if (update != null) updates.add(update);
 							}
 						}
@@ -166,6 +178,7 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 						});
 						
 					}catch(OperationCanceledException e) {
+						iscancel[0] = true;
 						Display.getDefault().syncExec(()->{
 							MessageDialog.openError(getShell(), Messages.SurveyCTPackageDialog_CancelledTitle, Messages.SurveyCTPackageDialog_CancelledMsg);	
 						});
@@ -179,7 +192,7 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 			CyberTrackerPlugIn.displayError(Messages.SurveyCTPackageDialog_ErrorTitle, Messages.SurveyCTPackageDialog_ExportErrorMsg + e.getMessage(), e);
 			return;
 		}	
-		super.okPressed();	
+		if (!iscancel[0]) super.okPressed();	
     }
       
 	/**
@@ -314,8 +327,9 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 		});
 				
 		if (contributions != null) {
-			for (IPackageContribution cc : contributions) {
-				Composite part = cc.createUi(main, "survey"); //$NON-NLS-1$
+			for (IPackageUiContribution cc : contributions) {
+				//TODO: fix this
+				Composite part = cc.createUi(main, null, null); //$NON-NLS-1$
 				if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			}
 		}

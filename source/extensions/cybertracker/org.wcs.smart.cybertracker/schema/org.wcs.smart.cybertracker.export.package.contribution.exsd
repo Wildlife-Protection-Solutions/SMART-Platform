@@ -17,7 +17,7 @@
          </appinfo>
       </annotation>
       <complexType>
-         <sequence minOccurs="1" maxOccurs="unbounded">
+         <sequence minOccurs="0" maxOccurs="unbounded">
             <element ref="contribution" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
@@ -48,6 +48,11 @@
    </element>
 
    <element name="contribution">
+      <annotation>
+         <documentation>
+            Use this extension element point for contributing files to the package.  To contribute additonal settings to the project.json file use the project element.
+         </documentation>
+      </annotation>
       <complexType>
          <attribute name="contribution" type="string" use="required">
             <annotation>

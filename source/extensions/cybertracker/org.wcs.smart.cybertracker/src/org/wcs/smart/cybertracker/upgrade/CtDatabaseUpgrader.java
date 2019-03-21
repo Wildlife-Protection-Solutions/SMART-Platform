@@ -83,6 +83,7 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_4_0)) {
 			update40to50(session);
 		}
+		
 	}
 	
 	private static void update40to50(Session session) {
@@ -105,5 +106,7 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		
 		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_5_0, session);
 	}
+	
+	
 
 }

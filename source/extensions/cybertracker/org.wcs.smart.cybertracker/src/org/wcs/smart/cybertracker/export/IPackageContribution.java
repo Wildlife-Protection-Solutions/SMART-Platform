@@ -24,11 +24,14 @@ package org.wcs.smart.cybertracker.export;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.json.simple.JSONObject;
+import org.wcs.smart.cybertracker.model.ICtPackage;
 
 /**
  * Extension for contributing additional items to the Cybertracker export
@@ -42,26 +45,30 @@ import org.json.simple.JSONObject;
 public interface IPackageContribution {
 
 	/**
-	 * Create the ui component to add to the export dialog.  Can return null
-	 * if no ui component.
-	 * 
-	 * @param parent
-	 * @param prefKey a string used for storing preferences to database, same dialog type (patrols vs surveys)
-	 * should provide the same preferenece key
+	 * Returns the ui controller for this contribution.
 	 * @return
 	 */
-	public Composite createUi(Composite parent, String prefKey);
+	public IPackageUiContribution getUiController();
 	
 	/**
 	 * Returns a configuration describing the options that need
 	 * to be added to the package.  Can return null if nothing 
 	 * to do.
 	 * 
+	 * @param ctpackage
 	 * @param monitor
 	 * @return
 	 */
-	public PackageContribution packageFiles(IProgressMonitor monitor) throws IOException;
+	public PackageContribution packageFiles( ICtPackage ctpackage, IProgressMonitor monitor) throws IOException;
 
+	
+	/**
+	 * Create the contents of the details panel for the contribution.
+	 * @param parent the parent composite with a grid layout with 1 column
+	 * @return
+	 */
+	public void createDetails(Composite parent, ICtPackage ctpackage, Session session);
+	
 	/**
 	 * The contribution to add to the patrol export package.  This
 	 * includes a list of files to include in the package and a 
@@ -71,8 +78,8 @@ public interface IPackageContribution {
 	public class PackageContribution {
 		
 		private List<Path> filesToAdd = new ArrayList<>();
-		private String metadataKey = null;
-		private Object metadataValue = null;
+		private HashMap<String, Object> metadata = new HashMap<>();
+		
 		
 		/**
 		 * Can be file or a directory. If a directory all subdirectories will
@@ -91,27 +98,31 @@ public interface IPackageContribution {
 		public List<Path> getAddedFiles(){
 			return this.filesToAdd;
 		}
-			
-		public String getProjectMetadataKey(){
-			return metadataKey;
+		
+		/**
+		 * Get project metadata additions
+		 * @return
+		 */
+		public HashMap<String, Object> getProjectMetadata(){
+			return this.metadata;
 		}
 		
 		/**
-		 * 
-		 * @return either JSONObject or String
+		 * Adds a value to the project metadata
+		 * @param key
+		 * @param value
 		 */
-		public Object getProjectMetdata() {
-			return metadataValue;
+		public void addProjectMetadata(String key, JSONObject value) {
+			metadata.put(key, value);
 		}
 		
-		public void setProjectMetadata(String key, JSONObject value) {
-			this.metadataKey = key;
-			this.metadataValue = value;
-		}
-		
+		/**
+		 * Adds a string value to the project metadata
+		 * @param key
+		 * @param value
+		 */
 		public void setProjectMetadata(String key, String value) {
-			this.metadataKey = key;
-			this.metadataValue = value;
+			metadata.put(key, value);
 		}
 		
 		/**

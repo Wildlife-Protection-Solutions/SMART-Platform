@@ -27,6 +27,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.cybertracker.export.mbtile.MapPackageContribution;
 import org.wcs.smart.cybertracker.internal.Messages;
 
 /**
@@ -47,7 +48,7 @@ public enum PackageContributionManager {
 	 */
 	public List<IPackageContribution> getContributionItems(){
 		List<IPackageContribution>  items = new ArrayList<>();
-		
+		items.add(new MapPackageContribution());
 		if (Platform.getExtensionRegistry() != null) {
 			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXT_ID);
 			try {

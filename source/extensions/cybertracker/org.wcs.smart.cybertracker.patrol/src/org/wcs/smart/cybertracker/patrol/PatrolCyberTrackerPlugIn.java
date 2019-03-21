@@ -21,8 +21,14 @@
  */
 package org.wcs.smart.cybertracker.patrol;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.ICaDeleteHandler;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -38,7 +44,8 @@ public class PatrolCyberTrackerPlugIn extends AbstractUIPlugin {
 	private static PatrolCyberTrackerPlugIn plugin;
 	
 	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_1;
+	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_2;
 	
 	
 	/**
@@ -54,6 +61,16 @@ public class PatrolCyberTrackerPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		ICaDeleteHandler deleteHandler = new ICaDeleteHandler() {
+			@Override
+			public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
+				Query<?> q = session.createQuery("delete from PatrolCtPackage where conservationArea = :ca"); //$NON-NLS-1$
+				q.setParameter("ca", ca); //$NON-NLS-1$
+				q.executeUpdate();
+			}
+		};
+		ConservationAreaManager.getInstance().addDeleteHandler(deleteHandler, 1);
 	}
 
 	/*

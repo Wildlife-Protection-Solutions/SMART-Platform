@@ -112,6 +112,10 @@
             class="org.wcs.smart.cybertracker.survey.model.CtMissionLink"
             supportsCcaa="false">
       </class>
+      <class
+            class="org.wcs.smart.cybertracker.survey.model.SurveyCtPackage"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.cybertracker.json.processor">
@@ -153,6 +157,12 @@
             touchpointType="org.eclipse.equinox.p2.osgi"
             version="4.0.0">
       </action>
+   </extension>
+   <extension
+         point="org.wcs.smart.cybertracker.ctpackage">
+      <ctpackagemanager
+            class="org.wcs.smart.cybertracker.survey.ui.SurveyCtPackageManager">
+      </ctpackagemanager>
    </extension>
   
 </plugin>

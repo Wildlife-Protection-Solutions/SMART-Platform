@@ -119,6 +119,10 @@
             class="org.wcs.smart.cybertracker.patrol.model.CtPatrolLink"
             supportsCcaa="false">
       </class>
+      <class
+            class="org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.eclipse.equinox.p2.engine.actions">
@@ -160,6 +164,12 @@
       <JsonProcessor
             class="org.wcs.smart.cybertracker.patrol.json.PatrolJsonProcessor">
       </JsonProcessor>
+   </extension>
+   <extension
+         point="org.wcs.smart.cybertracker.ctpackage">
+      <ctpackagemanager
+            class="org.wcs.smart.cybertracker.patrol.ui.PatrolCtPackageManager">
+      </ctpackagemanager>
    </extension>
 
 </plugin>

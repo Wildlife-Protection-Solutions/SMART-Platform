@@ -7,11 +7,12 @@ Bundle-Activator: org.wcs.smart.connect.cybertracker.ConnectCtPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.wcs.smart.dataentry;bundle-version="[7.0.0,8.0.0)",
- org.wcs.smart.cybertracker;bundle-version="[7.0.0,8.0.0)",
- org.wcs.smart.connect;bundle-version="[7.0.0,8.0.0)"
+ org.wcs.smart.connect;bundle-version="[7.0.0,8.0.0)",
+ org.wcs.smart.cybertracker;bundle-version="[7.0.0,8.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: org.wcs.smart
-Export-Package: org.wcs.smart.connect.cybertracker.model,
+Export-Package: org.wcs.smart.connect.cybertracker.ctpackage,
+ org.wcs.smart.connect.cybertracker.model,
  org.wcs.smart.connect.cybertracker.updatesite
 Automatic-Module-Name: org.wcs.smart.connect.cybertracker

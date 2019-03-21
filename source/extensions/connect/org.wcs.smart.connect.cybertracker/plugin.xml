@@ -84,5 +84,20 @@
             class="org.wcs.smart.connect.cybertracker.FilestoreWatcherConfigurator">
       </handler>
    </extension>
+   <extension
+         point="org.wcs.smart.cybertracker.ctpackage">
+      <ctexportaction
+            class="org.wcs.smart.connect.cybertracker.ctpackage.ExportCtPackageToConnect">
+      </ctexportaction>
+      <ctpackageproperty
+            class="org.wcs.smart.connect.cybertracker.ctpackage.ConnectCtPackageProperties">
+      </ctpackageproperty>
+   </extension>
+   <extension
+         point="org.wcs.smart.cybertracker.export.package.contribution">
+      <contribution
+            contribution="org.wcs.smart.connect.cybertracker.ctpackage.ConnectUrlContribution">
+      </contribution>
+   </extension>
 
 </plugin>

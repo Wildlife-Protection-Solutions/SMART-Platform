@@ -21,8 +21,14 @@
  */
 package org.wcs.smart.cybertracker.survey;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.ICaDeleteHandler;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -37,8 +43,9 @@ public class SurveyCyberTrackerPlugIn extends AbstractUIPlugin {
 	// The shared instance
 	private static SurveyCyberTrackerPlugIn plugin;
 	
+	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_1;
+	public static final String DB_VERSION = DB_VERSION_2;
 	
 	/**
 	 * The constructor
@@ -53,6 +60,16 @@ public class SurveyCyberTrackerPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		ICaDeleteHandler deleteHandler = new ICaDeleteHandler() {
+			@Override
+			public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
+				Query<?> q = session.createQuery("delete from SurveyCtPackage where conservationArea = :ca"); //$NON-NLS-1$
+				q.setParameter("ca", ca); //$NON-NLS-1$
+				q.executeUpdate();
+			}
+		};
+		ConservationAreaManager.getInstance().addDeleteHandler(deleteHandler, 1);
 	}
 
 	/*

@@ -11,6 +11,7 @@ Require-Bundle: org.eclipse.ui.forms,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: org.wcs.smart.cybertracker,
+ org.wcs.smart.cybertracker.ctpackage.ui,
  org.wcs.smart.cybertracker.export,
  org.wcs.smart.cybertracker.export.alert,
  org.wcs.smart.cybertracker.export.data,

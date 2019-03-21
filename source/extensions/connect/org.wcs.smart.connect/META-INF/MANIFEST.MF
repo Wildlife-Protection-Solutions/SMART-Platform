@@ -13,12 +13,14 @@ Require-Bundle: org.eclipse.ui,
  org.apache.httpcomponents.httpcore;bundle-version="4.4.9"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
-Export-Package: javax.ws.rs,
+Export-Package: com.fasterxml.jackson.annotation,
+ javax.ws.rs,
  javax.ws.rs.core,
  org.jboss.resteasy.client.jaxrs,
  org.wcs.smart.connect,
  org.wcs.smart.connect.api,
  org.wcs.smart.connect.api.model,
+ org.wcs.smart.connect.internal.server,
  org.wcs.smart.connect.model,
  org.wcs.smart.connect.server,
  org.wcs.smart.connect.ui,

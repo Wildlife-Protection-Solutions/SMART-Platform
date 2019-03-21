@@ -45,8 +45,8 @@ import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
-import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils.Type;
+import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
@@ -125,8 +125,8 @@ public enum SurveyPackageExporter {
 						Files.move(p, moveTo);
 						toIncludeInZip.add(moveTo.toFile());
 					}
-					if (update.getProjectMetadataKey() != null) {
-						projectAdditions.put(update.getProjectMetadataKey(), update.getProjectMetdata());
+					if (update.getProjectMetadata() != null) {
+						projectAdditions.putAll(update.getProjectMetadata());
 					}
 				}
 				
@@ -148,14 +148,14 @@ public enum SurveyPackageExporter {
 				includeDmIcons(modelToExport, toIncludeInZip, tempDir);
 				
 				//include ca logo
-				Path logo = design.getConservationArea().getLogo();
+				Path logo = sd.getConservationArea().getLogo();
 				if (logo != null && Files.exists(logo)) {
 					toIncludeInZip.add(logo.toFile());
 				}
 				
 				sub.split(1);
 				Path metadataFile = tempDir.resolve(PATROL_METADATA_FILE);
-				metadataToJson(modelToExport.getConservationArea(), design, session,  metadataFile);
+				metadataToJson(modelToExport.getConservationArea(), sd, session,  metadataFile);
 				toIncludeInZip.add(metadataFile.toFile());
 				
 				sub.split(1);
@@ -163,9 +163,15 @@ public enum SurveyPackageExporter {
 				profileToJson(session.get(CyberTrackerPropertiesProfile.class, profile.getUuid()), modelToExport, session, profileFile);
 				toIncludeInZip.add(profileFile.toFile());
 								
+				//get version number from output file
+				String fname = exportFile.getFileName().toString();
+				int start = fname.indexOf('.') + 1;
+				int end = fname.lastIndexOf('.');
+				String version = fname.substring(start,end);
+				
 				sub.split(1);
 				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile(modelToExport, logo, projectFile, metadataFile, projectAdditions);
+				writeProjectFile( modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
 				toIncludeInZip.add(projectFile.toFile());
 				
 				ZipUtil.createZip(toIncludeInZip.toArray(new File[toIncludeInZip.size()]), exportFile.toFile(), sub.split(1));
@@ -292,8 +298,8 @@ public enum SurveyPackageExporter {
 		}
 	}
 
-	private void writeProjectFile(ConfigurableModel cm, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
-		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
+	private void writeProjectFile(ConfigurableModel cm, String version, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
+		CtJsonExportUtils.writeProjectJson(cm.getName(), version, CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -49,6 +49,7 @@ import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
+import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
@@ -102,16 +103,16 @@ public enum PatrolPackageExporter {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void exportPackage(ConfigurableModel cm, CyberTrackerPropertiesProfile profile, Path exportFile, List<IPackageContribution.PackageContribution> updates, IProgressMonitor monitor) throws Exception{
+	public void exportPackage(PatrolCtPackage ctPackage, List<IPackageContribution.PackageContribution> updates, Path exportFile, IProgressMonitor monitor) throws Exception{
+		PatrolCtPackage localpackage = (PatrolCtPackage)ctPackage;
 		//TODO: support cancelling
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.PatrolPackageExporter_TaskName, 8);
-		
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
 		try {
 			try(Session session = HibernateManager.openSession()){
-				ConfigurableModel modelToExport = cm;
-				if (cm.getUuid() != null) {
-					modelToExport = session.get(ConfigurableModel.class, cm.getUuid());
+				ConfigurableModel modelToExport = localpackage.getConfigurableModel();
+				if (modelToExport.getUuid() != null) {
+					modelToExport = session.get(ConfigurableModel.class, modelToExport.getUuid());
 				}
 				
 				List<File> toIncludeInZip = new ArrayList<>();
@@ -130,8 +131,8 @@ public enum PatrolPackageExporter {
 							toIncludeInZip.add(moveTo.toFile());
 						}
 					}
-					if (update.getProjectMetadataKey() != null) {
-						projectAdditions.put(update.getProjectMetadataKey(), update.getProjectMetdata());
+					if (update.getProjectMetadata() != null) {
+						projectAdditions.putAll(update.getProjectMetadata());
 					}
 				}
 				
@@ -145,7 +146,7 @@ public enum PatrolPackageExporter {
 				
 				//include configurable model image files
 				sub.split(1);
-				File dataFolder = new File(cm.getFileDataStoreLocation());
+				File dataFolder = new File(modelToExport.getFileDataStoreLocation());
 				if (dataFolder != null && dataFolder.exists() && dataFolder.isDirectory()) {
 					toIncludeInZip.addAll(Arrays.asList(dataFolder.listFiles()));
 				}
@@ -155,7 +156,7 @@ public enum PatrolPackageExporter {
 				includeDmIcons(modelToExport, toIncludeInZip, tempDir);
 				
 				//include ca logo
-				Path logo = cm.getConservationArea().getLogo();
+				Path logo = modelToExport.getConservationArea().getLogo();
 				if (logo != null && Files.exists(logo)) {
 					toIncludeInZip.add(logo.toFile());
 				}
@@ -167,12 +168,18 @@ public enum PatrolPackageExporter {
 				
 				sub.split(1);
 				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
-				profileToJson(session.get(CyberTrackerPropertiesProfile.class, profile.getUuid()), modelToExport, session, profileFile);
+				profileToJson(session.get(CyberTrackerPropertiesProfile.class, localpackage.getCtProfile().getUuid()), modelToExport, session, profileFile);
 				toIncludeInZip.add(profileFile.toFile());
+				
+				//get version number from output file
+				String fname = exportFile.getFileName().toString();
+				int start = fname.indexOf('.') + 1;
+				int end = fname.lastIndexOf('.');
+				String version = fname.substring(start,end);
 				
 				sub.split(1);
 				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile(cm, logo, projectFile, metadataFile, projectAdditions);
+				writeProjectFile(modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
 				toIncludeInZip.add(projectFile.toFile());
 				
 				ZipUtil.createZip(toIncludeInZip.toArray(new File[toIncludeInZip.size()]), exportFile.toFile(), sub.split(1));
@@ -260,8 +267,8 @@ public enum PatrolPackageExporter {
 		}
 	}
 	
-	private void writeProjectFile(ConfigurableModel cm, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
-		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
+	private void writeProjectFile(ConfigurableModel cm, String version, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
+		CtJsonExportUtils.writeProjectJson(cm.getName(), version, CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
 	}
 	
 	private void profileToJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, Session session, Path outputFile) throws IOException {

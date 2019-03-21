@@ -191,13 +191,14 @@ public class CtJsonExportUtils {
 		return profileObj.toJSONString();
 	}
 
-	public static void writeProjectJson(String projectName, String cmFile, Path logoFile, Path outputFile, Path metadataFilename, HashMap<String, Object> projectAdditions) throws IOException {
+	public static void writeProjectJson(String projectName, String version, String cmFile, Path logoFile, Path outputFile, Path metadataFilename, HashMap<String, Object> projectAdditions) throws IOException {
 		JSONObject projectJSON = new JSONObject();
 		projectJSON.put("projectName",projectName); //$NON-NLS-1$
 		projectJSON.put("decoder","sourceparser_smartconfigurabledatamodel"); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("source",Messages.CtJsonExportUtils_SmartCtSource); //$NON-NLS-1$
 		projectJSON.put("definition",cmFile); //$NON-NLS-1$
 		projectJSON.put("metadata", metadataFilename.getFileName().toString()); //$NON-NLS-1$
+		projectJSON.put("version",  version == null ? "" : version); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("creation_date",new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date())); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("logo", (logoFile == null || !Files.exists(logoFile)) ? null : logoFile.getFileName().toString()); //$NON-NLS-1$
 
@@ -206,6 +207,7 @@ public class CtJsonExportUtils {
 				projectJSON.put(e.getKey(), e.getValue());
 			}
 		}
+		
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
 			fw.write(projectJSON.toJSONString());
 		}

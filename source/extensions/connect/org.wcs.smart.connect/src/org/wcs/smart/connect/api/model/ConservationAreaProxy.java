@@ -39,7 +39,8 @@ public class ConservationAreaProxy {
 		DATA,
 		NODATA,
 		CCAA,
-		DELETING
+		DELETING,
+		ERROR
 	}
 	
 	private UUID caUuid;

@@ -22,6 +22,8 @@
 package org.wcs.smart.cybertracker.model;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.wcs.smart.ca.ConservationArea;
 
@@ -61,6 +63,7 @@ public interface ICyberTrackerConstants {
 	public static final String SMART_CTX_FILENEME = "smart.ctx"; //$NON-NLS-1$
 	public static final String SMART_CTX_DOWNLOAD_FOLDER = "CyberTracker"; //$NON-NLS-1$
 	public static final String SMART_CTX_STORAGE_FOLDER = "storage"; //$NON-NLS-1$
+	public static final String CT_PACKAGE_FOLDER = "packages"; //$NON-NLS-1$
 	
 	public static final String XML_SCREENS = "Screens.xml"; //$NON-NLS-1$
 	public static final String XML_ELEMENTS = "Elements.xml"; //$NON-NLS-1$
@@ -141,6 +144,9 @@ public interface ICyberTrackerConstants {
 	public static final String PHOTO = "{82D16C8E-776E-4E8B-A459-6EBF62E50076}"; //$NON-NLS-1$
 	
 	
+	static Path getCyberTrackerPackageFolder(ConservationArea ca) {
+		return Paths.get(ca.getFileDataStoreLocation()).resolve(SMART_CTX_DOWNLOAD_FOLDER).resolve(CT_PACKAGE_FOLDER);
+	}
 	static String getCyberTrackerFolder(ConservationArea ca) {
 		return ca.getFileDataStoreLocation() + File.separator + ICyberTrackerConstants.SMART_CTX_DOWNLOAD_FOLDER;
 	}

@@ -71,6 +71,30 @@ public class CtPatrolDatabaseUpgrader implements IDatabaseUpgrader {
 	 * @param session in active transaction
 	 */
 	public static final void upgrade(String currentVersion, Session session){
+		if (currentVersion.equals(PatrolCyberTrackerPlugIn.DB_VERSION_1)) {
+			update10to20(session);
+		}
+	}
+	
+	private static void update10to20(Session session) {
+		String[] sql = new String[] {
+				"create table smart.ct_patrol_package(uuid char(16) for bit data not null, name varchar(512), ca_uuid char(16) for bit data not null, cm_uuid char(16) for bit data, ctprofile_uuid char(16) for bit data, has_incident boolean default false, incident_uuid char(16) for bit data, basemapdef varchar(32672), primary key (uuid))", //$NON-NLS-1$
+
+				"ALTER TABLE SMART.ct_patrol_package ADD CONSTRAINT ct_patrol_package_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE SMART.ct_patrol_package ADD CONSTRAINT ct_patrol_package_cm_uuid_fk FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE SMART.ct_patrol_package ADD CONSTRAINT ct_patrol_package_incident_uuid_fk FOREIGN KEY (incident_uuid) REFERENCES smart.configurable_model(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE SMART.ct_patrol_package ADD CONSTRAINT ct_patrol_package_ctprofile_uuid_fk FOREIGN KEY (ctprofile_uuid) REFERENCES smart.ct_properties_profile(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
+				"GRANT ALL PRIVILEGES ON smart.ct_patrol_package to data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_patrol_package to manager", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_patrol_package to analyst", //$NON-NLS-1$ 
+		};
+		
+		for (String s : sql) {
+			session.createNativeQuery(s).executeUpdate();
+		}
+		
+		HibernateManager.setPlugInVersion(PatrolCyberTrackerPlugIn.PLUGIN_ID, PatrolCyberTrackerPlugIn.DB_VERSION_2, session);
 	}
 
 }

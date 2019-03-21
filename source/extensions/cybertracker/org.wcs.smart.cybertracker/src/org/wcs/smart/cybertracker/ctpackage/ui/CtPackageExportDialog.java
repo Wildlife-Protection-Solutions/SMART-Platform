@@ -1,0 +1,146 @@
+/*
+ * Copyright (C) 2019 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.cybertracker.ctpackage.ui;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.ui.properties.DialogConstants;
+
+/**
+ * Dialog to display ct package export options to user
+ * 
+ * @author Emily
+ *
+ */
+public class CtPackageExportDialog extends Dialog {
+
+	private static final String KEY_SEP = "|"; //$NON-NLS-1$
+	private static final String ACTIONS_PREF_KEY = "org.wcs.smart.cybertracker.ctpackage.ui.CtPackageExportDialog.action"; //$NON-NLS-1$
+	private static final String GENERATE_PREF_KEY = "org.wcs.smart.cybertracker.ctpackage.ui.CtPackageExportDialog.dogenerate"; //$NON-NLS-1$
+	
+	private boolean requireUpdateOp;
+	private List<ICtExportAction> actions;
+	private Button btnGenerate;
+	private List<Button> actionButtons;
+	
+	private boolean doGenerate = false;
+	private List<ICtExportAction> selectedActions;
+	
+	public CtPackageExportDialog(Shell parent, boolean requireUpdateOp,List<ICtExportAction> actions) {
+		super(parent);
+		this.requireUpdateOp = requireUpdateOp;
+		this.actions = actions;
+	}
+
+	public boolean getDoGenerate() { return this.doGenerate; }
+	public List<ICtExportAction> getSelectedActions() { return this.selectedActions;}
+	
+	@Override
+	public void okPressed() {
+		selectedActions = new ArrayList<>();
+		
+		doGenerate = btnGenerate.getSelection();
+		for (Button b : actionButtons) {
+			ICtExportAction action = (ICtExportAction)b.getData();
+			if (b.getSelection()) {
+				selectedActions.add(action);
+				InstanceScope.INSTANCE.getNode(CyberTrackerPlugIn.PLUGIN_ID).putBoolean(ACTIONS_PREF_KEY + KEY_SEP + action.getClass().getCanonicalName(), true);
+			}else {
+				InstanceScope.INSTANCE.getNode(CyberTrackerPlugIn.PLUGIN_ID).putBoolean(ACTIONS_PREF_KEY + KEY_SEP + action.getClass().getCanonicalName(), false); 
+			}
+		}
+		
+		InstanceScope.INSTANCE.getNode(CyberTrackerPlugIn.PLUGIN_ID).putBoolean(GENERATE_PREF_KEY, doGenerate);
+		super.okPressed();
+	}
+	
+	@Override
+	public void createButtonsForButtonBar(Composite parent) {
+		createButton(parent, IDialogConstants.OK_ID, DialogConstants.EXPORT_BUTTON_TEXT, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+	}
+	
+	@Override
+	public Composite createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
+		parent.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayout(new GridLayout());
+		((GridLayout)main.getLayout()).marginWidth = 0;
+		((GridLayout)main.getLayout()).marginHeight = 0;
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		main.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
+		
+		actionButtons = new ArrayList<>();
+
+		for (ICtExportAction a : actions) {
+			Button btnAction = new Button(main, SWT.CHECK);
+			btnAction.setText(a.getName());
+			btnAction.setData(a);
+			btnAction.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			actionButtons.add(btnAction);
+			
+			String key = ACTIONS_PREF_KEY + KEY_SEP + a.getClass().getCanonicalName();
+			
+			boolean dogenerate = InstanceScope.INSTANCE.getNode(CyberTrackerPlugIn.PLUGIN_ID).getBoolean(key, true);
+			btnAction.setSelection(dogenerate);
+		}
+		
+
+		Label l = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		btnGenerate = new Button(main, SWT.CHECK);
+		btnGenerate.setEnabled(requireUpdateOp);
+		btnGenerate.setText("Regenerate packages before exporting");
+		btnGenerate.setToolTipText("recreate packages if changes have been made to the configurable models, settings etc since the package was created");
+		btnGenerate.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		if (requireUpdateOp) {
+			boolean dogenerate = InstanceScope.INSTANCE.getNode(CyberTrackerPlugIn.PLUGIN_ID).getBoolean(GENERATE_PREF_KEY, true);
+			btnGenerate.setSelection(dogenerate);
+		}else {
+			btnGenerate.setSelection(true);
+		}
+
+		getShell().setText("Export CyberTracker Packages");
+		return parent;
+	}
+	
+	@Override
+	public boolean isResizable() {
+		return true;
+	}
+}

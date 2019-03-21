@@ -58,8 +58,8 @@ public enum ChangeLogTableManager {
 	 * @param ca
 	 */
 	public void deleteAll(Session s, ConservationArea ca){
-		Query<?> query = s.createQuery("DELETE FROM ChangeLogItem WHERE conservationArea = ?"); //$NON-NLS-1$
-		query.setParameter(0, ca.getUuid());
+		Query<?> query = s.createQuery("DELETE FROM ChangeLogItem WHERE conservationArea = :ca"); //$NON-NLS-1$
+		query.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
 		query.executeUpdate();
 	}
 

@@ -64,12 +64,14 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
+import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.export.PackageContributionManager;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
-import org.wcs.smart.cybertracker.export.mbtile.MapPackageContribution;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
+import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
+import org.wcs.smart.cybertracker.patrol.ui.PatrolCtPackageManager;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
@@ -103,12 +105,14 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 	
 	private CyberTrackerPropertiesProfile cmDefaultProfile = null;
 	
-	private List<IPackageContribution> contributions = null;
+	private List<IPackageUiContribution> contributions = null;
 	
     public PatrolCTPackageDialog(Shell parentShell) {
 		super(parentShell);
-		this.contributions = PackageContributionManager.INSTANCE.getContributionItems();
-		this.contributions.add(0,  new MapPackageContribution());
+		this.contributions = new ArrayList<>();
+		for (IPackageContribution c : PackageContributionManager.INSTANCE.getContributionItems()) {
+			if (c.getUiController() != null) this.contributions.add(c.getUiController());
+		}
 	}
 
     @Override
@@ -147,6 +151,13 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 			}
 		}
 
+		PatrolCtPackage ctpackage = (PatrolCtPackage) (new PatrolCtPackageManager()).createPackage();
+		ctpackage.setConfigurableModel(selectedModel);
+		ctpackage.setCtProfile(selectedProfile);
+		for (IPackageUiContribution c : contributions) {
+			c.updatePackage(ctpackage);
+		}
+		
 		final boolean[] iscancel = new boolean[] {false};
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
@@ -161,8 +172,8 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 						List<IPackageContribution.PackageContribution> updates = new ArrayList<>();
 						SubMonitor work = progress.split(1);
 						if (contributions != null) {
-							for (IPackageContribution cc : contributions) {
-								IPackageContribution.PackageContribution update = cc.packageFiles(work);
+							for (IPackageContribution cc : PackageContributionManager.INSTANCE.getContributionItems()) {
+								IPackageContribution.PackageContribution update = cc.packageFiles(ctpackage, work);
 								if (update != null) updates.add(update);
 							}
 						}
@@ -179,8 +190,10 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 						}else {
 							toExport = selectedModel;
 						}
+						ctpackage.setConfigurableModel(toExport);
+						
 						progress.checkCanceled();
-						PatrolPackageExporter.INSTANCE.exportPackage(toExport, selectedProfile, exportFile, updates, progress.split(1));
+						PatrolPackageExporter.INSTANCE.exportPackage(ctpackage, updates,  exportFile, progress.split(1));
 						
 						Display.getDefault().syncExec(()->{
 							MessageDialog.openInformation(getShell(), Messages.PatrolCTPackageDialog_CompleteTitle, MessageFormat.format(Messages.PatrolCTPackageDialog_CompleteMsg,exportFile.toString()));	
@@ -236,6 +249,13 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 		if (this.selectedProfile == null) {
 			setErrorMessage(Messages.PatrolCTPackageDialog_ProfileRequired);
 			return;
+		}
+		for (IPackageUiContribution c : contributions) {
+			String error = c.isValid();
+			if (error != null) {
+				setErrorMessage(error);
+				return;
+			}
 		}
 		
 		getButton(IDialogConstants.OK_ID).setEnabled(true);
@@ -348,8 +368,8 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 		});
 		
 		if (contributions != null) {
-			for (IPackageContribution cc : contributions) {
-				Composite part = cc.createUi(main, "patrol"); //$NON-NLS-1$
+			for (IPackageUiContribution cc : contributions) {
+				Composite part = cc.createUi(main, null, e->validate());
 				if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			}
 		}
