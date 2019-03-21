@@ -105,6 +105,10 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String SMART_48_ICON = "org.wcs.smart.SMART_48_ICON"; //$NON-NLS-1$
 	
+	/**
+	 * Image descriptor for copy icon
+	 */
+	public static final String CREATECOPY_ICON = "org.wcs.smart.CREATECOPY_ICON"; //$NON-NLS-1$
 	
 	/**
 	 * Image descriptor for category icon
@@ -451,6 +455,9 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(EDIT_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/track/edit_track.png")); //$NON-NLS-1$
 	     reg.put(MERGE_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/track/merge_track.png")); //$NON-NLS-1$
 	     reg.put(ZOOM_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/track/zoom_track.png")); //$NON-NLS-1$
+	     
+	     reg.put(CREATECOPY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/createcopy.png")); //$NON-NLS-1$
+
 	}
 	
 	/**

@@ -89,6 +89,10 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String PATROL_ICON = "org.wsc.smart.patrol.PATROL"; //$NON-NLS-1$
 	
+	/**
+	 * Image descriptor key for patrol icon
+	 */
+	public static final String PATROL32_ICON = "org.wsc.smart.patrol.PATROL32"; //$NON-NLS-1$
 	
 	/**
 	 * Image descriptor key for patrol armed icon
@@ -150,6 +154,7 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 		
 		reg.put(MONTH_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/calendar_month.png")); //$NON-NLS-1$
 		reg.put(YEAR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/calendar_year.png")); //$NON-NLS-1$
+		reg.put(PATROL32_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj32/patrol.32.png")); //$NON-NLS-1$
 
 		reg.put(PATROL_FOLDER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_folder.png")); //$NON-NLS-1$
 	}

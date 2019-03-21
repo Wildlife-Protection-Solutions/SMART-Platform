@@ -47,7 +47,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.command.navigation.ZoomCommand;
@@ -64,8 +67,10 @@ import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseWheelEvent
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseWheelListener;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
+import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
@@ -77,8 +82,6 @@ import org.wcs.smart.ui.map.tool.ZoomInTool;
 import org.wcs.smart.ui.map.tool.ZoomOutTool;
 import org.wcs.smart.ui.map.tool.ZoomTool;
 import org.wcs.smart.util.ReprojectUtils;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Map dialog for picking map extents
@@ -172,7 +175,14 @@ public class SelectBoundsMapDialog extends Dialog implements MapPart{
 			@Override
 			public void done(IJobChangeEvent event) {
 				if (bounds == null) return;
-				getMap().sendCommandASync(new ZoomCommand(bounds));
+				ReferencedEnvelope zoombnds = bounds;
+				try {
+					MathTransform t = CRS.findMathTransform(bounds.getCoordinateReferenceSystem(), map.getViewportModel().getCRS());
+					zoombnds = new ReferencedEnvelope(JTS.transform(bounds, t), SmartDB.DATABASE_CRS);
+				}catch (Exception ex) {
+					SmartPlugIn.log(ex.getMessage(), ex);
+				}
+				getMap().sendCommandASync(new ZoomCommand(zoombnds));
 			}
 		});
 		layer.schedule();
