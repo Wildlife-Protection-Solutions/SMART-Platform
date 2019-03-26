@@ -384,9 +384,12 @@ public class DataGenerator implements IDataEngine{
 							if (mappingType == ObservationConfiguration.Type.RANDOM) {
 								WaypointObservationAttribute woa = new WaypointObservationAttribute();
 								woa.setAttribute(a);
-								woa.setAttributeValue(generateRandomValue(a));
-								woa.setObservation(wo);
-								wo.getAttributes().add(woa);
+								Object value = generateRandomValue(a);
+								if (value != null) {
+									woa.setAttributeValue(value);
+									woa.setObservation(wo);
+									wo.getAttributes().add(woa);
+								}
 							}
 						}
 					}
@@ -438,6 +441,7 @@ public class DataGenerator implements IDataEngine{
 		case DATE:
 			return new Date(  (new Date()).getTime() + (long)(random.nextDouble() * ((long)365 * 24 * 60 *60 *1000)) );
 		case LIST:
+			if (a.getActiveListItems().isEmpty()) return null;
 			return a.getActiveListItems().get(random.nextInt(a.getActiveListItems().size()));
 		case NUMERIC:
 			if (a.getMinValue() != null && a.getMaxValue() != null) {
@@ -470,6 +474,7 @@ public class DataGenerator implements IDataEngine{
 					processing.addAll(n.getActiveChildren());
 				}
 			}
+			if (kids.isEmpty()) return null;
 			return kids.get(random.nextInt(kids.size()));
 		}
 		throw new Exception(MessageFormat.format(Messages.DataGenerator_AttributeTypeNotSupported, a.getType().typeKey));

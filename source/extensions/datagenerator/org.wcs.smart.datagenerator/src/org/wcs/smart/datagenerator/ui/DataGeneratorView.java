@@ -85,6 +85,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -178,6 +179,8 @@ public class DataGeneratorView {
 	private Category lastSelectedCategory = null;
 	
 	private boolean isInitializing = false;
+	
+	private List<ControlDecoration> decorations = new ArrayList<>();
 	
 	private LabelProvider typeLabelProvider = new LabelProvider() {
 		public String getText(Object element) {
@@ -402,8 +405,13 @@ public class DataGeneratorView {
 			}else if (x instanceof Area.AreaType) {
 				dataConfig.setBboxArea(((Area.AreaType)x));
 				saveConfig();
+				cdBBox.hide();
+				enableGenerateButton(true);
 			}else {
 				//validate envelope
+				Event evt = new Event();
+				evt.widget = txtBoundingBox;
+				txtBoundingBox.notifyListeners(SWT.Modify, evt);
 			}
 			
 			
@@ -411,6 +419,7 @@ public class DataGeneratorView {
 		txtBoundingBox.addListener(SWT.Modify, e->{
 			if (dataConfig == null || isInitializing) return;
 			String[] parts = txtBoundingBox.getText().split(","); //$NON-NLS-1$
+			enableGenerateButton(false);
 			if (parts.length != 4) {
 				cdBBox.show();
 				return;
@@ -422,7 +431,7 @@ public class DataGeneratorView {
 				x2 = Double.parseDouble(parts[2]);
 				y2 = Double.parseDouble(parts[3]);
 				
-				if (x1 < -180 || x2 < -180 || x1 > 180 || x2 > 180 || y1 < -90 || y2 < -90 || y1 > 90 || y2 > 90) {
+				if (x1 < -180 || x2 < -180 || x1 > 180 || x2 > 180 || y1 < -90 || y2 < -90 || y1 > 90 || y2 > 90 || x1 > x2 || y1 > y2) {
 					cdBBox.show();
 					return;
 				}
@@ -431,8 +440,8 @@ public class DataGeneratorView {
 				cdBBox.show();
 				return;
 			}
-			
 			cdBBox.hide();
+			enableGenerateButton(true);
 			Envelope env = new Envelope(x1, x2, y1, y2);
 			dataConfig.setBboxEnvelope(env);
 			saveConfig();
@@ -769,13 +778,26 @@ public class DataGeneratorView {
 	}
 	
 	private void enableGenerateButton(boolean enable) {
-		btnGenerateData.setEnabled(enable);
+		if (!enable) {
+			btnGenerateData.setEnabled(enable);
+			return;
+		}else {
+			for (ControlDecoration c : decorations) {
+				if (c.isVisible()) {
+					btnGenerateData.setEnabled(false);
+					return;
+				}
+			}
+			btnGenerateData.setEnabled(true);
+		}
+		
 	}
 	
 	ControlDecoration createCd(Control owner) {
 		ControlDecoration cd = new ControlDecoration(owner, SWT.TOP | SWT.RIGHT);
 		cd.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		cd.hide();
+		decorations.add(cd);
 		return cd;
 	}
 	
