@@ -29,6 +29,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
+import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -40,7 +41,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 @Entity
 @Table(name="smart.ct_patrol_package")
-public class PatrolCtPackage extends AbstractCtPackage{
+public class PatrolCtPackage extends AbstractCtPackage implements ICmProvider{
 
 	public static final String TYPE_NAME = "PATROL"; //$NON-NLS-1$
 
@@ -54,6 +55,12 @@ public class PatrolCtPackage extends AbstractCtPackage{
 	}
 	public void setConfigurableModel(ConfigurableModel cm) {
 		this.cm = cm;
+	}
+	
+	@Transient
+	public boolean isDataModel() {
+		if (getConfigurableModel() == null) return true;
+		return false;
 	}
 	
 	@Transient

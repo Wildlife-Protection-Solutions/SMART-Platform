@@ -98,6 +98,9 @@
       <contribution
             contribution="org.wcs.smart.connect.cybertracker.ctpackage.ConnectUrlContribution">
       </contribution>
+      <contribution
+            contribution="org.wcs.smart.connect.cybertracker.ctpackage.ConnectDataContribution">
+      </contribution>
    </extension>
 
 </plugin>

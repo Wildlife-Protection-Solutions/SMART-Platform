@@ -41,7 +41,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public interface ICtPackage {
 
-	public static final String PACKAGE_DATE_FORMAT = "yyyyMMddHHmmss";
+	public static final String PACKAGE_DATE_FORMAT = "yyyyMMddHHmmss"; //$NON-NLS-1$
 	
 	/**
 	 * Unique identifier

@@ -46,6 +46,7 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -66,7 +67,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
@@ -76,7 +76,7 @@ import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 
-/**
+/**	
  * Dialog for listing and managing all ct packages.
  * 
  * @author Emily
@@ -158,9 +158,14 @@ public class ConfigurePackagesDialog extends TitleAreaDialog {
 		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		sash.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
-		tblViewer = new TableViewer(sash, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
+		Composite t = new Composite(sash, SWT.NONE);
+		TableColumnLayout tcl = new TableColumnLayout();
+		t.setLayout(tcl);
+		
+		tblViewer = new TableViewer(t, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 		tblViewer.setContentProvider(ArrayContentProvider.getInstance());
 		tblViewer.getTable().setHeaderVisible(true);
+	
 		for (Column c : Column.values()) {
 			TableViewerColumn gc = new TableViewerColumn(tblViewer, SWT.NONE);
 			gc.setLabelProvider(new ColumnLabelProvider() {
@@ -173,7 +178,12 @@ public class ConfigurePackagesDialog extends TitleAreaDialog {
 				}
 			});
 			gc.getColumn().setText(c.guiName);
-			gc.getColumn().setWidth(200);
+			
+			if (c == Column.TYPE) {
+				tcl.setColumnData(gc.getColumn(), new ColumnPixelData(40,false));
+			}else {
+				tcl.setColumnData(gc.getColumn(), new ColumnWeightData(100, 150, true));
+			}
 		}
 		for (ICtPackagePropertyProvider pp : propertyproviders) {
 			for (ICtPackageProperty prop : pp.getProperties()) {
@@ -189,12 +199,14 @@ public class ConfigurePackagesDialog extends TitleAreaDialog {
 					
 				});
 				gc.getColumn().setText(prop.getName());
-				gc.getColumn().setWidth(200);
+				tcl.setColumnData(gc.getColumn(), new ColumnWeightData(100, 150, true));
 			}
 			pp.addPropertyUpdatedListener(()->{
 				Display.getDefault().asyncExec(()->tblViewer.refresh());	
 			});
 		}
+		
+		
 		Menu mnu = new Menu(tblViewer.getControl());
 		
 		MenuItem miExport = new MenuItem(mnu, SWT.PUSH);
@@ -345,6 +357,7 @@ public class ConfigurePackagesDialog extends TitleAreaDialog {
 	
 	private void editPackage(ICtPackage item) {
 		ConfigurePackageDialog dialog = new ConfigurePackageDialog(getShell(), item);
+		ContextInjectionFactory.inject(dialog, context);
 		dialog.open();
 		refresh();
 	}
@@ -439,13 +452,7 @@ public class ConfigurePackagesDialog extends TitleAreaDialog {
 			}
 			packages.sort((a,b)->a.getName().compareTo(b.getName()));
 			Display.getDefault().asyncExec(()->{
-				tblViewer.setInput(packages);
-				
-				for (TableColumn tc: tblViewer.getTable().getColumns()) {
-					tc.pack();
-					tc.setWidth((int)(tc.getWidth() * 1.1));					
-				}
-				
+				tblViewer.setInput(packages);				
 			});
 			
 			return Status.OK_STATUS;

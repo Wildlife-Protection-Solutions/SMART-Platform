@@ -27,10 +27,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -62,12 +66,9 @@ import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
-import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.SurveyCtPackage;
-import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -98,6 +99,9 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 	
 	private boolean isInit = false;
 	
+	@Inject
+	private IEclipseContext context;
+	
 	public CtSurveyPackageConfigurator() {
 		contributions = new ArrayList<>();
 		for ( IPackageContribution c : PackageContributionManager.INSTANCE.getContributionItems()) {
@@ -107,6 +111,8 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 	
 	@Override
 	public void createGui(Composite parent, ICtPackage ctitem, Consumer<String> onValidate) {
+		contributions.forEach(e->ContextInjectionFactory.inject(e, context));
+		
 		this.onValidate = onValidate;
 		if (!(ctitem instanceof SurveyCtPackage)) throw new IllegalStateException("Incorrect package type for cybertracker patrol editor.");
 		this.ctpackage = (SurveyCtPackage) ctitem;

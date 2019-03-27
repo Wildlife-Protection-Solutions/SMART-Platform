@@ -342,7 +342,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		((GridLayout)innerLeft.getLayout()).marginHeight = 0;
 		
 		modelTreeViewer = new TreeViewer(innerLeft, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-		modelTreeViewer.setLabelProvider(new ConnectCmTreeLabelProvider(dialog.getModel()));
+		modelTreeViewer.setLabelProvider(new ConnectCmTreeLabelProvider());
 		modelTreeViewer.setContentProvider(new ConnectCmTreeContentProvider(false));
 		modelTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	

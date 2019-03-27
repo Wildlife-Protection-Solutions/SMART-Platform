@@ -32,7 +32,6 @@ import org.wcs.smart.dataentry.dialog.composite.CmListItemLabelProvider;
 import org.wcs.smart.dataentry.dialog.composite.CmTreeLabelProvider;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
  * Label provider for configurable model tree used in connect tab.
@@ -46,7 +45,7 @@ public class ConnectCmTreeLabelProvider extends LabelProvider implements IColorP
 	private CmListItemLabelProvider liLabelProvider;
 	private CmTreeLabelProvider tnLabelProvider;
 
-	public ConnectCmTreeLabelProvider(ConfigurableModel model) {
+	public ConnectCmTreeLabelProvider() {
 		cmLabelProvider = new ConfigurableModelLabelProvider();
 		liLabelProvider = new CmListItemLabelProvider();
 		tnLabelProvider = new CmTreeLabelProvider();

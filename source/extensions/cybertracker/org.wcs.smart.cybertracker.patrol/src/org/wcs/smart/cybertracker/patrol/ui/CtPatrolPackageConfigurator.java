@@ -27,10 +27,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.internal.contexts.EclipseContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -96,6 +101,9 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 	
 	private boolean isInit = false;
 	
+	@Inject
+	private IEclipseContext context;
+	
 	public CtPatrolPackageConfigurator() {
 		contributions = new ArrayList<>();
 		contributions.add(new PatrolMetadataPackageContribution());
@@ -106,6 +114,8 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 	
 	@Override
 	public void createGui(Composite parent, ICtPackage ctitem, Consumer<String> onValidate) {
+		contributions.forEach(e->ContextInjectionFactory.inject(e, context));
+		
 		this.onValidate = onValidate;
 		if (!(ctitem instanceof PatrolCtPackage)) throw new IllegalStateException("Incorrect package type for cybertracker patrol editor.");
 		this.ctpackage = (PatrolCtPackage) ctitem;
@@ -207,7 +217,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 					all.setLayout(new GridLayout());
 					item.setControl(all);
 					Composite part = cc.createUi(all, ctpackage, e->validate());
-					if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 				}
 			}
 		}

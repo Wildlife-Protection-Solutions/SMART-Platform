@@ -21,37 +21,39 @@
  */
 package org.wcs.smart.connect.cybertracker.ctpackage;
 
-import java.util.List;
+import java.io.IOException;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.wcs.smart.connect.api.ConnectClient;
-import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
+import org.wcs.smart.cybertracker.export.IPackageContribution;
+import org.wcs.smart.cybertracker.export.IPackageUiContribution;
+import org.wcs.smart.cybertracker.model.ICtPackage;
 
 /**
- * Client for cybertracker api
+ * Contributing alerts and data upload package items 
+ * 
  * @author Emily
  *
  */
-public interface CtConnectClient extends ConnectClient{
-	
-	@POST
-	@Path("/cybertracker/{uuid}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response uploadCtPackage(@HeaderParam("X-Upload-Content-Length") Long length, 
-			@PathParam("uuid") String packageuuid,
-			CyberTrackerPackageProxy proxy);
+public class ConnectDataContribution implements IPackageContribution {
 
-	@GET
-    @Path("/cybertracker/")
-    public List<CyberTrackerPackageProxy> getCtPackages(@QueryParam("cauuid") String caUuid);
-	
+	public ConnectDataContribution() {
+	}
+
+	@Override
+	public IPackageUiContribution getUiController() {
+		return new ConnectDataUiController();
+	}
+
+	@Override
+	public PackageContribution packageFiles(ICtPackage ctpackage, IProgressMonitor monitor) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void createDetails(Composite parent, ICtPackage ctpackage, Session session) {
+	}
+
 }

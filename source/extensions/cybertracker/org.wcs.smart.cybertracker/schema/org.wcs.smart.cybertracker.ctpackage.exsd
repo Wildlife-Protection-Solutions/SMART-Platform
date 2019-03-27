@@ -57,7 +57,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.wcs.smart.cybertracker.model.ICtPackageManager"/>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageManager"/>
                </appinfo>
             </annotation>
          </attribute>

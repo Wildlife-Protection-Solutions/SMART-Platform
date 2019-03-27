@@ -29,7 +29,9 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
+import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.model.SurveyDesign;
 
 /**
@@ -40,7 +42,7 @@ import org.wcs.smart.er.model.SurveyDesign;
  */
 @Entity
 @Table(name="smart.ct_survey_package")
-public class SurveyCtPackage extends AbstractCtPackage{
+public class SurveyCtPackage extends AbstractCtPackage implements ICmProvider{
 
 	public static final String TYPE_NAME = "SURVEY"; //$NON-NLS-1$
 
@@ -61,6 +63,18 @@ public class SurveyCtPackage extends AbstractCtPackage{
 		return TYPE_NAME;
 	}
 
+	@Transient
+	public boolean isDataModel() {
+		if (getSurveyDesign().getConfigurableModel() == null) return true;
+		return false;
+	}
+	
+	@Override
+	@Transient
+	public ConfigurableModel getConfigurableModel() {
+		return getSurveyDesign().getConfigurableModel();
+	}
+	
 	@Transient
 	@Override
 	public ICtPackage copy() {

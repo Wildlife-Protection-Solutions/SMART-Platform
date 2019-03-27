@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.cybertracker.ctpackage.ui;
 
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
@@ -42,6 +46,9 @@ public class ConfigurePackageDialog extends TitleAreaDialog{
 	
 	private ICtPackage toEdit;
 	private ICtPackageConfigurator config;
+
+	@Inject
+	private IEclipseContext context;
 	
 	public ConfigurePackageDialog(Shell parentShell, ICtPackage toEdit) {
 		super(parentShell);
@@ -72,6 +79,7 @@ public class ConfigurePackageDialog extends TitleAreaDialog{
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		parent.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		config = CtPackageExtensionPointManager.INSTANCE.findManager(toEdit).createConfigurator();
+		ContextInjectionFactory.inject(config, context);
 		if (config == null) {
 			throw new IllegalStateException("Not package manager found for package type: " + toEdit.getTypeIdentifier());
 		}

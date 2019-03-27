@@ -42,7 +42,7 @@ public class ConnectAlertSourceLabelProvider extends ColumnLabelProvider {
 	
 	public ConnectAlertSourceLabelProvider(ConfigurableModel model) {
 		treeProvider = new ConnectCmTreeContentProvider(false);
-		labelProvider = new ConnectCmTreeLabelProvider(model);
+		labelProvider = new ConnectCmTreeLabelProvider();
 	}
 
 	@Override

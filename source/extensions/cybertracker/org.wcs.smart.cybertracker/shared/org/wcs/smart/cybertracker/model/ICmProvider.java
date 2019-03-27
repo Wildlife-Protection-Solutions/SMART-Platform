@@ -19,39 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.cybertracker.ctpackage;
+package org.wcs.smart.cybertracker.model;
 
-import java.util.List;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.wcs.smart.connect.api.ConnectClient;
-import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
- * Client for cybertracker api
+ * Interface for object providing a configurable model or optionally
+ * to use the data model
+ * 
  * @author Emily
  *
  */
-public interface CtConnectClient extends ConnectClient{
-	
-	@POST
-	@Path("/cybertracker/{uuid}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response uploadCtPackage(@HeaderParam("X-Upload-Content-Length") Long length, 
-			@PathParam("uuid") String packageuuid,
-			CyberTrackerPackageProxy proxy);
+public interface ICmProvider {
 
-	@GET
-    @Path("/cybertracker/")
-    public List<CyberTrackerPackageProxy> getCtPackages(@QueryParam("cauuid") String caUuid);
+	public ConfigurableModel getConfigurableModel();
 	
+	public boolean isDataModel();
 }
