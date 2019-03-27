@@ -199,7 +199,7 @@ public class CtJsonExportUtils {
 		projectJSON.put("source",Messages.CtJsonExportUtils_SmartCtSource); //$NON-NLS-1$
 		projectJSON.put("definition",cmFile); //$NON-NLS-1$
 		projectJSON.put("metadata", metadataFilename.getFileName().toString()); //$NON-NLS-1$
-		projectJSON.put("version",  version == null ? "" : version); //$NON-NLS-1$ //$NON-NLS-2$
+		if (version != null) projectJSON.put("version",  version); //$NON-NLS-1$ 
 		projectJSON.put("creation_date",new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date())); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("logo", (logoFile == null || !Files.exists(logoFile)) ? null : logoFile.getFileName().toString()); //$NON-NLS-1$
 

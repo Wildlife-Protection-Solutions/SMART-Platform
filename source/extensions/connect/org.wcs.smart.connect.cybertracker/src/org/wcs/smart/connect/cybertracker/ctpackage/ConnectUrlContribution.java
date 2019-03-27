@@ -66,9 +66,10 @@ public class ConnectUrlContribution implements IPackageContribution {
 		}
 		//get connect url
 		if (url == null) return cc;
-		
-		cc.setProjectMetadata("status_url:", url + "/api/cybertracker/" + ctpackage.getUuid().toString());
-		cc.setProjectMetadata("download_url:", url + "/api/cybertracker/packages/" + ctpackage.getUuid().toString());
+		if (ctpackage.getUuid() != null) {
+			cc.setProjectMetadata("status_url:", url + "/api/cybertracker/" + ctpackage.getUuid().toString());
+			cc.setProjectMetadata("download_url:", url + "/api/cybertracker/packages/" + ctpackage.getUuid().toString());
+		}
 		
 		return cc;
 	}

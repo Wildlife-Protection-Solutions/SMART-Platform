@@ -172,11 +172,15 @@ public enum PatrolPackageExporter {
 				profileToJson(session.get(CyberTrackerPropertiesProfile.class, localpackage.getCtProfile().getUuid()), modelToExport, session, context, profileFile);
 				toIncludeInZip.add(profileFile.toFile());
 				
+				
 				//get version number from output file
-				String fname = exportFile.getFileName().toString();
-				int start = fname.indexOf('.') + 1;
-				int end = fname.lastIndexOf('.');
-				String version = fname.substring(start,end);
+				String version = null;
+				if (ctPackage.getUuid() != null) {
+					String fname = exportFile.getFileName().toString();
+					int start = fname.indexOf('.') + 1;
+					int end = fname.lastIndexOf('.');
+					version = fname.substring(start,end);
+				}
 				
 				sub.split(1);
 				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
@@ -295,8 +299,14 @@ public enum PatrolPackageExporter {
 		metadataScreens.add(CtJsonExportUtils.convertStringOp(options.get(PatrolScreenOptionMeta.OBJECTIVE), PatrolScreenOptionMeta.OBJECTIVE.key, Messages.PatrolPackageExporter_ObjectivePageLabel, PatrolScreenOptionMeta.OBJECTIVE.isRequired(), PatrolScreenOptionMeta.OBJECTIVE.isFixed(), session, ca));
 		metadataScreens.add(CtJsonExportUtils.convertStringOp(options.get(PatrolScreenOptionMeta.COMMENT), PatrolScreenOptionMeta.COMMENT.key, Messages.PatrolPackageExporter_CommentPageLabel, PatrolScreenOptionMeta.COMMENT.isRequired(), PatrolScreenOptionMeta.COMMENT.isFixed(), session, ca));
 		metadataScreens.add(CtJsonExportUtils.convertEmployees(options.get(PatrolScreenOptionMeta.MEMBERS),PatrolScreenOptionMeta.MEMBERS.isRequired(), PatrolScreenOptionMeta.MEMBERS.isFixed(), session, ca));
-		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(options.get(PatrolScreenOptionMeta.LEADER), PatrolScreenOptionMeta.LEADER.key, Messages.PatrolPackageExporter_LeaderPageLabel, PatrolScreenOptionMeta.LEADER.isRequired(), PatrolScreenOptionMeta.LEADER.isFixed(), session, ca));
-		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(options.get(PatrolScreenOptionMeta.PILOT), PatrolScreenOptionMeta.PILOT.key, Messages.PatrolPackageExporter_PilotPageLabel, PatrolScreenOptionMeta.PILOT.isRequired(), PatrolScreenOptionMeta.PILOT.isFixed(), session, ca));
+		if (options.get(PatrolScreenOptionMeta.MEMBERS) == null || options.get(PatrolScreenOptionMeta.MEMBERS).isVisible()) {
+			//force leader and pilot to be visible as well; ticket #2690
+			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(null, PatrolScreenOptionMeta.LEADER.key, Messages.PatrolPackageExporter_LeaderPageLabel, PatrolScreenOptionMeta.LEADER.isRequired(), PatrolScreenOptionMeta.LEADER.isFixed(), session, ca));
+			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(null, PatrolScreenOptionMeta.PILOT.key, Messages.PatrolPackageExporter_PilotPageLabel, PatrolScreenOptionMeta.PILOT.isRequired(), PatrolScreenOptionMeta.PILOT.isFixed(), session, ca));
+		}else {
+			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(options.get(PatrolScreenOptionMeta.LEADER), PatrolScreenOptionMeta.LEADER.key, Messages.PatrolPackageExporter_LeaderPageLabel, PatrolScreenOptionMeta.LEADER.isRequired(), PatrolScreenOptionMeta.LEADER.isFixed(), session, ca));
+			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(options.get(PatrolScreenOptionMeta.PILOT), PatrolScreenOptionMeta.PILOT.key, Messages.PatrolPackageExporter_PilotPageLabel, PatrolScreenOptionMeta.PILOT.isRequired(), PatrolScreenOptionMeta.PILOT.isFixed(), session, ca));
+		}
 		metadataScreens.add(CtJsonExportUtils.createDataType(PatrolScreenOptionMeta.PATROL_RESOURCE_ID));
 		metadataScreens.add(CtJsonExportUtils.createPatrolId());
 		metadataScreens.add(CtJsonExportUtils.createStartDate());

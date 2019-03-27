@@ -111,7 +111,7 @@ public class PatrolCTPackageDialog extends TitleAreaDialog {
 		super(parentShell);
 		this.contributions = new ArrayList<>();
 		for (IPackageContribution c : PackageContributionManager.INSTANCE.getContributionItems()) {
-			if (c.getUiController() != null) this.contributions.add(c.getUiController());
+			if (c.getUiController() != null && !c.getUiController().isTab()) this.contributions.add(c.getUiController());
 		}
 	}
 

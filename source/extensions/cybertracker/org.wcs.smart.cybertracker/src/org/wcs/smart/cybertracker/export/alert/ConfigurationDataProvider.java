@@ -59,7 +59,7 @@ public class ConfigurationDataProvider {
 			try {
 				for (IConfigurationElement e : config) {
 					ICtConfigurationExtension ext = (ICtConfigurationExtension) e.createExecutableExtension("clazz"); //$NON-NLS-1$
-					ContextInjectionFactory.inject(ext, context);
+					if (context != null) ContextInjectionFactory.inject(ext, context);
 					providers.add(ext);
 				}
 			}catch (Exception ex){

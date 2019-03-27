@@ -473,7 +473,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		isInit = true;
 		try {
 			cmbBasemap.setSelection(new StructuredSelection(Messages.MapPackageContribution_NoBasemap));
-			if (ctpackage.getBasemapDef() != null && !ctpackage.getBasemapDef().isBlank()) {
+			if (ctpackage != null && ctpackage.getBasemapDef() != null && !ctpackage.getBasemapDef().isBlank()) {
 				
 				JSONObject obj = null;
 				try {
