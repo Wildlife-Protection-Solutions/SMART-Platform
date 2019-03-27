@@ -42,6 +42,15 @@ public class PluginAdvisor implements IPluginAdvisor {
 	@Override
 	public String canUninstall() {
 		try(Session session = HibernateManager.openSession()){
+			
+			//first check if class is mapped - see ticket 2712
+			try {
+				session.getEntityManagerFactory().createEntityManager().getMetamodel().managedType(ConnectServerStatus.class);
+			}catch (IllegalArgumentException ex) {
+				//entity not mapped
+				return null;
+			}
+			
 			//if there is any conservation area with a active connect instance then we cannot uninstall plugins
 			//if connect is installed but no plugins are replicating to connect then it's ok to uninstall
 			String sql = "FROM ConnectServerStatus WHERE status in (:status) "; //$NON-NLS-1$
