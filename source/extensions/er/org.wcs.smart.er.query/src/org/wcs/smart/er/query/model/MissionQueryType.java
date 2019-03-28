@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.er.query.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.List;
 
@@ -137,7 +137,8 @@ public class MissionQueryType implements IMappableQueryType {
 		if (queryString.isEmpty()) return null;
 		
 		QueryFilter def = null;
-		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+		
+		try(Reader is = new StringReader(queryString)){
 			Parser parser = new Parser(is);
 			def = parser.QueryFilter();
 		}catch (Throwable ex){

@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.views.query.dropitem;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -77,9 +78,9 @@ public class SystemAttributeGroupByDropItem extends DropItem implements IGroupBy
 		StringBuilder sb = new StringBuilder();
 		sb.append(SystemAttributeFilter.SA_KEY);
 		sb.append(GroupByItem.INTERNAL_SEPERATOR);
-		sb.append(type.name().toLowerCase());
+		sb.append(type.name().toLowerCase(Locale.ROOT));
 		sb.append(GroupByItem.INTERNAL_SEPERATOR);
-		sb.append(attribute.name().toLowerCase());
+		sb.append(attribute.name().toLowerCase(Locale.ROOT));
 		sb.append(GroupByItem.INTERNAL_SEPERATOR);
 		if (cmbOptions != null) {
 			Object x = cmbOptions.getStructuredSelection().getFirstElement();

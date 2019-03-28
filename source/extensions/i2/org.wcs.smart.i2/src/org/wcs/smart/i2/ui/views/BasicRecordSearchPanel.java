@@ -464,7 +464,7 @@ public class BasicRecordSearchPanel extends Composite {
 		
 		narrativePattern = null;
 		if (narrative != null && !narrative.isEmpty()){
-			narrativePattern = Pattern.compile(narrative);
+			narrativePattern = Pattern.compile(narrative, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 		}
 		
 		Job searchJob = new Job(Messages.BasicRecordSearchPanel_SearchJobName){
@@ -555,7 +555,7 @@ public class BasicRecordSearchPanel extends Composite {
 			StringBuilder localMatch = new StringBuilder();
 			List<int[]> matchRanges = new ArrayList<>();
 			if (narrativePattern != null){
-				Matcher m = narrativePattern.matcher(narrative.toLowerCase());
+				Matcher m = narrativePattern.matcher(narrative);
 				while(m.find()){
 					if (monitor.isCanceled()) {
 						return Status.CANCEL_STATUS;

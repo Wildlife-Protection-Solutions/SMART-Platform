@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.ui.views.query;
 
+import java.util.Locale;
+
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
@@ -68,9 +70,9 @@ public class SystemAttributeFilterItem extends BasicTreeFilterItem {
 			StringBuilder sb = new StringBuilder();
 			sb.append(SystemAttributeFilter.SA_KEY);
 			sb.append(SystemAttributeFilter.INTERNAL_SEPERATOR);
-			sb.append(type.name().toLowerCase());
+			sb.append(type.name().toLowerCase(Locale.ROOT));
 			sb.append(SystemAttributeFilter.INTERNAL_SEPERATOR);
-			sb.append(attribute.name().toLowerCase());
+			sb.append(attribute.name().toLowerCase(Locale.ROOT));
 			
 			DateDropItem di = new DateDropItem(MessageFormat.format("{0} ({1})", getName(), IntelligenceLabelProviderImpl.getName(type)), sb.toString(), canEdit); //$NON-NLS-1$
 			return new DropItem[] {di};

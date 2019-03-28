@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.entity.query.model.type;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.List;
 
@@ -173,14 +173,13 @@ public class EntityWaypointQueryType implements IMappableQueryType {
 			
 			if (p.getId().equals(BasicFilterDefintionPanel.ID)){
 				filters = p.getQueryPart();
-			}
-			
+			}	
 		}
 		
 		//validate query
 		String queryString = filters;
 		if (queryString.isEmpty()) return null;
-		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+		try(Reader is = new StringReader(queryString)){
 			Parser parser = new Parser(is);
 			parser.QueryFilter();
 		}catch (Throwable ex){

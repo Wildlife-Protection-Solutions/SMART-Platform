@@ -23,6 +23,7 @@ package org.wcs.smart.i2.query.observation.filter;
 
 import java.text.MessageFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import org.wcs.smart.i2.query.Operator;
 
@@ -79,12 +80,12 @@ public class SystemAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 		
 		String[] parts = key.split(INTERNAL_SEPERATOR);
 		
-		if (!parts[0].toLowerCase().equals(SA_KEY)) throw new IllegalStateException("Not a valid system attribute filter."); //$NON-NLS-1$
+		if (!parts[0].toLowerCase(Locale.ROOT).equals(SA_KEY)) throw new IllegalStateException("Not a valid system attribute filter."); //$NON-NLS-1$
 		
-		Type type = Type.valueOf(parts[1].toUpperCase());
+		Type type = Type.valueOf(parts[1].toUpperCase(Locale.ROOT));
 		if (type == null) throw new IllegalStateException(MessageFormat.format("Invalid type for system attribute:{0}", parts[1])); //$NON-NLS-1$
 		
-		SystemAttribute sa = SystemAttribute.valueOf(parts[2].toUpperCase());
+		SystemAttribute sa = SystemAttribute.valueOf(parts[2].toUpperCase(Locale.ROOT));
 		if (sa == null) throw new IllegalStateException(MessageFormat.format("Invalid attribute for system attribute:{0}", parts[2])); //$NON-NLS-1$
 		
 		SystemAttributeFilter filter = new SystemAttributeFilter(type, sa, operator, date1, date2);

@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.event.filter;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +69,7 @@ public class ParsedFilter {
 		}
 		
 		if (parts.length > 1 && !parts[1].trim().isEmpty()) {
-			try(InputStream is = new ByteArrayInputStream(parts[1].trim().getBytes())){
+			try(Reader is = new StringReader(parts[1].trim())){
 				wpFilter = (new Parser(is)).EventFilter();
 			}catch (Throwable ex) {
 				throw new Exception(ex);

@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -881,19 +882,23 @@ public class RecordsView {
 	
 	class RecordViewerFilter extends ViewerFilter{
 
-		private String filterString;
+		private Pattern pattern = null;
 		
 		public void setFilterString(String filterString){
-			this.filterString = ".*" + filterString.toUpperCase() + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
+			if (filterString.isEmpty()) {
+				pattern = null;
+				return;
+			}
+			this.pattern = Pattern.compile(".*" + filterString + ".*", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
-			if (filterString == null || filterString.isEmpty()) return true;
+			if (pattern == null) return true;
 			if (!(element instanceof IntelRecordProxy)) return true;
 			IntelRecordProxy in = (IntelRecordProxy)element;
-			if (in.getTitle().toUpperCase().matches(filterString)) return true;
-			if (DateFormat.getDateInstance().format(in.getDate()).toUpperCase().matches(filterString)) return true;
+			if (pattern.matcher(in.getTitle()).matches()) return true;
+			if (pattern.matcher(DateFormat.getDateInstance().format(in.getDate())).matches()) return true;
 			return false;
 		}
 		

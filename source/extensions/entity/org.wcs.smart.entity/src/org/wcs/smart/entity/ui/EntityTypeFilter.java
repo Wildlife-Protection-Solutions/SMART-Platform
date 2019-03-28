@@ -155,7 +155,7 @@ public class EntityTypeFilter  {
 		
 		if (strFilter != null && stringComparator != null && searchField != null){
 			str.append(" AND "); //$NON-NLS-1$
-			str.append(" lower(" + searchField.getDbFieldName() + ") like :eid "); //$NON-NLS-1$ //$NON-NLS-2$
+			str.append(" lower(" + searchField.getDbFieldName() + ") like LOWER(:eid) "); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		str.append(" ORDER BY e.name asc"); //$NON-NLS-1$
@@ -174,9 +174,9 @@ public class EntityTypeFilter  {
 		}
 		if (strFilter != null && stringComparator != null && searchField != null){
 			if (stringComparator == StringComparison.CONTAINS){
-				query.setParameter("eid", "%" + this.strFilter.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				query.setParameter("eid", "%" + this.strFilter + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}else{
-				query.setParameter("eid", this.strFilter.toLowerCase()); //$NON-NLS-1$
+				query.setParameter("eid", this.strFilter); //$NON-NLS-1$
 			}
 		}
 		

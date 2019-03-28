@@ -275,7 +275,7 @@ public class LocationMappingPage extends WizardPage{
 			cmbViewer.setInput(options);
 			
 			for (HeaderIndex x : headers) {
-				if (x.header.trim().toLowerCase().equals(attribute.getName().trim().toLowerCase())) {
+				if (x.header.trim().equalsIgnoreCase(attribute.getName().trim())) {
 					cmbViewer.setSelection(new StructuredSelection(x));
 				}
 			}

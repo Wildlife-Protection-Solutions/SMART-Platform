@@ -210,7 +210,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 			if (t.startsWith(SystemAttributeFilter.SA_KEY)) {
 				String[] bits = t.split(" "); //$NON-NLS-1$
 				String systemKey = bits[0].split(":")[2]; //$NON-NLS-1$
-				SystemAttributeFilter.SystemAttribute attribute = SystemAttributeFilter.SystemAttribute.valueOf(systemKey.toUpperCase());
+				SystemAttributeFilter.SystemAttribute attribute = SystemAttributeFilter.SystemAttribute.valueOf(systemKey.toUpperCase(Locale.ROOT));
 				if (attribute == null) {
 					throw new Exception(MessageFormat.format("System attribute with key {0} not supported.", systemKey)); //$NON-NLS-1$
 				}
@@ -337,7 +337,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 						
 					int startIndex = t.indexOf(qbits[2], qbits[0].length());
 					String strValue = t.substring(startIndex).trim();
-					String value = SharedUtils.stripQuotes(strValue).toLowerCase();
+					String value = SharedUtils.stripQuotes(strValue);
 					if (qbits[1].equalsIgnoreCase(Operator.STR_EQUALS.getKey())){
 						sb.append(" = "); //$NON-NLS-1$
 					}else if (qbits[1].equalsIgnoreCase(Operator.STR_CONTAINS.getKey())){
@@ -347,7 +347,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 						sb.append(" not like "); //$NON-NLS-1$
 						value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 					}
-					sb.append(" :value "); //$NON-NLS-1$
+					sb.append(" LOWER(:value) "); //$NON-NLS-1$
 					sb.append(")");  //$NON-NLS-1$
 						
 					session.createNativeQuery(sb.toString())

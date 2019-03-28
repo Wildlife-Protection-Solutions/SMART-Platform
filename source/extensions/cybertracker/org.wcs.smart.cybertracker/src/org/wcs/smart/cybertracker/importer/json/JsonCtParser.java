@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -588,7 +589,7 @@ public class JsonCtParser {
 			if (image == null){
 				warnings.add(MessageFormat.format(Messages.JsonCtParser_CouldNotImportPhoto, value));
 			}else{
-				ImageIO.write(image, JPEG_EXT.toUpperCase(), temp.toFile());	
+				ImageIO.write(image, JPEG_EXT.toUpperCase(Locale.ROOT), temp.toFile());	
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setCopyFromLocation(temp.toFile());
 				attachment.setFilename(fileName);

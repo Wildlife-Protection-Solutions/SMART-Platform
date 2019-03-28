@@ -155,12 +155,12 @@ public class StationEditor extends EditorPart implements MapPart {
 		boolean isNew = station.getUuid() == null;
 		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 			try {
-				String query =  "SELECT count(*) FROM AssetStation where LOWER(id) = :id AND conservationArea = :ca "; //$NON-NLS-1$
+				String query =  "SELECT count(*) FROM AssetStation where LOWER(id) = LOWER(:id) AND conservationArea = :ca "; //$NON-NLS-1$
 				if (!isNew) {
 					query += " AND uuid != :uuid"; //$NON-NLS-1$
 				}
 				Query<?> q = s.createQuery(query)
-				.setParameter("id", station.getId().toLowerCase()) //$NON-NLS-1$
+				.setParameter("id", station.getId()) //$NON-NLS-1$
 				.setParameter("ca", station.getConservationArea()); //$NON-NLS-1$
 				if (!isNew) {
 					q.setParameter("uuid", station.getUuid()); //$NON-NLS-1$

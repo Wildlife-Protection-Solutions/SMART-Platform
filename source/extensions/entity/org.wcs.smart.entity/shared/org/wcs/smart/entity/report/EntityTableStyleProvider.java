@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.report;
 
 import java.io.StringReader;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,7 +52,7 @@ public class EntityTableStyleProvider implements IBirtLayerStyleProvider {
 		
 		if (extensionId.equals(SmartTableQuery.SMART_DATASET_TYPE)){
 			Style style = null;
-			if (queryText.toUpperCase().startsWith(EntityTable.ENTITYKEY_PREFIX + ":" + EntityType.Type.FIXED.name())){ //$NON-NLS-1$
+			if (queryText.toUpperCase(Locale.ROOT).startsWith(EntityTable.ENTITYKEY_PREFIX + ":" + EntityType.Type.FIXED.name())){ //$NON-NLS-1$
 				try{
 					style = createDefaultStyle();
 				}catch (Exception ex){

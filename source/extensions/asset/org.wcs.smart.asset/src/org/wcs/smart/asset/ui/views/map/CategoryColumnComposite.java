@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.asset.ui.views.map;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -118,7 +118,7 @@ public class CategoryColumnComposite extends Composite {
 		
 		String text = txtAttributeFilters.getText().trim();
 		if (!text.isEmpty()) {
-			try(InputStream is = new ByteArrayInputStream(text.getBytes())){
+			try(Reader is = new StringReader(text)){
 				Parser parser = new Parser(is);
 				parser.AttributeExpression();
 			} catch (Exception e) {

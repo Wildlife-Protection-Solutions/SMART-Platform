@@ -23,6 +23,7 @@ package org.wcs.smart.connect.dataqueue.patrol;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -52,7 +53,7 @@ public class PatrolDataQueueProcessor implements IItemProcessor {
 
 	@Override
 	public boolean canProcess(String type) {
-		return type.toUpperCase().equals(PATROL_XML);
+		return type.toUpperCase(Locale.ROOT).equals(PATROL_XML);
 	}
 
 	@Override

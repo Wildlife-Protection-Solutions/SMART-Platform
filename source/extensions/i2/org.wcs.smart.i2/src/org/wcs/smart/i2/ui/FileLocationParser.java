@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -85,7 +86,7 @@ public enum FileLocationParser {
 	public List<IntelLocation> parseFromGpx(File gpxFile, IProgressMonitor monitor){
 		SubMonitor progress  = SubMonitor.convert(monitor, 2);
 		
-		if (!gpxFile.getName().toLowerCase().endsWith(GPX_EXTENSION)) return Collections.emptyList();
+		if (!gpxFile.getName().toLowerCase(Locale.ROOT).endsWith(GPX_EXTENSION)) return Collections.emptyList();
 		List<IntelLocation> locations = new ArrayList<IntelLocation>();
 		try{
 			List<WptType> waypoints = GPSDataImport.getWaypointsGpx(Collections.singletonList(gpxFile.getAbsolutePath()), progress.split(1));
@@ -109,7 +110,7 @@ public enum FileLocationParser {
 				l.setGeometry(pnt);
 				l.setDateTime(dt);
 				l.setId(wp.getName());
-				if (wp.getCmt() != null && !"null".equals(wp.getCmt().toLowerCase())){ //$NON-NLS-1$
+				if (wp.getCmt() != null && !"null".equalsIgnoreCase(wp.getCmt())){ //$NON-NLS-1$
 					l.setComment(wp.getCmt());
 				}
 				locations.add(l);

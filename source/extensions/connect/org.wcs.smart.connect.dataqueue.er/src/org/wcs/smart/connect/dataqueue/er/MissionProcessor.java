@@ -23,6 +23,7 @@ package org.wcs.smart.connect.dataqueue.er;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -54,7 +55,7 @@ public class MissionProcessor implements IItemProcessor {
 
 	@Override
 	public boolean canProcess(String type) {
-		return type.toUpperCase().equals(MISSION_XML);
+		return type.toUpperCase(Locale.ROOT).equals(MISSION_XML);
 	}
 
 	@Override

@@ -23,6 +23,7 @@ package org.wcs.smart.asset.report.map;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
@@ -68,9 +69,9 @@ public class StationLocationTableMapLayer implements IBirtMapLayerManager {
 		if (handle instanceof OdaDataSetHandle){
 			String geomColumn = null;
 			if (((OdaDataSetHandle)handle).getQueryText().startsWith("asset:assetstationlocation")){ //$NON-NLS-1$
-				geomColumn = LocationTable.COLUMN_PREFIX + LocationTable.Column.POSITION.name().toLowerCase();				
+				geomColumn = LocationTable.COLUMN_PREFIX + LocationTable.Column.POSITION.name().toLowerCase(Locale.ROOT);				
 			}else if (((OdaDataSetHandle)handle).getQueryText().startsWith("asset:assetstation")){ //$NON-NLS-1$
-				geomColumn = StationTable.COLUMN_PREFIX + StationTable.Column.POSITION.name().toLowerCase();
+				geomColumn = StationTable.COLUMN_PREFIX + StationTable.Column.POSITION.name().toLowerCase(Locale.ROOT);
 			}
 			if (geomColumn == null) return null;
 			return Collections.singletonList(new MapLayerInfo(null, null, LayerType.POINT, geomColumn));		

@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.i2.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -56,7 +56,7 @@ public class IntelEntitySummaryQuery extends AbstractIntelQuery {
 	@Transient
 	public static SumQueryDefinition parseQuery(String queryString) throws Exception{
 		if (queryString.isEmpty()) throw new ParseException("At least one value must be supplied."); //$NON-NLS-1$
-		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+		try(Reader is = new StringReader(queryString)){
 			Parser parser = new Parser(is);
 			return parser.ParseSummary();
 		}catch (Throwable ex) {

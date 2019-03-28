@@ -184,7 +184,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 			E e = eMap.get(v);
 			String tag0 = e != null ? e.getTag0() : null;
 			if (tag0 != null) {
-				ctPatrol.setArmed(ElementsUtil.BOOL_TRUE.equals(tag0.toLowerCase()));
+				ctPatrol.setArmed(ElementsUtil.BOOL_TRUE.equalsIgnoreCase(tag0));
 			}				
 		} else if (PatrolScreenOptionMeta.TEAM.key.equals(n)) {
 			E e = eMap.get(v);

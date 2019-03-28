@@ -115,7 +115,7 @@ public class WptTypeSelectionDialog extends TitleAreaDialog{
 					WptType wp = (WptType) element;
 					StringBuilder value = new StringBuilder( );
 					value.append(wp.getName());
-					if (wp.getCmt() != null && !wp.getCmt().toLowerCase().equals("null")){ //$NON-NLS-1$
+					if (wp.getCmt() != null && !wp.getCmt().equalsIgnoreCase("null")){ //$NON-NLS-1$
 						value.append (" (" + wp.getCmt() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					

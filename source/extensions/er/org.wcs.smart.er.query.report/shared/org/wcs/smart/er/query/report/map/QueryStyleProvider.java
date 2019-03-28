@@ -22,6 +22,7 @@
 package org.wcs.smart.er.query.report.map;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -63,10 +64,10 @@ public class QueryStyleProvider extends AbstractQueryStyleProvider{
 			return getStyle(pquery.getType(), pquery.getUuid(), layerType, s);
 		}else if (extensionId.equals(SmartTableQuery.SMART_DATASET_TYPE)){
 			Style style = null;
-			if (queryText.toUpperCase().startsWith(SurveySamplingUnitTable.SU_PREFIX + ":" + GeometryType.TRANSECT.name())){ //$NON-NLS-1$
+			if (queryText.toUpperCase(Locale.ROOT).startsWith(SurveySamplingUnitTable.SU_PREFIX + ":" + GeometryType.TRANSECT.name())){ //$NON-NLS-1$
 				style = SamplingUnitStyleProvider.createDefaultStyle(GeometryType.TRANSECT);
 			}
-			if (queryText.toUpperCase().startsWith(SurveySamplingUnitTable.SU_PREFIX + ":" + GeometryType.PLOT.name())){ //$NON-NLS-1$
+			if (queryText.toUpperCase(Locale.ROOT).startsWith(SurveySamplingUnitTable.SU_PREFIX + ":" + GeometryType.PLOT.name())){ //$NON-NLS-1$
 				style = SamplingUnitStyleProvider.createDefaultStyle(GeometryType.PLOT);
 			}
 			if (style != null){

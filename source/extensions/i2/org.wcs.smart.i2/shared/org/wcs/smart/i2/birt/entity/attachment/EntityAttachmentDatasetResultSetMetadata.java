@@ -31,14 +31,6 @@ import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 
-/* Birt filter to filter only images (png, jpeg):
- * var re = /.*\.(png|jpeg|jpg)/
- * if (re.test(row["Name"].toLowerCase())){
- * "true"
- * }else{
- * "false"
- * }
- */
 /**
  * Entity attachment result set metadata
  * @author Emily

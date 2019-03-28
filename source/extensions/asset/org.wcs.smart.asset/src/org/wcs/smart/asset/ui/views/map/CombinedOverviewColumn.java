@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.asset.ui.views.map;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.Collections;
 import java.util.List;
 
@@ -83,8 +83,8 @@ public class CombinedOverviewColumn implements IOverviewTableColumn{
 	 * @throws Exception
 	 */
 	public IExpression getParsedExpression() throws Exception{
-		if (expression != null) return expression;
-		try(InputStream is = new ByteArrayInputStream(definition.getBytes())){
+		if (expression != null) return expression;		
+		try(Reader is = new StringReader(definition)){
 			Parser p = new Parser(is);
 			expression = p.CombinedExpression();
 		}

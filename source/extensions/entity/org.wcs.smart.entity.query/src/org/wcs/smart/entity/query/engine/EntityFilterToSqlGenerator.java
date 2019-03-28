@@ -105,11 +105,11 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 			String val = (String)filter.getValue();
 			if (filter.getOperator() == Operator.STR_CONTAINS || 
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
-				String p1 = engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " " + p1 + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				String p1 = engine.addParameterValue("%" + val + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}else if (filter.getOperator() == Operator.STR_EQUALS){
-				String p1 = engine.addParameterValue(val.toLowerCase());
-				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " " + p1 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				String p1 = engine.addParameterValue(val);
+				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 			return queryStr;
 		}else if (filter.getAttributeType() == AttributeType.DATE){

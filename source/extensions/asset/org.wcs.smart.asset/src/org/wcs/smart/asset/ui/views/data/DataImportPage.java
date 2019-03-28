@@ -462,9 +462,9 @@ public class DataImportPage {
 		int cnt = 1;
 		while(true) {
 			String id = Messages.DataImportPage_StationIdPrefix + cnt;
-			String query =  "SELECT count(*) FROM AssetStation where LOWER(id) = :id AND conservationArea = :ca "; //$NON-NLS-1$
+			String query =  "SELECT count(*) FROM AssetStation where LOWER(id) = LOWER(:id) AND conservationArea = :ca "; //$NON-NLS-1$
 			Long stncnt = (Long) session.createQuery(query)
-				.setParameter("id",  id.toLowerCase()) //$NON-NLS-1$
+				.setParameter("id",  id) //$NON-NLS-1$
 				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 				.uniqueResult();
 			
@@ -477,9 +477,9 @@ public class DataImportPage {
 		int cnt = 1;
 		while(true) {
 			String id = station.getId() + " - " + cnt; //$NON-NLS-1$
-			String query =  "SELECT count(*) FROM AssetStationLocation where LOWER(id) = :id AND station.conservationArea = :ca "; //$NON-NLS-1$
+			String query =  "SELECT count(*) FROM AssetStationLocation where LOWER(id) = LOWER(:id) AND station.conservationArea = :ca "; //$NON-NLS-1$
 			Long stncnt = (Long) session.createQuery(query)
-				.setParameter("id",  id.toLowerCase()) //$NON-NLS-1$
+				.setParameter("id",  id) //$NON-NLS-1$
 				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 				.uniqueResult();
 			

@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.asset.query.model.types;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.List;
 
@@ -187,7 +187,7 @@ public class AssetSummaryQueryType implements IQueryType {
 		
 		//validate query
 		String queryString = definition + "|" + filters ; //$NON-NLS-1$
-		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+		try(Reader is = new StringReader(queryString)){
 			Parser parser = new Parser(is);
 			parser.SumQuery();			
 		}catch (Throwable ex){

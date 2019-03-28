@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.entity.query.exportimport;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.HashMap;
 
 import org.hibernate.Session;
@@ -58,7 +58,7 @@ public class EntitySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 	@Override
 	protected String processDefinition(ConservationArea importCa, String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
 		QueryFilter queryFilter = null;
-		try(InputStream is = new ByteArrayInputStream(queryDef.getBytes())){
+		try(Reader is = new StringReader(queryDef)){
 			Parser parser = new Parser(is);
 			queryFilter = parser.QueryFilter();
 		}

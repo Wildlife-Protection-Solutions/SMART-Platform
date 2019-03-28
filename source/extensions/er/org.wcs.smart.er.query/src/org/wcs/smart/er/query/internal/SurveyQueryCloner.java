@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.er.query.internal;
 
-import java.io.ByteArrayInputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -294,8 +295,8 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 		if (strFilter.length() == 0){
 			return strFilter;
 		}
-		try{
-			Parser parser = new Parser(new ByteArrayInputStream(strFilter.getBytes()));
+		try(Reader is = new StringReader(strFilter)){
+			Parser parser = new Parser(is);
 			QueryFilter queryfilter = parser.QueryFilter();
 			return queryfilter.asString();
 		}catch (Throwable t){
@@ -312,8 +313,8 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 		if (strFilter.length() == 0){
 			return strFilter;
 		}
-		try{
-			Parser parser = new Parser(new ByteArrayInputStream(strFilter.getBytes()));
+		try(Reader is = new StringReader(strFilter)){
+			Parser parser = new Parser(is);
 			return parser.ExpressionPart().asString();
 		}catch (Throwable t){
 			QueryPlugIn.log("Error cloning query definition: " + strFilter, t); //$NON-NLS-1$
@@ -327,8 +328,8 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 	 * the new conservation area uuid items 
 	 */
 	private String cloneGriddedQueryDefinition(String griddedQueryStr, ConservationAreaClonerEngine engine) {
-		try{
-			Parser parser = new Parser(new ByteArrayInputStream(griddedQueryStr.getBytes()));
+		try(Reader is = new StringReader(griddedQueryStr)){
+			Parser parser = new Parser(is);
 			GridQueryDefinition def = parser.GridQuery();
 			return def.asQuery();
 		}catch (Throwable ex){
@@ -341,8 +342,8 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 	 * updates summary query definitions; updating query uuid items
 	 */
 	private String cloneSummaryQueryDefinition(String griddedQueryStr, ConservationAreaClonerEngine engine) {
-		try{
-			Parser parser = new Parser(new ByteArrayInputStream(griddedQueryStr.getBytes()));
+		try(Reader is = new StringReader(griddedQueryStr)){
+			Parser parser = new Parser(is);
 			SumQueryDefinition def = parser.SumQuery();
 			return def.asQuery();
 		}catch (Throwable ex){

@@ -107,7 +107,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 		case LOC_TIME:
 			return i.getLocationDate();
 		case RECORD_STATUS:
-			return IntelRecord.Status.valueOf(i.getRecordStatus().toUpperCase());
+			return IntelRecord.Status.valueOf(i.getRecordStatus().toUpperCase(Locale.ROOT));
 		case RECORD_SOURCE:
 			return i.getRecordSource();
 		case RECORD_TITLE:

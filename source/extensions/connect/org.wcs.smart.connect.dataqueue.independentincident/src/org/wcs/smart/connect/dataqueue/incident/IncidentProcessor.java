@@ -23,6 +23,7 @@ package org.wcs.smart.connect.dataqueue.incident;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
@@ -50,7 +51,7 @@ public class IncidentProcessor implements IItemProcessor {
 
 	@Override
 	public boolean canProcess(String type) {
-		return type.toUpperCase().equals(INCIDENT_XML);
+		return type.toUpperCase(Locale.ROOT).equals(INCIDENT_XML);
 	}
 
 	@Override

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.ui.handler;
 
+import java.util.Locale;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -66,7 +68,7 @@ public class NewQueryHandler {
 			MessageDialog.openError(context.get(Shell.class), Messages.NewQueryHandler_ErrorTitle, Messages.NewQueryHandler_NoQueryType);
 			return;
 		}
-		typeKey = typeKey.toUpperCase();
+		typeKey = typeKey.toUpperCase(Locale.ROOT);
 		if (!typeKey.equals(IntelRecordObservationQuery.KEY) && !typeKey.equals(IntelEntitySummaryQuery.KEY)
 				&& !typeKey.equals(IntelEntityRecordQuery.KEY)) {
 			MessageDialog.openError(context.get(Shell.class), Messages.NewQueryHandler_ErrorTitle, MessageFormat.format(Messages.NewQueryHandler_InvalidQueryType, typeKey));

@@ -542,12 +542,12 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					String val = (String)efilter.getValue();
 					if (efilter.getOperator() == Operator.STR_CONTAINS || 
 							efilter.getOperator() == Operator.STR_NOTCONTAINS){
-						String p1 = engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-						queryStr = "( LOWER(foo.value) " + EntityFilterToSqlGenerator.asSql(efilter.getOperator()) + " " + p1 + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+						String p1 = engine.addParameterValue("%" + val + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+						queryStr = "( LOWER(foo.value) " + EntityFilterToSqlGenerator.asSql(efilter.getOperator()) + " LOWER(" + p1 + ") )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 						
 					}else if (efilter.getOperator() == Operator.STR_EQUALS){
-						String p1 = engine.addParameterValue(val.toLowerCase());
-						queryStr = "( LOWER(foo.value) " + EntityFilterToSqlGenerator.asSql(efilter.getOperator()) + " " + p1 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+						String p1 = engine.addParameterValue(val);
+						queryStr = "( LOWER(foo.value) " + EntityFilterToSqlGenerator.asSql(efilter.getOperator()) + " LOWER(" + p1 + ") )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 					}
 					sql.append( queryStr);
 				}else if (efilter.getAttributeType() == AttributeType.DATE){
@@ -612,11 +612,11 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					sql.append(".string_value) "); //$NON-NLS-1$
 					
 					if (attfilter.getOperator() == Operator.STR_CONTAINS || attfilter.getOperator() == Operator.STR_NOTCONTAINS){
-						String p1 = engine.addParameterValue("%" + ((String)attfilter.getValue()).toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-						sql.append(EntityFilterToSqlGenerator.asSql(attfilter.getOperator()) + " " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$
+						String p1 = engine.addParameterValue("%" + ((String)attfilter.getValue()) + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+						sql.append(EntityFilterToSqlGenerator.asSql(attfilter.getOperator()) + " LOWER(" + p1 + ") )"); //$NON-NLS-1$ //$NON-NLS-2$
 					}else if (attfilter.getOperator() == Operator.STR_EQUALS){
-						String p1 = engine.addParameterValue(((String)attfilter.getValue()).toLowerCase());
-						sql.append(EntityFilterToSqlGenerator.asSql(attfilter.getOperator()) + " " + p1 + " )");  //$NON-NLS-1$ //$NON-NLS-2$ 
+						String p1 = engine.addParameterValue(((String)attfilter.getValue()));
+						sql.append(EntityFilterToSqlGenerator.asSql(attfilter.getOperator()) + " LOWER(" + p1 + ") )");  //$NON-NLS-1$ //$NON-NLS-2$ 
 					}
 				}else if (attfilter.getAttributeType() == AttributeType.LIST){
 					sql.append("("); //$NON-NLS-1$

@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.dialogs;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -102,7 +103,7 @@ public class GPSDeviceSelectionDialog extends TitleAreaDialog{
 		for (Entry<String,String> op : options.entrySet()){
 			stroptions[index][0] = op.getKey();
 			stroptions[index++][1] = op.getValue();
-			if (op.getKey().toLowerCase().contains(GPSBabel.DEFAULT_DEVICE_TYPE)){
+			if (op.getKey().toLowerCase(Locale.ROOT).contains(GPSBabel.DEFAULT_DEVICE_TYPE)){
 				toSelect = stroptions[index-1];
 			}
 		}

@@ -179,12 +179,12 @@ public class AssetEditor extends EditorPart implements MapPart {
 		boolean isNew = asset.getUuid() == null;
 		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 			try {
-				String query =  "SELECT count(*) FROM Asset WHERE LOWER(id) = :id AND conservationArea = :ca "; //$NON-NLS-1$
+				String query =  "SELECT count(*) FROM Asset WHERE LOWER(id) = LOWER(:id) AND conservationArea = :ca "; //$NON-NLS-1$
 				if (!isNew) {
 					query += " AND uuid != :uuid"; //$NON-NLS-1$
 				}
 				Query<?> q = s.createQuery(query)
-				.setParameter("id", asset.getId().toLowerCase()) //$NON-NLS-1$
+				.setParameter("id", asset.getId()) //$NON-NLS-1$
 				.setParameter("ca", asset.getConservationArea()); //$NON-NLS-1$
 				if (!isNew) {
 					q.setParameter("uuid", asset.getUuid()); //$NON-NLS-1$

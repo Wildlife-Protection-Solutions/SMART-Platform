@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -95,7 +96,7 @@ public class EntityMapping {
 			JSONObject item = (JSONObject)oitem;
 			
 			String typeString = (String) item.get(JSON_TYPE_KEY);
-			Type type = Type.valueOf(typeString.toUpperCase());
+			Type type = Type.valueOf(typeString.toUpperCase(Locale.ROOT));
 			
 			EntityMapping mapping = new EntityMapping(type);
 			

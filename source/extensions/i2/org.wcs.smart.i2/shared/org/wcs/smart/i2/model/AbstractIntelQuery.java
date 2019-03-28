@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.model;
 
 import java.util.Date;
+import java.util.Locale;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -64,7 +65,7 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	
 	@Transient
 	public String getIconName() {
-		return getTypeKey().toLowerCase() + ".png"; //$NON-NLS-1$
+		return getTypeKey().toLowerCase(Locale.ROOT) + ".png"; //$NON-NLS-1$
 	}
 	
 	/**

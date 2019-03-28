@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Stack;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -264,9 +265,11 @@ public class EventProcessingJob extends Job {
 					if (afilter.getOperator() == Operator.STR_EQUALS) {
 						value = strvalue.equalsIgnoreCase(attributeValue.getStringValue().trim());
 					}else if (afilter.getOperator() == Operator.STR_CONTAINS) {
-						value = attributeValue.getStringValue().trim().toUpperCase().matches(".*"+ strvalue.toUpperCase() + ".*"); //$NON-NLS-1$ //$NON-NLS-2$
+						Pattern p = Pattern.compile( ".*" + Pattern.quote(strvalue) + ".*", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE); //$NON-NLS-1$ //$NON-NLS-2$
+						value = p.matcher(attributeValue.getStringValue()).matches();
 					}else if (afilter.getOperator() == Operator.STR_NOTCONTAINS) {
-						value = !attributeValue.getStringValue().trim().toUpperCase().matches(".*"+ strvalue.toUpperCase() + ".*");  //$NON-NLS-1$ //$NON-NLS-2$
+						Pattern p = Pattern.compile( ".*" + Pattern.quote(strvalue) + ".*", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE); //$NON-NLS-1$ //$NON-NLS-2$
+						value = !p.matcher(attributeValue.getStringValue()).matches();
 					}
 					equation.add(value);
 					break;

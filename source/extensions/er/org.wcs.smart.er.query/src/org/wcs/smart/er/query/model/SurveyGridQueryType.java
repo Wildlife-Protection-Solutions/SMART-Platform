@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.er.query.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.List;
 
@@ -205,7 +205,7 @@ public class SurveyGridQueryType implements IMappableQueryType {
 		String queryString = definition + "|" + filters; //$NON-NLS-1$
 		
 		GridQueryDefinition def = null;
-		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+		try(Reader is = new StringReader(queryString)){
 			Parser parser = new Parser(is);
 			def = parser.GridQuery();
 		}catch (Throwable ex){

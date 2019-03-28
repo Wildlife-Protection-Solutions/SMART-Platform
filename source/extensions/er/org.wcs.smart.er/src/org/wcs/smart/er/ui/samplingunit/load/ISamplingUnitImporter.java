@@ -171,7 +171,7 @@ public abstract class ISamplingUnitImporter {
 		//search all names; case insensitive
 		for (SamplingUnitAttributeListItem item : su.getAttributeList()){
 			for (Label l : item.getNames()){
-				if (l.getValue().toUpperCase().equals(value.toUpperCase())){
+				if (l.getValue().equalsIgnoreCase(value)){
 					return item;
 				}
 			}

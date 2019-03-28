@@ -1,5 +1,7 @@
 package org.wcs.smart.i2.security;
 
+import java.util.Locale;
+
 import org.eclipse.core.expressions.PropertyTester;
 import org.wcs.smart.ca.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
@@ -32,7 +34,7 @@ public class PermissionTester extends PropertyTester {
 		if (SmartDB.getCurrentEmployee() == null) return false;
 		Permission p = null;
 		try {
-			p = Permission.valueOf(expectedValue.toString().toUpperCase());
+			p = Permission.valueOf(expectedValue.toString().toUpperCase(Locale.ROOT));
 		}catch (Exception ex) {
 			//not supported
 			ex.printStackTrace();

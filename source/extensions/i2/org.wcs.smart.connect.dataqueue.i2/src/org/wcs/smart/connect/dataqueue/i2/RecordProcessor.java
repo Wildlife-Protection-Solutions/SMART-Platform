@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.dataqueue.i2;
 
 import java.nio.file.Path;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -52,7 +53,7 @@ public class RecordProcessor implements IItemProcessor {
 
 	@Override
 	public boolean canProcess(String type) {
-		return type.toUpperCase().equals(RECORD_XML);
+		return type.toUpperCase(Locale.ROOT).equals(RECORD_XML);
 	}
 
 	@Override

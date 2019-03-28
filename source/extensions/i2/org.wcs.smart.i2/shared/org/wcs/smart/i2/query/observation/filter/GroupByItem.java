@@ -110,10 +110,10 @@ public class GroupByItem {
 			String sattribute = bits[2];
 			String dateFilter = bits[3];
 			
-			SystemAttributeFilter.Type type = SystemAttributeFilter.Type.valueOf(stype.toUpperCase());
+			SystemAttributeFilter.Type type = SystemAttributeFilter.Type.valueOf(stype.toUpperCase(Locale.ROOT));
 			if (type == null || type == SystemAttributeFilter.Type.RECORD) throw new IllegalStateException(MessageFormat.format("System attribute group by of type {0} not supported", stype)); //$NON-NLS-1$
 			
-			SystemAttributeFilter.SystemAttribute attribute = SystemAttributeFilter.SystemAttribute.valueOf(sattribute.toUpperCase());
+			SystemAttributeFilter.SystemAttribute attribute = SystemAttributeFilter.SystemAttribute.valueOf(sattribute.toUpperCase(Locale.ROOT));
 			if (attribute == null) throw new IllegalStateException(MessageFormat.format("System attribute group by of {0} not supported", sattribute)); //$NON-NLS-1$
 			
 			DateOption op = null;

@@ -346,7 +346,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog implements ModifyLis
 		//look and see if id is unique
 		String id = txtId.getText();
 		for (SamplingUnit s : siblings){
-			if (s.getId().toLowerCase().equals(id.toLowerCase())){
+			if (s.getId().equalsIgnoreCase(id)){
 				error = true;
 				cdId.show();
 				cdId.setDescriptionText(Messages.EditSamplingUnitDialog_IdUnique);

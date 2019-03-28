@@ -69,7 +69,7 @@ public class BasicRecordSearch implements IRecordSearch{
 				where = true;
 				hql += " WHERE "; //$NON-NLS-1$
 			}
-			hql += " lower(description) like :narrative "; //$NON-NLS-1$
+			hql += " lower(description) like lower(:narrative) "; //$NON-NLS-1$
 		}
 		if (titleSearch != null){
 			if (where){
@@ -78,7 +78,7 @@ public class BasicRecordSearch implements IRecordSearch{
 				where = true;
 				hql += " WHERE "; //$NON-NLS-1$
 			}
-			hql += " lower(title) like :title "; //$NON-NLS-1$
+			hql += " lower(title) like lower(:title) "; //$NON-NLS-1$
 		}
 		
 		Query<?> query = session.createQuery("SELECT count(*) " + hql); //$NON-NLS-1$
@@ -86,10 +86,10 @@ public class BasicRecordSearch implements IRecordSearch{
 			query.setParameter("source", source); //$NON-NLS-1$
 		}
 		if (narrativeSearch != null){
-			query.setParameter("narrative", "%" + narrativeSearch.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			query.setParameter("narrative", "%" + narrativeSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		if (titleSearch != null){
-			query.setParameter("title", "%" + titleSearch.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			query.setParameter("title", "%" + titleSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		
 		long cnt = (long) query.uniqueResult();
@@ -100,10 +100,10 @@ public class BasicRecordSearch implements IRecordSearch{
 			query.setParameter("source", source); //$NON-NLS-1$
 		}
 		if (narrativeSearch != null){
-			query.setParameter("narrative", "%" + narrativeSearch.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			query.setParameter("narrative", "%" + narrativeSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		if (titleSearch != null){
-			query.setParameter("title", "%" + titleSearch.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			query.setParameter("title", "%" + titleSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		List<?> items = query.list();
 		List<IntelRecordSearchResultItem> resultItems = new ArrayList<>();

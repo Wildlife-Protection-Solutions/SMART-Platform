@@ -719,10 +719,10 @@ public class FileProcessor {
 	}
 	private void findAsset(FileProxy p, String id, Session session) {
 		//search the database for the given asset id
-		String hql = "FROM Asset WHERE conservationArea = :ca and upper(id) = :id"; //$NON-NLS-1$
+		String hql = "FROM Asset WHERE conservationArea = :ca and lower(id) = lower(:id)"; //$NON-NLS-1$
 		Asset asset = (Asset) session.createQuery(hql)
 				.setParameter("ca", ca) //$NON-NLS-1$
-				.setParameter("id", id.toUpperCase()) //$NON-NLS-1$
+				.setParameter("id", id) //$NON-NLS-1$
 				.uniqueResult();
 		if (asset != null) {
 			asset.getAssetType().getIncidentCutoff();
@@ -735,10 +735,10 @@ public class FileProcessor {
 	
 	private void findLocation(FileProxy p, String id, Session session) {
 		//search the database for the given asset id
-		String hql = "FROM AssetStationLocation WHERE station.conservationArea = :ca and upper(id) = :id"; //$NON-NLS-1$
+		String hql = "FROM AssetStationLocation WHERE station.conservationArea = :ca and lower(id) = lower(:id)"; //$NON-NLS-1$
 		AssetStationLocation location = (AssetStationLocation) session.createQuery(hql)
 				.setParameter("ca", ca) //$NON-NLS-1$
-				.setParameter("id", id.toUpperCase()) //$NON-NLS-1$
+				.setParameter("id", id) //$NON-NLS-1$
 				.uniqueResult();
 		if (location != null) {
 			if (p.getStation() != null && p.getStation() != location.getStation()) {
@@ -754,10 +754,10 @@ public class FileProcessor {
 	private void findStation(FileProxy p, String id, Session session) {
 		//search the database for the given asset id
 		
-		String hql = "FROM AssetStation WHERE conservationArea = :ca and upper(id) = :id"; //$NON-NLS-1$
+		String hql = "FROM AssetStation WHERE conservationArea = :ca and lower(id) = lower(:id)"; //$NON-NLS-1$
 		AssetStation station = (AssetStation) session.createQuery(hql)
 				.setParameter("ca", ca) //$NON-NLS-1$
-				.setParameter("id", id.toUpperCase()) //$NON-NLS-1$
+				.setParameter("id", id) //$NON-NLS-1$
 				.uniqueResult();
 		if (station != null) {
 			if (p.getStationLocation() != null && p.getStationLocation().getStation() != station) {

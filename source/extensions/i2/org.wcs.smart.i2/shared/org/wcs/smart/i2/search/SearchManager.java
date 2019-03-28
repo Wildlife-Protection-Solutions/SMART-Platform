@@ -104,11 +104,11 @@ public enum SearchManager {
 			sql.deleteCharAt(sql.length() - 1);
 			
 			sql.append(" OR "); //$NON-NLS-1$
-			sql.append(" LOWER(a.string_value) like :ml"); //$NON-NLS-1$
+			sql.append(" LOWER(a.string_value) like LOWER(:ml)"); //$NON-NLS-1$
 			sql.append(" ) "); //$NON-NLS-1$
 		}else{
 			sql.append(" AND "); //$NON-NLS-1$
-			sql.append(" LOWER(a.string_value) like :ml"); //$NON-NLS-1$
+			sql.append(" LOWER(a.string_value) like LOWER(:ml)"); //$NON-NLS-1$
 		}
 
 		// create the query and parameters
@@ -124,7 +124,7 @@ public enum SearchManager {
 		for (int i = 0; i < metas.size(); i ++){
 			q.setParameter("m" + i, metas.get(i)); //$NON-NLS-1$
 		}
-		q.setParameter("ml", "%" + searchFor.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		q.setParameter("ml", "%" + searchFor + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		q.setMaxResults(maxResults);
 		List<?> items = q.list();
 		

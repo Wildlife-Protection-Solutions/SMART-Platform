@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.entity.query.internal;
 
-import java.io.ByteArrayInputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -206,8 +207,8 @@ public class EntityQueryTemplateCloner implements
 		if (strFilter.length() == 0){
 			return strFilter;
 		}
-		try{
-			Parser parser = new Parser(new ByteArrayInputStream(strFilter.getBytes()));
+		try(Reader is = new StringReader(strFilter)){
+			Parser parser = new Parser(is);
 			QueryFilter queryfilter = parser.QueryFilter();
 			return queryfilter.asString();
 		}catch (Throwable t){
@@ -223,8 +224,8 @@ public class EntityQueryTemplateCloner implements
 	 * the new conservation area uuid items 
 	 */
 	private String cloneGriddedQueryDefinition(String griddedQueryStr, ConservationAreaClonerEngine engine) {
-		try{
-			Parser parser = new Parser(new ByteArrayInputStream(griddedQueryStr.getBytes()));
+		try(Reader is = new StringReader(griddedQueryStr)){
+			Parser parser = new Parser(is);
 			GridQueryDefinition def = parser.GridQuery();
 			return def.asQuery();
 		}catch (Throwable ex){
@@ -237,8 +238,8 @@ public class EntityQueryTemplateCloner implements
 	 * updates summary query definitions; updating query uuid items
 	 */
 	private String cloneSummaryQueryDefinition(String griddedQueryStr, ConservationAreaClonerEngine engine) {
-		try{
-			Parser parser = new Parser(new ByteArrayInputStream(griddedQueryStr.getBytes()));
+		try(Reader is = new StringReader(griddedQueryStr)){
+			Parser parser = new Parser(is);
 			SumQueryDefinition def = parser.SumQuery();
 			return def.asQuery();
 		}catch (Throwable ex){

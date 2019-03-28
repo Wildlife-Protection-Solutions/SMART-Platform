@@ -249,7 +249,7 @@ public abstract class EntitySearchPanel extends Composite {
 				
 
 				
-				SystemAttributeFilter.SystemAttribute sa = SystemAttributeFilter.SystemAttribute.valueOf(bits[2].toUpperCase());
+				SystemAttributeFilter.SystemAttribute sa = SystemAttributeFilter.SystemAttribute.valueOf(bits[2].toUpperCase(Locale.ROOT));
 				if (sa == null) {
 					toAdd.add(new ErrorDropItem(MessageFormat.format(Messages.EntitySearchPanel_SystemFilterNotSupported, bits[2])));
 				}else {
@@ -522,7 +522,7 @@ public abstract class EntitySearchPanel extends Composite {
 	}
 	
 	private DropItem createSystemAttributeDropItem(SystemAttributeFilter.SystemAttribute attribute){
-		String key = SystemAttributeFilter.SA_KEY + ":" + IntelAttribute.AttributeType.DATE + ":" + attribute.name().toLowerCase();  //$NON-NLS-1$ //$NON-NLS-2$
+		String key = SystemAttributeFilter.SA_KEY + ":" + IntelAttribute.AttributeType.DATE + ":" + attribute.name().toLowerCase(Locale.ROOT);  //$NON-NLS-1$ //$NON-NLS-2$
 		return new DateDropItem(getName(attribute), key, true);
 	}
 	

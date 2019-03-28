@@ -307,7 +307,7 @@ public class AssetXmlToAssetData {
 		for (org.wcs.smart.asset.data.inout.xml.AssetModuleSettings xmlSetting : xmlData.getModuleSettings()) {
 			AssetModuleSettings newSetting = new AssetModuleSettings();
 			newSetting.setConservationArea(ca);
-			newSetting.setKeyId(xmlSetting.getKey().toLowerCase().toLowerCase());
+			newSetting.setKeyId(xmlSetting.getKey().toLowerCase());
 			newSetting.setValue(xmlSetting.getValue());
 			newSettings.add(newSetting);
 		}
@@ -346,7 +346,7 @@ public class AssetXmlToAssetData {
 			
 			if (xmlMapping.getType() != null && !xmlMapping.getType().isEmpty()) {
 				try {
-					AssetMetadataMapping.MetadataType prop = AssetMetadataMapping.MetadataType.valueOf(xmlMapping.getType().toUpperCase());
+					AssetMetadataMapping.MetadataType prop = AssetMetadataMapping.MetadataType.valueOf(xmlMapping.getType().toUpperCase(Locale.ROOT));
 					newMapping.setMetadataType(prop);
 				}catch (Exception ex) {
 					warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_MappingNoValid, xmlMapping.getAssetProperty()));
@@ -356,7 +356,7 @@ public class AssetXmlToAssetData {
 			
 			if (xmlMapping.getAssetProperty() != null && !xmlMapping.getAssetProperty().isEmpty()) {
 				try {
-					AssetMetadataMapping.AssetProperty prop = AssetMetadataMapping.AssetProperty.valueOf(xmlMapping.getAssetProperty().toUpperCase());
+					AssetMetadataMapping.AssetProperty prop = AssetMetadataMapping.AssetProperty.valueOf(xmlMapping.getAssetProperty().toUpperCase(Locale.ROOT));
 					newMapping.setMappedAssetProperty(prop);
 				}catch (Exception ex) {
 					warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_InvalidMappingAssetProperty, xmlMapping.getAssetProperty()));

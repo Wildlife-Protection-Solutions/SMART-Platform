@@ -1,7 +1,7 @@
 package org.wcs.smart.entity.query.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -31,7 +31,7 @@ public class EntityObservationQuery extends ObservationQuery {
 		if(queryFilter != null){
 			return queryFilter;
 		}
-		try(InputStream is = new ByteArrayInputStream(strQueryFilter.getBytes())){
+		try(Reader is = new StringReader(strQueryFilter)){
 			Parser parser = new Parser(is);
 			QueryFilter myQuery = parser.QueryFilter();
 			queryFilter = myQuery;

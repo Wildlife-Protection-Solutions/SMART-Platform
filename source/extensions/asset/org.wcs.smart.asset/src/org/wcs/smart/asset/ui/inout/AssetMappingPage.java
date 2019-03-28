@@ -189,7 +189,7 @@ public class AssetMappingPage extends WizardPage{
 		
 		cmbAssetId.setInput(headers);
 		for (HeaderIndex x : headers) {
-			if (x.header.trim().toLowerCase().equals("asset id".trim().toLowerCase())) { //$NON-NLS-1$
+			if (x.header.trim().equalsIgnoreCase("asset id".trim())) { //$NON-NLS-1$
 				cmbAssetId.setSelection(new StructuredSelection(x));
 			}
 		}
@@ -227,7 +227,7 @@ public class AssetMappingPage extends WizardPage{
 			cmbViewer.setInput(options);
 			
 			for (HeaderIndex x : headers) {
-				if (x.header.trim().toLowerCase().equals(attribute.getName().trim().toLowerCase())) {
+				if (x.header.trim().equalsIgnoreCase(attribute.getName().trim())) {
 					cmbViewer.setSelection(new StructuredSelection(x));
 				}
 			}

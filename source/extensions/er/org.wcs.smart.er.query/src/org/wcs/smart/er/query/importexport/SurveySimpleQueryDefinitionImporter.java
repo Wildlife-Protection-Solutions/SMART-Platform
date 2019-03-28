@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.er.query.importexport;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.HashMap;
 
 import org.hibernate.Session;
@@ -68,7 +68,7 @@ public class SurveySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 		
 		if (qTypeInternal.equals(MissionTrackQuery.KEY)){
 			IFilter filter = null;
-			try(InputStream is = new ByteArrayInputStream(queryDef.getBytes())){
+			try(Reader is = new StringReader(queryDef)){
 				Parser parser = new Parser(is);
 				filter = parser.ExpressionPart();
 			}
@@ -86,7 +86,7 @@ public class SurveySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 			
 		}else{
 			QueryFilter queryFilter = null;
-			try(InputStream is = new ByteArrayInputStream(queryDef.getBytes())){
+			try(Reader is = new StringReader(queryDef)){
 				Parser parser = new Parser(is);
 				queryFilter = parser.QueryFilter();
 			}

@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.entity.query.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +61,7 @@ public class EntitySummaryQuery extends SummaryQuery {
 			return null;
 		}
 		
-		try(InputStream is = new ByteArrayInputStream(getQuery().getBytes())){
+		try(Reader is = new StringReader(getQuery())){
 			Parser parser = new Parser(is);
 			SumQueryDefinition myQuery = parser.SumQuery();		
 			return myQuery;

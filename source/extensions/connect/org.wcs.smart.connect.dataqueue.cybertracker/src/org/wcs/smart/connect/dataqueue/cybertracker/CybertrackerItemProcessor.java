@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -94,7 +95,7 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 
 	@Override
 	public boolean canProcess(String type) {
-		return (type.toUpperCase().equals(CT_TYPE) || type.toUpperCase().equals(CT_ZIP_TYPE));
+		return (type.toUpperCase(Locale.ROOT).equals(CT_TYPE) || type.toUpperCase(Locale.ROOT).equals(CT_ZIP_TYPE));
 	}
 	
 	@Override
@@ -108,9 +109,9 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 		
 		final CloseMsgDialog[] id = {null};
 		
-		if (item.getType().toUpperCase().equals(CT_ZIP_TYPE)){
+		if (item.getType().toUpperCase(Locale.ROOT).equals(CT_ZIP_TYPE)){
 			json = ZLibUtil.decompressFile(litem.getFullFilePath().toFile());
-		}else if (item.getType().toUpperCase().equals(CT_TYPE)){
+		}else if (item.getType().toUpperCase(Locale.ROOT).equals(CT_TYPE)){
 			try(Reader in = Files.newBufferedReader(litem.getFullFilePath(), StandardCharsets.UTF_8)){
 				json = IOUtils.toString(in);
 			}

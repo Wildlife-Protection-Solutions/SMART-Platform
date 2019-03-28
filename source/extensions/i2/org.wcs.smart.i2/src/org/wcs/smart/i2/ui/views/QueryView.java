@@ -22,12 +22,14 @@
 package org.wcs.smart.i2.ui.views;
 
 import java.text.Collator;
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -685,20 +687,22 @@ public class QueryView {
 	
 	private class QueryViewerFilter extends ViewerFilter{
 
-		private String filterString;
+		private Pattern pattern;
 		
 		public void setFilterString(String filterString){
-			this.filterString = ".*" + filterString.toUpperCase() + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
+			if (filterString.isEmpty()) {
+				pattern = null;
+				return;
+			}
+			this.pattern = Pattern.compile(".*" + filterString + ".*", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
-			if (filterString == null || filterString.isEmpty()) return true;
-		
-			QueryProxy in = (QueryProxy)element;
-			if (in.getName().toUpperCase().matches(filterString)) return true;
+			if (pattern == null) return true;
+	QueryProxy in = (QueryProxy)element;
+			if (pattern.matcher(in.getName()).matches()) return true;
 			return false;
 		}
-		
 	}
 }

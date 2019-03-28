@@ -103,7 +103,7 @@ public class AssetTable extends SmartBirtTable {
 		getAttributeColumn(connection);
 		List<String> names = new ArrayList<>();
 		for (Column c : Column.values()) {
-			names.add("asset:" + c.name().toLowerCase()); //$NON-NLS-1$
+			names.add("asset:" + c.name().toLowerCase(Locale.ROOT)); //$NON-NLS-1$
 		}
 		for (AssetAttribute a : attributeColumns) {
 			names.add("asset:" + a.getKeyId()); //$NON-NLS-1$

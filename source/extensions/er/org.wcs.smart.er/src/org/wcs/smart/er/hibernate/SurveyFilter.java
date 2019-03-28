@@ -218,7 +218,7 @@ public class SurveyFilter {
 				str.append(" AND "); //$NON-NLS-1$
 			}
 			or = true;
-			str.append(" lower(s.id) like :name "); //$NON-NLS-1$
+			str.append(" lower(s.id) like lower(:name) "); //$NON-NLS-1$
 			
 		}
 		if (dateFilter != null){
@@ -249,9 +249,9 @@ public class SurveyFilter {
 		
 		if (stringComparator != null && surveyNameFilter != null){
 			if (stringComparator == StringComparison.CONTAINS){
-				query.setParameter("name", "%" + this.surveyNameFilter.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				query.setParameter("name", "%" + this.surveyNameFilter + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}else{
-				query.setParameter("name", this.surveyNameFilter.toLowerCase()); //$NON-NLS-1$
+				query.setParameter("name", this.surveyNameFilter); //$NON-NLS-1$
 			}
 		}
 		if (dateFilter != null) {

@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.er.query.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -60,7 +60,7 @@ public class SurveySummaryQuery extends SummaryQuery implements ISurveyQuery{
 		if (getQuery() == null || getQuery().length() == 0){
 			return null;
 		}
-		try(InputStream is = new ByteArrayInputStream(getQuery().getBytes())){
+		try(Reader is = new StringReader(getQuery())){
 			Parser parser = new Parser(is);
 			SumQueryDefinition myQuery = parser.SumQuery();
 			return myQuery;

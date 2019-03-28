@@ -193,9 +193,9 @@ public class NewAssetHandler {
 	}
 	
 	private boolean checkDuplicate(Session session, String assetId) {
-		String query =  "SELECT count(*) FROM Asset WHERE LOWER(id) = :id AND conservationArea = :ca "; //$NON-NLS-1$
+		String query =  "SELECT count(*) FROM Asset WHERE LOWER(id) = LOWER(:id) AND conservationArea = :ca "; //$NON-NLS-1$
 		Query<?> q = session.createQuery(query)
-		.setParameter("id", assetId.toLowerCase()) //$NON-NLS-1$
+		.setParameter("id", assetId) //$NON-NLS-1$
 		.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		Long cnt = (Long)q.uniqueResult();
 		if (cnt == 0) return false;

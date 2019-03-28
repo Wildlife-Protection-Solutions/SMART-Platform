@@ -73,7 +73,7 @@ public class FixedColumn implements IOverviewTableColumn{
 	
 	@Override
 	public String getKey() {
-		return column.name().toLowerCase();
+		return column.name().toLowerCase(Locale.ROOT);
 	}
 	
 	@Override

@@ -28,6 +28,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
@@ -124,7 +125,7 @@ public class CyberTrackerImporter {
 			//move processed files to storage
 			File storageFolder = ICyberTrackerConstants.getStorageFolder(ca);
 			for (final File file : cxtDataFolder.listFiles()) {
-				if (file.isFile() && file.getName().toLowerCase().endsWith(".ctx")) { //$NON-NLS-1$
+				if (file.isFile() && file.getName().toLowerCase(Locale.ROOT).endsWith(".ctx")) { //$NON-NLS-1$
 					if (patrols.isEmpty()) {
 						FileUtils.forceDelete(file);
 					} else {
@@ -142,7 +143,7 @@ public class CyberTrackerImporter {
 	}
 
 	public List<ICyberTrackerData> importFileData(File file, IProgressMonitor monitor) throws Exception {
-		if (file.getName().toLowerCase().endsWith(".ctx")) { //$NON-NLS-1$
+		if (file.getName().toLowerCase(Locale.ROOT).endsWith(".ctx")) { //$NON-NLS-1$
 			return importCtxFileData(file, monitor);
 		}
 		return importXmlFileData(file, monitor);
@@ -240,7 +241,7 @@ public class CyberTrackerImporter {
 		if (!ctxFile.isFile())
 			return null;
 		String xmlFilePath = ctxFile.getName();
-		xmlFilePath = xmlFilePath.substring(0, xmlFilePath.toLowerCase().lastIndexOf(".ctx")) + ".xml";  //$NON-NLS-1$//$NON-NLS-2$
+		xmlFilePath = xmlFilePath.substring(0, xmlFilePath.toLowerCase(Locale.ROOT).lastIndexOf(".ctx")) + ".xml";  //$NON-NLS-1$//$NON-NLS-2$
 		xmlFilePath = destFolder.getAbsolutePath() + "\\" + xmlFilePath; //$NON-NLS-1$
 		String[] extractCommand = {ctPath, ICyberTrackerConstants.COMMAND_DATAFILE, ctxFile.getAbsolutePath(), ICyberTrackerConstants.COMMAND_EXPORT, xmlFilePath};
 		Process proc = Runtime.getRuntime().exec(extractCommand);

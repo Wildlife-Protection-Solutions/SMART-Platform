@@ -12,7 +12,7 @@ options
   DEBUG_LOOKAHEAD = false;
   DEBUG_TOKEN_MANAGER = false;
   ERROR_REPORTING = true;
-  JAVA_UNICODE_ESCAPE = false;
+  JAVA_UNICODE_ESCAPE = true;
   UNICODE_INPUT = false;
   IGNORE_CASE = false;
   USER_TOKEN_MANAGER = false;

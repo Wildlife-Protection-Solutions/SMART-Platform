@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.i2.model;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -61,7 +61,7 @@ public class IntelEntityRecordQuery extends AbstractIntelQuery {
 	@Transient
 	public static ParsedObservationQuery parseQuery(String queryString) throws ParseException, IOException{
 		if (queryString.isEmpty()) return new ParsedObservationQuery(FilterType.OBSERVATION, null);
-		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+		try(Reader is = new StringReader(queryString)){
 			Parser parser = new Parser(is);
 			return parser.ParseQuery();
 		}

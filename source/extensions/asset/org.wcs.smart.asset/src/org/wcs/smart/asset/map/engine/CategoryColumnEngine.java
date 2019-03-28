@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.asset.map.engine;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -158,7 +159,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 				if (toCompute.getAttributeFilter() != null && !toCompute.getAttributeFilter().trim().isEmpty()) {
 					//we need to parse the attribute filter
 					IExpression attributeFilter = null;
-					try(InputStream is = new ByteArrayInputStream(toCompute.getAttributeFilter().getBytes())){
+					try(Reader is = new StringReader(toCompute.getAttributeFilter())){
 						Parser parser = new Parser(is);
 						attributeFilter = parser.AttributeExpression();
 					} catch (Exception e) {
@@ -376,7 +377,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 		case BOOLEAN:
 			Boolean bool = null;
 			try{
-				bool = Boolean.valueOf(filter.getStringValue().toUpperCase());
+				bool = Boolean.valueOf(filter.getStringValue().toUpperCase(Locale.ROOT));
 			}catch (Exception ex) {
 			}
 			if (bool == null) throw new Exception(MessageFormat.format(Messages.CategoryColumnEngine_BooleanParseItem, filter.getStringValue()));

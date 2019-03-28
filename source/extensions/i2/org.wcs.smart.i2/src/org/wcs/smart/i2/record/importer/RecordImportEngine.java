@@ -216,7 +216,7 @@ public enum RecordImportEngine {
 						//find the matching source
 						for (IntelRecordSource r : sources){
 							for (Label l : r.getNames()){
-								if (l.getValue().toLowerCase().equals(src.toLowerCase())){
+								if (l.getValue().equalsIgnoreCase(src)){
 									record.setRecordSource(r);
 									break;
 								}
@@ -352,11 +352,11 @@ public enum RecordImportEngine {
 			IntelEntityType type = (IntelEntityType) s.get(IntelEntityType.class, attribute.getEntityType().getUuid());
 			IntelAttribute ia = type.getIdAttribute();
 			
-			String hql = "SELECT v.id.entity FROM IntelEntityAttributeValue v join v.id.entity e WHERE v.id.attribute = :ia and e.entityType = :type and lower(v.stringValue) like :value "; //$NON-NLS-1$
+			String hql = "SELECT v.id.entity FROM IntelEntityAttributeValue v join v.id.entity e WHERE v.id.attribute = :ia and e.entityType = :type and lower(v.stringValue) like lower(:value) "; //$NON-NLS-1$
 			Query<IntelEntity> query = s.createQuery(hql, IntelEntity.class);
 			query.setParameter("ia", ia); //$NON-NLS-1$
 			query.setParameter("type", type); //$NON-NLS-1$
-			query.setParameter("value", "%" + strvalue.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			query.setParameter("value", "%" + strvalue + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			
 			List<IntelEntity> entities = query.list();
 			if (entities.size() > 1){

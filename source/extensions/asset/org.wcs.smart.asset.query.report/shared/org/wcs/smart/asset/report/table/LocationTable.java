@@ -104,7 +104,7 @@ public class LocationTable extends SmartBirtTable {
 		getAttributeColumn(connection);
 		List<String> names = new ArrayList<>();
 		for (Column c : Column.values()) {
-			names.add(COLUMN_PREFIX + c.name().toLowerCase());
+			names.add(COLUMN_PREFIX + c.name().toLowerCase(Locale.ROOT));
 		}
 		for (AssetAttribute a : attributeColumns) {
 			names.add(ATTRIBUTE_COLUMN_PREFIX + a.getKeyId());

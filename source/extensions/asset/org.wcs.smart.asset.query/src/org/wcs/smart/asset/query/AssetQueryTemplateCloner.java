@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.asset.query;
 
-import java.io.ByteArrayInputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
 import java.util.UUID;
 
@@ -190,9 +191,8 @@ public class AssetQueryTemplateCloner implements
 		if (strFilter.length() == 0){
 			return strFilter;
 		}
-		try{
-			Parser parser = new Parser(new ByteArrayInputStream(strFilter.getBytes()));
-		
+		try(Reader is = new StringReader(strFilter)){
+			Parser parser = new Parser(is);
 			QueryFilter queryfilter = parser.QueryFilter();
 			updateQueryFilter(queryfilter, engine);
 			return queryfilter.asString();
@@ -269,8 +269,8 @@ public class AssetQueryTemplateCloner implements
 	 * updates summary query definitions; updating query uuid items
 	 */
 	private String cloneSummaryQueryDefinition(String griddedQueryStr, ConservationAreaClonerEngine engine) {
-		try{
-			Parser parser = new Parser(new ByteArrayInputStream(griddedQueryStr.getBytes()));
+		try(Reader is = new StringReader(griddedQueryStr)){
+			Parser parser = new Parser(is);
 			SumQueryDefinition def = parser.SumQuery();
 			updateQueryFilter(def.getRateFilter(), engine);
 			updateQueryFilter(def.getValueFilter(), engine);

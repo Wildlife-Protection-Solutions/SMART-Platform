@@ -51,10 +51,10 @@ public class TableColumnViewerFilter extends TextViewerFilter {
 		if (filter == null || filter.length() == 0) {
 			return true;
 		}
-		String search = ".*" + Pattern.quote(filter.toLowerCase()) + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
+		String search = ".*" + Pattern.quote(filter) + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
 		for (ColumnLabelProvider col : columns){
 			String text = col.getText(element);
-			if (text != null && text.toLowerCase().matches(search)) return true;
+			if (text != null && Pattern.compile(search, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(text).matches()) return true;
 		}
 		return false;
 	}
