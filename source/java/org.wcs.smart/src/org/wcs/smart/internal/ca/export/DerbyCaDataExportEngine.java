@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -68,8 +69,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 		String sql = "select a.columnname FROM " + //$NON-NLS-1$
 				"sys.syscolumns a, sys.systables b, sys.sysschemas c " + //$NON-NLS-1$
 				" WHERE a.referenceid = b.tableid and b.schemaid = c.schemaid and " + //$NON-NLS-1$
-				"c.schemaname || '.' || b.tablename = '" +  //$NON-NLS-1$
-				tableName.toUpperCase() + "' " + //$NON-NLS-1$
+				"c.schemaname || '.' || b.tablename = UPPER('" + tableName + "') " +  //$NON-NLS-1$ //$NON-NLS-2$
 				" AND (a.autoincrementvalue is null or (a.autoincrementvalue is not null and a.columndefault is not null)) " + //not an generated always identity column //$NON-NLS-1$
 				"order by a.columnnumber"; //$NON-NLS-1$
 		

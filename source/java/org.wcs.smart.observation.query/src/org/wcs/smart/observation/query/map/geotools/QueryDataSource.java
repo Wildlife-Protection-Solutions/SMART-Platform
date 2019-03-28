@@ -49,7 +49,6 @@ public class QueryDataSource extends ContentDataStore{
 	public static final String WAYPOINT_TYPE = "Waypoint"; //$NON-NLS-1$
 	
 	private SimpleQuery query;
-//	private List<QueryColumn> cachedColumns; 
 	private IProjectionProvider prjProvider;
 	
 	/**

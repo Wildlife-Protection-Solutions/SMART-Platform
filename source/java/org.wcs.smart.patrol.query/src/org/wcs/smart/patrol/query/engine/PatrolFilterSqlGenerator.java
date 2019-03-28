@@ -257,8 +257,8 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 						filter.getOperator() == Operator.STR_NOTCONTAINS){
 					value1 = "%" + value1 + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				String p1 = engine.addParameterValue(value1.toLowerCase());
-				String x = "LOWER(" + prefix + "." + option.getColumnName() + ") " + asSql(filter.getOperator()) + " " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				String p1 = engine.addParameterValue(value1);
+				String x = "LOWER(" + prefix + "." + option.getColumnName() + ") " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				return x;
 			}
 		}else if (option.getType() == PatrolQueryOptionType.BOOLEAN){

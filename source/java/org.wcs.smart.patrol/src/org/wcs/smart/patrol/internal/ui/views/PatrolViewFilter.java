@@ -256,7 +256,7 @@ public class PatrolViewFilter {
 				str.append(" AND "); //$NON-NLS-1$
 			}
 			or = true;
-			str.append(" lower(p.id) like :pid "); //$NON-NLS-1$
+			str.append(" lower(p.id) like lower(:pid) "); //$NON-NLS-1$
 			
 		}
 		if (dateFilter != null){
@@ -283,9 +283,9 @@ public class PatrolViewFilter {
 		}
 		if (stringComparator != null && patrolIdFilter != null){
 			if (stringComparator == StringComparison.CONTAINS){
-				query.setParameter("pid", "%" + this.patrolIdFilter.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				query.setParameter("pid", "%" + this.patrolIdFilter + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}else{
-				query.setParameter("pid", this.patrolIdFilter.toLowerCase()); //$NON-NLS-1$
+				query.setParameter("pid", this.patrolIdFilter); //$NON-NLS-1$
 			}
 		}
 		if (dateFilter != null) {

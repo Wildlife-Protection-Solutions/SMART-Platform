@@ -16,6 +16,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 
 import org.geotools.gce.image.WorldImageFormat;
@@ -132,7 +133,7 @@ public class AuxMdImageServiceExtension implements ServiceExtension2 {
             return Messages.AuxMdImageServiceExtension_NotAFile;
         }
         String path = file.getAbsolutePath();
-        String fileExt = path.substring(path.lastIndexOf('.') + 1).toLowerCase();
+        String fileExt = path.substring(path.lastIndexOf('.') + 1).toLowerCase(Locale.ROOT);
         if(     fileExt.compareToIgnoreCase("BMP") != 0 && //$NON-NLS-1$
                 fileExt.compareToIgnoreCase("PNG") != 0 &&  //$NON-NLS-1$
                 fileExt.compareToIgnoreCase("GIF") != 0 && //$NON-NLS-1$

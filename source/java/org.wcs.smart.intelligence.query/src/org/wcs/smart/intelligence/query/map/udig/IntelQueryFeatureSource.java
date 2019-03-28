@@ -72,10 +72,10 @@ public class IntelQueryFeatureSource extends ContentFeatureSource{
 	protected SimpleFeatureType buildFeatureType() throws IOException {
 		SimpleFeatureType type;
 		try {
-			type = DataUtilities.createType("smart." + IntelQueryDataSource.INTEL_TYPE, getFeatureSchemaDef(getSource().getColumns(), true, false));
+			type = DataUtilities.createType("smart." + IntelQueryDataSource.INTEL_TYPE, getFeatureSchemaDef(getSource().getColumns(), true, false)); //$NON-NLS-1$
 		} catch (SchemaException e) {
 			throw new IOException(e);
-		} //$NON-NLS-1$
+		} 
 		return type;
 	}
 	

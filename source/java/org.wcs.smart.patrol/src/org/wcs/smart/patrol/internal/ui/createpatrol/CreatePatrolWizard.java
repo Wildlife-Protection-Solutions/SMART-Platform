@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -190,10 +191,10 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 				if (targetIndex < 0 || sourceIndex < 0){
 					continue;
 				}
-				if (bits[0].toLowerCase().equals("before")){ //$NON-NLS-1$
+				if (bits[0].toLowerCase(Locale.ROOT).equals("before")){ //$NON-NLS-1$
 					thisitems.remove(sourceIndex);
 					thisitems.add(targetIndex, sortSource);
-				}else if (bits[0].toLowerCase().endsWith("after")){ //$NON-NLS-1$
+				}else if (bits[0].toLowerCase(Locale.ROOT).endsWith("after")){ //$NON-NLS-1$
 					thisitems.remove(sourceIndex);
 					thisitems.add(targetIndex + 1, sortSource);
 				}

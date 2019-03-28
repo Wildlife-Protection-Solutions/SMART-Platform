@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -150,10 +151,10 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 				//gender
 				String gender = data[index++];
 				if (gender == null || gender.trim().length() != 1 || 
-						!(gender.trim().toUpperCase().charAt(0) == Employee.DB_FEMALE || gender.trim().toUpperCase().charAt(0) == Employee.DB_MALE)){
+						!(gender.trim().toUpperCase(Locale.ROOT).charAt(0) == Employee.DB_FEMALE || gender.trim().toUpperCase(Locale.ROOT).charAt(0) == Employee.DB_MALE)){
 					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_Gender, Employee.DB_FEMALE, Employee.DB_MALE, line));
 				}
-				if (gender.trim().toUpperCase().charAt(0) == Employee.DB_FEMALE){
+				if (gender.trim().toUpperCase(Locale.ROOT).charAt(0) == Employee.DB_FEMALE){
 					e.setGender(Employee.DB_FEMALE);
 				}else{
 					e.setGender(Employee.DB_MALE);

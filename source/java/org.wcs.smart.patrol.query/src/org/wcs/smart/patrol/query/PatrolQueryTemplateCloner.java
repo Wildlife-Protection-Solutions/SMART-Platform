@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.patrol.query;
 
-import java.io.ByteArrayInputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -260,9 +261,8 @@ public class PatrolQueryTemplateCloner implements
 		if (strFilter.length() == 0){
 			return strFilter;
 		}
-		try{
-			Parser parser = new Parser(new ByteArrayInputStream(strFilter.getBytes()));
-		
+		try(Reader is = new StringReader(strFilter)){
+			Parser parser = new Parser(is);
 			QueryFilter queryfilter = parser.QueryFilter();
 			updateQueryFilter(queryfilter, engine);
 			return queryfilter.asString();
@@ -339,8 +339,8 @@ public class PatrolQueryTemplateCloner implements
 	 * the new conservation area uuid items 
 	 */
 	private String cloneGriddedQueryDefinition(String griddedQueryStr, ConservationAreaClonerEngine engine) {
-		try{
-			Parser parser = new Parser(new ByteArrayInputStream(griddedQueryStr.getBytes()));
+		try(Reader is = new StringReader(griddedQueryStr)){
+			Parser parser = new Parser(is);
 			PatrolGridQueryDefinition def = parser.GridQuery();
 			updateQueryFilter(def.getRateFilter(), engine);
 			updateQueryFilter(def.getValueFilter(), engine);
@@ -356,8 +356,8 @@ public class PatrolQueryTemplateCloner implements
 	 * updates summary query definitions; updating query uuid items
 	 */
 	private String cloneSummaryQueryDefinition(String griddedQueryStr, ConservationAreaClonerEngine engine) {
-		try{
-			Parser parser = new Parser(new ByteArrayInputStream(griddedQueryStr.getBytes()));
+		try(Reader is = new StringReader(griddedQueryStr)){
+			Parser parser = new Parser(is);
 			SumQueryDefinition def = parser.SumQuery();
 			updateQueryFilter(def.getRateFilter(), engine);
 			updateQueryFilter(def.getValueFilter(), engine);

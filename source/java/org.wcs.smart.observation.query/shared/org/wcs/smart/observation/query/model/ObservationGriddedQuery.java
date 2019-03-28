@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.observation.query.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -67,7 +67,7 @@ public class ObservationGriddedQuery extends GriddedQuery {
 		if (strQuery == null || strQuery.length() == 0){
 			return null;
 		}
-		try(InputStream is = new ByteArrayInputStream(strQuery.getBytes())){
+		try(Reader is = new StringReader(strQuery)){
 			Parser parser = new Parser(is);
 			GridQueryDefinition myQuery = parser.GridQuery();
 			return myQuery;

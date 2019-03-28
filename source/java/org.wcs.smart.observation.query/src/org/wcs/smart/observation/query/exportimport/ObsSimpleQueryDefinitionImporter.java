@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.observation.query.exportimport;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.HashMap;
 
 import org.hibernate.Session;
@@ -61,12 +61,11 @@ public class ObsSimpleQueryDefinitionImporter extends SimpleQueryDefinitionImpor
 	protected String processDefinition(ConservationArea importCa, String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
 		QueryFilter queryFilter = null;
 		
-		try(InputStream is = new ByteArrayInputStream(queryDef.getBytes())){
+		try(Reader is = new StringReader(queryDef)){
 			Parser parser = new Parser(is);
 			queryFilter = parser.QueryFilter();
 		}
 		
-
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {

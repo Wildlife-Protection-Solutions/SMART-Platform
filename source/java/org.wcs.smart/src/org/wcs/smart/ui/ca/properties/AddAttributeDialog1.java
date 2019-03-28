@@ -455,7 +455,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 			}
 			String search = ".*" + Pattern.quote(filter.toLowerCase()) + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
 			Attribute a = (Attribute) element;
-			if (a.getName().toLowerCase().matches(search)){
+			if (Pattern.compile(search, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(a.getName()).matches()){
 				return true;
 			}
 			return false;

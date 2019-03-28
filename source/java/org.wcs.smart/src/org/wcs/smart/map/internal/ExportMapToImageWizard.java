@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -251,7 +252,7 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 	//SMART BUG #1592
 	private void resetCatalog(final File file) {
 		if (!file.exists()) return; //file not created
-        if ( file.getAbsolutePath().toLowerCase().endsWith("pdf") ) return; //$NON-NLS-1$
+        if ( file.getAbsolutePath().toLowerCase(Locale.ROOT).endsWith("pdf") ) return; //$NON-NLS-1$
 
         Job resetCatalog = new Job("Resetting " + file.getName() ){ //$NON-NLS-1$
             @Override

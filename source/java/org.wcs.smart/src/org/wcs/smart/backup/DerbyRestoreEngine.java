@@ -116,10 +116,10 @@ public class DerbyRestoreEngine {
 				String username = dialog.getUserName();
 				String password = dialog.getPassword();
 
-				CriteriaQuery<Employee> q = cb.createQuery(Employee.class);
-				Root<Employee> root2 = q.from(Employee.class);
-				q.where(cb.equal(cb.upper(root2.get("smartUserId")), username.toUpperCase())); //$NON-NLS-1$
-				List<Employee> matching = session.createQuery(q).getResultList();
+				String query = "FROM Employee WHERE UPPER(smartUserId) = UPPER(:userid) and endEmploymentDate is null"; //$NON-NLS-1$
+				List<Employee> matching = session.createQuery(query, Employee.class)
+						.setParameter("userid", username) //$NON-NLS-1$
+						.getResultList();
 				
 				boolean found = false;
 				for (Employee e : matching){

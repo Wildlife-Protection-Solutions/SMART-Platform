@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Queue;
 import java.util.Set;
 
@@ -170,7 +171,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 		HashMap<String, List<TableInfo>> map = new HashMap<String, List<TableInfo>>();
 		for (int i = 0; i < files.length; i++){
 			try(BufferedReader reader = new BufferedReader(new FileReader(new File(dataFileDir, files[i])))){
-				String tablename = reader.readLine().toUpperCase();
+				String tablename = reader.readLine().toUpperCase(Locale.ROOT);
 				String columns = reader.readLine();
 				String data = files[i].substring(0,files[i].lastIndexOf(".def")); //$NON-NLS-1$
 				

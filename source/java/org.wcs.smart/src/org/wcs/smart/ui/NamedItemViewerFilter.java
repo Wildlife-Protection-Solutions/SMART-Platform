@@ -46,7 +46,7 @@ public class NamedItemViewerFilter extends TextViewerFilter{
 		String search = ".*" + Pattern.quote(filter.toLowerCase()) + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
 		if (element instanceof NamedItem){
 			NamedItem item = (NamedItem) element;
-			if (item.getName().toLowerCase().matches(search)){
+			if (Pattern.compile(search, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(item.getName()).matches()){
 				return true;
 			}
 			return false;

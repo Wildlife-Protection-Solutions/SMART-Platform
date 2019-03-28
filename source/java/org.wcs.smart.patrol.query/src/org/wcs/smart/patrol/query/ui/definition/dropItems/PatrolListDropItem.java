@@ -182,7 +182,7 @@ public class PatrolListDropItem extends DropItem implements IFilterDropItem{
 		if (it != null){
 			sb.append("\""); //$NON-NLS-1$
 			if (option == PatrolQueryOption.PATROL_TYPE){
-				sb.append(it.getKey().toUpperCase());
+				sb.append(it.getKey().toUpperCase(Locale.ROOT));
 			}else if (option.getType() == PatrolQueryOptionType.KEY){
 				sb.append(it.getKey());
 			}else{

@@ -185,7 +185,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		patrol.setComment(xml.getComment());
 		patrol.setId(xml.getId());
 		
-		patrol.setPatrolType(org.wcs.smart.patrol.model.PatrolType.Type.valueOf(xml.getPatrolType().toUpperCase()));
+		patrol.setPatrolType(org.wcs.smart.patrol.model.PatrolType.Type.valueOf(xml.getPatrolType().toUpperCase(Locale.ROOT)));
 		if (xml.getObjective() != null){
 			patrol.setObjective(xml.getObjective().getDescription());
 		}

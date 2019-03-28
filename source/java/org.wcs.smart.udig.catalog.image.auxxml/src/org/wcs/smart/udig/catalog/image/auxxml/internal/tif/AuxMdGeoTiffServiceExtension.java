@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.geotools.gce.geotiff.GeoTiffFormat;
@@ -165,7 +166,7 @@ public class AuxMdGeoTiffServiceExtension extends GeoTiffServiceExtension {
     
     private boolean isSupportedExtension( URL url ) {
         File file = URLUtils.urlToFile(url);
-        String fileLower = file.getAbsolutePath().toLowerCase();
+        String fileLower = file.getAbsolutePath().toLowerCase(Locale.ROOT);
         boolean isTiff = fileLower.endsWith(".tiff") || fileLower.endsWith(".tif"); //$NON-NLS-1$ //$NON-NLS-2$
         if (!isTiff) {
             return false;

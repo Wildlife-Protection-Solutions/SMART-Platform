@@ -151,8 +151,6 @@ public class IncidentFilter {
 			or = true;
 			if (stringComparator == StringComparison.EQUALS){
 				str.append(" i.id = :pid "); //$NON-NLS-1$
-//			}else{
-//				str.append(" cast(i.id as char) like :pid "); //$NON-NLS-1$
 			}
 			
 		}
@@ -182,8 +180,6 @@ public class IncidentFilter {
 				}catch (Exception ex){
 					query.setParameter("pid", null); //$NON-NLS-1$
 				}
-//			}else{
-//				query.setParameter("pid", "%" + this.incidentIdFilter.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 		if (dateFilter != null) {

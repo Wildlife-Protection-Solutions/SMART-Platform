@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.changetracking;
 
+import java.util.Locale;
+
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 
@@ -41,8 +43,8 @@ public enum DerbyTriggerManager {
      * @return true if trigger exists, false otherwise
      */
 	public boolean triggerExists(String name, Session s){
-		NativeQuery<?> q = s.createNativeQuery("SELECT count(*) FROM SYS.SYSTRIGGERS trj, SYS.SYSSCHEMAS sc WHERE trj.schemaid = sc.schemaid AND sc.schemaname || '.' || UPPER(triggername) = :triggerName"); //$NON-NLS-1$
-		q.setParameter("triggerName", name.toUpperCase()); //$NON-NLS-1$
+		NativeQuery<?> q = s.createNativeQuery("SELECT count(*) FROM SYS.SYSTRIGGERS trj, SYS.SYSSCHEMAS sc WHERE trj.schemaid = sc.schemaid AND sc.schemaname || '.' || UPPER(triggername) = UPPER(:triggerName)"); //$NON-NLS-1$
+		q.setParameter("triggerName", name); //$NON-NLS-1$
 		Integer cnt = (Integer)q.uniqueResult();
 		if (cnt.longValue() == 0) return false;
 		return true;	

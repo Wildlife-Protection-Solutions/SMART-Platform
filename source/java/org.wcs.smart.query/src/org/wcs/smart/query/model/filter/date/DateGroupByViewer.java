@@ -180,8 +180,7 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 		// each month between start and end of
 		// form "m/yyyy"
 		SimpleDateFormat nameFormat = new SimpleDateFormat("MM/yyyy"); //$NON-NLS-1$
-		SimpleDateFormat keyFormat = new SimpleDateFormat(
-				"M/yyyy", Locale.ENGLISH); //$NON-NLS-1$
+		SimpleDateFormat keyFormat = new SimpleDateFormat("M/yyyy", Locale.ENGLISH); //$NON-NLS-1$
 
 		cals.set(Calendar.DAY_OF_MONTH, 1);
 		cale.set(Calendar.DAY_OF_MONTH,

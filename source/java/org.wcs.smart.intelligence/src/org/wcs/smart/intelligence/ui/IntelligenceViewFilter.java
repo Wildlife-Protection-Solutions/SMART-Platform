@@ -100,7 +100,7 @@ public class IntelligenceViewFilter {
 		if (label) {
 		    str.append("AND  lbl.id.element.uuid = i.uuid AND lbl.id.language = :language "); //$NON-NLS-1$
 		    if (nameComparison != null && name != null) {
-		    	str.append("AND lower(lbl.value) like :name ");  //$NON-NLS-1$
+		    	str.append("AND lower(lbl.value) like lower(:name) ");  //$NON-NLS-1$
 		    }
 		}
 		
@@ -144,10 +144,10 @@ public class IntelligenceViewFilter {
 		if (nameComparison != null && name != null) {
 			switch (nameComparison) {
 			case CONTAINS:
-				query.setParameter("name", "%" + name.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				query.setParameter("name", "%" + name + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				break;
 			case EQUALS:
-				query.setParameter("name", name.toLowerCase()); //$NON-NLS-1$
+				query.setParameter("name", name); //$NON-NLS-1$
 				break;
 			}
 		}

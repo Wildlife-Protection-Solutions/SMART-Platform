@@ -232,9 +232,9 @@ public class IntelligenceImporter {
 					return null;
 				}
 				
-				Query<?> query = session.createQuery("SELECT l.value FROM Label l, Intelligence i WHERE l.id.language = :language AND lower(l.value) like :name AND l.id.element.uuid = i.uuid"); //$NON-NLS-1$
+				Query<?> query = session.createQuery("SELECT l.value FROM Label l, Intelligence i WHERE l.id.language = :language AND lower(l.value) like lower(:name) AND l.id.element.uuid = i.uuid"); //$NON-NLS-1$
 				query.setParameter("language", language); //$NON-NLS-1$
-				query.setParameter("name", name.toLowerCase()); //$NON-NLS-1$
+				query.setParameter("name", name); //$NON-NLS-1$
 				List<?> result = query.list();
 				if (result != null && result.size() > 0){
 					final boolean[] cont = new boolean[]{true};

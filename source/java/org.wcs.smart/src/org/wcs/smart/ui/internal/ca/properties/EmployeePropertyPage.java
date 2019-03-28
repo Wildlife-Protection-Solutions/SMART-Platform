@@ -872,11 +872,13 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 				return true;
 			}
 			String search = ".*" + Pattern.quote(searchString.toLowerCase()) + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
+			
 			Employee p = (Employee) element;
-			if (p.getGivenName().toLowerCase().matches(search)){
+			Pattern ptn = Pattern.compile(search, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+			if (ptn.matcher(p.getGivenName()).matches()){
 				return true;
 			}
-			if (p.getFamilyName().toLowerCase().matches(search)){
+			if (ptn.matcher(p.getFamilyName()).matches()){
 				return true;
 			}
 			return false;

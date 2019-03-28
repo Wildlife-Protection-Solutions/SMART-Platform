@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.udig.catalog;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.locationtech.udig.catalog.IService;
@@ -72,7 +73,7 @@ public class PatrolServiceExtension implements ServiceExtension {
 	
 	public static Map<String, Serializable> createParamsFromUrl(URL url){
 		//not a valid url
-		if (!url.toExternalForm().toLowerCase().startsWith("smart://smartdb/patrol/")) return null; //$NON-NLS-1$
+		if (!url.toExternalForm().toLowerCase(Locale.ROOT).startsWith("smart://smartdb/patrol/")) return null; //$NON-NLS-1$
 
 		String uuid = url.getPath();
 		if (uuid == null){

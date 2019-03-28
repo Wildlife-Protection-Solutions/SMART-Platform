@@ -774,11 +774,8 @@ public class ExportMapWizardPage extends WizardPage {
         formats.add(new PDFImageExportFormat());
 
         Collections.sort(formats, new Comparator<ImageExportFormat>(){
-
             public int compare( ImageExportFormat format1, ImageExportFormat format2 ) {
-                String name1 = format1.getName().toLowerCase();
-                String name2 = format2.getName().toLowerCase();
-                return name1.compareTo(name2);
+            	return format1.getName().compareToIgnoreCase(format2.getName());
             }
 
         });

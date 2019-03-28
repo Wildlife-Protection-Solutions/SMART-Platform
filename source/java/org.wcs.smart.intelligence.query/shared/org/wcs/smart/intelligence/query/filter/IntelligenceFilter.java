@@ -45,7 +45,7 @@ public class IntelligenceFilter implements IFilter {
 	public static IntelligenceFilter parseIntelligenceFilter(String key, Operator operator, String value) {
 		IntelligenceFilterOption op = null;
 		for (IntelligenceFilterOption option : IntelligenceFilterOption.values()){
-			if (option.getKey().equals(key.toLowerCase())){
+			if (option.getKey().equalsIgnoreCase(key)){
 				op = option;
 				break;
 			}

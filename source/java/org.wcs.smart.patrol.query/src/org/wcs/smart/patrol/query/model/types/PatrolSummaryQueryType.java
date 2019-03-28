@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.patrol.query.model.types;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -213,7 +213,7 @@ public class PatrolSummaryQueryType implements IQueryType {
 		
 		//validate query
 		String queryString = definition + "|" + filters; //$NON-NLS-1$
-		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+		try(Reader is = new StringReader(queryString)){
 			Parser parser = new Parser(is);
 			SumQueryDefinition def = parser.SumQuery();
 			

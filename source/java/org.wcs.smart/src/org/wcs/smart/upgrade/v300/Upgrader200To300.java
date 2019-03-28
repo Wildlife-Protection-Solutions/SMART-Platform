@@ -28,6 +28,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -131,7 +132,7 @@ public class Upgrader200To300 implements IDatabaseUpgrader {
 		pst = c.prepareStatement("UPDATE smart.intelligence SET source_uuid = ? where ca_uuid = ? and source = ?"); //$NON-NLS-1$
 		pst.setBytes(1, uuid);
 		pst.setBytes(2, ca.uuid);
-		pst.setString(3, keyId.toUpperCase());
+		pst.setString(3, keyId.toUpperCase(Locale.ROOT));
 		pst.executeUpdate();
 		
 	}

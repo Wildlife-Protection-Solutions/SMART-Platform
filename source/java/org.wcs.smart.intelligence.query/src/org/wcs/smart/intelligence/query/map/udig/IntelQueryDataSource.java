@@ -69,6 +69,7 @@ public class IntelQueryDataSource extends ContentDataStore{
 	public void dispose(){
 		super.dispose();
 		this.cachedColumns = null;
+		this.query = null;
 	}
 
 	public IntelligenceRecordQuery getQuery() {
@@ -107,14 +108,14 @@ public class IntelQueryDataSource extends ContentDataStore{
 
 	@Override
 	protected List<Name> createTypeNames() throws IOException {
-		if (cachedColumns == null) {
-			cachedColumns = query.computeQueryColumns(Locale.getDefault(), null, null);
-		}
 		return Collections.singletonList(new NameImpl(INTEL_TYPE));
 	}
 
 	@Override
 	protected ContentFeatureSource createFeatureSource(ContentEntry entry) throws IOException {
+		if (cachedColumns == null) {
+			cachedColumns = query.computeQueryColumns(Locale.getDefault(), null, null);
+		}
 		return new IntelQueryFeatureSource(entry);
 	}
 	

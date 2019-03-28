@@ -295,9 +295,6 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		sql.append(prefix(Waypoint.class));
 		sql.append(".uuid "); //$NON-NLS-1$
 		sql.append("FROM "); //$NON-NLS-1$
-
-		
-
 		sql.append(name(Waypoint.class));
 		sql.append(" as ");//$NON-NLS-1$
 		sql.append(prefix(Waypoint.class)); 
@@ -468,11 +465,11 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					sql.append(".string_value) "); //$NON-NLS-1$
 					
 					if (attfilter.getOperator() == Operator.STR_CONTAINS || attfilter.getOperator() == Operator.STR_NOTCONTAINS){
-						String p1 = engine.addParameterValue("%" + ((String)attfilter.getValue()).toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-						sql.append(ObservationFilterToSqlGenerator.asSql(attfilter.getOperator()) + " " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$  	
+						String p1 = engine.addParameterValue("%" + ((String)attfilter.getValue()) + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+						sql.append(ObservationFilterToSqlGenerator.asSql(attfilter.getOperator()) + " LOWER(" + p1 + ") )"); //$NON-NLS-1$ //$NON-NLS-2$  	
 					}else if (attfilter.getOperator() == Operator.STR_EQUALS){
-						String p1 = engine.addParameterValue(((String)attfilter.getValue()).toLowerCase());
-						sql.append(ObservationFilterToSqlGenerator.asSql(attfilter.getOperator()) + " " + p1 + " )");  //$NON-NLS-1$ //$NON-NLS-2$  
+						String p1 = engine.addParameterValue(((String)attfilter.getValue()));
+						sql.append(ObservationFilterToSqlGenerator.asSql(attfilter.getOperator()) + " LOWER(" + p1 + ") )");  //$NON-NLS-1$ //$NON-NLS-2$  
 					}
 				}else if (attfilter.getAttributeType() == AttributeType.LIST){
 					sql.append("("); //$NON-NLS-1$

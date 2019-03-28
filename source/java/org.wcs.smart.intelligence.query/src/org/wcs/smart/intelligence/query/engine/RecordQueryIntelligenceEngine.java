@@ -306,9 +306,9 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				}else{
 					sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
 				}
-				sql.append(" ? "); //$NON-NLS-1$
+				sql.append(" LOWER(?) "); //$NON-NLS-1$
 				
-				String value = f.getValue().toLowerCase();
+				String value = f.getValue();
 				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
 					value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
@@ -318,16 +318,16 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				sql.append("LOWER("); //$NON-NLS-1$
 				sql.append(tablePrefix(Informant.class) + ".id) "); //$NON-NLS-1$
 				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append(" ? "); //$NON-NLS-1$
-				parameterValues.add(f.getValue().toLowerCase());
+				sql.append(" LOWER(?) "); //$NON-NLS-1$
+				parameterValues.add(f.getValue());
 				
 			}else if (f.getFilterOption() == IntelligenceFilterOption.PATROLID){
 				sql.append("LOWER("); //$NON-NLS-1$
 				sql.append(tablePrefix(Patrol.class) + ".id) "); //$NON-NLS-1$
 				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append(" ? "); //$NON-NLS-1$
+				sql.append(" LOWER(?) "); //$NON-NLS-1$
 				
-				String value = f.getValue().toLowerCase();
+				String value = f.getValue();
 				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
 					value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
@@ -343,8 +343,8 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				sql.append(".uuid and LOWER(value) "); //$NON-NLS-1$
 				
 				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append(" ? )"); //$NON-NLS-1$
-				String value = f.getValue().toLowerCase();
+				sql.append(" LOWER(?) )"); //$NON-NLS-1$
+				String value = f.getValue();
 				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
 					value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 				}

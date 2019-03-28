@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -131,7 +132,7 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 		type.setConservationArea(SmartDB.getCurrentConservationArea());
 		
 		try{
-			PatrolType.Type ttype = PatrolType.Type.valueOf(row[0].toUpperCase());
+			PatrolType.Type ttype = PatrolType.Type.valueOf(row[0].toUpperCase(Locale.ROOT));
 			type.setPatrolType(ttype);
 		}catch (Exception ex){
 			throw new Exception(MessageFormat.format(Messages.PatrolTransportCsvImporter_InvalidPatrolType, new Object[]{row[0], linenumber}));

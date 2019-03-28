@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -97,7 +98,7 @@ public class QueryResultsImagePage extends EditorPart  implements AttachmentTabl
 		String size = QueryPlugIn.getDefault().getPreferenceStore().getString(PREFERENCE_ICONSIZE);
 		if (size != null) {
 			try {
-				iconSize = IconSize.valueOf(size.toUpperCase());
+				iconSize = IconSize.valueOf(size.toUpperCase(Locale.ROOT));
 			}catch (Throwable t) {}
 		}
 	}

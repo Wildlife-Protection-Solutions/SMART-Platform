@@ -85,7 +85,7 @@ public class PatrolQueryFeatureSource  extends ContentFeatureSource {
 	 * @throws SchemaException
 	 */
 	private SimpleFeatureType createPatrolSchema() throws SchemaException{
-		SimpleFeatureType type =  DataUtilities.createType(entry.getTypeName(), getFeatureSchemaDef(getSource().getColumns(), true, false)); //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType(entry.getTypeName(), getFeatureSchemaDef(getSource().getColumns(), true, false)); 
 		return type;
 	}
 	

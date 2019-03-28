@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -316,7 +317,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		sb.append("SELECT count(*) "); //$NON-NLS-1$
 		sb.append("FROM sys.SYSSCHEMAS s, sys.systables t, sys.syscolumns c "); //$NON-NLS-1$
 		sb.append(" WHERE s.schemaid = t.schemaid and c.referenceid = t.tableid "); //$NON-NLS-1$
-		sb.append(" and t.tablename = '" + tableName.toUpperCase() + "' and c.columnname = '" + columnName.toUpperCase() + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append(" and t.tablename = UPPER('" + tableName + "') and c.columnname = UPPER('" + columnName + "')"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		try(ResultSet rs = c.createStatement().executeQuery(sb.toString())){
 			if (rs.next()) {

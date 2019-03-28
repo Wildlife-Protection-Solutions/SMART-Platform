@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.patrol.query.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -59,7 +59,7 @@ public class PatrolSummaryQuery extends SummaryQuery {
 		if (getQuery() == null || getQuery().length() == 0){
 			return null;
 		}
-		try(InputStream is = new ByteArrayInputStream(getQuery().getBytes())){
+		try(Reader is = new StringReader(getQuery())){
 			Parser parser = new Parser(is);
 			SumQueryDefinition myQuery = parser.SumQuery();
 			

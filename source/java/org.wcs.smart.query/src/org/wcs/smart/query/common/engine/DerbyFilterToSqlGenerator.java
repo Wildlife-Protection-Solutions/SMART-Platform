@@ -148,11 +148,11 @@ public class DerbyFilterToSqlGenerator {
 			String val = (String)filter.getValue();
 			if (filter.getOperator() == Operator.STR_CONTAINS || 
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
-				String param = engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ 
-				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " " + param + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 	
+				String param = engine.addParameterValue("%" + val + "%"); //$NON-NLS-1$ //$NON-NLS-2$ 
+				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " LOWER(" + param + ") )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 	
 			}else if (filter.getOperator() == Operator.STR_EQUALS){
-				String param = engine.addParameterValue(val.toLowerCase()); 
-				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " " + param + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+				String param = engine.addParameterValue(val); 
+				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " LOWER(" + param + ") )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 			}
 			return queryStr;
 		}else if (filter.getAttributeType() == AttributeType.DATE){

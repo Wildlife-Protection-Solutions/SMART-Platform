@@ -47,7 +47,7 @@ public class SmartUserTester extends PropertyTester {
 		String userLevel = (String)expectedValue;
 		
 		for (String key : SmartDB.getCurrentEmployee().getSmartUserLevels()){
-			if (key.toUpperCase().equals(userLevel.toUpperCase())){
+			if (key.equalsIgnoreCase(userLevel)){
 				return true;
 			}
 		}

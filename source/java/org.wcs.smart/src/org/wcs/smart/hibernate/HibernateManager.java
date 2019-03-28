@@ -316,10 +316,10 @@ public class HibernateManager extends SmartHibernateManager{
 	public static boolean validateUserIdUnique(String userName, ConservationArea ca, Session session){
 		Transaction tx = session.beginTransaction();
 		try{
-			String query = "select count(*) from Employee where conservationArea = :ca and UPPER(smartUserId) = :userId"; //$NON-NLS-1$
+			String query = "select count(*) from Employee where conservationArea = :ca and UPPER(smartUserId) = UPPER(:userId)"; //$NON-NLS-1$
 			List<?> cnt = session.createQuery(query)
 					.setParameter("ca", ca) //$NON-NLS-1$
-					.setParameter("userId", userName.toUpperCase()).list(); //$NON-NLS-1$ 
+					.setParameter("userId", userName).list(); //$NON-NLS-1$ 
 			boolean ok = false;
 			if ( (Long) cnt.get(0) > 0){
 				ok = false;
@@ -351,11 +351,10 @@ public class HibernateManager extends SmartHibernateManager{
 	public static List<ConservationArea> findConservationAreas(String userName, String password) throws Exception{
 		try(Session s = HibernateManager.openSession()){
 		
-			CriteriaBuilder cb = s.getCriteriaBuilder();
-			CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
-			Root<Employee> root = c.from(Employee.class);
-			c.where(cb.equal(cb.upper(root.get("smartUserId")), userName.toUpperCase())); //$NON-NLS-1$
-			List<Employee> es = s.createQuery(c).list();
+			String query = "FROM Employee WHERE UPPER(smartUserId) = UPPER(:userId)"; //$NON-NLS-1$
+			List<Employee> es = s.createQuery(query, Employee.class)
+				.setParameter("userId", userName) //$NON-NLS-1$
+				.getResultList();
 
 			List<ConservationArea> areas = new ArrayList<ConservationArea>();
 			for (Employee e : es){
@@ -403,15 +402,11 @@ public class HibernateManager extends SmartHibernateManager{
 		
 		try(Session s = HibernateManager.openSession()){
 			
-			CriteriaBuilder cb = s.getCriteriaBuilder();
-			CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
-			Root<Employee> root = c.from(Employee.class);
-			c.where(cb.and(
-					cb.equal(cb.upper(root.get("smartUserId")), userName.toUpperCase()), //$NON-NLS-1$
-					cb.isNull(root.get("endEmploymentDate")), //$NON-NLS-1$
-					cb.equal(root.get("conservationArea"), ca) //$NON-NLS-1$
-					));
-			List<Employee> people = s.createQuery(c).list();
+			String query = "FROM Employee WHERE conservationArea = :ca and UPPER(smartUserId) = UPPER(:userId) and endEmploymentDate is null"; //$NON-NLS-1$
+			List<Employee> people = s.createQuery(query, Employee.class)
+					.setParameter("ca", ca) //$NON-NLS-1$
+					.setParameter("userId", userName) //$NON-NLS-1$
+					.list();
 			
 			if (people.size() == 1){
 				Employee user = people.get(0);
@@ -423,14 +418,11 @@ public class HibernateManager extends SmartHibernateManager{
 					return null;
 				}else{
 					//check passwords for all users with matching userids
-					cb = s.getCriteriaBuilder();
-					c = cb.createQuery(Employee.class);
-					root = c.from(Employee.class);
-					c.where(cb.and(cb.equal(cb.upper(root.get("smartUserId")), userName.toUpperCase()), //$NON-NLS-1$
-							cb.isNull(root.get("endEmploymentDate")), //$NON-NLS-1$
-							cb.notEqual(root.get("conservationArea"), ca) //$NON-NLS-1$
-							));
-					List<Employee> otherUsers = s.createQuery(c).list();
+					query = "FROM Employee WHERE conservationArea != :ca and UPPER(smartUserId) = UPPER(:userId) and endEmploymentDate is null"; //$NON-NLS-1$
+					List<Employee> otherUsers = s.createQuery(query, Employee.class)
+							.setParameter("ca", ca) //$NON-NLS-1$
+							.setParameter("userId", userName) //$NON-NLS-1$
+							.list();
 					
 					for (Employee o : otherUsers){
 						if (validatePassword(password, o)){

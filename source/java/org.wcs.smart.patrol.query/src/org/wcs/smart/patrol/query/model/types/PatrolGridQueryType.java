@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.patrol.query.model.types;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.List;
 
@@ -216,7 +216,7 @@ public class PatrolGridQueryType implements IMappableQueryType {
 		
 		//validate query
 		String queryString = definition + "|" + filters + "|" + nodatafilter; //$NON-NLS-1$ //$NON-NLS-2$
-		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+		try(Reader is = new StringReader(queryString)){
 			Parser parser = new Parser(is);
 			parser.GridQuery();
 		}catch (Throwable ex){

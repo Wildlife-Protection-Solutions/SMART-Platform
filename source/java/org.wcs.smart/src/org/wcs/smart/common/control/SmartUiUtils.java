@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.common.control;
 
+import java.util.Locale;
+
 import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -37,7 +39,7 @@ public class SmartUiUtils {
 		//the height for these does not configure nicely on mac so for mac only we adjust the height
 		//assumption is viewer layout data is griddata if not we don't do anything
 		if (!(viewer.getControl().getLayoutData() instanceof GridData)) return;		
-		if (System.getProperty("os.name").toLowerCase().contains("mac")) { //$NON-NLS-1$ //$NON-NLS-2$
+		if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac")) { //$NON-NLS-1$ //$NON-NLS-2$
 			GridData gd = (GridData) viewer.getControl().getLayoutData();
 			gd.heightHint = viewer.getControl().computeSize(SWT.DEFAULT,SWT.DEFAULT).y + 6;
 		}

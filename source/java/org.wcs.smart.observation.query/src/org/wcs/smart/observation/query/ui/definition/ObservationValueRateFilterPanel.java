@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.observation.query.ui.definition;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +69,7 @@ public class ObservationValueRateFilterPanel extends ValueRateFilterDeifnitionPa
 		}
 		
 		QueryFilter filterPart  = null;
-		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+		try(Reader is = new StringReader(queryString)){
 			Parser parser = new Parser(is);
 			filterPart = parser.QueryFilter();
 		}catch (Exception ex){

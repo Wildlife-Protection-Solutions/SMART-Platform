@@ -251,9 +251,9 @@ public class SmartStartUp {
 						
 						session.beginTransaction();
 						try {
-							Query<Employee> e = session.createQuery("FROM Employee WHERE conservationArea = :ca and upper(smartUserId) = :id", Employee.class); //$NON-NLS-1$
+							Query<Employee> e = session.createQuery("FROM Employee WHERE conservationArea = :ca and upper(smartUserId) = upper(:id)", Employee.class); //$NON-NLS-1$
 							e.setParameter("ca", ca); //$NON-NLS-1$
-							e.setParameter("id", users.get(0).getSmartUserId().toUpperCase()); //$NON-NLS-1$
+							e.setParameter("id", users.get(0).getSmartUserId()); //$NON-NLS-1$
 							ccaaUser = e.uniqueResult();
 							
 							if (ccaaUser == null){
@@ -265,15 +265,14 @@ public class SmartStartUp {
 								ccaaUser.setStartEmploymentDate(new Date());
 								ccaaUser.setId(ccaaUser.getSmartUserId());
 								ccaaUser.setConservationArea(ca);
-//								ccaaUser.setSmartUserLevel(UserLevelManager.INSTANCE.getUserLevels().values()); //give them all seeing access
 								session.save(ccaaUser);
 								session.flush();
 							}
 							
 							//determine user levels by combining all permissions 
-							List<Employee> employeeUsers = session.createQuery("FROM Employee WHERE conservationArea in (:cas) and upper(smartUserId) = :id", Employee.class) //$NON-NLS-1$
+							List<Employee> employeeUsers = session.createQuery("FROM Employee WHERE conservationArea in (:cas) and upper(smartUserId) = upper(:id)", Employee.class) //$NON-NLS-1$
 									.setParameterList("cas", areas) //$NON-NLS-1$
-									.setParameter("id",  users.get(0).getSmartUserId().toUpperCase()) //$NON-NLS-1$
+									.setParameter("id",  users.get(0).getSmartUserId()) //$NON-NLS-1$
 									.list();
 							Set<String> userLevelKeys = new HashSet<>();
 							for (Employee employee : employeeUsers) {
@@ -377,7 +376,7 @@ public class SmartStartUp {
 			try{
 				Files.createDirectory(caDir);
 			}catch (Exception ex) {
-				SmartPlugIn.displayError("Unable to create required filestore directory: " + caDir.toString(), ex);
+				SmartPlugIn.displayError("Unable to create required filestore directory: " + caDir.toString(), ex); //$NON-NLS-1$
 				return false;
 			}
 		}

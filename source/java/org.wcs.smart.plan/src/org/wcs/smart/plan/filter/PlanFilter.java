@@ -196,7 +196,7 @@ public class PlanFilter {
 			if (searchField == PLAN_NAME_FILTER) {
 			    str.append(" (lbl.id.element.uuid = p.uuid AND lower(lbl.value) like :pid AND lbl.id.language = :language) "); //$NON-NLS-1$
 			} else {
-				str.append(" lower( p." + searchField.getDbFieldName() + ") like :pid "); //$NON-NLS-1$ //$NON-NLS-2$
+				str.append(" lower( p." + searchField.getDbFieldName() + ") like lower(:pid) "); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			
 		}
@@ -221,9 +221,9 @@ public class PlanFilter {
 		}
 		if (stringComparator != null && planIdFilter != null){
 			if (stringComparator == StringComparison.CONTAINS){
-				query.setParameter("pid", "%" + this.planIdFilter.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				query.setParameter("pid", "%" + this.planIdFilter + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}else{
-				query.setParameter("pid", this.planIdFilter.toLowerCase()); //$NON-NLS-1$
+				query.setParameter("pid", this.planIdFilter); //$NON-NLS-1$
 			}
 			if (searchField == PLAN_NAME_FILTER) {
 				query.setParameter("language", SmartDB.getCurrentLanguage()); //$NON-NLS-1$

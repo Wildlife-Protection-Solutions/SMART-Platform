@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.intelligence.query.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -65,7 +65,7 @@ public class IntelligenceRecordQuery extends SimpleQuery implements IPagedQuery{
 			return queryFilter;
 		}
 		
-		try(InputStream is = new ByteArrayInputStream(getQueryFilter().getBytes())){
+		try(Reader is = new StringReader(getQueryFilter())){
 			Parser parser = new Parser(is);
 			queryFilter = parser.IntelligenceFilter();
 			return queryFilter;

@@ -143,15 +143,12 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 				}
 				
 				try(Session s = HibernateManager.openSession()){
-					CriteriaBuilder cb = s.getCriteriaBuilder();
-					CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
-					Root<Employee> from = c.from(Employee.class);
-					c.where(cb.and(
-							cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
-							cb.equal(cb.upper(from.get("smartUserId")), newUserName.toUpperCase()) //$NON-NLS-1$
-							));
+					String query = "FROM Employee WHERE conservationArea = :ca and UPPER(smartUserId) = UPPER(:newuser)"; //$NON-NLS-1$
+					List<Employee> otherUsers = s.createQuery(query, Employee.class)
+							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+							.setParameter("newuser", newUserName) //$NON-NLS-1$
+							.getResultList();
 					
-					List<Employee> otherUsers = s.createQuery(c).getResultList();
 					if (otherUsers.size() > 0){
 						MessageDialog.openError(ChangeUserPasswordDialog.this.getShell(), Messages.ChangeUserPasswordDialog_Error_DialogTitle, MessageFormat.format(Messages.ChangeUserPasswordDialog_Error_UserExists, new Object[]{ newUserName }));
 						return;

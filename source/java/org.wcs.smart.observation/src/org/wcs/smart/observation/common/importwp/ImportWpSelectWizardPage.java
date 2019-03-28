@@ -89,7 +89,7 @@ public class ImportWpSelectWizardPage extends WizardPage implements IImportWizar
 					Waypoint wp = (Waypoint) element;
 					StringBuilder value = new StringBuilder( );
 					value.append(wp.getId());
-					if (wp.getComment() != null && !wp.getComment().toLowerCase().equals("null")){ //$NON-NLS-1$
+					if (wp.getComment() != null && !wp.getComment().equalsIgnoreCase("null")){ //$NON-NLS-1$
 						value.append (" (" + wp.getComment() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					value.append(" ["); //$NON-NLS-1$

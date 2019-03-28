@@ -24,6 +24,7 @@ package org.wcs.smart.observation.common.importwp;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -121,7 +122,7 @@ public class ImportGPSWizardPage extends ImportOptionsWizardPage {
 				Entry<String, String> type = iterator.next();
 				DeviceSelection ds = new DeviceSelection(type.getKey(), type.getValue());;
 				devices[i++] = ds;
-				if (type.getKey().toLowerCase().contains(GPSBabel.DEFAULT_DEVICE_TYPE)){ 
+				if (type.getKey().toLowerCase(Locale.ROOT).contains(GPSBabel.DEFAULT_DEVICE_TYPE)){ 
 					toSelect = ds;
 				}
 				
