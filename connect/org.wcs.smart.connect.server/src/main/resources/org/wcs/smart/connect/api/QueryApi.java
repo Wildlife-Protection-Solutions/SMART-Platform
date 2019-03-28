@@ -178,12 +178,12 @@ public class QueryApi extends HttpServlet{
 
 		UUID uuid = UuidUtils.stringToUuid(queryuuid);
 		QueryApi.Direction sortDirectionInt = QueryApi.Direction.UP;
-		if(sortdirection != null && (sortdirection.toLowerCase().equals("descending") || sortdirection.toLowerCase().equals("desc") ) ){  //$NON-NLS-1$//$NON-NLS-2$
+		if(sortdirection != null && (sortdirection.equalsIgnoreCase("descending") || sortdirection.equalsIgnoreCase("desc") ) ){  //$NON-NLS-1$//$NON-NLS-2$
 				sortDirectionInt = QueryApi.Direction.DOWN;
 		}
 		Boolean includeUuids = false;
 		if (includeuuids != null) {
-			if (includeuuids.trim().toUpperCase().equals("TRUE")) { //$NON-NLS-1$
+			if (includeuuids.trim().equalsIgnoreCase("TRUE")) { //$NON-NLS-1$
 				includeUuids = true;
 			}
 		}
@@ -273,7 +273,7 @@ public class QueryApi extends HttpServlet{
 	
 	private void validateDateFilter(String queryType, String filter) {
 		if (filter.isEmpty()) filter = null;
-		String[] dateFilters = QueryManager.DATE_FILTERS.get(queryType.toLowerCase());
+		String[] dateFilters = QueryManager.DATE_FILTERS.get(queryType.toLowerCase(Locale.ROOT));
 		if (dateFilters == null && filter != null ) {
 			throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("QueryApi.InvalidDateField", SmartUtils.getRequestLocale(request)), filter)); //$NON-NLS-1$
 		}else if (filter != null ) {

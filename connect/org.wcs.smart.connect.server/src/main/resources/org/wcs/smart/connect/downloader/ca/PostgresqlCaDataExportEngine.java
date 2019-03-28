@@ -35,6 +35,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -78,7 +79,7 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 		/* write column listing to file */
 		String sql = "select column_name " + //$NON-NLS-1$
 				"FROM information_schema.columns " + //$NON-NLS-1$
-				" WHERE table_schema || '.' || table_name = '" + tableName.toLowerCase() + "'  " + //$NON-NLS-1$ //$NON-NLS-2$
+				" WHERE table_schema || '.' || table_name = '" + tableName.toLowerCase(Locale.ROOT) + "'  " + //$NON-NLS-1$ //$NON-NLS-2$
 				" AND ( column_default is null or (column_default is not null and " + //$NON-NLS-1$
 				" column_default not like 'nextval(%::regclass)')) " + //$NON-NLS-1$
 				" ORDER BY ordinal_position";  //$NON-NLS-1$
@@ -99,11 +100,11 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 			String[] columns) throws Exception {
 		Path columnFile = createFileName( getExportLocation().toPath(), tableName + "." + hibernateClass + ".def"); //$NON-NLS-1$ //$NON-NLS-2$
 		try(BufferedWriter writer = Files.newBufferedWriter(columnFile, StandardCharsets.UTF_8)){
-			writer.write(tableName.toUpperCase());
+			writer.write(tableName.toUpperCase(Locale.ROOT));
 			writer.newLine();
 			StringBuilder record = new StringBuilder();
 			for (int i = 0; i < columns.length; i ++){
-				record.append(columns[i].toUpperCase());
+				record.append(columns[i].toUpperCase(Locale.ROOT));
 				if (i != columns.length - 1){
 					record.append(","); //$NON-NLS-1$
 				}
@@ -203,14 +204,14 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 			public void execute(Connection connection) throws SQLException {
 				
 				String mdquery = query;
-				if (mdquery.toUpperCase().contains(" WHERE ")){ //$NON-NLS-1$
+				if (mdquery.toUpperCase(Locale.ROOT).contains(" WHERE ")){ //$NON-NLS-1$
 					mdquery += " AND false"; //$NON-NLS-1$
 				}else{
 					mdquery += " WHERE false"; //$NON-NLS-1$
 				}
 				ResultSet rs = connection.createStatement().executeQuery(mdquery);
 				ResultSetMetaData md = rs.getMetaData();
-				String[] parts = query.substring(query.toUpperCase().indexOf("SELECT") + "SELECT".length(), query.toUpperCase().indexOf(" FROM ")).split(","); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				String[] parts = query.substring(query.toUpperCase(Locale.ROOT).indexOf("SELECT") + "SELECT".length(), query.toUpperCase(Locale.ROOT).indexOf(" FROM ")).split(","); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				
 				
 				for (int i = 0; i < md.getColumnCount(); i ++){
@@ -228,7 +229,7 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 					newQuery += x + ","; //$NON-NLS-1$
 				}
 				newQuery = newQuery.substring(0, newQuery.length() - 1);
-				newQuery = newQuery + query.substring(query.toUpperCase().indexOf(" FROM ")); //$NON-NLS-1$
+				newQuery = newQuery + query.substring(query.toUpperCase(Locale.ROOT).indexOf(" FROM ")); //$NON-NLS-1$
 				
 				String sql = ("COPY (" + newQuery + ") TO STDOUT WITH (FORMAT CSV, ENCODING 'utf-8', HEADER false, QUOTE '\"', FORCE_QUOTE *)"); //$NON-NLS-1$ //$NON-NLS-2$
 				CopyManager copy = connection.unwrap(PGConnection.class).getCopyAPI();

@@ -634,9 +634,9 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		sb.append(".language_uuid  = "); //$NON-NLS-1$
 		sb.append(tablePrefix(Language.class) + ".uuid "); //$NON-NLS-1$
 		sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		sb.append(" WHERE upper(code) = '" + locale.toString().toUpperCase() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(" WHERE upper(code) = upper('" + locale.toString() + "')"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		if (!locale.toString().toUpperCase().endsWith(locale.getLanguage().toUpperCase())){
+		if (!locale.toString().toUpperCase(Locale.ROOT).endsWith(locale.getLanguage().toUpperCase(Locale.ROOT))){
 			sb.append(" UNION "); //$NON-NLS-1$
 			
 			sb.append(" SELECT "); //$NON-NLS-1$
@@ -653,12 +653,12 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			sb.append(".language_uuid  = "); //$NON-NLS-1$
 			sb.append(tablePrefix(Language.class) + ".uuid "); //$NON-NLS-1$
 			sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-			sb.append(" WHERE upper(code) = '" + locale.getLanguage().toUpperCase() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(" WHERE upper(code) = upper('" + locale.getLanguage() + "')"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			sb.append("AND " + tablePrefix(Label.class) + ".element_uuid not in ("); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(" SELECT " + tablePrefix(Label.class) + ".element_uuid as uuid FROM " + tableNamePrefix(Label.class) + " JOIN " + tableNamePrefix(Language.class) + " on " + tablePrefix(Label.class) + ".language_uuid = " + tablePrefix(Language.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 			sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-			sb.append(" WHERE  upper(code) = '" +  locale.toString().toUpperCase()+ "')"); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(" WHERE  upper(code) = upper('" +  locale.toString() + "'))"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		sb.append(" UNION "); //$NON-NLS-1$
@@ -682,7 +682,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		sb.append("AND " + tablePrefix(Label.class) + ".element_uuid not in ("); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" SELECT " + tablePrefix(Label.class) + ".element_uuid as uuid FROM " + tableNamePrefix(Label.class) + " JOIN " + tableNamePrefix(Language.class) + " on " + tablePrefix(Label.class) + ".language_uuid = " + tablePrefix(Language.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		sb.append(" WHERE  upper(code) IN( '" +  locale.toString().toUpperCase()+ "',  '" +  locale.getLanguage().toUpperCase() + "'))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append(" WHERE  upper(code) IN( upper('" +  locale.toString() + "'),  upper('" +  locale.getLanguage() + "')))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		sb.append(") a "); //$NON-NLS-1$
 		sb.append(" WHERE a.uuid = " + tableName + "." + uuid); //$NON-NLS-1$ //$NON-NLS-2$
@@ -789,8 +789,8 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			sb.append(" AND "); //$NON-NLS-1$
 			sb.append("mash.mashup_" + (i+1) + " = " ); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(tablePrefix(Label.class) + ".element_uuid"); //$NON-NLS-1$
-			sb.append(" ORDER BY CASE WHEN upper(code) = '" + locale.toString().toUpperCase() + "' THEN 1 ELSE "); //$NON-NLS-1$ //$NON-NLS-2$
-			sb.append(" CASE WHEN upper(code) = '" + locale.getLanguage().toUpperCase() + "' THEN 2 ELSE "); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(" ORDER BY CASE WHEN upper(code) = upper('" + locale.toString() + "') THEN 1 ELSE "); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(" CASE WHEN upper(code) = ('" + locale.getLanguage() + "') THEN 2 ELSE "); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(" CASE WHEN isdefault THEN 3 ELSE 4 END END END LIMIT 1)"); //$NON-NLS-1$
 			
 			logger.finest(sb.toString());

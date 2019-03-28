@@ -568,11 +568,11 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 				sql.append(".string_value) "); //$NON-NLS-1$
 				String p1 = ""; //$NON-NLS-1$
 				if (attfilter.getOperator() == Operator.STR_CONTAINS || attfilter.getOperator() == Operator.STR_NOTCONTAINS){
-					p1 = engine.addParameterValue("%" + ((String)attfilter.getValue()).toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+					p1 = engine.addParameterValue("%" + ((String)attfilter.getValue()) + "%"); //$NON-NLS-1$ //$NON-NLS-2$
 				}else if (attfilter.getOperator() == Operator.STR_EQUALS){
-					p1 = engine.addParameterValue(((String)attfilter.getValue()).toLowerCase() ); 
+					p1 = engine.addParameterValue(((String)attfilter.getValue())); 
 				}
-				sql.append(PsqlFilterToSqlGenerator.asSql(attfilter.getOperator()) + " " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ 
+				sql.append(PsqlFilterToSqlGenerator.asSql(attfilter.getOperator()) + " lower(" + p1 + ") )"); //$NON-NLS-1$ //$NON-NLS-2$ 
 				
 			}else if (attfilter.getAttributeType() == AttributeType.LIST){
 				sql.append("("); //$NON-NLS-1$
@@ -680,15 +680,15 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 			p1 = ""; //$NON-NLS-1$
 			if (lfilter.getOperator() == Operator.STR_CONTAINS || 
 					lfilter.getOperator() == Operator.STR_NOTCONTAINS){
-				p1 = engine.addParameterValue("%" + lfilter.getValue().toString().toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+				p1 = engine.addParameterValue("%" + lfilter.getValue().toString()+ "%"); //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (lfilter.getOperator() == Operator.STR_EQUALS){
-				p1 = engine.addParameterValue(lfilter.getValue().toString().toLowerCase());
+				p1 = engine.addParameterValue(lfilter.getValue().toString());
 			}
 			sql.append(" LOWER("); //$NON-NLS-1$
 			sql.append(prefix(MissionPropertyValue.class));
 			sql.append(".string_value) "); //$NON-NLS-1$
 			sql.append(PsqlFilterToSqlGenerator.asSql(lfilter.getOperator()));
-			sql.append(" " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" LOWER(" + p1 + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 		}else if (lfilter.getAttributeType() == AttributeType.LIST){
 			if (lfilter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)) {
 				sql.append(prefix(MissionAttributeListItem.class));
@@ -787,15 +787,15 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 				p1 = ""; //$NON-NLS-1$
 				if (lfilter.getOperator() == Operator.STR_CONTAINS || 
 						lfilter.getOperator() == Operator.STR_NOTCONTAINS){
-					p1 = engine.addParameterValue("%" + lfilter.getValue().toString().toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+					p1 = engine.addParameterValue("%" + lfilter.getValue().toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
 				}else if (lfilter.getOperator() == Operator.STR_EQUALS){
-					p1 = engine.addParameterValue(lfilter.getValue().toString().toLowerCase());
+					p1 = engine.addParameterValue(lfilter.getValue().toString());
 				}
 				sql.append(" LOWER("); //$NON-NLS-1$
 				sql.append(prefix(SamplingUnitAttributeValue.class));
 				sql.append(".string_value ) "); //$NON-NLS-1$
 				sql.append(PsqlFilterToSqlGenerator.asSql(lfilter.getOperator()));
-				sql.append(" " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(" LOWER(" + p1 + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 
 			}else if (lfilter.getAttributeType() == AttributeType.LIST){
 				if (lfilter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)) {
@@ -875,15 +875,15 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 			p1 = ""; //$NON-NLS-1$
 			if (lfilter.getOperator() == Operator.STR_CONTAINS || 
 					lfilter.getOperator() == Operator.STR_NOTCONTAINS){
-				p1 = engine.addParameterValue("%" + lfilter.getValue().toString().toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+				p1 = engine.addParameterValue("%" + lfilter.getValue().toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (lfilter.getOperator() == Operator.STR_EQUALS){
-				p1 = engine.addParameterValue(lfilter.getValue().toString().toLowerCase());
+				p1 = engine.addParameterValue(lfilter.getValue().toString());
 			}
 			sql.append(" LOWER("); //$NON-NLS-1$
 			sql.append(prefix(SamplingUnitAttributeValue.class));
 			sql.append(".string_value ) "); //$NON-NLS-1$
 			sql.append(PsqlFilterToSqlGenerator.asSql(lfilter.getOperator()));
-			sql.append(" " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" LOWER(" + p1 + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 			
 		}else if (lfilter.getAttributeType() == AttributeType.LIST){
 			if (lfilter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)) {

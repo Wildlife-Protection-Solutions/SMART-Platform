@@ -182,9 +182,8 @@ public class QueryColumnUtils {
 		attquery.setParameter("cnt", Long.valueOf(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 		
 		//this gets the attribute name based on the requested locale name query 
-		String nameQueryHql = "SELECT a.value FROM Label a, Attribute c where c.conservationArea.uuid in (:cauuids) AND a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = :code1 then 1 else case when upper(a.id.language.code) = :code2 then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
-		String allLocal = l.toString().toUpperCase();
-		String local = l.getLanguage().toUpperCase();
+		String nameQueryHql = "SELECT a.value FROM Label a, Attribute c where c.conservationArea.uuid in (:cauuids) AND a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = upper(:code1) then 1 else case when upper(a.id.language.code) = upper(:code2) then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
+		
 		org.hibernate.query.Query<?> nameQuery = session.createQuery(nameQueryHql);
 		
 		List<?> attributes = attquery.list();
@@ -195,8 +194,8 @@ public class QueryColumnUtils {
 			AttributeType atype = (AttributeType) attribute[1];
 			
 			nameQuery.setParameter("attributeKey", keyid); //$NON-NLS-1$
-			nameQuery.setParameter("code1", allLocal); //$NON-NLS-1$
-			nameQuery.setParameter("code2", local); //$NON-NLS-1$
+			nameQuery.setParameter("code1", l.toString()); //$NON-NLS-1$
+			nameQuery.setParameter("code2", l.getLanguage()); //$NON-NLS-1$
 			nameQuery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 			nameQuery.setMaxResults(1);
 			String name = (String) nameQuery.uniqueResult();

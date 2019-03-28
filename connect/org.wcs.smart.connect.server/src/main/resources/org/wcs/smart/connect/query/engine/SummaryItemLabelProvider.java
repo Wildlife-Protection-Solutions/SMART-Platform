@@ -460,9 +460,9 @@ public class SummaryItemLabelProvider {
 				attquery.setParameter("cnt", Long.valueOf(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 				
 				//this gets the attribute name based on the requested locale name query 
-				String nameQueryHql = "SELECT a.value FROM Label a, AttributeListItem c where a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = :code1 then 1 else case when upper(a.id.language.code) = :code2 then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
-				String allLocal = l.toString().toUpperCase();
-				String local = l.getLanguage().toUpperCase();
+				String nameQueryHql = "SELECT a.value FROM Label a, AttributeListItem c where a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = upper(:code1) then 1 else case when upper(a.id.language.code) = upper(:code2) then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
+				String allLocal = l.toString();
+				String local = l.getLanguage();
 				Query<?> nameQuery = s.createQuery(nameQueryHql);
 				
 				List<?> listitems = attquery.list();
@@ -485,9 +485,9 @@ public class SummaryItemLabelProvider {
 				}
 			}else{
 				List<String> nodes = getTreeNodes(item.getAttributeKey(), item.getTreeLevel());
-				String nameQueryHql = "SELECT a.value FROM Label a, AttributeTreeNode c where a.id.element = c.uuid and c.hkey = :attributeKey ORDER By case when upper(a.id.language.code) = :code1 then 1 else case when upper(a.id.language.code) = :code2 then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
-				String allLocal = l.toString().toUpperCase();
-				String local = l.getLanguage().toUpperCase();
+				String nameQueryHql = "SELECT a.value FROM Label a, AttributeTreeNode c where a.id.element = c.uuid and c.hkey = :attributeKey ORDER By case when upper(a.id.language.code) = upper(:code1) then 1 else case when upper(a.id.language.code) = upper(:code2) then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
+				String allLocal = l.toString();
+				String local = l.getLanguage();
 				org.hibernate.query.Query<?> nameQuery = s.createQuery(nameQueryHql);
 				for (String hkey : nodes){
 					nameQuery.setParameter("attributeKey", hkey); //$NON-NLS-1$

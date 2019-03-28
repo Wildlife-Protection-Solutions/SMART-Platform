@@ -223,7 +223,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			}
 			cnt++;
 			if (groupBy.getGroupByType() == GroupByType.SYSTEM) {
-				String columnName = groupBy.getSystemType().name().toLowerCase() + "_" + groupBy.getSystemAttribute().name().toLowerCase(); //$NON-NLS-1$
+				String columnName = groupBy.getSystemType().name().toLowerCase(Locale.ROOT) + "_" + groupBy.getSystemAttribute().name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
 				GroupByItem.DateOption dateOp = groupBy.getDateOption();
 				switch(dateOp) {
 					case DAY:
@@ -368,8 +368,8 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		
 		dataTable = new DataTable(obsTable);
 		
-		String created = SystemAttributeFilter.Type.ENTITY.name().toLowerCase() + "_" + SystemAttributeFilter.SystemAttribute.DATE_CREATED.name().toLowerCase(); //$NON-NLS-1$
-		String modified = SystemAttributeFilter.Type.ENTITY.name().toLowerCase() + "_" + SystemAttributeFilter.SystemAttribute.DATE_MODIFIED.name().toLowerCase(); //$NON-NLS-1$
+		String created = SystemAttributeFilter.Type.ENTITY.name().toLowerCase(Locale.ROOT) + "_" + SystemAttributeFilter.SystemAttribute.DATE_CREATED.name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
+		String modified = SystemAttributeFilter.Type.ENTITY.name().toLowerCase(Locale.ROOT) + "_" + SystemAttributeFilter.SystemAttribute.DATE_MODIFIED.name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
 		
 		
 		//create table
@@ -474,7 +474,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			
 			if (item.getGroupByType() == GroupByType.SYSTEM) {
 				if (item.getSystemType() == SystemAttributeFilter.Type.ENTITY) {
-					columnName = item.getSystemType().name().toLowerCase() + "_" + item.getSystemAttribute().name().toLowerCase(); //$NON-NLS-1$
+					columnName = item.getSystemType().name().toLowerCase(Locale.ROOT) + "_" + item.getSystemAttribute().name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
 					}else {
 					continue;
 				}
@@ -807,12 +807,12 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 				whereSql.append(" LOWER( " + columnName + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 				whereSql.append( SqlGenerator.operatorToSql(f.getOperator()) );
 				String key = "p_" + parameters.size(); //$NON-NLS-1$
-				String value = f.getStringValue().toLowerCase();
+				String value = f.getStringValue();
 				if (f.getOperator() == Operator.STR_CONTAINS || f.getOperator() == Operator.STR_NOTCONTAINS) {
 					value = "%" + value + "%";  //$NON-NLS-1$//$NON-NLS-2$
 				}
 				parameters.put(key, value);
-				whereSql.append(" :" + key + " "); //$NON-NLS-1$ //$NON-NLS-2$
+				whereSql.append(" LOWER(:" + key + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			
 			

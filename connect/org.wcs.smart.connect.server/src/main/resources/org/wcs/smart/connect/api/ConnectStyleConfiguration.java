@@ -279,17 +279,17 @@ public class ConnectStyleConfiguration extends HttpServlet {
 
 		if(header_image.length > 0){
 			style.setHeaderImage(header_image);
-		}else if (strClearHeader.toUpperCase().equals("TRUE")) { //$NON-NLS-1$
+		}else if (strClearHeader.equalsIgnoreCase("TRUE")) { //$NON-NLS-1$
 			style.setHeaderImage(null);
 		}
 		if(bg_image.length > 0){
 			style.setBackgroundImage(bg_image);
-		}else if (strClearBackground.toUpperCase().equals("TRUE")) { //$NON-NLS-1$
+		}else if (strClearBackground.equalsIgnoreCase("TRUE")) { //$NON-NLS-1$
 			style.setBackgroundImage(null);
 		}
 		if(login_image.length > 0){
 			style.setLoginImage(login_image);
-		}else if (strClearLogin.toUpperCase().equals("TRUE")) { //$NON-NLS-1$
+		}else if (strClearLogin.equalsIgnoreCase("TRUE")) { //$NON-NLS-1$
 			style.setLoginImage(null);
 		}
 

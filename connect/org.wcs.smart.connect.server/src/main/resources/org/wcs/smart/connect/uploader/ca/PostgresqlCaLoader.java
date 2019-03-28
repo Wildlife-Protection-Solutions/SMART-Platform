@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Level;
@@ -194,7 +195,7 @@ public class PostgresqlCaLoader {
 					if (!info.getDataFile().exists()){
 						throw new Exception(MessageFormat.format(Messages.getString("PostgresqlCaLoader.MissingDataFile", item.getLocale()), tableName, info.getDataFile().getAbsolutePath())); //$NON-NLS-1$
 					}
-					if (!toIngore.contains(tableName.toLowerCase())){
+					if (!toIngore.contains(tableName.toLowerCase(Locale.ROOT))){
 						importData(tableName, info.getColumns(), info.getDataFile() );
 					}
 					processed.add(tableName);
@@ -287,7 +288,7 @@ public class PostgresqlCaLoader {
 		HashMap<String, List<TableInfo>> map = new HashMap<String, List<TableInfo>>();
 		for (int i = 0; i < files.length; i++){
 			try(BufferedReader reader = new BufferedReader(new FileReader(new File(dataFileDir, files[i])))){
-				String tablename = reader.readLine().toUpperCase();
+				String tablename = reader.readLine().toUpperCase(Locale.ROOT);
 				String columns = reader.readLine();
 				String data = files[i].substring(0,files[i].lastIndexOf(".def")); //$NON-NLS-1$
 				
@@ -408,8 +409,8 @@ public class PostgresqlCaLoader {
 		List<?> data = session.createNativeQuery(sql.toString()).list();
 		for (Object dRow : data){
 			Object[] d = (Object[])dRow;
-			String source = ((String) d[0]).toUpperCase();
-			String req = ((String)d[1]).toUpperCase();
+			String source = ((String) d[0]).toUpperCase(Locale.ROOT);
+			String req = ((String)d[1]).toUpperCase(Locale.ROOT);
 			if (source.equals(req)) continue;
 			HashSet<String> requires = results.get(source);
 			if (requires == null){

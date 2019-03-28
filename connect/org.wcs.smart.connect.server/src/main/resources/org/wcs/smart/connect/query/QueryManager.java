@@ -222,11 +222,11 @@ public enum QueryManager {
 		DATE_FILTERS.put(IntelligenceRecordQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
 		DATE_FILTERS.put(IntelligenceSummaryQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
 		
-		DATE_FILTERS.put(IntelRecordObservationQuery.KEY.toLowerCase(), new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(IntelRecordObservationQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
 		
-		DATE_FILTERS.put(AssetObservationQuery.KEY.toLowerCase(), new String[]{WaypointDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(AssetWaypointQuery.KEY.toLowerCase(), new String[]{WaypointDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(AssetSummaryQuery.KEY.toLowerCase(), new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(AssetObservationQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(AssetWaypointQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(AssetSummaryQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
 	}
 	
 	/**
@@ -346,7 +346,7 @@ public enum QueryManager {
 						true,
 						q.getConservationArea().getUuid(),
 						q.getConservationArea().getIsCcaa(),
-						IntelRecordObservationQuery.KEY.toLowerCase(),
+						IntelRecordObservationQuery.KEY.toLowerCase(Locale.ROOT),
 						q.getIconName());
 			queries.add(qp);
 		}
@@ -359,7 +359,7 @@ public enum QueryManager {
 						true,
 						q.getConservationArea().getUuid(),
 						q.getConservationArea().getIsCcaa(),
-						IntelEntitySummaryQuery.KEY.toLowerCase(),
+						IntelEntitySummaryQuery.KEY.toLowerCase(Locale.ROOT),
 						q.getIconName());
 			queries.add(qp);
 		}
@@ -372,7 +372,7 @@ public enum QueryManager {
 						true,
 						q.getConservationArea().getUuid(),
 						q.getConservationArea().getIsCcaa(),
-						IntelEntitySummaryQuery.KEY.toLowerCase(),
+						IntelEntitySummaryQuery.KEY.toLowerCase(Locale.ROOT),
 						q.getIconName());
 			queries.add(qp);
 		}
@@ -427,7 +427,7 @@ public enum QueryManager {
 		for (IQueryEngine e : engines){
 			if (e.canExecute(queryTypeKey)) return true;
 		}
-		if (queryTypeKey.toUpperCase().equals(IntelRecordObservationQuery.KEY)) return true;
+		if (queryTypeKey.equalsIgnoreCase(IntelRecordObservationQuery.KEY)) return true;
 		return false;
 	}
 	

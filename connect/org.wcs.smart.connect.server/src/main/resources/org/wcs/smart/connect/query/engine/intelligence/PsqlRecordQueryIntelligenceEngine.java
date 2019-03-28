@@ -226,14 +226,14 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 					}
 					
 					//match language and country
-					String key1 = locale.toString().toUpperCase();
-					String query = "UPDATE " + queryDataTable + " SET intel_name = a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid WHERE " + queryDataTable + ".intel_uuid = a.element_uuid AND upper(b.code) = '" + key1 + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					String key1 = locale.toString();
+					String query = "UPDATE " + queryDataTable + " SET intel_name = a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid WHERE " + queryDataTable + ".intel_uuid = a.element_uuid AND upper(b.code) = upper('" + key1 + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					logger.finest(query);
 					c.createStatement().executeUpdate(query);
 					
 					//match language
-					key1 = locale.getLanguage().toUpperCase();
-					query = "UPDATE " + queryDataTable + " SET intel_name = a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid WHERE " + queryDataTable + ".intel_uuid = a.element_uuid AND upper(b.code) = '" + key1 + "' AND intel_name is null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					key1 = locale.getLanguage();
+					query = "UPDATE " + queryDataTable + " SET intel_name = a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid WHERE " + queryDataTable + ".intel_uuid = a.element_uuid AND upper(b.code) = upper('" + key1 + "') AND intel_name is null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					logger.finest(query);
 					c.createStatement().executeUpdate(query);
 
@@ -273,9 +273,9 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				}else{
 					sql.append(PsqlFilterToSqlGenerator.asSql(f.getOperator()));
 				}
-				sql.append(" ? "); //$NON-NLS-1$
+				sql.append(" LOWER( ? )"); //$NON-NLS-1$
 				
-				String value = f.getValue().toLowerCase();
+				String value = f.getValue();
 				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
 					value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
@@ -285,16 +285,16 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				sql.append("LOWER("); //$NON-NLS-1$
 				sql.append(tablePrefix(Informant.class) + ".id) "); //$NON-NLS-1$
 				sql.append(PsqlFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append(" ? "); //$NON-NLS-1$
-				parameterValues.add(f.getValue().toLowerCase());
+				sql.append(" LOWER(?) "); //$NON-NLS-1$
+				parameterValues.add(f.getValue());
 				
 			}else if (f.getFilterOption() == IntelligenceFilterOption.PATROLID){
 				sql.append("LOWER("); //$NON-NLS-1$
 				sql.append(tablePrefix(Patrol.class) + ".id) "); //$NON-NLS-1$
 				sql.append(PsqlFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append(" ? "); //$NON-NLS-1$
+				sql.append(" LOWER(?) "); //$NON-NLS-1$
 				
-				String value = f.getValue().toLowerCase();
+				String value = f.getValue();
 				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
 					value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
@@ -310,8 +310,8 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				sql.append(".uuid and LOWER(value) "); //$NON-NLS-1$
 				
 				sql.append(PsqlFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append(" ? )"); //$NON-NLS-1$
-				String value = f.getValue().toLowerCase();
+				sql.append(" LOWER(?) )"); //$NON-NLS-1$
+				String value = f.getValue();
 				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
 					value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 				}

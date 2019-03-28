@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -319,7 +320,7 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 		if(type == null){
 			//lets see if this is a mission attribute
 			String tableSortField = "sortKeyTxt"; //$NON-NLS-1$
-			if (sortColumn.toLowerCase().startsWith("ma_")){ //$NON-NLS-1$
+			if (sortColumn.toLowerCase(Locale.ROOT).startsWith("ma_")){ //$NON-NLS-1$
 				String missionAttributeKey = sortColumn.substring(3);
 				Attribute.AttributeType maType = getMissionAttributeType(session, missionAttributeKey, caFilter);
 				if (maType != null){
@@ -333,7 +334,7 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 				}
 
 			}
-			if (sortColumn.toLowerCase().startsWith("su_")){ //$NON-NLS-1$
+			if (sortColumn.toLowerCase(Locale.ROOT).startsWith("su_")){ //$NON-NLS-1$
 				String samplingUnitAttributeKey = sortColumn.substring(3);
 				Attribute.AttributeType maType = getSamplingUnitAttributeType(session, samplingUnitAttributeKey, caFilter);
 				if (maType != null){

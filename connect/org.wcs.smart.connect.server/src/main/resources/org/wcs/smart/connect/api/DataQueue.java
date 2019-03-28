@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -479,7 +480,7 @@ public class DataQueue {
 		
 		ServerDataQueueItem.Status serverStatus = null;
 		try{
-			serverStatus = ServerDataQueueItem.Status.valueOf(newStatus.toUpperCase());
+			serverStatus = ServerDataQueueItem.Status.valueOf(newStatus.toUpperCase(Locale.ROOT));
 		}catch (Exception ex){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format(Messages.getString("DataQueue.StatusValueNotSupport", SmartUtils.getRequestLocale(request)), newStatus)); //$NON-NLS-1$
 		}

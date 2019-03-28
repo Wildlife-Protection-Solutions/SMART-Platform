@@ -308,11 +308,11 @@ public enum PsqlFilterToSqlGenerator {
 			String val = (String)filter.getValue();
 			if (filter.getOperator() == Operator.STR_CONTAINS || 
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
-				String param = engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ 
-				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " " + param + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 	
+				String param = engine.addParameterValue("%" + val + "%"); //$NON-NLS-1$ //$NON-NLS-2$ 
+				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " LOWER(" + param + ") )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 	
 			}else if (filter.getOperator() == Operator.STR_EQUALS){
-				String param = engine.addParameterValue(val.toLowerCase()); 
-				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " " + param + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+				String param = engine.addParameterValue(val); 
+				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " LOWER(" + param + ") )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 			}
 			return queryStr;
 		}else if (filter.getAttributeType() == AttributeType.DATE){
@@ -657,8 +657,8 @@ public enum PsqlFilterToSqlGenerator {
 						filter.getOperator() == Operator.STR_NOTCONTAINS){
 					value1 = "%" + value1 + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				String p1 = engine.addParameterValue(value1.toLowerCase());
-				String x = "LOWER(" + prefix + "." + option.getColumnName() + ") " + asSql(filter.getOperator()) + " " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				String p1 = engine.addParameterValue(value1);
+				String x = "LOWER(" + prefix + "." + option.getColumnName() + ") " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				return x;
 			}
 		}else if (option.getType() == PatrolQueryOptionType.BOOLEAN){
@@ -744,11 +744,11 @@ public enum PsqlFilterToSqlGenerator {
 			String val = (String)filter.getValue();
 			if (filter.getOperator() == Operator.STR_CONTAINS || 
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
-				String p1 = engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " " + p1 + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				String p1 = engine.addParameterValue("%" + val + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}else if (filter.getOperator() == Operator.STR_EQUALS){
-				String p1 = engine.addParameterValue(val.toLowerCase());
-				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " " + p1 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				String p1 = engine.addParameterValue(val);
+				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 			return queryStr;
 		}else if (filter.getAttributeType() == AttributeType.DATE){
@@ -818,8 +818,8 @@ public enum PsqlFilterToSqlGenerator {
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
 				value1 = "%" + value1 + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			String p1 = engine.addParameterValue(value1.toLowerCase());
-			String x = "LOWER(" + engine.tablePrefix(Survey.class) + ".id) " + asSql(filter.getOperator()) + " " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+			String p1 = engine.addParameterValue(value1);
+			String x = "LOWER(" + engine.tablePrefix(Survey.class) + ".id) " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 			return x;
 		}else if (filter.getType() == SurveyFilter.Type.UUID){
 			try{
@@ -895,11 +895,11 @@ public enum PsqlFilterToSqlGenerator {
 			
 			if (filter.getOperator() == Operator.STR_CONTAINS || 
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
-				String p1 = engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-				queryStr = "( LOWER(sua.sua_" + filter.getSamplingUnitAttributeKey() + ") " + asSql(filter.getOperator()) + " " + p1 + " )";	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				String p1 = engine.addParameterValue("%" + val + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+				queryStr = "( LOWER(sua.sua_" + filter.getSamplingUnitAttributeKey() + ") " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") )";	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}else if (filter.getOperator() == Operator.STR_EQUALS){
-				String p1 = engine.addParameterValue(val.toLowerCase());
-				queryStr = "( LOWER(sua.sua_" + filter.getSamplingUnitAttributeKey() + ") " + asSql(filter.getOperator()) + " " + p1 + " )";  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
+				String p1 = engine.addParameterValue(val);
+				queryStr = "( LOWER(sua.sua_" + filter.getSamplingUnitAttributeKey() + ") " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") )";  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
 			}
 			return queryStr;
 		}else if (filter.getAttributeType() == AttributeType.LIST) {
@@ -926,8 +926,8 @@ public enum PsqlFilterToSqlGenerator {
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
 				value1 = "%" + value1 + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			String p1 = engine.addParameterValue(value1.toLowerCase());
-			String x = "LOWER(" + engine.tablePrefix(Mission.class) + ".id) " + asSql(filter.getOperator()) + " " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+			String p1 = engine.addParameterValue(value1);
+			String x = "LOWER(" + engine.tablePrefix(Mission.class) + ".id) " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 			return x;
 		}else if (filter.getType() == MissionFilter.Type.UUID){
 			try{
@@ -965,11 +965,11 @@ public enum PsqlFilterToSqlGenerator {
 			String val = (String)filter.getValue();
 			if (filter.getOperator() == Operator.STR_CONTAINS
 					|| filter.getOperator() == Operator.STR_NOTCONTAINS) {
-				String p1 = engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-				queryStr = "( LOWER(mt.ma_" + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " " + p1 + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 	
+				String p1 = engine.addParameterValue("%" + val + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+				queryStr = "( LOWER(mt.ma_" + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 	
 			} else if (filter.getOperator() == Operator.STR_EQUALS) {
-				String p1 = engine.addParameterValue(val.toLowerCase());
-				queryStr = "( LOWER(mt.ma_" + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " " + p1 + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+				String p1 = engine.addParameterValue(val);
+				queryStr = "( LOWER(mt.ma_" + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " LOWER(" + p1 + ") )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 			}
 			return queryStr;
 		} else if (filter.getAttributeType() == AttributeType.LIST) {

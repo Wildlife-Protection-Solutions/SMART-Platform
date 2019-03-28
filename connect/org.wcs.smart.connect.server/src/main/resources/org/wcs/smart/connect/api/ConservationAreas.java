@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
@@ -291,7 +292,7 @@ public class ConservationAreas extends HttpServlet{
 						passedBoundary=true; //no filter provided or it is blank, assume they want everything
 					}
 					boolean passedOrg = false;
-					if(organizationFilter == null || organizationFilter.equals("") || (proxy.getOrganization() != null && proxy.getOrganization().toUpperCase().contains(organizationFilter.toUpperCase())) ){ //$NON-NLS-1$
+					if(organizationFilter == null || organizationFilter.equals("") || (proxy.getOrganization() != null && proxy.getOrganization().toUpperCase(Locale.ROOT).contains(organizationFilter.toUpperCase(Locale.ROOT))) ){ //$NON-NLS-1$
 						passedOrg = true;
 					}else{
 						passedOrg = false;
@@ -310,7 +311,7 @@ public class ConservationAreas extends HttpServlet{
 				@Override
 				public int compare(ConservationAreaProxy o1,
 						ConservationAreaProxy o2) {
-					return o1.getLabel().toUpperCase().compareTo(o2.getLabel().toUpperCase());
+					return o1.getLabel().toUpperCase(Locale.ROOT).compareTo(o2.getLabel().toUpperCase(Locale.ROOT));
 				}
 			});
 			return conservationAreas;

@@ -24,6 +24,7 @@ package org.wcs.smart.connect.servlet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -78,11 +79,11 @@ public class QueryServlet extends HttpServlet {
 		try{
 			for (String type : QueryManager.INSTANCE.getQueryTypes()){
 				if (QueryManager.INSTANCE.hasQueryEngine(type)){
-					executableQueryTypes.add(type.toLowerCase());
+					executableQueryTypes.add(type.toLowerCase(Locale.ROOT));
 				}
 			}
-			executableQueryTypes.add(IntelRecordObservationQuery.KEY.toLowerCase());
-			executableQueryTypes.add(IntelEntitySummaryQuery.KEY.toLowerCase());
+			executableQueryTypes.add(IntelRecordObservationQuery.KEY.toLowerCase(Locale.ROOT));
+			executableQueryTypes.add(IntelEntitySummaryQuery.KEY.toLowerCase(Locale.ROOT));
 			
 		}catch (Exception ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
