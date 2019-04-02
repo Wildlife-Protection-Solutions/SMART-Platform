@@ -148,14 +148,28 @@ public class CtDataApi extends HttpServlet {
 				+ File.separator + UuidUtils.uuidToString(item.getUuid()) + ".file"); //$NON-NLS-1$
 		item.setFile(localName);
 		
-		try(OutputStream out = Files.newOutputStream(DataStoreManager.INSTANCE.getFile(item.getFile()).toPath(), StandardOpenOption.CREATE)){ 
-			IOUtils.copy(data, out);
-			item.setStatus(Status.QUEUED);
-		} catch (IOException ex) {
-			logger.log(Level.SEVERE, ex.getMessage(), ex);
-			item.setStatus(Status.ERROR);
-			item.setStatusMessage(Messages.getString("CtDataApi.WriteError", request.getLocale()) + ex.getMessage()); //$NON-NLS-1$
-			thrown = ex;
+		java.nio.file.Path upfile = DataStoreManager.INSTANCE.getFile(item.getFile()).toPath();
+		if (!Files.exists(upfile.getParent())) {
+			try {
+				Files.createDirectories(upfile.getParent());
+			} catch (IOException ex) {
+				logger.log(Level.SEVERE, ex.getMessage(), ex);
+				item.setStatus(Status.ERROR);
+				item.setStatusMessage("Unable to create directory: " + upfile.getParent().toString() + ": " + ex.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+				thrown = ex;
+			}
+		}
+		
+		if (thrown == null) {
+			try(OutputStream out = Files.newOutputStream(upfile, StandardOpenOption.CREATE)){ 
+				IOUtils.copy(data, out);
+				item.setStatus(Status.QUEUED);
+			} catch (IOException ex) {
+				logger.log(Level.SEVERE, ex.getMessage(), ex);
+				item.setStatus(Status.ERROR);
+				item.setStatusMessage(Messages.getString("CtDataApi.WriteError", request.getLocale()) + ex.getMessage()); //$NON-NLS-1$
+				thrown = ex;
+			}
 		}
 			
 		//update item status 
