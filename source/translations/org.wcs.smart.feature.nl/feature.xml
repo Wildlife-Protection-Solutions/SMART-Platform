@@ -79,6 +79,30 @@
          id="org.eclipse.babel.nls_eclipse_zh"
          version="0.0.0"/>
 
+   <includes
+         id="org.eclipse.babel.nls_birt_ar"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.babel.nls_birt_pt"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.babel.nls_birt_pt_BR"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.babel.nls_eclipse_ar"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.babel.nls_eclipse_pt"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.babel.nls_eclipse_pt_BR"
+         version="0.0.0"/>
+
    <plugin
          id="org.wcs.smart.nl"
          download-size="0"

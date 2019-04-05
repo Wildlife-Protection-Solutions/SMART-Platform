@@ -89,6 +89,9 @@
 <unit id="org.eclipse.babel.nls_eclipse_th.feature.group" version="4.10.0.v20190126060001"/>
 <unit id="org.eclipse.babel.nls_eclipse_vi.feature.group" version="4.10.0.v20190126060001"/>
 <unit id="org.eclipse.babel.nls_eclipse_zh.feature.group" version="4.10.0.v20190126060001"/>
+<unit id="org.eclipse.babel.nls_eclipse_pt.feature.group" version="4.10.0.v20190126060001"/>
+<unit id="org.eclipse.babel.nls_eclipse_pt_BR.feature.group" version="4.10.0.v20190126060001"/>
+<unit id="org.eclipse.babel.nls_eclipse_ar.feature.group" version="4.10.0.v20190126060001"/>
 <repository location="https://download.eclipse.org/technology/babel/update-site/R0.16.1/2018-12/"/>
 </location>
 <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -101,6 +104,9 @@
 <unit id="org.eclipse.babel.nls_birt_th.feature.group" version="4.5.0.v20171231064042"/>
 <unit id="org.eclipse.babel.nls_birt_vi.feature.group" version="4.5.0.v20171231064042"/>
 <unit id="org.eclipse.babel.nls_birt_zh.feature.group" version="4.5.0.v20171231064042"/>
+<unit id="org.eclipse.babel.nls_birt_pt.feature.group" version="4.5.0.v20171231064042"/>
+<unit id="org.eclipse.babel.nls_birt_pt_BR.feature.group" version="4.5.0.v20171231064042"/>
+<unit id="org.eclipse.babel.nls_birt_ar.feature.group" version="4.5.0.v20171231064042"/>
 <repository location="https://archive.eclipse.org/technology/babel/update-site/R0.15.1/mars"/>
 </location>
 	<location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
