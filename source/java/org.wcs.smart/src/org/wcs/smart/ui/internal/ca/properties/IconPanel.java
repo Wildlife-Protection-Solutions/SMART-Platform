@@ -69,6 +69,7 @@ public class IconPanel extends Composite {
 	}
 
 	public void setDmObject(DmObject object) {
+		this.newIcon = object.getIcon();
 		updateIcon(object.getIcon());
 	}
 	
