@@ -65,7 +65,7 @@ public class SurveyCtPackage extends AbstractCtPackage implements ICmProvider{
 
 	@Transient
 	public boolean isDataModel() {
-		if (getSurveyDesign().getConfigurableModel() == null) return true;
+		if (getSurveyDesign() == null || getSurveyDesign().getConfigurableModel() == null) return true;
 		return false;
 	}
 	
