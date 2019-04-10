@@ -30,6 +30,7 @@ import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Import record command handler
@@ -40,7 +41,7 @@ import org.eclipse.swt.widgets.Shell;
 public class ImportRecordCsvHandler {
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell, IEclipseContext context){
-		WizardDialog wd = new WizardDialog(activeShell, ContextInjectionFactory.make(ImportRecordCsvWizard.class, context));
+		WizardDialog wd = new SmartWizardDialog(activeShell, ContextInjectionFactory.make(ImportRecordCsvWizard.class, context));
 		wd.open();
 	}
 	

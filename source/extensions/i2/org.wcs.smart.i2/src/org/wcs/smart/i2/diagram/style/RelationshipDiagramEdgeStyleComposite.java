@@ -31,6 +31,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
 
@@ -57,10 +58,22 @@ public class RelationshipDiagramEdgeStyleComposite extends Composite {
 		createContent(this);
 	}
 	
+	private void enableAll(Composite c, boolean state) {
+		List<Control> items = new ArrayList<>();
+		items.add(c);
+		while(!items.isEmpty()) {
+			Control kid = items.remove(0);
+			kid.setEnabled(state);
+			if (kid instanceof Composite) {
+				for (Control kk : ((Composite)kid).getChildren()) items.add(kk);
+			}
+		}
+	}
+	
 	public void setSourceOptions(RelationshipDiagramEdgeStyleOptions options) {
 		fireListeners = false;
 		btnOverride.setSelection(options != null);
-		edgeCmp.setVisible(options != null);
+		enableAll(edgeCmp, options != null);
 		edgeCmp.setSourceOptions(options);
 		fireListeners = true;
 		this.layout(true);

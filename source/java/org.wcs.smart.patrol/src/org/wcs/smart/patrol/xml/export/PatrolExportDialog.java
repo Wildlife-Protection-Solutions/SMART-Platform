@@ -24,7 +24,6 @@ package org.wcs.smart.patrol.xml.export;
 import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -41,6 +40,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog box for exporting patrol data as xml.
@@ -48,7 +48,7 @@ import org.wcs.smart.patrol.model.Patrol;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolExportDialog extends TitleAreaDialog {
+public class PatrolExportDialog extends SmartStyledTitleDialog {
 
 	private Patrol patrol;
 	private Text txtFile;

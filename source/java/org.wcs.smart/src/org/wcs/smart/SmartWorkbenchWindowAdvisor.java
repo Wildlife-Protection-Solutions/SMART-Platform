@@ -38,12 +38,12 @@ import org.eclipse.e4.ui.model.application.ui.basic.MTrimBar;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MToolBar;
 import org.eclipse.e4.ui.model.application.ui.menu.MToolControl;
+import org.eclipse.e4.ui.workbench.IPresentationEngine;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -56,7 +56,6 @@ import org.eclipse.ui.progress.WorkbenchJob;
 import org.hibernate.Session;
 import org.locationtech.udig.project.ui.internal.LayersView;
 import org.locationtech.udig.project.ui.internal.MapPart;
-import org.locationtech.udig.tool.info.internal.InfoView2;
 import org.locationtech.udig.ui.UDIGDragDropUtilities;
 import org.wcs.smart.backup.AutoBackupEngine;
 import org.wcs.smart.ca.ConservationArea;
@@ -64,7 +63,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.startup.EncryptCleanUp;
-import org.wcs.smart.util.E3Utils;
 
 /**
  * Smart Workbench Window Advisor.
@@ -211,16 +209,6 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
 			@Override
 			public void partHidden(IWorkbenchPartReference partRef) {
-				//hide the info view when the mappart is closed
-				//EG: this causes problems when the info view is dragged into the editor area so we removed it and deal
-				//with this case in the perspectivetracker
-//				if (partRef.getPart(false) instanceof MapPart){
-//					IViewPart infoView = partRef.getPage().findView(InfoView2.VIEW_ID);
-//					if (infoView != null){
-//						((InfoView2)infoView).get
-//						partRef.getPage().hideView(infoView);
-//					}
-//				}
 			}
 
 			@Override

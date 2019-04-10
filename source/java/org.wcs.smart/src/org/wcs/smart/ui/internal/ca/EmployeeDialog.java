@@ -24,7 +24,6 @@ package org.wcs.smart.ui.internal.ca;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -42,6 +41,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledDialog;
 
 /**
  * Dialog for creating new employees or
@@ -50,7 +50,7 @@ import org.wcs.smart.internal.Messages;
  * @author Emily
  * @since 1.0.0
  */
-public class EmployeeDialog extends Dialog {
+public class EmployeeDialog extends SmartStyledDialog {
 
 
 	private Employee toUpdate;

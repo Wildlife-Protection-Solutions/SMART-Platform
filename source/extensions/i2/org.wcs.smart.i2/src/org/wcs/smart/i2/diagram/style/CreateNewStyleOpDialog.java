@@ -27,7 +27,6 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -48,6 +47,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for creating new relationship diagram style.
@@ -56,7 +56,7 @@ import org.wcs.smart.i2.model.RelationshipDiagramStyle;
  * @since 6.0.0
  *
  */
-public class CreateNewStyleOpDialog extends TitleAreaDialog {
+public class CreateNewStyleOpDialog extends SmartStyledTitleDialog {
 	
 	private enum CreateStyleOption {
 		BLANK,

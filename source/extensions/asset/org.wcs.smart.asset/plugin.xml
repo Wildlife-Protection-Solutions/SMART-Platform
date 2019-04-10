@@ -424,7 +424,9 @@
          <command
                commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/obj16/asset.png"
-               style="push"
+               label="%openperspective.command.label"
+               mode="FORCE_TEXT"
+               style="radio"
                tooltip="%openperspective.command.tooltip">
             <parameter
                   name="org.wcs.smart.observation.perspective.show.focusview"

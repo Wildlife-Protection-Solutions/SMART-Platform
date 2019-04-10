@@ -23,7 +23,6 @@ package org.wcs.smart.common.control;
 
 import java.util.List;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
@@ -35,6 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 
 /**
@@ -42,7 +42,7 @@ import org.wcs.smart.ui.ca.properties.NameKeyComposite;
  * @author Emily
  *
  */
-public class NameKeyDialog<T extends NamedKeyItem> extends Dialog{
+public class NameKeyDialog<T extends NamedKeyItem> extends SmartStyledDialog{
 
 	protected NameKeyComposite keyComp;
 	

@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -71,6 +70,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.FilterComposite;
 
 /**
@@ -80,7 +80,7 @@ import org.wcs.smart.ui.properties.FilterComposite;
  * @author Emily
  * @since 1.0.0
  */
-public class AddAttributeDialog1 extends TitleAreaDialog {
+public class AddAttributeDialog1 extends SmartStyledTitleDialog {
 	/**
 	 * Value returned by open() existing attributes are added and FINISH button
 	 * selected

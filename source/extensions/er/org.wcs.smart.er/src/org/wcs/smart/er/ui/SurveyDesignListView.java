@@ -55,6 +55,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
@@ -62,8 +64,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
@@ -107,7 +107,7 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 	private TreeViewer lstViewer;
 	private TableViewer designViewer;
 	
-	private TabFolder bar;
+	private CTabFolder bar;
 	
 	@Inject private MPart localPart;
 	@Inject private IMenuService menuService;
@@ -165,7 +165,7 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		filter = new SurveyFilter();
 		designFilter = new SurveyDesignFilter(SmartDB.getCurrentConservationArea());
 		
-		bar = new TabFolder(parent, SWT.NONE);
+		bar = new CTabFolder(parent, SWT.NONE);
 
 		lstViewer = new TreeViewer(bar, SWT.NONE);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -174,7 +174,7 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		lstViewer.setInput(null);
 		lstViewer.addDoubleClickListener(this);
 		
-		TabItem titem = new TabItem(bar, SWT.NONE);
+		CTabItem titem = new CTabItem(bar, SWT.NONE);
 		titem.setText(Messages.SurveyDesignListView_SurveysTabName);
 		titem.setControl(lstViewer.getControl());
 		
@@ -184,7 +184,7 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		designViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		designViewer.addDoubleClickListener(this);
 		
-		TabItem item = new TabItem(bar, SWT.NONE);
+		CTabItem item = new CTabItem(bar, SWT.NONE);
 		item.setText(Messages.SurveyDesignListView_DesignsTabName);
 		item.setControl(designViewer.getControl());
 
@@ -227,6 +227,7 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 				active.setSelection(active.getSelection());
 			}
 		});
+		bar.setSelection(0);
 	}
 
 	@Focus

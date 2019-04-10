@@ -22,7 +22,6 @@
 package org.wcs.smart.common.attachment;
 
 import java.io.File;
-import java.net.URL;
 import java.nio.file.Path;
 
 import org.eclipse.swt.program.Program;

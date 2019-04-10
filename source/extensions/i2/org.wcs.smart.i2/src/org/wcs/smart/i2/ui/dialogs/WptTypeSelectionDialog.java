@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -47,6 +46,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.gpx.xml.WptType;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for selecting waypoints from a gpx file.
@@ -54,7 +54,7 @@ import org.wcs.smart.i2.internal.Messages;
  * @author Emily
  *
  */
-public class WptTypeSelectionDialog extends TitleAreaDialog{
+public class WptTypeSelectionDialog extends SmartStyledTitleDialog{
 
 	private CheckboxTableViewer lstViewer;
 	

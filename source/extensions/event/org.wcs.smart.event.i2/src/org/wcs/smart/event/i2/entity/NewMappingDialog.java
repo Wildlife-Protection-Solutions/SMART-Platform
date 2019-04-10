@@ -29,7 +29,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -64,6 +63,7 @@ import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for creating entity mappings for the create entity action
@@ -71,7 +71,7 @@ import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
  * @author Emily
  *
  */
-public class NewMappingDialog extends TitleAreaDialog {
+public class NewMappingDialog extends SmartStyledTitleDialog {
 
 	private static final String ATTRIBUTE_KEY = "ATTRIBUTE"; //$NON-NLS-1$
 	private static final String EDITOR_KEY = "EDITOR"; //$NON-NLS-1$

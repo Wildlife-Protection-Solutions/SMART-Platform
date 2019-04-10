@@ -25,7 +25,6 @@ import java.io.File;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -39,6 +38,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for restoring backup file.
@@ -46,7 +46,7 @@ import org.wcs.smart.internal.Messages;
  * @author egouge
  * @since 1.0.0
  */
-public class RestoreDialog extends TitleAreaDialog {
+public class RestoreDialog extends SmartStyledTitleDialog {
 
 	private Text txtRestorefile;
 	private File selectedFile;

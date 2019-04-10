@@ -68,7 +68,7 @@ public class RelationshipDiagramDefaultStyleComposite extends Composite {
 		Group grpNode = new Group(parent, SWT.NONE);
 		grpNode.setText(Messages.RelationshipDiagramDefaultStyleComposite_NodeGroup_Title);
 		grpNode.setLayout(new GridLayout());
-		grpNode.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		grpNode.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		nodeCmp = new RelationshipDiagramNodeStyleOptionsComposite(grpNode);
 		nodeCmp.addOptionsChangeListener(new INodeStyleOptionsChangeListener() {
@@ -81,7 +81,7 @@ public class RelationshipDiagramDefaultStyleComposite extends Composite {
 		Group grpEdge = new Group(parent, SWT.NONE);
 		grpEdge.setText(Messages.RelationshipDiagramDefaultStyleComposite_EdgeGroup_Title);
 		grpEdge.setLayout(new GridLayout());
-		grpEdge.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		grpEdge.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		edgeCmp = new RelationshipDiagramEdgeStyleOptionsComposite(grpEdge);
 		edgeCmp.addOptionsChangeListener(new IEdgeStyleOptionsChangeListener() {

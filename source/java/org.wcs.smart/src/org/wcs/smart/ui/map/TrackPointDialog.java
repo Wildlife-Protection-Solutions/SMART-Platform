@@ -49,7 +49,6 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -115,6 +114,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.udig.SmartDistanceTool;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.map.tool.PanTool;
 import org.wcs.smart.ui.map.tool.TrackPointSelectionTool;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -133,7 +133,7 @@ import org.locationtech.jts.geom.Point;
  * @author Emily
  * @since 1.0.0
  */
-public abstract class TrackPointDialog extends TitleAreaDialog implements MapPart{
+public abstract class TrackPointDialog extends SmartStyledTitleDialog implements MapPart{
 	private final static FilterFactory2 FACTORY = CommonFactoryFinder.getFilterFactory2(null);
 
 	private final static String SELECTED_FIELD = "selected"; //$NON-NLS-1$

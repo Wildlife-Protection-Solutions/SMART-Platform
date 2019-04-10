@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.er.ui.samplingunit;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -30,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for selecting a sampling unit state.  This allows
@@ -38,7 +38,7 @@ import org.wcs.smart.er.model.SamplingUnit;
  * @author Emily
  *
  */
-public class SamplingUnitStateDialog extends TitleAreaDialog{
+public class SamplingUnitStateDialog extends SmartStyledTitleDialog{
 
 	private Button btnActive;
 	private Button btnInactive;

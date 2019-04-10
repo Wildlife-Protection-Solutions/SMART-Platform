@@ -32,7 +32,6 @@ import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -66,7 +65,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  *
  */
-public class TranslateSimpleListItemDialog extends TitleAreaDialog {
+public class TranslateSimpleListItemDialog extends SmartStyledTitleDialog {
 
 	private TableViewer tblViewer;
 	protected NamedItem item;

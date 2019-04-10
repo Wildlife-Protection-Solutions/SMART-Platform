@@ -340,9 +340,9 @@ public class SmartStartUp {
 				SmartDB.setConservationAreaConfiguration(e, password, ca, config);
 				
 				//Record this Login in the login-log
-				recordLogin(e, ca);
-				
-				try(Session s = HibernateManager.openSession()){}
+				recordLogin(e, ca);				
+				//no longer necessary; done above by record login
+				//try(Session s = HibernateManager.openSession()){}
 
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(Messages.SmartStartUp_Error_LoginError + ": " + ex.getMessage(), ex); //$NON-NLS-1$

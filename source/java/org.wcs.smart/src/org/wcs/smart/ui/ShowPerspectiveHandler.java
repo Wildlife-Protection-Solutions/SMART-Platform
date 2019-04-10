@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.ui;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.inject.Named;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -32,6 +35,7 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.model.application.ui.menu.MHandledItem;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
@@ -64,6 +68,21 @@ public class ShowPerspectiveHandler {
 				SmartPlugIn.displayLog(e.getMessage(), e);
 			}
 		}
+
+
+		List<MHandledItem> elements = mService.findElements(window, null, MHandledItem.class );
+		
+		elements.forEach(f->{
+			if (f.getCommand() != null) {
+				f.setSelected(false);
+				f.getParameters().forEach(p->{
+					if (p.getName().equals(PERSPECTIVE_ID_PARAM) && p.getValue().equalsIgnoreCase(perspectiveId)) {
+						f.setSelected(true);
+					}
+				});
+			}
+		});
+		
 	}
 	
 	public static class ShowPerspectiveHandlerWrapper extends AbstractHandler {

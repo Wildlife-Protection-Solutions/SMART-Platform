@@ -26,7 +26,6 @@ import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -41,6 +40,7 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.map.TracksComposite.ITracksCompositeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -50,7 +50,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author elitvin
  * @since 3.0.0
  */
-public class MissionTrackEditDialog extends TitleAreaDialog {
+public class MissionTrackEditDialog extends SmartStyledTitleDialog {
 
 	private boolean isChanged = false;
 	

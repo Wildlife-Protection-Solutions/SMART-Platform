@@ -25,20 +25,26 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -79,7 +85,7 @@ public class RecordDescriptionPage extends EditorPart{
 	private Composite scratchpadPart;
 	private Text txtDescription;
 	private Text txtScratchpad;
-	
+	private Label headerLabel;
 	
 	public RecordDescriptionPage(RecordEditor parent){
 		this.recordEditor =  parent;
@@ -102,15 +108,35 @@ public class RecordDescriptionPage extends EditorPart{
 		toolkit = new FormToolkit(parent.getDisplay());
 		
 		parent.setLayout(new GridLayout());
-		((GridLayout)parent.getLayout()).marginWidth= 0;
-		((GridLayout)parent.getLayout()).marginHeight = 0;
-		((GridLayout)parent.getLayout()).verticalSpacing= 0;
+		((GridLayout)parent.getLayout()).marginWidth= 5;
+		((GridLayout)parent.getLayout()).marginHeight = 5;
+//		((GridLayout)parent.getLayout()).verticalSpacing= 0;
 				
-		Composite buttonComp = toolkit.createComposite(parent, SWT.NONE);
-		buttonComp.setLayout(new GridLayout());
-		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Composite buttonPanel = toolkit.createComposite(parent, SWT.NONE);
+		buttonPanel.setLayout(new GridLayout(3, false));
+		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)buttonPanel.getLayout()).marginWidth = 5;
+		((GridLayout)buttonPanel.getLayout()).marginHeight = 5;
+		((GridLayout)buttonPanel.getLayout()).horizontalSpacing = 0;
 		
-		buttontoolbar = new RecordButtonToolbar(buttonComp, recordEditor, toolkit);
+		WidgetElement.setCSSClass(buttonPanel, "SMARTFormHeader");
+		
+		headerLabel = toolkit.createLabel(buttonPanel, ""); //$NON-NLS-1$
+		
+		FontData fd = headerLabel.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		fd.setHeight(fd.getHeight() + 1);
+		Font headerFont = new Font(parent.getShell().getDisplay(), fd);
+		headerLabel.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				headerFont.dispose();	
+			}
+		});
+		headerLabel.setFont(headerFont);
+		headerLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		buttontoolbar = new RecordButtonToolbar(buttonPanel, recordEditor, toolkit);
 		buttontoolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		
 		sashForm = new SashForm(parent, SWT.VERTICAL);
@@ -160,6 +186,10 @@ public class RecordDescriptionPage extends EditorPart{
 		buttontoolbar.setEditMode(editMode);
 	}
 	
+	public void doAfterSave(){
+		headerLabel.setText(recordEditor.getRecord().getTitle());
+	}
+	
 	public void initPage(){
 		if (narrativePart != null){
 			for (Control c : narrativePart.getChildren()){
@@ -171,7 +201,8 @@ public class RecordDescriptionPage extends EditorPart{
 				c.dispose();
 			}
 		}
-		
+		headerLabel.setText(recordEditor.getRecord().getTitle() == null ? "" : recordEditor.getRecord().getTitle()); //$NON-NLS-1$
+
 		txtDescription = toolkit.createText(narrativePart, recordEditor.getRecord().getDescription(), SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		if (recordEditor.getEditMode()){

@@ -23,8 +23,8 @@ package org.wcs.smart.i2;
 
 import java.util.UUID;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;

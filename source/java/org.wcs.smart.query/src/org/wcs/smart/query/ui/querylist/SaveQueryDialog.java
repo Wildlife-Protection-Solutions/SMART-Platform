@@ -24,7 +24,6 @@ package org.wcs.smart.query.ui.querylist;
 import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -43,6 +42,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.QueryFolderTreeComposite;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -52,7 +52,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  * @since 1.0.0
  */
-public class SaveQueryDialog  extends TitleAreaDialog {
+public class SaveQueryDialog  extends SmartStyledTitleDialog {
 
 	private Text txtName;
 	private boolean includeName = false;

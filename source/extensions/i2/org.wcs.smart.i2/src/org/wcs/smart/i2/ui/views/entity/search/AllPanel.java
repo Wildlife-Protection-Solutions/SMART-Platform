@@ -50,7 +50,6 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
 import org.eclipse.swt.dnd.DragSourceAdapter;
@@ -125,7 +124,6 @@ public class AllPanel extends Composite {
 	private Composite tableComposite;
 	private TableViewer entityTable;
 	private EntitySearchPanel searchPanel;
-	private SashForm main;
 	private Label cntLabel;
 			
 	//search object
@@ -167,15 +165,48 @@ public class AllPanel extends Composite {
 		return LAST_SEARCH_KEY_PREFIX + "." + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
 	}
 	
+	public Composite createResultsComposite(Composite parent) {
+		tableComposite = toolkit.createComposite(parent);
+		
+		tableComposite.setLayout(new GridLayout());
+		((GridLayout)tableComposite.getLayout()).marginWidth = 0;
+		((GridLayout)tableComposite.getLayout()).marginHeight = 0;
+		
+		//only do search when this panel is viewed
+		String toLoad = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(getPreferenceStoreKey());
+		if (toLoad != null && !toLoad.isEmpty()) {
+			AllEntitySearch load = AllEntitySearch.parse(toLoad, Collections.singleton(SmartDB.getCurrentConservationArea()));
+			if (load != null && (load.getQueryColumns() != null || !load.getFilterString().isEmpty())) {
+				//if load is not empty; then load it and display filter panel
+				this.entitySearch = load;
+				searchPanel.initPanel(load.getFilterString());
+			}
+		}
+		
+		
+		Listener firstSearch = new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				tableComposite.removeListener(SWT.Paint, this);
+				refresh(0);
+			}};
+		Listener otherRefresh = new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					if (needsRefresh) refreshJob.schedule();
+				}};
+		tableComposite.addListener(SWT.Paint, firstSearch);
+		tableComposite.addListener(SWT.Paint, otherRefresh);
+		
+		return tableComposite;
+	}
+	
 	private void createContents() {
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;
 		((GridLayout)getLayout()).marginHeight = 0;
 		
-		main = new SashForm(this, SWT.VERTICAL);
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		searchPanel = new EntitySearchPanel(main) {
+		searchPanel = new EntitySearchPanel(this) {
 			@Override
 			public void saveSearch() {
 				entitySearch.setFilterString(getQueryString());
@@ -197,11 +228,7 @@ public class AllPanel extends Composite {
 				doSearch();
 			}
 		};
-		searchPanel.addQueryModifiedListener(e->{
-			//show if hidden; otherwise leave alone 
-			showHideFilter(true);
-		});
-
+		searchPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		ToolItem refreshItem = new ToolItem(searchPanel.getToolbar(), SWT.PUSH);
 		refreshItem.addListener(SWT.Selection, e->searchPanel.doSearch());
 		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
@@ -212,72 +239,8 @@ public class AllPanel extends Composite {
 		configureItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CONFIGURE));
 		configureItem.setToolTipText(Messages.AllPanel_configtabletooltip);
 		
-		ToolItem hideFilters = new ToolItem(searchPanel.getToolbar(), SWT.PUSH);
-		hideFilters.addListener(SWT.Selection, e->{
-			boolean isVisible = (boolean) main.getData(FILTER_DATAKEY);
-			showHideFilter(!isVisible);
-		});
-		hideFilters.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_FILTERS));
-		hideFilters.setToolTipText(Messages.AllPanel_showhidetooltip);
-		
-		tableComposite = toolkit.createComposite(main);
-		
-		tableComposite.setLayout(new GridLayout());
-		((GridLayout)tableComposite.getLayout()).marginWidth = 0;
-		((GridLayout)tableComposite.getLayout()).marginHeight = 0;
-		
-		//only do search when this panel is viewed
-		boolean showHide = false;
-		String toLoad = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(getPreferenceStoreKey());
-		if (toLoad != null && !toLoad.isEmpty()) {
-			AllEntitySearch load = AllEntitySearch.parse(toLoad, Collections.singleton(SmartDB.getCurrentConservationArea()));
-			if (load != null && (load.getQueryColumns() != null || !load.getFilterString().isEmpty())) {
-				//if load is not empty; then load it and display filter panel
-				this.entitySearch = load;
-				searchPanel.initPanel(load.getFilterString());
-				showHide = true;
-			}
-		}
-		
-		final boolean fshowHide = showHide;
-		Listener firstSearch = new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				tableComposite.removeListener(SWT.Paint, this);
-				showHideFilter(fshowHide);
-				refresh(0);
-			}};
-		Listener otherRefresh = new Listener() {
-				@Override
-				public void handleEvent(Event event) {
-					if (needsRefresh) refreshJob.schedule();
-				}};
-		tableComposite.addListener(SWT.Paint, firstSearch);
-		tableComposite.addListener(SWT.Paint, otherRefresh);
 	}
 	
-	private void showHideFilter(boolean visible) {
-		if (main.getData(FILTER_DATAKEY) != null && (boolean)main.getData(FILTER_DATAKEY) == visible) return;
-		main.setData(FILTER_DATAKEY, visible);
-		
-		if (!visible) {
-			main.setData(WEIGHTS_DATAKEY, main.getWeights());
-		}
-		if (visible && main.getData(WEIGHTS_DATAKEY) != null) {
-			main.setWeights((int[])main.getData(WEIGHTS_DATAKEY));
-			return;
-		}
-		
-		int total = main.getBounds().height;
-		if (total == 0) total = 10;
-		int first = (int)(total * 0.2);
-		
-		if (!visible) {
-			first = searchPanel.getToolbar().getParent().getBounds().height + 2;
-			if (first == 0) first = 1;
-		}
-		main.setWeights(new int[] {first, total});
-	}
 	
 	/**
 	 * Initialize the panel with the contents from the saved search
@@ -294,7 +257,7 @@ public class AllPanel extends Composite {
 	 * Clears the table and reruns the search
 	 */
 	public void refresh(long delay) {
-		
+		if (tableComposite == null) return; 
 		for (Control c : tableComposite.getChildren()) c.dispose();
 		toolkit.createLabel(tableComposite, DialogConstants.LOADING_TEXT);
 		tableComposite.layout();

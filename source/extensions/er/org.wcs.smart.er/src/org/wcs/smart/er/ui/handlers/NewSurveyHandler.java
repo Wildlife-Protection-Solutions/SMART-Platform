@@ -47,6 +47,7 @@ import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.survey.wizard.NewSurveyWizard;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * New survey handler.
@@ -114,7 +115,7 @@ public class NewSurveyHandler {
 	public static Survey newSurvey(Shell parent, UUID parentDesign, UUID parentSurvey, NewSurveyWizard.StartPage startPage){
 		NewSurveyWizard newWizard = new NewSurveyWizard(parentDesign, parentSurvey);
 		newWizard.setStartPage(startPage);
-		WizardDialog wd = new WizardDialog(parent, newWizard);
+		WizardDialog wd = new SmartWizardDialog(parent, newWizard);
 		if (wd.open() == WizardDialog.OK){
 			return newWizard.getNewSurvey();
 		}

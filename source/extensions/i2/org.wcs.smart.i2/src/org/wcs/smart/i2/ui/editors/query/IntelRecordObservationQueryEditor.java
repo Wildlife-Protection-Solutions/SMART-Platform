@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -98,6 +99,7 @@ import org.wcs.smart.i2.ui.dialogs.query.ExportQueryWizard;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Intelligence query editor for record observation query
@@ -317,8 +319,8 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		Composite headerComp = toolkit.createComposite(main);
 		headerComp.setLayout(new GridLayout(2, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridLayout)headerComp.getLayout()).marginWidth = 0;
-		((GridLayout)headerComp.getLayout()).marginHeight = 0;
+		
+		WidgetElement.setCSSClass(headerComp, "SMARTFormHeader");
 		
 		header = new IntelQueryNameLabel(headerComp, toolkit, pageForm.getFont(), pageForm.getForeground());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -370,9 +372,16 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		
 		SmartSection resultsSection = new SmartSection(core, toolkit, Messages.IntelQueryEditor_ResultsSectionLabel){
 			public void populateHeaderAdditions(Composite parent){
-				dataTabList = new SectionTabHeader(new String[]{Messages.IntelQueryEditor_TabSectionsLabel, Messages.IntelQueryEditor_MapSectionLabel}, parent, toolkit);
+				Composite outer = new Composite(parent, SWT.NONE);
+				outer.setLayout(new GridLayout());
+				((GridLayout)outer.getLayout()).marginHeight = 0;
+				((GridLayout)outer.getLayout()).marginWidth = 30;
+				
+				dataTabList = new SectionTabHeader(new String[]{Messages.IntelQueryEditor_TabSectionsLabel, 
+						Messages.IntelQueryEditor_MapSectionLabel}, outer, toolkit);
 				((GridLayout)dataTabList.getLayout()).marginHeight = 0;
-				((GridLayout)dataTabList.getLayout()).marginWidth = 20;
+				((GridLayout)dataTabList.getLayout()).marginWidth = 0;
+				
 			}
 		};
 		
@@ -446,7 +455,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		}
 		
 		ExportQueryWizard wizard = new ExportQueryWizard(query, resultsTable.getCurrentResults());
-		WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
+		WizardDialog wd = new SmartWizardDialog(getSite().getShell(), wizard);
 		wd.open();
 	}
 	

@@ -23,8 +23,8 @@ package org.wcs.smart.observation.internal.advisor;
 
 import java.text.MessageFormat;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.observation.internal.Messages;

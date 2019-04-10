@@ -31,9 +31,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -42,14 +43,13 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.EventProcessingJob;
 import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.event.xml.EventsFromXml;
 import org.wcs.smart.event.xml.EventsToXml;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for configuring events.
@@ -57,7 +57,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Emily
  *
  */
-public class ConfigureEventsDialog extends TitleAreaDialog {
+public class ConfigureEventsDialog extends SmartStyledTitleDialog {
 
 	private EventsPanel eventPanel;
 	private FiltersPanel filtersPanel;
@@ -98,7 +98,7 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true ));
 		
-		TabFolder tabs = new TabFolder(main, SWT.NONE);
+		CTabFolder tabs = new CTabFolder(main, SWT.NONE);
 		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		eventPanel = new EventsPanel(tabs, SWT.NONE);
@@ -109,22 +109,22 @@ public class ConfigureEventsDialog extends TitleAreaDialog {
 		filtersPanel.addListener(e->eventPanel.refresh());
 		actionPanel.addListener(e->eventPanel.refresh());
 		
-		TabItem eventTab = new TabItem(tabs, SWT.NONE);
+		CTabItem eventTab = new CTabItem(tabs, SWT.NONE);
 		eventTab.setText(Messages.ConfigureEventsDialog_EventsTab);
 		eventTab.setControl(eventPanel);
 		eventTab.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ACTION_EVENT));
 		
-		TabItem filtersTab = new TabItem(tabs, SWT.NONE);
+		CTabItem filtersTab = new CTabItem(tabs, SWT.NONE);
 		filtersTab.setText(Messages.ConfigureEventsDialog_FiltersTab);
 		filtersTab.setControl(filtersPanel);
 		filtersTab.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_FILTER));
 		
-		TabItem actionsTab = new TabItem(tabs, SWT.NONE);
+		CTabItem actionsTab = new CTabItem(tabs, SWT.NONE);
 		actionsTab.setText(Messages.ConfigureEventsDialog_ActionsTab);
 		actionsTab.setControl(actionPanel);
 		actionsTab.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ACTION));
 		
-		TabItem typesTab = new TabItem(tabs, SWT.NONE);
+		CTabItem typesTab = new CTabItem(tabs, SWT.NONE);
 		typesTab.setText(Messages.ConfigureEventsDialog_TypesTab);
 		typesTab.setControl(typesPanel);
 		typesTab.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ACTION_TYPE));

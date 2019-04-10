@@ -29,16 +29,15 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
@@ -48,6 +47,7 @@ import org.wcs.smart.connect.dataqueue.ui.IProcessingOptionPanel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -56,7 +56,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class DataQueueProcessingOptionDialog extends TitleAreaDialog{
+public class DataQueueProcessingOptionDialog extends SmartStyledTitleDialog{
 
 	public DataQueueProcessingOptionDialog(Shell parentShell) {
 		super(parentShell);
@@ -118,10 +118,10 @@ public class DataQueueProcessingOptionDialog extends TitleAreaDialog{
 			Label l = new Label(main, SWT.NONE);
 			l.setText(Messages.DataQueueProcessingOptionDialog_NoOptions);
 		}else{
-			TabFolder tabConfig = new TabFolder(main, SWT.NONE);
+			CTabFolder tabConfig = new CTabFolder(main, SWT.NONE);
 			tabConfig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,3,1));
 			for (IProcessingOptionPanel p : optionPanels){
-				TabItem ti = new TabItem(tabConfig, SWT.DEFAULT);
+				CTabItem ti = new CTabItem(tabConfig, SWT.DEFAULT);
 				ti.setText(p.getName());
 				ti.setControl(p.createComposite(tabConfig));
 				p.addChangeListener(listener);

@@ -30,7 +30,6 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
@@ -55,6 +54,7 @@ import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -63,7 +63,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class EditConnectServerInfoDialog extends TitleAreaDialog{
+public class EditConnectServerInfoDialog extends SmartStyledTitleDialog{
 
 	private ServerPanel serverpnl;
 	

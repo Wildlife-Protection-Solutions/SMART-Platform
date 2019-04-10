@@ -197,7 +197,7 @@ public class QueryView {
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 		toolkit.adapt(parent);
 		
-		tabList = new SectionTabHeader(new String[]{Messages.QueryView_SaveQuerySection, Messages.QueryView_FiltersSection}, parent, toolkit, parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		tabList = new SectionTabHeader(new String[]{Messages.QueryView_SaveQuerySection, Messages.QueryView_FiltersSection}, parent, toolkit);
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)tabList.getLayoutData()).verticalIndent = 2;
 		

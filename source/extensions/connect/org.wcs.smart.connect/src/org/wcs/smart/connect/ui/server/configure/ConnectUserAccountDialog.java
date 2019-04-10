@@ -28,7 +28,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -51,6 +50,7 @@ import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for collecting a connect username and password for a given server.
@@ -59,7 +59,7 @@ import org.wcs.smart.ui.SmartLabelProvider;
  * @author Emily
  *
  */
-public class ConnectUserAccountDialog extends TitleAreaDialog{
+public class ConnectUserAccountDialog extends SmartStyledTitleDialog{
 
 	private Text txtUser;
 	private List<ConnectUser> toUpdate;

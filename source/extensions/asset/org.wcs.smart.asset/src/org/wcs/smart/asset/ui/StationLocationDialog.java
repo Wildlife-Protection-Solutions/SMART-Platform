@@ -31,7 +31,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionEvent;
@@ -57,6 +56,7 @@ import org.wcs.smart.asset.model.AssetStationLocationAttribute;
 import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -65,7 +65,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class StationLocationDialog extends TitleAreaDialog{
+public class StationLocationDialog extends SmartStyledTitleDialog{
 
 	private AssetStationLocation toUpdate;
 	

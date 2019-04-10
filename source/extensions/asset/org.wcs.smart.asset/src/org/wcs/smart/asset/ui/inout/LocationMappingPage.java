@@ -186,6 +186,7 @@ public class LocationMappingPage extends WizardPage{
 		});
 		
 		fields = new Composite(main, SWT.NONE);
+		fields.setBackgroundMode(SWT.INHERIT_FORCE);
 		fields.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		fields.setLayout(new GridLayout(2, false));
 		((GridLayout)fields.getLayout()).marginWidth = 0;

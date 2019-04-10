@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.dataqueue.cybertracker;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -29,6 +28,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.connect.dataqueue.cybertracker.internal.Messages;
+import org.wcs.smart.ui.SmartStyledDialog;
 
 /**
  * Simple dialog with not buttons, not title to inform user they
@@ -37,7 +37,7 @@ import org.wcs.smart.connect.dataqueue.cybertracker.internal.Messages;
  * @author Emily
  *
  */
-public class CloseMsgDialog extends Dialog {
+public class CloseMsgDialog extends SmartStyledDialog {
 
 	protected CloseMsgDialog(Shell parentShell) {
 		super(parentShell);

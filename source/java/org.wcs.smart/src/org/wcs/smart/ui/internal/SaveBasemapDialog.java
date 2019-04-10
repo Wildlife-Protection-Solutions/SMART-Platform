@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ListViewer;
@@ -55,6 +54,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.BasemapLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.util.SmartUtils;
 
@@ -65,7 +65,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class SaveBasemapDialog  extends TitleAreaDialog {
+public class SaveBasemapDialog  extends SmartStyledTitleDialog {
 
 	private Button btnOverwrite;
 	private Button btnCreateNew;

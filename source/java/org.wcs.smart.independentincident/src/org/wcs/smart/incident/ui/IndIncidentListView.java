@@ -46,13 +46,18 @@ import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
@@ -63,8 +68,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.menus.IMenuService;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -175,20 +180,13 @@ public class IndIncidentListView implements IIncidentFilteringView {
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		GridLayout layout = new GridLayout(1, false);
-		layout.horizontalSpacing = 0;
-		layout.verticalSpacing = 0;
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
-		main.setLayout(layout);
+		main.setLayout(new TableColumnLayout());
 		
 		incidentListViewer = new TableViewer(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
-		Table list = incidentListViewer.getTable();
-		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		list.setBounds(0, 0, 88, 68);
-		
-		incidentListViewer.setLabelProvider(new LabelProvider(){
+		incidentListViewer.getTable().setHeaderVisible(false);
+		incidentListViewer.getTable().setLinesVisible(false);
+		TableViewerColumn col1 = new TableViewerColumn(incidentListViewer, SWT.NONE);
+		col1.setLabelProvider(new ColumnLabelProvider(){
 			
 			@Override
 			public Image getImage(Object element){
@@ -205,9 +203,11 @@ public class IndIncidentListView implements IIncidentFilteringView {
 				return super.getText(element);
 			}
 		});
+		((TableColumnLayout)main.getLayout()).setColumnData(col1.getColumn(), new ColumnWeightData(100));
+		
 		incidentListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		incidentListViewer.setInput(loadingInput);
-		incidentListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		updateContent();
 		
 		IncidentEventManager.getInstance().addListener(ilistener);

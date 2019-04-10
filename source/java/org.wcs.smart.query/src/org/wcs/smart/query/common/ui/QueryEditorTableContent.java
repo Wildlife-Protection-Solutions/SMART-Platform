@@ -239,13 +239,10 @@ public class QueryEditorTableContent {
 		frmQueryArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1, 1));
 		
 		layout = new GridLayout(1, false);
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
 		frmQueryArea.getBody().setLayout(layout);
-		
-		
+
 		createNameHeader(frmQueryArea.getBody(), toolkit);
 		
 		// --- Query Properties ----

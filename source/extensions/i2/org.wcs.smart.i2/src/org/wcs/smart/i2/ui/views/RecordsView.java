@@ -197,10 +197,9 @@ public class RecordsView {
 			}
 		};
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.RecordsView_unprocessedSection, Messages.RecordsView_inprogressSection, Messages.RecordsView_allSection, Messages.RecordsView_basicSection}, thisParent, toolkit, thisParent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.RecordsView_unprocessedSection, Messages.RecordsView_inprogressSection, Messages.RecordsView_allSection, Messages.RecordsView_basicSection}, thisParent, toolkit);
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-//		((GridData)tabList.getLayoutData()).verticalIndent = 2;
-		
+
 		Composite tabPart = toolkit.createComposite(thisParent, SWT.NONE);
 		tabPart.setLayout(new StackLayout());
 		tabPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

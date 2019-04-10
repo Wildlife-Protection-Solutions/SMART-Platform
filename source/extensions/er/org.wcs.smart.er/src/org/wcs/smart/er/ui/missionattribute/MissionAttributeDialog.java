@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -42,8 +41,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -52,6 +54,7 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -60,12 +63,14 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class MissionAttributeDialog extends TitleAreaDialog implements SelectionListener{
+public class MissionAttributeDialog extends SmartStyledTitleDialog implements SelectionListener{
 
 	private TableViewer lstAttributes;
 	private Button btnAdd;
 	private Button btnDelete;
 	private Button btnEdit;
+	
+	private MenuItem miAdd, miDelete, miEdit;
 	
 	private List<MissionAttribute> attributes;
 	
@@ -147,15 +152,34 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnAdd.addSelectionListener(this);
 		
+		btnEdit = new Button(btnComp, SWT.PUSH);
+		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnEdit.addSelectionListener(this);
+		
 		btnDelete = new Button(btnComp, SWT.PUSH);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnDelete.addSelectionListener(this);
 		
-		btnEdit = new Button(btnComp, SWT.PUSH);
-		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnEdit.addSelectionListener(this);
+		Menu mnu = new Menu(lstAttributes.getControl());
+		
+		miAdd = new MenuItem(mnu, SWT.PUSH);
+		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miAdd.addSelectionListener(this);
+		
+		miEdit = new MenuItem(mnu, SWT.PUSH);
+		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		miEdit.addSelectionListener(this);
+		
+		miDelete = new MenuItem(mnu, SWT.PUSH);
+		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDelete.addSelectionListener(this);
+		
+		lstAttributes.getControl().setMenu(mnu);
 		
 		lstAttributes.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -230,6 +254,9 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 		
 		btnDelete.setEnabled(!isSelected);
 		btnEdit.setEnabled(!isSelected);
+		
+		miDelete.setEnabled(!isSelected);
+		miEdit.setEnabled(!isSelected);
 	}
 	
 	
@@ -245,11 +272,11 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 
 	@Override
 	public void widgetSelected(SelectionEvent e) {
-		if (e.widget == btnAdd){
+		if (e.widget == btnAdd || e.widget == miAdd){
 			addAttribute();
-		}else if (e.widget == btnDelete){
+		}else if (e.widget == btnDelete || e.widget == miDelete){
 			deleteAttribute();
-		}else if (e.widget == btnEdit){
+		}else if (e.widget == btnEdit || e.widget == miEdit){
 			editAttribute();
 		}
 	}

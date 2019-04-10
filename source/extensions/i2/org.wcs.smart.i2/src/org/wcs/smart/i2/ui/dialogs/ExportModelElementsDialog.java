@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -85,6 +84,7 @@ import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.xml.IntelDataToXml;
 import org.wcs.smart.i2.xml.XmlToIntelData;
 import org.wcs.smart.ui.ConservationAreaLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -94,7 +94,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class ExportModelElementsDialog extends TitleAreaDialog{
+public class ExportModelElementsDialog extends SmartStyledTitleDialog{
 
 	public static final String PREFERENCE_DIR_KEY = ExportModelElementsDialog.class.getCanonicalName() + ".dir"; //$NON-NLS-1$
 	

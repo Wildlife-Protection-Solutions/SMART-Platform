@@ -186,9 +186,7 @@ public class RunPage extends EditorPart {
 		((GridLayout)top.getLayout()).marginWidth = 0;
 		((GridLayout)top.getLayout()).marginHeight = 0;
 		
-		header = new HeaderComposite(top, toolkit, mainForm.getFont(), mainForm.getForeground()) {
-			
-		};
+		header = new HeaderComposite(top, toolkit, mainForm.getFont(), mainForm.getForeground()) {};
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		header.addListener(SWT.Selection, e->{
 			RunPage.this.parent.updateName(e.text);

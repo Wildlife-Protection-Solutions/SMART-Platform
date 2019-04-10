@@ -103,6 +103,8 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 	
 	@Override
 	public void createControl(Composite parent) {
+		parent.setBackgroundMode(SWT.INHERIT_FORCE);
+		
 		parent = new Composite(parent, SWT.NONE);
 		parent.setLayout(new GridLayout());
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

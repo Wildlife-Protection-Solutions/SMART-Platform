@@ -24,7 +24,6 @@ package org.wcs.smart.asset.ui.views.asset;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 

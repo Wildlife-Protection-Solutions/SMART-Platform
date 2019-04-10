@@ -234,7 +234,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 	public void createPartControl(Composite parent) {
 		toolkit.setBorderStyle(SWT.BORDER);
 		form = toolkit.createForm(parent);
-		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+//		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		GridLayout glayout = new GridLayout();
 		glayout.verticalSpacing = 0;

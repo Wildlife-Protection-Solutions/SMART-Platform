@@ -29,6 +29,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.incident.ui.newwizard.NewIncidentWizard;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * New incident handler.  Opens the new incident wizard.
@@ -43,7 +44,7 @@ public class NewIncidentHandler {
 		(new ShowFieldDataPerspective()).execute(IndIncidentListView.ID, activeWindow);
 		
 		NewIncidentWizard wizard = new NewIncidentWizard();
-		WizardDialog wd = new WizardDialog(activeShell, wizard);
+		WizardDialog wd = new SmartWizardDialog(activeShell, wizard);
 		if (wd.open() == Window.OK){
 			(new OpenIncidentHandler()).openIncident(wizard.getNewIncident().getUuid(), activeWindow);
 		}

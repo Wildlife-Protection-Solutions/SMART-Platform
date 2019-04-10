@@ -44,7 +44,6 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 
 /**
  * Composite with text field and "Translate" button.

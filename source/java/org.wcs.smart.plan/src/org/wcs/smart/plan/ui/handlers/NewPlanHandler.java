@@ -28,6 +28,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.plan.ui.newPlanWizard.CreatePlanWizard;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 
 /**
@@ -44,7 +45,7 @@ public class NewPlanHandler {
 	public void execute(Shell activeShell, MWindow activeWindow){
 		//Show Create Patrol Wizard
 		final CreatePlanWizard wizard = new CreatePlanWizard();
-		WizardDialog dialog = new WizardDialog(activeShell, wizard);
+		WizardDialog dialog = new SmartWizardDialog(activeShell, wizard);
 		if (dialog.open() == Window.OK){
 			(new OpenPlanHandler()).openPlan(wizard.getPlan().getUuid(), activeWindow);
 		}

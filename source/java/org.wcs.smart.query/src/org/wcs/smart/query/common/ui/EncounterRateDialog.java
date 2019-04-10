@@ -23,7 +23,6 @@ package org.wcs.smart.query.common.ui;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -39,13 +38,14 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IValueDropItem;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for selecting encourter rate variables.
  * @author egouge
  * @since 1.0.0
  */
-public class EncounterRateDialog extends TitleAreaDialog{
+public class EncounterRateDialog extends SmartStyledTitleDialog{
 
 	private static final String ENCOUNTER_RATE = Messages.EncounterRateDialog_EncounterRateLabel;
 	private Composite main = null;

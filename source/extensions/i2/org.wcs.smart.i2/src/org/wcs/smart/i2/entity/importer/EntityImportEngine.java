@@ -64,10 +64,10 @@ import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 
-import au.com.bytecode.opencsv.CSVReader;
-
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * Import entity engine for importing from csv file.

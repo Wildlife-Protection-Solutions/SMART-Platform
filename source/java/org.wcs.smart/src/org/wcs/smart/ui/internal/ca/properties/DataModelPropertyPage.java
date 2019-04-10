@@ -146,6 +146,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		for (Aggregation agg : DataModel.getAggregations()){
 			getSession().update(agg);
 		}
+		setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE);
 	}
 	
 	@Override
@@ -254,7 +255,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	}
 	
 	/**
-	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#createContent(org.eclipse.swt.widgets.Composite)
+	 * @see org.wcs.smart.ui.ca.properties.SmartStyledTitleDialog#createContent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
@@ -720,7 +721,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	/**
 	 * Commits the current open transaction.
 	 * 
-	 * @see org.wcs.smart.ui.ca.properties.AbstractPropertyJHeaderDialog#performSave()
+	 * @see org.wcs.smart.ui.ca.properties.SmartStyledTitleDialog#performSave()
 	 */
 	@Override
 	protected boolean performSave() {

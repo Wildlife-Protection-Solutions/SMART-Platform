@@ -100,6 +100,7 @@ import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportOptionDialog;
 import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportWizard;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.ui.SmartWizardDialog;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.GeometryUtils;
@@ -757,13 +758,13 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		}else{
 			wizard = new ImportAttributeWizard(editor.getSurveyDesign());
 		}
-		WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
+		WizardDialog wd = new SmartWizardDialog(getSite().getShell(), wizard);
 		wd.open();
 	}
 	
 	private void exportSu(){
 		ExportWizard wizard = new ExportWizard(editor.getSurveyDesign());
-		WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
+		WizardDialog wd = new SmartWizardDialog(getSite().getShell(), wizard);
 		wd.open();
 	}
 	

@@ -130,8 +130,10 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 		toolkit.setBorderStyle(SWT.BORDER);
 		
+		GridLayout gl = new GridLayout();
+		gl.marginWidth = gl.marginHeight = 0;
 		form = toolkit.createForm(parent);
-		form.getBody().setLayout(new GridLayout());
+		form.getBody().setLayout(gl);
 		
 		String errorMsg = missionEditor.canEdit();
 		boolean canEdit = errorMsg == null;
@@ -145,7 +147,6 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		section.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		ScrolledComposite scrolltop = new ScrolledComposite(section, SWT.V_SCROLL | SWT.H_SCROLL);
-		scrolltop.setLayout(new GridLayout());
 		scrolltop.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		scrolltop.setExpandHorizontal(true);
 		scrolltop.setExpandVertical(true);
@@ -153,13 +154,15 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		Composite comp = toolkit.createComposite(scrolltop, SWT.NONE);
 		comp.setLayout(new GridLayout(2, false));
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)comp.getLayout()).marginWidth = 0;
+		((GridLayout)comp.getLayout()).marginHeight = 0;
 		section.setClient(scrolltop);
 		scrolltop.setContent(comp);
 		
 		Composite left = toolkit.createComposite(comp, SWT.NONE);
 		left.setLayout(new GridLayout(3, false));
 		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+		((GridLayout)left.getLayout()).marginWidth = 0;
 		//mission id
 		toolkit.createLabel(left, Messages.MissionSummaryPage_MissionIdLabel);
 		txtId = toolkit.createText(left, ""); //$NON-NLS-1$
@@ -310,6 +313,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		dataProp.setLayout(new GridLayout(5, false));
 		dataProp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		dataSection.setClient(dataProp);
+		((GridLayout)dataProp.getLayout()).marginWidth = 0;
 				
 		toolkit.createLabel(dataProp,  Messages.MissionSummaryPage_StartDate);
 		txtStart = toolkit.createText(dataProp, ""); //$NON-NLS-1$

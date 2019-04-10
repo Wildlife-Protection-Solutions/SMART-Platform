@@ -89,6 +89,7 @@ import org.wcs.smart.er.ui.mision.udig.MissionServiceExtension;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
+import org.wcs.smart.ui.SmartWizardDialog;
 import org.wcs.smart.ui.map.TracksComposite;
 import org.wcs.smart.ui.map.tool.SplitTrackTool;
 import org.wcs.smart.util.GeometryUtils;
@@ -204,7 +205,7 @@ public class MissionTracksComposite extends TracksComposite {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					monitor.setTaskName(Messages.MissionDayComposite_LoadingWizard);
-					WizardDialog dialog = new WizardDialog(getShell(), wizard);
+					WizardDialog dialog = new SmartWizardDialog(getShell(), wizard);
 
 					if (dialog != null) {
 						monitor.setTaskName(Messages.MissionDayComposite_DisplayingWizard);

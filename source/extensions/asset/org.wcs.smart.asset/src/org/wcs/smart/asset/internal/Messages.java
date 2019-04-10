@@ -294,7 +294,9 @@ public class Messages extends NLS {
 	public static String AssetOverviewMap_GroupingTooltip;
 	public static String AssetOverviewMap_loadingstyleJobName;
 	public static String AssetOverviewMap_ManageStyle;
+	public static String AssetOverviewMap_RefreshJob;
 	public static String AssetOverviewMap_SaveStyle;
+	public static String AssetOverviewMap_SensorTable;
 	public static String AssetOverviewMap_StatTableSectionName;
 	public static String AssetOverviewMap_StatusStyleName;
 	public static String AssetOverviewMap_StyleParseError;

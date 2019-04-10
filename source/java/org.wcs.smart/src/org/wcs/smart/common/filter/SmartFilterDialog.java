@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.common.filter;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -29,6 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Filter dialog for filtering smart object displayed in the list views.
@@ -37,7 +37,7 @@ import org.wcs.smart.internal.Messages;
  * @author elitvin
  * @since 1.0.0
  */
-public abstract class SmartFilterDialog extends TitleAreaDialog {
+public abstract class SmartFilterDialog extends SmartStyledTitleDialog {
 
 	protected static final int APPLY_ID = 4;
 	protected static final int DEFAULTS_ID = 8;

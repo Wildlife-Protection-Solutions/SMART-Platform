@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.internal.contexts.EclipseContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -43,6 +42,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -52,8 +53,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -121,11 +120,11 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		this.ctpackage = (PatrolCtPackage) ctitem;
 	
 		
-		TabFolder tabs = new TabFolder(parent, SWT.NONE);
+		CTabFolder tabs = new CTabFolder(parent, SWT.NONE);
 		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tabs.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
-		TabItem mainTab = new TabItem(tabs, SWT.NONE);
+		CTabItem mainTab = new CTabItem(tabs, SWT.NONE);
 		mainTab.setText("Model Settings");
 		
 		Composite main = new Composite(tabs, SWT.NONE);
@@ -211,7 +210,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		if (contributions != null) {
 			for (IPackageUiContribution cc : contributions) {
 				if (cc.isTab()) {
-					TabItem item = new TabItem(tabs, SWT.NONE);
+					CTabItem item = new CTabItem(tabs, SWT.NONE);
 					item.setText(cc.getTabName());
 					Composite all = new Composite(tabs, SWT.NONE);
 					all.setLayout(new GridLayout());

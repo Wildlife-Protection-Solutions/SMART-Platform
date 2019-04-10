@@ -31,7 +31,6 @@ import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -57,6 +56,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -66,7 +66,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public abstract class XmlMultiExportDialog extends TitleAreaDialog implements IUpdatableView {
+public abstract class XmlMultiExportDialog extends SmartStyledTitleDialog implements IUpdatableView {
 
 	private static final String LOADING_TEXT = Messages.XmlMultiExportDialog_LoadingText;
 	
@@ -323,11 +323,6 @@ public abstract class XmlMultiExportDialog extends TitleAreaDialog implements IU
 	protected abstract void handleFilterLinkClicked();
 	
 	protected abstract void loadObjectData();
-	
-	@Override
-	public boolean isResizable(){
-		return true;
-	}
 
 	@Override
 	public void updateContent() {

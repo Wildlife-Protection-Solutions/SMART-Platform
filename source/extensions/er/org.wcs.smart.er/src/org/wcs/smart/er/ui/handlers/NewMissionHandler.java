@@ -48,6 +48,7 @@ import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.mision.wizard.NewMissionWizard;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Handler for creating new missions.
@@ -124,7 +125,7 @@ public class NewMissionHandler {
 	public static Mission newMission(Shell parent, UUID parentDesign, UUID parentSurvey, NewMissionWizard.StartPage startPage){
 		NewMissionWizard newWizard = new NewMissionWizard(parentDesign, parentSurvey);
 		newWizard.setStartPage(startPage);
-		WizardDialog wd = new WizardDialog(parent, newWizard);
+		WizardDialog wd = new SmartWizardDialog(parent, newWizard);
 		if (wd.open() == WizardDialog.OK){
 			return newWizard.getNewMission();
 		}else{

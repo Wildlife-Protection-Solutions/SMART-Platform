@@ -106,7 +106,7 @@
             <command
                   commandId="org.wcs.smart.observation.perspective.show"
                   icon="images/icons/obj16/entitytype.png"
-                  label="%viewentities.command.name"
+                  label="%viewentities.menu.name"
                   mnemonic="%showentities.command.mnemonic"
                   style="push"
                   tooltip="%showentities.command.tooltip">
@@ -130,9 +130,10 @@
          <command
                commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/obj16/entitytype.png"
-               label="%viewentities.command.name"
+               label="%viewentities.command.name1"
                mnemonic="%showentities.command.mnemonic"
-               style="push"
+               mode="FORCE_TEXT"
+               style="radio"
                tooltip="%openentities.command.tooltip">
             <parameter
                   name="org.wcs.smart.observation.perspective.show.focusview"
@@ -247,7 +248,8 @@
          <command
                commandId="org.wcs.smart.command.showperspective"
                icon="images/icons/obj16/entitytype.png"
-               label="%viewentities.command.name"
+               label="%viewentities.command.name1"
+               mode="FORCE_TEXT"
                style="push"
                tooltip="%openentities.command.tooltip">
             <parameter
@@ -495,15 +497,15 @@
          point="org.eclipse.ui.commandImages">
       <image
             commandId="org.wcs.smart.entitytype.delete"
-            icon="images/icons/etool16/deleteentitytype.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png">
       </image>
       <image
             commandId="org.wcs.smart.entitytype.new"
-            icon="images/icons/etool16/newentitytype.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png">
       </image>
       <image
             commandId="org.wcs.smart.entity.entitytypefilter"
-            icon="images/icons/etool16/filterentitytype.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/filter.png">
       </image>
       <image
             commandId="org.wcs.smart.entitytype.export"

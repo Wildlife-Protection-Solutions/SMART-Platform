@@ -25,7 +25,6 @@ import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -45,13 +44,14 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.ImageSizeOption;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * dialog for collecting details about how a given image should be resized
  * @author Emily
  *
  */
-public class ReSizeImageDialog extends TitleAreaDialog{
+public class ReSizeImageDialog extends SmartStyledTitleDialog{
 
 	private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("0.00"); //$NON-NLS-1$
 	

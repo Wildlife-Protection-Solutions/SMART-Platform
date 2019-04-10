@@ -173,6 +173,7 @@ public class StationMappingPage extends WizardPage{
 		});
 		
 		fields = new Composite(main, SWT.NONE);
+		fields.setBackgroundMode(SWT.INHERIT_FORCE);
 		fields.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		fields.setLayout(new GridLayout(2, false));
 		((GridLayout)fields.getLayout()).marginWidth = 0;
@@ -239,6 +240,7 @@ public class StationMappingPage extends WizardPage{
 		options.addAll(headers);
 		
 		ScrolledComposite scroll = new ScrolledComposite(fields, SWT.V_SCROLL);
+		
 		Composite content = new Composite(scroll, SWT.NONE);
 		scroll.setContent(content);
 		scroll.setExpandVertical(true);

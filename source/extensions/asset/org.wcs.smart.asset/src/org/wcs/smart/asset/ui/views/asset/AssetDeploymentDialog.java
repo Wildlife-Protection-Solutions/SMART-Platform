@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -70,6 +69,7 @@ import org.wcs.smart.asset.ui.StationLocationDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -79,7 +79,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class AssetDeploymentDialog extends TitleAreaDialog{
+public class AssetDeploymentDialog extends SmartStyledTitleDialog{
 
 	private static final String NEW_STATION = Messages.AssetDeploymentDialog_CreateNewStation;
 	private static final String NEW_LOCATION = Messages.AssetDeploymentDialog_CreateNewLocation;

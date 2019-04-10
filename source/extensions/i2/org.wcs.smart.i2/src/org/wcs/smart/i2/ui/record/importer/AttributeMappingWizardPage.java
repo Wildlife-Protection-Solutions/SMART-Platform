@@ -122,7 +122,8 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 		
 		mappingPanel = new Composite(sc, SWT.NONE);
 		mappingPanel.setLayout(new GridLayout(2, false));
-		
+		mappingPanel.setBackgroundMode(SWT.INHERIT_FORCE);
+
 		sc.setContent(mappingPanel);
 		sc.setMinSize(mappingPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		setTitle(Messages.AttributeMappingWizardPage1_Title);

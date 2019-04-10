@@ -37,7 +37,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -52,6 +51,8 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -64,8 +65,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
@@ -82,6 +81,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.icon.ui.IconTable;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -93,7 +93,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class IconsetPropertyPage extends TitleAreaDialog {
+public class IconsetPropertyPage extends SmartStyledTitleDialog {
 
 	private static final String CURRENT_SET_KEY = "CURRENT"; //$NON-NLS-1$
 
@@ -191,14 +191,14 @@ public class IconsetPropertyPage extends TitleAreaDialog {
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		TabFolder tabs = new TabFolder(main, SWT.TOP );
+		CTabFolder tabs = new CTabFolder(main, SWT.TOP | SWT.FLAT );
 		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		TabItem itemSets = new TabItem(tabs, SWT.NONE);
+		CTabItem itemSets = new CTabItem(tabs, SWT.NONE);
 		itemSets.setText(Messages.IconPreferencePage_IconSetsTab);
 		itemSets.setControl(createSetTab(tabs));
 		
-		TabItem itemIcons = new TabItem(tabs, SWT.NONE);
+		CTabItem itemIcons = new CTabItem(tabs, SWT.NONE);
 		itemIcons.setText(Messages.IconPreferencePage_IconsTab);
 		iconComp = createIconsTab(tabs);
 		itemIcons.setControl(iconComp);
@@ -211,11 +211,12 @@ public class IconsetPropertyPage extends TitleAreaDialog {
 	}
 	
 	private Composite createIconsTab(Composite parent) {
-		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true ));
-
+		main.setBackgroundMode(SWT.INHERIT_FORCE);
+		((GridLayout)main.getLayout()).marginWidth = 0;
+		((GridLayout)main.getLayout()).marginHeight = 0;
 		Label l = new Label(main, SWT.NONE);
 		l.setText(DialogConstants.LOADING_TEXT);
 		
@@ -418,6 +419,8 @@ public class IconsetPropertyPage extends TitleAreaDialog {
 	private Composite createSetTab(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
+		((GridLayout)main.getLayout()).marginWidth = 0;
+		((GridLayout)main.getLayout()).marginHeight = 0;
 		
 		Composite top = new Composite(main, SWT.NONE);
 		top.setLayout(new GridLayout(2, false));
@@ -721,11 +724,4 @@ public class IconsetPropertyPage extends TitleAreaDialog {
 		}
 		
 	};
-	
-	
-	
-	@Override
-	protected boolean isResizable() {
-		return true;
-	}
 }

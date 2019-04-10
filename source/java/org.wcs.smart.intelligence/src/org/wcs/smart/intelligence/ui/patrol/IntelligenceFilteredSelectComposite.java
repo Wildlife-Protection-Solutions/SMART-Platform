@@ -34,11 +34,11 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.MultipleSelectComposite;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.IIntelligenceFilteringView;
@@ -80,7 +80,7 @@ public class IntelligenceFilteredSelectComposite extends MultipleSelectComposite
 	@Override
 	protected void contributeToFromLabelSection(Composite parent) {
 		Button btnFilter = new Button(parent, SWT.PUSH);
-		Image image = IntelligencePlugIn.getDefault().getImageRegistry().get(IntelligencePlugIn.INTELLIGENCE_FILTER_ICON);		
+		Image image = SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.FILTER_ICON);		
 		btnFilter.setImage(image);
 		btnFilter.setToolTipText(Messages.IntelligenceFilteredSelectComposite_Filter_Tooltip);
 		btnFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));

@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -50,6 +49,7 @@ import org.wcs.smart.event.model.IActionType;
 import org.wcs.smart.event.ui.model.IActionParameterCollector;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -58,7 +58,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class NewActionDialog extends TitleAreaDialog {
+public class NewActionDialog extends SmartStyledTitleDialog{
 
 	private static final String COLLECTOR_KEY = "COLLECTOR"; //$NON-NLS-1$
 	

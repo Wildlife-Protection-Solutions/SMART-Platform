@@ -28,7 +28,6 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -55,6 +54,7 @@ import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.search.IIntelEntitySearch;
 import org.wcs.smart.i2.search.LoadSavedSearches;
 import org.wcs.smart.i2.search.SearchProxy;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -63,7 +63,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class SaveSearchDialog extends TitleAreaDialog{
+public class SaveSearchDialog extends SmartStyledTitleDialog{
 
 	private String NEW_QUERY_OP = Messages.SaveSearchDialog_CreateQueryOption;
 	

@@ -94,6 +94,7 @@ public class AttachmentListComposite extends Composite{
 		
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginHeight = 0;
+		((GridLayout)getLayout()).marginWidth = 0;
 	
 		compAttachmentEdit= toolkit.createComposite(this, SWT.NONE);
 		compAttachmentEdit.setLayout(new GridLayout(1, false));

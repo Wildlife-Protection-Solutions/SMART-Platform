@@ -90,13 +90,20 @@ public class JsonImportEditor extends EditorPart {
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
 		
-		Form form = toolkit.createForm(parent);
+		Composite spacer = toolkit.createComposite(parent);
+		spacer.setLayout(new GridLayout());
+		
+		Form form = toolkit.createForm(spacer);
 		form.setText(Messages.JsonImportEditor_FormText);
 		GridLayout layout = new GridLayout();
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
 		form.getBody().setLayout(layout);
+		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite main = toolkit.createComposite(form.getBody());
 		main.setLayout(new GridLayout());
+		((GridLayout)main.getLayout()).marginWidth = 0;
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite btnComp = toolkit.createComposite(main);

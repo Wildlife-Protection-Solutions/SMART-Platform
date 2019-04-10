@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.er.ui.SurveyDesignListView;
 import org.wcs.smart.er.ui.surveydesign.importing.ImportSurveyDesignWizard;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Handler for importing entity types.
@@ -45,7 +46,7 @@ public class SurveyDesignImportHandler {
 		ContextInjectionFactory.invoke(new ShowFieldDataPerspective(), Execute.class, ctx);
 		
 		ImportSurveyDesignWizard wizard = new ImportSurveyDesignWizard();
-		WizardDialog wd = new WizardDialog(activeShell, wizard);
+		WizardDialog wd = new SmartWizardDialog(activeShell, wizard);
 		wd.open();
 	}
 	

@@ -207,8 +207,9 @@
          <command
                commandId="org.wcs.smart.command.showperspective"
                icon="images/etool16/intelligence.png"
-               label="%command.perspective.label"
-               style="push"
+               label="%command.perspective.label1"
+               mode="FORCE_TEXT"
+               style="radio"
                tooltip="%command.perspective.tooltip">
             <visibleWhen
                   checkEnabled="false">
@@ -252,7 +253,7 @@
             locationURI="toolbar:org.wcs.smart.intelligence.IntelligenceListView">
          <command
                commandId="org.wcs.smart.intelligence.DeleteIntelligence"
-               icon="images/etool16/delete.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png"
                label="%command.delete.label"
                style="push"
                tooltip="%command.delete.tooltip">
@@ -276,6 +277,7 @@
          </command>
          <command
                commandId="org.wcs.smart.intelligence.NewIntelligence"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                label="%command.create.label"
                style="push"
                tooltip="%command.create.tooltip">
@@ -299,7 +301,7 @@
          </command>
          <command
                commandId="org.wcs.smart.intelligence.ShowIntelligenceFilter"
-               icon="images/etool16/filter.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/filter.png"
                label="%command.filter.label"
                style="push"
                tooltip="%command.filter.tooltip">
@@ -346,7 +348,7 @@
          </separator>
          <command
                commandId="org.wcs.smart.intelligence.DeleteIntelligence"
-               icon="images/etool16/delete.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png"
                label="%delete.command.label"
                style="push"
                tooltip="%delete.command.tooltip">
@@ -434,6 +436,7 @@
             locationURI="toolbar:org.wcs.smart.toolbar.create?before=org.wcs.smart.toolbar.create.other">
          <command
                commandId="org.wcs.smart.intelligence.NewIntelligence"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                label="%command.create.label"
                style="push"
                tooltip="%command.create.tooltip">

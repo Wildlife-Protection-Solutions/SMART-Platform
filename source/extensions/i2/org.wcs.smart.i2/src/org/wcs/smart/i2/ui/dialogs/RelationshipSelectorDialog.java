@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.ui.dialogs;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -40,6 +39,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.ui.editors.RelationshipSearchJob;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -49,7 +49,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class RelationshipSelectorDialog extends TitleAreaDialog{
+public class RelationshipSelectorDialog extends SmartStyledTitleDialog{
 
 	private IntelEntityType srcType, targetType;
 	

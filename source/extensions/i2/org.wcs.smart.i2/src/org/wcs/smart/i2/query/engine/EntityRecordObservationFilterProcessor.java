@@ -53,9 +53,9 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.NotFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
+import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
 import org.wcs.smart.i2.query.observation.filter.RecordSourceFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
-import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
 import org.wcs.smart.util.UuidUtils;
 

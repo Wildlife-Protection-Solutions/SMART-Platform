@@ -24,8 +24,8 @@ package org.wcs.smart.entity.event;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.entity.internal.Messages;

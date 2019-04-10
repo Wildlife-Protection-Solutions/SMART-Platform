@@ -25,6 +25,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.ui.IAdvancedStartupOption;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Sync multiple conservation areas startup option.
@@ -43,7 +44,7 @@ public class SyncMultiStartupOption implements IAdvancedStartupOption {
 
 	@Override
 	public Status performTask(Shell activeShell) throws Exception {
-		WizardDialog wd = new WizardDialog(activeShell, new SyncMultipleCaWizard());
+		WizardDialog wd = new SmartWizardDialog(activeShell, new SyncMultipleCaWizard());
 		wd.open();
 		return Status.OK;
 	}

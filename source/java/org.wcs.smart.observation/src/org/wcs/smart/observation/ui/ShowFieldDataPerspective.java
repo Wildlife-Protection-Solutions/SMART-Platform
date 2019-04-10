@@ -1,5 +1,7 @@
 package org.wcs.smart.observation.ui;
 
+import java.util.List;
+
 import javax.inject.Named;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -11,6 +13,8 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.model.application.ui.menu.MHandledItem;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
@@ -33,6 +37,19 @@ public class ShowFieldDataPerspective {
 		MPart activate = pService.findPart(focusView);
 		if (activate == null) return;
 		pService.bringToTop(activate);
+		
+		EModelService mService = currentWindow.getContext().get(EModelService.class);
+		List<MHandledItem> elements = mService.findElements(currentWindow, null, MHandledItem.class );
+		elements.forEach(f->{
+			if (f.getCommand() != null) {
+				f.setSelected(false);
+				f.getParameters().forEach(p->{
+					if (p.getName().equals(FOCUS_VIEW) && p.getValue().equalsIgnoreCase(focusView)) {
+						f.setSelected(true);
+					}
+				});
+			}
+		});
 	}
 	
 	public static class ShowFieldDataPerspectiveWrapper extends AbstractHandler {

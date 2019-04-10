@@ -24,6 +24,9 @@ package org.wcs.smart;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.ui.PlatformUI;
+import org.hibernate.Session;
+import org.wcs.smart.changetracking.ChangeLogInstaller;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * 
@@ -41,7 +44,15 @@ public class LogoutHandler {
 	 */
 	@Execute
 	public void execute()  {
-		PlatformUI.getWorkbench().restart();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(session);
+			session.getTransaction().commit();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+//		PlatformUI.getWorkbench().restart();
 	}
 	
 	// E3

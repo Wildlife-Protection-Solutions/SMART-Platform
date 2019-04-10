@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -66,6 +65,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
 import org.wcs.smart.ui.ConservationAreaLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.internal.ca.LanguageSelectionDialog;
 
 
@@ -74,7 +74,7 @@ import org.wcs.smart.ui.internal.ca.LanguageSelectionDialog;
  * 
  * @since 1.0.0
  */
-public class InitCaDataModelDialog extends TitleAreaDialog {
+public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 
 	private Button btnImport;
 	private Button btnUseCustom;

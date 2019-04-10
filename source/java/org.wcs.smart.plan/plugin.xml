@@ -12,7 +12,7 @@
                mnemonic="%plan.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.plan.NewPlan"
-                  icon="images/icons/view16/plan_add.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                   label="%plan.menu.command.label.newplan"
                   mnemonic="%plan.menu.command.mnemonic.newplan"
                   style="push"
@@ -142,8 +142,9 @@
          <command
                commandId="org.wcs.smart.command.showperspective"
                icon="images/icons/view16/plan.png"
-               label="%smart.toolbar.command.label.viewplans"
-               style="push"
+               label="%smart.toolbar.command.label.viewplans1"
+               mode="FORCE_TEXT"
+               style="radio"
                tooltip="%smart.toolbar.command.tooltip.viewplans">
             <visibleWhen
                   checkEnabled="false">
@@ -188,7 +189,7 @@
             locationURI="toolbar:org.wcs.smart.plan.PlanListView">
          <command
                commandId="org.wcs.smart.plan.DeletePlan"
-               icon="images/icons/etool16/delete.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png"
                label="%planlistview.toolbar.command.label.deleteplan"
                style="push"
                tooltip="%planlistview.toolbar.command.tooltip.deleteplan">
@@ -212,7 +213,7 @@
          </command>
          <command
                commandId="org.wcs.smart.plan.NewPlan"
-               icon="images/icons/view16/plan_add.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                label="%planlistview.toolbar.command.label.newplan"
                style="push"
                tooltip="%planlistview.toolbar.command.tooltip.newplan">
@@ -236,6 +237,7 @@
          </command>
          <command
                commandId="org.wcs.smart.plan.ShowPlanFilter"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/filter.png"
                style="push"
                tooltip="%filterplan.command.tooltip">
          </command>
@@ -281,7 +283,7 @@
          </separator>
          <command
                commandId="org.wcs.smart.plan.DeletePlan"
-               icon="images/icons/etool16/delete.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png"
                label="%planlistview.popup.command.label.deleteplan2"
                style="push"
                tooltip="%planlistview.popup.command.tooltip.deleteplan2">
@@ -406,7 +408,7 @@
             locationURI="toolbar:org.wcs.smart.toolbar.create?before=org.wcs.smart.toolbar.create.other">
          <command
                commandId="org.wcs.smart.plan.NewPlan"
-               icon="images/icons/view16/plan_add.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                label="%plan.menu.command.label.newplan"
                mnemonic="%plan.menu.command.mnemonic.newplan"
                style="push"

@@ -282,7 +282,7 @@
             <command
                   commandId="org.wcs.smart.observation.perspective.show"
                   icon="images/icons/obj16/survey.png"
-                  label="%survey.view.command.label"
+                  label="%survey.view.command.label2"
                   mnemonic="%view.command.mnemonic"
                   style="push"
                   tooltip="%survey.view.command.tooltip">
@@ -347,9 +347,10 @@
          <command
                commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/obj16/survey.png"
-               label="%survey.view.command.label"
+               label="%survey.view.command.name1"
                mnemonic="%view1.command.mnemonic"
-               style="push"
+               mode="FORCE_TEXT"
+               style="radio"
                tooltip="%survey.view.command.tooltip">
             <parameter
                   name="org.wcs.smart.observation.perspective.show.focusview"
@@ -753,7 +754,7 @@
       </image>
       <image
             commandId="org.wcs.smart.er.delete"
-            icon="images/icons/etool16/delete.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png">
       </image>
       <image
             commandId="org.wcs.smart.er.survey.new"
@@ -769,7 +770,7 @@
       </image>
       <image
             commandId="org.wcs.smart.er.filter"
-            icon="images/icons/obj16/survey_design_filter.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/filter.png">
       </image>
       <image
             commandId="org.wcs.smart.er.missionattributes.show"
@@ -790,6 +791,10 @@
       <image
             commandId="org.wcs.smart.er.missionExportHandler"
             icon="images/icons/obj16/mission_export.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.er.editItem"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/edit.png">
       </image>
    </extension>
    <extension

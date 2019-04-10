@@ -43,8 +43,8 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 

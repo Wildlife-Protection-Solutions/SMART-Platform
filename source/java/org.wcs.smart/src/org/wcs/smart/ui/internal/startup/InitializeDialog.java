@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -46,6 +45,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.IAdvancedStartupOption;
 import org.wcs.smart.ui.IAdvancedStartupOption.Status;
+import org.wcs.smart.ui.SmartStyledDialog;
 
 /**
  * Abstract dialog for start-up smart dialogs.
@@ -57,7 +57,7 @@ import org.wcs.smart.ui.IAdvancedStartupOption.Status;
  * @author egouge
  * @since 1.0.0
  */
-public abstract class InitializeDialog  extends Dialog {
+public abstract class InitializeDialog  extends SmartStyledDialog {
 
 	public static int RESTART = -2;
 	

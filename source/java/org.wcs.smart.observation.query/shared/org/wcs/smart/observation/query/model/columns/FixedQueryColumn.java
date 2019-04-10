@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.observation.query.model.columns;
 
-import java.sql.Time;
 import java.sql.Date;
+import java.sql.Time;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;

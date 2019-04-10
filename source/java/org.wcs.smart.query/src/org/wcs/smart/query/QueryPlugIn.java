@@ -265,7 +265,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 
 	@Override
 	public void initializeImageRegistry(ImageRegistry reg){	
-		reg.put(DELETE_MINI_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/delete.png")); //$NON-NLS-1$
+		reg.put(DELETE_MINI_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/delete_mini.png")); //$NON-NLS-1$
 		reg.put(QUERY_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/querypatrol.gif"));//$NON-NLS-1$
 		reg.put(FOLDER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/folder.png"));//$NON-NLS-1$
 		reg.put(GRID_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/grid.png"));//$NON-NLS-1$

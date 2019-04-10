@@ -25,7 +25,6 @@ import java.util.Date;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -40,6 +39,7 @@ import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypointMapping;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -50,7 +50,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class EditWaypointDialog extends TitleAreaDialog{
+public class EditWaypointDialog extends SmartStyledTitleDialog{
 
 	private AssetWaypointMapping toUpdate;
 	

@@ -22,8 +22,8 @@
 package org.wcs.smart.intelligence;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.intelligence.internal.Messages;

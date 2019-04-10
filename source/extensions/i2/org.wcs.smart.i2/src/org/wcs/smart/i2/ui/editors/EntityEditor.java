@@ -50,6 +50,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -91,7 +92,6 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -127,7 +127,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
-import org.eclipse.ui.themes.ColorUtil;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.ApplicationGIS;
@@ -865,13 +864,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 		panel.setLayout(new GridLayout(2, false));
 		((GridLayout)panel.getLayout()).marginWidth = 0;
 		((GridLayout)panel.getLayout()).marginHeight = 0;
+		((GridLayout)panel.getLayout()).horizontalSpacing = 0;
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite leftPart = toolkit.createComposite(panel, SWT.NONE);
 		leftPart.setLayout(new GridLayout(2, false));
 		leftPart.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
-		lblMainImage = new Canvas(leftPart, SWT.NONE);
+		lblMainImage = new Canvas(leftPart, SWT.BORDER);
 		lblMainImage.addPaintListener(new PaintListener() {			
 			@Override
 			public void paintControl(PaintEvent e) {
@@ -896,15 +896,15 @@ public class EntityEditor extends EditorPart implements MapPart{
 		toolkit.createLabel(leftPart, Messages.EntityEditor_TypeLabel);
 		lblType = toolkit.createLabel(leftPart, ""); //$NON-NLS-1$
 		lblType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		int offset = 0;
-		GC gc = new GC(lblType);
-		try{
-			offset = gc.textExtent(Messages.EntityEditor_TypeLabel).x;
-		}finally{
-			gc.dispose();
-		}
-		((GridData)lblType.getLayoutData()).widthHint = THUMB_SIZE - offset;
-		
+//		int offset = 0;
+//		GC gc = new GC(lblType);
+//		try{
+//			offset = gc.textExtent(Messages.EntityEditor_TypeLabel).x;
+//		}finally{
+//			gc.dispose();
+//		}
+//		((GridData)lblType.getLayoutData()).widthHint = THUMB_SIZE - offset;
+//		
 		toolkit.createLabel(leftPart, Messages.EntityEditor_CreatedLabel);
 		lblCreated = toolkit.createLabel(leftPart, DateFormat.getInstance().format(new Date()));
 		
@@ -912,14 +912,22 @@ public class EntityEditor extends EditorPart implements MapPart{
 		lblModified= toolkit.createLabel(leftPart, DateFormat.getInstance().format(new Date()));
 		
 		Composite rightPart = toolkit.createComposite(panel, SWT.NONE);
-		rightPart.setLayout(new GridLayout(2, false));
+		rightPart.setLayout(new GridLayout());
 		rightPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)rightPart.getLayout()).verticalSpacing = 2;
-		lblIdentifier = toolkit.createLabel(rightPart, ""); //$NON-NLS-1$
+		
+		Composite header = toolkit.createComposite(rightPart);
+		header.setLayout(new GridLayout(2, false));
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//		((GridLayout)header.getLayout()).marginWidth = 2;
+//		((GridLayout)header.getLayout()).marginHeight = 2;
+		WidgetElement.setCSSClass(header, "SMARTFormHeader");
+		
+		lblIdentifier = toolkit.createLabel(header, ""); //$NON-NLS-1$
 		lblIdentifier.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		lblIdentifier.setFont(headerFont);
 
-		ToolBar buttonBar = new ToolBar(rightPart, SWT.HORIZONTAL | SWT.FLAT);
+		ToolBar buttonBar = new ToolBar(header, SWT.HORIZONTAL | SWT.FLAT);
 		buttonBar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		Menu formatsOpMenu = new Menu(getSite().getShell(), SWT.POP_UP);
@@ -1112,7 +1120,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		Composite tabPart = toolkit.createComposite(rightPart, SWT.NONE);
 		tabPart.setLayout(new StackLayout());
-		tabPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		tabPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		compAttributes = toolkit.createComposite(tabPart, SWT.NONE);
 		compAttributes.setLayout(new GridLayout());
@@ -1955,17 +1963,17 @@ public class EntityEditor extends EditorPart implements MapPart{
 		((GridLayout)outer.getLayout()).marginHeight = 0;
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Color c = toolkit.getColors().getColor(IFormColors.TB_BG);
-		Color e2 = new Color(getSite().getShell().getDisplay(), ColorUtil.blend(c.getRGB(), new RGB(255,255,255),50));
+//		Color c = toolkit.getColors().getColor(IFormColors.TB_BG);
+//		Color e2 = new Color(getSite().getShell().getDisplay(), ColorUtil.blend(c.getRGB(), new RGB(255,255,255),50));
+//		
 		
-		
-		SectionTabHeader tabList = new SectionTabHeader(groupHeaders.toArray(new String[groupHeaders.size()]), outer, toolkit,e2);
+		SectionTabHeader tabList = new SectionTabHeader(groupHeaders.toArray(new String[groupHeaders.size()]), outer, toolkit);
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite tabPart = toolkit.createComposite(outer, SWT.NONE);
 		tabPart.setLayout(new StackLayout());
 		tabPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		tabPart.addDisposeListener((e) ->  e2.dispose());
+//		tabPart.addDisposeListener((e) ->  e2.dispose());
 		
 		Composite[] parts = new Composite[groupHeaders.size()];
 		int counter = 0;

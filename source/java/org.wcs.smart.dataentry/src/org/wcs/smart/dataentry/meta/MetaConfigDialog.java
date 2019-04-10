@@ -37,6 +37,7 @@ import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -81,9 +82,20 @@ public abstract class MetaConfigDialog<T> extends AbstractPropertyJHeaderDialog 
 	@Override
 	protected Composite createContent(Composite parent) {
 		
-		SashForm container = new SashForm(parent, SWT.HORIZONTAL);
-
-		modelListViewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		Composite spacer = new Composite(parent, SWT.NONE);
+		spacer.setLayout(new GridLayout());
+		
+		SashForm container = new SashForm(spacer, SWT.HORIZONTAL);
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Group g = new Group(container, SWT.NONE);
+		g.setText("Metadata Pages");
+		g.setLayout(new GridLayout());
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)g.getLayout()).marginHeight = 0;
+		((GridLayout)g.getLayout()).marginWidth = 0;
+		
+		modelListViewer = new TableViewer(g, SWT.V_SCROLL | SWT.H_SCROLL | SWT.NONE);
 		modelListViewer.setLabelProvider(getMetaTypeLabelProvider());
 		modelListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		modelListViewer.setInput(getOptionsToShow());
@@ -97,10 +109,14 @@ public abstract class MetaConfigDialog<T> extends AbstractPropertyJHeaderDialog 
 
 		Composite rightPanel = new Composite(container, SWT.NONE);
 		rightPanel.setLayout(new GridLayout(1, false));
+		((GridLayout)rightPanel.getLayout()).marginWidth = 0;
+		((GridLayout)rightPanel.getLayout()).marginHeight = 0;
 		rightPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		infoInnerPanel = new Composite(rightPanel, SWT.NONE);
 		infoInnerPanel.setLayout(new StackLayout());
+		((StackLayout)infoInnerPanel.getLayout()).marginHeight = 0;
+		((StackLayout)infoInnerPanel.getLayout()).marginWidth = 0;
 		infoInnerPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		emptyComposite = new Composite(infoInnerPanel, SWT.NONE);
@@ -121,7 +137,7 @@ public abstract class MetaConfigDialog<T> extends AbstractPropertyJHeaderDialog 
 		
 		setTitle(title);
 		setMessage(message);
-		return container;
+		return spacer;
 	}
 
 	private void updateRightPanel() {

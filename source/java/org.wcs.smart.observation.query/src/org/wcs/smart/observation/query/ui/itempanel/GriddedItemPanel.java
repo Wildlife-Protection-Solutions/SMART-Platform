@@ -34,10 +34,7 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.observation.query.internal.Messages;
@@ -91,20 +88,17 @@ public class GriddedItemPanel extends AbstractQueryItemPanel{
 		});
 		filterTreeViewer.setAutoExpandLevel(2);
 		filterTreeViewer.setInput(LOADING_TEXT);
-		Button btnAdd = new Button(main, SWT.PUSH);
-		btnAdd.setText(Messages.QueryFilterView_AddToQueryButton);
-		btnAdd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addItem();
-			}
-		});
+		
+		createAddButton(filterTreeViewer, main);
+		
 		refreshPanel();
 		return main;
 
 	}
 	
-	private void addItem(){
+
+	@Override
+	protected void addItem(){
 		addQueryItem( ItemTreeNodeContentProvider.unwrapSelection((IStructuredSelection) filterTreeViewer.getSelection()));
 	}
 		

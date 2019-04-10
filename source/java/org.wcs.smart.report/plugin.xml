@@ -57,10 +57,6 @@
             id="org.wcs.smart.report.translateItem"
             name="%translate.command.name">
       </command>
-      <command
-            id="org.wcs.smart.report.show"
-            name="Show Reports Viewer">
-      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -216,10 +212,6 @@
             class="org.wcs.smart.report.internal.ui.TranslateNamesHandler$TranslateNamesHandlerWrapper"
             commandId="org.wcs.smart.report.translateItem">
       </handler>
-      <handler
-            class="org.wcs.smart.report.internal.ui.ShowReportViewerPerspectiveHandler$ShowReportViewerPerspectiveHandlerWrapper"
-            commandId="org.wcs.smart.report.show">
-      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -227,12 +219,13 @@
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.query.menu.view">
          <command
-               commandId="org.wcs.smart.report.show"
+               commandId="org.wcs.smart.command.showperspective"
                icon="images/icons/etool16/report_view.png"
                id="org.wcs.smart.query.toolbar.report"
-               label="%showreportperspective.menu.label"
+               label="%showreportperspective.menu.label1"
                mnemonic="%showreportperspective.menu.mnemonic"
-               style="pulldown"
+               mode="FORCE_TEXT"
+               style="radio"
                tooltip="%showreportperspective.menu.tooltip">
             <visibleWhen
                   checkEnabled="false">
@@ -254,6 +247,10 @@
                   </test>
                </or>
             </visibleWhen>
+            <parameter
+                  name="org.wcs.smart.perspectiveid"
+                  value="org.wcs.smart.report.ReportViewerPerspective">
+            </parameter>
          </command>
       </menuContribution>
       <menuContribution
@@ -659,11 +656,12 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.report.show"
+                  commandId="org.wcs.smart.command.showperspective"
                   icon="images/icons/etool16/report_view.png"
-                  label="%showreportperspective.menu.label"
+                  id="org.wcs.smart.query.toolbar.report"
+                  label="%showreportperspective.menu.label2"
                   mnemonic="%showreportperspective.menu.mnemonic"
-                  style="push"
+                  style="radio"
                   tooltip="%showreportperspective.menu.tooltip">
                <visibleWhen
                      checkEnabled="false">
@@ -685,6 +683,10 @@
                      </test>
                   </or>
                </visibleWhen>
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.report.ReportViewerPerspective">
+               </parameter>
             </command>
          </menu>
       </menuContribution>

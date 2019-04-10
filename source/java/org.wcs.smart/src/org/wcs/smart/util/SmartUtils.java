@@ -964,4 +964,5 @@ public class SmartUtils {
 		return image2;
 		
 	}
+
 }

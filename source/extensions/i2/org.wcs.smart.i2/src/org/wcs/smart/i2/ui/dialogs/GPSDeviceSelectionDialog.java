@@ -27,7 +27,6 @@ import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -43,6 +42,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.gpx.GPSBabel;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Simple dialog for selecting the device type from the GPS Babel device options.
@@ -50,7 +50,7 @@ import org.wcs.smart.i2.internal.Messages;
  * @author Emily
  *
  */
-public class GPSDeviceSelectionDialog extends TitleAreaDialog{
+public class GPSDeviceSelectionDialog extends SmartStyledTitleDialog{
 
 	private ComboViewer cmbDevice;
 	private String type;

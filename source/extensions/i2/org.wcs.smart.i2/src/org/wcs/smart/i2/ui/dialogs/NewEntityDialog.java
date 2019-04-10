@@ -36,7 +36,6 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -78,6 +77,7 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
@@ -86,7 +86,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class NewEntityDialog extends TitleAreaDialog{
+public class NewEntityDialog extends SmartStyledTitleDialog{
 
 	private static final String LAST_TYPE_KEY = "org.wcs.smart.i2.ui.dialogs.newentity.lasttype"; //$NON-NLS-1$
 	

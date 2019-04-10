@@ -201,6 +201,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	
 	@Override
 	protected Composite createContent(Composite parent) {
+		
 		Composite container = new Composite(parent, SWT.NULL);
 		container.setLayout(new GridLayout(3, false));
 		
@@ -257,6 +258,8 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		Composite buttons = new Composite(container, SWT.NONE);
 		buttons.setLayout(new GridLayout(1,true));
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1,1));
+		((GridLayout)buttons.getLayout()).marginWidth = 0;
+		((GridLayout)buttons.getLayout()).marginHeight = 0;
 		
 		Button btnAddAgency = new Button(buttons, SWT.NONE);
 		btnAddAgency.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -351,6 +354,8 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		Composite buttons_1 = new Composite(container, SWT.NONE);
 		buttons_1.setLayout(new GridLayout(1,true));
 		buttons_1.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1,1));
+		((GridLayout)buttons_1.getLayout()).marginWidth = 0;
+		((GridLayout)buttons_1.getLayout()).marginHeight = 0;
 		
 		btnAddRank = new Button(buttons_1, SWT.NONE);
 		btnAddRank.setText(DialogConstants.ADD_BUTTON_TEXT);
@@ -403,6 +408,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 				dialog.open();
 			}
 		});
+				
 		setMessage(Messages.AgencyRankPropertyPage_DialogMessage);
 		setTitle(Messages.AgencyRankPropertyPage_PageTitle);
 		return container;

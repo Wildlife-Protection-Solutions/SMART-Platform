@@ -22,7 +22,6 @@
 package org.wcs.smart.er.ui.samplingunit.load.wizard;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -32,6 +31,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for selecting import option for sampling unit
@@ -40,7 +40,7 @@ import org.wcs.smart.er.internal.Messages;
  * @author Emily
  *
  */
-public class ImportOptionDialog extends TitleAreaDialog{
+public class ImportOptionDialog extends SmartStyledTitleDialog{
 
 	private Button opNew;
 	private Button opFields;

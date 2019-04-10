@@ -24,10 +24,11 @@ package org.wcs.smart.qa.ui.configure.create;
 import java.util.Locale;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -37,8 +38,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -50,6 +49,7 @@ import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.model.QaRoutineParameter;
 import org.wcs.smart.qa.ui.configure.IParameterCollector;
 import org.wcs.smart.qa.ui.configure.RoutinesListDialog;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -57,7 +57,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class EditRoutineDialog extends TitleAreaDialog{
+public class EditRoutineDialog extends SmartStyledTitleDialog{
 
 	private QaRoutine routine;
 	
@@ -163,33 +163,40 @@ public class EditRoutineDialog extends TitleAreaDialog{
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
 		
-		TabFolder tabs = new TabFolder(composite, SWT.NONE);
+		Composite main = new Composite(composite, SWT.NONE);
+		main.setLayout(new GridLayout());
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		CTabFolder tabs = new CTabFolder(main, SWT.FLAT);
 		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		TabItem generalTab = new TabItem(tabs, SWT.NONE);
+		CTabItem generalTab = new CTabItem(tabs, SWT.NONE);
 		generalTab.setText(Messages.EditRoutineDialog_GeneralTab);
 		
 		Composite generalTabComp = createGeneralTab(tabs);
 		generalTab.setControl(generalTabComp);
 		
 		
-		TabItem parametersTab = new TabItem(tabs, SWT.NONE);
+		CTabItem parametersTab = new CTabItem(tabs, SWT.NONE);
 		parametersTab.setText(Messages.EditRoutineDialog_ParametersTab);
 		
 		Composite parametersTabComp = new Composite(tabs, SWT.NONE);
-		parametersTabComp.setLayout(new GridLayout(2, false));
+		parametersTabComp.setLayout(new GridLayout());
 		parametersTabComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
-		parametersTab.setControl(parametersTabComp);
 		((GridLayout)parametersTabComp.getLayout()).marginWidth = 0;
 		((GridLayout)parametersTabComp.getLayout()).marginHeight = 0;
+		parametersTab.setControl(parametersTabComp);
 		
-		sc = new ScrolledComposite(parametersTabComp, SWT.V_SCROLL );
+		sc = new ScrolledComposite(parametersTabComp, SWT.V_SCROLL);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
 		
 		parameterComp = new Composite(sc, SWT.NONE);
+		parameterComp.setBackgroundMode(SWT.INHERIT_FORCE);
 		parameterComp.setLayout(new GridLayout());
+		((GridLayout)parameterComp.getLayout()).marginWidth = 0;
+		((GridLayout)parameterComp.getLayout()).marginHeight = 0;
 		parameterComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	
 		sc.setContent(parameterComp);

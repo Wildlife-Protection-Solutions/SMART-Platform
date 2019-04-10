@@ -24,7 +24,6 @@ package org.wcs.smart.asset.ui.views.map;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -42,6 +41,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.asset.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -51,7 +51,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class CategoryColumnDialog extends TitleAreaDialog {
+public class CategoryColumnDialog extends SmartStyledTitleDialog {
 
 	private enum Type{
 		CATEGORY(Messages.CategoryColumnDialog_CategoryColumnType),

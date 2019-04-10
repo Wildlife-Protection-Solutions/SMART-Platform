@@ -24,8 +24,8 @@ package org.wcs.smart.entity.internal;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.IDmEditAdvisor;

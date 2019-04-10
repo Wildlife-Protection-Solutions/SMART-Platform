@@ -32,7 +32,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 //import org.wcs.smart.SmartPlugIn;
 //import org.wcs.smart.ui.map.location.GeometryFactoryProvider;
-
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.map.GeometryFactoryProvider;
 

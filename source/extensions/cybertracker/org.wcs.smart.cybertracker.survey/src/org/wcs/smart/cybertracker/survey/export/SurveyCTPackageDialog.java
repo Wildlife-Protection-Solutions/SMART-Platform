@@ -38,7 +38,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -78,6 +77,7 @@ import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
@@ -87,7 +87,7 @@ import org.wcs.smart.util.UuidUtils;
  * 
  * @author Emily
  */
-public class SurveyCTPackageDialog extends TitleAreaDialog {
+public class SurveyCTPackageDialog extends SmartStyledTitleDialog {
 
 	private static final String LAST_FILE_KEY = "SurveyCTPackageDialog.file"; //$NON-NLS-1$
 	private static final String LAST_DESIGN_KEY = "SurveyCTPackageDialog.cm"; //$NON-NLS-1$

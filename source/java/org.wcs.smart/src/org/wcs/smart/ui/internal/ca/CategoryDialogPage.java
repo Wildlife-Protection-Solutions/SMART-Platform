@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -36,6 +35,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.internal.ca.properties.CategoryInfoPanel;
 
 /**
@@ -44,7 +44,7 @@ import org.wcs.smart.ui.internal.ca.properties.CategoryInfoPanel;
  * @author Emily
  * @since 1.0.0
  */
-public class CategoryDialogPage  extends TitleAreaDialog {
+public class CategoryDialogPage  extends SmartStyledTitleDialog {
 
 	private Language defaultLang;
 	private Category toUpdate;

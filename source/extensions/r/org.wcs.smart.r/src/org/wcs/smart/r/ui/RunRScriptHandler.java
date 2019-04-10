@@ -43,7 +43,6 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -71,6 +70,7 @@ import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.r.ui.editor.script.RScriptEditor;
 import org.wcs.smart.r.ui.editor.script.RScriptEditorInput;
 import org.wcs.smart.ui.NamedItemLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
@@ -158,7 +158,7 @@ public class RunRScriptHandler {
 		}
 	}
 	
-	private class ListRScriptDialog extends TitleAreaDialog{
+	private class ListRScriptDialog extends SmartStyledTitleDialog{
 
 		private TableViewer cmbScripts;
 		private List<RScript> script = null;

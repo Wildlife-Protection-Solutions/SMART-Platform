@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.entity.ui;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.common.filter.StringFilterComposite;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.common.filter.StringFilterComposite.TextField;

@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
@@ -44,6 +43,7 @@ import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.export.config.ICsvDialogConfig;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.util.SharedUtils;
 
 /**
@@ -52,7 +52,7 @@ import org.wcs.smart.util.SharedUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public abstract class AbstractCsvDialog extends TitleAreaDialog {
+public abstract class AbstractCsvDialog extends SmartStyledTitleDialog {
 
 	private static final String LAST_DIR_KEY = "ABSTRACT_CSV_LAST_DIR_KEY"; //$NON-NLS-1$
 	

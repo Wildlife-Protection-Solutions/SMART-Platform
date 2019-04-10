@@ -93,7 +93,7 @@ public class AttributePage extends WizardPage {
 		
 		sc.setExpandVertical(true);
 		sc.setExpandHorizontal(true);
-		
+		sc.setBackgroundMode(SWT.INHERIT_FORCE);
 		main = new Composite(sc, SWT.NONE);
 		main.setLayout(new GridLayout());
 
@@ -120,7 +120,7 @@ public class AttributePage extends WizardPage {
 		g.setText(Messages.AttributePage_RequiredLabels);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
+
 		Label l = new Label(g, SWT.NONE);
 		l.setText(Messages.AttributePage_IdLabel);
 		
@@ -141,6 +141,7 @@ public class AttributePage extends WizardPage {
 			g2.setText(Messages.AttributePage_OptionalLabel);
 			g2.setLayout(new GridLayout(2, false));
 			g2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
 			String[] attFields = new String[fields.length +1];
 			attFields[0] = ""; //$NON-NLS-1$
 			for (int i = 0; i < fields.length; i ++){

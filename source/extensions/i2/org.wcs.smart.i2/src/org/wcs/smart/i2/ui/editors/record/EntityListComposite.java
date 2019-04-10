@@ -95,8 +95,8 @@ public class EntityListComposite extends Composite{
 		toolkit.adapt(this);
 		
 		GridLayout gl = new GridLayout();
-		gl.marginHeight = 2;
-		gl.marginWidth = 2;
+		gl.marginHeight = 0;
+		gl.marginWidth = 0;
 		setLayout(gl);
 				
 		compEntityEdit = toolkit.createComposite(this, SWT.NONE);

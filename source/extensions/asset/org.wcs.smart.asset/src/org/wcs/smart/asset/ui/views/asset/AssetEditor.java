@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -380,10 +381,9 @@ public class AssetEditor extends EditorPart implements MapPart {
 		body.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite headerComp = toolkit.createComposite(body);
+		WidgetElement.setCSSClass(headerComp, "SMARTFormHeader");
 		headerComp.setLayout(new GridLayout(7, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridLayout)headerComp.getLayout()).marginWidth = 0;
-		((GridLayout)headerComp.getLayout()).marginHeight = 0;
 		lblAssetTypeImage = toolkit.createLabel(headerComp,""); //$NON-NLS-1$
 		
 		lblId = new IdFieldHeader(headerComp, toolkit, pageForm.getFont(), pageForm.getForeground());
@@ -463,7 +463,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 				sectionBody.layout(true);},
 		};
 		
-		SectionHeader headerSection = new SectionHeader(body, SWT.NONE, headers, actions, toolkit);
+		SectionHeader headerSection = new SectionHeader(body, SWT.NONE, headers, actions);
 		headerSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		sectionBody = toolkit.createComposite(body);

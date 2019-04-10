@@ -37,6 +37,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -55,8 +57,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
@@ -134,7 +134,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
     private ControlDecoration utmZoneDecoration;
     
     private ControlDecoration maxPhotoCountDecoration;
-	private TabFolder tabFolder;
+	private CTabFolder tabFolder;
 	
 	public CyberTrackerPropertiesComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -147,23 +147,23 @@ public class CyberTrackerPropertiesComposite extends Composite {
 
 	private void createContent(Composite parent) {
 		
-		tabFolder = new TabFolder (parent, SWT.NONE);
+		tabFolder = new CTabFolder (parent, SWT.NONE);
 		Rectangle clientArea = parent.getClientArea ();
 		tabFolder.setLocation (clientArea.x, clientArea.y);
 		
 		tabFolder.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
 		
 		
-		TabItem generalTab = new TabItem (tabFolder, SWT.NONE);
+		CTabItem generalTab = new CTabItem (tabFolder, SWT.NONE);
 		generalTab.setText (Messages.CyberTrackerPropertiesDialog_0);
 		
-		TabItem gpsTab = new TabItem (tabFolder, SWT.NONE);
+		CTabItem gpsTab = new CTabItem (tabFolder, SWT.NONE);
 		gpsTab.setText (Messages.CyberTrackerPropertiesDialog_1);
 		
-		TabItem fieldmapTab = new TabItem (tabFolder, SWT.NONE);
+		CTabItem fieldmapTab = new CTabItem (tabFolder, SWT.NONE);
 		fieldmapTab.setText (Messages.CyberTrackerPropertiesDialog_2);
 		
-		TabItem themeTab = new TabItem (tabFolder, SWT.NONE);
+		CTabItem themeTab = new CTabItem (tabFolder, SWT.NONE);
 		themeTab.setText (Messages.CyberTrackerPropertiesComposite_ThemeTabName);
 		
 		ScrolledComposite generalScroll = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.H_SCROLL );
@@ -929,6 +929,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		mapScroll.setMinSize(fieldmapContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		gpsScroll.setMinSize(gpsContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		themeScroll.setMinSize(themeContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		tabFolder.setSelection(0);
 	}
 
 	private void disposeColor(Label label) {

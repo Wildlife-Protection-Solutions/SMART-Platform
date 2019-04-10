@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -51,13 +50,14 @@ import org.wcs.smart.i2.entity.exporter.EntityRelationshipExporter;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.ui.TransparentInfoDialog;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for exporting entities and relationships to csv file.
  * @author Emily
  *
  */
-public class EntityRelationshipExportDialog extends TitleAreaDialog{
+public class EntityRelationshipExportDialog extends SmartStyledTitleDialog{
 
 	private String LAST_DIR_KEY = "org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog.DIR"; //$NON-NLS-1$
 	private String LAST_DEGREE_KEY = "org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog.DEGREE"; //$NON-NLS-1$

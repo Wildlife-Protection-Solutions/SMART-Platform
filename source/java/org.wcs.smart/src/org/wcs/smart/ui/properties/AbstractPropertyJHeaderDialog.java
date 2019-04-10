@@ -23,7 +23,6 @@ package org.wcs.smart.ui.properties;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
@@ -32,6 +31,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * SMART property page dialog 
@@ -41,7 +41,7 @@ import org.wcs.smart.internal.Messages;
  * @author Emily
  * @since 1.0.0
  */
-public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
+public abstract class AbstractPropertyJHeaderDialog extends SmartStyledTitleDialog {
 
 	protected boolean changesMade;
 	
@@ -59,12 +59,13 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText(title);
+		
 	}
-
+	
 	@Override
 	public Control createDialogArea(Composite parent){
 		Composite composite = (Composite) super.createDialogArea(parent);
-
+		
 		//Create an outer composite for spacing
 		ScrolledComposite scrolled = new ScrolledComposite(composite, SWT.V_SCROLL | SWT.H_SCROLL );
 		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -179,8 +180,4 @@ public abstract class AbstractPropertyJHeaderDialog extends TitleAreaDialog {
 	 */
 	protected abstract boolean performSave();
 	
-	@Override
-	protected boolean isResizable() {
-		return true;
-	}
 }

@@ -28,6 +28,7 @@ import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.asset.ui.inout.AssetDataImportWizard;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Import model data from xml file
@@ -44,7 +45,7 @@ public class ImportAssetModelDataHandler {
 	public void execute(IEclipseContext context) {
 		AssetDataImportWizard wizard = new AssetDataImportWizard();
 		ContextInjectionFactory.inject(wizard, context);
-		WizardDialog wd = new WizardDialog(context.get(Shell.class), wizard);
+		WizardDialog wd = new SmartWizardDialog(context.get(Shell.class), wizard);
 		wd.open();
 	}
 	

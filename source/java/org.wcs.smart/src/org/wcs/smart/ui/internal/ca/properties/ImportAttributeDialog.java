@@ -28,7 +28,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -53,6 +52,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog box for selecting nodes from the xml datamodel 
@@ -62,7 +62,7 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
  * @author Emily
  *
  */
-public class ImportAttributeDialog extends TitleAreaDialog {
+public class ImportAttributeDialog extends SmartStyledTitleDialog {
 
 	private LabelProvider nodeTypeLabelProvider = new LabelProvider(){
 		@Override

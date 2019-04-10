@@ -15,7 +15,7 @@
                mnemonic="%patrol.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.patrol.newPatrol"
-                  icon="images/icons/etool16/patrol_add.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                   label="%patrol.newpatrol.command.label"
                   mnemonic="%patrol.newpatrol.command.mnemonic"
                   style="push"
@@ -96,7 +96,7 @@
             <command
                   commandId="org.wcs.smart.observation.perspective.show"
                   icon="images/icons/etool16/patrol.png"
-                  label="%showpatrolperspective.command.label"
+                  label="%showpatrolperspective.command.label2"
                   mnemonic="%showpatrolperspectivecommand.mnemonic"
                   style="push"
                   tooltip="%showpatrolperspectivecommand.tooltip">
@@ -194,7 +194,7 @@
             locationURI="toolbar:org.wcs.smart.patrol.ui.PatrolListView">
          <command
                commandId="org.wcs.smart.patrol.view.DeletePatrol"
-               icon="images/icons/etool16/patrol_delete.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png"
                label="%patrollist.delete.command.label"
                mnemonic="%patrollist.delete.command.mnemonic"
                style="push"
@@ -202,7 +202,7 @@
          </command>
          <command
                commandId="org.wcs.smart.patrol.newPatrol"
-               icon="images/icons/etool16/patrol_add.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                label="%patroltoolbar.newpatrol.command.label"
                mnemonic="%patroltoolbar.newpatrol.command.mnemonic"
                style="push"
@@ -222,7 +222,7 @@
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.ShowPatrolFilter"
-               icon="images/icons/etool16/patrol_filter.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/filter.png"
                label="%patrollist.filter.command.label"
                style="push"
                tooltip="%patrollist.filter.command.tooltip">
@@ -242,7 +242,7 @@
          </separator>
          <command
                commandId="org.wcs.smart.patrol.view.DeletePatrol"
-               icon="images/icons/etool16/patrol_delete.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png"
                label="%popup.delete.command.label"
                mnemonic="%popup.delete.command.mnemonic"
                style="push"
@@ -370,9 +370,10 @@
          <command
                commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/etool16/patrol.png"
-               label="%showpatrolperspective.command.label"
+               label="%showpatrolperspective.command.label1"
                mnemonic="%showpatrolperspectivecommand.mnemonic"
-               style="push"
+               mode="FORCE_TEXT"
+               style="radio"
                tooltip="%showpatrolperspectivecommand.tooltip">
             <parameter
                   name="org.wcs.smart.observation.perspective.show.focusview"

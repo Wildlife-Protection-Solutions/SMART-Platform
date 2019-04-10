@@ -31,7 +31,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
@@ -60,6 +59,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.util.UuidUtils;
 
@@ -70,7 +70,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class QueryPropertiesDialog extends TitleAreaDialog {
+public class QueryPropertiesDialog extends SmartStyledTitleDialog {
 
 	private List<AbstractQueryPropertyProvider> props;
 	private Query query;

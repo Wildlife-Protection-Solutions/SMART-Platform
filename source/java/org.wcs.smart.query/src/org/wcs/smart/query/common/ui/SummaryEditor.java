@@ -411,7 +411,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 		// Composite main = new Composite(frmSummaryArea.getBody(), SWT.BORDER);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridLayout gl = new GridLayout(1, false);
-		gl.marginWidth = gl.marginHeight = gl.verticalSpacing = gl.horizontalSpacing = 0;
+		gl.verticalSpacing = gl.horizontalSpacing = 0;
 		main.setLayout(gl);
 		
 		createNameHeader(main, toolkit);

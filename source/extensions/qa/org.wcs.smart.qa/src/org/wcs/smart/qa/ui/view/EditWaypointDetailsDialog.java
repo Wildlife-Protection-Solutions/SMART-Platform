@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -75,6 +74,7 @@ import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.udig.EditPointTool;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.udig.SetBasemapTool;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapInfoAreaComposite;
 import org.wcs.smart.ui.map.MapToolComposite;
@@ -93,7 +93,7 @@ import org.wcs.smart.util.ReprojectUtils;
  * @author Emily
  *
  */
-public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implements MapPart{
+public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog implements MapPart{
 
 	protected UUID waypointUuid;
 	

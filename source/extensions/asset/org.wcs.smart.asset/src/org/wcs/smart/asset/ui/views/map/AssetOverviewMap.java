@@ -54,14 +54,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -69,7 +68,6 @@ import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -92,6 +90,7 @@ import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.map.engine.OverviewmapColumnEngine;
 import org.wcs.smart.asset.map.engine.StatusEngine;
 import org.wcs.smart.asset.model.AssetMapStyle;
+import org.wcs.smart.asset.ui.SectionHeader;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
 import org.wcs.smart.asset.ui.views.map.udig.AssetStationSummaryGeoResource;
 import org.wcs.smart.asset.ui.views.map.udig.AssetStationSummaryService;
@@ -153,10 +152,6 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	private IEclipseContext parentContext;
 	private List<EventHandler> handlers = null;
 	private boolean fireStyleChange = true;
-	
-	private Hyperlink lnkSummary = null;
-	private Hyperlink lnkStatus = null;
-	private Hyperlink lnkAssets = null;
 	
 	private OverviewmapColumnEngine statEngine = new OverviewmapColumnEngine(SmartDB.getCurrentConservationArea()) {
 		
@@ -323,62 +318,34 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		createAssetTablePart();
 		
 		Composite bottomLinks = toolkit.createComposite(bottomPart);
-		bottomLinks.setLayout(new GridLayout(4, false));
-		bottomLinks.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
+		bottomLinks.setLayout(new GridLayout(2, false));
 		((GridLayout)bottomLinks.getLayout()).marginWidth = 0;
 		((GridLayout)bottomLinks.getLayout()).marginHeight = 0;
+		bottomLinks.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		FontData fd = bottomLinks.getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		Font boldFont = new Font(bottomLinks.getDisplay(), fd);
-		Font normalFont = bottomLinks.getFont();
-		
-		
-		lnkSummary = toolkit.createHyperlink(bottomLinks, Messages.AssetOverviewMap_SummaryTableSectionName, SWT.NONE);
-		lnkSummary.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-		lnkSummary.setFont(boldFont);
-		lnkSummary.addHyperlinkListener(new HyperlinkAdapter() {			
-			public void linkActivated(HyperlinkEvent e) {
-				((StackLayout)stackPart.getLayout()).topControl = tableComposite;
-				stackPart.layout();
-				lnkSummary.setFont(boldFont);
-				lnkStatus.setFont(normalFont);
-				lnkAssets.setFont(normalFont);
-				bottomLinks.layout();
-
-			}
-		});
-		
-		lnkStatus = toolkit.createHyperlink(bottomLinks, Messages.AssetOverviewMap_StatTableSectionName, SWT.NONE);
-		lnkStatus.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER,false, false));
-		lnkStatus.addHyperlinkListener(new HyperlinkAdapter() {			
-			public void linkActivated(HyperlinkEvent e) {
-				((StackLayout)stackPart.getLayout()).topControl = statusTableComposite;
-				stackPart.layout();
-				lnkStatus.setFont(boldFont);
-				lnkSummary.setFont(normalFont);
-				lnkAssets.setFont(normalFont);
-				bottomLinks.layout();
-			}
-		});
-		
-		lnkAssets = toolkit.createHyperlink(bottomLinks, "Asset Table", SWT.NONE);
-		lnkAssets.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER,true, false));
-		lnkAssets.addHyperlinkListener(new HyperlinkAdapter() {			
-			public void linkActivated(HyperlinkEvent e) {
-				((StackLayout)stackPart.getLayout()).topControl = assetTableComposite;
-				stackPart.layout();
-				lnkAssets.setFont(boldFont);
-				lnkSummary.setFont(normalFont);
-				lnkStatus.setFont(normalFont);
-				bottomLinks.layout();
-			}
-		});
-		
+		SectionHeader header = new SectionHeader(bottomLinks, SWT.NONE,
+				new String[] {Messages.AssetOverviewMap_SummaryTableSectionName, 
+						Messages.AssetOverviewMap_StatTableSectionName,
+						Messages.AssetOverviewMap_SensorTable},
+				new Listener[] {
+						e->{
+							((StackLayout)stackPart.getLayout()).topControl = tableComposite;
+							stackPart.layout();
+						},
+						e->{
+							((StackLayout)stackPart.getLayout()).topControl = statusTableComposite;
+							stackPart.layout();
+						},
+						e->{
+							((StackLayout)stackPart.getLayout()).topControl = assetTableComposite;
+							stackPart.layout();
+						}
+				});
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		header.selectPanel(0);
 		if (AssetSecurityManager.INSTANCE.canConfigureAssetOverviewMap()) {
 			Hyperlink hlConfigure = toolkit.createHyperlink(bottomLinks, Messages.AssetOverviewMap_configureLink, SWT.NONE);
-			hlConfigure.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER,true, false));
+			hlConfigure.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER,false, false));
 			hlConfigure.addHyperlinkListener(new IHyperlinkListener() {			
 				@Override
 				public void linkExited(HyperlinkEvent e) {}
@@ -779,7 +746,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	};
 	
 	
-	private Job refreshAssetTable = new Job("Refresh Asset Summary Table") {
+	private Job refreshAssetTable = new Job(Messages.AssetOverviewMap_RefreshJob) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

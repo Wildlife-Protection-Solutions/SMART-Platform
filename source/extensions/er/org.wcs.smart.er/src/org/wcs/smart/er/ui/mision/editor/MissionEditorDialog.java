@@ -31,7 +31,6 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -49,6 +48,7 @@ import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.mision.MissionComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SharedUtils;
 
@@ -58,7 +58,7 @@ import org.wcs.smart.util.SharedUtils;
  * @author Emily
  *
  */
-public class MissionEditorDialog extends TitleAreaDialog {
+public class MissionEditorDialog extends SmartStyledTitleDialog {
 
 	private MissionComposite composite;
 	private Mission toUpdate;

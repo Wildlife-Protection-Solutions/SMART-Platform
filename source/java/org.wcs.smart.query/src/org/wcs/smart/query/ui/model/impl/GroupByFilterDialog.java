@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -51,6 +50,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for selecting items group by items
@@ -60,7 +60,7 @@ import org.wcs.smart.query.ui.model.ListItem;
  * @author egouge
  * @since 1.0.0
  */
-public class GroupByFilterDialog extends TitleAreaDialog{
+public class GroupByFilterDialog extends SmartStyledTitleDialog{
 
 	private Composite main = null;
 	private CheckboxTableViewer viewer;

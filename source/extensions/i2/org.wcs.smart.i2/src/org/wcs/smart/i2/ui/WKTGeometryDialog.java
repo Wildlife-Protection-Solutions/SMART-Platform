@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.ui;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -35,13 +34,14 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.WKTReader;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for editing the WKT of a geometry
  * @author Emily
  *
  */
-public class WKTGeometryDialog extends TitleAreaDialog {
+public class WKTGeometryDialog extends SmartStyledTitleDialog {
 
 	private Text txtGeometry;
 	

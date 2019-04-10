@@ -22,7 +22,6 @@
 package org.wcs.smart.query.ui;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -38,6 +37,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for users to select the type of
@@ -46,7 +46,7 @@ import org.wcs.smart.query.model.IQueryType;
  * @author egouge
  * @since 1.0.0
  */
-public class QueryTypeDialog extends TitleAreaDialog {
+public class QueryTypeDialog extends SmartStyledTitleDialog {
 
 	private IQueryType selectedQueryType = null;
 

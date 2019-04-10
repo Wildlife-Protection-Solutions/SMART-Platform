@@ -80,8 +80,9 @@ public class PatrolSpeedParameterCollector extends IParameterCollector {
 	
 	@Override
 	public void createUi(Composite composite) {
-
+		
 		Composite panel = new Composite(composite, SWT.NONE);
+
 		panel.setLayout(new GridLayout(2, false));
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		

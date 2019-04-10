@@ -21,22 +21,22 @@
  */
 package org.wcs.smart.i2.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.forms.IFormColors;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 
 /**
@@ -45,61 +45,101 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
  * @author Emily
  *
  */
-public class SectionTabHeader extends Composite implements IHyperlinkListener{
+@SuppressWarnings("restriction")
+public class SectionTabHeader extends Composite implements Listener{
 
 	private Composite[] parts;
 	private Composite stackPanel;
-	private Font boldFont;
-	private Font normalFont;
-	private Hyperlink[] headers;
 	
-	public SectionTabHeader(String tabs[], Composite parent, FormToolkit toolkit, Color background, Runnable onMaximize){
+	private CLabel[] headers;
+	
+	private List<Listener> listeners;
+	
+	public SectionTabHeader(String tabs[], Composite parent, FormToolkit toolkit, Runnable onMaximize){
 		super(parent, SWT.NONE);
 		
+		WidgetElement.setCSSClass(this, "SMARTTabBar");
+		
 		setLayout(new GridLayout(tabs.length*2-1 + (onMaximize == null ? 0 : 1), false));
-		setBackground(background);
-		((GridLayout)getLayout()).marginHeight = 2;
-		((GridLayout)getLayout()).marginWidth = 5;
+		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginHeight = 0;
+		((GridLayout)getLayout()).horizontalSpacing = 0;
+	
+		listeners = new ArrayList<>();
 		
-		
-		headers = new Hyperlink[tabs.length];
+		headers = new CLabel[tabs.length];
 		for (int i = 0; i < tabs.length; i ++){
-			Hyperlink header = toolkit.createHyperlink(this, tabs[i], SWT.NONE);
-			header.setBackground(background);
+			CLabel header = new CLabel(this, SWT.NONE);
+			header.setText(tabs[i]);
+			header.setMargins(3, 3, 5, 2);
+			WidgetElement.setCSSClass(header, "SMARTTab");
+
+			
 			headers[i] = header;
-			normalFont = header.getFont();
+			
 			header.setData(i);
-			header.addHyperlinkListener(this);
+			header.addListener(SWT.MouseUp, this);
+			
+			header.addMouseTrackListener(new MouseTrackListener() {
+
+				private String lastClass = null;
+				@Override
+				public void mouseEnter(MouseEvent e) {
+					header.setCursor(getDisplay().getSystemCursor(SWT.CURSOR_HAND));
+					
+					lastClass = WidgetElement.getCSSClass(header);
+					if (!lastClass.equals("SMARTTabSelected")) {
+						WidgetElement.setCSSClass(header, "SMARTTabMouseOver");
+						WidgetElement.applyStyles(header, true);
+					}
+				}
+
+				@Override
+				public void mouseExit(MouseEvent e) {
+					header.setCursor(null);
+					String currentClass = WidgetElement.getCSSClass(header);
+					if (!currentClass.equals("SMARTTabSelected")) {
+						WidgetElement.setCSSClass(header, lastClass);
+						WidgetElement.applyStyles(header, true);
+					}
+				}
+
+				@Override
+				public void mouseHover(MouseEvent e) {
+				}
+
+			});
 		}
 		
-		FontData fd = headers[0].getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		boldFont = new Font(getDisplay(), fd);
-		addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				boldFont.dispose();
-			}
-		});
 
 		if (onMaximize != null){
 			Label max = toolkit.createLabel(this, ""); //$NON-NLS-1$
 			max.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 			max.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SECTION_EXPAND));
 			max.addListener(SWT.MouseUp, (e)->onMaximize.run());
-			max.setBackground(background);
+			
 			max.setCursor(getDisplay().getSystemCursor(SWT.CURSOR_HAND));
 		}
 	}
-	public SectionTabHeader(String tabs[], Composite parent, FormToolkit toolkit, Runnable onMaximize){
-		this(tabs, parent, toolkit, toolkit.getColors().getColor(IFormColors.TB_BG), onMaximize);
+	
+	public SectionTabHeader(String tabs[], Composite parent, FormToolkit toolkit){
+		this(tabs, parent, toolkit, null);
 	}
 	
-	public SectionTabHeader(String tabs[], Composite parent, FormToolkit toolkit, Color background){
-		this(tabs, parent, toolkit, background, null);
+	public void addTabSelectionListener(Listener l) {
+		listeners.add(l);
 	}
-	public SectionTabHeader(String tabs[], Composite parent, FormToolkit toolkit){
-		this(tabs, parent, toolkit, toolkit.getColors().getColor(IFormColors.TB_BG));
+	
+	private void fireListeners() {
+		Event evt = new Event();
+		listeners.forEach(l->l.handleEvent(evt));
+	}
+	
+	public int getSelection() {
+		for (int i = 0; i < parts.length; i ++) {
+			if (((StackLayout)stackPanel.getLayout()).topControl == parts[i]) return i;
+		}
+		return -1;
 	}
 	
 	public void setContent(Composite[] parts, Composite stackPanel){
@@ -108,28 +148,30 @@ public class SectionTabHeader extends Composite implements IHyperlinkListener{
 	}
 	
 	public void selectTab(int tab){
-		linkActivated(new HyperlinkEvent(headers[tab], null, null, -1));
+		Event evt = new Event();
+		evt.widget = headers[tab];
+		handleEvent(evt);
 	}
 
+
 	@Override
-	public void linkExited(HyperlinkEvent e) {
-	}
-	
-	@Override
-	public void linkEntered(HyperlinkEvent e) {
-	}
-	
-	@Override
-	public void linkActivated(HyperlinkEvent e) {
-		for (Hyperlink link : headers){
-			if (link == e.widget){
+	public void handleEvent(Event event) {
+		for (CLabel link : headers){
+			if (link == event.widget){
 				((StackLayout)stackPanel.getLayout()).topControl = parts[(int)link.getData()];
-				link.setFont(boldFont);
-			}else{
-				link.setFont(normalFont);
+				selectTabItem(link);
+				fireListeners();
+				break;
 			}
 		}
 		layout(true);
 		stackPanel.layout();
 	}
+	
+	private void selectTabItem(CLabel link) {
+		for (CLabel l : headers) WidgetElement.setCSSClass(l, "SMARTTab");
+		WidgetElement.setCSSClass(link, "SMARTTabSelected");
+		WidgetElement.applyStyles(this, true);	
+	}
 }
+

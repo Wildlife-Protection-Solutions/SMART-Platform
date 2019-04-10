@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.ui;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -43,7 +42,7 @@ import org.wcs.smart.internal.Messages;
  * @author Emily
  *
  */
-public class UserNamePasswordDialog extends Dialog{
+public class UserNamePasswordDialog extends SmartStyledDialog{
 
 	private Text txtUsername;
 	private Text txtPassword;

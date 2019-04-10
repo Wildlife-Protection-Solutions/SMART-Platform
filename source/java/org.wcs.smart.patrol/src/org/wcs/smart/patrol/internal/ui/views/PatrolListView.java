@@ -328,18 +328,21 @@ public class PatrolListView implements IPatrolFilteringView {
 
 					mnuCreateFolder = new MenuItem(menu, SWT.PUSH);
 					mnuCreateFolder.setText(Messages.PatrolListView_CreateFolderOp);
+					mnuCreateFolder.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 					mnuCreateFolder.addListener(SWT.Selection, x->{
 						handleFolderCreate();
 					});
 
 					mnuEditFolder = new MenuItem(menu, SWT.PUSH);
 					mnuEditFolder.setText(Messages.PatrolListView_EditFolderOp);
+					mnuEditFolder.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 					mnuEditFolder.addListener(SWT.Selection, x->{
 						handleFolderEdit();
 					});
 
 					mnuDeleteFolder = new MenuItem(menu, SWT.PUSH);
 					mnuDeleteFolder.setText(Messages.PatrolListView_DeleteFolderOp);
+					mnuDeleteFolder.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 					mnuDeleteFolder.addListener(SWT.Selection, x->{
 						handleFolderDelete();
 					});

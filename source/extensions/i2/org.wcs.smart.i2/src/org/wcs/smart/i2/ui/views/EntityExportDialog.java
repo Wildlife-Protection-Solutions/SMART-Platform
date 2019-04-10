@@ -35,7 +35,6 @@ import org.eclipse.birt.report.designer.internal.ui.util.UIHelper;
 import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -62,6 +61,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.EntityExportReportJob;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for exporting multiple entities
@@ -69,7 +69,7 @@ import org.wcs.smart.i2.model.IntelEntity;
  * @author Emily
  *
  */
-public class EntityExportDialog extends TitleAreaDialog {
+public class EntityExportDialog extends SmartStyledTitleDialog {
 
 	private static final String DIR_KEY = "org.wcs.smart.i2.entity.export.directory"; //$NON-NLS-1$
 	private List<IntelEntity> toExport;

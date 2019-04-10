@@ -66,7 +66,7 @@ public abstract class ScreenOptionGroup extends Composite {
 		gd.marginTop = 0;
 		gd.marginWidth = 0;
 		this.setLayout(gd);
-		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		group = new Group(this,  SWT.NONE);
 		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

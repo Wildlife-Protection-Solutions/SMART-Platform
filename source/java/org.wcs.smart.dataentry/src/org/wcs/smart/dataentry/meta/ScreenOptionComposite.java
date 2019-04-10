@@ -43,6 +43,8 @@ public abstract class ScreenOptionComposite extends Composite {
 		super(parent, SWT.NONE);
 		this.setLayout(new GridLayout(1, false));
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginHeight = 0;
 	}
 
 	public void addScreenOptionListener(IScreenOptionChangeListener listener) {

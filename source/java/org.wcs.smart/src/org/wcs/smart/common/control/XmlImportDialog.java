@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -44,6 +43,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for selecting file to import
@@ -51,7 +51,7 @@ import org.wcs.smart.internal.Messages;
  * @author Emily
  * @since 1.0.0
  */
-public class XmlImportDialog  extends TitleAreaDialog {
+public class XmlImportDialog  extends SmartStyledTitleDialog {
 
 	private static final String[] FILTER_EXTENSIONS = new String[] { "*.zip;*.xml", "*.zip", "*.xml", "*.*" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	private static final String[] FILTER_NAMES = new String[] { Messages.XmlImportDialog_Filter_Supported, Messages.XmlImportDialog_Filter_Xml, Messages.XmlImportDialog_Filter_Zip, Messages.XmlImportDialog_Filter_All };
@@ -178,11 +178,6 @@ public class XmlImportDialog  extends TitleAreaDialog {
 		setTitle(dialogTitle);
 		getShell().setText(dialogText);
 		return composite;
-	}
-	
-	@Override
-	public boolean isResizable(){
-		return true;
 	}
 
 }

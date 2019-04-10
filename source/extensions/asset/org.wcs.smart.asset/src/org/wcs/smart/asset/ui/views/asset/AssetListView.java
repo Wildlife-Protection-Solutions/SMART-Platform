@@ -152,6 +152,8 @@ public class AssetListView {
 		Composite main = toolkit.createComposite(parent);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)main.getLayout()).marginWidth = 0;
+		((GridLayout)main.getLayout()).marginHeight = 0;
 
 		Composite headerMain = toolkit.createComposite(main, SWT.NONE);
 		headerMain.setLayout(new GridLayout(2, false));
@@ -180,7 +182,7 @@ public class AssetListView {
 							createStationsToolbar(toolbarHeaderComposite);
 							toolbarHeaderComposite.layout(true);
 						}
-				}, toolkit);
+				});
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		toolbarHeaderComposite = toolkit.createComposite(headerMain, SWT.NONE);
@@ -203,7 +205,7 @@ public class AssetListView {
 		((GridLayout)assetPanel.getLayout()).marginWidth = 0;
 		((GridLayout)assetPanel.getLayout()).marginHeight = 0;
 		
-		lstAssets = new TreeViewer(assetPanel, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		lstAssets = new TreeViewer(assetPanel, SWT.V_SCROLL | SWT.H_SCROLL);
 		toolkit.adapt(lstAssets.getControl(), true, true);
 		lstAssets.setLabelProvider(new AssetLabelProvider());
 		lstAssets.setContentProvider(assetContentProvider);

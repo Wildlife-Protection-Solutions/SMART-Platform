@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.er.hibernate;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.SurveyDesign;
 

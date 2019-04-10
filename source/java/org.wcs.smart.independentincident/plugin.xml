@@ -165,8 +165,10 @@
          <command
                commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/obj16/incident.png"
+               label="%incidentperspective.command.label"
                mnemonic="%incidentperspective.command.mnemonic2"
-               style="push"
+               mode="FORCE_TEXT"
+               style="radio"
                tooltip="%incidentperspective.command.tooltip">
             <parameter
                   name="org.wcs.smart.observation.perspective.show.focusview"
@@ -278,15 +280,15 @@
          point="org.eclipse.ui.commandImages">
       <image
             commandId="org.wcs.smart.incident.new"
-            icon="images/icons/etool16/new_incident.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png">
       </image>
       <image
             commandId="org.wcs.smart.incident.delete"
-            icon="images/icons/etool16/delete_incident.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png">
       </image>
       <image
             commandId="org.wcs.smart.independentincident.filter"
-            icon="images/icons/etool16/filter_incident.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/filter.png">
       </image>
       <image
             commandId="org.wcs.smart.independentincident.export"

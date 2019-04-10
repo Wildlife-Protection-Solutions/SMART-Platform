@@ -398,8 +398,7 @@ public class DataQueueView{
 		Section dataQueueSection = toolkit.createSection(parent, Section.TITLE_BAR | Section.EXPANDED);
 		dataQueueSection.setText(Messages.DataQueueView_LocalDataQueueLabel);
 		dataQueueSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		dataQueueSection.setLayout(new GridLayout());
-	
+		
 		Composite main = toolkit.createComposite(dataQueueSection);
 		main.setLayout(new GridLayout());
 		((GridLayout)main.getLayout()).marginWidth = 0;
@@ -442,6 +441,7 @@ public class DataQueueView{
 		Composite linkComp = toolkit.createComposite(main);
 		linkComp.setLayout(new GridLayout(5, false));
 		((GridLayout)linkComp.getLayout()).marginHeight = 0;
+		((GridLayout)linkComp.getLayout()).marginWidth = 0;
 		
 		Hyperlink link = toolkit.createHyperlink(linkComp, Messages.DataQueueView_RefreshLabel, SWT.NONE);
 		link.addHyperlinkListener(new HyperlinkAdapter() {
@@ -486,13 +486,12 @@ public class DataQueueView{
 		Section dataQueueSection = toolkit.createSection(parent, Section.TITLE_BAR | Section.EXPANDED );
 		dataQueueSection.setText(Messages.DataQueueView_ServerQueueSectionLabel);
 		dataQueueSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		dataQueueSection.setLayout(new GridLayout());
-	
-		
+			
 		Composite main = toolkit.createComposite(dataQueueSection);
 		main.setLayout(new GridLayout());
 		dataQueueSection.setClient(main);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)main.getLayout()).marginWidth = 0;
 		
 		Composite buttonComp = toolkit.createComposite(main, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);

@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -75,7 +76,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
@@ -278,8 +278,9 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		header.setLayout(new GridLayout(3, false));
 		((GridLayout)header.getLayout()).horizontalSpacing = 10;
+		WidgetElement.setCSSClass(header, "SMARTSection");
 		//((GridLayout)header.getLayout()).marginHeight = 8;
-		header.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
+//		header.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
 		
 		Hyperlink lOptions = toolkit.createHyperlink(header, Messages.ManualResultsEditor_OptionsHeaderLbl, SWT.NONE);
 		Hyperlink lResults = toolkit.createHyperlink(header, Messages.ManualResultsEditor_ResultsHeaderLbl, SWT.NONE);

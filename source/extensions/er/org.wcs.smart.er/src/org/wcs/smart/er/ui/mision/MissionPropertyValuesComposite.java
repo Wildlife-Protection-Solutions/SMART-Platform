@@ -72,6 +72,7 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 		sc = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
+		sc.setBackgroundMode(SWT.INHERIT_FORCE);
 		
 		parts = new Composite(sc, SWT.NONE);
 		parts.setLayout(new GridLayout());

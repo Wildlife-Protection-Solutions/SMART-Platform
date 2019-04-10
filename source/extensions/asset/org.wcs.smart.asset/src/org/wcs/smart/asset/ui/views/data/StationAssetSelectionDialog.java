@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -63,6 +62,7 @@ import org.wcs.smart.asset.ui.StationLocationDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -72,7 +72,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class StationAssetSelectionDialog extends Dialog{
+public class StationAssetSelectionDialog extends SmartStyledDialog{
 
 	public static final String CREATE_STATION = Messages.StationAssetSelectionDialog_NewStationAction;
 	public static final String CREATE_LOCATION = Messages.StationAssetSelectionDialog_NewLocationAction;

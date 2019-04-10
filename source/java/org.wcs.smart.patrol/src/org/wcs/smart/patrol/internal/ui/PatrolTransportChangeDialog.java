@@ -30,7 +30,6 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -50,6 +49,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.ui.EmployeeSelectorDialog;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -60,7 +60,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolTransportChangeDialog extends TitleAreaDialog implements SelectionListener{
+public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implements SelectionListener{
 
 	private DateFormat dateTimeFormatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
 	

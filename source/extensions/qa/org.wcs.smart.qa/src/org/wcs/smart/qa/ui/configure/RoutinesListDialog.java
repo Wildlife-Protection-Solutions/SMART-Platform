@@ -36,7 +36,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -87,6 +86,8 @@ import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.ui.configure.create.EditRoutineDialog;
 import org.wcs.smart.qa.ui.configure.create.NewRoutineWizard;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
+import org.wcs.smart.ui.SmartWizardDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -95,7 +96,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class RoutinesListDialog extends TitleAreaDialog {
+public class RoutinesListDialog extends SmartStyledTitleDialog {
 
 	private TableViewer tblRoutines;
 	private Font boldFont;
@@ -407,7 +408,7 @@ public class RoutinesListDialog extends TitleAreaDialog {
 	}
 	
 	private void add(){
-		WizardDialog ws = new WizardDialog(getShell(), new NewRoutineWizard());
+		WizardDialog ws = new SmartWizardDialog(getShell(), new NewRoutineWizard());
 		if (ws.open() == Window.OK){
 			refresh();
 		}

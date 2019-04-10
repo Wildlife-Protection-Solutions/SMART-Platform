@@ -54,7 +54,8 @@ public class NewRoutineWizard extends Wizard implements IPageChangingListener{
     	addPage(page1);
     	addPage(page2);
     	
-    	setWindowTitle(Messages.NewRoutineWizard_WindowTitle);    	
+    	setWindowTitle(Messages.NewRoutineWizard_WindowTitle);   
+    	
     }
 
     @Override
@@ -66,8 +67,7 @@ public class NewRoutineWizard extends Wizard implements IPageChangingListener{
 		}
 		return false;
 	}
-	
- 	
+    
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
 		if (event.getCurrentPage() == page1){

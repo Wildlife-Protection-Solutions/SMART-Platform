@@ -24,6 +24,7 @@ package org.wcs.smart.e4;
 import org.eclipse.e4.ui.internal.workbench.swt.AbstractPartRenderer;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
+import org.eclipse.e4.ui.model.application.ui.menu.MToolBar;
 import org.eclipse.e4.ui.workbench.renderers.swt.WorkbenchRendererFactory;
 
 /**
@@ -34,6 +35,7 @@ import org.eclipse.e4.ui.workbench.renderers.swt.WorkbenchRendererFactory;
 public class SmartRenderFactory extends WorkbenchRendererFactory {
 
 	private SmartStackRenderer stackRenderer;
+	private SmartToolBarRenderer toolbarRenderer;
 
 	// private RenderedToolBarRenderer renderedToolbarRenderer;
 
@@ -45,6 +47,12 @@ public class SmartRenderFactory extends WorkbenchRendererFactory {
 				initRenderer(stackRenderer);
 			}
 			return stackRenderer;
+		} else if (uiElement instanceof MToolBar) {
+			if (toolbarRenderer == null) {
+				toolbarRenderer = new SmartToolBarRenderer();
+				initRenderer(toolbarRenderer);
+			}
+			return toolbarRenderer;
 		}
 		return super.getRenderer(uiElement, parent);
 	}

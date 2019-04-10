@@ -61,6 +61,7 @@ public class ParameterPage extends WizardPage{
 		all = new Composite(parent,  SWT.NONE);
 		all.setLayout(new GridLayout());
 		all.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		all.setBackgroundMode(SWT.INHERIT_FORCE);
 		
 		setTitle(Messages.ParameterPage_PageTitle);
 		setMessage(Messages.ParameterPage_PageMessage);

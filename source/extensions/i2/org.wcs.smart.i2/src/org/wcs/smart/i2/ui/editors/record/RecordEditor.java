@@ -416,6 +416,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		
 		setDirty(false);
 		summaryPage.doAfterSave();
+		descPage.doAfterSave();
 		summaryPage.enableWs(WorkingSetManager.INSTANCE.isSet() && getRecord().getUuid() != null);
 		descPage.enableWs(WorkingSetManager.INSTANCE.isSet() && getRecord().getUuid() != null);
 		

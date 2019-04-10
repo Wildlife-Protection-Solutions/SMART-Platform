@@ -78,11 +78,13 @@ public class IntelQueryNameLabel extends Composite implements Listener{
 		
 		GridLayout gl = new GridLayout(3, false);
 		gl.marginHeight = 0;
+		gl.marginWidth = 0;
 		gl.verticalSpacing = 0;
 		setLayout(gl);
 		
-		Composite it = toolkit.createComposite(this);
-		it.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Composite it = toolkit.createComposite(this, SWT.NONE);
+		it.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		
 		it.addListener(SWT.Resize, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -92,6 +94,8 @@ public class IntelQueryNameLabel extends Composite implements Listener{
 
 			}
 		});
+		
+		
 		lblName = toolkit.createLabel(it, ""); //$NON-NLS-1$
 		txtName = toolkit.createText(it, ""); //$NON-NLS-1$
 		
@@ -106,6 +110,10 @@ public class IntelQueryNameLabel extends Composite implements Listener{
 		txtName.addListener(SWT.FocusOut, this);
 		txtName.addListener(SWT.KeyUp, this);
 		lblName.addListener(SWT.MouseUp, this);
+		
+		Point p = lblName.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		lblName.setBounds(0, 0, it.getBounds().width, p.y);
+		txtName.setBounds(0, 0, it.getBounds().width, p.y);
 	}
 	
 	private boolean validateName(String name){

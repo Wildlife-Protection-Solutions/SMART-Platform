@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -45,6 +44,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.util.ReprojectUtils;
 
 /**
@@ -52,7 +52,7 @@ import org.wcs.smart.util.ReprojectUtils;
  * @author egouge
  *
  */
-public class ProjectionDialog extends TitleAreaDialog {
+public class ProjectionDialog extends SmartStyledTitleDialog {
 
 	private ListViewer lst ;
 	private Projection selection;

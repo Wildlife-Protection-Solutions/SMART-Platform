@@ -46,10 +46,10 @@ import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
-import au.com.bytecode.opencsv.CSVReader;
-
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
+
+import au.com.bytecode.opencsv.CSVReader;
 /**
  * 
  * Class for tracking CSV import configuration 

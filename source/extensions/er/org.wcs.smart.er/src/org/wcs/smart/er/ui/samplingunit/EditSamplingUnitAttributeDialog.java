@@ -29,7 +29,6 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.util.LocalSelectionTransfer;
@@ -71,6 +70,7 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.ca.properties.AttributeItemDialog;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
@@ -85,7 +85,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class EditSamplingUnitAttributeDialog extends TitleAreaDialog implements SelectionListener {
+public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog implements SelectionListener {
 	
 	
 	private Collection<? extends NamedKeyItem> siblings;	//attributes that are siblings to the current attribute being updated/created

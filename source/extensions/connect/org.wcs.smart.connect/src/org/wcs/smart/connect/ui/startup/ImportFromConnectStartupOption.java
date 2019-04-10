@@ -25,6 +25,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.ui.IAdvancedStartupOption;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Import ca from connect start up option
@@ -40,7 +41,7 @@ public class ImportFromConnectStartupOption implements IAdvancedStartupOption {
 
 	@Override
 	public Status performTask(Shell activeShell) throws Exception {
-		WizardDialog wd = new WizardDialog(activeShell, new DownloadConnectWizard());
+		WizardDialog wd = new SmartWizardDialog(activeShell, new DownloadConnectWizard());
 		wd.open();
 		return Status.OK;
 	}

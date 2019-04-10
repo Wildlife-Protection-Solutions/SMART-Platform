@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -64,7 +63,7 @@ import org.wcs.smart.internal.Messages;
  * @author Emily
  *
  */
-public class SelectCaDialog extends TitleAreaDialog {
+public class SelectCaDialog extends SmartStyledTitleDialog {
 
 	private static final String ERROR_DIALOG_TITLE = Messages.SelectCaDialog_ErrorDialogtitle;
 

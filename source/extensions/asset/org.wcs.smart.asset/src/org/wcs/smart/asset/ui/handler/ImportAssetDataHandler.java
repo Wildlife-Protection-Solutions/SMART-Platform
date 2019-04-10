@@ -32,8 +32,8 @@ import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.ui.views.data.DataImporterInput;
-import org.wcs.smart.asset.ui.views.data.DataImporterView;
 import org.wcs.smart.asset.ui.views.data.DataImporterInput.Page;
+import org.wcs.smart.asset.ui.views.data.DataImporterView;
 import org.wcs.smart.observation.ui.FieldDataPerspective;
 
 /**

@@ -36,7 +36,6 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -55,6 +54,7 @@ import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.model.SpatialPlanTarget;
 import org.wcs.smart.plan.ui.newPlanWizard.ITargetPage;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 
@@ -66,7 +66,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class TargetPropertyDialog extends TitleAreaDialog {
+public class TargetPropertyDialog extends SmartStyledTitleDialog{
 
 	private List<PlanTarget> parentTargets;
 	private PlanTarget toUpdate;

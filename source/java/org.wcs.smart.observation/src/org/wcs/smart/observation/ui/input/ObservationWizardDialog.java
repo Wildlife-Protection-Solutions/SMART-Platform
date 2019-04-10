@@ -23,13 +23,13 @@ package org.wcs.smart.observation.ui.input;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Extension to the wizard dialog and disables
@@ -39,7 +39,7 @@ import org.eclipse.swt.widgets.Shell;
  * @author egouge
  *
  */
-public class ObservationWizardDialog extends WizardDialog {
+public class ObservationWizardDialog extends SmartWizardDialog {
 
 	public ObservationWizardDialog(Shell parentShell, IWizard newWizard) {
 		super(parentShell, newWizard);

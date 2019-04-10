@@ -738,75 +738,6 @@
          <toolbar
                id="org.wcs.smart.i2.toolbar.perspective">
             <command
-                  commandId="org.wcs.smart.i2.command.perspective.open"
-                  icon="images/icons/obj16/analysis.png"
-                  label="%DataAnalysisModeCommandName2"
-                  tooltip="%DataAnalysisModeTooltip">
-               <parameter
-                     name="org.wcs.smart.perspectiveid"
-                     value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
-               </parameter>
-               <visibleWhen
-                     checkEnabled="false">
-                  <and>
-                     <test
-                           property="org.wcs.smart.i2.permission"
-                           value="analyst_perspective">
-                     </test>
-                  </and>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.perspective.open"
-                  icon="images/icons/obj16/assessment.png"
-                  label="%DataAssesmentModeCommandName2"
-                  tooltip="%DataAsessmentModeTooltip">
-               <parameter
-                     name="org.wcs.smart.perspectiveid"
-                     value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
-               </parameter>
-               <visibleWhen
-                     checkEnabled="false">
-                  <and>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.caSingle">
-                     </test>
-                     <test
-                           property="org.wcs.smart.i2.permission"
-                           value="assessment_perspective">
-                     </test>
-                  </and>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.perspective.open"
-                  icon="images/icons/obj16/entity2.png"
-                  label="%EntityPerspectiveName"
-                  style="push"
-                  tooltip="%openentityperspectivetooltip">
-               <parameter
-                     name="org.wcs.smart.perspectiveid"
-                     value="org.wcs.smart.i2.IntelEntityPerspective">
-               </parameter>
-               <visibleWhen
-                     checkEnabled="false">
-                  <and>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.caSingle">
-                     </test>
-                     <test
-                           property="org.wcs.smart.i2.permission"
-                           value="entity_perspective">
-                     </test>
-                  </and>
-               </visibleWhen>
-            </command>
-            <separator
-                  name="org.wcs.smart.i2.toolbar.seperator">
-            </separator>
-            <command
                   commandId="org.eclipse.ui.file.save">
                <visibleWhen
                      checkEnabled="false">
@@ -1215,6 +1146,81 @@
             </visibleWhen>
          </menu>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.query.menu.view">
+         <command
+               commandId="org.wcs.smart.i2.command.perspective.open"
+               icon="images/icons/obj16/analysis.png"
+               label="%DataAnalysisModeCommandName3"
+               mode="FORCE_TEXT"
+               style="radio"
+               tooltip="%DataAnalysisModeTooltip">
+            <parameter
+                  name="org.wcs.smart.perspectiveid"
+                  value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+            </parameter>
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="analyst_perspective">
+                  </test>
+               </and>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.wcs.smart.i2.command.perspective.open"
+               icon="images/icons/obj16/assessment.png"
+               label="%DataAssesmentModeCommandName3"
+               mode="FORCE_TEXT"
+               style="radio"
+               tooltip="%DataAsessmentModeTooltip">
+            <parameter
+                  name="org.wcs.smart.perspectiveid"
+                  value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+            </parameter>
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="assessment_perspective">
+                  </test>
+               </and>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.wcs.smart.i2.command.perspective.open"
+               icon="images/icons/obj16/entity2.png"
+               label="%EntityPerspectiveName3"
+               mode="FORCE_TEXT"
+               style="radio"
+               tooltip="%openentityperspectivetooltip">
+            <parameter
+                  name="org.wcs.smart.perspectiveid"
+                  value="org.wcs.smart.i2.IntelEntityPerspective">
+            </parameter>
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="entity_perspective">
+                  </test>
+               </and>
+            </visibleWhen>
+         </command>
+      </menuContribution>
       
    </extension>
    <extension
@@ -1369,6 +1375,15 @@
                name="Perspective ID"
                optional="true">
          </commandParameter>
+         <commandParameter
+               id="org.eclipse.ui.commands.radioStateParameter"
+               name="State"
+               optional="true">
+         </commandParameter>
+         <state
+               class="org.eclipse.ui.handlers.RadioState"
+               id="org.eclipse.ui.commands.radioStateParameter">
+         </state>
       </command>
       <command
             id="org.wcs.smart.i2.command.record.view.refresh"

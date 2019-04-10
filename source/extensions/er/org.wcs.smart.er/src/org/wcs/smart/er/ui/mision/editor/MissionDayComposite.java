@@ -81,6 +81,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
@@ -90,6 +92,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.IntegerCellEditor;
@@ -114,6 +117,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.ui.AttachmentCellEditor;
 import org.wcs.smart.observation.ui.ObservationCellEditor;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.SmartWizardDialog;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
@@ -150,6 +154,8 @@ public class MissionDayComposite {
 	private Button btnAddWaypoint;
 	private Button btnDeleteWaypoint;
 	private Button btnMoveWaypoint;
+	
+	private MenuItem miAdd, miMove, miDelete;
 
 	private DoubleCellEditor doubleCellEditor;
 	private DoubleCellEditor nullableDoubleCellEditor;
@@ -210,7 +216,7 @@ public class MissionDayComposite {
 		timeInfo.setLayout(new GridLayout(4, false));
 		((GridLayout) timeInfo.getLayout()).horizontalSpacing = 15;
 		 ((GridLayout)timeInfo.getLayout()).marginWidth = 0;
-		 ((GridLayout)timeInfo.getLayout()).marginLeft = 5;
+		 ((GridLayout)timeInfo.getLayout()).marginLeft = 0;
 		 ((GridLayout)timeInfo.getLayout()).marginHeight = 0;
 		timeInfo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
@@ -415,30 +421,40 @@ public class MissionDayComposite {
 		});
 		
 		if (canEdit){
+			
+			Menu mnu = new Menu(observationTable.getControl());
+			
+			miAdd = new MenuItem(mnu, SWT.PUSH);
+			miAdd.setText(Messages.MissionDayComposite_AddWaypoint);
+			miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			miAdd.addListener(SWT.Selection, e->addWaypoint());
+			
+			miMove = new MenuItem(mnu, SWT.PUSH);
+			miMove.setText(Messages.MissionDayComposite_MoveWaypoint);
+//			miMove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			miMove.addListener(SWT.Selection, e->moveSelectedWaypoints());
+			
+			miDelete = new MenuItem(mnu, SWT.PUSH);
+			miDelete.setText(Messages.MissionDayComposite_DeleteWaypoint);
+			miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			miDelete.addListener(SWT.Selection, e->deleteSelectedWaypoints());
+			
+			
+			
+			observationTable.getControl().setMenu(mnu);
+			
 			Composite buttonComp = toolkit.createComposite(mainComposite);
 			buttonComp.setLayout(new GridLayout(3, false));
+			((GridLayout)buttonComp.getLayout()).marginWidth = 0;
 			btnAddWaypoint = toolkit.createButton(buttonComp, Messages.MissionDayComposite_AddWaypoint, SWT.PUSH);
-			btnAddWaypoint.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					addWaypoint();
-				}
-			});
-			
-			
+			btnAddWaypoint.addListener(SWT.Selection, e->addWaypoint());
+						
 			btnDeleteWaypoint = toolkit.createButton(buttonComp, Messages.MissionDayComposite_DeleteWaypoint, SWT.PUSH);
-			btnDeleteWaypoint.addSelectionListener(new SelectionAdapter(){
-				public void widgetSelected(SelectionEvent e){
-					deleteSelectedWaypoints();
-				}
-			});
-			
+			btnDeleteWaypoint.addListener(SWT.Selection, e->deleteSelectedWaypoints());
+
 			btnMoveWaypoint = toolkit.createButton(buttonComp, Messages.MissionDayComposite_MoveWaypoint, SWT.PUSH);
-			btnMoveWaypoint.addSelectionListener(new SelectionAdapter(){
-				public void widgetSelected(SelectionEvent e){
-					moveSelectedWaypoints();
-				}
-			});
+			btnMoveWaypoint.addListener(SWT.Selection, e->moveSelectedWaypoints());
+
 		}
 		updateTotalHours();
 		
@@ -645,12 +661,14 @@ public class MissionDayComposite {
 						if (editor.getMissionEditor().canEdit() == null) {
 							boolean enabled = !((IStructuredSelection)observationTable.getSelection()).isEmpty();
 							btnDeleteWaypoint.setEnabled(enabled);
-							
+							miDelete.setEnabled(enabled);
 							if (!SharedUtils.isSameDate(editor.getMissionEditor().getMission().getStartDate(), 
 									editor.getMissionEditor().getMission().getEndDate())) {
-								btnMoveWaypoint.setEnabled(enabled);	
+								btnMoveWaypoint.setEnabled(enabled);
+								miMove.setEnabled(enabled);
 							} else {
 								btnMoveWaypoint.setEnabled(false);
+								miMove.setEnabled(false);
 							}
 						}
 					}
@@ -661,12 +679,10 @@ public class MissionDayComposite {
 						
 				updateTotalHours();
 				
-				if (btnMoveWaypoint != null){
-					btnMoveWaypoint.setEnabled(false);
-				}
-				if (btnDeleteWaypoint != null){
-					btnDeleteWaypoint.setEnabled(false);
-				}
+				if (btnMoveWaypoint != null)btnMoveWaypoint.setEnabled(false);
+				if (btnDeleteWaypoint != null) btnDeleteWaypoint.setEnabled(false);
+				if (miDelete != null) miDelete.setEnabled(false);
+				if (miMove != null) miMove.setEnabled(false);
 				
 				if (editor.getMissionEditor().canEdit() != null){
 					dtEndTime.setEnabled(false);
@@ -674,21 +690,15 @@ public class MissionDayComposite {
 					restMinutes.setEditable(false);
 					restMinutes.setEnabled(false);
 					
-					if (btnAddWaypoint != null){
-						btnAddWaypoint.setVisible(false);
-					}
-					if (btnDeleteWaypoint != null){
-						btnDeleteWaypoint.setVisible(false);
-					}
-					if (btnMoveWaypoint != null){
-						btnMoveWaypoint.setVisible(false);
-					}
-					if (lnkImportWaypoints != null){
-						lnkImportWaypoints.setVisible(false);
-					}
-					if (lnkEditTrack != null){
-						lnkEditTrack.setVisible(false);
-					}
+					if (btnAddWaypoint != null) btnAddWaypoint.setVisible(false);
+					if (btnDeleteWaypoint != null) btnDeleteWaypoint.setVisible(false);
+					if (btnMoveWaypoint != null) btnMoveWaypoint.setVisible(false);
+					if (lnkImportWaypoints != null) lnkImportWaypoints.setVisible(false);
+					if (lnkEditTrack != null) lnkEditTrack.setVisible(false);
+					
+					if (miAdd != null) miAdd.setEnabled(false);
+					if (miMove != null) miMove.setEnabled(false);
+					if (miDelete != null) miDelete.setEnabled(false);
 				}
 			}catch (Exception ex){
 				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
@@ -768,7 +778,7 @@ public class MissionDayComposite {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					monitor.setTaskName(Messages.MissionDayComposite_LoadingWizard);
-					WizardDialog dialog = new WizardDialog(editor.getSite().getShell(), wizard);
+					WizardDialog dialog = new SmartWizardDialog(editor.getSite().getShell(), wizard);
 
 					if (dialog != null) {
 						monitor.setTaskName(Messages.MissionDayComposite_DisplayingWizard);

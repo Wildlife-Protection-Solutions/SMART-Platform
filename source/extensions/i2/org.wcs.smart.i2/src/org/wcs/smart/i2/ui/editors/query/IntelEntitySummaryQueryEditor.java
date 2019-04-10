@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -84,6 +85,7 @@ import org.wcs.smart.i2.ui.dialogs.query.ExportQueryWizard;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Intelligence query editor for record observation query
@@ -304,9 +306,8 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 		Composite headerComp = toolkit.createComposite(main);
 		headerComp.setLayout(new GridLayout(2, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridLayout)headerComp.getLayout()).marginWidth = 0;
-		((GridLayout)headerComp.getLayout()).marginHeight = 0;
-		((GridData)headerComp.getLayoutData()).heightHint = 24;
+		
+		WidgetElement.setCSSClass(headerComp, "SMARTFormHeader");
 		
 		header = new IntelQueryNameLabel(headerComp, toolkit, pageForm.getFont(), pageForm.getForeground());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -354,7 +355,10 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 		SashForm core = new SashForm(main, SWT.VERTICAL);
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite c = toolkit.createComposite(core);
+		SmartSection resultsSection = new SmartSection(core, toolkit, Messages.IntelQueryEditor_ResultsSectionLabel);
+
+			
+		Composite c = toolkit.createComposite(resultsSection);
 		c.setLayout(new GridLayout());
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)c.getLayout()).marginWidth = 0;
@@ -406,7 +410,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 			return;
 		}
 		ExportQueryWizard wizard = new ExportQueryWizard(query, results);
-		WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
+		WizardDialog wd = new SmartWizardDialog(getSite().getShell(), wizard);
 		wd.open();
 	}
 	

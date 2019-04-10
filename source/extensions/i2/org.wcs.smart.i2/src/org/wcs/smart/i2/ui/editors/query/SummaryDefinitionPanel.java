@@ -110,7 +110,7 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 		((GridLayout)headerPart.getLayout()).marginHeight = 0;
 		headerPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		header = new SectionTabHeader(new String[] {Messages.SummaryDefinitionPanel_GroupByOpHeader, Messages.SummaryDefinitionPanel_FilterOpHeader}, headerPart, toolkit, Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		header = new SectionTabHeader(new String[] {Messages.SummaryDefinitionPanel_GroupByOpHeader, Messages.SummaryDefinitionPanel_FilterOpHeader}, headerPart, toolkit);
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridLayout)header.getLayout()).marginWidth = 0;
 		

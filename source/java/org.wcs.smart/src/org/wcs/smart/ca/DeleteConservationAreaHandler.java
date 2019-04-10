@@ -22,8 +22,8 @@
 package org.wcs.smart.ca;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.internal.Messages;
 
 /**

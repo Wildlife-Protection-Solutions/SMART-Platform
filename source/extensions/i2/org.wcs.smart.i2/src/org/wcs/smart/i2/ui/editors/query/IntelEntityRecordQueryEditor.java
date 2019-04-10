@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -84,6 +85,7 @@ import org.wcs.smart.i2.ui.dialogs.query.ExportQueryWizard;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Intelligence query editor for record observation query
@@ -298,10 +300,9 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		Composite headerComp = toolkit.createComposite(main, SWT.NONE);
 		headerComp.setLayout(new GridLayout(2, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridLayout)headerComp.getLayout()).marginWidth = 0;
-		((GridLayout)headerComp.getLayout()).marginHeight = 0;
-		((GridData)headerComp.getLayoutData()).heightHint = 27;
 		
+		WidgetElement.setCSSClass(headerComp, "SMARTFormHeader");
+
 		header = new IntelQueryNameLabel(headerComp, toolkit, pageForm.getFont(), pageForm.getForeground());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		header.addListener(SWT.Selection, e-> {
@@ -316,7 +317,7 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		
 		ToolBar headerToolbar = new ToolBar(headerComp, SWT.FLAT);
 		headerToolbar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-
+	
 		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
 			saveItem = new ToolItem(headerToolbar, SWT.PUSH);
 			saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
@@ -410,7 +411,7 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		}
 		
 		ExportQueryWizard wizard = new ExportQueryWizard(query, resultsTable.getCurrentResults());
-		WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
+		WizardDialog wd = new SmartWizardDialog(getSite().getShell(), wizard);
 		wd.open();
 	}
 	

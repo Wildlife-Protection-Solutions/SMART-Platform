@@ -24,7 +24,6 @@ package org.wcs.smart.er.ui.mision.editor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -64,6 +63,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.ProjectionLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -72,7 +72,7 @@ import org.wcs.smart.util.ReprojectUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class AddWaypointDialog extends TitleAreaDialog{
+public class AddWaypointDialog extends SmartStyledTitleDialog{
 
 	private GeometryFactory gf = GeometryFactoryProvider.getFactory();
 	private Text txtWaypointId;

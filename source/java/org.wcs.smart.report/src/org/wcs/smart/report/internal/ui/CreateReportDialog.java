@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
@@ -69,6 +68,7 @@ import org.wcs.smart.report.model.RootReportFolder;
 import org.wcs.smart.report.ui.LazyReportContentProvider;
 import org.wcs.smart.report.ui.LazyReportContentProvider.RootType;
 import org.wcs.smart.report.ui.ReportLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -79,7 +79,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class CreateReportDialog extends TitleAreaDialog {
+public class CreateReportDialog extends SmartStyledTitleDialog {
 
 	private Text txtName = null;
 	private Object selectedItem = null;

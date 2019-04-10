@@ -229,7 +229,10 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * Refresh icon
 	 */
 	public static final String REFRESH_ICON = "org.wsc.smart.action.refresh"; //$NON-NLS-1$
-
+	/**
+	 * Filter icon
+	 */
+	public static final String FILTER_ICON = "org.wsc.smart.FILTER_ICON"; //$NON-NLS-1$
 	/**
 	 * Track point editor icons
 	 */
@@ -425,13 +428,13 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(WIZBAN_EXPORT_IMAGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/wizban/exportimage_wiz.gif")); //$NON-NLS-1$
 	     reg.put(CROSSCA_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/eview16/crossca.png")); //$NON-NLS-1$
 	     
-	     reg.put(DELETE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/delete.png")); //$NON-NLS-1$
+	     reg.put(DELETE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/delete.png")); //$NON-NLS-1$
 	     
 	     reg.put(IMG_DEC_FIELD_ERROR, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/ovr16/error_ovr.png")); //$NON-NLS-1$
 	     reg.put(IMG_DEC_FIELD_WARNING, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/ovr16/warning_ovr.png")); //$NON-NLS-1$
 	     reg.put(STYLE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/style.png")); //$NON-NLS-1$
 	     reg.put(RENAME_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/pencil.png")); //$NON-NLS-1$
-	     reg.put(ADD_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/add.png")); //$NON-NLS-1$
+	     reg.put(ADD_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/add.png")); //$NON-NLS-1$
 	     
 	     reg.put(BROWSER_FORWARD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_right.png")); //$NON-NLS-1$
 	     reg.put(BROWSER_BACKWARD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_left.png")); //$NON-NLS-1$
@@ -444,7 +447,9 @@ public class SmartPlugIn extends AbstractUIPlugin {
 
 	     
 	     reg.put(GOTO_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_right.png")); //$NON-NLS-1$
-	     reg.put(EDIT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/edit.png")); //$NON-NLS-1$
+	     reg.put(EDIT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/edit.png")); //$NON-NLS-1$
+	     reg.put(FILTER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/filter.png")); //$NON-NLS-1$
+
 	     
 	     reg.put(CLEAR_SELECTION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/clear_selection.png")); //$NON-NLS-1$
 	     reg.put(REFRESH_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/arrow_refresh.png")); //$NON-NLS-1$

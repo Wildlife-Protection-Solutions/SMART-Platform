@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -54,6 +53,7 @@ import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.BasemapLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 
 /**
@@ -62,7 +62,7 @@ import org.wcs.smart.ui.BasemapLabelProvider;
  * @author egouge
  * @since 1.0.0
  */
-public class LoadBasemapDialog extends TitleAreaDialog {
+public class LoadBasemapDialog extends SmartStyledTitleDialog {
 
 	private ListViewer lstBasemaps;
 	private BasemapDefinition baseMap;

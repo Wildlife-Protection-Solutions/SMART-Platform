@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -35,6 +34,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -43,7 +43,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class CtPackageExportDialog extends Dialog {
+public class CtPackageExportDialog extends SmartStyledDialog {
 
 	private static final String KEY_SEP = "|"; //$NON-NLS-1$
 	private static final String ACTIONS_PREF_KEY = "org.wcs.smart.cybertracker.ctpackage.ui.CtPackageExportDialog.action"; //$NON-NLS-1$

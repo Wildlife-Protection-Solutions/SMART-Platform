@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.observation.model.Waypoint;

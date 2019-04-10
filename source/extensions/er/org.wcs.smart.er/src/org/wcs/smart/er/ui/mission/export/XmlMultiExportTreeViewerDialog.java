@@ -32,7 +32,6 @@ import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -59,6 +58,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -68,7 +68,7 @@ import org.wcs.smart.util.SmartUtils;
 * @author jeffloun
 * @since 4.0.0
 */
-public abstract class XmlMultiExportTreeViewerDialog extends TitleAreaDialog implements IUpdatableView {
+public abstract class XmlMultiExportTreeViewerDialog extends SmartStyledTitleDialog implements IUpdatableView {
 
 	protected Text txtFile;
 	private Button btnIncludeAttachments;

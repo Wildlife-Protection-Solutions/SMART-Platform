@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.connect.ui.startup.LocalCaListPage;
 import org.wcs.smart.connect.ui.startup.SyncMultipleCaWizard;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Download change log handler for manually downloading 
@@ -46,7 +47,7 @@ public class SyncMultiChangeLogHandler {
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
 		SyncMultipleCaWizard syncWizard = new SyncMultipleCaWizard();
 		((LocalCaListPage)syncWizard.getPage(LocalCaListPage.NAME)).setUsernamePassword(SmartDB.getCurrentEmployee().getSmartUserId(), SmartDB.getPlainTextPassword());
-		WizardDialog wd = new WizardDialog(activeShell, syncWizard);
+		WizardDialog wd = new SmartWizardDialog(activeShell, syncWizard);
 		wd.open();
 	}
 	

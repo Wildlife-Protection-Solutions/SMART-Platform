@@ -22,7 +22,6 @@
 package org.wcs.smart.asset.ui;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -30,13 +29,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * A dialog to collect a comment
  * @author Emily
  *
  */
-public class CommentDialog extends TitleAreaDialog {
+public class CommentDialog extends SmartStyledTitleDialog {
 
 	protected Text txtComment;
 	protected String comment;

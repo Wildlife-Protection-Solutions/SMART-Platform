@@ -38,7 +38,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -78,6 +77,7 @@ import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
@@ -87,7 +87,7 @@ import org.wcs.smart.util.UuidUtils;
  * 
  * @author Emily
  */
-public class PatrolCTPackageDialog extends TitleAreaDialog {
+public class PatrolCTPackageDialog extends SmartStyledTitleDialog {
 
 	private static final String LAST_FILE_KEY = "PatrolCTPackageDialog.file"; //$NON-NLS-1$
 	private static final String LAST_CM_KEY = "PatrolCTPackageDialog.cm"; //$NON-NLS-1$

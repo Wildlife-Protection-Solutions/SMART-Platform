@@ -58,10 +58,18 @@ public class CyberTrackerImportEditor extends EditorPart implements ISaveablePar
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
-		Form form = toolkit.createForm(parent);
+		
+		Composite spacer = toolkit.createComposite(parent, SWT.NONE);
+		spacer.setLayout(new GridLayout());
+//		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		Form form = toolkit.createForm(spacer);
 		form.setText(Messages.CyberTrackerImportEditor_ImportDataFormTitle);
 		GridLayout layout = new GridLayout();
 		form.getBody().setLayout(layout);
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		tableContainer = new CyberTrackerImportComposite(form.getBody(), SWT.NONE, toolkit);
 		tableContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

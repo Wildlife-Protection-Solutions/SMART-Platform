@@ -23,7 +23,6 @@ package org.wcs.smart.ui.internal.userlog;
 
 import java.util.Calendar;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -46,6 +45,7 @@ import org.hibernate.query.Query;
 import org.wcs.smart.LoginLogEntry;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledDialog;
 
 
 
@@ -55,7 +55,7 @@ import org.wcs.smart.internal.Messages;
  * @author jeffloun
  *
  */
-public class LoginLogDialog extends Dialog {
+public class LoginLogDialog extends SmartStyledDialog {
 
 	private TableViewer viewer;
 	private LoginLogTableComparator comparator;

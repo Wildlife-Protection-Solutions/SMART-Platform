@@ -24,7 +24,6 @@ package org.wcs.smart.ui.ca.properties;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -37,6 +36,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.internal.ca.properties.IconPanel;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -48,7 +48,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  * @since 1.0.0
  */
-public class AttributeItemDialog  extends TitleAreaDialog{
+public class AttributeItemDialog  extends SmartStyledTitleDialog{
 
 	private NamedKeyItem toUpdate = null;
 	private Language lang = null;

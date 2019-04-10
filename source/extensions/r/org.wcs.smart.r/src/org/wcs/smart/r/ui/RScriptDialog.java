@@ -29,7 +29,6 @@ import java.util.HashSet;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -51,6 +50,7 @@ import org.wcs.smart.r.RScriptInterceptor;
 import org.wcs.smart.r.RScriptManager;
 import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.r.model.RScript;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -60,7 +60,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class RScriptDialog extends TitleAreaDialog {
+public class RScriptDialog extends SmartStyledTitleDialog{
 
 	private RScript script;
 	

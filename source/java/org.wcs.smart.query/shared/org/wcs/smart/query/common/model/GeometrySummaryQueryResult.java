@@ -24,8 +24,6 @@ package org.wcs.smart.query.common.model;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.wcs.smart.query.common.model.SummaryQueryResult;
-
 import org.locationtech.jts.geom.Coordinate;
 
 /**

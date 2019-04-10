@@ -22,7 +22,6 @@
 package org.wcs.smart.ui;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -49,7 +48,7 @@ import org.eclipse.swt.widgets.Shell;
  * @author Emily
  * @since 1.0.0
  */
-public class OptionSelectionDialog extends Dialog {
+public class OptionSelectionDialog extends SmartStyledDialog {
 	private TableViewer fTableViewer;
 	private String[] options;
 	private IStructuredSelection selection;
@@ -105,10 +104,6 @@ public class OptionSelectionDialog extends Dialog {
 				IDialogConstants.OK_LABEL, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
-	}
-
-	protected boolean isResizable() {
-		return true;
 	}
 
 	private Image getWarningIcon() {

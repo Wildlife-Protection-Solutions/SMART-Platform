@@ -42,7 +42,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -74,6 +73,9 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.udig.SmartDistanceTool;
+import org.wcs.smart.ui.SmartStyledDialog;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**	
@@ -82,7 +84,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class ConfigurePackagesDialog extends TitleAreaDialog {
+public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 
 
 	private TableViewer tblViewer;
@@ -460,7 +462,7 @@ public class ConfigurePackagesDialog extends TitleAreaDialog {
 		
 	};
 	
-	private class SelectionDialog<T> extends Dialog{
+	private class SelectionDialog<T> extends SmartStyledDialog{
 
 		private T selection;
 		private TableViewer cmbItems;

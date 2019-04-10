@@ -43,8 +43,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.query.QueryTypeManager;
-import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryColumn;
@@ -217,8 +217,6 @@ public class GriddedTableContent {
 		frmQueryArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1, 1));
 		
 		layout = new GridLayout(1, false);
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
 		frmQueryArea.getBody().setLayout(layout);

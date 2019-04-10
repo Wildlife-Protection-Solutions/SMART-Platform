@@ -29,7 +29,6 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -46,6 +45,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for displaying system
@@ -54,7 +54,7 @@ import org.wcs.smart.internal.Messages;
  * @author egouge
  * @since 1.0.0
  */
-public class BackupDialog extends TitleAreaDialog {
+public class BackupDialog extends SmartStyledTitleDialog {
 
 	// only maintain dialog settings within the current application run
 	private final static DialogSettings localSettings = new DialogSettings(""); //$NON-NLS-1$

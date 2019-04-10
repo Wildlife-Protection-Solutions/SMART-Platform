@@ -368,7 +368,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 			updateResultsTableFilter();
 		});
 		btnIncludeFixed.setToolTipText(Messages.TableMapQaErrorComposite_filterTooltip);
-		btnIncludeFixed.setImage(QaPlugIn.getDefault().getImageRegistry().get(QaPlugIn.ICON_FILTER));
+		btnIncludeFixed.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.FILTER_ICON));
 		
 		ToolItem btnOrderSelection = new ToolItem(tb,  SWT.PUSH);
 		btnOrderSelection.setSelection(false);

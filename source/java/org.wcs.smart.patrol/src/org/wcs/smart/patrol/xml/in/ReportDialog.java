@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.patrol.xml.in;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -30,6 +29,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.ui.SmartStyledDialog;
 
 /**
  * Dialog to display big miltiline massages with ability to copy data to clipboard.
@@ -38,7 +38,7 @@ import org.eclipse.swt.widgets.Text;
  * @author elitvin
  * @since 3.0.0
  */
-public class ReportDialog extends Dialog {
+public class ReportDialog extends SmartStyledDialog {
 
 	private Text text;
 	private String title;

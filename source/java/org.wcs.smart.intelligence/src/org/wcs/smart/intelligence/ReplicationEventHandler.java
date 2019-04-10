@@ -25,8 +25,8 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.List;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.changetracking.IFileStoreWatcher;
 import org.wcs.smart.intelligence.model.Informant;

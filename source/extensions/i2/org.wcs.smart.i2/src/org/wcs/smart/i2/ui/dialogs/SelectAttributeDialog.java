@@ -30,7 +30,6 @@ import javax.inject.Inject;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -58,6 +57,7 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.ui.NamedItemViewerFilter;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 
@@ -66,7 +66,7 @@ import org.wcs.smart.ui.properties.FilterComposite;
  * @author Emily
  *
  */
-public class SelectAttributeDialog extends TitleAreaDialog{
+public class SelectAttributeDialog extends SmartStyledTitleDialog{
 	
 	@Inject
 	private IEclipseContext context;

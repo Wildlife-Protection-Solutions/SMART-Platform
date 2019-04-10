@@ -27,8 +27,8 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.swt.graphics.Image;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
 import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;

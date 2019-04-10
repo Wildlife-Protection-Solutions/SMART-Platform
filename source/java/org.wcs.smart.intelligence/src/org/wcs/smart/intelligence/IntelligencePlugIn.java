@@ -53,10 +53,7 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 	// The shared instance
 	private static IntelligencePlugIn plugin;
 
-	/**
-	 * Image descriptor key for intelligence filter icon
-	 */
-	public static final String INTELLIGENCE_FILTER_ICON = "org.wcs.smart.intelligence.INTELLIGENCE_FILTER"; //$NON-NLS-1$
+	
 	/**
 	 * Image descriptor key for intelligence icon
 	 */
@@ -76,7 +73,6 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 	@Override
 	protected void initializeImageRegistry(ImageRegistry reg) {
 		super.initializeImageRegistry(reg);
-		reg.put(INTELLIGENCE_FILTER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool16/filter.png")); //$NON-NLS-1$			
 		reg.put(INTELLIGENCE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool16/intelligence.png")); //$NON-NLS-1$
 		reg.put(INFORMANT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool16/informant.png")); //$NON-NLS-1$
 	}

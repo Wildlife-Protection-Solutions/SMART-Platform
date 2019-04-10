@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
@@ -58,6 +57,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
@@ -68,7 +68,7 @@ import org.wcs.smart.util.SmartUtils.RegExLevel;
  * @author Emily
  *
  */
-public class EditSurveyDialog extends TitleAreaDialog{
+public class EditSurveyDialog extends SmartStyledTitleDialog{
 
 	private Text txtDesign;
 	private Text txtId;

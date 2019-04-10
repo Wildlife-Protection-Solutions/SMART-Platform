@@ -23,6 +23,7 @@ package org.wcs.smart.query.ui;
 
 import java.text.MessageFormat;
 
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -79,10 +80,11 @@ public class QueryHeaderComposite extends Composite {
 	 * 
 	 */
 	public QueryHeaderComposite(Composite parent, FormToolkit toolkit, Font headerFont, Color headerColor) {
-		
 		super(parent, SWT.NONE);
 		toolkit.adapt(this);
+		WidgetElement.setCSSClass(this, "SMARTFormHeader");
 		createComposite(headerFont, headerColor, toolkit);
+		
 	}
 
 	public void setText(String text, String id, String type){
@@ -104,9 +106,11 @@ public class QueryHeaderComposite extends Composite {
 		GridLayout gl = new GridLayout(3, false);
 		gl.marginHeight = 0;
 		gl.verticalSpacing = 0;
+		gl.marginBottom = 5;
 		setLayout(gl);
 		lblType = toolkit.createLabel(this, ""); //$NON-NLS-1$
 		lblType.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 3, 1));
+		
 		FontData[] fd = lblType.getFont().getFontData();
 		fd[0].setHeight(fd[0].getHeight()-1);
 		final Font f = new Font(lblType.getDisplay(), fd[0]);

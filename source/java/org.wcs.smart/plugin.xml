@@ -701,8 +701,9 @@
             <command
                   commandId="org.wcs.smart.command.showperspective"
                   icon="images/icons/etool16/map.png"
-                  label="%showmapperspective.command.label"
-                  style="push"
+                  label="%showmapperspective.command.label1"
+                  mode="FORCE_TEXT"
+                  style="radio"
                   tooltip="%showmapperspective.command.tooltip">
                <parameter
                      name="org.wcs.smart.perspectiveid"

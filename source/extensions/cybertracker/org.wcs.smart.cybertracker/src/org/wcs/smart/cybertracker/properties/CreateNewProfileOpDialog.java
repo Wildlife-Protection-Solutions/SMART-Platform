@@ -27,7 +27,6 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -50,6 +49,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for creating new CyberTracker profile.
@@ -57,7 +57,7 @@ import org.wcs.smart.hibernate.HibernateManager;
  * @author Evgeniy
  *
  */
-public class CreateNewProfileOpDialog extends TitleAreaDialog {
+public class CreateNewProfileOpDialog extends SmartStyledTitleDialog{
 	
 	private enum CreateProfileOption {
 		BLANK,

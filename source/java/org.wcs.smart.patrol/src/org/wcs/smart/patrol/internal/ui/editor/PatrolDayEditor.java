@@ -114,14 +114,17 @@ public class PatrolDayEditor extends EditorPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
+		
+		Composite outline = toolkit.createComposite(parent);
+		outline.setLayout(new GridLayout());
+	
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
 				Projection viewProjection = HibernateManager.getCurrentViewProjection(session);
 				session.update(editor.getPatrol());
-				frmSummary = toolkit.createScrolledForm(parent);
-				
-				frmSummary.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+				frmSummary = toolkit.createScrolledForm(outline);
+				frmSummary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 				
 				String canEdit = editor.canEdit();
 				if (canEdit != null){
@@ -142,7 +145,7 @@ public class PatrolDayEditor extends EditorPart {
 				text.append(DateFormat.getDateInstance(DateFormat.MEDIUM).format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
 				frmSummary.setText(text.toString());
 				frmSummary.getBody().setLayout(new GridLayout(1, false));
-			
+				((GridLayout)frmSummary.getBody().getLayout()).marginWidth = 0;
 		
 				//find all patrol legs for this day
 				List<PatrolLeg> legs = editor.getPatrol().getLegs();		
@@ -199,14 +202,14 @@ public class PatrolDayEditor extends EditorPart {
 					Composite mainComp = toolkit.createComposite(frmSummary.getBody());
 					mainComp.setLayout(new GridLayout(1, false));
 					mainComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-					
+					((GridLayout)mainComp.getLayout()).marginWidth = 0;
+					((GridLayout)mainComp.getLayout()).marginHeight = 0;
 					
 					for (int i = 0; i < plds.size(); i ++){
 						PatrolLegDay pld = (PatrolLegDay)plds.get(i);
 						final Section sec = toolkit.createSection(mainComp, Section.TWISTIE | Section.TITLE_BAR | Section.EXPANDED);
 						sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 						sec.addExpansionListener(new ExpansionAdapter() {
-							
 							@Override
 							public void expansionStateChanged(ExpansionEvent e) {
 								if (sec.isExpanded()){
@@ -218,8 +221,8 @@ public class PatrolDayEditor extends EditorPart {
 								
 							}
 						});
-						
 						sec.setText(Messages.PatrolDayEditor_LegSectionNamePrefix + pld.getPatrolLeg().getId());
+						
 						PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
 						Composite comp2 = comp.createComposite(sec, toolkit);
 						comp.setData(pld);

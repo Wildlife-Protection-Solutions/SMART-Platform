@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -88,7 +87,7 @@ import org.wcs.smart.util.ReprojectUtils;
  * @author Emily
  *
  */
-public class SelectBoundsMapDialog extends Dialog implements MapPart{
+public class SelectBoundsMapDialog extends SmartStyledTitleDialog implements MapPart{
 
 	private MapViewer viewer;
 	private Label lblCoordinates;
@@ -325,12 +324,7 @@ public class SelectBoundsMapDialog extends Dialog implements MapPart{
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
 	}
-	
-	@Override
-	protected boolean isResizable() {
-		return true;
-	}
-  
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object getAdapter(Class adaptee) {
 		if (adaptee.isAssignableFrom(Map.class)) {

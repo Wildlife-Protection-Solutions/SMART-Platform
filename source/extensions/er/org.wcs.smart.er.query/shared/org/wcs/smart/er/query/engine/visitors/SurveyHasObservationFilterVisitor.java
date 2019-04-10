@@ -26,8 +26,8 @@ import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.model.filter.AreaFilter;
-import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
+import org.wcs.smart.query.model.filter.IFilter;
 
 /**
  * Has observation filter visitor for survey visitors.

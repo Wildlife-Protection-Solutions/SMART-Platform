@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
@@ -71,6 +70,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
@@ -81,7 +81,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class ImageSelectionDialog extends TitleAreaDialog {
+public class ImageSelectionDialog extends SmartStyledTitleDialog {
 
 	private static final String WIDGET_KEY = "WIDGET"; //$NON-NLS-1$
 	private static final String IMAGE_KEY = "IMAGE"; //$NON-NLS-1$

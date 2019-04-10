@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -50,7 +49,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author elitvin
  * @since 6.0.0
  */
-public class CreateEditNamedItemDialog extends TitleAreaDialog {
+public class CreateEditNamedItemDialog extends SmartStyledTitleDialog {
 
 	private TranslateNameComposite tnc;
 	private NamedItem item;

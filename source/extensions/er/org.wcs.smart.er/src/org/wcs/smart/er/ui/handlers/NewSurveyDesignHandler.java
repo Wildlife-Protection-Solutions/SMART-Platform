@@ -34,6 +34,7 @@ import org.wcs.smart.er.ui.SurveyDesignListView;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.ui.surveydesign.wizard.NewSurveyDesignWizard;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Handler for creating new survey design.
@@ -59,7 +60,7 @@ public class NewSurveyDesignHandler {
 	
 	public static SurveyDesign showNewDesignWizard(Shell parent){
 		NewSurveyDesignWizard newWizard = new NewSurveyDesignWizard();
-		WizardDialog wd = new WizardDialog(parent, newWizard);
+		WizardDialog wd = new SmartWizardDialog(parent, newWizard);
 		if (wd.open() == WizardDialog.OK){
 			return newWizard.getNewSurveyDesign();
 		}else{

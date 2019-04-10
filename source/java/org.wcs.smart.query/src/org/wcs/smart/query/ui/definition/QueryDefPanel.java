@@ -26,14 +26,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
@@ -58,6 +58,8 @@ public class QueryDefPanel {
 	
 	private String currentPanel;
 	private QueryDefView parentView;
+	
+	private CTabFolder tabFolder ;
 	
 	/**
 	 * New definition panel
@@ -109,7 +111,7 @@ public class QueryDefPanel {
 		if (dropPanels.size() == 1){
 			panel = dropPanels.get(0);
 		}else if (dropPanels.size() > 1){
-			panel = (IDefinitionPanel) tabFolder.getSelection()[0].getData();
+			panel = (IDefinitionPanel) tabFolder.getSelection().getData();
 		}
 		if (panel != null){
 			String itemId = QueryTypeManager.INSTANCE.getQueryItemPanel(queryType, panel.getId());
@@ -152,8 +154,6 @@ public class QueryDefPanel {
 		return main;
 	}
 	
-	private TabFolder tabFolder ;
-	
 	private Composite createComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -182,10 +182,10 @@ public class QueryDefPanel {
 				QueryPlugIn.displayLog(ex.getMessage(), ex);
 			}
 		} else {
-			tabFolder = new TabFolder(main, SWT.NONE);
+			tabFolder = new CTabFolder(main, SWT.NONE);
 			tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			for (int i = 0; i < panelIds.length; i++) {
-				TabItem item = new TabItem(tabFolder, SWT.NONE);
+				CTabItem item = new CTabItem(tabFolder, SWT.NONE);
 
 				IDefinitionPanel pnl = parentView.getPart().getContext().get(DefinitionPanelManager.class).createDefinitionPanel(panelIds[i]);
 				if (pnl != null) {
@@ -205,18 +205,16 @@ public class QueryDefPanel {
 			}
 			tabFolder.pack();
 			tabFolder.addSelectionListener(new SelectionAdapter() {
-
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					TabItem[] sel = tabFolder.getSelection();
-					if (sel.length > 0) {
-						setQueryDefinitionPanel(((IDefinitionPanel) sel[0]
-								.getData()).getId());
+					CTabItem sel = tabFolder.getSelection();
+					if (sel != null) {
+						setQueryDefinitionPanel(((IDefinitionPanel)sel.getData()).getId());
 					}
 				}
 			});
-			setQueryDefinitionPanel(((IDefinitionPanel) tabFolder.getItem(0).getData())
-					.getId());
+			tabFolder.setSelection(0);
+//			setQueryDefinitionPanel(((IDefinitionPanel) tabFolder.getItem(0).getData()).getId());
 
 		}
 		parent.layout(true);

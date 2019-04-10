@@ -32,7 +32,6 @@ import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -67,6 +66,7 @@ import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -77,7 +77,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class EditSamplingUnitDialog extends TitleAreaDialog implements ModifyListener, ISelectionChangedListener{
+public class EditSamplingUnitDialog extends SmartStyledTitleDialog implements ModifyListener, ISelectionChangedListener{
 
 	private Session session;
 	private SamplingUnit su;

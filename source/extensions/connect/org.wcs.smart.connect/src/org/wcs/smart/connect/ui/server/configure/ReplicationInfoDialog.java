@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -49,6 +48,7 @@ import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -57,7 +57,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class ReplicationInfoDialog extends TitleAreaDialog {
+public class ReplicationInfoDialog extends SmartStyledTitleDialog {
 
 	private Label lblServerVersion;
 	private Label lblServerRevision;

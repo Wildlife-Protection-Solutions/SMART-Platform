@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.MouseAdapter;
@@ -113,17 +114,17 @@ public class SmartSection extends Composite{
 		((GridLayout)header.getLayout()).marginWidth = 2;
 		((GridLayout)header.getLayout()).marginHeight = 2;
 		
+		WidgetElement.setCSSClass(header, "SMARTSection");
+		
 		img = new Twistie(header, SWT.NONE){
 			@Override
 			protected void handleActivate(Event e) {
 				
 			}
 		};
-		img.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
 		img.setExpanded(true);
 		Label l =toolkit.createLabel(header, text);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		l.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
 		FontData fd = l.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
 		final Font boldFont = new Font(getDisplay(), fd);
@@ -149,6 +150,7 @@ public class SmartSection extends Composite{
 			public void mouseDoubleClick(MouseEvent e) {
 				sashForm.setData(MAX_KEY, -1);
 				List<SmartSection> items = (List<SmartSection>) sash.getData(KIDS_KEY);
+				
 				int index = -1;
 				int sumWeights = 0;
 				int weights[] = sash.getWeights();

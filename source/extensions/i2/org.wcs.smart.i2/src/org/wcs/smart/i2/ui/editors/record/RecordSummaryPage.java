@@ -39,6 +39,7 @@ import javax.persistence.criteria.Root;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -59,11 +60,9 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -76,14 +75,12 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.internal.SharedImages;
 import org.eclipse.ui.part.EditorPart;
-import org.eclipse.ui.themes.ColorUtil;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
@@ -240,9 +237,8 @@ public class RecordSummaryPage extends EditorPart{
 		toolkit = new FormToolkit(parent.getDisplay());
 		
 		parent.setLayout(new GridLayout());
-		((GridLayout)parent.getLayout()).marginWidth= 0;
-		((GridLayout)parent.getLayout()).marginHeight = 0;
-		((GridLayout)parent.getLayout()).verticalSpacing= 0;
+		((GridLayout)parent.getLayout()).marginWidth= 5;
+		((GridLayout)parent.getLayout()).marginHeight = 5;
 		
 		Composite buttonPanel = toolkit.createComposite(parent, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(3, false));
@@ -251,7 +247,10 @@ public class RecordSummaryPage extends EditorPart{
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 5;
 		((GridLayout)buttonPanel.getLayout()).horizontalSpacing = 0;
 		
+		WidgetElement.setCSSClass(buttonPanel, "SMARTFormHeader");
+		
 		headerLabel = toolkit.createLabel(buttonPanel, ""); //$NON-NLS-1$
+		
 		FontData fd = headerLabel.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
 		fd.setHeight(fd.getHeight() + 1);
@@ -272,10 +271,10 @@ public class RecordSummaryPage extends EditorPart{
 		
 		detailSection = createSectionHeader(sashForm, toolkit, Messages.RecordSummaryPage_DetailsSection);
 		
-		Color c = toolkit.getColors().getColor(IFormColors.TB_BG);
-		Color e2 = new Color(getSite().getShell().getDisplay(), ColorUtil.blend(c.getRGB(), new RGB(255,255,255),50));
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.RecordSummaryPage_SummarySection, Messages.RecordSummaryPage_HistorySection}, detailSection, toolkit, e2);
-		tabList.addDisposeListener(e->e2.dispose());
+//		Color c = toolkit.getColors().getColor(IFormColors.TB_BG);
+//		Color e2 = new Color(getSite().getShell().getDisplay(), ColorUtil.blend(c.getRGB(), new RGB(255,255,255),50));
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.RecordSummaryPage_SummarySection, Messages.RecordSummaryPage_HistorySection}, detailSection, toolkit);
+//		tabList.addDisposeListener(e->e2.dispose());
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		
 		Composite tabPart = toolkit.createComposite(detailSection, SWT.NONE);
@@ -347,7 +346,7 @@ public class RecordSummaryPage extends EditorPart{
 		entityPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)entityPanel.getLayoutData()).horizontalSpan = 0;
 		((GridData)entityPanel.getLayoutData()).verticalSpan = 0;
-				
+		
 		SmartSection expAttachments = createSectionHeader(sashForm, toolkit, Messages.RecordSummaryPage_AttachmentsSection);
 		attachmentPanel = new AttachmentListComposite(expAttachments, toolkit, recordEditor);
 		attachmentPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

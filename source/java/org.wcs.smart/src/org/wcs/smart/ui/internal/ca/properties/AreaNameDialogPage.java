@@ -31,7 +31,6 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -56,6 +55,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
@@ -68,7 +68,7 @@ import org.wcs.smart.util.SmartUtils.RegExLevel;
  * @author egouge
  * @since 1.0.0
  */
-public class AreaNameDialogPage extends TitleAreaDialog {
+public class AreaNameDialogPage extends SmartStyledTitleDialog {
 	
 	private Session session;
 	private Area.AreaType type;
@@ -352,11 +352,5 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 			getButton(IDialogConstants.OK_ID).setEnabled(dirty);
 		}
 	}
-		
-	/** dialog is resizable
-	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
-	 */
-	protected boolean isResizable() {
-		return true;
-	}
+
 }

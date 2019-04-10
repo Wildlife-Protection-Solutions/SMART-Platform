@@ -29,7 +29,6 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -55,6 +54,7 @@ import org.wcs.smart.er.ui.samplingunit.SamplingUnitLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for selecting the sampling unit attributes to use with 
@@ -64,7 +64,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Emily
  *
  */
-public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
+public class SurveyDesignSamplingUnitAttributeDialog extends SmartStyledTitleDialog {
 
 	private MultipleSelectComposite<SamplingUnitAttribute> composite;
 	

@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -48,6 +47,7 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 /**
  * Dialog for importing areas from shapefiles.  Asks
  * users which shapefile attributes to use for
@@ -56,7 +56,7 @@ import org.wcs.smart.internal.Messages;
  * @author egouge
  *
  */
-public class AreaIdDialog extends TitleAreaDialog {
+public class AreaIdDialog extends SmartStyledTitleDialog {
 	
 	private SimpleFeatureType schema;
 	private List<ComboViewer> langViewers;
@@ -209,11 +209,5 @@ public class AreaIdDialog extends TitleAreaDialog {
 	public HashMap<Language, AttributeDescriptor> getSelectedFields(){
 		return results;
 	}
-	
-	/** dialog is resizable
-	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
-	 */
-	protected boolean isResizable() {
-		return true;
-	}
+
 }

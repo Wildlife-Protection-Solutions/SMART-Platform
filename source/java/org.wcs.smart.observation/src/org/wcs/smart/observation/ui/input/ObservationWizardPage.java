@@ -67,6 +67,8 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 	 */
 	@Override
 	public void createControl(Composite parent) {
+		parent.setBackgroundMode(SWT.INHERIT_FORCE);
+		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

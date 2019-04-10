@@ -24,7 +24,6 @@ package org.wcs.smart.ui.internal.ca.properties;
 import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -39,6 +38,7 @@ import org.geotools.referencing.CRS;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for editing projection information.
@@ -46,7 +46,7 @@ import org.wcs.smart.internal.Messages;
  * @author egouge
  *
  */
-public class EditProjectionDialog extends TitleAreaDialog implements Listener{
+public class EditProjectionDialog extends SmartStyledTitleDialog implements Listener{
 
 	
 	private Projection toEdit = null;

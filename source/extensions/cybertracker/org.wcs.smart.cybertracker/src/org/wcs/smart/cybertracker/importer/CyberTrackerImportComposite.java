@@ -159,13 +159,14 @@ public class CyberTrackerImportComposite extends Composite {
 		
 		Section data = toolkit.createSection(this, Section.TITLE_BAR | Section.EXPANDED);
 		layout = new GridLayout();
+		layout.marginWidth = 0;
 		data.setLayout(layout);
 		data.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		data.setText(Messages.CTPatrolTableContainer_DataSectionHeader);
 		
 		Composite dataComp = toolkit.createComposite(data);
 		layout = new GridLayout();
-		layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
+		layout.marginWidth = layout.horizontalSpacing = 0;
 		dataComp.setLayout(layout);
 		dataComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -175,6 +176,8 @@ public class CyberTrackerImportComposite extends Composite {
 		Composite buttons = toolkit.createComposite(dataComp);
 		buttons.setLayout(new GridLayout(2, true));
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		((GridLayout)buttons.getLayout()).marginWidth = 0;
+		((GridLayout)buttons.getLayout()).marginHeight = 0;
 		
 		Button btnImport = toolkit.createButton(buttons, Messages.CyberTrackerImportDialog_Button_Import, SWT.PUSH);
 		btnImport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
@@ -249,6 +252,8 @@ public class CyberTrackerImportComposite extends Composite {
 		buttons = new Composite(dataComp, SWT.NONE);
 		buttons.setLayout(new GridLayout(3, true));
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		((GridLayout)buttons.getLayout()).marginWidth = 0;
+		((GridLayout)buttons.getLayout()).marginHeight = 0;
 		btnAdd = toolkit.createButton(buttons,Messages.CyberTrackerImportComposite_Add, SWT.PUSH);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override

@@ -32,7 +32,6 @@ import java.util.Map.Entry;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -40,6 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for collection report parameters.
@@ -50,7 +50,7 @@ import org.wcs.smart.report.internal.Messages;
  * @author egouge
  * @since 1.0.0
  */
-public class ReportParameterDialog extends TitleAreaDialog {
+public class ReportParameterDialog extends SmartStyledTitleDialog {
 	
 	public static String SIMPLE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";  //$NON-NLS-1$
 	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.report.parameters"); //$NON-NLS-1$

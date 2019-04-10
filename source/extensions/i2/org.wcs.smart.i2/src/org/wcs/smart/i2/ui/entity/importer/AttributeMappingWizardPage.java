@@ -100,6 +100,7 @@ public class AttributeMappingWizardPage extends WizardPage{
 		
 		mappingPanel = new Composite(sc, SWT.NONE);
 		mappingPanel.setLayout(new GridLayout(2, false));
+		mappingPanel.setBackgroundMode(SWT.INHERIT_FORCE);
 		
 		FontData fd = mappingPanel.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);

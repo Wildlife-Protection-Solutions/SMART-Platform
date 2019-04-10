@@ -1,38 +1,198 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2014 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *     Lars Vogel <Lars.Vogel@gmail.com> - Bug 420836
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
  *******************************************************************************/
+	 
+.MTrimBar{
+	background-color: white;
+}
+
 .MPartStack {
-	swt-tab-renderer: null;
-	swt-selected-tabs-background: '#org-eclipse-ui-workbench-INACTIVE_TAB_BG_START' '#org-eclipse-ui-workbench-INACTIVE_TAB_BG_END' 100%;
-	swt-simple: true;
-	
-	color: '#org-eclipse-ui-workbench-INACTIVE_TAB_TEXT_COLOR';
+	swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
+	swt-unselected-hot-tab-color-background: #EFEFEF;
+    swt-unselected-tabs-color:  #FFFFFF;
+    swt-selected-tab-fill: #EDEDED;
+    swt-outer-keyline-color: white;
+    swt-tab-outline: white;
+    swt-shadow-visible: false;
+    swt-shadow-color: white;
+    swt-simple: true;
+    swt-tab-height: 32px;
+    swt-shadow-color: white;
+    swt-corner-radius: 0px;
+    color: #222837;
 }
 
 .MPartStack.active {
-	swt-selected-tabs-background: '#org-eclipse-ui-workbench-ACTIVE_TAB_BG_START' '#org-eclipse-ui-workbench-ACTIVE_TAB_BG_END' 100%;
+    swt-selected-tab-fill: #748DBD;   
+    swt-tab-outline: white;
+    swt-outer-keyline-color: white;
+	swt-corner-radius: 15;
+	swt-shadow-visible: false;
+	swt-corner-radius: 0px;
+	color: #222837;
+	
 }
 
-.MPartStack.active.noFocus {
-	swt-selected-tabs-background: '#org-eclipse-ui-workbench-ACTIVE_NOFOCUS_TAB_BG_START' '#org-eclipse-ui-workbench-ACTIVE_NOFOCUS_TAB_BG_END' 100%;
+.MPartStack.active > CTabItem:selected {
+	color: white;
 }
 
-.MPartStack.active.noFocus > CTabItem:selected {
-	color: '#org-eclipse-ui-workbench-ACTIVE_NOFOCUS_TAB_TEXT_COLOR';
+/* customized SMART tab bar*/
+.SMARTTabBar{
+	background-color: #FCEDDA;
+}
+.SMARTTab{
+	background-color: #FCEDDA;
+}
+.SMARTTabSelected{
+	background-color: #F09F3F;
+}
+.SMARTTabMouseOver{
+	background-color: #F6C78E;
 }
 
-.MToolBar.Draggable {
-	handle-image: url(./dragHandle.png);
+
+
+
+.SMARTSection{
+	background-color: #D5E1A3;
+}
+.SMARTSection Label{
+	background-color: #D5E1A3;
 }
 
-.MToolControl.Draggable {
-	handle-image: url(./dragHandle.png);
+.SMARTSection Hyperlink{
+	background-color: #D5E1A3;
 }
+
+Section {
+	background-color: #FFFFFF;
+	background-image: none;
+	swt-background-mode: default;
+	text-transform: none;
+	visibility: visible;
+
+  /* declared in CSS rules */
+	background-color-titlebar: #D5E1A3; /*#33446B;*/
+	background-color-gradient-titlebar: #D5E1A3;
+	border-color-titlebar: #FFFFFF;
+  	
+  	color: #33446B;
+}
+
+.SMARTFormHeader Label{
+	background-color: #B7CEE3;
+	color: #33446B;
+}
+
+.SMARTFormHeader IdFieldHeader{
+	background-color: #B7CEE3;
+	color: #33446B;
+}
+
+.SMARTFormHeader IntelQueryNameLabel{
+	background-color: #B7CEE3;
+	color: #33446B;
+}
+
+.SMARTFormHeader ToolBar{
+	background-color: #B7CEE3;
+	color: #33446B;
+}
+.SMARTFormHeader{
+	background-color: #B7CEE3;
+	color: #33446B;
+}
+FormHeading{
+	background-color: #B7CEE3;
+	color: #33446B;
+}
+
+Form{
+  /* actual values */
+  background-color: #ffffff;	/* declared in CSS: rgb(255, 255, 255) */
+  background-image: none;	/* declared in CSS: rgb(255, 255, 255) */
+  color: #32649F;	/* declared in CSS: rgb(80, 80, 80) */
+ 
+  swt-background-mode: none;
+  text-transform: none;
+  visibility: visible;
+
+  /* declared in CSS rules */
+  background: rgb(255, 255, 255);
+  h-bottom-keyline-1-color: rgb(234, 234, 234);
+  h-bottom-keyline-2-color: rgb(234, 234, 234);
+  h-hover-full-color: rgb(80, 80, 80);
+  h-hover-light-color: rgb(80, 80, 80);
+  tb-toggle-color: rgb(80, 80, 80);
+  tb-toggle-hover-color: rgb(80, 80, 80);
+  text-background-color: rgb(255, 255, 255);
+}
+
+ToolBar{
+	background-color:white;
+}
+
+CTabFolder{
+	swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
+	swt-corner-radius: 0px;
+	swt-selected-tab-fill: #F09F3F;
+	swt-unselected-hot-tab-color-background: #F6C78E;
+    swt-unselected-tabs-color:  #FCEDDA;
+
+    swt-outer-keyline-color: #FCEDDA;
+    swt-tab-outline: #F09F3F;
+    swt-shadow-visible: false;
+    swt-shadow-color: #FCEDDA;
+    swt-simple: true;
+    
+    background-color:white;        
+    color: black;
+}
+
+CTabItem{
+	color: black;
+}
+CTabItem:selected{
+	color: black;
+}
+
+#org-eclipse-e4-ui-compatibility-editor CTabFolder{
+	swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
+	swt-corner-radius: 0px;
+	swt-selected-tab-fill: #F09F3F;
+	swt-unselected-hot-tab-color-background: #F6C78E;
+    swt-unselected-tabs-color:  #FCEDDA;
+
+    swt-outer-keyline-color: white;
+    swt-tab-outline: #F09F3F;
+    swt-shadow-visible: false;
+    swt-shadow-color: #FCEDDA;
+    swt-simple: true;
+    
+    background-color:white;
+}
+#org-eclipse-e4-ui-compatibility-editor  CTabItem:selected{
+	color: black;
+}
+

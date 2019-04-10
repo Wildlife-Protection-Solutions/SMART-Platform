@@ -23,7 +23,6 @@ package org.wcs.smart.i2.ui.views;
 
 import java.text.MessageFormat;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,26 +58,16 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -99,6 +88,7 @@ import org.wcs.smart.i2.search.SpatialEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.EntitySearchJob;
+import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.dialogs.SaveSearchDialog;
 import org.wcs.smart.i2.ui.views.entity.search.AdvancedEntitySearchPanel;
 import org.wcs.smart.i2.ui.views.entity.search.AllPanel;
@@ -130,21 +120,7 @@ public class EntitySearchView {
 	private FormToolkit toolkit;
 	
 	private ComboViewer cmbSavedSearch;
-	
-	private Font boldFont;
-	private Font hlFont;
-	
-	
-	private Hyperlink basicSearch;
-	private Hyperlink advancedSearch;
-	private Hyperlink savedSearch;
-	private Hyperlink spatialSearch;
-	private Hyperlink allTable;
-	
-	
-	private StackLayout searchStack;
-	private StackLayout outerStack;
-	private Composite searchArea;
+
 	private SashForm searchSashForm;
 	
 	private IntelEntitySearch lastSearch = null;
@@ -154,7 +130,13 @@ public class EntitySearchView {
 	private SpatialSearchPanel spatialPanel;
 	private AllPanel allPanel = null;
 	
-	private HashMap<Control, int[]> weightMap = new HashMap<>();
+	private SectionTabHeader tabList;
+	private Composite tabPart;
+	
+	private Composite resultsStacks;
+	private Composite allResults;
+	private Composite entityListResults;
+	
 	
 	private LoadSavedSearches loadSearchJob = new LoadSavedSearches() {
 		ISelection lastSelection;
@@ -222,30 +204,24 @@ public class EntitySearchView {
 	 * Gets a list of current entities.
 	 */
 	public List<? extends Object> getEntities(){
-		if (outerStack.topControl == allPanel) {
+		if (tabList.getSelection() == Panel.ALL.ordinal()) {
 			return allPanel.getEntities(50);
 		}
 		return this.entityList.getEntities();
 	}
 	
 	public void setPanel(Panel p) {
-		switch(p) {
-		case ADVANCED:
-			updateHyperlink(new HyperlinkEvent(advancedSearch, null, null, -1));
-			return;
-		case ALL:
-			updateHyperlink(new HyperlinkEvent(allTable, null, null, -1));
-			return;
-		case BASIC:
-			updateHyperlink(new HyperlinkEvent(basicSearch, null, null, -1));
-			return;
-		case SAVED:
-			updateHyperlink(new HyperlinkEvent(savedSearch, null, null, -1));
-			return;
-		case SPATIAL:
-			updateHyperlink(new HyperlinkEvent(spatialSearch, null, null, -1));
-			return;
+		tabList.selectTab(p.ordinal());
+		selectResultsPanel();
+	}
+	
+	private void selectResultsPanel() {
+		if (tabList.getSelection() == Panel.ALL.ordinal()) {
+			((StackLayout)resultsStacks.getLayout()).topControl = allResults;
+		}else {
+			((StackLayout)resultsStacks.getLayout()).topControl = entityListResults;
 		}
+		resultsStacks.layout();
 	}
 	
 	@PostConstruct
@@ -263,72 +239,71 @@ public class EntitySearchView {
 		
 		toolkit.adapt(parent);
 		
-		Composite header = toolkit.createComposite(parent);
+		searchSashForm = new SashForm(parent, SWT.VERTICAL);
+		searchSashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite header = toolkit.createComposite(searchSashForm);
 		header.setLayout(new GridLayout());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		createHeaderOptions(header);
 		
 		Composite main = toolkit.createComposite(parent);
 		main.setLayout(new StackLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		outerStack = (StackLayout) main.getLayout();
-
-		searchSashForm = new SashForm(main, SWT.VERTICAL);
-		searchSashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		searchArea = toolkit.createComposite(searchSashForm);
-		searchArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		searchStack = new StackLayout();
-		searchArea.setLayout(searchStack);
-		
-		createBasicSearch(searchArea);
-		createAdvancedSearch(searchArea);
-		createSavedSearch(searchArea);
-		createSpatialSearch(searchArea);
-		
-		searchStack.topControl = searchArea.getChildren()[0];
-	
 		//spacer
-		Composite searchResultsPanel = toolkit.createComposite(searchSashForm);
-		searchResultsPanel.setLayout(new GridLayout());
-		((GridLayout)searchResultsPanel.getLayout()).marginWidth = 0;
-		((GridLayout)searchResultsPanel.getLayout()).marginHeight = 0;
+		resultsStacks = toolkit.createComposite(searchSashForm, SWT.NONE);
+		resultsStacks.setLayout(new StackLayout());
 		
-		Label l = toolkit.createLabel(searchResultsPanel, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
+		
+		entityListResults = toolkit.createComposite(resultsStacks, SWT.NONE);
+		entityListResults.setLayout(new GridLayout());
+		((GridLayout)entityListResults.getLayout()).marginWidth = 0;
+		((GridLayout)entityListResults.getLayout()).marginHeight = 0;
+		
+		Label l = toolkit.createLabel(entityListResults, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		entityList = new EntitySearchResultTable(searchResultsPanel, toolkit, context);
+		entityList = new EntitySearchResultTable(entityListResults, toolkit, context);
 		entityList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		loadSearchJob.schedule();
 		
-		searchSashForm.setWeights(new int[]{20,80});
+		
 		
 		//enforce a minimum size
-		entityList.addListener(SWT.Resize, new Listener(){
-			@Override
-			public void handleEvent(Event event) {
-				Point topSize = ((StackLayout)searchArea.getLayout()).topControl.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-				int topHeight = topSize.y+5;
-				int totalHeight = searchSashForm.getBounds().height;
-				if (topHeight > totalHeight) return;
-				if (searchSashForm.getChildren()[0].getBounds().height < topHeight){
-					searchSashForm.setWeights(new int[]{topHeight - searchSashForm.getSashWidth(), totalHeight - topHeight});
-				}
-			}
-				
-		});
+//		entityList.addListener(SWT.Resize, new Listener(){
+//			@Override
+//			public void handleEvent(Event event) {
+//				Point topSize = tabPart.computeSize(SWT.DEFAULT, SWT.DEFAULT);//((StackLayout)searchArea.getLayout()).topControl.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+//				int topHeight = topSize.y - tabList.computeSize(SWT.DEFAULT, SWT.DEFAULT).y + 5;
+//				int totalHeight = searchSashForm.getBounds().height;
+//				if (topHeight > totalHeight) return;
+//				if (searchSashForm.getChildren()[0].getBounds().height < topHeight){
+//					searchSashForm.setWeights(new int[]{topHeight - searchSashForm.getSashWidth(), totalHeight - topHeight});
+//				}
+//			}
+//				
+//		});
 		
+		allResults = toolkit.createComposite(resultsStacks, SWT.NONE);
+		allResults.setLayout(new GridLayout());
+		Composite c = allPanel.createResultsComposite(allResults);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		allPanel = new AllPanel(main, this, toolkit);
-		ContextInjectionFactory.inject(allPanel, context);
-		allPanel.setLayout(new GridLayout());
-		allPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		
+		searchSashForm.setWeights(new int[]{20,80});
 		
-		outerStack.topControl = searchSashForm;
-		searchStack.topControl = searchArea.getChildren()[0];
-		searchArea.layout();
-		searchSashForm.getParent().layout();
+//		allPanel = new AllPanel(main, this, toolkit);
+//		ContextInjectionFactory.inject(allPanel, context);
+//		allPanel.setLayout(new GridLayout());
+//		allPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		
+//		outerStack.topControl = searchSashForm;
+//		searchStack.topControl = searchArea.getChildren()[0];
+//		searchArea.layout();
+//		searchSashForm.getParent().layout();
 		
 		context.get(EPartService.class).activate(context.get(MPart.class), true);
 		
@@ -338,6 +313,8 @@ public class EntitySearchView {
 			setPanel(Panel.BASIC);
 			basicPanel.doSearch();
 		}
+		
+		tabList.addTabSelectionListener(ev->selectResultsPanel());
 	}
 	
 	@Inject
@@ -357,88 +334,81 @@ public class EntitySearchView {
 		}
 	}
 	
-	private void updateHyperlink(HyperlinkEvent e){
-		basicSearch.setFont(hlFont);
-		advancedSearch.setFont(hlFont);
-		savedSearch.setFont(hlFont);
-		spatialSearch.setFont(hlFont);
-		allTable.setFont(hlFont);
-		((Hyperlink)e.widget).setFont(boldFont);
-		((Hyperlink)e.widget).getParent().layout();
-		
-		
-		weightMap.put(searchStack.topControl, searchSashForm.getWeights());
-		if (e.widget == basicSearch){
-			searchStack.topControl = searchArea.getChildren()[0];
-			outerStack.topControl = searchSashForm;
-		}else if (e.widget == advancedSearch){
-			searchStack.topControl = searchArea.getChildren()[1];
-			outerStack.topControl = searchSashForm;
-		}else if (e.widget == savedSearch){
-			searchStack.topControl = searchArea.getChildren()[2];
-			outerStack.topControl = searchSashForm;
-		}else if (e.widget == spatialSearch) {
-			searchStack.topControl = searchArea.getChildren()[3];
-			outerStack.topControl = searchSashForm;
-		}else if (e.widget == allTable) {
-			outerStack.topControl = allPanel;
-		}
-		int[] weights = weightMap.get(searchStack.topControl);
-		if (weights == null) weights = new int[]{20,80};
-		searchSashForm.setWeights(weights);
-		searchArea.layout();
-		searchSashForm.getParent().layout();
-//		basicSearch.getParent().layout();
-	}
+//	private void updateHyperlink(HyperlinkEvent e){
+//		basicSearch.setFont(hlFont);
+//		advancedSearch.setFont(hlFont);
+//		savedSearch.setFont(hlFont);
+//		spatialSearch.setFont(hlFont);
+//		allTable.setFont(hlFont);
+//		((Hyperlink)e.widget).setFont(boldFont);
+//		((Hyperlink)e.widget).getParent().layout();
+//		
+//		
+//		weightMap.put(searchStack.topControl, searchSashForm.getWeights());
+//		if (e.widget == basicSearch){
+//			searchStack.topControl = searchArea.getChildren()[0];
+//			outerStack.topControl = searchSashForm;
+//		}else if (e.widget == advancedSearch){
+//			searchStack.topControl = searchArea.getChildren()[1];
+//			outerStack.topControl = searchSashForm;
+//		}else if (e.widget == savedSearch){
+//			searchStack.topControl = searchArea.getChildren()[2];
+//			outerStack.topControl = searchSashForm;
+//		}else if (e.widget == spatialSearch) {
+//			searchStack.topControl = searchArea.getChildren()[3];
+//			outerStack.topControl = searchSashForm;
+//		}else if (e.widget == allTable) {
+//			outerStack.topControl = allPanel;
+//		}
+//		int[] weights = weightMap.get(searchStack.topControl);
+//		if (weights == null) weights = new int[]{20,80};
+//		searchSashForm.setWeights(weights);
+//		searchArea.layout();
+//		searchSashForm.getParent().layout();
+////		basicSearch.getParent().layout();
+//	}
 	
 	public boolean isSpatialActive() {
-		return searchStack.topControl == searchArea.getChildren()[3];
+		return tabList.getSelection() == Panel.SPATIAL.ordinal();
 	}
 	
 	private void createHeaderOptions(Composite parent){
-		Composite header = toolkit.createComposite(parent, SWT.NONE);
-		header.setLayout(new GridLayout(5, false));
-		((GridLayout)header.getLayout()).marginWidth = 0;
-		((GridLayout)header.getLayout()).marginHeight = 0;
-		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		basicSearch = toolkit.createHyperlink(header, Messages.EntitySearchView_BasicSearchTab, SWT.NONE);
-		basicSearch.setToolTipText(Messages.EntitySearchView_BasicSearchTooltip);
-		advancedSearch = toolkit.createHyperlink(header, Messages.EntitySearchView_AdvSearchTab, SWT.NONE);
-		savedSearch = toolkit.createHyperlink(header, Messages.EntitySearchView_SavedSearchTab, SWT.NONE);
-		spatialSearch = toolkit.createHyperlink(header, Messages.EntitySearchView_SpatialSearchLabel, SWT.NONE);
-		spatialSearch.setToolTipText(Messages.EntitySearchView_SpatialSearchTooltip);
+		tabList = new SectionTabHeader(new String[]{
+				Messages.EntitySearchView_BasicSearchTab, 
+				Messages.EntitySearchView_AdvSearchTab, 
+				Messages.EntitySearchView_SavedSearchTab,
+				Messages.EntitySearchView_SpatialSearchLabel,
+				Messages.EntitySearchView_AllLabel
+		}, parent, toolkit);
+		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		tabPart = toolkit.createComposite(parent, SWT.NONE);
+		tabPart.setLayout(new StackLayout());
+		tabPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		allTable = toolkit.createHyperlink(header, Messages.EntitySearchView_AllLabel, SWT.NONE);
-		allTable.setToolTipText(Messages.EntitySearchView_AllTooltip);
+//		basicSearch.setToolTipText(Messages.EntitySearchView_BasicSearchTooltip);
+//		spatialSearch.setToolTipText(Messages.EntitySearchView_SpatialSearchTooltip);
+//		allTable.setToolTipText(Messages.EntitySearchView_AllTooltip);
 		
-		IHyperlinkListener hlistener = new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				updateHyperlink(e);
-			}
-		};
-		basicSearch.addHyperlinkListener(hlistener);
-		advancedSearch.addHyperlinkListener(hlistener);
-		savedSearch.addHyperlinkListener(hlistener);
-		spatialSearch.addHyperlinkListener(hlistener);
-		allTable.addHyperlinkListener(hlistener);
+//		basicSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+//		advancedSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+//		savedSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+//		spatialSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+//		allTable.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		
-		basicSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
-		advancedSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
-		savedSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
-		spatialSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
-		allTable.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		Composite b = createBasicSearch(tabPart);
+		Composite a = createAdvancedSearch(tabPart);
+		Composite s = createSavedSearch(tabPart);
+		Composite z = createSpatialSearch(tabPart);
 		
-		hlFont = basicSearch.getFont();
-		FontData fd = basicSearch.getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		boldFont = new Font(parent.getDisplay(), fd);
+		allPanel = new AllPanel(tabPart, this, toolkit);
+		ContextInjectionFactory.inject(allPanel, context);
 		
-		basicSearch.setFont(boldFont);
+		tabList.setContent(new Composite[] {b,a,s,z, allPanel}, tabPart);
 	}
 	
-	private void createSavedSearch(Composite parent){
+	private Composite createSavedSearch(Composite parent){
 
 		Composite core = toolkit.createComposite(parent, SWT.NONE);
 		core.setLayout(new GridLayout(2, false));
@@ -508,26 +478,31 @@ public class EntitySearchView {
 		btnLoad.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 2, 1));
 		btnLoad.addListener(SWT.Selection, (event)->loadSearch());
 		btnLoad.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		
+		return core;
 	}
 	
 	
-	private void createSpatialSearch(Composite parent){
+	private Composite createSpatialSearch(Composite parent){
 		Composite core = toolkit.createComposite(parent, SWT.NONE);
 		core.setLayout(new GridLayout());
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		spatialPanel = new SpatialSearchPanel(core, context, toolkit, this);
 		spatialPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		return core;
 	}
 	
 	
-	private void createAdvancedSearch(Composite parent){
+	private Composite createAdvancedSearch(Composite parent){
 		Composite core = toolkit.createComposite(parent, SWT.NONE);
 		core.setLayout(new GridLayout(2, false));
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		advancedSearchPanel = new AdvancedEntitySearchPanel(core, this, toolkit);
 		advancedSearchPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		return core;
 	}
 	
 	/**
@@ -564,7 +539,7 @@ public class EntitySearchView {
 		}else if (geometry != null) {
 			iSearch = new SpatialEntitySearch(search, geometry, SmartDB.getCurrentConservationArea());
 		}
-		updateHyperlink(new HyperlinkEvent(spatialSearch, null, null, -1));
+		setPanel(Panel.SPATIAL);
 		doSearch(iSearch, searchDelay);
 	}
 	
@@ -581,18 +556,18 @@ public class EntitySearchView {
 		IIntelEntitySearch iSearch = IIntelEntitySearch.parseSearchString(search.getSearchString(), search.getConservationArea());
 		if (iSearch instanceof BasicEntitySearch) {
 			setSearch((BasicEntitySearch)iSearch);
-			updateHyperlink(new HyperlinkEvent(basicSearch, null, null, -1));
+			setPanel(Panel.BASIC);
 			doSearch(null, searchDelay);
 		}else if (iSearch instanceof AdvancedEntitySearch){
 			//advanced search
 			AdvancedEntitySearch advsearch = (AdvancedEntitySearch) iSearch;
 			advancedSearchPanel.initPanel(advsearch);
-			updateHyperlink(new HyperlinkEvent(advancedSearch, null, null, -1));
+			setPanel(Panel.ADVANCED);
 			advancedSearchPanel.doSearch();
 		}else if (iSearch instanceof AllEntitySearch) {
 			AllEntitySearch allSearch = (AllEntitySearch)iSearch;
 			allPanel.initPanel(allSearch); //this will reload data as necessary
-			updateHyperlink(new HyperlinkEvent(allTable, null, null, -1));
+			setPanel(Panel.ALL);
 		}
 		this.lastSearch =  search;
 		
@@ -704,7 +679,6 @@ public class EntitySearchView {
 	@PreDestroy
 	public void dispose() {
 		toolkit.dispose();
-		if (boldFont != null) boldFont.dispose();
 	}
 	
 	/*

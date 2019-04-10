@@ -55,7 +55,7 @@ public class IconPanel extends Composite {
 	public IconPanel(Composite parent, boolean canEdit) {
 		super(parent, SWT.NONE);
 		this.canEdit = canEdit;
-		
+		super.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;
 		((GridLayout)getLayout()).marginHeight = 0;

@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -59,13 +58,15 @@ import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 
 /**
  * Connect server info dialog for displaying server details.
  * 
  */
-public class ConnectServerInfoDialog extends TitleAreaDialog {
+public class ConnectServerInfoDialog extends SmartStyledTitleDialog {
 
 	public static final String ID = "org.wcs.smart.preference.connect.ServerConfiguration"; //$NON-NLS-1$
 	
@@ -269,7 +270,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 
 		//get new server information
 		ConnectServerWizard wz = new ConnectServerWizard();
-		WizardDialog wd = new WizardDialog(getShell(), wz);
+		WizardDialog wd = new SmartWizardDialog(getShell(), wz);
 		wd.open();
 		initControls();
 	}

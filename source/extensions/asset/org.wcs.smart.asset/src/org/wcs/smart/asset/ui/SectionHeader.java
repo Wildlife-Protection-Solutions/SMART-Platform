@@ -24,18 +24,19 @@ package org.wcs.smart.asset.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseTrackListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.ui.forms.IFormColors;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 
 /**
  * Asset editor section header.
@@ -47,59 +48,106 @@ public class SectionHeader extends Composite{
 
 	private static final String EVENT_KEY = "EVENT"; //$NON-NLS-1$
 	
-	private FormToolkit toolkit;
-	private List<Hyperlink> links;
+	private List<CLabel> links;
 	
-	private Font normalFont;
-	private Font boldFont;
+	private Color borderColor = null; 
 	
-	public SectionHeader(Composite parent, int style, String[] headers, Listener[] actions, FormToolkit toolkit) {
+	public SectionHeader(Composite parent, int style, String[] headers, Listener[] actions) {
 		super(parent, style);
-		this.toolkit = toolkit;
+		WidgetElement.setCSSClass(this, "SMARTTabBar");
+		//TODO: fix this - currently this is the easiest way
+		//I could figure out how to get the selected
+		//tab color from the css
+		Composite temp = new Composite(parent, SWT.NONE);
+		WidgetElement.setCSSClass(temp, "SMARTTabSelected");
+		WidgetElement.applyStyles(temp, true);
+		borderColor = temp.getBackground();
+		temp.dispose();
+
+		addListener(SWT.Paint, e->{
+			drawBorder(e.gc);
+		});
 		createComponent(headers, actions);
+	}
+	
+	private void drawBorder(GC gc) {
+		Rectangle rr = SectionHeader.this.getBounds();
+
+		gc.setForeground(borderColor);
+		gc.setLineWidth(2);
+		gc.drawLine(0, rr.height-1, rr.width, rr.height-1);
+		gc.setLineWidth(1);
 	}
 	
 	private void createComponent(String[] headers, Listener[] actions) {
 		
 		setLayout(new GridLayout(headers.length, false));
-		((GridLayout)getLayout()).marginWidth = 2;
-		((GridLayout)getLayout()).marginHeight = 2;
-		setBackground( toolkit.getColors().getColor(IFormColors.TB_BG) );
-		
-		FontData fd = getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		boldFont = new Font(getDisplay(), fd);
-		addListener(SWT.Dispose, e->boldFont.dispose());
-		normalFont = getFont();
+		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginHeight = 0;
 		
 		links = new ArrayList<>();
 		for (int i = 0; i < headers.length; i ++) {
-			links.add(createHyperlink(headers[i], actions[i]));
+			links.add(createTab(headers[i], actions[i]));
 		}
 		
 	}
 	
 	public void selectPanel(int index) {
-		((IHyperlinkListener)links.get(index).getData(EVENT_KEY)).linkActivated(new HyperlinkEvent(links.get(index), null, "", 0)); //$NON-NLS-1$
+		selectTab(links.get(index));
+		((Listener)links.get(index).getData(EVENT_KEY)).handleEvent(new Event());
 	}
 
-	private Hyperlink createHyperlink(String text, Listener action) {
+	private void selectTab(CLabel link) {
+		links.forEach(l->WidgetElement.setCSSClass(l, "SMARTTab"));
+		WidgetElement.setCSSClass(link, "SMARTTabSelected");
+		WidgetElement.applyStyles(this, true);
+	}
+	
+	private CLabel createTab(String text, Listener action) {
 		
-		Hyperlink lnkEvents = toolkit.createHyperlink(this, text, SWT.NONE);
-		lnkEvents.setBackground(getBackground());
+		CLabel tab = new CLabel(this, SWT.NONE);
+		tab.setText(text);
+		tab.setMargins(3, 5, 5, 3);
+		tab.addListener(SWT.Paint,e->drawBorder(e.gc));
+		WidgetElement.setCSSClass(tab, "SMARTTab");
 		
-		IHyperlinkListener listener = new HyperlinkAdapter() {
+		tab.addMouseTrackListener(new MouseTrackListener() {
+
+			private String lastClass = null;
 			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				action.handleEvent(null);
+			public void mouseEnter(MouseEvent e) {
+				tab.setCursor(getDisplay().getSystemCursor(SWT.CURSOR_HAND));
 				
-				links.forEach(lnk->lnk.setFont(normalFont));
-				lnkEvents.setFont(boldFont);
-				layout();
+				lastClass = WidgetElement.getCSSClass(tab);
+				if (!lastClass.equals("SMARTTabSelected")) {
+					WidgetElement.setCSSClass(tab, "SMARTTabMouseOver");
+					WidgetElement.applyStyles(tab, true);
+				}
 			}
+
+			@Override
+			public void mouseExit(MouseEvent e) {
+				tab.setCursor(null);
+				String currentClass = WidgetElement.getCSSClass(tab);
+				if (!currentClass.equals("SMARTTabSelected")) {
+					WidgetElement.setCSSClass(tab, lastClass);
+					WidgetElement.applyStyles(tab, true);
+				}
+			}
+
+			@Override
+			public void mouseHover(MouseEvent e) {
+			}
+
+		});
+		
+		Listener click = e->{
+			action.handleEvent(null);
+			selectTab(tab);
+			layout();
 		};
-		lnkEvents.addHyperlinkListener(listener);
-		lnkEvents.setData(EVENT_KEY, listener);
-		return lnkEvents;
+		tab.addListener(SWT.MouseUp, click);
+		tab.setData(EVENT_KEY, click);
+		return tab;
 	}
 }

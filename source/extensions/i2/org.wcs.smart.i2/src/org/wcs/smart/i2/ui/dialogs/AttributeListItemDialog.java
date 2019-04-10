@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -35,6 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 
@@ -43,7 +43,7 @@ import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
  * @author Emily
  *
  */
-public class AttributeListItemDialog extends TitleAreaDialog {
+public class AttributeListItemDialog extends SmartStyledTitleDialog {
 
 	private IntelAttributeListItem item;
 	private NameKeyComposite nameKeyInfo;

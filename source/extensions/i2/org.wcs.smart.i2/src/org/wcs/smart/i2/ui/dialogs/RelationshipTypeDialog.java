@@ -83,8 +83,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.common.control.IconComposite;
@@ -106,6 +106,7 @@ import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.ui.NamedItemViewerFilter;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -117,7 +118,7 @@ import org.wcs.smart.ui.properties.FilterComposite;
  * @author Emily
  *
  */
-public class RelationshipTypeDialog extends TitleAreaDialog {
+public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 
 	private static final String NEW_GROUP = Messages.RelationshipTypeDialog_CreateNewGroupLabel;
 	

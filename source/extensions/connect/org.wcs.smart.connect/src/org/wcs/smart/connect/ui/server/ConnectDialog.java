@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -55,6 +54,7 @@ import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.ui.server.configure.ShowServerConfigurationHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Generate connect server dialog which asks for username and password.
@@ -62,7 +62,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Emily
  *
  */
-public class ConnectDialog extends TitleAreaDialog {
+public class ConnectDialog extends SmartStyledTitleDialog {
 
 	private Label lblServer;
 	

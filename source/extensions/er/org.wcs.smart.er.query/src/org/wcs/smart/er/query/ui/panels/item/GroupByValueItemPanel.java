@@ -36,10 +36,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.Area.AreaType;
@@ -142,19 +139,16 @@ public class GroupByValueItemPanel extends AbstractQueryItemPanel implements ISu
 		});
 		filterTreeViewer.setAutoExpandLevel(2);
 		filterTreeViewer.setInput(LOADING_TEXT);
-		Button btnAdd = new Button(main, SWT.PUSH);
-		btnAdd.setText(Messages.GroupByValueItemPanel_AddToQueryButtonText);
-		btnAdd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addItem();
-			}
-		});
+
+		createAddButton(filterTreeViewer, main);
+		
 		refreshPanel();
 		return main;
 	}
 	
-	private void addItem(){
+
+	@Override
+	protected void addItem(){
 		addQueryItem( ItemTreeNodeContentProvider.unwrapSelection((IStructuredSelection) filterTreeViewer.getSelection()));
 	}
 	

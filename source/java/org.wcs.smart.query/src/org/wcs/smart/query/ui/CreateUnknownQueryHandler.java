@@ -53,6 +53,7 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.newwizard.NewQueryWizard;
 import org.wcs.smart.query.ui.querylist.OpenQueryHandler;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Query handler that prompt the user for the type of query they
@@ -126,7 +127,7 @@ public class CreateUnknownQueryHandler {
 	
 	private void createUnknownQuery(Shell activeShell){
 		NewQueryWizard w = new NewQueryWizard();
-		WizardDialog d = new WizardDialog(activeShell, w);
+		WizardDialog d = new SmartWizardDialog(activeShell, w);
 		d.setMinimumPageSize(650,200);
 		
 		if (d.open() != IDialogConstants.OK_ID){

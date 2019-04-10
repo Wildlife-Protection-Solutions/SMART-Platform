@@ -24,6 +24,13 @@ package org.wcs.smart.query.ui.itempanel;
 import javax.inject.Inject;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.QuerySourceProvider;
 
@@ -44,5 +51,19 @@ public abstract class AbstractQueryItemPanel implements IQueryItemPanel{
 	{
 		provider.setQueryDefinitionSelection(currentSelection, getId());
 	}
-
+	
+	protected abstract void addItem();
+	
+	protected void createAddButton(TreeViewer filterTreeViewer, Composite parent) {
+		Menu m = new Menu(filterTreeViewer.getControl());
+		MenuItem add = new MenuItem(m, SWT.PUSH);
+		add.setText("Add to Query");
+		add.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		add.addListener(SWT.Selection, e->addItem( ));
+		filterTreeViewer.getControl().setMenu(m);
+		
+		Button btnAdd = new Button(parent, SWT.PUSH);
+		btnAdd.setText("Add to Query");
+		btnAdd.addListener(SWT.Selection, e->addItem());
+	}
 }

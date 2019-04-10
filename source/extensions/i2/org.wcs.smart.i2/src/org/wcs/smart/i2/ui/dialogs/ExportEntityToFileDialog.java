@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -62,6 +61,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.entity.exporter.EntityRelationshipExporter;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.xml.EntityToXml;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Export entities to xml for csv dialog 
@@ -69,7 +69,7 @@ import org.wcs.smart.i2.xml.EntityToXml;
  * @author Emily
  *
  */
-public class ExportEntityToFileDialog extends TitleAreaDialog {
+public class ExportEntityToFileDialog extends SmartStyledTitleDialog {
 
 	public static final String PREFERENCE_DIR_KEY = ExportEntityToFileDialog.class.getCanonicalName() + ".dir"; //$NON-NLS-1$
 

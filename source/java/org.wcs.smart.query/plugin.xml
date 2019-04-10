@@ -117,8 +117,9 @@
                commandId="org.wcs.smart.command.showperspective"
                icon="images/icons/view16/querypatrol.gif"
                id="org.wcs.smart.query.menu.view"
-               label="%perspectivetoolbar.showquery.command.label"
-               style="push"
+               label="%perspectivetoolbar.showquery.command.label1"
+               mode="FORCE_TEXT"
+               style="radio"
                tooltip="%perspectivetoolbar.showquery.command.tooltip">
             <parameter
                   name="org.wcs.smart.perspectiveid"
@@ -154,8 +155,9 @@
          <command
                commandId="org.wcs.smart.command.showperspective"
                icon="images/icons/view16/querypatrol.gif"
-               label="%perspectivetoolbar.showquery.command.label"
-               style="push"
+               label="%perspectivetoolbar.showquery.command.label1"
+               mode="FORCE_TEXT"
+               style="radio"
                tooltip="%perspectivetoolbar.showquery.command.tooltip">
             <parameter
                   name="org.wcs.smart.perspectiveid"
@@ -552,7 +554,7 @@
             <command
                   commandId="org.wcs.smart.command.showperspective"
                   icon="images/icons/view16/querypatrol.gif"
-                  label="%perspectivetoolbar.showquery.command.label"
+                  label="%showqueryperspective.command.name"
                   style="push"
                   tooltip="%perspectivetoolbar.showquery.command.tooltip">
                <parameter
@@ -589,7 +591,7 @@
             <command
                   commandId="org.wcs.smart.command.showperspective"
                   icon="images/icons/view16/querypatrol.gif"
-                  label="%perspectivetoolbar.showquery.command.label"
+                  label="%showqueryperspective.command.name"
                   style="push"
                   tooltip="%perspectivetoolbar.showquery.command.tooltip">
                <parameter

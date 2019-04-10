@@ -51,7 +51,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -148,10 +147,25 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 	
 	@Override
 	public Control createDialogArea(Composite parent) {
+		Composite composite = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		layout.verticalSpacing = 0;
+		layout.horizontalSpacing = 0;
+		composite.setLayout(layout);
+		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		composite.setFont(parent.getFont());
+		// Build the separator line
+		Label titleBarSeparator = new Label(composite, SWT.HORIZONTAL
+				| SWT.SEPARATOR);
+		titleBarSeparator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		parent = composite;
+		
 		setChangesMade(rdStyle.getUuid() == null);
 		
 		Composite main = new Composite(parent, SWT.NONE);
-		GridLayout layout = new GridLayout();
+		layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
 		main.setLayout(layout);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -238,12 +252,14 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 
 		Composite rightPanel = new Composite(container, SWT.NONE);
 		rightPanel.setLayout(new GridLayout(1, false));
-
-		Group area = new Group(rightPanel, SWT.NONE);
+		
+		
+		Composite area = new Composite(rightPanel, SWT.BORDER);
 		area.setLayout(new GridLayout());
 		area.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)area.getLayout()).marginWidth = 0;
 		((GridLayout)area.getLayout()).marginHeight = 0;
+		
 		ScrolledComposite scrolled = new ScrolledComposite(area, SWT.V_SCROLL | SWT.H_SCROLL );
 		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -261,7 +277,10 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 
 		emptyComposite = new Composite(infoInnerPanel, SWT.NONE);
 		emptyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-
+		emptyComposite.setLayout(new GridLayout());
+		Label l = new Label(emptyComposite, SWT.NONE);
+		l.setText("No style options for selected item.");
+		
 		defaultComposite = new RelationshipDiagramDefaultStyleComposite(infoInnerPanel);
 		defaultComposite.addOptionsChangeListener(new IStyleOptionsChangeListener() {
 			@Override

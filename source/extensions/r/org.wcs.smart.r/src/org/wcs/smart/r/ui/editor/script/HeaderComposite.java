@@ -23,6 +23,7 @@ package org.wcs.smart.r.ui.editor.script;
 
 import java.text.MessageFormat;
 
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -75,9 +76,9 @@ public class HeaderComposite extends Composite {
 	 * 
 	 */
 	public HeaderComposite(Composite parent, FormToolkit toolkit, Font headerFont, Color headerColor) {
-		
 		super(parent, SWT.NONE);
 		toolkit.adapt(this);
+		WidgetElement.setCSSClass(this, "SMARTFormHeader");
 		createComposite(headerFont, headerColor, toolkit);
 	}
 
@@ -90,8 +91,6 @@ public class HeaderComposite extends Composite {
 		
 	private void createComposite(Font headerFont, Color headerColor, FormToolkit toolkit) {
 		GridLayout gl = new GridLayout(3, false);
-		gl.marginHeight = 0;
-		gl.verticalSpacing = 0;
 		setLayout(gl);
 		
 		Label img = toolkit.createLabel(this,""); //$NON-NLS-1$

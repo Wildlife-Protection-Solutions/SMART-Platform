@@ -38,7 +38,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
@@ -94,6 +93,7 @@ import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.ui.RecordSourceAttributeLabelProvider;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
 import org.wcs.smart.i2.ui.handler.EditRecordTemplateHandler;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -103,7 +103,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class RecordSourceAttributeDialog extends TitleAreaDialog{
+public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 
 	@Inject
 	protected IEclipseContext context;

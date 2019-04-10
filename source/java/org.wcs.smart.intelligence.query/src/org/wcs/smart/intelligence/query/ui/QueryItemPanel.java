@@ -35,11 +35,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
@@ -186,14 +183,8 @@ public class QueryItemPanel extends AbstractQueryItemPanel {
 		input.put(OperatorsTreeNode.KEY, new Operator[]{Operator.NOT, Operator.BRACKETS});
 		filterTreeViewer.setInput(input);
 		
-		Button btnAdd = new Button(main, SWT.PUSH);
-		btnAdd.setText(Messages.QueryItemPanel_AddToQueryButton);
-		btnAdd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addItem();
-			}
-		});
+		createAddButton(filterTreeViewer, main);
+		
 		refreshPanel();
 		
 		return main;
@@ -204,7 +195,8 @@ public class QueryItemPanel extends AbstractQueryItemPanel {
 	public void refreshPanel() {
 	}
 
-	private void addItem(){
+	@Override
+	protected void addItem(){
 		addQueryItem( ItemTreeNodeContentProvider.unwrapSelection((IStructuredSelection) filterTreeViewer.getSelection()));
 	}
 }

@@ -330,6 +330,7 @@ public class PatrolLegDayInputComposite {
 		mnuDelete.setEnabled(false);
 		mnuMove.setEnabled(false);
 		mnuEdit.setEnabled(false);
+		
 		if (editor.getPatrolEditor().canEdit() != null){
 			dtEndTime.setEnabled(false);
 			dtStartTime.setEnabled(false);
@@ -342,34 +343,35 @@ public class PatrolLegDayInputComposite {
 			mnuDelete.setEnabled(false);
 			mnuMove.setEnabled(false);
 			mnuEdit.setEnabled(false);
+			mnuAdd.setEnabled(false);
+			
 			importTrack.setVisible(false);
 			lblImportWaypoints.setVisible(false);
-			
 		}
 	}
 
 	public Composite createComposite(Composite parent, FormToolkit toolkit) {
 		
-		mainComposite = toolkit.createComposite(parent);
+		mainComposite = toolkit.createComposite(parent, SWT.NONE);
 		mainComposite.setLayout(new GridLayout(1, false));
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridLayout)mainComposite.getLayout()).verticalSpacing = 0;
+		((GridLayout)mainComposite.getLayout()).marginWidth = 0;
+		((GridLayout)mainComposite.getLayout()).marginHeight = 0;
+		((GridLayout)mainComposite.getLayout()).verticalSpacing = 10;
 		
 		Composite timeInfo = toolkit.createComposite(mainComposite);
 		timeInfo.setLayout(new GridLayout(4, false));
+		((GridLayout) timeInfo.getLayout()).marginWidth = 0;
 		((GridLayout) timeInfo.getLayout()).horizontalSpacing = 15;
-		((GridLayout) timeInfo.getLayout()).verticalSpacing = 0;
-		 ((GridLayout)timeInfo.getLayout()).marginWidth = 0;
-		 ((GridLayout)timeInfo.getLayout()).marginLeft = 5;
-		 ((GridLayout)timeInfo.getLayout()).marginHeight = 5;
+		 
 		timeInfo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Composite c = toolkit.createComposite(timeInfo);
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		c.setLayout(new GridLayout(2, false));
-		((GridLayout)c.getLayout()).marginWidth = 0;
-		((GridLayout)c.getLayout()).marginHeight = 0;
-		((GridLayout)c.getLayout()).verticalSpacing = 3;
+		((GridLayout) c.getLayout()).marginWidth = 0;
+		((GridLayout) c.getLayout()).marginHeight = 0;
+		
 		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_StartTimeLabel);
 		dtStartTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
 		toolkit.adapt(dtStartTime);
@@ -391,26 +393,28 @@ public class PatrolLegDayInputComposite {
 				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
 			}
 		});
-		Hyperlink btnUpdateTime = toolkit.createHyperlink(c, Messages.PatrolLegDayInputComposite_Button_UpdateTime_Text, SWT.NONE);
-		btnUpdateTime.setToolTipText(Messages.PatrolLegDayInputComposite_Button_UpdateTime_Tooltip);
-		btnUpdateTime.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false, 2, 1));
-		btnUpdateTime.addHyperlinkListener(new IHyperlinkListener() {
-			
-			@Override
-			public void linkExited(HyperlinkEvent e) {
-			}
-			
-			@Override
-			public void linkEntered(HyperlinkEvent e) {
-			}
-			
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Title, Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Message)) {
-					updateTimeWithWpData();
+		if (editor.getPatrolEditor().canEdit() == null) {
+			Hyperlink btnUpdateTime = toolkit.createHyperlink(c, Messages.PatrolLegDayInputComposite_Button_UpdateTime_Text, SWT.NONE);
+			btnUpdateTime.setToolTipText(Messages.PatrolLegDayInputComposite_Button_UpdateTime_Tooltip);
+			btnUpdateTime.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false, 2, 1));
+			btnUpdateTime.addHyperlinkListener(new IHyperlinkListener() {
+				
+				@Override
+				public void linkExited(HyperlinkEvent e) {
 				}
-			}
-		});
+				
+				@Override
+				public void linkEntered(HyperlinkEvent e) {
+				}
+				
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Title, Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Message)) {
+						updateTimeWithWpData();
+					}
+				}
+			});
+		}
 		
 		c = toolkit.createComposite(timeInfo);
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -511,7 +515,8 @@ public class PatrolLegDayInputComposite {
 		
 		Composite trackComp = toolkit.createComposite(mainComposite);
 		trackComp.setLayout(new GridLayout(4, false));
-		
+		((GridLayout)trackComp.getLayout()).marginWidth = 0;
+		((GridLayout)trackComp.getLayout()).marginHeight = 0;
 		
 		toolkit.createLabel(trackComp, Messages.PatrolLegDayInputComposite_DistanceTravelledLabel);
 		txtDistance = toolkit.createText(trackComp, "0", SWT.NONE); //$NON-NLS-1$
@@ -542,6 +547,8 @@ public class PatrolLegDayInputComposite {
 		
 		Composite observationHcomp = toolkit.createComposite(mainComposite);
 		observationHcomp.setLayout(new GridLayout(2, false));
+		((GridLayout)observationHcomp.getLayout()).marginWidth = 0;
+		((GridLayout)observationHcomp.getLayout()).marginHeight = 0;
 		toolkit.createLabel(observationHcomp, Messages.PatrolLegDayInputComposite_ObservationsWaypointsLabel);
 		lblImportWaypoints = toolkit.createHyperlink(observationHcomp, Messages.PatrolLegDayInputComposite_ImportWaypointsLabel, SWT.NONE);
 		lblImportWaypoints.addHyperlinkListener(new HyperlinkAdapter(){
@@ -557,6 +564,8 @@ public class PatrolLegDayInputComposite {
 		
 		Composite buttonComp = toolkit.createComposite(mainComposite);
 		buttonComp.setLayout(new GridLayout(3, false));
+		((GridLayout)buttonComp.getLayout()).marginWidth = 0;
+		((GridLayout)buttonComp.getLayout()).marginHeight = 0;
 		btnAddWaypoint = toolkit.createButton(buttonComp, Messages.PatrolLegDayInputComposite_AddWaypoint_Button, SWT.PUSH);
 		btnAddWaypoint.addSelectionListener(new SelectionAdapter() {
 			@Override

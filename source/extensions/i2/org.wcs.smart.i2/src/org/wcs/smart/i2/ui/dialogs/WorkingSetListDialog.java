@@ -38,7 +38,6 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -75,6 +74,7 @@ import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.WorkingSetLabelProvider;
 import org.wcs.smart.i2.ui.views.WorkingSetView;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -84,7 +84,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class WorkingSetListDialog extends TitleAreaDialog {
+public class WorkingSetListDialog extends SmartStyledTitleDialog {
 
 	public static final String NONE_LABEL = Messages.WorkingSetListDialog_NoneLabel;
 	
