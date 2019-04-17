@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.cybertracker.survey.export;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,9 +62,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.MobileDeviceUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.export.PackageContributionManager;
@@ -92,7 +97,8 @@ public class SurveyCTPackageDialog extends SmartStyledTitleDialog {
 	private static final String LAST_FILE_KEY = "SurveyCTPackageDialog.file"; //$NON-NLS-1$
 	private static final String LAST_DESIGN_KEY = "SurveyCTPackageDialog.cm"; //$NON-NLS-1$
 	private static final String LAST_PROFILE_KEY ="SurveyCTPackageDialog.profile"; //$NON-NLS-1$
-	
+	private static final String LAST_ISFILE_KEY = "PatrolCTPackageDialog.isfile"; //$NON-NLS-1$
+
 	private ComboViewer designViewer;
 	private ComboViewer profileViewer;
 	private Text txtOutputFile;
@@ -104,6 +110,9 @@ public class SurveyCTPackageDialog extends SmartStyledTitleDialog {
 	private CyberTrackerPropertiesProfile cmDefaultProfile = null;
 	
 	private List<IPackageUiContribution> contributions = null;
+	
+	private Button opDevice;
+	private Button opFile;
 	
     public SurveyCTPackageDialog(Shell parentShell) {
 		super(parentShell);
@@ -122,28 +131,51 @@ public class SurveyCTPackageDialog extends SmartStyledTitleDialog {
     
     public void okPressed() {
     	String selectedFile = txtOutputFile.getText();
+    	final boolean todevice = opDevice.getSelection();
     	
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_FILE_KEY, selectedFile);
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(LAST_DESIGN_KEY), UuidUtils.uuidToString(selectedDesign.getUuid()));
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(LAST_PROFILE_KEY), UuidUtils.uuidToString(selectedProfile.getUuid()));
-    	
+    	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(LAST_ISFILE_KEY), todevice);
 
-		Path exportFile = Paths.get(selectedFile);
-		if (Files.exists(exportFile)) {
-			if (!MessageDialog.openQuestion(getShell(), Messages.SurveyCTPackageDialog_DialogTitle, MessageFormat.format(Messages.SurveyCTPackageDialog_OverwriteQuestion, exportFile.toString()))) {
+    	Path exportFile = null;
+    	if (todevice) {
+    		StringBuilder sb = new StringBuilder();
+    		
+    		sb.append( selectedDesign.getName().replaceAll("[^A-Za-z0-9]", "") ); //$NON-NLS-1$ //$NON-NLS-2$
+    		sb.append("_"); //$NON-NLS-1$
+    		sb.append(selectedDesign.getConservationArea().getId());
+    		sb.append("_"); //$NON-NLS-1$
+    		sb.append( LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) ); //$NON-NLS-1$
+    		sb.append(".zip"); //$NON-NLS-1$
+    		
+    		try {
+    			exportFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(sb.toString());
+    			if (Files.exists(exportFile)) Files.delete(exportFile);
+				
+			} catch (IOException e) {
+				CyberTrackerPlugIn.displayError(Messages.SurveyCTPackageDialog_ErrorTitle, MessageFormat.format(Messages.SurveyCTPackageDialog_UnableToCreateTempFile, e.getMessage()), e);
 				return;
 			}
-			boolean ok = true;
-			try{
-				ok = Files.deleteIfExists(exportFile);
-			}catch (Exception ex) {
-				ok = false;
+    	}else {
+			exportFile = Paths.get(selectedFile);
+			if (Files.exists(exportFile)) {
+				if (!MessageDialog.openQuestion(getShell(), Messages.SurveyCTPackageDialog_DialogTitle, MessageFormat.format(Messages.SurveyCTPackageDialog_OverwriteQuestion, exportFile.toString()))) {
+					return;
+				}
+				boolean ok = true;
+				try{
+					ok = Files.deleteIfExists(exportFile);
+				}catch (Exception ex) {
+					ok = false;
+				}
+				if (!ok) {
+					MessageDialog.openError(getShell(), Messages.SurveyCTPackageDialog_DialogTitle, MessageFormat.format(Messages.SurveyCTPackageDialog_OverwriteError, exportFile.toString()));
+					return;
+				}
 			}
-			if (!ok) {
-				MessageDialog.openError(getShell(), Messages.SurveyCTPackageDialog_DialogTitle, MessageFormat.format(Messages.SurveyCTPackageDialog_OverwriteError, exportFile.toString()));
-				return;
-			}
-		}
+    	}
+    	final Path fexportFile = exportFile;
 		SurveyCtPackage ctpackage = (SurveyCtPackage) (new SurveyCtPackageManager()).createPackage();
 		ctpackage.setSurveyDesign(selectedDesign);
 		ctpackage.setCtProfile(selectedProfile);
@@ -171,11 +203,32 @@ public class SurveyCTPackageDialog extends SmartStyledTitleDialog {
 								if (update != null) updates.add(update);
 							}
 						}
+						SurveyPackageExporter.INSTANCE.exportPackage(selectedDesign, selectedProfile, fexportFile, updates, null, progress.split(1));
+
 						
-						SurveyPackageExporter.INSTANCE.exportPackage(selectedDesign, selectedProfile, exportFile, updates, null, progress.split(1));
-						Display.getDefault().syncExec(()->{
-							MessageDialog.openInformation(getShell(), Messages.SurveyCTPackageDialog_ExportDoneTitle, MessageFormat.format(Messages.SurveyCTPackageDialog_ExportDoneMessage,exportFile.toString()));	
-						});
+						if(todevice) {
+							//write file to device and delete it
+							try {
+								MobileDeviceUtils.exportAppToDevice(fexportFile);
+							}catch (Exception ex) {
+								throw ex;
+							}finally {
+								//delete temporary file
+								try {
+									Files.delete(fexportFile);
+								}catch (Exception ex) {
+									CyberTrackerPlugIn.log(ex.getMessage(), ex);
+								}
+							}
+							
+							Display.getDefault().syncExec(()->{
+								MessageDialog.openInformation(getShell(), Messages.SurveyCTPackageDialog_ExportDoneTitle, MessageFormat.format(Messages.SurveyCTPackageDialog_ExportDeviceSuccess, fexportFile.getFileName().toString()));	
+							});
+						}else {
+							Display.getDefault().syncExec(()->{
+								MessageDialog.openInformation(getShell(), Messages.SurveyCTPackageDialog_ExportDoneTitle, MessageFormat.format(Messages.SurveyCTPackageDialog_ExportDoneMessage,fexportFile.toString()));	
+							});
+						}
 						
 					}catch(OperationCanceledException e) {
 						iscancel[0] = true;
@@ -184,12 +237,12 @@ public class SurveyCTPackageDialog extends SmartStyledTitleDialog {
 						});
 						
 					} catch (Exception e) {
-						CyberTrackerPlugIn.displayError(Messages.SurveyCTPackageDialog_ErrorTitle, Messages.SurveyCTPackageDialog_ExportErrorMsg + e.getMessage(), e);
+						throw new InvocationTargetException(e, e.getMessage());
 					}		
 				}
 			});
 		} catch (Exception e) {
-			CyberTrackerPlugIn.displayError(Messages.SurveyCTPackageDialog_ErrorTitle, Messages.SurveyCTPackageDialog_ExportErrorMsg + e.getMessage(), e);
+			CyberTrackerPlugIn.displayError(Messages.SurveyCTPackageDialog_ErrorTitle, Messages.SurveyCTPackageDialog_ExportErrorMsg + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 			return;
 		}	
 		if (!iscancel[0]) super.okPressed();	
@@ -212,12 +265,13 @@ public class SurveyCTPackageDialog extends SmartStyledTitleDialog {
 		if (getButton(IDialogConstants.OK_ID) == null) return;
 		setErrorMessage(null);
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
-		
-		if (txtOutputFile.getText().isEmpty()) {
-			setErrorMessage(Messages.SurveyCTPackageDialog_FileRequired);
-			return;
+		if (opFile.getSelection()){
+			if (txtOutputFile.getText().isEmpty()) {
+				setErrorMessage(Messages.SurveyCTPackageDialog_FileRequired);
+				return;
+			}
 		}
-		
+			
 		if (this.selectedDesign == null) {
 			setErrorMessage(Messages.SurveyCTPackageDialog_DesignRequired);
 			return;
@@ -252,6 +306,8 @@ public class SurveyCTPackageDialog extends SmartStyledTitleDialog {
 		lblwarnimage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)lblwarnimage.getLayoutData()).widthHint = 200;
 		
+    	boolean isFile = CyberTrackerPlugIn.getDefault().getPreferenceStore().getBoolean(LAST_ISFILE_KEY);
+
 		Group g = new Group(main, SWT.NONE);
 		g.setText(Messages.SurveyCTPackageDialog_PropertiesGroup);
 		g.setLayout(new GridLayout(3, false));
@@ -260,12 +316,36 @@ public class SurveyCTPackageDialog extends SmartStyledTitleDialog {
 		Label outputFile = new Label(g, SWT.NONE);
 		outputFile.setText(Messages.SurveyCTPackageDialog_FileLabel);
 		
-		txtOutputFile = new Text(g, SWT.BORDER);
+		Composite outputOps = new Composite(g, SWT.NONE);
+		outputOps.setLayout(new GridLayout(4, false));
+		((GridLayout)outputOps.getLayout()).marginWidth = 0;
+		((GridLayout)outputOps.getLayout()).marginHeight = 0;
+		outputOps.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		opDevice = new Button(outputOps, SWT.RADIO);
+		opDevice.setText(Messages.SurveyCTPackageDialog_DeviceLabel);
+		opDevice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		opDevice.setSelection(!isFile);
+		
+		opFile = new Button(outputOps, SWT.RADIO);
+		opFile.setText(Messages.SurveyCTPackageDialog_FileItemLabel);
+		opFile.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		opFile.setSelection(isFile);
+		
+		if (!CyberTrackerPlugIn.getDefault().isWindows()) {
+			opDevice.setSelection(false);
+			opFile.setSelection(true);
+			opDevice.setEnabled(false);
+			lblwarnimage.setText(lblwarnimage.getText() + "\n\n" + Messages.SurveyCTPackageDialog_DirectoExportNotSupported); //$NON-NLS-1$
+		}
+		
+		txtOutputFile = new Text(outputOps, SWT.BORDER);
 		txtOutputFile.setText(""); //$NON-NLS-1$
 		txtOutputFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtOutputFile.addListener(SWT.Modify, e->validate());
+		txtOutputFile.setEnabled(opFile.getSelection());
 		
-		Button btnBrowse = new Button(g, SWT.PUSH);
+		Button btnBrowse = new Button(outputOps, SWT.PUSH);
 		btnBrowse.setText("..."); //$NON-NLS-1$
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnBrowse.addListener(SWT.Selection, e->{
@@ -277,6 +357,18 @@ public class SurveyCTPackageDialog extends SmartStyledTitleDialog {
 			String file = fd.open();
 			if (file == null) return;
 			txtOutputFile.setText(file);
+		});
+		btnBrowse.setEnabled(opFile.getSelection());
+		
+		opDevice.addListener(SWT.Selection, e->{
+			txtOutputFile.setEnabled(opFile.getSelection());
+			btnBrowse.setEnabled(opFile.getSelection());
+			validate();
+		});
+		opFile.addListener(SWT.Selection, e->{
+			txtOutputFile.setEnabled(opFile.getSelection());
+			btnBrowse.setEnabled(opFile.getSelection());
+			validate();
 		});
 		
 		Label modelLabel = new Label(g, SWT.NONE);

@@ -187,72 +187,80 @@ public class MbTileGenerator {
 
 			//create tiles tables
 			createTiles(c);
-			monitor.worked(1);
-			
-			//create images here 
-			BufferedImage tileimage = new BufferedImage(256, 256, BufferedImage.TYPE_INT_RGB);
-			Graphics2D gc = tileimage.createGraphics();
-			
-			//populate tiles tables
-			for(ZoomLevel zz : lyr.getZooms()) {
-				monitor.subTask(MessageFormat.format(Messages.MbTileGenerator_SubTask3, zz.getZoom()));
+			try {
+				monitor.worked(1);
 				
-				int totalTiles = zz.getTiles().size();
-				int cnt = 0;
+				//create images here 
+				BufferedImage tileimage = new BufferedImage(256, 256, BufferedImage.TYPE_INT_RGB);
+				Graphics2D gc = tileimage.createGraphics();
 				
-				int xMinTile = zz.getMinTileX();
-				int xMaxTile = zz.getMaxTileX();
-				int yMinTile = zz.getMinTileY();
-				int yMaxTile = zz.getMaxTileY();
-
-				//process images TILE_TO_RENDER_BUFFER x TILE_TO_RENDER_BUFFER at a time
-				for (int x = xMinTile; x <= xMaxTile; x += TILE_TO_RENDER_BUFFER) {
-					for (int y = yMinTile; y <= yMaxTile; y += TILE_TO_RENDER_BUFFER) {
-						
-						Tile minTile = zz.getTile(x, y);
-						Tile maxTile = zz.getTile(Math.min(xMaxTile, x + TILE_TO_RENDER_BUFFER - 1), Math.min(yMaxTile, y + TILE_TO_RENDER_BUFFER - 1));
-						
-						Envelope r1 = minTile.getBoundsMercator();
-						r1.expandToInclude(maxTile.getBoundsMercator());
-						
-						BufferedImage img = new BufferedImage((maxTile.getTileX() - minTile.getTileX()+1)*TILESIZE,  (maxTile.getTileY() - minTile.getTileY()+1)*TILESIZE, BufferedImage.TYPE_INT_RGB);
-						Graphics2D gg = img.createGraphics();
-
-						ReferencedEnvelope rr = new ReferencedEnvelope(r1,  sphericalMercator);
-						BoundsStrategy bnds = new BoundsStrategy(rr);
-						try {
-							DrawMapParameter params = new ApplicationGIS.DrawMapParameter(gg,  new Dimension(img.getWidth(),img.getHeight()), thisMap, bnds, 92, SelectionStyle.IGNORE, new NullProgressMonitor());
-							ApplicationGIS.drawMap(params);
+				//populate tiles tables
+				for(ZoomLevel zz : lyr.getZooms()) {
+					monitor.subTask(MessageFormat.format(Messages.MbTileGenerator_SubTask3, zz.getZoom()));
+					
+					int totalTiles = zz.getTiles().size();
+					int cnt = 0;
+					
+					int xMinTile = zz.getMinTileX();
+					int xMaxTile = zz.getMaxTileX();
+					int yMinTile = zz.getMinTileY();
+					int yMaxTile = zz.getMaxTileY();
+	
+					//process images TILE_TO_RENDER_BUFFER x TILE_TO_RENDER_BUFFER at a time
+					for (int x = xMinTile; x <= xMaxTile; x += TILE_TO_RENDER_BUFFER) {
+						for (int y = yMinTile; y <= yMaxTile; y += TILE_TO_RENDER_BUFFER) {
 							
-						}catch (Throwable t) {
+							Tile minTile = zz.getTile(x, y);
+							Tile maxTile = zz.getTile(Math.min(xMaxTile, x + TILE_TO_RENDER_BUFFER - 1), Math.min(yMaxTile, y + TILE_TO_RENDER_BUFFER - 1));
 							
-						}
-						gg.dispose();
-//						ImageIO.write(img, "png", new File("C:\\temp\\mbtiles\\overview_" + zz.getZoom() + "_" + x + "_" + y + ".png"));
-
-						for (int i = 0; i < TILE_TO_RENDER_BUFFER; i ++) {
-							for (int j = 0; j < TILE_TO_RENDER_BUFFER; j ++) {
-								Tile t = zz.getTile(x+i, y+j);
-								if (t == null) continue;
+							Envelope r1 = minTile.getBoundsMercator();
+							r1.expandToInclude(maxTile.getBoundsMercator());
 							
-								gc.clearRect(0, 0, tileimage.getWidth(), tileimage.getHeight());
-								gc.drawImage(img, 0, 0, 256, 256, i * 256, j * 256, (i + 1) * 256, (j + 1) * 256, null);
-								writeTile(c, t, tileimage);
+							BufferedImage img = new BufferedImage((maxTile.getTileX() - minTile.getTileX()+1)*TILESIZE,  (maxTile.getTileY() - minTile.getTileY()+1)*TILESIZE, BufferedImage.TYPE_INT_RGB);
+							Graphics2D gg = img.createGraphics();
+	
+							ReferencedEnvelope rr = new ReferencedEnvelope(r1,  sphericalMercator);
+							BoundsStrategy bnds = new BoundsStrategy(rr);
+							try {
+								DrawMapParameter params = new ApplicationGIS.DrawMapParameter(gg,  new Dimension(img.getWidth(),img.getHeight()), thisMap, bnds, 92, SelectionStyle.IGNORE, new NullProgressMonitor());
+								ApplicationGIS.drawMap(params);
 								
-								cnt++;
-								monitor.worked(1);
-								monitor.subTask(MessageFormat.format(Messages.MbTileGenerator_SubTask4, + zz.getZoom(), cnt, totalTiles ));
-								if (monitor.isCanceled()) return;
+							}catch (Throwable t) {
+								
 							}
+							gg.dispose();
+							
+	//						ImageIO.write(img, "png", new File("C:\\temp\\mbtiles\\overview_" + zz.getZoom() + "_" + x + "_" + y + ".png"));
+	
+							for (int i = 0; i < TILE_TO_RENDER_BUFFER; i ++) {
+								for (int j = 0; j < TILE_TO_RENDER_BUFFER; j ++) {
+									Tile t = zz.getTile(x+i, y+j);
+									if (t == null) continue;
+								
+									gc.clearRect(0, 0, tileimage.getWidth(), tileimage.getHeight());
+									gc.drawImage(img, 0, 0, 256, 256, i * 256, j * 256, (i + 1) * 256, (j + 1) * 256, null);
+									writeTile(c, t, tileimage);
+									
+									cnt++;
+									monitor.worked(1);
+									monitor.subTask(MessageFormat.format(Messages.MbTileGenerator_SubTask4, + zz.getZoom(), cnt, totalTiles ));
+									if (monitor.isCanceled()) return;
+								}
+							}
+							
+							psInsertTile.executeBatch();
+							img = null;
+							
 						}
-						psInsertTile.executeBatch();
 					}
 				}
+				c.createStatement().executeUpdate("COMMIT TRANSACTION"); //$NON-NLS-1$
+				gc.dispose();
+				tileimage = null;
+			}finally {
+				if (psInsertTile != null) psInsertTile.close();
 			}
-			c.createStatement().executeUpdate("COMMIT TRANSACTION"); //$NON-NLS-1$
-			gc.dispose();
 		}
-		
 		monitor.done();
 	}
 	

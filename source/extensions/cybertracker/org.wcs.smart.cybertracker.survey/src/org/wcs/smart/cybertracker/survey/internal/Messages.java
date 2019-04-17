@@ -108,13 +108,18 @@ public class Messages extends NLS {
 	public static String SurveyCTPackageDialog_CancelledTitle;
 	public static String SurveyCTPackageDialog_DesignLabel;
 	public static String SurveyCTPackageDialog_DesignRequired;
+	public static String SurveyCTPackageDialog_DeviceLabel;
 	public static String SurveyCTPackageDialog_DialogTitle;
+	public static String SurveyCTPackageDialog_DirectoExportNotSupported;
 	public static String SurveyCTPackageDialog_ErrorTitle;
+	public static String SurveyCTPackageDialog_ExportDeviceSuccess;
 	public static String SurveyCTPackageDialog_ExportDoneMessage;
 	public static String SurveyCTPackageDialog_ExportDoneTitle;
 	public static String SurveyCTPackageDialog_ExportErrorMsg;
+	public static String SurveyCTPackageDialog_ExportFailed;
 	public static String SurveyCTPackageDialog_ExportTaskName;
 	public static String SurveyCTPackageDialog_FileDialogTitle;
+	public static String SurveyCTPackageDialog_FileItemLabel;
 	public static String SurveyCTPackageDialog_FileLabel;
 	public static String SurveyCTPackageDialog_FileRequired;
 	public static String SurveyCTPackageDialog_MapDirectoryLabel;
@@ -128,6 +133,7 @@ public class Messages extends NLS {
 	public static String SurveyCTPackageDialog_SelectDirectoryText;
 	public static String SurveyCTPackageDialog_ShellMsg;
 	public static String SurveyCTPackageDialog_ShellTitle;
+	public static String SurveyCTPackageDialog_UnableToCreateTempFile;
 	public static String SurveyCTPackageDialog_warning;
 	public static String SurveyCTPackageDialog_ZipFileLbl;
 	public static String SurveyJsonUtils_MemberNotFound;

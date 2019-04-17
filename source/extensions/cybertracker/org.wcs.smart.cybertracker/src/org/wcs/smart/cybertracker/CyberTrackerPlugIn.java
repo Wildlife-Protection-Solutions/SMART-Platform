@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.cybertracker;
 
+import java.util.Locale;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -48,6 +50,7 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	
 	//image registry key for cybertracker dialog image
 	public static final String CT_WIZARD_BANNER = "org.wcs.smart.cybertracker.wizban"; //$NON-NLS-1$
+	public static final String ICON_INFO = "org.wcs.smart.cybertracker.icon.info"; //$NON-NLS-1$
 
 	/**
 	 * Extension id
@@ -119,6 +122,7 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	@Override
 	protected void initializeImageRegistry(ImageRegistry reg) {
 	     reg.put(CT_WIZARD_BANNER, imageDescriptorFromPlugin(PLUGIN_ID, "images/wizban/cybertracker.png")); //$NON-NLS-1$
+	     reg.put(ICON_INFO, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool16/information.png")); //$NON-NLS-1$
 	}
 	
 	public static void displayInfo(final String title, final String message) {
@@ -159,5 +163,13 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 		//default to compressed JSON
 		return CyberTrackerProperties.Protocol.GEOJSON_COMPRESSED;
 //		return CyberTrackerProperties.Protocol.GEOJSON;
+	}
+	
+	/**
+	 * Returns true if the os.name system property starts with windows
+	 * @return
+	 */
+	public boolean isWindows() {
+		return System.getProperty("os.name").toLowerCase(Locale.ROOT).startsWith("windows");  //$NON-NLS-1$//$NON-NLS-2$
 	}
 }

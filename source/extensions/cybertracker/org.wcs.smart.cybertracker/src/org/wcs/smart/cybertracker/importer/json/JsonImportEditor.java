@@ -25,7 +25,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,7 +44,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
@@ -112,22 +110,10 @@ public class JsonImportEditor extends EditorPart {
 		((GridLayout)btnComp.getLayout()).marginWidth = 0;
 		((GridLayout)btnComp.getLayout()).marginHeight = 0;
 		
-		Button btnAddFiles = toolkit.createButton(btnComp, Messages.JsonImportEditor_ImportButton, SWT.PUSH);
+		Button btnAddFiles = toolkit.createButton(btnComp, Messages.JsonImportEditor_ImportButton1, SWT.PUSH);
 		btnAddFiles.addListener(SWT.Selection, e->{
-			FileDialog fd = new FileDialog(getSite().getShell(), SWT.OPEN | SWT.MULTI);
-			fd.setText(Messages.JsonImportEditor_Importtitle);
-			fd.setFilterExtensions(new String[] {"*.json", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-			fd.setFilterNames(new String[] {Messages.JsonImportEditor_JsonFile, Messages.JsonImportEditor_AllFiles});
-			if (fd.open() == null) return;
-			String path = fd.getFilterPath();
-			String[] files = fd.getFileNames();
-			
-			List<Path> toProcess = new ArrayList<>();
-			Path root = Paths.get(path);
-			for (String f : files) {
-				toProcess.add(root.resolve(f));
-			}
-			processFiles(toProcess);
+			ImportDialog dialog = new ImportDialog(getSite().getShell(), this);
+			dialog.open();
 		});
 		
 		SashForm sash = new SashForm(main, SWT.HORIZONTAL);

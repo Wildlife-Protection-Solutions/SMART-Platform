@@ -56,9 +56,6 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class JsonFileProcessor {
 	
-	public static final String CT_TYPE = "JSON_CT"; //$NON-NLS-1$
-	public static final String CT_ZIP_TYPE = "JSON_ZLIB_CT"; //$NON-NLS-1$
-	
 	private static volatile List<IJsonProcessor> jsonProcessors;
 	
 	/**

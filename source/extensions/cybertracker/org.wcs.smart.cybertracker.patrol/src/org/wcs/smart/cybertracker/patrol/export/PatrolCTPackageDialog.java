@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.cybertracker.patrol.export;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,9 +62,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.MobileDeviceUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.export.PackageContributionManager;
@@ -91,6 +96,7 @@ public class PatrolCTPackageDialog extends SmartStyledTitleDialog {
 
 	private static final String LAST_FILE_KEY = "PatrolCTPackageDialog.file"; //$NON-NLS-1$
 	private static final String LAST_CM_KEY = "PatrolCTPackageDialog.cm"; //$NON-NLS-1$
+	private static final String LAST_ISFILE_KEY = "PatrolCTPackageDialog.isfile"; //$NON-NLS-1$
 	private static final String DM_KEY = "DataModel"; //$NON-NLS-1$
 	private static final String LAST_PROFILE_KEY ="PatrolCTPackageDialog.profile"; //$NON-NLS-1$
 
@@ -106,6 +112,9 @@ public class PatrolCTPackageDialog extends SmartStyledTitleDialog {
 	private CyberTrackerPropertiesProfile cmDefaultProfile = null;
 	
 	private List<IPackageUiContribution> contributions = null;
+	
+	private Button opDevice;
+	private Button opFile;
 	
     public PatrolCTPackageDialog(Shell parentShell) {
 		super(parentShell);
@@ -124,7 +133,8 @@ public class PatrolCTPackageDialog extends SmartStyledTitleDialog {
     
     public void okPressed() {
     	String selectedFile = txtOutputFile.getText();
-    	
+    	final boolean todevice = opDevice.getSelection();
+
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_FILE_KEY, selectedFile);
     	if (selectedModel != null) {
     		CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(LAST_CM_KEY), UuidUtils.uuidToString(selectedModel.getUuid()));
@@ -132,32 +142,56 @@ public class PatrolCTPackageDialog extends SmartStyledTitleDialog {
     		CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(LAST_CM_KEY), DM_KEY);
     	}
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(LAST_PROFILE_KEY), UuidUtils.uuidToString(selectedProfile.getUuid()));
-    	
+    	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(LAST_ISFILE_KEY), todevice);
 
-		Path exportFile = Paths.get(selectedFile);
-		if (Files.exists(exportFile)) {
-			if (!MessageDialog.openQuestion(getShell(), Messages.PatrolCTPackageDialog_DialogTitle, MessageFormat.format(Messages.PatrolCTPackageDialog_FileExistsMsg, exportFile.toString()))) {
+    	Path exportFile = null;
+    	if (todevice) {
+    		StringBuilder sb = new StringBuilder();
+    		if (selectedModel != null) {
+    			sb.append( selectedModel.getName().replaceAll("[^A-Za-z0-9]", "") ); //$NON-NLS-1$ //$NON-NLS-2$
+    			sb.append("_"); //$NON-NLS-1$
+
+    		}
+    		sb.append(SmartDB.getCurrentConservationArea().getId());
+    		sb.append("_"); //$NON-NLS-1$
+    		sb.append( LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) ); //$NON-NLS-1$
+    		sb.append(".zip"); //$NON-NLS-1$
+    		
+    		try {
+    			exportFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(sb.toString());
+    			if (Files.exists(exportFile)) Files.delete(exportFile);
+				
+			} catch (IOException e) {
+				CyberTrackerPlugIn.displayError(Messages.PatrolCTPackageDialog_ErrorTitle, MessageFormat.format(Messages.PatrolCTPackageDialog_TempFileError, e.getMessage()), e);
 				return;
 			}
-			boolean ok = true;
-			try{
-				ok = Files.deleteIfExists(exportFile);
-			}catch (Exception ex) {
-				ok = false;
-			}
-			if (!ok) {
-				MessageDialog.openError(getShell(), Messages.PatrolCTPackageDialog_DialogTitle, MessageFormat.format(Messages.PatrolCTPackageDialog_WriteError, exportFile.toString()));
-				return;
-			}
+    	}else {
+    		exportFile = Paths.get(selectedFile);
+    		if (Files.exists(exportFile)) {
+				if (!MessageDialog.openQuestion(getShell(), Messages.PatrolCTPackageDialog_DialogTitle, MessageFormat.format(Messages.PatrolCTPackageDialog_FileExistsMsg, exportFile.toString()))) {
+					return;
+				}
+				boolean ok = true;
+				try{
+					ok = Files.deleteIfExists(exportFile);
+				}catch (Exception ex) {
+					ok = false;
+				}
+				if (!ok) {
+					MessageDialog.openError(getShell(), Messages.PatrolCTPackageDialog_DialogTitle, MessageFormat.format(Messages.PatrolCTPackageDialog_WriteError, exportFile.toString()));
+					return;
+				}
+    		}
 		}
 
+    	final Path fexportFile = exportFile;
 		PatrolCtPackage ctpackage = (PatrolCtPackage) (new PatrolCtPackageManager()).createPackage();
 		ctpackage.setConfigurableModel(selectedModel);
 		ctpackage.setCtProfile(selectedProfile);
 		for (IPackageUiContribution c : contributions) {
 			c.updatePackage(ctpackage);
 		}
-		
+
 		final boolean[] iscancel = new boolean[] {false};
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
@@ -193,11 +227,32 @@ public class PatrolCTPackageDialog extends SmartStyledTitleDialog {
 						ctpackage.setConfigurableModel(toExport);
 						
 						progress.checkCanceled();
-						PatrolPackageExporter.INSTANCE.exportPackage(ctpackage, updates,  exportFile, null, progress.split(1));
+
+						PatrolPackageExporter.INSTANCE.exportPackage(ctpackage, updates,  fexportFile, null, progress.split(1));
 						
-						Display.getDefault().syncExec(()->{
-							MessageDialog.openInformation(getShell(), Messages.PatrolCTPackageDialog_CompleteTitle, MessageFormat.format(Messages.PatrolCTPackageDialog_CompleteMsg,exportFile.toString()));	
-						});
+						if(todevice) {
+							//write file to device and delete it
+							try {
+								MobileDeviceUtils.exportAppToDevice(fexportFile);
+							}catch (Exception ex) {
+								throw ex;
+							}finally {
+								//delete temporary file
+								try {
+									Files.delete(fexportFile);
+								}catch (Exception ex) {
+									CyberTrackerPlugIn.log(ex.getMessage(), ex);
+								}
+							}
+							
+							Display.getDefault().syncExec(()->{
+								MessageDialog.openInformation(getShell(), Messages.PatrolCTPackageDialog_CompleteTitle, MessageFormat.format(Messages.PatrolCTPackageDialog_ExportDeviceOk, fexportFile.getFileName().toString()));	
+							});
+						}else {
+							Display.getDefault().syncExec(()->{
+								MessageDialog.openInformation(getShell(), Messages.PatrolCTPackageDialog_CompleteTitle, MessageFormat.format(Messages.PatrolCTPackageDialog_CompleteMsg,fexportFile.toString()));	
+							});
+						}
 						
 					}catch(OperationCanceledException e) {
 						iscancel[0] = true;
@@ -206,12 +261,12 @@ public class PatrolCTPackageDialog extends SmartStyledTitleDialog {
 						});
 						
 					} catch (Exception e) {
-						CyberTrackerPlugIn.displayError(Messages.PatrolCTPackageDialog_ErrorTitle, Messages.PatrolCTPackageDialog_ErrorMsg + e.getMessage(), e);
+						throw new InvocationTargetException(e, e.getMessage());
 					}		
 				}
 			});
 		} catch (Exception e) {
-			CyberTrackerPlugIn.displayError(Messages.PatrolCTPackageDialog_ErrorTitle, Messages.PatrolCTPackageDialog_ErrorMsg + e.getMessage(), e);
+			CyberTrackerPlugIn.displayError(Messages.PatrolCTPackageDialog_ErrorTitle, Messages.PatrolCTPackageDialog_ErrorMsg + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 			return;
 		}	
 		if (!iscancel[0]) super.okPressed();
@@ -236,9 +291,11 @@ public class PatrolCTPackageDialog extends SmartStyledTitleDialog {
 		setErrorMessage(null);
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 		
-		if (txtOutputFile.getText().isEmpty()) {
-			setErrorMessage(Messages.PatrolCTPackageDialog_FileRequired);
-			return;
+		if (opFile.getSelection()){
+			if (txtOutputFile.getText().isEmpty()) {
+				setErrorMessage(Messages.PatrolCTPackageDialog_FileRequired);
+				return;
+			}
 		}
 		
 		if (this.selectedModel == null && selectedDataModel == null) {
@@ -276,26 +333,54 @@ public class PatrolCTPackageDialog extends SmartStyledTitleDialog {
 		
 		Label lblwarnimage = new Label(warn, SWT.NONE);
 		lblwarnimage.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
-		
+		lblwarnimage.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		lblwarnimage = new Label(warn, SWT.WRAP);
 		lblwarnimage.setText(Messages.PatrolCTPackageDialog_warning);
 		lblwarnimage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)lblwarnimage.getLayoutData()).widthHint = 200;
 		
+		
+    	boolean isFile = CyberTrackerPlugIn.getDefault().getPreferenceStore().getBoolean(LAST_ISFILE_KEY);
+    	
 		Group g = new Group(main, SWT.NONE);
 		g.setLayout(new GridLayout(3, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		g.setText(Messages.PatrolCTPackageDialog_PatrolConfigurationLabel);
 		
 		Label outputFile = new Label(g, SWT.NONE);
-		outputFile.setText(Messages.PatrolCTPackageDialog_FileLbl);
+		outputFile.setText(Messages.PatrolCTPackageDialog_FileLbl1);
+		outputFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
-		txtOutputFile = new Text(g, SWT.BORDER);
+		Composite outputOps = new Composite(g, SWT.NONE);
+		outputOps.setLayout(new GridLayout(4, false));
+		((GridLayout)outputOps.getLayout()).marginWidth = 0;
+		((GridLayout)outputOps.getLayout()).marginHeight = 0;
+		outputOps.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		opDevice = new Button(outputOps, SWT.RADIO);
+		opDevice.setText(Messages.PatrolCTPackageDialog_DeviceLabel);
+		opDevice.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		opDevice.setSelection(!isFile);
+		
+		opFile = new Button(outputOps, SWT.RADIO);
+		opFile.setText(Messages.PatrolCTPackageDialog_FileLabel);
+		opFile.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		opFile.setSelection(isFile);
+		
+		if (!CyberTrackerPlugIn.getDefault().isWindows()) {
+			opDevice.setSelection(false);
+			opFile.setSelection(true);
+			opDevice.setEnabled(false);
+			lblwarnimage.setText(lblwarnimage.getText() + "\n\n" + Messages.PatrolCTPackageDialog_ExportDeviceNotSupported); //$NON-NLS-1$
+		}
+		
+		txtOutputFile = new Text(outputOps, SWT.BORDER);
 		txtOutputFile.setText(""); //$NON-NLS-1$
 		txtOutputFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtOutputFile.addListener(SWT.Modify, e->validate());
+		txtOutputFile.setEnabled(opFile.getSelection());
 		
-		Button btnBrowse = new Button(g, SWT.PUSH);
+		Button btnBrowse = new Button(outputOps, SWT.PUSH);
 		btnBrowse.setText("..."); //$NON-NLS-1$
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnBrowse.addListener(SWT.Selection, e->{
@@ -307,6 +392,20 @@ public class PatrolCTPackageDialog extends SmartStyledTitleDialog {
 			String file = fd.open();
 			if (file == null) return;
 			txtOutputFile.setText(file);
+		});
+		btnBrowse.setEnabled(opFile.getSelection());
+		
+		
+		
+		opDevice.addListener(SWT.Selection, e->{
+			txtOutputFile.setEnabled(opFile.getSelection());
+			btnBrowse.setEnabled(opFile.getSelection());
+			validate();
+		});
+		opFile.addListener(SWT.Selection, e->{
+			txtOutputFile.setEnabled(opFile.getSelection());
+			btnBrowse.setEnabled(opFile.getSelection());
+			validate();
 		});
 		
 		Label modelLabel = new Label(g, SWT.NONE);

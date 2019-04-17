@@ -19,46 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.importer.json;
+package org.wcs.smart.cybertracker.handler;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
-import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
+import org.wcs.smart.cybertracker.export.InstallToDeviceDialog;
 
 /**
- * Handler for importing data from CyberTracker application.
+ * Handler for exporting CT mobile app to device
  * 
- * @author elitvin
- * @since 1.0.0
  */
 @SuppressWarnings("restriction")
-public class CyberTrackerJsonImportHandler {
+public class InstallOnDeviceHandler {
 
 	@Execute
-	public void execute(MWindow activeWindow, Shell shell){
-		(new ShowFieldDataPerspective()).execute(
-				"org.wcs.smart.patrol.ui.PatrolListView", activeWindow); //$NON-NLS-1$
-		
-		try {
-			JsonImportEditor editor = (JsonImportEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-				.getActivePage().openEditor(JsonImportEditor.INPUT, JsonImportEditor.ID);
-			
-			ImportDialog dialog = new ImportDialog(shell, editor);
-			dialog.open();
-		} catch (Throwable t) {
-			SmartPlugIn.displayLog(t.getLocalizedMessage(), t);
-		}
-		
-		
+	public void execute (Shell shell) {
+		InstallToDeviceDialog dialog = new InstallToDeviceDialog(shell);
+		dialog.open();
 	}
-	
-	public static class CyberTrackerJsonImportHandlerWrapper extends DIHandler<CyberTrackerJsonImportHandler>{
-		public CyberTrackerJsonImportHandlerWrapper(){
-			super(CyberTrackerJsonImportHandler.class);
+
+	public static class InstallOnDeviceHandlerWrapper extends DIHandler<InstallOnDeviceHandler>{
+		public InstallOnDeviceHandlerWrapper(){
+			super (InstallOnDeviceHandler.class);
 		}
 	}
 }

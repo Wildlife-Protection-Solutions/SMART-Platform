@@ -116,15 +116,25 @@ public class Messages extends NLS {
 	public static String PatrolCTPackageDialog_CompleteMsg;
 	public static String PatrolCTPackageDialog_CompleteTitle;
 	public static String PatrolCTPackageDialog_CtProfileLbl;
+	public static String PatrolCTPackageDialog_DeviceLabel;
+
 	public static String PatrolCTPackageDialog_DialogTitle;
 	public static String PatrolCTPackageDialog_DmLbl;
 
 	public static String PatrolCTPackageDialog_DmToCmTaskName;
 	public static String PatrolCTPackageDialog_ErrorMsg;
 	public static String PatrolCTPackageDialog_ErrorTitle;
+
+	public static String PatrolCTPackageDialog_ExportDeviceError;
+
+	public static String PatrolCTPackageDialog_ExportDeviceNotSupported;
+
+	public static String PatrolCTPackageDialog_ExportDeviceOk;
 	public static String PatrolCTPackageDialog_FileDialogTitle;
 	public static String PatrolCTPackageDialog_FileExistsMsg;
-	public static String PatrolCTPackageDialog_FileLbl;
+	public static String PatrolCTPackageDialog_FileLabel;
+
+	public static String PatrolCTPackageDialog_FileLbl1;
 	public static String PatrolCTPackageDialog_FileRequired;
 	public static String PatrolCTPackageDialog_MapDirectoryDialogTitle;
 	public static String PatrolCTPackageDialog_MapDirectoryLabel;
@@ -137,6 +147,8 @@ public class Messages extends NLS {
 	public static String PatrolCTPackageDialog_ShellTitle;
 
 	public static String PatrolCTPackageDialog_TaskName;
+
+	public static String PatrolCTPackageDialog_TempFileError;
 
 	public static String PatrolCTPackageDialog_warning;
 	public static String PatrolCTPackageDialog_WriteError;
