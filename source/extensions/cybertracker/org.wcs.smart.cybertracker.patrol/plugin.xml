@@ -32,35 +32,106 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.cybertracker">
-         <command
-               commandId="org.wcs.smart.cybertracker.patrol.export"
-               label="%command.cybertracker.patrol.export.label1"
-               style="push">
-            <visibleWhen
-                  checkEnabled="false">
-               <and>
-                  <or>
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=vertical.org.wcs.smart.patrol.toolbar2">
+         <toolbar
+               id="vertical.org.wcs.smart.cybertracker.patrol.toolbar1">
+            <command
+                  commandId="org.wcs.smart.cybertracker.json.import"
+                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/import.png"
+                  label="Import"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="import data from CyberTracker devices">
+               <visibleWhen>
+                  <and>
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
                      </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.observation.FieldDataPerspective">
+                        </equals>
+                     </with>
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
+                           property="org.wcs.smart.fielddata.focusview"
+                           value="org.wcs.smart.patrol.ui.PatrolListView">
                      </test>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="analyst">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.cybertracker.packages.show"
+                  icon="images/etool16/export.png"
+                  label="Export"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="export packages to CyberTracker devices">
+               <visibleWhen>
+                  <and>
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
                      </test>
-                  </or>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.caSingle">
-                  </test>
-               </and>
-            </visibleWhen>
-         </command>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.observation.FieldDataPerspective">
+                        </equals>
+                     </with>
+                     <test
+                           property="org.wcs.smart.fielddata.focusview"
+                           value="org.wcs.smart.patrol.ui.PatrolListView">
+                     </test>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="analyst">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+         </toolbar>
       </menuContribution>
    </extension>
    <extension

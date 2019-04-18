@@ -12,7 +12,7 @@
                mnemonic="%plan.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.plan.NewPlan"
-                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
+                  icon="images/icons/obj16/add_plan.png"
                   label="%plan.menu.command.label.newplan"
                   mnemonic="%plan.menu.command.mnemonic.newplan"
                   style="push"
@@ -309,40 +309,6 @@
       <menuContribution
             allPopups="false"
             locationURI="toolbar:org.eclipse.ui.main.toolbar">
-         <toolbar
-               id="org.wcs.smart.plan.toolbar">
-            <command
-                  commandId="org.wcs.smart.plan.editor.exportPdf"
-                  style="push"
-                  tooltip="%exportpdf.command.tooltip.0">
-               <visibleWhen
-                     checkEnabled="false">
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.plan.planPerspective">
-                     </equals>
-                  </with>
-               </visibleWhen>
-               <parameter
-                     name="org.wcs.smart.plan.exportpdf.editor"
-                     value="true">
-               </parameter>
-            </command>
-            <command
-                  commandId="org.eclipse.ui.file.save"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.plan.PlanReportPerspective">
-                     </equals>
-                  </with>
-               </visibleWhen>
-            </command>
-         </toolbar>
       </menuContribution>
       <menuContribution
             allPopups="false"
@@ -405,38 +371,108 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.toolbar.create?before=org.wcs.smart.toolbar.create.other">
-         <command
-               commandId="org.wcs.smart.plan.NewPlan"
-               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
-               label="%plan.menu.command.label.newplan"
-               mnemonic="%plan.menu.command.mnemonic.newplan"
-               style="push"
-               tooltip="%plan.menu.command.tooltip.newplan">
-            <visibleWhen
-                  checkEnabled="false">
-               <and>
-                  <or>
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="vertical.org.wcs.smart.plan.toolbar.1">
+            <command
+                  commandId="org.wcs.smart.plan.NewPlan"
+                  icon="images/icons/obj16/add_plan.png"
+                  label="New"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="%plan.menu.command.tooltip.newplan">
+               <visibleWhen>
+                  <and>
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
                      </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.plan.planPerspective">
+                        </equals>
+                     </with>
+                     <or>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.plan.editor.exportPdf"
+                  label="PDF"
+                  mode="FORCE_TEXT"
+                  style="push">
+               <parameter
+                     name="org.wcs.smart.plan.exportpdf.editor"
+                     value="true">
+               </parameter>
+               <visibleWhen>
+                  <and>
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
                      </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.caSingle">
-                  </test>
-               </and>
-            </visibleWhen>
-         </command>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.plan.planPerspective">
+                        </equals>
+                     </with>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="analyst">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+         </toolbar>
+         <toolbar
+               id="vertical.org.wcs.smart.plan.toolbar.3">
+            <command
+                  commandId="org.eclipse.ui.file.save"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.plan.PlanReportPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+         </toolbar>
       </menuContribution>
    </extension>
    <extension
@@ -650,6 +686,29 @@
             name="%importtemplate.command.name">
       </command>
    </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.plan.ShowPlanFilter"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/filter.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.plan.DeletePlan"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.plan.exportPdf"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/pdf.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.plan.editor.exportPdf"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/pdf.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.plan.NewPlan"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png">
+      </image>
+   </extension>
 
    <extension
          point="org.wcs.smart.patrol.wizardpage">
@@ -738,25 +797,6 @@
             id="org.wcs.smart.plan.ui.editor.PlanEditor"
             name="%planlistview.editor.name">
       </editor>
-   </extension>
-   <extension
-         point="org.eclipse.ui.commandImages">
-      <image
-            commandId="org.wcs.smart.plan.ShowPlanFilter"
-            icon="images/icons/etool16/plan_filter.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.plan.DeletePlan"
-            icon="images/icons/etool16/delete.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.plan.exportPdf"
-            icon="images/icons/etool16/printpdf.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.plan.editor.exportPdf"
-            icon="images/icons/etool16/printpdf.png">
-      </image>
    </extension>
    <extension
          point="org.wcs.smart.patrol.xml">

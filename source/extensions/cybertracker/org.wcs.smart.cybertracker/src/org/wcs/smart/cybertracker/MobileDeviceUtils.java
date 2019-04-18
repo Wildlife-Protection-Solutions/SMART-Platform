@@ -53,6 +53,11 @@ public class MobileDeviceUtils {
 	public static final String DATA_FOLDER = "SMARTdata"; //$NON-NLS-1$
 	
 	/**
+	 * If exe has been extracted for this session or not
+	 */
+	private static boolean isExeExtracted = false;
+	
+	/**
 	 * Export application to device.  Installs to root folder
 	 * 
 	 * @param packageFile
@@ -180,13 +185,17 @@ public class MobileDeviceUtils {
 		URL bundleFile = CyberTrackerPlugIn.getDefault().getBundle().getEntry("ext/" + MPTCOPY_EXE); //$NON-NLS-1$
 		Path tempFile = CyberTrackerPlugIn.getDefault().getBundle().getDataFile("/ext/" + MPTCOPY_EXE).toPath(); //$NON-NLS-1$
 		
-		if (!Files.exists(tempFile)) {
-			//extract exe to temp location
-			if (!Files.exists(tempFile.getParent())) Files.createDirectories(tempFile.getParent());
-			try(InputStream is = bundleFile.openStream()){
-				Files.copy(is, tempFile, StandardCopyOption.REPLACE_EXISTING );
-			}
+		System.out.println(tempFile.toString());
+		
+		if (isExeExtracted && Files.exists(tempFile)) return tempFile;
+		
+		//extract exe to temp location
+		if (!Files.exists(tempFile.getParent())) Files.createDirectories(tempFile.getParent());
+		try(InputStream is = bundleFile.openStream()){
+			Files.copy(is, tempFile, StandardCopyOption.REPLACE_EXISTING );
 		}
+		isExeExtracted = true;
+		
 		return tempFile;
 	}
 }

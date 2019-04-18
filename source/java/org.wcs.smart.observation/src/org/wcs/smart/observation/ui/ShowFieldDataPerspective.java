@@ -17,11 +17,32 @@ import org.eclipse.e4.ui.model.application.ui.menu.MHandledItem;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.services.IEvaluationService;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
 
 public class ShowFieldDataPerspective {
 
 	public static final String FOCUS_VIEW = "org.wcs.smart.observation.perspective.show.focusview"; //$NON-NLS-1$
+	
+	public static String LASTVIEW = "";
+	public static void enableToolbarItem(String focusView, IEclipseContext context) {
+		EModelService mService = context.get(EModelService.class);
+		List<MHandledItem> elements = mService.findElements(context.get(MWindow.class), null, MHandledItem.class );
+		elements.forEach(f->{
+			if (f.getCommand() != null) {
+				f.setSelected(false);
+				f.getParameters().forEach(p->{
+					if (p.getName().equals(FOCUS_VIEW) && p.getValue().equalsIgnoreCase(focusView)) {
+						f.setSelected(true);
+					}
+				});
+			}
+		});
+		
+		LASTVIEW = focusView;
+		context.get(IEvaluationService.class).requestEvaluation("org.wcs.smart.fielddata.focusview"); //$NON-NLS-1$
+		//Fire event to refresh menus
+	}
 	
 	@Execute
 	public void execute(@Optional @Named(FOCUS_VIEW) String focusView,
@@ -37,19 +58,7 @@ public class ShowFieldDataPerspective {
 		MPart activate = pService.findPart(focusView);
 		if (activate == null) return;
 		pService.bringToTop(activate);
-		
-		EModelService mService = currentWindow.getContext().get(EModelService.class);
-		List<MHandledItem> elements = mService.findElements(currentWindow, null, MHandledItem.class );
-		elements.forEach(f->{
-			if (f.getCommand() != null) {
-				f.setSelected(false);
-				f.getParameters().forEach(p->{
-					if (p.getName().equals(FOCUS_VIEW) && p.getValue().equalsIgnoreCase(focusView)) {
-						f.setSelected(true);
-					}
-				});
-			}
-		});
+		enableToolbarItem(focusView, currentWindow.getContext());
 	}
 	
 	public static class ShowFieldDataPerspectiveWrapper extends AbstractHandler {

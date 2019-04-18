@@ -51,6 +51,8 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -79,6 +81,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
+import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
@@ -105,6 +108,7 @@ import org.wcs.smart.asset.ui.views.station.StationEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
@@ -119,8 +123,8 @@ public class AssetListView {
 	
 	public static final String ID = "org.wcs.smart.asset.view.assets"; //$NON-NLS-1$
 	
-	@Inject
-	private IEclipseContext context;
+	@Inject	private IEclipseContext context;
+	@Inject	private MPart localPart;
 	
 	private Composite assetComposite;
 	private Composite stationComposite;
@@ -144,6 +148,13 @@ public class AssetListView {
 	}
 	
 	private Composite toolbarHeaderComposite;
+	
+	@Inject
+	@Optional
+	public void partActivation(@UIEventTopic(UIEvents.UILifeCycle.BRINGTOTOP) Event event) {
+		if (event.getProperty(UIEvents.EventTags.ELEMENT) != localPart) return;
+		ShowFieldDataPerspective.enableToolbarItem(ID, context);
+	}
 	
 	@PostConstruct
 	public void createPartControl(final Composite parent) {
@@ -327,7 +338,7 @@ public class AssetListView {
 		((GridLayout)stationsPanel.getLayout()).marginWidth = 0;
 		((GridLayout)stationsPanel.getLayout()).marginHeight = 0;
 		
-		lstStations = new TreeViewer(stationsPanel, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL );
+		lstStations = new TreeViewer(stationsPanel, SWT.V_SCROLL | SWT.H_SCROLL );
 		toolkit.adapt(lstStations.getControl(), true, true);
 		lstStations.setLabelProvider(new AssetLabelProvider());
 		lstStations.setContentProvider(new MappingContentProvider<AssetStation, AssetStationLocation>((a,b)->Collator.getInstance().compare(a.getId().toLowerCase(), b.getId().toLowerCase())));

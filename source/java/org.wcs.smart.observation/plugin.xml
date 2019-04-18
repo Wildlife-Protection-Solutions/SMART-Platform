@@ -286,19 +286,16 @@
             class="org.wcs.smart.observation.ui.WpInfoViewToggleTextHandler$WpInfoViewToggleTextHandlerWrapper"
             commandId="org.wcs.smart.observation.waypointinfoview.text.toggle">
       </handler>
+      <handler
+            class="org.wcs.smart.observation.ui.ShowFieldDataPerspective$ShowFieldDataPerspectiveWrapper"
+            commandId="org.wcs.smart.observation.perspective.show">
+      </handler>
    </extension>
    <extension
          point="org.wcs.smart.caFilestoreDir">
       <FilestoreDirectory
             directory="incidents">
       </FilestoreDirectory>
-   </extension>
-   <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            class="org.wcs.smart.observation.ui.ShowFieldDataPerspective$ShowFieldDataPerspectiveWrapper"
-            commandId="org.wcs.smart.observation.perspective.show">
-      </handler>
    </extension>
    <extension
          point="org.eclipse.core.runtime.adapters">
@@ -315,6 +312,16 @@
       <integrator
             class="org.wcs.smart.observation.WaypointHibernateIntegrator">
       </integrator>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="org.wcs.smart.observation.FocusViewTester"
+            id="org.wcs.smart.fielddata.focusview"
+            namespace="org.wcs.smart.fielddata"
+            properties="focusview"
+            type="java.lang.Object">
+      </propertyTester>
    </extension>
 
 </plugin>

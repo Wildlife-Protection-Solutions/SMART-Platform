@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
@@ -75,6 +76,7 @@ import org.wcs.smart.entity.ui.editor.EntityTypeEditor;
 import org.wcs.smart.entity.ui.editor.EntityTypeEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
 
@@ -96,6 +98,7 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 	@Inject private IMenuService menuService;
 	@Inject private MPart localPart;
 	@Inject private ESelectionService selService;
+	@Inject private IEclipseContext context;
 	
 	/*
 	 * Job that updates the patrol list based on the current filter
@@ -169,6 +172,13 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 			}
 		}
 	};
+	
+	@Inject
+	@Optional
+	public void partActivation(@UIEventTopic(UIEvents.UILifeCycle.BRINGTOTOP) Event event) {
+		if (event.getProperty(UIEvents.EventTags.ELEMENT) != localPart) return;
+		ShowFieldDataPerspective.enableToolbarItem(ID, context);
+	}
 	
 	@Optional
 	@Inject

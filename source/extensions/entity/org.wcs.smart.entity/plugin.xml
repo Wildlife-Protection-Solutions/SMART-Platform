@@ -244,37 +244,6 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata">
-         <command
-               commandId="org.wcs.smart.command.showperspective"
-               icon="images/icons/obj16/entitytype.png"
-               label="%viewentities.command.name1"
-               mode="FORCE_TEXT"
-               style="push"
-               tooltip="%openentities.command.tooltip">
-            <parameter
-                  name="org.wcs.smart.perspectiveid"
-                  value="org.wcs.smart.entity.ccaa.EntityTypePerspective">
-            </parameter>
-            <visibleWhen
-                  checkEnabled="false">
-               <and>
-                  <not>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.caSingle">
-                     </test>
-                  </not>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-               </and>
-            </visibleWhen>
-         </command>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
             locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.file.multipleCa">
          <menu
                id="org.wcs.smart.menu.ccaa.entity"
@@ -340,6 +309,120 @@
                visible="true">
          </separator>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="vertical.org.wcs.smart.entity.toolbar1">
+            <command
+                  commandId="org.wcs.smart.entitytype.new"
+                  icon="images/icons/etool16/addentitytype.png"
+                  label="New"
+                  mnemonic="%newentity.command.mnemonic"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="%newentity.command.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.observation.FieldDataPerspective">
+                        </equals>
+                     </with>
+                     <test
+                           property="org.wcs.smart.fielddata.focusview"
+                           value="org.wcs.smart.entity.typelist">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                  </and>
+               </visibleWhen>
+            </command>
+         </toolbar>
+         <toolbar
+               id="vertical.org.wcs.smart.entity.toolbar2">
+            <command
+                  commandId="org.wcs.smart.entitytype.import"
+                  label="Import"
+                  mnemonic="%importentitytype.command.mnemonic"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="%importentitytype.command.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.observation.FieldDataPerspective">
+                        </equals>
+                     </with>
+                     <test
+                           property="org.wcs.smart.fielddata.focusview"
+                           value="org.wcs.smart.entity.typelist">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                  </and>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.entitytype.export"
+                  label="Export"
+                  mnemonic="%exportentitytype.command.mnemonic"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="%exportentitytype.command.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.observation.FieldDataPerspective">
+                        </equals>
+                     </with>
+                     <test
+                           property="org.wcs.smart.fielddata.focusview"
+                           value="org.wcs.smart.entity.typelist">
+                     </test>
+                     <or>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+         </toolbar>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -363,6 +446,29 @@
             id="org.wcs.smart.entitytype.export"
             name="%exportentitytype.command.name">
       </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.entitytype.delete"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.entitytype.new"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.entity.entitytypefilter"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/filter.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.entitytype.export"
+            icon="images/icons/etool16/exportentitytype.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.entitytype.import"
+            icon="images/icons/etool16/importentitytype.png">
+      </image>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -492,29 +598,6 @@
             advisor="org.wcs.smart.entity.event.DmAttributeTreeNodeDeleteAdvisor"
             class="org.wcs.smart.ca.datamodel.AttributeTreeNode">
       </DeleteAdvisor>
-   </extension>
-   <extension
-         point="org.eclipse.ui.commandImages">
-      <image
-            commandId="org.wcs.smart.entitytype.delete"
-            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.entitytype.new"
-            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.entity.entitytypefilter"
-            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/filter.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.entitytype.export"
-            icon="images/icons/etool16/exportentitytype.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.entitytype.import"
-            icon="images/icons/etool16/importentitytype.png">
-      </image>
    </extension>
    <extension
          point="org.eclipse.ui.editors">

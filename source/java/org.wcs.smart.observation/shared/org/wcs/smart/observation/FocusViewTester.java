@@ -19,43 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.internal.ui;
+package org.wcs.smart.observation;
 
-import javax.inject.Named;
-
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.tools.compat.parts.DIHandler;
-import org.eclipse.e4.ui.services.IServiceConstants;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.wcs.smart.report.manger.ReportManager;
-import org.wcs.smart.report.model.Report;
+import org.eclipse.core.expressions.PropertyTester;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
 /**
- * Handler for editing a report.
+ * Test the current value of the focus view in the field data perspective
  * 
- * @author egouge
- * @since 1.0.0
+ * @author Emily
+ *
  */
-@SuppressWarnings("restriction")
-public class EditReportHandler {
+public class FocusViewTester extends PropertyTester {
 
-	@Execute
-	public void execute(@Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection){
-		Report r = null;
-		
-		if (thisSelection != null && (thisSelection instanceof IStructuredSelection) && !((IStructuredSelection)thisSelection).isEmpty() ){
-			Object obj = ((IStructuredSelection)thisSelection).getFirstElement();		
-			if (obj instanceof Report) {
-				r = (Report)obj;
-			}
-		}
-		ReportManager.editReport(r);	
-		
+	public FocusViewTester() {
 	}
 
-	public static class EditReportHandlerWrapper extends DIHandler<EditReportHandler>{
-		public EditReportHandlerWrapper(){
-			super(EditReportHandler.class);
-		}
+	@Override
+	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
+		//does the current focus view in the field data perspective match the selected values
+		String view = (String)expectedValue;
+		if (view.equals(ShowFieldDataPerspective.LASTVIEW)) return true;
+		return false;
 	}
+
 }

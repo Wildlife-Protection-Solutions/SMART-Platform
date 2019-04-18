@@ -53,11 +53,19 @@
 	
 }
 
-.MPartStack.active > CTabItem:selected {
+.MPartStack.active CTabItem:selected {
 	color: white;
 }
 
+
+
 /* customized SMART tab bar*/
+
+.SMARTTabMouseOver{
+	background-color: #F6C78E;
+}
+
+/* no tab bar */
 .SMARTTabBar{
 	background-color: #FCEDDA;
 }
@@ -67,9 +75,37 @@
 .SMARTTabSelected{
 	background-color: #F09F3F;
 }
-.SMARTTabMouseOver{
-	background-color: #F6C78E;
+
+
+/* active tab bar */
+.MPartStack.active .SMARTTabSelected{
+	background-color: #F09F3F;
 }
+
+.MPartStack.active .SMARTTabBar{
+	background-color: #FCEDDA;
+}
+
+.MPartStack.active .SMARTTab{
+	background-color: #FCEDDA;
+}
+
+/* inactive tab bar */
+.MPartStack .SMARTTabSelected{
+	background-color: #EDEDED;
+}
+
+.MPartStack .SMARTTabBar{
+	background-color: #EFEFEF;
+}
+
+.MPartStack .SMARTTab{
+	background-color: #EFEFEF;
+}
+
+
+
+
 
 
 
@@ -101,30 +137,30 @@ Section {
 }
 
 .SMARTFormHeader Label{
-	background-color: #B7CEE3;
+	background-color: #B9C77D;
 	color: #33446B;
 }
 
 .SMARTFormHeader IdFieldHeader{
-	background-color: #B7CEE3;
+	background-color: #B9C77D;
 	color: #33446B;
 }
 
 .SMARTFormHeader IntelQueryNameLabel{
-	background-color: #B7CEE3;
+	background-color: #B9C77D;
 	color: #33446B;
 }
 
 .SMARTFormHeader ToolBar{
-	background-color: #B7CEE3;
+	background-color: #B9C77D;
 	color: #33446B;
 }
 .SMARTFormHeader{
-	background-color: #B7CEE3;
+	background-color: #B9C77D;
 	color: #33446B;
 }
 FormHeading{
-	background-color: #B7CEE3;
+	background-color: #B9C77D;
 	color: #33446B;
 }
 

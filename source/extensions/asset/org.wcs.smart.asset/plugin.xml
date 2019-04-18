@@ -363,36 +363,6 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.eclipse.ui.main.toolbar">
-         <toolbar
-               id="org.wcs.smart.asset.toolbar">
-            <command
-                  commandId="org.eclipse.ui.file.save">
-               <visibleWhen
-                     checkEnabled="false">
-                  <with
-                        variable="activePartId">
-                     <or>
-                        <equals
-                              value="org.wcs.smart.asset.ui.views.asset">
-                        </equals>
-                        <equals
-                              value="org.wcs.smart.asset.ui.views.station">
-                        </equals>
-                        <equals
-                              value="org.wcs.smart.asset.ui.views.station">
-                        </equals>
-                        <equals
-                              value="org.wcs.smart.asset.ui.views.stationlocation">
-                        </equals>
-                     </or>
-                  </with>
-               </visibleWhen>
-            </command>
-         </toolbar>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
             locationURI="menu:org.wcs.smart.menu.file?before=org.eclipse.ui.file.export">
          <command
                commandId="org.eclipse.ui.file.save">
@@ -464,6 +434,111 @@
                </and>
             </visibleWhen>
          </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="vertical.org.wcs.smart.asset.toolbar2">
+            <command
+                  commandId="org.wcs.smart.asset.command.data.import"
+                  label="Import"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="import sensor data files">
+               <visibleWhen>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.observation.FieldDataPerspective">
+                        </equals>
+                     </with>
+                     <test
+                           property="org.wcs.smart.fielddata.focusview"
+                           value="org.wcs.smart.asset.view.assets">
+                     </test>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="analyst">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.asset.command.overviewmap.show"
+                  label="Sensor Map"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="view sensor map">
+               <visibleWhen>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.observation.FieldDataPerspective">
+                        </equals>
+                     </with>
+                     <test
+                           property="org.wcs.smart.fielddata.focusview"
+                           value="org.wcs.smart.asset.view.assets">
+                     </test>
+                  </and>
+               </visibleWhen>
+            </command>
+         </toolbar>
+         <toolbar
+               id="vertical.org.wcs.smart.asset.toolbar1">
+            <command
+                  commandId="org.eclipse.ui.file.save"
+                  mode="FORCE_TEXT"
+                  style="push">
+               <visibleWhen>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.observation.FieldDataPerspective">
+                        </equals>
+                     </with>
+                     <test
+                           property="org.wcs.smart.fielddata.focusview"
+                           value="org.wcs.smart.asset.view.assets">
+                     </test>
+                  </and>
+               </visibleWhen>
+            </command>
+         </toolbar>
       </menuContribution>
    </extension>
    <extension

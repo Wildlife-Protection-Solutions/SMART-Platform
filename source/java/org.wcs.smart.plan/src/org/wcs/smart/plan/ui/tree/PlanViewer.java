@@ -24,6 +24,7 @@ package org.wcs.smart.plan.ui.tree;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.plan.internal.PlanLabelProvider;
@@ -54,7 +55,7 @@ public class PlanViewer {
 	}
 	
 	protected void createControl(Composite parent){
-		planViewer = new TreeViewer(parent);
+		planViewer = new TreeViewer(parent, SWT.V_SCROLL);
 		
 		planViewer.setContentProvider(new PlanContentProvider());
 		planViewer.setLabelProvider(new LabelProvider(){

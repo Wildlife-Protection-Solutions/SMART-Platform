@@ -85,10 +85,12 @@ import org.wcs.smart.common.folder.FolderTreeDragListener;
 import org.wcs.smart.common.folder.FolderTreeUtils;
 import org.wcs.smart.common.folder.NoneFolder;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.views.PatrolTreeContentProvider.GroupByType;
 import org.wcs.smart.patrol.model.Patrol;
@@ -100,6 +102,7 @@ import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.E3Utils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * A viewer where users can view all patrols by a specified filter.
@@ -111,6 +114,8 @@ import org.wcs.smart.util.E3Utils;
 @SuppressWarnings("restriction")
 public class PatrolListView implements IPatrolFilteringView {
 
+	private static final String GB_PREF_KEY = "org.wcs.smart.patrol.list.groupbykey"; //$NON-NLS-1$
+	
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolListView"; //$NON-NLS-1$
 	
 	public static final String GROUP_BY_EVENT = "PATROL/GROUPBY"; //$NON-NLS-1$
@@ -194,10 +199,20 @@ public class PatrolListView implements IPatrolFilteringView {
 	}
 
 	@Inject
+	@Optional
+	public void partActivation(@UIEventTopic(UIEvents.UILifeCycle.BRINGTOTOP) Event event) {
+		if (event.getProperty(UIEvents.EventTags.ELEMENT) != localPart) return;
+		ShowFieldDataPerspective.enableToolbarItem(ID, context);
+	}
+	
+	private String getPreferenceKey(String part) {
+		return part + "." + UuidUtils.uuidToString( SmartDB.getCurrentConservationArea().getUuid() ); //$NON-NLS-1$
+	}
+	
+	@Inject
 	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent, EPartService pService){
 		if (partEvent == null) return;
 		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
-//		if (activePart.getElementId().equals(PatrolEditor.ID)){ //this doesn't work as it returns compatibility id; not editor id
 		Object lpart = E3Utils.getSourceObject(activePart);
 		if (lpart instanceof PatrolEditor){
 			Patrol p = ((PatrolEditor)lpart).getPatrol();
@@ -212,6 +227,7 @@ public class PatrolListView implements IPatrolFilteringView {
 	private void groupByChanged(@EventTopic(GROUP_BY_EVENT) Object data){
 		if (!(data instanceof String)) return;
 		contentProvider.setGroupBy((String)data);
+		SmartPatrolPlugIn.getDefault().getPreferenceStore().setValue(getPreferenceKey(GB_PREF_KEY), (String)data);
 	}
 	
 	@Optional
@@ -266,20 +282,7 @@ public class PatrolListView implements IPatrolFilteringView {
 		patrolListViewer.setContentProvider(contentProvider);
 		patrolListViewer.setInput(DialogConstants.LOADING_TEXT);
 		patrolListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//		patrolListViewer.addDoubleClickListener(new IDoubleClickListener() {
-//			
-//			@Override
-//			public void doubleClick(DoubleClickEvent event) {
-//				IStructuredSelection selection = (IStructuredSelection)event.getSelection();
-//				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-//					Object item = (Object) iterator.next();
-//					boolean isExpanded = patrolListViewer.getExpandedState(item);
-//					//patrolListViewer.setExpandedState(item, !isExpanded);
-//				}
-//				
-//				
-//			}
-//		});
+
 		updateContent();
 		
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_ADDED, patrolListener);
@@ -389,6 +392,11 @@ public class PatrolListView implements IPatrolFilteringView {
 		Transfer[] transferTypes = new Transfer[]{LocalSelectionTransfer.getTransfer()};
 		patrolListViewer.addDragSupport(DND.DROP_MOVE, transferTypes , new FolderTreeDragListener(patrolListViewer));
 		patrolListViewer.addDropSupport(DND.DROP_MOVE, transferTypes, new PatrolFolderTreeDropListener(patrolListViewer, contentProvider));
+		
+		if (SmartPatrolPlugIn.getDefault().getPreferenceStore().contains(getPreferenceKey(GB_PREF_KEY))) {
+			String gb = SmartPatrolPlugIn.getDefault().getPreferenceStore().getString(getPreferenceKey(GB_PREF_KEY));
+			contentProvider.setGroupBy(gb);
+		}
 	}
 
 	protected void handleFolderCreate() {

@@ -469,10 +469,50 @@
             allPopups="false"
             locationURI="toolbar:org.eclipse.ui.main.toolbar">
          <toolbar
-               id="org.wcs.smart.intelligence.toolbar">
+               id="vertical.org.wcs.smart.intelligence.toolbar2">
+            <command
+                  commandId="org.wcs.smart.intelligence.NewIntelligence"
+                  label="New"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="create new intelligence record">
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.intelligence.IntelligencePerspective">
+                        </equals>
+                     </with>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
             <command
                   commandId="org.wcs.smart.intelligence.editor.exportPdf"
-                  label="%pdf.toolbar.command.label"
+                  label="PDF"
+                  mode="FORCE_TEXT"
                   style="push"
                   tooltip="%pdf.toolbar.command.tooltip">
                <visibleWhen
@@ -489,17 +529,107 @@
                      value="true">
                </parameter>
             </command>
+         </toolbar>
+         <toolbar
+               id="vertical.org.wcs.smart.intelligence.toolbar1">
             <command
-                  commandId="org.eclipse.ui.file.save"
-                  style="push">
+                  commandId="org.wcs.smart.intelligence.import"
+                  label="Import"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="%import.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.intelligence.report.IntelligenceReportPerspective">
-                     </equals>
-                  </with>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.intelligence.IntelligencePerspective">
+                        </equals>
+                     </with>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.intelligence.export"
+                  label="Export"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="%export.command.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.intelligence.IntelligencePerspective">
+                        </equals>
+                     </with>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+         </toolbar>
+         <toolbar
+               id="vertical.org.wcs.smart.intelligence.toolbar3">
+            <command
+                  commandId="org.eclipse.ui.file.save"
+                  mode="FORCE_TEXT"
+                  style="push">
+               <visibleWhen>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.intelligence.report.IntelligenceReportPerspective">
+                        </equals>
+                     </with>
+                  </and>
                </visibleWhen>
             </command>
          </toolbar>
@@ -573,6 +703,33 @@
                optional="true">
          </commandParameter>
       </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.intelligence.NewIntelligence"
+            icon="images/etool16/create_intel.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.intelligence.export"
+            icon="images/etool16/export_intel.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.intelligence.import"
+            icon="images/etool16/import_intel.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.intelligence.ShowInformant"
+            icon="images/etool16/informant.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.intelligence.editor.exportPdf"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/pdf.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.intelligence.exportPdf"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/pdf.png">
+      </image>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -863,33 +1020,6 @@
             id="newpatrol.intelligence"
             location="after=newpatrol.patrolid">
       </wizardpage>
-   </extension>
-   <extension
-         point="org.eclipse.ui.commandImages">
-      <image
-            commandId="org.wcs.smart.intelligence.NewIntelligence"
-            icon="images/etool16/intelligence_add.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.intelligence.export"
-            icon="images/etool16/export_intel.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.intelligence.import"
-            icon="images/etool16/import_intel.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.intelligence.exportPdf"
-            icon="images/etool16/printpdf.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.intelligence.ShowInformant"
-            icon="images/etool16/informant.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.intelligence.editor.exportPdf"
-            icon="images/etool16/printpdf.png">
-      </image>
    </extension>
    <extension
          point="org.wcs.smart.patrol.xml">

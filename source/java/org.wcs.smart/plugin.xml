@@ -700,7 +700,7 @@
                id="org.wcs.smart.perspectives">
             <command
                   commandId="org.wcs.smart.command.showperspective"
-                  icon="images/icons/etool16/map.png"
+                  icon="images/icons/obj32/map.32.png"
                   label="%showmapperspective.command.label1"
                   mode="FORCE_TEXT"
                   style="radio"
@@ -714,17 +714,6 @@
                   name="org.wcs.smart.perspectivesSeperator"
                   visible="false">
             </separator>
-            <separator
-                  name="org.wcs.smart.resetSeparator"
-                  visible="true">
-            </separator>
-            <command
-                  commandId="org.wcs.smart.command.resetperspective"
-                  icon="images/icons/etool16/arrow_refresh.png"
-                  label="%resetwindows.command.label"
-                  style="push"
-                  tooltip="%resetwindows.command.tooltip">
-            </command>
          </toolbar>
       </menuContribution>
       <menuContribution
@@ -846,24 +835,6 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.eclipse.ui.main.toolbar">
-         <toolbar
-               id="org.wcs.smart.toolbar.create">
-            <separator
-                  name="org.wcs.smart.toolbar.create.data"
-                  visible="false">
-            </separator>
-            <separator
-                  name="org.wcs.smart.toolbar.create.query">
-            </separator>
-            <separator
-                  name="org.wcs.smart.toolbar.create.other"
-                  visible="false">
-            </separator>
-         </toolbar>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
             locationURI="toolbar:org.locationtech.udig.project.ui.layerManager">
          <command
                commandId="org.wcs.smart.command.map.style"
@@ -884,6 +855,20 @@
                style="push"
                tooltip="%style.command.tooltip.0">
          </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.trim.status">
+         <toolbar
+               id="org.wcs.smart.toolbar3">
+            <command
+                  commandId="org.wcs.smart.command.resetperspective"
+                  icon="images/icons/etool16/arrow_refresh.png"
+                  label="%resetwindows.command.label1"
+                  style="push"
+                  tooltip="%resetwindows.command.tooltip">
+            </command>
+         </toolbar>
       </menuContribution>
    </extension>
    <extension

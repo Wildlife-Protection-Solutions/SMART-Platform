@@ -228,10 +228,10 @@ public class ReportManager {
 	 */
 	public static void editReport(Report r){
 		try {
-			if (r != null) {
-				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-				window.getWorkbench().showPerspective(SmartReportPerspective.ID,window);
-				
+			
+			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+			window.getWorkbench().showPerspective(SmartReportPerspective.ID,window);
+			if (r != null) {	
 				SmartReportEditorInput ri = new SmartReportEditorInput(r);
 				
 				IEditorPart part = window.getActivePage().findEditor(ri);

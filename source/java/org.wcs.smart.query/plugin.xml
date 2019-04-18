@@ -197,12 +197,54 @@
             allPopups="false"
             locationURI="toolbar:org.eclipse.ui.main.toolbar">
          <toolbar
-               id="org.wcs.smart.query.queryToolbar">
+               id="org.wcs.smart.query.toolbar.create">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <or>
+                     <equals
+                           value="org.wcs.smart.query.persepectives.single">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.persepectives.multi">
+                     </equals>
+                  </or>
+               </with>
+            </visibleWhen>
+         </toolbar>
+         <toolbar
+               id="org.wcs.smart.query.toolbar1">
             <command
                   commandId="org.wcs.smart.query.export"
-                  label="%queryToolbar.exportquery.command.label"
+                  label="Export Results"
+                  mode="FORCE_TEXT"
                   style="push"
-                  tooltip="%queryToolbar.exportquery.command.tooltip">
+                  tooltip="export the current query results">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <or>
+                        <equals
+                              value="org.wcs.smart.query.persepectives.single">
+                        </equals>
+                        <equals
+                              value="org.wcs.smart.query.persepectives.multi">
+                        </equals>
+                     </or>
+                  </with>
+               </visibleWhen>
+            </command>
+         </toolbar>
+         <toolbar
+               id="vertical.org.wcs.smart.query.toolbar2">
+            <command
+                  commandId="org.wcs.smart.query.import"
+                  label="Import"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="import query definitions">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -219,9 +261,34 @@
                </visibleWhen>
             </command>
             <command
+                  commandId="org.wcs.smart.query.exportmulti"
+                  label="Export"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="export query definitions">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <or>
+                        <equals
+                              value="org.wcs.smart.query.persepectives.single">
+                        </equals>
+                        <equals
+                              value="org.wcs.smart.query.persepectives.multi">
+                        </equals>
+                     </or>
+                  </with>
+               </visibleWhen>
+            </command>
+         </toolbar>
+         <toolbar
+               id="vertical.org.wcs.smart.query.toolbar3">
+            <command
                   commandId="org.eclipse.ui.file.save"
-                  label="%queryToolbar.savequery.command.label"
-                  tooltip="%queryToolbar.savequery.command.tooltip">
+                  label="Save"
+                  mode="FORCE_TEXT"
+                  style="push">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -239,8 +306,9 @@
             </command>
             <command
                   commandId="org.eclipse.ui.file.saveAs"
-                  label="%queryToolbar.saveasquery.command.label"
-                  tooltip="%queryToolbar.saveasquery.command.tooltip">
+                  label="Save As"
+                  mode="FORCE_TEXT"
+                  style="push">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -713,34 +781,6 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.toolbar.create">
-         <command
-               commandId="org.wcs.smart.query.create.unknown"
-               id="org.wcs.smart.query.toolbar.menu.create"
-               label="%queryToolbar.createquery.command.label"
-               style="pulldown"
-               tooltip="%queryToolbar.createquery.command.toolbar">
-            <visibleWhen
-                  checkEnabled="false">
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="analyst">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-            </visibleWhen>
-         </command>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
             locationURI="menu:org.wcs.smart.query.toolbar.menu.create">
          <command
                commandId="org.wcs.smart.query.create.unknown"
@@ -850,7 +890,7 @@
          point="org.eclipse.ui.commandImages">
       <image
             commandId="org.wcs.smart.query.deleteitem"
-            icon="images/icons/etool16/delete.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png">
       </image>
       <image
             commandId="org.wcs.smart.query.export"
@@ -863,6 +903,10 @@
       <image
             commandId="org.wcs.smart.query.exportmulti"
             icon="images/icons/etool16/exportqueries.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.query.import"
+            icon="images/icons/etool16/importquery.png">
       </image>
    </extension>
    <extension

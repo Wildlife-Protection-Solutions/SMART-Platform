@@ -94,7 +94,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.query.toolbar.menu.create?after=org.wcs.smart.query.createunknown.separator">
+            locationURI="menu:org.wcs.smart.query.toolbar.menu.create">
          <menu
                id="org.wcs.smart.query.createquery.alldata"
                label="%menu.query.alldata.name"
@@ -197,6 +197,33 @@
                </parameter>
             </command>
          </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.query.toolbar.create">
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/observation_query.png"
+               id="org.wcs.smart.menu.query.newquery.alldata"
+               label="All Data"
+               mode="FORCE_TEXT"
+               style="pulldown"
+               tooltip="%command.tooltip.newobservation">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <or>
+                     <equals
+                           value="org.wcs.smart.query.persepectives.single">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.persepectives.multi">
+                     </equals>
+                  </or>
+               </with>
+            </visibleWhen>
+         </command>
       </menuContribution>
    </extension>
    <extension

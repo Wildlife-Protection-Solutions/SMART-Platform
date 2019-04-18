@@ -15,7 +15,6 @@
                mnemonic="%patrol.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.patrol.newPatrol"
-                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                   label="%patrol.newpatrol.command.label"
                   mnemonic="%patrol.newpatrol.command.mnemonic"
                   style="push"
@@ -23,7 +22,6 @@
             </command>
             <command
                   commandId="org.wcs.smart.patrol.exportPatrol"
-                  icon="images/icons/etool16/patrol_export.png"
                   label="%patrol.export.command.label"
                   mnemonic="%patrol.export.command.mnemonic"
                   style="push"
@@ -31,7 +29,6 @@
             </command>
             <command
                   commandId="org.wcs.smart.patrol.importPatrol"
-                  icon="images/icons/etool16/patrol_import.png"
                   label="%patrol.importpatrols.command.label"
                   mnemonic="%patrol.importpatrols.command.mnemonic"
                   style="push"
@@ -145,49 +142,6 @@
                name="org.wcs.smart.patrol.separator2"
                visible="true">
          </separator>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:org.wcs.smart.toolbar.create?before=org.wcs.smart.toolbar.create.data">
-         <command
-               commandId="org.wcs.smart.patrol.newPatrol"
-               icon="images/icons/etool16/patrol_add.png"
-               label="%patroltoolbar.newpatrol.command.label"
-               mnemonic="%patroltoolbar.newpatrol.command.mnemonic"
-               style="push"
-               tooltip="%patroltoolbar.newpatrol.command.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <and>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.caSingle">
-                  </test>
-                  <or>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="analyst">
-                     </test>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-               </and>
-            </visibleWhen>
-         </command>
       </menuContribution>
       <menuContribution
             allPopups="false"
@@ -616,6 +570,157 @@
             </parameter>
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="vertical.org.wcs.smart.patrol.toolbar1">
+            <command
+                  commandId="org.wcs.smart.patrol.newPatrol"
+                  label="New"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="create a new patrol">
+               <visibleWhen>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.observation.FieldDataPerspective">
+                        </equals>
+                     </with>
+                     <test
+                           property="org.wcs.smart.fielddata.focusview"
+                           value="org.wcs.smart.patrol.ui.PatrolListView">
+                     </test>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="analyst">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+         </toolbar>
+         <toolbar
+               id="vertical.org.wcs.smart.patrol.toolbar2">
+            <command
+                  commandId="org.wcs.smart.patrol.importPatrol"
+                  label="Import"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="%patrol.importpatrols.command.tooltip">
+               <visibleWhen>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.observation.FieldDataPerspective">
+                        </equals>
+                     </with>
+                     <test
+                           property="org.wcs.smart.fielddata.focusview"
+                           value="org.wcs.smart.patrol.ui.PatrolListView">
+                     </test>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="analyst">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.patrol.exportPatrol"
+                  label="Export"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="%patrol.export.command.tooltip">
+               <visibleWhen>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.observation.FieldDataPerspective">
+                        </equals>
+                     </with>
+                     <test
+                           property="org.wcs.smart.fielddata.focusview"
+                           value="org.wcs.smart.patrol.ui.PatrolListView">
+                     </test>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="analyst">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+         </toolbar>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -680,6 +785,21 @@
                id="org.eclipse.ui.commands.radioState">
          </state>
       </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.patrol.newPatrol"
+            icon="images/icons/etool16/patrol_add.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.patrol.exportPatrol"
+            icon="images/icons/etool16/patrol_export.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.patrol.importPatrol"
+            icon="images/icons/etool16/patrol_import.png">
+      </image>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">

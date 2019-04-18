@@ -13,9 +13,12 @@ import org.eclipse.e4.ui.model.application.ui.menu.MToolBar;
 import org.eclipse.e4.ui.workbench.IPresentationEngine;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.renderers.swt.ToolBarManagerRenderer;
+import org.eclipse.e4.ui.workbench.renderers.swt.TrimBarLayout;
 import org.eclipse.jface.action.IContributionManagerOverrides;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.ToolBar;
@@ -69,6 +72,7 @@ public class SmartToolBarRenderer extends ToolBarManagerRenderer {
 	private ToolBar createToolbar(final MUIElement element, Composite parent) {
 		int orientation = getOrientation(element);
 		int style = orientation | SWT.WRAP | SWT.FLAT ;
+		
 		ToolBarManager manager = getManager((MToolBar) element);
 		if (manager == null) {
 			manager = new ToolBarManager(style);
@@ -95,7 +99,20 @@ public class SmartToolBarRenderer extends ToolBarManagerRenderer {
 		ToolBar btoolbar = manager.createControl(parent);
 		btoolbar.setData(manager);
 		btoolbar.setData(AbstractPartRenderer.OWNING_ME, element);
+		
 		btoolbar.requestLayout();
+		
+		
+		if (element.getElementId().startsWith("vertical.org.wcs.smart")) {
+//			element.getTags().add(TrimBarLayout.SPACER);
+			
+			FontData f = btoolbar.getFont().getFontData()[0];
+			
+			f.setHeight(f.getHeight() - 1);
+			Font smaller = new Font(btoolbar.getDisplay(), f);
+			btoolbar.setFont(smaller);
+			btoolbar.addListener(SWT.Dispose, e->smaller.dispose());
+		}
 		return btoolbar;
 	}
 
@@ -107,6 +124,11 @@ public class SmartToolBarRenderer extends ToolBarManagerRenderer {
 			if (side.getValue() == SideValue.LEFT_VALUE || side.getValue() == SideValue.RIGHT_VALUE) {
 				return SWT.VERTICAL;
 			}
+		}
+		if (element.getElementId().equals("org.wcs.smart.perspectives")){
+			return SWT.HORIZONTAL;	
+		}else if (element.getElementId().startsWith("vertical.org.wcs.smart")) {
+			return SWT.VERTICAL | SWT.RIGHT;	
 		}
 		return SWT.HORIZONTAL;
 	}

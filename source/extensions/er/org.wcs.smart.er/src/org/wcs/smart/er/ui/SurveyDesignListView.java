@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
@@ -88,6 +89,7 @@ import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
 
@@ -112,7 +114,7 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 	@Inject private MPart localPart;
 	@Inject private IMenuService menuService;
 	@Inject private ESelectionService selService; 
-	
+	@Inject private IEclipseContext context;
 	
 	private ISurveyEventListener listener = new ISurveyEventListener(){
 		@Override
@@ -132,6 +134,13 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_ADDED, listener);
 		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_DELETED, listener);
 		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, listener);
+	}
+	
+	@Inject
+	@Optional
+	public void partActivation(@UIEventTopic(UIEvents.UILifeCycle.BRINGTOTOP) Event event) {
+		if (event.getProperty(UIEvents.EventTags.ELEMENT) != localPart) return;
+		ShowFieldDataPerspective.enableToolbarItem(ID, context);
 	}
 	
 	@Optional
