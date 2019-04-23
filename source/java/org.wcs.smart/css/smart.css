@@ -58,9 +58,7 @@
 }
 
 
-
 /* customized SMART tab bar*/
-
 .SMARTTabMouseOver{
 	background-color: #F6C78E;
 }
@@ -78,6 +76,9 @@
 
 
 /* active tab bar */
+.MPartStack.active .SMARTTabMouseOver{
+	background-color: #F6C78E;
+}
 .MPartStack.active .SMARTTabSelected{
 	background-color: #F09F3F;
 }
@@ -91,16 +92,20 @@
 }
 
 /* inactive tab bar */
+.MPartStack .SMARTTabMouseOver{
+	background-color: #EDEDED;
+}
+
 .MPartStack .SMARTTabSelected{
 	background-color: #EDEDED;
 }
 
 .MPartStack .SMARTTabBar{
-	background-color: #EFEFEF;
+	background-color: #FFFFFF;
 }
 
 .MPartStack .SMARTTab{
-	background-color: #EFEFEF;
+	background-color: #FFFFFF;
 }
 
 
@@ -213,22 +218,41 @@ CTabItem:selected{
 	color: black;
 }
 
-#org-eclipse-e4-ui-compatibility-editor CTabFolder{
+.MPartStack.active CTabFolder{
 	swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
 	swt-corner-radius: 0px;
 	swt-selected-tab-fill: #F09F3F;
 	swt-unselected-hot-tab-color-background: #F6C78E;
     swt-unselected-tabs-color:  #FCEDDA;
 
-    swt-outer-keyline-color: white;
+    swt-outer-keyline-color: #FCEDDA;
     swt-tab-outline: #F09F3F;
     swt-shadow-visible: false;
     swt-shadow-color: #FCEDDA;
     swt-simple: true;
     
-    background-color:white;
+    background-color:white;        
+    color: black;
 }
+
+
+.MPartStack CTabFolder{
+	swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
+	swt-corner-radius: 0px;
+	swt-selected-tab-fill: #EDEDED;
+	swt-unselected-hot-tab-color-background: #EDEDED;
+    swt-unselected-tabs-color:  #FFFFFF;
+
+    swt-outer-keyline-color: #FFFFFF;
+    swt-tab-outline: #EDEDED;
+    swt-shadow-visible: false;
+    swt-shadow-color: #FFFFFF;
+    swt-simple: true;
+    
+    background-color:white;        
+    color: black;
+}
+
 #org-eclipse-e4-ui-compatibility-editor  CTabItem:selected{
 	color: black;
 }
-

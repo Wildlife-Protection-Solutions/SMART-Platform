@@ -216,6 +216,29 @@
          <toolbar
                id="org.wcs.smart.query.toolbar1">
             <command
+                  commandId="org.wcs.smart.query.create.dropdown"
+                  icon="images/icons/etool16/addquery.png"
+                  id="org.wc.smart.query.create.dropdown.mi"
+                  label="New"
+                  mode="FORCE_TEXT"
+                  style="radio"
+                  tooltip="create a new query">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <or>
+                        <equals
+                              value="org.wcs.smart.query.persepectives.single">
+                        </equals>
+                        <equals
+                              value="org.wcs.smart.query.persepectives.multi">
+                        </equals>
+                     </or>
+                  </with>
+               </visibleWhen>
+            </command>
+            <command
                   commandId="org.wcs.smart.query.export"
                   label="Export Results"
                   mode="FORCE_TEXT"
@@ -538,9 +561,20 @@
                      tooltip="%querywizard.command.tooltip">
                </command>
                <separator
-                     name="org.wcs.smart.query.newquery.separator"
+                     name="org.wcs.smart.query.newquery.separator1"
                      visible="true">
                </separator>
+               <command
+                     commandId="org.wcs.smart.query.create.unknown"
+                     icon="images/icons/obj16/compound_query.png"
+                     label="%newcompound.command.label.1"
+                     style="pulldown"
+                     tooltip="%newcompound.command.tooltip.1">
+                  <parameter
+                        name="org.wcs.smart.query.type"
+                        value="compound">
+                  </parameter>
+               </command>
                <separator
                      name="org.wcs.smart.query.newquery.separator2"
                      visible="false">
@@ -781,24 +815,6 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.query.toolbar.menu.create">
-         <command
-               commandId="org.wcs.smart.query.create.unknown"
-               id="org.wcs.smart.query.createunknown.wizard"
-               label="%querywizoard.command.label.0"
-               style="push">
-         </command>
-         <separator
-               name="org.wcs.smart.query.createunknown.separator"
-               visible="true">
-         </separator>
-         <separator
-               name="org.wcs.smart.query.createunknown.separator2"
-               visible="false">
-         </separator>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
             locationURI="menu:org.wcs.smart.menu.file.multipleCa?before=org.wcs.smart.file.separator1">
          <separator
                name="org.wcs.smart.query.ccaa.separator2"
@@ -854,36 +870,6 @@
                name="org.wcs.smart.query.ccaa.separator3"
                visible="true">
          </separator>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="menu:org.wcs.smart.query.toolbar.menu.create?before=org.wcs.smart.query.createunknown.separator2">
-         <command
-               commandId="org.wcs.smart.query.create.unknown"
-               icon="images/icons/obj16/compound_query.png"
-               label="%newcompound.command.label.0"
-               style="pulldown"
-               tooltip="%newcompound.command.tooltip.0">
-            <parameter
-                  name="org.wcs.smart.query.type"
-                  value="compound">
-            </parameter>
-         </command>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
-         <command
-               commandId="org.wcs.smart.query.create.unknown"
-               icon="images/icons/obj16/compound_query.png"
-               label="%newcompound.command.label.1"
-               style="pulldown"
-               tooltip="%newcompound.command.tooltip.1">
-            <parameter
-                  name="org.wcs.smart.query.type"
-                  value="compound">
-            </parameter>
-         </command>
       </menuContribution>
    </extension>
    <extension
@@ -967,6 +953,10 @@
                class="org.eclipse.jface.commands.ToggleState"
                id="org.wcs.smart.query.state.showinactive">
          </state>
+      </command>
+      <command
+            id="org.wcs.smart.query.create.dropdown"
+            name="name">
       </command>
    </extension>
    <extension
@@ -1126,6 +1116,10 @@
       <handler
             class="org.wcs.smart.query.ui.ShowInactiveFilterItemsHandler$ShowInactiveFilterItemsHandlerWrapper"
             commandId="org.wcs.smart.query.showinactive">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.ui.NewQueryDropDownHandler$NewQueryDropDownHandlerWrapper"
+            commandId="org.wcs.smart.query.create.dropdown">
       </handler>
    </extension>
    <extension

@@ -94,59 +94,6 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.query.toolbar.menu.create">
-         <menu
-               id="org.wcs.smart.query.createquery.alldata"
-               label="%menu.query.alldata.name"
-               tooltip="%menu.query.alldata.tooltip">
-            <command
-                  commandId="org.wcs.smart.query.create.unknown"
-                  icon="images/icons/obj16/observation_query.png"
-                  label="%command.label.newobservation"
-                  style="pulldown"
-                  tooltip="%command.tooltip.newobservation">
-               <parameter
-                     name="org.wcs.smart.query.type"
-                     value="observationobservation">
-               </parameter>
-            </command>
-            <command
-                  commandId="org.wcs.smart.query.create.unknown"
-                  icon="images/icons/obj16/waypoint_query.png"
-                  label="%command.label.newincident"
-                  style="push"
-                  tooltip="%command.tooltip.newincident">
-               <parameter
-                     name="org.wcs.smart.query.type"
-                     value="observationwaypoint">
-               </parameter>
-            </command>
-            <command
-                  commandId="org.wcs.smart.query.create.unknown"
-                  icon="images/icons/obj16/summary_query.png"
-                  label="%command.label.newsummary"
-                  style="push"
-                  tooltip="%command.tooltip.newsummary">
-               <parameter
-                     name="org.wcs.smart.query.type"
-                     value="observationsummary">
-               </parameter>
-            </command>
-            <command
-                  commandId="org.wcs.smart.query.create.unknown"
-                  icon="images/icons/obj16/gridded_query.png"
-                  label="%command.label.newgrid"
-                  style="push"
-                  tooltip="%command.tooltip.newgrid">
-               <parameter
-                     name="org.wcs.smart.query.type"
-                     value="observationgrid">
-               </parameter>
-            </command>
-         </menu>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
             locationURI="menu:org.wcs.smart.menu.query.newquery?after=org.wcs.smart.query.newquery.separator">
          <menu
                id="org.wcs.smart.menu.query.newquery.alldata"
@@ -197,33 +144,6 @@
                </parameter>
             </command>
          </menu>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:org.wcs.smart.query.toolbar.create">
-         <command
-               commandId="org.wcs.smart.query.create.unknown"
-               icon="images/icons/obj16/observation_query.png"
-               id="org.wcs.smart.menu.query.newquery.alldata"
-               label="All Data"
-               mode="FORCE_TEXT"
-               style="pulldown"
-               tooltip="%command.tooltip.newobservation">
-            <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="activeWorkbenchWindow.activePerspective">
-                  <or>
-                     <equals
-                           value="org.wcs.smart.query.persepectives.single">
-                     </equals>
-                     <equals
-                           value="org.wcs.smart.query.persepectives.multi">
-                     </equals>
-                  </or>
-               </with>
-            </visibleWhen>
-         </command>
       </menuContribution>
    </extension>
    <extension

@@ -41,3 +41,4 @@ Export-Package: org.wcs.smart.query,
 Eclipse-BuddyPolicy: global
 Bundle-Vendor: org.wcs.smart
 Automatic-Module-Name: org.wcs.smart.query
+Import-Package: org.eclipse.e4.core.commands

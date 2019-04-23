@@ -132,11 +132,15 @@
       <menuContribution
             allPopups="false"
             locationURI="menu:org.wcs.smart.query.toolbar.menu.create?before=org.wcs.smart.query.createunknown.separator2">
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
          <menu
                icon="images/icons/obj16/survey.png"
                id="org.wcs.smart.query.createquery.surveyquery"
-               label="%surveyquery.menu.label"
-               tooltip="%surveyquery.menu.tooltip">
+               label="%surveyquery.menu.label1"
+               tooltip="%surveyquery.menu.tooltip1">
             <command
                   commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/survey_observation_query.png"
@@ -183,17 +187,6 @@
             </command>
             <command
                   commandId="org.wcs.smart.query.create.unknown"
-                  icon="images/icons/obj16/survey_summary_query.png"
-                  label="%surveyquery.summary.command.label"
-                  style="push"
-                  tooltip="%surveyquery.summary.command.tooltip">
-               <parameter
-                     name="org.wcs.smart.query.type"
-                     value="surveysummary">
-               </parameter>
-            </command>
-            <command
-                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/survey_gridded_query.png"
                   label="%surveyquery.grid.command.label"
                   style="push"
@@ -203,22 +196,17 @@
                      value="surveygrid">
                </parameter>
             </command>
-            <visibleWhen
-                  checkEnabled="false">
-               <test
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </visibleWhen>
-         </menu>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
-         <menu
-               icon="images/icons/obj16/survey.png"
-               id="org.wcs.smart.query.createquery.surveyquery"
-               label="%surveyquery.menu.label1"
-               tooltip="%surveyquery.menu.tooltip1">
+            <command
+                  commandId="org.wcs.smart.query.create.unknown"
+                  icon="images/icons/obj16/survey_summary_query.png"
+                  label="%surveyquery.summary.command.label"
+                  style="push"
+                  tooltip="%surveyquery.summary.command.tooltip">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="surveysummary">
+               </parameter>
+            </command>
             <visibleWhen
                   checkEnabled="false">
                <test
