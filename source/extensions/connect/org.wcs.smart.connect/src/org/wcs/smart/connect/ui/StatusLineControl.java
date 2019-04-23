@@ -28,9 +28,11 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
@@ -60,8 +62,9 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(contribs.length, false);
-		gl.marginWidth = 0;
+		gl.marginWidth = 2;
 		gl.marginHeight = 2;
+		gl.verticalSpacing = 2;
 		main.setLayout(gl);
 		
 		//refresh now menu
@@ -89,6 +92,9 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 			}
 		}
 
+		Label l = new Label(main, SWT.NONE);
+		l.setText("Status");
+		l.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, contribs.length, 1));
 		return main;
 	}
 
