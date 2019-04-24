@@ -716,6 +716,33 @@
                   </and>
                </visibleWhen>
             </command>
+            <visibleWhen>
+               <and>
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.report.ReportViewerPerspective">
+                     </equals>
+                  </with>
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </and>
+            </visibleWhen>
          </toolbar>
          <toolbar
                id="vertical.org.wcs.smart.report.toolbar2">
@@ -791,6 +818,33 @@
                   </and>
                </visibleWhen>
             </command>
+            <visibleWhen>
+               <and>
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.report.ReportViewerPerspective">
+                     </equals>
+                  </with>
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </and>
+            </visibleWhen>
          </toolbar>
          <toolbar
                id="vertical.org.wcs.smart.report.toolbar3">
@@ -826,6 +880,33 @@
                   </with>
                </visibleWhen>
             </command>
+            <visibleWhen>
+               <and>
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.report.ReportViewerPerspective">
+                     </equals>
+                  </with>
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </and>
+            </visibleWhen>
          </toolbar>
       </menuContribution>
    </extension>

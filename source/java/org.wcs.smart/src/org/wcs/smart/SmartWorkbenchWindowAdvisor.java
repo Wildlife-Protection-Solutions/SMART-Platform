@@ -34,12 +34,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimBar;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MToolBar;
 import org.eclipse.e4.ui.model.application.ui.menu.MToolControl;
-import org.eclipse.e4.ui.workbench.IPresentationEngine;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.renderers.swt.TrimBarLayout;
@@ -265,6 +263,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 		//so instead we ensure it is visible here.
 		MTrimBar statusBar = (MTrimBar) modelService.find("org.eclipse.ui.trim.status", ctx.get(MApplication.class)); //$NON-NLS-1$
 		statusBar.setVisible(true);
+
 		
 		//when we added the -Dosgi.framework.extensions=org.eclipse.fx.osgi vm argument
 		//this caused the undoredo toolbar to show up - I couldn't figure out why so
@@ -277,16 +276,14 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 		
 		//move the start status bar to the right and add spacer as require
 		MTrimElement smartStatusBar = (MTrimElement)modelService.find("org.wcs.smart.status.toolbar", statusBar); //$NON-NLS-1$
-		smartStatusBar.getTags().add("NoMove"); //$NON-NLS-1$
 		statusBar.getChildren().remove(smartStatusBar);
 		
 		MToolControl tc = modelService.createModelElement(MToolControl.class);
 		tc.setElementId("org.wcs.smart.trim.status.spacer"); //$NON-NLS-1$
 		tc.getTags().add(TrimBarLayout.SPACER);
 		statusBar.getChildren().add(1, tc);
-		tc.getTags().add("stretch"); //$NON-NLS-1$		
+		statusBar.getChildren().add(smartStatusBar);
 		
-		statusBar.getChildren().add(smartStatusBar);		
     }
     
     public void postWindowCreate() {

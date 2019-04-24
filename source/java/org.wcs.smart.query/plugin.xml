@@ -197,23 +197,6 @@
             allPopups="false"
             locationURI="toolbar:org.eclipse.ui.main.toolbar">
          <toolbar
-               id="org.wcs.smart.query.toolbar.create">
-            <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="activeWorkbenchWindow.activePerspective">
-                  <or>
-                     <equals
-                           value="org.wcs.smart.query.persepectives.single">
-                     </equals>
-                     <equals
-                           value="org.wcs.smart.query.persepectives.multi">
-                     </equals>
-                  </or>
-               </with>
-            </visibleWhen>
-         </toolbar>
-         <toolbar
                id="org.wcs.smart.query.toolbar1">
             <command
                   commandId="org.wcs.smart.query.create.dropdown"
@@ -259,6 +242,20 @@
                   </with>
                </visibleWhen>
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <or>
+                     <equals
+                           value="org.wcs.smart.query.persepectives.single">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.persepectives.multi">
+                     </equals>
+                  </or>
+               </with>
+            </visibleWhen>
          </toolbar>
          <toolbar
                id="vertical.org.wcs.smart.query.toolbar2">
@@ -304,6 +301,20 @@
                   </with>
                </visibleWhen>
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <or>
+                     <equals
+                           value="org.wcs.smart.query.persepectives.single">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.persepectives.multi">
+                     </equals>
+                  </or>
+               </with>
+            </visibleWhen>
          </toolbar>
          <toolbar
                id="vertical.org.wcs.smart.query.toolbar3">
@@ -347,6 +358,20 @@
                   </with>
                </visibleWhen>
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <or>
+                     <equals
+                           value="org.wcs.smart.query.persepectives.single">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.persepectives.multi">
+                     </equals>
+                  </or>
+               </with>
+            </visibleWhen>
          </toolbar>
       </menuContribution>
       <menuContribution

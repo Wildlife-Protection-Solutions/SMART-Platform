@@ -10,6 +10,7 @@ import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.SideValue;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimBar;
 import org.eclipse.e4.ui.model.application.ui.menu.MToolBar;
+import org.eclipse.e4.ui.widgets.ImageBasedFrame;
 import org.eclipse.e4.ui.workbench.IPresentationEngine;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.renderers.swt.ToolBarManagerRenderer;
@@ -48,10 +49,11 @@ public class SmartToolBarRenderer extends ToolBarManagerRenderer {
 		Control renderedCtrl = newTB;
 		MUIElement parentElement = element.getParent();
 		if (parentElement instanceof MTrimBar) {
-			if (!element.getTags().contains(IPresentationEngine.NO_MOVE)) {
-				element.getTags().add(IPresentationEngine.DRAGGABLE);
-			}
-
+			//for SMART none of the toolbars are draggable
+//			if (!element.getTags().contains(IPresentationEngine.NO_MOVE)) {
+//				element.getTags().add(IPresentationEngine.DRAGGABLE);
+//			}
+			
 			setCSSInfo(element, newTB);
 
 			boolean vertical = false;
@@ -62,7 +64,13 @@ public class SmartToolBarRenderer extends ToolBarManagerRenderer {
 			if (cssUtils != null) {
 				MUIElement modelElement = (MUIElement) newTB.getData(AbstractPartRenderer.OWNING_ME);
 				boolean draggable = ((modelElement != null) && (modelElement.getTags().contains(IPresentationEngine.DRAGGABLE)));
-				renderedCtrl = cssUtils.frameMeIfPossible(newTB, null, vertical, draggable);
+				if (!draggable) {
+					//had to add this otherwise the toolbar visiblity property does not get set
+					//properly and additional spacers get added to toolbar
+					renderedCtrl = new ImageBasedFrame(newTB.getParent(), newTB, vertical, false);
+				}else {
+					renderedCtrl = cssUtils.frameMeIfPossible(newTB, null, vertical, draggable);
+				}
 			}
 		}
 
@@ -102,10 +110,7 @@ public class SmartToolBarRenderer extends ToolBarManagerRenderer {
 		
 		btoolbar.requestLayout();
 		
-		
-		if (element.getElementId().startsWith("vertical.org.wcs.smart")) {
-//			element.getTags().add(TrimBarLayout.SPACER);
-			
+		if (element.getElementId().startsWith("vertical.org.wcs.smart")) {		
 			FontData f = btoolbar.getFont().getFontData()[0];
 			
 			f.setHeight(f.getHeight() - 1);

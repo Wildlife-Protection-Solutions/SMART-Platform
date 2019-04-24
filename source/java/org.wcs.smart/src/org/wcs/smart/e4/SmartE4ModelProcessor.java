@@ -55,8 +55,6 @@ public class SmartE4ModelProcessor {
         		a.setContributionURI("bundleclass://org.wcs.smart/org.wcs.smart.ui.workbench.addons.dndaddon.DnDAddon"); //$NON-NLS-1$
         	}
         }
-      
-
 	}
 
 }

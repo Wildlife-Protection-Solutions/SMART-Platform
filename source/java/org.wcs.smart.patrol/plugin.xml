@@ -622,6 +622,46 @@
                   </and>
                </visibleWhen>
             </command>
+            <visibleWhen>
+               <and>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.observation.FieldDataPerspective">
+                     </equals>
+                  </with>
+                  <test
+                        property="org.wcs.smart.fielddata.focusview"
+                        value="org.wcs.smart.patrol.ui.PatrolListView">
+                  </test>
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </and>
+            </visibleWhen>
          </toolbar>
          <toolbar
                id="vertical.org.wcs.smart.patrol.toolbar2">
@@ -719,6 +759,46 @@
                   </and>
                </visibleWhen>
             </command>
+            <visibleWhen>
+               <and>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.observation.FieldDataPerspective">
+                     </equals>
+                  </with>
+                  <test
+                        property="org.wcs.smart.fielddata.focusview"
+                        value="org.wcs.smart.patrol.ui.PatrolListView">
+                  </test>
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </and>
+            </visibleWhen>
          </toolbar>
       </menuContribution>
    </extension>
