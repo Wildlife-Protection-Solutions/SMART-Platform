@@ -49,9 +49,18 @@ import org.wcs.smart.ca.UuidItem;
 public class ScreenOption extends UuidItem {
 
 	private ConservationArea ca;
+	
+	//key identifying the metadata field
 	private String type;
+
+	//current patrol or mission to identify which metadata we are representing
+	//we want to change this to be per package
 	private String resource;
+	
+	//if the item should be visible or not
 	private boolean visible = true;
+
+	//default value
 	private String stringValue;
 	private Boolean booleanValue;
 	private UUID uuidValue;
