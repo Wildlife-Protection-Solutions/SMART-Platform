@@ -47,7 +47,9 @@ import org.wcs.smart.cybertracker.export.alert.IDataTargetProvider.DataTarget;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.ProfileOptionID;
+import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.ScreenOptionUuid;
@@ -325,6 +327,26 @@ public class CtJsonExportUtils {
 		return objectiveOp;
 	}
 	
+	public static JSONObject convertStringOp(MetadataFieldValue metadataValue, String opKey, String opLabel, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+		JSONObject objective = new JSONObject();
+		objective.put(JSON_OPTION_TYPE_KEY, Type.TEXT.name());
+		objective.put(JSON_OPTION_LABEL_KEY, opLabel);
+		objective.put(JSON_REQUIRED_PROP_KEY, isRequired);
+		objective.put(JSON_FIXED_PROP_KEY, isFixed);
+		if (metadataValue != null) {
+			objective.put(JSON_ISVISIBILE_PROP_KEY, metadataValue.isVisible());
+			if (!metadataValue.isVisible() && metadataValue.getStringValue() != null) {
+				objective.put(JSON_DEFAULT_PROP_KEY, metadataValue.getStringValue());
+			}
+		}else {
+			objective.put(JSON_ISVISIBILE_PROP_KEY, true);
+		}
+		
+		JSONObject objectiveOp = new JSONObject();
+		objectiveOp.put(opKey, objective);
+		return objectiveOp;
+	}
+	
 	/**
 	 * Convert employee metadata to JSON string
 	 * 
@@ -346,6 +368,45 @@ public class CtJsonExportUtils {
 				if (screenOption.getUuidList() != null) {
 					JSONArray defaultValues = new JSONArray();
 					for (ScreenOptionUuid defaultOp : screenOption.getUuidList()) {
+						defaultValues.add(UuidUtils.uuidToString(defaultOp.getUuidValue()));
+					}
+					optionType.put(JSON_DEFAULTS_PROP_KEY, defaultValues);
+				}
+			}
+		}else {
+			optionType.put(JSON_ISVISIBILE_PROP_KEY, true);
+		}
+		
+		JSONArray optionOptions = new JSONArray();
+		
+		List<Employee> items = QueryFactory.buildQuery(session, Employee.class, 
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"endEmploymentDate", null}).list(); //$NON-NLS-1$
+		
+		for (Employee t : items) {
+			JSONObject ttype = new JSONObject();
+			ttype.put("uuid", UuidUtils.uuidToString(t.getUuid())); //$NON-NLS-1$
+			ttype.put("label", SmartLabelProvider.getShortLabel(t)); //$NON-NLS-1$
+			optionOptions.add(ttype);
+		}
+		optionType.put(JSON_OPTION_PROP_KEY, optionOptions);
+		
+		JSONObject teamTypeOp = new JSONObject();
+		teamTypeOp.put(JSON_EMPLOYEE_METADATA_KEY, optionType);
+		return teamTypeOp;
+	}
+	public static JSONObject convertEmployees(MetadataFieldValue screenOption, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+		JSONObject optionType = new JSONObject();
+		optionType.put(JSON_OPTION_TYPE_KEY, Type.MULTI_CHOICE.name());
+		optionType.put(JSON_OPTION_LABEL_KEY, Messages.CtJsonExportUtils_EmployeePageLabel);
+		optionType.put(JSON_REQUIRED_PROP_KEY, isRequired);
+		optionType.put(JSON_FIXED_PROP_KEY, isFixed);
+		if (screenOption != null) {
+			optionType.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
+			if (!screenOption.isVisible()) {
+				if (screenOption.getUuidList() != null) {
+					JSONArray defaultValues = new JSONArray();
+					for (MetadataFieldUuidValue defaultOp : screenOption.getUuidList()) {
 						defaultValues.add(UuidUtils.uuidToString(defaultOp.getUuidValue()));
 					}
 					optionType.put(JSON_DEFAULTS_PROP_KEY, defaultValues);
@@ -395,7 +456,72 @@ public class CtJsonExportUtils {
 		return objectiveOp;
 	}
 	
+	public static JSONObject convertLeaderPilot(MetadataFieldValue screenOption, String opKey, String opLabel, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+		JSONObject objective = new JSONObject();
+		objective.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
+		objective.put(JSON_OPTION_PARENT_KEY, JSON_EMPLOYEE_METADATA_KEY);
+		objective.put(JSON_OPTION_LABEL_KEY, opLabel);
+		objective.put(JSON_REQUIRED_PROP_KEY, isRequired);
+		objective.put(JSON_FIXED_PROP_KEY, isFixed);
+		if (screenOption != null) {
+			objective.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
+			if (!screenOption.isVisible() && screenOption.getUuidValue() != null) {
+				objective.put(JSON_DEFAULT_PROP_KEY, UuidUtils.uuidToString(screenOption.getUuidValue()));
+			}
+		}else {
+			objective.put(JSON_ISVISIBILE_PROP_KEY, true);
+		}
+		
+		JSONObject objectiveOp = new JSONObject();
+		objectiveOp.put(opKey, objective);
+		return objectiveOp;
+	}
+	
 	public static JSONObject convertKeyOptions(ScreenOption screenOption, Class<? extends NamedKeyItem> clazz, String screenKey, String opLabel, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+		JSONObject optionType = new JSONObject();
+		optionType.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
+		optionType.put(JSON_OPTION_LABEL_KEY, opLabel);
+		optionType.put(JSON_REQUIRED_PROP_KEY, isRequired);
+		optionType.put(JSON_FIXED_PROP_KEY, isFixed);
+		if (screenOption != null) {
+			optionType.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
+			if (!screenOption.isVisible()) {
+				if (screenOption.getUuidValue() != null) {
+					optionType.put(JSON_DEFAULT_PROP_KEY, UuidUtils.uuidToString(screenOption.getUuidValue()));
+				}else {
+					optionType.put(JSON_DEFAULT_PROP_KEY, null);
+				}
+			}
+		}else {
+			optionType.put(JSON_ISVISIBILE_PROP_KEY, true);
+		}
+		
+		JSONArray optionOptions = new JSONArray();
+		
+		List<? extends NamedKeyItem> items = QueryFactory.buildQuery(session, clazz, 
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"isActive", true}).list(); //$NON-NLS-1$
+		for (NamedKeyItem t : items) {
+			JSONObject ttype = new JSONObject();
+			ttype.put("uuid", UuidUtils.uuidToString(t.getUuid())); //$NON-NLS-1$
+			ttype.put("key", t.getKeyId()); //$NON-NLS-1$
+			ttype.put("label_default", t.findName(ca.getDefaultLanguage())); //$NON-NLS-1$
+			for (Label l : t.getNames()) {
+				ttype.put("label_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$
+				
+			}
+			optionOptions.add(ttype);
+		}
+		optionType.put(JSON_OPTION_PROP_KEY, optionOptions);
+		
+		JSONObject teamTypeOp = new JSONObject();
+		teamTypeOp.put(screenKey, optionType);
+		return teamTypeOp;
+	}
+	
+	public static JSONObject convertKeyOptions(MetadataFieldValue screenOption, 
+			Class<? extends NamedKeyItem> clazz, String screenKey, 
+			String opLabel, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
 		JSONObject optionType = new JSONObject();
 		optionType.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
 		optionType.put(JSON_OPTION_LABEL_KEY, opLabel);

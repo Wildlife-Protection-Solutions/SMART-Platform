@@ -22,12 +22,15 @@
 package org.wcs.smart.cybertracker.ctpackage.ui;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 
 /**
@@ -93,7 +96,25 @@ public interface ICtPackageManager {
 	 * @return
 	 */
 	public default void deletePackage(ICtPackage ctpackage, Session session) {
+		//delete all metadata
+		session.createQuery("DELETE FROM MetadataFieldValue WHERE ctPackage = :ctpackage") //$NON-NLS-1$
+			.setParameter("ctpackage", ctpackage) //$NON-NLS-1$
+			.executeUpdate();
+
+		//delete package
 		session.delete(ctpackage);
+
+		//delete local file
+		if (ctpackage instanceof AbstractCtPackage) {
+			try {
+				Path p = ((AbstractCtPackage)ctpackage).getLocalFile();
+				if (Files.exists(p)){
+					Files.delete(p);
+				}
+			}catch (Exception ex) {
+				CyberTrackerPlugIn.log(ex.getMessage(), ex);
+			}
+		}
 	}
 	
 	

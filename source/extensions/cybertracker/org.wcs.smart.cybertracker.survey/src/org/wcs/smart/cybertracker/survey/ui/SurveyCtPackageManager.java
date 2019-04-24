@@ -124,7 +124,7 @@ public class SurveyCtPackageManager implements ICtPackageManager {
 							}
 						}
 						
-						SurveyPackageExporter.INSTANCE.exportPackage(ppackage.getSurveyDesign(), ppackage.getCtProfile(), output, updates, context, progress.split(1));
+						SurveyPackageExporter.INSTANCE.exportPackage(ppackage, output, updates, context, progress.split(1));
 					}catch(OperationCanceledException e) {
 						iscancel[0] = true;
 						Display.getDefault().syncExec(()->{

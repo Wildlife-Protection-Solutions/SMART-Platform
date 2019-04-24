@@ -79,9 +79,14 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 			CtDatabaseUpgrader30To40 upgrader30To40 = new CtDatabaseUpgrader30To40();
 			upgrader30To40.upgrade(session);
 			update40to50(session);
+			update50to60(session);
 		}
 		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_4_0)) {
 			update40to50(session);
+			update50to60(session);
+		}
+		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_5_0)) {
+			update50to60(session);
 		}
 		
 	}
@@ -108,5 +113,24 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 	}
 	
 	
-
+	private static void update50to60(Session session) {
+		String[] sql = new String[] {
+				"CREATE TABLE smart.ct_metadata_value(uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, package_uuid char(16) for bit data not null, keyid varchar(32) not null, is_visible boolean not null, string_value varchar(8192), boolean_value boolean, uuid_value char(16) for bit data, primary key (uuid),unique(package_uuid, keyid))", //$NON-NLS-1$
+				"CREATE TABLE smart.ct_metadata_value_uuid (uuid CHAR(16) for bit data NOT NULL,field_uuid CHAR(16) for bit data NOT NULL, uuid_value CHAR(16) for bit data NOT NULL, PRIMARY KEY (UUID))", //$NON-NLS-1$
+				"ALTER TABLE smart.ct_metadata_value ADD CONSTRAINT ct_metadata_value_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area (UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.ct_metadata_value_uuid ADD CONSTRAINT field_uuid_option_uuid_fk FOREIGN KEY (field_uuid) REFERENCES smart.ct_metadata_value(UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_metadata_value to data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_metadata_value to manager", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_metadata_value to analyst", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_metadata_value_uuid to data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_metadata_value_uuid to manager", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_metadata_value_uuid to analyst", //$NON-NLS-1$
+		};
+		
+		for (String s : sql) {
+			session.createNativeQuery(s).executeUpdate();
+		}
+		
+		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_6_0, session);
+	}
 }

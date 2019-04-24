@@ -14,15 +14,6 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.cybertracker2.menu?after=org.wcs.smart.cybertracker2.separator.import">
-         <command
-               commandId="org.wcs.smart.cybertracker.patrol.export.package"
-               label="%exportpatrol.command.label"
-               style="push">
-         </command>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
             locationURI="menu:org.wcs.smart.cybertracker.menu?before=org.wcs.smart.cybertracker.patrolmetaseparator">
          <command
                commandId="org.wcs.smart.patrol.patrolScreens"

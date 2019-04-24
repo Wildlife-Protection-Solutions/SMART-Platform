@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -77,9 +78,19 @@ public class IncidentPackageUiContribution implements IPackageUiContribution{
 	@Override
 	public Composite createUi(Composite parent, ICtPackage ctPackage, Listener onValidate) {
 
-		Group incidentComposite = new Group(parent, SWT.NONE);
+		Composite g = new Composite(parent, SWT.NONE);
+		g.setLayout(new GridLayout());
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Composite header = new Composite(g, SWT.NONE);
+		header.setLayout(new GridLayout());
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Label headerLabel = new Label(header, SWT.NONE);
+		headerLabel.setText(Messages.IncidentPackageContribution_ConfigurationGroupLablel);
+		WidgetElement.setCSSClass(header, "SMARTSection");
+		
+		Composite incidentComposite = new Composite(g, SWT.NONE);
 		incidentComposite.setLayout(new GridLayout());
-		incidentComposite.setText(Messages.IncidentPackageContribution_ConfigurationGroupLablel);
 		
 		btnCollect = new Button(incidentComposite, SWT.CHECK);
 		btnCollect.setText(Messages.IncidentPackageContribution_CollectIncidentsOp);

@@ -226,6 +226,19 @@
             class="org.wcs.smart.cybertracker.model.CtIncidentLink"
             supportsCcaa="false">
       </class>
+      <class
+            class="org.wcs.smart.cybertracker.model.MetadataFieldValue"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".metadata.conservationArea"
+            class="org.wcs.smart.cybertracker.model.MetadataFieldUuidValue"
+            supportsCcaa="false">
+      </class>
+      <class
+            class="org.wcs.smart.cybertracker.model.AbstractCtPackage"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.editors">

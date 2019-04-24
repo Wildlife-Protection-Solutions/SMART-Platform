@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -50,7 +51,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
@@ -83,7 +83,7 @@ import org.wcs.smart.util.UuidUtils;
 
 public class MapPackageUiContribution implements IPackageUiContribution{
 
-	public static final String RE_KEY = "ReferencedEnvelope";
+	public static final String RE_KEY = "ReferencedEnvelope"; //$NON-NLS-1$
 	
 	private ComboViewer cmbBasemap;
 	private Text txtBounds;
@@ -93,7 +93,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 	
 	private Text txtMapDirectory;
 	private MbTileGenerator generator;
-	private Group mapComposite;
+	private Composite mapComposite;
 	
 	private final static Integer[] validZooms = new Integer[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21};
 	
@@ -146,9 +146,19 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		
 		generator = new MbTileGenerator();
 		
-		mapComposite = new Group(parent, SWT.NONE);
+		Composite g = new Composite(parent, SWT.NONE);
+		g.setLayout(new GridLayout());
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Composite header = new Composite(g, SWT.NONE);
+		header.setLayout(new GridLayout());
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Label headerLabel = new Label(header, SWT.NONE);
+		headerLabel.setText(Messages.MapPackageContribution_BasemapOpsTitle);
+		WidgetElement.setCSSClass(header, "SMARTSection");
+		
+		mapComposite = new Composite(g, SWT.NONE);
 		mapComposite.setLayout(new GridLayout());
-		mapComposite.setText(Messages.MapPackageContribution_BasemapOpsTitle);
 		
 		Composite top = new Composite(mapComposite, SWT.NONE);
 		top.setLayout(new GridLayout(2, false));

@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -51,7 +52,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
@@ -67,6 +67,7 @@ import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
@@ -127,16 +128,33 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		CTabItem mainTab = new CTabItem(tabs, SWT.NONE);
 		mainTab.setText("Model Settings");
 		
-		Composite main = new Composite(tabs, SWT.NONE);
+		ScrolledComposite scroll = new ScrolledComposite(tabs,  SWT.V_SCROLL);
+		scroll.setExpandHorizontal(true);
+		scroll.setExpandVertical(true);
+		
+		Composite main = new Composite(scroll, SWT.NONE);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)main.getLayout()).marginWidth = 0;
+		((GridLayout)main.getLayout()).marginHeight = 0;
 		
-		mainTab.setControl(main);
+		scroll.setContent(main);
+		mainTab.setControl(scroll);
 		
-		Group g = new Group(main, SWT.NONE);
+		Composite g = new Composite(main, SWT.NONE);
+		g.setLayout(new GridLayout());
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Composite header = new Composite(g, SWT.NONE);
+		header.setLayout(new GridLayout());
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Label headerLabel = new Label(header, SWT.NONE);
+		headerLabel.setText(Messages.PatrolCTPackageDialog_PatrolConfigurationLabel);
+		WidgetElement.setCSSClass(header, "SMARTSection");
+		
+		g = new Composite(g, SWT.NONE);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		g.setText(Messages.PatrolCTPackageDialog_PatrolConfigurationLabel);
 		
 		Label nameLabel = new Label(g, SWT.NONE);
 		nameLabel.setText("Package Name:");
@@ -197,7 +215,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 			}
 		});
 		
-		
+		//main page contributions
 		if (contributions != null) {
 			for (IPackageUiContribution cc : contributions) {
 				if (!cc.isTab()) {
@@ -207,6 +225,9 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 			}
 		}
 		
+		scroll.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		//tab contributaions
 		if (contributions != null) {
 			for (IPackageUiContribution cc : contributions) {
 				if (cc.isTab()) {
@@ -238,10 +259,11 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				}
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setName(txtName.getText());
+				session.saveOrUpdate(ctpackage);
+				session.flush();
 				for (IPackageUiContribution cc : contributions) {
 					cc.updatePackage(ctpackage);
 				}
-				session.saveOrUpdate(ctpackage);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -316,6 +338,18 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 						if (init.getConfigurableModel() != null) init.getConfigurableModel().getUuid();
 						if (init.getCtProfile() != null) init.getCtProfile().getUuid();
 						if (init.getIncidentModel() != null) init.getIncidentModel().getUuid();
+					}else if (ctpackage != null) {
+						init = ctpackage;
+						if (init.getConfigurableModel() != null) {
+							init.setConfigurableModel(session.get(ConfigurableModel.class, init.getConfigurableModel().getUuid()));
+							init.getConfigurableModel().getUuid();
+						}
+						init.setCtProfile(session.get(CyberTrackerPropertiesProfile.class, init.getCtProfile().getUuid()));
+						init.getCtProfile().getUuid();
+						if (ctpackage.getIncidentModel() != null) {
+							init.setIncidentModel(session.get(ConfigurableModel.class, init.getIncidentModel().getUuid()));
+							init.getIncidentModel().getUuid();
+						}
 					}
 				}
 				
@@ -370,6 +404,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		
 		try(Session session = HibernateManager.openSession()){
 			PatrolCtPackage local = session.get(PatrolCtPackage.class, ((PatrolCtPackage)ctpackage).getUuid());
+			if (local == null) return all;
 			
 			Label header = new Label(all, SWT.NONE);
 			header.setText(local.getName());

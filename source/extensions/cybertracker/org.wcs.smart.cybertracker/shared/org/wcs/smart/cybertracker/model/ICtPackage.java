@@ -28,6 +28,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
@@ -39,6 +42,8 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
+@Entity
+@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 public interface ICtPackage {
 
 	public static final String PACKAGE_DATE_FORMAT = "yyyyMMddHHmmss"; //$NON-NLS-1$

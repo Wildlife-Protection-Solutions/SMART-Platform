@@ -19,33 +19,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.patrol.handler;
+package org.wcs.smart.cybertracker.model;
 
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.tools.compat.parts.DIHandler;
-import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.cybertracker.patrol.export.PatrolCTPackageDialog;
+import java.util.UUID;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import org.wcs.smart.ca.UuidItem;
 
 /**
- * Handler for the cybertracker patrol package exporter.  See PatrolPacageExporter.java
- * for more details.
+ * Uuid option for {@link MetadataFieldValue}
  * 
- * 
- * @author Emily
- *
+ * @author elitvin
+ * @since 2.0.0
  */
-@SuppressWarnings("restriction")
-public class ExportPatrolCtPackageHandler {
+@Entity
+@Table(name = "smart.ct_metadata_value_uuid")
+public class MetadataFieldUuidValue extends UuidItem {
 	
-	@Execute
-	public void execute (Shell shell) {
-		PatrolCTPackageDialog dialog = new PatrolCTPackageDialog(shell);
-		dialog.open();
+	private MetadataFieldValue screenOption;
+	private UUID uuidValue;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="field_uuid", referencedColumnName="uuid")
+	public MetadataFieldValue getMetadata() {
+		return screenOption;
+	}
+	public void setMetadata(MetadataFieldValue screenOption) {
+		this.screenOption = screenOption;
 	}
 	
-	public static class ExportPatrolCtPackageHandlerWrapper extends DIHandler<ExportPatrolCtPackageHandler>{
-		public ExportPatrolCtPackageHandlerWrapper() {
-			super (ExportPatrolCtPackageHandler.class);
-		}
+	@Column(name="uuid_value")
+	public UUID getUuidValue() {
+		return uuidValue;
 	}
+	public void setUuidValue(UUID uuidValue) {
+		this.uuidValue = uuidValue;
+	}
+	
+	
 }

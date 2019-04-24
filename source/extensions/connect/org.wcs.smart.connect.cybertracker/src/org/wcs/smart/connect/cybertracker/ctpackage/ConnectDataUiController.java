@@ -396,7 +396,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	}
 
 	@Override
-	public void updatePackage(ICtPackage ctpackage) {
+	public void updatePackage(ICtPackage ctpackage, Session session) {
 		
 	}
 	

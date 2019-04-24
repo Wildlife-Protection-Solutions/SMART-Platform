@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2019 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,34 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.survey.handler;
-
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.tools.compat.parts.DIHandler;
-import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.cybertracker.survey.export.SurveyCTPackageDialog;
+package org.wcs.smart.cybertracker.survey.model;
 
 /**
- * Handler for the cybertracker patrol package exporter.  See PatrolPacageExporter.java
- * for more details.
- * 
- * 
+ * Survey Metadata fields
  * @author Emily
  *
  */
-@SuppressWarnings("restriction")
-public class ExportSurveyCtPackageHandler {
+public enum MissionMetadataField {
 	
-	@Execute
-	public void execute (Shell shell) {
-		
-		SurveyCTPackageDialog dialog = new SurveyCTPackageDialog(shell);
-		dialog.open();
+	COMMENT("SMART_Comments", false), //$NON-NLS-1$
+	MEMBERS("SMART_Members", true), //$NON-NLS-1$
+	LEADER("SMART_Leader", true); //$NON-NLS-1$
+	
+	private String jsonKey;
+	private boolean isRequired;
+	
+	MissionMetadataField(String jsonKey, boolean isRequired){
+		this.jsonKey = jsonKey;
+		this.isRequired = isRequired;
 	}
 	
-	public static class ExportSurveyCtPackageHandlerWrapper extends DIHandler<ExportSurveyCtPackageHandler>{
-		public ExportSurveyCtPackageHandlerWrapper() {
-			super (ExportSurveyCtPackageHandler.class);
-		}
+	public String getJsonKey() {
+		return this.jsonKey;
 	}
+	
+	public boolean isRequired() {
+		return this.isRequired;
+	}
+	
 }

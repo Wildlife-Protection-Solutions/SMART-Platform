@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,18 +50,20 @@ import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils.Type;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
+import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
+import org.wcs.smart.cybertracker.survey.model.MissionMetadataField;
+import org.wcs.smart.cybertracker.survey.model.SurveyCtPackage;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
-import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
-import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
@@ -101,13 +104,14 @@ public enum SurveyPackageExporter {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void exportPackage(SurveyDesign design, CyberTrackerPropertiesProfile profile, Path exportFile, List<IPackageContribution.PackageContribution> contributions, IEclipseContext context, IProgressMonitor monitor) throws Exception{
+	public void exportPackage(SurveyCtPackage ctpackage, Path exportFile, List<IPackageContribution.PackageContribution> contributions, IEclipseContext context, IProgressMonitor monitor) throws Exception{
 		
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.SurveyPackageExporter_TaskName, 7);
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
 		try {
 			try(Session session = HibernateManager.openSession()){
-				SurveyDesign sd = session.get(SurveyDesign.class, design.getUuid());
+				ctpackage = session.get(SurveyCtPackage.class, ctpackage.getUuid());
+				SurveyDesign sd = ctpackage.getSurveyDesign();
 				
 				ConfigurableModel modelToExport = null;
 				if (sd.getConfigurableModel() != null) {
@@ -156,12 +160,12 @@ public enum SurveyPackageExporter {
 				
 				sub.split(1);
 				Path metadataFile = tempDir.resolve(PATROL_METADATA_FILE);
-				metadataToJson(modelToExport.getConservationArea(), sd, session,  metadataFile);
+				metadataToJson(ctpackage, sd, session,  metadataFile);
 				toIncludeInZip.add(metadataFile.toFile());
 				
 				sub.split(1);
 				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
-				profileToJson(session.get(CyberTrackerPropertiesProfile.class, profile.getUuid()), modelToExport, session, context, profileFile);
+				profileToJson(ctpackage.getCtProfile(), modelToExport, session, context, profileFile);
 				toIncludeInZip.add(profileFile.toFile());
 								
 				//get version number from output file
@@ -265,8 +269,7 @@ public enum SurveyPackageExporter {
 	
 	
 	@SuppressWarnings("unchecked")
-	private void metadataToJson(ConservationArea ca, SurveyDesign design, Session session, Path outputFile) throws IOException {
-		Map<MissionScreenOptionMeta, ScreenOption> options = SurveyHibernateManager.getMissionScreenOptions(ca, session);
+	private void metadataToJson(AbstractCtPackage ctpackage, SurveyDesign design, Session session, Path outputFile) throws IOException {
 		
 		JSONArray metadataScreens = new JSONArray();
 		
@@ -276,17 +279,28 @@ public enum SurveyPackageExporter {
 			MissionAttribute a = session.get(MissionAttribute.class, prop.getAttribute().getUuid());
 			//only supports number, text and list
 			if (prop.getAttribute().getType() == AttributeType.NUMERIC) {
-				metadataScreens.add(covertNumberProperty(a, session, ca));
+				metadataScreens.add(covertNumberProperty(a, session, ctpackage.getConservationArea()));
 			}else if (prop.getAttribute().getType() == AttributeType.TEXT) {
-				metadataScreens.add(covertStringProperty(a, session, ca));
+				metadataScreens.add(covertStringProperty(a, session, ctpackage.getConservationArea()));
 			}else if (prop.getAttribute().getType() == AttributeType.LIST) {
-				metadataScreens.add(covertListProperty(a, session, ca));
+				metadataScreens.add(covertListProperty(a, session, ctpackage.getConservationArea()));
 			}	
 		}
 				
-		metadataScreens.add(CtJsonExportUtils.convertStringOp(options.get(MissionScreenOptionMeta.COMMENT), MissionScreenOptionMeta.COMMENT.key, Messages.SurveyPackageExporter_CommentPageLabel, MissionScreenOptionMeta.COMMENT.isRequired(), false, session, ca)); 
-		metadataScreens.add(CtJsonExportUtils.convertEmployees(options.get(MissionScreenOptionMeta.MEMBERS), MissionScreenOptionMeta.MEMBERS.isRequired(), false, session, ca));
-		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(options.get(MissionScreenOptionMeta.LEADER), MissionScreenOptionMeta.LEADER.key, Messages.SurveyPackageExporter_LeaderPageLabel, MissionScreenOptionMeta.LEADER.isRequired(), false, session, ca)); 
+		List<MetadataFieldValue> metadataFields = ((SurveyCtPackage)ctpackage).getMetadataValues();
+
+		Map<String, MetadataFieldValue> map = metadataFields.stream().collect(Collectors.toMap(e->e.getMetadataKey(), e->e));
+	
+		metadataScreens.add(CtJsonExportUtils.convertStringOp(map.get(MissionMetadataField.COMMENT.name()), 
+				MissionMetadataField.COMMENT.getJsonKey(), Messages.SurveyPackageExporter_CommentPageLabel,
+				MissionScreenOptionMeta.COMMENT.isRequired(), false, session, ctpackage.getConservationArea()));
+		
+		metadataScreens.add(CtJsonExportUtils.convertEmployees(map.get(MissionMetadataField.MEMBERS.name()), 
+				MissionMetadataField.MEMBERS.isRequired(), false, session, ctpackage.getConservationArea()));
+		
+		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(map.get(MissionMetadataField.LEADER.name()),
+				MissionMetadataField.LEADER.getJsonKey(), Messages.SurveyPackageExporter_LeaderPageLabel, 
+				MissionScreenOptionMeta.LEADER.isRequired(), false, session, ctpackage.getConservationArea())); 
 		
 		metadataScreens.add(CtJsonExportUtils.createDataType(SurveyScreensUtil.DATATYPE_SURVEY));
 		metadataScreens.add(CtJsonExportUtils.createPatrolId());

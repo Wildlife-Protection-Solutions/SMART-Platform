@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.patrol.ui;
+package org.wcs.smart.cybertracker.survey.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,23 +48,18 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
-import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
-import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
-import org.wcs.smart.cybertracker.patrol.model.PatrolMetadataField;
+import org.wcs.smart.cybertracker.survey.model.MissionMetadataField;
+import org.wcs.smart.cybertracker.survey.model.SurveyCtPackage;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.model.PatrolMandate;
-import org.wcs.smart.patrol.model.PatrolTransportType;
-import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.ui.NamedItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -74,11 +69,11 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class PatrolMetadataPackageContribution implements IPackageUiContribution {
+public class SurveyMetadataPackageContribution implements IPackageUiContribution {
 
-	private Button btnTT, btnArmed, btnTeam, btnStation, btnMandate, btnObj, btnCmt, btnMembers, btnLeader, btnPilot, btnArmedYes, btnArmedNo;
-	private ComboViewer cmbTt, cmbTeam, cmbStation, cmbMandate, cmbLeader, cmbPilot;
-	private Text txtObj, txtComment;
+	private Button btnCmt, btnMembers, btnLeader;
+	private ComboViewer cmbLeader;
+	private Text txtComment;
 	
 	private CheckboxTableViewer lstEmployees;
 	private Listener onModified;
@@ -107,12 +102,12 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 
 		Label col1 = new Label(headerComp, SWT.NONE);
 		col1.setText("Metadata Field");
-		col1.setToolTipText("the patrol metadata field");
+		col1.setToolTipText("the mission metadata field");
 		col1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 
 		Label col2 = new Label(headerComp, SWT.NONE);
 		col2.setText("User Selected");
-		col2.setToolTipText("if checked, the user selects the value when creating the patrol otherwise the fixed value is used");
+		col2.setToolTipText("if checked, the user selects the value when creating the mission otherwise the fixed value is used");
 		col2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Label col3 = new Label(headerComp, SWT.NONE);
@@ -145,62 +140,8 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		c4.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		((GridData)c4.getLayoutData()).heightHint = 0;
 		
-		// transport type
-		Object[] d = createComboViewerSection("Transport Type", core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MIXED_PATROL_ICON));
-		btnTT = (Button) d[0];
-		cmbTt = (ComboViewer) d[1];
-		
-		// armed
-		Label l = new Label(core, SWT.NONE);
-		l.setImage(SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ARMED_ICON));
-				
-		l = new Label(core, SWT.NONE);
-		l.setText("Is Armed");
-		
-		btnArmed = new Button(core, SWT.CHECK);
-		btnArmed.setSelection(true);
-		btnArmed.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-
-		Composite cmp = new Composite(core, SWT.NONE);
-		cmp.setLayout(new GridLayout(2, false));
-		
-		btnArmedYes = new Button(cmp, SWT.RADIO);
-		btnArmedYes.setText("yes");
-		btnArmedYes.setEnabled(false);
-		btnArmedNo = new Button(cmp, SWT.RADIO);
-		btnArmedNo.setText("no");
-		btnArmedNo.setSelection(true);
-		btnArmedNo.setEnabled(false);
-		btnArmed.addListener(SWT.Selection, e->{
-			btnArmedYes.setEnabled(!btnArmed.getSelection());
-			btnArmedNo.setEnabled(!btnArmed.getSelection());
-			fireChanged();
-		});
-		btnArmedYes.addListener(SWT.Selection, e->fireChanged());
-		btnArmedNo.addListener(SWT.Selection, e->fireChanged());
-		
-		// team
-		d = createComboViewerSection("Team", core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON));
-		btnTeam = (Button) d[0];
-		cmbTeam = (ComboViewer) d[1];
-		
-		// station
-		d = createComboViewerSection("Station", core, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STATION_ICON));
-		btnStation = (Button) d[0];
-		cmbStation = (ComboViewer) d[1];
-		
-		// mandate
-		d = createComboViewerSection("Patrol Mandate", core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON));
-		btnMandate = (Button) d[0];
-		cmbMandate = (ComboViewer) d[1];
-				
-		// objective
-		d = createTextSection("Patol Objective", core, null);
-		btnObj = (Button) d[0];
-		txtObj = (Text) d[1];
-		
 		// comment
-		d = createTextSection("Patol Comment", core, null);
+		Object[] d = createTextSection("Mission Comment", core, null);
 		btnCmt = (Button) d[0];
 		txtComment = (Text) d[1];		
 		
@@ -214,8 +155,8 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		};
 		
 		// employess
-		l = new Label(core, SWT.NONE);
-		l.setImage(SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MEMBER_ICON));
+		Label l = new Label(core, SWT.NONE);
+		l.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_MEMBER_ICON));
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		l = new Label(core, SWT.NONE);
@@ -234,33 +175,22 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		((GridData)lstEmployees.getControl().getLayoutData()).heightHint = 80;
 		
 		// leader
-		d = createComboViewerSection("Patrol Leader", core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_LEADER_ICON));
+		d = createComboViewerSection("Mission Leader", core, EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_LEADER_ICON));
 		btnLeader = (Button) d[0];
 		cmbLeader = (ComboViewer) d[1];
 		cmbLeader.setLabelProvider(employeeLblProvider);
 		btnLeader.setEnabled(false);
 		cmbLeader.getControl().setEnabled(false);
-		// pilot
-		d = createComboViewerSection("Patrol Pilot", core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_PILOT_ICON));
-		btnPilot = (Button) d[0];
-		cmbPilot = (ComboViewer) d[1];
-		cmbPilot.setLabelProvider(employeeLblProvider);
-		btnPilot.setEnabled(false);
-		cmbPilot.getControl().setEnabled(false);
-		
+
 		btnMembers.addListener(SWT.Selection, e->{
 			lstEmployees.getControl().setEnabled(!btnMembers.getSelection());
 			
 			if (btnMembers.getSelection()) {
 				btnLeader.setEnabled(false);
-				btnPilot.setEnabled(false);
 				cmbLeader.getControl().setEnabled(false);
-				cmbPilot.getControl().setEnabled(false);
 			}else {
 				btnLeader.setEnabled(true);
-				btnPilot.setEnabled(true);
 				cmbLeader.getControl().setEnabled(!btnLeader.getSelection());
-				cmbPilot.getControl().setEnabled(!btnPilot.getSelection());
 			}
 			fireChanged();
 		});
@@ -286,9 +216,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			if (o instanceof Employee) items.add((Employee) o);
 		}
 		cmbLeader.setInput(items);
-		cmbPilot.setInput(items);
 		if (cmbLeader.getStructuredSelection().isEmpty() && items.size() > 0) cmbLeader.setSelection(new StructuredSelection(items.get(0)));
-		if (cmbPilot.getStructuredSelection().isEmpty() && items.size() > 0) cmbPilot.setSelection(new StructuredSelection(items.get(0)));
 	}
 	
 	private Object[] createComboViewerSection(String sectionName, Composite parent, Image icon) {
@@ -359,48 +287,31 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		if (!btnMembers.getSelection() && !btnLeader.getSelection() && cmbLeader.getStructuredSelection().isEmpty()) {
 			return "Leader selection is required when the metadata field is not visible";
 		}
-		
-		if (!btnMandate.getSelection() && cmbMandate.getStructuredSelection().isEmpty()) {
-			return "Patrol mandate selection is required when the metadata field is not visible";
-		}
-		if (!btnTT.getSelection() && cmbTt.getStructuredSelection().isEmpty()) {
-			return "Transport type selection is required when the metadata field is not visible";
-		}
-
 		return null;
 	}
 
 	@Override
-	public void updatePackage(ICtPackage ctpackage) {		
-		PatrolCtPackage ppackage = (PatrolCtPackage)ctpackage;
-		if (ppackage.getMetadataValues() == null) ppackage.setMetadataValues(new ArrayList<>());
+	public void updatePackage(ICtPackage ctpackage) {
+		SurveyCtPackage cpackage = ((SurveyCtPackage)ctpackage);
+		if (cpackage.getMetadataValues() == null) cpackage.setMetadataValues(new ArrayList<>());
 		
+		List<MetadataFieldValue> items = ((SurveyCtPackage)ctpackage).getMetadataValues();
 		HashMap<String, MetadataFieldValue> map = new HashMap<>();
-		for (MetadataFieldValue v : ppackage.getMetadataValues()) {
+		for (MetadataFieldValue v : items) {
 			map.put(v.getMetadataKey(), v);
 		}
 		
-		MetadataFieldValue v = findMetadataValue(map, PatrolMetadataField.ARMED,  btnArmed, ppackage);
-		v.setBooleanValue(btnArmedYes.getSelection());
-		
-		v = findMetadataValue(map, PatrolMetadataField.COMMENT,  btnCmt, ppackage);
+		MetadataFieldValue v = findMetadataValue(map, MissionMetadataField.COMMENT,  btnCmt, cpackage);
 		v.setStringValue(txtComment.getText().strip());
 		
-		v = findMetadataValue(map, PatrolMetadataField.LEADER,  btnLeader, ppackage);
+		v = findMetadataValue(map, MissionMetadataField.LEADER,  btnLeader, cpackage);
 		if (cmbLeader.getStructuredSelection().isEmpty()) {
 			v.setUuidValue(null);
 		}else {
 			v.setUuidValue( ((Employee)cmbLeader.getStructuredSelection().getFirstElement()).getUuid() );
 		}
 		
-		v = findMetadataValue(map, PatrolMetadataField.MANDATE,  btnMandate, ppackage);
-		if (cmbMandate.getStructuredSelection().isEmpty()) {
-			v.setUuidValue(null);
-		}else {
-			v.setUuidValue( ((PatrolMandate)cmbMandate.getStructuredSelection().getFirstElement()).getUuid() );
-		}
-		
-		v = findMetadataValue(map, PatrolMetadataField.MEMBERS,  btnMembers, ppackage);
+		v = findMetadataValue(map, MissionMetadataField.MEMBERS,  btnMembers, cpackage);
 		if (v.getUuidList() == null) v.setUuidList(new ArrayList<>());
 		v.getUuidList().clear();
 		
@@ -412,57 +323,16 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				v.getUuidList().add(uuidValue);
 			}
 		}
-		
-		v = findMetadataValue(map, PatrolMetadataField.OBJECTIVE,  btnObj, ppackage);
-		v.setStringValue(txtObj.getText());
-		
-		v = findMetadataValue(map, PatrolMetadataField.PILOT,  btnPilot, ppackage);
-		if (cmbPilot.getStructuredSelection().isEmpty()) {
-			v.setUuidValue(null);
-		}else {
-			v.setUuidValue( ((Employee)cmbPilot.getStructuredSelection().getFirstElement()).getUuid() );
-		}
-		
-		v = findMetadataValue(map, PatrolMetadataField.STATION,  btnStation, ppackage);
-		if (cmbStation.getStructuredSelection().isEmpty()) {
-			v.setUuidValue(null);
-		}else {
-			if (cmbStation.getStructuredSelection().getFirstElement() instanceof Station) {
-				v.setUuidValue( ((Station)cmbStation.getStructuredSelection().getFirstElement()).getUuid() );
-			}else {
-				v.setUuidValue( null );
-			}
-		}
-		
-		v = findMetadataValue(map, PatrolMetadataField.TEAM,  btnTeam, ppackage);
-		if (cmbTeam.getStructuredSelection().isEmpty()) {
-			v.setUuidValue(null);
-		}else {
-			if (cmbTeam.getStructuredSelection().getFirstElement() instanceof Team) {
-				v.setUuidValue( ((Team)cmbTeam.getStructuredSelection().getFirstElement()).getUuid() );
-			}else {
-				v.setUuidValue( null );
-			}
-		}
-		
-		v = findMetadataValue(map, PatrolMetadataField.TRANSPORT,  btnTT, ppackage);
-		if (cmbTt.getStructuredSelection().isEmpty()) {
-			v.setUuidValue(null);
-		}else {
-			v.setUuidValue( ((PatrolTransportType)cmbTt.getStructuredSelection().getFirstElement()).getUuid() );
-		}
-		
-		
 	}
 	
-	private MetadataFieldValue findMetadataValue(HashMap<String, MetadataFieldValue> items, PatrolMetadataField field, Button btnVisible, PatrolCtPackage ppackage) {
+	private MetadataFieldValue findMetadataValue(HashMap<String, MetadataFieldValue> items, MissionMetadataField field, Button btnVisible, SurveyCtPackage cpackage) {
 		MetadataFieldValue v = items.get(field.name());
 		if (v == null) {
 			v = new MetadataFieldValue();
-			v.setCtPackage((AbstractCtPackage)ppackage);
-			v.setConservationArea(ppackage.getConservationArea());
+			v.setCtPackage(cpackage);
+			v.setConservationArea(cpackage.getConservationArea());
 			v.setMetadataKey(field.name());
-			ppackage.getMetadataValues().add(v);
+			cpackage.getMetadataValues().add(v);
 		}
 		v.setVisible(btnVisible.getSelection());
 		return v;
@@ -473,79 +343,43 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	public boolean isTab() { return true; }
 	
 	@Override
-	public String getTabName() { return "Patrol Metadata"; }
+	public String getTabName() { return "Mission Metadata"; }
 	
 	Job loadValues = new Job("loading metadata values") {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
-			List<PatrolTransportType> types = new ArrayList<>();
-			List<Object> teams = new ArrayList<>();
-			List<Object> stations = new ArrayList<>();
-			List<PatrolMandate> mandates = new ArrayList<>();
-
 			List<Employee> employees = new ArrayList<>();
 			
 			List<MetadataFieldValue> metadataValues = new ArrayList<>();
 			
 			try(Session s = HibernateManager.openSession()){
-				
-				types.addAll(QueryFactory.buildQuery(s, PatrolTransportType.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"isActive", true})
-						.list());
-			
-				teams.addAll(QueryFactory.buildQuery(s, Team.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"isActive", true}).list());
-				
-				stations.addAll(QueryFactory.buildQuery(s, Station.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"isActive", true}).list());
-				
-				mandates.addAll(QueryFactory.buildQuery(s, PatrolMandate.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"isActive", true}).list());
-				
 				employees.addAll(QueryFactory.buildQuery(s, Employee.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"endEmploymentDate", null}).list());
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"endEmploymentDate", null}).list()); //$NON-NLS-1$
 			
 				if (ctpackage.getUuid() != null) {
-					metadataValues.addAll(s.get(PatrolCtPackage.class, ctpackage.getUuid()).getMetadataValues());
-					metadataValues.forEach(md->{
-						if (md.getUuidList() != null) md.getUuidList().forEach(ui->ui.getUuidValue());
-					});
-				}else if ( ((PatrolCtPackage)ctpackage).getMetadataValues() != null) {
-					metadataValues.addAll(((PatrolCtPackage)ctpackage).getMetadataValues());
+					SurveyCtPackage p = (SurveyCtPackage) s.get(SurveyCtPackage.class, ctpackage.getUuid());
+					if (p.getMetadataValues() != null) metadataValues.addAll(p.getMetadataValues());
+				}else {
+					if ( ((SurveyCtPackage)ctpackage).getMetadataValues() != null  ) {
+						metadataValues.addAll(((SurveyCtPackage)ctpackage).getMetadataValues());
+					}
 				}
+				metadataValues.forEach(md->{
+					if (md.getUuidList() != null) md.getUuidList().forEach(ui->ui.getUuidValue());
+				});
 			}
 			
-			teams.add(0, "<none>");
-			stations.add(0, "<none>");
 			Display.getDefault().syncExec(()->{
-				cmbTt.setInput(types);
-				cmbTt.setSelection(new StructuredSelection(types.get(0)));
-				
-				cmbTeam.setInput(teams);
-				cmbTeam.setSelection(new StructuredSelection(teams.get(0)));
-				
-				cmbStation.setInput(stations);
-				cmbStation.setSelection(new StructuredSelection(stations.get(0)));
-				
-				cmbMandate.setInput(mandates);
-				cmbMandate.setSelection(new StructuredSelection(mandates.get(0)));
-				
-				cmbPilot.setInput(new ArrayList<>());
 				cmbLeader.setInput(new ArrayList<>());
-				
 				lstEmployees.setInput(employees);
 				
 				//configure default values
 				for (MetadataFieldValue v : metadataValues) {
 					//populate members first
-					 if (v.getMetadataKey().equals(PatrolMetadataField.MEMBERS.name())) {
+					 if (v.getMetadataKey().equals(MissionMetadataField.MEMBERS.name())) {
 						btnMembers.setSelection(v.isVisible());
 						for (MetadataFieldUuidValue item : v.getUuidList()) {
 							Employee e = new Employee();
@@ -556,60 +390,19 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				}
 				updateLeaderPilotLists();
 				for (MetadataFieldValue v : metadataValues) {
-					if (v.getMetadataKey().equals(PatrolMetadataField.ARMED.name())) {
-						btnArmed.setSelection(v.isVisible());
-						btnArmedYes.setSelection(v.getBooleanValue());
-						btnArmedNo.setSelection(!v.getBooleanValue());
-					}else if (v.getMetadataKey().equals(PatrolMetadataField.COMMENT.name())) {
+					if (v.getMetadataKey().equals(MissionMetadataField.COMMENT.name())) {
 						btnCmt.setSelection(v.isVisible());
 						txtComment.setText(v.getStringValue());
-					}else if (v.getMetadataKey().equals(PatrolMetadataField.LEADER.name())) {
+					}else if (v.getMetadataKey().equals(MissionMetadataField.LEADER.name())) {
 						btnLeader.setSelection(v.isVisible());
 						Employee temp = new Employee();
 						temp.setUuid(v.getUuidValue());
 						cmbLeader.setSelection(new StructuredSelection(temp));
-					}else if(v.getMetadataKey().equals(PatrolMetadataField.MANDATE.name())){
-						btnMandate.setSelection(v.isVisible());
-						PatrolMandate temp = new PatrolMandate();
-						temp.setUuid(v.getUuidValue());
-						cmbMandate.setSelection(new StructuredSelection(temp));
-					}else if (v.getMetadataKey().equals(PatrolMetadataField.OBJECTIVE.name())) {
-						btnObj.setSelection(v.isVisible());
-						txtObj.setText(v.getStringValue());
-					}else if (v.getMetadataKey().equals(PatrolMetadataField.PILOT.name())) {
-						btnPilot.setSelection(v.isVisible());
-						Employee temp = new Employee();
-						temp.setUuid(v.getUuidValue());
-						cmbPilot.setSelection(new StructuredSelection(temp));
-					}else if(v.getMetadataKey().equals(PatrolMetadataField.STATION.name())) {
-						btnStation.setSelection(v.isVisible());
-						Station temp = new Station();
-						temp.setUuid(v.getUuidValue());
-						cmbStation.setSelection(new StructuredSelection(temp));
-					}else if(v.getMetadataKey().equals(PatrolMetadataField.TEAM.name())) {
-						btnTeam.setSelection(v.isVisible());
-						Team temp = new Team();
-						temp.setUuid(v.getUuidValue());
-						cmbTeam.setSelection(new StructuredSelection(temp));
-					}else if(v.getMetadataKey().equals(PatrolMetadataField.TRANSPORT.name())) {
-						btnTT.setSelection(v.isVisible());
-						PatrolTransportType temp = new PatrolTransportType();
-						temp.setUuid(v.getUuidValue());
-						cmbTt.setSelection(new StructuredSelection(temp));
 					}
 				}
-				btnArmed.notifyListeners(SWT.Selection, new Event());
 				btnCmt.notifyListeners(SWT.Selection, new Event());
-				btnMandate.notifyListeners(SWT.Selection, new Event());
 				btnMembers.notifyListeners(SWT.Selection, new Event());
-				btnObj.notifyListeners(SWT.Selection, new Event());
-				btnStation.notifyListeners(SWT.Selection, new Event());
-				btnTeam.notifyListeners(SWT.Selection, new Event());
-				btnTT.notifyListeners(SWT.Selection, new Event());
-
 				btnLeader.notifyListeners(SWT.Selection, new Event());
-				btnPilot.notifyListeners(SWT.Selection, new Event());
-				
 				fireChanged();
 			});
 			

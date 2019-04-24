@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.export;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Listener;
+import org.hibernate.Session;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 
 /**

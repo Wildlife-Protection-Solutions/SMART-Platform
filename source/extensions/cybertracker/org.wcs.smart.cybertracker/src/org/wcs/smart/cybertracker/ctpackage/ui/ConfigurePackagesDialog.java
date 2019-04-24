@@ -333,7 +333,11 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		List<ICtPackage> items = getSelection();
 		if (items.isEmpty()) return;
 		
-		ICtPackage newpackage = items.get(0).copy();
+		ICtPackage newpackage = null;
+		try(Session session = HibernateManager.openSession()){
+			ICtPackage tocopy = session.get(items.get(0).getClass(), items.get(0).getUuid());
+			newpackage = tocopy.copy();
+		}
 		editPackage(newpackage);
 	}
 	

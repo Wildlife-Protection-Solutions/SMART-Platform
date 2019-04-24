@@ -21,16 +21,23 @@
  */
 package org.wcs.smart.cybertracker.survey.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.model.SurveyDesign;
 
@@ -47,8 +54,8 @@ public class SurveyCtPackage extends AbstractCtPackage implements ICmProvider{
 	public static final String TYPE_NAME = "SURVEY"; //$NON-NLS-1$
 
 	private SurveyDesign sd;
-	
-	//TODO: survey metadata settings
+	private List<MetadataFieldValue> metadataValues;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="sd_uuid", referencedColumnName="uuid")
 	public SurveyDesign getSurveyDesign() {
@@ -56,6 +63,16 @@ public class SurveyCtPackage extends AbstractCtPackage implements ICmProvider{
 	}
 	public void setSurveyDesign(SurveyDesign sd) {
 		this.sd = sd;
+	}
+	
+	@OneToMany(fetch = FetchType.LAZY, cascade= {CascadeType.ALL}, orphanRemoval = true, mappedBy="ctPackage")
+	@JoinColumn(name="package_uuid", referencedColumnName="uuid")
+	public List<MetadataFieldValue> getMetadataValues(){
+		return this.metadataValues;
+	}
+	
+	public void setMetadataValues(List<MetadataFieldValue> values) {
+		this.metadataValues = values;
 	}
 	
 	@Transient
@@ -79,14 +96,38 @@ public class SurveyCtPackage extends AbstractCtPackage implements ICmProvider{
 	@Override
 	public ICtPackage copy() {
 		SurveyCtPackage copy = new SurveyCtPackage();
-		copy.ca = this.ca;
-		copy.sd = this.sd;
-		copy.incidentmodel = this.incidentmodel;
-		copy.ctprofile = this.ctprofile;
-		copy.name = name;
-		copy.basemapdef = this.basemapdef;
-		copy.hasIncident = this.hasIncident;
-		//TODO: other options basemape/metadata
+		copy.setConservationArea(getConservationArea());
+		copy.setSurveyDesign(getSurveyDesign());
+		copy.setIncidentModel(getIncidentModel());
+		copy.setCtProfile(getCtProfile());
+		copy.setName(getName());
+		copy.setBasemapDef(getBasemapDef());
+		copy.setHasIncident(getHasIncident());
+		
+		if (getMetadataValues() != null) {
+			copy.metadataValues = new ArrayList<>();
+			for (MetadataFieldValue v : getMetadataValues()) {
+				MetadataFieldValue mcopy = new MetadataFieldValue();
+				mcopy.setBooleanValue(v.getBooleanValue());
+				mcopy.setConservationArea(v.getConservationArea());
+				mcopy.setCtPackage(copy);
+				mcopy.setMetadataKey(v.getMetadataKey());
+				mcopy.setStringValue(v.getStringValue());
+				mcopy.setUuidValue(v.getUuidValue());
+				mcopy.setVisible(v.isVisible());
+				
+				if (v.getUuidList() != null) {
+					mcopy.setUuidList(new ArrayList<>());
+					for (MetadataFieldUuidValue uuidValue : v.getUuidList()) {
+						MetadataFieldUuidValue uuidcopy = new MetadataFieldUuidValue();
+						uuidcopy.setMetadata(mcopy);
+						uuidcopy.setUuidValue(uuidValue.getUuidValue());
+						mcopy.getUuidList().add(uuidcopy);
+					}
+				}
+				copy.getMetadataValues().add(mcopy);
+			}
+		}
 		return copy;
 	}
 

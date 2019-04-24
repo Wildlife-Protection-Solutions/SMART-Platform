@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -42,6 +43,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -49,7 +52,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
@@ -104,6 +106,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 	
 	public CtSurveyPackageConfigurator() {
 		contributions = new ArrayList<>();
+		contributions.add(new SurveyMetadataPackageContribution());
 		for ( IPackageContribution c : PackageContributionManager.INSTANCE.getContributionItems()) {
 			if (c.getUiController() != null) contributions.add(c.getUiController());
 		}
@@ -117,14 +120,40 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		if (!(ctitem instanceof SurveyCtPackage)) throw new IllegalStateException("Incorrect package type for cybertracker patrol editor.");
 		this.ctpackage = (SurveyCtPackage) ctitem;
 	
-		Composite main = new Composite(parent, SWT.NONE);
+		CTabFolder tabs = new CTabFolder(parent, SWT.NONE);
+		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tabs.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		CTabItem mainTab = new CTabItem(tabs, SWT.NONE);
+		mainTab.setText("Model Settings");
+		
+		ScrolledComposite scroll = new ScrolledComposite(tabs,  SWT.V_SCROLL);
+		scroll.setExpandHorizontal(true);
+		scroll.setExpandVertical(true);
+		
+		Composite main = new Composite(scroll, SWT.NONE);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)main.getLayout()).marginWidth = 0;
+		((GridLayout)main.getLayout()).marginHeight = 0;
 		
-		Group g = new Group(main, SWT.NONE);
+		scroll.setContent(main);
+		mainTab.setControl(scroll);
+		
+		Composite g = new Composite(main, SWT.NONE);
+		g.setLayout(new GridLayout());
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Composite header = new Composite(g, SWT.NONE);
+		header.setLayout(new GridLayout());
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Label headerLabel = new Label(header, SWT.NONE);
+		headerLabel.setText("Configuration");
+		WidgetElement.setCSSClass(header, "SMARTSection");
+		
+		g = new Composite(g, SWT.NONE);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		g.setText("Survey Configuration");
 		
 		Label nameLabel = new Label(g, SWT.NONE);
 		nameLabel.setText("Package Name:");
@@ -184,14 +213,33 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 				{ if (!isInit) validate();}
 			}
 		});
-		
+
+		//main page contributions
 		if (contributions != null) {
 			for (IPackageUiContribution cc : contributions) {
-				Composite part = cc.createUi(main, ctpackage, e->validate());
-				if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				if (!cc.isTab()) {
+					Composite part = cc.createUi(main, ctpackage, e->validate());
+					if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));	
+				}
 			}
 		}
 		
+		scroll.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		//tab contributaions
+		if (contributions != null) {
+			for (IPackageUiContribution cc : contributions) {
+				if (cc.isTab()) {
+					CTabItem item = new CTabItem(tabs, SWT.NONE);
+					item.setText(cc.getTabName());
+					Composite all = new Composite(tabs, SWT.NONE);
+					all.setLayout(new GridLayout());
+					item.setControl(all);
+					Composite part = cc.createUi(all, ctpackage, e->validate());
+					if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+				}
+			}
+		}
 		loadData();
 		
 	}
@@ -204,10 +252,13 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 				ctpackage.setSurveyDesign((SurveyDesign)designViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setName(txtName.getText());
+				
+				session.saveOrUpdate(ctpackage);
+				
 				for (IPackageUiContribution cc : contributions) {
 					cc.updatePackage(ctpackage);
 				}
-				session.saveOrUpdate(ctpackage);
+				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -283,6 +334,16 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 						if (init.getSurveyDesign() != null) init.getSurveyDesign().getUuid();
 						if (init.getCtProfile() != null) init.getCtProfile().getUuid();
 						if (init.getIncidentModel() != null) init.getIncidentModel().getUuid();
+					}else if (ctpackage != null) {
+						init = ctpackage;
+						init.setSurveyDesign(session.get(SurveyDesign.class, ctpackage.getSurveyDesign().getUuid()));
+						init.getSurveyDesign().getUuid();
+						init.setCtProfile(session.get(CyberTrackerPropertiesProfile.class, ctpackage.getCtProfile().getUuid()));
+						init.getCtProfile().getUuid();
+						if (ctpackage.getIncidentModel() != null) {
+							init.setIncidentModel(session.get(ConfigurableModel.class, ctpackage.getIncidentModel().getUuid()));
+							init.getIncidentModel().getUuid();
+						}
 					}
 				}
 				
