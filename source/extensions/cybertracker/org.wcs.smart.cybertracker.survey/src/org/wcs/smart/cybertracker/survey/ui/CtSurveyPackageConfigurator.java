@@ -193,6 +193,11 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 				}else if (profile instanceof DataModelWrapper) {
 					selectedModel = null;					
 				}
+				if (selectedModel == null) {
+					context.set(ConfigurableModel.class, new ConfigurableModel());
+				}else {
+					context.set(ConfigurableModel.class, selectedModel);
+				}
 				{ if (!isInit) validate();}
 			}
 		});
@@ -346,7 +351,9 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 						}
 					}
 				}
-				
+				if (init.getSurveyDesign() != null) {
+					context.set(ConfigurableModel.class, init.getConfigurableModel());
+				}
 				SurveyCtPackage finit = init;
 				Display.getDefault().syncExec(()->{
 					try {

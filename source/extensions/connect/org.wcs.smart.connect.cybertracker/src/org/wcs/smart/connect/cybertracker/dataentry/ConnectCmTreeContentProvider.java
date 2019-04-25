@@ -45,6 +45,7 @@ public class ConnectCmTreeContentProvider extends ConfigurableModelTreeContentPr
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
+		
 		if (parentElement instanceof CmAttribute) {
 			CmAttribute a = (CmAttribute) parentElement;
 			AttributeType type = a.getAttribute().getType();

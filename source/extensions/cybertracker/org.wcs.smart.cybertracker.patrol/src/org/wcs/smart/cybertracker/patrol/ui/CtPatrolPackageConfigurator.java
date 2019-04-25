@@ -194,6 +194,11 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				}else if (profile instanceof DataModelWrapper) {
 					selectedModel = null;					
 				}
+				if (selectedModel == null) {
+					context.set(ConfigurableModel.class, new ConfigurableModel());
+				}else {
+					context.set(ConfigurableModel.class, selectedModel);
+				}
 				{ if (!isInit) validate();}
 			}
 		});
@@ -344,16 +349,23 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 							init.setConfigurableModel(session.get(ConfigurableModel.class, init.getConfigurableModel().getUuid()));
 							init.getConfigurableModel().getUuid();
 						}
-						init.setCtProfile(session.get(CyberTrackerPropertiesProfile.class, init.getCtProfile().getUuid()));
-						init.getCtProfile().getUuid();
+						if (init.getCtProfile() != null) {
+							init.setCtProfile(session.get(CyberTrackerPropertiesProfile.class, init.getCtProfile().getUuid()));
+							init.getCtProfile().getUuid();
+						}
 						if (ctpackage.getIncidentModel() != null) {
 							init.setIncidentModel(session.get(ConfigurableModel.class, init.getIncidentModel().getUuid()));
 							init.getIncidentModel().getUuid();
 						}
 					}
 				}
-				
+				if (init.isDataModel()) {
+					context.set(ConfigurableModel.class, new ConfigurableModel());
+				}else {
+					context.set(ConfigurableModel.class, init.getConfigurableModel());
+				}
 				PatrolCtPackage finit = init;
+				
 				Display.getDefault().syncExec(()->{
 					try {
 						isInit = true;

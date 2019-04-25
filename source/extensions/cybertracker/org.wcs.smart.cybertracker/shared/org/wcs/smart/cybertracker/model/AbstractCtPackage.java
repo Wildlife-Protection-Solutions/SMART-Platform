@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.cybertracker.model;
 
+import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -30,6 +32,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
 import org.geotools.geometry.jts.JTS;
@@ -74,8 +77,17 @@ public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 	
 	protected String basemapdef;
 	
-	//TODO: basemap and patrol metadata settings
+	protected List<MetadataFieldValue> metadataValues;
 
+	@OneToMany(fetch = FetchType.LAZY, cascade= {CascadeType.ALL}, orphanRemoval = true, mappedBy="ctPackage")
+	public List<MetadataFieldValue> getMetadataValues(){
+		return this.metadataValues;
+	}
+	
+	public void setMetadataValues(List<MetadataFieldValue> values) {
+		this.metadataValues = values;
+	}
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ctprofile_uuid", referencedColumnName="uuid")
 	public CyberTrackerPropertiesProfile getCtProfile() {

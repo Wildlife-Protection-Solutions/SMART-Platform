@@ -126,8 +126,8 @@ public enum CtPackageExtensionPointManager {
 	}
 	public List<ICtExportAction> getPackageActions() {
 		List<ICtExportAction> actions = new ArrayList<>();
+		actions.add(new ExportPackageToDeviceAction());
 		actions.add(new ExportPackageToFileAction());
-		
 		if (Platform.getExtensionRegistry() != null) {
 			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXT_ID);
 			try {

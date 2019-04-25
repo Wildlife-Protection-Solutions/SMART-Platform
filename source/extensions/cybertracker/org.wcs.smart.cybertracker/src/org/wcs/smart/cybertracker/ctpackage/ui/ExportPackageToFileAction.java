@@ -55,7 +55,7 @@ public class ExportPackageToFileAction implements ICtExportAction {
 
 	@Override
 	public String getName() {
-		return "Export to File/Device";
+		return "Export to File";
 	}
 
 	@Override
@@ -124,7 +124,7 @@ public class ExportPackageToFileAction implements ICtExportAction {
 				try {
 					String name = w.getName().replaceAll("[^a-zA-Z0-9]", "");
 					Path export = exportPath.resolve(name + "." + UuidUtils.uuidToString(w.getUuid()) + ".zip");
-					Files.copy(towrite.get(0).getLocalFile(), export);
+					Files.copy(w.getLocalFile(), export);
 					cnt++;
 
 				} catch (IOException e) {

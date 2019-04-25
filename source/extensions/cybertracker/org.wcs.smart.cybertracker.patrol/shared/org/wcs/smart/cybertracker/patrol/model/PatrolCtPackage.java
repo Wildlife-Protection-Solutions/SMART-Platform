@@ -53,7 +53,6 @@ public class PatrolCtPackage extends AbstractCtPackage implements ICmProvider{
 	public static final String TYPE_NAME = "PATROL"; //$NON-NLS-1$
 
 	private ConfigurableModel cm;
-	private List<MetadataFieldValue> metadataValues;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
@@ -62,15 +61,6 @@ public class PatrolCtPackage extends AbstractCtPackage implements ICmProvider{
 	}
 	public void setConfigurableModel(ConfigurableModel cm) {
 		this.cm = cm;
-	}
-	
-	@OneToMany(fetch = FetchType.LAZY, cascade= {CascadeType.ALL}, orphanRemoval = true, mappedBy="ctPackage")
-	public List<MetadataFieldValue> getMetadataValues(){
-		return this.metadataValues;
-	}
-	
-	public void setMetadataValues(List<MetadataFieldValue> values) {
-		this.metadataValues = values;
 	}
 	
 	@Transient

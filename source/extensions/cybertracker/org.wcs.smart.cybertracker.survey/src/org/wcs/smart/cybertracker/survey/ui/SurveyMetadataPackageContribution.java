@@ -353,23 +353,13 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 			List<Employee> employees = new ArrayList<>();
 			
 			List<MetadataFieldValue> metadataValues = new ArrayList<>();
-			
+			if ( ((SurveyCtPackage)ctpackage).getMetadataValues() != null) {
+				metadataValues.addAll(((SurveyCtPackage)ctpackage).getMetadataValues());
+			}
 			try(Session s = HibernateManager.openSession()){
 				employees.addAll(QueryFactory.buildQuery(s, Employee.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 						new Object[] {"endEmploymentDate", null}).list()); //$NON-NLS-1$
-			
-				if (ctpackage.getUuid() != null) {
-					SurveyCtPackage p = (SurveyCtPackage) s.get(SurveyCtPackage.class, ctpackage.getUuid());
-					if (p.getMetadataValues() != null) metadataValues.addAll(p.getMetadataValues());
-				}else {
-					if ( ((SurveyCtPackage)ctpackage).getMetadataValues() != null  ) {
-						metadataValues.addAll(((SurveyCtPackage)ctpackage).getMetadataValues());
-					}
-				}
-				metadataValues.forEach(md->{
-					if (md.getUuidList() != null) md.getUuidList().forEach(ui->ui.getUuidValue());
-				});
 			}
 			
 			Display.getDefault().syncExec(()->{

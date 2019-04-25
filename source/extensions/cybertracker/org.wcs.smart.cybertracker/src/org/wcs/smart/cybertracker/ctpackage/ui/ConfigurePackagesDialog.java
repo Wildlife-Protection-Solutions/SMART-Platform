@@ -71,6 +71,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.udig.SmartDistanceTool;
@@ -454,7 +455,15 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 				for (ICtPackageManager m : managers) {
 					packages.addAll(m.getPackages(session));
 				}
-				packages.forEach(p->p.getConservationArea().getFileDataStoreLocation());
+				packages.forEach(p->{
+				
+					p.getConservationArea().getFileDataStoreLocation();
+					if (p instanceof AbstractCtPackage) {
+						((AbstractCtPackage)p).getMetadataValues().forEach(md->{
+							if (md.getUuidList() != null) md.getUuidList().forEach(ui->ui.getUuidValue());
+						});
+					}
+				});
 			}
 			packages.sort((a,b)->a.getName().compareTo(b.getName()));
 			Display.getDefault().asyncExec(()->{

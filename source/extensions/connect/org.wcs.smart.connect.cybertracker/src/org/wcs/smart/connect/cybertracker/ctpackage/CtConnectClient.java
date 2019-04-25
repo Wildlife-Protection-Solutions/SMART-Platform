@@ -47,8 +47,7 @@ public interface CtConnectClient extends ConnectClient{
 	@Path("/cybertracker/{uuid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response uploadCtPackage(@HeaderParam("X-Upload-Content-Length") Long length, 
-			@PathParam("uuid") String packageuuid,
-			CyberTrackerPackageProxy proxy);
+			@PathParam("uuid") String packageuuid, CyberTrackerPackageProxy proxy);
 
 	@GET
     @Path("/cybertracker/")

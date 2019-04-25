@@ -54,7 +54,6 @@ public class SurveyCtPackage extends AbstractCtPackage implements ICmProvider{
 	public static final String TYPE_NAME = "SURVEY"; //$NON-NLS-1$
 
 	private SurveyDesign sd;
-	private List<MetadataFieldValue> metadataValues;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="sd_uuid", referencedColumnName="uuid")
@@ -63,16 +62,6 @@ public class SurveyCtPackage extends AbstractCtPackage implements ICmProvider{
 	}
 	public void setSurveyDesign(SurveyDesign sd) {
 		this.sd = sd;
-	}
-	
-	@OneToMany(fetch = FetchType.LAZY, cascade= {CascadeType.ALL}, orphanRemoval = true, mappedBy="ctPackage")
-	@JoinColumn(name="package_uuid", referencedColumnName="uuid")
-	public List<MetadataFieldValue> getMetadataValues(){
-		return this.metadataValues;
-	}
-	
-	public void setMetadataValues(List<MetadataFieldValue> values) {
-		this.metadataValues = values;
 	}
 	
 	@Transient
