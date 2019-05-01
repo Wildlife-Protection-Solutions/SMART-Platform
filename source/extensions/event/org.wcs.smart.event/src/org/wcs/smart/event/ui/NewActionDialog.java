@@ -35,11 +35,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.event.ActionTypeManager;
 import org.wcs.smart.event.ActionTypeManagerInternal;
 import org.wcs.smart.event.EventPlugIn;
@@ -122,17 +122,23 @@ public class NewActionDialog extends SmartStyledTitleDialog{
 	@Override
 	public Control createDialogArea(Composite parent) {
 		parent = (Composite) super.createDialogArea(parent);
+		parent.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true ));
+		main.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		SmartUiUtils.createHeaderLabel(main, Messages.NewActionDialog_DetailsLabel);
 		
 		Composite header = new Composite(main, SWT.NONE);
 		header.setLayout(new GridLayout(2, false));
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		header.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		Label l = new Label(header, SWT.NONE);
 		l.setText(Messages.NewActionDialog_IDLabel);
+		l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		txtId = new Text(header, SWT.BORDER);
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -142,6 +148,7 @@ public class NewActionDialog extends SmartStyledTitleDialog{
 		
 		l = new Label(header, SWT.NONE);
 		l.setText(Messages.NewActionDialog_TypeLabel);
+		l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		cmbActionType = new ComboViewer(header, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbActionType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -149,15 +156,21 @@ public class NewActionDialog extends SmartStyledTitleDialog{
 		cmbActionType.setLabelProvider(new AssetTypeLabelProvider());
 		List<IActionType> types = ActionTypeManager.INSTANCE.getActionTypes();
 		cmbActionType.setInput(types);
-		
-		Group g = new Group(main, SWT.NONE);
-		g.setText(Messages.NewActionDialog_ParameterLabel);
+		cmbActionType.getControl().setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
+		Composite g = new Composite(main, SWT.NONE);
 		g.setLayout(new GridLayout());
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-	
+		((GridLayout)g.getLayout()).marginWidth = 0;
+		((GridLayout)g.getLayout()).marginHeight = 0;
+		g.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		SmartUiUtils.createHeaderLabel(g, Messages.NewActionDialog_ParameterLabel);
+		
 		parameterPanel = new Composite(g, SWT.NONE);
 		parameterPanel.setLayout(new GridLayout());
 		parameterPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		parameterPanel.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		((GridData)parameterPanel.getLayoutData()).heightHint = 300;
 		
 		if (toUpdate != null) {
@@ -231,10 +244,12 @@ public class NewActionDialog extends SmartStyledTitleDialog{
 				parameterPanel.setData(COLLECTOR_KEY, null); 
 				Label l = new Label(parameterPanel, SWT.NONE);
 				l.setText(Messages.NewActionDialog_NoParameters);
+				l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			}else {
 				paramCollector.addModifyListener(e->validate());
 				Composite inner = paramCollector.createComposite(parameterPanel);
 				inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+				inner.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 				parameterPanel.setData(COLLECTOR_KEY, paramCollector); 
 				if (toUpdate != null) paramCollector.initParameters(toUpdate);
 			}

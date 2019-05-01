@@ -49,6 +49,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -562,6 +563,7 @@ public abstract class AssetDataPanel {
 			ToolBar tb = new ToolBar(part, SWT.FLAT);
 			tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 			toolkit.adapt(tb);
+			tb.setBackground(part.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			
 			if (isEditable) {
 				//enable/disable editing button based on user permission
@@ -1400,7 +1402,6 @@ public abstract class AssetDataPanel {
 			
 			if (isEdit) {
 				ToolBar tb = new ToolBar(header, SWT.FLAT);
-				tb.setBackground(header.getBackground());
 				
 				ToolItem itemEdit = new ToolItem(tb, SWT.PUSH);
 				itemEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
@@ -1474,9 +1475,7 @@ public abstract class AssetDataPanel {
 				
 				createImageTable(false);
 			}
-			
-
-					
+								
 			Composite spacer = toolkit.createComposite(wppart);
 			spacer.setLayout(new GridLayout());
 			spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

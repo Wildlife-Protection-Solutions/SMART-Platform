@@ -29,10 +29,10 @@
             <command
                   commandId="org.wcs.smart.cybertracker.json.import"
                   icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/import.png"
-                  label="Import"
+                  label="%command.import.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="import data from CyberTracker devices">
+                  tooltip="%command.import.tooltip">
                <visibleWhen>
                   <and>
                      <test
@@ -77,10 +77,10 @@
             <command
                   commandId="org.wcs.smart.cybertracker.packages.show"
                   icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/export.png"
-                  label="Export"
+                  label="%command.export.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="export packages to CyberTracker devices">
+                  tooltip="%command.export.tooltip">
                <visibleWhen>
                   <and>
                      <test

@@ -236,6 +236,14 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 		return (option != null) ? option.getStringValue() : defaultValue;
 	}
 	
+	@Transient
+	public CyberTrackerProperties.Protocol getDataFormat() {
+		return CyberTrackerProperties.Protocol.valueOf( getStringValue(ProfileOptionID.DATA_FORMAT, CyberTrackerProperties.Protocol.GEOJSON_COMPRESSED.name()) );
+	}
+	public void setDataFormat(CyberTrackerProperties.Protocol dataFormat) {
+		getOption(ProfileOptionID.DATA_FORMAT).setStringValue(dataFormat.name());
+	}
+
 	
 	
 	@Transient

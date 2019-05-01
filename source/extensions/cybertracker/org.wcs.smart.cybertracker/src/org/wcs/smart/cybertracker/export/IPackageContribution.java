@@ -30,6 +30,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 
@@ -78,7 +79,8 @@ public interface IPackageContribution {
 	public class PackageContribution {
 		
 		private List<Path> filesToAdd = new ArrayList<>();
-		private HashMap<String, Object> metadata = new HashMap<>();
+		private HashMap<String, Object> projectMetadata = new HashMap<>();
+		private HashMap<String, Object> profileMetadata = new HashMap<>();
 		
 		
 		/**
@@ -104,7 +106,7 @@ public interface IPackageContribution {
 		 * @return
 		 */
 		public HashMap<String, Object> getProjectMetadata(){
-			return this.metadata;
+			return this.projectMetadata;
 		}
 		
 		/**
@@ -113,7 +115,7 @@ public interface IPackageContribution {
 		 * @param value
 		 */
 		public void addProjectMetadata(String key, JSONObject value) {
-			metadata.put(key, value);
+			projectMetadata.put(key, value);
 		}
 		
 		/**
@@ -122,7 +124,36 @@ public interface IPackageContribution {
 		 * @param value
 		 */
 		public void setProjectMetadata(String key, String value) {
-			metadata.put(key, value);
+			projectMetadata.put(key, value);
+		}
+		
+		/**
+		 * Get project metadata additions
+		 * @return
+		 */
+		public HashMap<String, Object> getProfileMetadata(){
+			return this.profileMetadata;
+		}
+		
+		/**
+		 * Adds a value to the project metadata
+		 * @param key
+		 * @param value
+		 */
+		public void addProfileMetadata(String key, JSONObject value) {
+			profileMetadata.put(key, value);
+		}
+		public void addProfileMetadata(String key, JSONArray value) {
+			profileMetadata.put(key, value);
+		}
+		
+		/**
+		 * Adds a string value to the project metadata
+		 * @param key
+		 * @param value
+		 */
+		public void setProfileMetadata(String key, String value) {
+			profileMetadata.put(key, value);
 		}
 		
 		/**

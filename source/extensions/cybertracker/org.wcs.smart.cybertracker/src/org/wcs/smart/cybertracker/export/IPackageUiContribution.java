@@ -23,7 +23,6 @@ package org.wcs.smart.cybertracker.export;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Listener;
-import org.hibernate.Session;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 
 /**
@@ -36,6 +35,7 @@ import org.wcs.smart.cybertracker.model.ICtPackage;
  *
  */
 public interface IPackageUiContribution {
+	
 	/**
 	 * Create the ui component to add to the export dialog.  Can return null
 	 * if no ui component.
@@ -59,6 +59,10 @@ public interface IPackageUiContribution {
 	 */
 	public default boolean isTab() { return false; }
 	
+	/**
+	 * 
+	 * @return the tab name or null if no tab
+	 */
 	public default String getTabName() { return null; }
 	
 	/**

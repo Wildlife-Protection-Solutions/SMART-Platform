@@ -134,9 +134,11 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 	public Composite createComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
+		main.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		Label l = new Label(main, SWT.NONE);
 		l.setText(Messages.CreateRecordParameterCollector_SourceLabel);
+		l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		cmbSource = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbSource.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -151,12 +153,15 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 			}
 		});
 		cmbSource.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		cmbSource.getControl().setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		l = new Label(main, SWT.NONE);
 		l.setText(Messages.CreateRecordParameterCollector_TitleLabel);
+		l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		txtTitle = new Text(main, SWT.BORDER);
 		txtTitle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtTitle.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		loadSources.schedule();
 		return main;

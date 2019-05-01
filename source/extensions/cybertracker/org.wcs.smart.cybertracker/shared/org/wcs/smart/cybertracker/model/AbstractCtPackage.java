@@ -145,6 +145,7 @@ public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 	 * Sets the basemap to a set of files residing on the uesrs computers
 	 * @param files
 	 */
+	@SuppressWarnings("unchecked")
 	@Transient
 	public void setBasemap(String files) {
 		JSONObject obj = new JSONObject();
@@ -160,6 +161,7 @@ public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 	 * @param minzoom
 	 * @param maxzoom
 	 */
+	@SuppressWarnings("unchecked")
 	@Transient
 	public void setBasemap(UUID basemapUuid, ReferencedEnvelope env, CoordinateReferenceSystem databaseCrs, int minzoom, int maxzoom ) throws Exception{
 		//convert env to latlong

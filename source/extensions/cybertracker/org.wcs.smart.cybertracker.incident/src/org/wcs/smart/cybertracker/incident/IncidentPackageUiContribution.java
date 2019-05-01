@@ -41,10 +41,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
@@ -87,7 +87,7 @@ public class IncidentPackageUiContribution implements IPackageUiContribution{
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		Label headerLabel = new Label(header, SWT.NONE);
 		headerLabel.setText(Messages.IncidentPackageContribution_ConfigurationGroupLablel);
-		WidgetElement.setCSSClass(header, "SMARTSection");
+		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS);
 		
 		Composite incidentComposite = new Composite(g, SWT.NONE);
 		incidentComposite.setLayout(new GridLayout());
@@ -156,11 +156,11 @@ public class IncidentPackageUiContribution implements IPackageUiContribution{
 	public String isValid() {
 		if (this.btnCollect.getSelection()) {
 			if (cmbModel.getSelection().isEmpty()) {
-				return "A configurable model must be selected.";
+				return Messages.IncidentPackageUiContribution_CmRequired;
 			}else {
 				Object x = cmbModel.getStructuredSelection().getFirstElement();
 				if (!(x instanceof ConfigurableModel || x == DATAMODEL)) {
-					return "A valid configurable model must be selected.";
+					return Messages.IncidentPackageUiContribution_cmRequired;
 					
 				}
 			}
@@ -203,7 +203,7 @@ public class IncidentPackageUiContribution implements IPackageUiContribution{
 				List<Object> items = new ArrayList<>();
 				ConfigurableModel selection = null;
 				UUID selectionUuid =  null;
-				String cmUuid = "";
+				String cmUuid = ""; //$NON-NLS-1$
 				if (ctPackage != null && ctPackage instanceof AbstractCtPackage) {
 					AbstractCtPackage ct = (AbstractCtPackage)ctPackage;
 					if (ct.getHasIncident()) {

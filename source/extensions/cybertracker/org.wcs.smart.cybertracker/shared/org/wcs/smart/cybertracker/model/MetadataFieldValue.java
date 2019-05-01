@@ -82,7 +82,7 @@ public class MetadataFieldValue extends UuidItem {
 		this.key = type;
 	}
 	
-	@ManyToOne(fetch = FetchType.LAZY, cascade= {CascadeType.ALL})
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="package_uuid", referencedColumnName="uuid")
 	public AbstractCtPackage getCtPackage() {
 		return ctpackage;

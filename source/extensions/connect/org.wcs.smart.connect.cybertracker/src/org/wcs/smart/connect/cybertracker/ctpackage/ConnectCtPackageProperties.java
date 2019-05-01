@@ -45,6 +45,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageProperty;
@@ -81,7 +82,7 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 
 	@Override
 	public String getName() {
-		return "Connect Package Details";
+		return Messages.ConnectCtPackageProperties_ConnectDetailsLabel;
 	}
 	
 	@Override
@@ -114,12 +115,12 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 			}else if (loadProperties.getState() == Job.RUNNING  || loadProperties.getState() == Job.WAITING){
 				return DialogConstants.LOADING_TEXT;
 			}else {
-				return "No Connection";
+				return Messages.ConnectCtPackageProperties_NoConnect;
 			}
 		}else {
 			String data[] = values.get(ctpackage.getUuid());
 			if (data == null) {
-				return "";
+				return ""; //$NON-NLS-1$
 			}else {
 				return data[index];
 			}
@@ -127,7 +128,7 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 	}
 	
 
-	private Job loadProperties = new Job("loading connect properties") {
+	private Job loadProperties = new Job(Messages.ConnectCtPackageProperties_LoadingConnectProperties) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -137,9 +138,9 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 						ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
 							@Override
 							protected Control createDialogArea(Composite parent) {
-								setTitle("CyberTracker Packages");
-								getShell().setText("CyberTracker Packages");
-								setMessage("Configure SMART Connect details");	
+								setTitle(Messages.ConnectCtPackageProperties_Title);
+								getShell().setText(Messages.ConnectCtPackageProperties_Title);
+								setMessage(Messages.ConnectCtPackageProperties_Message);	
 								return super.createDialogArea(parent);
 							}	
 						};
@@ -174,7 +175,7 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 					
 					String r = revision.substring(0, 32);
 					SimpleDateFormat sdf = new SimpleDateFormat(ICtPackage.PACKAGE_DATE_FORMAT);
-					String v = "ERROR";
+					String v = Messages.ConnectCtPackageProperties_ErrorLabel;
 					try {
 						Date d = sdf.parse(revision.substring(33));
 						v = DateFormat.getDateTimeInstance().format(d);
@@ -187,7 +188,7 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 				}
 				values = properties;	
 			}catch (Exception ex) {
-				ConnectPlugIn.displayLog("Error loading details about Connect CyberTracker packages: " + ex.getMessage(), ex);
+				ConnectPlugIn.displayLog(Messages.ConnectCtPackageProperties_ErrorMessage + ex.getMessage(), ex);
 			}
 			
 				
@@ -207,7 +208,7 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 
 		@Override
 		public String getName() {
-			return "Connect Package Date";
+			return Messages.ConnectCtPackageProperties_DateColumn;
 		}
 		
 	}
@@ -221,7 +222,7 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 
 		@Override
 		public String getName() {
-			return "Connect Package Version";
+			return Messages.ConnectCtPackageProperties_VersionColumn;
 		}
 		
 		public boolean showInSummaryTable() {

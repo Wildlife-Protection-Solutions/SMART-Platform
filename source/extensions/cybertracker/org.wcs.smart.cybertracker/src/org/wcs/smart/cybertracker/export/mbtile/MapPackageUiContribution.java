@@ -67,6 +67,7 @@ import org.locationtech.udig.project.internal.ProjectFactory;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -155,7 +156,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		Label headerLabel = new Label(header, SWT.NONE);
 		headerLabel.setText(Messages.MapPackageContribution_BasemapOpsTitle);
-		WidgetElement.setCSSClass(header, "SMARTSection");
+		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS);
 		
 		mapComposite = new Composite(g, SWT.NONE);
 		mapComposite.setLayout(new GridLayout());

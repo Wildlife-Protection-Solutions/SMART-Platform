@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.util.UuidUtils;
 
@@ -55,7 +56,7 @@ public class ExportPackageToFileAction implements ICtExportAction {
 
 	@Override
 	public String getName() {
-		return "Export to File";
+		return Messages.ExportPackageToFileAction_OptionNAme;
 	}
 
 	@Override
@@ -69,9 +70,9 @@ public class ExportPackageToFileAction implements ICtExportAction {
 		if (towrite.size() == 1) {
 			// single package let the user pick the file name
 			FileDialog fd = new FileDialog(shell, SWT.SAVE);
-			fd.setText("Export CyberTracker Package");
-			fd.setFilterExtensions(new String[] { "*.zip", "*.*" });
-			fd.setFilterNames(new String[] { "Cybertracker Package(*.zip)", "All Files (*.*)" });
+			fd.setText(Messages.ExportPackageToFileAction_FileDialogText);
+			fd.setFilterExtensions(new String[] { "*.zip", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$
+			fd.setFilterNames(new String[] { Messages.ExportPackageToFileAction_MobilePackageType, Messages.ExportPackageToFileAction_AllFilesType });
 			// fd.setFilterPath(string);
 			// fd.setfilename
 
@@ -81,8 +82,8 @@ public class ExportPackageToFileAction implements ICtExportAction {
 
 			Path exportFile = Paths.get(output);
 			if (Files.exists(exportFile)) {
-				if (!MessageDialog.openQuestion(shell, "Overwrite",
-						MessageFormat.format("File file {0} exists and will be overwritten.  Do you want to continue?",
+				if (!MessageDialog.openQuestion(shell, Messages.ExportPackageToFileAction_OverwriteTitle,
+						MessageFormat.format(Messages.ExportPackageToFileAction_OverwriteMessage,
 								exportFile.toString()))) {
 					return;
 				}
@@ -94,26 +95,26 @@ public class ExportPackageToFileAction implements ICtExportAction {
 					ok = false;
 				}
 				if (!ok) {
-					MessageDialog.openError(shell, "Error",
-							MessageFormat.format("Unable to remove file {0}.", exportFile.toString()));
+					MessageDialog.openError(shell, Messages.ExportPackageToFileAction_ErrorTitle,
+							MessageFormat.format(Messages.ExportPackageToFileAction_ErrorMsg, exportFile.toString()));
 					return;
 				}
 			}
 
 			try {
 				Files.copy(towrite.get(0).getLocalFile(), exportFile);
-				MessageDialog.openInformation(shell, "Export Cybertracker Package",
-						MessageFormat.format("Package exported to {0}", exportFile.toString()));
+				MessageDialog.openInformation(shell, Messages.ExportPackageToFileAction_ExportCompleteTitle,
+						MessageFormat.format(Messages.ExportPackageToFileAction_ExportCompleteMsg, exportFile.toString()));
 
 			} catch (IOException e) {
-				CyberTrackerPlugIn.displayError("Error", "Error exporting cybertracker package: " + e.getMessage(), e);
+				CyberTrackerPlugIn.displayError(Messages.ExportPackageToFileAction_ErrorTitle, Messages.ExportPackageToFileAction_ExportCompleteErrorMsg + e.getMessage(), e);
 			}
 		} else {
 			// multiple packages get a directory from the user and use the package name/uuid
 			// as the
 			// file name
 			DirectoryDialog dd = new DirectoryDialog(shell, SWT.NONE);
-			dd.setText("Export CyberTracker Packages");
+			dd.setText(Messages.ExportPackageToFileAction_DirectoryTextTitle);
 			String output = dd.open();
 			if (output == null)
 				return;
@@ -122,18 +123,18 @@ public class ExportPackageToFileAction implements ICtExportAction {
 			int cnt = 0;
 			for (ICtPackage w : towrite) {
 				try {
-					String name = w.getName().replaceAll("[^a-zA-Z0-9]", "");
-					Path export = exportPath.resolve(name + "." + UuidUtils.uuidToString(w.getUuid()) + ".zip");
+					String name = w.getName().replaceAll("[^a-zA-Z0-9]", ""); //$NON-NLS-1$ //$NON-NLS-2$
+					Path export = exportPath.resolve(name + "." + UuidUtils.uuidToString(w.getUuid()) + ".zip"); //$NON-NLS-1$ //$NON-NLS-2$
 					Files.copy(w.getLocalFile(), export);
 					cnt++;
 
 				} catch (IOException e) {
-					CyberTrackerPlugIn.displayError("Error", "Error exporting cybertracker package: " + e.getMessage(),
+					CyberTrackerPlugIn.displayError(Messages.ExportPackageToFileAction_ErrorTitle, Messages.ExportPackageToFileAction_ExportError + e.getMessage(),
 							e);
 				}
 			}
-			MessageDialog.openInformation(shell, "Export Cybertracker Package", MessageFormat
-					.format("Exported {0} or {1} packages to {2}", cnt, towrite.size(), exportPath.toString()));
+			MessageDialog.openInformation(shell, Messages.ExportPackageToFileAction_ExportCompleteTitle, MessageFormat
+					.format(Messages.ExportPackageToFileAction_ExportCompleteMultiMessage, cnt, towrite.size(), exportPath.toString()));
 		}
 	}
 

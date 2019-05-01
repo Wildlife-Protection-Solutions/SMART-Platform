@@ -59,6 +59,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ProjectionFormat;
 
@@ -94,7 +95,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	private Button btnSimpleCamera;
 	private Button btnCanPause;
 	private Text txtExitPin;
-
+	private ComboViewer cmbDataFormat; 
+	
 	private Text txtSightingAccuracy;
 	private Text txtSightingFixCount;
 	private Text txtTrackAccuracy;
@@ -541,6 +543,24 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		maxPhotoCountDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_MaxPhotoCountInvalid, CyberTrackerPropertiesProfile.MAX_PHOTO_COUNT_MIN_VALUE, CyberTrackerPropertiesProfile.MAX_PHOTO_COUNT_MAX_VALUE));
 		maxPhotoCountDecoration.hide();
 		
+		Label lblDataFormat = new Label(generalContainer, SWT.NONE);
+		lblDataFormat.setText("Data Format:");
+		lblDataFormat.setToolTipText("format of data sent to SMART");
+		
+		cmbDataFormat = new ComboViewer(generalContainer, SWT.READ_ONLY | SWT.DROP_DOWN);
+		cmbDataFormat.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbDataFormat.setContentProvider(ArrayContentProvider.getInstance());
+		cmbDataFormat.setInput(CyberTrackerProperties.Protocol.values());
+		cmbDataFormat.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof CyberTrackerProperties.Protocol) {
+					return ((CyberTrackerProperties.Protocol) element).name();
+				}
+				return super.getText(element);
+			}
+		});
+		cmbDataFormat.addSelectionChangedListener(e->changesMade());
 		
 		
 		
@@ -1043,6 +1063,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		btnAllowSkipManual.setSelection(ctProperties.isAllowSkipManualGps());
 		txtFileName.setText(ctProperties.getFieldMapFilename());
 		btnLock100.setSelection(ctProperties.isLock100());
+		cmbDataFormat.setSelection(new StructuredSelection(ctProperties.getDataFormat()));
 		
 		for (int i = 1; i <= 4; i ++) {
 			java.awt.Color r = ctProperties.getThemeColor(i);
@@ -1067,7 +1088,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		ctProperties.setSimpleCamera(btnSimpleCamera.getSelection());
 		ctProperties.setCanPause(btnCanPause.getSelection());
 		ctProperties.setExitPin(Integer.valueOf(txtExitPin.getText()));
-		
+		ctProperties.setDataFormat((CyberTrackerProperties.Protocol) cmbDataFormat.getStructuredSelection().getFirstElement());
 			
 		ctProperties.setSightingAccuracy(Double.valueOf(txtSightingAccuracy.getText()));
 		ctProperties.setSightingFixCount(Integer.valueOf(txtSightingFixCount.getText()));

@@ -68,7 +68,7 @@ public class SurveyCtPackageManager implements ICtPackageManager {
 
 	@Override
 	public String getTypeName() {
-		return "Survey Package";
+		return Messages.SurveyCtPackageManager_PackageType;
 	}
 	
 	@Override
@@ -87,7 +87,7 @@ public class SurveyCtPackageManager implements ICtPackageManager {
 	public ICtPackage createPackage() {
 		SurveyCtPackage ctpackage = new SurveyCtPackage();
 		ctpackage.setConservationArea(SmartDB.getCurrentConservationArea());
-		ctpackage.setName("Survey");
+		ctpackage.setName(Messages.SurveyCtPackageManager_DefaultPackageName);
 		return ctpackage;
 	}
 	

@@ -56,6 +56,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageProperty;
@@ -67,7 +68,6 @@ import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICtPackage;
-import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
@@ -117,7 +117,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		contributions.forEach(e->ContextInjectionFactory.inject(e, context));
 		
 		this.onValidate = onValidate;
-		if (!(ctitem instanceof PatrolCtPackage)) throw new IllegalStateException("Incorrect package type for cybertracker patrol editor.");
+		if (!(ctitem instanceof PatrolCtPackage)) throw new IllegalStateException(Messages.CtPatrolPackageConfigurator_InvalidPackageType);
 		this.ctpackage = (PatrolCtPackage) ctitem;
 	
 		
@@ -126,7 +126,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		tabs.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		CTabItem mainTab = new CTabItem(tabs, SWT.NONE);
-		mainTab.setText("Model Settings");
+		mainTab.setText(Messages.CtPatrolPackageConfigurator_SettingsLabel);
 		
 		ScrolledComposite scroll = new ScrolledComposite(tabs,  SWT.V_SCROLL);
 		scroll.setExpandHorizontal(true);
@@ -150,17 +150,17 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		Label headerLabel = new Label(header, SWT.NONE);
 		headerLabel.setText(Messages.PatrolCTPackageDialog_PatrolConfigurationLabel);
-		WidgetElement.setCSSClass(header, "SMARTSection");
+		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS);
 		
 		g = new Composite(g, SWT.NONE);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label nameLabel = new Label(g, SWT.NONE);
-		nameLabel.setText("Package Name:");
+		nameLabel.setText(Messages.CtPatrolPackageConfigurator_NameLabel);
 		
 		txtName = new Text(g, SWT.BORDER);
-		txtName.setText(ctitem.getName() == null ? (ctitem.getTypeIdentifier() + " Package") : ctitem.getName());
+		txtName.setText(ctitem.getName() == null ? (ctitem.getTypeIdentifier() + Messages.CtPatrolPackageConfigurator_DefaultName) : ctitem.getName());
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtName.addListener(SWT.Modify, e->{ if (!isInit) validate();});
 		
@@ -281,15 +281,15 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		
 		try {
 			if (txtName.getText().isBlank()) {
-				throw new Exception("A package name is required");
+				throw new Exception(Messages.CtPatrolPackageConfigurator_NameRequired);
 			}
 		
 			if (modelViewer.getSelection().isEmpty()) {
-				throw new Exception("A configurable model must be selected");
+				throw new Exception(Messages.CtPatrolPackageConfigurator_CmRequired);
 			}
 		
 			if (profileViewer.getSelection().isEmpty()) {
-				throw new Exception("A profile must be selected");
+				throw new Exception(Messages.CtPatrolPackageConfigurator_ProfileRequired);
 			}
 			for (IPackageUiContribution cc : contributions) {
 				String x = cc.isValid();
@@ -372,25 +372,18 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 						profileViewer.setInput(profiles);
 						modelViewer.setInput(modelList);
 						
-						//to do fix this incase any of these have been deleted
-						if (finit != null) {
-							if (finit.getConfigurableModel() != null) {
-								modelViewer.setSelection(new StructuredSelection(finit.getConfigurableModel()));
-							}else {
-								modelViewer.setSelection(new StructuredSelection(dm));
-							}
+						if (finit.getConfigurableModel() != null) {
+							modelViewer.setSelection(new StructuredSelection(finit.getConfigurableModel()));
 						}else {
-							if (!modelList.isEmpty()) modelViewer.setSelection(new StructuredSelection(modelList.get(0)));
+							modelViewer.setSelection(new StructuredSelection(dm));
 						}
-						if (finit != null) {
-							if (finit.getCtProfile() != null) {
-								profileViewer.setSelection(new StructuredSelection(finit.getCtProfile()));
-							}else {
-								if (!profiles.isEmpty()) profileViewer.setSelection(new StructuredSelection(profiles.get(0)));
-							}
+						
+						if (finit.getCtProfile() != null) {
+							profileViewer.setSelection(new StructuredSelection(finit.getCtProfile()));
 						}else {
 							if (!profiles.isEmpty()) profileViewer.setSelection(new StructuredSelection(profiles.get(0)));
 						}
+						
 					}finally {
 						isInit = false;
 					}
@@ -442,7 +435,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 			((GridLayout)inner.getLayout()).marginHeight = 0;
 			
 			Label l= new Label(inner, SWT.NONE);
-			l.setText("Configurable Model");
+			l.setText(Messages.CtPatrolPackageConfigurator_CmLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 			
@@ -456,7 +449,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			l= new Label(inner, SWT.NONE);
-			l.setText("Cybertracker Profile");
+			l.setText(Messages.CtPatrolPackageConfigurator_ProfileLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 			
@@ -470,7 +463,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 			}
 			
 			l= new Label(inner, SWT.NONE);
-			l.setText("Local Package Details");
+			l.setText(Messages.CtPatrolPackageConfigurator_DetailsLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 			
@@ -496,7 +489,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				}
 			}catch (Exception ex) {
 				l= new Label(inner, SWT.NONE);
-				l.setText("Unknown");
+				l.setText(Messages.CtPatrolPackageConfigurator_Unknown);
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			}

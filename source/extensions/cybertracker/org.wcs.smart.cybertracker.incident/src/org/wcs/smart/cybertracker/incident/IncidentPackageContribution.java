@@ -64,6 +64,11 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Package contribution for adding incident model to CT package
+ * @author Emily
+ *
+ */
 public class IncidentPackageContribution implements IPackageContribution{
 
 	//package files
@@ -84,7 +89,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 		
 		Label l = new Label(parent, SWT.NONE);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		l.setText("Incident Model");
+		l.setText(Messages.IncidentPackageContribution_ModelLabel);
 		((GridData)l.getLayoutData()).verticalIndent = 5;
 		
 		l = new Label(parent, SWT.NONE);
@@ -96,7 +101,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 				l.setText( Messages.IncidentPackageContribution_OriginalDmLabel);
 			}
 		}else {
-			l.setText("None");
+			l.setText(Messages.IncidentPackageContribution_NoneOption);
 		}
 	}
 	

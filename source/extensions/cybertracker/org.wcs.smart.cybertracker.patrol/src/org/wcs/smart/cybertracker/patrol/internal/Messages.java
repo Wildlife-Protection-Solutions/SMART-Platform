@@ -65,6 +65,28 @@ public class Messages extends NLS {
 	public static String PatrolJsonProcessor_WarningsLabel;
 	public static String PatrolJsonProcessor_WarningsMsg;
 	public static String PatrolJsonTrackProcessor_MultiplePnts;
+	public static String CtPatrolPackageConfigurator_CmLabel;
+
+	public static String CtPatrolPackageConfigurator_CmRequired;
+
+	public static String CtPatrolPackageConfigurator_DefaultName;
+
+	public static String CtPatrolPackageConfigurator_DetailsLabel;
+
+	public static String CtPatrolPackageConfigurator_InvalidPackageType;
+
+	public static String CtPatrolPackageConfigurator_NameLabel;
+
+	public static String CtPatrolPackageConfigurator_NameRequired;
+
+	public static String CtPatrolPackageConfigurator_ProfileLabel;
+
+	public static String CtPatrolPackageConfigurator_ProfileRequired;
+
+	public static String CtPatrolPackageConfigurator_SettingsLabel;
+
+	public static String CtPatrolPackageConfigurator_Unknown;
+
 	public static String CTPatrolTableCellLabelProvider_Armed_No;
 	public static String CTPatrolTableCellLabelProvider_Armed_Yes;
 	public static String CTPatrolTableContainer_AddLeg_SubTaskName;
@@ -153,6 +175,10 @@ public class Messages extends NLS {
 	public static String PatrolCTPackageDialog_warning;
 	public static String PatrolCTPackageDialog_WriteError;
 	public static String PatrolCTPackageDialog_ZipFileLbl;
+	public static String PatrolCtPackageManager_DefaultName;
+
+	public static String PatrolCtPackageManager_PatrolType;
+
 	public static String PatrolImporter_DuplicateMessage;
 	public static String PatrolImporter_ImportDialogTitle;
 	public static String PatrolImporter_Save_Error;
@@ -171,6 +197,54 @@ public class Messages extends NLS {
 	public static String PatrolLegImporter_MetaWarning_Team;
 	public static String PatrolLegImporter_Warn_TimeGap_End;
 	public static String PatrolLegImporter_Warn_TimeGap_Start;
+	public static String PatrolMetadataPackageContribution_ArmedLabel;
+
+	public static String PatrolMetadataPackageContribution_CommentLabel;
+
+	public static String PatrolMetadataPackageContribution_FieldLabel;
+
+	public static String PatrolMetadataPackageContribution_FieldTooltip;
+
+	public static String PatrolMetadataPackageContribution_FixedLabel;
+
+	public static String PatrolMetadataPackageContribution_FixedTooltip;
+
+	public static String PatrolMetadataPackageContribution_LeaderLabel;
+
+	public static String PatrolMetadataPackageContribution_LeaderRequired;
+
+	public static String PatrolMetadataPackageContribution_MandateLabel;
+
+	public static String PatrolMetadataPackageContribution_MandateRequired;
+
+	public static String PatrolMetadataPackageContribution_MemberRequired;
+
+	public static String PatrolMetadataPackageContribution_MembersLabel;
+
+	public static String PatrolMetadataPackageContribution_NoneOption;
+
+	public static String PatrolMetadataPackageContribution_NoOption;
+
+	public static String PatrolMetadataPackageContribution_ObjectiveLabel;
+
+	public static String PatrolMetadataPackageContribution_PilotLabel;
+
+	public static String PatrolMetadataPackageContribution_StationLabel;
+
+	public static String PatrolMetadataPackageContribution_TabName;
+
+	public static String PatrolMetadataPackageContribution_TeamLabel;
+
+	public static String PatrolMetadataPackageContribution_TransportRequired;
+
+	public static String PatrolMetadataPackageContribution_TransportTypeLabel;
+
+	public static String PatrolMetadataPackageContribution_UserSelectedLabel;
+
+	public static String PatrolMetadataPackageContribution_UserSelectedTooltip;
+
+	public static String PatrolMetadataPackageContribution_YesOption;
+
 	public static String PatrolPackageExporter_ArmedPageLabel;
 	public static String PatrolPackageExporter_CommentPageLabel;
 	public static String PatrolPackageExporter_LeaderPageLabel;

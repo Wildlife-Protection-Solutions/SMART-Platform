@@ -39,7 +39,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -71,10 +70,10 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.udig.SmartDistanceTool;
 import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -136,24 +135,24 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		
 		ToolItem tiAdd = new ToolItem(tb, SWT.PUSH);
 		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		tiAdd.setToolTipText("create a new CyberTracker package");
+		tiAdd.setToolTipText(Messages.ConfigurePackagesDialog_addtooltip);
 		tiAdd.addListener(SWT.Selection, e->addPackage());
 		
 		ToolItem tiDup = new ToolItem(tb, SWT.PUSH);
 		tiDup.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CREATECOPY_ICON));
-		tiDup.setToolTipText("create a new CyberTracker package copying settings from selected package");
+		tiDup.setToolTipText(Messages.ConfigurePackagesDialog_duplicatetooltip);
 		tiDup.addListener(SWT.Selection, e->duplicatePackage());
 		tiDup.setEnabled(false);
 		
 		ToolItem tiEdit = new ToolItem(tb, SWT.PUSH);
 		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		tiEdit.setToolTipText("edit CyberTracker package");
+		tiEdit.setToolTipText(Messages.ConfigurePackagesDialog_edittooltip);
 		tiEdit.addListener(SWT.Selection, e->editPackage());
 		tiEdit.setEnabled(false);
 		
 		ToolItem tiDelete = new ToolItem(tb, SWT.PUSH);
 		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiDelete.setToolTipText("delete CyberTracker package");
+		tiDelete.setToolTipText(Messages.ConfigurePackagesDialog_deleteTooltip);
 		tiDelete.addListener(SWT.Selection, e->deletePackage());
 		tiDelete.setEnabled(false);
 		
@@ -213,7 +212,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		Menu mnu = new Menu(tblViewer.getControl());
 		
 		MenuItem miExport = new MenuItem(mnu, SWT.PUSH);
-		miExport.setText("Export...");
+		miExport.setText(DialogConstants.EXPORT_BUTTON_TEXT + "..."); //$NON-NLS-1$
 		miExport.addListener(SWT.Selection, e->okPressed());
 		miExport.setEnabled(false);
 		
@@ -221,18 +220,18 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		
 		MenuItem miAdd = new MenuItem(mnu, SWT.PUSH);
 		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		miAdd.setText("New...");
+		miAdd.setText(Messages.ConfigurePackagesDialog_AddMenuItem);
 		miAdd.addListener(SWT.Selection, e->addPackage());
 		
 		MenuItem miDup = new MenuItem(mnu, SWT.PUSH);
 		miDup.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CREATECOPY_ICON));
-		miDup.setText("Create Copy...");
+		miDup.setText(Messages.ConfigurePackagesDialog_CopyLabel);
 		miDup.addListener(SWT.Selection, e->duplicatePackage());
 		miDup.setEnabled(false);
 		
 		MenuItem miEdit = new MenuItem(mnu, SWT.PUSH);
 		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT + "...");
+		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT + "..."); //$NON-NLS-1$
 		miEdit.addListener(SWT.Selection, e->editPackage());
 		miEdit.setEnabled(false);
 		
@@ -272,9 +271,9 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		
 		loadItems.schedule();
 		
-		setMessage("Export and manage the CyberTracker packages");
-		setTitle("SMART Cybertracker Packages");
-		getShell().setText("SMART Cybertracker Packages");
+		setMessage(Messages.ConfigurePackagesDialog_ShellMessage);
+		setTitle(Messages.ConfigurePackagesDialog_ShellTitle);
+		getShell().setText(Messages.ConfigurePackagesDialog_ShellTitle);
 		
 		return parent;
 	}
@@ -301,7 +300,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 	
 	private List<ICtPackage> getSelection(){
 		List<ICtPackage> items = new ArrayList<>();
-		for (Iterator<Object> iterator = tblViewer.getStructuredSelection().iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = tblViewer.getStructuredSelection().iterator(); iterator.hasNext();) {
 			Object type = (Object) iterator.next();
 			if (type instanceof ICtPackage) {
 				items.add((ICtPackage)type);
@@ -347,7 +346,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		try {
 			return mm.doExport(getSelection(), context);
 		} catch (IOException ex) {
-			CyberTrackerPlugIn.displayError("Error", "Error exporting CyberTracker packages: " + ex.getMessage(), ex);
+			CyberTrackerPlugIn.displayError(Messages.ConfigurePackagesDialog_ErrorTitle, Messages.ConfigurePackagesDialog_ErrorMessage + ex.getMessage(), ex);
 			return false;
 		}finally {
 			propertyproviders.forEach(pp->pp.refresh());
@@ -372,7 +371,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 	private void deletePackage() {
 		List<ICtPackage> items = getSelection();
 		if (items.isEmpty()) return;
-		if (!MessageDialog.openQuestion(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected packages.  This action cannot be undone.", items.size()))){
+		if (!MessageDialog.openQuestion(getShell(), Messages.ConfigurePackagesDialog_DeleteTitle, MessageFormat.format(Messages.ConfigurePackagesDialog_DeleteConfirm, items.size()))){
 			return;
 		}
 		
@@ -384,7 +383,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {
-				CyberTrackerPlugIn.displayError("Delete Error", "Unable to delete selected configurations: " + ex.getMessage(), ex);
+				CyberTrackerPlugIn.displayError(Messages.ConfigurePackagesDialog_DeleteErrorTitle, Messages.ConfigurePackagesDialog_DeleteErrorMsg + ex.getMessage(), ex);
 				session.getTransaction().rollback();
 			}
 			
@@ -399,9 +398,9 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 	}
 	
 	private enum Column{
-		TYPE ("Type"),
-		NAME ("Name"),
-		PACKAGE_DATE("Local Package Date");
+		TYPE (Messages.ConfigurePackagesDialog_TypeColumn),
+		NAME (Messages.ConfigurePackagesDialog_NameColumn),
+		PACKAGE_DATE(Messages.ConfigurePackagesDialog_DateColumn);
 		
 		
 		String guiName;
@@ -418,17 +417,17 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		}
 		
 		public String getValue(Object x) {
-			if (!(x instanceof ICtPackage)) return "";
+			if (!(x instanceof ICtPackage)) return ""; //$NON-NLS-1$
 			ICtPackage pp = (ICtPackage)x;
 			
 			if (this == NAME) return pp.getName();
-			if (this == TYPE) return "";//CtPackageExtensionPointManager.INSTANCE.findManager(pp).getTypeName();
+			if (this == TYPE) return "";//CtPackageExtensionPointManager.INSTANCE.findManager(pp).getTypeName(); //$NON-NLS-1$
 			if (this == PACKAGE_DATE) {
 				//search filestore for package and display date
 				try {
 					Path ctPackageFile = pp.getLocalFile();
 					if (ctPackageFile == null) {
-						return "No Package";
+						return Messages.ConfigurePackagesDialog_NoPackageLabel;
 					}else {
 						String name = ctPackageFile.getFileName().toString();
 						int index = name.indexOf('.', name.indexOf('.') + 1) + 1;
@@ -438,14 +437,14 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 					}
 				}catch (Exception ex) {
 					CyberTrackerPlugIn.log(ex.getMessage(), ex);
-					return "unknown";
+					return Messages.ConfigurePackagesDialog_Unknown;
 				}
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
 	
-	private Job loadItems = new Job("Load ct packages") {
+	private Job loadItems = new Job("Load ct packages") { //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -525,7 +524,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 			main.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			
 			Label l = new Label(main, SWT.NONE);
-			l.setText("Select the type of package to create:");
+			l.setText(Messages.ConfigurePackagesDialog_PackageTypeMsg);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			
@@ -564,7 +563,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 				}
 			});
 			
-			getShell().setText("Cybertracker Package Type");
+			getShell().setText(Messages.ConfigurePackagesDialog_PackageTypeTitle);
 			return parent;
 		}
 	}

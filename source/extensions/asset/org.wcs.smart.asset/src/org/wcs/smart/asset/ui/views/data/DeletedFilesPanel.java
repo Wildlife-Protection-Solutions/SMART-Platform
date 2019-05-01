@@ -74,6 +74,8 @@ public class DeletedFilesPanel {
 	private void createComposite(Composite parent, FormToolkit toolkit) {
 		item = toolkit.createComposite(parent);
 		item.setLayout(new GridLayout());
+		((GridLayout)item.getLayout()).marginWidth = 0;
+		((GridLayout)item.getLayout()).marginHeight = 0;
 		
 		tblResults = new TableViewer(item, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 		tblResults.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

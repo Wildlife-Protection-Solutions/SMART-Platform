@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -76,6 +75,7 @@ import org.wcs.smart.event.model.IActionType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -482,7 +482,7 @@ public class EventsPanel extends Composite {
 		
 	};
 
-	private class NewActionEventDialog extends TitleAreaDialog{
+	private class NewActionEventDialog extends SmartStyledTitleDialog{
 	
 		private ComboViewer cmbAction;
 		private ComboViewer cmbFilter;

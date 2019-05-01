@@ -31,14 +31,17 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
@@ -91,11 +94,18 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		profilesViewer = new TableViewer(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-		profilesViewer.setLabelProvider(new CtProfileLabelProvider());
+		Composite tableComposite = new Composite(main, SWT.NONE);
+		TableColumnLayout tableColumnLayout = new TableColumnLayout();
+		tableComposite.setLayout(tableColumnLayout);
+		tableComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		profilesViewer = new TableViewer(tableComposite, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		profilesViewer.setContentProvider(ArrayContentProvider.getInstance());
+		
+		TableViewerColumn column = new TableViewerColumn(profilesViewer, SWT.NONE);
+		column.setLabelProvider(new CtProfileLabelProvider());
+		
 		profilesViewer.setInput(getProfilesList());
-		profilesViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		profilesViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -108,7 +118,8 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 				updateState();
 			}
 		});
-
+		tableColumnLayout.setColumnData(profilesViewer.getTable().getColumn(0), new ColumnWeightData(1));
+		
 		Composite btnCmp = new Composite(main, SWT.NONE);
 		btnCmp.setLayout(new GridLayout(1, false));
 		btnCmp.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));

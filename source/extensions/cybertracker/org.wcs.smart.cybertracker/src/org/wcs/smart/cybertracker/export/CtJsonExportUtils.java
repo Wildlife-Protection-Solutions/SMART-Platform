@@ -194,6 +194,38 @@ public class CtJsonExportUtils {
 		return profileObj.toJSONString();
 	}
 
+	/**
+	 * Convert cybertracker properties profile to JSON string.
+	 * 
+	 * @param profile
+	 * @return
+	 */
+	public static String toJson(CyberTrackerPropertiesProfile profile, HashMap<String, Object> additions, IEclipseContext context, Session session) {
+		JSONObject profileObj = new JSONObject();
+		
+		for (ProfileOptionID option : ProfileOptionID.values()) {
+			CyberTrackerPropertiesProfileOption opValue = profile.getOptions().get(option);
+			if (opValue == null) continue;
+			if (isBoolean(option)) {
+				profileObj.put(option.name(), opValue.getBooleanValue());
+			}else if (opValue.getDoubleValue() != null) {
+				profileObj.put(option.name(), opValue.getDoubleValue());
+			}else if (opValue.getIntegerValue() != null) {
+				profileObj.put(option.name(), opValue.getIntegerValue());
+			}else if (opValue.getStringValue() != null) {
+				profileObj.put(option.name(), opValue.getStringValue());
+			}
+		}
+		
+		if(additions != null) {
+			for (Entry<String, Object> e : additions.entrySet()) {
+				profileObj.put(e.getKey(), e.getValue());
+			}
+		}
+		return profileObj.toJSONString();
+	}
+
+	
 	public static void writeProjectJson(String projectName, String version, String cmFile, Path logoFile, Path outputFile, Path metadataFilename, HashMap<String, Object> projectAdditions) throws IOException {
 		JSONObject projectJSON = new JSONObject();
 		projectJSON.put("projectName",projectName); //$NON-NLS-1$

@@ -48,6 +48,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 import org.wcs.smart.connect.internal.server.FileUploaderJob;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
@@ -77,9 +78,9 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 				ConnectDialog cd = new ConnectDialog(context.get(Shell.class), true){
 					@Override
 					protected Control createDialogArea(Composite parent) {
-						setTitle("Export Package To Connect");
-						getShell().setText("Export CyberTracker Package To Connect");
-						setMessage("Configure SMART Connect details for export");	
+						setTitle(Messages.ExportCtPackageToConnect_Title);
+						getShell().setText(Messages.ExportCtPackageToConnect_ShellTitle);
+						setMessage(Messages.ExportCtPackageToConnect_Message);	
 						return super.createDialogArea(parent);
 					}	
 				};
@@ -140,10 +141,10 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 				}
 				String location = response.getHeaderString(HttpHeaders.LOCATION);
 				if (location == null) {
-					throw new Exception("Response does not contain upload url");
+					throw new Exception(Messages.ExportCtPackageToConnect_NoUrl);
 				}
 				
-				FileUploaderJob job = new FileUploaderJob(location, file, connect, "Upload Cybertracker Package") {
+				FileUploaderJob job = new FileUploaderJob(location, file, connect, Messages.ExportCtPackageToConnect_UploadJobName) {
 	
 					@Override
 					protected void onUploadComplete(WorkItemStatus status) {
@@ -156,7 +157,7 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 	
 					@Override
 					protected void onError(String errorMessage) {
-						ConnectPlugIn.log("Error uploading package to connect: " + errorMessage, null);
+						ConnectPlugIn.log(Messages.ExportCtPackageToConnect_UploadError + errorMessage, null);
 					}
 	
 					@Override
@@ -164,7 +165,7 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 						try {
 							super.uploadFile(monitor);
 						} catch (Exception e) {
-							ConnectPlugIn.log("Error uploading package to Connect: " +e.getMessage(), e);
+							ConnectPlugIn.log(Messages.ExportCtPackageToConnect_UploadError +e.getMessage(), e);
 						}
 						return Status.OK_STATUS;
 					}
@@ -176,7 +177,7 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 				
 			}
 		} catch (Exception e) {
-			ConnectPlugIn.displayLog("Error uploading package to Connect: " + e.getMessage(), e);
+			ConnectPlugIn.displayLog(Messages.ExportCtPackageToConnect_UploadError + e.getMessage(), e);
 		}
 	}
 	
@@ -185,16 +186,16 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 		
 		shell.getDisplay().syncExec(()->{
 			if (ok == total) {
-				MessageDialog.openInformation(shell, "Upload Complete", MessageFormat.format("Uploaded {0} of {1} package(s) to connect.", ok, total));
+				MessageDialog.openInformation(shell, Messages.ExportCtPackageToConnect_CompleteTitle, MessageFormat.format(Messages.ExportCtPackageToConnect_UplodeCompleteMsg, ok, total));
 			}else {
-				MessageDialog.openInformation(shell, "Upload Complete", MessageFormat.format("Uploaded {0} of {1} package(s) to connect. See error logs for error details.", ok, total));
+				MessageDialog.openInformation(shell, Messages.ExportCtPackageToConnect_CompleteTitle, MessageFormat.format(Messages.ExportCtPackageToConnect_UploadCompleteMsg2, ok, total));
 			}
 		});
 	}
 
 	@Override
 	public String getName() {
-		return "Export To Connect";
+		return Messages.ExportCtPackageToConnect_Name;
 	}
 
 	@Override

@@ -71,7 +71,7 @@ public class PatrolCtPackageManager implements ICtPackageManager {
 
 	@Override
 	public String getTypeName() {
-		return "Patrol Package";
+		return Messages.PatrolCtPackageManager_PatrolType;
 	}
 	
 	@Override
@@ -90,7 +90,7 @@ public class PatrolCtPackageManager implements ICtPackageManager {
 	public ICtPackage createPackage() {
 		PatrolCtPackage ctpackage = new PatrolCtPackage();
 		ctpackage.setConservationArea(SmartDB.getCurrentConservationArea());
-		ctpackage.setName("Patrol");
+		ctpackage.setName(Messages.PatrolCtPackageManager_DefaultName);
 		return ctpackage;
 	}
 	

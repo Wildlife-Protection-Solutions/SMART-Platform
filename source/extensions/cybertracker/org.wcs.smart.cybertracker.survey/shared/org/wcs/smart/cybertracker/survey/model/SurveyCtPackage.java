@@ -22,14 +22,11 @@
 package org.wcs.smart.cybertracker.survey.model;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -42,7 +39,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.model.SurveyDesign;
 
 /**
- * Patrol cybertracker package configuration
+ * Survey cybertracker package configuration
  * 
  * @author Emily
  *
@@ -119,9 +116,5 @@ public class SurveyCtPackage extends AbstractCtPackage implements ICmProvider{
 		}
 		return copy;
 	}
-
-	
-	
-	
 
 }

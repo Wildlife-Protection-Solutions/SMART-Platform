@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.cybertracker.properties;
 
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
-import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
  * Label provider for {@link CyberTrackerPropertiesProfile}.
@@ -31,13 +31,13 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
  * @author elitvin
  * @since 4.0.0
  */
-public class CtProfileLabelProvider extends NamedItemLabelProvider {
+public class CtProfileLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public String getText(Object element) {
 		if (element instanceof CyberTrackerPropertiesProfile) {
 			CyberTrackerPropertiesProfile p = (CyberTrackerPropertiesProfile) element;
-			String name = super.getText(element);
+			String name = p.getName();
 			return p.isDefault() ? name + Messages.ManageProfilesDialog_DefaultProfilePostfix : name;
 		}
 		return super.getText(element);

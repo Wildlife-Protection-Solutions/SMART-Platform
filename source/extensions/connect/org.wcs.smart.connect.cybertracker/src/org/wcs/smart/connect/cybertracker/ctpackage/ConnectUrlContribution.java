@@ -36,7 +36,9 @@ import org.wcs.smart.hibernate.HibernateManager;
 /**
  * This contribution adds the status_url and download_url
  * links to the project json file.  Only added if a
- * connect server is configured.
+ * connect server is configured.  These urls identify the location 
+ * of the package and/or all packages on the connect server (for installing or
+ * updating the app on the device).
  * 
  * @author Emily
  *
@@ -67,8 +69,8 @@ public class ConnectUrlContribution implements IPackageContribution {
 		//get connect url
 		if (url == null) return cc;
 		if (ctpackage.getUuid() != null) {
-			cc.setProjectMetadata("status_url:", url + "/api/cybertracker/" + ctpackage.getUuid().toString());
-			cc.setProjectMetadata("download_url:", url + "/api/cybertracker/packages/" + ctpackage.getUuid().toString());
+			cc.setProjectMetadata("status_url:", url + "/api/cybertracker/" + ctpackage.getUuid().toString()); //$NON-NLS-1$ //$NON-NLS-2$
+			cc.setProjectMetadata("download_url:", url + "/api/cybertracker/packages/" + ctpackage.getUuid().toString()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		return cc;

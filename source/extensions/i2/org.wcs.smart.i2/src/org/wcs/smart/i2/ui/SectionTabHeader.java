@@ -30,6 +30,9 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseTrackListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -48,6 +51,11 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 @SuppressWarnings("restriction")
 public class SectionTabHeader extends Composite implements Listener{
 
+	private static final String TAB_MOUSEOVER_CLASS = "SMARTTabMouseOver"; //$NON-NLS-1$
+	private static final String TAB_BAR_CLASS = "SMARTTabBar"; //$NON-NLS-1$
+	private static final String TAB_CLASS = "SMARTTab"; //$NON-NLS-1$
+	private static final String TAB_SELECTED_CLASS = "SMARTTabSelected"; //$NON-NLS-1$
+	
 	private Composite[] parts;
 	private Composite stackPanel;
 	
@@ -55,10 +63,24 @@ public class SectionTabHeader extends Composite implements Listener{
 	
 	private List<Listener> listeners;
 	
+	private Color borderColor = null;
+
+	
 	public SectionTabHeader(String tabs[], Composite parent, FormToolkit toolkit, Runnable onMaximize){
 		super(parent, SWT.NONE);
 		
-		WidgetElement.setCSSClass(this, "SMARTTabBar");
+		WidgetElement.setCSSClass(this, TAB_BAR_CLASS);
+		
+		addListener(SWT.Paint, e->{
+			CLabel t = null;
+			for (CLabel l : headers) {
+				if (WidgetElement.getCSSClass(l).equalsIgnoreCase(TAB_SELECTED_CLASS)){
+					t = l;
+				}
+			}
+			borderColor = t.getBackground();
+			drawBorder(e.gc);
+		});
 		
 		setLayout(new GridLayout(tabs.length*2-1 + (onMaximize == null ? 0 : 1), false));
 		((GridLayout)getLayout()).marginWidth = 0;
@@ -71,9 +93,9 @@ public class SectionTabHeader extends Composite implements Listener{
 		for (int i = 0; i < tabs.length; i ++){
 			CLabel header = new CLabel(this, SWT.NONE);
 			header.setText(tabs[i]);
-			header.setMargins(3, 3, 5, 2);
-			WidgetElement.setCSSClass(header, "SMARTTab");
-
+			header.setMargins(3, 5, 7, 3);
+			WidgetElement.setCSSClass(header, TAB_CLASS);
+			header.addListener(SWT.Paint,e->drawBorder(e.gc));
 			
 			headers[i] = header;
 			
@@ -88,8 +110,8 @@ public class SectionTabHeader extends Composite implements Listener{
 					header.setCursor(getDisplay().getSystemCursor(SWT.CURSOR_HAND));
 					
 					lastClass = WidgetElement.getCSSClass(header);
-					if (!lastClass.equals("SMARTTabSelected")) {
-						WidgetElement.setCSSClass(header, "SMARTTabMouseOver");
+					if (!lastClass.equals(TAB_SELECTED_CLASS)) {
+						WidgetElement.setCSSClass(header, TAB_MOUSEOVER_CLASS);
 						WidgetElement.applyStyles(header, true);
 					}
 				}
@@ -98,7 +120,7 @@ public class SectionTabHeader extends Composite implements Listener{
 				public void mouseExit(MouseEvent e) {
 					header.setCursor(null);
 					String currentClass = WidgetElement.getCSSClass(header);
-					if (!currentClass.equals("SMARTTabSelected")) {
+					if (!currentClass.equals(TAB_SELECTED_CLASS)) {
 						WidgetElement.setCSSClass(header, lastClass);
 						WidgetElement.applyStyles(header, true);
 					}
@@ -122,8 +144,18 @@ public class SectionTabHeader extends Composite implements Listener{
 		}
 	}
 	
+	
 	public SectionTabHeader(String tabs[], Composite parent, FormToolkit toolkit){
 		this(tabs, parent, toolkit, null);
+	}
+	
+	private void drawBorder(GC gc) {
+		Rectangle rr = SectionTabHeader.this.getBounds();
+
+		gc.setForeground(borderColor);
+		gc.setLineWidth(2);
+		gc.drawLine(0, rr.height-1, rr.width, rr.height-1);
+		gc.setLineWidth(1);
 	}
 	
 	public void addTabSelectionListener(Listener l) {
@@ -169,8 +201,8 @@ public class SectionTabHeader extends Composite implements Listener{
 	}
 	
 	private void selectTabItem(CLabel link) {
-		for (CLabel l : headers) WidgetElement.setCSSClass(l, "SMARTTab");
-		WidgetElement.setCSSClass(link, "SMARTTabSelected");
+		for (CLabel l : headers) WidgetElement.setCSSClass(l, TAB_CLASS);
+		WidgetElement.setCSSClass(link, TAB_SELECTED_CLASS);
 		WidgetElement.applyStyles(this, true);	
 	}
 }

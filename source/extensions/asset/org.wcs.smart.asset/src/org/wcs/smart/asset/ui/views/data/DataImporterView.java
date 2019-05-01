@@ -24,24 +24,20 @@ package org.wcs.smart.asset.ui.views.data;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.forms.IFormColors;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.asset.internal.Messages;
+import org.wcs.smart.asset.ui.SectionHeader;
 import org.wcs.smart.asset.ui.views.data.DataImporterInput.Page;
 
 /**
@@ -63,8 +59,6 @@ public class DataImporterView extends EditorPart{
 	private DataReviewPage reviewPage;
 	
 	private Composite body;
-	private Hyperlink lnkImport, lnkReview;
-	private Font normalFont, boldFont;
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -122,36 +116,16 @@ public class DataImporterView extends EditorPart{
 		mainform.getBody().setLayout(new GridLayout());
 		zeroMargins(mainform.getBody());
 		
-		Composite header = toolkit.createComposite(mainform.getBody(), SWT.NONE);
+		Composite header = toolkit.createComposite(mainform.getBody(), SWT.BORDER);
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		header.setLayout(new GridLayout());
 		((GridLayout)header.getLayout()).verticalSpacing = 0;
+		((GridLayout)header.getLayout()).verticalSpacing = 0;
 	
-		Composite topPanel = toolkit.createComposite(header, SWT.NONE);
-		topPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		topPanel.setLayout(new GridLayout(3, false));
-		((GridLayout)topPanel.getLayout()).marginWidth = 3;
-		((GridLayout)topPanel.getLayout()).marginHeight = 3;
-		
-		FontData fd = mainform.getFont().getFontData()[0];
-		fd.setStyle(SWT.NORMAL);
-		normalFont = new Font(topPanel.getDisplay(), fd);
-		fd.setStyle(SWT.BOLD);
-		boldFont = new Font(topPanel.getDisplay(), fd);
-		topPanel.addListener(SWT.Dispose, e->{
-			normalFont.dispose();
-			boldFont.dispose();
-		});
-		
-		topPanel.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG) );
-		
-		lnkImport = toolkit.createHyperlink(topPanel, Messages.DataImporterView_ImportSectionName, SWT.NONE);
-		lnkImport.setFont(normalFont);
-		lnkImport.setBackground(topPanel.getBackground());
-		
-		lnkReview = toolkit.createHyperlink(topPanel, Messages.DataImporterView_ReviewSectionName, SWT.NONE);
-		lnkReview.setFont(normalFont);
-		lnkReview.setBackground(topPanel.getBackground());
+		SectionHeader sectionheader = new SectionHeader(header, SWT.NONE, 2, 
+				new String[] {Messages.DataImporterView_ImportSectionName, Messages.DataImporterView_ReviewSectionName}, 
+				new Listener[] {e->{showImport();}, e->{showReview();}});
+		sectionheader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		body = toolkit.createComposite(header, SWT.NONE);
 		body.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -162,24 +136,10 @@ public class DataImporterView extends EditorPart{
 		importPage = new DataImportPage(this, toolkit);
 		reviewPage = new DataReviewPage(this, toolkit);
 		
-		lnkImport.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				showImport();
-			}
-		});
-		
-		lnkReview.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				showReview();
-			}
-		});
-		
 		if (( (DataImporterInput)getEditorInput() ).getPage() == Page.REVIEW) {
-			showReview();
+			sectionheader.selectPanel(1);
 		}else if (( (DataImporterInput)getEditorInput() ).getPage() == Page.IMPORT) {
-			showImport();
+			sectionheader.selectPanel(0);
 		}
 
 	}
@@ -188,20 +148,12 @@ public class DataImporterView extends EditorPart{
 		for (Control c : body.getChildren()) c.dispose();
 		importPage.createPage(body);
 		body.layout(true, true);
-		
-		lnkImport.setFont(boldFont);
-		lnkReview.setFont(normalFont);
-		lnkImport.getParent().layout();
 	}
 	
 	private void showReview() {
 		for (Control c : body.getChildren()) c.dispose();
 		reviewPage.createControl(body);
 		body.layout(true, true);
-		
-		lnkImport.setFont(normalFont);
-		lnkReview.setFont(boldFont);
-		lnkImport.getParent().layout();
 	}
 	
 		

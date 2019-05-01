@@ -30,13 +30,14 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.ui.forms.widgets.FormToolkit;
 
 /**
  * Asset editor section header.
@@ -44,35 +45,46 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class SectionHeader extends Composite{
 
+	private static final String TAB_MOUSEOVER_CLASS = "SMARTTabMouseOver"; //$NON-NLS-1$
+	public static final String TAB_BAR_CLASS = "SMARTTabBar"; //$NON-NLS-1$
+	private static final String TAB_CLASS = "SMARTTab"; //$NON-NLS-1$
+	private static final String TAB_SELECTED_CLASS = "SMARTTabSelected"; //$NON-NLS-1$
+	
 	private static final String EVENT_KEY = "EVENT"; //$NON-NLS-1$
 	
 	private List<CLabel> links;
 	
-	private Color borderColor = null; 
+	private Color borderColor = null;
+	private int fontsize = 0;
 	
 	public SectionHeader(Composite parent, int style, String[] headers, Listener[] actions) {
+		this(parent, style, 0, headers,actions);
+	}
+	public SectionHeader(Composite parent, int style, int fontsize, String[] headers, Listener[] actions) {
 		super(parent, style);
-		WidgetElement.setCSSClass(this, "SMARTTabBar");
-		//TODO: fix this - currently this is the easiest way
-		//I could figure out how to get the selected
-		//tab color from the css
-		Composite temp = new Composite(parent, SWT.NONE);
-		WidgetElement.setCSSClass(temp, "SMARTTabSelected");
-		WidgetElement.applyStyles(temp, true);
-		borderColor = temp.getBackground();
-		temp.dispose();
-
+		this.fontsize = fontsize;
+		WidgetElement.setCSSClass(this, TAB_BAR_CLASS);
+		WidgetElement.applyStyles(this, true);
+		
 		addListener(SWT.Paint, e->{
+			CLabel t = null;
+			for (CLabel l : links) {
+				if (WidgetElement.getCSSClass(l).equalsIgnoreCase(TAB_SELECTED_CLASS)){
+					t = l;
+				}
+			}
+			borderColor = t.getBackground();
 			drawBorder(e.gc);
 		});
 		createComponent(headers, actions);
 	}
 	
 	private void drawBorder(GC gc) {
+		if (borderColor == null) return;
 		Rectangle rr = SectionHeader.this.getBounds();
-
 		gc.setForeground(borderColor);
 		gc.setLineWidth(2);
 		gc.drawLine(0, rr.height-1, rr.width, rr.height-1);
@@ -84,6 +96,7 @@ public class SectionHeader extends Composite{
 		setLayout(new GridLayout(headers.length, false));
 		((GridLayout)getLayout()).marginWidth = 0;
 		((GridLayout)getLayout()).marginHeight = 0;
+		((GridLayout)getLayout()).horizontalSpacing = 0;
 		
 		links = new ArrayList<>();
 		for (int i = 0; i < headers.length; i ++) {
@@ -98,8 +111,8 @@ public class SectionHeader extends Composite{
 	}
 
 	private void selectTab(CLabel link) {
-		links.forEach(l->WidgetElement.setCSSClass(l, "SMARTTab"));
-		WidgetElement.setCSSClass(link, "SMARTTabSelected");
+		links.forEach(l->WidgetElement.setCSSClass(l, TAB_CLASS));
+		WidgetElement.setCSSClass(link, TAB_SELECTED_CLASS);
 		WidgetElement.applyStyles(this, true);
 	}
 	
@@ -107,9 +120,17 @@ public class SectionHeader extends Composite{
 		
 		CLabel tab = new CLabel(this, SWT.NONE);
 		tab.setText(text);
-		tab.setMargins(3, 5, 5, 3);
+		tab.setMargins(3, 5, 7, 3);
+		
+		if (fontsize != 0) {
+			FontData fd = tab.getFont().getFontData()[0];
+			fd.setHeight(fd.getHeight() + fontsize);
+			Font font = new Font(tab.getDisplay(),fd);
+			tab.setFont(font);
+			tab.addListener(SWT.Dispose, e->font.dispose());
+		}
 		tab.addListener(SWT.Paint,e->drawBorder(e.gc));
-		WidgetElement.setCSSClass(tab, "SMARTTab");
+		WidgetElement.setCSSClass(tab, TAB_CLASS);
 		
 		tab.addMouseTrackListener(new MouseTrackListener() {
 
@@ -119,8 +140,8 @@ public class SectionHeader extends Composite{
 				tab.setCursor(getDisplay().getSystemCursor(SWT.CURSOR_HAND));
 				
 				lastClass = WidgetElement.getCSSClass(tab);
-				if (!lastClass.equals("SMARTTabSelected")) {
-					WidgetElement.setCSSClass(tab, "SMARTTabMouseOver");
+				if (!lastClass.equals(TAB_SELECTED_CLASS)) {
+					WidgetElement.setCSSClass(tab, TAB_MOUSEOVER_CLASS);
 					WidgetElement.applyStyles(tab, true);
 				}
 			}
@@ -129,7 +150,7 @@ public class SectionHeader extends Composite{
 			public void mouseExit(MouseEvent e) {
 				tab.setCursor(null);
 				String currentClass = WidgetElement.getCSSClass(tab);
-				if (!currentClass.equals("SMARTTabSelected")) {
+				if (!currentClass.equals(TAB_SELECTED_CLASS)) {
 					WidgetElement.setCSSClass(tab, lastClass);
 					WidgetElement.applyStyles(tab, true);
 				}

@@ -30,6 +30,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.MobileDeviceUtils;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 
 /**
@@ -48,7 +49,7 @@ public class ExportPackageToDeviceAction implements ICtExportAction {
 
 	@Override
 	public String getName() {
-		return "Export to Device";
+		return Messages.ExportPackageToDeviceAction_OptionName;
 	}
 
 	@Override
@@ -65,12 +66,12 @@ public class ExportPackageToDeviceAction implements ICtExportAction {
 				MobileDeviceUtils.exportAppToDevice(w.getLocalFile());
 				cnt++;
 			} catch (Exception e) {
-				CyberTrackerPlugIn.displayError("Error", 
-						MessageFormat.format("Error exporting cybertracker package {0} to device." + "\n\n{1}", w.getName(), e.getMessage()), e);
+				CyberTrackerPlugIn.displayError(Messages.ExportPackageToDeviceAction_ErrorTitle, 
+						MessageFormat.format(Messages.ExportPackageToDeviceAction_ErrorMsg + "\n\n{1}", w.getName(), e.getMessage()), e); //$NON-NLS-1$
 			}
 		}
-		MessageDialog.openInformation(shell, "Export Cybertracker Package", MessageFormat
-				.format("Exported {0} or {1} packages to device", cnt, towrite.size()));
+		MessageDialog.openInformation(shell, Messages.ExportPackageToDeviceAction_ExportMsgTitle, MessageFormat
+				.format(Messages.ExportPackageToDeviceAction_ExportMsg, cnt, towrite.size()));
 
 	}
 

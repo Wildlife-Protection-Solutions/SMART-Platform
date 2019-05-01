@@ -16,8 +16,12 @@ public class Messages extends NLS {
 	public static String IncidentPackageContribution_CollectIncidentsOp;
 	public static String IncidentPackageContribution_ConfigurationGroupLablel;
 	public static String IncidentPackageContribution_LoadingCmJobname;
+	public static String IncidentPackageContribution_ModelLabel;
+	public static String IncidentPackageContribution_NoneOption;
 	public static String IncidentPackageContribution_OriginalDmLabel;
 	public static String IncidentPackageContribution_TaskName;
+	public static String IncidentPackageUiContribution_cmRequired;
+	public static String IncidentPackageUiContribution_CmRequired;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

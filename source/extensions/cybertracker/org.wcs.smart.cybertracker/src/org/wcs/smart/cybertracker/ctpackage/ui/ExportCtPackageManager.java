@@ -31,6 +31,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 
 /**
@@ -62,8 +63,8 @@ public class ExportCtPackageManager {
 		List<ICtExportAction> doActions = new ArrayList<>(actions);
 		if (actions.size() == 1) {
 			if (requireCreateOp) {
-				if (MessageDialog.openQuestion(shell, "Export CyberTracker Packages",
-						"Do you want to re-generate these packages before exporting?  \n\nThis is only necessary if there have been changes to the package contents (configurable models, cybertracker setting etc.).")) {
+				if (MessageDialog.openQuestion(shell, Messages.ExportCtPackageManager_ShellTitle,
+						Messages.ExportCtPackageManager_RegenQuestion)) {
 					create = true;
 				}else {
 					create = false;
@@ -97,7 +98,7 @@ public class ExportCtPackageManager {
 				CtPackageExtensionPointManager.INSTANCE.createPackage(p, context);
 			}catch (Throwable ex) {
 				towrite.remove(p);
-				CyberTrackerPlugIn.displayError("ERROR", MessageFormat.format("Error generating package {0}: {1}", p.getName(), ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage()), ex);
+				CyberTrackerPlugIn.displayError(Messages.ExportCtPackageManager_ErrorTitle, MessageFormat.format(Messages.ExportCtPackageManager_ErrorMsg, p.getName(), ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage()), ex);
 			}
 		}
 		return towrite;

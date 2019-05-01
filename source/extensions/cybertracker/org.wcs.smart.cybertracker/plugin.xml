@@ -14,7 +14,7 @@
          <menu
                icon="images/etool16/cybertracker16.png"
                id="org.wcs.smart.cybertracker.menu"
-               label="%cybertracker.menu.label">
+               label="%cybertracker.menu.label1">
             <separator
                   name="org.wcs.smart.cybertracker.patrolseparator"
                   visible="false">
@@ -97,7 +97,7 @@
          <menu
                icon="images/etool16/cybertracker16.png"
                id="org.wcs.smart.cybertracker2.menu"
-               label="%menu.ct2.label">
+               label="%menu.ct2.label2">
             <command
                   commandId="org.wcs.smart.cybertracker.json.import"
                   label="%cybertracker.import.command.label"
@@ -105,13 +105,18 @@
             </command>
             <command
                   commandId="org.wcs.smart.cybertracker.packages.show"
-                  label="Packages..."
+                  label="%command.packages.show.label"
                   style="push">
             </command>
             <separator
                   name="org.wcs.smart.cybertracker2.separator.import"
                   visible="true">
             </separator>
+            <command
+                  commandId="org.wcs.smart.cybertracker.properties"
+                  label="%command.smproperties.label"
+                  style="push">
+            </command>
             <separator
                   name="org.wcs.smart.cybertracker3.separator.import"
                   visible="true">

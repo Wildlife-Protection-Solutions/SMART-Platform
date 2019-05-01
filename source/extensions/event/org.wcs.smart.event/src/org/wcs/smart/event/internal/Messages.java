@@ -129,6 +129,7 @@ public class Messages extends NLS {
 	public static String NewActionDialog_ActionRequired;
 	public static String NewActionDialog_ActionTypeRequiredMsg;
 	public static String NewActionDialog_ActionTypeRequiredTitle;
+	public static String NewActionDialog_DetailsLabel;
 	public static String NewActionDialog_IDLabel;
 	public static String NewActionDialog_IdRequired;
 	public static String NewActionDialog_Message;

@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.hibernate.SmartDB;
@@ -119,7 +120,7 @@ public enum CtPackageExtensionPointManager {
 					}
 				}
 			}catch (Exception ex){
-				CyberTrackerPlugIn.displayError("Error", "Unable to load package action extension points:" + ex.getMessage(), ex);
+				CyberTrackerPlugIn.displayError(Messages.CtPackageExtensionPointManager_ErrorTitle, Messages.CtPackageExtensionPointManager_ActionError + ex.getMessage(), ex);
 			}
 		}
 		this.managers = mgs;
@@ -138,7 +139,7 @@ public enum CtPackageExtensionPointManager {
 					}
 				}
 			}catch (Exception ex){
-				CyberTrackerPlugIn.displayError("Error", "Unable to load package action extension points:" + ex.getMessage(), ex);
+				CyberTrackerPlugIn.displayError(Messages.CtPackageExtensionPointManager_ErrorTitle, Messages.CtPackageExtensionPointManager_Action2Error + ex.getMessage(), ex);
 			}
 		}
 		return actions;
@@ -157,7 +158,7 @@ public enum CtPackageExtensionPointManager {
 					}
 				}
 			}catch (Exception ex){
-				CyberTrackerPlugIn.displayError("Error", "Unable to load package action property points:" + ex.getMessage(), ex);
+				CyberTrackerPlugIn.displayError(Messages.CtPackageExtensionPointManager_ErrorTitle, Messages.CtPackageExtensionPointManager_PropertyError + ex.getMessage(), ex);
 			}
 		}
 		return props;

@@ -39,22 +39,19 @@ import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.importer.ActionableWarning;
@@ -63,6 +60,7 @@ import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.DataDisplaySettings;
+import org.wcs.smart.asset.ui.SectionHeader;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -81,6 +79,10 @@ public class ResultsPanel {
 	private DeletedFilesPanel tblDeletedItems;
 	
 	private FileDetailsPanel detailsPanel;
+	
+	private Composite stackPanel;
+	private Composite iconSizeComp;
+	private SectionHeader header;
 	
 	public ResultsPanel(Composite parent, DataImportPage view, FormToolkit toolkit) {
 		this.view = view;
@@ -118,23 +120,50 @@ public class ResultsPanel {
 		((GridLayout) leftPart.getLayout()).marginHeight = 0;
 
 		Composite bottom = toolkit.createComposite(leftPart);
-		bottom.setLayout(new GridLayout(4, false));
+		bottom.setLayout(new GridLayout());
 		bottom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout) bottom.getLayout()).marginWidth = 0;
 		((GridLayout) bottom.getLayout()).marginHeight = 0;
 		
-		Hyperlink tblLink = toolkit.createHyperlink(bottom, Messages.ResultsPanel_TableSection, SWT.NONE);
-		Hyperlink imgsLink = toolkit.createHyperlink(bottom, Messages.ResultsPanel_ImagesSection, SWT.NONE);
-		Hyperlink deletedLink = toolkit.createHyperlink(bottom, Messages.ResultsPanel_DeletedFilesSection, SWT.NONE);
-		deletedLink.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		header = new SectionHeader(bottom, SWT.NONE,
+				new String[] {Messages.ResultsPanel_TableSection, Messages.ResultsPanel_ImagesSection, Messages.ResultsPanel_DeletedFilesSection},
+				new Listener[] {
+						e->{
+							((StackLayout) stackPanel.getLayout()).topControl = tblResults.getControl();
+							stackPanel.layout();
+							iconSizeComp.setVisible(false);
+							detailsPanel.updateFileDetails(tblResults.getStructuredSelection());
+							header.layout(true);
+						},
+						e->{
+							((StackLayout) stackPanel.getLayout()).topControl = tblResultsImages.getControl();
+							stackPanel.layout();
+							iconSizeComp.setVisible(true);
+							detailsPanel.updateFileDetails(tblResults.getStructuredSelection());
+							header.layout(true);
+						},
+						e->{
+							((StackLayout) stackPanel.getLayout()).topControl = tblDeletedItems.getControl();
+							stackPanel.layout();
+							iconSizeComp.setVisible(false);
+							detailsPanel.updateFileDetails(null);
+							header.layout(true);
+						}
+				});
+		((GridLayout)header.getLayout()).numColumns = 4;
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+//		WidgetElement.setCSSClass(bottom, SectionHeader.TAB_BAR_CLASS); 
 		
 		// icon size for images table
-		Composite iconSizeComp = toolkit.createComposite(bottom);
+		iconSizeComp = toolkit.createComposite(header);
+		iconSizeComp.setBackground(bottom.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		iconSizeComp.setLayout(new GridLayout(2, false));
 		((GridLayout)iconSizeComp.getLayout()).marginWidth = 0;
 		((GridLayout)iconSizeComp.getLayout()).marginHeight = 0;
-		iconSizeComp.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-		toolkit.createLabel(iconSizeComp, Messages.ResultsPanel_IconSizeOp);
+		iconSizeComp.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		Label l = toolkit.createLabel(iconSizeComp, Messages.ResultsPanel_IconSizeOp);
+		l.setBackground(bottom.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		DataDisplaySettings.IconSize defaultSize = DataDisplaySettings.IconSize.MEDIUM;
 		try {
@@ -145,6 +174,9 @@ public class ResultsPanel {
 		}catch (Exception ex) {}
 		
 		Button btnIconSize = new Button(iconSizeComp, SWT.ARROW | SWT.DOWN);
+		btnIconSize.setBackground(bottom.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
+		btnIconSize.setLayoutData(new GridData(SWT.FILL,SWT.CENTER,false,true));
 		Menu mnuIconSize = new Menu(btnIconSize);
 		for(DataDisplaySettings.IconSize s : DataDisplaySettings.IconSize.values()) {
 			MenuItem item = new MenuItem(mnuIconSize,SWT.RADIO);
@@ -159,7 +191,7 @@ public class ResultsPanel {
 		});
 		iconSizeComp.setVisible(false);
 		
-		Composite stackPanel = toolkit.createComposite(leftPart, SWT.NONE);
+		stackPanel = toolkit.createComposite(leftPart, SWT.NONE);
 		stackPanel.setLayout(new StackLayout());
 		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -356,61 +388,10 @@ public class ResultsPanel {
 
 		tblResultsImages = new ImagesTablePanel(stackPanel, view, toolkit);
 
-		
 		tblDeletedItems = new DeletedFilesPanel(stackPanel, view, toolkit);
 		tblDeletedItems.addSelectionChangedListener(e->detailsPanel.updateFileDetails(tblDeletedItems.getSelection()));
 		
 		((StackLayout) stackPanel.getLayout()).topControl = tblResults.getControl();
-
-		FontData fd = tblLink.getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		Font boldFont = new Font(tblLink.getDisplay(), fd);
-		tblLink.addDisposeListener(e -> boldFont.dispose());
-		Font normalFont = tblLink.getFont();
-		tblLink.setFont(boldFont);
-		tblLink.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				((StackLayout) stackPanel.getLayout()).topControl = tblResults.getControl();
-				stackPanel.layout();
-
-				tblLink.setFont(boldFont);
-				imgsLink.setFont(normalFont);
-				deletedLink.setFont(normalFont);
-				tblLink.getParent().layout();
-				iconSizeComp.setVisible(false);
-				detailsPanel.updateFileDetails(tblResults.getStructuredSelection());
-			}
-		});
-
-		imgsLink.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				((StackLayout) stackPanel.getLayout()).topControl = tblResultsImages.getControl();
-				stackPanel.layout();
-
-				tblLink.setFont(normalFont);
-				imgsLink.setFont(boldFont);
-				deletedLink.setFont(normalFont);
-				tblLink.getParent().layout();
-				iconSizeComp.setVisible(true);
-				detailsPanel.updateFileDetails(tblResults.getStructuredSelection());
-			}
-		});
-		deletedLink.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				((StackLayout) stackPanel.getLayout()).topControl = tblDeletedItems.getControl();
-				stackPanel.layout();
-
-				tblLink.setFont(normalFont);
-				imgsLink.setFont(normalFont);
-				deletedLink.setFont(boldFont);
-				tblLink.getParent().layout();
-				iconSizeComp.setVisible(false);
-				detailsPanel.updateFileDetails(null);
-			}
-		});
 
 		Composite rightPart = toolkit.createComposite(sash, SWT.NONE);
 		rightPart.setLayout(new GridLayout());
@@ -418,6 +399,8 @@ public class ResultsPanel {
 		((GridLayout) rightPart.getLayout()).marginHeight = 0;
 
 		detailsPanel = new FileDetailsPanel(rightPart, view, toolkit);
+
+		header.selectPanel(0);
 		
 		sash.setWeights(new int[] { 7, 4 });
 		parent.layout(true);

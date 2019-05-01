@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2019 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.cybertracker.ctpackage;
 
 import java.util.ArrayList;
@@ -16,13 +37,20 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.AlertType;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
 
+/**
+ * Job for loading support alert types from Connect server
+ * @author Emily
+ *
+ */
 public abstract class LoadAlertTypesJob extends Job {
 
 	private IEclipseContext context;
-	
+	private boolean forceReload = false;
 	private static class MutexRule implements ISchedulingRule {
+		
 		private static final MutexRule INSTANCE = new MutexRule();
 
 		public boolean isConflicting(ISchedulingRule rule) {
@@ -35,17 +63,22 @@ public abstract class LoadAlertTypesJob extends Job {
 	}
 	
 	public LoadAlertTypesJob(IEclipseContext context) {
-		super("load alert types");
+		this(context, false);
+	}
+	public LoadAlertTypesJob(IEclipseContext context, boolean forceReload) {
+		super(Messages.LoadAlertTypesJob_LoadingAlertType);
 		this.context = context;
 		setRule(MutexRule.INSTANCE);
+		this.forceReload = forceReload;
 	}
 
 	public abstract void typesLoaded(List<AlertType> types);
 	
+	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		List<AlertType> loadedTypes = (List<AlertType>) context.get(AlertType.class.toString());
-		if (loadedTypes == null) {
+		if (loadedTypes == null || forceReload) {
 			if (context != null && context.get(SmartConnect.class) != null) {
 				//try to load alert types from connect
 				try {
@@ -61,9 +94,9 @@ public abstract class LoadAlertTypesJob extends Job {
 					ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
 						@Override
 						protected Control createDialogArea(Composite parent) {
-							setTitle("Connect Alerts");
-							getShell().setText("Connect Alerts");
-							setMessage("Load alert types from connect");	
+							setTitle(Messages.LoadAlertTypesJob_DialogTitle);
+							getShell().setText(Messages.LoadAlertTypesJob_DialogTitle);
+							setMessage(Messages.LoadAlertTypesJob_DialogMessage);	
 							return super.createDialogArea(parent);
 						}	
 					};
@@ -87,7 +120,7 @@ public abstract class LoadAlertTypesJob extends Job {
 				loadedTypes = AlertUtils.getCachedAlertTypes();
 				if (loadedTypes != null) {
 					Display.getDefault().syncExec(()->{
-						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Warning", "Alert types could not be refreshed from the Connect server.  Cached values will be used instead.");
+						MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.LoadAlertTypesJob_WarningTitle, Messages.LoadAlertTypesJob_WarningMessage);
 					});
 				}
 			}

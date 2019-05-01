@@ -32,7 +32,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -61,7 +60,6 @@ import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
-
 import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -121,6 +119,8 @@ public enum PatrolPackageExporter {
 				
 				List<File> toIncludeInZip = new ArrayList<>();
 				HashMap<String, Object> projectAdditions = new HashMap<>();
+				HashMap<String, Object> ctprofileAdditions = new HashMap<>();
+				
 				for (IPackageContribution.PackageContribution update : updates) {
 					for (Path p : update.getAddedFiles()) {
 						if (Files.isDirectory(p)) {
@@ -137,6 +137,9 @@ public enum PatrolPackageExporter {
 					}
 					if (update.getProjectMetadata() != null) {
 						projectAdditions.putAll(update.getProjectMetadata());
+					}
+					if (update.getProfileMetadata() != null) {
+						ctprofileAdditions.putAll(update.getProfileMetadata());
 					}
 				}
 				
@@ -172,7 +175,7 @@ public enum PatrolPackageExporter {
 				
 				sub.split(1);
 				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
-				profileToJson(session.get(CyberTrackerPropertiesProfile.class, localpackage.getCtProfile().getUuid()), modelToExport, session, context, profileFile);
+				profileToJson(session.get(CyberTrackerPropertiesProfile.class, localpackage.getCtProfile().getUuid()), session, context, profileFile, ctprofileAdditions);
 				toIncludeInZip.add(profileFile.toFile());
 				
 				
@@ -278,13 +281,12 @@ public enum PatrolPackageExporter {
 	private void writeProjectFile(ConfigurableModel cm, String version, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
 		CtJsonExportUtils.writeProjectJson(cm.getName(), version, CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
 	}
-	
-	private void profileToJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, Session session, IEclipseContext context, Path outputFile) throws IOException {
+
+	private void profileToJson(CyberTrackerPropertiesProfile profile, Session session, IEclipseContext context, Path outputFile, HashMap<String, Object> additions ) throws IOException {
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
-			fw.write(CtJsonExportUtils.toJson(profile, cm, context, session));
+			fw.write(CtJsonExportUtils.toJson(profile, additions, context, session));
 		}
 	}
-	
 
 	
 	
@@ -294,7 +296,10 @@ public enum PatrolPackageExporter {
 		List<MetadataFieldValue> metadataFields = ((PatrolCtPackage)ctpackage).getMetadataValues();
 		if (metadataFields == null) metadataFields = new ArrayList<>();
 
-		Map<String, MetadataFieldValue> map = metadataFields.stream().collect(Collectors.toMap(e->e.getMetadataKey(), e->e));
+		Map<String, MetadataFieldValue> map = new HashMap<>();
+		for (MetadataFieldValue v : metadataFields) {
+			map.put(v.getMetadataKey(),v);
+		}
 	
 		JSONArray metadataScreens = new JSONArray();
 		

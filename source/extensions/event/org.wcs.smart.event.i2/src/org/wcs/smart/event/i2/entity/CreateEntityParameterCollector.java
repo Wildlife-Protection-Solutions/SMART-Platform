@@ -195,15 +195,18 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 	public Composite createComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
+		main.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		Composite top = new Composite(main, SWT.NONE);
 		top.setLayout(new GridLayout(2, false));
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)top.getLayout()).marginWidth = 0;
 		((GridLayout)top.getLayout()).marginHeight = 0;
+		top.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		Label l = new Label(top, SWT.NONE);
 		l.setText(Messages.CreateEntityParameterCollector_EntityTypeLabel);
+		l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		cmbEntityType = new ComboViewer(top, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbEntityType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -218,14 +221,19 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 			}
 		});
 		cmbEntityType.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		cmbEntityType.getControl().setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 
 		l = new Label(main, SWT.NONE);
 		l.setText(Messages.CreateEntityParameterCollector_MappingsLable);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 		
 		Composite bottom = new Composite(main, SWT.NONE);
 		bottom.setLayout(new GridLayout(2, false));
 		bottom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		bottom.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		((GridLayout)bottom.getLayout()).marginWidth = 0;
 		((GridLayout)bottom.getLayout()).marginHeight = 0;
 		
@@ -291,6 +299,8 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		buttonArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridLayout)buttonArea.getLayout()).marginWidth = 0;
 		((GridLayout)buttonArea.getLayout()).marginHeight = 0;
+		buttonArea.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 		
 		Button btnAdd = new Button(buttonArea, SWT.PUSH);
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
@@ -312,7 +322,8 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		
 		l = new Label(buttonArea, SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
+		l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 		Button btnMoveUp= new Button(buttonArea, SWT.PUSH);
 		btnMoveUp.setText(Messages.CreateEntityParameterCollector_UpButton);
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -331,15 +342,18 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		((GridLayout)warningSection.getLayout()).marginWidth = 0;
 		((GridLayout)warningSection.getLayout()).marginHeight = 0;
 		warningSection.setVisible(false);
-		
+		warningSection.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 		l = new Label(warningSection, SWT.NONE);
 		l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
-		
+		l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 		warningLabel = new Label(warningSection, SWT.WRAP);
 		warningLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)warningLabel.getLayoutData()).widthHint = 100;
 		warningLabel.setText(""); //$NON-NLS-1$
-		
+		warningLabel.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 		cmbEntityType.addSelectionChangedListener(e->{
 			btnAdd.setEnabled(cmbEntityType.getStructuredSelection().getFirstElement() instanceof IntelEntityType);
 			if (lastSelection == cmbEntityType.getStructuredSelection().getFirstElement()) return;

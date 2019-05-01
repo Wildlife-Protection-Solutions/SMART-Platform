@@ -49,10 +49,12 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.MissionMetadataField;
 import org.wcs.smart.cybertracker.survey.model.SurveyCtPackage;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -80,6 +82,16 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 	
 	private ICtPackage ctpackage;
 	
+	@Override
+	public boolean isTab() { 
+		return true; 
+	}
+	
+	@Override
+	public String getTabName() { 
+		return Messages.SurveyMetadataPackageContribution_TabName; 
+	}
+	
 	private void fireChanged() {
 		if (onModified != null) onModified.handleEvent(new Event());
 	}
@@ -98,21 +110,21 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		Composite headerComp = new Composite(outer, SWT.NONE);
 		headerComp.setLayout(new GridLayout(4, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		WidgetElement.setCSSClass(headerComp, "SMARTSection");
+		WidgetElement.setCSSClass(headerComp, SmartUiUtils.HEADER_CLASS);
 
 		Label col1 = new Label(headerComp, SWT.NONE);
-		col1.setText("Metadata Field");
-		col1.setToolTipText("the mission metadata field");
+		col1.setText(Messages.SurveyMetadataPackageContribution_MetadataColumn);
+		col1.setToolTipText(Messages.SurveyMetadataPackageContribution_MetadataTooltip);
 		col1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 
 		Label col2 = new Label(headerComp, SWT.NONE);
-		col2.setText("User Selected");
-		col2.setToolTipText("if checked, the user selects the value when creating the mission otherwise the fixed value is used");
+		col2.setText(Messages.SurveyMetadataPackageContribution_UserSelectedLabel);
+		col2.setToolTipText(Messages.SurveyMetadataPackageContribution_UserSelectedTooltip);
 		col2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Label col3 = new Label(headerComp, SWT.NONE);
-		col3.setText("Fixed Value");
-		col3.setToolTipText("the fixed value to use if not user selected");
+		col3.setText(Messages.SurveyMetadataPackageContribution_FixedValueLabel);
+		col3.setToolTipText(Messages.SurveyMetadataPackageContribution_FixedValueTooltip);
 		col3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		ScrolledComposite table = new ScrolledComposite(outer, SWT.V_SCROLL);
@@ -141,7 +153,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		((GridData)c4.getLayoutData()).heightHint = 0;
 		
 		// comment
-		Object[] d = createTextSection("Mission Comment", core, null);
+		Object[] d = createTextSection(Messages.SurveyMetadataPackageContribution_MissionCommentLabel, core, null);
 		btnCmt = (Button) d[0];
 		txtComment = (Text) d[1];		
 		
@@ -160,7 +172,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		l = new Label(core, SWT.NONE);
-		l.setText("Members");
+		l.setText(Messages.SurveyMetadataPackageContribution_MembersLabel);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		btnMembers = new Button(core, SWT.CHECK);
@@ -175,7 +187,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		((GridData)lstEmployees.getControl().getLayoutData()).heightHint = 80;
 		
 		// leader
-		d = createComboViewerSection("Mission Leader", core, EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_LEADER_ICON));
+		d = createComboViewerSection(Messages.SurveyMetadataPackageContribution_LeaderLabel, core, EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_LEADER_ICON));
 		btnLeader = (Button) d[0];
 		cmbLeader = (ComboViewer) d[1];
 		cmbLeader.setLabelProvider(employeeLblProvider);
@@ -281,11 +293,11 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 	@Override
 	public String isValid() {
 		if (!btnMembers.getSelection() && lstEmployees.getCheckedElements().length == 0) {
-			return "At least one member must be selected when metadata field is not visible";
+			return Messages.SurveyMetadataPackageContribution_MemberRequired;
 		}
 		
 		if (!btnMembers.getSelection() && !btnLeader.getSelection() && cmbLeader.getStructuredSelection().isEmpty()) {
-			return "Leader selection is required when the metadata field is not visible";
+			return Messages.SurveyMetadataPackageContribution_LeaderRequired;
 		}
 		return null;
 	}
@@ -338,14 +350,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 		return v;
 	}
 	
-	
-	@Override
-	public boolean isTab() { return true; }
-	
-	@Override
-	public String getTabName() { return "Mission Metadata"; }
-	
-	Job loadValues = new Job("loading metadata values") {
+	private Job loadValues = new Job("loading metadata values") { //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -395,7 +400,6 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 				btnLeader.notifyListeners(SWT.Selection, new Event());
 				fireChanged();
 			});
-			
 			
 			return Status.OK_STATUS;
 		}

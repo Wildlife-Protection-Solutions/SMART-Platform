@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -56,17 +57,17 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.importer.ActionableWarning;
 import org.wcs.smart.asset.data.importer.FileMetadataReader;
 import org.wcs.smart.asset.data.importer.FileProxy;
 import org.wcs.smart.asset.internal.Messages;
+import org.wcs.smart.asset.ui.SectionHeader;
 import org.wcs.smart.common.attachment.AttachmentUtil;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.util.SmartUtils;
@@ -99,9 +100,12 @@ public class FileDetailsPanel {
 	private Label lblDetailsStatus ;
 	private Canvas imageCanvas;
 	private Composite proxyDetailsComp; 
-	 
+	private Composite exifMetadataComp;
+	
 	private DataImportPage view;
 	private FormToolkit toolkit;
+	
+	private Composite stackComposite ;
 	
 	public FileDetailsPanel(Composite parent, DataImportPage view, FormToolkit toolkit) {
 		this.view = view;
@@ -110,25 +114,43 @@ public class FileDetailsPanel {
 	}
 	
 	private void createDetailsComposite(Composite parent, FormToolkit toolkit) {
+			
 		fileDetailsComposite = toolkit.createComposite(parent, SWT.NONE);
 		fileDetailsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		fileDetailsComposite.setLayout(new StackLayout());
 		
 		singleSelectDetails = toolkit.createComposite(fileDetailsComposite);
 		singleSelectDetails.setLayout(new GridLayout());
+		((GridLayout)singleSelectDetails.getLayout()).marginWidth = 0;
+		((GridLayout)singleSelectDetails.getLayout()).marginHeight = 0;
 		
 		multiSelectDetails = toolkit.createComposite(fileDetailsComposite);
 		multiSelectDetails.setLayout(new GridLayout());
 		
 		((StackLayout)fileDetailsComposite.getLayout()).topControl = singleSelectDetails;
 		
-		Composite top = toolkit.createComposite(singleSelectDetails);
-		top.setLayout(new GridLayout(2, false));
-		((GridLayout)top.getLayout()).marginWidth = 0;
-		((GridLayout)top.getLayout()).marginHeight = 0;
-		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		lblDetailsStatus = toolkit.createLabel(top, ""); //$NON-NLS-1$
-		lblDetailsFileName = toolkit.createLabel(top, ""); //$NON-NLS-1$
+		
+		SectionHeader sectionheader = new SectionHeader(singleSelectDetails, SWT.NONE,
+				new String[] {Messages.FileDetailsPanel_DetailsSection, Messages.FileDetailsPanel_MetadataSection},
+				new Listener[] {
+						e->{
+							((StackLayout)stackComposite.getLayout()).topControl = proxyDetailsComp;
+							stackComposite.layout();
+						},
+						e->{
+							((StackLayout)stackComposite.getLayout()).topControl = exifMetadataComp;
+							stackComposite.layout();
+						},
+				});
+		
+		sectionheader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Composite fdetails = toolkit.createComposite(singleSelectDetails, SWT.BORDER);
+		fdetails.setLayout(new GridLayout(2, false));
+		fdetails.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		lblDetailsStatus = toolkit.createLabel(fdetails, ""); //$NON-NLS-1$
+		lblDetailsFileName = toolkit.createLabel(fdetails, ""); //$NON-NLS-1$
 		lblDetailsFileName .setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		SashForm detailsSash = new SashForm(singleSelectDetails, SWT.VERTICAL);
@@ -140,16 +162,7 @@ public class FileDetailsPanel {
 		((GridLayout)infoComposite.getLayout()).marginWidth = 0;
 		((GridLayout)infoComposite.getLayout()).marginHeight = 0;
 		
-		Composite header = toolkit.createComposite(infoComposite);
-		header.setLayout(new GridLayout(3, false));
-		((GridLayout)header.getLayout()).marginWidth = 0;
-		((GridLayout)header.getLayout()).marginHeight = 0;
-		
-		
-		Hyperlink lnkDetails = toolkit.createHyperlink(header, Messages.FileDetailsPanel_DetailsSection, SWT.NONE);
-		Hyperlink lnkExif = toolkit.createHyperlink(header, Messages.FileDetailsPanel_MetadataSection, SWT.NONE);
-		
-		Composite stackComposite = toolkit.createComposite(infoComposite, SWT.BORDER);
+		stackComposite = toolkit.createComposite(infoComposite, SWT.BORDER);
 		stackComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		stackComposite.setLayout(new StackLayout());
 		
@@ -158,7 +171,7 @@ public class FileDetailsPanel {
 		((GridLayout)proxyDetailsComp.getLayout()).marginWidth = 0;
 		((GridLayout)proxyDetailsComp.getLayout()).marginHeight = 0;
 		
-		Composite exifMetadataComp = toolkit.createComposite(stackComposite);
+		exifMetadataComp = toolkit.createComposite(stackComposite);
 		exifMetadataComp.setLayout(new GridLayout());
 		((GridLayout)exifMetadataComp.getLayout()).marginWidth = 0;
 		((GridLayout)exifMetadataComp.getLayout()).marginHeight = 0;
@@ -169,7 +182,13 @@ public class FileDetailsPanel {
 		tblExif.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblExif.setContentProvider(ArrayContentProvider.getInstance());
 		
-		Color bgColor = new Color(tblExif.getControl().getDisplay(), 160,185,224);
+		//get background color
+		Composite temp = new Composite(exifMetadataComp, SWT.NONE);
+		WidgetElement.setCSSClass(temp, SmartUiUtils.HEADER_CLASS);
+		WidgetElement.applyStyles(temp, false);
+		Color bgColor = temp.getBackground();
+		temp.dispose();
+
 		tblExif.getControl().addListener(SWT.Dispose, e->bgColor.dispose());
 		
 		TableViewerColumn colTag = new TableViewerColumn(tblExif, SWT.NONE);
@@ -204,36 +223,7 @@ public class FileDetailsPanel {
 			}
 		});
 		
-		FontData fd = lnkDetails.getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		Font boldFont = new Font(lnkDetails.getDisplay(), fd);
-		Font normalFont = lnkDetails.getFont(); 
-		lnkDetails.addListener(SWT.Dispose, e->boldFont.dispose());
-		
-		lblDetailsFileName.setFont(boldFont);
-		lnkDetails.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				((StackLayout)stackComposite.getLayout()).topControl = proxyDetailsComp;
-				stackComposite.layout();
-				lnkDetails.setFont(boldFont);
-				lnkExif.setFont(normalFont);
-				header.layout();
-			}
-		});
-		lnkExif.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				((StackLayout)stackComposite.getLayout()).topControl = exifMetadataComp;
-				stackComposite.layout();
-				lnkDetails.setFont(normalFont);
-				lnkExif.setFont(boldFont);
-				header.layout();
-			}
-		});
-
-		((StackLayout)stackComposite.getLayout()).topControl = proxyDetailsComp;
-		lnkDetails.setFont(boldFont);
+		sectionheader.selectPanel(0);
 		
 		imageCanvas = new Canvas(detailsSash,SWT.BORDER);
 		imageCanvas.addListener(SWT.Paint, e->{

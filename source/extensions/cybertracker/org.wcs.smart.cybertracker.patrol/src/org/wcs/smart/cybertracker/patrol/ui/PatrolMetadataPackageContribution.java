@@ -51,11 +51,13 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
 import org.wcs.smart.cybertracker.patrol.model.PatrolMetadataField;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -92,6 +94,17 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	}
 	
 	@Override
+	public boolean isTab() { 
+		return true; 
+	}
+	
+	@Override
+	public String getTabName() { 
+		return Messages.PatrolMetadataPackageContribution_TabName; 
+	}
+	
+	
+	@Override
 	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified) {
 		this.ctpackage = ctpackage;
 		this.onModified = onModified;
@@ -105,21 +118,21 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		Composite headerComp = new Composite(outer, SWT.NONE);
 		headerComp.setLayout(new GridLayout(4, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		WidgetElement.setCSSClass(headerComp, "SMARTSection");
+		WidgetElement.setCSSClass(headerComp, SmartUiUtils.HEADER_CLASS);
 
 		Label col1 = new Label(headerComp, SWT.NONE);
-		col1.setText("Metadata Field");
-		col1.setToolTipText("the patrol metadata field");
+		col1.setText(Messages.PatrolMetadataPackageContribution_FieldLabel);
+		col1.setToolTipText(Messages.PatrolMetadataPackageContribution_FieldTooltip);
 		col1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 
 		Label col2 = new Label(headerComp, SWT.NONE);
-		col2.setText("User Selected");
-		col2.setToolTipText("if checked, the user selects the value when creating the patrol otherwise the fixed value is used");
+		col2.setText(Messages.PatrolMetadataPackageContribution_UserSelectedLabel);
+		col2.setToolTipText(Messages.PatrolMetadataPackageContribution_UserSelectedTooltip);
 		col2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Label col3 = new Label(headerComp, SWT.NONE);
-		col3.setText("Fixed Value");
-		col3.setToolTipText("the fixed value to use if not user selected");
+		col3.setText(Messages.PatrolMetadataPackageContribution_FixedLabel);
+		col3.setToolTipText(Messages.PatrolMetadataPackageContribution_FixedTooltip);
 		col3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		ScrolledComposite table = new ScrolledComposite(outer, SWT.V_SCROLL);
@@ -148,7 +161,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		((GridData)c4.getLayoutData()).heightHint = 0;
 		
 		// transport type
-		Object[] d = createComboViewerSection("Transport Type", core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MIXED_PATROL_ICON));
+		Object[] d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_TransportTypeLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MIXED_PATROL_ICON));
 		btnTT = (Button) d[0];
 		cmbTt = (ComboViewer) d[1];
 		
@@ -157,7 +170,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		l.setImage(SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ARMED_ICON));
 				
 		l = new Label(core, SWT.NONE);
-		l.setText("Is Armed");
+		l.setText(Messages.PatrolMetadataPackageContribution_ArmedLabel);
 		
 		btnArmed = new Button(core, SWT.CHECK);
 		btnArmed.setSelection(true);
@@ -167,10 +180,10 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		cmp.setLayout(new GridLayout(2, false));
 		
 		btnArmedYes = new Button(cmp, SWT.RADIO);
-		btnArmedYes.setText("yes");
+		btnArmedYes.setText(Messages.PatrolMetadataPackageContribution_YesOption);
 		btnArmedYes.setEnabled(false);
 		btnArmedNo = new Button(cmp, SWT.RADIO);
-		btnArmedNo.setText("no");
+		btnArmedNo.setText(Messages.PatrolMetadataPackageContribution_NoOption);
 		btnArmedNo.setSelection(true);
 		btnArmedNo.setEnabled(false);
 		btnArmed.addListener(SWT.Selection, e->{
@@ -182,27 +195,27 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		btnArmedNo.addListener(SWT.Selection, e->fireChanged());
 		
 		// team
-		d = createComboViewerSection("Team", core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON));
+		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_TeamLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON));
 		btnTeam = (Button) d[0];
 		cmbTeam = (ComboViewer) d[1];
 		
 		// station
-		d = createComboViewerSection("Station", core, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STATION_ICON));
+		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_StationLabel, core, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STATION_ICON));
 		btnStation = (Button) d[0];
 		cmbStation = (ComboViewer) d[1];
 		
 		// mandate
-		d = createComboViewerSection("Patrol Mandate", core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON));
+		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_MandateLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON));
 		btnMandate = (Button) d[0];
 		cmbMandate = (ComboViewer) d[1];
 				
 		// objective
-		d = createTextSection("Patol Objective", core, null);
+		d = createTextSection(Messages.PatrolMetadataPackageContribution_ObjectiveLabel, core, null);
 		btnObj = (Button) d[0];
 		txtObj = (Text) d[1];
 		
 		// comment
-		d = createTextSection("Patol Comment", core, null);
+		d = createTextSection(Messages.PatrolMetadataPackageContribution_CommentLabel, core, null);
 		btnCmt = (Button) d[0];
 		txtComment = (Text) d[1];		
 		
@@ -221,7 +234,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		l = new Label(core, SWT.NONE);
-		l.setText("Members");
+		l.setText(Messages.PatrolMetadataPackageContribution_MembersLabel);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		btnMembers = new Button(core, SWT.CHECK);
@@ -236,14 +249,14 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		((GridData)lstEmployees.getControl().getLayoutData()).heightHint = 80;
 		
 		// leader
-		d = createComboViewerSection("Patrol Leader", core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_LEADER_ICON));
+		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_LeaderLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_LEADER_ICON));
 		btnLeader = (Button) d[0];
 		cmbLeader = (ComboViewer) d[1];
 		cmbLeader.setLabelProvider(employeeLblProvider);
 		btnLeader.setEnabled(false);
 		cmbLeader.getControl().setEnabled(false);
 		// pilot
-		d = createComboViewerSection("Patrol Pilot", core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_PILOT_ICON));
+		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_PilotLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_PILOT_ICON));
 		btnPilot = (Button) d[0];
 		cmbPilot = (ComboViewer) d[1];
 		cmbPilot.setLabelProvider(employeeLblProvider);
@@ -352,21 +365,22 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		
 		return new Object[] {btn, txt};
 	}
+	
 	@Override
 	public String isValid() {
 		if (!btnMembers.getSelection() && lstEmployees.getCheckedElements().length == 0) {
-			return "At least one member must be selected when metadata field is not visible";
+			return Messages.PatrolMetadataPackageContribution_MemberRequired;
 		}
 		
 		if (!btnMembers.getSelection() && !btnLeader.getSelection() && cmbLeader.getStructuredSelection().isEmpty()) {
-			return "Leader selection is required when the metadata field is not visible";
+			return Messages.PatrolMetadataPackageContribution_LeaderRequired;
 		}
 		
 		if (!btnMandate.getSelection() && cmbMandate.getStructuredSelection().isEmpty()) {
-			return "Patrol mandate selection is required when the metadata field is not visible";
+			return Messages.PatrolMetadataPackageContribution_MandateRequired;
 		}
 		if (!btnTT.getSelection() && cmbTt.getStructuredSelection().isEmpty()) {
-			return "Transport type selection is required when the metadata field is not visible";
+			return Messages.PatrolMetadataPackageContribution_TransportRequired;
 		}
 
 		return null;
@@ -453,8 +467,6 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		}else {
 			v.setUuidValue( ((PatrolTransportType)cmbTt.getStructuredSelection().getFirstElement()).getUuid() );
 		}
-		
-		
 	}
 	
 	private MetadataFieldValue findMetadataValue(HashMap<String, MetadataFieldValue> items, PatrolMetadataField field, Button btnVisible, PatrolCtPackage ppackage) {
@@ -469,15 +481,8 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		v.setVisible(btnVisible.getSelection());
 		return v;
 	}
-	
-	
-	@Override
-	public boolean isTab() { return true; }
-	
-	@Override
-	public String getTabName() { return "Patrol Metadata"; }
-	
-	Job loadValues = new Job("loading metadata values") {
+		
+	private Job loadValues = new Job("loading metadata values") { //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -497,30 +502,30 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			try(Session s = HibernateManager.openSession()){
 				
 				types.addAll(QueryFactory.buildQuery(s, PatrolTransportType.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"isActive", true})
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"isActive", true}) //$NON-NLS-1$
 						.list());
 			
 				teams.addAll(QueryFactory.buildQuery(s, Team.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"isActive", true}).list());
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"isActive", true}).list()); //$NON-NLS-1$
 				
 				stations.addAll(QueryFactory.buildQuery(s, Station.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"isActive", true}).list());
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"isActive", true}).list()); //$NON-NLS-1$
 				
 				mandates.addAll(QueryFactory.buildQuery(s, PatrolMandate.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"isActive", true}).list());
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"isActive", true}).list()); //$NON-NLS-1$
 				
 				employees.addAll(QueryFactory.buildQuery(s, Employee.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"endEmploymentDate", null}).list());
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"endEmploymentDate", null}).list()); //$NON-NLS-1$
 			
 			}
 			
-			teams.add(0, "<none>");
-			stations.add(0, "<none>");
+			teams.add(0, Messages.PatrolMetadataPackageContribution_NoneOption);
+			stations.add(0, Messages.PatrolMetadataPackageContribution_NoneOption);
 			Display.getDefault().syncExec(()->{
 				try {
 					fireEvents = false;
@@ -612,7 +617,6 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				}finally {
 					fireEvents = true;
 				}
-				fireChanged();
 			});
 			
 			

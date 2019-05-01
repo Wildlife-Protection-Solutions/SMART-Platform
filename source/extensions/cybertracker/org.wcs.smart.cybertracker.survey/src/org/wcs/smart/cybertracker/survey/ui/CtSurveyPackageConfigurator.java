@@ -56,6 +56,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageProperty;
@@ -68,6 +69,7 @@ import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.SurveyCtPackage;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -117,7 +119,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		contributions.forEach(e->ContextInjectionFactory.inject(e, context));
 		
 		this.onValidate = onValidate;
-		if (!(ctitem instanceof SurveyCtPackage)) throw new IllegalStateException("Incorrect package type for cybertracker patrol editor.");
+		if (!(ctitem instanceof SurveyCtPackage)) throw new IllegalStateException(Messages.CtSurveyPackageConfigurator_InvalidType);
 		this.ctpackage = (SurveyCtPackage) ctitem;
 	
 		CTabFolder tabs = new CTabFolder(parent, SWT.NONE);
@@ -125,7 +127,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		tabs.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		CTabItem mainTab = new CTabItem(tabs, SWT.NONE);
-		mainTab.setText("Model Settings");
+		mainTab.setText(Messages.CtSurveyPackageConfigurator_SettingsTab);
 		
 		ScrolledComposite scroll = new ScrolledComposite(tabs,  SWT.V_SCROLL);
 		scroll.setExpandHorizontal(true);
@@ -148,23 +150,23 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		header.setLayout(new GridLayout());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		Label headerLabel = new Label(header, SWT.NONE);
-		headerLabel.setText("Configuration");
-		WidgetElement.setCSSClass(header, "SMARTSection");
+		headerLabel.setText(Messages.CtSurveyPackageConfigurator_ConfigurationHeader);
+		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS); 
 		
 		g = new Composite(g, SWT.NONE);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label nameLabel = new Label(g, SWT.NONE);
-		nameLabel.setText("Package Name:");
+		nameLabel.setText(Messages.CtSurveyPackageConfigurator_PackageName);
 		
 		txtName = new Text(g, SWT.BORDER);
-		txtName.setText(ctitem.getName() == null ? (ctitem.getTypeIdentifier() + " Package") : ctitem.getName());
+		txtName.setText(ctitem.getName() == null ? (ctitem.getTypeIdentifier() + Messages.CtSurveyPackageConfigurator_DefaultName) : ctitem.getName());
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtName.addListener(SWT.Modify, e->{ if (!isInit) validate();});
 		
 		Label modelLabel = new Label(g, SWT.NONE);
-		modelLabel.setText("Survey Design");
+		modelLabel.setText(Messages.CtSurveyPackageConfigurator_ModelLabel);
 		
 		designViewer = new ComboViewer(g, SWT.READ_ONLY);
 		designViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -204,7 +206,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 
 		
 		Label lblProfile = new Label(g, SWT.NONE);
-		lblProfile.setText("CyberTracker Properties");
+		lblProfile.setText(Messages.CtSurveyPackageConfigurator_CtPropertiesLabel);
 
 		profileViewer = new ComboViewer(g, SWT.READ_ONLY);
 		profileViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -276,15 +278,15 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		
 		try {
 			if (txtName.getText().isBlank()) {
-				throw new Exception("A package name is required");
+				throw new Exception(Messages.CtSurveyPackageConfigurator_NameRequired);
 			}
 		
 			if (designViewer.getSelection().isEmpty() || !(designViewer.getStructuredSelection().getFirstElement() instanceof SurveyDesign)) {
-				throw new Exception("A survey design must be selected");
+				throw new Exception(Messages.CtSurveyPackageConfigurator_DesignRequired);
 			}
 		
 			if (profileViewer.getSelection().isEmpty()) {
-				throw new Exception("A profile must be selected");
+				throw new Exception(Messages.CtSurveyPackageConfigurator_ProfileRequired);
 			}
 			for (IPackageUiContribution cc : contributions) {
 				String x = cc.isValid();
@@ -311,7 +313,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 				return profile;
 			}
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog("Error loading cybertracker profiles.", ex);
+			SmartPlugIn.displayLog(Messages.CtSurveyPackageConfigurator_LoadingError, ex);
 			return null;
 		}
 	}
@@ -341,10 +343,14 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 						if (init.getIncidentModel() != null) init.getIncidentModel().getUuid();
 					}else if (ctpackage != null) {
 						init = ctpackage;
-						init.setSurveyDesign(session.get(SurveyDesign.class, ctpackage.getSurveyDesign().getUuid()));
-						init.getSurveyDesign().getUuid();
-						init.setCtProfile(session.get(CyberTrackerPropertiesProfile.class, ctpackage.getCtProfile().getUuid()));
-						init.getCtProfile().getUuid();
+						if (ctpackage.getSurveyDesign() != null) {
+							init.setSurveyDesign(session.get(SurveyDesign.class, ctpackage.getSurveyDesign().getUuid()));
+							init.getSurveyDesign().getUuid();
+						}
+						if (ctpackage.getCtProfile() != null) {
+							init.setCtProfile(session.get(CyberTrackerPropertiesProfile.class, ctpackage.getCtProfile().getUuid()));
+							init.getCtProfile().getUuid();
+						}
 						if (ctpackage.getIncidentModel() != null) {
 							init.setIncidentModel(session.get(ConfigurableModel.class, ctpackage.getIncidentModel().getUuid()));
 							init.getIncidentModel().getUuid();
@@ -421,7 +427,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 			((GridLayout)inner.getLayout()).marginHeight = 0;
 			
 			Label l= new Label(inner, SWT.NONE);
-			l.setText("Survey Design");
+			l.setText(Messages.CtSurveyPackageConfigurator_DesignLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 			
@@ -430,12 +436,12 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 			if (local.getSurveyDesign() != null) {
 				l.setText(local.getSurveyDesign().getName());
 			}else {
-				l.setText( "Unknown" );
+				l.setText( Messages.CtSurveyPackageConfigurator_UnknownLabel );
 			}
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			l= new Label(inner, SWT.NONE);
-			l.setText("Cybertracker Profile");
+			l.setText(Messages.CtSurveyPackageConfigurator_ProfileLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 			
@@ -449,7 +455,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 			}
 			
 			l= new Label(inner, SWT.NONE);
-			l.setText("Local Package Details");
+			l.setText(Messages.CtSurveyPackageConfigurator_DetailsLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 			
@@ -475,7 +481,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 				}
 			}catch (Exception ex) {
 				l= new Label(inner, SWT.NONE);
-				l.setText("Unknown");
+				l.setText(Messages.CtSurveyPackageConfigurator_UnknownLabel);
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			}

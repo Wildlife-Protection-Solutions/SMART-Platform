@@ -29,10 +29,12 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -61,13 +63,13 @@ public class ConfigurePackageDialog extends SmartStyledTitleDialog{
 			config.save();
 			getButton(IDialogConstants.OK_ID).setEnabled(false);
 		}catch (Exception ex) {
-			CyberTrackerPlugIn.displayError("Error", "Error saving package configuration: " +ex.getMessage(), ex);
+			CyberTrackerPlugIn.displayError(Messages.ConfigurePackageDialog_ErrorTitle, Messages.ConfigurePackageDialog_ErrorMessage +ex.getMessage(), ex);
 		}
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
-		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		Button btn = createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
+		btn.setEnabled(false);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 	}
 	
@@ -81,10 +83,11 @@ public class ConfigurePackageDialog extends SmartStyledTitleDialog{
 		config = CtPackageExtensionPointManager.INSTANCE.findManager(toEdit).createConfigurator();
 		ContextInjectionFactory.inject(config, context);
 		if (config == null) {
-			throw new IllegalStateException("Not package manager found for package type: " + toEdit.getTypeIdentifier());
+			throw new IllegalStateException(Messages.ConfigurePackageDialog_ManagerNotFound + toEdit.getTypeIdentifier());
 		}
 		
 		config.createGui(parent, toEdit, e->{
+			if (getButton(IDialogConstants.OK_ID) == null) return;
 			if (e == null) {
 				setErrorMessage(null);
 				getButton(IDialogConstants.OK_ID).setEnabled(true);
@@ -94,9 +97,9 @@ public class ConfigurePackageDialog extends SmartStyledTitleDialog{
 			}
 		});
 		
-		setMessage("Configure the CT packages");
-		setTitle("SMART Cybertracker Packages");
-		getShell().setText("SMART Cybertracker Packages");
+		setMessage(Messages.ConfigurePackageDialog_ShellMessage);
+		setTitle(Messages.ConfigurePackageDialog_ShellTitle);
+		getShell().setText(Messages.ConfigurePackageDialog_ShellTitle);
 		
 		return parent;
 	}

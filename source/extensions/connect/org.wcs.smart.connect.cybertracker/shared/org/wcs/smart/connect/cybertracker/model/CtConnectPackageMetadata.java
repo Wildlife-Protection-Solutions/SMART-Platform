@@ -4,6 +4,7 @@ public class CtConnectPackageMetadata {
 
 	public enum Properties{
 		DATA_UPLOAD,
-		POSITION_UPLOAD
+		POSITION_UPLOAD,
+		CONNECT_ALERT,
 	};
 }

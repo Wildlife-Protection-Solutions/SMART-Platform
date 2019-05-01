@@ -47,14 +47,13 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
@@ -64,33 +63,29 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.common.celleditor.ComboBoxViewerCellEditor;
-import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.connect.api.model.AlertType;
 import org.wcs.smart.connect.cybertracker.dataentry.ConnectCmTreeContentProvider;
 import org.wcs.smart.connect.cybertracker.dataentry.ConnectCmTreeElement;
 import org.wcs.smart.connect.cybertracker.dataentry.ConnectCmTreeLabelProvider;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
+import org.wcs.smart.connect.cybertracker.model.CtConnectPackageMetadata;
 import org.wcs.smart.connect.cybertracker.model.CtPackageAlert;
-import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
+import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.ui.properties.DataModelContentProvider;
-import org.wcs.smart.ui.properties.DataModelLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -99,6 +94,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
  *
  */
 public class ConnectAlertUiController implements IPackageUiContribution{
+
+	private static final String ALERT_LBL_KEY = "ALERT_LBL"; //$NON-NLS-1$
 
 	private ICtPackage ctpackage;
 	
@@ -117,16 +114,20 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 	
 	@Inject
 	private IEclipseContext context;
-
-	private LoadAlertTypesJob loadTypesJob;
 	
+	private Composite alertComp;
+	private SashForm sash;
 	
 	public boolean isTab() { 
 		return true; 
 	}
 	
 	public String getTabName() { 
-		return "Alerts"; 
+		return Messages.ConnectAlertUiController_TabName; 
+	}
+	
+	private void fireEvents() {
+		if (onModified != null) onModified.handleEvent(new Event());
 	}
 	
 	@Override
@@ -135,22 +136,26 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 		this.onModified = onModified;
 		
 		this.cmAlerts = new HashMap<>();
+		
 		this.currentAlerts = new ArrayList<>();
 		
-		loadTypesJob = new LoadAlertTypesJob(context) {
-			@Override
-			public void typesLoaded(List<AlertType> atypes) {
-				types = atypes;
-				parent.getDisplay().asyncExec(()->alertList.refresh());
+		if (ctpackage instanceof ICmProvider) {
+			ICmProvider cmprovider = (ICmProvider)ctpackage;
+			if (cmprovider.isDataModel()) {
+				currentModel = new ConfigurableModel();
+			}else {
+				currentModel = cmprovider.getConfigurableModel();
 			}
-		};
+			
+		}
+		
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
 		((GridLayout)main.getLayout()).marginWidth = 0;
 		((GridLayout)main.getLayout()).marginHeight = 0;
 		
-		Composite alertComp = new Composite(main, SWT.FLAT);
+		alertComp = new Composite(main, SWT.FLAT);
 		alertComp.setLayout(new GridLayout());
 		((GridLayout)alertComp.getLayout()).marginWidth = 0;
 		((GridLayout)alertComp.getLayout()).marginHeight = 0;
@@ -159,12 +164,12 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 		Composite header = new Composite(alertComp, SWT.NONE);
 		header.setLayout(new GridLayout());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		WidgetElement.setCSSClass(header, "SMARTSection");
+		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS); 
 		
 		Label l = new Label(header, SWT.NONE);
-		l.setText("Alerts");
+		l.setText(Messages.ConnectAlertUiController_SectionHeader);
 
-		SashForm sash = new SashForm(alertComp, SWT.HORIZONTAL);
+		sash = new SashForm(alertComp, SWT.HORIZONTAL);
 		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Composite listComp = new Composite(sash, SWT.NONE);
@@ -182,13 +187,13 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 		
 		ToolItem tiAdd= new ToolItem(alertToolbar, SWT.PUSH);
 		tiAdd.setEnabled(false);
-		tiAdd.setToolTipText("create a new alert");
+		tiAdd.setToolTipText(Messages.ConnectAlertUiController_createtooltip);
 		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		tiAdd.addListener(SWT.Selection, e->addAlert());
 		
 		ToolItem tiDelete = new ToolItem(alertToolbar, SWT.PUSH);
 		tiDelete.setEnabled(false);
-		tiDelete.setToolTipText("delete alert");
+		tiDelete.setToolTipText(Messages.ConnectAlertUiController_deletetooltip);
 		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		tiDelete.addListener(SWT.Selection, e->deleteAlert());
 		
@@ -201,6 +206,7 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 		miAdd.addListener(SWT.Selection, e->addAlert());
 		
 		modelViewer.getControl().setMenu(modelMenu);
+		modelViewer.addDoubleClickListener(evt->addAlert());
 		
 		Composite aComp = new Composite(sash, SWT.NONE);
 		aComp.setLayout(new GridLayout());
@@ -226,12 +232,12 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 		alertList.getControl().setMenu(alertMenu);
 				
 		TableViewerColumn alertCol = new TableViewerColumn(alertList,  SWT.NONE);
-		alertCol.getColumn().setText("Type");
+		alertCol.getColumn().setText(Messages.ConnectAlertUiController_TypeColumn);
 		alertCol.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
 				CtPackageAlert pa = (CtPackageAlert)element;
 				if (types == null) {
-					return MessageFormat.format("<Types Not Loaded> ({0})", pa.getUuid().toString());
+					return MessageFormat.format(Messages.ConnectAlertUiController_TypeNotLoaded, pa.getType().toString());
 				}else {
 					for (AlertType a : types) {
 						if (a.getUuid().equals(pa.getType())) {
@@ -239,7 +245,7 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 						}
 					}
 					//not found
-					return MessageFormat.format("<Types Not Found> ({0})", pa.getUuid().toString());
+					return MessageFormat.format(Messages.ConnectAlertUiController_TypeNotFound, pa.getType().toString());
 				}
 			}
 		});
@@ -248,8 +254,10 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 			
 			@Override
 			protected void setValue(Object element, Object value) {
+				if (value == null) return;
 				((CtPackageAlert)element).setType(((AlertType)value).getUuid());
 				alertList.refresh();
+				fireEvents();
 			}
 			
 			@Override
@@ -282,30 +290,24 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 		});
 		
 		TableViewerColumn importanceCol = new TableViewerColumn(alertList,  SWT.NONE);
-		importanceCol.getColumn().setText("Importance");
+		importanceCol.getColumn().setText(Messages.ConnectAlertUiController_ImportanceColumn);
 		importanceCol.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
-				return String.valueOf( ((CtPackageAlert)element).getLevel() );
+				return String.valueOf( ((CtPackageAlert)element).getLevel().value );
 			}
 		});
 		importanceCol.setEditingSupport(new EditingSupport(importanceCol.getViewer()) {
 			
 			@Override
 			protected void setValue(Object element, Object value) {
-				((CtPackageAlert)element).setLevel(((CtPackageAlert.Level)value).value);
+				((CtPackageAlert)element).setLevel(((CtPackageAlert.Level)value));
 				alertList.refresh();
+				fireEvents();
 			}
 			
 			@Override
 			protected Object getValue(Object element) {
-				
-				int v = ((CtPackageAlert)element).getLevel();
-				for (CtPackageAlert.Level l : CtPackageAlert.Level.values()) {
-					if (l.value == v) {
-						return l;
-					}
-				}
-				return null;
+				return ((CtPackageAlert)element).getLevel();
 			}
 			
 			@Override
@@ -330,10 +332,60 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 		importanceCol.getColumn().pack();
 		
 		TableViewerColumn itemCol = new TableViewerColumn(alertList,  SWT.NONE);
-		itemCol.getColumn().setText("Alert");
+		itemCol.getColumn().setText(Messages.ConnectAlertUiController_ObsColumn);
 		itemCol.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
-				return ((CtPackageAlert)element).toString();
+				CtPackageAlert alert = ((CtPackageAlert)element);
+				
+				StringBuilder sb = new StringBuilder();
+				if (alert.getCmAttributeListItem()  != null) {
+					CmAttributeListItem i = alert.getCmAttributeListItem();
+					if (i.getName() != null) {
+						sb.append(i.getName());
+					}else {
+						sb.append(i.getListItem().getName());
+					}
+					sb.append(" ("); //$NON-NLS-1$
+				}
+				if (alert.getCmAttributeTreeNode()  != null) {
+					CmAttributeTreeNode i = alert.getCmAttributeTreeNode();
+					if (i.getName() != null) {
+						sb.append(i.getName());
+					}else {
+						sb.append(i.getDmTreeNode().getName());
+					}
+					sb.append(" ("); //$NON-NLS-1$
+				}
+
+					
+				
+				if (alert.getCmAttribute() != null) {
+					if (alert.getCmAttribute().getName() != null) {
+						sb.append(alert.getCmAttribute().getName());
+					}else {
+						sb.append(alert.getCmAttribute().getAttribute().getName());
+					}
+					if (alert.getCmAttributeListItem() != null || alert.getCmAttributeTreeNode() != null) {
+						sb.append(")"); //$NON-NLS-1$
+					}
+					sb.append(" -> "); //$NON-NLS-1$
+				}
+				
+				
+				CmNode node = alert.getCmNode();
+				while(node != null) {
+					if (node!= null) {
+						if (node.getName() != null) {
+							sb.append(node.getName());
+						}else if (node.getCategory() != null) {
+							sb.append(node.getCategory().getName());
+						}
+						sb.append(" -> "); //$NON-NLS-1$
+					}
+					node = node.getParent();
+				}
+				if (sb.length() < 4) return sb.toString();
+				return sb.substring(0, sb.length() - 4);
 			}
 		});
 		itemCol.getColumn().setWidth(200);
@@ -363,26 +415,47 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 		initModel();
 		
 		Link link = new Link(main, SWT.NONE);
-		link.setText("<a>" + "refresh alert types" + "</a>");
+		link.setText("<a>" + Messages.ConnectAlertUiController_RefreshLink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		link.addListener(SWT.Selection, e->{
-			loadTypesJob.schedule();
+			refreshAlertTypes(true);
 		});
 		
-		loadTypesJob.schedule();
+		loadAlerts.schedule();
+		refreshAlertTypes(false);
 		
 		return main;
+	}
+	
+	private void refreshAlertTypes(boolean force) {
+		(new LoadAlertTypesJob(context, force) {
+			@Override
+			public void typesLoaded(List<AlertType> atypes) {
+				types = atypes;
+				alertList.getControl().getDisplay().asyncExec(()->alertList.refresh());
+			}
+		}).schedule();
 	}
 
 	private void addAlert() {
 		if (types == null || types.isEmpty()) {
-			MessageDialog.openError(alertList.getControl().getShell(), "No Alert Types", "No alert types were loaded from Connect.  Ensure alert types are configured on Connect, then refresh the alert types");
+			MessageDialog.openError(alertList.getControl().getShell(), Messages.ConnectAlertUiController_NoTypesTitle, Messages.ConnectAlertUiController_NoTypesMessage);
 			return;
 		}
 		Object selectedItem = modelViewer.getStructuredSelection().getFirstElement();
 		
+		boolean isok = false;
+		if (selectedItem instanceof Category) isok = true;
+		else if (selectedItem instanceof AttributeListItem) isok = true;
+		else if (selectedItem instanceof AttributeTreeNode) isok = true;
+		else if (selectedItem instanceof CmNode) isok = true;
+		else if (selectedItem instanceof ConnectCmTreeElement) isok = true;
+		//cannot create an alert for this type
+		if (!isok) return;
+		
+		
 		CtPackageAlert alert = new CtPackageAlert();
 		
-		alert.setLevel(CtPackageAlert.Level.ONE.value);
+		alert.setLevel(CtPackageAlert.Level.ONE);
 		alert.setPackage(ctpackage);
 		alert.setType(types.get(0).getUuid());//uuid
 		if (selectedItem instanceof CmNode) {
@@ -392,8 +465,12 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 			ConnectCmTreeElement telement = (ConnectCmTreeElement)selectedItem;
 			
 			alert.setCmNode(telement.getAttribute().getNode());
-			alert.setCmAttrubute( telement.getAttribute() );
-			alert.setCmAttributeItem( telement.getElement() );
+			alert.setCmAttribute( telement.getAttribute() );
+			if (telement.getElement() instanceof CmAttributeListItem) {
+				alert.setCmAttributeListItem( (CmAttributeListItem)telement.getElement() );
+			}else if (telement.getElement() instanceof CmAttributeTreeNode) {
+				alert.setCmAttributeTreeNode( (CmAttributeTreeNode)telement.getElement() );
+			}
 		}
 		
 		currentAlerts.add(alert);
@@ -405,112 +482,77 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 			int x2 = alertList.getTable().getColumn(i).getWidth();
 			if (x > x2) alertList.getTable().getColumn(i).setWidth(x);
 		}
+		
+		fireEvents();
 	}
 
 	private void deleteAlert() {
 		IStructuredSelection s = alertList.getStructuredSelection();
-		for (Iterator<Object> iterator = s.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = s.iterator(); iterator.hasNext();) {
 			CtPackageAlert alert = (CtPackageAlert) iterator.next();
 			currentAlerts.remove(alert);
 		}
 		alertList.refresh();
+		fireEvents();
 	}
 	
 	private void initModel() {
-		if (!(ctpackage instanceof ICmProvider)) {
-			modelViewer.setInput(null);
-			modelViewer.getControl().setEnabled(false);
+
+		if (currentModel == null || currentModel.getUuid() == null) {
+			//data model does not support alergs
 			alertList.getControl().setEnabled(false);
-		}else {
-			ICmProvider cmprovider = (ICmProvider)ctpackage;
-			
-			modelViewer.getControl().setEnabled(true);
-			alertList.getControl().setEnabled(true);
-			
-			if (cmprovider.isDataModel()) {
-				modelViewer.setContentProvider(new DataModelContentProvider(false,  true) {
-					@Override
-					public Object[] getElements(Object inputElement) {
-						return getChildren(super.getElements(inputElement) [0]);
-					}
-					
-					@Override
-					public Object[] getChildren(Object parentElement) {
-						if (parentElement instanceof Category) {
-							ArrayList<Object> children = new ArrayList<Object>();
-							Category category = ((Category)parentElement);
-							//add children attributes
-							if (category.getActiveChildren() != null){
-								children.addAll(category.getActiveChildren());
-							}
-							List<CategoryAttribute> all = new ArrayList<>();
-							category.getAllCategoryAttribute(all, true);
-							for (CategoryAttribute ca : all) {
-								children.add(ca);
-							}
-							return children.toArray();
-						}else if (parentElement instanceof CategoryAttribute) {
-							Attribute a = ((CategoryAttribute)parentElement).getAttribute();
-							if (a.getType() == AttributeType.LIST) {
-								return a.getActiveListItems().toArray();
-							}else if (a.getType() == AttributeType.TREE) {
-								return a.getActiveTreeNodes().toArray();
-							}
-						}else if (parentElement instanceof AttributeTreeNode) {
-							AttributeTreeNode a = (AttributeTreeNode)parentElement;
-							return a.getActiveChildren().toArray();
-						}
-						
-						return super.getChildren(parentElement);
-					}
-					public boolean hasChildren(Object element) {
-						if (element instanceof Category) return true;
-						if (element instanceof CategoryAttribute ) return true;
-						if (element instanceof AttributeTreeNode) return !((AttributeTreeNode)element).getActiveChildren().isEmpty();
-						return super.hasChildren(element);
-					}
-				});
-				modelViewer.setLabelProvider(new DataModelLabelProvider());
-			}else {
-				modelViewer.setContentProvider(new ConnectCmTreeContentProvider(false));
-				modelViewer.setLabelProvider(new ConnectCmTreeLabelProvider());			
+			modelViewer.getControl().setEnabled(false);
+		
+			if (alertComp.getData(ALERT_LBL_KEY) == null) {
+				Label warning = new Label(alertComp, SWT.WRAP);
+				warning.setBackground(warning.getDisplay().getSystemColor( SWT.COLOR_TRANSPARENT));
+				warning.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				((GridData)warning.getLayoutData()).widthHint = 200;
+				warning.setText(Messages.ConnectAlertUiController_AlertsNotSupported);
+				warning.moveAbove(sash);
+				
+				alertComp.setData(ALERT_LBL_KEY, warning);
+				
+				alertComp.layout(true);
 			}
-			loadModelJob.schedule();
+		}else {
+			alertList.getControl().setEnabled(true);
+			modelViewer.getControl().setEnabled(true);
+			modelViewer.setInput(DialogConstants.LOADING_TEXT);
+			modelViewer.refresh();
+			if (alertComp.getData(ALERT_LBL_KEY) != null) {
+				((Label)alertComp.getData(ALERT_LBL_KEY)).dispose();
+				alertComp.setData(ALERT_LBL_KEY, null);
+				alertComp.layout(true);
+			}
+			
 		}
+		loadModelJob.schedule();
+		
 	}
 	
 	@Override
 	public String isValid() {
+		
+		//update configurable model viewer
 		ConfigurableModel cm = context.get(ConfigurableModel.class);
 		if (cm != null) {
-			if (cm.getUuid() == null) {
-				//data model; does not support alerts
-				alertList.getControl().setEnabled(false);
-				modelViewer.getControl().setEnabled(false);
-			}else {
-				
-				alertList.getControl().setEnabled(true);
-				modelViewer.getControl().setEnabled(true);
-				
-				//clear alerts
-				if (currentModel != null && currentModel.equals(cm)) {
-					//do nothing; same model
-				}else if (currentModel != null && !currentModel.equals(cm)) {
-					//different model; clear alerts and reload
-					cmAlerts.put(currentModel, currentAlerts);
-					currentAlerts.clear();
-					if (cmAlerts.containsKey(cm)) {
-						currentAlerts.addAll(cmAlerts.get(cm));
-					}
-					currentModel = cm;
-					
-					alertList.refresh();
-					loadModelJob.schedule();
-				}else if (currentModel == null) {
-					//not set yet ignore
+			//first cache old alerts
+			if (currentModel != null && currentModel.equals(cm)) {
+				//do nothing; same model
+			}else if (currentModel != null && !currentModel.equals(cm)) {
+				//different model; clear alerts and reload
+				cmAlerts.put(currentModel, new ArrayList<>(currentAlerts));
+				currentAlerts.clear();
+				if (cmAlerts.containsKey(cm)) {
+					currentAlerts.addAll(cmAlerts.get(cm));
 				}
+				currentModel = cm;
+				alertList.refresh();
+				initModel();
+			}else if (currentModel == null) {
+				//not set yet ignore
 			}
-		
 		}
 		
 		return null;
@@ -518,60 +560,52 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 
 	@Override
 	public void updatePackage(ICtPackage ctpackage) {
+		if (!(ctpackage instanceof AbstractCtPackage)) return;
+		
+		AbstractCtPackage apackage = (AbstractCtPackage)ctpackage;
+		//remove existing metadata values and add new ones
+		List<MetadataFieldValue> existing = new ArrayList<>();
+		for (MetadataFieldValue vv : apackage.getMetadataValues()) {
+			if (vv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.CONNECT_ALERT.name())) {
+				existing.add(vv);
+			}
+		}
+		
+		List<MetadataFieldValue> newvalues = new ArrayList<>();
+		for (CtPackageAlert pa : currentAlerts) {
+			MetadataFieldValue v = pa.toMetadataField();
+			v.setCtPackage(apackage);
+			newvalues.add(v);
+		}
+		
+		apackage.getMetadataValues().removeAll(existing);
+		apackage.getMetadataValues().addAll(newvalues);
 		
 	}
 	
 
-
-	private Job loadModelJob = new Job("loading data model") {
+	private Job loadAlerts = new Job(Messages.ConnectAlertUiController_LoadingAlerts) {
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			try(Session session = HibernateManager.openSession()){
+				currentAlerts.addAll(CtPackageAlert.fromString((AbstractCtPackage)ctpackage, session));
+			}
+			Display.getDefault().asyncExec(()->{alertList.refresh();});
+			return Status.OK_STATUS;
+		}
+	};
+	
+	private Job loadModelJob = new Job(Messages.ConnectAlertUiController_LoadingDataModel) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			if (!(ctpackage instanceof ICmProvider))  return Status.OK_STATUS;
-			ICmProvider cmprovider = (ICmProvider)ctpackage;
-			if (currentModel == null) {
-				if (cmprovider.isDataModel()) {
-					currentModel = new ConfigurableModel();
-				}else {
-					currentModel = cmprovider.getConfigurableModel();
-				}
-			}
+			if (currentModel.getUuid() == null) {
+				//data model
+				
+				Display.getDefault().syncExec(()->{
+					modelViewer.setInput(Messages.ConnectAlertUiController_NotSupported);	
+				});
 
-			if (cmprovider.isDataModel()) {
-				DataModel dm = null;
-				try(Session s = HibernateManager.openSession()){
-					dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), s);
-					
-					ArrayDeque<Category> cats = new ArrayDeque<>();
-					cats.addAll(dm.getCategories());
-					while(!cats.isEmpty()) {
-						Category cc = cats.removeFirst();
-						cc.getFullCategoryName();
-						cc.getName();
-						cc.getAttributes().size();
-						if (cc.getActiveChildren() != null) cats.addAll(cc.getActiveChildren());
-						
-						if (cc.getAttributes() != null) {
-							for (CategoryAttribute a : cc.getAttributes()) {
-								if (a.getAttribute().getAttributeList() != null) {
-									for (AttributeListItem ii : a.getAttribute().getAttributeList()) ii.getName();
-								}
-								if (a.getAttribute().getTree() != null) {
-									ArrayDeque<AttributeTreeNode> tnodes = new ArrayDeque<>();
-									tnodes.addAll(a.getAttribute().getActiveTreeNodes());
-									while(!tnodes.isEmpty()) {
-										AttributeTreeNode n = tnodes.removeFirst();
-										n.getName();
-										if (n.getActiveChildren() != null)tnodes.addAll(n.getActiveChildren());
-									}
-								}
-							}
-						}
-					}
-				}
-				final DataModel fdm = dm;
-				Display.getDefault().syncExec(()->modelViewer.setInput(fdm));
-				//TODO: dm loading job
 			}else {
 				try(Session s = HibernateManager.openSession()){
 					currentModel = s.get(ConfigurableModel.class, currentModel.getUuid());
@@ -621,6 +655,8 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 				}
 				
 				Display.getDefault().syncExec(()->{
+					if (modelViewer.getControl().isDisposed()) return;
+					modelViewer.setLabelProvider(new ConnectCmTreeLabelProvider());
 					modelViewer.setInput(currentModel);
 				});
 

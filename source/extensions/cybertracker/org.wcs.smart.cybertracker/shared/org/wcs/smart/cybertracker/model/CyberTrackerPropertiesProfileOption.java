@@ -70,6 +70,8 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 		RESET_ON_SYNC,
 		RESET_ON_NEXT,
 		
+		DATA_FORMAT,
+		
 		TRACK_ACCURACY,
 		
 		USE_GPS_TIME,

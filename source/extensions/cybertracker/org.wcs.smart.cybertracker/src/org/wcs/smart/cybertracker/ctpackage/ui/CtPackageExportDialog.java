@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -125,8 +126,8 @@ public class CtPackageExportDialog extends SmartStyledDialog {
 		
 		btnGenerate = new Button(main, SWT.CHECK);
 		btnGenerate.setEnabled(requireUpdateOp);
-		btnGenerate.setText("Regenerate packages before exporting");
-		btnGenerate.setToolTipText("recreate packages if changes have been made to the configurable models, settings etc since the package was created");
+		btnGenerate.setText(Messages.CtPackageExportDialog_RegenerateOp);
+		btnGenerate.setToolTipText(Messages.CtPackageExportDialog_regenerateTooltip);
 		btnGenerate.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		if (requireUpdateOp) {
 			boolean dogenerate = InstanceScope.INSTANCE.getNode(CyberTrackerPlugIn.PLUGIN_ID).getBoolean(GENERATE_PREF_KEY, true);
@@ -135,7 +136,7 @@ public class CtPackageExportDialog extends SmartStyledDialog {
 			btnGenerate.setSelection(true);
 		}
 
-		getShell().setText("Export CyberTracker Packages");
+		getShell().setText(Messages.CtPackageExportDialog_Title);
 		return parent;
 	}
 	
