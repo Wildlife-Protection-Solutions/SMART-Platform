@@ -28,16 +28,16 @@
 
 .MPartStack {
 	swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
-	swt-unselected-hot-tab-color-background: #EFEFEF;
+	swt-unselected-hot-tab-color-background: #C7D2E5;
     swt-unselected-tabs-color:  #FFFFFF;
     swt-selected-tab-fill: #EDEDED;
-    swt-outer-keyline-color: white;
-    swt-tab-outline: white;
+    swt-outer-keyline-color: #C7D2E5;
+    swt-tab-outline: #00FF00;
     swt-shadow-visible: false;
-    swt-shadow-color: white;
+    swt-shadow-color: #0000FF;
     swt-simple: true;
     swt-tab-height: 32px;
-    swt-shadow-color: white;
+    swt-shadow-color: #00FFFF;
     swt-corner-radius: 0px;
     color: #222837;
 }
@@ -45,7 +45,7 @@
 .MPartStack.active {
     swt-selected-tab-fill: #748DBD;   
     swt-tab-outline: white;
-    swt-outer-keyline-color: white;
+    swt-outer-keyline-color: #C7D2E5;
 	swt-corner-radius: 15;
 	swt-shadow-visible: false;
 	swt-corner-radius: 0px;
@@ -73,8 +73,15 @@
 .SMARTTabSelected{
 	background-color: #F09F3F;
 }
-
-
+/* there is probably a better way to do this but
+* I use these colors to get the selected and none selected
+* colors in the Section Header so I can draw a border
+* in the correct color
+*/
+.SMARTTabColors{
+	background-color: #F09F3F; /* active color */
+	color: #EDEDED; /*non-active color */
+}
 /* active tab bar */
 .MPartStack.active .SMARTTabMouseOver{
 	background-color: #F6C78E;
@@ -107,12 +114,6 @@
 .MPartStack .SMARTTab{
 	background-color: #FFFFFF;
 }
-
-
-
-
-
-
 
 
 .SMARTSection{
@@ -235,7 +236,6 @@ CTabItem:selected{
     color: black;
 }
 
-
 .MPartStack CTabFolder{
 	swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
 	swt-corner-radius: 0px;
@@ -251,6 +251,10 @@ CTabItem:selected{
     
     background-color:white;        
     color: black;
+}
+
+.MPartStack.active CTabFolder CTabItem:selected{
+	color: black;
 }
 
 #org-eclipse-e4-ui-compatibility-editor  CTabItem:selected{

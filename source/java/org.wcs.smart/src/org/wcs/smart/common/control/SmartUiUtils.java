@@ -23,9 +23,13 @@ package org.wcs.smart.common.control;
 
 import java.util.Locale;
 
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 /**
  * UI Utilities for SMART
@@ -35,6 +39,8 @@ import org.eclipse.swt.layout.GridData;
  */
 public class SmartUiUtils {
 
+	public static final String HEADER_CLASS = "SMARTSection";  //$NON-NLS-1$
+	
 	public static void configure(TableComboViewer viewer) {
 		//the height for these does not configure nicely on mac so for mac only we adjust the height
 		//assumption is viewer layout data is griddata if not we don't do anything
@@ -43,5 +49,23 @@ public class SmartUiUtils {
 			GridData gd = (GridData) viewer.getControl().getLayoutData();
 			gd.heightHint = viewer.getControl().computeSize(SWT.DEFAULT,SWT.DEFAULT).y + 6;
 		}
+	}
+	
+	/**
+	 * Assumes parent has a grid layout
+	 * @param parent
+	 * @param text
+	 * @return
+	 */
+	public static Composite createHeaderLabel(Composite parent, String text) {
+		Composite sectionheader = new Composite(parent, SWT.NONE);
+		sectionheader.setLayout(new GridLayout());
+		sectionheader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		WidgetElement.setCSSClass(sectionheader, SmartUiUtils.HEADER_CLASS);
+		sectionheader.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_RED));
+		Label headerLabel = new Label(sectionheader, SWT.NONE);
+		headerLabel.setText(text);
+		
+		return sectionheader;
 	}
 }
