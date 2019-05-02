@@ -390,10 +390,11 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata">
+            locationURI="toolbar:org.wcs.smart.perspectives?endof=org.wcs.smart.perspective.fielddata">
          <command
                commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/obj16/asset.png"
+               id="org.wcs.smart.perspective.fielddata.asset"
                label="%openperspective.command.label"
                mode="FORCE_TEXT"
                style="radio"

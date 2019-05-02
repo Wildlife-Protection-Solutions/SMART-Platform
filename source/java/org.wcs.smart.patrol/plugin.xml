@@ -324,6 +324,7 @@
          <command
                commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/etool16/patrol.png"
+               id="org.wcs.smart.perspective.fielddata.patrol"
                label="%showpatrolperspective.command.label1"
                mnemonic="%showpatrolperspectivecommand.mnemonic"
                mode="FORCE_TEXT"

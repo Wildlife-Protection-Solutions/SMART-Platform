@@ -711,8 +711,17 @@
                </parameter>
             </command>
             <separator
-                  name="org.wcs.smart.perspectivesSeperator"
+                  name="org.wcs.smart.perspective.fielddata"
                   visible="false">
+            </separator>
+            <separator
+                  name="org.wcs.smart.perspective.analysis">
+            </separator>
+            <separator
+                  name="org.wcs.smart.perspective.other1">
+            </separator>
+            <separator
+                  name="org.wcs.smart.perspective.other2">
             </separator>
          </toolbar>
       </menuContribution>

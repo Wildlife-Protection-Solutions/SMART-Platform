@@ -343,10 +343,11 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata">
+            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata.patrol">
          <command
                commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/obj16/survey.png"
+               id="org.wcs.smart.perspective.fielddata.survey"
                label="%survey.view.command.name1"
                mnemonic="%view1.command.mnemonic"
                mode="FORCE_TEXT"

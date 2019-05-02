@@ -1001,7 +1001,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.query.menu.view">
+            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.other2">
          <command
                commandId="org.wcs.smart.i2.command.perspective.open"
                icon="images/icons/obj16/analysis.png"

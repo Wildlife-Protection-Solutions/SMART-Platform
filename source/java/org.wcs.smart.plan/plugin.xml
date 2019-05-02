@@ -138,10 +138,11 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives?endof=org.wcs.smart.perspectivesSeperator">
+            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.other1">
          <command
                commandId="org.wcs.smart.command.showperspective"
                icon="images/icons/view16/plan.png"
+               id="org.wcs.smart.perspective.plan"
                label="%smart.toolbar.command.label.viewplans1"
                mode="FORCE_TEXT"
                style="radio"

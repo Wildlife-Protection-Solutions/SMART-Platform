@@ -203,10 +203,11 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives?endof=org.wcs.smart.perspectivesSeperator">
+            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.other1">
          <command
                commandId="org.wcs.smart.command.showperspective"
                icon="images/etool16/intelligence.png"
+               id="org.wcs.smart.perspective.intelligence"
                label="%command.perspective.label1"
                mode="FORCE_TEXT"
                style="radio"
@@ -430,40 +431,6 @@
                name="org.wcs.smart.intelligence.separator3"
                visible="true">
          </separator>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:org.wcs.smart.toolbar.create?before=org.wcs.smart.toolbar.create.other">
-         <command
-               commandId="org.wcs.smart.intelligence.NewIntelligence"
-               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
-               label="%command.create.label"
-               style="push"
-               tooltip="%command.create.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <and>
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.caSingle">
-                  </test>
-               </and>
-            </visibleWhen>
-         </command>
       </menuContribution>
       <menuContribution
             allPopups="false"

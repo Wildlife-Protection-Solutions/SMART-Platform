@@ -112,7 +112,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives?endof=org.wcs.smart.perspective.fielddata">
+            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.analysis">
          <command
                commandId="org.wcs.smart.command.showperspective"
                icon="images/icons/view16/querypatrol.gif"
@@ -155,6 +155,7 @@
          <command
                commandId="org.wcs.smart.command.showperspective"
                icon="images/icons/view16/querypatrol.gif"
+               id="org.wcs.smart.query.menu.view1"
                label="%perspectivetoolbar.showquery.command.label1"
                mode="FORCE_TEXT"
                style="radio"
