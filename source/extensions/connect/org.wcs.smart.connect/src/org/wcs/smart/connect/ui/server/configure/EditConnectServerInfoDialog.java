@@ -24,9 +24,7 @@ package org.wcs.smart.connect.ui.server.configure;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -44,9 +42,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
@@ -235,19 +233,23 @@ public class EditConnectServerInfoDialog extends SmartStyledTitleDialog{
 				validate();
 			}
 		};
-		Group g = new Group(main, SWT.NONE);
-		g.setLayout(new GridLayout());
+		
+		SmartUiUtils.createHeaderLabel(main, Messages.EditConnectServerInfoDialog_ConfigLabel);
+		
+		Composite g = new Composite(main, SWT.FLAT );
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		g.setText(Messages.EditConnectServerInfoDialog_ConfigLabel);
+		g.setLayout(new GridLayout(3, false));
+		
 		
 		serverpnl = new ServerPanel(g);
 		serverpnl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Group partComposite = new Group(main, SWT.FLAT );
-		partComposite.setText(Messages.EditConnectServerInfoDialog_SettingsSection);
+		SmartUiUtils.createHeaderLabel(main, Messages.EditConnectServerInfoDialog_SettingsSection);
+		
+		Composite partComposite = new Composite(main, SWT.FLAT );
 		partComposite.setLayout(new GridLayout(2, false));
 		partComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+				
 		ListViewer lstViewer = new ListViewer(partComposite, SWT.BORDER | SWT.V_SCROLL);
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
 		lstViewer.setLabelProvider(new LabelProvider() {
@@ -274,17 +276,6 @@ public class EditConnectServerInfoDialog extends SmartStyledTitleDialog{
 			scroll.setExpandVertical(true);
 			scroll.setMinSize(part.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 			panels.put(p,  scroll);
-			
-			List<Control> c = new ArrayList<>();
-			c.add(scroll);
-			while(!c.isEmpty()) {
-				Control k = c.remove(0);
-				k.setBackground(scroll.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-				if (k instanceof Composite) {
-					Composite kk = (Composite)k;
-					for (Control kkk : kk.getChildren()) c.add(kkk);
-				}
-			}
 			
 			try(Session session = HibernateManager.openSession()){
 				p.initValues(server, session);

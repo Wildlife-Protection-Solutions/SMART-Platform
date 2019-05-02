@@ -42,14 +42,17 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -163,11 +166,20 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 		l.setVisible(false);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		cmbTypes = new TableViewer(parent);
+		Composite tablecomp = new Composite(parent, SWT.NONE);
+		tablecomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		TableColumnLayout tlayout = new TableColumnLayout();
+		tablecomp.setLayout(tlayout);
+		
+		cmbTypes = new TableViewer(tablecomp);
 		cmbTypes.setContentProvider(ArrayContentProvider.getInstance());
-		cmbTypes.setLabelProvider(new EntityTypeLabelProvider());
 		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		cmbTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		TableViewerColumn col = new TableViewerColumn(cmbTypes, SWT.NONE);
+		col.setLabelProvider(new EntityTypeLabelProvider());
+		tlayout.setColumnData(col.getColumn(), new ColumnWeightData(1));
+		
 		cmbTypes.getControl().setFocus();
 		cmbTypes.addDoubleClickListener(new IDoubleClickListener() {
 			@Override

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.diagram.style;
 
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -36,7 +37,7 @@ import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
  *
  */
 public class RelationshipDiagramStyledObjectsLabelProvider extends LabelProvider {
-	private LabelProvider entityLabelProvider = new EntityTypeLabelProvider();
+	private ColumnLabelProvider entityLabelProvider = new EntityTypeLabelProvider();
 	private LabelProvider relationshipLabelProvider = new RelationshipTypeLabelProvider();
 
 	@Override

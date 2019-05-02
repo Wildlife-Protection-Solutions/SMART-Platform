@@ -22,7 +22,7 @@
 package org.wcs.smart.i2.ui;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -36,7 +36,7 @@ import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
  * @author Emily
  *
  */
-public class AttributeLabelProvider extends LabelProvider {
+public class AttributeLabelProvider extends ColumnLabelProvider {
 	
 	
 	public String getText(Object element){

@@ -37,12 +37,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.internal.server.replication.AutoReplicationManager;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -107,8 +107,9 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 		l.setLayoutData(gd);
 		l.setText(IServerOptionsPanel.DESKTOP_ONLY_MESSAGE);
 		
-		Group g1 = new Group(main, SWT.DEFAULT);
-		g1.setText(Messages.AutoOptionsPanel_StartUpOptionLabel);
+		SmartUiUtils.createSubHeaderLabel(main, Messages.AutoOptionsPanel_StartUpOptionLabel);
+		
+		Composite g1 = new Composite(main, SWT.NONE);
 		g1.setLayout(new GridLayout());
 		g1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -122,8 +123,9 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 		btnUploadStartUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)btnUploadStartUp.getLayoutData()).horizontalIndent = 10;
 		
-		Group g2 = new Group(main, SWT.DEFAULT);
-		g2.setText(Messages.AutoOptionsPanel_ShutdownOpLabel);
+		SmartUiUtils.createSubHeaderLabel(main, Messages.AutoOptionsPanel_ShutdownOpLabel);
+		
+		Composite g2 = new Composite(main, SWT.NONE);
 		g2.setLayout(new GridLayout());
 		g2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -137,8 +139,9 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 		btnUploadShutDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)btnUploadShutDown.getLayoutData()).horizontalIndent = 10;
 		
-		Group g3 = new Group(main, SWT.DEFAULT);
-		g3.setText(Messages.AutoOptionsPanel_AutoOpLabel);
+		SmartUiUtils.createSubHeaderLabel(main, Messages.AutoOptionsPanel_AutoOpLabel);
+		
+		Composite g3 = new Composite(main, SWT.NONE);
 		g3.setLayout(new GridLayout());
 		g3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -195,10 +198,11 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 		btnUpload.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)btnUpload.getLayoutData()).horizontalIndent = 20;
 		
-		Group g4 = new Group(main, SWT.DEFAULT);
-		g4.setText(Messages.AutoOptionsPanel_PackageOpLable);
+		SmartUiUtils.createSubHeaderLabel(main, Messages.AutoOptionsPanel_PackageOpLable);
+		
+		Composite g4 = new Composite(main, SWT.NONE);
 		g4.setLayout(new GridLayout(3, false));
-		g4.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		g4.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));	
 		
 		btnPackageSize = new Button(g4, SWT.CHECK);
 		btnPackageSize.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(ConnectionOption.PACKAGE_PROMPT));

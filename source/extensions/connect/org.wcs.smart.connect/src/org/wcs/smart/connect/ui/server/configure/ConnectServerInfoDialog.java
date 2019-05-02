@@ -46,11 +46,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectServerManager;
@@ -104,8 +104,9 @@ public class ConnectServerInfoDialog extends SmartStyledTitleDialog {
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Group g = new Group(main, SWT.FLAT );
-		g.setText(Messages.ConnectServerInfoDialog_ServerLabel);
+		SmartUiUtils.createHeaderLabel(main, Messages.ConnectServerInfoDialog_ServerLabel);
+		
+		Composite g = new Composite(main, SWT.FLAT );
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		g.setLayout(new GridLayout(3, false));
 		
@@ -144,8 +145,9 @@ public class ConnectServerInfoDialog extends SmartStyledTitleDialog {
 		});
 		btnSet.setToolTipText(Messages.ConnectServerInfoDialog_resetTooltip);
 		
-		Group partComposite = new Group(main, SWT.FLAT );
-		partComposite.setText(Messages.ConnectServerInfoDialog_SettingsSection);
+		SmartUiUtils.createHeaderLabel(main, Messages.ConnectServerInfoDialog_SettingsSection);
+		
+		Composite partComposite = new Composite(main, SWT.FLAT );
 		partComposite.setLayout(new GridLayout(2, false));
 		partComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -181,17 +183,6 @@ public class ConnectServerInfoDialog extends SmartStyledTitleDialog {
 			scroll.setExpandVertical(true);
 			scroll.setMinSize(part.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 			panels.put(p,  scroll);
-			
-			List<Control> c = new ArrayList<>();
-			c.add(scroll);
-			while(!c.isEmpty()) {
-				Control k = c.remove(0);
-				k.setBackground(scroll.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-				if (k instanceof Composite) {
-					Composite kk = (Composite)k;
-					for (Control kkk : kk.getChildren()) c.add(kkk);
-				}
-			}
 		}
 		
 		lstViewer.addSelectionChangedListener(e->{

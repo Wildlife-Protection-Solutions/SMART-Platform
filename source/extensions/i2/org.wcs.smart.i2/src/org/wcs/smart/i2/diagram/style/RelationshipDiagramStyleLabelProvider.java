@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.i2.diagram.style;
 
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
-import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
  * Label provider for {@link RelationshipDiagramStyle}.
@@ -31,13 +31,13 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
  * @author elitvin
  * @since 6.0.0
  */
-public class RelationshipDiagramStyleLabelProvider extends NamedItemLabelProvider {
+public class RelationshipDiagramStyleLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public String getText(Object element) {
 		if (element instanceof RelationshipDiagramStyle) {
 			RelationshipDiagramStyle s = (RelationshipDiagramStyle) element;
-			String name = super.getText(element);
+			String name = s.getName();
 			return s.isDefault() ? name + Messages.RelationshipDiagramStyleLabelProvider_DefaultStyle_Postfix : name;
 		}
 		return super.getText(element);

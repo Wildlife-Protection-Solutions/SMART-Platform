@@ -56,6 +56,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -166,11 +167,10 @@ public class ConfigurationDialog extends SmartStyledTitleDialog{
 		parent.setLayout(new GridLayout(2, false));
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Label l = new Label(parent, SWT.NONE);
-		l.setText(Messages.ConfigurationDialog_MenuLabel);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		Composite c = SmartUiUtils.createHeaderLabel(parent, Messages.ConfigurationDialog_MenuLabel);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		l = new Label(parent, SWT.WRAP);
+		Label l = new Label(parent, SWT.WRAP);
 		l.setText(Messages.ConfigurationDialog_MenuInfo);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		((GridData)l.getLayoutData()).widthHint = 200;

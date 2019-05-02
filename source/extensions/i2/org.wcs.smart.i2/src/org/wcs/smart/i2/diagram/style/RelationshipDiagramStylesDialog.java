@@ -29,13 +29,16 @@ import java.util.List;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuEvent;
@@ -117,11 +120,20 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		stylesViewer = new TableViewer(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-		stylesViewer.setLabelProvider(new RelationshipDiagramStyleLabelProvider());
+		Composite tableComp = new Composite(main, SWT.NONE);
+		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		TableColumnLayout tlayout = new TableColumnLayout();
+		tableComp.setLayout(tlayout);
+		
+		stylesViewer = new TableViewer(tableComp, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		stylesViewer.setContentProvider(ArrayContentProvider.getInstance());
 		stylesViewer.setInput(Arrays.asList(DialogConstants.LOADING_TEXT));
-		stylesViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		TableViewerColumn col = new TableViewerColumn(stylesViewer, SWT.NONE);
+		col.setLabelProvider(new RelationshipDiagramStyleLabelProvider());
+		tlayout.setColumnData(col.getColumn(), new ColumnWeightData(1));
+		
+		
 		stylesViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {

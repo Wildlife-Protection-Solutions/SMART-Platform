@@ -38,14 +38,17 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -72,6 +75,7 @@ import org.wcs.smart.i2.RelationshipTypeManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
+import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -151,11 +155,20 @@ public class RelationshipGroupListDialog extends SmartStyledTitleDialog {
 		l.setVisible(false);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		cmbGroups = new TableViewer(parent);
+		Composite tablecomp = new Composite(parent, SWT.NONE);
+		tablecomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		TableColumnLayout tlayout = new TableColumnLayout();
+		tablecomp.setLayout(tlayout);
+		
+		cmbGroups = new TableViewer(tablecomp);
 		cmbGroups.setContentProvider(ArrayContentProvider.getInstance());
-		cmbGroups.setLabelProvider(new RelationshipGroupLabelProvider());
 		cmbGroups.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		cmbGroups.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		TableViewerColumn col = new TableViewerColumn(cmbGroups, SWT.NONE);
+		col.setLabelProvider(new RelationshipGroupLabelProvider());
+		tlayout.setColumnData(col.getColumn(), new ColumnWeightData(1));
+		
 		cmbGroups.getControl().setFocus();
 		cmbGroups.addDoubleClickListener(new IDoubleClickListener() {
 			@Override

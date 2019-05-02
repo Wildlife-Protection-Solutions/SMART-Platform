@@ -25,7 +25,7 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
@@ -38,7 +38,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
  * @author Emily
  *
  */
-public class EntityTypeLabelProvider extends LabelProvider {
+public class EntityTypeLabelProvider extends ColumnLabelProvider {
 
 	private HashMap<IntelEntityType, Image> images = new HashMap<>();
 	

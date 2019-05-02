@@ -37,12 +37,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.internal.process.AutoProcessingManager;
 import org.wcs.smart.connect.dataqueue.model.DataQueueServerOptions;
@@ -111,8 +111,9 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 		l.setLayoutData(gd);
 		l.setText(IServerOptionsPanel.DESKTOP_ONLY_MESSAGE);
 		
-		Group g1 = new Group(main, SWT.DEFAULT);
-		g1.setText(Messages.DataQueueOptionPanel_StartUpLabel);
+		SmartUiUtils.createSubHeaderLabel(main, Messages.DataQueueOptionPanel_StartUpLabel);
+
+		Composite g1 = new Composite(main, SWT.NONE);
 		g1.setLayout(new GridLayout());
 		g1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -135,10 +136,12 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 		opStartUpPrompt.setText(Messages.DataQueueOptionPanel_PromptUserLabel);
 		opStartUpPrompt.setToolTipText(Messages.DataQueueOptionPanel_PromptUserTooltip);
 		
-		Group g2 = new Group(main, SWT.DEFAULT);
-		g2.setText(Messages.DataQueueOptionPanel_AutoGroupLabel);
+		SmartUiUtils.createSubHeaderLabel(main, Messages.DataQueueOptionPanel_AutoGroupLabel);
+
+		Composite g2 = new Composite(main, SWT.NONE);
 		g2.setLayout(new GridLayout());
 		g2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		
 		btnAutoCheck = new Button(g2, SWT.CHECK);
 		btnAutoCheck.setText(Messages.DataQueueOptionPanel_CheckPeriodLabel);
@@ -193,11 +196,13 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 		opAutoPrompt = new Button(autoOp, SWT.RADIO);
 		opAutoPrompt.setText(Messages.DataQueueOptionPanel_AutoStartPromptLabel);
 		opAutoPrompt.setToolTipText(Messages.DataQueueOptionPanel_AutoStartPromptTooltip);
-		
-		Group g3 = new Group(main, SWT.DEFAULT);
-		g3.setText(Messages.DataQueueOptionPanel_GeneralSectionLabel);
+
+		SmartUiUtils.createSubHeaderLabel(main, Messages.DataQueueOptionPanel_GeneralSectionLabel);
+
+		Composite g3 = new Composite(main, SWT.NONE);
 		g3.setLayout(new GridLayout());
 		g3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		
 		btnPromptUser = new Button(g3, SWT.CHECK);
 		btnPromptUser.setText(Messages.DataQueueOptionPanel_PromptConnectUserLabel);

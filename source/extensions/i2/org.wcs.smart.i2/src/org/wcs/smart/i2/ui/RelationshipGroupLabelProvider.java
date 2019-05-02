@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.ui;
 
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 
 /**
@@ -29,7 +29,7 @@ import org.wcs.smart.i2.model.IntelRelationshipGroup;
  * @author Emily
  *
  */
-public class RelationshipGroupLabelProvider extends LabelProvider {
+public class RelationshipGroupLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public String getText(Object element){
