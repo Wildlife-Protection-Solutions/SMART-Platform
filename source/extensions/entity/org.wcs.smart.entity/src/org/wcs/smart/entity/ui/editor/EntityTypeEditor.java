@@ -252,22 +252,24 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 							EntityPlugIn.displayLog(ex.getMessage(), ex);
 						}
 						availablePrj = HibernateManager.getCaProjectionList(entityType.getConservationArea(), s);
-						Display.getDefault().syncExec(new Runnable(){
-	
-							@Override
-							public void run() {
-								for (int i = 0; i < partsToUpdate.length; i ++){
-									if (partsToUpdate[i] != null){
-										partsToUpdate[i].updatePage(s, typeChanged);
-									}
-								}
-								setPartName(entityType.getLabel());							
-							}});
-	
-					}finally{
+					}finally {
 						s.getTransaction().rollback();
 					}
 				}
+				Display.getDefault().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						try(Session s = HibernateManager.openSession()){
+							if (entityType.getUuid() != null) s.saveOrUpdate(entityType);
+							for (int i = 0; i < partsToUpdate.length; i ++){
+								if (partsToUpdate[i] != null){
+									partsToUpdate[i].updatePage(s, typeChanged);
+								}
+							}
+						}
+						setPartName(entityType.getLabel());							
+				}});
+	
 				return Status.OK_STATUS;
 			}};
 		loadEntity.setSystem(true);

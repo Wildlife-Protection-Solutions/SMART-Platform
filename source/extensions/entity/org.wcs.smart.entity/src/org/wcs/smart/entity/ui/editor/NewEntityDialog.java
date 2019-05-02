@@ -26,7 +26,6 @@ import java.util.ArrayList;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
@@ -48,6 +47,7 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.Status;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -56,7 +56,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class NewEntityDialog extends TitleAreaDialog {
+public class NewEntityDialog extends SmartStyledTitleDialog {
 
 	private EntityType etype;
 	private EntityEditPanelComposite eaComp;

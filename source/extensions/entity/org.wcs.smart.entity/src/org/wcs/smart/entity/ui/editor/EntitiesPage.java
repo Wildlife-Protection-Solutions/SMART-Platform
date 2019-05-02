@@ -137,6 +137,8 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 		GridLayout glayout = new GridLayout();
 		glayout.verticalSpacing = 0;
 		glayout.marginHeight = 0;
+		glayout.marginWidth= 0;
+		
 		form.getBody().setLayout(glayout);
 		
 		final SashForm sashForm = new SashForm(form.getBody(), SWT.VERTICAL);
@@ -150,6 +152,9 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 		Composite main = toolkit.createComposite(entityList);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)main.getLayout()).marginWidth = 0;
+		((GridLayout)main.getLayout()).marginHeight = 0;
+		
 		entityList.setClient(main);
 
 		// --- attribute table list

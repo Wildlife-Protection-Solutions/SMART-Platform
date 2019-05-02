@@ -44,10 +44,12 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.imageprocessor.ImageResizeProcessor;
 import org.wcs.smart.imageprocessor.internal.Messages;
 import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.IWaypointSource;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for selecting which images to resize and the output 
@@ -56,7 +58,7 @@ import org.wcs.smart.observation.model.IWaypointSource;
  * @author Emily
  *
  */
-public class ResizeAttachmentDialog extends TitleAreaDialog {
+public class ResizeAttachmentDialog extends SmartStyledTitleDialog {
 
 	private enum Size{
 		S640 ("640x480", 640, 480), //$NON-NLS-1$
@@ -92,28 +94,21 @@ public class ResizeAttachmentDialog extends TitleAreaDialog {
 	@Override
 	public Control createDialogArea(Composite parent){
 		Composite composite = (Composite) super.createDialogArea(parent);
-		
-		FontData fd = composite.getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		
-		Font boldFont = new Font(getShell().getDisplay(), fd);
-		composite.addListener(SWT.Dispose, e->boldFont.dispose());
-		
+				
 		Composite main = new Composite(composite, SWT.NONE);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 
-		Group g = new Group(main, SWT.NONE);
-		g.setText(Messages.ResizeAttachmentDialog_typesLabel);
-		g.setLayout(new GridLayout());
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		g.setFont(boldFont);
+		SmartUiUtils.createHeaderLabel(main, Messages.ResizeAttachmentDialog_typesLabel);
+		Composite c = new Composite(main, SWT.NONE);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		c.setLayout(new GridLayout());
 		
-		Label l = new Label(g, SWT.WRAP);
+		Label l = new Label(c, SWT.WRAP);
 		l.setText(Messages.ResizeAttachmentDialog_typesmessage);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		lstTypes = CheckboxTableViewer.newCheckList(g, SWT.MULTI | SWT.BORDER);
+		lstTypes = CheckboxTableViewer.newCheckList(c, SWT.MULTI | SWT.BORDER);
 		lstTypes.setContentProvider(ArrayContentProvider.getInstance());
 		lstTypes.setLabelProvider(new LabelProvider() {
 			@Override
@@ -126,17 +121,16 @@ public class ResizeAttachmentDialog extends TitleAreaDialog {
 		lstTypes.addCheckStateListener(e->validate());
 		lstTypes.setAllChecked(true);
 		
-		g = new Group(main, SWT.NONE);
-		g.setText(Messages.ResizeAttachmentDialog_MaxSize);
-		g.setLayout(new GridLayout());
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		g.setFont(boldFont);
+		SmartUiUtils.createHeaderLabel(main, Messages.ResizeAttachmentDialog_MaxSize);
+		c = new Composite(main, SWT.NONE);
+		c.setLayout(new GridLayout());
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		l = new Label(g, SWT.WRAP);
+		l = new Label(c, SWT.WRAP);
 		l.setText(Messages.ResizeAttachmentDialog_MaxSizeMessage);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-		Composite temp = new Composite(g, SWT.NONE);
+		Composite temp = new Composite(c, SWT.NONE);
 		temp.setLayout(new GridLayout(2, false));
 		((GridLayout)temp.getLayout()).marginWidth = 0;
 		((GridLayout)temp.getLayout()).marginHeight = 0;
@@ -150,17 +144,16 @@ public class ResizeAttachmentDialog extends TitleAreaDialog {
 		l = new Label(temp, SWT.NONE);
 		l.setText("MB"); //$NON-NLS-1$
 		
-		g = new Group(main, SWT.NONE);
-		g.setText(Messages.ResizeAttachmentDialog_NewSize);
-		g.setLayout(new GridLayout());
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		g.setFont(boldFont);
+		SmartUiUtils.createHeaderLabel(main, Messages.ResizeAttachmentDialog_NewSize);
+		c = new Composite(main, SWT.NONE);
+		c.setLayout(new GridLayout());
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		l = new Label(g, SWT.WRAP);
+		l = new Label(c, SWT.WRAP);
 		l.setText(Messages.ResizeAttachmentDialog_NewSizeMessage);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		cmbNewSize = new ComboViewer(g, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbNewSize = new ComboViewer(c, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbNewSize.setContentProvider(ArrayContentProvider.getInstance());
 		cmbNewSize.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 6, 1));
 		cmbNewSize.setLabelProvider(new LabelProvider() {
@@ -172,7 +165,7 @@ public class ResizeAttachmentDialog extends TitleAreaDialog {
 		cmbNewSize.setInput(Size.values());
 		cmbNewSize.setSelection(new StructuredSelection(Size.S640));
 		
-		temp = new Composite(g, SWT.NONE);
+		temp = new Composite(c, SWT.NONE);
 		temp.setLayout(new GridLayout(6, false));
 		((GridLayout)temp.getLayout()).marginWidth = 0;
 		((GridLayout)temp.getLayout()).marginHeight = 0;

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.asset.ui;
 
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.model.AssetAttribute;
@@ -36,7 +36,7 @@ import org.wcs.smart.asset.model.AssetTypeDeploymentAttribute;
  * @author Emily
  *
  */
-public class AttributeLabelProvider extends LabelProvider {
+public class AttributeLabelProvider extends ColumnLabelProvider {
 	
 	
 	public String getText(Object element){

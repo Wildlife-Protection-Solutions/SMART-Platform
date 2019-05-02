@@ -38,12 +38,15 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuEvent;
@@ -131,7 +134,7 @@ public class StationPropertiesDialog extends SmartStyledTitleDialog {
 				
 				//station attributes
 				for (AssetStationAttribute toDelete : deletedStationAttributes) {
-					String deleteQuery = "DELETE FROM AssetStationAttributeValue WHERE id.attribute = :attribute";
+					String deleteQuery = "DELETE FROM AssetStationAttributeValue WHERE id.attribute = :attribute"; //$NON-NLS-1$
 					Query<?> q = session.createQuery(deleteQuery);
 					q.setParameter("attribute", toDelete.getAttribute()); //$NON-NLS-1$
 					q.executeUpdate();
@@ -181,10 +184,21 @@ public class StationPropertiesDialog extends SmartStyledTitleDialog {
 		if (type == Type.LOCATION) l.setText(Messages.StationPropertiesDialog_LocationAttributeLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		
-		TableViewer tblAttribute = new TableViewer(parent, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
+		
+		Composite tableComp = new Composite(parent, SWT.NONE);
+		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		TableColumnLayout tlayout = new TableColumnLayout();
+		tableComp.setLayout(tlayout);
+		
+		TableViewer tblAttribute = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
 		tblAttribute.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblAttribute.setContentProvider(ArrayContentProvider.getInstance());
-		tblAttribute.setLabelProvider(new AttributeLabelProvider());
+		
+		
+		TableViewerColumn col = new TableViewerColumn(tblAttribute, SWT.NONE);
+		col.setLabelProvider(new AttributeLabelProvider());
+		tlayout.setColumnData(col.getColumn(), new ColumnWeightData(1));
+		
 		tblAttribute.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		
 		Composite buttonPanel = new Composite(parent, SWT.NONE);

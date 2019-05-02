@@ -49,7 +49,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -563,7 +562,6 @@ public abstract class AssetDataPanel {
 			ToolBar tb = new ToolBar(part, SWT.FLAT);
 			tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 			toolkit.adapt(tb);
-			tb.setBackground(part.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			
 			if (isEditable) {
 				//enable/disable editing button based on user permission

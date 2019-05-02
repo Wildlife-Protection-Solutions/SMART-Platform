@@ -57,6 +57,7 @@ public class EntityQueryDataSource extends ContentDataStore{
 
 	public void refresh(EntitySightingQuery query){
 		removeEntry(new NameImpl(TYPENAME));
+		this.query = query;
 	}
 
 

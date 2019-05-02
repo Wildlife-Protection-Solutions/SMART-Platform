@@ -45,12 +45,15 @@ import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -58,7 +61,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -78,6 +80,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 import org.wcs.smart.ui.ViewerSelectionListener;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -92,9 +95,6 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 	public static final String ID = "org.wcs.smart.entity.typelist"; //$NON-NLS-1$
 	private TableViewer entityListViewer;
 	private EntityTypeFilter filter = new EntityTypeFilter();
-
-	private Object[] loadingInput = new Object[]{Messages.EntityTypeListView_LoadingLabel};
-	
 	@Inject private IMenuService menuService;
 	@Inject private MPart localPart;
 	@Inject private ESelectionService selService;
@@ -110,7 +110,7 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					entityListViewer.setInput(loadingInput);
+					entityListViewer.setInput(new String[] {DialogConstants.LOADING_TEXT});
 					entityListViewer.refresh();
 				}
 			});
@@ -229,14 +229,20 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 		layout.marginHeight = 0;
 		main.setLayout(layout);
 		
-		entityListViewer = new TableViewer(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
-		Table list = entityListViewer.getTable();
-		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		list.setBounds(0, 0, 88, 68);
-		entityListViewer.setLabelProvider(new EntityTypeLabelProvider());
+		Composite c = new Composite(main, SWT.NONE);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		TableColumnLayout tlayout = new TableColumnLayout();
+		c.setLayout(tlayout);
+		
+		entityListViewer = new TableViewer(c, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
 		entityListViewer.setContentProvider(ArrayContentProvider.getInstance());
-		entityListViewer.setInput(loadingInput);
-		entityListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		TableViewerColumn col = new TableViewerColumn(entityListViewer, SWT.NONE);
+		col.setLabelProvider(new EntityTypeLabelProvider());
+		tlayout.setColumnData(col.getColumn(), new ColumnWeightData(1));
+		
+		entityListViewer.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		
 		updateContent();
 
 		entityListViewer.addDoubleClickListener(new IDoubleClickListener() {

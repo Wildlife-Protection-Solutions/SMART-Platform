@@ -140,6 +140,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 		GridLayout glayout = new GridLayout();
 		glayout.verticalSpacing = 0;
 		glayout.marginHeight = 0;
+		glayout.marginWidth = 0;
 		form.getBody().setLayout(glayout);
 		
 		Section sec = toolkit.createSection(form.getBody(), Section.TITLE_BAR | Section.EXPANDED | Section.CLIENT_INDENT);		

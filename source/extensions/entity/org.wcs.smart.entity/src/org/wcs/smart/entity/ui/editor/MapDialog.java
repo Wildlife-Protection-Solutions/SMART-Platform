@@ -25,7 +25,6 @@ package org.wcs.smart.entity.ui.editor;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
@@ -33,6 +32,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.ISmartPoint;
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.map.location.LocationSelectComposite;
 
 /**
@@ -41,7 +41,7 @@ import org.wcs.smart.ui.map.location.LocationSelectComposite;
  * @author Emily
  *
  */
-public class MapDialog extends Dialog {
+public class MapDialog extends SmartStyledDialog {
 
 	private TmpPoint point;
 	private LocationSelectComposite<TmpPoint> locationComp;

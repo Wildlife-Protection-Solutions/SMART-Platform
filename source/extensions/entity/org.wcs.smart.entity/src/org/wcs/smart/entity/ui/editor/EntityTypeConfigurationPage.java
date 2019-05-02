@@ -184,12 +184,11 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 	public void createPartControl(Composite parent) {
 		toolkit.setBorderStyle(SWT.BORDER);
 		form = toolkit.createForm(parent);
-		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		
 
 		GridLayout glayout = new GridLayout();
 		glayout.verticalSpacing = 0;
 		glayout.marginHeight = 0;
+		glayout.marginWidth = 0;
 		form.getBody().setLayout(glayout);
 		
 		if (EntityPermissionManager.canCreateEditDeleteTypes()) {

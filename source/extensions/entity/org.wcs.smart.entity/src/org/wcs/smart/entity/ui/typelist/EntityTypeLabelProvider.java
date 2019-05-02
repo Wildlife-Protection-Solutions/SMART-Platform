@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.entity.ui.typelist;
 
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.model.EntityType;
@@ -32,7 +32,7 @@ import org.wcs.smart.entity.ui.editor.EntityTypeEditorInput;
  * @author Emily
  *
  */
-public class EntityTypeLabelProvider extends LabelProvider {
+public class EntityTypeLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public Image getImage(Object element) {
