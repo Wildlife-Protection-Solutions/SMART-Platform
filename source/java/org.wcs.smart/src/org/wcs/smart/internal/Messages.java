@@ -55,7 +55,7 @@ public class Messages extends NLS {
 	public static String AgencyCsvImporter_LanguageDialog_Title;
 	public static String AgencyDeleteAdvisor_Error_AgencyReferenced;
 	public static String AgencyDeleteAdvisor_Error_NotAgency;
-	public static String AgencyRankPropertyPage_Agencies_Label;
+	public static String AgencyRankPropertyPage_Agencies_Label1;
 	public static String AgencyRankPropertyPage_AgencyKeyRequired;
 	public static String AgencyRankPropertyPage_DefaultAgencyName;
 	public static String AgencyRankPropertyPage_DefaultRankName;
@@ -72,7 +72,7 @@ public class Messages extends NLS {
 	public static String AgencyRankPropertyPage_InvalidName_DialogTitle;
 	public static String AgencyRankPropertyPage_Language_Label;
 	public static String AgencyRankPropertyPage_PageTitle;
-	public static String AgencyRankPropertyPage_Ranks_Label;
+	public static String AgencyRankPropertyPage_Ranks_Label1;
 	public static String Area_EmptyKey;
 	public static String Area_AdminArea_Name;
 	public static String Area_BufferedManagementArea_Name;

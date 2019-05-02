@@ -133,7 +133,7 @@ public class PlanListView implements IPlanFilterItem {
 		main.setLayout(layout);
 		
 
-		planViewer = new PlanViewer(main);
+		planViewer = new PlanViewer(main, SWT.NONE);
 		planViewer.getViewer().getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4 , 1));
 		
 		PlanEventManager.getInstance().addListener(EventType.PLAN_ADDED, planListener);

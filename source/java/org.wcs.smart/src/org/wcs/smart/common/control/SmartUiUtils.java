@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Label;
 public class SmartUiUtils {
 
 	public static final String HEADER_CLASS = "SMARTSection";  //$NON-NLS-1$
+	public static final String SUB_HEADER_CLASS = "SMARTSubSection";  //$NON-NLS-1$
 	
 	public static void configure(TableComboViewer viewer) {
 		//the height for these does not configure nicely on mac so for mac only we adjust the height
@@ -58,11 +59,17 @@ public class SmartUiUtils {
 	 * @return
 	 */
 	public static Composite createHeaderLabel(Composite parent, String text) {
+		return createHeaderLabelInternal(parent, text, HEADER_CLASS);
+	}
+	public static Composite createSubHeaderLabel(Composite parent, String text) {
+		return createHeaderLabelInternal(parent, text, SUB_HEADER_CLASS);
+	}
+	
+	public static Composite createHeaderLabelInternal(Composite parent, String text, String style) {
 		Composite sectionheader = new Composite(parent, SWT.NONE);
 		sectionheader.setLayout(new GridLayout());
 		sectionheader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		WidgetElement.setCSSClass(sectionheader, SmartUiUtils.HEADER_CLASS);
-		sectionheader.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_RED));
+		WidgetElement.setCSSClass(sectionheader, style);
 		Label headerLabel = new Label(sectionheader, SWT.NONE);
 		headerLabel.setText(text);
 		

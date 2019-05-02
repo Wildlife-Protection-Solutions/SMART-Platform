@@ -27,24 +27,21 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
@@ -98,20 +95,11 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Group g = new Group(container, SWT.NONE);
-		g.setText(Messages.ObservationOptionsPropertyPage_WaypointOptionsLbl);
+		SmartUiUtils.createHeaderLabel(container, Messages.ObservationOptionsPropertyPage_WaypointOptionsLbl);
+		
+		Composite g = new Composite(container, SWT.NONE);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		FontData fd = g.getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		boldFont = new Font(getShell().getDisplay(), fd);
-		parent.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				boldFont.dispose();	
-			}
-		});
-		g.setFont(boldFont);
 		
 		Label lbl = new Label(g, SWT.WRAP);
 		lbl.setText(Messages.PatrolOptionsPropertyPage_DistanceDirection_DescLabel);
@@ -147,11 +135,11 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		
 		lbl = new Label(container, SWT.NONE);  //spacer
 		
-		g = new Group(container, SWT.NONE);
-		g.setText(Messages.PatrolOptionsPropertyPage_PatrolEditOptions_Label);
+		SmartUiUtils.createHeaderLabel(container, Messages.PatrolOptionsPropertyPage_PatrolEditOptions_Label);
+		
+		g = new Composite(container, SWT.NONE);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		g.setFont(boldFont);
 		
 		lbl = new Label(g, SWT.WRAP);
 		lbl.setText(Messages.PatrolOptionsPropertyPage_PatrolEditOptions_DescLabel);

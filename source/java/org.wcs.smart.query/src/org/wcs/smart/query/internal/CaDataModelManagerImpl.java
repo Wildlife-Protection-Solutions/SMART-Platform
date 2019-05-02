@@ -491,10 +491,6 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 				ca.getAttribute().getName();
 			}	
 		}
-	
 	};
-	
-	
-	
 	
 }

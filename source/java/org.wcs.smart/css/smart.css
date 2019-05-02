@@ -127,6 +127,17 @@
 	background-color: #D5E1A3;
 }
 
+.SMARTSubSection{
+	background-color: #ECF1D5;
+}
+.SMARTSubSection Label{
+	background-color: #ECF1D5;
+}
+
+.SMARTSubSection Hyperlink{
+	background-color: #ECF1D5;
+}
+
 Section {
 	background-color: #FFFFFF;
 	background-image: none;
@@ -192,7 +203,7 @@ Form{
 }
 
 ToolBar{
-	background-color:white;
+	background-color: inherit;
 }
 
 CTabFolder{

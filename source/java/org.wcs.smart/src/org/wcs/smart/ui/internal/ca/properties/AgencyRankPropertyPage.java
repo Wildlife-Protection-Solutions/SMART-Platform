@@ -80,6 +80,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.export.AgencyCsvImporter;
 import org.wcs.smart.export.config.impl.AgencyCsvExportConfig;
 import org.wcs.smart.export.config.impl.AgencyCsvImportConfig;
@@ -224,9 +225,8 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		});
 		
 		/* Agency */
-		Label lblAgencies = new Label(container, SWT.NONE);
-		lblAgencies.setText(Messages.AgencyRankPropertyPage_Agencies_Label);
-		lblAgencies.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3,1));
+		Composite c = SmartUiUtils.createHeaderLabel(container, Messages.AgencyRankPropertyPage_Agencies_Label1);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3,1));
 		
 		Composite owner = new Composite(container, SWT.NONE);
 		owner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2,1));
@@ -320,9 +320,9 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		
 		/* Rank */
-		Label lblRanks = new Label(container, SWT.NONE);
-		lblRanks.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
-		lblRanks.setText(Messages.AgencyRankPropertyPage_Ranks_Label);
+		c = SmartUiUtils.createHeaderLabel(container, Messages.AgencyRankPropertyPage_Ranks_Label1);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3,1));
+
 		
 		owner = new Composite(container, SWT.NONE);
 		owner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2,1));

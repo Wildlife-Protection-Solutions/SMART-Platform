@@ -49,13 +49,13 @@ public class PlanViewer {
 	 * Creates a new plan viewer
 	 * @param parent
 	 */
-	public PlanViewer(Composite parent) {
-		createControl(parent);
+	public PlanViewer(Composite parent, int style) {
+		createControl(parent, style);
 
 	}
 	
-	protected void createControl(Composite parent){
-		planViewer = new TreeViewer(parent, SWT.V_SCROLL);
+	protected void createControl(Composite parent, int style){
+		planViewer = new TreeViewer(parent, SWT.V_SCROLL | style);
 		
 		planViewer.setContentProvider(new PlanContentProvider());
 		planViewer.setLabelProvider(new LabelProvider(){

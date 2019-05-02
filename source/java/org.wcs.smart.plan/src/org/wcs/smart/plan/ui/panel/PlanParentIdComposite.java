@@ -106,7 +106,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 		});
 		
 		
-		planTreeViewer = new PlanViewer(this);
+		planTreeViewer = new PlanViewer(this , SWT.BORDER);
 		planTreeViewer.getViewer().getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4 , 1));
 		planTreeViewer.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
 			

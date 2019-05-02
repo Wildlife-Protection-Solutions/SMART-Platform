@@ -55,11 +55,14 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -71,8 +74,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -177,11 +178,11 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		});
 		
 		
-		TabFolder folder = new TabFolder(container, SWT.TOP);
+		CTabFolder folder = new CTabFolder(container, SWT.TOP);
 		folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
 		/* --------- Patrol Transport Type -------------- */
-		TabItem transportTab = new TabItem(folder, SWT.NONE);
+		CTabItem transportTab = new CTabItem(folder, SWT.NONE);
 		Composite transportComp = new Composite(folder, SWT.NONE);
 		transportTab.setControl(transportComp);
 		transportComp.setLayout(new GridLayout(2, false));
@@ -339,7 +340,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		
 		/* --------- Patrol Type -------------- */
-		TabItem typeTab = new TabItem(folder, SWT.NONE);
+		CTabItem typeTab = new CTabItem(folder, SWT.NONE);
 		Composite typeComp = new Composite(folder, SWT.NONE);
 		typeTab.setControl(typeComp);
 		typeComp.setLayout(new GridLayout(2, false));
@@ -474,6 +475,8 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 		
+		folder.setSelection(0);
+		
 		setTitle(SmartUtils.formatStringForLabel(Messages.PatrolTypePropertyPage_PageName));
 		setMessage(Messages.PatrolTypePropertyPage_DialogMessage);
 		return container;
@@ -596,6 +599,19 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			public Color getForeground(Object element) {
 				if (element instanceof PatrolType){
 					if (!((PatrolType) element).getIsActive()) return getShell().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+				}
+				return null;
+			}
+			
+			public Image getImage(Object element) {
+				if (!(element instanceof PatrolType)) return null;
+				
+				PatrolType pt = (PatrolType)element;
+				switch(pt.getType()) {
+				case AIR: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.AIR_PATROL_ICON);
+				case GROUND: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
+				case MARINE: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MARINE_PATROL_ICON);
+				case MIXED: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MIXED_PATROL_ICON);				
 				}
 				return null;
 			}
@@ -740,6 +756,20 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 				return null;
 			}
+			
+			@Override
+			public Image getImage(Object element) {
+				if (!(element instanceof PatrolTransportType)) return null;
+				
+				PatrolType.Type pt = ((PatrolTransportType)element).getPatrolType();
+				switch(pt) {
+				case AIR: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.AIR_PATROL_ICON);
+				case GROUND: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
+				case MARINE: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MARINE_PATROL_ICON);
+				case MIXED: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MIXED_PATROL_ICON);				
+				}
+				return null;
+			}
 		};
 			
 		viewerColumn.setLabelProvider(lblProvider);
@@ -823,7 +853,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		column.setMoveable(true);
 
 		layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
-		layout.setColumnData(column, new ColumnWeightData(1,ColumnWeightData.MINIMUM_WIDTH, true));
+		layout.setColumnData(column, new ColumnWeightData(2,ColumnWeightData.MINIMUM_WIDTH, true));
 		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -839,6 +869,18 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 				return null;
 				
+			}
+			public Image getImage(Object element) {
+				if (!(element instanceof PatrolTransportType)) return null;
+				
+				PatrolType.Type pt = ((PatrolTransportType)element).getPatrolType();
+				switch(pt) {
+				case AIR: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.AIR_PATROL_ICON);
+				case GROUND: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
+				case MARINE: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MARINE_PATROL_ICON);
+				case MIXED: return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MIXED_PATROL_ICON);				
+				}
+				return null;
 			}
 		});
 		viewerColumn.setEditingSupport(new EditingSupport(viewer){

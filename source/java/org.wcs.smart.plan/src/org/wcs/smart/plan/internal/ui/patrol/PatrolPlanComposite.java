@@ -77,7 +77,7 @@ public class PatrolPlanComposite extends PlanComposite implements IPlanFilterIte
 				d.open();
 			}
 		});
-		pv = new PlanViewer(this);
+		pv = new PlanViewer(this, SWT.NONE);
 		pv.getViewer().getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		updateJob = new LoadPlanJob(pv, currentFilter, true);

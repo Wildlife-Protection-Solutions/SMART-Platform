@@ -87,7 +87,7 @@ public class TemplateSelectPlanWizardPage extends PlanWizardPage implements IPla
 			}
 		});
 		
-		planTreeViewer = new PlanViewer(center);
+		planTreeViewer = new PlanViewer(center, SWT.NONE);
 		planTreeViewer.getViewer().getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4 , 1));
 		planTreeViewer.refresh();
 		
