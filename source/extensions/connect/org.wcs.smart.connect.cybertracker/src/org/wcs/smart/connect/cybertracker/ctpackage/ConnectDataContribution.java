@@ -28,7 +28,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.wcs.smart.connect.ConnectHibernateManager;
-import org.wcs.smart.connect.cybertracker.model.ConnectCtProperties;
 import org.wcs.smart.connect.cybertracker.model.CtConnectPackageMetadata;
 import org.wcs.smart.connect.cybertracker.model.CtPackageAlert;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -47,6 +46,15 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 public class ConnectDataContribution implements IPackageContribution {
+
+	private static final String POSITION_UPDATES_JSONKEY = "POSITION_UPDATES"; //$NON-NLS-1$
+	private static final String METADATA_JSONKEY = "METADATA"; //$NON-NLS-1$
+	private static final String LEVEL_JSONKEY = "LEVEL"; //$NON-NLS-1$
+	private static final String CAUUID_JSONKEY = "CAUUID"; //$NON-NLS-1$
+	private static final String TYPEUUID_JSONKEY = "TYPEUUID"; //$NON-NLS-1$
+	private static final String DATA_SERVER_JSONKEY = "DATA_SERVER"; //$NON-NLS-1$
+	private static final String URL_JSONKEY = "URL"; //$NON-NLS-1$
+	private static final String FREQUENCY_MIN_JSONKEY = "FREQUENCY_MIN"; //$NON-NLS-1$
 
 	public ConnectDataContribution() {
 	}
@@ -78,28 +86,26 @@ public class ConnectDataContribution implements IPackageContribution {
 			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name())) {
 				if (mv.getBooleanValue()) {
 					JSONObject dataserver = new JSONObject();
-					//TODO:
-					dataserver.put("PROTOCOL", "GEOJSON_COMPRESSED"); 
-					dataserver.put("FREQUENCY_MIN", Integer.valueOf( mv.getStringValue() ) );
-					dataserver.put("URL", url + "/api/ctdata/" + UuidUtils.uuidToString( ctpackage.getConservationArea().getUuid() ));
+					dataserver.put(FREQUENCY_MIN_JSONKEY, Integer.valueOf( mv.getStringValue() ) );
+					dataserver.put(URL_JSONKEY, url + "/api/ctdata/" + UuidUtils.uuidToString( ctpackage.getConservationArea().getUuid() ));
 					//TODO: api key
-					cc.addProfileMetadata("DATA_SERVER", dataserver);
+					cc.addProfileMetadata(DATA_SERVER_JSONKEY, dataserver);
 				}
 			}else if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name())) {
 				if (mv.getBooleanValue()) {
 					JSONObject pingalert = new JSONObject();
 					
-					pingalert.put("FREQUENCY_MIN", Integer.valueOf( mv.getStringValue() ) );
-					pingalert.put("URL", url + "/api/connectalert/");
+					pingalert.put(FREQUENCY_MIN_JSONKEY, Integer.valueOf( mv.getStringValue() ) );
+					pingalert.put(URL_JSONKEY, url + "/api/connectalert/");
 					//TODO: api key
 					
 					JSONObject metadata = new JSONObject();
-					metadata.put("TYPEUUID", mv.getUuidValue().toString());
-					metadata.put("CAUUID",mv.getConservationArea().getUuid().toString());
-					metadata.put("LEVEL", CtPackageAlert.Level.ONE.value);
+					metadata.put(TYPEUUID_JSONKEY, mv.getUuidValue().toString());
+					metadata.put(CAUUID_JSONKEY, mv.getConservationArea().getUuid().toString());
+					metadata.put(LEVEL_JSONKEY, CtPackageAlert.Level.ONE.value);
 					
-					pingalert.put("METADATA", metadata);
-					cc.addProfileMetadata("POSITION_UPDATES", pingalert);
+					pingalert.put(METADATA_JSONKEY, metadata);
+					cc.addProfileMetadata(POSITION_UPDATES_JSONKEY, pingalert);
 				}
 			}
 			

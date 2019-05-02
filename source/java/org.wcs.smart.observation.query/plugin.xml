@@ -94,7 +94,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.menu.query.newquery?after=org.wcs.smart.query.newquery.separator">
+            locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator3">
          <menu
                id="org.wcs.smart.menu.query.newquery.alldata"
                label="%menu.query.alldata.name"

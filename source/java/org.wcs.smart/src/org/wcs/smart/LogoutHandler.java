@@ -44,15 +44,24 @@ public class LogoutHandler {
 	 */
 	@Execute
 	public void execute()  {
-		try(Session session = HibernateManager.openSession()){
-			session.beginTransaction();
-			ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(session);
-			session.getTransaction().commit();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-//		PlatformUI.getWorkbench().restart();
+//		try(Session session = HibernateManager.openSession()){
+//			session.beginTransaction();
+//			ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(session);
+//			session.getTransaction().commit();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		try(Session session = HibernateManager.openSession()){
+//			session.beginTransaction();
+//			ChangeLogInstaller.INSTANCE.installChangeLogTracking(session);
+//			session.getTransaction().commit();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		PlatformUI.getWorkbench().restart();
 	}
 	
 	// E3

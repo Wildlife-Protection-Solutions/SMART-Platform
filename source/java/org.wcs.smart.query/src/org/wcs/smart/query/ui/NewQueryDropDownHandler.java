@@ -124,8 +124,8 @@ public class NewQueryDropDownHandler {
 				processChild(kid, menu, context);
 			}
 		}else if (e instanceof MMenuSeparator) {
-			MenuItem mi = new MenuItem(menu, SWT.SEPARATOR);
-			if (e.getLabel() != null) mi.setText(e.getLabel());
+//			MenuItem mi = new MenuItem(menu, SWT.SEPARATOR);
+//			if (e.getLabel() != null) mi.setText(e.getLabel());
 		}
 	}
 

@@ -44,6 +44,17 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class ConnectAlertContribution implements IPackageContribution {
 
+	private static final String ALERTS_JSONKEY = "ALERTS"; //$NON-NLS-1$
+	private static final String CMATTRIBUTE_TREENODE_UUID_JSONKEY = "CMATTRIBUTE_TREENODE_UUID"; //$NON-NLS-1$
+	private static final String CMATTRIBUTE_LISTITEM_UUID_JSONKEY = "CMATTRIBUTE_LISTITEM_UUID"; //$NON-NLS-1$
+	private static final String CMATTRIBUTE_UUID_JSONKEY = "CMATTRIBUTE_UUID"; //$NON-NLS-1$
+	private static final String CMNODE_UUID_JSONKEY = "CMNODE_UUID"; //$NON-NLS-1$
+	private static final String URL_JSONKEY = "URL"; //$NON-NLS-1$
+	private static final String TYPEUUID_JSONKEY = "TYPEUUID"; //$NON-NLS-1$
+	private static final String CA_JSONKEY = "CAUUID"; //$NON-NLS-1$
+	private static final String LEVEL_JSONKEY = "LEVEL"; //$NON-NLS-1$
+	private static final String METADATA_JSONKEY = "METADATA"; //$NON-NLS-1$
+
 	public ConnectAlertContribution() {
 	}
 
@@ -75,29 +86,27 @@ public class ConnectAlertContribution implements IPackageContribution {
 			for (CtPackageAlert palert: CtPackageAlert.fromString(apackage, s)) { 
 				JSONObject alert = new JSONObject();
 						
-				alert.put("CMNODE_UUID", palert.getCmNode().getUuid().toString());
+				alert.put(CMNODE_UUID_JSONKEY, palert.getCmNode().getUuid().toString());
 				if (palert.getCmAttribute() != null)
-					alert.put("CMATTRIBUTE_UUID", palert.getCmAttribute().getUuid().toString());
+					alert.put(CMATTRIBUTE_UUID_JSONKEY, palert.getCmAttribute().getUuid().toString());
 				if (palert.getCmAttributeListItem() != null) 
-					alert.put("CMATTRIBUTE_LISTITEM_UUID", palert.getCmAttributeListItem().getUuid().toString());
+					alert.put(CMATTRIBUTE_LISTITEM_UUID_JSONKEY, palert.getCmAttributeListItem().getUuid().toString());
 				if (palert.getCmAttributeTreeNode() != null) 
-					alert.put("CMATTRIBUTE_TREENODE_UUID", palert.getCmAttributeTreeNode().getUuid().toString());
+					alert.put(CMATTRIBUTE_TREENODE_UUID_JSONKEY, palert.getCmAttributeTreeNode().getUuid().toString());
 				
-				//TODO: fix this
-				alert.put("URL", url + "/api/connectalert/");
-				//TODO: api key
-						
+				//TODO: fix this and add api key
+				alert.put(URL_JSONKEY, url + "/api/connectalert/");
 				JSONObject metadata = new JSONObject();
-				metadata.put("TYPEUUID", palert.getType().toString());
-				metadata.put("CAUUID", apackage.getConservationArea().getUuid().toString());
-				metadata.put("LEVEL", palert.getLevel().value);
+				metadata.put(TYPEUUID_JSONKEY, palert.getType().toString());
+				metadata.put(CA_JSONKEY, apackage.getConservationArea().getUuid().toString());
+				metadata.put(LEVEL_JSONKEY, palert.getLevel().value);
 				
-				alert.put("METADATA", metadata);
+				alert.put(METADATA_JSONKEY, metadata);
 				
 				alerts.add(alert);
 			}
 		}
-		cc.addProfileMetadata("ALERTS", alerts);
+		cc.addProfileMetadata(ALERTS_JSONKEY, alerts);
 		
 		return cc;
 	}

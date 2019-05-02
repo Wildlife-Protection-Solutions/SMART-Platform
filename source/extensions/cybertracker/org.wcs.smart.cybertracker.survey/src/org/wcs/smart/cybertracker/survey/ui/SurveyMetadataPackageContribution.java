@@ -81,6 +81,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 	private Listener onModified;
 	
 	private ICtPackage ctpackage;
+	private boolean fireEvents = true;
 	
 	@Override
 	public boolean isTab() { 
@@ -93,6 +94,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 	}
 	
 	private void fireChanged() {
+		if (!fireEvents) return;
 		if (onModified != null) onModified.handleEvent(new Event());
 	}
 	
@@ -368,37 +370,42 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 			}
 			
 			Display.getDefault().syncExec(()->{
-				cmbLeader.setInput(new ArrayList<>());
-				lstEmployees.setInput(employees);
-				
-				//configure default values
-				for (MetadataFieldValue v : metadataValues) {
-					//populate members first
-					 if (v.getMetadataKey().equals(MissionMetadataField.MEMBERS.name())) {
-						btnMembers.setSelection(v.isVisible());
-						for (MetadataFieldUuidValue item : v.getUuidList()) {
-							Employee e = new Employee();
-							e.setUuid(item.getUuidValue());
-							lstEmployees.setChecked(e, true);
+				try {
+					fireEvents = false;
+					
+					cmbLeader.setInput(new ArrayList<>());
+					lstEmployees.setInput(employees);
+					
+					//configure default values
+					for (MetadataFieldValue v : metadataValues) {
+						//populate members first
+						 if (v.getMetadataKey().equals(MissionMetadataField.MEMBERS.name())) {
+							btnMembers.setSelection(v.isVisible());
+							for (MetadataFieldUuidValue item : v.getUuidList()) {
+								Employee e = new Employee();
+								e.setUuid(item.getUuidValue());
+								lstEmployees.setChecked(e, true);
+							}
 						}
 					}
-				}
-				updateLeaderPilotLists();
-				for (MetadataFieldValue v : metadataValues) {
-					if (v.getMetadataKey().equals(MissionMetadataField.COMMENT.name())) {
-						btnCmt.setSelection(v.isVisible());
-						txtComment.setText(v.getStringValue());
-					}else if (v.getMetadataKey().equals(MissionMetadataField.LEADER.name())) {
-						btnLeader.setSelection(v.isVisible());
-						Employee temp = new Employee();
-						temp.setUuid(v.getUuidValue());
-						cmbLeader.setSelection(new StructuredSelection(temp));
+					updateLeaderPilotLists();
+					for (MetadataFieldValue v : metadataValues) {
+						if (v.getMetadataKey().equals(MissionMetadataField.COMMENT.name())) {
+							btnCmt.setSelection(v.isVisible());
+							txtComment.setText(v.getStringValue());
+						}else if (v.getMetadataKey().equals(MissionMetadataField.LEADER.name())) {
+							btnLeader.setSelection(v.isVisible());
+							Employee temp = new Employee();
+							temp.setUuid(v.getUuidValue());
+							cmbLeader.setSelection(new StructuredSelection(temp));
+						}
 					}
+					btnCmt.notifyListeners(SWT.Selection, new Event());
+					btnMembers.notifyListeners(SWT.Selection, new Event());
+					btnLeader.notifyListeners(SWT.Selection, new Event());
+				}finally {
+					fireEvents = true;
 				}
-				btnCmt.notifyListeners(SWT.Selection, new Event());
-				btnMembers.notifyListeners(SWT.Selection, new Event());
-				btnLeader.notifyListeners(SWT.Selection, new Event());
-				fireChanged();
 			});
 			
 			return Status.OK_STATUS;

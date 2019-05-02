@@ -78,9 +78,11 @@ public class SurveyCtPackageManager implements ICtPackageManager {
 	
 	@Override
 	public List<? extends ICtPackage> getPackages(Session session) {
-		return QueryFactory.buildQuery(session, SurveyCtPackage.class, 
+		List<SurveyCtPackage> items = QueryFactory.buildQuery(session, SurveyCtPackage.class, 
 				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}) //$NON-NLS-1$
 			.getResultList();
+		items.forEach(e->e.isDataModel());
+		return items;
 	}
 
 	@Override

@@ -206,39 +206,39 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	}
 
 	@Transient
-	private boolean getBooleanValue(ProfileOptionID optionId, boolean defaultValue) {
+	private boolean getBooleanValue(ProfileOptionID optionId) {
 		Map<ProfileOptionID, CyberTrackerPropertiesProfileOption> map = getOptions();
 		CyberTrackerPropertiesProfileOption option = map.get(optionId);
-		return (option != null) ? option.getBooleanValue() : defaultValue;
+		return (option != null) ? option.getBooleanValue() : (boolean)getBooleanValue(optionId);
 	}
 
 	
 	@Transient
-	private double getDoubleValue(ProfileOptionID optionId, double defaultValue) {
+	private double getDoubleValue(ProfileOptionID optionId) {
 		Map<ProfileOptionID, CyberTrackerPropertiesProfileOption> map = getOptions();
 		CyberTrackerPropertiesProfileOption option = map.get(optionId);
-		return (option != null) ? option.getDoubleValue() : defaultValue;
+		return (option != null) ? option.getDoubleValue() : (double)getDoubleValue(optionId);
 	}
 
 	
 	@Transient
-	private int getIntValue(ProfileOptionID optionId, int defaultValue) {
+	private int getIntValue(ProfileOptionID optionId) {
 		Map<ProfileOptionID, CyberTrackerPropertiesProfileOption> map = getOptions();
 		CyberTrackerPropertiesProfileOption option = map.get(optionId);
-		return (option != null && option.getIntegerValue() != null) ? option.getIntegerValue() : defaultValue;
+		return (option != null && option.getIntegerValue() != null) ? option.getIntegerValue() : (int)getDefaultValue(optionId);
 	}
 	
 	
 	@Transient
-	private String getStringValue(ProfileOptionID optionId, String defaultValue) {
+	private String getStringValue(ProfileOptionID optionId) {
 		Map<ProfileOptionID, CyberTrackerPropertiesProfileOption> map = getOptions();
 		CyberTrackerPropertiesProfileOption option = map.get(optionId);
-		return (option != null) ? option.getStringValue() : defaultValue;
+		return (option != null) ? option.getStringValue() : (String)getDefaultValue(optionId);
 	}
 	
 	@Transient
 	public CyberTrackerProperties.Protocol getDataFormat() {
-		return CyberTrackerProperties.Protocol.valueOf( getStringValue(ProfileOptionID.DATA_FORMAT, CyberTrackerProperties.Protocol.GEOJSON_COMPRESSED.name()) );
+		return CyberTrackerProperties.Protocol.valueOf( getStringValue(ProfileOptionID.DATA_FORMAT) );
 	}
 	public void setDataFormat(CyberTrackerProperties.Protocol dataFormat) {
 		getOption(ProfileOptionID.DATA_FORMAT).setStringValue(dataFormat.name());
@@ -248,7 +248,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isKioskMode() {
-		return getBooleanValue(ProfileOptionID.KIOSK_MODE, kioskMode);
+		return getBooleanValue(ProfileOptionID.KIOSK_MODE);
 	}
 	public void setKioskMode(boolean kioskMode) {
 		getOption(ProfileOptionID.KIOSK_MODE).setBooleanValue(kioskMode);
@@ -256,7 +256,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 
 	@Transient
 	public boolean isSimpleCamera() {
-		return getBooleanValue(ProfileOptionID.SIMPLE_CAMERA, simpleCamera);
+		return getBooleanValue(ProfileOptionID.SIMPLE_CAMERA);
 	}
 	public void setSimpleCamera(boolean simpleCamera) {
 		getOption(ProfileOptionID.SIMPLE_CAMERA).setBooleanValue(simpleCamera);
@@ -264,7 +264,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isCanPause() {
-		return getBooleanValue(ProfileOptionID.CAN_PAUSE, canPause);
+		return getBooleanValue(ProfileOptionID.CAN_PAUSE);
 	}
 	public void setCanPause(boolean canPause) {
 		getOption(ProfileOptionID.CAN_PAUSE).setBooleanValue(canPause);
@@ -272,7 +272,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isLargeScrollBars() {
-		return getBooleanValue(ProfileOptionID.LARGE_SCROLL_BARS, largeScrollBars);
+		return getBooleanValue(ProfileOptionID.LARGE_SCROLL_BARS);
 	}
 	public void setLargeScrollBars(boolean largeScrollBars) {
 		getOption(ProfileOptionID.LARGE_SCROLL_BARS).setBooleanValue(largeScrollBars);
@@ -281,7 +281,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public double getSightingAccuracy() {
-		return getDoubleValue(ProfileOptionID.SIGHTING_ACCURACY, sightingAccuracy);
+		return getDoubleValue(ProfileOptionID.SIGHTING_ACCURACY);
 	}
 	public void setSightingAccuracy(double sightingAccuracy) {
 		getOption(ProfileOptionID.SIGHTING_ACCURACY).setDoubleValue(sightingAccuracy);
@@ -290,7 +290,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public int getSightingFixCount() {
-		return getIntValue(ProfileOptionID.SIGHTING_FIX_COUNT, sightingFixCount);
+		return getIntValue(ProfileOptionID.SIGHTING_FIX_COUNT);
 	}
 	public void setSightingFixCount(int sightingFixCount) {
 		getOption(ProfileOptionID.SIGHTING_FIX_COUNT).setIntegerValue(sightingFixCount);
@@ -299,7 +299,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public int getWaypointTimer() {
-		return getIntValue(ProfileOptionID.WAYPOINT_TIMER, waypointTimer);
+		return getIntValue(ProfileOptionID.WAYPOINT_TIMER);
 	}
 	public void setWaypointTimer(int waypointTimer) {
 		getOption(ProfileOptionID.WAYPOINT_TIMER).setIntegerValue(waypointTimer);
@@ -308,7 +308,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public int getGpsTimeZone() {
-		return getIntValue(ProfileOptionID.GPS_TIME_ZONE, gpsTimeZone);
+		return getIntValue(ProfileOptionID.GPS_TIME_ZONE);
 	}
 	public void setGpsTimeZone(int gpsTimeZone) {
 		getOption(ProfileOptionID.GPS_TIME_ZONE).setIntegerValue(gpsTimeZone);
@@ -317,7 +317,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public int getSkipButtonTimeout() {
-		return getIntValue(ProfileOptionID.SKIP_BUTTON_TIMEOUT, skipButtonTimeout);
+		return getIntValue(ProfileOptionID.SKIP_BUTTON_TIMEOUT);
 	}
 	public void setSkipButtonTimeout(int skipButtonTimeout) {
 		getOption(ProfileOptionID.SKIP_BUTTON_TIMEOUT).setIntegerValue(skipButtonTimeout);
@@ -326,7 +326,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isAutoNext() {
-		return getBooleanValue(ProfileOptionID.AUTO_NEXT, autoNext);
+		return getBooleanValue(ProfileOptionID.AUTO_NEXT);
 	}
 	public void setAutoNext(boolean autoNext) {
 		getOption(ProfileOptionID.AUTO_NEXT).setBooleanValue(autoNext);
@@ -335,7 +335,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public int getExitPin() {
-		return getIntValue(ProfileOptionID.EXIT_PIN, exitPin);
+		return getIntValue(ProfileOptionID.EXIT_PIN);
 	}
 	public void setExitPin(int exitPin) {
 		getOption(ProfileOptionID.EXIT_PIN).setIntegerValue(exitPin);
@@ -344,7 +344,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isUseTitleBar() {
-		return getBooleanValue(ProfileOptionID.USE_TITLE_BAR, useTitleBar);
+		return getBooleanValue(ProfileOptionID.USE_TITLE_BAR);
 	}
 	public void setUseTitleBar(boolean useTitleBar) {
 		getOption(ProfileOptionID.USE_TITLE_BAR).setBooleanValue(useTitleBar);
@@ -353,7 +353,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isUseLargeTabs() {
-		return getBooleanValue(ProfileOptionID.USE_LARGE_TABS, useLargeTabs);
+		return getBooleanValue(ProfileOptionID.USE_LARGE_TABS);
 	}
 	public void setUseLargeTabs(boolean useLargeTabs) {
 		getOption(ProfileOptionID.USE_LARGE_TABS).setBooleanValue(useLargeTabs);
@@ -362,7 +362,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isUseLargeTitles() {
-		return getBooleanValue(ProfileOptionID.USE_LARGE_TITLES, useLargeTitles);
+		return getBooleanValue(ProfileOptionID.USE_LARGE_TITLES);
 	}
 	public void setUseLargeTitles(boolean useLargeTitles) {
 		getOption(ProfileOptionID.USE_LARGE_TITLES).setBooleanValue(useLargeTitles);
@@ -371,7 +371,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isDisableEditing() {
-		return getBooleanValue(ProfileOptionID.DISABLE_EDITING, disableEditing);
+		return getBooleanValue(ProfileOptionID.DISABLE_EDITING);
 	}
 	public void setDisableEditing(boolean disableEditing) {
 		getOption(ProfileOptionID.DISABLE_EDITING).setBooleanValue(disableEditing);
@@ -380,7 +380,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isUseSdCard() {
-		return getBooleanValue(ProfileOptionID.USE_SD_CARD, useSdCard);
+		return getBooleanValue(ProfileOptionID.USE_SD_CARD);
 	}
 	public void setUseSdCard(boolean useSdCard) {
 		getOption(ProfileOptionID.USE_SD_CARD).setBooleanValue(useSdCard);
@@ -389,7 +389,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isTestTime() {
-		return getBooleanValue(ProfileOptionID.TEST_TIME, testTime);
+		return getBooleanValue(ProfileOptionID.TEST_TIME);
 	}
 	public void setTestTime(boolean testTime) {
 		getOption(ProfileOptionID.TEST_TIME).setBooleanValue(testTime);
@@ -398,7 +398,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isResetOnSync() {
-		return getBooleanValue(ProfileOptionID.RESET_ON_SYNC, resetOnSync);
+		return getBooleanValue(ProfileOptionID.RESET_ON_SYNC);
 	}
 	public void setResetOnSync(boolean resetOnSync) {
 		getOption(ProfileOptionID.RESET_ON_SYNC).setBooleanValue(resetOnSync);
@@ -407,7 +407,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isResetOnNext() {
-		return getBooleanValue(ProfileOptionID.RESET_ON_NEXT, resetOnNext);
+		return getBooleanValue(ProfileOptionID.RESET_ON_NEXT);
 	}
 	public void setResetOnNext(boolean resetOnNext) {
 		getOption(ProfileOptionID.RESET_ON_NEXT).setBooleanValue(resetOnNext);
@@ -416,7 +416,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public double getTrackAccuracy() {
-		return getDoubleValue(ProfileOptionID.TRACK_ACCURACY, trackAccuracy);
+		return getDoubleValue(ProfileOptionID.TRACK_ACCURACY);
 	}
 	public void setTrackAccuracy(double trackAccuracy) {
 		getOption(ProfileOptionID.TRACK_ACCURACY).setDoubleValue(trackAccuracy);
@@ -425,7 +425,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isUseGpsTime() {
-		return getBooleanValue(ProfileOptionID.USE_GPS_TIME, useGpsTime);
+		return getBooleanValue(ProfileOptionID.USE_GPS_TIME);
 	}
 	public void setUseGpsTime(boolean useGpsTime) {
 		getOption(ProfileOptionID.USE_GPS_TIME).setBooleanValue(useGpsTime);
@@ -434,7 +434,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isManualGps() {
-		return getBooleanValue(ProfileOptionID.MANUAL_GPS, manualGps);
+		return getBooleanValue(ProfileOptionID.MANUAL_GPS);
 	}
 	public void setManualGps(boolean manualGps) {
 		getOption(ProfileOptionID.MANUAL_GPS).setBooleanValue(manualGps);
@@ -443,7 +443,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isAllowSkipManualGps() {
-		return getBooleanValue(ProfileOptionID.ALLOW_SKIP_MANUAL_GPS, allowSkipManualGps);
+		return getBooleanValue(ProfileOptionID.ALLOW_SKIP_MANUAL_GPS);
 	}
 	public void setAllowSkipManualGps(boolean allowSkipManualGps) {
 		getOption(ProfileOptionID.ALLOW_SKIP_MANUAL_GPS).setBooleanValue(allowSkipManualGps);
@@ -452,7 +452,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public String getFieldMapFilename() {
-		return getStringValue(ProfileOptionID.FIELD_MAP_FILENAME, fieldMapFilename);
+		return getStringValue(ProfileOptionID.FIELD_MAP_FILENAME);
 	}
 	public void setFieldMapFilename(String fieldMapFilename) {
 		getOption(ProfileOptionID.FIELD_MAP_FILENAME).setStringValue(fieldMapFilename);
@@ -461,7 +461,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isLock100() {
-		return getBooleanValue(ProfileOptionID.LOCK100, lock100);
+		return getBooleanValue(ProfileOptionID.LOCK100);
 	}
 	public void setLock100(boolean lock100) {
 		getOption(ProfileOptionID.LOCK100).setBooleanValue(lock100);
@@ -470,7 +470,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isUseMapOnSkip() {
-		return getBooleanValue(ProfileOptionID.USE_MAP_ON_SKIP, useMapOnSkip);
+		return getBooleanValue(ProfileOptionID.USE_MAP_ON_SKIP);
 	}
 	public void setUseMapOnSkip(boolean useMapOnSkip) {
 		getOption(ProfileOptionID.USE_MAP_ON_SKIP).setBooleanValue(useMapOnSkip);
@@ -478,7 +478,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	@Transient
 	public boolean isShowEdit() {
-		return getBooleanValue(ProfileOptionID.SHOW_EDIT, showEdit);
+		return getBooleanValue(ProfileOptionID.SHOW_EDIT);
 	}
 	public void setShowEdit(boolean showEdit) {
 		getOption(ProfileOptionID.SHOW_EDIT).setBooleanValue(showEdit);
@@ -486,7 +486,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 
 	@Transient
 	public boolean isShowGPS() {
-		return getBooleanValue(ProfileOptionID.SHOW_GPS, showGPS);
+		return getBooleanValue(ProfileOptionID.SHOW_GPS);
 	}
 	public void setShowGPS(boolean showGPS) {
 		getOption(ProfileOptionID.SHOW_GPS).setBooleanValue(showGPS);
@@ -494,7 +494,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 
 	@Transient
 	public int getProjection() {
-		return getIntValue(ProfileOptionID.PROJECTION, projection);
+		return getIntValue(ProfileOptionID.PROJECTION);
 	}
 	public void setProjection(int prj) {
 		getOption(ProfileOptionID.PROJECTION).setIntegerValue(prj);
@@ -502,7 +502,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 
 	@Transient
 	public int getUtmZone() {
-		return getIntValue(ProfileOptionID.UTM_ZONE, utmZone);
+		return getIntValue(ProfileOptionID.UTM_ZONE);
 	}
 	public void setUtmZone(int zone) {
 		getOption(ProfileOptionID.UTM_ZONE).setIntegerValue(zone);
@@ -510,7 +510,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 
 	@Transient
 	public int getMaxPhotoCount() {
-		return getIntValue(ProfileOptionID.MAX_PHOTO_COUNT, maxPhotoCount);
+		return getIntValue(ProfileOptionID.MAX_PHOTO_COUNT);
 	}
 	public void setMaxPhotoCount(int count) {
 		getOption(ProfileOptionID.MAX_PHOTO_COUNT).setIntegerValue(count);
@@ -518,13 +518,55 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 
 	@Transient
 	public int getDilutionOfPrecision() {
-		return getIntValue(ProfileOptionID.DILUTION_OF_PRECISION, dilutionOfPrecision);
+		return getIntValue(ProfileOptionID.DILUTION_OF_PRECISION);
 	}
 	public void setDilutionOfPrecision(int dop) {
 		getOption(ProfileOptionID.DILUTION_OF_PRECISION).setIntegerValue(dop);
 	}
 	
-	
+	public Object getDefaultValue(ProfileOptionID option) {
+		switch(option) {
+		case ALLOW_SKIP_MANUAL_GPS: return allowSkipManualGps;
+		case APP_NAME: return "SMART Mobile Application"; 
+		case AUTO_NEXT: return autoNext;
+		case CAN_PAUSE: return canPause;
+		case DATA_FORMAT: return CyberTrackerProperties.Protocol.GEOJSON_COMPRESSED.name();
+		case DILUTION_OF_PRECISION: return dilutionOfPrecision;
+		case DISABLE_EDITING: return disableEditing;
+		case EXIT_PIN: return exitPin;
+		case FIELD_MAP_FILENAME: return fieldMapFilename;
+		case GPS_TIME_ZONE: return gpsTimeZone;
+		case KIOSK_MODE: return kioskMode;
+		case LARGE_SCROLL_BARS: return largeScrollBars;
+		case LOCK100: return lock100;
+		case MANUAL_GPS: return manualGps;
+		case MAX_PHOTO_COUNT: return maxPhotoCount;
+		case PROJECTION: return projection;
+		case RESET_ON_NEXT: return resetOnNext;
+		case RESET_ON_SYNC: return resetOnSync;
+		case SHOW_EDIT: return showEdit;
+		case SHOW_GPS: return showGPS;
+		case SIGHTING_ACCURACY: return sightingAccuracy;
+		case SIGHTING_FIX_COUNT: return sightingFixCount;
+		case SIMPLE_CAMERA: return simpleCamera;
+		case SKIP_BUTTON_TIMEOUT: return skipButtonTimeout;
+		case TEST_TIME: return testTime;
+		case TRACK_ACCURACY: return trackAccuracy;
+		case USE_GPS_TIME: return useGpsTime;
+		case USE_LARGE_TABS: return useLargeTabs;
+		case USE_LARGE_TITLES: return useLargeTitles;
+		case USE_MAP_ON_SKIP: return useMapOnSkip;
+		case USE_SD_CARD: return useSdCard;
+		case USE_TITLE_BAR: return useTitleBar;
+		case UTM_ZONE: return utmZone;
+		case WAYPOINT_TIMER: return waypointTimer;
+		case THEME_COLOR_1: return -1;
+		case THEME_COLOR_2: return -1;
+		case THEME_COLOR_3: return -1;
+		case THEME_COLOR_4: return -1;
+		}
+		return null;
+	}
 	
 	/**
 	 * 
@@ -535,10 +577,10 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	public Color getThemeColor(int index) {
 		Integer color = -1;
 		switch(index) {
-		case 1: color = getIntValue(ProfileOptionID.THEME_COLOR_1, -1); break;
-		case 2: color = getIntValue(ProfileOptionID.THEME_COLOR_2, -1); break;
-		case 3: color = getIntValue(ProfileOptionID.THEME_COLOR_3, -1); break;
-		case 4: color = getIntValue(ProfileOptionID.THEME_COLOR_4, -1); break;
+		case 1: color = getIntValue(ProfileOptionID.THEME_COLOR_1); break;
+		case 2: color = getIntValue(ProfileOptionID.THEME_COLOR_2); break;
+		case 3: color = getIntValue(ProfileOptionID.THEME_COLOR_3); break;
+		case 4: color = getIntValue(ProfileOptionID.THEME_COLOR_4); break;
 		}
 		if (color == -1) return null;
 		return new Color(color);

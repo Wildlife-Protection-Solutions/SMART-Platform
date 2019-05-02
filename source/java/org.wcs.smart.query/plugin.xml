@@ -602,6 +602,10 @@
                   </parameter>
                </command>
                <separator
+                     name="org.wcs.smart.query.newquery.separator3"
+                     visible="false">
+               </separator>
+               <separator
                      name="org.wcs.smart.query.newquery.separator2"
                      visible="false">
                </separator>

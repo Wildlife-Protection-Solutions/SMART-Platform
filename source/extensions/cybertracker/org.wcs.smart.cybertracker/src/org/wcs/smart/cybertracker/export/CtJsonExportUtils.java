@@ -205,15 +205,20 @@ public class CtJsonExportUtils {
 		
 		for (ProfileOptionID option : ProfileOptionID.values()) {
 			CyberTrackerPropertiesProfileOption opValue = profile.getOptions().get(option);
-			if (opValue == null) continue;
-			if (isBoolean(option)) {
-				profileObj.put(option.name(), opValue.getBooleanValue());
-			}else if (opValue.getDoubleValue() != null) {
-				profileObj.put(option.name(), opValue.getDoubleValue());
-			}else if (opValue.getIntegerValue() != null) {
-				profileObj.put(option.name(), opValue.getIntegerValue());
-			}else if (opValue.getStringValue() != null) {
-				profileObj.put(option.name(), opValue.getStringValue());
+			Object defaultValue = profile.getDefaultValue(option);
+			
+			if (opValue == null) {
+				profileObj.put(option.name(), defaultValue);
+			}else {
+				if (isBoolean(option)) {
+					profileObj.put(option.name(), opValue.getBooleanValue());
+				}else if (opValue.getDoubleValue() != null) {
+					profileObj.put(option.name(), opValue.getDoubleValue());
+				}else if (opValue.getIntegerValue() != null) {
+					profileObj.put(option.name(), opValue.getIntegerValue());
+				}else if (opValue.getStringValue() != null) {
+					profileObj.put(option.name(), opValue.getStringValue());
+				}
 			}
 		}
 		

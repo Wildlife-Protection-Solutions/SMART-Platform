@@ -562,8 +562,6 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		});
 		cmbDataFormat.addSelectionChangedListener(e->changesMade());
 		
-		
-		
 		Label lblSigtingAccuracy = new Label(gpsContainer, SWT.NONE);
 		lblSigtingAccuracy.setText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy);
 		lblSigtingAccuracy.setToolTipText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy_Tooltip);
