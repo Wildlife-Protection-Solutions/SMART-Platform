@@ -19,40 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset.ui.handler;
+package org.wcs.smart.paws.model;
 
-import javax.inject.Named;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.services.IServiceConstants;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.UuidItem;
 
-/**
- * Handler that opens the specified dialog.
- * 
- * @author Emily
- *
- */
-public class ShowDialogHandler{
+@Entity
+@Table(name="smart.paws_configuration")
+public class PawsConfiguration extends UuidItem{
 
-	private Class<? extends Dialog> dialogClass;
+	private ConservationArea ca;
+	private String name;
 	
-	public ShowDialogHandler(Class<? extends Dialog> dialogClass){
-		this.dialogClass = dialogClass;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	public ConservationArea getConservationArea() {
+		return this.ca;
 	}
 	
-	@Execute
-	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell, IEclipseContext context) {
-		try{
-			Dialog d = (Dialog)dialogClass.getDeclaredConstructor(Shell.class).newInstance(activeShell);
-			ContextInjectionFactory.inject(d, context);
-			d.open();
-		}catch (Exception ex){
-			AssetPlugIn.displayLog(ex.getMessage(), ex);
-		}
+	public void setConservationArea(ConservationArea ca) {
+		this.ca = ca;
+	}
+	
+	@Column(name="name")
+	public String getName() {
+		return this.name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
 	}
 }

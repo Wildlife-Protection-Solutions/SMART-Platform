@@ -19,40 +19,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset.ui.handler;
+package org.wcs.smart.paws.model;
 
-import javax.inject.Named;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.services.IServiceConstants;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.ca.UuidItem;
 
-/**
- * Handler that opens the specified dialog.
- * 
- * @author Emily
- *
- */
-public class ShowDialogHandler{
+@Entity
+@Table(name="smart.paws_parameter")
+public class PawsParameter extends UuidItem{
 
-	private Class<? extends Dialog> dialogClass;
+	private PawsConfiguration config;
 	
-	public ShowDialogHandler(Class<? extends Dialog> dialogClass){
-		this.dialogClass = dialogClass;
+	private String key;
+	private String value;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="config_uuid", referencedColumnName="uuid")
+	public PawsConfiguration getConfiguration() {
+		return this.config;
 	}
 	
-	@Execute
-	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell, IEclipseContext context) {
-		try{
-			Dialog d = (Dialog)dialogClass.getDeclaredConstructor(Shell.class).newInstance(activeShell);
-			ContextInjectionFactory.inject(d, context);
-			d.open();
-		}catch (Exception ex){
-			AssetPlugIn.displayLog(ex.getMessage(), ex);
-		}
+	public void setConfiguration(PawsConfiguration config) {
+		this.config = config;
+	}
+	
+	@Column(name="keyid")
+	public String getKey() {
+		return this.key;
+	}
+	
+	public void setKey(String key) {
+		this.key = key;
+	}
+	
+	@Column(name="value")
+	public String getValue() {
+		return this.value;
+	}
+	
+	public void setValue(String value) {
+		this.value = value;
 	}
 }

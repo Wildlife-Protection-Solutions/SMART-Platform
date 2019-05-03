@@ -60,7 +60,7 @@ import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.DataDisplaySettings;
-import org.wcs.smart.asset.ui.SectionHeader;
+import org.wcs.smart.ui.SectionHeader;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**

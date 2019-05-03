@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SMART PAWS Configuration
+Bundle-SymbolicName: org.wcs.smart.paws;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: org.wcs.smart
+Automatic-Module-Name: org.wcs.smart.paws
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Bundle: org.wcs.smart;bundle-version="7.0.0",
+ org.wcs.smart.p2;bundle-version="7.0.0"
+Bundle-Activator: org.wcs.smart.paws.PawsPlugIn
+Bundle-ActivationPolicy: lazy
+Export-Package: org.wcs.smart.paws.model

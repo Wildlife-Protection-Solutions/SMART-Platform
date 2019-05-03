@@ -94,7 +94,6 @@ import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.ui.AssetLabelProvider;
-import org.wcs.smart.asset.ui.SectionHeader;
 import org.wcs.smart.asset.ui.StationDialog;
 import org.wcs.smart.asset.ui.StationLocationDialog;
 import org.wcs.smart.asset.ui.handler.DeleteAssetHandler;
@@ -109,6 +108,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
+import org.wcs.smart.ui.SectionHeader;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 

@@ -37,8 +37,8 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.asset.internal.Messages;
-import org.wcs.smart.asset.ui.SectionHeader;
 import org.wcs.smart.asset.ui.views.data.DataImporterInput.Page;
+import org.wcs.smart.ui.SectionHeader;
 
 /**
  * Asset data importer view

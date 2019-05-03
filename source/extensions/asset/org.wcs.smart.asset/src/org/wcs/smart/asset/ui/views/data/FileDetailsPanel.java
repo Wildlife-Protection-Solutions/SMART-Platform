@@ -65,11 +65,11 @@ import org.wcs.smart.asset.data.importer.ActionableWarning;
 import org.wcs.smart.asset.data.importer.FileMetadataReader;
 import org.wcs.smart.asset.data.importer.FileProxy;
 import org.wcs.smart.asset.internal.Messages;
-import org.wcs.smart.asset.ui.SectionHeader;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.ui.SectionHeader;
 import org.wcs.smart.util.SmartUtils;
 
 import com.drew.metadata.Directory;

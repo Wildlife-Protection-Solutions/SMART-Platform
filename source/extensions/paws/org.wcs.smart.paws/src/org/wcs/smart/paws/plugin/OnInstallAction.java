@@ -19,40 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset.ui.handler;
+package org.wcs.smart.paws.plugin;
 
-import javax.inject.Named;
+import java.util.Map;
 
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.services.IServiceConstants;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.asset.AssetPlugIn;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.p2.common.updatesite.InstallProvisioningAction;
+import org.wcs.smart.paws.PawsPlugIn;
 
 /**
- * Handler that opens the specified dialog.
+ * Action that is called when r plug-in is installed
  * 
  * @author Emily
- *
  */
-public class ShowDialogHandler{
+public class OnInstallAction extends InstallProvisioningAction {
 
-	private Class<? extends Dialog> dialogClass;
-	
-	public ShowDialogHandler(Class<? extends Dialog> dialogClass){
-		this.dialogClass = dialogClass;
-	}
-	
-	@Execute
-	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell, IEclipseContext context) {
+	@Override
+	public IStatus executeInternal(Map<String, Object> parameters) {
+		Job job = new AddPawsJob();
+		job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
+		job.schedule();
 		try{
-			Dialog d = (Dialog)dialogClass.getDeclaredConstructor(Shell.class).newInstance(activeShell);
-			ContextInjectionFactory.inject(d, context);
-			d.open();
-		}catch (Exception ex){
-			AssetPlugIn.displayLog(ex.getMessage(), ex);
+			job.join();
+		}catch(InterruptedException ex){
+			PawsPlugIn.log(ex.getLocalizedMessage(), ex);
 		}
+		return Status.OK_STATUS;
 	}
+
+	@Override
+	protected String getPluginId() {
+		return PawsPlugIn.PLUGIN_ID;
+	}
+
 }

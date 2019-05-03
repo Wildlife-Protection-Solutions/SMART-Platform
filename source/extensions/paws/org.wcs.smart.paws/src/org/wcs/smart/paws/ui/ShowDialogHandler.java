@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Wildlife Conservation Society
+ * Copyright (C) 2016 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset.ui.handler;
+package org.wcs.smart.paws.ui;
 
 import javax.inject.Named;
 
@@ -29,7 +29,7 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.paws.PawsPlugIn;
 
 /**
  * Handler that opens the specified dialog.
@@ -52,7 +52,7 @@ public class ShowDialogHandler{
 			ContextInjectionFactory.inject(d, context);
 			d.open();
 		}catch (Exception ex){
-			AssetPlugIn.displayLog(ex.getMessage(), ex);
+			PawsPlugIn.displayLog(ex.getMessage(), ex);
 		}
 	}
 }

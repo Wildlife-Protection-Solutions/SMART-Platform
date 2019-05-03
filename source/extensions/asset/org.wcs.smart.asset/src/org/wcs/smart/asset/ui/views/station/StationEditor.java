@@ -85,9 +85,9 @@ import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.IdFieldHeader;
-import org.wcs.smart.asset.ui.SectionHeader;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.SectionHeader;
 
 /**
  * Station editor 

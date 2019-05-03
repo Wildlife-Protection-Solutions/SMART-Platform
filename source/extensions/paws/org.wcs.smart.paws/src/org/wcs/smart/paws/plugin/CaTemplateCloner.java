@@ -19,40 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset.ui.handler;
+package org.wcs.smart.paws.plugin;
 
-import javax.inject.Named;
-
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.services.IServiceConstants;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.asset.AssetPlugIn;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.ca.ConservationAreaClonerEngine;
+import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 
 /**
- * Handler that opens the specified dialog.
+ * 
+ * Functionality to clone Conservation Area configuration into
+ * a new Conservation area. 
  * 
  * @author Emily
  *
  */
-public class ShowDialogHandler{
+public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 
-	private Class<? extends Dialog> dialogClass;
+	public static final String ID = "org.wcs.smart.paws.caclone"; //$NON-NLS-1$
 	
-	public ShowDialogHandler(Class<? extends Dialog> dialogClass){
-		this.dialogClass = dialogClass;
+	public CaTemplateCloner() {
 	}
-	
-	@Execute
-	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell, IEclipseContext context) {
-		try{
-			Dialog d = (Dialog)dialogClass.getDeclaredConstructor(Shell.class).newInstance(activeShell);
-			ContextInjectionFactory.inject(d, context);
-			d.open();
-		}catch (Exception ex){
-			AssetPlugIn.displayLog(ex.getMessage(), ex);
-		}
+
+	@Override
+	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {		
+		//copied into the new conservation area; engine provides
+		//details about old and new conservation area mappings between
+		//old object uuids and new object uuid for some objects (data model objects etc)
+
+		//we do not clone anything for the r plugin at this time
 	}
+
 }

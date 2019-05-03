@@ -19,40 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset.ui.handler;
+package org.wcs.smart.paws.ui;
 
-import javax.inject.Named;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.services.IServiceConstants;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.asset.AssetPlugIn;
+public class ShowConfigurationHandler extends ShowDialogHandler{
 
-/**
- * Handler that opens the specified dialog.
- * 
- * @author Emily
- *
- */
-public class ShowDialogHandler{
-
-	private Class<? extends Dialog> dialogClass;
-	
-	public ShowDialogHandler(Class<? extends Dialog> dialogClass){
-		this.dialogClass = dialogClass;
+	public ShowConfigurationHandler() {
+		super(ServerConfigurationDialog.class);
 	}
+
 	
-	@Execute
-	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell, IEclipseContext context) {
-		try{
-			Dialog d = (Dialog)dialogClass.getDeclaredConstructor(Shell.class).newInstance(activeShell);
-			ContextInjectionFactory.inject(d, context);
-			d.open();
-		}catch (Exception ex){
-			AssetPlugIn.displayLog(ex.getMessage(), ex);
+	// E3
+	public static class ShowConfigurationHandlerWrapper extends DIHandler<ShowConfigurationHandler> {
+		public ShowConfigurationHandlerWrapper() {
+			super(ShowConfigurationHandler.class);
 		}
 	}
 }
