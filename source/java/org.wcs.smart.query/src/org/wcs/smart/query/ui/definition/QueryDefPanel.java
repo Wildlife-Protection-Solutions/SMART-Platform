@@ -214,7 +214,7 @@ public class QueryDefPanel {
 				}
 			});
 			tabFolder.setSelection(0);
-//			setQueryDefinitionPanel(((IDefinitionPanel) tabFolder.getItem(0).getData()).getId());
+			setQueryDefinitionPanel(((IDefinitionPanel) tabFolder.getItem(0).getData()).getId());
 
 		}
 		parent.layout(true);
