@@ -86,6 +86,8 @@ import org.wcs.smart.cybertracker.model.CtIncidentLink;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
+import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
@@ -457,6 +459,8 @@ public enum SmartTable {
 	PATROLCTPACKAGE(PatrolCtPackage.class, null),
 	SURVEYCTPACKAGE(SurveyCtPackage.class, null),
 	
+	METADATAVALUES(MetadataFieldValue.class, null),
+	METADTAVALUESUUID(MetadataFieldUuidValue.class, ".metadata.conservationArea"),
 	;
 	
 	public Class<?> hibernateClass;
