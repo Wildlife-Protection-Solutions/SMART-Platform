@@ -128,7 +128,8 @@ public class PatrolQueryOptions {
 	public final static PatrolValueOption[] GRID_ENCOUNTER_RATE_OPTIONS = {
 		PatrolValueOption.DISTANCE,
 		PatrolValueOption.NUM_PATROLS,
-		PatrolValueOption.NUM_DAYS
+		PatrolValueOption.NUM_DAYS,
+		PatrolValueOption.PATROLHOURS_TRACK,
 	};
 
 	

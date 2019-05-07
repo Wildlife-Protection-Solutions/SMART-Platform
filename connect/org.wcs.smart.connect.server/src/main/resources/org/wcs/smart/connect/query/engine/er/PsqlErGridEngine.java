@@ -82,6 +82,7 @@ import org.wcs.smart.query.common.engine.DistanceValueComputer;
 import org.wcs.smart.query.common.engine.ExistsValueComputer;
 import org.wcs.smart.query.common.engine.GridAnalysisEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.TimeValueComputer;
 import org.wcs.smart.query.common.engine.UuidCellMerger;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
@@ -748,6 +749,11 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		if (item.getValueItem() == MissionValueItem.ValueItem.TRACK_LENGTH){
 			AddCellMerger cellMerger = new AddCellMerger();	//adds cell values
 			DistanceValueComputer valueComputer = new DistanceValueComputer();
+			engine = new GridAnalysisEngine<Double>(gridDef, cellMerger, valueComputer);
+			return computeMissionTrack(c, engine, dataField);
+		}else if (item.getValueItem() == MissionValueItem.ValueItem.HOUR_COUNT) {
+			AddCellMerger cellMerger = new AddCellMerger();	//adds cell values
+			TimeValueComputer valueComputer = new TimeValueComputer();
 			engine = new GridAnalysisEngine<Double>(gridDef, cellMerger, valueComputer);
 			return computeMissionTrack(c, engine, dataField);
 		}else if (item.getValueItem() == MissionValueItem.ValueItem.MISSION_COUNT){

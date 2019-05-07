@@ -80,6 +80,7 @@ import org.wcs.smart.query.common.engine.DistanceValueComputer;
 import org.wcs.smart.query.common.engine.ExistsValueComputer;
 import org.wcs.smart.query.common.engine.GridAnalysisEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.TimeValueComputer;
 import org.wcs.smart.query.common.engine.UuidCellMerger;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
@@ -589,6 +590,10 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 		if (option == PatrolValueOption.DISTANCE){
 			AddCellMerger cellMerger = new AddCellMerger();	//adds cell values
 			DistanceValueComputer valueComputer = new DistanceValueComputer();
+			engine = new GridAnalysisEngine<Double>(gridDef, cellMerger, valueComputer);
+		}else if (option == PatrolValueOption.PATROLHOURS_TRACK) {
+			AddCellMerger cellMerger = new AddCellMerger();	//adds cell values
+			TimeValueComputer valueComputer = new TimeValueComputer();
 			engine = new GridAnalysisEngine<Double>(gridDef, cellMerger, valueComputer);
 		}else if (option == PatrolValueOption.NUM_DAYS){	
 			dataField = new String[]{"p_uuid", "pld_patrol_day"}; //$NON-NLS-1$ //$NON-NLS-2$

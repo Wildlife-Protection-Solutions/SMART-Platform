@@ -86,6 +86,7 @@ import org.wcs.smart.query.common.engine.ExistsValueComputer;
 import org.wcs.smart.query.common.engine.GridAnalysisEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.TimeValueComputer;
 import org.wcs.smart.query.common.engine.UuidCellMerger;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
@@ -781,6 +782,11 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			UuidCellMerger cellMerger = new UuidCellMerger();
 			SurveyCntValueComputer valueComputer = new SurveyCntValueComputer();
 			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
+			return computeMissionTrack(c, engine, dataField);
+		}else if (item.getValueItem() == MissionValueItem.ValueItem.HOUR_COUNT) {
+			AddCellMerger cellMerger = new AddCellMerger();	//adds cell values
+			TimeValueComputer valueComputer = new TimeValueComputer();
+			engine = new GridAnalysisEngine<Double>(gridDef, cellMerger, valueComputer);
 			return computeMissionTrack(c, engine, dataField);
 		}else{
 			throw new Exception(MessageFormat.format(Messages.DerbyGridEngine_UnsupportedValue, new Object[]{item.getValueItem().getGuiName(Locale.getDefault())}));

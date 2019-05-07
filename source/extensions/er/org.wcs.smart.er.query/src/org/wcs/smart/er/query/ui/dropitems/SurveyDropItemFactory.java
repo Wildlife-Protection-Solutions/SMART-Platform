@@ -159,6 +159,8 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 				(IValueDropItem)INSTANCE.createMissionLengthValueItem(),
 				(IValueDropItem)INSTANCE.createMissionCountValueItem(),
 				(IValueDropItem)INSTANCE.createSurveyCountValueItem(),
+				(IValueDropItem)INSTANCE.createMissionHourCountValueItem(),
+
 		};
 	}
 	
