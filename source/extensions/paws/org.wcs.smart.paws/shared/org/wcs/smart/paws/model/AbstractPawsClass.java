@@ -21,49 +21,50 @@
  */
 package org.wcs.smart.paws.model;
 
-import java.util.UUID;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.FetchType;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
-import org.wcs.smart.query.model.Query;
+import org.wcs.smart.ca.UuidItem;
 
 @Entity
-@Table(name="smart.paws_query_class")
-public class PawsQueryClass extends AbstractPawsClass{
+@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+public class AbstractPawsClass extends UuidItem{
 
-	private String querytype;
-	private UUID queryuuid;
+	private String classification;
+	private PawsConfiguration config;
 	
-	private Query cachedQuery;
-	
-	@Column(name="query_type")
-	public String getQueryType() {
-		return this.querytype;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="config_uuid", referencedColumnName="uuid")
+	public PawsConfiguration getConfiguration() {
+		return this.config;
 	}
 	
-	public void setQueryType(String querytype) {
-		this.querytype = querytype;
+	public void setConfiguration(PawsConfiguration config) {
+		this.config = config;
 	}
 	
-	@Column(name="query_uuid")
-	public UUID getQueryUuid() {
-		return this.queryuuid;
+	@Column(name="classification")
+	public String getClassification() {
+		return this.classification;
 	}
 	
-	public void setQueryUuid(UUID queryuuid) {
-		this.queryuuid = queryuuid;
+	public void setClassification(String classification) {
+		this.classification = classification;
 	}
 	
-	@Transient
-	public Query getCachedQuery() {
-		return this.cachedQuery;
-	}
-	@Transient
-	public void setCachedQuery(Query cachedQuery) {
-		this.cachedQuery = cachedQuery;
-	}
+
+//	@Column(name="date_range")
+//	public String getDateRange() {
+//		return this.daterange;
+//	}
+//	
+//	public void setDateRange(String daterange) {
+//		this.daterange = daterange;
+//	}
+//	
 }
-

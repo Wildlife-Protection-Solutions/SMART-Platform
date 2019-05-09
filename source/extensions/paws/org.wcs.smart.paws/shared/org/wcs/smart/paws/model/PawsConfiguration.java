@@ -21,12 +21,17 @@
  */
 package org.wcs.smart.paws.model;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
@@ -37,6 +42,7 @@ public class PawsConfiguration extends UuidItem{
 
 	private ConservationArea ca;
 	private String name;
+	private List<PawsParameter> parameters;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -55,5 +61,23 @@ public class PawsConfiguration extends UuidItem{
 	
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="configuration", cascade={CascadeType.ALL}, orphanRemoval = true)
+	public List<PawsParameter> getParameters(){
+		return this.parameters;
+	}
+	
+	public void setParameters(List<PawsParameter> parameters) {
+		this.parameters = parameters;
+	}
+	
+	@Transient
+	public PawsParameter findParameter(String key) {
+		if (getParameters() == null) return null;
+		for (PawsParameter pp : getParameters()) {
+			if (pp.getKey().equals(key)) return pp;
+		}
+		return null;
 	}
 }

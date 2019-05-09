@@ -92,7 +92,7 @@ public class AddPawsJob extends Job {
 	private void createTables(Session session){
 		String[] sql = new String[]{
 				//Tables
-				"CREATE TABLE smart.paws_configuration(uuid char(16) for bit data NOT NULL, ca_uuid char(16) for bit data NOT NULL, name varchar(8192) for bit data NOT NULL, PRIMARY KEY (uuid))", //$NON-NLS-1$
+				"CREATE TABLE smart.paws_configuration(uuid char(16) for bit data NOT NULL, ca_uuid char(16) for bit data NOT NULL, name varchar(8192) NOT NULL, PRIMARY KEY (uuid))", //$NON-NLS-1$
 				"CREATE TABLE smart.paws_parameter( uuid char(16) for bit data NOT NULL, config_uuid char(16) for bit data NOT NULL, keyid varchar(8192) NOT NULL, value varchar(8192), PRIMARY KEY (uuid))", //$NON-NLS-1$
 				"CREATE TABLE smart.paws_query_class(uuid char(16) for bit data NOT NULL, config_uuid char(16) for bit data NOT NULL, query_uuid char(16) for bit data NOT NULL, query_type varchar(32) NOT NULL, date_range varchar(512), classification varchar(512) NOT NULL, PRIMARY KEY (uuid))", //$NON-NLS-1$
 				"CREATE TABLE smart.paws_run(uuid char(16) for bit data NOT NULL, ca_uuid char(16) for bit data NOT NULL, config_uuid char(16) for bit data NOT NULL, id varchar(256) NOT NULL, server_run_id varchar(256), run_date timestamp, package_file varchar(256), result_location varchar(256), status varchar(32) NOT NULL, status_message varchar(8192) PRIMARY KEY (uuid))", //$NON-NLS-1$

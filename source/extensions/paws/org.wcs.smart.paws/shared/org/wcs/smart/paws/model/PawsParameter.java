@@ -34,13 +34,27 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.paws_parameter")
 public class PawsParameter extends UuidItem{
 
+	public static final String AREA_PREFIX = "area:";
+	public static final String FILE_PREFIX = "file:";
+	
+	public static enum FixedParameter{
+		LYR_BOUNDARY,
+		LYR_ROAD,
+		LYR_WATER,
+		LYR_CONTOUR,
+		GRID_SIZE,
+		GRID_CRS,
+		GRID_BNDS,
+		TIMEZONE
+	}
+	
 	private PawsConfiguration config;
 	
 	private String key;
 	private String value;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="config_uuid", referencedColumnName="uuid")
+	@JoinColumn(name="config_uuid")
 	public PawsConfiguration getConfiguration() {
 		return this.config;
 	}

@@ -126,5 +126,20 @@
          </view>
       </perspectiveExtension>
    </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.paws.ui.config.ConfigurationEditor"
+            default="false"
+            id="org.wcs.smart.paws.configuration.editor"
+            name="PAWS Configuration">
+      </editor>
+      <editor
+            class="org.wcs.smart.paws.ui.run.RunEditor"
+            default="false"
+            id="org.wcs.smart.paws.run.editor"
+            name="PAWS Run">
+      </editor>
+   </extension>
 
 </plugin>

@@ -21,14 +21,12 @@
  */
 package org.wcs.smart.paws.model;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -36,45 +34,12 @@ import org.wcs.smart.ca.datamodel.Category;
 
 @Entity
 @Table(name="smart.paws_simple_classification")
-public class PawsSimpleClass extends UuidItem{
+public class PawsSimpleClass extends AbstractPawsClass{
 
-	private PawsConfiguration config;
-	
-	private String daterange;
-	private String classification;
-	
 	private Category category;
 	private Attribute attribute;
 	private AttributeListItem list;
 	private AttributeTreeNode node;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="config_uuid", referencedColumnName="uuid")
-	public PawsConfiguration getConfiguration() {
-		return this.config;
-	}
-	
-	public void setConfiguration(PawsConfiguration config) {
-		this.config = config;
-	}
-	
-	@Column(name="classification")
-	public String getClassification() {
-		return this.classification;
-	}
-	
-	public void setClassification(String classification) {
-		this.classification = classification;
-	}
-	
-	@Column(name="date_range")
-	public String getDateRange() {
-		return this.daterange;
-	}
-	
-	public void setDateRange(String daterange) {
-		this.daterange = daterange;
-	}
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="category_uuid", referencedColumnName="uuid")
