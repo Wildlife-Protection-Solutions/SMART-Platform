@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Set;
@@ -102,6 +103,39 @@ public class ZipUtil {
             	if (!itemsToExclude.contains(f)) {
             		addFileToZip(tOut, directories[i].getAbsoluteFile(), "", itemsToExclude, progress.split(1)); //$NON-NLS-1$
             	}
+            }
+            
+        }
+        return true;
+
+	}
+
+	/**
+	 * Creates a zip file of the set of files.  
+	 * 
+	 * 
+	 * @param directories directories to include in zip
+	 * @param outputZipFile output zip file name
+	 * @param itemsToExclude a set of files to exclude from the backup
+	 * @param monitor progress monitor the progress monitor to use for reporting 
+	 * progress to the user. It is the caller's responsibility to call done() on the given monitor
+	 * @return <code>true</code> if successful <code>false</code> if error
+	 * @throws IOException
+	 */
+	public static boolean createZip(
+			Collection<File> files,
+			File outputZipFile, 			
+			IProgressMonitor monitor) throws IOException{
+
+        SubMonitor progress = SubMonitor.convert(monitor, Messages.ZipUtil_Progress_CreatingZip, 100);
+        progress.subTask(Messages.ZipUtil_Progress_CreatingZip);
+        try (FileOutputStream fOut = new FileOutputStream(outputZipFile);
+        	 BufferedOutputStream bOut = new BufferedOutputStream(fOut);
+        	ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(bOut);){
+            
+            progress.setWorkRemaining(files.size());
+            for (File f : files){
+            	addFileToZip(tOut, f, "", Collections.emptySet(), progress.split(1)); //$NON-NLS-1$
             }
             
         }
