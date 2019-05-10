@@ -115,6 +115,7 @@ public class RunEditor extends MultiPageEditorPart {
 				if (pr == null) return Status.OK_STATUS;
 				
 				pr.getConfiguration().getName();
+				pr.getConservationArea().getFileDataStoreLocation();
 			}
 			
 			PawsRun fpr = pr;

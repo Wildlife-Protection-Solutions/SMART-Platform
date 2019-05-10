@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.paws.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -53,13 +53,18 @@ public class PawsRun extends UuidItem{
 	
 	private String id;
 	private String runid;
+	
 	private LocalDateTime runDate;
+	
+	private LocalDate dataStartDate;
+	private LocalDate dataEndDate;
 	
 	private String packagefile;
 	private String resultslocation;
 	
 	private Status status;
 	private String statusmessage;
+	
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -88,6 +93,24 @@ public class PawsRun extends UuidItem{
 	
 	public void setRunDate(LocalDateTime runDate) {
 		this.runDate = runDate;
+	}
+	
+	@Column(name="data_start_date")
+	public LocalDate getDataStartDate() {
+		return this.dataStartDate;
+	}
+	
+	public void setDataStartDate(LocalDate dataStartDate) {
+		this.dataStartDate = dataStartDate;
+	}
+	
+	@Column(name="data_end_date")
+	public LocalDate getDataEndDate() {
+		return this.dataEndDate;
+	}
+	
+	public void setDataEndDate(LocalDate dataEndDate) {
+		this.dataEndDate = dataEndDate;
 	}
 	
 	@Column(name="id")

@@ -458,7 +458,7 @@ public class ConfigurationEditor extends EditorPart {
 			}
 			
 			try {
-				ContextInjectionFactory.make(NewRunHandler.class, parentContext).createAndRun(config);
+				ContextInjectionFactory.make(NewRunHandler.class, parentContext).createAndRun(config, null, null);
 			} catch (Exception ex) {
 				PawsPlugIn.displayLog("Unable to create new analysis from these settings." + "\n\n" + ex.getMessage(), ex);
 			}

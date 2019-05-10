@@ -1,5 +1,7 @@
 package org.wcs.smart.paws.ui.run;
 
+import java.awt.Desktop;
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
@@ -13,12 +15,18 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.common.control.SmartUiUtils;
+import org.wcs.smart.paws.PawsManager;
+import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.ui.HeaderComposite;
+import org.wcs.smart.util.UiUtils;
 
 public class RunSummaryPage extends EditorPart {
 
@@ -85,7 +93,7 @@ public class RunSummaryPage extends EditorPart {
 		SmartUiUtils.createHeaderLabel(main.getBody(), "Status");
 		
 		Composite scomp = toolkit.createComposite(main.getBody());
-		scomp.setLayout(new GridLayout(2, false));
+		scomp.setLayout(new GridLayout());
 		scomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
 		
 		lblStatus = toolkit.createLabel(scomp, "");
@@ -112,25 +120,55 @@ public class RunSummaryPage extends EditorPart {
 		detailsComp.setLayout(new GridLayout(2, false));
 		
 		toolkit.createLabel(detailsComp, "PAWS Run Id:");
-		toolkit.createLabel(detailsComp, run.getId());
+		toolkit.createLabel(detailsComp, run.getRunId());
 		
 		toolkit.createLabel(detailsComp, "Executed On:");
 		toolkit.createLabel(detailsComp, run.getRunDate() == null ? "" : run.getRunDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)));
 		
 		toolkit.createLabel(detailsComp, "Data Dates:");
-		toolkit.createLabel(detailsComp, "TODO");
+		if (run.getDataEndDate() != null && run.getDataStartDate() != null){
+			String value = run.getDataStartDate().format( DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) ) +
+					" to " + run.getDataEndDate().format( DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) );
+			toolkit.createLabel(detailsComp, value);
+		}else{
+			toolkit.createLabel(detailsComp, "");
+		}
 		
 		toolkit.createLabel(detailsComp, "Settings:");
 		toolkit.createLabel(detailsComp, run.getConfiguration().getName());
 		
 		toolkit.createLabel(detailsComp, "Local Package File:");
-		toolkit.createLabel(detailsComp, run.getPackageFile());
+		if (run.getPackageFile() != null){
+			Hyperlink openhl = toolkit.createHyperlink(detailsComp, run.getPackageFile(), SWT.NONE);
+			openhl.addHyperlinkListener(new IHyperlinkListener() {
+				
+				@Override
+				public void linkExited(HyperlinkEvent e) {}
+				
+				@Override
+				public void linkEntered(HyperlinkEvent e) {}
+				
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					try {
+						Desktop.getDesktop().open(  PawsManager.INSTANCE.getDirectory(run).toFile() );
+					} catch (IOException e1) {
+						PawsPlugIn.displayLog(e1.getMessage(), e1);
+					}
+					
+				}
+			});
+		}else{
+			toolkit.createLabel(detailsComp, "");
+		}
+		
 		
 		toolkit.createLabel(detailsComp, "Local Results File:");
 		toolkit.createLabel(detailsComp, run.getResultLocation());
 		
 		detailsComp.layout(true);
 	}
+
 	@Override
 	public void setFocus() {
 		lblStatus.setFocus();

@@ -23,6 +23,7 @@ package org.wcs.smart.paws.ui;
 
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -265,7 +266,7 @@ public class PawsView {
 		mnuAdd.addListener(SWT.Selection, e->{
 			Object x = tblResults.getStructuredSelection().getFirstElement();
 			if (x instanceof PawsRun) {
-				newRun( ((PawsRun)x).getConfiguration() );
+				newRun( ((PawsRun)x) );
 			}
 		});
 		
@@ -282,7 +283,7 @@ public class PawsView {
 		tiAdd.addListener(SWT.Selection, e->{
 			Object x = tblResults.getStructuredSelection().getFirstElement();
 			if (x instanceof PawsRun) {
-				newRun( ((PawsRun)x).getConfiguration() );
+				newRun( ((PawsRun)x)  );
 			}
 		});
 
@@ -395,9 +396,22 @@ public class PawsView {
 	}
 	
 	private void newRun(Object config) {
-		if (!(config instanceof PawsConfiguration)) return;
+		PawsConfiguration c = null;
+		LocalDate start = null;
+		LocalDate end = null;
+		
+		if (config instanceof PawsConfiguration){
+			c = (PawsConfiguration) config;
+		}
+		if (config instanceof PawsRun){
+			c = ((PawsRun) config).getConfiguration();
+			start = ((PawsRun) config).getDataStartDate();
+			end = ((PawsRun) config).getDataEndDate();
+		}
+		
+		if (c == null) return;
 		try {
-			ContextInjectionFactory.make(NewRunHandler.class, context).createAndRun((PawsConfiguration)config);
+			ContextInjectionFactory.make(NewRunHandler.class, context).createAndRun(c, start, end);
 		}catch (Exception ex) {
 			PawsPlugIn.displayLog(ex.getMessage(), ex);
 		}
