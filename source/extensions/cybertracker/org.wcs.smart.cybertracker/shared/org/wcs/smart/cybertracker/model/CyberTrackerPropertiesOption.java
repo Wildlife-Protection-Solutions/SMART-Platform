@@ -48,6 +48,19 @@ public class CyberTrackerPropertiesOption extends UuidItem {
 	
 	public static final String PROP_SEP = ";"; //$NON-NLS-1$
 	
+
+	public enum Protocol{
+		GEOJSON(4),
+		GEOJSON_COMPRESSED(6);
+		
+		public int ctValue;
+		
+		private Protocol(int ctValue){
+			this.ctValue = ctValue;
+		}
+	}
+	
+	
 	public enum OptionID {
 		STORAGE_TIME,
 		RESIZE_IMAGE,	//how images should be resized;  stored as the name() value of on of the ImageReiszeOption enum values

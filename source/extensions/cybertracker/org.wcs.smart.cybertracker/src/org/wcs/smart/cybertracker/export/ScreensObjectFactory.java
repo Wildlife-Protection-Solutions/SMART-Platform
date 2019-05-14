@@ -24,7 +24,7 @@ package org.wcs.smart.cybertracker.export;
 import java.util.List;
 
 import org.wcs.smart.cybertracker.export.alert.AlertData;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.screens.Controls;
@@ -1206,7 +1206,7 @@ public class ScreensObjectFactory {
 		control.setTranslatePatrolElementId(patrolId);
 		control.setPingOnly(ctBooleanValue(data.getPingOnly()));
 		control.setTranslateElements(trElements);
-		control.setProtocol(CyberTrackerProperties.Protocol.GEOJSON.ctValue);
+		control.setProtocol(CyberTrackerPropertiesOption.Protocol.GEOJSON.ctValue);
 		return control;
 	}	
 	

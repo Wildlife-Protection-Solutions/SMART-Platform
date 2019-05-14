@@ -59,7 +59,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ProjectionFormat;
 
@@ -544,18 +544,18 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		maxPhotoCountDecoration.hide();
 		
 		Label lblDataFormat = new Label(generalContainer, SWT.NONE);
-		lblDataFormat.setText("Data Format:");
-		lblDataFormat.setToolTipText("format of data sent to SMART");
+		lblDataFormat.setText(Messages.CyberTrackerPropertiesComposite_CtDataFormatLbl);
+		lblDataFormat.setToolTipText(Messages.CyberTrackerPropertiesComposite_CtDataFormatTp);
 		
 		cmbDataFormat = new ComboViewer(generalContainer, SWT.READ_ONLY | SWT.DROP_DOWN);
 		cmbDataFormat.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbDataFormat.setContentProvider(ArrayContentProvider.getInstance());
-		cmbDataFormat.setInput(CyberTrackerProperties.Protocol.values());
+		cmbDataFormat.setInput(CyberTrackerPropertiesOption.Protocol.values());
 		cmbDataFormat.setLabelProvider(new LabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element instanceof CyberTrackerProperties.Protocol) {
-					return ((CyberTrackerProperties.Protocol) element).name();
+				if (element instanceof CyberTrackerPropertiesOption.Protocol) {
+					return ((CyberTrackerPropertiesOption.Protocol) element).name();
 				}
 				return super.getText(element);
 			}
@@ -1086,7 +1086,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		ctProperties.setSimpleCamera(btnSimpleCamera.getSelection());
 		ctProperties.setCanPause(btnCanPause.getSelection());
 		ctProperties.setExitPin(Integer.valueOf(txtExitPin.getText()));
-		ctProperties.setDataFormat((CyberTrackerProperties.Protocol) cmbDataFormat.getStructuredSelection().getFirstElement());
+		ctProperties.setDataFormat((CyberTrackerPropertiesOption.Protocol) cmbDataFormat.getStructuredSelection().getFirstElement());
 			
 		ctProperties.setSightingAccuracy(Double.valueOf(txtSightingAccuracy.getText()));
 		ctProperties.setSightingFixCount(Integer.valueOf(txtSightingFixCount.getText()));

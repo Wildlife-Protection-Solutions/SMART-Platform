@@ -82,6 +82,11 @@ import org.wcs.smart.ui.SelectBoundsMapDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Mappackage ui contribution
+ * @author Emily
+ *
+ */
 public class MapPackageUiContribution implements IPackageUiContribution{
 
 	public static final String RE_KEY = "ReferencedEnvelope"; //$NON-NLS-1$

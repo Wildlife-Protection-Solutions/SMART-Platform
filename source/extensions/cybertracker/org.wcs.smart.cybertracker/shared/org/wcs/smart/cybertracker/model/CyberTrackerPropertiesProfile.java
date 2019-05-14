@@ -237,10 +237,10 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	}
 	
 	@Transient
-	public CyberTrackerProperties.Protocol getDataFormat() {
-		return CyberTrackerProperties.Protocol.valueOf( getStringValue(ProfileOptionID.DATA_FORMAT) );
+	public CyberTrackerPropertiesOption.Protocol getDataFormat() {
+		return CyberTrackerPropertiesOption.Protocol.valueOf( getStringValue(ProfileOptionID.DATA_FORMAT) );
 	}
-	public void setDataFormat(CyberTrackerProperties.Protocol dataFormat) {
+	public void setDataFormat(CyberTrackerPropertiesOption.Protocol dataFormat) {
 		getOption(ProfileOptionID.DATA_FORMAT).setStringValue(dataFormat.name());
 	}
 
@@ -527,10 +527,10 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	public Object getDefaultValue(ProfileOptionID option) {
 		switch(option) {
 		case ALLOW_SKIP_MANUAL_GPS: return allowSkipManualGps;
-		case APP_NAME: return "SMART Mobile Application"; 
+		case APP_NAME: return "SMART Mobile Application";  //$NON-NLS-1$
 		case AUTO_NEXT: return autoNext;
 		case CAN_PAUSE: return canPause;
-		case DATA_FORMAT: return CyberTrackerProperties.Protocol.GEOJSON_COMPRESSED.name();
+		case DATA_FORMAT: return CyberTrackerPropertiesOption.Protocol.GEOJSON_COMPRESSED.name();
 		case DILUTION_OF_PRECISION: return dilutionOfPrecision;
 		case DISABLE_EDITING: return disableEditing;
 		case EXIT_PIN: return exitPin;

@@ -22,7 +22,7 @@
 package org.wcs.smart.cybertracker.export.alert;
 
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 
 /**
  * Interface for providing a data target for Cybertracker data.  Only one plugin should
@@ -53,13 +53,13 @@ public interface IDataTargetProvider {
 		private String username; //target username
 		private String password; //target password
 		private Integer frequency; //how often to send data
-		private CyberTrackerProperties.Protocol protocol; //data protocol
+		private CyberTrackerPropertiesOption.Protocol protocol; //data protocol
 		
 		public DataTarget(String url, String username, String password, int frequency){
 			this(url, username, password, frequency, CyberTrackerPlugIn.getDefault().getDefaultCtEncoding());
 		}
 		
-		public DataTarget(String url, String username, String password, int frequency, CyberTrackerProperties.Protocol protocol){
+		public DataTarget(String url, String username, String password, int frequency, CyberTrackerPropertiesOption.Protocol protocol){
 			this.url = url;
 			this.username = username;
 			this.password = password;
@@ -83,7 +83,7 @@ public interface IDataTargetProvider {
 			return this.frequency;
 		}
 		
-		public CyberTrackerProperties.Protocol getProtocol(){
+		public CyberTrackerPropertiesOption.Protocol getProtocol(){
 			return this.protocol;
 		}
 	}

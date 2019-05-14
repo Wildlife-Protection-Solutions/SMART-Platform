@@ -33,7 +33,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
-import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -152,17 +152,17 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	 * 
 	 * @return
 	 */
-	public CyberTrackerProperties.Protocol getDefaultCtEncoding(){
+	public CyberTrackerPropertiesOption.Protocol getDefaultCtEncoding(){
 		if (getDefault().getPreferenceStore().contains(JSON_ENCODING_TYPE_KEY)){
 			try{
-				return CyberTrackerProperties.Protocol.valueOf(getDefault().getPreferenceStore().getString(JSON_ENCODING_TYPE_KEY));
+				return CyberTrackerPropertiesOption.Protocol.valueOf(getDefault().getPreferenceStore().getString(JSON_ENCODING_TYPE_KEY));
 			}catch (Exception ex){
 				log("Invalid cybertracker protocol: " +getDefault().getPreferenceStore().getString(JSON_ENCODING_TYPE_KEY), ex); //$NON-NLS-1$
 			}
 			
 		}
 		//default to compressed JSON
-		return CyberTrackerProperties.Protocol.GEOJSON_COMPRESSED;
+		return CyberTrackerPropertiesOption.Protocol.GEOJSON_COMPRESSED;
 //		return CyberTrackerProperties.Protocol.GEOJSON;
 	}
 	

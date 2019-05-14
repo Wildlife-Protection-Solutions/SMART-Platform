@@ -34,16 +34,15 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage.BaseMapKeys;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -51,6 +50,12 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Contribution for map files
+ * 
+ * @author Emily
+ *
+ */
 public class MapPackageContribution implements IPackageContribution{
 
 	//package files
@@ -68,14 +73,14 @@ public class MapPackageContribution implements IPackageContribution{
 		
 		Label l = new Label(parent, SWT.NONE);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		l.setText("Basemap Files");
+		l.setText(Messages.MapPackageContribution_BasemapFilesOp);
 		((GridData)l.getLayoutData()).verticalIndent = 5;
 		
 		l = new Label(parent, SWT.NONE);
 		l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		String bm = pp.getBasemapDef();
 		if (bm == null) {
-			l.setText("None");
+			l.setText(Messages.MapPackageContribution_NoneLabel);
 		}else {
 			JSONParser parser = new JSONParser();
 			try {
@@ -89,14 +94,14 @@ public class MapPackageContribution implements IPackageContribution{
 					if (bmdef != null) {
 						l.setText(bmdef.getName());
 					}else {
-						l.setText("Unknown");
+						l.setText(Messages.MapPackageContribution_UnknownLabel);
 					}
 				}else {
-					l.setText("Unknown");
+					l.setText(Messages.MapPackageContribution_UnknownLabel);
 				}
 			}catch (Exception ex) {
 				CyberTrackerPlugIn.log(ex.getMessage(), ex);
-				l.setText("Unknown");
+				l.setText(Messages.MapPackageContribution_UnknownLabel);
 			}
 		}
 	}
@@ -138,7 +143,7 @@ public class MapPackageContribution implements IPackageContribution{
 				
 			}
 			if (def == null) {
-				CyberTrackerPlugIn.log("No basemap found for the uuid", null);
+				CyberTrackerPlugIn.log(Messages.MapPackageContribution_BasemapNotFound, null);
 				return new PackageContribution();
 			}
 

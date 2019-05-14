@@ -265,6 +265,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesComposite_ClearButton;
 	public static String CyberTrackerPropertiesComposite_ColorLabel;
 	public static String CyberTrackerPropertiesComposite_ColorSelectionDialogTitle;
+	public static String CyberTrackerPropertiesComposite_CtDataFormatLbl;
+	public static String CyberTrackerPropertiesComposite_CtDataFormatTp;
 	public static String CyberTrackerPropertiesComposite_DilutionOfPrecision;
 	public static String CyberTrackerPropertiesComposite_DilutionOfPrecision_Invalid;
 	public static String CyberTrackerPropertiesComposite_DilutionOfPrecision_Tooltip;
@@ -472,7 +474,9 @@ public class Messages extends NLS {
 	public static String ManageProfilesDialog_LoadProfileList_Task;
 	public static String ManageProfilesDialog_Message;
 	public static String ManageProfilesDialog_Title;
+	public static String MapPackageContribution_BasemapFilesOp;
 	public static String MapPackageContribution_BasemapLabel;
+	public static String MapPackageContribution_BasemapNotFound;
 	public static String MapPackageContribution_BasemapOp;
 	public static String MapPackageContribution_BasemapOpsTitle;
 	public static String MapPackageContribution_BoundsLabel;
@@ -484,8 +488,10 @@ public class Messages extends NLS {
 	public static String MapPackageContribution_MaxLabel;
 	public static String MapPackageContribution_MinLabel;
 	public static String MapPackageContribution_NoBasemap;
+	public static String MapPackageContribution_NoneLabel;
 	public static String MapPackageContribution_TilesCnt;
 	public static String MapPackageContribution_TilesWarnCnt;
+	public static String MapPackageContribution_UnknownLabel;
 	public static String MapPackageContribution_ZoomLabel;
 	public static String MbTileGenerator_LayerName;
 	public static String MbTileGenerator_SubTask1;
