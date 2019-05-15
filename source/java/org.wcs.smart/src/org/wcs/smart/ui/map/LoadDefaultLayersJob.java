@@ -103,10 +103,14 @@ public class LoadDefaultLayersJob extends Job{
 	 * @param basemapUuid
 	 */
 	public LoadDefaultLayersJob(IMap map, UUID basemapUuid){
+		this(map, basemapUuid, true);
+	}
+	
+	public LoadDefaultLayersJob(IMap map, UUID basemapUuid, boolean zoomExtends){
 		super(JOB_NAME);
 		this.map = map;
 		this.basemapUuid = basemapUuid;
-		this.zoomExtents = true;
+		this.zoomExtents = zoomExtends;
 	}
 	
 	@Override

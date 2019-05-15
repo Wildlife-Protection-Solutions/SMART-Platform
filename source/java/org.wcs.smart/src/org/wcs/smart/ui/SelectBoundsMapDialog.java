@@ -145,7 +145,10 @@ public class SelectBoundsMapDialog extends SmartStyledTitleDialog implements Map
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		
-		Composite composite = (Composite) super.createDialogArea(parent);
+		parent = (Composite) super.createDialogArea(parent);
+		
+		Composite composite = new Composite(parent, SWT.NONE);
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridLayout gd = new GridLayout(2, false);
 		gd.marginBottom=0;
 		gd.marginHeight = 0;
@@ -167,7 +170,7 @@ public class SelectBoundsMapDialog extends SmartStyledTitleDialog implements Map
         map.getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 		map.getViewportModelInternal().setCRS(Area.AREA_CRS);
 		
-		LoadDefaultLayersJob layer = new LoadDefaultLayersJob(map, this.basemapUuid);
+		LoadDefaultLayersJob layer = new LoadDefaultLayersJob(map, this.basemapUuid, bounds==null);
 		// we need to do this because this map is in a dialog box and
 		// events does work correctly
 		layer.addJobChangeListener(new JobChangeAdapter() {
@@ -176,8 +179,7 @@ public class SelectBoundsMapDialog extends SmartStyledTitleDialog implements Map
 				if (bounds == null) return;
 				ReferencedEnvelope zoombnds = bounds;
 				try {
-					MathTransform t = CRS.findMathTransform(bounds.getCoordinateReferenceSystem(), map.getViewportModel().getCRS());
-					zoombnds = new ReferencedEnvelope(JTS.transform(bounds, t), SmartDB.DATABASE_CRS);
+					zoombnds = ReprojectUtils.reproject(zoombnds, map.getViewportModel().getCRS());
 				}catch (Exception ex) {
 					SmartPlugIn.log(ex.getMessage(), ex);
 				}
@@ -217,7 +219,7 @@ public class SelectBoundsMapDialog extends SmartStyledTitleDialog implements Map
 			}
 		});
 
-		return composite;
+		return parent;
 	}
 
 	
@@ -335,6 +337,7 @@ public class SelectBoundsMapDialog extends SmartStyledTitleDialog implements Map
 
 	@Override
 	public Map getMap() {
+		if (viewer == null) return null;
 		return viewer.getMap();
 	}
 

@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.geometry.jts.JTS;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -150,5 +151,20 @@ public class ReprojectUtils {
 			Logger.getLogger(Area.class.getName()).log(Level.WARNING, "Failed while converting point to projection", e); //$NON-NLS-1$
 		}
 		return point;
+	}
+	
+	
+	/**
+	 * Re-projects a referenced envelope to target CRS. 
+	 * crs.
+	 * 
+	 * @param env 
+	 * @param targetCrs
+	 * @return
+	 * @throws Exception
+	 */
+	public static ReferencedEnvelope reproject(ReferencedEnvelope env, CoordinateReferenceSystem targetCrs) throws Exception{
+		MathTransform t = CRS.findMathTransform(env.getCoordinateReferenceSystem(), targetCrs);
+		return new ReferencedEnvelope(JTS.transform(env, t), targetCrs);
 	}
 }
