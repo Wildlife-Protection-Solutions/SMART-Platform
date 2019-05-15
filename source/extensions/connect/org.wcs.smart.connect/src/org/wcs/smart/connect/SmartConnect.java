@@ -55,6 +55,7 @@ import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Invocation.Builder;
@@ -80,7 +81,7 @@ import org.eclipse.swt.widgets.Display;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.api.ConnectClient;
 import org.wcs.smart.connect.api.io.IOUtils;
@@ -224,9 +225,9 @@ public class SmartConnect {
 					.setRetryHandler(new DefaultHttpRequestRetryHandler(0, false))
 					.build();
 			
-			ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
+			ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine(httpClient);
 			
-			client = new ResteasyClientBuilder()
+			client = ((ResteasyClientBuilder)ClientBuilder.newBuilder())
 				.httpEngine(engine)
 				.build();
 
