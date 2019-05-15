@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.search;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.geometry.jts.JTS;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.operation.distance.DistanceOp;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -45,12 +50,6 @@ import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.GeometryUtils;
-
-import com.ibm.icu.text.MessageFormat;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.operation.distance.DistanceOp;
 
 /**
  * Spatial search

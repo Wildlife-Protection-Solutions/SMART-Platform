@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.views.query;
 
+import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -31,8 +32,6 @@ import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAtt
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
-
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Tree filter item for system attributes

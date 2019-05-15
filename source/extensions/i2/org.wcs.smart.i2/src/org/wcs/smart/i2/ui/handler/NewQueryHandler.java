@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.handler;
 
+import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -43,8 +44,6 @@ import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
 import org.wcs.smart.i2.ui.views.QueryView;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
 import org.wcs.smart.util.E3Utils;
-
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Open dialog handler

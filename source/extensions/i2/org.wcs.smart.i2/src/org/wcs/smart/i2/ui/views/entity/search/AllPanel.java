@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.views.entity.search;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -96,8 +97,6 @@ import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.UuidUtils;
-
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * All entity table panel for entity search view

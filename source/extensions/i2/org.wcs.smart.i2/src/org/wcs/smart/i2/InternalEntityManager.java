@@ -22,6 +22,7 @@
 package org.wcs.smart.i2;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -44,8 +45,6 @@ import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.views.EntityExportDialog;
 import org.wcs.smart.util.E3Utils;
-
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Common code for managing entities 

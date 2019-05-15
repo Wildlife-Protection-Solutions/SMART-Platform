@@ -24,6 +24,7 @@ package org.wcs.smart.i2.xml;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -82,8 +83,6 @@ import org.wcs.smart.i2.xml.entity.Relationship;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
-
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Convert xml entity file to entity records linking when possible.

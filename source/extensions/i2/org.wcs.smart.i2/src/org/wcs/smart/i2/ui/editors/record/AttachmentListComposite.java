@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.editors.record;
 
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -67,7 +68,6 @@ import org.wcs.smart.i2.ui.handler.OpenAttachmentViewHandler;
 import org.wcs.smart.i2.ui.views.FileSearchView;
 import org.wcs.smart.ui.properties.DialogConstants;
 
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Composite for displaying attachments and thumbnails

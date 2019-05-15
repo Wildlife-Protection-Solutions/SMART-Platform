@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.views;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -51,8 +52,6 @@ import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.search.IntelRecordSearchResultItem;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
-
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Label provider for records list view and various trees/tables

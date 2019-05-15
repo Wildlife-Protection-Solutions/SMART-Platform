@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -77,9 +78,6 @@ import org.wcs.smart.i2.xml.model.RelationshipGroup;
 import org.wcs.smart.i2.xml.model.RelationshipType;
 import org.wcs.smart.i2.xml.model.RelationshipTypeAttribute;
 import org.wcs.smart.util.ZipUtil;
-
-import com.ibm.icu.text.MessageFormat;
-
 /**
  * Converts xml data to intelligence model objects
  * 
