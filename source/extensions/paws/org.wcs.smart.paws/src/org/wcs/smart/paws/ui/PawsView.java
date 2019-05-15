@@ -25,6 +25,7 @@ import java.text.Collator;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -46,6 +47,7 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -55,6 +57,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -79,6 +82,7 @@ import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.ui.config.ConfigEditorInput;
 import org.wcs.smart.paws.ui.config.EditConfigHandler;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.ui.SectionHeader;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -240,12 +244,21 @@ public class PawsView {
 		
 		TableViewerColumn col = new TableViewerColumn(tblResults, SWT.NONE);
 		col.setLabelProvider(new ColumnLabelProvider() {
+			@Override
 			public String getText(Object element) {
 				if (element instanceof PawsRun) {
 					PawsRun pc = (PawsRun)element;
 					return pc.getId();
 				}
 				return super.getText(element);
+			}
+			@Override
+			public Image getImage(Object element){
+				if (element instanceof PawsRun) {
+					PawsRun pc = (PawsRun)element;
+					return PawsManager.INSTANCE.getImage(pc.getStatus());
+				}
+				return super.getImage(element);
 			}
 		});
 		((TableColumnLayout)tpart.getLayout()).setColumnData(col.getColumn(),  new ColumnWeightData(1));
@@ -262,13 +275,28 @@ public class PawsView {
 		
 		MenuItem mnuAdd = new MenuItem(mnu, SWT.PUSH);
 		mnuAdd.setText("Re-Run");
-		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		mnuAdd.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
 		mnuAdd.addListener(SWT.Selection, e->{
 			Object x = tblResults.getStructuredSelection().getFirstElement();
 			if (x instanceof PawsRun) {
 				newRun( ((PawsRun)x) );
 			}
 		});
+		
+		MenuItem mnuCancel = new MenuItem(mnu, SWT.PUSH);
+		mnuCancel.setText(IDialogConstants.CANCEL_LABEL);
+		mnuCancel.addListener(SWT.Selection, e->{
+			cancelRun(tblResults.getStructuredSelection().getFirstElement());
+		});
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		MenuItem mnuRefresh = new MenuItem(mnu, SWT.PUSH);
+		mnuRefresh.setText("Refresh");
+		mnuRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		mnuRefresh.addListener(SWT.Selection, e->refresh());
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
 		
 		MenuItem mnuDelete = new MenuItem(mnu, SWT.PUSH);
 		mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
@@ -278,7 +306,7 @@ public class PawsView {
 		tblResults.getTable().setMenu(mnu);
 		
 		ToolItem tiAdd = new ToolItem(tbResults, SWT.PUSH);
-		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		tiAdd.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
 		tiAdd.setToolTipText("Re-run analysis");
 		tiAdd.addListener(SWT.Selection, e->{
 			Object x = tblResults.getStructuredSelection().getFirstElement();
@@ -294,6 +322,7 @@ public class PawsView {
 		mnuOpen.setEnabled(false);
 		mnuAdd.setEnabled(false);
 		mnuDelete.setEnabled(false);
+		mnuCancel.setEnabled(false);
 		tiAdd.setEnabled(false);
 		tiDelete.setEnabled(false);
 		
@@ -303,6 +332,23 @@ public class PawsView {
 			mnuDelete.setEnabled(!tblResults.getStructuredSelection().isEmpty());
 			tiAdd.setEnabled(!tblResults.getStructuredSelection().isEmpty());
 			tiDelete.setEnabled(!tblResults.getStructuredSelection().isEmpty());
+			
+			mnuCancel.setEnabled(false);
+			Object x = tblResults.getStructuredSelection().getFirstElement();
+			if (x instanceof PawsRun){
+				switch(((PawsRun)x).getStatus()){
+				case COMPILING_DATA:
+				case DOWNLOADING_RESULTS:
+				case RUNNING:
+				case UPLOADING_DATA:
+					mnuCancel.setEnabled(true);
+					return;
+				case COMPLETE:
+				case ERROR:
+					mnuCancel.setEnabled(false);
+					return;
+				}
+			}
 		});
 		return part;
 	}
@@ -340,15 +386,17 @@ public class PawsView {
 		
 		Menu mnu = new Menu(tblConfigs.getTable());
 		
-		MenuItem mnuAdd = new MenuItem(mnu, SWT.PUSH);
-		mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		mnuAdd.addListener(SWT.Selection, e->newConfiguration());
-		
 		MenuItem mnuRun = new MenuItem(mnu, SWT.PUSH);
 		mnuRun.setText("Run");
-		mnuRun.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		mnuRun.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
 		mnuRun.addListener(SWT.Selection, e->newRun(tblConfigs.getStructuredSelection().getFirstElement()));
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		MenuItem mnuAdd = new MenuItem(mnu, SWT.PUSH);
+		mnuAdd.setText("Create New...");
+		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		mnuAdd.addListener(SWT.Selection, e->newConfiguration());
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
 		
@@ -395,23 +443,52 @@ public class PawsView {
 		return part;
 	}
 	
+	private void cancelRun(Object config) {
+		if (!(config instanceof PawsRun)) return;
+		PawsRun pw = (PawsRun)config;
+		
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try{
+				PawsRun rr = session.get(PawsRun.class, pw.getUuid());
+				if (rr != null){
+					rr.setStatus(PawsRun.Status.ERROR);
+					rr.setStatusMessage("Cancelled by user.");
+				}
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				try{
+					session.getTransaction().rollback();
+				}catch (Exception ex2){
+					PawsPlugIn.log(ex2.getMessage(),ex2);
+				}
+				PawsPlugIn.displayLog("Unable to update status." + "\n\n" + ex.getMessage(), ex);
+			}
+		}
+		context.get(IEventBroker.class).post(PawsEvent.PAWS_RUN_MODIFY, Collections.singleton(pw));
+	}
+	
 	private void newRun(Object config) {
 		PawsConfiguration c = null;
 		LocalDate start = null;
 		LocalDate end = null;
+		String id = null;
 		
 		if (config instanceof PawsConfiguration){
 			c = (PawsConfiguration) config;
+			id = c.getName();
 		}
 		if (config instanceof PawsRun){
 			c = ((PawsRun) config).getConfiguration();
 			start = ((PawsRun) config).getDataStartDate();
 			end = ((PawsRun) config).getDataEndDate();
+			id = ((PawsRun) config).getId();
 		}
 		
 		if (c == null) return;
 		try {
-			ContextInjectionFactory.make(NewRunHandler.class, context).createAndRun(c, start, end);
+			id = PawsManager.INSTANCE.generateUniqueName(id, c.getConservationArea());
+			ContextInjectionFactory.make(NewRunHandler.class, context).createAndRun(c, start, end, id);
 		}catch (Exception ex) {
 			PawsPlugIn.displayLog(ex.getMessage(), ex);
 		}
@@ -501,7 +578,7 @@ public class PawsView {
 				if (a.getRunDate() == b.getRunDate()) return Collator.getInstance().compare(a.getId(), b.getId());
 				if (a.getRunDate() == null) return -1;
 				if (b.getRunDate() == null) return 1;
-				return a.getRunDate().compareTo(b.getRunDate());
+				return -1*a.getRunDate().compareTo(b.getRunDate());
 			});
 			
 			Display.getDefault().syncExec(()->{

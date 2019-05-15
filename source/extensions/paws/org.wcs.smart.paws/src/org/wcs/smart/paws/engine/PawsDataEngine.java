@@ -6,9 +6,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -39,12 +37,17 @@ import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsRun.Status;
 import org.wcs.smart.paws.model.PawsSimpleClass;
+import org.wcs.smart.paws.model.PawsWorkspace;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
 public class PawsDataEngine {
 
+	public static final String DATA_FILE_NAME  = "SMARTdata.json";
+	
+	public static final String CONFIG_FILE_NAME  = "config.json";
+	
 	private static AtomicLong tableCnter = new AtomicLong();
 
 	private PawsRun run;
@@ -66,34 +69,27 @@ public class PawsDataEngine {
 			run.getConservationArea().getFileDataStoreLocation();
 		}
 		
-		Path workingDir = Paths.get( run.getConservationArea().getFileDataStoreLocation() )
-				.resolve(PawsPlugIn.PAWS_DIR)
-				.resolve("packaging_" + System.nanoTime());
+		Path workingDir = PawsManager.INSTANCE.getDirectory(run);
 		
 		if (!Files.exists(workingDir)){
 			Files.createDirectories(workingDir);
 		}
 		
-		Path dataFiles = workingDir.resolve("SMARTdata.json");
+		Path dataFiles = workingDir.resolve(DATA_FILE_NAME);
 		packageData(dataFiles);
 		
 		packageBasemapFiles(workingDir);
 		
 		createConfig(workingDir);
 		
-		Path runDir = PawsManager.INSTANCE.getDirectory(run);
-		if (!Files.deleteIfExists(runDir)){
-			Files.createDirectories(runDir);
-		}
-		
-		Path packageFile = runDir.resolve("package.zip");
-		ZipUtil.createZip(new File[]{workingDir.toFile()}, packageFile.toFile(), new NullProgressMonitor());
+//		Path packageFile = runDir.resolve("package.zip");
+//		ZipUtil.createZip(new File[]{workingDir.toFile()}, packageFile.toFile(), new NullProgressMonitor());
 		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
 				session.saveOrUpdate(run);
-				run.setPackageFile(packageFile.getFileName().toString());
+				run.setPackageFile(workingDir.getFileName().toString());
 				run.setStatus(Status.UPLOADING_DATA);
 				run.setRunDate(LocalDateTime.now());
 				session.getTransaction().commit();
@@ -102,11 +98,11 @@ public class PawsDataEngine {
 				throw ex;
 			}
 		}
-		return packageFile;
+		return workingDir;
 	}
 	
 	private void createConfig(Path target) throws Exception{
-		Path configPath = target.resolve("config.json");
+		Path configPath = target.resolve(CONFIG_FILE_NAME);
 		
 		JSONObject config = new JSONObject();
 		
@@ -115,8 +111,15 @@ public class PawsDataEngine {
 			run = (PawsRun) session.merge(run);
 			run.getConfiguration().findParameter(PawsParameter.FixedParameter.TIMEZONE.name());
 			
+			PawsWorkspace ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
+					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
+				
+			if (ws == null || ws.getApiKey() == null || ws.getUrl() == null){
+				throw new Exception("PAWS Workspace not configured.  You must first configure the PAWS Workspace before you can run paws analysis.");
+			}
+			String url = ws.getUrl() + "?" + ws.getApiKey();
+			config.put("container_name", url);
 			
-			config.put("container_name", "TODO");
 			config.put("run_id", run.getRunId());
 			
 			PawsParameter pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.TIMEZONE.name());
@@ -144,7 +147,7 @@ public class PawsDataEngine {
 			};
 			for (PawsParameter.FixedParameter ll : bm){
 				pp = run.getConfiguration().findParameter(ll.name());
-				if (pp != null){
+				if (pp != null && pp.getValue() != null){
 					layers.add(ll.name() + ".zip");
 				}
 			}
@@ -174,6 +177,7 @@ public class PawsDataEngine {
 		try(Session session = HibernateManager.openSession()){
 			configuration = session.get(PawsConfiguration.class, run.getConfiguration().getUuid());
 			configuration.getParameters().forEach(pp->pp.getValue());
+			configuration.getConservationArea().getFileDataStoreLocation();
 		}
 		
 		for (PawsParameter.FixedParameter layer : bm){

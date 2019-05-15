@@ -1,9 +1,11 @@
 package org.wcs.smart.paws.ui.config;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -25,13 +27,18 @@ import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.paws.model.PawsSimpleClass;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
-
+/**
+ * Observation classification composite
+ * 
+ * @author Emily
+ *
+ */
 public class ClassificationComposite extends Composite{
 
-	
 	ClassificationTableComposite classTable;
 	
 	public ClassificationComposite(Composite parent, ConfigurationEditor editor) {
@@ -72,7 +79,11 @@ public class ClassificationComposite extends Composite{
 							QueryEditorInput dragItem = (QueryEditorInput) x;
 							Query temp = QueryHibernateManager.getInstance().findQuery(s, dragItem.getUuid(), dragItem.getType());
 							if (temp != null) {
-								q.add(temp);
+								if (temp instanceof ObservationQuery && temp.getIsShared()){
+									q.add(temp);
+								}else{
+									MessageDialog.openError(getShell(), "Error", MessageFormat.format("The query ''{0}'' is not supported.  Only shared queries that return a list of observations are supported.", temp.getName()));
+								}
 							}	
 						}
 					}

@@ -72,5 +72,10 @@ public class ErrorText extends Composite {
 	public void setText(String text) {
 		txtError.setText(text);
 	}
+	
+	@Override
+	public void setToolTipText(String text){
+		txtError.setToolTipText(text);
+	}
 
 }

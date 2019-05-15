@@ -9,8 +9,11 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.util.UuidUtils;
@@ -98,9 +101,26 @@ public enum PawsManager {
 		broker.post(PawsEvent.PAWS_RUN_DELETE, runs);
 	}
 	
+	public String generateUniqueName(String runname, ConservationArea ca){
+		String id = runname;
+		int cnt = 1;
+		try(Session session = HibernateManager.openSession()){
+			while(true) {
+				if (QueryFactory.buildCountQuery(session, PawsRun.class, 
+						new Object[] {"conservationArea", ca},
+						new Object[] {"id", id}) > 0) {
+					id = runname + " " + (cnt++);
+				}else {
+					break;
+				}
+			}
+		}
+		return id;
+	}
 	public Path getDirectory(PawsConfiguration config) {
 		Path ds = Paths.get(config.getConservationArea().getFileDataStoreLocation())
 				.resolve(PawsPlugIn.PAWS_DIR)
+				.resolve("config")
 				.resolve(UuidUtils.uuidToString(config.getUuid()));
 		return ds;
 	}
@@ -108,7 +128,20 @@ public enum PawsManager {
 	public Path getDirectory(PawsRun config) {
 		Path ds = Paths.get(config.getConservationArea().getFileDataStoreLocation())
 				.resolve(PawsPlugIn.PAWS_DIR)
+				.resolve("run")
 				.resolve(UuidUtils.uuidToString(config.getUuid()));
 		return ds;
+	}
+	
+	public Image getImage(PawsRun.Status status){
+		switch(status){
+		case UPLOADING_DATA:
+		case RUNNING:
+		case DOWNLOADING_RESULTS:
+		case COMPILING_DATA: return PawsPlugIn.getDefault().getImageRegistry().get(PawsPlugIn.ICON_WORKING);
+		case COMPLETE: return PawsPlugIn.getDefault().getImageRegistry().get(PawsPlugIn.ICON_DONE);
+		case ERROR: return PawsPlugIn.getDefault().getImageRegistry().get(PawsPlugIn.ICON_ERROR);
+		}
+		return null;
 	}
 }

@@ -58,6 +58,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.paws.model.AbstractPawsClass;
 import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.paws.model.PawsSimpleClass;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.model.Query;
@@ -131,15 +132,17 @@ public class ClassificationTableComposite extends Composite{
 				}
 			});
 			MenuItem miDataModel = new MenuItem(menu, SWT.PUSH);
+			miDataModel.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON));
 			miDataModel.setText("Data Model...");
 			miDataModel.addListener(SWT.Selection, evt->{
 				addDataModelItems();
 			});
 			
 			MenuItem miQuery = new MenuItem(menu, SWT.PUSH);
+			miQuery.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.QUERY_ICON));
 			miQuery.setText("Query...");
 			miQuery.addListener(SWT.Selection, evt->{
-				
+				addQueryItems();
 			});
 			
 			Point p1 = tableHeader.toDisplay(tb.getLocation());
@@ -359,6 +362,17 @@ public class ClassificationTableComposite extends Composite{
 		fireListeners();
 	}
 	
+	private void addQueryItems() {
+		QueryDialog d = new QueryDialog(getShell());
+		if (d.open() != Window.OK) return;
+		
+		for (PawsQueryClass obj : d.getSelectedItems()) {
+			uiElements.add(new Classification(obj));
+		}
+		updateList();
+		fireListeners();
+	}
+	
 	public List<AbstractPawsClass> getQueries(){
 		List<AbstractPawsClass> configs = new ArrayList<>();
 		for (Classification i : uiElements) {
@@ -486,11 +500,7 @@ public class ClassificationTableComposite extends Composite{
 		public void setText(String text) {
 			l.setText(text);
 		}
-		
-		public String getText() {
-			return l.getText();
-		}
-		
+			
 		private void editItem(boolean edit) {
 			Rectangle r = EditLabel.this.getBounds();
 			if (edit) {

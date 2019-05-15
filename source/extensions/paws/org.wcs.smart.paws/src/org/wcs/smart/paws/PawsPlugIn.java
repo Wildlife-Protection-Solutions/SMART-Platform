@@ -63,6 +63,9 @@ public class PawsPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String DB_VERSION = DB_VERSION_1;
   
+	public static final String ICON_DONE = "org.wcs.smart.paws.icon.done";
+	public static final String ICON_ERROR = "org.wcs.smart.paws.icon.error";
+	public static final String ICON_WORKING = "org.wcs.smart.paws.icon.working";
 	/**
 	 * The constructor
 	 */
@@ -131,7 +134,9 @@ public class PawsPlugIn extends AbstractUIPlugin {
 	@Override
 	protected void initializeImageRegistry(ImageRegistry reg) {
 		super.initializeImageRegistry(reg);
-//	    reg.put(ICON_DOWN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/down.png")); //$NON-NLS-1$
+	    reg.put(ICON_DONE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/status_done.png")); //$NON-NLS-1$
+	    reg.put(ICON_ERROR, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/status_error.png")); //$NON-NLS-1$
+	    reg.put(ICON_WORKING, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/status_working.png")); //$NON-NLS-1$
 	}
 	
 	

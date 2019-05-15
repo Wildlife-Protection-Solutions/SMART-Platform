@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.paws.ui.config;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -57,8 +58,6 @@ import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
-
-import com.ibm.icu.text.MessageFormat;
 
 public class DataModelDialog extends SmartStyledDialog {
 
@@ -146,6 +145,8 @@ public class DataModelDialog extends SmartStyledDialog {
 		});
 		
 		loadDm.schedule();
+		
+		getShell().setText("SMART Data Model");
 		return parent;
 	}
 	

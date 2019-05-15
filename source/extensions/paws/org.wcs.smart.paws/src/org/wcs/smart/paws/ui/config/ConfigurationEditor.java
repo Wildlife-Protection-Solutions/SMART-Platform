@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -42,16 +41,16 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.InjectionException;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -61,37 +60,43 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
-import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.ui.ErrorText;
 import org.wcs.smart.paws.ui.HeaderComposite;
+import org.wcs.smart.paws.ui.HidePartsPartListener;
 import org.wcs.smart.paws.ui.NewRunHandler;
-import org.wcs.smart.paws.ui.ShowRunHandler;
+import org.wcs.smart.ui.SelectBoundsMapDialog;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -104,6 +109,8 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class ConfigurationEditor extends EditorPart {
 
+	private static final String RE_DATA_KEY = "RE";
+
 	public static final String ID = "org.wcs.smart.paws.configuration.editor"; //$NON-NLS-1$
 
 	private static final String CUSTOM_FILE = "Custom File...";
@@ -115,7 +122,7 @@ public class ConfigurationEditor extends EditorPart {
 
 	private HeaderComposite compHeader;
 	private ComboViewer cmbBound, cmbRoad, cmbRiver, cmbContour, cmbCrs, cmbTimeZone;
-	private Text txtBounds;
+	private ErrorText txtBounds;
 	private ErrorText txtGridSize;
 	
 	private ClassificationComposite classComposite;
@@ -356,7 +363,7 @@ public class ConfigurationEditor extends EditorPart {
 		setSite(site);
 		setInput(input);
 		parentContext = (IEclipseContext) getSite().getService(IEclipseContext.class);
-
+		parentContext.get(EPartService.class).addPartListener(HidePartsPartListener.getInstance());
 	}
 
 	private ConfigEditorInput getInputInternal() {
@@ -455,10 +462,12 @@ public class ConfigurationEditor extends EditorPart {
 			PawsConfiguration config = null; 
 			try(Session session = HibernateManager.openSession()){
 				config = session.get(PawsConfiguration.class, getInputInternal().getUuid());
+				config.getConservationArea().getUuid();
 			}
 			
 			try {
-				ContextInjectionFactory.make(NewRunHandler.class, parentContext).createAndRun(config, null, null);
+				String id = PawsManager.INSTANCE. generateUniqueName(config.getName(), config.getConservationArea());
+				ContextInjectionFactory.make(NewRunHandler.class, parentContext).createAndRun(config, null, null, id);
 			} catch (Exception ex) {
 				PawsPlugIn.displayLog("Unable to create new analysis from these settings." + "\n\n" + ex.getMessage(), ex);
 			}
@@ -482,7 +491,7 @@ public class ConfigurationEditor extends EditorPart {
 		if (error != null) return error;
 		
 		Object x = cmbBound.getStructuredSelection().getFirstElement();
-		if (!(x instanceof Area.AreaType || x instanceof Path)) {
+		if (!(x instanceof Area.AreaType || x instanceof Path || x instanceof InternalPath)) {
 			return "Conservation Area Boundary layer is required.";
 		}
 		
@@ -498,6 +507,13 @@ public class ConfigurationEditor extends EditorPart {
 		return null;
 	}
 
+	private void updateBounds(){
+		ReferencedEnvelope env = (ReferencedEnvelope) txtBounds.getData(RE_DATA_KEY);
+		if (env != null){
+			txtBounds.setText(env.getMinX() + "  " + env.getMinY() + "  " + env.getMaxX() + "  " + env.getMaxY());
+		}
+
+	}
 	
 	private void createSettingsComp(Composite parent) {
 		Composite core = toolkit.createComposite(parent);
@@ -562,14 +578,92 @@ public class ConfigurationEditor extends EditorPart {
 		});
 		cmbCrs.getControl().setBackground(inner.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		cmbCrs.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbCrs.addPostSelectionChangedListener(e->setDirty(true));
+		cmbCrs.addPostSelectionChangedListener(e->{
+			//update bounds if valid
+			ReferencedEnvelope re = (ReferencedEnvelope)txtBounds.getData(RE_DATA_KEY);
+			CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
+
+			if (re != null){
+				try{
+					re = ReprojectUtils.reproject(re, crs);
+					txtBounds.setData(RE_DATA_KEY, re);
+					updateBounds();
+				}catch (Exception ex){
+					
+				}
+			}
+			
+			setDirty(true);
+		});
 		
 		l = toolkit.createLabel(inner, "Bounds:");
-		txtBounds = toolkit.createText(inner, "");
+		l.setToolTipText("xmin,ymin,xmax,ymax in selected CRS");
+		
+		Composite bnds = toolkit.createComposite(inner);
+		bnds.setLayout(new GridLayout(2, false));
+		bnds.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
+		((GridLayout)bnds.getLayout()).marginWidth = 0;
+		((GridLayout)bnds.getLayout()).marginHeight = 0;
+		
+		txtBounds = new ErrorText(bnds, txt-> {
+			try {
+				String[] bits = txt.split("\\s+");
+				if (bits.length != 4) throw new Exception();
+				for (int i = 0; i < 4; i ++) Double.parseDouble(bits[i]);
+				return null;
+			}catch (Exception ex) {
+				return "Bounds must be of the format \"xmin ymin xmax ymax\"";
+			}
+		});
 		txtBounds.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
-		txtBounds.addListener(SWT.Modify, e->setDirty(true));
+		txtBounds.addListener(SWT.Modify, e->{
+			try {
+				String[] bits = txtBounds.getText().split("\\s+");
+				if (bits.length != 4) throw new Exception();
+				double xmin= Double.parseDouble(bits[0]);
+				double ymin= Double.parseDouble(bits[1]);
+				double xmax= Double.parseDouble(bits[2]);
+				double ymax= Double.parseDouble(bits[3]);
+				CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
+				txtBounds.setData(RE_DATA_KEY, new ReferencedEnvelope(xmin, xmax, ymin, ymax, crs));
+				
+			}catch (Exception ex) {
+				txtBounds.setData(RE_DATA_KEY, null);
+			}
+			setDirty(true);
+		});
+		
+		Hyperlink lnkBnds = toolkit.createHyperlink(bnds, "select...", SWT.NONE);
+		lnkBnds.addHyperlinkListener(new IHyperlinkListener() {
+			@Override
+			public void linkExited(HyperlinkEvent e) { }
+			@Override
+			public void linkEntered(HyperlinkEvent e) { }
+			
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
+
+				ReferencedEnvelope init = (ReferencedEnvelope) txtBounds.getData(RE_DATA_KEY);
+				SelectBoundsMapDialog md = new SelectBoundsMapDialog(Display.getDefault().getActiveShell(), null, init);
+				if (md.open() != Window.OK){
+					return;
+				}
+				ReferencedEnvelope re = md.getBounds();
+				try {
+					re = ReprojectUtils.reproject(re, crs);
+					txtBounds.setData(RE_DATA_KEY, re);
+					updateBounds();
+				} catch (Exception e1) {
+					PawsPlugIn.displayLog(e1.getMessage(), e1);
+				}
+				
+			}
+		});
 		
 		l = toolkit.createLabel(inner, "Grid Size:");
+		l.setToolTipText("grid units are the units of the selected CRS");
+		
 		txtGridSize = new ErrorText(inner, txt-> {
 			try {
 				Integer.parseInt(txtGridSize.getText());
@@ -680,6 +774,14 @@ public class ConfigurationEditor extends EditorPart {
 				allPrjs.addAll(session.createQuery("FROM Projection WHERE conservationArea = :ca", Projection.class)
 					.setParameter("ca",  SmartDB.getCurrentConservationArea())
 					.list());
+				allPrjs.forEach(prj->{
+					try {
+						prj.setParsedCoordinateReferenceSystem(CRS.parseWKT(prj.getDefinition()));
+					} catch (FactoryException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}	
+				});
 			}
 			
 			final Projection fcurrentPrj = currentPrj;
@@ -744,21 +846,45 @@ public class ConfigurationEditor extends EditorPart {
 							}
 						}
 					}
-					PawsParameter pp = pw.findParameter(PawsParameter.FixedParameter.GRID_BNDS.name());
-					if (pp != null) txtBounds.setText(pp.getValue());
+	
 					
-					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
+					PawsParameter pp = pw.findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
 					if (pp != null) txtGridSize.setText(pp.getValue());
 					
 					pp = pw.findParameter(PawsParameter.FixedParameter.TIMEZONE.name());
 					if (pp != null) cmbTimeZone.setSelection(new StructuredSelection(TimeZone.getTimeZone(pp.getValue())));
 					
+					CoordinateReferenceSystem selectedCrs = null;
 					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
 					if (pp != null) {
 						String uuid = pp.getValue().split(":")[0];
 						Projection temp = new Projection();
 						temp.setUuid( UuidUtils.stringToUuid(uuid) );
 						cmbCrs.setSelection(new StructuredSelection(temp));
+						try {
+							selectedCrs = CRS.parseWKT(pp.getValue().substring(uuid.length() + 1));
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					
+					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_BNDS.name());
+					if (pp != null){
+						try{
+							String[] bits = pp.getValue().split("\\s+");
+							double x1 = Double.parseDouble(bits[0]);
+							double y1 = Double.parseDouble(bits[1]);
+							double x2 = Double.parseDouble(bits[2]);
+							double y2 = Double.parseDouble(bits[3]);
+							ReferencedEnvelope re = new ReferencedEnvelope(x1,x2, y1, y2, selectedCrs);
+							txtBounds.setData(RE_DATA_KEY, re);
+							updateBounds();
+						}catch (Exception ex){
+							txtBounds.setText("");
+						}
+						
+						
 					}
 					
 					setDirty(false);

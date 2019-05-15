@@ -4,14 +4,18 @@ import java.awt.Desktop;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Collections;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -21,23 +25,25 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
+import org.hibernate.Session;
 import org.wcs.smart.common.control.SmartUiUtils;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.ui.HeaderComposite;
-import org.wcs.smart.util.UiUtils;
 
 public class RunSummaryPage extends EditorPart {
 
 	private HeaderComposite header;
-	private Label lblStatus, lblStatusMsg;
+	private Label lblStatus, lblStatusImg, lblStatusMsg;
 	private Composite detailsComp ;
 	
 	private RunEditor parent;
 	private FormToolkit toolkit;
 
-	
+
 	public RunSummaryPage(RunEditor parent) {
 		this.parent = parent;
 	}
@@ -89,15 +95,43 @@ public class RunSummaryPage extends EditorPart {
 		
 		header = new HeaderComposite(main.getBody(), toolkit, main.getFont(), main.getForeground());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		header.addListener(SWT.Selection, e->{
+			if (header.getData("RUN") == null) return;
+			PawsRun run = (PawsRun)header.getData("RUN");
+			run.setId(header.getText());
+			
+			try(Session s = HibernateManager.openSession()){
+				PawsRun toupdate = s.get(PawsRun.class, run.getUuid());
+				s.beginTransaction();
+				try{
+					toupdate.setId(run.getId());
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					try{ s.getTransaction().rollback(); }catch (Exception ex2){ PawsPlugIn.log(ex2.getMessage(),ex2); }
+					PawsPlugIn.displayLog(ex.getMessage(), ex);
+				}
+			}
+			RunSummaryPage.this.parent.setPartName(run.getId());
+			HashMap<Object,Object> info = new HashMap<>();
+			info.put(IEventBroker.DATA, Collections.singletonList(info));
+			info.put(RunEditor.class.toString(), RunSummaryPage.this.parent);
+			RunSummaryPage.this.parent.getContext().get(IEventBroker.class).post(PawsEvent.PAWS_RUN_MODIFY, info);
+			
+		});
 		
 		SmartUiUtils.createHeaderLabel(main.getBody(), "Status");
 		
 		Composite scomp = toolkit.createComposite(main.getBody());
-		scomp.setLayout(new GridLayout());
+		scomp.setLayout(new GridLayout(2, false));
 		scomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
 		
+		lblStatusImg = toolkit.createLabel(scomp, "");
+		
 		lblStatus = toolkit.createLabel(scomp, "");
-		lblStatusMsg = toolkit.createLabel(scomp, "");
+		lblStatus.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		lblStatusMsg = toolkit.createLabel(scomp, "", SWT.WRAP);
+		lblStatusMsg.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 				
 		
 		SmartUiUtils.createHeaderLabel(main.getBody(), "Details");
@@ -108,12 +142,12 @@ public class RunSummaryPage extends EditorPart {
 	}
 
 	public void init(PawsRun run) {
+		lblStatusImg.setImage(PawsManager.INSTANCE.getImage(run.getStatus()));
 		lblStatus.setText(run.getStatus().name());
 		if (run.getStatusMessage() != null) lblStatusMsg.setText(run.getStatusMessage());
 		
-		lblStatus.getParent().layout(true);
-		
 		header.setText(run.getId());
+		header.setData("RUN", run);
 		
 		for (Control kid : detailsComp.getChildren()) kid.dispose();
 		
@@ -167,6 +201,8 @@ public class RunSummaryPage extends EditorPart {
 		toolkit.createLabel(detailsComp, run.getResultLocation());
 		
 		detailsComp.layout(true);
+		header.getParent().layout(true);
+		
 	}
 
 	@Override

@@ -25,59 +25,47 @@ public class NewRunHandler {
 	@Inject
 	private IEclipseContext context;
 	
-	public void createAndRun(PawsConfiguration config, LocalDate start, LocalDate end) throws Exception {
+	public void createAndRun(PawsConfiguration config, LocalDate start, LocalDate end, String initName) throws Exception {
 		
-		DateDialog dialog = new DateDialog(context.get(Shell.class));
+		RunDialog dialog = new RunDialog(context.get(Shell.class));
 		if (start != null)dialog.setStart(start);
 		if (end != null) dialog.setEnd(end);
+		if (initName != null) dialog.setId(initName);
+		
 		if (dialog.open() != Window.OK) return;
 		
 		start = dialog.getStartDate();
 		end = dialog.getEndDate();
+		initName = dialog.getId();
 		
-		PawsRun rr = createInternal(config, start, end);
+		PawsRun rr = createInternal(config, start, end, initName);
 		
 		//TODO: run
 		run(rr);
 		
 		open(rr);
 	}
-	
-//	public void create(PawsConfiguration config) throws Exception{
-//		PawsRun rr = createInternal(config);
-//		open(rr);
-//		
-//	}
-	
-	private PawsRun createInternal(PawsConfiguration config, LocalDate start, LocalDate end) throws Exception{
+
+	private PawsRun createInternal(PawsConfiguration config, LocalDate start, LocalDate end, String initName) throws Exception{
 		PawsRun prun = null;
 		
 		try(Session session = HibernateManager.openSession()){
 			PawsConfiguration pw = session.get(PawsConfiguration.class, config.getUuid());
 			if (pw == null) throw new Exception("Configuration not found.");
-					
-			String id = pw.getName();
-			int cnt = 1;
-			while(true) {
-				if (QueryFactory.buildCountQuery(session, PawsRun.class, 
-						new Object[] {"conservationArea", pw.getConservationArea()},
-						new Object[] {"id", id}) > 0) {
-					id = pw.getName() + " " + (cnt++);
-				}else {
-					break;
-				}
-			}
 			session.beginTransaction();
 			try {
 				prun = new PawsRun();
 				prun.setConfiguration(pw);
 				prun.setConservationArea(pw.getConservationArea());
-				prun.setId(id);
-				prun.setRunId( UuidUtils.uuidToString( UUID.randomUUID() ));
+				prun.setId(initName);
+				
 				prun.setStatus(PawsRun.Status.COMPILING_DATA);
 				prun.setDataStartDate(start);
 				prun.setDataEndDate(end);
 				session.save(prun);
+				
+				prun.setRunId( UuidUtils.uuidToString( prun.getUuid() ));
+				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				throw ex;
@@ -94,7 +82,7 @@ public class NewRunHandler {
 	}
 	
 	private void run(PawsRun rr){
-		PawsRunJob job = new PawsRunJob(rr);
+		PawsRunJob job = new PawsRunJob(rr, context.get(IEventBroker.class));
 		job.schedule();
 	}
 }

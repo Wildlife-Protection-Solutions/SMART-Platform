@@ -108,6 +108,7 @@
          point="org.eclipse.ui.views">
       <view
             class="org.wcs.smart.paws.ui.PawsView$PawsViewWrapper"
+            icon="images/icons/run.png"
             id="org.wcs.smart.paws.view"
             name="PAWS "
             restorable="true">
@@ -131,15 +132,23 @@
       <editor
             class="org.wcs.smart.paws.ui.config.ConfigurationEditor"
             default="false"
+            icon="images/icons/config.png"
             id="org.wcs.smart.paws.configuration.editor"
             name="PAWS Configuration">
       </editor>
       <editor
             class="org.wcs.smart.paws.ui.run.RunEditor"
             default="false"
+            icon="images/icons/run.png"
             id="org.wcs.smart.paws.run.editor"
             name="PAWS Run">
       </editor>
+   </extension>
+   <extension
+         point="org.wcs.smart.caLogin">
+      <loginHandler
+            clazz="org.wcs.smart.paws.LoginHandler">
+      </loginHandler>
    </extension>
 
 </plugin>

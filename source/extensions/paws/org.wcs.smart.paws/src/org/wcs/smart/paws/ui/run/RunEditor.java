@@ -1,19 +1,33 @@
 package org.wcs.smart.paws.ui.run;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.osgi.service.event.EventHandler;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsRun;
+import org.wcs.smart.paws.ui.HidePartsPartListener;
+import org.wcs.smart.paws.ui.config.ConfigurationEditor;
 
 public class RunEditor extends MultiPageEditorPart {
 
@@ -24,19 +38,67 @@ public class RunEditor extends MultiPageEditorPart {
 	private RunSummaryPage summaryPage;
 	private RunResultsPage resultsPage;
 	
+	private List<EventHandler> handlers = null;
+	private IEclipseContext context;
 	
 	/**
 	 * Default constructor
 	 */
 	public RunEditor() {
-		super();
-		
-	
+		super();	
 	}
 
 	@Override
 	public void dispose() {
 		toolkit.dispose();	
+		
+		IEventBroker event = context.get(IEventBroker.class);
+		if (handlers != null){
+			handlers.forEach((h)->event.unsubscribe(h));
+		}
+		handlers = null;
+	}
+	
+	private void forceCloseEditor(){
+		getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RunEditor.this, false);
+	}
+	
+	private void subscribeToEvent(String eventTopic, EventHandler handler){
+		context.get(IEventBroker.class).subscribe(eventTopic, handler);
+		handlers.add(handler);
+	}
+	
+	private void createEventHandlers() {
+		//on delete close editor
+		handlers = new ArrayList<>();
+		
+		subscribeToEvent(PawsEvent.PAWS_RUN_DELETE, (event)->{
+			Object data = event.getProperty(IEventBroker.DATA);
+			if (data != null){
+				Collection<PawsRun> items = (Collection<PawsRun>)data;
+				for (PawsRun pc : items){
+					if (pc.getUuid().equals(getInputInternal().getUuid())) forceCloseEditor();
+				}
+			}
+		});
+
+		subscribeToEvent(PawsEvent.PAWS_RUN_MODIFY, (event)->{
+			Object src = event.getProperty(RunEditor.class.toString());
+			if (src != null && src == RunEditor.this) return;
+			
+			Object data = event.getProperty(IEventBroker.DATA);
+			if (data != null){
+				Collection<PawsRun> items = (Collection<PawsRun>)data;
+				for (PawsRun pc : items){
+					if (pc.getUuid().equals(getInputInternal().getUuid())) initEditor();
+				}
+			}
+		});
+		
+		
+		subscribeToEvent(SmartPlugIn.E4_DATABASE_CHANGED_EVENT, e->{
+			initEditor();
+		});
 	}
 	
 	private RunEditorInput getInputInternal() {
@@ -50,6 +112,8 @@ public class RunEditor extends MultiPageEditorPart {
 		}
 		setSite(site);
 		setInput(input);
+		context = (IEclipseContext) getSite().getService(IEclipseContext.class);
+		context.get(EPartService.class).addPartListener(HidePartsPartListener.getInstance());
 	}
 
 	
@@ -94,6 +158,7 @@ public class RunEditor extends MultiPageEditorPart {
 			PawsPlugIn.displayLog("Error opening PAWS Analysis" + "\n\n" + ex.getMessage(), ex);
 			throw new RuntimeException(ex);
 		}
+		createEventHandlers();
 		initEditor();
 	}
 	
@@ -101,7 +166,14 @@ public class RunEditor extends MultiPageEditorPart {
 		loadSettings.schedule();
 	}
 	
-
+	public void setPartName(String name){
+		super.setPartName(name);
+	}
+	
+	public IEclipseContext getContext(){
+		return this.context;
+	}
+	
 	private Job loadSettings = new Job("loading paws run settings") {
 
 		@Override

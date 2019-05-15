@@ -33,6 +33,7 @@ import com.microsoft.rest.v2.util.FlowableUtil;
 import io.reactivex.*;
 import io.reactivex.Flowable;
 
+@SuppressWarnings({"resource", "nls"})
 public class Quickstart {
 	
     static File createTempFile() throws IOException {
@@ -41,7 +42,7 @@ public class Quickstart {
         File sampleFile = null;
         sampleFile = File.createTempFile("sampleFile", ".txt");
         System.out.println(">> Creating a sample file at: " + sampleFile.toString());
-        Writer output = new BufferedWriter(new FileWriter(sampleFile));
+		Writer output = new BufferedWriter(new FileWriter(sampleFile));
         output.write("Hello Azure!");
         output.close();
 

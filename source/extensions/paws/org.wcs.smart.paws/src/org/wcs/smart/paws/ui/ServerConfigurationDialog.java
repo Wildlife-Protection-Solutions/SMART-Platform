@@ -80,6 +80,7 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 				}
 				service.setApiKey(txtServerKey.getText());
 				service.setUrl(txtServerURL.getText());
+				session.saveOrUpdate(service);
 				
 				PawsWorkspace ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult();
@@ -89,12 +90,15 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 				}
 				ws.setApiKey(txtWorkspaceKey.getText());
 				ws.setUrl(txtWorkspaceURL.getText());
+				session.saveOrUpdate(ws);
 				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				PawsPlugIn.displayLog("Unable to save changes to PAWS Server configurations." + "\n\n" + ex.getMessage(), ex);
+				return;
 			}
 		}
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
 	
 	@Override
@@ -140,32 +144,35 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 		txtServerKey.addListener(SWT.Modify, modifiedlistener);
 		
 		
-		SmartUiUtils.createHeaderLabel(main, "PAWS Workspace");
+		SmartUiUtils.createHeaderLabel(main, "PAWS Workspace / Microsoft Azure Blob Storage");
 		
 		Composite pawws = new Composite(main, SWT.NONE);
 		pawws.setLayout(new GridLayout(2, false));
 		((GridLayout)pawws.getLayout()).marginWidth = 0;
 		((GridLayout)pawws.getLayout()).marginHeight = 0;
-		pawws.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		pawws.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		infoMessage = new Label(pawws, SWT.NONE);
 		infoMessage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		infoMessage.setText("This must be a link to a Microsoft Azure cloud service");
+		infoMessage.setText("A link to the Microsoft Azure blob container URL for temporarily storing working data and paws results");
 		
 		
 		l = new Label(pawws, SWT.NONE);
-		l.setText("URL:");
+		l.setText("Container URL:");
 		
 		txtWorkspaceURL = new Text(pawws, SWT.BORDER);
 		txtWorkspaceURL.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtWorkspaceURL.setText(DialogConstants.LOADING_TEXT);
+		txtWorkspaceURL.setText("https://<your blob>.blob.core.windows.net/<your container>");
 		txtWorkspaceURL.addListener(SWT.Modify, modifiedlistener);
 		
 		l = new Label(pawws, SWT.NONE);
-		l.setText("API Key:");
+		l.setText("Shared Access Signature:");
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
-		txtWorkspaceKey = new Text(pawws, SWT.BORDER);
-		txtWorkspaceKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtWorkspaceKey = new Text(pawws, SWT.BORDER  | SWT.WRAP | SWT.V_SCROLL);
+		txtWorkspaceKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)txtWorkspaceKey.getLayoutData()).heightHint = 80;
 		txtWorkspaceKey.setText(DialogConstants.LOADING_TEXT);
 		txtWorkspaceKey.addListener(SWT.Modify, modifiedlistener);
 	
@@ -200,7 +207,7 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 				
 				if (fws == null) {
 					txtWorkspaceKey.setText("");
-					txtWorkspaceURL.setText("");
+					//txtWorkspaceURL.setText("");
 				}else {
 					txtWorkspaceKey.setText(fws.getApiKey());
 					txtWorkspaceURL.setText(fws.getUrl());
