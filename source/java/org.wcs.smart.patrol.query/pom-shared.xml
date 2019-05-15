@@ -14,6 +14,28 @@
 	<name>Patrol Query Module</name>
 	<packaging>bundle</packaging>
 	
+	
+	<!-- without using the eclipse complier we get -->
+	<!--  code too large for try statement errors -->
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.6.0</version>
+				<configuration>
+					<compilerId>eclipse</compilerId>
+				</configuration>
+        			<dependencies>
+          				<dependency>
+            					<groupId>org.codehaus.plexus</groupId>
+            					<artifactId>plexus-compiler-eclipse</artifactId>
+            					<version>2.8.1</version>
+          				</dependency>
+        			</dependencies>
+      			</plugin>
+    		</plugins>
+  	</build>
+  
 	<dependencies>
 		<dependency>
     			<groupId>org.wcs.smart.core</groupId>

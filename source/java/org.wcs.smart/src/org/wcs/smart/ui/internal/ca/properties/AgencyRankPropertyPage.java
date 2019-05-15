@@ -22,6 +22,7 @@
 package org.wcs.smart.ui.internal.ca.properties;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -95,8 +96,6 @@ import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.KeyInputDialog;
 import org.wcs.smart.ui.properties.LanguageViewer;
 import org.wcs.smart.util.SmartUtils;
-
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Rank and Agency list property page

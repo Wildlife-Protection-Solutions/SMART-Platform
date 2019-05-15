@@ -22,6 +22,7 @@
 package org.wcs.smart.ui.ca.datamodel;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -55,8 +56,6 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.user.UserLevelManager;
-
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * 

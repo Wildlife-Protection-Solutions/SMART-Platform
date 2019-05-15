@@ -49,6 +49,11 @@
    </element>
 
    <element name="loginHandler">
+      <annotation>
+         <documentation>
+            Use this element to run code when a user logs into a Conservation Area.  This will be run UI thread after the user has been validated and set.
+         </documentation>
+      </annotation>
       <complexType>
          <attribute name="clazz" type="string" use="required">
             <annotation>
@@ -64,6 +69,11 @@
    </element>
 
    <element name="windowHandler">
+      <annotation>
+         <documentation>
+            Use this element to run code after the user logs in, but before the main window is configured.  This allows for changing of the e4 application model if required.
+         </documentation>
+      </annotation>
       <complexType>
          <attribute name="class" type="string">
             <annotation>

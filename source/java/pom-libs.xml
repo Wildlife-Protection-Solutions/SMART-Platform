@@ -8,11 +8,17 @@
 	<name>SMART</name>
 	<packaging>pom</packaging>
 	
+	 <properties>
+        	<lib.dir>${basedir}/lib</lib.dir>
+       		<lib.source.dir>${basedir}/lib-src</lib.source.dir>
+	</properties>
+    
 	<modules>
 		<module>org.wcs.smart/pom-libs.xml</module>
 		<module>org.wcs.smart.hibernate.libs/pom-libs.xml</module>
 		<module>org.wcs.smart.patrol/pom-libs.xml</module>
 		<module>../extensions/i2/org.wcs.smart.i2/pom-libs.xml</module>
+		<module>../extensions/paws/org.wcs.smart.paws/pom-libs.xml</module>
 		<module>../extensions/connect/org.wcs.smart.connect/pom-libs.xml</module>
 	</modules>
 	
@@ -23,7 +29,7 @@
 			<name>OpenGeo Maven Repository</name>
 			<url>https://repo.boundlessgeo.com/main/</url>
 			<snapshots><enabled>false</enabled></snapshots>
-    		</repository>    			
+    		</repository>    	
 	</repositories>
 	
 	<build>
@@ -40,6 +46,13 @@
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
+						<fileset>
+                            				<directory>${basedir}/lib-src</directory>
+                            				<includes>
+                                				<include>*.*</include>
+                            				</includes>
+                            				<followSymlinks>false</followSymlinks>
+                        			</fileset>
 					</filesets>
 				</configuration>
 			</plugin>
@@ -62,7 +75,24 @@
 							<excludeScope>provided</excludeScope>
 						</configuration>
 					</execution>
+					<execution>
+						<id>copy-dependencies-sources</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<classifier>sources</classifier>
+                            				<outputDirectory>${basedir}/lib-src</outputDirectory>
+                            				<overWriteReleases>false</overWriteReleases>
+                            				<overWriteSnapshots>false</overWriteSnapshots>
+                            				<overWriteIfNewer>true</overWriteIfNewer>
+                            				<excludeScope>provided</excludeScope>
+                            				<failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
+                        			</configuration>
+                    			</execution>
 				</executions>
+				
 			</plugin>
 		</plugins>
 	</build>
