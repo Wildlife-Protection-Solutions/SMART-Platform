@@ -70,6 +70,12 @@
       <templateCloner
             class="org.wcs.smart.paws.plugin.CaTemplateCloner"
             id="org.wcs.smart.paws.caclone">
+         <require
+               id="org.wcs.smart.QueryCloner">
+         </require>
+         <require
+               id="org.wcs.smart.query.*">
+         </require>
       </templateCloner>
    </extension>
    <extension
@@ -118,6 +124,16 @@
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
             targetID="org.wcs.smart.query.persepectives.single">
+         <view
+               id="org.wcs.smart.paws.view"
+               minimized="false"
+               relationship="stack"
+               relative="org.wcs.smart.query.parts.itemlist"
+               visible="true">
+         </view>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.wcs.smart.query.persepectives.multi">
          <view
                id="org.wcs.smart.paws.view"
                minimized="false"

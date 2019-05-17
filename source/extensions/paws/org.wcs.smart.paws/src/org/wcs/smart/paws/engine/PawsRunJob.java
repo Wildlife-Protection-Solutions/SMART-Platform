@@ -176,7 +176,12 @@ public class PawsRunJob extends Job{
 							}
 						}
 					},
-					error->{uperror[0] = error;});
+					error->{
+						uperror[0] = error;
+						synchronized (lock) {
+							lock.notifyAll();
+						}
+					});
 		
 		//wait for transfer to finish
 		synchronized (lock) {

@@ -223,10 +223,14 @@ public class PawsDataEngine {
 			List<PawsQueryClass> queries = QueryFactory.buildQuery(session, PawsQueryClass.class, 
 					new Object[] {"configuration", configuration}).list();
 			
+			
+			
 			StringBuilder create = new StringBuilder();
 			create.append("CREATE TABLE ");
 			create.append(mastertable);
 			create.append("( wp_uuid char(16) for bit data, obs_uuid char(16) for bit data, x double, y double, datetime timestamp ");
+			
+			if (simple.isEmpty() && queries.isEmpty()) return;
 			
 			StringBuilder select = new StringBuilder();
 			select.append("SELECT ");

@@ -51,15 +51,35 @@ public class DeleteCaHandler implements ICaDeleteHandler {
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
 		
-		monitor.subTask("removing R plugin data"); //$NON-NLS-1$
+		monitor.subTask("removing PAWS plugin data"); //$NON-NLS-1$
 		
-		Query<?>  q = session.createQuery("DELETE from RQuery where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?>  q = session.createQuery("DELETE FROM PawsWorkspace WHERE conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		q = session.createQuery("DELETE from RScript where conservationArea = :ca"); //$NON-NLS-1$
+		q = session.createQuery("DELETE FROM PawsService WHERE conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();		
+		
+		q = session.createQuery("DELETE FROM PawsRun WHERE conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("DELETE FROM PawsSimpleClass WHERE configuration IN (FROM PawsConfiguration WHERE conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("DELETE FROM PawsQueryClass WHERE configuration IN (FROM PawsConfiguration WHERE conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("DELETE FROM PawsParameter WHERE configuration IN (FROM PawsConfiguration WHERE conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("DELETE FROM PawsConfiguration WHERE conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
 	}
 
 }

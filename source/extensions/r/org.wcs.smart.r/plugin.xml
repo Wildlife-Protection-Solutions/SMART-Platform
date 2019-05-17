@@ -172,6 +172,16 @@
                visible="true">
          </view>
       </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.wcs.smart.query.persepectives.multi">
+         <view
+               id="org.wcs.smart.r.view.rscripts"
+               minimized="false"
+               relationship="stack"
+               relative="org.wcs.smart.query.parts.itemlist"
+               visible="true">
+         </view>
+      </perspectiveExtension>
    </extension>
    <extension
          point="org.wcs.smart.caFilestoreDir">

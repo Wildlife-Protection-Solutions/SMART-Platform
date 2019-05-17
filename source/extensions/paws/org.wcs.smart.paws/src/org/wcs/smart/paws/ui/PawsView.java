@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -45,33 +46,36 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -81,10 +85,13 @@ import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.ui.config.ConfigEditorInput;
+import org.wcs.smart.paws.ui.config.ConfigurationEditor;
 import org.wcs.smart.paws.ui.config.EditConfigHandler;
+import org.wcs.smart.paws.ui.run.RunEditor;
+import org.wcs.smart.paws.ui.run.RunEditorInput;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.ui.SectionHeader;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Simple view for listing R scripts and queries
@@ -98,20 +105,12 @@ public class PawsView {
 	public static final String ID = "org.wcs.smart.paws.view"; //$NON-NLS-1$
 
 	private FormToolkit toolkit;
-	
-	private Composite content;
-	
-	private Composite resultsComposite;
-	private Composite configComposite;
-	
+		
 	private TableViewer tblConfigs;
 	private TableViewer tblResults;
-	
-	private ToolBar tbConfig;
-	private ToolBar tbResults;
 
-	@Inject
-	private IEclipseContext context;
+	@Inject private IEclipseContext context;
+	@Inject private MPart part;
 	
 	/**
 	 * Default constructor
@@ -137,7 +136,7 @@ public class PawsView {
 	private void pawsRunModified(@EventTopic(PawsEvent.PAWS_RUN_ALL) Object data){
 		refresh();
 	}
-	
+
 	@PreDestroy
 	public void dispose() {		
 
@@ -154,68 +153,18 @@ public class PawsView {
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
 
-		
 		Composite main = toolkit.createComposite(parent, SWT.BORDER);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)main.getLayout()).marginWidth = 0;
 		((GridLayout)main.getLayout()).marginHeight = 0;
 
-		Composite headerMain = toolkit.createComposite(main, SWT.NONE);
-		headerMain.setLayout(new GridLayout());
-		headerMain.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridLayout)headerMain.getLayout()).marginWidth = 0;
-		((GridLayout)headerMain.getLayout()).marginHeight = 0;
+		SashForm sash = new SashForm(main, SWT.VERTICAL );
+		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		SectionHeader header = new SectionHeader(headerMain, SWT.NONE,
-				new String[] {"Results", "Configurations"},
-				new Listener[] {
-						e->{
-							((StackLayout)content.getLayout()).topControl = resultsComposite;
-							content.layout(true);
-							tbConfig.setVisible(false);
-							((GridData)tbConfig.getLayoutData()).widthHint = 0;
-							
-							tbResults.setVisible(true);
-							((GridData)tbResults.getLayoutData()).widthHint = tbResults.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-							tbResults.getParent().layout(true);
-						},
-						e->{
-							((StackLayout)content.getLayout()).topControl = configComposite;
-							content.layout(true);
-							tbConfig.setVisible(true);
-							((GridData)tbConfig.getLayoutData()).widthHint = tbConfig.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-							tbResults.setVisible(false);
-							((GridData)tbResults.getLayoutData()).widthHint = 0;
-							tbResults.getParent().layout(true);
-						}
-				});
-		
-		((GridLayout)header.getLayout()).numColumns = 5;
-		Label spacer = toolkit.createLabel(header, "", SWT.NONE); //$NON-NLS-1$
-		spacer.setBackground(spacer.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		spacer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		
-		tbResults = new ToolBar(header, SWT.FLAT);
-		tbResults.setBackground(header.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		tbResults.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-		tbConfig = new ToolBar(header, SWT.FLAT );
-		tbConfig.setBackground(header.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		tbConfig.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-		
-		tbResults.setVisible(false);
-		tbConfig.setVisible(false);
-		
-		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		content = toolkit.createComposite(main, SWT.NONE);
-		content.setLayout(new StackLayout());
-		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		resultsComposite = createResultsPanel(content);
-		configComposite = createConfigurationPanel(content);
-		
-		header.selectPanel(0);
+		createResultsPanel(sash);
+		createConfigurationPanel(sash);
+		sash.setWeights(new int[]{7,3});
 		
 		refresh();
 	}
@@ -223,6 +172,32 @@ public class PawsView {
 	
 	@Inject
 	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent){
+		if (partEvent == null) return;
+		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+//		if (activePart.equals(part)){
+//			//this is necessary to get the menus to show up correctly if you right click on the current selection
+//			//when the focus is not on the current view (run a report, click on the report view, then right click on the report
+//			//item in the report list.  Without this, the menu will not display correctly.
+//			queryList.setSelection(queryList.getSelection());
+//			return;
+//		}
+		
+		Object lpart = E3Utils.getSourceObject(activePart);
+		if (lpart instanceof ConfigurationEditor){
+			context.get(EPartService.class).bringToTop(part);
+			UUID uuid = ((ConfigEditorInput)((ConfigurationEditor)lpart).getEditorInput()).getUuid();
+			PawsConfiguration r = new PawsConfiguration();
+			r.setUuid(uuid);
+			tblConfigs.setSelection(new StructuredSelection(r));
+			
+			
+		}else if (lpart instanceof RunEditor){
+			context.get(EPartService.class).bringToTop(part);
+			UUID uuid = ((RunEditorInput)((RunEditor)lpart).getEditorInput()).getUuid();
+			PawsRun r = new PawsRun();
+			r.setUuid(uuid);
+			tblResults.setSelection(new StructuredSelection(r));
+		}
 	}
 	
 	@Focus
@@ -234,6 +209,29 @@ public class PawsView {
 		part.setLayout(new GridLayout());
 		((GridLayout)part.getLayout()).marginWidth = 0;
 		((GridLayout)part.getLayout()).marginHeight = 0;
+		
+		Composite c = SmartUiUtils.createHeaderLabel(part, "PAWS Results");
+		((GridLayout)c.getLayout()).numColumns = 2;
+		((GridLayout)c.getLayout()).marginHeight = 0;
+		
+		ToolBar tbResults = new ToolBar(c, SWT.FLAT );
+		tbResults.setBackground(part.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		tbResults.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		
+		ToolItem tiAdd = new ToolItem(tbResults, SWT.PUSH);
+		tiAdd.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
+		tiAdd.setToolTipText("Re-run analysis");
+		tiAdd.addListener(SWT.Selection, e->{
+			Object x = tblResults.getStructuredSelection().getFirstElement();
+			if (x instanceof PawsRun) {
+				newRun( ((PawsRun)x)  );
+			}
+		});
+
+		ToolItem tiDelete = new ToolItem(tbResults, SWT.PUSH);
+		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDelete.addListener(SWT.Selection, e->deleteRun());
+		
 		
 		Composite tpart = toolkit.createComposite(part);
 		tpart.setLayout(new TableColumnLayout());
@@ -305,19 +303,6 @@ public class PawsView {
 		
 		tblResults.getTable().setMenu(mnu);
 		
-		ToolItem tiAdd = new ToolItem(tbResults, SWT.PUSH);
-		tiAdd.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
-		tiAdd.setToolTipText("Re-run analysis");
-		tiAdd.addListener(SWT.Selection, e->{
-			Object x = tblResults.getStructuredSelection().getFirstElement();
-			if (x instanceof PawsRun) {
-				newRun( ((PawsRun)x)  );
-			}
-		});
-
-		ToolItem tiDelete = new ToolItem(tbResults, SWT.PUSH);
-		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiDelete.addListener(SWT.Selection, e->deleteRun());
 		
 		mnuOpen.setEnabled(false);
 		mnuAdd.setEnabled(false);
@@ -361,6 +346,27 @@ public class PawsView {
 		((GridLayout)part.getLayout()).marginWidth = 0;
 		((GridLayout)part.getLayout()).marginHeight = 0;
 		
+		Composite c = SmartUiUtils.createHeaderLabel(part, "PAWS Configurations");
+		((GridLayout)c.getLayout()).numColumns = 2;
+		((GridLayout)c.getLayout()).marginHeight = 0;
+
+		
+		ToolBar tbConfig = new ToolBar(c, SWT.FLAT );
+		tbConfig.setBackground(part.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		tbConfig.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+
+		ToolItem tiAdd = new ToolItem(tbConfig, SWT.PUSH);
+		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		tiAdd.addListener(SWT.Selection, e->newConfiguration());
+		
+		ToolItem tiEdit = new ToolItem(tbConfig, SWT.PUSH);
+		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		tiEdit.addListener(SWT.Selection, e->editConfiguration());
+		
+		ToolItem tiDelete = new ToolItem(tbConfig, SWT.PUSH);
+		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDelete.addListener(SWT.Selection, e->deleteConfiguration());
+		
 		Composite tpart = toolkit.createComposite(part);
 		tpart.setLayout(new TableColumnLayout());
 		tpart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -376,6 +382,10 @@ public class PawsView {
 					return pc.getName();
 				}
 				return super.getText(element);
+			}
+			public Image getImage(Object element){
+				if (element instanceof PawsConfiguration) return PawsPlugIn.getDefault().getImageRegistry().get(PawsPlugIn.ICON_CONFIG);
+				return super.getImage(element);
 			}
 		});
 		((TableColumnLayout)tpart.getLayout()).setColumnData(col.getColumn(),  new ColumnWeightData(1));
@@ -412,19 +422,7 @@ public class PawsView {
 		
 		tblConfigs.getTable().setMenu(mnu);
 
-		ToolItem tiAdd = new ToolItem(tbConfig, SWT.PUSH);
-//		tiAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		tiAdd.addListener(SWT.Selection, e->newConfiguration());
-		ToolItem tiEdit = new ToolItem(tbConfig, SWT.PUSH);
-//		tiEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		tiEdit.addListener(SWT.Selection, e->editConfiguration());
 		
-		ToolItem tiDelete = new ToolItem(tbConfig, SWT.PUSH);
-//		tiDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiDelete.addListener(SWT.Selection, e->deleteConfiguration());
 
 		tblConfigs.addSelectionChangedListener(e->{
 			mnuEdit.setEnabled(!tblConfigs.getStructuredSelection().isEmpty());
@@ -488,7 +486,7 @@ public class PawsView {
 		if (c == null) return;
 		try {
 			id = PawsManager.INSTANCE.generateUniqueName(id, c.getConservationArea());
-			ContextInjectionFactory.make(NewRunHandler.class, context).createAndRun(c, start, end, id);
+			ContextInjectionFactory.make(NewPawsRunHandler.class, context).createAndRun(c, start, end, id);
 		}catch (Exception ex) {
 			PawsPlugIn.displayLog(ex.getMessage(), ex);
 		}
@@ -512,7 +510,7 @@ public class PawsView {
 		}
 		if (runs.isEmpty()) return;
 		
-		if (!MessageDialog.openConfirm(content.getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected results?  This action cannot be undone.", runs.size()))) {
+		if (!MessageDialog.openConfirm(context.get(Shell.class), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected results?  This action cannot be undone.", runs.size()))) {
 			return;
 		}
 		
@@ -546,7 +544,7 @@ public class PawsView {
 		}
 		if (configs.isEmpty()) return;
 		
-		if (!MessageDialog.openConfirm(content.getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected configurations?  This action cannot be undone.", configs.size()))) {
+		if (!MessageDialog.openConfirm(context.get(Shell.class), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected configurations?  This action cannot be undone.", configs.size()))) {
 			return;
 		}
 		

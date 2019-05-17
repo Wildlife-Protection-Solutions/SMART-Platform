@@ -37,6 +37,7 @@ import java.util.TimeZone;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
@@ -45,6 +46,7 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -60,6 +62,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -70,15 +74,17 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
+import org.geotools.data.FeatureStore;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.hibernate.EmptyInterceptor;
-import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IService;
 import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
@@ -92,14 +98,16 @@ import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
+import org.wcs.smart.paws.model.PawsParameter.FixedParameter;
 import org.wcs.smart.paws.ui.ErrorText;
 import org.wcs.smart.paws.ui.HeaderComposite;
 import org.wcs.smart.paws.ui.HidePartsPartListener;
-import org.wcs.smart.paws.ui.NewRunHandler;
+import org.wcs.smart.paws.ui.NewPawsRunHandler;
 import org.wcs.smart.ui.SelectBoundsMapDialog;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
+
 
 /**
  * Script page of editor
@@ -128,7 +136,7 @@ public class ConfigurationEditor extends EditorPart {
 	private ClassificationComposite classComposite;
 
 	private boolean isDirty = false;
-	
+		
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -141,17 +149,12 @@ public class ConfigurationEditor extends EditorPart {
 		handlers = null;
 	}
 	
-	@Override
-	public void doSave(IProgressMonitor monitor) {
-		
+	private void save(PawsConfiguration pw){
 		String valid = validate();
 		if (valid != null) {
 			MessageDialog.openError(getSite().getShell(), "Error", "Unable to save changes until all error are resovled." + "\n\n" + valid);
 			return;
 		}
-		ConfigEditorInput in = getInputInternal();
-		PawsConfiguration pw = null;
-		
 
 		List<Path[]> filesToCopy = new ArrayList<>();
 		List<String> fileNames = new ArrayList<>();
@@ -159,84 +162,27 @@ public class ConfigurationEditor extends EditorPart {
 		
 		boolean isNew = false;
 		
-		Interceptor copyFilesInterceptor = new EmptyInterceptor() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void afterTransactionCompletion(Transaction tx) {
-				if (tx.getStatus() == TransactionStatus.COMMITTED) {
-					for (Path[] p : filesToCopy) {
-						try {
-							if(!Files.exists(p[1].getParent()) ) {
-								Files.createDirectories(p[1].getParent());
-							}
-							
-							Path source = p[0];
-							Path target = p[1];
-							
-							Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
-							
-							//copy over all supporting files (files with the same names)
-							//but different extensions.
-							String sourceName =  SharedUtils.getFilenameWithoutExtension(source.getFileName().toString());
-							String targetName = SharedUtils.getFilenameWithoutExtension(target.getFileName().toString());
-							Files.list(source.getParent()).forEach(other->{
-								String fName = other.getFileName().toString();
-								String n = SharedUtils.getFilenameWithoutExtension(fName);
-								String ext = SharedUtils.getFilenameExtension(fName);
-								if (n.equalsIgnoreCase(sourceName)) {
-									Path copyto = target.getParent().resolve(targetName + "." + ext);
-									try {
-										Files.copy(other, copyto, StandardCopyOption.REPLACE_EXISTING);
-									} catch (IOException e) {
-										PawsPlugIn.displayLog(MessageFormat.format("Error copying shapefile supporting files to SMART Data store {0} to {1}",  other.toString(), copyto.toString()), e);
-									}
-									}
-							});
-						} catch (IOException e) {
-							PawsPlugIn.displayLog("Error copying layer map file to SMART Data store." + "\n\n" + e.getMessage(), e);
-						}
-					}
-					
-					//delete any files not referenced
-					Path root = Paths.get(fileNames.get(0));
-					
-					fileNames.remove(0);
-					try {
-						if (!Files.exists(root)) Files.createDirectories(root);
-						Files.list(root).forEach(other->{
-							String name = SharedUtils.getFilenameWithoutExtension(other.getFileName().toString());
-							if (!fileNames.contains(name)) {
-								try {
-									deletedFiles.add(other.getFileName().toString());
-									Files.delete(other);
-								} catch (IOException e) {
-									PawsPlugIn.log(e.getMessage(),e);
-								}
-							}
-						});
-					} catch (IOException e) {
-						PawsPlugIn.log(e.getMessage(),e);
-					}
-					
-				}
-			}
-			
-		};
 		
-		try(Session s = HibernateManager.openSession(copyFilesInterceptor)){
+		try(Session s = HibernateManager.openSession(new CopyFilesInterceptor(filesToCopy, fileNames, deletedFiles))){
 			
 			s.beginTransaction();
 			try {
-				if (in.getUuid() == null) {
+				if (pw.getUuid() == null) {
+					String name = pw.getName();
 					pw = new PawsConfiguration();
 					pw.setConservationArea(SmartDB.getCurrentConservationArea());
+					if (name != null){
+						pw.setName(name);
+						compHeader.setText(name);
+					}else{
+						pw.setName(compHeader.getText());
+					}
 					isNew = true;
 				}else {
-					pw = s.get(PawsConfiguration.class, in.getUuid());
+					pw = s.get(PawsConfiguration.class, pw.getUuid());
+					pw.setName(compHeader.getText());
 				}
 				
-				pw.setName(compHeader.getText());
 				s.saveOrUpdate(pw);
 	
 				fileNames.add(PawsManager.INSTANCE.getDirectory(pw).toString());
@@ -250,9 +196,18 @@ public class ConfigurationEditor extends EditorPart {
 					Object x = ((ComboViewer)items[i+1]).getStructuredSelection().getFirstElement();
 					if (x instanceof Area.AreaType) {
 						pp.setValue(PawsParameter.AREA_PREFIX + ((Area.AreaType)x).name());
-					}else if (x instanceof Path) {
+					}else if (x instanceof Path || (isNew && x instanceof InternalPath) ) {
+						Path path = null;
+						if (x instanceof Path){
+							path = (Path)x;
+						}else{
+							PawsConfiguration temp = new PawsConfiguration();
+							temp.setUuid(getInputInternal().getUuid());
+							temp.setConservationArea(SmartDB.getCurrentConservationArea());
+							path = PawsManager.INSTANCE.getDirectory(temp).resolve( ((InternalPath)x).path );
+						}
 						//import file
-						String fname = ((Path)x).getFileName().toString();
+						String fname = path.getFileName().toString();
 						
 						String namepart = SharedUtils.getFilenameWithoutExtension(fname);
 						String extpart = SharedUtils.getFilenameExtension(fname);
@@ -267,7 +222,7 @@ public class ConfigurationEditor extends EditorPart {
 						}
 						pp.setValue( PawsParameter.FILE_PREFIX + fname );
 						fileNames.add(SharedUtils.getFilenameWithoutExtension(fname));
-						filesToCopy.add(new Path[] {(Path)x, (Path)target});
+						filesToCopy.add(new Path[] {path, (Path)target});
 						
 					}else if (x instanceof InternalPath) {
 						pp.setValue( PawsParameter.FILE_PREFIX + ((InternalPath)x).path );
@@ -291,7 +246,11 @@ public class ConfigurationEditor extends EditorPart {
 				Object crs = cmbCrs.getStructuredSelection().getFirstElement();
 				Projection prj = (Projection)crs;
 				prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
-				pp.setValue( UuidUtils.uuidToString(prj.getUuid()) + ":" + prj.getParsedCoordinateReferenceSystem().toWKT() );
+				if (prj.getUuid() != null){
+					pp.setValue( UuidUtils.uuidToString(prj.getUuid()) + ":" + prj.getParsedCoordinateReferenceSystem().toWKT() );
+				}else{
+					pp.setValue( ":" + prj.getParsedCoordinateReferenceSystem().toWKT() );
+				}
 				
 				classComposite.doSave(pw, s);
 				
@@ -338,6 +297,13 @@ public class ConfigurationEditor extends EditorPart {
 		fireModified(isNew, pw);
 		setDirty(false);
 	}
+	
+	@Override
+	public void doSave(IProgressMonitor monitor) {
+		PawsConfiguration temp = new PawsConfiguration();
+		temp.setUuid(getInputInternal().getUuid());
+		save(temp);
+	}
 
 	private PawsParameter getOrCreateParameter(PawsConfiguration pw, PawsParameter.FixedParameter param) {
 		PawsParameter pp = pw.findParameter(param.name());
@@ -356,7 +322,20 @@ public class ConfigurationEditor extends EditorPart {
 	}
 	
 	@Override
-	public void doSaveAs() {}
+	public void doSaveAs() {
+		
+		String currentName = compHeader.getText();
+		InputDialog newNameDialog = new InputDialog(getSite().getShell(), "Save As", "Enter the new Configuration name", currentName, 
+				e->{
+					if (e.isBlank()) return "Name must be supplied";
+					return null;
+				}); 
+		if (newNameDialog.open() != Window.OK) return;
+		String newName = newNameDialog.getValue();
+		PawsConfiguration pw = new PawsConfiguration();
+		pw.setName(newName);
+		save(pw);
+	}
 
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
@@ -467,7 +446,7 @@ public class ConfigurationEditor extends EditorPart {
 			
 			try {
 				String id = PawsManager.INSTANCE. generateUniqueName(config.getName(), config.getConservationArea());
-				ContextInjectionFactory.make(NewRunHandler.class, parentContext).createAndRun(config, null, null, id);
+				ContextInjectionFactory.make(NewPawsRunHandler.class, parentContext).createAndRun(config, null, null, id);
 			} catch (Exception ex) {
 				PawsPlugIn.displayLog("Unable to create new analysis from these settings." + "\n\n" + ex.getMessage(), ex);
 			}
@@ -504,6 +483,10 @@ public class ConfigurationEditor extends EditorPart {
 		if (!(x instanceof Projection)) {
 			return "Projection is required";
 		}
+		if (txtBounds.getData(RE_DATA_KEY) == null){
+			return "Valid bounds are required.";
+		}
+		
 		return null;
 	}
 
@@ -540,19 +523,19 @@ public class ConfigurationEditor extends EditorPart {
 		inner.setLayout(new GridLayout(2, false));
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label l = toolkit.createLabel(inner, "Conservation Area Boundary:");
+		Label l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.LYR_BOUNDARY) + ":");
 		cmbBound = createBmCombo(inner);
 		cmbBound.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		l = toolkit.createLabel(inner, "Roads:");
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.LYR_ROAD) + ":");
 		cmbRoad = createBmCombo(inner);
 		cmbRoad.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		l = toolkit.createLabel(inner, "River/Water:");
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.LYR_WATER) + ":");
 		cmbRiver = createBmCombo(inner);
 		cmbRiver.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		l = toolkit.createLabel(inner, "Contours:");
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.LYR_CONTOUR) + ":");
 		cmbContour = createBmCombo(inner);
 		cmbContour.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
@@ -562,7 +545,7 @@ public class ConfigurationEditor extends EditorPart {
 		inner.setLayout(new GridLayout(2, false));
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		l = toolkit.createLabel(inner, "CRS:");
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_CRS) + ":");
 		l.setToolTipText("Coordinate Reference System");
 		
 		cmbCrs = new ComboViewer(inner, SWT.READ_ONLY | SWT.FLAT | SWT.BORDER | SWT.DROP_DOWN);
@@ -596,7 +579,7 @@ public class ConfigurationEditor extends EditorPart {
 			setDirty(true);
 		});
 		
-		l = toolkit.createLabel(inner, "Bounds:");
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_BNDS) + ":");
 		l.setToolTipText("xmin,ymin,xmax,ymax in selected CRS");
 		
 		Composite bnds = toolkit.createComposite(inner);
@@ -616,6 +599,7 @@ public class ConfigurationEditor extends EditorPart {
 			}
 		});
 		txtBounds.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
+		txtBounds.setText("");
 		txtBounds.addListener(SWT.Modify, e->{
 			try {
 				String[] bits = txtBounds.getText().split("\\s+");
@@ -633,7 +617,69 @@ public class ConfigurationEditor extends EditorPart {
 			setDirty(true);
 		});
 		
-		Hyperlink lnkBnds = toolkit.createHyperlink(bnds, "select...", SWT.NONE);
+		Hyperlink lnkBnds = toolkit.createHyperlink(bnds, "set...", SWT.NONE);
+		
+		Menu mnu = new Menu(lnkBnds);
+		
+		Object[] items = new Object[] {PawsParameter.FixedParameter.LYR_BOUNDARY, cmbBound,
+				PawsParameter.FixedParameter.LYR_ROAD, cmbRoad,
+				PawsParameter.FixedParameter.LYR_CONTOUR, cmbContour,
+				PawsParameter.FixedParameter.LYR_WATER, cmbRiver,
+		};
+		for (int i = 0; i < items.length; i +=2){
+			MenuItem mi = new MenuItem(mnu, SWT.PUSH);
+			mi.setEnabled(false);
+			mi.setText("Set to " + PawsManager.INSTANCE.getName((PawsParameter.FixedParameter)items[i]) + " Bounds");
+			final ComboViewer cmbViewer = (ComboViewer) items[i+1];
+			cmbViewer.addSelectionChangedListener(e->{mi.setEnabled(cmbViewer.getStructuredSelection().getFirstElement() != null);});
+			mi.addListener(SWT.Selection, e->{
+				Job temp = new Job("computing bounds"){
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						Object[] selection = new Object[]{null};
+						getSite().getShell().getDisplay().syncExec(()->{
+							selection[0] = cmbViewer.getStructuredSelection().getFirstElement();
+						});
+						
+						final ReferencedEnvelope re = getBounds(selection[0]);
+						if (re == null) return Status.OK_STATUS;
+						getSite().getShell().getDisplay().syncExec(()->{
+							try {
+								CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
+								ReferencedEnvelope re2 = ReprojectUtils.reproject(re, crs);
+								txtBounds.setData(RE_DATA_KEY, re2);
+								updateBounds();
+							} catch (Exception e1) {
+								PawsPlugIn.displayLog(e1.getMessage(), e1);
+							}
+						});
+						return Status.OK_STATUS;
+					}
+					
+				};
+				temp.schedule();
+				
+			});
+		}
+		new MenuItem(mnu, SWT.SEPARATOR);
+		MenuItem mi = new MenuItem(mnu, SWT.PUSH);
+		mi.setText("Custom...");
+		mi.addListener(SWT.Selection, e->{
+			CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
+			
+			ReferencedEnvelope init = (ReferencedEnvelope) txtBounds.getData(RE_DATA_KEY);
+			SelectBoundsMapDialog md = new SelectBoundsMapDialog(Display.getDefault().getActiveShell(), null, init);
+			if (md.open() != Window.OK) return;
+			ReferencedEnvelope re = md.getBounds();
+			try {
+				re = ReprojectUtils.reproject(re, crs);
+				txtBounds.setData(RE_DATA_KEY, re);
+				updateBounds();
+			} catch (Exception e1) {
+				PawsPlugIn.displayLog(e1.getMessage(), e1);
+			}
+		});
+		
 		lnkBnds.addHyperlinkListener(new IHyperlinkListener() {
 			@Override
 			public void linkExited(HyperlinkEvent e) { }
@@ -642,26 +688,11 @@ public class ConfigurationEditor extends EditorPart {
 			
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
-
-				ReferencedEnvelope init = (ReferencedEnvelope) txtBounds.getData(RE_DATA_KEY);
-				SelectBoundsMapDialog md = new SelectBoundsMapDialog(Display.getDefault().getActiveShell(), null, init);
-				if (md.open() != Window.OK){
-					return;
-				}
-				ReferencedEnvelope re = md.getBounds();
-				try {
-					re = ReprojectUtils.reproject(re, crs);
-					txtBounds.setData(RE_DATA_KEY, re);
-					updateBounds();
-				} catch (Exception e1) {
-					PawsPlugIn.displayLog(e1.getMessage(), e1);
-				}
-				
+				mnu.setVisible(true);
 			}
 		});
 		
-		l = toolkit.createLabel(inner, "Grid Size:");
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_SIZE) + ":");
 		l.setToolTipText("grid units are the units of the selected CRS");
 		
 		txtGridSize = new ErrorText(inner, txt-> {
@@ -678,7 +709,7 @@ public class ConfigurationEditor extends EditorPart {
 			setDirty(true);	
 		});
 		
-		l = toolkit.createLabel(inner, "Time Zone:");
+		l = toolkit.createLabel(inner,PawsManager.INSTANCE.getName(FixedParameter.TIMEZONE) + ":");
 		cmbTimeZone = new ComboViewer(inner, SWT.READ_ONLY | SWT.FLAT | SWT.BORDER | SWT.DROP_DOWN);
 		cmbTimeZone.setContentProvider(ArrayContentProvider.getInstance());
 		cmbTimeZone.getControl().setBackground(inner.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
@@ -752,6 +783,59 @@ public class ConfigurationEditor extends EditorPart {
 	
 	private void initPage() {
 		layersJob.schedule();
+	}
+	
+	
+	private ReferencedEnvelope getBounds(Object source){
+		if (source instanceof Area.AreaType){
+		
+			//load bounds from database
+			ReferencedEnvelope re = null;
+			try(Session session = HibernateManager.openSession()){
+				List<Area> areas = HibernateManager.loadAreas(((Area.AreaType)source), session);
+				
+				for (Area a : areas){
+					if (re == null){
+						re = new ReferencedEnvelope(a.getGeometry().getEnvelopeInternal(), SmartDB.DATABASE_CRS);
+					}else{
+						re.expandToInclude(a.getGeometry().getEnvelopeInternal());
+					}
+				}
+			}
+			return re;
+		}
+		if (source instanceof InternalPath){
+			PawsConfiguration temp = new PawsConfiguration();
+			temp.setUuid(getInputInternal().getUuid());
+			temp.setConservationArea(SmartDB.getCurrentConservationArea());
+			source = PawsManager.INSTANCE.getDirectory(temp).resolve( ((InternalPath)source).path );
+		}
+		
+		if (source  instanceof Path){
+			//assume some sort of file store
+			//read bounds using udig
+			try {
+				List<IService> services = CatalogPlugin.getDefault().getServiceFactory().createService(((Path) source).toUri().toURL());
+				if (services.isEmpty()) return null;
+				for (IService s : services){
+					for (IGeoResource r : s.resources(new NullProgressMonitor())){
+						if (r.canResolve(FeatureStore.class)){
+							ReferencedEnvelope env = r.resolve(FeatureStore.class, new NullProgressMonitor()).getBounds();
+							
+							r.dispose(new NullProgressMonitor());
+							s.dispose(new NullProgressMonitor());
+							
+							return env;
+							
+						}
+					}
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return null;
 	}
 	
 	private Job layersJob = new Job("loading layers") {
@@ -858,15 +942,36 @@ public class ConfigurationEditor extends EditorPart {
 					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
 					if (pp != null) {
 						String uuid = pp.getValue().split(":")[0];
+						String def = pp.getValue().substring(uuid.length() + 1);
+						
 						Projection temp = new Projection();
-						temp.setUuid( UuidUtils.stringToUuid(uuid) );
-						cmbCrs.setSelection(new StructuredSelection(temp));
-						try {
-							selectedCrs = CRS.parseWKT(pp.getValue().substring(uuid.length() + 1));
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+						boolean add = false;
+						if (uuid.isBlank()){
+							add = true;
+						}else{
+							temp.setUuid( UuidUtils.stringToUuid(uuid) );
+							
+							if (!((List<Projection>)cmbCrs.getInput()).contains(temp)){
+								add = true;
+							}else{
+								Projection prj = ((List<Projection>)cmbCrs.getInput()).get(((List<Projection>)cmbCrs.getInput()).indexOf(temp));
+								if (!prj.getDefinition().equals(def)) add = true;
+							}
 						}
+						if (add){
+							temp.setUuid(null);
+							temp.setDefinition(pp.getValue().substring(uuid.length() + 1));
+							temp.setName("Custom");
+							((List<Projection>)cmbCrs.getInput()).add(temp);
+							cmbCrs.refresh();
+							try {
+								temp.setParsedCoordinateReferenceSystem(CRS.parseWKT(temp.getDefinition()));
+							}catch (Exception ex){
+								PawsPlugIn.log(ex.getMessage(), ex);
+							}
+						}
+						cmbCrs.setSelection(new StructuredSelection(temp));
+						selectedCrs = temp.getParsedCoordinateReferenceSystem();
 					}
 					
 					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_BNDS.name());
@@ -916,8 +1021,85 @@ public class ConfigurationEditor extends EditorPart {
 			return path.equals( ((InternalPath)other).path );
 					
 		}
-		
-		
-		
 	}
+	
+	class CopyFilesInterceptor extends EmptyInterceptor{
+		private static final long serialVersionUID = 1L;
+
+		private List<Path[]> filesToCopy;
+		List<String> fileNames = new ArrayList<>();
+		List<String> deletedFiles = new ArrayList<>();
+		
+		/**
+		 * 
+		 * @param filesToCopy list of arrays representing source and target
+		 */
+		public CopyFilesInterceptor(List<Path[]> filesToCopy, List<String> fileNames, List<String> deletedFiles) {
+			super();
+			this.filesToCopy = filesToCopy;
+			this.fileNames = fileNames;
+			this.deletedFiles = deletedFiles;
+		}
+		
+		@Override
+		public void afterTransactionCompletion(Transaction tx) {
+			if (tx.getStatus() == TransactionStatus.COMMITTED) {
+				for (Path[] p : filesToCopy) {
+					try {
+						if(!Files.exists(p[1].getParent()) ) {
+							Files.createDirectories(p[1].getParent());
+						}
+						
+						Path source = p[0];
+						Path target = p[1];
+						
+						Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+						
+						//copy over all supporting files (files with the same names)
+						//but different extensions.
+						String sourceName =  SharedUtils.getFilenameWithoutExtension(source.getFileName().toString());
+						String targetName = SharedUtils.getFilenameWithoutExtension(target.getFileName().toString());
+						Files.list(source.getParent()).forEach(other->{
+							String fName = other.getFileName().toString();
+							String n = SharedUtils.getFilenameWithoutExtension(fName);
+							String ext = SharedUtils.getFilenameExtension(fName);
+							if (n.equalsIgnoreCase(sourceName)) {
+								Path copyto = target.getParent().resolve(targetName + "." + ext);
+								try {
+									Files.copy(other, copyto, StandardCopyOption.REPLACE_EXISTING);
+								} catch (IOException e) {
+									PawsPlugIn.displayLog(MessageFormat.format("Error copying shapefile supporting files to SMART Data store {0} to {1}",  other.toString(), copyto.toString()), e);
+								}
+								}
+						});
+					} catch (IOException e) {
+						PawsPlugIn.displayLog("Error copying layer map file to SMART Data store." + "\n\n" + e.getMessage(), e);
+					}
+				}
+				
+				//delete any files not referenced
+				Path root = Paths.get(fileNames.get(0));
+				
+				fileNames.remove(0);
+				try {
+					if (!Files.exists(root)) Files.createDirectories(root);
+					Files.list(root).forEach(other->{
+						String name = SharedUtils.getFilenameWithoutExtension(other.getFileName().toString());
+						if (!fileNames.contains(name)) {
+							try {
+								deletedFiles.add(other.getFileName().toString());
+								Files.delete(other);
+							} catch (IOException e) {
+								PawsPlugIn.log(e.getMessage(),e);
+							}
+						}
+					});
+				} catch (IOException e) {
+					PawsPlugIn.log(e.getMessage(),e);
+				}
+				
+			}
+		}
+		
+	};
 }

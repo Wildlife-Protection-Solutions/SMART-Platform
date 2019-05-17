@@ -6,7 +6,9 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.QueryPerspective;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
 
@@ -14,7 +16,7 @@ public class EditConfigHandler {
 
 	@Execute
 	public void execute(MWindow window, ConfigEditorInput input ) {
-		(new ShowPerspectiveHandler()).execute(QueryPerspective.ID, window);
+		(new ShowPerspectiveHandler()).execute(QueryPlugIn.getActivePerspectiveId(), window);
 		
 		try {
 			IWorkbenchWindow ww = PlatformUI.getWorkbench().getActiveWorkbenchWindow();

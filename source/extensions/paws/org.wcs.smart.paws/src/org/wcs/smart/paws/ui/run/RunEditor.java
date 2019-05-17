@@ -185,8 +185,7 @@ public class RunEditor extends MultiPageEditorPart {
 				
 				//TODO: not found
 				if (pr == null) return Status.OK_STATUS;
-				
-				pr.getConfiguration().getName();
+				if (pr.getConfiguration() != null) pr.getConfiguration().getName();
 				pr.getConservationArea().getFileDataStoreLocation();
 			}
 			

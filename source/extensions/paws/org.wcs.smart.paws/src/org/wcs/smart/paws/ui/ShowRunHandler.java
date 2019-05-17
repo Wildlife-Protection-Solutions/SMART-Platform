@@ -10,6 +10,7 @@ import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.ui.run.RunEditor;
 import org.wcs.smart.paws.ui.run.RunEditorInput;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.QueryPerspective;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
 
@@ -17,7 +18,7 @@ public class ShowRunHandler {
 	
 	@Execute
 	public void execute(MWindow window, PawsRun pawsRun ) {
-		(new ShowPerspectiveHandler()).execute(QueryPerspective.ID, window);
+		(new ShowPerspectiveHandler()).execute(QueryPlugIn.getActivePerspectiveId(), window);
 		
 		try {
 			IWorkbenchWindow ww = PlatformUI.getWorkbench().getActiveWorkbenchWindow();

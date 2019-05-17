@@ -58,7 +58,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class QueryDialog extends SmartStyledDialog {
 
 	private TableViewer queryTree;
-	private List<PawsQueryClass> selectedItems;
+	private List<ClassificationData> selectedItems;
 	
 	protected QueryDialog(Shell parent) {
 		super(parent);
@@ -110,17 +110,17 @@ public class QueryDialog extends SmartStyledDialog {
 					item.setQueryUuid(c.getUuid());
 					Query q = QueryHibernateManager.getInstance().findQuery(session, c.getUuid(), c.getType());
 					item.setCachedQuery(q);
+					selectedItems.add(new ClassificationData(item, c.getName()));
 				}else {
 					MessageDialog.openWarning(getShell(), "Invalid Selection", MessageFormat.format("Selected item {0} cannot be added.  Please select a query.", dmObject.toString()));
 					return;
-				}			
-				if (item != null) selectedItems.add(item);
+				}	
 			}
 		}
 		super.okPressed();
 	}
 	
-	public List<PawsQueryClass> getSelectedItems(){
+	public List<ClassificationData> getSelectedItems(){
 		return this.selectedItems;
 	}
 	

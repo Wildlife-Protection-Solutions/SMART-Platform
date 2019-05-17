@@ -168,8 +168,12 @@ public class RunSummaryPage extends EditorPart {
 			toolkit.createLabel(detailsComp, "");
 		}
 		
-		toolkit.createLabel(detailsComp, "Settings:");
-		toolkit.createLabel(detailsComp, run.getConfiguration().getName());
+		toolkit.createLabel(detailsComp, "Configuration:");
+		if (run.getConfiguration() != null){
+			toolkit.createLabel(detailsComp, run.getConfiguration().getName());
+		}else{
+			toolkit.createLabel(detailsComp, "! NOT FOUND !");
+		}
 		
 		toolkit.createLabel(detailsComp, "Local Package File:");
 		if (run.getPackageFile() != null){

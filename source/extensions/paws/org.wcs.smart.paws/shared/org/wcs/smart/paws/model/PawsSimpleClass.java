@@ -21,63 +21,52 @@
  */
 package org.wcs.smart.paws.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Category;
-
 @Entity
-@Table(name="smart.paws_simple_classification")
+@Table(name="smart.paws_simple_class")
 public class PawsSimpleClass extends AbstractPawsClass{
 
-	private Category category;
-	private Attribute attribute;
-	private AttributeListItem list;
-	private AttributeTreeNode node;
+	private String categoryKey;
+	private String attributeKey;
+	private String listItemKey;
+	private String treeNodeKey;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="category_uuid", referencedColumnName="uuid")
-	public Category getCategory() {
-		return this.category;
+	@Column(name="category_hkey")
+	public String getCategoryHkey() {
+		return this.categoryKey;
 	}
 	
-	public void setCategory(Category category) {
-		this.category = category;
+	public void setCategoryHkey(String categoryKey) {
+		this.categoryKey = categoryKey;
 	}
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="attribute_uuid", referencedColumnName="uuid")
-	public Attribute getAttribute() {
-		return this.attribute;
+	@Column(name="attribute_key")
+	public String getAttributeKey() {
+		return this.attributeKey;
 	}
 	
-	public void setAttribute(Attribute attribute) {
-		this.attribute = attribute;
+	public void setAttributeKey(String attributeKey) {
+		this.attributeKey = attributeKey;
 	}
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="list_uuid", referencedColumnName="uuid")
-	public AttributeListItem getAttributeListItem() {
-		return this.list;
+	@Column(name="list_key")
+	public String getAttributeListItemKey() {
+		return this.listItemKey;
 	}
 	
-	public void setAttributeListItem(AttributeListItem list) {
-		this.list = list;
+	public void setAttributeListItemKey(String listItemKey) {
+		this.listItemKey = listItemKey;
 	}
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="tree_uuid", referencedColumnName="uuid")
-	public AttributeTreeNode getAttributeTreeNode() {
-		return this.node;
+	@Column(name="tree_hkey")
+	public String getAttributeTreeNodeHkey() {
+		return this.treeNodeKey;
 	}
 	
-	public void setAttributeTreeNode(AttributeTreeNode node) {
-		this.node = node;
+	public void setAttributeTreeNodeHkey(String treeNodeKey) {
+		this.treeNodeKey = treeNodeKey;
 	}
 }

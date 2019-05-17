@@ -56,15 +56,4 @@ public class AbstractPawsClass extends UuidItem{
 	public void setClassification(String classification) {
 		this.classification = classification;
 	}
-	
-
-//	@Column(name="date_range")
-//	public String getDateRange() {
-//		return this.daterange;
-//	}
-//	
-//	public void setDateRange(String daterange) {
-//		this.daterange = daterange;
-//	}
-//	
 }

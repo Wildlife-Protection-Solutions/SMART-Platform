@@ -57,12 +57,9 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.paws.model.AbstractPawsClass;
 import org.wcs.smart.paws.model.PawsQueryClass;
-import org.wcs.smart.paws.model.PawsSimpleClass;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Composite for listing queries and collection date and output format 
@@ -73,7 +70,7 @@ import org.wcs.smart.util.UuidUtils;
 public class ClassificationTableComposite extends Composite{
 
 //	private List<Query> queries;
-	private List<Classification> uiElements;
+	private List<ClassificationData> uiElements;
 	
 	private Composite list;
 	private FormToolkit toolkit;
@@ -198,7 +195,7 @@ public class ClassificationTableComposite extends Composite{
 		qc.setQueryType(query.getTypeKey());
 		qc.setQueryUuid(query.getUuid());
 		
-		Classification qi = new Classification(qc);
+		ClassificationData qi = new ClassificationData(qc, query.getName());
 
 		uiElements.add(qi);
 		fireListeners();
@@ -216,26 +213,26 @@ public class ClassificationTableComposite extends Composite{
 			qc.setQueryType(query.getTypeKey());
 			qc.setQueryUuid(query.getUuid());
 			
-			Classification qi = new Classification(qc);
+			ClassificationData qi = new ClassificationData(qc, query.getName());
 			uiElements.add(qi);
 		}
 		updateList();
 		fireListeners();
 	}
 
-	private void removeQuery(Classification query) {
+	private void removeQuery(ClassificationData query) {
 		uiElements.remove(query);
 		updateList();
 		fireListeners();
 	}
 	
 	public List<AbstractPawsClass> getClassifications(){
-		return uiElements.stream().map(e->e.op1).collect(Collectors.toList());
+		return uiElements.stream().map(e->e.getPawsClass()	).collect(Collectors.toList());
 	}
 	
-	public void initItem(Collection<AbstractPawsClass> items) {
-		for (AbstractPawsClass i : items) {
-			uiElements.add(new Classification(i));
+	public void initItem(Collection<ClassificationData> items) {
+		for (ClassificationData i : items) {
+			uiElements.add(i);
 		}
 		updateList();
 	}
@@ -260,11 +257,12 @@ public class ClassificationTableComposite extends Composite{
 	void updateList() {
 		for (Control c : list.getChildren()) c.dispose();
 		
-		for (Classification q : uiElements) {
+		for (ClassificationData q : uiElements) {
 
 			//classification
 			EditLabel lbl = new EditLabel(list);
 			lbl.setText(q.getClassification());
+			lbl.setToolTipText(q.getClassification());
 			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			//data source
@@ -294,24 +292,40 @@ public class ClassificationTableComposite extends Composite{
 
 		}
 		
-		Label l = toolkit.createLabel(list,"Drag and drop queries here to add to a query classification");
-		l.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, cols, 1));
-		((GridData)l.getLayoutData()).verticalIndent = 5;
-		l.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
-		
-		FontData fd = l.getFont().getFontData()[0];
+		FontData fd = getFont().getFontData()[0];
 		fd.setStyle(SWT.ITALIC);
-		Font newFont = new Font(l.getDisplay(), fd);
-		l.addListener(SWT.Dispose, e->newFont.dispose());
-		l.setFont(newFont);
+		Font newFont = new Font(getDisplay(), fd);
+		addListener(SWT.Dispose, e->newFont.dispose());
 		
-		l = toolkit.createLabel(list,"OR");
+		
+		Hyperlink hl = toolkit.createHyperlink(list,"Drag and drop queries or click here to add to a query classification", SWT.NONE);
+		hl.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, cols, 1));
+		((GridData)hl.getLayoutData()).verticalIndent = 5;
+		hl.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
+		hl.setFont(newFont);
+		hl.addHyperlinkListener(new IHyperlinkListener() {
+			
+			@Override
+			public void linkExited(HyperlinkEvent e) {
+			}
+			
+			@Override
+			public void linkEntered(HyperlinkEvent e) {
+			}
+			
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				addQueryItems();
+			}
+		});
+
+		Label l = toolkit.createLabel(list,"OR");
 		l.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, cols, 1));
 		((GridData)l.getLayoutData()).verticalIndent = 5;
 		l.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
 		l.setFont(newFont);
 		
-		Hyperlink hl = toolkit.createHyperlink(list,"Click here to add a data model classification", SWT.NONE);
+		hl = toolkit.createHyperlink(list,"Click here to add a data model classification", SWT.NONE);
 		hl.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, cols, 1));
 		((GridData)hl.getLayoutData()).verticalIndent = 5;
 		hl.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
@@ -355,8 +369,8 @@ public class ClassificationTableComposite extends Composite{
 		DataModelDialog d = new DataModelDialog(getShell());
 		if (d.open() != Window.OK) return;
 		
-		for (PawsSimpleClass obj : d.getSelectedItems()) {
-			uiElements.add(new Classification(obj));
+		for (ClassificationData obj : d.getSelectedItems()) {
+			uiElements.add(obj);
 		}
 		updateList();
 		fireListeners();
@@ -366,72 +380,13 @@ public class ClassificationTableComposite extends Composite{
 		QueryDialog d = new QueryDialog(getShell());
 		if (d.open() != Window.OK) return;
 		
-		for (PawsQueryClass obj : d.getSelectedItems()) {
-			uiElements.add(new Classification(obj));
+		for (ClassificationData obj : d.getSelectedItems()) {
+			uiElements.add(obj);
 		}
 		updateList();
 		fireListeners();
 	}
-	
-	public List<AbstractPawsClass> getQueries(){
-		List<AbstractPawsClass> configs = new ArrayList<>();
-		for (Classification i : uiElements) {
-			configs.add(i.op1);
-		}
-		return configs;
-	}
-	
-	private class Classification{
-		AbstractPawsClass op1 = null;
 		
-		public Classification(AbstractPawsClass op) {
-			this.op1 = op;
-		}
-
-		
-		public String getClassification() {
-			if (op1 instanceof PawsSimpleClass) return op1.getClassification();
-			if (op1 instanceof PawsQueryClass) return op1.getClassification();
-			return "";
-		}
-		
-		public String getDataSource() {
-			if (op1 instanceof PawsSimpleClass) return "Data Model";
-			if (op1 instanceof PawsQueryClass) return "Query";
-			return "unknown";
-		}
-		
-		public String getDetails() {
-			if (op1 instanceof PawsSimpleClass) {
-				PawsSimpleClass pws = (PawsSimpleClass)op1;
-				StringBuilder sb = new StringBuilder();
-				if (pws.getAttributeListItem() != null) {
-					sb.append(pws.getAttributeListItem().getName());
-					sb.append( " (" + pws.getAttribute().getName() + ") ");
-				}
-				if (pws.getAttributeTreeNode() != null) {
-					sb.append(pws.getAttributeListItem().getName());
-					sb.append( " (" + pws.getAttribute().getName() + ") ");
-				}
-				sb.append(pws.getCategory().getFullCategoryName());
-				return sb.toString();
-			}
-			if (op1 instanceof PawsQueryClass) {
-				PawsQueryClass pq = (PawsQueryClass) op1;
-				StringBuilder sb = new StringBuilder();
-				if (pq.getCachedQuery() != null) {
-					sb.append(pq.getCachedQuery().getName());
-				}else {
-					sb.append(UuidUtils.uuidToString(pq.getQueryUuid()));
-				}
-				sb.append( " (" + QueryTypeManager.INSTANCE.findQueryType(pq.getQueryType()).getGuiName() + ")");
-				return sb.toString();
-			}
-			return "Unknown";
-		}
-
-	}
-	
 	private class EditLabel extends Composite{
 		private Text txtEdit;
 		private Label l;
@@ -497,6 +452,9 @@ public class ClassificationTableComposite extends Composite{
 			});
 		}
 		
+		public void setToolTipText(String text){
+			l.setToolTipText(text);
+		}
 		public void setText(String text) {
 			l.setText(text);
 		}

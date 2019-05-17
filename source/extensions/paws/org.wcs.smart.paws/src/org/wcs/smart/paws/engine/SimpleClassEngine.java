@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.paws.model.PawsSimpleClass;
-import org.wcs.smart.util.UuidUtils;
 
 public class SimpleClassEngine {
 
@@ -42,33 +41,44 @@ public class SimpleClassEngine {
 				sb.append(" SELECT wp.uuid, obs.uuid, wp.x, wp.y, wp.datetime, ? ");
 				sb.append(" FROM smart.waypoint wp ");
 				sb.append(" JOIN smart.wp_observation obs ON obs.wp_uuid = wp.uuid " );
+				sb.append(" JOIN smart.dm_category c ON obs.category_uuid = c.uuid " );
 				
-				if (pc.getAttributeListItem() != null || pc.getAttributeTreeNode() != null) {
+				if (pc.getAttributeListItemKey() != null || pc.getAttributeTreeNodeHkey() != null) {
 					sb.append(" JOIN smart.wp_observation_attributes oba ON obs.uuid = oba.observation_uuid " );
+					sb.append(" JOIN smart.dm_attribute a on oba.attribute_uuid = a.uuid and a.keyid = ? ");
+					if (pc.getAttributeListItemKey() != null){
+						sb.append(" JOIN smart.dm_attribute_list al on al.uuid = oba.list_element_uuid and al.keyid = ? ");
+					}
+					if (pc.getAttributeTreeNodeHkey() != null){
+						sb.append(" JOIN smart.dm_attribute_tree att on att.uuid = oba.tree_node_uuid and ( att.hkey >= ? and att.hkey < ? )" );
+					}
 				}
+				
 				
 				sb.append(" WHERE ");
 				sb.append(" wp.datetime between ? and ?");
-				sb.append(" and obs.category_uuid = ? ");
+				sb.append(" and (c.hkey >= ?  and c.hkey < ? ) ");
+		
+				//TODO: filter on CA or CCAA depending on 
+				//analysis 
 				
-				if (pc.getAttributeTreeNode() != null) {
-					sb.append(" AND ");
-					sb.append( "oba.tree_node_uuid = ? ");
-				}else if (pc.getAttributeListItem() != null) {
-					sb.append(" AND ");
-					sb.append( "oba.list_element_uuid = ? ");
-				}
 				System.out.println(sb.toString());
 				PreparedStatement ps = c.prepareStatement(sb.toString());
-				ps.setString(1, pc.getClassification());
-				ps.setDate(2, java.sql.Date.valueOf(startDate));
-				ps.setDate(3, java.sql.Date.valueOf(endDate));
-				ps.setBytes(4, UuidUtils.uuidToByte(pc.getCategory().getUuid()));
-				if (pc.getAttributeTreeNode() != null) {
-					ps.setBytes(5, UuidUtils.uuidToByte(pc.getAttributeTreeNode().getUuid()));
-				}else if (pc.getAttributeListItem() != null) {
-					ps.setBytes(5, UuidUtils.uuidToByte(pc.getAttributeListItem().getUuid()));
+				int index = 1;
+				ps.setString(index++, pc.getClassification());
+				if (pc.getAttributeListItemKey() != null){
+					ps.setString(index++,  pc.getAttributeKey());
+					ps.setString(index++, pc.getAttributeListItemKey());
+				}else if (pc.getAttributeTreeNodeHkey() != null){
+					ps.setString(index++,  pc.getAttributeKey());
+					ps.setString(index++, pc.getAttributeTreeNodeHkey());
+					ps.setString(index++, pc.getAttributeTreeNodeHkey().substring(0, pc.getAttributeTreeNodeHkey().length() - 1) + "/");
 				}
+				ps.setDate(index++, java.sql.Date.valueOf(startDate));
+				ps.setDate(index++, java.sql.Date.valueOf(endDate));
+				ps.setString(index++, pc.getCategoryHkey());
+				ps.setString(index++, pc.getCategoryHkey().substring(0, pc.getCategoryHkey().length() - 1) + "/");
+			
 				ps.execute();
 			}
 		});

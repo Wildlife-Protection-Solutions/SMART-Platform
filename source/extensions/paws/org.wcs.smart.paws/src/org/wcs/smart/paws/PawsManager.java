@@ -15,6 +15,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.model.PawsConfiguration;
+import org.wcs.smart.paws.model.PawsParameter;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.util.UuidUtils;
 
@@ -101,6 +102,28 @@ public enum PawsManager {
 		broker.post(PawsEvent.PAWS_RUN_DELETE, runs);
 	}
 	
+	public void validateConfiguration(PawsConfiguration config) throws Exception{
+		try(Session session = HibernateManager.openSession()){
+			config = session.get(PawsConfiguration.class, config.getUuid());
+			if (config.getParameters() == null) throw new Exception("Grid parameters not supplied");
+			
+			PawsParameter pp = config.findParameter(PawsParameter.FixedParameter.GRID_BNDS.name());
+			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Grid bounds required");
+			
+			pp = config.findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
+			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Grid coordinate reference system required");
+	
+			pp = config.findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
+			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Grid size required");
+	
+			pp = config.findParameter(PawsParameter.FixedParameter.TIMEZONE.name());
+			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Timezone required");
+	
+			pp = config.findParameter(PawsParameter.FixedParameter.LYR_BOUNDARY.name());
+			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Conservation Area Boundary layer required");
+		}
+	}
+	
 	public String generateUniqueName(String runname, ConservationArea ca){
 		String id = runname;
 		int cnt = 1;
@@ -141,6 +164,24 @@ public enum PawsManager {
 		case COMPILING_DATA: return PawsPlugIn.getDefault().getImageRegistry().get(PawsPlugIn.ICON_WORKING);
 		case COMPLETE: return PawsPlugIn.getDefault().getImageRegistry().get(PawsPlugIn.ICON_DONE);
 		case ERROR: return PawsPlugIn.getDefault().getImageRegistry().get(PawsPlugIn.ICON_ERROR);
+		}
+		return null;
+	}
+	
+	public String getName(PawsParameter.FixedParameter fixedParameter){
+		switch(fixedParameter){
+		case GRID_BNDS: return "Bounds";
+		case GRID_CRS: return "CRS" ;
+		case GRID_SIZE: return "Grid Size";
+		case LYR_BOUNDARY: return "Conservation Area Boundary";
+		case LYR_CONTOUR: return "Contours";
+		case LYR_ROAD: return "Roads";
+		case LYR_WATER: return "River/Water";
+		case TIMEZONE: return "Time Zone";
+
+		default:
+			break;
+		
 		}
 		return null;
 	}

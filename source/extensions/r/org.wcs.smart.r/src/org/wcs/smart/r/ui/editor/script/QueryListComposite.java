@@ -110,27 +110,25 @@ public class QueryListComposite extends Composite{
 		return !query.getTypeKey().equalsIgnoreCase(CompoundMapQuery.TYPE_KEY);
 	}
 	
+	/**
+	 * Adds the given query does not fire any listeners
+	 * @param query
+	 * @param dFilter
+	 * @param exportId
+	 */
 	public void addQuery(Query query, DateFilter dFilter, String exportId) {
-		addQuery(query,dFilter, exportId, true);
-	}
-	
-	public void addQuery(Query query, DateFilter dFilter, String exportId, boolean refresh) {
 		if (!canAdd(query)) return;
 		
 		QueryItem qi = new QueryItem(query, null, null);
 		qi.lastDate = dFilter;
 		qi.lastFormat = exportId;
 		uiElements.add(qi);
-		if (refresh) updateList();
 	}
 	
-	public void addQuery(Query query) {
-		if (!canAdd(query)) return;
-		QueryItem qi = new QueryItem(query, null, null);
-		uiElements.add(qi);
-		updateList();
-	}
-	
+	/**
+	 * Adds the queries, fires change listeners once added
+	 * @param queries
+	 */
 	public void addQueries(List<Query> queries) {
 		for (Query q : queries) {
 			if (!canAdd(q)) continue;
@@ -138,6 +136,7 @@ public class QueryListComposite extends Composite{
 			uiElements.add(qi);
 		}
 		updateList();
+		fireListeners();
 	}
 
 	private void removeQuery(QueryItem query) {

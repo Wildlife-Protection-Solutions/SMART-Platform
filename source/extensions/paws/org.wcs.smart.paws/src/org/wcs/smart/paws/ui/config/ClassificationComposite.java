@@ -19,12 +19,16 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.model.AbstractPawsClass;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.paws.model.PawsSimpleClass;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.ObservationQuery;
@@ -91,18 +95,19 @@ public class ClassificationComposite extends Composite{
 				if (q != null) classTable.addQueries(q);
 			}
 		});
-		
-	}
-	
-	private void fireModified() {
-		//TODO:
 	}
 	
 	public void doSave(PawsConfiguration config, Session session) {
-		List<AbstractPawsClass> newItems =  classTable.getClassifications();
+		List<AbstractPawsClass> allItems =  classTable.getClassifications();
 		
-		for (AbstractPawsClass pc : newItems) {
-			pc.setConfiguration(config);
+		for (AbstractPawsClass pc : allItems) {
+			if (pc.getConfiguration() == null){
+				pc.setConfiguration(config);
+			}else if (!pc.getConfiguration().equals(config)){
+				//clear from database
+				pc.setUuid(null);
+				pc.setConfiguration(config);
+			}
 			session.saveOrUpdate(pc);
 		}
 		
@@ -113,30 +118,62 @@ public class ClassificationComposite extends Composite{
 		
 		
 		for (AbstractPawsClass pc : currentItems) {
-			if (!newItems.contains(pc)) session.delete(pc);
+			if (!allItems.contains(pc)) session.delete(pc);
 		}
 	}
 	
 	public void initialize(PawsConfiguration config, Session session) {
-		List<AbstractPawsClass> currentItems = new ArrayList<>();
-		currentItems.addAll(QueryFactory.buildQuery(session, PawsSimpleClass.class, new Object[] {"configuration", config}).list());
-		currentItems.addAll(QueryFactory.buildQuery(session, PawsQueryClass.class, new Object[] {"configuration", config}).list());
+		List<ClassificationData> currentItems = new ArrayList<>();
 		
-		currentItems.forEach(e->{
-			if (e instanceof PawsQueryClass) {
-				Query temp = QueryHibernateManager.getInstance().findQuery(session, ((PawsQueryClass) e).getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType( ((PawsQueryClass) e).getQueryType()));
-				((PawsQueryClass)e).setCachedQuery(temp);
-				temp.getName();
-			}else if (e instanceof PawsSimpleClass) {
-				PawsSimpleClass sc = (PawsSimpleClass)e;
-				sc.getCategory().getFullCategoryName();
-				if (sc.getAttribute() != null) sc.getAttribute().getName();
-				if (sc.getAttributeListItem() != null) sc.getAttributeListItem().getName();
-				if (sc.getAttributeTreeNode() != null) sc.getAttributeTreeNode().getName();
+		for (PawsSimpleClass pc : QueryFactory.buildQuery(session, PawsSimpleClass.class, new Object[] {"configuration", config}).list()){
+			pc.getClassification();
+			
+			String lbl = "";
+			Category c = QueryDataModelManager.getInstance().getCategory(session, pc.getCategoryHkey());
+			if (c == null){
+				lbl = MessageFormat.format("ERROR: Category {0} not found.", pc.getCategoryHkey());
+			}else{
+			
+				if (pc.getAttributeKey() != null){
+					if (pc.getAttributeListItemKey() != null){
+						AttributeListItem li = QueryDataModelManager.getInstance().getAttributeListItem(session, pc.getAttributeKey(), pc.getAttributeListItemKey());
+						if (li == null){
+							lbl = MessageFormat.format("ERROR: Attribute list item {0} not found.", pc.getAttributeListItemKey());
+						}else{
+							lbl = ClassificationData.createLabel(c,  li.getAttribute(), li);
+						}
+					}
+					
+					if (pc.getAttributeTreeNodeHkey() != null){
+						AttributeTreeNode node = QueryDataModelManager.getInstance().getAttributeTreeNode(session, pc.getAttributeKey(), pc.getAttributeTreeNodeHkey());
+						if (node == null){
+							lbl = MessageFormat.format("ERROR: Attribute tree node {0} not found.", pc.getAttributeTreeNodeHkey());
+						}else{
+							lbl = ClassificationData.createLabel(c,  node.getAttribute(), node);
+						}
+					}
+				}else{
+					lbl = ClassificationData.createLabel(c, null, null);
+				}
 				
 			}
-			e.getClassification();
-		});
+			currentItems.add(new ClassificationData(pc, lbl));
+		}
+		
+		for (PawsQueryClass pc : QueryFactory.buildQuery(session, PawsQueryClass.class, new Object[] {"configuration", config}).list()){
+			Query temp = QueryHibernateManager.getInstance().findQuery(session, ((PawsQueryClass) pc).getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType( ((PawsQueryClass) pc).getQueryType()));
+			String lbl = "";
+			if (temp != null){
+				((PawsQueryClass)pc).setCachedQuery(temp);
+				lbl = temp.getName();
+			}else{
+				lbl = "QUERY NOT FOUND";
+			}
+			
+			pc.getClassification();
+			currentItems.add(new ClassificationData(pc, lbl));
+		}
+		
 		
 		Display.getDefault().asyncExec(()->{
 			classTable.initItem(currentItems);

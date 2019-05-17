@@ -153,7 +153,7 @@ public class RunPage extends EditorPart {
 			try(Session session = HibernateManager.openSession()){
 				dbquery = QueryHibernateManager.getInstance().findQuery(session, qUuid, qType);
 			}
-			if (dbquery != null) queryList.addQuery(dbquery, dFilter, eFormat, false);
+			if (dbquery != null) queryList.addQuery(dbquery, dFilter, eFormat);
 		}
 		queryList.updateList();
 		

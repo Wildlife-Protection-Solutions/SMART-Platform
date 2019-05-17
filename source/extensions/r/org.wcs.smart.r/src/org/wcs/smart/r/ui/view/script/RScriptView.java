@@ -44,12 +44,15 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuEvent;
@@ -75,7 +78,10 @@ import org.wcs.smart.r.model.RQuery;
 import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.r.ui.OpenRScriptHandler;
 import org.wcs.smart.r.ui.RunRScriptHandler;
+import org.wcs.smart.r.ui.editor.script.RScriptEditor;
+import org.wcs.smart.r.ui.editor.script.RScriptEditorInput;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -90,6 +96,7 @@ public class RScriptView {
 	public static final String ID = "org.wcs.smart.r.view.rscripts"; //$NON-NLS-1$
 
 	@Inject private IEclipseContext context;
+	@Inject private MPart localpart;
 	
 	private TreeViewer itemViewer;
 	private List<UuidItem> queries = new ArrayList<>();
@@ -293,12 +300,19 @@ public class RScriptView {
 
 	@Inject
 	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent){
-//		if (partEvent == null) return;
-//		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
-//		Object lpart = E3Utils.getSourceObject(activePart);
-//		if (lpart instanceof PlanEditor){
-//			planViewer.setSelection(((PlanEditor)lpart).getEditorInput());
-//		}
+		if (partEvent == null) return;
+
+		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+		Object lpart = E3Utils.getSourceObject(activePart);
+		if (lpart instanceof RScriptEditor){
+			context.get(EPartService.class).bringToTop(localpart);
+
+			UUID uuid = ((RScriptEditorInput) ((RScriptEditor)lpart).getEditorInput()).getRScript();
+			RScript temp = new RScript();
+			temp.setUuid(uuid);
+					
+			itemViewer.setSelection(new StructuredSelection(temp));
+		}
 	}
 	
 	
