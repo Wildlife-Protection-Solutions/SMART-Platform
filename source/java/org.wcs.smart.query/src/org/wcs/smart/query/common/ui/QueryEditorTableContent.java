@@ -153,7 +153,9 @@ public class QueryEditorTableContent {
 	private void refreshQueryDetails(){
 		if (tableComp.isDisposed()) return;
 		if (infoSection == null) return;
-		infoSection.updateControls((IPagedQueryResultSet)resultsTable.getTable().getInput());
+		if (resultsTable.getTable().getInput() instanceof IPagedQueryResultSet){
+			infoSection.updateControls((IPagedQueryResultSet)resultsTable.getTable().getInput());
+		}
 	}
 	
 	/**

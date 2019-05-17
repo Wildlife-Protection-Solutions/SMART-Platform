@@ -47,13 +47,13 @@ public class MultiCaQueryPerspective implements IPerspectiveFactory {
 		layout.addView(QueryListView.ID, IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA);
 		
 		//right side - filters and layer manager
-		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.query.queryFolder1", IPageLayout.RIGHT, 0.8f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+		IFolderLayout folder1 = layout.createFolder(QueryPerspective.ITEM_FOLDER, IPageLayout.RIGHT, 0.8f, IPageLayout.ID_EDITOR_AREA); 
 		folder1.addView(QueryItemView.ID);
 		folder1.addView("org.locationtech.udig.project.ui.layerManager"); //$NON-NLS-1$
 		folder1.addView(WaypointInfoView.ID);
 		
 		//bottom query and info view
-		IFolderLayout folder2 = layout.createFolder("org.wcs.smart.query.queryFolder2", IPageLayout.BOTTOM, 0.7f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+		IFolderLayout folder2 = layout.createFolder(QueryPerspective.DEF_FOLDER, IPageLayout.BOTTOM, 0.7f, IPageLayout.ID_EDITOR_AREA); 
 		folder2.addView(QueryDefView.ID);
 		folder2.addPlaceholder("org.locationtech.udig.tool.info.infoView"); //$NON-NLS-1$
 

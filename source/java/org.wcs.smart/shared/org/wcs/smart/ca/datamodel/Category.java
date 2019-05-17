@@ -23,7 +23,6 @@ package org.wcs.smart.ca.datamodel;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -314,12 +313,10 @@ RETURNS NULL ON NULL INPUT;
 	@Transient 
 	public List<CategoryAttribute> getAttributes(Boolean active){
 		List<CategoryAttribute> tmp = new ArrayList<CategoryAttribute>();
-		if (getAttributes() != null){
-			for (Iterator<CategoryAttribute> iterator = getAttributes().iterator(); iterator.hasNext();) {
-				CategoryAttribute category = (CategoryAttribute) iterator.next();
-				if (active == null || (active != null && category.getIsActive() == active)){
-					tmp.add(category);
-				}
+		if (getAttributes() == null) return tmp;
+		for(CategoryAttribute ca : getAttributes()){
+			if (active == null || (active != null && ca.getIsActive() == active)){
+				tmp.add(ca);
 			}
 		}
 		return tmp;

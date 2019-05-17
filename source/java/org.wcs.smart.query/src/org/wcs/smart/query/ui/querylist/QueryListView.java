@@ -39,6 +39,7 @@ import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.di.UISynchronize;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.LocalSelectionTransfer;
@@ -163,6 +164,8 @@ public class QueryListView {
 		}
 		Object lpart = E3Utils.getSourceObject(activePart);
 		if (lpart instanceof IQueryEditor){
+			part.getContext().get(EPartService.class).bringToTop(part);
+
 			queryList.setSelection(new StructuredSelection(((IQueryEditor)lpart).getInputInternal()));
 			focusCellManager.getFocusCell();
 		}

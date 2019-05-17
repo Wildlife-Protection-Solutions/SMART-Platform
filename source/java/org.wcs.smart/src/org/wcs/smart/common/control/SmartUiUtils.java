@@ -65,7 +65,7 @@ public class SmartUiUtils {
 		return createHeaderLabelInternal(parent, text, SUB_HEADER_CLASS);
 	}
 	
-	public static Composite createHeaderLabelInternal(Composite parent, String text, String style) {
+	private static Composite createHeaderLabelInternal(Composite parent, String text, String style) {
 		Composite sectionheader = new Composite(parent, SWT.NONE);
 		sectionheader.setLayout(new GridLayout());
 		sectionheader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

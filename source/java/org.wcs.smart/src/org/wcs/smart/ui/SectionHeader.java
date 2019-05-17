@@ -40,7 +40,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 
 /**
- * Section header.
+ * Section header ui element.  A section header emulates a set
+ * of tabs, styling them with the smart styles for tabs.
  * 
  * @author Emily
  *
@@ -59,10 +60,27 @@ public class SectionHeader extends Composite{
 	
 	private Color borderColor = null;
 	private int fontsize = 0;
+	private int currentIndex = -1;
 	
+	/**
+	 * Creates a new section header
+	 * @param parent parent widget
+	 * @param style style
+	 * @param headers header strings
+	 * @param actions actions to perform when tab is selected
+	 */
 	public SectionHeader(Composite parent, int style, String[] headers, Listener[] actions) {
 		this(parent, style, 0, headers,actions);
 	}
+	
+	/**
+	 * Creates a new section header
+	 * @param parent parent widget
+	 * @param style style
+	 * @param fontsize the size of the font for the headers
+	 * @param headers header strings
+	 * @param actions actions to perform when tab is selected
+	 */
 	public SectionHeader(Composite parent, int style, int fontsize, String[] headers, Listener[] actions) {
 		super(parent, style);
 		this.fontsize = fontsize;
@@ -105,12 +123,26 @@ public class SectionHeader extends Composite{
 		
 	}
 	
+	/**
+	 * The current selected tab or -1 if not set
+	 * @return
+	 */
+	public int getCurrentTab(){
+		return this.currentIndex;
+	}
+	
+	/**
+	 * Selects a given header.  
+	 * @param index 
+	 */
 	public void selectPanel(int index) {
+		if (index > links.size()) throw new IllegalArgumentException("index cannot be greater than number of headers"); //$NON-NLS-1$
 		selectTab(links.get(index));
 		((Listener)links.get(index).getData(EVENT_KEY)).handleEvent(new Event());
 	}
 
 	private void selectTab(CLabel link) {
+		this.currentIndex = links.indexOf(link);
 		links.forEach(l->WidgetElement.setCSSClass(l, TAB_CLASS));
 		WidgetElement.setCSSClass(link, TAB_SELECTED_CLASS);
 		WidgetElement.applyStyles(this, true);

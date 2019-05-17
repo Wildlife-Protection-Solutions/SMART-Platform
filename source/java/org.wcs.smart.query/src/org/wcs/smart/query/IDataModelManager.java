@@ -143,10 +143,10 @@ public interface IDataModelManager {
 	 * Loads the category for the given category key
 	 * 
 	 * @param session
-	 * @param categoryKey
+	 * @param categoryKey category unique hierarchical key
 	 * @return category object or <code>null</code> if not loaded
 	 */
-	public Category getCategory(Session session, String categoryKey);
+	public Category getCategory(Session session, String categoryHKey);
 
 	/**
 	 * 

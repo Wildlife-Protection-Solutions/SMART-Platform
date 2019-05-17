@@ -41,6 +41,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -247,7 +248,7 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	/**
 	 * Loads the category for the given category key 
 	 * @param session
-	 * @param categoryKey
+	 * @param categoryKey category unique hierarchical key
 	 * @return category object or <code>null</code> if not loaded
 	 */
 	@Override
@@ -460,6 +461,7 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 					}
 					for (Attribute att: tmp.getAttributes()){
 						att.getAggregations().size();
+						att.getName();
 					}
 					dm = tmp;
 				}finally{
@@ -491,6 +493,7 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 				ca.getAttribute().getName();
 			}	
 		}
+		
 	};
 	
 }

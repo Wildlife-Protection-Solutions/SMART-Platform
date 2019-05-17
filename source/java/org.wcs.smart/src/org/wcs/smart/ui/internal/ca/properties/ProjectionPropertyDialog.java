@@ -42,10 +42,13 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.locationtech.udig.ui.CRSChooserDialog;
@@ -59,6 +62,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+
 /**
  * Dialog for modifying conservation area projection options.
  * @author egouge
@@ -70,9 +74,8 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 	private List<Projection> projections;
 	private List<Projection> projectionsToDelete;
 	
-	private Button btnAdd;
-	private Button btnRemove;
-	private Button btnEdit;
+	private MenuItem miAdd, miDelete, miEdit;
+	private ToolItem tiAdd, tiDelete, tiEdit;
 	
 	private ComboViewer projectionViewer = null;
 	
@@ -90,10 +93,31 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		
 		Label lbl = new Label(main, SWT.NONE);
 		lbl.setText(Messages.ProjectionPropertyDialog_ProjectionList_Label);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
+		ToolBar tb = new ToolBar(main,SWT.HORIZONTAL | SWT.FLAT);
+		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		
+		tiAdd = new ToolItem(tb, SWT.PUSH);
+		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		tiAdd.setToolTipText(DialogConstants.ADD_BUTTON_TEXT);
+		tiAdd.addSelectionListener(this);
+		
+		tiEdit = new ToolItem(tb, SWT.PUSH);
+		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		tiEdit.setToolTipText(DialogConstants.EDIT_BUTTON_TEXT);
+		tiEdit.addSelectionListener(this);
+		tiEdit.setEnabled(false);
+		
+		tiDelete = new ToolItem(tb, SWT.PUSH);
+		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDelete.setToolTipText(DialogConstants.DELETE_BUTTON_TEXT);
+		tiDelete.addSelectionListener(this);
+		tiDelete.setEnabled(false);
+		
+		
 		lstViewer = new ListViewer(main, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
-		lstViewer.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		lstViewer.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		((GridData)lstViewer.getList().getLayoutData()).widthHint = 350;
 		((GridData)lstViewer.getList().getLayoutData()).heightHint = 100;
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -115,8 +139,10 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 				if (!lstViewer.getSelection().isEmpty()){
 					enabled = Projection.class.isAssignableFrom( ((IStructuredSelection)lstViewer.getSelection()).getFirstElement().getClass()) ;
 				}
-				btnEdit.setEnabled(enabled);
-				btnRemove.setEnabled(enabled);
+				tiEdit.setEnabled(enabled);
+				tiDelete.setEnabled(enabled);
+				miEdit.setEnabled(enabled);
+				miDelete.setEnabled(enabled);
 			}
 		});
 		lstViewer.addDoubleClickListener(new IDoubleClickListener() {
@@ -126,29 +152,28 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 			}
 		});
 		
+		Menu mnu = new Menu(lstViewer.getControl());
+		
+		miAdd = new MenuItem(mnu, SWT.PUSH);
+		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miAdd.addSelectionListener(this);
+		
+		miEdit = new MenuItem(mnu, SWT.PUSH);
+		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		miEdit.addSelectionListener(this);
+		miEdit.setEnabled(false);
+		
+		miDelete = new MenuItem(mnu, SWT.PUSH);
+		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDelete.addSelectionListener(this);
+		miDelete.setEnabled(false);
+		
+		lstViewer.getControl().setMenu(mnu);
 		
 		
-		Composite buttonPnl = new Composite(main, SWT.NONE);
-		GridLayout gl = new GridLayout(1, false);
-		gl.marginHeight = gl.marginTop = gl.marginBottom = 0;
-		buttonPnl.setLayout(gl);
-		buttonPnl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		btnAdd = new Button(buttonPnl, SWT.PUSH);
-		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnAdd.addSelectionListener(this);
-		
-		btnRemove = new Button(buttonPnl, SWT.PUSH);
-		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnRemove.addSelectionListener(this);
-		btnRemove.setEnabled(false);
-		
-		btnEdit = new Button(buttonPnl, SWT.PUSH);
-		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnEdit.addSelectionListener(this);
-		btnEdit.setEnabled(false);
 		
 		Composite prjComp = new Composite(main, SWT.NONE);
 		GridLayout pgl = new GridLayout(2, false);
@@ -302,11 +327,11 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 	
 	@Override
 	public void widgetSelected(SelectionEvent e) {
-		if (e.widget == btnRemove){
+		if (e.widget == tiDelete || e.widget == miDelete){
 			removeSelected();
-		}else if (e.widget == btnAdd){
+		}else if (e.widget == tiAdd || e.widget == miAdd){
 			add();
-		}else if (e.widget == btnEdit){
+		}else if (e.widget == tiEdit || e.widget == miEdit){
 			editSelected();
 		}
 	}
