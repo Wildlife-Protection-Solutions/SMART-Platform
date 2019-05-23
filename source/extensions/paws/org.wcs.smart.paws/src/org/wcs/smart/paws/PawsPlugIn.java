@@ -21,9 +21,6 @@
  */
 package org.wcs.smart.paws;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -32,9 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
-import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.plugin.DeleteCaHandler;
-import org.wcs.smart.util.UuidUtils;
 
 public class PawsPlugIn extends AbstractUIPlugin {
 

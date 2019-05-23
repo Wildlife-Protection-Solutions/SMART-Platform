@@ -33,16 +33,20 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryFilterConfigManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Content provider for data model dialog for selecting simple paws classifications 
+ * 
+ * @author Emily
+ *
+ */
 public class DataModelContentProvider implements ITreeContentProvider {
 
 	protected DataModel model;
-	private IconSet iset;
 	
 	/**
 	 * Creates a new content provider that provides categories, tree and list
@@ -63,9 +67,8 @@ public class DataModelContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if (newInput instanceof Object[]) {
-			this.model = (DataModel)((Object[])newInput)[0];
-			this.iset = (IconSet)((Object[])newInput)[1];
+		if (newInput instanceof DataModel) {
+			this.model = (DataModel)newInput;
 		}else {
 			this.model = null;
 		}
@@ -79,11 +82,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 		if (model == null) return new Object[] {DialogConstants.LOADING_TEXT};
 		return  model.getCategories().toArray();
 	}
-//	private void loadIcon(DmObject dm, Session session) {
-//		if (iset == null) return;
-//		if (dm.getIcon() != null && dm.getIcon().getIconFile(iset) != null) dm.getIcon().getIconFile(iset).computeFileLocation(session);
-//
-//	}
+
 	/*
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
 	 */
@@ -98,9 +97,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 				try(Session session = HibernateManager.openSession()){
 					children = QueryDataModelManager.getInstance().getAttributeListItems(ca.getAttribute(), 
 							session, !(Boolean)QueryFilterConfigManager.getShowInavtiveItemsState().getValue());
-
 					for (AttributeListItem li : children) {
-//						loadIcon(li, session);
 						li.getAttribute().getName();
 						kids.add(new CategoryItemWrapper(ca.getCategory(), li));
 					}	
@@ -113,32 +110,25 @@ public class DataModelContentProvider implements ITreeContentProvider {
 				List<AttributeTreeNode> children = null;
 				try(Session session = HibernateManager.openSession()){
 					children = QueryDataModelManager.getInstance().getAllAttributeTreeNodes(ca.getAttribute(), session);
-
 					for (AttributeTreeNode li : children) {
 						if (!(Boolean)QueryFilterConfigManager.getShowInavtiveItemsState().getValue() && !li.getIsActive()) continue; 
-//						loadIcon(li, session);
 						kids.add(new CategoryItemWrapper(ca.getCategory(), li));
 					}
 				}
-				
 				return kids.toArray();
 			}
 		
 		}else if (parentElement instanceof CategoryItemWrapper && ((CategoryItemWrapper)parentElement).node != null) {
 			AttributeTreeNode tn = (AttributeTreeNode)((CategoryItemWrapper)parentElement).node;
-			
 			List<CategoryItemWrapper> kids = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
 				for (AttributeTreeNode li : tn.getChildren()) {
 					if (!(Boolean)QueryFilterConfigManager.getShowInavtiveItemsState().getValue() && !li.getIsActive()) continue; 
-//					loadIcon(li, session);
 					kids.add(new CategoryItemWrapper(((CategoryItemWrapper)parentElement).c, li));
-
 				}
 			}
 			return kids.toArray();
 			
-		
 		}else if (parentElement instanceof Category) {
 			
 			ArrayList<Object> children = new ArrayList<Object>();
@@ -174,10 +164,20 @@ public class DataModelContentProvider implements ITreeContentProvider {
 			return ((Category)element).getParent();
 		}else if (element instanceof CategoryAttribute){
 			return ((CategoryAttribute) element).getCategory();
-		}else if (element instanceof AttributeListItem) {
-			//TODO:
-		}else if (element instanceof AttributeTreeNode) {
-			//TODO:
+		}else if (element instanceof CategoryItemWrapper) {
+			CategoryItemWrapper w = (CategoryItemWrapper)element;
+			if (w.li != null) {
+				CategoryAttribute ca = new CategoryAttribute();
+				ca.setCategory(w.c);
+				ca.setAttribute(w.li.getAttribute());
+				return ca;
+			}
+			if (w.node != null) {
+				CategoryAttribute ca = new CategoryAttribute();
+				ca.setCategory(w.c);
+				ca.setAttribute(w.node.getAttribute());
+				return ca;
+			}
 		}
 		return null;
 	}

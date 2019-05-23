@@ -48,6 +48,11 @@ import org.wcs.smart.paws.model.PawsWorkspace;
 import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Dialog for configuring PAWS Azure and AI servers
+ * @author Emily
+ *
+ */
 public class ServerConfigurationDialog extends SmartStyledDialog {
 
 	private Text txtServerURL;

@@ -23,13 +23,13 @@ package org.wcs.smart.paws.ui;
 
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 
+@SuppressWarnings("restriction")
 public class ShowConfigurationHandler extends ShowDialogHandler{
 
 	public ShowConfigurationHandler() {
 		super(ServerConfigurationDialog.class);
 	}
 
-	
 	// E3
 	public static class ShowConfigurationHandlerWrapper extends DIHandler<ShowConfigurationHandler> {
 		public ShowConfigurationHandlerWrapper() {

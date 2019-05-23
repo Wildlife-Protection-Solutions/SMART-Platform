@@ -37,7 +37,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.paws.PawsPlugIn;
 
 /**
- * Job removes all plan related tabled from the database
+ * Job removes all PAWS related tabled from the database
  * 
  * @author Emily
  * @since 3.0.0

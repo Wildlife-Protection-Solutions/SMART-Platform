@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2019 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -110,17 +111,16 @@ import org.wcs.smart.util.UuidUtils;
 
 
 /**
- * Script page of editor
+ * PAWS Configuration editor
  * 
  * @author Emily
  *
  */
 public class ConfigurationEditor extends EditorPart {
 
-	private static final String RE_DATA_KEY = "RE";
-
 	public static final String ID = "org.wcs.smart.paws.configuration.editor"; //$NON-NLS-1$
-
+	
+	private static final String RE_DATA_KEY = "RE";
 	private static final String CUSTOM_FILE = "Custom File...";
 
 	private IEclipseContext parentContext;
@@ -517,7 +517,7 @@ public class ConfigurationEditor extends EditorPart {
 		((GridLayout)gridspec.getLayout()).marginWidth = 0;
 		((GridLayout)gridspec.getLayout()).marginHeight = 0;
 		
-		Composite c = SmartUiUtils.createHeaderLabel(bmlayers, "Map Layers");
+		SmartUiUtils.createHeaderLabel(bmlayers, "Map Layers");
 		
 		Composite inner = toolkit.createComposite(bmlayers);
 		inner.setLayout(new GridLayout(2, false));
@@ -539,7 +539,7 @@ public class ConfigurationEditor extends EditorPart {
 		cmbContour = createBmCombo(inner);
 		cmbContour.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-		c = SmartUiUtils.createHeaderLabel(gridspec, "Grid Specifications");
+		SmartUiUtils.createHeaderLabel(gridspec, "Grid Specifications");
 		
 		inner = toolkit.createComposite(gridspec);
 		inner.setLayout(new GridLayout(2, false));
@@ -831,8 +831,7 @@ public class ConfigurationEditor extends EditorPart {
 					}
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				PawsPlugIn.log(e.getMessage(), e);
 			}
 		}
 		return null;
@@ -846,7 +845,7 @@ public class ConfigurationEditor extends EditorPart {
 			Projection currentPrj = null;
 			List<Projection> allPrjs = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){			
-				List<Area.AreaType> types = session.createQuery("SELECT DISTINCT type FROM Area WHERE conservationArea = :ca")
+				List<Area.AreaType> types = session.createQuery("SELECT DISTINCT type FROM Area WHERE conservationArea = :ca", Area.AreaType.class)
 					.setParameter("ca", SmartDB.getCurrentConservationArea())
 					.list();
 				options.add("");
@@ -862,8 +861,7 @@ public class ConfigurationEditor extends EditorPart {
 					try {
 						prj.setParsedCoordinateReferenceSystem(CRS.parseWKT(prj.getDefinition()));
 					} catch (FactoryException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						PawsPlugIn.log(e.getMessage(),e);
 					}	
 				});
 			}
@@ -901,8 +899,7 @@ public class ConfigurationEditor extends EditorPart {
 			try(Session s = HibernateManager.openSession()){
 				PawsConfiguration pw = s.get(PawsConfiguration.class, in.getUuid());
 				if (pw == null) {
-					//TODO: ERROR
-					
+					throw new Exception("Paws Configuration not found");					
 				}
 				
 				Display.getDefault().syncExec(()->{
@@ -946,15 +943,15 @@ public class ConfigurationEditor extends EditorPart {
 						
 						Projection temp = new Projection();
 						boolean add = false;
+						List<Projection> prjs = (List<Projection>)cmbCrs.getInput();
 						if (uuid.isBlank()){
 							add = true;
 						}else{
 							temp.setUuid( UuidUtils.stringToUuid(uuid) );
-							
-							if (!((List<Projection>)cmbCrs.getInput()).contains(temp)){
+							if (!prjs.contains(temp)){
 								add = true;
 							}else{
-								Projection prj = ((List<Projection>)cmbCrs.getInput()).get(((List<Projection>)cmbCrs.getInput()).indexOf(temp));
+								Projection prj = prjs.get(prjs.indexOf(temp));
 								if (!prj.getDefinition().equals(def)) add = true;
 							}
 						}
@@ -962,7 +959,7 @@ public class ConfigurationEditor extends EditorPart {
 							temp.setUuid(null);
 							temp.setDefinition(pp.getValue().substring(uuid.length() + 1));
 							temp.setName("Custom");
-							((List<Projection>)cmbCrs.getInput()).add(temp);
+							prjs.add(temp);
 							cmbCrs.refresh();
 							try {
 								temp.setParsedCoordinateReferenceSystem(CRS.parseWKT(temp.getDefinition()));
@@ -996,6 +993,8 @@ public class ConfigurationEditor extends EditorPart {
 				});
 				
 				classComposite.initialize(pw, s);
+			}catch (Exception ex) {
+				PawsPlugIn.log(ex.getMessage(), ex);
 			}
 			
 			
@@ -1044,12 +1043,20 @@ public class ConfigurationEditor extends EditorPart {
 		@Override
 		public void afterTransactionCompletion(Transaction tx) {
 			if (tx.getStatus() == TransactionStatus.COMMITTED) {
+				
+				Path root = Paths.get(fileNames.get(0));
+				fileNames.remove(0);
+				if (!Files.exists(root)) {
+					try {
+						Files.createDirectories(root);
+					} catch (IOException e) {
+						PawsPlugIn.displayLog("Unable to create directory for configuration files. You should resolve the error and re-create the configuration." + e.getMessage(), e);
+					}
+				}
+
+				
 				for (Path[] p : filesToCopy) {
 					try {
-						if(!Files.exists(p[1].getParent()) ) {
-							Files.createDirectories(p[1].getParent());
-						}
-						
 						Path source = p[0];
 						Path target = p[1];
 						
@@ -1070,20 +1077,18 @@ public class ConfigurationEditor extends EditorPart {
 								} catch (IOException e) {
 									PawsPlugIn.displayLog(MessageFormat.format("Error copying shapefile supporting files to SMART Data store {0} to {1}",  other.toString(), copyto.toString()), e);
 								}
-								}
+							}
 						});
 					} catch (IOException e) {
 						PawsPlugIn.displayLog("Error copying layer map file to SMART Data store." + "\n\n" + e.getMessage(), e);
 					}
 				}
-				
-				//delete any files not referenced
-				Path root = Paths.get(fileNames.get(0));
-				
-				fileNames.remove(0);
+
 				try {
-					if (!Files.exists(root)) Files.createDirectories(root);
-					Files.list(root).forEach(other->{
+					//delete any files not referenced
+					try(Stream<Path> files = Files.list(root)){
+						files.forEach(other->{
+					
 						String name = SharedUtils.getFilenameWithoutExtension(other.getFileName().toString());
 						if (!fileNames.contains(name)) {
 							try {
@@ -1093,7 +1098,8 @@ public class ConfigurationEditor extends EditorPart {
 								PawsPlugIn.log(e.getMessage(),e);
 							}
 						}
-					});
+						});
+					}
 				} catch (IOException e) {
 					PawsPlugIn.log(e.getMessage(),e);
 				}

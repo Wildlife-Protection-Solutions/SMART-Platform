@@ -74,7 +74,7 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 				cpp.setConfiguration(clone);
 				cpp.setKey(pp.getKey());
 				
-				if (pp.getKey() == PawsParameter.FixedParameter.GRID_CRS.name()){
+				if (pp.getKey().equals(PawsParameter.FixedParameter.GRID_CRS.name())){
 					UUID uuid = UuidUtils.stringToUuid(pp.getValue().split(":")[0]);
 					String def = pp.getValue().substring(pp.getValue().indexOf(':')+1);
 					UuidItem prj = engine.getNewConservationItem(uuid);

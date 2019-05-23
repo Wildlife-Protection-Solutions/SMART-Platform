@@ -26,7 +26,7 @@ import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 import org.wcs.smart.paws.PawsPlugIn;
 
 /**
- * Action that is called when r plug-in is uninstalled
+ * Action that is called when PAWS plug-in is uninstalled
  * 
  * @author Emily
  */

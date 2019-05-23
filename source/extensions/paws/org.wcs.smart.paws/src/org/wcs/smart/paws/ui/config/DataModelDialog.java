@@ -47,18 +47,22 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.paws.model.PawsSimpleClass;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Dialog for selecting data model item for simple PAWS 
+ * Classification
+ * 
+ * @author Emily
+ *
+ */
 public class DataModelDialog extends SmartStyledDialog {
 
 	private TreeViewer dmTree;
-	private IconSet iset;
-	
 	private List<ClassificationData> selectedItems;
 	
 	protected DataModelDialog(Shell parent) {
@@ -102,36 +106,6 @@ public class DataModelDialog extends SmartStyledDialog {
 					if (w.node != null) return super.getText(w.node);
 				}
 				return super.getText(element);
-			}
-			
-			@Override
-			public Image getImage(Object element) {
-//				if (iset == null) return super.getImage(element);
-//				if (images.containsKey(element)) return images.get(element);
-//				
-//				if (element instanceof CategoryAttribute) {
-//					element = ((CategoryAttribute)element).getAttribute();
-//				}
-//				if (element instanceof DataModelContentProvider.CategoryItemWrapper) {
-//					DataModelContentProvider.CategoryItemWrapper w = (DataModelContentProvider.CategoryItemWrapper)element;
-//					if (w.li != null) element = w.li;
-//					if (w.node != null) element = w.node;
-//				}
-//				if (element instanceof DmObject) {
-//					Image img = null;
-//					DmObject d = (DmObject)element;
-//					if (d.getIcon() != null && d.getIcon().getIconFile(iset) != null) {
-//						img =  SmartUtils.getImage(d.getIcon().getIconFile(iset).getAttachmentFile().toPath(), 16);
-//						images.put(element, img);
-//					}
-//					if (img == null) {
-//						img = super.getImage(element);
-//					}
-//					
-//					return img;
-//				}
-//				return null;
-				return super.getImage(element);
 			}
 		});
 		dmTree.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -214,7 +188,7 @@ public class DataModelDialog extends SmartStyledDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			DataModel fdm = QueryDataModelManager.getInstance().getDataModel();
 			Display.getDefault().asyncExec(()->{
-				dmTree.setInput(new Object[]{fdm,iset});
+				dmTree.setInput(fdm);
 				dmTree.expandToLevel(2);
 			});
 			return Status.OK_STATUS;

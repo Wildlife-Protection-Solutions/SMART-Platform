@@ -25,7 +25,7 @@ import org.wcs.smart.changetracking.AbstractChangeTrackerInstaller;
 import org.wcs.smart.paws.PawsPlugIn;
 
 /**
- * Installs triggers for change tracking the plan plugin.
+ * Installs triggers for change tracking the PAWS plugin.
  * 
  * @author Emily
  *

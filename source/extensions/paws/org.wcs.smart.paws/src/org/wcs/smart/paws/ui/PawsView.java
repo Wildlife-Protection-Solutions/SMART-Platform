@@ -94,7 +94,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.E3Utils;
 
 /**
- * Simple view for listing R scripts and queries
+ * Simple view for listing PAWS runs and configurations
  * 
  * @author Emily
  *

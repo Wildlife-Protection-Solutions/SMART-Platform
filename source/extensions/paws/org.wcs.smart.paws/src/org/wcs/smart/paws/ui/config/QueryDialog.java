@@ -55,6 +55,12 @@ import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
 import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Dialog for selecting a query for a PAWS classification
+ * 
+ * @author Emily
+ *
+ */
 public class QueryDialog extends SmartStyledDialog {
 
 	private TableViewer queryTree;

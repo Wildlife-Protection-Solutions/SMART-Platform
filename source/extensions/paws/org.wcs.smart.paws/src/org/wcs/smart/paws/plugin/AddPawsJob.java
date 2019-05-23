@@ -36,7 +36,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.paws.PawsPlugIn;
 
 /**
- * Adds and/or upgrades the R plugin database tables.
+ * Adds and/or upgrades the PAWS plugin database tables.
  * 
  * @author Emily
  *

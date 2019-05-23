@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2019 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -46,9 +46,9 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 
 
 /**
- * A header composite that contains a
- * query name and id information allowing users to modify the 
- * query name.
+ * A header composite that contains a name and provides the ability
+ * to edit it.
+ * 
  * 
  * <b>Events:</b> SWT.Selection - the text field of 
  * the event object is set to the new name
@@ -56,6 +56,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
  * @author egouge
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class HeaderComposite extends Composite {
 	
 	private static final int MAX_NAME_LENGTH = 8192;
@@ -67,8 +68,14 @@ public class HeaderComposite extends Composite {
 	
 	private boolean cancelled = false;
 	
+	
 	/**
+	 * Creates new header composite 
 	 * 
+	 * @param parent
+	 * @param toolkit
+	 * @param headerFont
+	 * @param headerColor
 	 */
 	public HeaderComposite(Composite parent, FormToolkit toolkit, Font headerFont, Color headerColor) {
 		super(parent, SWT.NONE);
@@ -77,6 +84,10 @@ public class HeaderComposite extends Composite {
 		createComposite(headerFont, headerColor, toolkit);
 	}
 
+	/**
+	 * Sets the widget text
+	 * @param text the new text
+	 */
 	public void setText(String text){
 		this.name = text;
 		lblName.setText(this.name);
@@ -191,6 +202,10 @@ public class HeaderComposite extends Composite {
 		}
 	}
 	
+	/**
+	 * Gets the widget text
+	 * @return the widget text
+	 */
 	public String getText() {
 		return this.name;
 	}

@@ -62,14 +62,15 @@ import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.model.Query;
 
 /**
- * Composite for listing queries and collection date and output format 
+ * Composite for listing queries and data model items
+ * that are associated with a PAWS Configuration 
  * 
  * @author Emily
  *
  */
 public class ClassificationTableComposite extends Composite{
 
-//	private List<Query> queries;
+
 	private List<ClassificationData> uiElements;
 	
 	private Composite list;
@@ -110,7 +111,7 @@ public class ClassificationTableComposite extends Composite{
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		
-		ToolBar tb = new ToolBar(tableHeader, SWT.FLAT );
+		ToolBar tb = new ToolBar(tableHeader, SWT.FLAT);
 		adapt(tb);
 		
 		ToolItem addItem = new ToolItem(tb, SWT.RADIO);
@@ -347,7 +348,7 @@ public class ClassificationTableComposite extends Composite{
 		});
 
 		form.reflow(true);
-		list.layout();
+		list.layout(true);
 		resizeHeader();
 	}
 	
@@ -355,11 +356,13 @@ public class ClassificationTableComposite extends Composite{
 		if (!uiElements.isEmpty()) {
 			for (int i = 0; i < cols; i ++) {
 				Rectangle r = list.getChildren()[i].getBounds(); 
-				if (i == 0 && form.getVerticalBar().getVisible()) {
-					((GridData)tableHeader.getChildren()[i].getLayoutData()).widthHint = r.width - form.getVerticalBar().getSize().x;
-				}else {
-					((GridData)tableHeader.getChildren()[i].getLayoutData()).widthHint = r.width;
+				int hint = r.width;
+				
+				if(hint == 0) return;
+				if (form.getVerticalBar().getVisible() && i == 0) {
+					hint = hint - form.getVerticalBar().getSize().x;
 				}
+				((GridData)tableHeader.getChildren()[i].getLayoutData()).widthHint = hint;
 			}
 			tableHeader.layout(true);
 		}

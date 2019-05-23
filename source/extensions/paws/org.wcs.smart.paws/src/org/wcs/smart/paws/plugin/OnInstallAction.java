@@ -31,7 +31,7 @@ import org.wcs.smart.p2.common.updatesite.InstallProvisioningAction;
 import org.wcs.smart.paws.PawsPlugIn;
 
 /**
- * Action that is called when r plug-in is installed
+ * Action that is called when PAWS plug-in is installed
  * 
  * @author Emily
  */

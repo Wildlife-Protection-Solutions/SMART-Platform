@@ -31,7 +31,7 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
 /**
- * R plugin database upgrade scripts.  Upgrades the database
+ * PAWS plugin database upgrade scripts.  Upgrades the database
  * and file store options to match the current 
  * plugin version
  * 
