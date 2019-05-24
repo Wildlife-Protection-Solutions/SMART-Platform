@@ -46,7 +46,7 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 	private PatrolValueOption item;
 	private String guiLabel;
 	
-	private Button noData = null;
+	private Button btnExcludeNoDataDays = null;
 	
 	/**
 	 * Creates a new drop item
@@ -79,7 +79,7 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 		sb.append("patrol:sum:"); //$NON-NLS-1$
 		sb.append(item.getKeyPart());
 		if (item.hasNoDataOption()) {
-			if (noData != null && !noData.getSelection()) {
+			if (btnExcludeNoDataDays != null && !btnExcludeNoDataDays.getSelection()) {
 				sb.append(":" + PatrolValueItem.EXCLUDE_DATA_OPTION); //$NON-NLS-1$
 			}
 		}
@@ -104,18 +104,22 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 		super.updateUi();
 		
 		if (item.hasNoDataOption()) {
-			noData = new Button(main, SWT.CHECK);
-			noData.setText(Messages.PatrolValueDropItem_ExcludeDaysWithoutDataOption);
-			noData.setToolTipText(noData.getText());
-			noData.addListener(SWT.Selection, e->getTargetPanel().fireQueryChangedListeners());
-			noData.setSelection(initNoDataValue);
-			noData.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			btnExcludeNoDataDays = new Button(main, SWT.CHECK);
+			btnExcludeNoDataDays.setText(Messages.PatrolValueDropItem_ExcludeDaysWithoutDataOption);
+			btnExcludeNoDataDays.setToolTipText(btnExcludeNoDataDays.getText());
+			btnExcludeNoDataDays.addListener(SWT.Selection, e->getTargetPanel().fireQueryChangedListeners());
+			btnExcludeNoDataDays.setSelection(excludeNoDataDays);
+			btnExcludeNoDataDays.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
-			FontData fd = noData.getFont().getFontData()[0];
+			FontData fd = btnExcludeNoDataDays.getFont().getFontData()[0];
 			fd.setHeight(fd.getHeight() - 2);
-			Font f = new Font(noData.getShell().getDisplay(), fd);
-			noData.setFont(f);
-			noData.addListener(SWT.Dispose, e->f.dispose());
+			Font f = new Font(btnExcludeNoDataDays.getShell().getDisplay(), fd);
+			btnExcludeNoDataDays.setFont(f);
+			btnExcludeNoDataDays.addListener(SWT.Dispose, e->f.dispose());
+			
+			btnExcludeNoDataDays.addListener(SWT.Selection, e->{
+				excludeNoDataDays = btnExcludeNoDataDays.getSelection();
+			});
 		}
 		
 		
@@ -123,8 +127,11 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 		main.redraw();
 		
 	}
+	/*
+	 * by default include all data
+	 */
+	private boolean excludeNoDataDays = false;
 	
-	private boolean initNoDataValue = true;
 	/**
 	 * Does nothing
 	 * @see org.wcs.smart.query.ui.formulaDnd.AbstractValueDropItem#initializeValueData(java.lang.Object)
@@ -132,8 +139,8 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 	@Override
 	protected void initializeValueData(Object data) {
 		if (item.hasNoDataOption() && data instanceof Boolean) {
-			initNoDataValue = (Boolean)data;
-			if (noData != null) noData.setSelection(initNoDataValue);
+			excludeNoDataDays = !(Boolean)data;
+			if (btnExcludeNoDataDays != null) btnExcludeNoDataDays.setSelection(excludeNoDataDays);
 		}
 	}
 
