@@ -22,17 +22,24 @@
 package org.wcs.smart.paws.ui.config;
 
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Stream;
 
@@ -52,6 +59,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -65,6 +73,8 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -129,14 +139,15 @@ public class ConfigurationEditor extends EditorPart {
 	private FormToolkit toolkit;
 
 	private HeaderComposite compHeader;
-	private ComboViewer cmbBound, cmbRoad, cmbRiver, cmbContour, cmbCrs, cmbTimeZone;
+	private ComboViewer cmbBound,cmbCrs, cmbTimeZone, cmbTrainingRes, cmbClassifier; // cmbRoad, cmbRiver, cmbContour,
+	private ListViewer lstOther;
 	private ErrorText txtBounds;
 	private ErrorText txtGridSize;
 	
 	private ClassificationComposite classComposite;
 
 	private boolean isDirty = false;
-		
+			
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -149,6 +160,23 @@ public class ConfigurationEditor extends EditorPart {
 		handlers = null;
 	}
 	
+	private Path generateUniqueName(Path path, PawsConfiguration pw) {
+		String fname = path.getFileName().toString();
+		
+		String namepart = SharedUtils.getFilenameWithoutExtension(fname);
+		String extpart = SharedUtils.getFilenameExtension(fname);
+		
+		//ensure name is unique
+		Path target = PawsManager.INSTANCE.getDirectory(pw).resolve(  fname );
+		int cnt = 1;
+		while(Files.exists(target)) {
+			fname = namepart + "_" + cnt + "." + extpart;
+			target = PawsManager.INSTANCE.getDirectory(pw).resolve(  fname );
+			cnt++;
+		}
+		return target;
+		
+	}
 	private void save(PawsConfiguration pw){
 		String valid = validate();
 		if (valid != null) {
@@ -186,53 +214,73 @@ public class ConfigurationEditor extends EditorPart {
 				s.saveOrUpdate(pw);
 	
 				fileNames.add(PawsManager.INSTANCE.getDirectory(pw).toString());
-				Object[] items = new Object[] {PawsParameter.FixedParameter.LYR_BOUNDARY, cmbBound,
-						PawsParameter.FixedParameter.LYR_CONTOUR, cmbContour,
-						PawsParameter.FixedParameter.LYR_ROAD, cmbRoad,
-						PawsParameter.FixedParameter.LYR_WATER, cmbRiver,
-				};
-				for (int i = 0; i < items.length; i += 2) {
-					PawsParameter pp = getOrCreateParameter(pw, (PawsParameter.FixedParameter)items[i]);
-					Object x = ((ComboViewer)items[i+1]).getStructuredSelection().getFirstElement();
-					if (x instanceof Area.AreaType) {
-						pp.setValue(PawsParameter.AREA_PREFIX + ((Area.AreaType)x).name());
-					}else if (x instanceof Path || (isNew && x instanceof InternalPath) ) {
-						Path path = null;
-						if (x instanceof Path){
-							path = (Path)x;
-						}else{
-							PawsConfiguration temp = new PawsConfiguration();
-							temp.setUuid(getInputInternal().getUuid());
-							temp.setConservationArea(SmartDB.getCurrentConservationArea());
-							path = PawsManager.INSTANCE.getDirectory(temp).resolve( ((InternalPath)x).path );
+				
+				//update boundary
+				PawsParameter pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.LYR_BOUNDARY);
+				Object x = cmbBound.getStructuredSelection().getFirstElement();
+				if (x instanceof Area.AreaType) {
+					pp.setValue(PawsParameter.AREA_PREFIX + ((Area.AreaType)x).name());
+				}else if (x instanceof Path ) {
+					Path path = (Path)x;
+					Path target = generateUniqueName(path, pw);
+					pp.setValue( PawsParameter.FILE_PREFIX + target.getFileName().toString() );
+					fileNames.add(SharedUtils.getFilenameWithoutExtension(target.getFileName().toString()));
+					filesToCopy.add(new Path[] {path, (Path)target});
+						
+				}else if (x instanceof PawsParameter) {
+					String vname = ((PawsParameter)x).getValue();
+					if (vname.startsWith(PawsParameter.FILE_PREFIX)) {
+						fileNames.add( SharedUtils.getFilenameWithoutExtension( vname.substring(PawsParameter.FILE_PREFIX.length())  ) );
+					}
+				}else {
+					pp.setValue(null);
+				}
+				
+				//other files
+				List<PawsParameter> tokeep = new ArrayList<>();
+				for (Object item : (Collection<Object>)lstOther.getInput()) {
+					if (item instanceof PawsParameter) {
+						tokeep.add((PawsParameter)item);
+						String vname = ((PawsParameter)item).getValue();
+						if (vname.startsWith(PawsParameter.FILE_PREFIX)) {
+							fileNames.add( SharedUtils.getFilenameWithoutExtension( vname.substring(PawsParameter.FILE_PREFIX.length())  ) );
 						}
+					}else if (item instanceof Area.AreaType) {
+						
+						PawsParameter newpp = new PawsParameter();
+						newpp.setConfiguration(pw);
+						newpp.setKey(PawsParameter.FixedParameter.LYR_OTHER.name());
+						pw.getParameters().add(newpp);
+						pp.setValue(PawsParameter.AREA_PREFIX + ((Area.AreaType)item).name());
+						tokeep.add(newpp);
+					}else if (item instanceof Path) {
 						//import file
-						String fname = path.getFileName().toString();
+						Path path = (Path)item;
 						
-						String namepart = SharedUtils.getFilenameWithoutExtension(fname);
-						String extpart = SharedUtils.getFilenameExtension(fname);
-						
-						//ensure name is unique
-						Path target = PawsManager.INSTANCE.getDirectory(pw).resolve(  fname );
-						int cnt = 1;
-						while(Files.exists(target)) {
-							fname = namepart + "_" + cnt + "." + extpart;
-							target = PawsManager.INSTANCE.getDirectory(pw).resolve(  fname );
-							cnt++;
-						}
-						pp.setValue( PawsParameter.FILE_PREFIX + fname );
-						fileNames.add(SharedUtils.getFilenameWithoutExtension(fname));
+						Path target = generateUniqueName(path, pw);
+						fileNames.add(SharedUtils.getFilenameWithoutExtension(target.getFileName().toString()));
 						filesToCopy.add(new Path[] {path, (Path)target});
 						
-					}else if (x instanceof InternalPath) {
-						pp.setValue( PawsParameter.FILE_PREFIX + ((InternalPath)x).path );
-						fileNames.add( SharedUtils.getFilenameWithoutExtension( ((InternalPath)x).path) );
-					}else {
-						pp.setValue(null);
+						PawsParameter newpp = new PawsParameter();
+						newpp.setConfiguration(pw);
+						newpp.setKey(PawsParameter.FixedParameter.LYR_OTHER.name());
+						pw.getParameters().add(newpp);
+						newpp.setValue(PawsParameter.FILE_PREFIX + target.getFileName().toString());
+						tokeep.add(newpp);
 					}
 				}
-			
-				PawsParameter pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.GRID_SIZE);
+				List<PawsParameter> toremove = new ArrayList<>();
+				for (PawsParameter pc : pw.getParameters() ) {
+					if (pc.getKey().equals(PawsParameter.FixedParameter.LYR_OTHER.name()) && !tokeep.contains(pc)) toremove.add(pc);
+				}
+				pw.getParameters().removeAll(toremove);
+				for (PawsParameter pc: toremove) {
+					if (pc.getValue().startsWith(PawsParameter.FILE_PREFIX)) {
+						deletedFiles.add(pc.getValue().substring(PawsParameter.FILE_PREFIX.length()));
+					}
+				}
+				
+				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.GRID_SIZE);
 				pp.setValue(txtGridSize.getText());
 				
 				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.GRID_BNDS);
@@ -252,6 +300,14 @@ public class ConfigurationEditor extends EditorPart {
 					pp.setValue( ":" + prj.getParsedCoordinateReferenceSystem().toWKT() );
 				}
 				
+				pp = getOrCreateParameter(pw,  PawsParameter.FixedParameter.TRAINING_RES);
+				Object tr = cmbTrainingRes.getStructuredSelection().getFirstElement();
+				pp.setValue(  ((PawsParameter.TrainingResolution)tr).name() );
+				
+				pp = getOrCreateParameter(pw,  PawsParameter.FixedParameter.CLASSIFIER_MODEL);
+				tr = cmbClassifier.getStructuredSelection().getFirstElement();
+				pp.setValue(  ((PawsParameter.ClassifierModel)tr).name() );
+				
 				classComposite.doSave(pw, s);
 				
 				s.getTransaction().commit();
@@ -267,30 +323,27 @@ public class ConfigurationEditor extends EditorPart {
 		}
 		
 		//update combo viewers
-		Object[] items = new Object[] {PawsParameter.FixedParameter.LYR_BOUNDARY, cmbBound,
-				PawsParameter.FixedParameter.LYR_CONTOUR, cmbContour,
-				PawsParameter.FixedParameter.LYR_ROAD, cmbRoad,
-				PawsParameter.FixedParameter.LYR_WATER, cmbRiver,
-		};
-		for (int i = 0; i < items.length; i += 2) {
-			List<Object> citems = (List<Object>) ((ComboViewer)items[i+1]).getInput();
-			for (String fname : deletedFiles) citems.remove(new InternalPath(fname));
-			
-			
-			PawsParameter pp = pw.findParameter( ((PawsParameter.FixedParameter)items[i]).name() );
-			InternalPath ip = null;
-			if (pp != null && pp.getValue() != null) {
-				if (pp.getValue().startsWith(PawsParameter.FILE_PREFIX)) {
-					ip = new InternalPath(pp.getValue().substring(PawsParameter.FILE_PREFIX.length()));
-					if (!citems.contains(ip)) {
-						citems.add(citems.size() - 1, ip);
-					}
-				}
-			}
-			((ComboViewer)items[i+1]).refresh();
-			if (ip != null) ((ComboViewer)items[i+1]).setSelection(new StructuredSelection(ip));
+		List<Object> citems = (List<Object>)cmbBound.getInput();
+		
+		PawsParameter pp = pw.findParameter( PawsParameter.FixedParameter.LYR_BOUNDARY.name() );
+		citems.remove(pp);
+		citems.add(pp);
+		
+		for (Iterator<Object> iterator = citems.iterator(); iterator.hasNext();) {
+			Object object = (Object) iterator.next();
+			if (object instanceof Path) citems.remove(object);
 		}
-
+		cmbBound.refresh();
+		cmbBound.setSelection(new StructuredSelection(pp));
+		
+		
+		List<PawsParameter> items = (List<PawsParameter>)lstOther.getInput(); 
+		items.clear();
+		for (PawsParameter ppw : pw.getParameters()) {
+			if (ppw.getKey().equals(PawsParameter.FixedParameter.LYR_OTHER.name())) items.add(ppw);
+			
+		}
+		lstOther.refresh();
 	
 		if (isNew) setInput(new ConfigEditorInput(pw));
 		ConfigurationEditor.this.setPartName(pw.getName());
@@ -470,7 +523,7 @@ public class ConfigurationEditor extends EditorPart {
 		if (error != null) return error;
 		
 		Object x = cmbBound.getStructuredSelection().getFirstElement();
-		if (!(x instanceof Area.AreaType || x instanceof Path || x instanceof InternalPath)) {
+		if (!(x instanceof Area.AreaType || x instanceof Path || x instanceof PawsParameter)) {
 			return "Conservation Area Boundary layer is required.";
 		}
 		
@@ -505,43 +558,122 @@ public class ConfigurationEditor extends EditorPart {
 		((GridLayout)core.getLayout()).marginWidth = 0;
 		((GridLayout)core.getLayout()).marginHeight = 0;
 		
+		Composite modelspec = toolkit.createComposite(core);
+		modelspec.setLayout(new GridLayout());
+		modelspec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)modelspec.getLayout()).marginWidth = 0;
+		((GridLayout)modelspec.getLayout()).marginHeight = 0;
+		
 		Composite bmlayers = toolkit.createComposite(core);
 		bmlayers.setLayout(new GridLayout());
 		bmlayers.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)bmlayers.getLayout()).marginWidth = 0;
 		((GridLayout)bmlayers.getLayout()).marginHeight = 0;
 		
-		Composite gridspec = toolkit.createComposite(core);
-		gridspec.setLayout(new GridLayout());
-		gridspec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridLayout)gridspec.getLayout()).marginWidth = 0;
-		((GridLayout)gridspec.getLayout()).marginHeight = 0;
 		
 		SmartUiUtils.createHeaderLabel(bmlayers, "Map Layers");
 		
 		Composite inner = toolkit.createComposite(bmlayers);
 		inner.setLayout(new GridLayout(2, false));
-		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.LYR_BOUNDARY) + ":");
 		cmbBound = createBmCombo(inner);
 		cmbBound.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.LYR_ROAD) + ":");
-		cmbRoad = createBmCombo(inner);
-		cmbRoad.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		l = toolkit.createLabel(inner, "Other Map Layers:");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.LYR_WATER) + ":");
-		cmbRiver = createBmCombo(inner);
-		cmbRiver.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Composite others = new Composite(inner, SWT.NONE);
+		others.setLayout(new GridLayout(2, false));
+		((GridLayout)others.getLayout()).marginWidth = 0;
+		((GridLayout)others.getLayout()).marginHeight = 0;
+		others.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.LYR_CONTOUR) + ":");
-		cmbContour = createBmCombo(inner);
-		cmbContour.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-		SmartUiUtils.createHeaderLabel(gridspec, "Grid Specifications");
+		lstOther = new ListViewer(others, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI );
+		lstOther.setContentProvider(ArrayContentProvider.getInstance());
+		lstOther.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		lstOther.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof Area.AreaType) return ((Area.AreaType)element).getGuiName(Locale.getDefault());
+				if (element instanceof Path) return ((Path)element).toString();
+				if (element instanceof PawsParameter) {
+					PawsParameter pp = (PawsParameter)element;
+					if (pp.getValue().startsWith(PawsParameter.AREA_PREFIX)) {
+						String at = pp.getValue().substring(PawsParameter.AREA_PREFIX.length());
+						return Area.AreaType.valueOf(at).getGuiName(Locale.getDefault());
+						
+					}else if (pp.getValue().startsWith(PawsParameter.FILE_PREFIX)) {
+						String file = pp.getValue().substring(PawsParameter.FILE_PREFIX.length());
+						return file;
+					}
+				}
+				return super.getText(element);
+			}
+		});
+		lstOther.setInput(new ArrayList<>());
 		
-		inner = toolkit.createComposite(gridspec);
+		ToolBar tb = new ToolBar(others, SWT.FLAT | SWT.VERTICAL);
+		tb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		ToolItem tiAdd = new ToolItem(tb, SWT.PUSH);
+		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		tiAdd.addListener(SWT.Selection, e->{
+			Menu mnuTemp = new Menu(tb);
+			
+			Set<Area.AreaType> atypes = new HashSet<>();
+			try(Session session = HibernateManager.openSession()){
+				atypes.addAll(session.createQuery("SELECT DISTINCT type FROM Area WHERE conservationArea = :ca", Area.AreaType.class)
+						.setParameter("ca", SmartDB.getCurrentConservationArea())
+						.list());
+			}
+			
+			for (Area.AreaType t : Area.AreaType.values()) {
+				if (!atypes.contains(t)) continue;
+				MenuItem mi = new MenuItem(mnuTemp, SWT.PUSH);
+				mi.setText(t.getGuiName(Locale.getDefault()));
+				mi.addListener(SWT.Selection, evt->{
+					((Collection<Object>)lstOther.getInput()).add(t);
+					setDirty(true);
+					lstOther.refresh();
+				});
+			}
+			MenuItem mi = new MenuItem(mnuTemp, SWT.PUSH);
+			mi.setText("Shapefiles...");
+			mi.addListener(SWT.Selection, evt->{
+				FileDialog fd = new FileDialog(tb.getShell(), SWT.OPEN | SWT.MULTI);
+				fd.setText("Select Shapefile");
+				fd.setFilterExtensions(new String[] {"*.shp", "*.*"});
+				fd.setFilterNames(new String[] {"Shapefile (*.shp)", "All Files (*.*)"});
+				
+				String fname = fd.open();
+				if (fname == null) return;
+				for (String s : fd.getFileNames()) {
+					((Collection<Object>)lstOther.getInput()).add(Paths.get(fd.getFilterPath()).resolve(s));
+				}
+				setDirty(true);
+				lstOther.refresh();
+			});
+			mnuTemp.setVisible(true);
+		});
+		
+		ToolItem tiDelete = new ToolItem(tb, SWT.PUSH);
+		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDelete.setEnabled(false);
+		tiDelete.addListener(SWT.Selection, e->{
+			for (Iterator<Object> iterator = lstOther.getStructuredSelection().iterator(); iterator.hasNext();) {
+				Object item = (Object) iterator.next();
+				((Collection)lstOther.getInput()).remove(item);
+				setDirty(true);
+				lstOther.refresh();
+			}
+		});
+		lstOther.addSelectionChangedListener(e->tiDelete.setEnabled(!lstOther.getStructuredSelection().isEmpty()));
+		
+		SmartUiUtils.createHeaderLabel(modelspec, "Model Configurations");
+		
+		inner = toolkit.createComposite(modelspec);
 		inner.setLayout(new GridLayout(2, false));
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -622,9 +754,9 @@ public class ConfigurationEditor extends EditorPart {
 		Menu mnu = new Menu(lnkBnds);
 		
 		Object[] items = new Object[] {PawsParameter.FixedParameter.LYR_BOUNDARY, cmbBound,
-				PawsParameter.FixedParameter.LYR_ROAD, cmbRoad,
-				PawsParameter.FixedParameter.LYR_CONTOUR, cmbContour,
-				PawsParameter.FixedParameter.LYR_WATER, cmbRiver,
+//				PawsParameter.FixedParameter.LYR_ROAD, cmbRoad,
+//				PawsParameter.FixedParameter.LYR_CONTOUR, cmbContour,
+//				PawsParameter.FixedParameter.LYR_WATER, cmbRiver,
 		};
 		for (int i = 0; i < items.length; i +=2){
 			MenuItem mi = new MenuItem(mnu, SWT.PUSH);
@@ -697,7 +829,7 @@ public class ConfigurationEditor extends EditorPart {
 		
 		txtGridSize = new ErrorText(inner, txt-> {
 			try {
-				Integer.parseInt(txtGridSize.getText());
+				Double.parseDouble(txtGridSize.getText());
 				return null;
 			}catch (Exception ex) {
 				return "Grid size must be valid number.";
@@ -729,7 +861,53 @@ public class ConfigurationEditor extends EditorPart {
 		cmbTimeZone.setSelection(new StructuredSelection(TimeZone.getDefault()));
 		cmbTimeZone.addPostSelectionChangedListener(e->setDirty(true));
 		
-
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.TRAINING_RES) + ":");
+		
+		cmbTrainingRes = new ComboViewer(inner, SWT.READ_ONLY | SWT.DROP_DOWN);
+		cmbTrainingRes.setContentProvider(ArrayContentProvider.getInstance());
+		cmbTrainingRes.getControl().setBackground(inner.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		cmbTrainingRes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbTrainingRes.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof PawsParameter.TrainingResolution) { 
+					PawsParameter.TrainingResolution tw = (PawsParameter.TrainingResolution)element;
+					switch(tw) {
+					case MONTH: return "Month";
+					case MONTH3: return "3 Month";
+					case MONTH12: return "12 Month";					
+					}
+				};
+				return super.getText(element);
+			}
+		});		
+		cmbTrainingRes.setInput(PawsParameter.TrainingResolution.values());
+		cmbTrainingRes.setSelection(new StructuredSelection(PawsParameter.TrainingResolution.MONTH));
+		cmbTrainingRes.addPostSelectionChangedListener(e->setDirty(true));
+		
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.CLASSIFIER_MODEL) + ":");
+		
+		cmbClassifier = new ComboViewer(inner, SWT.READ_ONLY | SWT.DROP_DOWN);
+		cmbClassifier.setContentProvider(ArrayContentProvider.getInstance());
+		cmbClassifier.getControl().setBackground(inner.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		cmbClassifier.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbClassifier.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof PawsParameter.ClassifierModel) { 
+					PawsParameter.ClassifierModel tw = (PawsParameter.ClassifierModel)element;
+					switch(tw) {
+					case DECISION_TREE: return "Decision Tree";
+					case GAUSSIAN_PROCESS: return "Gaussian Process";
+					}
+				};
+				return super.getText(element);
+			}
+		});		
+		cmbClassifier.setInput(PawsParameter.ClassifierModel.values());
+		cmbClassifier.setSelection(new StructuredSelection(PawsParameter.ClassifierModel.DECISION_TREE));
+		cmbClassifier.addPostSelectionChangedListener(e->setDirty(true));
+		
 	}
 	
 	public void fireModified(boolean isNew, PawsConfiguration pc) {
@@ -748,7 +926,12 @@ public class ConfigurationEditor extends EditorPart {
 			public String getText(Object element) {
 				if (element instanceof Area.AreaType) return ((Area.AreaType)element).getGuiName(Locale.getDefault());
 				if (element instanceof Path) return ((Path)element).toString();
-				if (element instanceof InternalPath) return ((InternalPath)element).path;
+				if (element instanceof PawsParameter) {
+					String v = ((PawsParameter)element).getValue();
+					if (v.startsWith(PawsParameter.FILE_PREFIX)) return v.substring(PawsParameter.FILE_PREFIX.length());
+					if (v.startsWith(PawsParameter.AREA_PREFIX)) return Area.AreaType.valueOf( v.substring(PawsParameter.AREA_PREFIX.length())).getGuiName(Locale.getDefault());
+					return v;
+				}
 				return super.getText(element);
 			}
 		});
@@ -787,6 +970,19 @@ public class ConfigurationEditor extends EditorPart {
 	
 	
 	private ReferencedEnvelope getBounds(Object source){
+		
+		if (source instanceof PawsParameter){
+			String value = ((PawsParameter)source).getValue();
+			if (value.startsWith(PawsParameter.AREA_PREFIX)) {
+				source = Area.AreaType.valueOf( value.substring(PawsParameter.AREA_PREFIX.length()) );
+			}else if (value.startsWith(PawsParameter.AREA_PREFIX)) {
+				PawsConfiguration temp = new PawsConfiguration();
+				temp.setUuid(getInputInternal().getUuid());
+				temp.setConservationArea(SmartDB.getCurrentConservationArea());
+				source = PawsManager.INSTANCE.getDirectory(temp).resolve( value.substring(PawsParameter.FILE_PREFIX.length()) );
+			}
+		}
+		
 		if (source instanceof Area.AreaType){
 		
 			//load bounds from database
@@ -804,12 +1000,7 @@ public class ConfigurationEditor extends EditorPart {
 			}
 			return re;
 		}
-		if (source instanceof InternalPath){
-			PawsConfiguration temp = new PawsConfiguration();
-			temp.setUuid(getInputInternal().getUuid());
-			temp.setConservationArea(SmartDB.getCurrentConservationArea());
-			source = PawsManager.INSTANCE.getDirectory(temp).resolve( ((InternalPath)source).path );
-		}
+		
 		
 		if (source  instanceof Path){
 			//assume some sort of file store
@@ -871,10 +1062,6 @@ public class ConfigurationEditor extends EditorPart {
 			Display.getDefault().syncExec(()->{
 				cmbBound.setInput(new ArrayList<>(options));
 				if (options.contains(Area.AreaType.CA)) cmbBound.setSelection(new StructuredSelection(Area.AreaType.CA));
-				cmbContour.setInput(new ArrayList<>(options));
-				cmbRiver.setInput(new ArrayList<>(options));
-				cmbRoad.setInput(new ArrayList<>(options));
-				
 				cmbCrs.setInput(allPrjs);
 				cmbCrs.setSelection(new StructuredSelection(fcurrentPrj));
 			});
@@ -886,7 +1073,7 @@ public class ConfigurationEditor extends EditorPart {
 		
 	};
 	
-	private Job initFields = new Job("initializing configuration settings ") {
+	private Job initFields = new Job("initializing configuration settings") {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -906,30 +1093,29 @@ public class ConfigurationEditor extends EditorPart {
 					compHeader.setText(pw.getName());
 					ConfigurationEditor.this.setPartName(pw.getName());
 					
-					Object[] items = new Object[] {PawsParameter.FixedParameter.LYR_BOUNDARY, cmbBound,
-							PawsParameter.FixedParameter.LYR_CONTOUR, cmbContour,
-							PawsParameter.FixedParameter.LYR_ROAD, cmbRoad,
-							PawsParameter.FixedParameter.LYR_WATER, cmbRiver,
-					};
-					for (int i = 0; i < items.length; i +=2) {
-						PawsParameter pp = pw.findParameter(((PawsParameter.FixedParameter)items[i]).name());
-						if (pp != null && pp.getValue() != null) {
-							if (pp.getValue().startsWith(PawsParameter.AREA_PREFIX)) {
-								String at = pp.getValue().substring(PawsParameter.AREA_PREFIX.length());
-								((ComboViewer)items[i+1]).setSelection(new StructuredSelection(Area.AreaType.valueOf(at)));
-							}else if (pp.getValue().startsWith(PawsParameter.FILE_PREFIX)) {
-								String file = pp.getValue().substring(PawsParameter.FILE_PREFIX.length());
-								InternalPath ip = new InternalPath(file);
-								List<Object> obs = (List<Object>) ((ComboViewer)items[i+1]).getInput();
-								obs.add(obs.size() - 1, ip);
-								((ComboViewer)items[i+1]).refresh();
-								((ComboViewer)items[i+1]).setSelection(new StructuredSelection(ip));
-							}
+					PawsParameter pp = pw.findParameter(PawsParameter.FixedParameter.LYR_BOUNDARY.name());
+					if (pp != null && pp.getValue() != null) {
+						if (pp.getValue().startsWith(PawsParameter.AREA_PREFIX)) {
+							String at = pp.getValue().substring(PawsParameter.AREA_PREFIX.length());
+							cmbBound.setSelection(new StructuredSelection(Area.AreaType.valueOf(at)));
+						}else if (pp.getValue().startsWith(PawsParameter.FILE_PREFIX)) {
+							List<Object> obs = (List<Object>) (cmbBound).getInput();
+							obs.add(obs.size() - 1, pp);
+							cmbBound.refresh();
+							cmbBound.setSelection(new StructuredSelection(pp));
 						}
 					}
-	
 					
-					PawsParameter pp = pw.findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
+					
+					List<Object> obs = (List<Object>) (lstOther).getInput();
+					for (PawsParameter t : pw.getParameters()) {
+						if (t.getKey().equals(PawsParameter.FixedParameter.LYR_OTHER.name())){
+							obs.add(t);
+						}
+					}
+					lstOther.refresh();
+					
+					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
 					if (pp != null) txtGridSize.setText(pp.getValue());
 					
 					pp = pw.findParameter(PawsParameter.FixedParameter.TIMEZONE.name());
@@ -969,6 +1155,17 @@ public class ConfigurationEditor extends EditorPart {
 						}
 						cmbCrs.setSelection(new StructuredSelection(temp));
 						selectedCrs = temp.getParsedCoordinateReferenceSystem();
+						
+						
+					}
+					pp = pw.findParameter(PawsParameter.FixedParameter.TRAINING_RES.name());
+					if (pp != null) {
+						cmbTrainingRes.setSelection(new StructuredSelection( PawsParameter.TrainingResolution.valueOf( pp.getValue() ) ));
+					}
+					
+					pp = pw.findParameter(PawsParameter.FixedParameter.CLASSIFIER_MODEL.name());
+					if (pp != null) {
+						cmbClassifier.setSelection(new StructuredSelection( PawsParameter.ClassifierModel.valueOf( pp.getValue() ) ));
 					}
 					
 					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_BNDS.name());
@@ -1001,27 +1198,7 @@ public class ConfigurationEditor extends EditorPart {
 			return Status.OK_STATUS;
 		}
 	};
-	
-	class InternalPath {
-		String path;
 		
-		public InternalPath(String pp) {
-			this.path = pp;
-		}
-		
-		public int hashCode() {
-			return path.hashCode();
-		}
-		
-		public boolean equals(Object other) {
-			if (other == null) return false;
-			if (this == other) return true;
-			if (other.getClass() != this.getClass()) return false;
-			return path.equals( ((InternalPath)other).path );
-					
-		}
-	}
-	
 	class CopyFilesInterceptor extends EmptyInterceptor{
 		private static final long serialVersionUID = 1L;
 
@@ -1043,7 +1220,6 @@ public class ConfigurationEditor extends EditorPart {
 		@Override
 		public void afterTransactionCompletion(Transaction tx) {
 			if (tx.getStatus() == TransactionStatus.COMMITTED) {
-				
 				Path root = Paths.get(fileNames.get(0));
 				fileNames.remove(0);
 				if (!Files.exists(root)) {
@@ -1060,25 +1236,28 @@ public class ConfigurationEditor extends EditorPart {
 						Path source = p[0];
 						Path target = p[1];
 						
-						Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+						//Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
 						
 						//copy over all supporting files (files with the same names)
 						//but different extensions.
 						String sourceName =  SharedUtils.getFilenameWithoutExtension(source.getFileName().toString());
 						String targetName = SharedUtils.getFilenameWithoutExtension(target.getFileName().toString());
-						Files.list(source.getParent()).forEach(other->{
-							String fName = other.getFileName().toString();
-							String n = SharedUtils.getFilenameWithoutExtension(fName);
-							String ext = SharedUtils.getFilenameExtension(fName);
-							if (n.equalsIgnoreCase(sourceName)) {
-								Path copyto = target.getParent().resolve(targetName + "." + ext);
-								try {
-									Files.copy(other, copyto, StandardCopyOption.REPLACE_EXISTING);
-								} catch (IOException e) {
-									PawsPlugIn.displayLog(MessageFormat.format("Error copying shapefile supporting files to SMART Data store {0} to {1}",  other.toString(), copyto.toString()), e);
+						try(Stream<Path> files = Files.list(source.getParent())){
+							files.forEach(other->{
+								String fName = other.getFileName().toString();
+								String n = SharedUtils.getFilenameWithoutExtension(fName);
+								String ext = SharedUtils.getFilenameExtension(fName);
+								if (n.equalsIgnoreCase(sourceName)) {
+									Path copyto = target.getParent().resolve(targetName + "." + ext);
+									try {
+										Files.copy(other, copyto, StandardCopyOption.REPLACE_EXISTING);
+//										Files.setPosixFilePermissions(copyto, Collections.singleton(PosixFilePermission.OWNER_WRITE));
+									} catch (Throwable e) {
+										PawsPlugIn.displayLog(MessageFormat.format("Error copying shapefile supporting files to SMART Data store {0} to {1}",  other.toString(), copyto.toString()), e);
+									}
 								}
-							}
-						});
+							});
+						}
 					} catch (IOException e) {
 						PawsPlugIn.displayLog("Error copying layer map file to SMART Data store." + "\n\n" + e.getMessage(), e);
 					}
@@ -1091,15 +1270,16 @@ public class ConfigurationEditor extends EditorPart {
 					
 						String name = SharedUtils.getFilenameWithoutExtension(other.getFileName().toString());
 						if (!fileNames.contains(name)) {
-							try {
-								deletedFiles.add(other.getFileName().toString());
-								Files.delete(other);
-							} catch (IOException e) {
-								PawsPlugIn.log(e.getMessage(),e);
+							deletedFiles.add(other.getFileName().toString());
+							try{
+								Files.deleteIfExists(other);
+							}catch (IOException ex) {
+								PawsPlugIn.log(ex.getMessage(), ex);
 							}
 						}
-						});
+						});	
 					}
+					
 				} catch (IOException e) {
 					PawsPlugIn.log(e.getMessage(),e);
 				}

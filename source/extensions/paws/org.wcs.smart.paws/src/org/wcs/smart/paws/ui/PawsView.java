@@ -355,6 +355,10 @@ public class PawsView {
 		tbConfig.setBackground(part.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		tbConfig.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 
+		ToolItem tiRun = new ToolItem(tbConfig, SWT.PUSH);
+		tiRun.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
+		tiRun.addListener(SWT.Selection, e->newRun(tblConfigs.getStructuredSelection().getFirstElement()));
+		
 		ToolItem tiAdd = new ToolItem(tbConfig, SWT.PUSH);
 		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		tiAdd.addListener(SWT.Selection, e->newConfiguration());
@@ -430,6 +434,7 @@ public class PawsView {
 			mnuDelete.setEnabled(!tblConfigs.getStructuredSelection().isEmpty());
 			tiEdit.setEnabled(!tblConfigs.getStructuredSelection().isEmpty());
 			tiDelete.setEnabled(!tblConfigs.getStructuredSelection().isEmpty());
+			tiRun.setEnabled(!tblConfigs.getStructuredSelection().isEmpty());
 		});
 
 		mnuEdit.setEnabled(false);
@@ -437,6 +442,7 @@ public class PawsView {
 		mnuDelete.setEnabled(false);
 		tiEdit.setEnabled(false);
 		tiDelete.setEnabled(false);
+		tiRun.setEnabled(false);
 		
 		return part;
 	}

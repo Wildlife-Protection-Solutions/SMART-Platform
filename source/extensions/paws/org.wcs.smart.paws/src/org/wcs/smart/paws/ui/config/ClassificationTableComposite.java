@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.MouseEvent;
@@ -262,6 +263,7 @@ public class ClassificationTableComposite extends Composite{
 
 			//classification
 			EditLabel lbl = new EditLabel(list);
+//			Label lbl = new Label(list, SWT.NONE);
 			lbl.setText(q.getClassification());
 			lbl.setToolTipText(q.getClassification());
 			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -276,6 +278,7 @@ public class ClassificationTableComposite extends Composite{
 			l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 			ToolBar btn = new ToolBar(list, SWT.FLAT);
+			btn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			adapt(btn);
 			
 			ToolItem miDelete = new ToolItem(btn, SWT.PUSH);
@@ -398,28 +401,22 @@ public class ClassificationTableComposite extends Composite{
 			super(parent, SWT.NONE);
 			setBackground(getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			
+			setLayout(new StackLayout());
+			((StackLayout)getLayout()).marginWidth = 0;
+			((StackLayout)getLayout()).marginHeight = 0;
+			
 			l = new Label(this, SWT.NONE);
 			l.setBackground(getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-			l.setLayoutData(new GridData(SWT.FILL,SWT.CENTER, true, false));
+			
 			txtEdit = new Text(this, SWT.NONE);
 			txtEdit.setVisible(false);
 			txtEdit.setBackground(getDisplay().getSystemColor(SWT.COLOR_YELLOW));
-			txtEdit.setLayoutData(new GridData(SWT.FILL,SWT.CENTER, true, false));
-			txtEdit.setBounds(0, 0, 0, 0);
-			
 
-			addListener(SWT.Resize, new Listener() {
-				@Override
-				public void handleEvent(Event event) {
-					Rectangle r = EditLabel.this.getBounds();
-					if (txtEdit.getVisible()) {
-						txtEdit.setBounds(0,0,r.width,r.height);
-					}else {
-						l.setBounds(0,0,r.width,r.height);
-					}
-				}
-			});
+			txtEdit.setVisible(false);
 			
+			((StackLayout)getLayout()).topControl = l;
+			layout();
+
 			l.addMouseListener(new MouseListener() {
 				
 				@Override
@@ -463,22 +460,15 @@ public class ClassificationTableComposite extends Composite{
 		}
 			
 		private void editItem(boolean edit) {
-			Rectangle r = EditLabel.this.getBounds();
 			if (edit) {
 				txtEdit.setText(l.getText());
-				l.setVisible(false);
-				txtEdit.setVisible(true);
 				txtEdit.setFocus();
-				txtEdit.setBounds(0,0,r.width,r.height);
 				txtEdit.selectAll();
+				((StackLayout)getLayout()).topControl = txtEdit;
 			}else {
-				l.setVisible(true);
-				txtEdit.setVisible(false);
-				l.setBounds(0,0,r.width,r.height);
-				
-				
-
+				((StackLayout)getLayout()).topControl = l;
 			}
+			layout();
 		}
 	}
 }

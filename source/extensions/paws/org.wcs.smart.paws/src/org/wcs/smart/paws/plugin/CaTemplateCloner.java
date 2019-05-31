@@ -84,17 +84,21 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 						pp.setValue(UuidUtils.uuidToString(prj.getUuid()) + ":" + def);
 					}
 					clone.getParameters().add(cpp);
-				}else if (pp.getKey() == PawsParameter.FixedParameter.GRID_SIZE.name()){
+				}else if (pp.getKey().equals(PawsParameter.FixedParameter.GRID_SIZE.name())){
 					cpp.setValue(pp.getValue());
 					clone.getParameters().add(cpp);
-				}else if (pp.getKey() == PawsParameter.FixedParameter.GRID_BNDS.name()){
+				}else if (pp.getKey().equals(PawsParameter.FixedParameter.GRID_BNDS.name())){
 					//need to be redefined by user
 					cpp.setValue("0 0 0 0");
 					clone.getParameters().add(cpp);
-				}else if (pp.getKey() == PawsParameter.FixedParameter.LYR_BOUNDARY.name() ||
-						pp.getKey() == PawsParameter.FixedParameter.LYR_CONTOUR.name() ||
-						pp.getKey() == PawsParameter.FixedParameter.LYR_ROAD.name() ||
-						pp.getKey() == PawsParameter.FixedParameter.LYR_WATER .name()){
+				}else if (pp.getKey().equals(PawsParameter.FixedParameter.TRAINING_RES.name())) {
+					cpp.setValue(pp.getValue());
+					clone.getParameters().add(cpp);
+				}else if (pp.getKey().equals(PawsParameter.FixedParameter.CLASSIFIER_MODEL.name())) {
+					cpp.setValue(pp.getValue());
+					clone.getParameters().add(cpp);
+				}else if (pp.getKey().equals(PawsParameter.FixedParameter.LYR_BOUNDARY.name()) ||
+						pp.getKey().equals(PawsParameter.FixedParameter.LYR_OTHER.name())){
 					//will need to be redefined by user
 				}
 			}

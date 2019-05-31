@@ -72,6 +72,13 @@ public class PawsConfiguration extends UuidItem{
 		this.parameters = parameters;
 	}
 	
+	/**
+	 * Returns the first parameter found with this key.  If there are multiple
+	 * parameters with the same key, this always returns the first one.
+	 * 
+	 * @param key
+	 * @return
+	 */
 	@Transient
 	public PawsParameter findParameter(String key) {
 		if (getParameters() == null) return null;

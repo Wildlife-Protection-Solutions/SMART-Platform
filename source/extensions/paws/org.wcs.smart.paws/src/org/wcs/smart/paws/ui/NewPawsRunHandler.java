@@ -22,6 +22,8 @@
 package org.wcs.smart.paws.ui;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 import javax.inject.Inject;
@@ -117,7 +119,10 @@ public class NewPawsRunHandler {
 				prun.setDataEndDate(end);
 				session.save(prun);
 				
-				prun.setRunId( UuidUtils.uuidToString( prun.getUuid() ));
+				
+				LocalDateTime now = LocalDateTime.now();
+				String dpart = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+				prun.setRunId( dpart + "_" + UuidUtils.uuidToString( prun.getUuid() ));
 				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
@@ -164,7 +169,16 @@ public class NewPawsRunHandler {
 	}
 	
 	private void run(PawsRun rr){
-		PawsRunJob job = new PawsRunJob(rr, context.get(IEventBroker.class));
+		//perform validation; get token as required
+		LoginDialog dialog = new LoginDialog(Display.getDefault().getActiveShell());
+		dialog.open();
+		
+		String authorizationCode = dialog.getAuthorizationCode();
+		if (authorizationCode == null) return; //TODO:
+		
+		PawsRunJob job = new PawsRunJob(rr, authorizationCode, context.get(IEventBroker.class));
 		job.schedule();
 	}
+	
+	
 }

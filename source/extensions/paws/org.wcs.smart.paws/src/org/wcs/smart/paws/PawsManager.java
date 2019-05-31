@@ -227,14 +227,10 @@ public enum PawsManager {
 		case GRID_CRS: return "CRS" ;
 		case GRID_SIZE: return "Grid Size";
 		case LYR_BOUNDARY: return "Conservation Area Boundary";
-		case LYR_CONTOUR: return "Contours";
-		case LYR_ROAD: return "Roads";
-		case LYR_WATER: return "River/Water";
+		case LYR_OTHER: return "Shapefiles";
 		case TIMEZONE: return "Time Zone";
-
-		default:
-			break;
-		
+		case CLASSIFIER_MODEL: return "Classifier Model";
+		case TRAINING_RES: return "Temporal Training Resolution";
 		}
 		return null;
 	}

@@ -39,14 +39,39 @@ public class PawsParameter extends UuidItem{
 	
 	public static enum FixedParameter{
 		LYR_BOUNDARY,
-		LYR_ROAD,
-		LYR_WATER,
-		LYR_CONTOUR,
+		LYR_OTHER,
 		GRID_SIZE,
 		GRID_CRS,
 		GRID_BNDS,
-		TIMEZONE
+		TIMEZONE,
+		TRAINING_RES,
+		CLASSIFIER_MODEL
+		
 	}
+	
+	public static enum TrainingResolution{
+		MONTH("Month"),
+		MONTH3("3Month"),
+		MONTH12("12Month");
+		
+		public String key;
+		
+		private TrainingResolution(String key) {
+			this.key = key;
+		}
+	}
+	
+	public static enum ClassifierModel{
+		DECISION_TREE("decison_tree"),
+		GAUSSIAN_PROCESS("gaussian_process");
+		
+		public String key;
+		
+		private ClassifierModel(String key) {
+			this.key = key;
+		}
+	}
+	
 	
 	private PawsConfiguration config;
 	

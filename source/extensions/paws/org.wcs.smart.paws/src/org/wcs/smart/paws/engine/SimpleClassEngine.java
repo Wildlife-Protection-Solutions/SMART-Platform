@@ -31,14 +31,15 @@ public class SimpleClassEngine {
 				StringBuilder sb = new StringBuilder();
 				sb.append("CREATE TABLE ");
 				sb.append( tablename );
-				sb.append( "(wp_uuid char(16) for bit data, obs_uuid char(16) for bit data, x double, y double, datetime timestamp, pawsclass varchar(8192))");
+				sb.append( "(obs_uuid char(16) for bit data, pawsclass varchar(8192))");
+				System.out.println(sb.toString());
 				c.createStatement().execute(sb.toString());
 				
 				
 				sb = new StringBuilder();
 				sb.append(" INSERT INTO ");
 				sb.append(tablename);
-				sb.append(" SELECT wp.uuid, obs.uuid, wp.x, wp.y, wp.datetime, ? ");
+				sb.append(" SELECT obs.uuid, ? ");
 				sb.append(" FROM smart.waypoint wp ");
 				sb.append(" JOIN smart.wp_observation obs ON obs.wp_uuid = wp.uuid " );
 				sb.append(" JOIN smart.dm_category c ON obs.category_uuid = c.uuid " );
