@@ -125,6 +125,11 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet
 			}
 		});
 	}
+	
+	@Override
+	public String getResultsTable() {
+		return queryTempTable;
+	}
 
 	@Override
 	public boolean equals(Object obj) {

@@ -94,6 +94,11 @@ public class AssetPagedObservationResult extends AssetPagedWaypointResult implem
 	}
 	
 	@Override
+	public String getResultsTable() {
+		return queryTempTable;
+	}
+	
+	@Override
 	protected void updateSortColumn(QueryColumn sortColumn, Session session, Connection c) throws SQLException{
 		if (sortColumn instanceof AssetAttributeQueryColumn){
 			if (!hasSortColumns){

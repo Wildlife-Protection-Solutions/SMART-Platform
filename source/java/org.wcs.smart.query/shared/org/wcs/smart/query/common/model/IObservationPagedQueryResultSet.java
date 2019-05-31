@@ -37,4 +37,7 @@ public interface IObservationPagedQueryResultSet extends IPagedQueryResultSet, I
 	 * @return the count of distinct waypoints in the query result set
 	 */
 	public int getWpCount();
+	
+	public String getResultsTable();
+	public default String getObservationColumn() { return "ob_uuid"; }
 }

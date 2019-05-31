@@ -103,6 +103,11 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	}
 	
 	@Override
+	public String getResultsTable() {
+		return queryTempTable;
+	}
+	
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) return true;
 		if (obj == null ) return false;

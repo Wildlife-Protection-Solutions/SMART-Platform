@@ -27,6 +27,7 @@ import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.query.common.model.IUpdateableResultSet;
 
 /**
+ * A result set that allows update to a given waypoint
  * 
  * @author Emily
  *
