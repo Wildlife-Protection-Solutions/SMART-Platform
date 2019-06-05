@@ -27,6 +27,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
@@ -36,8 +37,9 @@ import org.wcs.smart.ca.UuidItem;
 public class PawsWorkspace extends UuidItem{
 
 	private ConservationArea ca;
-	private String apikey;
+	private String clientId;
 	private String url;
+	private String containerUrl;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -49,13 +51,13 @@ public class PawsWorkspace extends UuidItem{
 		this.ca = ca;
 	}
 	
-	@Column(name="api_key")
-	public String getApiKey() {
-		return this.apikey;
+	@Column(name="client_id")
+	public String getClientId() {
+		return this.clientId;
 	}
 	
-	public void setApiKey(String apikey) {
-		this.apikey = apikey;
+	public void setClientId(String apikey) {
+		this.clientId = apikey;
 	}
 	
 	@Column(name="url")
@@ -65,5 +67,21 @@ public class PawsWorkspace extends UuidItem{
 	
 	public void setUrl(String url) {
 		this.url = url;
+	}
+	
+	@Column(name="blob_url")
+	public String getContainerUrl() {
+		return this.containerUrl;
+	}
+	
+	public void setContainerUrl(String url) {
+		this.containerUrl = url;
+	}
+	
+	@Transient
+	public boolean isConfigured() {
+		return !(getClientId() == null || getUrl() == null || getUrl().isBlank() || 
+				getClientId().isBlank() ||  getContainerUrl() == null || getContainerUrl().isBlank());
+		
 	}
 }

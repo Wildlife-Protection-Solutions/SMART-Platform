@@ -54,10 +54,9 @@ public class PawsRun extends UuidItem{
 	private String id;
 	private String runid;
 	
-	private LocalDateTime runDate;
+	private String taskId;
 	
-	private LocalDate dataStartDate;
-	private LocalDate dataEndDate;
+	private LocalDateTime runDate;
 	
 	private String packagefile;
 	private String resultslocation;
@@ -65,6 +64,15 @@ public class PawsRun extends UuidItem{
 	private Status status;
 	private String statusmessage;
 	
+	private int teststartyear;
+	private int testendyear;
+	private int trainstartyear;
+	private int trainendyear;
+	private int forecaststartyear;
+	private int forecastendyear;
+	
+	private LocalDate dataStartDate;
+	private LocalDate dataEndDate;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -93,6 +101,60 @@ public class PawsRun extends UuidItem{
 	
 	public void setRunDate(LocalDateTime runDate) {
 		this.runDate = runDate;
+	}
+	
+	@Column(name="train_start_year")
+	public int getTrainStartYear() {
+		return this.trainstartyear;
+	}
+	
+	public void setTrainStartYear(int start) {
+		this.trainstartyear = start;
+	}
+	
+	@Column(name="train_end_year")
+	public int getTrainEndYear() {
+		return this.trainendyear;
+	}
+	
+	public void setTrainEndYear(int end) {
+		this.trainendyear = end;
+	}
+	
+	@Column(name="test_start_year")
+	public int getTestStartYear() {
+		return this.teststartyear;
+	}
+	
+	public void setTestStartYear(int start) {
+		this.teststartyear = start;
+	}
+	
+	@Column(name="test_end_year")
+	public int getTestEndYear() {
+		return this.testendyear;
+	}
+	
+	public void setTestEndYear(int end) {
+		this.testendyear = end;
+	}
+	
+	@Column(name="forecast_start_year")
+	public int getForecastStartYear() {
+		return this.forecaststartyear;
+	}
+	
+	public void setForecastStartYear(int start) {
+		this.forecaststartyear = start;
+	}
+	
+	@Column(name="forecast_end_year")
+	public int getForecastEndYear() {
+		return this.forecastendyear;
+	}
+	
+	public void setForecastEndYear(int end) {
+		this.forecastendyear = end;
 	}
 	
 	@Column(name="data_start_date")
@@ -166,5 +228,13 @@ public class PawsRun extends UuidItem{
 	
 	public void setStatus(Status status) {
 		this.status = status;
+	}
+	
+	@Column(name="paws_task_id")
+	public String getTaskId() {
+		return this.taskId;
+	}
+	public void setTaskId(String id) {
+		this.taskId = id;
 	}
 }

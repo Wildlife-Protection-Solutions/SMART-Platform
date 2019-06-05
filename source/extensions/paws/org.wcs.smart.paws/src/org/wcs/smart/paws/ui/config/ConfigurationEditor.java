@@ -22,14 +22,10 @@
 package org.wcs.smart.paws.ui.config;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.PosixFilePermission;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -499,7 +495,7 @@ public class ConfigurationEditor extends EditorPart {
 			
 			try {
 				String id = PawsManager.INSTANCE. generateUniqueName(config.getName(), config.getConservationArea());
-				ContextInjectionFactory.make(NewPawsRunHandler.class, parentContext).createAndRun(config, null, null, id);
+				ContextInjectionFactory.make(NewPawsRunHandler.class, parentContext).createAndRun(config, null, id);
 			} catch (Exception ex) {
 				PawsPlugIn.displayLog("Unable to create new analysis from these settings." + "\n\n" + ex.getMessage(), ex);
 			}

@@ -80,11 +80,11 @@ public class PawsDownloadResultJob extends Job {
 				PawsWorkspace ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
 						new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
 				
-				if (ws == null || ws.getApiKey() == null || ws.getUrl() == null){
+				if (ws == null || !ws.isConfigured()) {
 					handleError("PAWS Workspace not configured.  You must first configure the PAWS Workspace before you can run paws analysis.", new Exception("No Paws Workspace Configured."));
 					return Status.OK_STATUS;
 				}
-				url = ws.getUrl() + "?" + ws.getApiKey();
+				url = ws.getUrl() + "?" + ws.getClientId();
 			}
 			
 	        containerURL = new ContainerURL(new URL(url), StorageURL.createPipeline(new PipelineOptions()));

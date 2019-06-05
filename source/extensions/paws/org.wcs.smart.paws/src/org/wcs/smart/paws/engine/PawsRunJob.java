@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Collections;
-import java.util.concurrent.ExecutorService;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -23,7 +22,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsPlugIn;
-import org.wcs.smart.paws.model.PawsParameter;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsWorkspace;
 
@@ -61,94 +59,59 @@ public class PawsRunJob extends Job{
 		this.authorizationCode = authorizationCode;
 	}
 	  
-	
-//	private final static String AUTHORITY = "https://login.microsoftonline.com/common";
-//	    private final static String CLIENT_ID = "YOUR_PUBLIC_CLIENT_ID";
-//	private final static String RESOURCE = "https://graph.windows.net";
-	private void acquireToken() {
+	private void acquireToken(PawsWorkspace ws) throws Exception{
 		
-		//open a web browser and make the user login
-		//this gets a token
+		String redirecturi = "https://login.microsoftonline.com/common/oauth2/nativeclient";
 		
-		//https://login.microsoftonline.com/548d829f-38d0-42ac-9a2c-220944e5c275/oauth2/v2.0/authorize?client_id=98c26dd0-2a8e-4984-a1fe-8e3c1a75b114&response_type=code&redirect_url=http%3A%2F%2Flocalhost%3A12345&response_mode=query&state=1234&scope=other&sso_reload=true
-		//String clientid = "fd200799-513a-4000-9f01-8cf6485771de";
+		StringBuilder sb = new StringBuilder();
+		sb.append(ws.getUrl());
+		sb.append("/");
+		sb.append("token");
 		
-//		String token = "https://login.microsoftonline.com/548d829f-38d0-42ac-9a2c-220944e5c275/oauth2/v2.0/token";
 		
-
-		String auth = "https://login.microsoftonline.com/common";///oauth2/v2.0/token";//?client_id=98c26dd0-2a8e-4984-a1fe-8e3c1a75b114&grant_type=authorization_code&code=authorization_code&redirect_uri=
+		StringBuilder params = new StringBuilder();
+		params.append("client_id=" + ws.getClientId()); 
+		params.append("&code=" + authorizationCode );
+		params.append("&redirect_uri=" + redirecturi );
+		params.append("&resource=https://storage.azure.com/");
+		params.append("&grant_type=authorization_code");
+		String pp = params.toString();	
 		
-		ExecutorService service = null;
+		HttpURLConnection conn = (HttpURLConnection) (new URL(sb.toString())).openConnection();
 		try {
-//			service = Executors.newFixedThreadPool(1);
-//			
-//			String clientid = "fd200799-513a-4000-9f01-8cf6485771de";
-//			context = PublicClientApplication.builder(clientid).authority(auth).executorService(service).build();
-//////			context = new PublicClientApplication(auth, false, service);
-////			
-//			String redirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
-//			
-//			AuthorizationCodeParameters params = AuthorizationCodeParameters.builder(authorizationCode, new URI(redirectUri))
-//				.scopes(Collections.singleton("api://fd200799-513a-4000-9f01-8cf6485771de/Test"))
-//				.build();
-//			java.util.concurrent.Future<AuthenticationResult> future = context.acquireToken(params);
-////					context.acquireToken(new AuthorizationCodeParameters)
-////					context.acquireTokenByAuthorizationCode(authorizationCode, "api://fd200799-513a-4000-9f01-8cf6485771de/Test", clientid, new URI(redirectUri), null);
-//			this.token = future.get();
-			
-			
-//			String url = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
-//			String tenantid = "548d829f-38d0-42ac-9a2c-220944e5c275";
-			String tenantid = "common";
-//			String url = "https://login.microsoftonline.com/" + tenantid + "/oauth2/v2.0/token";
-			String url = "https://login.microsoftonline.com/" + tenantid + "/oauth2/v2.0/token";
-			String params="client_id=fd200799-513a-4000-9f01-8cf6485771de" + 
-					"&code=" + authorizationCode +
-					"&redirect_uri=https://login.microsoftonline.com/common/oauth2/nativeclient"+
-					"&scope=api://fd200799-513a-4000-9f01-8cf6485771de/Test" +
-					"&grant_type=authorization_code";
-//			System.out.println(url);
-			
-			HttpURLConnection conn = (HttpURLConnection) (new URL(url)).openConnection();
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			conn.setRequestProperty("Content-Length", Integer.valueOf( params.getBytes().length).toString());
+			conn.setRequestProperty("Content-Length", Integer.valueOf( pp.getBytes().length).toString());
 			conn.setDoOutput(true);
-			
-			conn.getOutputStream().write(params.getBytes());
+			conn.getOutputStream().write(pp.getBytes());
 			conn.getOutputStream().close();
-			
-			int status = conn.getResponseCode();
-//			if (status != HttpResponse)
-			System.out.println("STATUS: " + status);
-			BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-			String inputLine;
-			StringBuffer content = new StringBuffer();
-			while ((inputLine = in.readLine()) != null) {
-				content.append(inputLine);
-			}
-			in.close();
-			conn.disconnect();
-			
-			System.out.println(content.toString());
-			
-			JSONObject json = (JSONObject) (new JSONParser()).parse(content.toString());
-			
-//			this.token = AuthenticationResult.builder()
-//				.scopes((String)json.get("scope"))
-//				.extExpiresOn( (Long)json.get("ext_expires_in"))
-//				.expiresOn((Long)json.get("expires_in"))
-//				.accessToken((String)json.get("access_token")).build();
-			this.token = (String) json.get("access_token");
 				
-			
-		}catch (Exception ex) {
-			ex.printStackTrace();
-			//TODO
-		} finally {
-//			service.shutdown();
-	    }
-
+			int status = conn.getResponseCode();
+			if (status == HttpURLConnection.HTTP_OK) {
+				StringBuffer content = new StringBuffer();
+				String inputLine;
+				try(BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))){
+					while ((inputLine = in.readLine()) != null) {
+						content.append(inputLine);
+					}
+				}
+				try {
+					JSONObject json = (JSONObject) (new JSONParser()).parse(content.toString());
+					this.token = (String) json.get("access_token");
+					if (this.token == null || this.token.isBlank()) {
+						throw new Exception("access_token not found");
+					}
+				}catch (Exception ex) {
+					throw new Exception("Unable to parse access token from json : " +content.toString(), ex);
+				}
+			}else {
+				PawsPlugIn.log("Authorization token cannot be found. Response: " + status + " Request: " + sb.toString() + " " + params.toString(), null);
+				throw new Exception("Authorization Token cannot be found.  Response code: " + status);
+			}
+		}finally {
+			conn.disconnect();
+		}
+		
 	}
 
 	@Override
@@ -163,33 +126,30 @@ public class PawsRunJob extends Job{
 			handleError("Unable to package SMART data for PAWS analysis.", ex);
 			return Status.OK_STATUS;
 		}
-//		if (true) return Status.OK_STATUS;
 		
 		//upload package to azure
 		//TODO: update the required jar files when new build is released
 		//https://github.com/Azure/autorest-clientruntime-for-java/issues/569
 		ContainerURL containerURL;
 		try{
-			acquireToken();
-			if (this.token == null) throw new Exception("Invalid token");
-			String url = null;
+			PawsWorkspace ws;
 			try(Session session = HibernateManager.openSession()){
-				PawsWorkspace ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
+				ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
 						new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
 				
-				if (ws == null || ws.getApiKey() == null || ws.getUrl() == null){
+				if (ws == null || !ws.isConfigured()){
 					handleError("PAWS Workspace not configured.  You must first configure the PAWS Workspace before you can run paws analysis.", new Exception("No Paws Workspace Configured."));
 					return Status.OK_STATUS;
 				}
-				url = ws.getUrl(); // + "?" + ws.getApiKey();
+				
 			}
+			
+			acquireToken(ws);
+			if (this.token == null) throw new Exception("Invalid token");
+
 			TokenCredentials tc = new TokenCredentials(this.token);
-//			HttpPipelineBuilder builder = new HttpPipelineBuilder();
-//			builder.withCredentialsPolicy(new com.microsoft.rest.v2.credentials.TokenCredentials("Bearer", token));
-//			builder.withHttpLoggingPolicy(HttpLogDetailLevel.BODY_AND_HEADERS, true);	
-//			containerURL = new ContainerURL(new URL(url), builder.build());
-		    containerURL = new ContainerURL(new URL(url), StorageURL.createPipeline(tc, new PipelineOptions()));
-	    
+		    containerURL = new ContainerURL(new URL(ws.getContainerUrl()), StorageURL.createPipeline(tc, new PipelineOptions()));
+			
 	        //upload files
 	        for(Path p : engine.getDataFiles()) {
 				if (Files.exists(p)){
@@ -241,6 +201,13 @@ public class PawsRunJob extends Job{
 			System.out.println(json);
 			//TODO:
 //			PawsApi.INSTANCE.run(run.getConservationArea(), json);
+			
+			//{
+			 // "TaskId": "string",
+			 // "Timestamp": "2019-06-05T23:05:01.858Z",
+			 // "Status": "string",
+			 // "Endpoint": "string"
+			//}
 		}catch (Exception ex){
 			handleError("Error calling PAWS API", ex);
 			return Status.OK_STATUS;
@@ -255,7 +222,8 @@ public class PawsRunJob extends Job{
 
 	private void uploadFile(BlockBlobURL blobURL, Path file, String errorMsg) throws Throwable{
 		final Throwable[] uperror = new Throwable[]{null}; 
-		AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(file);
+		try(AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(file)) {
+			
 			TransferManager.uploadFileToBlockBlob(fileChannel, blobURL, 8 * 1024 * 1024, null, null)
 					.subscribe(response -> {
 						try{
@@ -278,11 +246,12 @@ public class PawsRunJob extends Job{
 						}
 					});
 		
-		//wait for transfer to finish
-		synchronized (lock) {
-			lock.wait();
+			//wait for transfer to finish
+			synchronized (lock) {
+				lock.wait();
+			}
+			if (uperror[0] != null) throw uperror[0];
 		}
-		if (uperror[0] != null) throw uperror[0];
 	}
 	
 	private void handleError(String msg, Throwable ex){

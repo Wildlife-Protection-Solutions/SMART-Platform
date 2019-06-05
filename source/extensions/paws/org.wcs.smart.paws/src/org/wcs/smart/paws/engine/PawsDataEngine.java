@@ -11,6 +11,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -154,10 +155,10 @@ public class PawsDataEngine {
 			PawsWorkspace ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
 					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
 				
-			if (ws == null || ws.getApiKey() == null || ws.getUrl() == null){
+			if (ws == null || !ws.isConfigured()){
 				throw new Exception("PAWS Workspace not configured.  You must first configure the PAWS Workspace before you can run paws analysis.");
 			}
-			String url = ws.getUrl() + "?" + ws.getApiKey();
+			String url = ws.getUrl() + "?" + ws.getClientId();
 			config.put("container_name", url);
 			
 			config.put("run_id", run.getRunId());
@@ -226,9 +227,9 @@ public class PawsDataEngine {
 			JSONObject patrolobs = new JSONObject();
 			config.put("patrol_observations", patrolobs);
 			
-			//TODO:
-			patrolobs.put("start_date", "MM/DD/YYY");
-			patrolobs.put("end_date", "MM/DD/YYY");
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+			patrolobs.put("start_date", formatter.format(run.getDataStartDate()));
+			patrolobs.put("end_date", formatter.format(run.getDataEndDate()));
 
 			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.TIMEZONE.name());
 			if (pp == null) throw new Exception("Timezone value must be provided.  Update the configuration and try again.");
@@ -249,6 +250,17 @@ public class PawsDataEngine {
 			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.CLASSIFIER_MODEL.name());
 			config.put("classifier_model", PawsParameter.ClassifierModel.valueOf(pp.getValue()).key);
 
+			JSONObject modelexperimentation = new JSONObject();
+			config.put("model_experimentation", modelexperimentation);
+			modelexperimentation.put("train_start_year", run.getTrainStartYear());
+			modelexperimentation.put("train_end_year", run.getTrainEndYear());
+			modelexperimentation.put("test_start_year", run.getTestStartYear());
+			modelexperimentation.put("test_end_year", run.getTestEndYear());
+			
+			JSONObject modelforecasting = new JSONObject();
+			config.put("model_forecasting", modelexperimentation);
+			modelforecasting.put("start_year", run.getForecastStartYear());
+			modelforecasting.put("end_year", run.getForecastEndYear());
 			
 			
 		}

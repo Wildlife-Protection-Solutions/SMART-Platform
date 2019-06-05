@@ -4,7 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="shared/"/>
-	<classpathentry exported="true" kind="lib" path="lib/azure-storage-blob-11.0.1.jar" sourcepath="lib-src/azure-storage-blob-11.0.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/azure-storage-blob-11.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/client-runtime-2.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-annotations-2.9.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-core-2.9.6.jar"/>

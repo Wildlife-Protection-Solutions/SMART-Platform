@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.paws.ui;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -67,7 +66,7 @@ public class NewPawsRunHandler {
 	@Inject
 	private IEclipseContext context;
 	
-	public void createAndRun(PawsConfiguration config, LocalDate start, LocalDate end, String initName) throws Exception {
+	public void createAndRun(PawsConfiguration config, PawsRun copy, String initName) throws Exception {
 		if (config == null) return;
 		if (!validateSetup()) return;
 	
@@ -84,25 +83,35 @@ public class NewPawsRunHandler {
 			return;
 		}
 		
+		
 		RunDialog dialog = new RunDialog(context.get(Shell.class));
-		if (start != null)dialog.setStart(start);
-		if (end != null) dialog.setEnd(end);
+
+		if (copy != null) dialog.setDates(copy.getTrainStartYear(), copy.getTrainEndYear(), copy.getTestStartYear(), copy.getTestEndYear(), copy.getForecastStartYear(), copy.getForecastEndYear(), copy.getDataStartDate(), copy.getDataEndDate());
 		if (initName != null) dialog.setId(initName);
 		
 		if (dialog.open() != Window.OK) return;
 		
-		start = dialog.getStartDate();
-		end = dialog.getEndDate();
+		PawsRun temp = new PawsRun();
+		temp.setTrainStartYear(dialog.getTrainStart());
+		temp.setTrainEndYear(dialog.getTrainEnd());
+		temp.setTestStartYear(dialog.getTestStart());
+		temp.setTestEndYear(dialog.getTestEnd());
+		temp.setForecastStartYear(dialog.getForcastStart());
+		temp.setForecastEndYear(dialog.getForcastEnd());
+		temp.setDataStartDate(dialog.getDataStart());
+		temp.setDataEndDate(dialog.getDataEnd());
+		
 		initName = dialog.getId();
 		
-		PawsRun rr = createInternal(config, start, end, initName);
+		PawsRun rr = createInternal(config, temp, initName);
 		
 		run(rr);
 		open(rr);
 	}
 
-	private PawsRun createInternal(PawsConfiguration config, LocalDate start, LocalDate end, String initName) throws Exception{
+	private PawsRun createInternal(PawsConfiguration config, PawsRun copy, String initName) throws Exception{
 		PawsRun prun = null;
+		if (copy == null) throw new IllegalArgumentException("PawsRun copy cannot be null.");
 		
 		try(Session session = HibernateManager.openSession()){
 			PawsConfiguration pw = session.get(PawsConfiguration.class, config.getUuid());
@@ -115,10 +124,17 @@ public class NewPawsRunHandler {
 				prun.setId(initName);
 				
 				prun.setStatus(PawsRun.Status.COMPILING_DATA);
-				prun.setDataStartDate(start);
-				prun.setDataEndDate(end);
-				session.save(prun);
 				
+				prun.setDataStartDate(copy.getDataStartDate());
+				prun.setDataEndDate(copy.getDataEndDate());
+				prun.setForecastEndYear(copy.getForecastEndYear());
+				prun.setForecastStartYear(copy.getForecastStartYear());
+				prun.setTestEndYear(copy.getTestEndYear());
+				prun.setTestStartYear(copy.getTestStartYear());
+				prun.setTrainEndYear(copy.getTrainEndYear());
+				prun.setTrainStartYear(copy.getTrainStartYear());
+				
+				session.save(prun);
 				
 				LocalDateTime now = LocalDateTime.now();
 				String dpart = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
@@ -142,7 +158,7 @@ public class NewPawsRunHandler {
 					new Object[]{"conservationArea", SmartDB.getCurrentConservationArea()})
 				.uniqueResult();
 			
-			if (pw == null || pw.getApiKey() == null || pw.getUrl() == null || pw.getUrl().isBlank() || pw.getApiKey().isBlank()){
+			if (pw == null || !pw.isConfigured()) {
 				openconfig = true;
 			}else{
 			

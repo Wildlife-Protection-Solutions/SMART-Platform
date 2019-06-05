@@ -60,6 +60,7 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 	
 	private Text txtServerKey;
 	private Text txtWorkspaceKey;
+	private Text txtWorkspaceContainer;
 	
 	protected ServerConfigurationDialog(Shell parent) {
 		super(parent);
@@ -93,8 +94,9 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 					ws = new PawsWorkspace();
 					ws.setConservationArea(SmartDB.getCurrentConservationArea());
 				}
-				ws.setApiKey(txtWorkspaceKey.getText());
+				ws.setClientId(txtWorkspaceKey.getText());
 				ws.setUrl(txtWorkspaceURL.getText());
+				ws.setContainerUrl(txtWorkspaceContainer.getText());
 				session.saveOrUpdate(ws);
 				
 				session.getTransaction().commit();
@@ -157,29 +159,38 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 		((GridLayout)pawws.getLayout()).marginHeight = 0;
 		pawws.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		infoMessage = new Label(pawws, SWT.NONE);
+		infoMessage = new Label(pawws, SWT.WRAP);
 		infoMessage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		infoMessage.setText("A link to the Microsoft Azure blob container URL for temporarily storing working data and paws results");
-		
+		infoMessage.setText("A link to the Microsoft Active Directory used for temporarily storing working data and PAWS results.  This needs to be the v1 OAuth 2.0 token endpoint target.  For example: https://login.microsoftonline.com/common/oauth2");
+		((GridData)infoMessage.getLayoutData()).widthHint = 350;
 		
 		l = new Label(pawws, SWT.NONE);
-		l.setText("Container URL:");
+		l.setText("OAuth 2.0 Enpoint (v1):");
 		
 		txtWorkspaceURL = new Text(pawws, SWT.BORDER);
 		txtWorkspaceURL.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtWorkspaceURL.setText(DialogConstants.LOADING_TEXT);
-		txtWorkspaceURL.setText("https://<your blob>.blob.core.windows.net/<your container>");
+		txtWorkspaceURL.setText("https://login.microsoftonline.com/common/oauth2");
 		txtWorkspaceURL.addListener(SWT.Modify, modifiedlistener);
 		
 		l = new Label(pawws, SWT.NONE);
-		l.setText("Shared Access Signature:");
+		l.setText("Client ID:");
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
-		txtWorkspaceKey = new Text(pawws, SWT.BORDER  | SWT.WRAP | SWT.V_SCROLL);
-		txtWorkspaceKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)txtWorkspaceKey.getLayoutData()).heightHint = 80;
+		txtWorkspaceKey = new Text(pawws, SWT.BORDER );
+		txtWorkspaceKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtWorkspaceKey.setText(DialogConstants.LOADING_TEXT);
 		txtWorkspaceKey.addListener(SWT.Modify, modifiedlistener);
+		
+		l = new Label(pawws, SWT.NONE);
+		l.setText("Container URL:");
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		
+		txtWorkspaceContainer = new Text(pawws, SWT.BORDER );
+		txtWorkspaceContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtWorkspaceContainer.setText(DialogConstants.LOADING_TEXT);
+		txtWorkspaceContainer.addListener(SWT.Modify, modifiedlistener);
+	
 	
 		getShell().setText("PAWS Server Configurations");
 		loadingJob.schedule();
@@ -202,20 +213,23 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 			final PawsService fservice = service;
 			final PawsWorkspace fws = ws;
 			Display.getDefault().asyncExec(()->{
+				txtServerURL.setText("https://aiforearth-v2-eastus-01.regional.azure-api.net/paws");
 				if (fservice == null) {
-					txtServerKey.setText("");
 					txtServerURL.setText("");
 				}else {
 					txtServerKey.setText(fservice.getApiKey());
 					txtServerURL.setText(fservice.getUrl());
 				}
 				
+				txtWorkspaceContainer.setText("https://<yourblob>.blob.core.windows.net/<yourcontainer>");
 				if (fws == null) {
-					txtWorkspaceKey.setText("");
+					txtWorkspaceKey.setText("<Client ID>");
 					//txtWorkspaceURL.setText("");
+					
 				}else {
-					txtWorkspaceKey.setText(fws.getApiKey());
+					txtWorkspaceKey.setText(fws.getClientId());
 					txtWorkspaceURL.setText(fws.getUrl());
+					if (fws.getContainerUrl() != null)  txtWorkspaceContainer.setText(fws.getContainerUrl());
 				}
 				
 				getButton(IDialogConstants.OK_ID).setEnabled(false);

@@ -21,13 +21,14 @@
  */
 package org.wcs.smart.paws.engine;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import org.hibernate.Session;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.PawsPlugIn;
@@ -38,16 +39,16 @@ public enum PawsApi {
 	
 	INSTANCE;
 	
-	public void run(ConservationArea ca, String json) throws Exception{
+	public void run(PawsRun run, String json) throws Exception{
 		String surl = null;
 		try(Session session = HibernateManager.openSession()){
 			PawsService service = QueryFactory.buildQuery(session, PawsService.class,  
-					new Object[] {"conservationArea", ca}).uniqueResult();
+					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
 				
 			if (service == null || service.getApiKey() == null || service.getUrl() == null){
 				throw new Exception("PAWS Service not configured.  You must first configure the PAWS Service before you can run paws analysis.");
 			}
-			surl = service.getUrl() + "?" + service.getApiKey();
+			surl = service.getUrl() + "/heatmap?subscription-key=" + service.getApiKey();
 		}
 		
 		//call the service with the json payload
@@ -64,6 +65,29 @@ public enum PawsApi {
 				throw new Exception("Failed to run PAWS Service - HTTP error code : "
 					+ conn.getResponseCode());
 			}
+			
+			StringBuffer content = new StringBuffer();
+			String inputLine;
+			try(BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))){
+				while ((inputLine = in.readLine()) != null) {
+					content.append(inputLine);
+				}
+			}
+			
+			PawsTask task = PawsTask.parse(content.toString());
+			
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try {
+					PawsRun r = session.get(PawsRun.class, run.getUuid());
+					r.setTaskId(task.getTaskId());
+					session.getTransaction().commit();
+				}catch (Exception ex) {
+					session.getTransaction().rollback();
+					throw new Exception("Unable to update local database with PAWS task id.  Run will not be configured correctly.  You should delete it locally and all data uploaded to the cloud storage and try again.");
+				}
+			}
+			
 		}catch (Exception ex){
 			PawsPlugIn.log(ex.getMessage(), ex);
 			throw ex;
@@ -84,11 +108,38 @@ public enum PawsApi {
 			if (service == null || service.getApiKey() == null || service.getUrl() == null || service.getApiKey().isBlank() || service.getUrl().isBlank()){
 				throw new Exception("PAWS Service not configured.");
 			}
-			surl = service.getUrl() + "/task/" + run.getRunId();
+			surl = service.getUrl() + "/task/" + run.getTaskId();
 		}
 		
 		//call the service with the json payload
 		URL url = new URL(surl);
+		
+		
+		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+		try{
+			conn.setRequestMethod("GET");
+			
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK ) {
+				throw new Exception("Failed to run PAWS Service - HTTP error code : " + conn.getResponseCode());
+			}
+			
+			StringBuffer content = new StringBuffer();
+			String inputLine;
+			try(BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))){
+				while ((inputLine = in.readLine()) != null) {
+					content.append(inputLine);
+				}
+			}
+			
+			PawsTask task = PawsTask.parse(content.toString());
+
+			//TODO: do something with task
+		}catch (Exception ex){
+			PawsPlugIn.log(ex.getMessage(), ex);
+			throw ex;
+		}finally{
+			conn.disconnect();
+		}
 		//TODO:
 		return false;
 	}

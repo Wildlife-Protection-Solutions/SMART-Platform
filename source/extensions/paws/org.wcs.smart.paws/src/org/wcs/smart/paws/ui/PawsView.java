@@ -23,7 +23,6 @@ package org.wcs.smart.paws.ui;
 
 import java.text.Collator;
 import java.text.MessageFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -474,8 +473,7 @@ public class PawsView {
 	
 	private void newRun(Object config) {
 		PawsConfiguration c = null;
-		LocalDate start = null;
-		LocalDate end = null;
+		PawsRun run = null;
 		String id = null;
 		
 		if (config instanceof PawsConfiguration){
@@ -483,16 +481,15 @@ public class PawsView {
 			id = c.getName();
 		}
 		if (config instanceof PawsRun){
+			run = (PawsRun)config;
 			c = ((PawsRun) config).getConfiguration();
-			start = ((PawsRun) config).getDataStartDate();
-			end = ((PawsRun) config).getDataEndDate();
 			id = ((PawsRun) config).getId();
 		}
 		
 		if (c == null) return;
 		try {
 			id = PawsManager.INSTANCE.generateUniqueName(id, c.getConservationArea());
-			ContextInjectionFactory.make(NewPawsRunHandler.class, context).createAndRun(c, start, end, id);
+			ContextInjectionFactory.make(NewPawsRunHandler.class, context).createAndRun(c, run, id);
 		}catch (Exception ex) {
 			PawsPlugIn.displayLog(ex.getMessage(), ex);
 		}
