@@ -121,10 +121,19 @@ public class SyncMultipleCaWizard extends Wizard {
 			ConnectPlugIn.log(e.getMessage(), e);
 			return false;
 		} 
-		String message = Messages.SyncMultipleCaWizard_WarningsDialogMessage;
+		
 		errors.add(0, MessageFormat.format(Messages.SyncMultipleCaWizard_CompleteMessage, okCnt[0], allCas.size()));
 		
-		WarningDialog wd = new WarningDialog(activeShell, Messages.SyncMultipleCaWizard_WarningsDialogTitle, message, errors);
+		String message = Messages.SyncMultipleCaWizard_DoneOk;
+		if (okCnt[0] != allCas.size()) {
+			message = Messages.SyncMultipleCaWizard_DoneWarnings;	
+		}
+		
+		WarningDialog wd = new WarningDialog(activeShell, Messages.SyncMultipleCaWizard_DoneTitle, message, errors);
+		if (okCnt[0] == allCas.size()) {
+			//update the image 
+			wd.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.OK32_ICON));
+		}
 		wd.open();
 		return true;
 		

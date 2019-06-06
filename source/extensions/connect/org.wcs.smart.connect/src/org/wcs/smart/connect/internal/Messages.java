@@ -390,6 +390,9 @@ public class Messages extends NLS {
 	public static String SyncMultipleCaWizard_Cancelled;
 	public static String SyncMultipleCaWizard_CompleteMessage;
 	public static String SyncMultipleCaWizard_ConnectUserpassDialogMessage;
+	public static String SyncMultipleCaWizard_DoneOk;
+	public static String SyncMultipleCaWizard_DoneTitle;
+	public static String SyncMultipleCaWizard_DoneWarnings;
 	public static String SyncMultipleCaWizard_SkippedDesktopInvalid;
 	public static String SyncMultipleCaWizard_SkippedServerAccountInvalid;
 	public static String SyncMultipleCaWizard_SkippedServerInvalid;
