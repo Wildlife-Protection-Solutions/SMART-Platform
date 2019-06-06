@@ -144,7 +144,8 @@ public class GlobalForestWatchProcessorServlet extends HttpServlet {
 			s.getTransaction().commit();
 		}catch (Exception ex) {
 			logger.log(Level.SEVERE, "Error saving global forest watch alerts",  ex); //$NON-NLS-1$
-			s.getTransaction().rollback();
+		}finally {
+			if (s.getTransaction().isActive()) s.getTransaction().rollback();
 		}
 	}
 
