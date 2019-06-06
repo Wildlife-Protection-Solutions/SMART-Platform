@@ -6,7 +6,7 @@
       <QueryCategory
             html_description="%QueryCategory.html_description"
             id="org.wcs.smart.er.query.category.survey"
-            name="Survey Queries">
+            name="%QueryCategory.name">
       </QueryCategory>
       <QueryType
             QueryCategory="org.wcs.smart.er.query.category.survey"

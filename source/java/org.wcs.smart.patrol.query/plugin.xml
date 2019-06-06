@@ -50,7 +50,7 @@
       <QueryCategory
             html_description="%patrol.querycategory.html_description"
             id="org.wcs.smart.patrol.query.group.PatrolQueries"
-            name="Patrol Queries">
+            name="%patrol.querycategory.name">
       </QueryCategory>
       <QueryType
             QueryCategory="org.wcs.smart.patrol.query.group.PatrolQueries"

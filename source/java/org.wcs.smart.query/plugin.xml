@@ -1240,7 +1240,7 @@
       <QueryCategory
             html_description="%newcompound.html_description"
             id="org.wcs.smart.query.type.compound"
-            name="Compound Query">
+            name="%newcompound.name">
       </QueryCategory>
       <QueryType
             QueryCategory="org.wcs.smart.query.type.compound"

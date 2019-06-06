@@ -40,7 +40,7 @@
       <QueryCategory
             html_description="%intelquery.description"
             id="org.wcs.smart.intelligence.query"
-            name="Intelligence Queries">
+            name="%intelquery.name">
       </QueryCategory>
       <QueryType
             QueryCategory="org.wcs.smart.intelligence.query"
