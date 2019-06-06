@@ -80,7 +80,7 @@ BEGIN
  	INSERT INTO connect.change_log 
  		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
  		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, iset.CA_UUID 
- 		FROM smart.ct_metadata_value iset WHERE iset.uuid = ROW.metadata_uuid;
+ 		FROM smart.ct_metadata_value iset WHERE iset.uuid = ROW.field_uuid;
  RETURN ROW;
 END$$ LANGUAGE 'plpgsql';
 CREATE TRIGGER trg_ct_metadata_value_uuid AFTER INSERT OR UPDATE OR DELETE ON smart.ct_metadata_value_uuid FOR EACH ROW execute procedure connect.trg_ct_metadata_value_uuid();
