@@ -42,6 +42,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsManager;
+import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.engine.PawsRunJob;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsRun;
@@ -105,8 +106,9 @@ public class NewPawsRunHandler {
 		
 		PawsRun rr = createInternal(config, temp, initName);
 		
-		run(rr);
-		open(rr);
+		if (run(rr)) {
+			open(rr);
+		}
 	}
 
 	private PawsRun createInternal(PawsConfiguration config, PawsRun copy, String initName) throws Exception{
@@ -116,41 +118,28 @@ public class NewPawsRunHandler {
 		try(Session session = HibernateManager.openSession()){
 			PawsConfiguration pw = session.get(PawsConfiguration.class, config.getUuid());
 			if (pw == null) throw new Exception("Configuration not found.");
-			session.beginTransaction();
-			try {
-				prun = new PawsRun();
-				prun.setConfiguration(pw);
-				prun.setConservationArea(pw.getConservationArea());
-				prun.setId(initName);
+			
+			prun = new PawsRun();
+			prun.setConfiguration(pw);
+			prun.setConservationArea(pw.getConservationArea());
+			prun.setId(initName);
 				
-				prun.setStatus(PawsRun.Status.COMPILING_DATA);
+			prun.setStatus(PawsRun.Status.COMPILING_DATA);
 				
-				prun.setDataStartDate(copy.getDataStartDate());
-				prun.setDataEndDate(copy.getDataEndDate());
-				prun.setForecastEndYear(copy.getForecastEndYear());
-				prun.setForecastStartYear(copy.getForecastStartYear());
-				prun.setTestEndYear(copy.getTestEndYear());
-				prun.setTestStartYear(copy.getTestStartYear());
-				prun.setTrainEndYear(copy.getTrainEndYear());
-				prun.setTrainStartYear(copy.getTrainStartYear());
+			prun.setDataStartDate(copy.getDataStartDate());
+			prun.setDataEndDate(copy.getDataEndDate());
+			prun.setForecastEndYear(copy.getForecastEndYear());
+			prun.setForecastStartYear(copy.getForecastStartYear());
+			prun.setTestEndYear(copy.getTestEndYear());
+			prun.setTestStartYear(copy.getTestStartYear());
+			prun.setTrainEndYear(copy.getTrainEndYear());
+			prun.setTrainStartYear(copy.getTrainStartYear());
 				
-				session.save(prun);
-				
-				LocalDateTime now = LocalDateTime.now();
-				String dpart = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-				prun.setRunId( dpart + "_" + UuidUtils.uuidToString( prun.getUuid() ));
-				
-				session.getTransaction().commit();
-			}catch (Exception ex) {
-				throw ex;
-			}
+			
 		}
-		
-
-		context.get(IEventBroker.class).post(PawsEvent.PAWS_RUN_NEW, Collections.singletonList(prun));
-		
 		return prun;
 	}
+	
 	private boolean validateSetup(){
 		boolean openconfig = false;
 		try(Session session = HibernateManager.openSession()){
@@ -184,16 +173,50 @@ public class NewPawsRunHandler {
 		(new ShowRunHandler()).execute(context.get(MWindow.class), rr);
 	}
 	
-	private void run(PawsRun rr){
+	private boolean run(PawsRun rr){
 		//perform validation; get token as required
 		LoginDialog dialog = new LoginDialog(Display.getDefault().getActiveShell());
 		dialog.open();
 		
 		String authorizationCode = dialog.getAuthorizationCode();
-		if (authorizationCode == null) return; //TODO:
+		if (authorizationCode == null) {
+			//fail
+			MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Authorization Failed", "Authorization failed, run not created.");
+			return false;
+		}
+		
+		//else save and run job
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				session.save(rr);
+				
+				LocalDateTime now = LocalDateTime.now();
+				String dpart = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+				rr.setRunId( dpart + "_" + UuidUtils.uuidToString( rr.getUuid() ));
+				
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				try {
+					session.getTransaction().rollback();
+				}catch (Exception ex2) {
+					PawsPlugIn.log(ex2.getMessage(), ex2);
+				}
+				PawsPlugIn.displayLog("Unable to save run to database: " + ex.getMessage(), ex);
+				return false;
+				
+			}
+		}
+		
+		try {
+			context.get(IEventBroker.class).post(PawsEvent.PAWS_RUN_NEW, Collections.singletonList(rr));
+		}catch (Exception ex) {
+			PawsPlugIn.log(ex.getMessage(), ex);
+		}
 		
 		PawsRunJob job = new PawsRunJob(rr, authorizationCode, context.get(IEventBroker.class));
 		job.schedule();
+		return true;
 	}
 	
 	

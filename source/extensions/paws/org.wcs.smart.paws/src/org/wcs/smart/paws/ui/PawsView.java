@@ -24,7 +24,6 @@ package org.wcs.smart.paws.ui;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -283,7 +282,7 @@ public class PawsView {
 		MenuItem mnuCancel = new MenuItem(mnu, SWT.PUSH);
 		mnuCancel.setText(IDialogConstants.CANCEL_LABEL);
 		mnuCancel.addListener(SWT.Selection, e->{
-			cancelRun(tblResults.getStructuredSelection().getFirstElement());
+			cancelRun();
 		});
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
@@ -317,22 +316,18 @@ public class PawsView {
 			tiAdd.setEnabled(!tblResults.getStructuredSelection().isEmpty());
 			tiDelete.setEnabled(!tblResults.getStructuredSelection().isEmpty());
 			
-			mnuCancel.setEnabled(false);
-			Object x = tblResults.getStructuredSelection().getFirstElement();
-			if (x instanceof PawsRun){
-				switch(((PawsRun)x).getStatus()){
-				case COMPILING_DATA:
-				case DOWNLOADING_RESULTS:
-				case RUNNING:
-				case UPLOADING_DATA:
-					mnuCancel.setEnabled(true);
-					return;
-				case COMPLETE:
-				case ERROR:
-					mnuCancel.setEnabled(false);
-					return;
+			boolean canEnable = false;
+			for (Iterator<Object> iterator = tblResults.getStructuredSelection().iterator(); iterator.hasNext();) {
+				Object r = (Object) iterator.next();
+				if ( r instanceof PawsRun) {
+					PawsRun rr = (PawsRun)r;
+					if(rr.getStatus() != PawsRun.Status.COMPLETE && rr.getStatus() != PawsRun.Status.ERROR) {
+						canEnable = true;
+						break;
+					}
 				}
 			}
+			mnuCancel.setEnabled(canEnable);
 		});
 		return part;
 	}
@@ -446,29 +441,36 @@ public class PawsView {
 		return part;
 	}
 	
-	private void cancelRun(Object config) {
-		if (!(config instanceof PawsRun)) return;
-		PawsRun pw = (PawsRun)config;
-		
+	private void cancelRun() {
+		List<PawsRun> cancelled = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			session.beginTransaction();
-			try{
-				PawsRun rr = session.get(PawsRun.class, pw.getUuid());
-				if (rr != null){
-					rr.setStatus(PawsRun.Status.ERROR);
-					rr.setStatusMessage("Cancelled by user.");
-				}
-				session.getTransaction().commit();
-			}catch (Exception ex){
+			
+			for (Iterator<?> iterator = tblResults.getStructuredSelection().iterator(); iterator.hasNext();) {
+				Object type = (Object) iterator.next();
+				if (!(type instanceof PawsRun)) continue;
+				PawsRun pw = (PawsRun)type;
+				if (pw.getStatus() == PawsRun.Status.COMPLETE || pw.getStatus() == PawsRun.Status.ERROR) continue;
+				
+				cancelled.add(pw);
+				session.beginTransaction();
 				try{
-					session.getTransaction().rollback();
-				}catch (Exception ex2){
-					PawsPlugIn.log(ex2.getMessage(),ex2);
+					PawsRun rr = session.get(PawsRun.class, pw.getUuid());
+					if (rr != null){
+						rr.setStatus(PawsRun.Status.ERROR);
+						rr.setStatusMessage("Cancelled by user.");
+					}
+					session.getTransaction().commit();
+				}catch (Exception ex){
+					try{
+						session.getTransaction().rollback();
+					}catch (Exception ex2){
+						PawsPlugIn.log(ex2.getMessage(),ex2);
+					}
+					PawsPlugIn.displayLog("Unable to update status." + "\n\n" + ex.getMessage(), ex);
 				}
-				PawsPlugIn.displayLog("Unable to update status." + "\n\n" + ex.getMessage(), ex);
 			}
 		}
-		context.get(IEventBroker.class).post(PawsEvent.PAWS_RUN_MODIFY, Collections.singleton(pw));
+		context.get(IEventBroker.class).post(PawsEvent.PAWS_RUN_MODIFY, cancelled);
 	}
 	
 	private void newRun(Object config) {

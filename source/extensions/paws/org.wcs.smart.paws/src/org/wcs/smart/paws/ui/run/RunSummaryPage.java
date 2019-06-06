@@ -193,6 +193,19 @@ public class RunSummaryPage extends EditorPart {
 			toolkit.createLabel(detailsComp, "");
 		}
 		
+		toolkit.createLabel(detailsComp, "Model Training Years:");
+		String value = run.getTrainStartYear() + " to " + run.getTrainEndYear();
+		toolkit.createLabel(detailsComp, value);
+		
+		toolkit.createLabel(detailsComp, "Model Test Years:");
+		value = run.getTestStartYear() + " to " + run.getTestEndYear();
+		toolkit.createLabel(detailsComp, value);
+		
+		toolkit.createLabel(detailsComp, "Model Forecasting Years:");
+		value = run.getForecastStartYear() + " to " + run.getForecastEndYear();
+		toolkit.createLabel(detailsComp, value);
+		
+		
 		toolkit.createLabel(detailsComp, "Configuration:");
 		if (run.getConfiguration() != null){
 			toolkit.createLabel(detailsComp, run.getConfiguration().getName());

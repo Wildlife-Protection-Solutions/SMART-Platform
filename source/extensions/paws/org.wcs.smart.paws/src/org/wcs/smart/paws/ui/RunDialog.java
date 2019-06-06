@@ -26,12 +26,14 @@ import java.time.LocalDate;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -63,9 +65,11 @@ public class RunDialog extends SmartStyledTitleDialog {
 	
 	private boolean startModified = false;
 	private boolean endModified = false;
+	private Color errorColor;
 	
 	protected RunDialog(Shell parent) {
 		super(parent);
+
 	}
 
 	public int getTrainStart(){ return this.trainStart; }
@@ -92,8 +96,32 @@ public class RunDialog extends SmartStyledTitleDialog {
 	public void setId(String id){ this.id = id; }
 	public String getId(){ return this.id; }
 	
+	private boolean validateInt(CCombo txt){
+		try {
+			int item = Integer.valueOf(txt.getText());
+			if (item < 1950 || item > 2300) throw new Exception("value must be between 1950 and 2300");
+			txt.setBackground(txt.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			return true;
+		}catch (Exception ex) {
+			txt.setBackground(errorColor);
+			return false;
+		}
+	}
 	@Override
 	public void okPressed(){
+		boolean error = false;
+		if (!validateInt(dtTrainStart)) error = true;
+		if (!validateInt(dtTrainEnd)) error = true;
+		if (!validateInt(dtTestStart)) error = true;
+		if (!validateInt(dtTestEnd)) error = true;
+		if (!validateInt(dtForcastStart)) error = true;
+		if (!validateInt(dtForcastEnd)) error = true;
+		
+		if (error) {
+			MessageDialog.openInformation(getShell(), "Error", "You must resvole date error before continuing.  All years must be valid integers between 1950 and 2300");
+			return;
+		}
+		
 		trainStart = Integer.valueOf(dtTrainStart.getText());
 		trainEnd = Integer.valueOf(dtTrainEnd.getText());
 		
@@ -131,6 +159,9 @@ public class RunDialog extends SmartStyledTitleDialog {
 	public Control createDialogArea(Composite parent){
 		Composite main = (Composite) super.createDialogArea(parent);
 
+		errorColor = new Color(main.getDisplay(), 255, 230, 230);
+		main.addListener(SWT.Dispose, e->errorColor.dispose());
+		
 		Composite outer = new Composite(main, SWT.NONE);
 		outer.setLayout(new GridLayout());
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
@@ -163,6 +194,8 @@ public class RunDialog extends SmartStyledTitleDialog {
 		l.setText("Training Years:");
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
+		Listener validate = e->validateInt((CCombo)e.widget);
+		
 		dtTrainStart = createDateDropDown(g);
 		dtTrainStart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		if (trainStart != null) {
@@ -170,6 +203,7 @@ public class RunDialog extends SmartStyledTitleDialog {
 		}else {
 			dtTrainStart.setText(String.valueOf(year - 5));
 		}
+		dtTrainStart.addListener(SWT.Modify, validate);
 		
 		l = new Label(g, SWT.NONE);
 		l.setText("to");
@@ -181,6 +215,7 @@ public class RunDialog extends SmartStyledTitleDialog {
 		}else {
 			dtTrainEnd.setText(String.valueOf(year - 1));
 		}
+		dtTrainEnd.addListener(SWT.Modify, validate);
 		
 		l = new Label(g, SWT.NONE);
 		l.setText("Test Years:");
@@ -192,6 +227,7 @@ public class RunDialog extends SmartStyledTitleDialog {
 		}else {
 			dtTestStart.setText(String.valueOf(year - 1));
 		}
+		dtTestStart.addListener(SWT.Modify, validate);
 		
 		l = new Label(g, SWT.NONE);
 		l.setText("to");
@@ -202,6 +238,7 @@ public class RunDialog extends SmartStyledTitleDialog {
 		}else {
 			dtTestEnd.setText(String.valueOf(year));
 		}
+		dtTestEnd.addListener(SWT.Modify, validate);
 		
 		l = new Label(g, SWT.NONE);
 		l.setText("Forecasting Years:");
@@ -213,6 +250,8 @@ public class RunDialog extends SmartStyledTitleDialog {
 		}else {
 			dtForcastStart.setText(String.valueOf(year + 1));
 		}
+		dtForcastStart.addListener(SWT.Modify, validate);
+		
 		
 		l = new Label(g, SWT.NONE);
 		l.setText("to");
@@ -223,6 +262,7 @@ public class RunDialog extends SmartStyledTitleDialog {
 		}else {
 			dtForcastEnd.setText(String.valueOf(year + 2));
 		}
+		dtForcastEnd.addListener(SWT.Modify, validate);
 		
 		l = new Label(g, SWT.NONE);
 		l.setText("Data Dates:");

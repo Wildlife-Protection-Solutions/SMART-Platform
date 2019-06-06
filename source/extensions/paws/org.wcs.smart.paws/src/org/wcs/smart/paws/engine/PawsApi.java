@@ -108,7 +108,7 @@ public enum PawsApi {
 			if (service == null || service.getApiKey() == null || service.getUrl() == null || service.getApiKey().isBlank() || service.getUrl().isBlank()){
 				throw new Exception("PAWS Service not configured.");
 			}
-			surl = service.getUrl() + "/task/" + run.getTaskId();
+			surl = service.getUrl() + "/task/" + run.getTaskId() + "?subscription-key=" + service.getApiKey();
 		}
 		
 		//call the service with the json payload
