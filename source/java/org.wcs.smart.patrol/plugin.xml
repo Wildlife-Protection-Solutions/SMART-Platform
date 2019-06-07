@@ -1110,7 +1110,7 @@
             icon="images/icons/view16/patrol.png"
             id="org.wcs.smart.patrol.ui.PatrolListView"
             name="%patrollist.view.name"
-            restorable="false">
+            restorable="true">
       </view>
    </extension>
    <extension
