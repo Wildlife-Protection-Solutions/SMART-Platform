@@ -22,6 +22,8 @@
 package org.wcs.smart.cybertracker;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -97,18 +99,18 @@ public class CyberTrackerStartupJob extends Job {
 		
 		for (ConservationArea ca : caList) {
 			CyberTrackerPropertiesOption ctp = propMap.get(ca.getUuid());
-			File storageDir = ICyberTrackerConstants.getStorageFolder(ca);
+			Path storageDir = ICyberTrackerConstants.getStorageFolder(ca);
 			int dayLimit = (ctp != null) ? ctp.getIntegerValue() : CyberTrackerProperties.STORAGE_TIME_DEFAULT_VALUE;
 			cleanStorage(storageDir, dayLimit);
 		}
 	}
 
-	private void cleanStorage(File folder, long dayLimit) {
-		if (!folder.exists())
+	private void cleanStorage(Path folder, long dayLimit) {
+		if (!Files.exists(folder))
 			return;
 		long current = new Date().getTime();
 		long bound = dayLimit * 24 * 60 * 60 * 1000;
-		for (File file : folder.listFiles()) {
+		for (File file : folder.toFile().listFiles()) {
 			if (current - file.lastModified() > bound) {
 				FileUtils.deleteQuietly(file);
 			}

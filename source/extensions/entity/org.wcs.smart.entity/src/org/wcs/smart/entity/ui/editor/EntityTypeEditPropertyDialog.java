@@ -22,7 +22,6 @@
 package org.wcs.smart.entity.ui.editor;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -38,6 +37,7 @@ import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.ui.newwizard.AbstractEntityComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -46,7 +46,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class EntityTypeEditPropertyDialog extends TitleAreaDialog{
+public class EntityTypeEditPropertyDialog extends SmartStyledTitleDialog{
 
 	private AbstractEntityComposite editComponent;
 	private EntityType toEdit;

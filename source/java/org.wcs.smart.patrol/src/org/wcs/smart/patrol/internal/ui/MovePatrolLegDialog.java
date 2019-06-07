@@ -27,7 +27,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -41,6 +40,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 /**
  * Dialog to let you name the new Patrol you create when using the "Split leg into new Patrol" button
  * You can move more than one leg, they all go into a single, new patrol.
@@ -51,7 +51,7 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
  */
 
 
-public class MovePatrolLegDialog extends TitleAreaDialog{
+public class MovePatrolLegDialog extends SmartStyledTitleDialog{
 
 
 	private List<PatrolLeg> legsToMove;

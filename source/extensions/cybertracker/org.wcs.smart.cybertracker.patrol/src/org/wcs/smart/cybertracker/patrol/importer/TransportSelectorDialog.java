@@ -27,7 +27,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -44,6 +43,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 
 /**
@@ -52,7 +52,7 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
  * @author elitvin
  * @since 1.0.0
  */
-public class TransportSelectorDialog extends TitleAreaDialog {
+public class TransportSelectorDialog extends SmartStyledTitleDialog {
 
 	private ComboViewer patrolTypeViewer;
 	private PatrolTransportType transportType;

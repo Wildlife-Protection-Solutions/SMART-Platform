@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
@@ -38,6 +37,7 @@ import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.ui.LazyReportContentProvider;
 import org.wcs.smart.report.ui.ReportLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for displaying list of reports from the current
@@ -46,7 +46,7 @@ import org.wcs.smart.report.ui.ReportLabelProvider;
  * @author Emily
  *
  */
-public class ReportListDialog extends TitleAreaDialog{
+public class ReportListDialog extends SmartStyledTitleDialog{
 
 	private TreeViewer reportList;
 	private List<Report> reports;

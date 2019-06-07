@@ -39,7 +39,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -77,6 +76,7 @@ import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.cybertracker.util.WinRegistry;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.LanguageViewer;
 import org.wcs.smart.util.SmartFileUtils;
 import org.wcs.smart.util.SmartUtils;
@@ -87,7 +87,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
+public abstract class CyberTrackerExportDialog extends SmartStyledTitleDialog {
 
 	private static final String OUTPUT_FILE = "outputFile"; //$NON-NLS-1$
 	private static final String LAUNCH_CT   = "launchCT"; //$NON-NLS-1$

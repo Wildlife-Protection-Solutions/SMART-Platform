@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -60,6 +59,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 
 /*
@@ -67,7 +67,7 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
  * @author Jeff
  */
 
-public class MergePatrolsDialog extends TitleAreaDialog {
+public class MergePatrolsDialog extends SmartStyledTitleDialog {
 
 	private Session session;
 	private ArrayList<Patrol> patrolsToMerge;

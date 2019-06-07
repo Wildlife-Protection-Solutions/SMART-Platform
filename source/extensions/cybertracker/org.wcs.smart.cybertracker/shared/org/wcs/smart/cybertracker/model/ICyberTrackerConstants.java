@@ -143,20 +143,48 @@ public interface ICyberTrackerConstants {
 	public static final String LONGITUDE = "{D93E86A8-2629-44FE-AFC4-2EC510FB1820}"; //$NON-NLS-1$
 	public static final String PHOTO = "{82D16C8E-776E-4E8B-A459-6EBF62E50076}"; //$NON-NLS-1$
 	
+	/**
+	 * Returns the CyberTracker folder storage location
+	 * for the given Conservation Area
+	 * 
+	 * @param ca
+	 * @return
+	 */
+	static Path getCyberTrackerFolder(ConservationArea ca) {
+		return Paths.get(ca.getFileDataStoreLocation())
+				.resolve(SMART_CTX_DOWNLOAD_FOLDER);
+	}
 	
+	/**
+	 * Returns the CyberTracker packages folder 
+	 * @param ca
+	 * @return
+	 */
 	static Path getCyberTrackerPackageFolder(ConservationArea ca) {
-		return Paths.get(ca.getFileDataStoreLocation()).resolve(SMART_CTX_DOWNLOAD_FOLDER).resolve(CT_PACKAGE_FOLDER);
-	}
-	static String getCyberTrackerFolder(ConservationArea ca) {
-		return ca.getFileDataStoreLocation() + File.separator + ICyberTrackerConstants.SMART_CTX_DOWNLOAD_FOLDER;
+		return getCyberTrackerFolder(ca).resolve(CT_PACKAGE_FOLDER);
 	}
 	
-	public static File getDowloadFolder(ConservationArea ca) {
-		return new File(getCyberTrackerFolder(ca));
+	/**
+	 * Returns the CyberTracker download folder for the Conservation Area
+	 * @param ca
+	 * @return
+	 */
+	public static Path getDowloadFolder(ConservationArea ca) {
+		return getCyberTrackerFolder(ca);
 	}
 
-	public static File getStorageFolder(ConservationArea ca) {
-		String dir = getCyberTrackerFolder(ca) + File.separator + ICyberTrackerConstants.SMART_CTX_STORAGE_FOLDER;
-		return new File(dir);
+	/**
+	 * Returns the CyberTracker Archive folder for the Conservation Area
+	 * @param ca
+	 * @return
+	 */
+	public static Path getStorageFolder(ConservationArea ca) {
+		return getCyberTrackerFolder(ca).resolve(ICyberTrackerConstants.SMART_CTX_STORAGE_FOLDER);
 	}
+	
+	
+	
+	
+	
+	
 }

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.cybertracker.survey.importer;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -38,6 +37,7 @@ import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for selecting an employee for leader for a given mission.
@@ -45,7 +45,7 @@ import org.wcs.smart.ui.SmartLabelProvider;
  * @author Evgeniy
  *
  */
-public class LeaderSelectorDialog extends TitleAreaDialog{
+public class LeaderSelectorDialog extends SmartStyledTitleDialog{
 	
 	private String message;
 	private String title;

@@ -35,9 +35,10 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -45,8 +46,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
@@ -55,6 +54,7 @@ import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SharedUtils;
 
@@ -64,7 +64,7 @@ import org.wcs.smart.util.SharedUtils;
  * @author elitvin
  * @since 2.0.0
  */
-public class ConfigurableModelEditDialog extends TitleAreaDialog {
+public class ConfigurableModelEditDialog extends SmartStyledTitleDialog {
 	
 	private static final int DIALOG_WIDTH = 750;
 	private static final int DIALOG_HEIGHT = 725;
@@ -227,27 +227,27 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 		
 		tabs = getExtraTabs();
 		
-		ConfigurableModelEditorDefaultTab defaultTab = new ConfigurableModelEditorDefaultTab(this);
-		tabs.add(0, defaultTab);
+		ConfigurableModelEditorDefaultTab defaultTab = new ConfigurableModelEditorDefaultTab(this);	
+		if (tabs.size() == 0) {
+			defaultTab.createTabContent(main);
+		}else {
+			tabs.add(0, defaultTab);
 		
-		if (tabs.size() > 1) {
 			//we have some extra tabs and need to create tab panel
-			final TabFolder tabFolder = new TabFolder (main, SWT.NONE);
+			CTabFolder tabFolder = new CTabFolder(main, SWT.NONE);
 			tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
 			for (IConfigurableModelEditorTabContent tabContent : tabs) {
-				TabItem tabItem = new TabItem (tabFolder, SWT.NONE);
+				CTabItem tabItem = new CTabItem (tabFolder, SWT.NONE);
 				tabItem.setText(tabContent.getTabName());
 
 				Composite tabContainer = new Composite(tabFolder, SWT.NONE);
-				tabContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 				tabContainer.setLayout(new GridLayout(1, false));
-				
-				tabItem.setControl(tabContainer);	
 				tabContent.createTabContent(tabContainer);
+
+				tabItem.setControl(tabContainer);	
 			}
-		} else {
-			//no extra tabs create old fashioned content without tabs
-			defaultTab.createTabContent(main);
+			tabFolder.setSelection(0);
 		}
 		
 		setTitle(Messages.ConfigurableModelEditDialog_Title);

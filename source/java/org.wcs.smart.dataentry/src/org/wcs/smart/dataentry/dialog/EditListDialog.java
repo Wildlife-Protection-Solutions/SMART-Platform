@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -81,6 +80,7 @@ import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateNameComposite;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -91,7 +91,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Evgeniy
  *
  */
-public class EditListDialog extends TitleAreaDialog{
+public class EditListDialog extends SmartStyledTitleDialog{
 
 	protected CmAttribute attribute;
 	

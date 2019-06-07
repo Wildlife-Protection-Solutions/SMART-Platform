@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
@@ -46,6 +45,7 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.querylist.QueryListContentProvider;
 import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
 import org.wcs.smart.query.ui.querylist.SavedQueryTree;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for displaying list of queries from the current
@@ -54,7 +54,7 @@ import org.wcs.smart.query.ui.querylist.SavedQueryTree;
  * @author Emily
  *
  */
-public class QueryListDialog extends TitleAreaDialog{
+public class QueryListDialog extends SmartStyledTitleDialog{
 
 	private TreeViewer queryTree;
 	

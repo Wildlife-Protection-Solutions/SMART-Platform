@@ -59,7 +59,7 @@ public class PdaUtil {
 	}
 
 	public static void updateRegistryKey(ConservationArea ca) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
-		File folder = ICyberTrackerConstants.getDowloadFolder(ca);
+		File folder = ICyberTrackerConstants.getDowloadFolder(ca).toFile();
 		if (!folder.exists())
 			folder.mkdirs();
 

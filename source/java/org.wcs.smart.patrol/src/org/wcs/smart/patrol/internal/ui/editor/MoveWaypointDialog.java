@@ -30,7 +30,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -50,6 +49,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.util.SharedUtils;
 
 /**
@@ -62,7 +62,7 @@ import org.wcs.smart.util.SharedUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class MoveWaypointDialog extends TitleAreaDialog{
+public class MoveWaypointDialog extends SmartStyledTitleDialog{
 
 	private Patrol patrol;
 

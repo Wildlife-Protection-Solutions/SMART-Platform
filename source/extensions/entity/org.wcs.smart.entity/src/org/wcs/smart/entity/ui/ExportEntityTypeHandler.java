@@ -44,7 +44,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -81,6 +80,7 @@ import org.wcs.smart.entity.ui.typelist.EntityTypeLabelProvider;
 import org.wcs.smart.entity.xml.EntityTypeToXmlConverter;
 import org.wcs.smart.entity.xml.EntityTypeXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.SmartUtils;
 
@@ -179,7 +179,7 @@ public class ExportEntityTypeHandler {
 		}
 	}
 	
-	class ExportEntityTypeDialog extends TitleAreaDialog{
+	class ExportEntityTypeDialog extends SmartStyledTitleDialog{
 
 		private static final String LAST_DIR_KEY = "LAST_EXPORT_DIR"; //$NON-NLS-1$
 		

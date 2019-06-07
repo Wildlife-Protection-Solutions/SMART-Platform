@@ -40,7 +40,6 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -829,7 +828,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 	
 	
 	
-	private class AttributeListDialog extends TitleAreaDialog{
+	private class AttributeListDialog extends SmartStyledTitleDialog{
 		private CheckboxTableViewer attributeList;
 		private NamedItemViewerFilter filter;
 		

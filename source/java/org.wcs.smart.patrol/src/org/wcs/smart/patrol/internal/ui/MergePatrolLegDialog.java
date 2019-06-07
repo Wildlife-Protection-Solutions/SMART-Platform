@@ -32,7 +32,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -45,6 +44,13 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBReader;
+import org.locationtech.jts.io.WKBWriter;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
@@ -56,14 +62,7 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.ui.SmartLabelProvider;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKBReader;
-import org.locationtech.jts.io.WKBWriter;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for merging patrol legs.
@@ -72,7 +71,7 @@ import org.locationtech.jts.io.WKBWriter;
  * @author Jeff
  * @since 5.0.0
  */
-public class MergePatrolLegDialog extends TitleAreaDialog{
+public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 	private PatrolLeg newLeg; 
 	private List<PatrolLeg> legsToMerge;
 	

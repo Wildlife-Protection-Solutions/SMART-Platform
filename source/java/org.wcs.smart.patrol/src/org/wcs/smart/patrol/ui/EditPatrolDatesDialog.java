@@ -36,7 +36,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -58,6 +57,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for editing patrol dates when opening a patrol that is 
@@ -66,7 +66,7 @@ import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
  * @author Emily
  *
  */
-public class EditPatrolDatesDialog extends TitleAreaDialog{
+public class EditPatrolDatesDialog extends SmartStyledTitleDialog{
 
 	private PatrolEditorInput input;
 	private DateComposite dateComp;

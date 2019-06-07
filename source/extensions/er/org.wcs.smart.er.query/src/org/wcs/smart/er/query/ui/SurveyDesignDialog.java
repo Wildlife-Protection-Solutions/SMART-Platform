@@ -28,7 +28,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -50,6 +49,7 @@ import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for selecting survey design.
@@ -57,7 +57,7 @@ import org.wcs.smart.hibernate.HibernateManager;
  * @author Emily
  *
  */
-public class SurveyDesignDialog extends TitleAreaDialog{
+public class SurveyDesignDialog extends SmartStyledTitleDialog{
 
 	private Session session;
 	private SurveyDesign sd;

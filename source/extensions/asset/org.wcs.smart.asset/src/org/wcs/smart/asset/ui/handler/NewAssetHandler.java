@@ -38,7 +38,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -71,6 +70,7 @@ import org.wcs.smart.asset.ui.views.asset.AssetEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
@@ -206,7 +206,7 @@ public class NewAssetHandler {
 	 * @author Emily
 	 *
 	 */
-	private class SelectAssetTypeDialog extends TitleAreaDialog {
+	private class SelectAssetTypeDialog extends SmartStyledTitleDialog {
 
 		private TableViewer lstAssets;
 		private AssetType selectedType;

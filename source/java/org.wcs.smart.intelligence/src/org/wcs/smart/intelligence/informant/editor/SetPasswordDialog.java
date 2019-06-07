@@ -22,7 +22,6 @@
 package org.wcs.smart.intelligence.informant.editor;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -34,6 +33,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog to set user password.
@@ -41,7 +41,7 @@ import org.wcs.smart.intelligence.internal.Messages;
  * @author elitvin
  * @since 3.2.0
  */
-public class SetPasswordDialog extends TitleAreaDialog {
+public class SetPasswordDialog extends SmartStyledTitleDialog {
 	
 	private static final String PASSWORD_REGEXP = "^.*(?=.{8,})(?=..*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&+=]).*$"; //$NON-NLS-1$
 

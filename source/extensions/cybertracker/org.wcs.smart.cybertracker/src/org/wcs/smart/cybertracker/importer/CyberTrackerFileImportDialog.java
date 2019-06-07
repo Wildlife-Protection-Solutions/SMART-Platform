@@ -6,13 +6,14 @@ package org.wcs.smart.cybertracker.importer;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -41,6 +42,7 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for importing CyberTracker data from file.
@@ -48,7 +50,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author elitvin
  * @since 2.0.0
  */
-public class CyberTrackerFileImportDialog extends TitleAreaDialog {
+public class CyberTrackerFileImportDialog extends SmartStyledTitleDialog {
 
 	private Button btnFromStorage;
 	private Button btnFromFile;
@@ -127,10 +129,10 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 		lnkOp.addListener(SWT.Selection,e->{
 			Desktop diapi = Desktop.getDesktop();
 			try {
-				File f = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea()).getCanonicalFile();
+				Path f = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea());
 				//if the folder doesn't exists then opening fails, so make sure the directory exists
-				if (!f.exists()) f.mkdir();
-				diapi.open(f);
+				if (!Files.exists(f)) Files.createDirectories(f);
+				diapi.open(f.toFile());
 			} catch (IOException e1) {
 				CyberTrackerPlugIn.log(e1.getMessage(),  e1);
 			}
@@ -261,7 +263,7 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 	}
 
 	private File[] getStorageFiles() {
-		File storageFolder = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea());
+		File storageFolder = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea()).toFile();
 		return storageFolder.listFiles();
 	}
 

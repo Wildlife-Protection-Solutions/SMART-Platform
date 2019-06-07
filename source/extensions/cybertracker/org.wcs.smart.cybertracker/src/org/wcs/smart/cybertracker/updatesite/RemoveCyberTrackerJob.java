@@ -75,7 +75,7 @@ public class RemoveCyberTrackerJob extends Job {
 				}		
 				//clean filestore
 				for (ConservationArea ca : caList) {
-					FileUtils.deleteDirectory(ICyberTrackerConstants.getDowloadFolder(ca));
+					FileUtils.deleteDirectory(ICyberTrackerConstants.getDowloadFolder(ca).toFile());
 				}
 				HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, null, session);
 				session.getTransaction().commit();

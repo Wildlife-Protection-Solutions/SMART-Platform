@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -41,6 +40,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for selecting patrol type
@@ -48,7 +48,7 @@ import org.wcs.smart.patrol.model.PatrolType;
  * @author elitvin
  * @since 3.3.0
  */
-public class PatrolTypeSelectorDialog extends TitleAreaDialog {
+public class PatrolTypeSelectorDialog extends SmartStyledTitleDialog {
 
 	private ComboViewer patrolTypeViewer;
 	private PatrolType type;

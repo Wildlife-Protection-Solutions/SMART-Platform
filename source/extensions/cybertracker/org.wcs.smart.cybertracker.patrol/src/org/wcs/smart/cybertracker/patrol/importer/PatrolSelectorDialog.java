@@ -22,7 +22,6 @@
 package org.wcs.smart.cybertracker.patrol.importer;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
@@ -37,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.PatrolFilteredComboViewer;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for selecting {@link Patrol}
@@ -44,7 +44,7 @@ import org.wcs.smart.patrol.ui.PatrolFilteredComboViewer;
  * @author elitvin
  * @since 1.0.0
  */
-public class PatrolSelectorDialog extends TitleAreaDialog {
+public class PatrolSelectorDialog extends SmartStyledTitleDialog {
 
 	private PatrolFilteredComboViewer patrolId;
 	private Patrol patrol;

@@ -30,7 +30,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -53,6 +52,7 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for selecting the target {@link Mission} when importing mission from CyberTracker.
@@ -60,7 +60,7 @@ import org.wcs.smart.hibernate.QueryFactory;
  * @author elitvin
  * @since 4.0.0
  */
-public class MissionSelectorDialog extends TitleAreaDialog {
+public class MissionSelectorDialog extends SmartStyledTitleDialog {
 
 	private SurveyDesign surveyDesign;
 	

@@ -45,7 +45,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -98,6 +97,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.udig.style.SmartLayerStyle;
 import org.wcs.smart.udig.style.StyleImageProducer;
 import org.wcs.smart.udig.style.StyleManager;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateNamesHandler;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -866,7 +866,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
     /*
      * Save style dialog
      */
-	private class SaveNameDialog extends TitleAreaDialog{
+	private class SaveNameDialog extends SmartStyledTitleDialog{
 
 		private Button btnCreateNew;
 		private Button btnOverwrite;

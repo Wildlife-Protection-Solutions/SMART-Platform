@@ -25,7 +25,6 @@ import java.io.File;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -45,6 +44,7 @@ import org.wcs.smart.imageprocessor.ImageProcessingPlugIn;
 import org.wcs.smart.imageprocessor.ImageResizeProcessor;
 import org.wcs.smart.imageprocessor.ProcessingItem;
 import org.wcs.smart.imageprocessor.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -54,7 +54,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class ProcessingStatusDialog extends TitleAreaDialog{
+public class ProcessingStatusDialog extends SmartStyledTitleDialog{
 	
 	private TableViewer resultsTable;
 	private ImageResizeProcessor processingJob;

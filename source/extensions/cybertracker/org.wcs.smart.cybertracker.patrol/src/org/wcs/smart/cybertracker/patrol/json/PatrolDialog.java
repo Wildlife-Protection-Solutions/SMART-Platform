@@ -36,7 +36,6 @@ import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -64,6 +63,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.ui.PatrolFilteredComboViewer;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
@@ -73,7 +73,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class PatrolDialog extends TitleAreaDialog {
+public class PatrolDialog extends SmartStyledTitleDialog{
 
 	private HashMap<UUID, CtPatrolLink> patrols;
 	

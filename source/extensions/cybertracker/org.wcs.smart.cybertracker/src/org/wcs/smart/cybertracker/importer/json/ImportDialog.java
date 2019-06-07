@@ -22,7 +22,6 @@
 package org.wcs.smart.cybertracker.importer.json;
 
 import java.awt.Desktop;
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -43,7 +42,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -72,6 +70,7 @@ import org.wcs.smart.cybertracker.MobileDeviceUtils;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -80,7 +79,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class ImportDialog extends TitleAreaDialog {
+public class ImportDialog extends SmartStyledTitleDialog{
 
 	private Button opDevice, opFile, opArchive;
 	private ListViewer lstFiles;
@@ -239,7 +238,7 @@ public class ImportDialog extends TitleAreaDialog {
 				return sb.toString();
 			}
 		});
-		Path storageFolder = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea()).toPath();
+		Path storageFolder = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea());
 		
 		List<Path> allFiles = new ArrayList<>();
 		try {
@@ -281,10 +280,10 @@ public class ImportDialog extends TitleAreaDialog {
 		lnkOp.addListener(SWT.Selection,e->{
 			Desktop diapi = Desktop.getDesktop();
 			try {
-				File f = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea()).getCanonicalFile();
+				Path f = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea());
 				//if the folder doesn't exists then opening fails, so make sure the directory exists
-				if (!f.exists()) f.mkdir();
-				diapi.open(f);
+				if (!Files.exists(f)) Files.createDirectories(f);
+				diapi.open(f.toFile());
 			} catch (IOException e1) {
 				CyberTrackerPlugIn.log(e1.getMessage(),  e1);
 			}
@@ -404,30 +403,32 @@ public class ImportDialog extends TitleAreaDialog {
 				return;
 			}
 			
-			Path archiveFolder = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea()).toPath();
+			Path archiveFolder = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea());
+			if (!Files.exists(archiveFolder)) {
+				try {
+					Files.createDirectories(archiveFolder);
+				} catch (IOException e) {
+					CyberTrackerPlugIn.displayError(Messages.ImportDialog_Error, e.getMessage(), e);
+					e.printStackTrace();
+				}
+			}
 			List<Path> filesInArchive = new ArrayList<>();
-			List<Path> toDelete = new ArrayList<>();
+			boolean error = false;
 			for (Path fp : importedFiles) {
 				Path target = archiveFolder.resolve(fp.getFileName().toString());
 				try {
 					Files.move(fp, target, StandardCopyOption.REPLACE_EXISTING);
 					filesInArchive.add(target);
-					toDelete.add(fp);
 				}catch (Exception ex) {
 					CyberTrackerPlugIn.displayError(Messages.ImportDialog_Error, MessageFormat.format(Messages.ImportDialog_CopyError, fp.toString()), ex);
+					error = true;
 				}
 			}
 			files.addAll(filesInArchive);
 			
-			for (Path dp : toDelete) {
-				try{
-					Files.delete(dp);
-				}catch (Exception ex) {
-					CyberTrackerPlugIn.log(ex.getMessage(), ex);
-				}
-			}	
-			if (filesInArchive.size() == toDelete.size()) {
-				//delete temp directory
+
+			if (!error) {
+				//delete temp directory (otherwise there is likely data in it)
 				try {
 					FileUtils.deleteDirectory(importPath.toFile());
 				}catch (Exception e) {

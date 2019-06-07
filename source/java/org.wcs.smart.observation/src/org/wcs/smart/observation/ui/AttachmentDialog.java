@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -41,6 +40,7 @@ import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -54,7 +54,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  * @since 1.0.0
  */
-public class AttachmentDialog extends TitleAreaDialog {
+public class AttachmentDialog extends SmartStyledTitleDialog{
 
 	private Waypoint waypoint;
 	private AttachmentComposite<WaypointAttachment> attachmentComposite;

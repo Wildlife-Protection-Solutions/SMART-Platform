@@ -38,7 +38,6 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -67,6 +66,7 @@ import org.wcs.smart.entity.xml.EntityTypeXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Handler for importing entity types.
@@ -203,7 +203,7 @@ public class ImportEntityTypeHandler{
 		}
 	}
 	
-	class ImportEntityTypeDialog extends TitleAreaDialog{
+	class ImportEntityTypeDialog extends SmartStyledTitleDialog{
 
 		private static final String LAST_DIR_KEY = "LAST_IMPORT_DIR"; //$NON-NLS-1$
 		

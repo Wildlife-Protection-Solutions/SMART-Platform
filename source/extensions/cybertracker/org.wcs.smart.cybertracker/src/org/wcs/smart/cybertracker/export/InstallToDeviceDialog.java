@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
@@ -47,6 +46,7 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.MobileDeviceUtils;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for installing apk to device.
@@ -54,7 +54,7 @@ import org.wcs.smart.cybertracker.internal.Messages;
  * @author Emily
  *
  */
-public class InstallToDeviceDialog extends TitleAreaDialog{
+public class InstallToDeviceDialog extends SmartStyledTitleDialog{
 
 	private static final String ERROR_MSG = Messages.InstallToDeviceDialog_InstallFailed;
 	private static final String FILE_KEY = "org.wcs.smart.cybertracker.export.InstallToDeviceDialog.file";  //$NON-NLS-1$

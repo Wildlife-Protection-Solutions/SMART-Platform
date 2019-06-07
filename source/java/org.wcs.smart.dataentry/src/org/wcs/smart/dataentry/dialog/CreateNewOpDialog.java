@@ -29,7 +29,6 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -58,6 +57,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for creating new configurable model.
@@ -65,7 +65,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Emily, Evgeniy
  *
  */
-public class CreateNewOpDialog extends TitleAreaDialog {
+public class CreateNewOpDialog extends SmartStyledTitleDialog {
 	
 	private enum CreateCmOption {
 		BLANK,

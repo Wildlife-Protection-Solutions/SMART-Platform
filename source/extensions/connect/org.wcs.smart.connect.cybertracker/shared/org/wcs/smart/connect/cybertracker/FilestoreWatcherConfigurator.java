@@ -63,7 +63,7 @@ public class FilestoreWatcherConfigurator implements org.wcs.smart.changetrackin
 		
 		List<ConservationArea> allcas = QueryFactory.buildQuery(session, ConservationArea.class).list();
 		for (ConservationArea ca : allcas) {
-			Path ctctxpath = ICyberTrackerConstants.getStorageFolder(ca).toPath();
+			Path ctctxpath = ICyberTrackerConstants.getStorageFolder(ca);
 			if (!optionmap.containsKey(ca)) {
 				toIgnore.add(ctctxpath);
 			}else {

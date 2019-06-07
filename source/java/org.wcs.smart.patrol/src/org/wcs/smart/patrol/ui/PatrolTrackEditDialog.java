@@ -26,7 +26,6 @@ import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -41,6 +40,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.editor.PartolTracksComposite;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.map.TracksComposite.ITracksCompositeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -50,7 +50,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author elitvin
  * @since 6.0.0
  */
-public class PatrolTrackEditDialog extends TitleAreaDialog {
+public class PatrolTrackEditDialog extends SmartStyledTitleDialog {
 
 	private boolean isChanged = false;
 	

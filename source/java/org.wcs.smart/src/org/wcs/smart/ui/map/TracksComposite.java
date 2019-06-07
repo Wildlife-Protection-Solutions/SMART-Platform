@@ -40,6 +40,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -49,8 +51,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.locationtech.udig.catalog.CatalogPlugin;
@@ -127,10 +127,10 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		gl.marginWidth = gl.marginHeight = 0;
 		leftArea.setLayout(gl);
 		
-		TabFolder tabFolder = new TabFolder(leftArea, SWT.TOP);
+		CTabFolder tabFolder = new CTabFolder(leftArea, SWT.TOP);
 		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		TabItem  tracksTabItem = new TabItem(tabFolder, SWT.NONE);
+		CTabItem  tracksTabItem = new CTabItem(tabFolder, SWT.NONE);
 		tracksTabItem.setText(Messages.TracksComposite_Tracks);
 		
 		Composite tableCompOuter = new Composite(tabFolder, SWT.NONE);
@@ -255,7 +255,7 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		
 		createTableViewerColumns(trackViewer, layout);
 		
-		TabItem  layerListTabItem = new TabItem(tabFolder, SWT.NONE);
+		CTabItem  layerListTabItem = new CTabItem(tabFolder, SWT.NONE);
 		layerListTabItem.setText(Messages.TracksComposite_MapLayers);
 		
 		Composite layersTab = new Composite(tabFolder, SWT.NONE);

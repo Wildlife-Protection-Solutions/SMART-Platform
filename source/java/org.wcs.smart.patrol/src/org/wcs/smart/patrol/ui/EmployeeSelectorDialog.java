@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.patrol.ui;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -38,6 +37,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
  * Dialog for selecting an employee for leader or pilot
@@ -47,7 +47,7 @@ import org.wcs.smart.ui.SmartLabelProvider;
  * @author elitvin
  *
  */
-public class EmployeeSelectorDialog extends TitleAreaDialog{
+public class EmployeeSelectorDialog extends SmartStyledTitleDialog{
 	
 	public enum Type {
 		LEADER(Messages.EmployeeSelectorDialog_LeaderType),
