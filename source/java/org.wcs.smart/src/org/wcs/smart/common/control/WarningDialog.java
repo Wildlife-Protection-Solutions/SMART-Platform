@@ -26,6 +26,7 @@ import java.util.List;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -44,6 +45,7 @@ import org.eclipse.swt.widgets.Text;
 public class WarningDialog extends MessageDialog {
 
 	private List<String> warnings;
+	private Image img;
 	
 	/**
 	 * Creates a new warning dialog with a single OK button
@@ -77,6 +79,15 @@ public class WarningDialog extends MessageDialog {
 				MessageDialog.WARNING, buttonLabels, index);
 		
 		this.warnings = warnings;
+	}
+	
+	public void setImage(Image img) {
+		this.img = img;
+	}
+	@Override
+	public Image getImage() {
+		if (img != null) return img;
+		return super.getImage();
 	}
 	
     protected Control createCustomArea(Composite parent) {
