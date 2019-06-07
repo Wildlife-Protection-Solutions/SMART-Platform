@@ -133,6 +133,12 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		tb.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
+		ToolItem tiExport = new ToolItem(tb, SWT.PUSH);
+		tiExport.setToolTipText("export selected packages");
+		tiExport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
+		tiExport.addListener(SWT.Selection, e->exportPackages());
+		tiExport.setEnabled(false);
+		
 		ToolItem tiAdd = new ToolItem(tb, SWT.PUSH);
 		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		tiAdd.setToolTipText(Messages.ConfigurePackagesDialog_addtooltip);
@@ -212,8 +218,9 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		Menu mnu = new Menu(tblViewer.getControl());
 		
 		MenuItem miExport = new MenuItem(mnu, SWT.PUSH);
-		miExport.setText(DialogConstants.EXPORT_BUTTON_TEXT + "..."); //$NON-NLS-1$
+		miExport.setText(DialogConstants.EXPORT_BUTTON_TEXT); 
 		miExport.addListener(SWT.Selection, e->okPressed());
+		miExport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
 		miExport.setEnabled(false);
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
@@ -246,6 +253,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		tblViewer.addSelectionChangedListener(e->{
 			boolean canEdit = !tblViewer.getSelection().isEmpty();
 			miExport.setEnabled(canEdit);
+			tiExport.setEnabled(canEdit);
 //			miCreate.setEnabled(canEdit);
 			miDup.setEnabled(canEdit);
 			miEdit.setEnabled(canEdit);

@@ -142,14 +142,14 @@ public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 	}
 	
 	/**
-	 * Sets the basemap to a set of files residing on the uesrs computers
+	 * Users files imported into the SMART system as the basemap
 	 * @param files
 	 */
 	@SuppressWarnings("unchecked")
 	@Transient
-	public void setBasemap(String files) {
+	public void setBasemapToFiles() {
 		JSONObject obj = new JSONObject();
-		obj.put(BaseMapKeys.FILE.jsonkey, files);
+		obj.put(BaseMapKeys.FILE.jsonkey, "true");
 		setBasemapDef(obj.toJSONString());
 	}
 	

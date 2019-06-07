@@ -242,6 +242,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String EDIT_TRACK_ICON = "org.wcs.smart.track.edit"; //$NON-NLS-1$
 	public static final String ZOOM_TRACK_ICON = "org.wcs.smart.track.zoom"; //$NON-NLS-1$
 	
+	public static final String EXPORT_ICON = "org.wcs.smart.export"; //$NON-NLS-1$
+	
 	/**
 	 * Mutex to ensure that jobs will not be conflicting as simultaneous jobs execution
 	 * might result in SQLException. This will ensure that jobs are running one by one.
@@ -462,6 +464,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(ZOOM_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/track/zoom_track.png")); //$NON-NLS-1$
 	     
 	     reg.put(CREATECOPY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/createcopy.png")); //$NON-NLS-1$
+	     
+	     reg.put(EXPORT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/export.png")); //$NON-NLS-1$
 
 	}
 	

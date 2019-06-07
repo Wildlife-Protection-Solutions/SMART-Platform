@@ -24,7 +24,6 @@ package org.wcs.smart.cybertracker.export.mbtile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
@@ -46,6 +45,7 @@ import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage.BaseMapKeys;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
@@ -165,11 +165,10 @@ public class MapPackageContribution implements IPackageContribution{
 			if (monitor.isCanceled()) return null;
 			updates.addFile(mapFile);
 		}else if (obj.containsKey(BaseMapKeys.FILE.jsonkey)) {
-			String file = (String)obj.get(BaseMapKeys.FILE.jsonkey);
-			Path p = Paths.get(file);
-			if (Files.exists(p)) {
-				updates.addFile(p);
-				updates.setProjectMetadata(CtJsonExportUtils.MAP_FILE_DIRECTORY_NAME, p.getFileName().toString());
+			Path dir = ICyberTrackerConstants.getBasemapFileStore(ctpackage);
+			if (Files.exists(dir)) {
+				updates.addFile(dir);
+				updates.setProjectMetadata(CtJsonExportUtils.MAP_FILE_DIRECTORY_NAME, dir.getFileName().toString());
 			}
 		}
 		

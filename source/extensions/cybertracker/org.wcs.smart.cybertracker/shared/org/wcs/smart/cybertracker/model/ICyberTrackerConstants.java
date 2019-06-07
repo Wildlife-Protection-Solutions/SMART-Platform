@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Place holder for CyberTracker constants
@@ -182,6 +183,11 @@ public interface ICyberTrackerConstants {
 		return getCyberTrackerFolder(ca).resolve(ICyberTrackerConstants.SMART_CTX_STORAGE_FOLDER);
 	}
 	
+	public static Path getBasemapFileStore(ICtPackage ctpackage) {
+		 return ICyberTrackerConstants.getCyberTrackerFolder(ctpackage.getConservationArea())
+				 .resolve("package_mapfiles")
+				 .resolve(UuidUtils.uuidToString( ctpackage.getUuid()));
+	}
 	
 	
 	

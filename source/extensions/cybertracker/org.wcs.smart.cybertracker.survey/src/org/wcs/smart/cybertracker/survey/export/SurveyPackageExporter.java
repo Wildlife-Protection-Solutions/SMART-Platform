@@ -126,9 +126,17 @@ public enum SurveyPackageExporter {
 				HashMap<String, Object> projectAdditions = new HashMap<>();
 				for (IPackageContribution.PackageContribution update : contributions) {
 					for (Path p : update.getAddedFiles()) {
-						Path moveTo = tempDir.resolve(p.getFileName().toString());
-						Files.move(p, moveTo);
-						toIncludeInZip.add(moveTo.toFile());
+						if (Files.isDirectory(p)) {
+							Path dirPath = tempDir.resolve(p.getFileName().toString());
+							Files.createDirectory(dirPath);
+							Path mapfiles = CtJsonExportUtils.copyFiles(p, dirPath);
+							if (mapfiles != null) toIncludeInZip.add(mapfiles.toFile());
+							
+						}else {
+							Path moveTo = tempDir.resolve(p.getFileName().toString());
+							Files.move(p, moveTo);
+							toIncludeInZip.add(moveTo.toFile());
+						}
 					}
 					if (update.getProjectMetadata() != null) {
 						projectAdditions.putAll(update.getProjectMetadata());

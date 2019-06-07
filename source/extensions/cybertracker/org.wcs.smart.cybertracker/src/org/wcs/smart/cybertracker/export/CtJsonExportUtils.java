@@ -253,28 +253,26 @@ public class CtJsonExportUtils {
 		}
 	}
 	
-	public static Path copyMapFiles(Path srcDirectory, Path targetDir) throws IOException {
+	public static Path copyFiles(Path srcDirectory, Path targetDir) throws IOException {
 		if (srcDirectory == null) return null;
 		if (!Files.exists(srcDirectory)) return null;
 		
-		Path targetDirectory = targetDir.resolve(MAP_FILE_DIRECTORY_NAME);
-		Files.createDirectories(targetDirectory);
-		
+		Files.createDirectories(targetDir);
 		//copy over all map files
 		Files.walkFileTree(srcDirectory, new SimpleFileVisitor<Path>() {
 			 @Override
 			    public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
-			        Files.createDirectories(targetDirectory.resolve(srcDirectory.relativize(dir)));
+			        Files.createDirectories(targetDir.resolve(srcDirectory.relativize(dir)));
 			        return FileVisitResult.CONTINUE;
 			    }
 
 			    @Override
 			    public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
-			    	Files.copy(file, targetDirectory.resolve(srcDirectory.relativize(file)));
+			    	Files.copy(file, targetDir.resolve(srcDirectory.relativize(file)));
 			    	return FileVisitResult.CONTINUE;
 			    }
 		});
-		return targetDirectory;
+		return targetDir;
 	}
 	
 	/**

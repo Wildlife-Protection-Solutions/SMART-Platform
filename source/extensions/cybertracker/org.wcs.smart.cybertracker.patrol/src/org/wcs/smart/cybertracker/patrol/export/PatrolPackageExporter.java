@@ -111,12 +111,15 @@ public enum PatrolPackageExporter {
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
 		try {
 			try(Session session = HibernateManager.openSession()){
-				PatrolCtPackage localpackage = session.get(PatrolCtPackage.class, ctPackage.getUuid());		
-				ConfigurableModel modelToExport = localpackage.getConfigurableModel();
+				//the ctpackage object is configured with the model to use
+				ConfigurableModel modelToExport = ctPackage.getConfigurableModel();
 				if (modelToExport.getUuid() != null) {
 					modelToExport = session.get(ConfigurableModel.class, modelToExport.getUuid());
 				}
 				
+				//reload package so we don't have hiberante issues
+				PatrolCtPackage localpackage = session.get(PatrolCtPackage.class, ctPackage.getUuid());		
+
 				List<File> toIncludeInZip = new ArrayList<>();
 				HashMap<String, Object> projectAdditions = new HashMap<>();
 				HashMap<String, Object> ctprofileAdditions = new HashMap<>();
@@ -126,7 +129,7 @@ public enum PatrolPackageExporter {
 						if (Files.isDirectory(p)) {
 							Path dirPath = tempDir.resolve(p.getFileName().toString());
 							Files.createDirectory(dirPath);
-							Path mapfiles = CtJsonExportUtils.copyMapFiles(p, dirPath);
+							Path mapfiles = CtJsonExportUtils.copyFiles(p, dirPath);
 							if (mapfiles != null) toIncludeInZip.add(mapfiles.toFile());
 							
 						}else {

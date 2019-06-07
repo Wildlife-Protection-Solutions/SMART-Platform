@@ -21,11 +21,17 @@
  */
 package org.wcs.smart.cybertracker.export.mbtile;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -38,6 +44,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -49,12 +56,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
@@ -74,6 +82,7 @@ import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage.BaseMapKeys;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -97,7 +106,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 	private Label warnLabel;
 	private Label warnImage;
 	
-	private Text txtMapDirectory;
+	private ListViewer lstMapFiles;
 	private MbTileGenerator generator;
 	private Composite mapComposite;
 	
@@ -105,13 +114,14 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 	
 	private List<Control> enableControls = new ArrayList<>();
 	
-	public enum MapType{SMARTMAP, CUSTOM};
-	private MapType mapType = MapType.SMARTMAP;
 	private Composite stackComposite;
 	private Composite smartComp, mapDirComp;
 	private Font boldFont, normalFont; 
-	private Link linkFile, linkSmart;
+//	private Link linkFile, linkSmart;
+	private Button linkFile, linkSmart;
 	
+	private List<Path> mapfiles;
+	private List<Path> deletedfiles;
 
 	private AbstractCtPackage ctpackage; 
 	private boolean isInit = false;
@@ -126,7 +136,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		Integer maxZoom = getMaxZoom();
 		ReferencedEnvelope evn = getBounds();
 		
-		if (mapType == MapType.SMARTMAP) {
+		if (linkSmart.getSelection()) {
 			if (def == null) {
 				pp.clearBasemap();
 			}else {
@@ -136,16 +146,86 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 					CyberTrackerPlugIn.log(e.getMessage(), e);
 				}
 			}
+			//delete all files in basemap dir
+			Path dir = ICyberTrackerConstants.getBasemapFileStore(ctpackage);
+			deletedfiles.clear();
+			mapfiles.clear();
+			if (Files.exists(dir)) {
+				//delete all files
+				try(Stream<Path> files = Files.list(dir)){
+					files.forEach(f->{
+						try {
+							Files.delete(f);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}	
+					});
+				}catch (Exception ex) {
+					//TODO:
+					ex.printStackTrace();
+				}
+			}
 		}else {
-			pp.setBasemap(txtMapDirectory.getText());
+			//import all files into necessary directory
+			Path dir = ICyberTrackerConstants.getBasemapFileStore(ctpackage);
+			if (!mapfiles.isEmpty() && !Files.exists(dir)) {
+				try {
+					Files.createDirectories(dir);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			for (Path p : deletedfiles) {
+				//if not in filestore then do not delete
+				if (!p.getParent().equals(dir)) continue;
+				try {
+					Files.delete(p);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			//copy in all files
+			List<Path>  newfiles = new ArrayList<>();
+			for (Path p : mapfiles) {
+				if (p.getParent().equals(dir)) {
+					newfiles.add(p);
+					continue;	//this file is already in the file store
+				}
+				Path target = dir.resolve(p.getFileName());
+				if (Files.exists(target)) {
+					//TODO: do something here or file will be overwritten; i think 
+					//failing is probably the only option
+				}
+				try {
+					Files.copy(p, target);
+					newfiles.add(target);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+			mapfiles.clear();
+			mapfiles.addAll(newfiles);
+			
+			//set package
+			pp.setBasemapToFiles();
 		}
+		lstMapFiles.refresh();
 	}
 	
 	@Override
 	public String isValid() {
+		//TODO: check at least one file selected?
 		return null;
 	}
 	
+
 	@Override
 	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onValidate) {
 		this.ctpackage = (AbstractCtPackage) ctpackage;
@@ -171,11 +251,12 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		((GridLayout)top.getLayout()).marginWidth = 0;
 		((GridLayout)top.getLayout()).marginHeight = 0;
 		
-		linkSmart = new Link(top,  SWT.NONE);
-		linkSmart.setText("<a>" + Messages.MapPackageContribution_BasemapOp + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		linkSmart = new Button(top,  SWT.RADIO);
+		linkSmart.setText(Messages.MapPackageContribution_BasemapOp); //$NON-NLS-1$ //$NON-NLS-2$
+		linkSmart.setSelection(true);
 		
-		linkFile = new Link(top,  SWT.NONE);
-		linkFile.setText("<a>" + Messages.MapPackageContribution_FilesOp + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		linkFile = new Button(top,  SWT.RADIO);
+		linkFile.setText( Messages.MapPackageContribution_FilesOp); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		FontData boldFontData = linkFile.getFont().getFontData()[0];
 		boldFontData.setStyle(SWT.BOLD);
@@ -191,29 +272,56 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		
 		mapDirComp = new Composite(stackComposite, SWT.NONE);
 		mapDirComp.setLayout(new GridLayout(3, false));
+		((GridLayout)mapDirComp.getLayout()).marginWidth = 0;
+		((GridLayout)mapDirComp.getLayout()).marginHeight = 0;
 		
 		Label l = new Label(mapDirComp, SWT.NONE);
-		l.setText(Messages.MapPackageContribution_MapFilesDir);
+		l.setText("Map Files:");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		txtMapDirectory = new Text(mapDirComp, SWT.BORDER);
-		txtMapDirectory.setText(""); //$NON-NLS-1$
-		txtMapDirectory.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtMapDirectory.addListener(SWT.Modify, e->{
-			if (!isInit) onValidate.handleEvent(e);
+		lstMapFiles = new ListViewer(mapDirComp, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
+		lstMapFiles.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		lstMapFiles.setContentProvider(ArrayContentProvider.getInstance());
+		lstMapFiles.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				return ((Path)element).getFileName().toString();
+			}
 		});
 		
-		Button btnBrowse2 = new Button(mapDirComp, SWT.PUSH);
-		btnBrowse2.setText("..."); //$NON-NLS-1$
-		btnBrowse2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnBrowse2.addListener(SWT.Selection, e->{
-			DirectoryDialog fd = new DirectoryDialog(parent.getShell());
-			fd.setFilterPath(txtMapDirectory.getText());
-			fd.setText(Messages.MapPackageContribution_CtFilesDialog);
-			String dir = fd.open();
-			if (dir == null) return;
-			txtMapDirectory.setText(dir);
+
+		ToolBar bt = new ToolBar(mapDirComp, SWT.FLAT | SWT.VERTICAL);
+		bt.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+
+		ToolItem tiAdd = new ToolItem(bt, SWT.PUSH);
+		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		tiAdd.setToolTipText("add basemap files");
+		tiAdd.addListener(SWT.Selection, e->{
+			FileDialog fd = new FileDialog(mapDirComp.getShell(), SWT.OPEN | SWT.MULTI);
+			fd.setText("CyberTracker Basemap Files");
+			fd.setText("Select files for CyberTracker package basemap");
+			if (fd.open() == null) return;
 			
-			if (!isInit) onValidate.handleEvent(e);
+			Path root = Paths.get(fd.getFilterPath());
+			for (String s : fd.getFileNames()) {
+				Path f = root.resolve(s);
+				if (!Files.exists(f)) continue;
+				mapfiles.add(f);
+			}
+			lstMapFiles.refresh();
+			if (!isInit) onValidate.handleEvent(null);
+			
+		});
+		
+		ToolItem tiClear = new ToolItem(bt, SWT.PUSH);
+		tiClear.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiClear.setToolTipText("remove selected files");
+		tiClear.addListener(SWT.Selection, e->{
+			for (Iterator<Object> iterator = lstMapFiles.getStructuredSelection().iterator(); iterator.hasNext();) {
+				Object item = (Object) iterator.next();
+				if (mapfiles.remove(item)) deletedfiles.add((Path)item);
+			}
+			lstMapFiles.refresh();
+			if (!isInit) onValidate.handleEvent(null);
 		});
 		
 		smartComp = new Composite(stackComposite, SWT.NONE);
@@ -225,7 +333,6 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 				linkFile.setFont(boldFont);
 				linkSmart.setFont(normalFont);
 				top.layout();
-				mapType = MapType.CUSTOM;
 				
 		});
 		linkSmart.addListener(SWT.Selection, e->{
@@ -234,7 +341,6 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 			linkFile.setFont(normalFont);
 			linkSmart.setFont(boldFont);
 			top.layout();
-			mapType = MapType.SMARTMAP;
 		});
 		
 		l = new Label(smartComp, SWT.NONE);
@@ -488,6 +594,9 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 	private void initialize() {
 		isInit = true;
 		try {
+			mapfiles = new ArrayList<>();
+			deletedfiles = new ArrayList<>();
+			lstMapFiles.setInput(mapfiles);
 			cmbBasemap.setSelection(new StructuredSelection(Messages.MapPackageContribution_NoBasemap));
 			if (ctpackage != null && ctpackage.getBasemapDef() != null && !ctpackage.getBasemapDef().isBlank()) {
 				
@@ -504,6 +613,8 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 					((StackLayout)stackComposite.getLayout()).topControl = smartComp;
 					linkSmart.setFont(boldFont);
 					linkFile.setFont(normalFont);
+					linkSmart.setSelection(true);
+					linkFile.setSelection(false);
 					
 					String bmUuid = (String) obj.get(BaseMapKeys.BM.jsonkey);
 					if (bmUuid != null && !bmUuid.trim().isEmpty()) {
@@ -538,14 +649,29 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 						maxBounds.setSelection(new StructuredSelection(maxZoom.intValue()));
 					}
 					checkTiles();
+					
+					//delete all previously imported map files
 				}else {
 					((StackLayout)stackComposite.getLayout()).topControl = mapDirComp;
 					linkFile.setFont(boldFont);
 					linkSmart.setFont(normalFont);
+					linkSmart.setSelection(false);
+					linkFile.setSelection(true);
 	
 					String dir = (String)obj.get(BaseMapKeys.FILE.jsonkey);
-					if (dir != null) txtMapDirectory.setText(dir);
+					//list all files
+					if (dir != null) {
+						Path mapdir = ICyberTrackerConstants.getBasemapFileStore(ctpackage);
+						if (Files.exists(mapdir)) {
+							try(Stream<Path> items = Files.list(mapdir)){
+								items.forEach(i->mapfiles.add(i));
+							}catch (IOException ex) {
+								CyberTrackerPlugIn.displayError("Error", "Unable to read directory. " + ex.getMessage(), ex);
+							}
+						}
+					}
 				}
+				lstMapFiles.refresh();
 				stackComposite.layout();
 				linkSmart.getParent().layout();
 			}
