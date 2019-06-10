@@ -200,7 +200,7 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 
 	@Override
 	public Image getIcon() {
-		return null;
+		return ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER32_ICON);
 	}
 
 }

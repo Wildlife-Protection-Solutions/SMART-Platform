@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -117,7 +118,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 	private Composite stackComposite;
 	private Composite smartComp, mapDirComp;
 	private Font boldFont, normalFont; 
-//	private Link linkFile, linkSmart;
+
 	private Button linkFile, linkSmart;
 	
 	private List<Path> mapfiles;
@@ -127,7 +128,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 	private boolean isInit = false;
 	
 	@Override
-	public void updatePackage(ICtPackage ctpackage) {
+	public void updatePackage(ICtPackage ctpackage) throws Exception{
 		if (!(ctpackage instanceof AbstractCtPackage)) return;
 		AbstractCtPackage pp = (AbstractCtPackage)ctpackage;
 
@@ -156,72 +157,71 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 					files.forEach(f->{
 						try {
 							Files.delete(f);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+						} catch (IOException ex) {
+							CyberTrackerPlugIn.displayError("Error", MessageFormat.format("Unable to delete previously imported map files.  You should remove the file {0} manually." + "\n\n" + ex.getMessage(), f.toString()), ex);
 						}	
 					});
 				}catch (Exception ex) {
-					//TODO:
-					ex.printStackTrace();
+					CyberTrackerPlugIn.displayError("Error", MessageFormat.format("Unable to delete previously imported map files.  You should remove the directory {0} manually." + "\n\n" + ex.getMessage(), dir.toString()), ex);
+
 				}
 			}
 		}else {
-			//import all files into necessary directory
-			Path dir = ICyberTrackerConstants.getBasemapFileStore(ctpackage);
-			if (!mapfiles.isEmpty() && !Files.exists(dir)) {
+			if (mapfiles.isEmpty()) {
+				//no basemap
+				pp.clearBasemap();
+			}else {
+				//import all files into necessary directory
+				Path dir = ICyberTrackerConstants.getBasemapFileStore(ctpackage);
 				try {
-					Files.createDirectories(dir);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					if (!mapfiles.isEmpty() && !Files.exists(dir))  Files.createDirectories(dir);
+				}catch (IOException ex) {
+					throw new Exception("Unable to create local directory for map files. " + ex.getMessage(),ex);
 				}
-			}
-			
-			for (Path p : deletedfiles) {
-				//if not in filestore then do not delete
-				if (!p.getParent().equals(dir)) continue;
-				try {
-					Files.delete(p);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			
-			//copy in all files
-			List<Path>  newfiles = new ArrayList<>();
-			for (Path p : mapfiles) {
-				if (p.getParent().equals(dir)) {
-					newfiles.add(p);
-					continue;	//this file is already in the file store
-				}
-				Path target = dir.resolve(p.getFileName());
-				if (Files.exists(target)) {
-					//TODO: do something here or file will be overwritten; i think 
-					//failing is probably the only option
-				}
-				try {
-					Files.copy(p, target);
-					newfiles.add(target);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					
+				for (Path p : deletedfiles) {
+					//if not in filestore then do not delete
+					if (!p.getParent().equals(dir)) continue;
+					try {
+						Files.delete(p);
+					} catch (IOException ex) {
+						CyberTrackerPlugIn.displayError("Error", MessageFormat.format("Unable to delete previously imported map files.  You should remove the file {0} manually." + "\n\n" + ex.getMessage(), p.toString()), ex);
+					}
 				}
 				
+				//copy in all files
+				List<Path>  newfiles = new ArrayList<>();
+				for (Path p : mapfiles) {
+					if (p.getParent().equals(dir)) {
+						newfiles.add(p);
+						continue;	//this file is already in the file store
+					}
+					Path target = dir.resolve(p.getFileName());
+					if (Files.exists(target)) {
+						//fail here, otherwise the file will be overwritten  
+						//we do have a check below to try the prevent the users from doing this
+						throw new Exception(MessageFormat.format("A file with the name {0} has already been imported.  You cannot import another file with the same name.", target.getFileName().toString()));
+					}
+					try {
+						Files.copy(p, target);
+						newfiles.add(target);
+					} catch (IOException ex) {
+						CyberTrackerPlugIn.displayError("Error", MessageFormat.format("Unable to import the file {0} into the SMART filestore. This file will not be included in your package exports." + "\n\n" + ex.getMessage(), p.toString()), ex);
+					}
+					
+				}
+				mapfiles.clear();
+				mapfiles.addAll(newfiles);
+				
+				//set package
+				pp.setBasemapToFiles();
 			}
-			mapfiles.clear();
-			mapfiles.addAll(newfiles);
-			
-			//set package
-			pp.setBasemapToFiles();
 		}
 		lstMapFiles.refresh();
 	}
 	
 	@Override
 	public String isValid() {
-		//TODO: check at least one file selected?
 		return null;
 	}
 	
@@ -305,7 +305,21 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 			for (String s : fd.getFileNames()) {
 				Path f = root.resolve(s);
 				if (!Files.exists(f)) continue;
-				mapfiles.add(f);
+				if (mapfiles.contains(f)) continue; //same file
+				
+				//check duplicate filenames
+				boolean isdup = false;
+				for(Path p : mapfiles) {
+					if (p.getFileName().toString().equalsIgnoreCase(f.getFileName().toString())) {
+						isdup = true; 
+						break;
+					}
+				}
+				if (isdup) {
+					MessageDialog.openWarning(bt.getShell(), "Duplicate", MessageFormat.format("A file with the name {0} has already been added.  You cannot add another file with the same name.", f.getFileName().toString()));
+				}else {
+					mapfiles.add(f);
+				}
 			}
 			lstMapFiles.refresh();
 			if (!isInit) onValidate.handleEvent(null);

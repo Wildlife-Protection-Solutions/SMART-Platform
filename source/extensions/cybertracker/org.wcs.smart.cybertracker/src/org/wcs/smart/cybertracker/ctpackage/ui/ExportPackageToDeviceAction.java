@@ -54,7 +54,7 @@ public class ExportPackageToDeviceAction implements ICtExportAction {
 
 	@Override
 	public Image getIcon() {
-		return null;
+		return CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.ICON_DEVICE32);
 	}
 
 	private void exportLocal(List<ICtPackage> towrite, Shell shell) {

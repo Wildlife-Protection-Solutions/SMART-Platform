@@ -63,7 +63,9 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	public static final String SERVER_PROCESSING_ICON = "org.wcs.smart.connect.server.processing"; //$NON-NLS-1$
 	public static final String SERVER_OK_ICON = "org.wcs.smart.connect.server.ok"; //$NON-NLS-1$
 	public static final String OK32_ICON = "org.wcs.smart.connect.ok32"; //$NON-NLS-1$
+	public static final String SERVER32_ICON = "org.wcs.smart.connect.server32"; //$NON-NLS-1$
 
+	
 	public static final String REFRESH_ICON = "org.wcs.smart.connect.refresh"; //$NON-NLS-1$
 	
 	public static final String CONNECT_URL_PREF = "org.wcs.smart.connect.url.pref"; //$NON-NLS-1$
@@ -188,5 +190,6 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 		reg.put(REFRESH_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/refresh.png")); //$NON-NLS-1$
 		
 		reg.put(OK32_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj32/ok32.png")); //$NON-NLS-1$
+		reg.put(SERVER32_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj32/server32.png")); //$NON-NLS-1$
     }
 }

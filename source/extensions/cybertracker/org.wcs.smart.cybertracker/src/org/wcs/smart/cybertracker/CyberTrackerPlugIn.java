@@ -52,6 +52,9 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	//image registry key for cybertracker dialog image
 	public static final String CT_WIZARD_BANNER = "org.wcs.smart.cybertracker.wizban"; //$NON-NLS-1$
 	public static final String ICON_INFO = "org.wcs.smart.cybertracker.icon.info"; //$NON-NLS-1$
+	
+	public static final String ICON_DEVICE32 = "org.wcs.smart.cybertracker.icon.device32"; //$NON-NLS-1$
+	public static final String ICON_FILE32 = "org.wcs.smart.cybertracker.icon.file32"; //$NON-NLS-1$
 
 	/**
 	 * Extension id
@@ -124,6 +127,9 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	protected void initializeImageRegistry(ImageRegistry reg) {
 	     reg.put(CT_WIZARD_BANNER, imageDescriptorFromPlugin(PLUGIN_ID, "images/wizban/cybertracker.png")); //$NON-NLS-1$
 	     reg.put(ICON_INFO, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool16/information.png")); //$NON-NLS-1$
+	     
+	     reg.put(ICON_DEVICE32, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool32/device32.png")); //$NON-NLS-1$
+	     reg.put(ICON_FILE32, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool32/file32.png")); //$NON-NLS-1$
 	}
 	
 	public static void displayInfo(final String title, final String message) {

@@ -69,5 +69,5 @@ public interface IPackageUiContribution {
 	 * Updates the contents of the package with the settings on this page
 	 * @param ctpackage
 	 */
-	public void updatePackage(ICtPackage ctpackage);
+	public void updatePackage(ICtPackage ctpackage) throws Exception;
 }

@@ -25,8 +25,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -67,6 +73,11 @@ public class CtPackageExportDialog extends SmartStyledDialog {
 	public boolean getDoGenerate() { return this.doGenerate; }
 	public List<ICtExportAction> getSelectedActions() { return this.selectedActions;}
 	
+	public Point getInitialSize() {
+		Point size = super.getInitialSize();
+		return new Point(350, size.y);
+	}
+	
 	@Override
 	public void okPressed() {
 		selectedActions = new ArrayList<>();
@@ -106,18 +117,53 @@ public class CtPackageExportDialog extends SmartStyledDialog {
 
 		
 		actionButtons = new ArrayList<>();
+		
+		Color selectionColor = new Color(main.getDisplay(), 226, 241, 255);
+		main.addListener(SWT.Dispose, e-> selectionColor.dispose());
 
 		for (ICtExportAction a : actions) {
-			Button btnAction = new Button(main, SWT.CHECK);
-			btnAction.setText(a.getName());
+			Composite small = new Composite(main, SWT.NONE);
+			small.setLayout(new GridLayout(3, false));
+			((GridLayout)small.getLayout()).marginWidth = 0;
+			((GridLayout)small.getLayout()).marginHeight = 0;
+			small.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			Button btnAction = new Button(small, SWT.CHECK);
 			btnAction.setData(a);
 			btnAction.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			
+			MouseListener click = new MouseAdapter() {
+				@Override
+				public void mouseUp(MouseEvent e) {
+					btnAction.setSelection(!btnAction.getSelection());
+					updateBackground(small, btnAction, selectionColor);
+				}
+			};
+			
+			Label l = new Label(small, SWT.NONE);
+			l.setImage(a.getIcon());
+			l.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			l.addMouseListener(click);
+			
+			l = new Label(small, SWT.NONE);
+			l.setText(a.getName());
+			l.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			l.addMouseListener(click);
+			
+			small.addMouseListener(click);
+			
 			actionButtons.add(btnAction);
+
+			btnAction.addListener(SWT.Selection, e->updateBackground(small, btnAction, selectionColor));
+
 			
 			String key = ACTIONS_PREF_KEY + KEY_SEP + a.getClass().getCanonicalName();
 			
 			boolean dogenerate = InstanceScope.INSTANCE.getNode(CyberTrackerPlugIn.PLUGIN_ID).getBoolean(key, true);
 			btnAction.setSelection(dogenerate);
+			WidgetElement.setCSSClass(small, "donotstyle");
+			updateBackground(small, btnAction, selectionColor);
+			
 		}
 		
 
@@ -140,6 +186,13 @@ public class CtPackageExportDialog extends SmartStyledDialog {
 		return parent;
 	}
 	
+	private void updateBackground(Composite small, Button btnItem, Color selectionColor) {
+		if (btnItem.getSelection()) {
+			small.setBackground(selectionColor);
+		}else {
+			small.setBackground(small.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		}
+	}
 	@Override
 	public boolean isResizable() {
 		return true;
