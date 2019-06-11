@@ -24,9 +24,11 @@ package org.wcs.smart.ca;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -34,6 +36,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -101,20 +104,7 @@ public class Employee {
 	 * Max number of chars for the staff id
 	 */
 	public static final int MAX_ID_LENGTH = 32;
-	
-//	/**
-//	 * Smart user level.
-//	 * 
-//	 * Do not change the ording or this as it is stored in the database
-//	 * as the order it appears in this list.
-//	 * @author Emily
-//	 *
-//	 */
-//	public enum SmartUserLevel {
-//		ADMIN, DATA_ENTRY, ANALYST, MANAGER;
-//
-//	};
-	
+
 	private UUID uuid;
 	
 	private String id;
@@ -132,6 +122,7 @@ public class Employee {
 	private String userLevelKey;
 	
 	private Set<String> userLevels;
+	private List<EmployeeTeamMember> teams;
 	
 	private ConservationArea ca;
 	private Agency agency;
@@ -310,6 +301,22 @@ public class Employee {
 	
 	public void setRank(Rank rank){
 		this.rank = rank;
+	}
+	
+	/**
+	 * Get employee teams this employee is associated with
+	 * @return
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.employee", orphanRemoval=true, cascade={CascadeType.ALL})
+	public List<EmployeeTeamMember> getEmployeeTeams(){
+		return this.teams;
+	}
+	/**
+	 * Sets the employee teams this employee is associated with
+	 * @param teams
+	 */
+	public void setEmployeeTeams(List<EmployeeTeamMember> teams) {
+		this.teams = teams;
 	}
 	
 	@Transient

@@ -64,7 +64,7 @@ public class SmartDataSource extends ContentDataStore{
 	protected List<Name> createTypeNames() throws IOException {
 		List<Name> names = new ArrayList<Name>();
 		for (int i = 0; i < Area.AreaType.values().length; i ++){
-			names.add(new NameImpl("smart." + Area.AreaType.values()[i].name(), Area.AreaType.values()[i].name() ));
+			names.add(new NameImpl("smart." + Area.AreaType.values()[i].name(), Area.AreaType.values()[i].name() )); //$NON-NLS-1$
 		}
 		
 		return names;

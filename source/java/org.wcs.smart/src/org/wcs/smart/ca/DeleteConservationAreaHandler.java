@@ -43,6 +43,8 @@ public class DeleteConservationAreaHandler implements ICaDeleteHandler{
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
 		
+		monitor.subTask("Delete Employee Teams");
+		deleteEmployeeTeams(ca, session);
 		monitor.subTask(Messages.DeleteConservationAreaHandler_Progress_Employees);
 		deleteEmployees(ca, session);
 		monitor.subTask(Messages.DeleteConservationAreaHandler_Progress_AgencyRank);
@@ -66,6 +68,16 @@ public class DeleteConservationAreaHandler implements ICaDeleteHandler{
 		q.executeUpdate();
 	}
 
+	private void deleteEmployeeTeams(ConservationArea ca, Session session) throws Exception{
+		Query<?> q = session.createQuery("delete from EmployeeTeamMember where id.team in (FROM EmployeeTeam WHERE conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("delete from EmployeeTeam where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+	}
+	
 	private void deleteEmployees(ConservationArea ca, Session session) throws Exception{
 		Query<?> q = session.createQuery("delete from Employee where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$

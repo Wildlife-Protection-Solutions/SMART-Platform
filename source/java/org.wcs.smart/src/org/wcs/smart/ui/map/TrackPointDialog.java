@@ -303,7 +303,7 @@ public abstract class TrackPointDialog extends SmartStyledTitleDialog implements
 		column.setLabelProvider(new ColumnLabelProvider(){
 			public String getText(Object element) {
 				if (element instanceof Coordinate){
-					Date d = new Date( (long) ((Coordinate)element).z );
+					Date d = new Date( (long) ((Coordinate)element).getZ() );
 					return DATEFORMAT.format(d);
 				}else if (element instanceof SimpleFeature){
 					return (String)(((SimpleFeature)element).getAttribute(DATETIME_FIELD));
@@ -420,7 +420,7 @@ public abstract class TrackPointDialog extends SmartStyledTitleDialog implements
 		Collections.sort(allC, new Comparator<Coordinate>() {
 			@Override
 			public int compare(Coordinate o1, Coordinate o2) {
-				return ((Double)o1.z).compareTo(o2.z);
+				return ((Double)o1.getZ()).compareTo(o2.getZ());
 			}
 		});
 		
@@ -745,7 +745,7 @@ public abstract class TrackPointDialog extends SmartStyledTitleDialog implements
 			data[0] = UuidUtils.uuidToString(getEditTrackUUid()) + "." + i; //$NON-NLS-1$
 			data[1] = c.x;
 			data[2] = c.y;
-			data[3] = DATEFORMAT.format(new Date( (long) ((Coordinate)c).z ));
+			data[3] = DATEFORMAT.format(new Date( (long) ((Coordinate)c).getZ() ));
 			data[4] = i;
 			data[5] = false;
 			data[6] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(c.x, c.y));

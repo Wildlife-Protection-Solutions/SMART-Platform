@@ -243,6 +243,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String ZOOM_TRACK_ICON = "org.wcs.smart.track.zoom"; //$NON-NLS-1$
 	
 	public static final String EXPORT_ICON = "org.wcs.smart.export"; //$NON-NLS-1$
+	public static final String IMPORT_ICON = "org.wcs.smart.import"; //$NON-NLS-1$
 	
 	/**
 	 * Mutex to ensure that jobs will not be conflicting as simultaneous jobs execution
@@ -466,6 +467,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(CREATECOPY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/createcopy.png")); //$NON-NLS-1$
 	     
 	     reg.put(EXPORT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/export.png")); //$NON-NLS-1$
+	     reg.put(IMPORT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/import.png")); //$NON-NLS-1$
 
 	}
 	

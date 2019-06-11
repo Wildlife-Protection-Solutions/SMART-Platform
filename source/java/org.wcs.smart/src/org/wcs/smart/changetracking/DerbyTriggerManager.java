@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.changetracking;
 
-import java.util.Locale;
-
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 

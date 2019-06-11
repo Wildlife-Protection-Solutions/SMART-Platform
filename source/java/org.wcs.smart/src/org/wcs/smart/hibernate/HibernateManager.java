@@ -378,7 +378,6 @@ public class HibernateManager extends SmartHibernateManager{
 	}
 	
 	private static boolean validatePassword(String password, String employeePassword){
-		if (true) return true; //TOOD: remove me after testing
 		if (employeePassword == null) return false;
 		return BCrypt.checkpw(password, employeePassword);
 	}

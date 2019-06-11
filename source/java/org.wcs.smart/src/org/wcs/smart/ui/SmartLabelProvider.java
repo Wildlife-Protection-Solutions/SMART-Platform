@@ -61,6 +61,7 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 	public static final String RANK_NAME = Messages.Rank_Label;
 	public static final String EMP_AGENCY = Messages.Employee_Agency_Label;
 	public static final String EMP_RANK = Messages.Employee_Rank_Label;
+	public static final String EMP_TEAMS = Messages.SmartLabelProvider_TeamsColumnLabel;
 	public static final String EMP_GENDER = Messages.Employee_Gender_Label;
 	public static final String EMP_ID = Messages.Employee_Id_Label;
 	public static final String EMP_BIRTHDATE = Messages.Employee_Birthdate_Label;

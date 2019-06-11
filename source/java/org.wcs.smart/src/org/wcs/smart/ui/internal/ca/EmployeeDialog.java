@@ -111,7 +111,7 @@ public class EmployeeDialog extends SmartStyledDialog {
 	public Control createDialogArea(Composite parent){
 		Composite composite = (Composite) super.createDialogArea(parent);
 		
-		int style = EmployeeComposite.AGENCY_RANK;
+		int style = EmployeeComposite.AGENCY_RANK | EmployeeComposite.TEAMS;
 		if (PermissionManager.INSTANCE.canConfigureSmartUser()){
 			style = style | EmployeeComposite.SMART_USER | EmployeeComposite.SMART_USER_LEVEL;
 		}

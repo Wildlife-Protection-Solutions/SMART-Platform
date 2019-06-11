@@ -293,11 +293,11 @@ public class GeometryUtils {
 			//correctly so we specifically check here the linestring point
 			//see tickets 2243 & 1933
 			if (p.intersects(GeometryFactoryProvider.getFactory().createPoint(ls.getCoordinate()))){
-				value = ls.getCoordinateN(ls.getNumPoints() - 1).z - ls.getCoordinateN(0).z;
+				value = ls.getCoordinateN(ls.getNumPoints() - 1).getZ() - ls.getCoordinateN(0).getZ();
 			}
 		}else{
 			if (p.contains(ls)){
-				value = ls.getCoordinateN(ls.getNumPoints() - 1).z - ls.getCoordinateN(0).z;
+				value = ls.getCoordinateN(ls.getNumPoints() - 1).getZ() - ls.getCoordinateN(0).getZ();
 			}else if (!p.intersects(ls)){
 				return 0;	//nothing
 			}else{
@@ -315,9 +315,9 @@ public class GeometryUtils {
 					LineString temp = GeometryFactoryProvider.getFactory().createLineString(new Coordinate[]{c1, c2});
 					if (pg.containsProperly(temp)){
 						//entirely contained within	 
-						value += (c2.z - c1.z);
+						value += (c2.getZ() - c1.getZ());
 					}else if (pg.intersects(temp)){
-						double time = c2.z - c1.z;
+						double time = c2.getZ() - c1.getZ();
 						double l1 = c2.distance(c1);
 						if (l1 == 0){
 							//the points are the same and intersect the polygon to include the entire length of time
@@ -331,7 +331,7 @@ public class GeometryUtils {
 				}
 			}
 		}
-		if ((new Double(value).isNaN())) value = 0;  //this should never happen but if it doesn't lets make sure it doesn't cause an error
+		if ((Double.valueOf(value).isNaN())) value = 0;  //this should never happen but if it doesn't lets make sure it doesn't cause an error
 		return value / MILLISEC_PER_HOUR;
 	}
 

@@ -28,19 +28,33 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -50,6 +64,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -57,22 +72,42 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.EmployeeTeam;
+import org.wcs.smart.ca.EmployeeTeamMember;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.CheckBoxDropDown;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.SmartStyledDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.SmartUtils;
 
+/**
+ * Composite for displaying/editing employee details
+ * 
+ * @author Emily
+ *
+ */
 public class EmployeeComposite extends Composite {
 
 	private static final String MODIFIED_KEY = "modified"; //$NON-NLS-1$
@@ -94,6 +129,8 @@ public class EmployeeComposite extends Composite {
 	protected ComboViewer cmbViewerAgency = null;
 	protected ComboViewer cmbViewerRank = null;
 	protected CheckBoxDropDown cmbUserLevel = null;
+	
+	protected ListViewer lstTeams = null;
 	
 	private Button chNotActive = null;
 	
@@ -117,11 +154,12 @@ public class EmployeeComposite extends Composite {
 	public static final int SMART_USER = 1 << 2;
 	public static final int END_DATE = 1 << 3;
 	public static final int SMART_USER_LEVEL = 1 << 4;
+	public static final int TEAMS = 1 << 5;
 	/**
 	 * Create the composite.
 	 * 
 	 * @param parent
-	 * @param localStyle any combination of AGENCY_RANK, SMART_USER, END_DATE, SMART_USER_LEVEL
+	 * @param localStyle any combination of AGENCY_RANK, SMART_USER, END_DATE, SMART_USER_LEVEL, TEAMS
 	 */
 	public EmployeeComposite(Composite parent, int localStyle, List<Agency> agencies) {
 		super(parent, SWT.NONE);
@@ -297,6 +335,63 @@ public class EmployeeComposite extends Composite {
 			
 			updateRanks();
 		}
+		if ((localStyle & TEAMS) == TEAMS) {
+			Label l = createLabelField(this, Messages.EmployeeComposite_TeamsLabel);
+			l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+
+			Composite teamComp = new Composite(this, SWT.NONE);
+			teamComp.setLayout(new GridLayout(2, false));
+			((GridLayout)teamComp.getLayout()).marginWidth = 0;
+			((GridLayout)teamComp.getLayout()).marginHeight = 0;
+			teamComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+			lstTeams = new ListViewer(teamComp, SWT.READ_ONLY | SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
+			lstTeams.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			((GridData)lstTeams.getControl().getLayoutData()).heightHint = 60;
+			lstTeams.setLabelProvider(new LabelProvider() {
+				@Override
+				public String getText(Object element) {
+					if (element instanceof EmployeeTeamMember) return ((EmployeeTeamMember)element).getTeam().getName();
+					return super.getText(element);
+				}
+			});
+			lstTeams.setContentProvider(ArrayContentProvider.getInstance());
+			lstTeams.setInput(new ArrayList<>());
+			
+			ToolBar tb = new ToolBar(teamComp, SWT.VERTICAL | SWT.FLAT);
+			tb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+			
+			ToolItem miAddTeam = new ToolItem(tb, SWT.PUSH);
+			miAddTeam.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			miAddTeam.setToolTipText(Messages.EmployeeComposite_addtooltip);
+			miAddTeam.addListener(SWT.Selection, e->addTeamMember());
+			
+			ToolItem miDeleteTeam = new ToolItem(tb, SWT.PUSH);
+			miDeleteTeam.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			miDeleteTeam.setToolTipText(Messages.EmployeeComposite_removetooltip);
+			miDeleteTeam.setEnabled(false);
+			miDeleteTeam.addListener(SWT.Selection, e->deleteTeamMember());
+			
+			Menu mnuTeams = new Menu(lstTeams.getControl());
+			lstTeams.getControl().setMenu(mnuTeams);
+			
+			MenuItem addTeam = new MenuItem(mnuTeams, SWT.PUSH);
+			addTeam.setText(DialogConstants.ADD_BUTTON_TEXT);
+			addTeam.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			addTeam.addListener(SWT.Selection, e->addTeamMember());
+
+			
+			MenuItem deleteTeam = new MenuItem(mnuTeams, SWT.PUSH);
+			deleteTeam.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			deleteTeam.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			deleteTeam.setEnabled(false);
+			deleteTeam.addListener(SWT.Selection, e->deleteTeamMember());
+			lstTeams.addSelectionChangedListener(e->{
+				deleteTeam.setEnabled(!lstTeams.getStructuredSelection().isEmpty());
+				miDeleteTeam.setEnabled(!lstTeams.getStructuredSelection().isEmpty());
+			});
+		}
+		
 		if ((localStyle & SMART_USER) == SMART_USER){
 			smartc = new Group(this, SWT.NONE );
 			smartc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -385,6 +480,36 @@ public class EmployeeComposite extends Composite {
 		validate();
 	}
 	
+	@SuppressWarnings("unchecked")
+	private void deleteTeamMember() {
+		List<EmployeeTeamMember> items = (List<EmployeeTeamMember>) lstTeams.getInput();
+		for (Iterator<?> iterator = lstTeams.getStructuredSelection().iterator(); iterator.hasNext();) {
+			EmployeeTeamMember employeeTeamMember = (EmployeeTeamMember) iterator.next();
+			items.remove(employeeTeamMember);
+		}
+		validate();
+		lstTeams.refresh();
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void addTeamMember() {
+		List<EmployeeTeamMember> items = (List<EmployeeTeamMember>) lstTeams.getInput();
+		
+		Set<EmployeeTeam> current = items.stream().map(t->t.getTeam()).collect(Collectors.toSet());
+		
+		TeamSelectDialog dialog = new TeamSelectDialog(getShell(), current);
+		if (dialog.open() != Window.OK) return;
+		
+		
+		for (EmployeeTeam t : dialog.teams) {
+			if (current.contains(t)) continue;
+			EmployeeTeamMember etm = new EmployeeTeamMember();
+			etm.setTeam(t);
+			items.add(etm);
+		}
+		validate();
+		lstTeams.refresh();
+	}
 	private void updateRanks(){
 		IStructuredSelection selection = ((IStructuredSelection) cmbViewerAgency
 				.getSelection());
@@ -683,6 +808,9 @@ public class EmployeeComposite extends Composite {
 			}
 			txtSmartPassword.setData(MODIFIED_KEY, false);
 		}
+		if (lstTeams != null) {
+			lstTeams.setInput(new ArrayList<>(e.getEmployeeTeams()));
+		}
 		
 		enableFields(!chNotActive.getSelection());
 		validate();
@@ -702,7 +830,8 @@ public class EmployeeComposite extends Composite {
 				this.chSmartUser,
 				this.cmbUserLevel,
 				this.cmbViewerAgency.getCombo(),
-				this.cmbViewerRank.getCombo()
+				this.cmbViewerRank.getCombo(),
+				this.lstTeams.getControl()
 		};
 		for (int i = 0; i < controls.length; i ++){
 			if (controls[i] != null){
@@ -737,9 +866,8 @@ public class EmployeeComposite extends Composite {
 	 * 
 	 * @param e updates employee object
 	 */
+	@SuppressWarnings("unchecked")
 	public void updateEmploye(Employee e){
-
-		
 		e.setStartEmploymentDate(SmartUtils.getDate(dtEmploymentStart));
 		e.setFamilyName(txtFamilyName.getText().trim());
 		e.setGender(opFemale.getSelection() ? Employee.DB_FEMALE : Employee.DB_MALE);
@@ -801,6 +929,23 @@ public class EmployeeComposite extends Composite {
 				e.setSmartPassword(null);
 			}
 		}
+		
+		if (lstTeams != null) {
+			if (e.getEmployeeTeams() == null) e.setEmployeeTeams(new ArrayList<>());
+			List<EmployeeTeamMember> members = (List<EmployeeTeamMember>) lstTeams.getInput();
+			
+			for (EmployeeTeamMember m : members) {
+				if (m.getEmployee() == null) {
+					m.setEmployee(e);
+					e.getEmployeeTeams().add(m);
+				}
+			}
+			List<EmployeeTeamMember> todelete = new ArrayList<>();
+			for(EmployeeTeamMember i : e.getEmployeeTeams()) {
+				if (!members.contains(i)) todelete.add(i);
+			}
+			e.getEmployeeTeams().removeAll(todelete);
+		}
 	}
 	
 	/**
@@ -819,5 +964,82 @@ public class EmployeeComposite extends Composite {
 	public boolean getSmartUserSelected(){
 		if (chSmartUser == null) return false;
 		return this.chSmartUser.getSelection();
+	}
+	
+	
+	private class TeamSelectDialog extends SmartStyledDialog{
+
+		private List<EmployeeTeam> teams;
+		private TableViewer tblViewer;
+		private Set<EmployeeTeam> existing;
+		
+		protected TeamSelectDialog(Shell parent, Set<EmployeeTeam> existing) {
+			super(parent);
+			this.existing = existing;
+		}
+		
+		@Override
+		public void okPressed() {
+			teams = new ArrayList<>();
+			for (Iterator<?> iterator = tblViewer.getStructuredSelection().iterator(); iterator.hasNext();) {
+				Object o = (Object) iterator.next();
+				if (o instanceof EmployeeTeam) teams.add((EmployeeTeam)o);
+			}
+			super.okPressed();
+		}
+		
+		@Override
+		public Point getInitialSize() {
+			return new Point(350, 350);
+		}
+		
+		@Override
+		public Control createDialogArea(Composite parent) {
+			Composite main = (Composite) super.createDialogArea(parent);
+			
+			Composite outer = new Composite(main, SWT.NONE);
+			outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true ));
+			outer.setLayout(new TableColumnLayout());
+			
+			tblViewer = new TableViewer(outer, SWT.BORDER | SWT.MULTI);
+			
+			tblViewer.setContentProvider(ArrayContentProvider.getInstance());
+			tblViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			TableViewerColumn col1 = new TableViewerColumn(tblViewer, SWT.NONE);
+			col1.setLabelProvider(new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					if (element instanceof EmployeeTeam) return ((EmployeeTeam)element).getName();
+					return super.getText(element);
+				}
+			});
+			((TableColumnLayout)outer.getLayout()).setColumnData(col1.getColumn(), new ColumnWeightData(1));
+			
+			tblViewer.addDoubleClickListener(evt->okPressed());
+			
+			Job load = new Job(Messages.EmployeeComposite_loadteamsjob) {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					List<EmployeeTeam> items = new ArrayList<>();
+					try(Session session = HibernateManager.openSession()){
+						items.addAll(QueryFactory.buildQuery(session, EmployeeTeam.class,
+								new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
+					}
+					items.removeAll(existing);
+					
+					Display.getDefault().syncExec(()->{
+						tblViewer.setInput(items);
+					});
+					return Status.OK_STATUS;
+				}
+				
+			};
+			load.schedule();
+			getShell().setText(Messages.EmployeeComposite_ShellTitle);
+			return main;
+		}
+		
 	}
 }

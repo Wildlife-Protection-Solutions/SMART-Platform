@@ -22,7 +22,6 @@
 package org.wcs.smart.hibernate;
 
 import java.sql.DriverManager;
-import java.util.Locale;
 
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
