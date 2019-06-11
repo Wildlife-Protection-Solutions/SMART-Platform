@@ -51,6 +51,8 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.EmployeeTeam;
+import org.wcs.smart.ca.EmployeeTeamMember;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedDescriptionItem;
@@ -207,6 +209,13 @@ import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
+import org.wcs.smart.paws.model.PawsConfiguration;
+import org.wcs.smart.paws.model.PawsParameter;
+import org.wcs.smart.paws.model.PawsQueryClass;
+import org.wcs.smart.paws.model.PawsRun;
+import org.wcs.smart.paws.model.PawsService;
+import org.wcs.smart.paws.model.PawsSimpleClass;
+import org.wcs.smart.paws.model.PawsWorkspace;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.PatrolPlan;
@@ -461,6 +470,19 @@ public enum SmartTable {
 	
 	METADATAVALUES(MetadataFieldValue.class, null),
 	METADTAVALUESUUID(MetadataFieldUuidValue.class, ".metadata.conservationArea"),
+	
+	EMPLOYEE_TEAM(EmployeeTeam.class, null),
+	EMPLOYEE_TEAM_MEMBER(EmployeeTeamMember.class, ".id.team.conservationArea"),
+	
+	
+	PAWS_CONFIG(PawsConfiguration.class, null),
+	PAWS_PARAM(PawsParameter.class, ".configuration.conservationArea"),
+	PAWS_QUERYCLASS(PawsQueryClass.class, ".configuration.conservationArea"),
+	PAWS_SIMPLECLASS(PawsSimpleClass.class, ".configuration.conservationArea"),
+	PAWS_WORKSPACE(PawsWorkspace.class, ""),
+	PAWS_SERVICE(PawsService.class, ""),
+	PAWS_RUN(PawsRun.class, ""),
+	
 	;
 	
 	public Class<?> hibernateClass;
