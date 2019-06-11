@@ -422,7 +422,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 	
 	public Composite createTeamArea(Composite parent) {
 		Composite area = new Composite(parent, SWT.NONE);
-		area.setLayout(new GridLayout(2, false));
+		area.setLayout(new GridLayout(2, true));
 		
 		Composite h1 = SmartUiUtils.createHeaderLabel(area, Messages.EmployeePropertyPage_TeamsHeader);
 		((GridLayout)h1.getLayout()).numColumns = 2;
@@ -562,7 +562,9 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 				Object i = lstTeams.getStructuredSelection().getFirstElement();
 				if (i instanceof EmployeeTeam) {
 					lstMembers.setInput(((EmployeeTeam) i).getMembers());
-					((Label)h2.getChildren()[0]).setText(Messages.EmployeePropertyPage_MembersHeader + ((EmployeeTeam)i).getName());
+					String name = ((EmployeeTeam)i).getName();
+					if (name.length() > 40) name = name.substring(0,40) + "..."; //$NON-NLS-1$
+					((Label)h2.getChildren()[0]).setText(Messages.EmployeePropertyPage_MembersHeader + name);
 					h2.layout(true);
 				}
 			}

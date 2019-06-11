@@ -59,11 +59,11 @@ public class MultipleSelectComposite<T> extends Composite {
 
 	private Comparator<T> itemComparator;
 	
-	private ArrayList<T> allItems = null;
+	protected ArrayList<T> allItems = null;
 	private ArrayList<T> selectedItems = null;
 
-	private TableViewer itemsListViewer;
-	private TableViewer selectedItemsListViewer;
+	protected TableViewer itemsListViewer;
+	protected TableViewer selectedItemsListViewer;
 	
 	private Label labelAll;
 	private Label labelSelected;
@@ -108,10 +108,11 @@ public class MultipleSelectComposite<T> extends Composite {
 		}
 	}
 
+	
 	/*
 	 * Creates items select composite
 	 */
-	private void createControls(){
+	protected void createControls(){
 		setLayout(new GridLayout(3, false));
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -138,30 +139,13 @@ public class MultipleSelectComposite<T> extends Composite {
 			}
 		});
 		
+		
 		Composite btnComposite = new Composite(this, SWT.NONE);
 		btnComposite.setLayout(new GridLayout(1, false));
 		btnComposite.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
-
-		btnAdd = new Button(btnComposite, SWT.PUSH);
-		btnAdd.setText(Messages.MultipleSelectComposite_Button_Add);
-		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		btnAdd.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				addItems();
-				updateButtonsState();
-			}
-
-		});
-		btnRemove = new Button(btnComposite, SWT.PUSH);
-		btnRemove.setText(Messages.MultipleSelectComposite_Button_Remove);
-		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		btnRemove.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				removeItems();
-				updateButtonsState();
-			}
-		});
-
+		
+		createButtonComposite(btnComposite);
+		
 		selectedItemsListViewer = new TableViewer(this, SWT.MULTI | SWT.BORDER);
 		selectedItemsListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		selectedItemsListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -181,6 +165,28 @@ public class MultipleSelectComposite<T> extends Composite {
 			}
 		});
 		updateButtonsState();
+	}
+	
+	protected void createButtonComposite(Composite btnComposite) {
+		btnAdd = new Button(btnComposite, SWT.PUSH);
+		btnAdd.setText(Messages.MultipleSelectComposite_Button_Add);
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		btnAdd.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				addItems();
+				updateButtonsState();
+			}
+
+		});
+		btnRemove = new Button(btnComposite, SWT.PUSH);
+		btnRemove.setText(Messages.MultipleSelectComposite_Button_Remove);
+		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		btnRemove.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				removeItems();
+				updateButtonsState();
+			}
+		});
 	}
 
 	private Label createFromSectionLabel(Composite parent) {
@@ -212,7 +218,7 @@ public class MultipleSelectComposite<T> extends Composite {
 		// nothing by default
 	}
 
-	private void updateButtonsState() {
+	protected void updateButtonsState() {
 		btnAdd.setEnabled(!itemsListViewer.getSelection().isEmpty());
 		btnRemove.setEnabled(!selectedItemsListViewer.getSelection().isEmpty());
 	}
@@ -220,7 +226,7 @@ public class MultipleSelectComposite<T> extends Composite {
 	/**
 	 * Moves items from the list of all to the list of selected.
 	 */
-	private void addItems() {
+	protected void addItems() {
 		Iterator<?> items = ((IStructuredSelection)itemsListViewer.getSelection()).iterator();
 		while(items.hasNext()){
 			@SuppressWarnings("unchecked")

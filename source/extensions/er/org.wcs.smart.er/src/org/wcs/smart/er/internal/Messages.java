@@ -360,8 +360,16 @@ public class Messages extends NLS {
 	public static String MissionEditorDialog_SaveError;
 	public static String MissionEditorDialog_SaveWarning;
 	public static String MissionEditorDialog_Title;
+	public static String MissionEmployeeComposite_AddAllButton;
+
+	public static String MissionEmployeeComposite_AllEmployees;
+
 	public static String MissionEmployeeComposite_AllEmployeesLabel;
 	public static String MissionEmployeeComposite_Description;
+
+	public static String MissionEmployeeComposite_filtertooltip;
+
+	public static String MissionEmployeeComposite_loadingteamsjob;
 	public static String MissionEmployeeComposite_MissionLeader;
 	public static String MissionEmployeeComposite_MissionMemberLabel;
 

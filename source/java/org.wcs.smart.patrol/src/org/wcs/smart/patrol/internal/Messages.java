@@ -106,8 +106,12 @@ public class Messages extends NLS {
 	public static String EmployeeScreenOptionComposite_Leader_Required;
 	public static String EmployeeScreenOptionComposite_Member_Required;
 	public static String EmployeeScreenOptionComposite_Pilot_Required;
+	public static String EmployeeSelectComposite_AddAllButton;
 	public static String EmployeeSelectComposite_AddEmployee_Label;
+	public static String EmployeeSelectComposite_AllEmployees;
+	public static String EmployeeSelectComposite_filtertooltip;
 	public static String EmployeeSelectComposite_SelectedEmployees;
+	public static String EmployeeSelectComposite_teamsjob;
 	public static String EmployeeSelectorDialog_LeaderType;
 	public static String EmployeeSelectorDialog_PilotType;
 	public static String ExportPatrolHandler_Error_CouldNotFindPatrol;

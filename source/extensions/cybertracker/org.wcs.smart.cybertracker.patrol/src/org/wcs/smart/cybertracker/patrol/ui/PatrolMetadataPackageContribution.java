@@ -531,16 +531,16 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 					fireEvents = false;
 				
 					cmbTt.setInput(types);
-					cmbTt.setSelection(new StructuredSelection(types.get(0)));
+					if (!types.isEmpty()) cmbTt.setSelection(new StructuredSelection(types.get(0)));
 					
 					cmbTeam.setInput(teams);
-					cmbTeam.setSelection(new StructuredSelection(teams.get(0)));
+					if (!teams.isEmpty()) cmbTeam.setSelection(new StructuredSelection(teams.get(0)));
 					
 					cmbStation.setInput(stations);
-					cmbStation.setSelection(new StructuredSelection(stations.get(0)));
+					if (!stations.isEmpty()) cmbStation.setSelection(new StructuredSelection(stations.get(0)));
 					
 					cmbMandate.setInput(mandates);
-					cmbMandate.setSelection(new StructuredSelection(mandates.get(0)));
+					if (!mandates.isEmpty()) cmbMandate.setSelection(new StructuredSelection(mandates.get(0)));
 					
 					cmbPilot.setInput(new ArrayList<>());
 					cmbLeader.setInput(new ArrayList<>());
