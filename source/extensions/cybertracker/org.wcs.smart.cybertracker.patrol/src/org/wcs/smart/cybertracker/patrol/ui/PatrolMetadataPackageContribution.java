@@ -291,7 +291,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			}
 		};
 		Button btnChecked = new Button(cemp, SWT.CHECK);
-		btnChecked.setText("Show Only Checked");
+		btnChecked.setText(Messages.PatrolMetadataPackageContribution_ShowChecked);
 		btnChecked.addListener(SWT.Selection, e->{
 			lstEmployees.getControl().setVisible(false);
 			if (btnChecked.getSelection()) lstEmployees.addFilter(filter);
@@ -316,13 +316,13 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		
 		btnMembers.addListener(SWT.Selection, e->{
 			if (btnMembers.getSelection()) {
-				elabel.setText("Employee Filter: The employee list on the device will only include employees selected below.  For teams, all members of the team will be added.");
+				elabel.setText(Messages.PatrolMetadataPackageContribution_FilterMsg);
 				btnLeader.setEnabled(false);
 				btnPilot.setEnabled(false);
 				cmbLeader.getControl().setEnabled(false);
 				cmbPilot.getControl().setEnabled(false);
 			}else {
-				elabel.setText("Patrol Members: All patrols will have the members selected below.  For teams, all members of the team will be added.");
+				elabel.setText(Messages.PatrolMetadataPackageContribution_MemberMsg);
 				
 				btnLeader.setEnabled(true);
 				btnPilot.setEnabled(true);
@@ -443,7 +443,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			}
 		}
 		if (!ok) {
-			return "At least one team (with members) or one employee must be selected for Patrol Members field.";
+			return Messages.PatrolMetadataPackageContribution_EmployeeRequired;
 		}
 		
 		if (!btnMembers.getSelection() && !btnLeader.getSelection() && cmbLeader.getStructuredSelection().isEmpty()) {
@@ -612,9 +612,9 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			
 			List<Object> alleteams = new ArrayList<>();
 			if (!eteams.isEmpty()) {
-				alleteams.add("---- Employee Teams ----");
+				alleteams.add(Messages.PatrolMetadataPackageContribution_Teams);
 				alleteams.addAll(eteams);
-				alleteams.add("---- Individual Employees ----");
+				alleteams.add(Messages.PatrolMetadataPackageContribution_Employees);
 			}
 			alleteams.addAll(employees);
 			

@@ -154,12 +154,18 @@ public class Messages extends NLS {
 	public static String SurveyCtPackageManager_DefaultPackageName;
 	public static String SurveyCtPackageManager_PackageType;
 	public static String SurveyJsonUtils_MemberNotFound;
+	public static String SurveyMetadataPackageContribution_BtnOnlyChecked;
+	public static String SurveyMetadataPackageContribution_EmployeeRequired;
+	public static String SurveyMetadataPackageContribution_Employees;
+	public static String SurveyMetadataPackageContribution_EmployeeTeams;
+	public static String SurveyMetadataPackageContribution_FilterMsg;
 	public static String SurveyMetadataPackageContribution_FixedValueLabel;
 	public static String SurveyMetadataPackageContribution_FixedValueTooltip;
 	public static String SurveyMetadataPackageContribution_LeaderLabel;
 	public static String SurveyMetadataPackageContribution_LeaderRequired;
 	public static String SurveyMetadataPackageContribution_MemberRequired;
 	public static String SurveyMetadataPackageContribution_MembersLabel;
+	public static String SurveyMetadataPackageContribution_MembersMsg;
 	public static String SurveyMetadataPackageContribution_MetadataColumn;
 	public static String SurveyMetadataPackageContribution_MetadataTooltip;
 	public static String SurveyMetadataPackageContribution_MissionCommentLabel;

@@ -201,9 +201,15 @@ public class Messages extends NLS {
 
 	public static String PatrolMetadataPackageContribution_CommentLabel;
 
+	public static String PatrolMetadataPackageContribution_EmployeeRequired;
+
+	public static String PatrolMetadataPackageContribution_Employees;
+
 	public static String PatrolMetadataPackageContribution_FieldLabel;
 
 	public static String PatrolMetadataPackageContribution_FieldTooltip;
+
+	public static String PatrolMetadataPackageContribution_FilterMsg;
 
 	public static String PatrolMetadataPackageContribution_FixedLabel;
 
@@ -217,6 +223,8 @@ public class Messages extends NLS {
 
 	public static String PatrolMetadataPackageContribution_MandateRequired;
 
+	public static String PatrolMetadataPackageContribution_MemberMsg;
+
 	public static String PatrolMetadataPackageContribution_MemberRequired;
 
 	public static String PatrolMetadataPackageContribution_MembersLabel;
@@ -229,11 +237,15 @@ public class Messages extends NLS {
 
 	public static String PatrolMetadataPackageContribution_PilotLabel;
 
+	public static String PatrolMetadataPackageContribution_ShowChecked;
+
 	public static String PatrolMetadataPackageContribution_StationLabel;
 
 	public static String PatrolMetadataPackageContribution_TabName;
 
 	public static String PatrolMetadataPackageContribution_TeamLabel;
+
+	public static String PatrolMetadataPackageContribution_Teams;
 
 	public static String PatrolMetadataPackageContribution_TransportRequired;
 

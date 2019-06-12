@@ -231,7 +231,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 			}
 		};
 		Button btnChecked = new Button(cemp, SWT.CHECK);
-		btnChecked.setText("Show Only Checked");
+		btnChecked.setText(Messages.SurveyMetadataPackageContribution_BtnOnlyChecked);
 		btnChecked.addListener(SWT.Selection, e->{
 			lstEmployees.getControl().setVisible(false);
 			if (btnChecked.getSelection()) lstEmployees.addFilter(filter);
@@ -250,11 +250,11 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 
 		btnMembers.addListener(SWT.Selection, e->{
 			if (btnMembers.getSelection()) {
-				elabel.setText("Employee Filter: The employee list on the device will only include employees selected below.  For teams, all members of the team will be added.");
+				elabel.setText(Messages.SurveyMetadataPackageContribution_FilterMsg);
 				btnLeader.setEnabled(false);
 				cmbLeader.getControl().setEnabled(false);
 			}else {
-				elabel.setText("Members: All missions will have the members selected below.  For teams, all members of the team will be added.");				
+				elabel.setText(Messages.SurveyMetadataPackageContribution_MembersMsg);				
 				btnLeader.setEnabled(true);
 				cmbLeader.getControl().setEnabled(!btnLeader.getSelection());
 			}
@@ -370,7 +370,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 			}
 		}
 		if (!ok) {
-			return "At least one team (with members) or one employee must be selected for Patrol Members field.";
+			return Messages.SurveyMetadataPackageContribution_EmployeeRequired;
 		}
 		
 		if (!btnMembers.getSelection() && !btnLeader.getSelection() && cmbLeader.getStructuredSelection().isEmpty()) {
@@ -459,9 +459,9 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 			
 			List<Object> alleteams = new ArrayList<>();
 			if (!eteams.isEmpty()) {
-				alleteams.add("---- Employee Teams ----");
+				alleteams.add(Messages.SurveyMetadataPackageContribution_EmployeeTeams);
 				alleteams.addAll(eteams);
-				alleteams.add("---- Individual Employees ----");
+				alleteams.add(Messages.SurveyMetadataPackageContribution_Employees);
 			}
 			alleteams.addAll(employees);
 			
