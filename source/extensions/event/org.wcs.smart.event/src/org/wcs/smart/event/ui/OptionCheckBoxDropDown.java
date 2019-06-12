@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.event.ui;
 
-import java.util.Iterator;
-
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -34,6 +32,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ui.CheckBoxDropDown;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 
 /**
  * Drop down check box viewer for selecting multiple items from a list
@@ -105,20 +104,7 @@ public class OptionCheckBoxDropDown extends CheckBoxDropDown{
 				checkChanged = true;				
 			}
 		});
-		table.getControl().addListener(SWT.KeyDown, e->{
-			if (e.keyCode != SWT.SPACE) return;
-			if (table.getSelection().isEmpty()) return;
-			
-			Object item = table.getStructuredSelection().getFirstElement();
-			if (item == null) return;
-			boolean value = ((CheckboxTableViewer)table).getChecked( item );
-			for (Iterator<?> iterator = table.getStructuredSelection().iterator(); iterator.hasNext();) {
-				Object tp = (Object) iterator.next();
-				((CheckboxTableViewer)table).setChecked(tp, !value);
-			}
-			e.doit = false;
-			
-		});
+		table.getControl().addKeyListener(new CheckboxSelectorKeyAdapter((CheckboxTableViewer)table));
 		if (labelProvider != null) table.setLabelProvider(labelProvider);
 		if (contentProvider != null) table.setContentProvider(contentProvider);
 		if (input != null) table.setInput(input);

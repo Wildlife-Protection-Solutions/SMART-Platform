@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.ListItem;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -149,24 +150,7 @@ public class OptionDialog extends SmartStyledTitleDialog {
 		viewer.getControl().setEnabled(false);
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)viewer.getControl().getLayoutData()).heightHint = 300;
-		viewer.getControl().addKeyListener(new KeyListener() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-			}
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.character == ' '){
-					boolean value = viewer.getChecked( ((IStructuredSelection)viewer.getSelection()).getFirstElement() );
-					for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
-						viewer.setChecked(tp, !value);
-						
-					}
-					e.doit = false;
-				}
-			}
-		});
+		viewer.getControl().addKeyListener(new CheckboxSelectorKeyAdapter(viewer));
 		
 		Composite links = new Composite(main, SWT.NONE);
 		links.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));

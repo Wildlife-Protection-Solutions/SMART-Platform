@@ -98,7 +98,7 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 		super(parent);
 		this.type = type;
 		this.isMulti = isMulti;
-		
+		setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		setContentProvider(ArrayContentProvider.getInstance());
 		setLabelProvider(new ColumnLabelProvider(){
 			public String getText(Object element){
@@ -167,6 +167,8 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 	    		e.doit = false;
 	    	}
 		});
+		popup.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
+
 		// create filter fields
 		txtSearch = new FilterComposite(popup, SWT.NONE);
 		txtSearch.setText(""); //$NON-NLS-1$
@@ -227,10 +229,18 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 				for (Iterator<?> iterator = table.getStructuredSelection().iterator(); iterator.hasNext();) {
 					Object tp = (Object) iterator.next();
 					((CheckboxTableViewer)table).setChecked(tp, !value);
+					
+					if (!value) {
+						selected.add((EntityItem)tp);
+					}else {
+						selected.remove((EntityItem)tp);
+					}
 				}
+				checkChanged = true;				
 				e.doit = false;
 				
 			});
+
 		}else{
 			table = new ListViewer(popup, SWT.V_SCROLL);
 			table.addSelectionChangedListener(new ISelectionChangedListener() {

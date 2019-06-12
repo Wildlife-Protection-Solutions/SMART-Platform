@@ -25,7 +25,6 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -50,8 +49,6 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -100,6 +97,7 @@ import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.model.QaRoutineParameter;
 import org.wcs.smart.qa.routine.ValidationTask;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -472,23 +470,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		//tblRoutines.getTable().setLinesVisible(true);
 		tblRoutines.getTable().setHeaderVisible(true);
 		tblRoutines.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		tblRoutines.getTable().addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.character == SWT.SPACE){
-					Object selection = ((IStructuredSelection)tblRoutines.getSelection()).getFirstElement();
-					boolean newValue = !tblRoutines.getChecked(selection);
-					
-					for (Iterator<?>iterator = ((IStructuredSelection)tblRoutines.getSelection()).iterator(); iterator.hasNext();) {
-						DataValidator type = (DataValidator) iterator.next();
-						tblRoutines.setChecked(type, newValue);
-					}
-					tblRoutines.refresh();
-					e.doit = false;
-				}
-			}
-		});
+		tblRoutines.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(tblRoutines));
 		
 		TableViewerColumn checkColumn = new TableViewerColumn(tblRoutines, SWT.CHECK);
 		checkColumn.getColumn().setWidth(30);

@@ -210,7 +210,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 				tcl.setColumnData(gc.getColumn(), new ColumnWeightData(100, 150, true));
 			}
 			pp.addPropertyUpdatedListener(()->{
-				Display.getDefault().asyncExec(()->tblViewer.refresh());	
+				Display.getDefault().asyncExec(()->{if (!tblViewer.getControl().isDisposed()) tblViewer.refresh();});	
 			});
 		}
 		

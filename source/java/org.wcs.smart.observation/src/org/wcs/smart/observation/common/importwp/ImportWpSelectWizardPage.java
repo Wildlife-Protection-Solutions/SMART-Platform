@@ -25,20 +25,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -48,6 +44,7 @@ import org.eclipse.swt.widgets.Link;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 
 /**
  * Wizard page to select the waypoints or track points to import.
@@ -105,26 +102,7 @@ public class ImportWpSelectWizardPage extends WizardPage implements IImportWizar
 			}
 		});
 
-		tblWaypoint.getTable().addKeyListener(new KeyListener(){
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.character == ' '){
-					boolean value = tblWaypoint.getChecked(   ((IStructuredSelection)tblWaypoint.getSelection()).getFirstElement() );
-					for (Iterator<?> iterator = ((IStructuredSelection)tblWaypoint.getSelection()).iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
-						tblWaypoint.setChecked(tp, !value);
-					}
-					e.doit = false;
-				}
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-			}
-		});
-		
-		
+		tblWaypoint.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(tblWaypoint));
 		tblWaypoint.setContentProvider(ArrayContentProvider.getInstance());
 		tblWaypoint.setInput(initialWaypoints);
 

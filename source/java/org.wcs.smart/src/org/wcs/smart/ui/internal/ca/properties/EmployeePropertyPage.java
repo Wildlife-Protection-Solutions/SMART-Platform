@@ -61,8 +61,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -103,6 +101,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.CreateEditNamedItemDialog;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledDialog;
@@ -472,7 +471,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 		Composite outer = new Composite(area, SWT.NONE);
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		outer.setLayout(new TableColumnLayout());
-		lstTeams = new TableViewer(outer, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER);
+		lstTeams = new TableViewer(outer, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER );
 		lstTeams.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstTeams.setContentProvider(ArrayContentProvider.getInstance());
 		TableViewerColumn tc1 = new TableViewerColumn(lstTeams, SWT.NONE);
@@ -509,17 +508,18 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 		outer = new Composite(area, SWT.NONE);
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		outer.setLayout(new TableColumnLayout());
-		lstMembers = new TableViewer(outer, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER);
+		lstMembers = new TableViewer(outer, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER );
 		lstMembers.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstMembers.setContentProvider(ArrayContentProvider.getInstance());
 		tc1 = new TableViewerColumn(lstMembers, SWT.NONE);
-		tc1.setLabelProvider(new ColumnLabelProvider() {
+		ColumnLabelProvider membersprovider = new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof EmployeeTeamMember) return SmartLabelProvider.getFullLabel(((EmployeeTeamMember)element).getEmployee());
 				return super.getText(element);
 			}
-		});
+		};
+		tc1.setLabelProvider(membersprovider);
 		((TableColumnLayout)outer.getLayout()).setColumnData(tc1.getColumn(), new ColumnWeightData(1));
 		
 		Menu memberMenu = new Menu(lstMembers.getControl());
@@ -548,6 +548,11 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 				miDeleteMemeber.setEnabled(isActive);
 			}
 		});
+		lstMembers.setComparator(new ViewerComparator() {
+		    public int compare(Viewer viewer, Object e1, Object e2) {
+		    	return Collator.getInstance().compare(membersprovider.getText(e1), membersprovider.getText(e2));
+		    }
+		});
 		lstTeams.addSelectionChangedListener(new ISelectionChangedListener() {			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -562,6 +567,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 				Object i = lstTeams.getStructuredSelection().getFirstElement();
 				if (i instanceof EmployeeTeam) {
 					lstMembers.setInput(((EmployeeTeam) i).getMembers());
+					
 					String name = ((EmployeeTeam)i).getName();
 					if (name.length() > 40) name = name.substring(0,40) + "..."; //$NON-NLS-1$
 					((Label)h2.getChildren()[0]).setText(Messages.EmployeePropertyPage_MembersHeader + name);
@@ -936,7 +942,9 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 				teams.forEach(team->team.getMembers().forEach(m->m.getEmployee().getGivenName()));
 			}
 			
+			teams.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 			Display.getDefault().syncExec(()->{
+				if (tblEmployee.getControl().isDisposed()) return;
 				tblEmployee.getControl().setVisible(false);
 				tblEmployee.setInput(employees);
 				tblEmployee.refresh();
@@ -1089,27 +1097,8 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 			});
 			tblViewer.setContentProvider(ArrayContentProvider.getInstance());
 			tblViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			tblViewer.getTable().addKeyListener(new KeyAdapter() {
-				//spacebar check
-				@Override
-				public void keyPressed(KeyEvent e) {
-					if (tblViewer.getSelection().isEmpty()){
-						return;
-					}
-					if (e.keyCode == SWT.SPACE){
-						IStructuredSelection selection = ((IStructuredSelection)tblViewer.getSelection());
-						selection.getFirstElement();
-						boolean value = tblViewer.getChecked(selection.getFirstElement() );
-						for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-							Object tp = (Object) iterator.next();
-							tblViewer.setChecked(tp, !value);
-						}
-						e.doit = false;
-								
-					}
-					
-				}
-			});
+			tblViewer.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(tblViewer));
+			
 			Job load = new Job(Messages.EmployeePropertyPage_loadingjob2) {
 
 				@Override
@@ -1118,6 +1107,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 					try(Session session = HibernateManager.openSession()){
 						items.addAll(HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), session));
 					}
+					items.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getFullLabel((Employee)a), SmartLabelProvider.getFullLabel((Employee)b)));
 					Display.getDefault().syncExec(()->{
 						tblViewer.setInput(items);
 					});

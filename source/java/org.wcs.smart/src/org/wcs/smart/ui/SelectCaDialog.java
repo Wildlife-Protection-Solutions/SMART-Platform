@@ -22,7 +22,6 @@
 package org.wcs.smart.ui;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -34,11 +33,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -123,24 +119,7 @@ public class SelectCaDialog extends SmartStyledTitleDialog {
 		
 		caList = CheckboxTableViewer.newCheckList(comp, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.MULTI);
 		caList.setLabelProvider(new ConservationAreaLabelProvider());
-		caList.getTable().addKeyListener(new KeyListener(){
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.character == ' '){
-					boolean value = caList.getChecked(   ((IStructuredSelection)caList.getSelection()).getFirstElement() );
-					for (Iterator<?> iterator = ((IStructuredSelection)caList.getSelection()).iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
-						caList.setChecked(tp, !value);
-					}
-					e.doit = false;
-					validate();
-				}
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-			}
-		});
+		caList.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(caList));
 		caList.setContentProvider(ArrayContentProvider.getInstance());
 		caList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)caList.getControl().getLayoutData()).heightHint = 250;

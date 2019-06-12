@@ -21,19 +21,15 @@
  */
 package org.wcs.smart.query.common.model;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -48,6 +44,7 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.ui.AbstractQueryPropertyProvider;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 
 /**
  * Query property provider that lists the columns associated with the query.
@@ -161,25 +158,7 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 			columnViewer.setChecked(col, col.isVisible());
 		}
 		
-		columnViewer.getTable().addKeyListener(new KeyListener(){
-			@SuppressWarnings("rawtypes")
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.character == SWT.SPACE){
-					boolean value = columnViewer.getChecked(   ((IStructuredSelection)columnViewer.getSelection()).getFirstElement() );
-					for (Iterator iterator = ((IStructuredSelection)columnViewer.getSelection()).iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
-						columnViewer.setChecked(tp, !value);
-					}
-					e.doit = false;
-				}
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-			}
-		});
-		
+		columnViewer.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(columnViewer));		
 	}
 
 	protected void updateColumnTableState() {

@@ -336,7 +336,8 @@ public enum PatrolPackageExporter {
 				ctpackage.getConservationArea()));
 		
 		metadataScreens.add(CtJsonExportUtils.convertEmployees(map.get(PatrolMetadataField.MEMBERS.name()),
-				PatrolMetadataField.MEMBERS.isRequired(), PatrolMetadataField.MEMBERS.isFixed(), session, ctpackage.getConservationArea()));
+				PatrolMetadataField.MEMBERS.isRequired(), PatrolMetadataField.MEMBERS.isFixed(), 
+				session, ctpackage.getConservationArea()));
 		
 		if (map.get(PatrolMetadataField.MEMBERS.name()) == null || map.get(PatrolMetadataField.MEMBERS.name()).isVisible()) {
 			//force leader and pilot to be visible as well; ticket #2690

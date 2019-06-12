@@ -21,9 +21,12 @@
  */
 package org.wcs.smart.cybertracker.patrol.ui;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -32,11 +35,16 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -50,6 +58,8 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.EmployeeTeam;
+import org.wcs.smart.ca.EmployeeTeamMember;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
@@ -67,6 +77,7 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -87,6 +98,8 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	
 	private ICtPackage ctpackage;
 	private boolean fireEvents = true;
+	
+	private Font boldFont;
 	
 	private void fireChanged() {
 		if (!fireEvents) return;
@@ -220,11 +233,20 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		txtComment = (Text) d[1];		
 		
 		
-		LabelProvider employeeLblProvider = new LabelProvider() {
+		
+		ColumnLabelProvider employeeLblProvider = new ColumnLabelProvider() {
+
 			@Override
 			public String getText(Object element) {
+				if (element instanceof EmployeeTeam) return ((EmployeeTeam)element).getName();
 				if (element instanceof Employee) return SmartLabelProvider.getShortLabel((Employee)element);
 				return super.getText(element);
+			}
+			
+			@Override
+			public Font getFont(Object element) {
+				if (element instanceof EmployeeTeam || element instanceof Employee) return null;
+				return boldFont;
 			}
 		};
 		
@@ -241,12 +263,41 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		btnMembers.setSelection(true);
 		btnMembers.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 
-		lstEmployees = CheckboxTableViewer.newCheckList(core, SWT.BORDER);
+		Composite cemp = new Composite(core, SWT.NONE);
+		cemp.setLayout(new GridLayout());
+		((GridLayout)cemp.getLayout()).marginWidth = 0;
+		((GridLayout)cemp.getLayout()).marginHeight = 0;
+		cemp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Label elabel = new Label(cemp, SWT.WRAP);
+		elabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)elabel.getLayoutData()).widthHint = 200;
+		
+		lstEmployees = CheckboxTableViewer.newCheckList(cemp, SWT.BORDER | SWT.MULTI);
+		lstEmployees.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(lstEmployees));
 		lstEmployees.setContentProvider(ArrayContentProvider.getInstance());
 		lstEmployees.setLabelProvider(employeeLblProvider);
-		lstEmployees.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		lstEmployees.getControl().setEnabled(false);
+		lstEmployees.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstEmployees.getControl().getLayoutData()).heightHint = 80;
+		FontData fd = lstEmployees.getControl().getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		boldFont = new Font(lstEmployees.getControl().getDisplay(), fd);
+		lstEmployees.getControl().addListener(SWT.Dispose,e->boldFont.dispose());
+		ViewerFilter filter = new ViewerFilter() {
+			@Override
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				if (element instanceof Employee || element instanceof EmployeeTeam) return lstEmployees.getChecked(element);
+				return true;
+			}
+		};
+		Button btnChecked = new Button(cemp, SWT.CHECK);
+		btnChecked.setText("Show Only Checked");
+		btnChecked.addListener(SWT.Selection, e->{
+			lstEmployees.getControl().setVisible(false);
+			if (btnChecked.getSelection()) lstEmployees.addFilter(filter);
+			else lstEmployees.removeFilter(filter);
+			lstEmployees.getControl().setVisible(true);
+		});
 		
 		// leader
 		d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_LeaderLabel, core, SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_LEADER_ICON));
@@ -264,14 +315,15 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		cmbPilot.getControl().setEnabled(false);
 		
 		btnMembers.addListener(SWT.Selection, e->{
-			lstEmployees.getControl().setEnabled(!btnMembers.getSelection());
-			
 			if (btnMembers.getSelection()) {
+				elabel.setText("Employee Filter: The employee list on the device will only include employees selected below.  For teams, all members of the team will be added.");
 				btnLeader.setEnabled(false);
 				btnPilot.setEnabled(false);
 				cmbLeader.getControl().setEnabled(false);
 				cmbPilot.getControl().setEnabled(false);
 			}else {
+				elabel.setText("Patrol Members: All patrols will have the members selected below.  For teams, all members of the team will be added.");
+				
 				btnLeader.setEnabled(true);
 				btnPilot.setEnabled(true);
 				cmbLeader.getControl().setEnabled(!btnLeader.getSelection());
@@ -296,14 +348,24 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	}
 	
 	private void updateLeaderPilotLists() {
-		List<Employee> items = new ArrayList<>();
+		Set<Employee> items = new HashSet<>();
 		for (Object o : lstEmployees.getCheckedElements()) {
-			if (o instanceof Employee) items.add((Employee) o);
+			if (o instanceof EmployeeTeam) {
+				EmployeeTeam team = (EmployeeTeam)o;
+				for (EmployeeTeamMember e : team.getMembers()) items.add(e.getEmployee());
+			}else if (o instanceof Employee) {
+				items.add((Employee) o);
+			}
 		}
-		cmbLeader.setInput(items);
-		cmbPilot.setInput(items);
-		if (cmbLeader.getStructuredSelection().isEmpty() && items.size() > 0) cmbLeader.setSelection(new StructuredSelection(items.get(0)));
-		if (cmbPilot.getStructuredSelection().isEmpty() && items.size() > 0) cmbPilot.setSelection(new StructuredSelection(items.get(0)));
+		
+		List<Employee> sorted = new ArrayList<>(items);
+		
+		sorted.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getShortLabel(a), SmartLabelProvider.getShortLabel(b)));
+		
+		cmbLeader.setInput(sorted);
+		cmbPilot.setInput(sorted);
+		if (cmbLeader.getStructuredSelection().isEmpty() && items.size() > 0) cmbLeader.setSelection(new StructuredSelection(sorted.get(0)));
+		if (cmbPilot.getStructuredSelection().isEmpty() && items.size() > 0) cmbPilot.setSelection(new StructuredSelection(sorted.get(0)));
 	}
 	
 	private Object[] createComboViewerSection(String sectionName, Composite parent, Image icon) {
@@ -368,8 +430,20 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	
 	@Override
 	public String isValid() {
-		if (!btnMembers.getSelection() && lstEmployees.getCheckedElements().length == 0) {
-			return Messages.PatrolMetadataPackageContribution_MemberRequired;
+		boolean ok = false;
+		for (Object type : lstEmployees.getCheckedElements()) {
+			if (type instanceof Employee) {
+				ok = true;
+				break;
+			}else if (type instanceof EmployeeTeam) {
+				if (!((EmployeeTeam)type).getMembers().isEmpty()) {
+					ok = true;
+					break;
+				}
+			}
+		}
+		if (!ok) {
+			return "At least one team (with members) or one employee must be selected for Patrol Members field.";
 		}
 		
 		if (!btnMembers.getSelection() && !btnLeader.getSelection() && cmbLeader.getStructuredSelection().isEmpty()) {
@@ -425,6 +499,11 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				MetadataFieldUuidValue uuidValue = new MetadataFieldUuidValue();
 				uuidValue.setMetadata(v);
 				uuidValue.setUuidValue(((Employee) o).getUuid());
+				v.getUuidList().add(uuidValue);
+			}else if (o instanceof EmployeeTeam) {
+				MetadataFieldUuidValue uuidValue = new MetadataFieldUuidValue();
+				uuidValue.setMetadata(v);
+				uuidValue.setUuidValue(((EmployeeTeam) o).getUuid());
 				v.getUuidList().add(uuidValue);
 			}
 		}
@@ -493,6 +572,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			List<PatrolMandate> mandates = new ArrayList<>();
 
 			List<Employee> employees = new ArrayList<>();
+			List<EmployeeTeam> eteams = new ArrayList<>();
 			
 			List<MetadataFieldValue> metadataValues = new ArrayList<>();
 			if ( ((PatrolCtPackage)ctpackage).getMetadataValues() != null) {
@@ -500,7 +580,10 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			}
 			
 			try(Session s = HibernateManager.openSession()){
-				
+				eteams.addAll(QueryFactory.buildQuery(s, EmployeeTeam.class,
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()})  //$NON-NLS-1$
+						.list());
+				eteams.forEach(team->team.getMembers().forEach(e->e.getEmployee().getGivenName()));
 				types.addAll(QueryFactory.buildQuery(s, PatrolTransportType.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 						new Object[] {"isActive", true}) //$NON-NLS-1$
@@ -524,6 +607,18 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			
 			}
 			
+			eteams.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+			employees.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getShortLabel(a), SmartLabelProvider.getShortLabel(b)));
+			
+			List<Object> alleteams = new ArrayList<>();
+			if (!eteams.isEmpty()) {
+				alleteams.add("---- Employee Teams ----");
+				alleteams.addAll(eteams);
+				alleteams.add("---- Individual Employees ----");
+			}
+			alleteams.addAll(employees);
+			
+			
 			teams.add(0, Messages.PatrolMetadataPackageContribution_NoneOption);
 			stations.add(0, Messages.PatrolMetadataPackageContribution_NoneOption);
 			Display.getDefault().syncExec(()->{
@@ -545,7 +640,8 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 					cmbPilot.setInput(new ArrayList<>());
 					cmbLeader.setInput(new ArrayList<>());
 					
-					lstEmployees.setInput(employees);
+
+					lstEmployees.setInput(alleteams);
 					
 					//configure default values
 					for (MetadataFieldValue v : metadataValues) {
@@ -553,9 +649,13 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 						 if (v.getMetadataKey().equals(PatrolMetadataField.MEMBERS.name())) {
 							btnMembers.setSelection(v.isVisible());
 							for (MetadataFieldUuidValue item : v.getUuidList()) {
+								//either an employee or a team
 								Employee e = new Employee();
 								e.setUuid(item.getUuidValue());
 								lstEmployees.setChecked(e, true);
+								EmployeeTeam t = new EmployeeTeam();
+								t.setUuid(item.getUuidValue());
+								lstEmployees.setChecked(t, true);
 							}
 						}
 					}

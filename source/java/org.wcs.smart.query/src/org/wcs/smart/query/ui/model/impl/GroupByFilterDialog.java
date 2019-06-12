@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.ui.model.impl;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,12 +31,9 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -50,6 +46,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
@@ -145,24 +142,7 @@ public class GroupByFilterDialog extends SmartStyledTitleDialog{
 		viewer.getControl().setEnabled(false);
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)viewer.getControl().getLayoutData()).heightHint = 300;
-		viewer.getControl().addKeyListener(new KeyListener() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-			}
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.character == ' '){
-					boolean value = viewer.getChecked( ((IStructuredSelection)viewer.getSelection()).getFirstElement() );
-					for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
-						viewer.setChecked(tp, !value);
-						
-					}
-					e.doit = false;
-				}
-			}
-		});
+		viewer.getControl().addKeyListener(new CheckboxSelectorKeyAdapter(viewer));
 		
 		Composite links = new Composite(main, SWT.NONE);
 		links.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));

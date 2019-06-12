@@ -150,6 +150,7 @@ public class SectionTabHeader extends Composite implements Listener{
 	}
 	
 	private void drawBorder(GC gc) {
+		if (borderColor == null) return;
 		Rectangle rr = SectionTabHeader.this.getBounds();
 
 		gc.setForeground(borderColor);

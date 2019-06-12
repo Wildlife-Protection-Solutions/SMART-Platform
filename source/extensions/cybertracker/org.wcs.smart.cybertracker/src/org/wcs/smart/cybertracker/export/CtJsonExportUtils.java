@@ -31,8 +31,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
@@ -40,6 +43,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.EmployeeTeam;
+import org.wcs.smart.ca.EmployeeTeamMember;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.cybertracker.export.alert.ConfigurationDataProvider;
@@ -47,9 +52,9 @@ import org.wcs.smart.cybertracker.export.alert.IDataTargetProvider.DataTarget;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
-import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.ProfileOptionID;
 import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.ScreenOptionUuid;
@@ -430,7 +435,27 @@ public class CtJsonExportUtils {
 		teamTypeOp.put(JSON_EMPLOYEE_METADATA_KEY, optionType);
 		return teamTypeOp;
 	}
+	
 	public static JSONObject convertEmployees(MetadataFieldValue screenOption, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+		//find all employees - they are either directly linked or linked through a employee team
+		Set<Employee> allEmployees = new HashSet<>();
+		if (screenOption != null) {
+			for (MetadataFieldUuidValue uuid : screenOption.getUuidList()) {
+				UUID item = uuid.getUuidValue();
+				Employee e = session.get(Employee.class, item);
+				if (e != null) {
+					allEmployees.add(e);
+					continue;
+				}
+				EmployeeTeam team = session.get(EmployeeTeam.class, item);
+				if (team != null) {
+					for (EmployeeTeamMember tm : team.getMembers()) {
+						allEmployees.add(tm.getEmployee());
+					}
+				}
+			}
+		}
+		
 		JSONObject optionType = new JSONObject();
 		optionType.put(JSON_OPTION_TYPE_KEY, Type.MULTI_CHOICE.name());
 		optionType.put(JSON_OPTION_LABEL_KEY, Messages.CtJsonExportUtils_EmployeePageLabel);
@@ -439,25 +464,18 @@ public class CtJsonExportUtils {
 		if (screenOption != null) {
 			optionType.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible()) {
-				if (screenOption.getUuidList() != null) {
-					JSONArray defaultValues = new JSONArray();
-					for (MetadataFieldUuidValue defaultOp : screenOption.getUuidList()) {
-						defaultValues.add(UuidUtils.uuidToString(defaultOp.getUuidValue()));
-					}
-					optionType.put(JSON_DEFAULTS_PROP_KEY, defaultValues);
+				JSONArray defaultValues = new JSONArray();
+				for (Employee e : allEmployees) {
+					defaultValues.add(UuidUtils.uuidToString(e.getUuid()));
 				}
+				optionType.put(JSON_DEFAULTS_PROP_KEY, defaultValues);
 			}
 		}else {
 			optionType.put(JSON_ISVISIBILE_PROP_KEY, true);
 		}
 		
 		JSONArray optionOptions = new JSONArray();
-		
-		List<Employee> items = QueryFactory.buildQuery(session, Employee.class, 
-				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"endEmploymentDate", null}).list(); //$NON-NLS-1$
-		
-		for (Employee t : items) {
+		for (Employee t : allEmployees) {
 			JSONObject ttype = new JSONObject();
 			ttype.put("uuid", UuidUtils.uuidToString(t.getUuid())); //$NON-NLS-1$
 			ttype.put("label", SmartLabelProvider.getShortLabel(t)); //$NON-NLS-1$

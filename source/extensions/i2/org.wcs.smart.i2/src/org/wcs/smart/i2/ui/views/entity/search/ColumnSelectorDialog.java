@@ -55,6 +55,7 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -107,23 +108,7 @@ public class ColumnSelectorDialog extends SmartStyledTitleDialog{
 		tblAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)tblAttributes.getControl().getLayoutData()).heightHint = 400;
 		tblAttributes.setInput(new String[] {DialogConstants.LOADING_TEXT});
-		
-		tblAttributes.getTable().addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.character == SWT.SPACE){
-					Object selection = ((IStructuredSelection)tblAttributes.getSelection()).getFirstElement();
-					boolean newValue = !tblAttributes.getChecked(selection);
-					
-					for (Iterator<?>iterator = ((IStructuredSelection)tblAttributes.getSelection()).iterator(); iterator.hasNext();) {
-						Object type = iterator.next();
-						tblAttributes.setChecked(type, newValue);
-					}
-					tblAttributes.refresh();
-					e.doit = false;
-				}
-			}
-		});
+		tblAttributes.getControl().addKeyListener(new CheckboxSelectorKeyAdapter(tblAttributes));
 		
 		Composite bottomPanel = new Composite(main, SWT.NONE);
 		bottomPanel.setLayout(new GridLayout(3, false));

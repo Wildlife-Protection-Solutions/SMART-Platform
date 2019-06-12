@@ -25,7 +25,6 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -78,6 +77,8 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	
 	public CheckBoxDropDown(Composite parent) {
 		super(parent, SWT.NONE);
+		setBackground(getDisplay().getSystemColor( SWT.COLOR_WHITE));
+
 		borderColor = new Color(getShell().getDisplay(),0, 120,215);
 		mouseOverColor = new Color(getShell().getDisplay(),229,241,251);
 		
@@ -113,6 +114,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		txtInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtInfo.setCursor(getShell().getDisplay().getSystemCursor(SWT.CURSOR_ARROW));
 		txtInfo.addListener(SWT.MouseDown, event->dropDown(true));
+		txtInfo.setBackground(getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		defaultBgColor = txtInfo.getBackground();
 		
@@ -161,7 +163,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 			if (mouseOver){
 				event.gc.setForeground(borderColor);
 			}else{
-				event.gc.setForeground(getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_BORDER));
+				event.gc.setForeground(getDisplay().getSystemColor(SWT.COLOR_WIDGET_BORDER));
 			}
 			event.gc.drawRectangle(0, 0, getBounds().width - 1, getBounds().height - 1);
 		}else if (event.type == SWT.MouseEnter){
@@ -243,29 +245,18 @@ public class CheckBoxDropDown extends Composite implements Listener {
             event.gc.setLineWidth(1);
             event.gc.drawRectangle(0, 0, bounds.width - 1, bounds.height - 1);
 		});
+		popup.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		// create table
 		table = CheckboxTableViewer.newCheckList(popup, SWT.V_SCROLL | SWT.MULTI);
 		table.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		table.getControl().addKeyListener(new CheckboxSelectorKeyAdapter((CheckboxTableViewer)table));
 		((CheckboxTableViewer)table).addCheckStateListener(new ICheckStateListener() {
 			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				checkChanged = true;				
 			}
 		});
-		table.getControl().addListener(SWT.KeyDown, e->{
-			if (e.keyCode != SWT.SPACE) return;
-			if (table.getSelection().isEmpty()) return;
-			
-			Object item = table.getStructuredSelection().getFirstElement();
-			if (item == null) return;
-			boolean value = ((CheckboxTableViewer)table).getChecked( item );
-			for (Iterator<?> iterator = table.getStructuredSelection().iterator(); iterator.hasNext();) {
-				Object tp = (Object) iterator.next();
-				((CheckboxTableViewer)table).setChecked(tp, !value);
-			}
-			e.doit = false;
-			
-		});
+		
 		if (labelProvider != null) table.setLabelProvider(labelProvider);
 		if (contentProvider != null) table.setContentProvider(contentProvider);
 		if (input != null) table.setInput(input);
@@ -350,10 +341,10 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	    popupVisible();
 		popup.setVisible (true);
 		popup.getChildren()[0].setFocus();
-		for (int i = 0; i < 150; i +=2){
+		for (int i = 0; i < 150; i +=25){
 			popup.setBounds(pnt.x, pnt.y + l.height , l.width, i);	
 	    }
-	    
+		
 		Collection<Object> items = (Collection<Object>) txtInfo.getData();
 		if (items != null && !items.isEmpty()){
 			setCheckedElements(items.toArray(new Object[items.size()]));

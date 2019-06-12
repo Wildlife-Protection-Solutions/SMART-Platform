@@ -56,6 +56,7 @@ import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 
 /**
  * Lists conservation area from a smart connect server.
@@ -117,24 +118,7 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 		});
 		cmbList.setInput(new String[]{Messages.LocalCaListPage_Loading});
 		cmbList.addSelectionChangedListener(this);
-		cmbList.getTable().addKeyListener(new KeyAdapter() {
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (cmbList.getSelection().isEmpty()){
-					return;
-				}
-				if (e.keyCode == SWT.SPACE){
-					IStructuredSelection selection = ((IStructuredSelection)cmbList.getSelection());
-					boolean value = cmbList.getChecked(selection.getFirstElement() );
-					for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
-						cmbList.setChecked(tp, !value);
-					}
-					e.doit = false;			
-				}
-			}
-		});
+		cmbList.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(cmbList));
 
 		Composite links = new Composite(outer, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);

@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.gpx.xml.WptType;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
@@ -109,6 +110,7 @@ public class WptTypeSelectionDialog extends SmartStyledTitleDialog{
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
 		lstViewer.setInput(waypoints);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		lstViewer.getControl().addKeyListener(new CheckboxSelectorKeyAdapter(lstViewer));
 		lstViewer.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
 				if (element instanceof WptType) {
@@ -129,24 +131,6 @@ public class WptTypeSelectionDialog extends SmartStyledTitleDialog{
 					return value.toString();
 				}
 				return super.getText(element);
-			}
-		});
-		lstViewer.getTable().addKeyListener(new KeyListener(){
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.character == SWT.SPACE){
-					boolean value = lstViewer.getChecked(   ((IStructuredSelection)lstViewer.getSelection()).getFirstElement() );
-					for (Iterator<?> iterator = ((IStructuredSelection)lstViewer.getSelection()).iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
-						lstViewer.setChecked(tp, !value);
-					}
-					e.doit = false;
-				}
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
 			}
 		});
 		

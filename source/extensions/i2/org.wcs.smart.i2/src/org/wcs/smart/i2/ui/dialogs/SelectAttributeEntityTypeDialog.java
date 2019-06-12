@@ -64,6 +64,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -203,27 +204,8 @@ public class SelectAttributeEntityTypeDialog extends SmartStyledTitleDialog{
 		attributeList.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		attributeList.getControl().setFocus();
 		attributeList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		attributeList.getTable().addKeyListener(new KeyAdapter() {
-			//spacebar check
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (attributeList.getSelection().isEmpty()){
-					return;
-				}
-				if (e.keyCode == SWT.SPACE){
-					IStructuredSelection selection = ((IStructuredSelection)attributeList.getSelection());
-					selection.getFirstElement();
-					boolean value = attributeList.getChecked(selection.getFirstElement() );
-					for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
-						attributeList.setChecked(tp, !value);
-					}
-					e.doit = false;
-							
-				}
-				
-			}
-		});
+		attributeList.getControl().addKeyListener(new CheckboxSelectorKeyAdapter(attributeList));
+		
 		filter = new NamedItemViewerFilter(attributeList);
 		attributeList.setFilters(new ViewerFilter[]{filter});
 		attributeList.addDoubleClickListener(new IDoubleClickListener() {

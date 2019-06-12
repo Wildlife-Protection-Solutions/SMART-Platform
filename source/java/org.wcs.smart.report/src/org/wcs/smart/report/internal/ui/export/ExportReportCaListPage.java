@@ -22,7 +22,6 @@
 package org.wcs.smart.report.internal.ui.export;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,13 +31,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -50,6 +46,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.report.internal.Messages;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.ConservationAreaLabelProvider;
 
 /**
@@ -89,25 +86,7 @@ public class ExportReportCaListPage extends WizardPage {
 		caList.setLabelProvider(new ConservationAreaLabelProvider());
 		caList.setInput(Messages.ExportReportCaListPage_LoadingLbl);
 		caList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		caList.getTable().addKeyListener(new KeyAdapter() {
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (caList.getSelection().isEmpty()){
-					return;
-				}
-				if (e.keyCode == SWT.SPACE){
-					IStructuredSelection selection = ((IStructuredSelection)caList.getSelection());
-					boolean value = caList.getChecked( selection.getFirstElement() );
-					for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
-						caList.setChecked(tp, !value);
-					}
-					e.doit = false;	
-				}
-				validate();
-			}
-		});
+		caList.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(caList));
 		caList.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

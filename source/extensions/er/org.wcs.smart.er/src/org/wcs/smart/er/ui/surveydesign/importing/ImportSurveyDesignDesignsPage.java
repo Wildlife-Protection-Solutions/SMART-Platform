@@ -25,7 +25,6 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,11 +35,8 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -52,6 +48,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 
 /**
  * Page to select designs for given Conservation Area.
@@ -91,28 +88,8 @@ public class ImportSurveyDesignDesignsPage extends WizardPage{
 				setPageComplete(tblEntities.getCheckedElements().length > 0);
 			}
 		});
-		tblEntities.getTable().addKeyListener(new KeyAdapter() {
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (tblEntities.getSelection().isEmpty()){
-					return;
-				}
-				if (e.keyCode == SWT.SPACE){
-					IStructuredSelection selection = ((IStructuredSelection)tblEntities.getSelection());
-					selection.getFirstElement();
-					boolean value = tblEntities.getChecked(   selection.getFirstElement() );
-					for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
-						tblEntities.setChecked(tp, !value);
-					}
-					e.doit = false;
-					setPageComplete(tblEntities.getCheckedElements().length > 0);
-				}
-				
-			}
-		});
-					
+		tblEntities.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(tblEntities));
+		
 		setControl(main);
 		setTitle(Messages.ImportSurveyDesignWizard_Title);
 		setMessage(Messages.ImportSurveyDesignDesignsPage_Message);

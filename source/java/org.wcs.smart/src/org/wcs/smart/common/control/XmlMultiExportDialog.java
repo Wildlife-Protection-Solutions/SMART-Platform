@@ -56,6 +56,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.util.SmartUtils;
 
@@ -232,26 +233,7 @@ public abstract class XmlMultiExportDialog extends SmartStyledTitleDialog implem
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1);
 		gd.heightHint = 200;
 		tableViewer.getControl().setLayoutData(gd);
-		tableViewer.getTable().addKeyListener(new KeyAdapter() {
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (tableViewer.getSelection().isEmpty()){
-					return;
-				}
-				if (e.keyCode == SWT.SPACE){
-					IStructuredSelection selection = ((IStructuredSelection)tableViewer.getSelection());
-					boolean value = tableViewer.getChecked( selection.getFirstElement() );
-					for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
-						tableViewer.setChecked(tp, !value);
-					}
-					e.doit = false;
-							
-				}
-				
-			}
-		});
+		tableViewer.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(tableViewer));
 		tableViewer.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element){

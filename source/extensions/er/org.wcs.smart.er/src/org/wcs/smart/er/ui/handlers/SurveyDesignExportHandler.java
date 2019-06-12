@@ -30,7 +30,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -51,11 +50,8 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -83,6 +79,7 @@ import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.xml.SurveyDesignToXmlConverter;
 import org.wcs.smart.er.xml.SurveyDesignXMLManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.SmartUtils;
@@ -307,28 +304,7 @@ public class SurveyDesignExportHandler {
 					getButton(OK).setEnabled(tblEntities.getCheckedElements().length > 0);	
 				}
 			});
-			tblEntities.getTable().addKeyListener(new KeyAdapter() {
-				
-				@Override
-				public void keyPressed(KeyEvent e) {
-					if (tblEntities.getSelection().isEmpty()){
-						return;
-					}
-					if (e.keyCode == SWT.SPACE){
-						IStructuredSelection selection = ((IStructuredSelection)tblEntities.getSelection());
-						selection.getFirstElement();
-						boolean value = tblEntities.getChecked(   selection.getFirstElement() );
-						for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-							Object tp = (Object) iterator.next();
-							tblEntities.setChecked(tp, !value);
-						}
-						e.doit = false;
-						getButton(OK).setEnabled(tblEntities.getCheckedElements().length > 0);	
-					}
-					
-				}
-			});
-						
+			tblEntities.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(tblEntities));		
 			Job j = new Job("loadsurveydesigns"){ //$NON-NLS-1$
 
 				@Override
