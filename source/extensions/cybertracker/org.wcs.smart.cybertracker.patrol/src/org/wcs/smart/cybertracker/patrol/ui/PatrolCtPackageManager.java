@@ -122,7 +122,7 @@ public class PatrolCtPackageManager implements ICtPackageManager {
 						SubMonitor work = progress.split(1);
 						if (contributions != null) {
 							for (IPackageContribution cc : contributions) {
-								IPackageContribution.PackageContribution update = cc.packageFiles(ppackage, work);
+								IPackageContribution.PackageContribution update = cc.packageFiles(ppackage, context.createChild(), work);
 								if (update != null) updates.add(update);
 							}
 						}

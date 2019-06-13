@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -108,7 +109,7 @@ public class MapPackageContribution implements IPackageContribution{
 	
 	
 	@Override
-	public PackageContribution packageFiles(ICtPackage ctpackage, IProgressMonitor monitor) throws IOException {
+	public PackageContribution packageFiles(ICtPackage ctpackage, IEclipseContext context, IProgressMonitor monitor) throws IOException {
 		if (!(ctpackage instanceof AbstractCtPackage)) return new PackageContribution();
 		AbstractCtPackage pp = (AbstractCtPackage)ctpackage;
 		

@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
@@ -56,11 +57,12 @@ public interface IPackageContribution {
 	 * to be added to the package.  Can return null if nothing 
 	 * to do.
 	 * 
-	 * @param ctpackage
+	 * @param ctpackage the package to export
+	 * @param context shared map for export variables
 	 * @param monitor
 	 * @return
 	 */
-	public PackageContribution packageFiles( ICtPackage ctpackage, IProgressMonitor monitor) throws IOException;
+	public PackageContribution packageFiles( ICtPackage ctpackage, IEclipseContext context, IProgressMonitor monitor) throws IOException;
 
 	
 	/**

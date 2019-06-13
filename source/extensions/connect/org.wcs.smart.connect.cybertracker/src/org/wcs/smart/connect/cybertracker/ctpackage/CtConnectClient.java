@@ -44,13 +44,17 @@ import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 public interface CtConnectClient extends ConnectClient{
 	
 	@POST
-	@Path("/cybertracker/{uuid}")
+	@Path("/cybertracker/packages/{uuid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response uploadCtPackage(@HeaderParam("X-Upload-Content-Length") Long length, 
 			@PathParam("uuid") String packageuuid, CyberTrackerPackageProxy proxy);
 
 	@GET
-    @Path("/cybertracker/")
+    @Path("/cybertracker/packages")
     public List<CyberTrackerPackageProxy> getCtPackages(@QueryParam("cauuid") String caUuid);
-	
+
+	@GET
+    @Path("/cybertracker/apikey/{cauuid}")
+    public String getApiKey(@PathParam("cauuid") String caUuid);
+
 }

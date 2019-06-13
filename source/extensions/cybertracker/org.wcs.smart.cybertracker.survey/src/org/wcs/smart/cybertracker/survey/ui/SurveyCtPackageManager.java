@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,6 +39,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageManager;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
@@ -121,7 +123,7 @@ public class SurveyCtPackageManager implements ICtPackageManager {
 						SubMonitor work = progress.split(1);
 						if (contributions != null) {
 							for (IPackageContribution cc : PackageContributionManager.INSTANCE.getContributionItems()) {
-								IPackageContribution.PackageContribution update = cc.packageFiles(ppackage, work);
+								IPackageContribution.PackageContribution update = cc.packageFiles(ppackage, context.createChild(), work);
 								if (update != null) updates.add(update);
 							}
 						}

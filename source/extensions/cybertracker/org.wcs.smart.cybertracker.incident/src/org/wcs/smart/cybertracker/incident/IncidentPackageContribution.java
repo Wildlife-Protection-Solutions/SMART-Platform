@@ -35,6 +35,7 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -107,7 +108,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 	
 
 	@Override
-	public PackageContribution packageFiles(ICtPackage ctpackage, IProgressMonitor monitor) throws IOException {
+	public PackageContribution packageFiles(ICtPackage ctpackage, IEclipseContext context, IProgressMonitor monitor) throws IOException {
 		if (!(ctpackage instanceof AbstractCtPackage)) return null;
 		AbstractCtPackage pp = (AbstractCtPackage)ctpackage;
 		monitor.subTask(Messages.IncidentPackageContribution_TaskName);

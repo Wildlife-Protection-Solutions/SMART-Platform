@@ -101,22 +101,17 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 	
 	private TableViewer alertList;
 	private TreeViewer modelViewer;
-	
-	private Listener onModified;
-	
-	
-	private List<CtPackageAlert> currentAlerts;
-	private HashMap<ConfigurableModel, List<CtPackageAlert>> cmAlerts;
-	
-	private List<AlertType> types;
-	
-	private ConfigurableModel currentModel = null;
-	
-	@Inject
-	private IEclipseContext context;
-	
 	private Composite alertComp;
 	private SashForm sash;
+	
+	private Listener onModified;
+
+	private List<CtPackageAlert> currentAlerts;
+	private HashMap<ConfigurableModel, List<CtPackageAlert>> cmAlerts;
+	private List<AlertType> types;
+	private ConfigurableModel currentModel = null;
+	
+	@Inject private IEclipseContext context;
 	
 	public boolean isTab() { 
 		return true; 
@@ -136,7 +131,6 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 		this.onModified = onModified;
 		
 		this.cmAlerts = new HashMap<>();
-		
 		this.currentAlerts = new ArrayList<>();
 		
 		if (ctpackage instanceof ICmProvider) {
@@ -146,9 +140,7 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 			}else {
 				currentModel = cmprovider.getConfigurableModel();
 			}
-			
 		}
-		
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());

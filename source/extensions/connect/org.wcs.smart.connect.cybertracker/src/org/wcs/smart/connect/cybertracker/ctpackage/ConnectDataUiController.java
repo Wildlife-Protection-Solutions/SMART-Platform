@@ -67,7 +67,6 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	private Button btnUploadData;
 	private Label lblUp1, lblUp2;
 	private Text txtDataPeriod;
-	
 	private Button btnPositionUpdates;
 	private Label lblPos1, lblPos2;
 	private Text txtPositionPeriod;
@@ -75,8 +74,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	
 	private List<AlertType> types = null;
 	
-	@Inject
-	private IEclipseContext context;
+	@Inject private IEclipseContext context;
 
 	private boolean fireEvents = true;
 	
@@ -117,7 +115,6 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		
 		Label l = new Label(header, SWT.NONE);
 		l.setText(Messages.ConnectDataUiController_DataUploadsLabel);
-//		l.setToolTipText("If using this option, users cannot plug\nthe mobile device into the SMART Desktop\nto download data.  All data\nwill be sent to a SMART Connect\nserver via an internet connection,\nthen processed on the SMART Desktop\nthrough the data queue.\nObservation data will stay on\nthe device until an internet connection\nis acquired at which time it\nwill be sent to SMART Connect.");
 		Composite core = new Composite(upDataComp, SWT.FLAT);
 		core.setLayout(new GridLayout(4, false));
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

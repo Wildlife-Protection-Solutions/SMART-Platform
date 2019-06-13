@@ -24,14 +24,11 @@ package org.wcs.smart.connect.cybertracker.ctpackage;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
-import org.wcs.smart.connect.ConnectHibernateManager;
-import org.wcs.smart.connect.model.ConnectServer;
-import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.model.ICtPackage;
-import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * This contribution adds the status_url and download_url
@@ -43,8 +40,17 @@ import org.wcs.smart.hibernate.HibernateManager;
  * @author Emily
  *
  */
-public class ConnectUrlContribution implements IPackageContribution {
+public class ConnectUrlContribution extends AbstractConnectPackageContribution {
 
+	//urls for package status and package
+	private static final String STATUS_URL = "/noa/cybertracker/packages/info/"; //$NON-NLS-1$
+	private static final String PACKAGE_URL = "/noa/cybertracker/packages/"; //$NON-NLS-1$
+
+	//json keys for status/package urls
+	private static final String JSON_STATUS_KEY = "status_url"; //$NON-NLS-1$
+	private static final String JSON_DOWNLOAD_KEY = "download_url"; //$NON-NLS-1$
+	
+	
 	public ConnectUrlContribution() {
 	}
 
@@ -54,23 +60,24 @@ public class ConnectUrlContribution implements IPackageContribution {
 	}
 
 	@Override
-	public PackageContribution packageFiles(ICtPackage ctpackage, IProgressMonitor monitor) throws IOException {
+	public PackageContribution packageFiles(ICtPackage ctpackage, IEclipseContext context, IProgressMonitor monitor) throws IOException {
 		PackageContribution cc = new PackageContribution();
 		
-		String url = null;
-		try(Session s = HibernateManager.openSession()){
-			ConnectServer cs = ConnectHibernateManager.getConnectServer(s);
-			if (cs == null) return cc;
-			
-			url = cs.getServerUrl();
-		}catch (Exception ex) {
-			ex.printStackTrace();
-		}
 		//get connect url
-		if (url == null) return cc;
 		if (ctpackage.getUuid() != null) {
-			cc.setProjectMetadata("status_url:", url + "/api/cybertracker/" + ctpackage.getUuid().toString()); //$NON-NLS-1$ //$NON-NLS-2$
-			cc.setProjectMetadata("download_url:", url + "/api/cybertracker/packages/" + ctpackage.getUuid().toString()); //$NON-NLS-1$ //$NON-NLS-2$
+			String[] parts = null;
+			try {
+				parts = super.getServerDetails(context, ctpackage.getConservationArea());
+			}catch (Exception ex) {
+				throw new IOException(ex);
+			}
+			if (parts == null) return null;
+			String url = parts[0];
+			String apikey = parts[1];
+			
+			cc.setProjectMetadata(JSON_STATUS_KEY, url + STATUS_URL + ctpackage.getUuid().toString());
+			cc.setProjectMetadata(JSON_DOWNLOAD_KEY, url + PACKAGE_URL + ctpackage.getUuid().toString()); 
+			cc.setProjectMetadata(JSON_APIKEY, apikey);
 		}
 		
 		return cc;
