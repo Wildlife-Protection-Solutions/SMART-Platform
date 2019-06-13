@@ -60,11 +60,14 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.CyberTrackerApiKey;
 import org.wcs.smart.connect.model.CyberTrackerPackage;
 import org.wcs.smart.connect.model.CyberTrackerPackage.Status;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Type;
+import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.CaAction;
+import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -82,12 +85,14 @@ import org.wcs.smart.util.UuidUtils;
 @Produces({ MediaType.APPLICATION_JSON })
 public class CyberTracker extends HttpServlet{
 	
+	private static final Object APIKEYLOCK = new Object();
+	
 	private static final long serialVersionUID = 1L;
 	
 	private static final String DATE_FORMAT = "yyyyMMddHHmmss"; //$NON-NLS-1$
 
 	public static final String PATH = "cybertracker"; //$NON-NLS-1$
-	public static final String CT_PACKAGE_LOCATION = "ctpackages"; //$NON-NLS-1$
+	public static final String CT_PACKAGE_DATASTORE_LOCATION = "ctpackages"; //$NON-NLS-1$
 
 	private final Logger logger = Logger.getLogger(DataQueue.class.getName());
 	
@@ -105,7 +110,7 @@ public class CyberTracker extends HttpServlet{
 	 * @return
 	 */
 	@GET
-    @Path("/")
+    @Path("/packages")
     public List<CyberTrackerPackageProxy> getPackages(@QueryParam("cauuid") String cauuid){
 		UUID caUuid = null;
 		try {
@@ -156,7 +161,7 @@ public class CyberTracker extends HttpServlet{
 	 * @return
 	 */
 	@DELETE
-    @Path("/{uuid}")
+    @Path("/packages/{uuid}")
     public void deletePackage(@PathParam("uuid") String uuid){
 		UUID itemUuid = null;
 		try {
@@ -187,7 +192,7 @@ public class CyberTracker extends HttpServlet{
 			//TODO: clean up these files in the clean up code
 			//delete the file 
 			java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
-					.toPath().resolve(CT_PACKAGE_LOCATION).resolve(p.getFilename());
+					.toPath().resolve(CT_PACKAGE_DATASTORE_LOCATION).resolve(p.getFilename());
 			Files.delete(toDelete);
 			
 			s.delete(p);
@@ -229,7 +234,7 @@ public class CyberTracker extends HttpServlet{
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 			file = DataStoreManager.INSTANCE.getRootDirectory()
-					.toPath().resolve(CT_PACKAGE_LOCATION).resolve(ctpackage.getFilename());
+					.toPath().resolve(CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
 		}finally {
 			s.getTransaction().commit();
 		}
@@ -272,7 +277,7 @@ public class CyberTracker extends HttpServlet{
 	 * 
 	 */
 	@GET
-    @Path("/{uuid}")
+    @Path("packages/info/{uuid}")
 	public CyberTrackerPackageProxy getPackage(@PathParam("uuid") String packageUuidstr){
 		UUID packageUuid = null;
 		
@@ -318,7 +323,7 @@ public class CyberTracker extends HttpServlet{
 	 * where oReq is the XMLHttpRequest object used to post this request.
 	 */
 	@POST
-    @Path("/{uuid}")
+    @Path("/packages/{uuid}")
 	public String createPackage(@PathParam("uuid") String packageUuidstr, CyberTrackerPackageProxy proxy){
 		UUID packageUuid = null;
 		
@@ -391,7 +396,7 @@ public class CyberTracker extends HttpServlet{
 				
 				//delete file
 				java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
-						.toPath().resolve(CT_PACKAGE_LOCATION).resolve(ctpackage.getFilename());
+						.toPath().resolve(CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
 				if (Files.exists(toDelete)) {
 					Files.delete(toDelete);	
 				}
@@ -423,7 +428,7 @@ public class CyberTracker extends HttpServlet{
 			
 			ctpackage.setWorkItem(up.getUuid());
 
-			java.nio.file.Path p = Paths.get(CT_PACKAGE_LOCATION);
+			java.nio.file.Path p = Paths.get(CT_PACKAGE_DATASTORE_LOCATION);
 			if (!Files.exists(p)) {
 				Files.createDirectories(p);
 			}
@@ -449,5 +454,113 @@ public class CyberTracker extends HttpServlet{
 			throw new SmartConnectException(Messages.getString("ConservationAreas.UploadErr", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
+	}
+	
+	
+	/**
+	 * Gets the current cybertracker api key for the Conservation Area.  If not created/set
+	 * then a new one is created.  This is used for downloading
+	 * cybertracker packages / updates.  Also used for uploading
+	 * data back to SMART 
+	 * 
+	 * <p>
+	 * URL: ../server/api/cybertracker/apikey<br>
+	 * Call Type: GET<br>
+	 * </p>
+	 * @return
+	 */
+	@GET
+    @Path("/apikey/{uuid}")
+    public String getApiKey(@PathParam("uuid") String cauuid){
+		
+		if (cauuid == null || cauuid.isEmpty()) throw new SmartConnectException(Response.Status.BAD_REQUEST);;
+		UUID cuuid = null;
+		try {
+			cuuid = UuidUtils.stringToUuid(cauuid);
+		}catch (Exception ex) {
+			throw new SmartConnectException(Response.Status.BAD_REQUEST);
+		}
+		
+		ConservationAreaInfo ca = new ConservationAreaInfo();
+		ca.setUuid(cuuid);
+		
+		//TODO: Permissions
+		CyberTrackerApiKey key = null;
+		Session s = HibernateManager.getSession(context);
+		try{
+			s.beginTransaction();
+			
+//			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CyberTrackerCaAdminAccountAction.KEY, ca)) throw new SmartConnectException(Response.Status.FORBIDDEN);
+			key = QueryFactory.buildQuery(s, CyberTrackerApiKey.class, new Object[] {"conservationArea",ca}).uniqueResult();
+		}finally {
+			s.getTransaction().rollback();
+		}
+		
+		if (key == null) {
+			synchronized (APIKEYLOCK) {
+				s = HibernateManager.getSession(context);
+				s.beginTransaction();
+				try {
+					key = QueryFactory.buildQuery(s, CyberTrackerApiKey.class, new Object[] {"conservationArea",ca}).uniqueResult();
+					if (key == null) {
+						key = new CyberTrackerApiKey();
+						key.setConservationArea(ca);
+						//TODO: hash this key
+						key.setApiKey( UUID.randomUUID().toString() );
+						s.saveOrUpdate(key);
+					}
+					s.getTransaction().commit();
+				}catch (Exception ex) {
+					logger.log(Level.SEVERE, ex.getMessage(), ex);
+					if (s.getTransaction().isActive()) s.getTransaction().rollback();
+					throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, ex);
+				}
+			}
+		}
+		return key.getApiKey();
+	}
+	
+	/**
+	 * Deletes the cybertracker api key for the given Conservation Area.  
+	 * This needs to be 
+	 * used with care as once deleted all devices with this key will be unable
+	 * to upload data or download packages
+	 * 
+	 * <p>
+	 * URL: ../server/api/cybertracker/apikey<br>
+	 * Call Type: DELETE<br>
+	 * </p>
+	 * 
+	 * @return
+	 */
+	@DELETE
+    @Path("/apikey/{uuid}")
+    public boolean deleteApiKey(@PathParam("uuid") String cauuid){
+		if (cauuid == null || cauuid.isEmpty()) throw new SmartConnectException(Response.Status.BAD_REQUEST);;
+		UUID cuuid = null;
+		try {
+			cuuid = UuidUtils.stringToUuid(cauuid);
+		}catch (Exception ex) {
+			throw new SmartConnectException(Response.Status.BAD_REQUEST);
+		}
+		
+		ConservationAreaInfo ca = new ConservationAreaInfo();
+		ca.setUuid(cuuid);
+		
+		CyberTrackerApiKey key = null;
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY, ca.getUuid())) throw new SmartConnectException(Response.Status.FORBIDDEN);
+			key = QueryFactory.buildQuery(s, CyberTrackerApiKey.class, new Object[] {"conservationArea", ca}).uniqueResult();
+			if (key != null) s.delete(key);
+			s.getTransaction().commit();
+		}catch(SmartConnectException ex) {
+			if (s.getTransaction().isActive()) s.getTransaction().rollback();
+			if (ex instanceof SmartConnectException) throw ex;
+		}catch (Exception ex) {
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, ex);
+		}
+		return true;
 	}
 }

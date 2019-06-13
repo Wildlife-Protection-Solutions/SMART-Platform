@@ -20,11 +20,12 @@
 
 <div id="main">
   <div class="tabheader pageheader">CyberTracker Packages</div>
-  <p class="infomessage">Lists all CyberTracker packages uploaded to Connect.</p>
+  <p class="infomessage">Manage CyberTracker packages and settings.</p>
   <div>
     <div id="message" class="msgsection"></div>
   </div>
   <!-- Package Table -->
+  <p class="top-spacer label-header" style="border-top:1px solid; padding-top:4px">Uploaded Device Packages</p>
   
   <div class="top-spacer" >
     <div id="ctpackagetable" class="table-cell smart-table">
@@ -40,6 +41,29 @@
     </div>
     <a id="refreshnow" href="#">refresh</a>
   </div>	
+  
+  <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px">CyberTracker API Keys</p>
+  <p>CyberTracker API keys are included in CyberTracker packages and
+  allow CyberTracker to communicate with SMART Connect. Each Conservation Area has its own key that limits
+  access to the packages associated with that Conservation Area.  These keys should be kept secret.  
+  Users with access to this key are able to download CyberTracker packages from Connect, 
+  view the package contents,  upload sighting data to Connect, and create/update Connect alerts.  You
+  can revoke access by resetting the key.  Resetting the key will cause 
+  all existing CyberTracker devices to no longer be able to communicate 
+  with SMART Connect.  To restore this functionality all packages for the affect Conservation Area
+  will need to be removed, recreated, then re-exported to the devices. 
+  Only SMART Connect Administrators and Conservation Area Administrators 
+  can reset the API Key.</p>
+   <div class="top-spacer" >
+  
+     <div id="ctapikeytable" class="table-cell smart-table">
+  	  <div class="table-row smart-table-header">
+		  <div class="table-cell smart-table-cell">Conservation Area</div>
+		  <div class="table-cell smart-table-cell"></div>
+	  </div>
+    </div>
+   </div>
+    
 </div>		
 
 	<%@include file="footer.jsp" %>

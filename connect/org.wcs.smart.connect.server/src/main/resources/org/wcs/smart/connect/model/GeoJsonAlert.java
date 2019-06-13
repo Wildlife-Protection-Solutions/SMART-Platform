@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
+import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /*
@@ -112,4 +114,37 @@ public class GeoJsonAlert{
 		return features.get(0).getGeometry().getCoordinates().get(0);
 	}
 
+	
+	/**
+	 * Converts the geojson alert to a connect alert.
+	 * Set the lat,long,typeuuid,level,datetime,description,status,track
+	 * fields.  Does not set the creator
+	 * 
+	 * @return
+	 */
+	public Alert toAlert() {
+		Alert a = new Alert();
+
+		a.setCreatorUuid(null);
+    	a.setX(getLongitude());
+    	a.setY(getLatitude());
+    	a.setTypeUuid(getTypeUuid());
+    	a.setLevel(getLevel());
+
+    	//default to now if no date given 
+		if(getDateTime() == null){
+			a.setDate(new Date());
+		}else{
+			a.setDate(getDateTime());
+		}
+		
+		//default to Active for new alerts 
+		a.setStatus(AlertStatusEnum.ACTIVE);
+		a.setDescription(getDescription());
+
+		String track = "[ [" + getLongitude() + " , " + getLatitude() + "]" + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		a.setTrack(track);
+		
+    	return a; 
+	}
 }

@@ -1,16 +1,111 @@
 var CTURL = "../api/cybertracker";
-
+var CAURL = "../api/conservationarea"
+	
 window.onload = function(){
+	menuCheckOnload();
+	
 	refreshPackageList();
+	refreshApiKeyTable();
 	
 	document.querySelector("#refreshnow").onclick=function(){refreshPackageList(); return false;};
+}
 
+function resetApiKey(){
+	hideInfo();
+	var cauuid = this.dataset.cauuid;
+	var oReq = new XMLHttpRequest();
+ 	oReq.onload = resetApiKeyRes;
+ 	oReq.calabel = this.dataset.label;
+ 	oReq.open("Delete", CTURL + "/apikey/" + cauuid, true);
+ 	oReq.send();
+ 	return false;
+}
+
+function resetApiKeyRes(){
+	if (this.status != 200) {
+		var msg = "Error resetting CyberTracker API Key: ";
+		if (this.status == 401){
+			msg += "Unauthorized";
+		}
+		try {
+			msg += JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	var msg = this.calabel + " - API Key Reset.  All CyberTracker packages for this Conservation Area should be removed and regenerated.";
+	displayInfo(msg);
+}
+
+function refreshApiKeyTable(){
+	
+	//clear current table
+	var objects = document.querySelectorAll("div.ctapikeytable");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+
+	var parent = document.querySelector("#ctapikeytable");
+	var row = document.createElement("div");
+	row.className="apirow";
+	row.innerHTML="Loading Conservation Areas...";
+	parent.appendChild(row);
+		
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = createApiKeyTable;
+ 	oReq.open("Get", CAURL + "?includeSpatialBoundaries=false", true);
+ 	oReq.send();
+}
+
+function createApiKeyTable(){
+	if (this.status != 200) {
+		var msg = "Error loading conservation areas";
+		if (this.status == 401){
+			msg += "Unauthorized";
+		}
+		try {
+			msg += JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	//clear current table
+	var objects = document.querySelectorAll("div.apirow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	
+	var parent = document.querySelector("#ctapikeytable");
+ 	var packages = JSON.parse(this.responseText);
+ 	
+ 	var cnt = 0;
+ 	for (var i = 0; i < packages.length; i ++){
+ 		var label = packages[i].label;
+ 		var uuid = packages[i].uuid;
+ 		if (uuid != "00000000-0000-0000-0000-000000000000"){
+	 		var row = tableCreateRow(parent,[label,null], 
+	 				"apirow " + (cnt % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
+	 		cnt++;
+	 		
+		 	var resetbtn = document.createElement("button");
+		 	resetbtn.innerHTML="Reset API Key";
+		 	resetbtn.className= "block button";
+		 	resetbtn.onclick = resetApiKey;
+		 	resetbtn.dataset.cauuid = uuid;
+		 	resetbtn.dataset.label = label;
+		 	row.childNodes[1].appendChild(resetbtn);
+ 		}
+ 	}
 }
 
 function refreshPackageList(){
 	
 	//clear current table
-	var objects = document.querySelectorAll("div.carow");
+	var objects = document.querySelectorAll("div.ctrow");
 	for (var i = 0; i < objects.length; i++){
 		var ele = objects[i];
 		ele.parentElement.removeChild(ele);
@@ -24,7 +119,7 @@ function refreshPackageList(){
 		
  	var oReq = new XMLHttpRequest();
  	oReq.onload = createPackageTable;
- 	oReq.open("Get", CTURL, true);
+ 	oReq.open("Get", CTURL + "/packages", true);
  	oReq.send();
 }
 
@@ -103,16 +198,15 @@ function deletePackageValidate(){
 }
 
 function deletePackage(){
-		
-	
 	closeDialog('deleteDialog');
 	var uuid = document.querySelector("#deleteform > input[name=packageuuid]").value;
 	var oReq = new XMLHttpRequest();
  	oReq.onload = packageDeleted;
- 	oReq.open("Delete", CTURL + "/" + uuid, true);
+ 	oReq.open("Delete", CTURL + "/packages/" + uuid, true);
  	oReq.send();
  	return false;
 }
+
 
 function packageDeleted(){
 	if (this.status != 204) {

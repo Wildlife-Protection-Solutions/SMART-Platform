@@ -27,6 +27,8 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -35,7 +37,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 import org.wcs.smart.connect.i18n.Messages;
 
-/*
+/**
  * An Alert entity
  *
  * @Author Jeff
@@ -64,6 +66,11 @@ public class Alert extends ConnectUuidItem{
 
 	}
 	
+	public enum Source{
+		USER,
+		CYBERTRACKER
+	}
+	
 	private String userGeneratedId; 
 	private Date date;
 	private String description;
@@ -74,6 +81,7 @@ public class Alert extends ConnectUuidItem{
 	private String track;
 	public UUID typeUuid;
 	private UUID creatorUuid;
+	private Alert.Source source;
 	
 	private ConservationAreaInfo ca;
 	
@@ -107,6 +115,15 @@ public class Alert extends ConnectUuidItem{
 	}
 	public void setLevel(Integer level) {
 		this.level = level;
+	}
+	
+	@Column(name="source")
+	@Enumerated(value=EnumType.STRING)
+	public Alert.Source getSource() {
+		return source;
+	}
+	public void setSource(Alert.Source source) {
+		this.source = source;
 	}
 	
 	@Column(name="status")

@@ -72,14 +72,14 @@
   
     
 	<configuration>
-                    <outputFileName>smart</outputFileName>
+                    <outputFileName>smart-noa</outputFileName>
                     <outputPath>./swagger</outputPath>
                     <outputFormat>YAML</outputFormat>
                     <!--<resourcePackages>
                         <package>test.petstore</package>
                     </resourcePackages>
                     -->
-                    <resourcePackages>org.wcs.smart.connect.api</resourcePackages>
+                    <resourcePackages>org.wcs.smart.connect.api.noa</resourcePackages>
                     <prettyPrint>TRUE</prettyPrint>
 	</configuration>
 

@@ -50,8 +50,8 @@ import org.wcs.smart.connect.servlet.UserRoleRequestWrapper;
 
 
 /**
- * Servlet filter to authorize all calls to the /api/*.  This just ensure the
- * current username/password is valid.  It does not ensure the user has
+ * Servlet filter to authorize all calls to the /api/*.  Performs only authentication, not authorizations.
+ * Ensure the current username/password is valid.  It does not ensure the user has
  * access to the request action/resource.
  *  
  */

@@ -67,7 +67,7 @@ public class MenuItemsFilter implements Filter {
 		CAUSERS("MenuItemsFilter.CaAccountsLabel", ConnectRESTApplication.SERVLET_PATH + "causers", CaAdminAccountAction.KEY, "users.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		SETTINGS("MenuItemsFilter.ConfigurationLabel", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY, "settings.png"),   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		CT("Cybertracker", ConnectRESTApplication.SERVLET_PATH + "cybertracker", AdminAccountAction.KEY, "cybertracker.png");
-		
+		//TODO: ct = admin or caadmin
 		String nameKey;
 		String url;
 		String actionKey;

@@ -48,6 +48,7 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.GlobalForestWatchApi;
+import org.wcs.smart.connect.api.noa.ConnectNoaRESTApplication;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.Alert;
@@ -66,7 +67,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Emily
  *
  */
-@WebServlet(ConnectRESTApplication.NO_AUTH_PATH  + GlobalForestWatchApi.PATH + "/*")
+@WebServlet(ConnectNoaRESTApplication.NO_AUTH_PATH  + GlobalForestWatchApi.PATH + "/*")
 public class GlobalForestWatchProcessorServlet extends HttpServlet {
 	
 	

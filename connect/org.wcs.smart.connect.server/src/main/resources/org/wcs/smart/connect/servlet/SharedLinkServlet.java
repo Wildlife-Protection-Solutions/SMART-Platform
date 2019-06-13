@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.Session;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
+import org.wcs.smart.connect.api.noa.ConnectNoaRESTApplication;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SharedLink;
@@ -45,7 +46,7 @@ import org.wcs.smart.connect.query.QueryManager;
  * @author Jeff
  *
  */
-@WebServlet(ConnectRESTApplication.NO_AUTH_PATH + "sharedlink/*")
+@WebServlet(ConnectNoaRESTApplication.NO_AUTH_PATH + "sharedlink/*")
 public class SharedLinkServlet extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;

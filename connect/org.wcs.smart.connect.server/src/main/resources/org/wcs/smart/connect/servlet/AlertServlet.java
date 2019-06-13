@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
+import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertFilterDefault;
@@ -48,7 +49,7 @@ import org.wcs.smart.connect.security.SecurityManager;
  * Much more information is requested with ajax/resteasy API once the page is loaded. 
  */
 
-@WebServlet("/connect/alert")
+@WebServlet(ConnectRESTApplication.SERVLET_PATH + "alert")
 public class AlertServlet extends HttpServlet{
 	/**
 	 * 

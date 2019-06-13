@@ -148,6 +148,7 @@ th{
 }
 .smart-table-cell{
 	padding: 4px;
+	vertical-align: middle;
 }
 .smart-table-rowon{
 	background-color: #FFFFFF;

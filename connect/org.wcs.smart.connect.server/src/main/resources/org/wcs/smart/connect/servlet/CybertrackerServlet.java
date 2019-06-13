@@ -8,7 +8,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet("/connect/cybertracker")
+import org.wcs.smart.connect.api.ConnectRESTApplication;
+
+@WebServlet(ConnectRESTApplication.SERVLET_PATH + "cybertracker")
 public class CybertrackerServlet extends HttpServlet{
 	/**
 	 * 

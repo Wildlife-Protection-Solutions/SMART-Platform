@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.GlobalForestWatchApi;
+import org.wcs.smart.connect.api.noa.ConnectNoaRESTApplication;
 import org.wcs.smart.util.UuidUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -62,7 +63,7 @@ public class GlobalForestWatchProxy {
 		sb.append(":"); //$NON-NLS-1$
 		sb.append(request.getServerPort());
 		sb.append(request.getContextPath());
-		sb.append(ConnectRESTApplication.NO_AUTH_PATH );
+		sb.append(ConnectNoaRESTApplication.NO_AUTH_PATH );
 		sb.append(GlobalForestWatchApi.PATH);
 		return sb.toString();
 		
