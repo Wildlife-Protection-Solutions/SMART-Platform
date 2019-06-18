@@ -28,10 +28,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,6 +52,7 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.api.ConnectAlert;
+import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.CyberTracker;
 import org.wcs.smart.connect.api.DataQueue;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
@@ -65,12 +63,9 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Alert;
-import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.CyberTrackerApiKey;
 import org.wcs.smart.connect.model.CyberTrackerPackage;
 import org.wcs.smart.connect.model.GeoJsonAlert;
-import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
-import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
 
@@ -78,7 +73,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -89,13 +83,13 @@ import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 /**
  * CyberTracker API that is available via the token authorization
  * scheme.  This api allows users to: view packages, get package
- * details, download package, upload observaton data, and create/update 
+ * details, download package, upload observation data, and create/update 
  * alerts.
  * 
  * @author Emily
  *
  */
-@Path(ConnectNoaRESTApplication.PATH_SEPERATOR + CyberTrackerNoa.PATH)
+@Path(ConnectRESTApplication.PATH_SEPERATOR + CyberTrackerNoa.PATH)
 @SecuritySchemes(value = {
 		@SecurityScheme(name="apikeyquery",  type = SecuritySchemeType.APIKEY,	in = SecuritySchemeIn.QUERY, paramName=ConnectNoaRESTApplication.APIKEY_QUERY_PARAM),
 		@SecurityScheme(name="apikeyheader",  type = SecuritySchemeType.APIKEY,	in = SecuritySchemeIn.HEADER, paramName=ConnectNoaRESTApplication.APIKEY_HEADER_PARAM)})
@@ -132,7 +126,7 @@ public class CyberTrackerNoa {
 		try {
 			
 			CyberTrackerApiKey key = QueryFactory.buildQuery(s, CyberTrackerApiKey.class, 
-					new Object[] {"apiKey", token}).uniqueResult();
+					new Object[] {"apiKey", token}).uniqueResult(); //$NON-NLS-1$
 			
 			if (key == null) throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			if (key.getApiKey() == null) throw new SmartConnectException(Response.Status.UNAUTHORIZED);
@@ -165,7 +159,7 @@ public class CyberTrackerNoa {
 		try{
 			packageUuid = UUID.fromString(packageUuidstr);
 		}catch (Exception ex) {
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid package uuid.");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CyberTrackerNoa.InvalidPackageError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
 		Session s = HibernateManager.getSession(context);
@@ -235,7 +229,7 @@ public class CyberTrackerNoa {
 		try{
 			packageUuid = UUID.fromString(packageUuidstr);
 		}catch (Exception ex) {
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid package uuid.");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CyberTrackerNoa.InvalidPackageError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		java.nio.file.Path file = null;
 		Session s = HibernateManager.getSession(context);
@@ -254,7 +248,7 @@ public class CyberTrackerNoa {
 		
 		long size = 0;
 		if (file == null || !Files.exists(file)) {
-			logger.log(Level.SEVERE, "Cybertracker package file not found.");
+			logger.log(Level.SEVERE, Messages.getString("CyberTrackerNoa.PackageNotFoundError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		try {

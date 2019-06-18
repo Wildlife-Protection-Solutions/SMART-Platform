@@ -51,18 +51,24 @@ import io.swagger.v3.oas.annotations.servers.Server;
 	info = @Info(title = "SMART Connect API", description = "SMART Connect API avaliable without login", version = "7.0"))
 public class ConnectNoaRESTApplication extends Application {
 
-	public static final String APIKEY_QUERY_PARAM = "api_key";
-	public static final String APIKEY_HEADER_PARAM = "X-API-KEY";
+	/**
+	 * The api key parameter for authentication using a query parameter 
+	 */
+	public static final String APIKEY_QUERY_PARAM = "api_key"; //$NON-NLS-1$
+	/**
+	 * The request header parameter authentication using request headers 
+	 */
+	public static final String APIKEY_HEADER_PARAM = "X-API-KEY"; //$NON-NLS-1$
 	
-	public static final String PATH_SEPERATOR = "/"; //$NON-NLS-1$
-
-	public static final String NO_AUTH_PATH = PATH_SEPERATOR + "noa" + PATH_SEPERATOR ; //$NON-NLS-1$
+	public static final String NO_AUTH_PATH = ConnectRESTApplication.PATH_SEPERATOR + "noa" + ConnectRESTApplication.PATH_SEPERATOR ; //$NON-NLS-1$
 
 	@Override
 	public Set<Class<?>> getClasses() {
 		Set<Class<?>> resources = new HashSet<>();
+		//api classes
 	    resources.add(CyberTrackerNoa.class);
 	    
+	    //exception mappers
 	    resources.add(SmartConnectExceptionMapper.class);
 		resources.add(GeneralExceptionMapper.class);
 		

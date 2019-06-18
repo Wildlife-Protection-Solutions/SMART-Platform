@@ -48,6 +48,7 @@ public enum ActionManager {
 		actions.add(new AdvIntelAction());
 		actions.add(new DataQueueAction());
 		actions.add(new ReportAction());
+		actions.add(new CyberTrackerAction());
 		
 		caActions = new ArrayList<ISmartConnectAction>();
 		caActions.add(new CaAction());
@@ -55,6 +56,7 @@ public enum ActionManager {
 		caActions.add(new QueryAction());
 		caActions.add(new DataQueueAction());
 		caActions.add(new ReportAction());
+		caActions.add(new CyberTrackerAction());
 
 	}
 	

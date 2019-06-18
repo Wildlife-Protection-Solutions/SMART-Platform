@@ -1,4 +1,15 @@
 labels_en= {
+"cybertracker.reseterror": "Error resetting CyberTracker API Key: ",
+"cybertracker.unauthorized": "Unauthorized",
+"cybertracker.resetmsg": "API Key Reset.  All CyberTracker packages for this Conservation Area should be removed and regenerated.",
+"cybertracker.loadingkeysmsg": "Loading API Keys...",
+"cybertracker.loadingkeyserror": "Error loading api keys",
+"cybertracker.resetbtn": "Reset API Key",
+"cybertracker.loadingpackagesmsg": "Loading Packages...",
+"cybertracker.loadingpackageserror": "Error loading cybertracker packages: ",
+"cybertracker.packagedeleteerror": "Error deleting cybertracker package: ",
+"cybertracker.packagedeletemsg": "Package deleted.",
+
 "alert.errorcreatingalert": "Error creating Alert",
 "alert.invalidlong": "Invalid Longitude must be between -180 and 180.",
 "alert.invalidlat": "Invalid Latitude must be between -90 and 90.",

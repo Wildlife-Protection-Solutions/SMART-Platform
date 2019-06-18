@@ -12,29 +12,29 @@
 
 
 
-<title>CyberTracker Packages</title>
+<title><fmt:message key="cybertracker.packagestitle"/></title>
 </head>
 <body style="${style_bodycss}">
 <%@include file="header.jsp" %>
 <%@include file="menu.jsp" %>
 
 <div id="main">
-  <div class="tabheader pageheader">CyberTracker Packages</div>
-  <p class="infomessage">Manage CyberTracker packages and settings.</p>
+  <div class="tabheader pageheader"><fmt:message key="cybertracker.header"/></div>
+  <p class="infomessage"><fmt:message key="cybertracker.info"/></p>
   <div>
     <div id="message" class="msgsection"></div>
   </div>
   <!-- Package Table -->
-  <p class="top-spacer label-header" style="border-top:1px solid; padding-top:4px">Uploaded Device Packages</p>
+  <p class="top-spacer label-header" style="border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.uploadedpackages"/></p>
   
   <div class="top-spacer" >
     <div id="ctpackagetable" class="table-cell smart-table">
   	  <div class="table-row smart-table-header">
-		  <div class="table-cell smart-table-cell">Name</div>
-		  <div class="table-cell smart-table-cell">Conservation Area</div>
-		  <div class="table-cell smart-table-cell">Date Uploaded</div>
-		  <div class="table-cell smart-table-cell">Revision Date</div>
-		  <div class="table-cell smart-table-cell">Revision</div>
+		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.name"/></div>
+		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.ca"/></div>
+		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.upload"/></div>
+		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.revisiondate"/></div>
+		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.revision"/></div>
 		  <div class="table-cell smart-table-cell"></div>
 		  <div class="table-cell smart-table-cell"></div>
 	  </div>
@@ -42,23 +42,13 @@
     <a id="refreshnow" href="#">refresh</a>
   </div>	
   
-  <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px">CyberTracker API Keys</p>
-  <p>CyberTracker API keys are included in CyberTracker packages and
-  allow CyberTracker to communicate with SMART Connect. Each Conservation Area has its own key that limits
-  access to the packages associated with that Conservation Area.  These keys should be kept secret.  
-  Users with access to this key are able to download CyberTracker packages from Connect, 
-  view the package contents,  upload sighting data to Connect, and create/update Connect alerts.  You
-  can revoke access by resetting the key.  Resetting the key will cause 
-  all existing CyberTracker devices to no longer be able to communicate 
-  with SMART Connect.  To restore this functionality all packages for the affect Conservation Area
-  will need to be removed, recreated, then re-exported to the devices. 
-  Only SMART Connect Administrators and Conservation Area Administrators 
-  can reset the API Key.</p>
+  <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.apikeys"/></p>
+  <p><fmt:message key="cybertracker.apikeysmessage"/></p>
    <div class="top-spacer" >
   
      <div id="ctapikeytable" class="table-cell smart-table">
   	  <div class="table-row smart-table-header">
-		  <div class="table-cell smart-table-cell">Conservation Area</div>
+		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.apikeytable.ca"/></div>
 		  <div class="table-cell smart-table-cell"></div>
 	  </div>
     </div>
@@ -69,15 +59,30 @@
 	<%@include file="footer.jsp" %>
 
 	<div id="deleteDialog" style="display: none;" class="dialog">
-	  <div class="dialog-title">Delete Package</div>
+	  <div class="dialog-title"><fmt:message key="cybertracker.deletepackage"/></div>
 	  <div id="dialogerror" class="errorsection"></div>
 	  
 	  <form id="deleteform" onsubmit="return deletePackage();" >
 	    <input type="hidden" name="packageuuid"/>
-	   	<p>Are you sure you want to delete this package?</p>
+	   	<p><fmt:message key="cybertracker.deletepackagemsg"/></p>
 	   	<div class="block top-spacer" style="text-align:right">
-	     <input class="button" type="submit" value="Delete" />
-	     <input class="button" type="button" value="Cancel" onclick="closeDialog('deleteDialog')" />
+	     <input class="button" type="submit" value="<fmt:message key="cybertracker.deletebtn"/>" />
+	     <input class="button" type="button" value="<fmt:message key="cybertracker.cancelbtn"/>" onclick="closeDialog('deleteDialog')" />
+	    </div>
+	  </form>
+  </div>
+  
+  
+  	<div id="resetApiDialog" style="display: none;" class="dialog">
+	  <div class="dialog-title"><fmt:message key="cybertracker.resetkey"/></div>
+	  
+	  <form id="resetapiform" onsubmit="return resetApiKey();" >
+	    <input type="hidden" name="cauuid"/>
+	    <input type="hidden" name="label"/>
+	    <p><fmt:message key="cybertracker.resetkeymsg"/></p>
+	    <div class="block top-spacer" style="text-align:right">
+	     <input class="button" type="submit" value="<fmt:message key="cybertracker.resetbtn"/>" />
+	     <input class="button" type="button" value="<fmt:message key="cybertracker.cancelbtn"/>" onclick="closeDialog('resetApiDialog')" />
 	    </div>
 	  </form>
   </div>

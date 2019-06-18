@@ -1,5 +1,4 @@
 var CTURL = "../api/cybertracker";
-var CAURL = "../api/conservationarea"
 	
 window.onload = function(){
 	menuCheckOnload();
@@ -10,12 +9,29 @@ window.onload = function(){
 	document.querySelector("#refreshnow").onclick=function(){refreshPackageList(); return false;};
 }
 
-function resetApiKey(){
-	hideInfo();
+function confirmResetApi(){
 	var cauuid = this.dataset.cauuid;
+	var label = this.dataset.label;
+	var formUuidElement = document.querySelector("#resetapiform > input[name=cauuid]");
+	formUuidElement.setAttribute("value", cauuid);
+	var formUuidElement = document.querySelector("#resetapiform > input[name=label]");
+	formUuidElement.setAttribute("value", label);
+	
+	displayDialog('resetApiDialog', 'main');
+	return false;	
+}
+
+function resetApiKey(){
+	
+	closeDialog('resetApiDialog', 'main');
+	
+	hideInfo();
+	var cauuid = document.querySelector("#resetapiform > input[name=cauuid]").value;
+	var label = document.querySelector("#resetapiform > input[name=label]").value;
+
 	var oReq = new XMLHttpRequest();
  	oReq.onload = resetApiKeyRes;
- 	oReq.calabel = this.dataset.label;
+ 	oReq.calabel = label;
  	oReq.open("Delete", CTURL + "/apikey/" + cauuid, true);
  	oReq.send();
  	return false;
@@ -23,9 +39,9 @@ function resetApiKey(){
 
 function resetApiKeyRes(){
 	if (this.status != 200) {
-		var msg = "Error resetting CyberTracker API Key: ";
+		var msg = i18n("cybertracker.reseterror");
 		if (this.status == 401){
-			msg += "Unauthorized";
+			msg += i18n("cybertracker.unauthorized");
 		}
 		try {
 			msg += JSON.parse(this.responseText).error
@@ -34,7 +50,7 @@ function resetApiKeyRes(){
 		displayError(msg);
 		return;
 	}
-	var msg = this.calabel + " - API Key Reset.  All CyberTracker packages for this Conservation Area should be removed and regenerated.";
+	var msg = this.calabel + " - " + i18n("cybertracker.resetmsg");
 	displayInfo(msg);
 }
 
@@ -50,20 +66,20 @@ function refreshApiKeyTable(){
 	var parent = document.querySelector("#ctapikeytable");
 	var row = document.createElement("div");
 	row.className="apirow";
-	row.innerHTML="Loading Conservation Areas...";
+	row.innerHTML=i18n("cybertracker.loadingkeysmsg");
 	parent.appendChild(row);
 		
  	var oReq = new XMLHttpRequest();
  	oReq.onload = createApiKeyTable;
- 	oReq.open("Get", CAURL + "?includeSpatialBoundaries=false", true);
+ 	oReq.open("Get", CTURL + "/apikey/", true);
  	oReq.send();
 }
 
 function createApiKeyTable(){
 	if (this.status != 200) {
-		var msg = "Error loading conservation areas";
+		var msg = i18n("cybertracker.loadingkeyserror");
 		if (this.status == 401){
-			msg += "Unauthorized";
+			msg += i18n("cybertracker.unauthorized");
 		}
 		try {
 			msg += JSON.parse(this.responseText).error
@@ -86,19 +102,18 @@ function createApiKeyTable(){
  	for (var i = 0; i < packages.length; i ++){
  		var label = packages[i].label;
  		var uuid = packages[i].uuid;
- 		if (uuid != "00000000-0000-0000-0000-000000000000"){
-	 		var row = tableCreateRow(parent,[label,null], 
-	 				"apirow " + (cnt % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
-	 		cnt++;
+ 	
+ 		var row = tableCreateRow(parent,[label,null], 
+	 			"apirow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
 	 		
-		 	var resetbtn = document.createElement("button");
-		 	resetbtn.innerHTML="Reset API Key";
-		 	resetbtn.className= "block button";
-		 	resetbtn.onclick = resetApiKey;
-		 	resetbtn.dataset.cauuid = uuid;
-		 	resetbtn.dataset.label = label;
-		 	row.childNodes[1].appendChild(resetbtn);
- 		}
+		var resetbtn = document.createElement("button");
+		resetbtn.innerHTML=i18n("cybertracker.resetbtn");
+		resetbtn.className= "block button";
+		resetbtn.onclick = confirmResetApi;
+		resetbtn.dataset.cauuid = uuid;
+		resetbtn.dataset.label = label;
+		row.childNodes[1].appendChild(resetbtn);
+ 		
  	}
 }
 
@@ -114,7 +129,7 @@ function refreshPackageList(){
 	var parent = document.querySelector("#ctpackagetable");
 	var row = document.createElement("div");
 	row.className="ctrow";
-	row.innerHTML="Loading Packages...";
+	row.innerHTML=i18n("cybertracker.loadingpackagesmsg");
 	parent.appendChild(row);
 		
  	var oReq = new XMLHttpRequest();
@@ -126,9 +141,9 @@ function refreshPackageList(){
 
 function createPackageTable(){
 	if (this.status != 200) {
-		var msg = "Error loading cybertracker packages: ";
+		var msg = i18n("cybertracker.loadingpackageserror");
 		if (this.status == 401){
-			msg += "Unauthorized";
+			msg += i18n("cybertracker.unauthorized");
 		}
 		try {
 			msg += JSON.parse(this.responseText).error
@@ -210,9 +225,9 @@ function deletePackage(){
 
 function packageDeleted(){
 	if (this.status != 204) {
-		var msg = "Error deleting cybertracker package: ";
+		var msg = i18n("cybertracker.packagedeleteerror");
 		if (this.status == 401){
-			msg += "Unauthorized";
+			msg += i18n("cybertracker.unauthorized");
 		}
 		try {
 			msg += JSON.parse(this.responseText).error
@@ -221,7 +236,7 @@ function packageDeleted(){
 		displayError(msg);
 		return;
 	}
-	displayInfo("Package deleted.");
+	displayInfo(i18n("cybertracker.packagedeletemsg"));
 	refreshPackageList();
 }
 

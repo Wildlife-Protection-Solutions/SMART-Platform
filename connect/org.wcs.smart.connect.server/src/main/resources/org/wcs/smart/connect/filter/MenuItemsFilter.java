@@ -23,8 +23,12 @@ package org.wcs.smart.connect.filter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -44,6 +48,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.CaAdminAccountAction;
+import org.wcs.smart.connect.security.CyberTrackerAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
 /**
@@ -53,30 +58,38 @@ import org.wcs.smart.connect.security.SecurityManager;
 public class MenuItemsFilter implements Filter {
 
 	private enum Page{
-		HOME("MenuItemsFilter.HomePageLabel", ConnectRESTApplication.SERVLET_PATH + "home", null, "house.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		DASHBOARDBETA("MenuItemsFilter.DashboardBetaLabel", ConnectRESTApplication.SERVLET_PATH + "dashboardbeta", null, "dashboard.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		ACCOUNT("MenuItemsFilter.MyAccountLabel", ConnectRESTApplication.SERVLET_PATH + "myaccount", null, "myaccount.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		CA("MenuItemsFilter.CaLabel", ConnectRESTApplication.SERVLET_PATH + "ca", null, "calist.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		ALERT("MenuItemsFilter.AlertLabel", ConnectRESTApplication.SERVLET_PATH + "alert", AlertAction.VIEW_ALERTS_KEY, "alert.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QUERY("MenuItemsFilter.QueryLabel", ConnectRESTApplication.SERVLET_PATH + "query", null, "query.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		REPORT("MenuItemsFilter.ReportLabel", ConnectRESTApplication.SERVLET_PATH + "report", null, "reports.png"),  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		SHAREDLINKS("MenuItemsFilter.SharedLinksLabel", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", CaAdminAccountAction.KEY, "share.png"),  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		SHAREDLINKSADMIN("MenuItemsFilter.SharedLinksLabel", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", AdminAccountAction.KEY, "share.png"),  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QUEUE("MenuItemsFilter.DataQueueLabel", ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY, "dataq.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		USERS("MenuItemsFilter.AccountsLabel", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY, "users.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		CAUSERS("MenuItemsFilter.CaAccountsLabel", ConnectRESTApplication.SERVLET_PATH + "causers", CaAdminAccountAction.KEY, "users.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		SETTINGS("MenuItemsFilter.ConfigurationLabel", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY, "settings.png"),   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-		CT("Cybertracker", ConnectRESTApplication.SERVLET_PATH + "cybertracker", AdminAccountAction.KEY, "cybertracker.png");
-		//TODO: ct = admin or caadmin
-		String nameKey;
-		String url;
-		String actionKey;
-		String imageFileName;
+		HOME("MenuItemsFilter.HomePageLabel", "house.png", ConnectRESTApplication.SERVLET_PATH + "home", (String)null), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		DASHBOARDBETA("MenuItemsFilter.DashboardBetaLabel", "dashboard.png", ConnectRESTApplication.SERVLET_PATH + "dashboardbeta", (String)null), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		ACCOUNT("MenuItemsFilter.MyAccountLabel", "myaccount.png", ConnectRESTApplication.SERVLET_PATH + "myaccount", (String)null), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		CA("MenuItemsFilter.CaLabel", "calist.png", ConnectRESTApplication.SERVLET_PATH + "ca", (String)null), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		ALERT("MenuItemsFilter.AlertLabel", "alert.png", ConnectRESTApplication.SERVLET_PATH + "alert", AlertAction.VIEW_ALERTS_KEY), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		QUERY("MenuItemsFilter.QueryLabel", "query.png", ConnectRESTApplication.SERVLET_PATH + "query", (String)null), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		REPORT("MenuItemsFilter.ReportLabel", "reports.png", ConnectRESTApplication.SERVLET_PATH + "report", (String)null),  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		SHAREDLINKS("MenuItemsFilter.SharedLinksLabel", "share.png", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", CaAdminAccountAction.KEY),  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		SHAREDLINKSADMIN("MenuItemsFilter.SharedLinksLabel", "share.png", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", AdminAccountAction.KEY),  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		QUEUE("MenuItemsFilter.DataQueueLabel","dataq.png",  ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		USERS("MenuItemsFilter.AccountsLabel", "users.png", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		CAUSERS("MenuItemsFilter.CaAccountsLabel", "users.png", ConnectRESTApplication.SERVLET_PATH + "causers", CaAdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		SETTINGS("MenuItemsFilter.ConfigurationLabel", "settings.png", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY),   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		CT("MenuItemsFilter.CyberTrackerMenuItem", "cybertracker.png", ConnectRESTApplication.SERVLET_PATH + "cybertracker", new HashSet<>(Arrays.asList(AdminAccountAction.KEY, CaAdminAccountAction.KEY, CyberTrackerAction.KEY))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
-		Page(String nameKey, String url, String actionKey, String imageFileName){
+		String nameKey = null;
+		String url = null;
+		Set<String> actionKeys = null;
+		String imageFileName = null;
+		
+		Page(String nameKey, String imageFileName, String url, String actionKey){
+			
 			this.nameKey = nameKey;
 			this.url = url;
-			this.actionKey = actionKey;
+			if (actionKey != null) this.actionKeys = Collections.singleton(actionKey);
+			this.imageFileName = imageFileName;
+		}
+		
+		Page(String nameKey, String imageFileName, String url, Set<String> actionKey){
+			this.nameKey = nameKey;
+			this.url = url;
+			this.actionKeys = actionKey;
 			this.imageFileName = imageFileName;
 		}
 	}
@@ -105,13 +118,21 @@ public class MenuItemsFilter implements Filter {
 		s.beginTransaction();
 		try{
 			for (Page p : Page.values()){
-				if (p.actionKey != null){
-					if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, ((HttpServletRequest)request).getUserPrincipal().getName(), p.actionKey)){
-						//do not add this menu item; user does not have permission to access
-						continue;
+				boolean canAccess = false;
+				if (p.actionKeys == null) {
+					canAccess = true;
+				}else {
+					for (String key : p.actionKeys) {
+						if (SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, ((HttpServletRequest)request).getUserPrincipal().getName(), key)){
+							//do not add this menu item; user does not have permission to access
+							canAccess = true;
+							break;
+						}
 					}
 				}
-				;
+				
+				if (!canAccess) continue;
+				
 				menuItems.add( new String[]{
 					Messages.getString(p.nameKey, l),
 					pathprefix + p.url,

@@ -30,6 +30,7 @@ import org.hibernate.Session;
 /**
  * An action in smart connect allows users to perform a set of tasks.
  * Actions can be associated with a set of resources to limit access to some resources.
+ * 
  * @author Emily
  *
  */
