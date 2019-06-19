@@ -65,12 +65,15 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.engine.spi.SessionImplementor;
@@ -115,8 +118,9 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	private LanguageViewer cmbLanguage;
 	private TableViewer tableViewer;
 	private StationSorter sorter;
-	private Button btnDisable; 
-	private Button btnDelete;
+	private ToolItem tiDisable, tiDelete;
+	private MenuItem miDisable, miDelete;
+	
 	
 	private static NullComparator nullStringComparator = new NullComparator();
 	
@@ -206,7 +210,6 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		composite2.setLayout(tableLayout);
 		
 		tableViewer = new TableViewer(composite2, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
-
 		createColumns(tableViewer);
 
 		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -234,116 +237,127 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		sorter = new StationSorter();
 		tableViewer.setComparator(sorter);
 		
-		Composite composite = new Composite(container, SWT.NONE);
-		composite.setLayout(new GridLayout(1, false));
-		composite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false,
-				1, 1));
-
-		Button btnAdd = new Button(composite, SWT.NONE);
-		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,
-				1, 1));
-		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnAdd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addStation();
-			}
-
+		
+		Menu mnu = new Menu(tableViewer.getTable());
+		tableViewer.getTable().setMenu(mnu);
+		MenuItem miAdd = new MenuItem(mnu, SWT.PUSH);
+		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miAdd.addListener(SWT.Selection, e->addStation());
+		
+		miDisable = new MenuItem(mnu, SWT.PUSH);
+		miDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+		miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+		miDisable.addListener(SWT.Selection, e->{
+			Station stn = (Station)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+			if (stn != null) stn.setIsActive(!stn.getIsActive());
+			updateButtons();
+			tableViewer.refresh();
+			setChangesMade(true);
 		});
 		
-		btnDisable = new Button(composite, SWT.NONE);
-		btnDisable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
-		btnDisable.setEnabled(false);
-		btnDisable.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				Station stn = (Station)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
-				if (btnDisable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT)){
-					stn.setIsActive(false);
-					btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
-				}else{
-					stn.setIsActive(true);
-					btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
-				}
-				tableViewer.refresh();
-				setChangesMade(true);
-			}
+		
+		ToolBar tb = new ToolBar(container, SWT.FLAT | SWT.VERTICAL | SWT.RIGHT);
+		tb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		ToolItem tiAdd = new ToolItem(tb, SWT.PUSH);
+		tiAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		tiAdd.addListener(SWT.Selection, e->addStation());
+				
+		tiDisable = new ToolItem(tb, SWT.NONE);
+		tiDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+		tiDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+		tiDisable.setEnabled(false);
+		tiDisable.addListener(SWT.Selection, e->{
+			Station stn = (Station)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+			if (stn != null) stn.setIsActive(!stn.getIsActive());
+			updateButtons();
+			tableViewer.refresh();
+			setChangesMade(true);
+			
 		});
 		
 		if (PermissionManager.INSTANCE.canDelete(Station.class)){
-			btnDelete = new Button(composite, SWT.NONE);
-			btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-			btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-			btnDelete.setEnabled(false);
-			btnDelete.addSelectionListener(new SelectionAdapter(){
-				@Override
-				public void widgetSelected(SelectionEvent e){
-					deleteStation();
-				}
-			});
+			miDelete = new MenuItem(mnu, SWT.PUSH);
+			miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			miDelete.addListener(SWT.Selection, e->deleteStation());
+			
+			tiDelete = new ToolItem(tb, SWT.PUSH);
+			tiDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			tiDelete.addListener(SWT.Selection, e->deleteStation());
+			tiDelete.setEnabled(false);
 		}
+		
+		new ToolItem(tb, SWT.SEPARATOR);
+		
+		ToolItem tiImport = new ToolItem(tb, SWT.PUSH);
+		tiImport.setText(DialogConstants.IMPORT_BUTTON_TEXT);
+		tiImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
+		tiImport.addListener(SWT.Selection, e->importStations());
+		
+		ToolItem tiExport = new ToolItem(tb, SWT.PUSH);
+		tiExport.setText(DialogConstants.EXPORT_BUTTON_TEXT);
+		tiExport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
+		tiExport.addListener(SWT.Selection, e->exportStations());
 		
 		tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				Station stn = (Station)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
-				if (stn != null){
-					btnDisable.setEnabled(true);
-					if (btnDelete != null) btnDelete.setEnabled(true);
-					if (stn.getIsActive()){
-						btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
-					}else{
-						btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
-					}
-				}	
+				updateButtons();
 			}
 		});
 		
-		Composite btnPanel = new Composite(container, SWT.NONE);
-		btnPanel.setLayout(new GridLayout(2, false));
-		btnPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3,1));
-		
-		Button btnImport = new Button(btnPanel, SWT.PUSH);
-		btnImport.setText(DialogConstants.IMPORT_BUTTON_TEXT);
-		btnImport.addSelectionListener(new SelectionAdapter() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				StationCsvImportConfig config = new StationCsvImportConfig();
-				CsvCaImportDialog dialog = new CsvCaImportDialog(getShell(), config);
-				int ret = dialog.open();
-				if (ret == IDialogConstants.CANCEL_ID) {
-					return;
-				} else {
-					Collection<Station> importedData = ((StationCsvImporter)config.getImporter()).getImportedData();
-					if (importedData != null && importedData.size() > 0){
-						stations.addAll(importedData);
-						tableViewer.refresh();
-						setChangesMade(true);
-					}
-				}
-				
-			}
-			
-		});
-		
-		Button btnExport = new Button(btnPanel, SWT.PUSH);
-		btnExport.setText(DialogConstants.EXPORT_BUTTON_TEXT);
-		btnExport.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				CsvExportDialog dialog = new CsvExportDialog(getShell(), new StationCsvExportConfig());
-				dialog.open();
-			}
-			
-		});
-
 		setTitle(Messages.StationListPropertyPage_PageName);
 		setMessage(Messages.StationListPropertyPage_Dialog_Message);
 		return container;
 
+	}
+	
+	private void updateButtons() {
+		Station stn = (Station)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
+		if (stn != null){
+			if (tiDelete != null) tiDelete.setEnabled(true);
+			if (miDelete != null) miDelete.setEnabled(true);
+			
+			miDisable.setEnabled(true);
+			tiDisable.setEnabled(true);
+			if (stn.getIsActive()){
+				tiDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+				miDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+				tiDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+				miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+			}else{
+				tiDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+				miDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+				tiDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
+				miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
+			}
+		}	
+	}
+	
+	private void exportStations() {
+		CsvExportDialog dialog = new CsvExportDialog(getShell(), new StationCsvExportConfig());
+		dialog.open();
+	}
+	
+	private void importStations() {
+		StationCsvImportConfig config = new StationCsvImportConfig();
+		CsvCaImportDialog dialog = new CsvCaImportDialog(getShell(), config);
+		int ret = dialog.open();
+		if (ret == IDialogConstants.CANCEL_ID) {
+			return;
+		} else {
+			Collection<Station> importedData = ((StationCsvImporter)config.getImporter()).getImportedData();
+			if (importedData != null && importedData.size() > 0){
+				stations.addAll(importedData);
+				tableViewer.refresh();
+				setChangesMade(true);
+			}
+		}
 	}
 	
 	private void deleteStation(){
@@ -704,6 +718,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			return findLangValue(column, (Station) element);
 		}
 		 
+		@Override
 		public Color getForeground(Object element){
 			 if (((Station)element).getIsActive()){
 				 return Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
@@ -713,7 +728,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		 }
 		
 		public Color getBackground(Object element){
-			 return null;
+			return null;
 		 }
 	}
 }

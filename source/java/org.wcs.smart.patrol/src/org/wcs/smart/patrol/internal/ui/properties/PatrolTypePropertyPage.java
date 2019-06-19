@@ -59,14 +59,11 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -75,6 +72,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
@@ -115,17 +114,12 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	private LanguageViewer languageViewer;
 	private TableViewer patrolTypeTblViewer;
 	private TableViewer transportTblViewer;
-	private Button btnDisableType;
-	private Button btnDisableTransport;
-	private Button btnDeleteTransport;
-	private Button btnEditKeyTransport;
+	private ToolItem tiAddTransport, tiDisableType, tiDisableTransport, tiDeleteTransport, tiEditTransport;
 	
 	private List<PatrolType> patrolTypes = null;
 	private List<PatrolTransportType> transportTypes = null;
 	private ConservationArea currentCa = null;
 	
-	private Button btnAddTransport;
-
 	/**
 	 * @param parent
 	 * @param title
@@ -205,19 +199,21 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				PatrolTransportType pt = (PatrolTransportType)((IStructuredSelection)transportTblViewer.getSelection()).getFirstElement();
 				
 				if (pt == null){
-					btnDisableTransport.setEnabled(false);
-					btnDeleteTransport.setEnabled(false);
-					btnEditKeyTransport.setEnabled(false);
+					tiDisableTransport.setEnabled(false);
+					tiDeleteTransport.setEnabled(false);
+					tiEditTransport.setEnabled(false);
 					return;
 				}
 				if (pt.getIsActive()){
-					btnDisableTransport.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+					tiDisableTransport.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
+					tiDisableTransport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 				}else{
-					btnDisableTransport.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+					tiDisableTransport.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
+					tiDisableTransport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 				}
-				btnDisableTransport.setEnabled(true);
-				btnDeleteTransport.setEnabled(true);
-				btnEditKeyTransport.setEnabled(true);
+				tiDisableTransport.setEnabled(true);
+				tiDeleteTransport.setEnabled(true);
+				tiEditTransport.setEnabled(true);
 				
 			}
 		});
@@ -236,50 +232,71 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 
 		customizeTableViewerEditor(transportTblViewer);
 		
-		Composite btnComposite = new Composite(transportComp, SWT.NONE);
-		btnComposite.setLayout(new GridLayout(1, false));
-		btnComposite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
-		((GridLayout)btnComposite.getLayout()).marginWidth = 0;
-		((GridLayout)btnComposite.getLayout()).marginHeight = 0;
-		btnAddTransport = new Button(btnComposite, SWT.NONE);
-		btnAddTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnAddTransport.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnAddTransport.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				addTransportType(null);
-			}
-		});
-		btnEditKeyTransport = new Button(btnComposite, SWT.NONE);
-		btnEditKeyTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		btnEditKeyTransport.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
-		btnEditKeyTransport.setEnabled(false);
-		btnEditKeyTransport.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				editKey();
-			}
-		});;
+		ToolBar tbType = new ToolBar(transportComp, SWT.FLAT | SWT.VERTICAL);
+		tbType.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		btnDisableTransport = new Button(btnComposite, SWT.NONE);
-		btnDisableTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		btnDisableTransport.setText(DialogConstants.ENABLE_BUTTON_TEXT);
-		btnDisableTransport.setEnabled(false);
-		btnDisableTransport.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				disableTransportType();
+		tiAddTransport = new ToolItem(tbType, SWT.PUSH);
+		tiAddTransport.setToolTipText(DialogConstants.ADD_BUTTON_TEXT);
+		tiAddTransport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		tiAddTransport.addListener(SWT.Selection, e->addTransportType(null));
+		
+		tiEditTransport = new ToolItem(tbType, SWT.PUSH);
+		tiEditTransport.setToolTipText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
+		tiEditTransport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		tiEditTransport.addListener(SWT.Selection, e->editKey());
+		tiEditTransport.setEnabled(false);
+		
+		tiDisableTransport = new ToolItem(tbType, SWT.PUSH);
+		tiDisableTransport.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
+		tiDisableTransport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+		tiDisableTransport.addListener(SWT.Selection, e->disableTransportType());
+		tiDisableTransport.setEnabled(false);
+		
+		tiDeleteTransport = new ToolItem(tbType, SWT.PUSH);
+		tiDeleteTransport.setToolTipText(DialogConstants.DELETE_BUTTON_TEXT);
+		tiDeleteTransport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDeleteTransport.addListener(SWT.Selection, e->deleteTransportType());
+		tiDeleteTransport.setEnabled(false);
+		
+		new ToolItem(tbType, SWT.SEPARATOR);
+		
+		ToolItem tiImport = new ToolItem(tbType, SWT.PUSH);
+		tiImport.setToolTipText(DialogConstants.IMPORT_BUTTON_TEXT);
+		tiImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
+		tiImport.addListener(SWT.Selection, e->{
+			CsvExportDialog dialog = new CsvExportDialog(getShell(), new PatrolTransportCsvExportConfig());
+			dialog.open();
+		});
+		
+		ToolItem tiExport = new ToolItem(tbType, SWT.PUSH);
+		tiExport.setToolTipText(DialogConstants.EXPORT_BUTTON_TEXT);
+		tiExport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
+		tiExport.addListener(SWT.Selection, e->{
+			PatrolTransportCsvImportConfig config = new PatrolTransportCsvImportConfig();
+			CsvCaImportDialog dialog = new CsvCaImportDialog(getShell(), config);
+			if (dialog.open() == Window.OK){
+				Collection<PatrolTransportType> types = ((PatrolTransportCsvImporter)config.getImporter()).getImportedData();
+				for (PatrolTransportType t : types){
+					for (PatrolType type : patrolTypes){
+						if (type.getType().equals(t.getPatrolType())){
+							//new to validate keys
+							if (DataModelManager.INSTANCE.validateKey(t.getKeyId(), transportTypes) != null){
+								t.setKeyId(DataModelManager.INSTANCE.generateKey(t.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()), transportTypes));
+							}
+							if (type.getTransportTypes() == null){
+								type.setTransportTypes(new ArrayList<PatrolTransportType>());
+							}
+							type.getTransportTypes().add(t);
+							transportTypes.add(t);
+						}
+					}
+					
+				}
+				setChangesMade(true);
+				transportTblViewer.refresh();
 			}
 		});
-		btnDeleteTransport = new Button(btnComposite, SWT.NONE);
-		btnDeleteTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		btnDeleteTransport.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDeleteTransport.setEnabled(false);
-		btnDeleteTransport.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteTransportType();
-			}
-		});
+		
 		
 		//table menu
 		Menu tableMenu = new Menu(transportTblViewer.getControl());
@@ -363,11 +380,13 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			public void selectionChanged(SelectionChangedEvent event) {
 				PatrolType pt = (PatrolType)((IStructuredSelection)patrolTypeTblViewer.getSelection()).getFirstElement();
 				if (pt.getIsActive()){
-					btnDisableType.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+					tiDisableType.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
+					tiDisableType.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 				}else{
-					btnDisableType.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+					tiDisableType.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
+					tiDisableType.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 				}
-				btnDisableType.setEnabled(true);
+				tiDisableType.setEnabled(true);
 				if (pt.getTransportTypes() == null){
 					pt.setTransportTypes(new ArrayList<PatrolTransportType>());
 				}				
@@ -410,70 +429,15 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			public void menuHidden(MenuEvent e) {}
 		});
 
-		Composite composite = new Composite(typeComp, SWT.NONE);
-		composite.setLayout(new GridLayout(1, false));
-		composite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
-		((GridLayout)composite.getLayout()).marginWidth = 0;
-		((GridLayout)composite.getLayout()).marginHeight = 0;
+
+		ToolBar tb = new ToolBar(typeComp, SWT.VERTICAL |  SWT.FLAT | SWT.RIGHT);
+		tb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		btnDisableType = new Button(composite, SWT.NONE);
-		btnDisableType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		btnDisableType.setText(DialogConstants.ENABLE_BUTTON_TEXT);
-		btnDisableType.setEnabled(false);
-		btnDisableType.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				disablePatrolType();
-			}
-		});
-		
-		Composite buttonComp = new Composite(container, SWT.NONE);
-		buttonComp.setLayout(new GridLayout(2, true));
-		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false,false,3,1));
-		
-		Button btnImport = new Button(buttonComp, SWT.PUSH);
-		btnImport.setText(DialogConstants.IMPORT_BUTTON_TEXT);
-		btnImport.addSelectionListener(new SelectionAdapter() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				PatrolTransportCsvImportConfig config = new PatrolTransportCsvImportConfig();
-				CsvCaImportDialog dialog = new CsvCaImportDialog(getShell(), config);
-				if (dialog.open() == Window.OK){
-					Collection<PatrolTransportType> types = ((PatrolTransportCsvImporter)config.getImporter()).getImportedData();
-					for (PatrolTransportType t : types){
-						for (PatrolType type : patrolTypes){
-							if (type.getType().equals(t.getPatrolType())){
-								//new to validate keys
-								if (DataModelManager.INSTANCE.validateKey(t.getKeyId(), transportTypes) != null){
-									t.setKeyId(DataModelManager.INSTANCE.generateKey(t.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()), transportTypes));
-								}
-								if (type.getTransportTypes() == null){
-									type.setTransportTypes(new ArrayList<PatrolTransportType>());
-								}
-								type.getTransportTypes().add(t);
-								transportTypes.add(t);
-							}
-						}
-						
-					}
-					setChangesMade(true);
-					transportTblViewer.refresh();
-				}
-				
-			}
-		});
-		
-		Button btnExport = new Button(buttonComp, SWT.PUSH);
-		btnExport.setText(DialogConstants.EXPORT_BUTTON_TEXT);
-		btnExport.addSelectionListener(new SelectionAdapter() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				CsvExportDialog dialog = new CsvExportDialog(getShell(), new PatrolTransportCsvExportConfig());
-				dialog.open();
-			}
-		});
+		tiDisableType = new ToolItem(tb, SWT.NONE);
+		tiDisableType.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
+		tiDisableType.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+		tiDisableType.setEnabled(false);
+		tiDisableType.addListener(SWT.Selection,e->disablePatrolType());
 		
 		folder.setSelection(0);
 		
@@ -484,12 +448,15 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 
 	private void disableTransportType(){
 		PatrolTransportType pt = (PatrolTransportType)((IStructuredSelection)transportTblViewer.getSelection()).getFirstElement();
-		if (btnDisableTransport.getText() == DialogConstants.DISABLE_BUTTON_TEXT){
+		if (tiDisableTransport.getToolTipText().equals(DialogConstants.DISABLE_BUTTON_TEXT)){
 			pt.setIsActive(false);
-			btnDisableTransport.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+			tiDisableTransport.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
+			tiDisableTransport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 		}else{
 			pt.setIsActive(true);
-			btnDisableTransport.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+			tiDisableTransport.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
+			tiDisableTransport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+
 		}
 		transportTblViewer.refresh();
 		setChangesMade(true);
@@ -497,12 +464,15 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	
 	private void disablePatrolType(){
 		PatrolType pt = (PatrolType)((IStructuredSelection)patrolTypeTblViewer.getSelection()).getFirstElement();
-		if (btnDisableType.getText() == DialogConstants.DISABLE_BUTTON_TEXT){
+		if (tiDisableType.getToolTipText().equals(DialogConstants.DISABLE_BUTTON_TEXT)){
 			pt.setIsActive(false);
-			btnDisableType.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+			tiDisableType.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
+			tiDisableType.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 		}else{
 			pt.setIsActive(true);
-			btnDisableType.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+			tiDisableType.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
+			tiDisableType.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+
 		}
 		patrolTypeTblViewer.refresh();
 		setChangesMade(true);

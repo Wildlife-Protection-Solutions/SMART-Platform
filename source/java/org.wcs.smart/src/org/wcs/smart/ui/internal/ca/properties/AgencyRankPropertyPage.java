@@ -63,7 +63,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -74,6 +73,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
@@ -111,8 +112,8 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	private LanguageViewer cmbLanguage;
 	private TableViewer tblAgencies;
 	private TableViewer tblRank;
-	private Button btnDeleteRank;
-	private Button btnAddRank;
+	private ToolItem tiDeleteRank;
+	private ToolItem tiAddRank;
 	private MenuItem addRankMnuItem ;
 	private MenuItem deleteRankMnuItem ;
 	
@@ -225,7 +226,22 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		/* Agency */
 		Composite c = SmartUiUtils.createHeaderLabel(container, Messages.AgencyRankPropertyPage_Agencies_Label1);
+		((GridLayout)c.getLayout()).numColumns = 2;
 		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3,1));
+		((GridLayout)c.getLayout()).marginHeight = 2;
+		
+		ToolBar tbinout = new ToolBar(c, SWT.FLAT | SWT.RIGHT);
+		tbinout.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL,true, false));
+		
+		ToolItem tiImport = new ToolItem(tbinout, SWT.PUSH);
+		tiImport.setText(DialogConstants.IMPORT_BUTTON_TEXT);
+		tiImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
+		tiImport.addListener(SWT.Selection, e->importAgencies());
+		
+		ToolItem tiExport = new ToolItem(tbinout, SWT.PUSH);
+		tiExport.setText(DialogConstants.EXPORT_BUTTON_TEXT);
+		tiExport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
+		tiExport.addListener(SWT.Selection, e->exportAgencies());
 		
 		Composite owner = new Composite(container, SWT.NONE);
 		owner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2,1));
@@ -254,42 +270,26 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		tblAgencies.getControl().setMenu(mnuAgency);
 		
 		//add/remove buttons
-		Composite buttons = new Composite(container, SWT.NONE);
-		buttons.setLayout(new GridLayout(1,true));
-		buttons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1,1));
-		((GridLayout)buttons.getLayout()).marginWidth = 0;
-		((GridLayout)buttons.getLayout()).marginHeight = 0;
+		ToolBar tb = new ToolBar(container, SWT.VERTICAL | SWT.FLAT | SWT.RIGHT);
+		tb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		Button btnAddAgency = new Button(buttons, SWT.NONE);
-		btnAddAgency.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnAddAgency.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnAddAgency.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addAgency();
-			}
-		});
+		ToolItem tiAddAgency = new ToolItem(tb, SWT.PUSH);
+		tiAddAgency.setText(DialogConstants.ADD_BUTTON_TEXT);
+		tiAddAgency.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		tiAddAgency.addListener(SWT.Selection, e->addAgency());
 		
-		final Button btnEditAgencyKey = new Button(buttons, SWT.NONE);
-		btnEditAgencyKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnEditAgencyKey.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
-		btnEditAgencyKey.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				editAgencyKey();
-			}
-		});
-		
-		final Button btnDeleteAgency = new Button(buttons, SWT.NONE);
-		btnDeleteAgency.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDeleteAgency.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnDeleteAgency.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteAgency();
-			}
-		});
-		btnDeleteAgency.setEnabled(false);
+		ToolItem tiEditAgency = new ToolItem(tb, SWT.PUSH);
+		tiEditAgency.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
+		tiEditAgency.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		tiEditAgency.addListener(SWT.Selection, e->editAgencyKey());
+		tiEditAgency.setEnabled(false);
+
+		ToolItem tiDeleteAgencey = new ToolItem(tb, SWT.PUSH);
+		tiDeleteAgencey.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		tiDeleteAgencey.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDeleteAgencey.addListener(SWT.Selection, e->deleteAgency());
+		tiDeleteAgencey.setEnabled(false);
+
 		
 		tblAgencies.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -298,10 +298,10 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 				if (selection.isEmpty()){
 					current = null;
 					currentRankSet = null;
-					btnDeleteAgency.setEnabled(false);
+					tiDeleteAgencey.setEnabled(false);
 					deleteAgencyMnuItem.setEnabled(false);
 					editAgencyKeyMnuItem.setEnabled(false);
-					btnEditAgencyKey.setEnabled(false);
+					tiEditAgency.setEnabled(false);
 					enableRank(false);
 				}else{
 					Agency agent = (Agency)selection.getFirstElement();
@@ -309,10 +309,10 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					tblRank.setInput(currentRankSet);
 					current = agent;
 					enableRank(true);
-					btnDeleteAgency.setEnabled(true);
+					tiDeleteAgencey.setEnabled(true);
 					deleteAgencyMnuItem.setEnabled(true);
 					editAgencyKeyMnuItem.setEnabled(true);
-					btnEditAgencyKey.setEnabled(true);
+					tiEditAgency.setEnabled(true);
 				}
 			}
 		});
@@ -330,7 +330,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		tblRank.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				btnDeleteRank.setEnabled(!tblRank.getSelection().isEmpty());
+				tiDeleteRank.setEnabled(!tblRank.getSelection().isEmpty());
 				deleteRankMnuItem.setEnabled(!tblRank.getSelection().isEmpty());
 			}
 		});
@@ -350,69 +350,47 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		tblRank.getControl().setMenu(mnuRank);
 		
-		Composite buttons_1 = new Composite(container, SWT.NONE);
-		buttons_1.setLayout(new GridLayout(1,true));
-		buttons_1.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1,1));
-		((GridLayout)buttons_1.getLayout()).marginWidth = 0;
-		((GridLayout)buttons_1.getLayout()).marginHeight = 0;
+		ToolBar tbRank = new ToolBar(container, SWT.VERTICAL | SWT.FLAT | SWT.RIGHT);
+		tbRank.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		btnAddRank = new Button(buttons_1, SWT.NONE);
-		btnAddRank.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnAddRank.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnAddRank.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addRank();
-				
-			}
-		});
-		btnDeleteRank = new Button(buttons_1, SWT.NONE);
-		btnDeleteRank.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDeleteRank.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnDeleteRank.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteRank();
-			}
-		});
+		tiAddRank = new ToolItem(tbRank, SWT.PUSH);
+		tiAddRank.setText(DialogConstants.ADD_BUTTON_TEXT);
+		tiAddRank.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		tiAddRank.addListener(SWT.Selection, e->addRank());
+		
+		tiDeleteRank = new ToolItem(tbRank, SWT.PUSH);
+		tiDeleteRank.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		tiDeleteRank.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDeleteRank.addListener(SWT.Selection, e->deleteRank());
+		
 		enableRank(false);
 		
 		tblAgencies.refresh();
-		Button btnImport = new Button(container, SWT.NONE);
-		btnImport.setText(DialogConstants.IMPORT_BUTTON_TEXT);
-		btnImport.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				AgencyCsvImportConfig config = new AgencyCsvImportConfig();
-				CsvCaImportDialog dialog = new CsvCaImportDialog(getShell(), config);
-				int ret = dialog.open();
-				if (ret == IDialogConstants.CANCEL_ID) {
-					return;
-				} else {
-					Collection<Agency> importedData = ((AgencyCsvImporter)config.getImporter()).getImportedData();
-					if (importedData != null && importedData.size() > 0){
-						agencies.addAll(importedData);
-						tblAgencies.refresh();
-						setChangesMade(true);
-					}
-				}
-			}
-		});
-		Button btnExport = new Button(container, SWT.NONE);
-		btnExport.setText(DialogConstants.EXPORT_BUTTON_TEXT);
-		btnExport.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				CsvExportDialog dialog = new CsvExportDialog(getShell(), new AgencyCsvExportConfig());
-				dialog.open();
-			}
-		});
 				
 		setMessage(Messages.AgencyRankPropertyPage_DialogMessage);
 		setTitle(Messages.AgencyRankPropertyPage_PageTitle);
 		return container;
 	}
 
+	private void importAgencies() {
+		AgencyCsvImportConfig config = new AgencyCsvImportConfig();
+		CsvCaImportDialog dialog = new CsvCaImportDialog(getShell(), config);
+		int ret = dialog.open();
+		if (ret == IDialogConstants.CANCEL_ID) {
+			return;
+		} else {
+			Collection<Agency> importedData = ((AgencyCsvImporter)config.getImporter()).getImportedData();
+			if (importedData != null && importedData.size() > 0){
+				agencies.addAll(importedData);
+				tblAgencies.refresh();
+				setChangesMade(true);
+			}
+		}
+	}
+	private void exportAgencies() {
+		CsvExportDialog dialog = new CsvExportDialog(getShell(), new AgencyCsvExportConfig());
+		dialog.open();
+	}
 
 	private void resetAgencyList() {
 		try(Session s = HibernateManager.openSession()){
@@ -555,9 +533,9 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	private void enableRank(boolean enable){
 		tblRank.getTable().setEnabled(enable);
-		btnAddRank.setEnabled(enable);
+		tiAddRank.setEnabled(enable);
 		addRankMnuItem.setEnabled(enable);
-		btnDeleteRank.setEnabled(!tblRank.getSelection().isEmpty());
+		tiDeleteRank.setEnabled(!tblRank.getSelection().isEmpty());
 		deleteRankMnuItem.setEnabled(!tblRank.getSelection().isEmpty());
 		
 	}

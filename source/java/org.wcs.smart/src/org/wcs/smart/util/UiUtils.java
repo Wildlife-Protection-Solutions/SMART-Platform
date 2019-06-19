@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 
@@ -65,6 +66,7 @@ public class UiUtils {
 					//this has a specific style; skip it
 					continue;
 				}
+				if (kid instanceof Table) continue;	//skip tables
 				if (kid instanceof Composite) comps.add((Composite)kid);
 				if (kid instanceof Label) kid.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 				if (kid instanceof Text) kid.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
