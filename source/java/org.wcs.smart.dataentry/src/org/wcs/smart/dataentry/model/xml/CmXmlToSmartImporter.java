@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -43,6 +42,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.UuidItem;
@@ -200,7 +200,19 @@ public class CmXmlToSmartImporter {
 			}
 			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingConfigs);
 			configLookup = loadAttributeConfigs(xmlCm.getAttributeConfig(), cm, monitor);
-			cm.setDefaultConfigs(configLookup.values().stream().filter(cfg -> cfg.isDefault()).collect(Collectors.toMap(CmAttributeConfig::getAttribute, Function.identity())));
+
+			Map<Attribute,CmAttributeConfig> items = new HashMap<>();
+			for (CmAttributeConfig c : configLookup.values()) {
+				if (!c.isDefault()) continue;
+				if (items.containsKey(c.getAttribute())) {
+					warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_InvalidXml, c.getAttribute().getName()));
+					c.setDefault(false);
+				}else {
+					items.put(c.getAttribute(), c);
+				}
+				
+			}
+			cm.setDefaultConfigs(items);
 			
 			if (xmlCm.getDefaultTrees() != null || xmlCm.getDefaultLists() != null) {
 				//backward compatibility logic to import configurable models of SMART versions after 3.2 and before 6.0.0
@@ -292,6 +304,7 @@ public class CmXmlToSmartImporter {
 	}
 
 	private void validateCmNode(CmNode cmNode) {
+		
 		for (CmAttribute cmAttr : cmNode.getCmAttributes()) {
 			Attribute dmAttr = cmAttr.getAttribute();
 			switch (dmAttr.getType()) {
@@ -313,8 +326,132 @@ public class CmXmlToSmartImporter {
 				break;
 			}
 		}
+		
+		if (cmNode.getCmAttributes() != null) {
+			for (CmAttribute a : cmNode.getCmAttributes()) {
+				if (a.getAttribute().getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.LIST) {
+					//validate that all list items are part of the configuration
+					List<AttributeListItem> allitems = new ArrayList<>(a.getAttribute().getAttributeList());
+					
+					for (CmAttributeListItem li : a.getConfig().getList()) {
+						allitems.remove(li.getListItem());
+					}
+					for (AttributeListItem toadd : allitems) {
+						CmAttributeListItem ali = new CmAttributeListItem();
+						ali.setConfig(a.getConfig());
+						ali.setIsActive(false);
+						ali.setListItem(toadd);
+						ali.setListOrder(a.getCurrentList().size() + 1);
+						for (Label l : toadd.getNames()) ali.updateName(l.getLanguage(),l.getValue());
+						a.getConfig().getList().add(ali);
+					}
+				}
+			}
+		}
+		if (cmNode.getCategory() != null) {
+			//validate that all attributes for this category are associated with
+			//this node; if they aren't add them as disabled
+			
+			Category c = cmNode.getCategory();
+			List<Attribute> dmAttributes = new ArrayList<>();
+			List<Attribute> cmAttributes = new ArrayList<>();
+			
+			c.getAllAttribute(dmAttributes, true);
+			for (CmAttribute ca : cmNode.getCmAttributes()) {
+				cmAttributes.add(ca.getAttribute());
+			}
+			dmAttributes.removeAll(cmAttributes);
+			
+			for (Attribute a : dmAttributes) {
+				CmAttribute newa = new CmAttribute();
+				newa.setAttribute(a);
+				
+				CmAttributeConfig defaultc = configLookup.get(a.getKeyId());
+				if (defaultc == null) {
+					defaultc = new CmAttributeConfig();
+					configLookup.put(a.getKeyId(), defaultc);
+					defaultc.setAttribute(a);
+					defaultc.setDisplayMode(DisplayMode.TEXT_IMAGE);
+					defaultc.setDefault(true);
+					for (Language l : langLookup.values()) defaultc.updateName(l, Messages.CmXmlToSmartImporter_DefaultConfigName);
+					defaultc.setModel(cmNode.getModel());
+					cmNode.getModel().getDefaultConfigs().put(a,  defaultc);
+					if (a.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.LIST) {
+						validateListConfig(defaultc, a);
+					}else if (a.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.TREE) {
+						validateTreeConfig(defaultc, a);
+					}
+				}
+				newa.setConfig( defaultc );
+				for (Label l : a.getNames()) newa.updateName(l.getLanguage(),l.getValue());
+				newa.setNode(cmNode);
+				newa.setOrder(cmNode.getCmAttributes().size() + 1);
+				
+				HashMap<String, CmAttributeOption> ops = new HashMap<>();
+				CmAttributeOption isvis = new CmAttributeOption();
+				isvis.setCmAttribute(newa);
+				isvis.setBooleanValue(false);
+				isvis.setOptionId(CmAttributeOption.ID_IS_VISIBLE);
+				ops.put(CmAttributeOption.ID_IS_VISIBLE, isvis);
+				newa.setCmAttributeOptions(ops);
+				
+				cmNode.getCmAttributes().add(newa);
+			}
+		}
+		
+		
 		for (CmNode node : cmNode.getChildren()) {
 			validateCmNode(node);
+		}
+	}
+	
+	private void processTreeNode(AttributeTreeNode node, CmAttributeTreeNode parent, CmAttributeConfig config) {
+		CmAttributeTreeNode kid = new CmAttributeTreeNode();
+		kid.setChildren(new ArrayList<>());
+		kid.setConfig(config);
+		kid.setDisplayMode(DisplayMode.TEXT_IMAGE);
+		kid.setDmTreeNode(node);
+		kid.setIsActive(node.getIsActive());
+		for (Label l : node.getNames()) kid.updateName(l.getLanguage(),l.getValue());
+		kid.setNodeOrder(node.getNodeOrder());
+		kid.setParent(parent);
+		if (parent != null) {
+			parent.getChildren().add(kid);
+		}else {
+			config.getTree().add(kid);
+		}
+		
+		for (AttributeTreeNode c : node.getChildren()) {
+			processTreeNode(c, kid, config);
+		}
+		
+	}
+	
+	private void validateListConfig(CmAttributeConfig config, Attribute dmAttribute) {
+		if (config.getList() == null) config.setList(new ArrayList<>());
+		if (config.getList().isEmpty()) {
+			warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_InvalidConfiguration, dmAttribute.getName()));
+			//add list items
+			for (AttributeListItem i : dmAttribute.getAttributeList()) {
+				CmAttributeListItem ali = new CmAttributeListItem();
+				ali.setConfig(config);
+				ali.setIsActive(i.getIsActive());
+				ali.setListItem(i);
+				ali.setListOrder(i.getListOrder());
+				for (Label l : i.getNames()) ali.updateName(l.getLanguage(),l.getValue());
+				config.getList().add(ali);
+			}
+		}
+	}
+	
+	private void validateTreeConfig(CmAttributeConfig config, Attribute dmAttribute) {
+		if (config.getTree() == null) config.setTree(new ArrayList<>());
+		if (config.getTree().isEmpty()) {
+			warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_InvalidConfiguration, dmAttribute.getName()));
+			//add default attributes
+			for (AttributeTreeNode n : dmAttribute.getTree()) {
+				processTreeNode(n, null, config);
+			}
 		}
 	}
 	
@@ -329,8 +466,14 @@ public class CmXmlToSmartImporter {
 			Attribute dmAttribute = fetchAttribute(xmlConfig.getAttributeKey());
 			if (dmAttribute != null) {
 				config.setAttribute(dmAttribute);
-				config.setList(processCmListItems(config, dmAttribute, xmlConfig.getListItem(), monitor));
-				config.setTree(processCmTreeNodes(config, dmAttribute, null, xmlConfig.getTreeNode(), monitor));
+				
+				if (dmAttribute.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.LIST) {
+					config.setList(processCmListItems(config, dmAttribute, xmlConfig.getListItem(), monitor));
+					validateListConfig(config, dmAttribute);
+				}else if (dmAttribute.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.TREE) {
+					config.setTree(processCmTreeNodes(config, dmAttribute, null, xmlConfig.getTreeNode(), monitor));
+					validateTreeConfig(config, dmAttribute);
+				}
 				
 				addToDataMap(xmlConfig.getId(), config);
 				configMap.put(xmlConfig.getId(), config);
@@ -348,7 +491,9 @@ public class CmXmlToSmartImporter {
 			updateNames(node, xmlNode.getName());
 			node.setConfig(cfg);
 			node.setIsActive(xmlNode.isIsActive());
-			node.setDmTreeNode(fetchAttributeTreeNode(xmlNode.getKeyRef(), xmlNode.getHkeyRef(), dmAttribute));
+			AttributeTreeNode dmnode = fetchAttributeTreeNode(xmlNode.getKeyRef(), xmlNode.getHkeyRef(), dmAttribute);
+			if (dmnode == null) continue; 
+			node.setDmTreeNode(dmnode);
 			node.setParent(parent);
 			node.setNodeOrder(result.size());
 			node.setDisplayMode(getDisplayMode(xmlNode.getDisplayMode()));
@@ -374,7 +519,9 @@ public class CmXmlToSmartImporter {
 			item.setConfig(cfg);
 			updateNames(item, xmlNode.getName());
 			item.setIsActive(xmlNode.isIsActive());
-			item.setListItem(fetchAttributeListItem(xmlNode.getKeyRef(), dmAttribute));
+			AttributeListItem li = fetchAttributeListItem(xmlNode.getKeyRef(), dmAttribute);
+			if (li == null) continue; //skip 
+			item.setListItem(li);
 			item.setListOrder(result.size());
 			if ( (xmlNode.isIsCustomImage() == null || xmlNode.isIsCustomImage() == Boolean.TRUE) && xmlNode.getImageFile() != null) {
 				item.setImageFile(findFile(xmlNode.getImageFile()));
@@ -635,12 +782,12 @@ public class CmXmlToSmartImporter {
 	private AttributeListItem fetchAttributeListItem(String key, Attribute attribute) {
 		if (key == null || key.isEmpty() || attribute == null)
 			return null;
-		AttributeListItem a = listItemLookup.get(key);
+		AttributeListItem a = listItemLookup.get(attribute.getKeyId() + "." + key); //$NON-NLS-1$
 		if (a == null) {
 			a = QueryFactory.buildQuery(session, AttributeListItem.class,
 					new Object[] {"attribute", attribute}, //$NON-NLS-1$
 					new Object[] {"keyId", key}).uniqueResult(); //$NON-NLS-1$
-			listItemLookup.put(key, a);
+			listItemLookup.put(attribute.getKeyId() + "." + key, a); //$NON-NLS-1$
 		}
 		if (a == null) {
 			warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_Problem_ListItem, key, attribute.getKeyId()));
@@ -652,7 +799,7 @@ public class CmXmlToSmartImporter {
 		//NOTE: we need to be able to work with keyId for backward compatibility, as before 3.3.0 hkey was not exported
 		if (key == null || key.isEmpty() || attribute == null)
 			return null;
-		String mapKey = hkey != null ? hkey : key;
+		String mapKey = attribute.getKeyId() + "." + (hkey != null ? hkey : key); //$NON-NLS-1$
 		AttributeTreeNode a = treeNodeLookup.get(mapKey);
 		if (a == null) {
 			

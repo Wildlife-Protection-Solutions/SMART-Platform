@@ -77,6 +77,7 @@ import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.IImageCont
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -628,6 +629,10 @@ public class EditTreeDialog extends SmartStyledTitleDialog {
 					itemViewer.refresh();
 					imageControl.updateImage();
 				}
+			}
+			@Override
+			public ConfigurableModel getModel() {
+				return attribute.getNode().getModel();
 			}
 		});
 		imageControl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

@@ -167,6 +167,10 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 				}
 				fireModelChanged();
 			}
+			@Override
+			public ConfigurableModel getModel() {
+				return CmNodeInfoComposite.this.getModel();
+			}
 		});
 		imageControl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 	}

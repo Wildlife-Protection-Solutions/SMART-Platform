@@ -76,6 +76,7 @@ public class Messages extends NLS {
 	public static String CmTemplateCloner_CopyProgress;
 	public static String CmTemplateCloner_TreeNodeNotFoundError;
 	public static String CmTreeLabelProvider_Root;
+	public static String CmXmlToSmartImporter_DefaultConfigName;
 	public static String CmXmlToSmartImporter_DefaultLanguage_Error;
 	public static String CmXmlToSmartImporter_ExtractingZip;
 	public static String CmXmlToSmartImporter_ImportingConfigs;
@@ -83,6 +84,8 @@ public class Messages extends NLS {
 	public static String CmXmlToSmartImporter_ImportingListItems;
 	public static String CmXmlToSmartImporter_ImportingNode;
 	public static String CmXmlToSmartImporter_ImportingTreeNodes;
+	public static String CmXmlToSmartImporter_InvalidConfiguration;
+	public static String CmXmlToSmartImporter_InvalidXml;
 	public static String CmXmlToSmartImporter_LanguageSelect_Message;
 	public static String CmXmlToSmartImporter_LanguageSelect_Title;
 	public static String CmXmlToSmartImporter_Problem_Attribute;
@@ -200,6 +203,8 @@ public class Messages extends NLS {
 	public static String ImageSelectionControl_Button_Load;
 	public static String ImageSelectionControl_CustomIcon;
 	public static String ImageSelectionControl_DefaultIcon;
+	public static String ImageSelectionControl_noiconsetmsg;
+	public static String ImageSelectionControl_noiconsettooltip;
 	public static String ImageSelectionControl_ResetIconBtn;
 	public static String ListAttributeInfoComposite_Button_Edit;
 	public static String ListAttributeInfoComposite_Button_Revert;

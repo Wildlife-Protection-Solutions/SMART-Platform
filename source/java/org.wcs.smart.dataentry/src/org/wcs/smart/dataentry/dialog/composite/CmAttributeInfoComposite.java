@@ -181,6 +181,10 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 					if (iconfile == null) return null;
 					return iconfile.getAttachmentFile();
 				}
+				@Override
+				public ConfigurableModel getModel() {
+					return CmAttributeInfoComposite.this.getModel();
+				}
 		});
 		imageSelection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		createTypeSpecificControls(container);

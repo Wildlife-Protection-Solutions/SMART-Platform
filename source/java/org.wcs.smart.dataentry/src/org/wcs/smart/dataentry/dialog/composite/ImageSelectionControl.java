@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
 import org.wcs.smart.icon.ui.ImageSelectionDialog;
 import org.wcs.smart.util.SmartUtils;
@@ -75,6 +76,7 @@ public class ImageSelectionControl extends Composite {
 	
 	private boolean fireEvents = true;
 	private Type lastSelection = null;
+	private ComboViewer cmbType;
 	
 	public ImageSelectionControl(Composite parent, IImageContentProvider contentProvider) {
 		super(parent, SWT.NONE);
@@ -127,6 +129,13 @@ public class ImageSelectionControl extends Composite {
 			}else {
 				lastSelection = Type.DATAMODEL;
 				cmbType.setSelection(new StructuredSelection(Type.DATAMODEL));
+				
+				//if model has no icon set warn the user
+				if (contentProvider.getModel().getIconSet() == null) {
+					lblWarnText.setText(Messages.ImageSelectionControl_noiconsetmsg);
+					lblWarnText.setToolTipText(Messages.ImageSelectionControl_noiconsettooltip);
+					warningArea.setVisible(true);
+				}
 			}
 		}
 		
@@ -142,8 +151,6 @@ public class ImageSelectionControl extends Composite {
 		
 		canvas.setToolTipText(file == null ? "" : file.getName()); //$NON-NLS-1$
 	}
-	
-	private ComboViewer cmbType;
 	
 	private void initControls() {
 		GridLayout gd = new GridLayout(3, false);
@@ -241,8 +248,6 @@ public class ImageSelectionControl extends Composite {
 			try {
 				fireEvents = false;
 				Type type = (Type) cmbType.getStructuredSelection().getFirstElement();
-
-				
 				if (type == Type.DATAMODEL) {
 					contentProvider.setImageFile(null);
 					updateImage();
@@ -317,5 +322,12 @@ public class ImageSelectionControl extends Composite {
 		 * @param file
 		 */
 		public void setImageFile(File file);
+		
+		/**
+		 * The configurable model being modified
+		 * 
+		 * @return
+		 */
+		public ConfigurableModel getModel();
 	}
 }

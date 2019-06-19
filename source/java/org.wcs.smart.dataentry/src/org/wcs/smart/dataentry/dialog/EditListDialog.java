@@ -76,6 +76,7 @@ import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.IImageCont
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -397,6 +398,10 @@ public class EditListDialog extends SmartStyledTitleDialog{
 					imageControl.updateImage();
 					listViewer.refresh();
 				}
+			}
+			@Override
+			public ConfigurableModel getModel() {
+				return attribute.getNode().getModel();
 			}
 		});
 		imageControl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
