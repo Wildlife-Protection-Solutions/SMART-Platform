@@ -190,6 +190,8 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		Composite main = new Composite(parent, SWT.BORDER);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)main.getLayout()).marginWidth = 0;
+		((GridLayout)main.getLayout()).marginHeight = 0;
 		
 		CTabFolder tabs = new CTabFolder(main, SWT.TOP | SWT.FLAT );
 		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

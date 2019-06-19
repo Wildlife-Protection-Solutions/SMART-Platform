@@ -34,10 +34,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -48,18 +51,18 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.locationtech.udig.catalog.URLUtils;
@@ -91,12 +94,8 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 	
 	private TableViewer modelListViewer;
 	private TreeViewer modelTreeViewer;
-	
-	private Button btnNew;
-	private Button btnEdit;
-	private Button btnDelete;
-	private Button btnExport;
-	private Button btnImport;
+
+	private ToolItem tiEdit, tiDelete, tiExport;
 
 	private LoadCmModelJob loadCmModelJob = new LoadCmModelJob();
 	
@@ -110,30 +109,76 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 	}
 	
 	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		createButton(parent, IDialogConstants.CLOSE_ID,IDialogConstants.CLOSE_LABEL, false);
+		getButton(IDialogConstants.CLOSE_ID).setFocus();
+	}
+	
+	@Override
 	protected Composite createContent(Composite parent) {
 		
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout());
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		ToolBar tb = new ToolBar(container, SWT.FLAT | SWT.RIGHT);
+		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		ToolItem tiAdd = new ToolItem(tb, SWT.PUSH);
+		tiAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		tiAdd.addListener(SWT.Selection, e->createNewCm());
+		
+		tiEdit = new ToolItem(tb, SWT.PUSH);
+		tiEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		tiEdit.addListener(SWT.Selection, e->editCm());
+		tiEdit.setEnabled(false);
+		
+		tiDelete = new ToolItem(tb, SWT.PUSH);
+		tiDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDelete.addListener(SWT.Selection, e->deleteCm());
+		tiDelete.setEnabled(false);
+		
+		new ToolItem(tb, SWT.SEPARATOR);
+		
+		tiExport = new ToolItem(tb, SWT.PUSH);
+		tiExport.setText(DialogConstants.EXPORT_BUTTON_TEXT);
+		tiExport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
+		tiExport.addListener(SWT.Selection, e->exportXml());
+		tiExport.setEnabled(false);
+
+		ToolItem tiImport = new ToolItem(tb, SWT.PUSH);
+		tiImport.setText(DialogConstants.IMPORT_BUTTON_TEXT);
+		tiImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
+		tiImport.addListener(SWT.Selection, e->importXml());
+
+		
 		SashForm form = new SashForm(container, SWT.HORIZONTAL);
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)form.getLayoutData()).heightHint = 50;
 
-		modelListViewer = new TableViewer(form, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-		modelListViewer.setLabelProvider(new ConfigurableModelLabelProvider());
+		Composite temp = new Composite(form, SWT.NONE);
+		temp.setLayout(new TableColumnLayout());
+
+		modelListViewer = new TableViewer(temp, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		modelListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		modelListViewer.setInput(getModelsList().toArray());
-		modelListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		modelListViewer.setLabelProvider(new ConfigurableModelLabelProvider());
 		modelListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateTreeViewer(false);
-				btnEdit.setEnabled(!modelListViewer.getSelection().isEmpty());
-				btnDelete.setEnabled(!modelListViewer.getSelection().isEmpty());
-				btnExport.setEnabled(!modelListViewer.getSelection().isEmpty());
+				tiEdit.setEnabled(!modelListViewer.getSelection().isEmpty());
+				tiDelete.setEnabled(!modelListViewer.getSelection().isEmpty());
+				tiExport.setEnabled(!modelListViewer.getSelection().isEmpty());
 			}
 		});
+		
+		TableColumnLayout ll = new TableColumnLayout();
+		ll.setColumnData(new TableColumn(modelListViewer.getTable(),SWT.NONE), new ColumnWeightData(100));
+		temp.setLayout(ll);
+		
 		
 		modelTreeViewer = new TreeViewer(form, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		modelTreeViewer.setLabelProvider(new ConfigurableModelLabelProvider());
@@ -142,49 +187,13 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		((GridData)modelTreeViewer.getControl().getLayoutData()).heightHint = 100;
 		form.setWeights(new int[]{40,60});
 		
-		Composite buttonComposite = new Composite(container, SWT.NONE);
-		buttonComposite.setLayout(new GridLayout(3, false));
-		buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,2,1));
-		
-		btnNew = new Button(buttonComposite, SWT.PUSH);
-		btnNew.setText(Messages.ConfigurableModelPropertyDialog_Button_Create);
-		setButtonLayoutData(btnNew);
-		btnNew.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				createNewCm();
-			}
-		});
-		
-		btnEdit = new Button(buttonComposite, SWT.PUSH);
-		btnEdit.setEnabled(false);
-		setButtonLayoutData(btnEdit);
-		btnEdit.setText(Messages.ConfigurableModelPropertyDialog_Button_Edit);
-		btnEdit.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				editCm();
-			}
-		});		
-		
-		btnDelete = new Button(buttonComposite, SWT.PUSH);
-		btnDelete.setEnabled(false);
-		setButtonLayoutData(btnDelete);
-		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDelete.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteCm();
-			}
-		});		
-
 
 		Menu menu = new Menu(modelListViewer.getControl());
 		modelListViewer.getControl().setMenu(menu);
 		
 		MenuItem edit = new MenuItem(menu, SWT.PUSH);
 		edit.setText(Messages.ConfigurableModelPropertyDialog_Button_Edit);
-//		add.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		edit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		edit.addListener(SWT.Selection, e->editCm());
 		
 		new MenuItem(menu, SWT.SEPARATOR);
@@ -196,7 +205,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		
 		MenuItem miImport = new MenuItem(menu, SWT.PUSH);
 		miImport.setText(Messages.ConfigurableModelPropertyDialog_Button_Import_File);
-		miImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
 		miImport.addListener(SWT.Selection, e->importXml());
 		
 		new MenuItem(menu, SWT.SEPARATOR);
@@ -210,6 +219,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		
 		MenuItem export = new MenuItem(menu, SWT.PUSH);
 		export.setText(Messages.ConfigurableModelPropertyDialog_Button_Export_File);
+		export.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
 		export.addListener(SWT.Selection, e->exportXml());
 		
 		menu.addMenuListener(new MenuListener(){
@@ -224,28 +234,28 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			}
 		});
 		
-		Composite exportImportCmp = new Composite(container, SWT.NONE);
-		exportImportCmp.setLayout(new GridLayout(2, false));
-		exportImportCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,2,1));
-		
-		btnExport = new Button(exportImportCmp, SWT.PUSH);
-		btnExport.setEnabled(false);
-		btnExport.setText(Messages.ConfigurableModelPropertyDialog_Button_Export_File);
-		btnExport.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				exportXml();
-			}
-		});
-
-		btnImport = new Button(exportImportCmp, SWT.PUSH);
-		btnImport.setText(Messages.ConfigurableModelPropertyDialog_Button_Import_File);
-		btnImport.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				importXml();
-			}
-		});
+//		Composite exportImportCmp = new Composite(container, SWT.NONE);
+//		exportImportCmp.setLayout(new GridLayout(2, false));
+//		exportImportCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,2,1));
+//		
+//		btnExport = new Button(exportImportCmp, SWT.PUSH);
+//		btnExport.setEnabled(false);
+//		btnExport.setText(Messages.ConfigurableModelPropertyDialog_Button_Export_File);
+//		btnExport.addSelectionListener(new SelectionAdapter() {
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				exportXml();
+//			}
+//		});
+//
+//		btnImport = new Button(exportImportCmp, SWT.PUSH);
+//		btnImport.setText(Messages.ConfigurableModelPropertyDialog_Button_Import_File);
+//		btnImport.addSelectionListener(new SelectionAdapter() {
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				importXml();
+//			}
+//		});
 		
 		setTitle(Messages.ConfigurableModelPropertyDialog_Title);
 		setMessage(Messages.ConfigurableModelPropertyDialog_Message);
