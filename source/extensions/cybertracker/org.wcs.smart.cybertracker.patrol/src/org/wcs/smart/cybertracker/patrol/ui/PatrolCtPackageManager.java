@@ -154,6 +154,7 @@ public class PatrolCtPackageManager implements ICtPackageManager {
 				}
 			});
 		} catch (Exception e) {
+			if (e.getCause() != null && e.getCause() instanceof IOException) throw ((IOException)e.getCause());
 			throw new IOException(e);
 			
 		}	

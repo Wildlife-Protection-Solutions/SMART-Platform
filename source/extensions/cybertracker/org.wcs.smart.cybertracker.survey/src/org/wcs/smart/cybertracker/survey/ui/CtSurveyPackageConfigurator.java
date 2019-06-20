@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -54,6 +55,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
@@ -69,6 +72,7 @@ import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
+import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesDialog;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.SurveyCtPackage;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
@@ -208,7 +212,13 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		Label lblProfile = new Label(g, SWT.NONE);
 		lblProfile.setText(Messages.CtSurveyPackageConfigurator_CtPropertiesLabel);
 
-		profileViewer = new ComboViewer(g, SWT.READ_ONLY);
+		Composite c = new Composite(g, SWT.NONE);
+		c.setLayout(new GridLayout(2, false));
+		((GridLayout)c.getLayout()).marginWidth = 0;
+		((GridLayout)c.getLayout()).marginHeight = 0;
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		profileViewer = new ComboViewer(c, SWT.READ_ONLY);
 		profileViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		profileViewer.setContentProvider(ArrayContentProvider.getInstance());
 		profileViewer.setLabelProvider(new CtProfileLabelProvider());
@@ -220,7 +230,19 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 				{ if (!isInit) validate();}
 			}
 		});
-
+		ToolBar tb = new ToolBar(c, SWT.FLAT);
+		ToolItem tiEdit = new ToolItem(tb,SWT.PUSH);
+		tiEdit.setToolTipText(Messages.CtSurveyPackageConfigurator_vieweditdevicesettings);
+		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		tiEdit.addListener(SWT.Selection, e->{
+			Object x = profileViewer.getStructuredSelection().getFirstElement();
+			if (!(x instanceof CyberTrackerPropertiesProfile)) return;
+			
+			Dialog dialog = new CyberTrackerPropertiesDialog(c.getShell(), (CyberTrackerPropertiesProfile)x);
+			dialog.open();
+		});
+		
+		
 		//main page contributions
 		if (contributions != null) {
 			for (IPackageUiContribution cc : contributions) {

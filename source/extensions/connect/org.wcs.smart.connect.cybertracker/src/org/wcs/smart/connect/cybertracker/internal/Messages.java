@@ -4,6 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.connect.cybertracker.internal.messages"; //$NON-NLS-1$
+	public static String AbstractConnectPackageContribution_KeyRequired;
 	public static String AddConnectCtJob_CreateTablesTaskName;
 	public static String AddConnectCtJob_ErrorDialogMessage;
 	public static String AddConnectCtJob_ErrorDialogTitle;
@@ -55,6 +56,7 @@ public class Messages extends NLS {
 	public static String ConnectAlertConfigDialog_DataExtractError;
 	public static String ConnectAlertConfigDialog_Message;
 	public static String ConnectAlertConfigDialog_Title;
+	public static String ConnectAlertContribution_ConnectRequired;
 	public static String ConnectAlertUiController_AlertsNotSupported;
 	public static String ConnectAlertUiController_createtooltip;
 	public static String ConnectAlertUiController_deletetooltip;
@@ -90,6 +92,7 @@ public class Messages extends NLS {
 	public static String ConnectCtPackageProperties_VersionColumn;
 	public static String ConnectCtTemplateCloner_CloneAlerts;
 	public static String ConnectCtTemplateCloner_TaskName;
+	public static String ConnectDataContribution_ConnectRequired;
 	public static String ConnectDataUiController_AertTypeRequired;
 	public static String ConnectDataUiController_dataUploadMsg;
 	public static String ConnectDataUiController_DataUploadsLabel;
@@ -104,6 +107,8 @@ public class Messages extends NLS {
 	public static String ConnectDataUiController_TabName;
 	public static String ConnectDataUiController_Upload1;
 	public static String ConnectDataUiController_Upload2;
+	public static String ConnectUrlContribution_AutoUpdateMsg;
+	public static String ConnectUrlContribution_Warning;
 	public static String ConvertedConnectCt2CmExtraData_InvalidReference;
 	public static String ConvertedConnectCt2CmExtraData_Missing_AlertItem;
 	public static String ConvertedConnectCt2CmExtraData_Missing_Level;

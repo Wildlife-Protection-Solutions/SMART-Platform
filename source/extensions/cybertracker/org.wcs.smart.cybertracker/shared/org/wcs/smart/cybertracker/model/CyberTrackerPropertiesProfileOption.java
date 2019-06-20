@@ -54,6 +54,7 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 		SIGHTING_ACCURACY,
 		SIGHTING_FIX_COUNT,
 		WAYPOINT_TIMER,
+		WAYPOINT_TIMER_TYPE,
 		GPS_TIME_ZONE,
 		SKIP_BUTTON_TIMEOUT,
 
@@ -89,12 +90,22 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 		MAX_PHOTO_COUNT,
 		DILUTION_OF_PRECISION,
 		
+		TRACK_COLOR,
 		THEME_COLOR_1,
 		THEME_COLOR_2,
 		THEME_COLOR_3,
 		THEME_COLOR_4,
+		
+		RESIZE_IMAGE,
+		IMAGE_WIDTH,
+		IMAGE_HEIGHT;
 	}
 
+	public enum TrackTimerOp{
+		TIME,
+		DISTANCE
+	}
+	
 	private CyberTrackerPropertiesProfile profile;
 	private ProfileOptionID optionId;
 	private Double doubleValue;

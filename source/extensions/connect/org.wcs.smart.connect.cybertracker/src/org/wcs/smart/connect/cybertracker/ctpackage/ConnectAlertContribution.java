@@ -29,10 +29,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
+import org.wcs.smart.connect.cybertracker.model.CtConnectPackageMetadata;
 import org.wcs.smart.connect.cybertracker.model.CtPackageAlert;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -67,18 +70,27 @@ public class ConnectAlertContribution extends AbstractConnectPackageContribution
 	public PackageContribution packageFiles(ICtPackage ctpackage, IEclipseContext context, IProgressMonitor monitor) throws IOException {
 		if (!(ctpackage instanceof AbstractCtPackage)) return null;
 		
+		AbstractCtPackage apackage = (AbstractCtPackage) ctpackage;
+		boolean requiresconnect = false;
+		for (MetadataFieldValue v : apackage.getMetadataValues()) {
+			if (v.getMetadataKey().equals(CtConnectPackageMetadata.Properties.CONNECT_ALERT.name())) {
+				requiresconnect = true;
+				break;
+			}
+		}
+		if (!requiresconnect) return null;
+		
 		String[] parts = null;
 		try {
 			parts = super.getServerDetails(context, ctpackage.getConservationArea());
 		}catch (Exception ex) {
 			throw new IOException(ex);
 		}
-		if (parts == null) return null;
+		if (parts == null) throw new IOException(Messages.ConnectAlertContribution_ConnectRequired);
+		
 		String url = parts[0];
 		String apikey = parts[1];
 
-		
-		AbstractCtPackage apackage = (AbstractCtPackage) ctpackage;
 		PackageContribution cc = new PackageContribution();
 
 		JSONArray alerts = new JSONArray();

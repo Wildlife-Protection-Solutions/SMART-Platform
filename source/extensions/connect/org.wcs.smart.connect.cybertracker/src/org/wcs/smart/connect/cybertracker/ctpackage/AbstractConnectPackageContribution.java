@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.connect.cybertracker.ctpackage;
 
-import java.util.HashMap;
-
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Composite;
@@ -39,17 +37,17 @@ import org.wcs.smart.util.UuidUtils;
 
 public abstract class AbstractConnectPackageContribution  implements IPackageContribution {
 	
+	public static final String CT_API_CONTEXT_KEY = "org.wcs.smart.connect.cybertracker.apikey"; //$NON-NLS-1$
 	protected static final String JSON_URLKEY = "url"; //$NON-NLS-1$
 	protected static final String JSON_APIKEY = "apikey"; //$NON-NLS-1$
 
 	private SmartConnect connect = null;
 	
 	/**
-	 * Two element array; first is the connect url the second is the ct api key.
-	 * return null if details cannot be obtained
 	 * 
 	 * @param context
-	 * @return
+	 * @return Two element array; first is the connect url the second is the ct api key; null if the user cancels
+	 * @throws exception if cannot connect (invalid username etc.)
 	 */
 	protected String[] getServerDetails(IEclipseContext context, ConservationArea ca) throws Exception{
 		connect = (SmartConnect) context.get(SmartConnect.class);
@@ -66,18 +64,17 @@ public abstract class AbstractConnectPackageContribution  implements IPackageCon
 						return super.createDialogArea(parent);
 					}	
 				};
-				
 				if (cd.open() == Window.OK) {
 					connect = cd.getConnection();
 					context.set(SmartConnect.class, connect);
 				}
 			});
 			if (connect == null) {
-				throw new Exception("A Connection to SMART Connect is required to export this package.");
+				return null;
 			}
 		}
 		
-		String apikey = (String) context.get("org.wcs.smart.connect.cybertracker.apikey");
+		String apikey = (String) context.get(CT_API_CONTEXT_KEY);
 		if (apikey == null) {
 			ResteasyClient client = connect.getClient();
 			ResteasyWebTarget target = client.target(connect.getServer().getServerUrl() + SmartConnect.API_URL);
@@ -86,9 +83,9 @@ public abstract class AbstractConnectPackageContribution  implements IPackageCon
 		}
 		
 		if (apikey == null) {
-			throw new Exception("A CyberTracker SMART Connect API Key could not be found.  This package cannot be exported without an api key.");
+			throw new Exception(Messages.AbstractConnectPackageContribution_KeyRequired);
 		}
-		context.set("org.wcs.smart.connect.cybertracker.apikey", apikey);
+		context.set(CT_API_CONTEXT_KEY, apikey);
 		
 		return new String[] {connect.getServer().getServerUrl(), apikey};
 	}

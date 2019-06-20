@@ -117,10 +117,6 @@
                   label="%command.smproperties.label"
                   style="push">
             </command>
-            <separator
-                  name="org.wcs.smart.cybertracker3.separator.import"
-                  visible="true">
-            </separator>
             <command
                   commandId="org.wcs.smart.cybertracker.export.device"
                   label="%installdevice.menu.label"
@@ -275,6 +271,10 @@
       <image
             commandId="org.wcs.smart.cybertracker.json.import"
             icon="images/etool16/import.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.cybertracker.packages.show"
+            icon="images/etool16/package.png">
       </image>
    </extension>
    <extension

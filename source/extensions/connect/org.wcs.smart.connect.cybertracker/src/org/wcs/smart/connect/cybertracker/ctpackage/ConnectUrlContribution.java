@@ -25,8 +25,11 @@ import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 
@@ -71,7 +74,13 @@ public class ConnectUrlContribution extends AbstractConnectPackageContribution {
 			}catch (Exception ex) {
 				throw new IOException(ex);
 			}
-			if (parts == null) return null;
+			if (parts == null) {
+				//user hit cancel
+				Display.getDefault().syncExec(()->{
+					MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ConnectUrlContribution_Warning, Messages.ConnectUrlContribution_AutoUpdateMsg);
+				});
+				return cc;
+			}
 			String url = parts[0];
 			String apikey = parts[1];
 			

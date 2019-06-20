@@ -133,7 +133,8 @@ public class ScreensObjectFactory {
 			a1Data.setSightingAccuracy(properties.getSightingAccuracy());
 			a1Data.setSightingFixCount(properties.getSightingFixCount());
 			a1Data.setWaypointAccuracy(properties.getTrackAccuracy());
-			a1Data.setWaypointTimer(properties.getWaypointTimer());
+			
+			a1Data.setWaypointTimer(properties.getWaypointTimerValue());
 			a1Data.setGpsTimeSync(ctBooleanValue(properties.isUseGpsTime()));
 			a1Data.setGpsTimeZone(properties.getGpsTimeZone());
 			a1Data.setProjection(properties.getProjection());
@@ -1036,7 +1037,7 @@ public class ScreensObjectFactory {
 		control.setSightingAccuracy(props.getSightingAccuracy());
 		control.setSightingFixCount(props.getSightingFixCount());
 		control.setWaypointAccuracy(props.getTrackAccuracy());
-		control.setWaypointTimer(props.getWaypointTimer());
+		control.setWaypointTimer(props.getWaypointTimerValue());
 		return control;
 	}
 

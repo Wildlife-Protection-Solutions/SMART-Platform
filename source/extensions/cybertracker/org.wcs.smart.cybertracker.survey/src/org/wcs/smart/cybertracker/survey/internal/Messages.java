@@ -65,6 +65,7 @@ public class Messages extends NLS {
 	public static String CtSurveyPackageConfigurator_ProfileRequired;
 	public static String CtSurveyPackageConfigurator_SettingsTab;
 	public static String CtSurveyPackageConfigurator_UnknownLabel;
+	public static String CtSurveyPackageConfigurator_vieweditdevicesettings;
 	public static String CyberTrackerSurvey_Details;
 	public static String CyberTrackerSurvey_DisplayType;
 	public static String CyberTrackerSurvey_Err_SurveyDesignMissing;

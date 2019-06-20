@@ -63,7 +63,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	public static final int SIGHTING_FIX_COUNT_MAX_VALUE = 60;
 
 	public static final int TIME_TRACK_MIN_VALUE = 0;
-	public static final int TIME_TRACK_MAX_VALUE = 1000;
+	public static final int TIME_TRACK_MAX_VALUE = 10000;
 
 	public static final int UTM_ZONE_MIN_VALUE = 0;
 	public static final int UTM_ZONE_MAX_VALUE = 60;
@@ -209,7 +209,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	private boolean getBooleanValue(ProfileOptionID optionId) {
 		Map<ProfileOptionID, CyberTrackerPropertiesProfileOption> map = getOptions();
 		CyberTrackerPropertiesProfileOption option = map.get(optionId);
-		return (option != null) ? option.getBooleanValue() : (boolean)getBooleanValue(optionId);
+		return (option != null) ? option.getBooleanValue() : (boolean)getDefaultValue(optionId);
 	}
 
 	
@@ -217,7 +217,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	private double getDoubleValue(ProfileOptionID optionId) {
 		Map<ProfileOptionID, CyberTrackerPropertiesProfileOption> map = getOptions();
 		CyberTrackerPropertiesProfileOption option = map.get(optionId);
-		return (option != null) ? option.getDoubleValue() : (double)getDoubleValue(optionId);
+		return (option != null) ? option.getDoubleValue() : (double)getDefaultValue(optionId);
 	}
 
 	
@@ -298,13 +298,21 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	
 	@Transient
-	public int getWaypointTimer() {
+	public int getWaypointTimerValue() {
 		return getIntValue(ProfileOptionID.WAYPOINT_TIMER);
 	}
-	public void setWaypointTimer(int waypointTimer) {
+	public void setWaypointTimerValue(int waypointTimer) {
 		getOption(ProfileOptionID.WAYPOINT_TIMER).setIntegerValue(waypointTimer);
 	}
 	
+	@Transient
+	public CyberTrackerPropertiesProfileOption.TrackTimerOp getWaypointTimerType() {
+		return CyberTrackerPropertiesProfileOption.TrackTimerOp.valueOf( getStringValue(ProfileOptionID.WAYPOINT_TIMER_TYPE));
+	}
+	public void setWaypointTimerType(CyberTrackerPropertiesProfileOption.TrackTimerOp tt) {
+		getOption(ProfileOptionID.WAYPOINT_TIMER_TYPE).setStringValue(tt.name());
+	}
+
 	
 	@Transient
 	public int getGpsTimeZone() {
@@ -524,6 +532,30 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 		getOption(ProfileOptionID.DILUTION_OF_PRECISION).setIntegerValue(dop);
 	}
 	
+	@Transient
+	public boolean getResizePhoto() {
+		return getBooleanValue(ProfileOptionID.RESIZE_IMAGE);
+	}
+	@Transient
+	public Integer getImageWidth() {
+		return getIntValue(ProfileOptionID.IMAGE_WIDTH);
+	}
+	@Transient
+	public Integer getImageHeight() {
+		return getIntValue(ProfileOptionID.IMAGE_HEIGHT);
+	}
+	@Transient
+	public void setResizePhoto(boolean resize, int w, int h) {
+		getOption(ProfileOptionID.RESIZE_IMAGE).setBooleanValue(resize);
+		if (resize) {
+			getOption(ProfileOptionID.IMAGE_WIDTH).setIntegerValue(w);
+			getOption(ProfileOptionID.IMAGE_HEIGHT).setIntegerValue(h);
+		}else {
+			getOption(ProfileOptionID.IMAGE_WIDTH).setIntegerValue(null);
+			getOption(ProfileOptionID.IMAGE_HEIGHT).setIntegerValue(null);
+		}
+	}
+	
 	public Object getDefaultValue(ProfileOptionID option) {
 		switch(option) {
 		case ALLOW_SKIP_MANUAL_GPS: return allowSkipManualGps;
@@ -560,12 +592,39 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 		case USE_TITLE_BAR: return useTitleBar;
 		case UTM_ZONE: return utmZone;
 		case WAYPOINT_TIMER: return waypointTimer;
+		case WAYPOINT_TIMER_TYPE: return CyberTrackerPropertiesProfileOption.TrackTimerOp.TIME.name();
 		case THEME_COLOR_1: return -1;
 		case THEME_COLOR_2: return -1;
 		case THEME_COLOR_3: return -1;
 		case THEME_COLOR_4: return -1;
+		case TRACK_COLOR: return -1;
+		case IMAGE_HEIGHT: return 1200;
+		case IMAGE_WIDTH: return 1600;
+		case RESIZE_IMAGE: return false;
 		}
 		return null;
+	}
+	
+	/**
+	 * Gets the default track color 
+	 * @return
+	 */
+	@Transient
+	public Color getTrackColor() {
+		Integer color = getIntValue(ProfileOptionID.TRACK_COLOR);
+		return new Color(color);
+	}
+	
+	/**
+	 * Sets the default track color
+	 * @param color
+	 */
+	public void setTrackColor(Color color) {
+		if (color == null) {
+			getOption(ProfileOptionID.TRACK_COLOR).setIntegerValue(null);
+		}else {
+			getOption(ProfileOptionID.TRACK_COLOR).setIntegerValue(color.getRGB());
+		}
 	}
 	
 	/**

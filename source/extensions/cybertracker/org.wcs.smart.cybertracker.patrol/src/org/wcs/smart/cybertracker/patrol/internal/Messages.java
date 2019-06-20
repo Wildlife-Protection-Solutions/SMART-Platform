@@ -87,6 +87,8 @@ public class Messages extends NLS {
 
 	public static String CtPatrolPackageConfigurator_Unknown;
 
+	public static String CtPatrolPackageConfigurator_viewedittooltip;
+
 	public static String CTPatrolTableCellLabelProvider_Armed_No;
 	public static String CTPatrolTableCellLabelProvider_Armed_Yes;
 	public static String CTPatrolTableContainer_AddLeg_SubTaskName;

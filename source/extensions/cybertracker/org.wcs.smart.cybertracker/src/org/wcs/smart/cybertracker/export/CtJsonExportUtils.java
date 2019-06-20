@@ -169,7 +169,13 @@ public class CtJsonExportUtils {
 		
 		for (ProfileOptionID option : ProfileOptionID.values()) {
 			CyberTrackerPropertiesProfileOption opValue = profile.getOptions().get(option);
-			if (opValue == null) continue;
+			if (opValue == null) {
+				//write the default value and continue
+				Object value = profile.getDefaultValue(option);
+				profileObj.put(option.name(), value);
+				continue;
+			}
+			
 			if (isBoolean(option)) {
 				profileObj.put(option.name(), opValue.getBooleanValue());
 			}else if (opValue.getDoubleValue() != null) {
@@ -310,6 +316,7 @@ public class CtJsonExportUtils {
 		case MANUAL_GPS:
 		case ALLOW_SKIP_MANUAL_GPS:
 		case LOCK100:
+		case RESIZE_IMAGE:
 			return true;
 			
 		case APP_NAME:
@@ -324,6 +331,7 @@ public class CtJsonExportUtils {
 		case SKIP_BUTTON_TIMEOUT:
 		case TRACK_ACCURACY:
 		case UTM_ZONE:
+		case WAYPOINT_TIMER_TYPE:
 		case WAYPOINT_TIMER:
 		case THEME_COLOR_1:
 		case THEME_COLOR_2:

@@ -28,6 +28,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.CtConnectPackageMetadata;
 import org.wcs.smart.connect.cybertracker.model.CtPackageAlert;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
@@ -70,6 +71,23 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 	@Override
 	public PackageContribution packageFiles(ICtPackage ctpackage, IEclipseContext context, IProgressMonitor monitor) throws IOException {
 		if (!(ctpackage instanceof AbstractCtPackage)) return null;
+		AbstractCtPackage apackage = (AbstractCtPackage) ctpackage;
+
+		boolean requiresConnect = false;
+		for (MetadataFieldValue mv : apackage.getMetadataValues()) {
+			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name())) {
+				if (mv.getBooleanValue()) {
+					requiresConnect=true;
+					break;
+				}
+			}else if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name())) {
+				if (mv.getBooleanValue()) {
+					requiresConnect=true;
+					break;
+				}
+			}
+		}
+		if (!requiresConnect) return null;
 		
 		String[] parts = null;
 		try {
@@ -77,11 +95,11 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 		}catch (Exception ex) {
 			throw new IOException(ex);
 		}
-		if (parts == null) return null;
+		if (parts == null) throw new IOException(Messages.ConnectDataContribution_ConnectRequired);
+		
 		String url = parts[0];
 		String apikey = parts[1];
 				
-		AbstractCtPackage apackage = (AbstractCtPackage) ctpackage;
 		PackageContribution cc = new PackageContribution();
 
 		for (MetadataFieldValue mv : apackage.getMetadataValues()) {

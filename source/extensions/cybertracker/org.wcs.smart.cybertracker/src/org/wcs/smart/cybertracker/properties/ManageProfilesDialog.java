@@ -47,11 +47,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
@@ -75,9 +76,9 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 	
 	private TableViewer profilesViewer;
 	
-	private Button btnCreate;
-	private Button btnEdit;
-	private Button btnDelete;
+	private ToolItem tiCreate, tiEdit, tiDelete;
+	private MenuItem miCreate, miEdit, miDelete;
+	
 	
 	public ManageProfilesDialog(Shell parent) {
 		super(parent, Messages.ManageProfilesDialog_Title);
@@ -120,41 +121,44 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 		});
 		tableColumnLayout.setColumnData(profilesViewer.getTable().getColumn(0), new ColumnWeightData(1));
 		
-		Composite btnCmp = new Composite(main, SWT.NONE);
-		btnCmp.setLayout(new GridLayout(1, false));
-		btnCmp.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+		ToolBar tb = new ToolBar(main, SWT.VERTICAL | SWT.FLAT | SWT.RIGHT);
+		tb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		btnCreate = new Button(btnCmp, SWT.PUSH);
-		btnCreate.setText(Messages.ManageProfilesDialog_Button_Create);
-		btnCreate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnCreate.addListener(SWT.Selection, e->createNewProfile());
-
-		btnEdit = new Button(btnCmp, SWT.PUSH);
-		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnEdit.addListener(SWT.Selection, e->editCurrentProfile());
+		tiCreate = new ToolItem(tb, SWT.PUSH);
+		tiCreate.setText(DialogConstants.ADD_BUTTON_TEXT);
+		tiCreate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		tiCreate.addListener(SWT.Selection, e->createNewProfile());
 		
-		btnDelete = new Button(btnCmp, SWT.PUSH);
-		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnDelete.addListener(SWT.Selection, e->deleteCurrentProfile());
+		tiEdit = new ToolItem(tb, SWT.PUSH);
+		tiEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		tiEdit.addListener(SWT.Selection, e->editCurrentProfile());
+		tiEdit.setEnabled(false);
+		
+		tiDelete = new ToolItem(tb, SWT.PUSH);
+		tiDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDelete.addListener(SWT.Selection, e->deleteCurrentProfile());
+		tiDelete.setEnabled(false);
 		
 		Menu menu = new Menu(profilesViewer.getControl());
 		
-		MenuItem miAdd = new MenuItem(menu, SWT.PUSH);
-		miAdd.setText(Messages.ManageProfilesDialog_Button_Create);
-		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		miAdd.addListener(SWT.Selection, e->createNewProfile());
+		miCreate = new MenuItem(menu, SWT.PUSH);
+		miCreate.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miCreate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miCreate.addListener(SWT.Selection, e->createNewProfile());
 		
-		MenuItem miEdit = new MenuItem(menu, SWT.PUSH);
+		miEdit = new MenuItem(menu, SWT.PUSH);
 		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		miEdit.setEnabled(false);
 		miEdit.addListener(SWT.Selection, e->editCurrentProfile());
 		
-		MenuItem miDelete = new MenuItem(menu, SWT.PUSH);
+		miDelete = new MenuItem(menu, SWT.PUSH);
 		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		miDelete.addListener(SWT.Selection, e->deleteCurrentProfile());
+		miDelete.setEnabled(false);
 		
 		
 		profilesViewer.getControl().setMenu(menu);
@@ -169,8 +173,10 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 	
 	protected void updateState() {
 		CyberTrackerPropertiesProfile p = getSelectedProfile();
-		btnEdit.setEnabled(p != null);
-		btnDelete.setEnabled(p != null && !p.isDefault());
+		tiEdit.setEnabled(p != null);
+		tiDelete.setEnabled(p != null && !p.isDefault());
+		miEdit.setEnabled(p != null);
+		miDelete.setEnabled(p != null && !p.isDefault());
 	}
 	
 	private void reloadData() {

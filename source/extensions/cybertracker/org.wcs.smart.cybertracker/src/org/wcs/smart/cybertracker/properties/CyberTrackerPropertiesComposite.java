@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -61,6 +62,7 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.cybertracker.model.ProjectionFormat;
 
 /**
@@ -72,6 +74,28 @@ import org.wcs.smart.cybertracker.model.ProjectionFormat;
 public class CyberTrackerPropertiesComposite extends Composite {
 	
 	private static final String COLOR_KEY = "COLOR"; //$NON-NLS-1$
+
+	private enum PhotoSize{
+		SIZE1(640,480),
+		SIZE2(1280,960),
+		SIZE3(1600,1200),
+		SIZE4(2048,1536),
+		SIZE5(2560,1920),
+		SIZE6(2816,2112),
+		SIZE7(3264,2468),
+		SIZE8(4200,2800),
+		CUSTOM(null, null);
+		
+		Integer w;
+		Integer h;
+		
+		PhotoSize(Integer w, Integer h){
+			this.w = w;
+			this.h = h;
+		}
+		
+	}
+	
 	private List<IPropsChangeListener> listeners = new ArrayList<IPropsChangeListener>();
 	private boolean isPopulating = false;
 
@@ -100,6 +124,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	private Text txtSightingAccuracy;
 	private Text txtSightingFixCount;
 	private Text txtTrackAccuracy;
+	
+	private ComboViewer cmbTrackTimer;
 	private Text txtTrackTimer;
 	
 	private Button btnUseGpsTime;
@@ -116,6 +142,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
     private Button btnLock100;
     private Button btnUseMapOnSkip;
     
+    private Label btnTrackColor;
     private Label[] btnThemeColors;
     
     private ComboViewer cbProjection;
@@ -137,6 +164,11 @@ public class CyberTrackerPropertiesComposite extends Composite {
     
     private ControlDecoration maxPhotoCountDecoration;
 	private CTabFolder tabFolder;
+	
+	private ComboViewer cmbSizes;
+	private Text txtWidth, txtHeight;
+	private ControlDecoration cdImageWidth, cdImageHeight;
+	private Button btnOpResize;
 	
 	public CyberTrackerPropertiesComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -167,6 +199,9 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		
 		CTabItem themeTab = new CTabItem (tabFolder, SWT.NONE);
 		themeTab.setText (Messages.CyberTrackerPropertiesComposite_ThemeTabName);
+		
+		CTabItem cameraTab = new CTabItem (tabFolder, SWT.NONE);
+		cameraTab.setText (Messages.CyberTrackerPropertiesComposite_PhotoTab);
 		
 		ScrolledComposite generalScroll = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.H_SCROLL );
 		generalScroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -216,12 +251,26 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		themeContainer.setLayout(new GridLayout());
 		themeScroll.setContent(themeContainer);
 		
+		ScrolledComposite cameraScroll = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.H_SCROLL );
+		cameraScroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cameraScroll.setShowFocusedControl(true);
+		cameraScroll.setExpandHorizontal(true);
+		cameraScroll.setExpandVertical(true);
+		
+		Composite cameraContainer = new Composite(cameraScroll, SWT.None);
+		cameraContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
+		cameraContainer.setLayout(new GridLayout());
+		cameraScroll.setContent(cameraContainer);
+		
+		
 		generalTab.setControl(generalScroll);
 		gpsTab.setControl(gpsScroll);
 		fieldmapTab.setControl(mapScroll);
 		themeTab.setControl(themeScroll);
+		cameraTab.setControl(cameraScroll);
 		
 		createThemeTab(themeContainer);
+		createCameraTab(cameraContainer);
 		
 		Label lblUseTitleBar = new Label(generalContainer, SWT.NONE);
 		lblUseTitleBar.setText(Messages.CyberTrackerPropertiesDialog_3);
@@ -643,11 +692,38 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		sightingFixCountDecoration.hide();
 		
 		Label lblTrackTimer = new Label(gpsContainer, SWT.NONE);
-		lblTrackTimer.setText(Messages.CyberTrackerPropertiesDialog_TrackTimer);
+		lblTrackTimer.setText(Messages.CyberTrackerPropertiesDialog_TrackTimer1);
 		lblTrackTimer.setToolTipText(Messages.CyberTrackerPropertiesDialog_TrackTimer_Tooltip);
 
-		txtTrackTimer = new Text(gpsContainer, SWT.BORDER);
-		txtTrackTimer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		Composite trackTimer = new Composite(gpsContainer, SWT.NONE);
+		trackTimer.setLayout(new GridLayout(2, false));
+		trackTimer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)trackTimer.getLayout()).marginWidth = 0;
+		((GridLayout)trackTimer.getLayout()).marginHeight = 0;
+		
+		cmbTrackTimer = new ComboViewer(trackTimer, SWT.DROP_DOWN);
+		cmbTrackTimer.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				switch((CyberTrackerPropertiesProfileOption.TrackTimerOp)element) {
+				case DISTANCE: return Messages.CyberTrackerPropertiesComposite_TrackTimerDistanceOp;
+				case TIME: return Messages.CyberTrackerPropertiesComposite_TrackTimerTimeOp;
+				}
+				return ""; //$NON-NLS-1$
+			}
+		});
+		cmbTrackTimer.setContentProvider(ArrayContentProvider.getInstance());
+		cmbTrackTimer.setInput(CyberTrackerPropertiesProfileOption.TrackTimerOp.values());
+		cmbTrackTimer.setSelection(new StructuredSelection(CyberTrackerPropertiesProfileOption.TrackTimerOp.TIME));
+		cmbTrackTimer.addSelectionChangedListener(e->{
+			if (isTrackTimerValid()) {
+				trackTimerDecoration.hide();
+			} else {
+				trackTimerDecoration.show();
+			}
+			changesMade();
+		});
+		txtTrackTimer = new Text(trackTimer, SWT.BORDER);
+		txtTrackTimer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtTrackTimer.setToolTipText(Messages.CyberTrackerPropertiesDialog_TrackTimer_Tooltip);
 		txtTrackTimer.addModifyListener(new ModifyListener() {
 			@Override
@@ -959,10 +1035,180 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		label.setData(COLOR_KEY, null);
 	}
 	
+	private void validateCamera() {
+		if (!btnOpResize.getSelection()) {
+			cdImageHeight.hide();
+			cdImageWidth.hide();
+			return;
+		}
+		PhotoSize ps = (PhotoSize) cmbSizes.getStructuredSelection().getFirstElement();
+		if (ps == PhotoSize.CUSTOM) {
+			try {
+				Integer.parseInt(txtWidth.getText());
+				cdImageWidth.hide();
+			}catch (Exception ex) {
+				cdImageWidth.show();
+			}
+			try {
+				Integer.parseInt(txtHeight.getText());
+				cdImageHeight.hide();
+			}catch (Exception ex) {
+				cdImageHeight.show();
+			}
+		}else {
+			cdImageHeight.hide();
+			cdImageWidth.hide();
+		}
+	}
+
+	
+	private void createCameraTab(Composite parent) {
+		Composite part = new Composite(parent, SWT.NONE);
+		part.setLayout(new GridLayout());
+		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		btnOpResize = new Button(part, SWT.CHECK);
+		btnOpResize.setText(Messages.CyberTrackerPropertiesComposite_ResizeOp);
+		
+		Label info = new Label(part, SWT.WRAP);
+		info.setText(Messages.CyberTrackerPropertiesComposite_ResizeMsg);
+		info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)info.getLayoutData()).widthHint = 200;
+		((GridData)info.getLayoutData()).horizontalIndent = 20;
+
+		cmbSizes = new ComboViewer(part, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbSizes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)cmbSizes.getControl().getLayoutData()).horizontalIndent = 20;
+		cmbSizes.getControl().setEnabled(false);
+		cmbSizes.setContentProvider(ArrayContentProvider.getInstance());
+		cmbSizes.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				PhotoSize ps = ((PhotoSize)element);
+				if (ps == PhotoSize.CUSTOM) return Messages.CyberTrackerPropertiesComposite_Custom;
+				return ps.w + " x "+ ps.h; //$NON-NLS-1$
+						
+			}
+		});
+		cmbSizes.setInput(PhotoSize.values());
+		cmbSizes.setSelection(new StructuredSelection(PhotoSize.SIZE1));
+		
+		Composite custom = new Composite(part, SWT.NONE);
+		custom.setLayout(new GridLayout(6, false));
+		custom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)custom.getLayoutData()).horizontalIndent = 20;
+		
+		Label l1 = new Label(custom, SWT.NONE);
+		l1.setText(Messages.CyberTrackerPropertiesComposite_WidthOp);
+		l1.setEnabled(false);
+		
+		cdImageWidth = new ControlDecoration(l1, SWT.RIGHT);
+		cdImageWidth.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cdImageWidth.setShowHover(true);
+		cdImageWidth.setDescriptionText(Messages.CyberTrackerPropertiesComposite_InvalidWidth);
+		cdImageWidth.hide();
+		
+		txtWidth = new Text(custom, SWT.BORDER);
+		txtWidth.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)txtWidth.getLayoutData()).widthHint = 100;
+		txtWidth.setEnabled(false);
+		
+		Label l2 = new Label(custom, SWT.NONE);
+		l2.setText(Messages.CyberTrackerPropertiesComposite_pixel);
+		l2.setEnabled(false);
+		
+		Label l3 = new Label(custom, SWT.NONE);
+		l3.setText(Messages.CyberTrackerPropertiesComposite_HeightOp);
+		l3.setEnabled(false);
+		
+		cdImageHeight = new ControlDecoration(l3, SWT.RIGHT);
+		cdImageHeight.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cdImageHeight.setShowHover(true);
+		cdImageHeight.setDescriptionText(Messages.CyberTrackerPropertiesComposite_InvalidHeight);
+		cdImageHeight.hide();
+		
+		txtHeight = new Text(custom, SWT.BORDER);
+		txtHeight.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)txtHeight.getLayoutData()).widthHint = 100;
+		txtHeight.setEnabled(false);
+		
+		Label l4 = new Label(custom, SWT.NONE);
+		l4.setText(Messages.CyberTrackerPropertiesComposite_pixel);
+		l4.setEnabled(false);
+		
+		txtWidth.addListener(SWT.Modify, e->{validateCamera(); changesMade();});
+		txtHeight.addListener(SWT.Modify, e->{validateCamera(); changesMade();});
+		
+		cmbSizes.addSelectionChangedListener(e->{
+			PhotoSize s = (PhotoSize) cmbSizes.getStructuredSelection().getFirstElement();
+			if (s == PhotoSize.CUSTOM) {
+				for (Control kid : custom.getChildren()) kid.setEnabled(true);
+			}else {
+				for (Control kid : custom.getChildren()) kid.setEnabled(false);
+			}
+			validateCamera();
+			changesMade();
+		});
+		btnOpResize.addListener(SWT.Selection, e->{
+			cmbSizes.getControl().setEnabled(btnOpResize.getSelection());
+			
+			boolean iscustom = false;
+			if (btnOpResize.getSelection()) {
+				PhotoSize s = (PhotoSize) cmbSizes.getStructuredSelection().getFirstElement();
+				if (s == PhotoSize.CUSTOM) iscustom = true;
+			}
+			for (Control kid : custom.getChildren()) kid.setEnabled(iscustom);
+			
+			validateCamera();
+			changesMade();
+		});
+		
+	}
+	
+	
 	private void createThemeTab(Composite parent) {
 		Composite part = new Composite(parent, SWT.NONE);
 		part.setLayout(new GridLayout(4, false));
 		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		Label ltrack = new Label(part, SWT.NONE);
+		ltrack.setText(Messages.CyberTrackerPropertiesComposite_TrackColorOp);
+	
+		btnTrackColor = new Label(part, SWT.NONE);
+		btnTrackColor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)btnTrackColor.getLayoutData()).widthHint = 30;
+		btnTrackColor.addListener(SWT.Dispose, e->disposeColor(btnTrackColor));		
+		
+		btnTrackColor.addListener(SWT.Paint, e->{
+			if (btnTrackColor.getData(COLOR_KEY) != null) e.gc.drawRectangle(0, 0, btnTrackColor.getBounds().width-1, btnTrackColor.getBounds().height-1);
+		});
+		WidgetElement.setCSSClass(btnTrackColor, "customcolor"); //$NON-NLS-1$
+		
+		Button btnSetTrackColor = new Button(part, SWT.PUSH);
+		btnSetTrackColor.setText("..."); //$NON-NLS-1$
+		
+		Button btnTrackClear = new Button(part, SWT.PUSH);
+		btnTrackClear.setText(Messages.CyberTrackerPropertiesComposite_ClearButton);
+		btnTrackClear.addListener(SWT.Selection, e->{
+			disposeColor(btnTrackColor);
+			btnTrackColor.setBackground(null);
+			changesMade();
+		});
+		Listener changeColorTrack = e->{
+			ColorDialog cd = new ColorDialog(parent.getShell());
+			cd.setRGB(btnTrackColor.getBackground().getRGB());
+			cd.setText(Messages.CyberTrackerPropertiesComposite_ColorSelectionDialogTitle);
+			RGB rgb = cd.open();
+			if (rgb == null) return;
+			
+			disposeColor(btnTrackColor);
+			Color newColor = new Color(parent.getDisplay(), rgb);
+			btnTrackColor.setData(COLOR_KEY, newColor);
+			btnTrackColor.setBackground(newColor);
+			changesMade();
+		};
+		
+		btnSetTrackColor.addListener(SWT.Selection, changeColorTrack);
+		btnTrackColor.addListener(SWT.MouseDoubleClick, changeColorTrack);
 		
 		btnThemeColors = new Label[4];
 		for (int i = 1; i <= 4; i ++) {
@@ -973,7 +1219,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			colorLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)colorLabel.getLayoutData()).widthHint = 30;
 			colorLabel.addListener(SWT.Dispose, e->disposeColor(colorLabel));		
-			
+			WidgetElement.setCSSClass(colorLabel, "customcolor"); //$NON-NLS-1$
 			colorLabel.addListener(SWT.Paint, e->{
 				if (colorLabel.getData(COLOR_KEY) != null) e.gc.drawRectangle(0, 0, colorLabel.getBounds().width-1, colorLabel.getBounds().height-1);
 			});
@@ -1049,7 +1295,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		txtSightingAccuracy.setText(String.valueOf(ctProperties.getSightingAccuracy()));
 		txtSightingFixCount.setText(String.valueOf(ctProperties.getSightingFixCount()));
 		txtTrackAccuracy.setText(String.valueOf(ctProperties.getTrackAccuracy()));
-		txtTrackTimer.setText(String.valueOf(ctProperties.getWaypointTimer()));
+		cmbTrackTimer.setSelection(new StructuredSelection(ctProperties.getWaypointTimerType()));
+		txtTrackTimer.setText(String.valueOf(ctProperties.getWaypointTimerValue()));
 		btnUseGpsTime.setSelection(ctProperties.isUseGpsTime());
 		timeOffset.setSelection(new StructuredSelection(ctProperties.getGpsTimeZone()));
 		cbProjection.setSelection(new StructuredSelection(ctProperties.getProjection()));
@@ -1062,16 +1309,52 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		txtFileName.setText(ctProperties.getFieldMapFilename());
 		btnLock100.setSelection(ctProperties.isLock100());
 		cmbDataFormat.setSelection(new StructuredSelection(ctProperties.getDataFormat()));
+	
+		java.awt.Color r = ctProperties.getTrackColor();
+		if (r != null) {
+			Color c = new Color(getDisplay(), r.getRed(), r.getGreen(), r.getBlue(), 255);
+			btnTrackColor.setData(COLOR_KEY, c);
+			btnTrackColor.setBackground(c);
+		}
 		
 		for (int i = 1; i <= 4; i ++) {
-			java.awt.Color r = ctProperties.getThemeColor(i);
+			r = ctProperties.getThemeColor(i);
 			if (r != null) {
-				Color c = new Color(getDisplay(), r.getRed(), r.getGreen(), r.getBlue());
+				Color c = new Color(getDisplay(), r.getRed(), r.getGreen(), r.getBlue(), 255);
 				btnThemeColors[i-1].setData(COLOR_KEY, c);
 				btnThemeColors[i-1].setBackground(c);
 			}
 			
 		}
+		
+		btnOpResize.setSelection(ctProperties.getResizePhoto());
+		if (ctProperties.getResizePhoto()) {
+			int w = ctProperties.getImageWidth();
+			int h = ctProperties.getImageHeight();
+			
+			PhotoSize defaultps = null;
+			for (PhotoSize ps : PhotoSize.values()) {
+				if (ps == PhotoSize.CUSTOM) continue;
+				if (ps.w == w && ps.h == h) {
+					defaultps = ps;
+					break;
+				}
+			}
+			if (defaultps != null) {
+				cmbSizes.setSelection(new StructuredSelection(defaultps));
+				for (Control kid : txtWidth.getParent().getChildren()) kid.setEnabled(false);
+			}else {
+				cmbSizes.setSelection(new StructuredSelection(PhotoSize.CUSTOM));
+				txtHeight.setText(String.valueOf(h));
+				txtWidth.setText(String.valueOf(w));
+				for (Control kid : txtWidth.getParent().getChildren()) kid.setEnabled(true);
+			}
+			cmbSizes.getControl().setEnabled(true);
+		}else {
+			cmbSizes.getControl().setEnabled(false);
+			for (Control kid : txtWidth.getParent().getChildren()) kid.setEnabled(false);
+		}
+		
 		isPopulating = false;
 	}
 
@@ -1090,7 +1373,10 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			
 		ctProperties.setSightingAccuracy(Double.valueOf(txtSightingAccuracy.getText()));
 		ctProperties.setSightingFixCount(Integer.valueOf(txtSightingFixCount.getText()));
-		ctProperties.setWaypointTimer(Integer.valueOf(txtTrackTimer.getText()));
+		
+		ctProperties.setWaypointTimerType( ((CyberTrackerPropertiesProfileOption.TrackTimerOp)cmbTrackTimer.getStructuredSelection().getFirstElement()) );
+		ctProperties.setWaypointTimerValue(Integer.valueOf(txtTrackTimer.getText()));
+		
 		StructuredSelection selection = (StructuredSelection) timeOffset.getSelection();
 		ctProperties.setGpsTimeZone((Integer)selection.getFirstElement());
 		selection = (StructuredSelection) cbProjection.getSelection();
@@ -1119,13 +1405,36 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		ctProperties.setLock100(btnLock100.getSelection());
 		ctProperties.setUseMapOnSkip(btnUseMapOnSkip.getSelection());
 		
+		Color c = (Color)btnTrackColor.getData(COLOR_KEY);
+		if (c == null) {
+			ctProperties.setTrackColor(null);
+		}else {
+			ctProperties.setTrackColor(new java.awt.Color(c.getRed(), c.getGreen(), c.getBlue()));
+		}
+		
 		for (int i = 1; i <= 4; i ++) {
-			Color c = (Color) btnThemeColors[i-1].getData(COLOR_KEY);
+			c = (Color) btnThemeColors[i-1].getData(COLOR_KEY);
 			if (c != null) {
 				ctProperties.setThemeColor(i, new java.awt.Color(c.getRed(), c.getGreen(), c.getBlue()));
 			}else {
 				ctProperties.setThemeColor(i, null);
 			}
+		}
+		
+		if (btnOpResize.getSelection()) {
+			int width = 0;
+			int height = 0;
+			PhotoSize ps = (PhotoSize) cmbSizes.getStructuredSelection().getFirstElement();
+			if (ps == PhotoSize.CUSTOM) {
+				width = Integer.parseInt(txtWidth.getText());
+				height = Integer.parseInt(txtHeight.getText());
+			}else {
+				width = ps.w;
+				height = ps.h;
+			}
+			ctProperties.setResizePhoto(true,  width,  height);
+		}else {
+			ctProperties.setResizePhoto(false, 0, 0);
 		}
 		
 		return true;
