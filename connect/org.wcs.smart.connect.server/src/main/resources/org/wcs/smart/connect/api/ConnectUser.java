@@ -57,6 +57,7 @@ import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.util.UuidUtils;
 
 
 /**
@@ -337,6 +338,9 @@ public class ConnectUser extends HttpServlet {
 	 *   password: "testtest1"
 	 *}</pre>
 	 * 
+	 * Only non-null attributes are updated.  For home ca use a value of 99999999-9999-9999-9999-999999999999 to
+	 * update the home ca to null.
+	 * 
 	 * @param	username	provided in the URL, the username of the requested user. 
 	 * @return Returns a JSON SmartUser object for the updated user
 	 */
@@ -412,7 +416,11 @@ public class ConnectUser extends HttpServlet {
 				toUpdate.setResetId(newUser.getResetId());
 			}
 			if(newUser.getHomeCaUuid() != null){
-				toUpdate.setHomeCaUuid(newUser.getHomeCaUuid());
+				if (newUser.getHomeCaUuid().equals(UuidUtils.stringToUuid("99999999-9999-9999-9999-999999999999"))) { //$NON-NLS-1$
+					toUpdate.setHomeCaUuid(null);
+				}else {
+					toUpdate.setHomeCaUuid(newUser.getHomeCaUuid());
+				}
 			}
 			s.update(toUpdate);
 			s.getTransaction().commit();

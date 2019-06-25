@@ -50,8 +50,15 @@ function populateCaList(){
 	var filterparent = document.getElementById("cafilteroptions");
 	
 	var cas = JSON.parse(this.responseText);
+	
+	
+	var opt = document.createElement('option');
+	opt.value = "99999999-9999-9999-9999-999999999999";
+    opt.innerHTML = "";
+    parent.appendChild(opt);
+    
 	for (var i = 0; i < cas.length; i ++){
-		var opt = document.createElement('option');
+		opt = document.createElement('option');
 		var label = cas[i].label;
 		value = cas[i].uuid;
 	    opt.value = value;

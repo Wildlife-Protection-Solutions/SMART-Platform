@@ -577,10 +577,17 @@ function setHomeCa(){
 	
 	var users = JSON.parse(this.responseText);
 	if(users.homeCaUuid != null){
-		parent.value = users.homeCaUuid;
+		//see if ca exists in list
+		var kids = parent.children;
+		var found = false;
+		for (var i = 0; i < kids.length; i ++){
+			if (kids[i].value == users.homeCaUuid){
+				found = true;
+				break;
+			}
+		}
+		if (found) parent.value = users.homeCaUuid;
 	}
-	
-	
 	getQueryList();
 }
 
