@@ -62,7 +62,7 @@ public interface ISmartConnectAction {
 	 * Will return null if no resource options for this action.
 	 * 
 	 */
-	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l);
+	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l) throws Exception;
 	
 	/**
 	 * @param actionKey the actionkey to list resources for
@@ -73,7 +73,7 @@ public interface ISmartConnectAction {
 	 * Will return null if no resource options for this action.
 	 * 
 	 */
-	public List<ResourceOption> getResourceOptionsForCas(String actionKey, Session s, Locale l, List<UUID> uuidList);
+	public List<ResourceOption> getResourceOptionsForCas(String actionKey, Session s, Locale l, List<UUID> uuidList) throws Exception;
 	
 	
 	/**

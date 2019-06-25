@@ -64,7 +64,7 @@ public class QueryAction implements ISmartConnectAction{
 	}
 
 	@Override
-	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l) {
+	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l) throws Exception {
 
 		List<ResourceOption> ops = new ArrayList<ResourceOption>();
 		ResourceOption ro = new ResourceOption(Messages.getString("QueryAction.AllQueries", l), null); //$NON-NLS-1$
@@ -77,18 +77,18 @@ public class QueryAction implements ISmartConnectAction{
 			ops.add(r);
 		}
 		
-		
 		List<QueryProxy> info = QueryManager.INSTANCE.getQueries(s, l);
 		for (QueryProxy i : info){
 			ro = new ResourceOption(i.getName() + "[" + i.getConservationArea() +"]", i.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 			ops.add(ro);
 		}
 		
+		
 		return ops;
 	}
 	
 	@Override
-	public List<ResourceOption> getResourceOptionsForCas(String actionKey, Session s, Locale l, List<UUID> uuidList) {
+	public List<ResourceOption> getResourceOptionsForCas(String actionKey, Session s, Locale l, List<UUID> uuidList) throws Exception {
 		List<ResourceOption> ops = new ArrayList<ResourceOption>();
 		
 		for (UUID id : uuidList){

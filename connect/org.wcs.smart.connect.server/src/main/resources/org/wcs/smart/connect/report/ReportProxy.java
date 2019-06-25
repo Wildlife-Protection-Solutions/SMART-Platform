@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.report;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class ReportProxy {
@@ -89,5 +90,16 @@ public class ReportProxy {
 	}
 	public void setIsCcaa(boolean isCcaa){
 		this.isCcaa = isCcaa;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (other == null) return false;
+		if (other.getClass() != getClass()) return false;
+		return Objects.equals(uuid, ((ReportProxy)other).uuid);
+	}
+	
+	public int hashCode() {
+		return this.uuid.hashCode();
 	}
 }

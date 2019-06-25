@@ -46,7 +46,7 @@ public class CyberTrackerAction implements ISmartConnectAction{
 	@Override
 	public String getActionName(String actionKey, Locale l) {
 		if (actionKey.equals(KEY)){
-			return "CyberTracker API"; //$NON-NLS-1$
+			return Messages.getString("CyberTrackerAction.CtApiKeyAction", l); //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -65,7 +65,7 @@ public class CyberTrackerAction implements ISmartConnectAction{
 	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l) {
 		List<ResourceOption> ops = new ArrayList<ResourceOption>();
 
-		ResourceOption ro = new ResourceOption("All", null);
+		ResourceOption ro = new ResourceOption(Messages.getString("CyberTrackerAction.All", l), null); //$NON-NLS-1$
 		ops.add(ro);
 		List<ConservationAreaInfo> info = QueryFactory.buildQuery(s, ConservationAreaInfo.class).list();
 		for (ConservationAreaInfo i : info){
@@ -84,14 +84,12 @@ public class CyberTrackerAction implements ISmartConnectAction{
 
 	@Override
 	public String getResourceName(String actionKey, UUID resource, Session s, Locale l) {
-		if (resource == null) return "All";
+		if (resource == null) return Messages.getString("CyberTrackerAction.All", l); //$NON-NLS-1$
 		ConservationAreaInfo info = s.get(ConservationAreaInfo.class, resource);
 		if (info == null) return resource.toString();
 		return info.getLabel();
 	}
-
-
-
+	
 }
 
 

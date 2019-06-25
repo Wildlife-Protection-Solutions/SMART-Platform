@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.query;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class QueryProxy {
@@ -120,5 +121,16 @@ public class QueryProxy {
 
 	public void setIconName(String iconName) {
 		this.iconName = iconName;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (other == null) return false;
+		if (other.getClass() != getClass()) return false;
+		return Objects.equals(uuid, ((QueryProxy)other).uuid);
+	}
+	
+	public int hashCode() {
+		return this.uuid.hashCode();
 	}
 }

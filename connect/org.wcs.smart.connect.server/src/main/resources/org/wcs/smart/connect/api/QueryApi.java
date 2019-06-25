@@ -734,7 +734,13 @@ public class QueryApi extends HttpServlet{
 	}
 	
 
-	private List<QueryProxy> getAdvancedIntelQueries(Session s, Locale l) {
+	private List<QueryProxy> getAdvancedIntelQueries(Session s, Locale l) throws Exception {
+		
+		if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), AdvIntelAction.RUNQUERY_KEY)){
+			//no query access
+			return Collections.emptyList();
+		}
+		
 		List<QueryProxy> queries = QueryManager.INSTANCE.getAdvanedIntelligenceQueries(s,  request.getLocale());
 		if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdvIntelAction.RUNQUERY_KEY, null)){
 			//can access all queries

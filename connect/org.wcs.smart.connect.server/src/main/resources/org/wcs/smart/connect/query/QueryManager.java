@@ -24,25 +24,29 @@ package org.wcs.smart.connect.query;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hibernate.Session;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.hql.spi.QueryTranslator;
+import org.hibernate.hql.spi.QueryTranslatorFactory;
 import org.hibernate.internal.util.ReflectHelper;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SharedLink;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.query.engine.asset.AssetObservationEngine;
@@ -82,7 +86,6 @@ import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
@@ -280,113 +283,211 @@ public enum QueryManager {
 		return null;
 	}
 	
-	/**
-	 * Lists all queries.
-	 * 
-	 * @param session
-	 * @param l
-	 * @param includeMyQueries  - by default we don't include shared queries, i.e. "My Queries" as they should not be shown most of the time. 
-	 * @return
-	 */
-	public List<QueryProxy> getQueries(Session session, final Locale l, Boolean includeMyQueries){
-		List<QueryProxy> proxies = new ArrayList<QueryProxy>();
-		for (Class<? extends Query> q : queryClasses){
-			List<? extends Query> queries = QueryFactory.buildQuery(session, q).list();
-			for (Query qq : queries){
-				QueryProxy proxy = new QueryProxy(qq.getUuid(), qq.getName() == null ? "" : qq.getName(), q.getSimpleName(),  //$NON-NLS-1$
-						qq.getConservationArea().getId(), qq.getId(), qq.getIsShared(), 
-						qq.getConservationArea().getUuid(),
-						qq.getConservationArea().getIsCcaa(),
-						qq.getTypeKey(), qq.getIconName());
-				if(qq.getIsShared() || includeMyQueries){
-					proxies.add(proxy);
-				}
-				
-			}
-		}
-		Collections.sort(proxies, new Comparator<QueryProxy>() {
 
-			@Override
-			public int compare(QueryProxy o1, QueryProxy o2) {
-				Collator textCompare = Collator.getInstance(l);
-//This is the method to sort by CA, then type, then name.
-//				int r = textCompare.compare(o1.getConservationArea(), o2.getConservationArea());
-//				if (r != 0) return r;
-//				r = textCompare.compare(o1.getType(), o2.getType());
-//				if (r != 0) return r;
-//				r = textCompare.compare(o1.getName(), o2.getName());
-//				return r;
-				
-				//I want to sort by Name only for now 
-				return textCompare.compare(o1.getName(), o2.getName());
-			}
-		});
-		return proxies;
-	}
-	
 	/*
 	 * If no third parameter is given, assume false.
 	 */
-	public List<QueryProxy> getQueries(Session session, final Locale l){
+	public List<QueryProxy> getQueries(Session session, final Locale l) throws Exception{
 		return getQueries(session, l, false);
 	}
 	
-	/**
-	 * Gets all advanced intelligence queries from the database
-	 * @param session
-	 * @return
-	 */
-	public List<QueryProxy> getAdvanedIntelligenceQueries(Session session, final Locale l){
-		List<QueryProxy> queries = new ArrayList<>();
-		List<IntelRecordObservationQuery> intelQuery = QueryFactory.buildQuery(session, IntelRecordObservationQuery.class).list();
-		for (IntelRecordObservationQuery q : intelQuery) {
-			QueryProxy qp = new QueryProxy(q.getUuid(), q.getName(), Messages.getString("QueryManager.AdvIntlQueryTypeName", l), //$NON-NLS-1$
-						q.getConservationArea().getId(), 
-						"-",//$NON-NLS-1$
-						true,
-						q.getConservationArea().getUuid(),
-						q.getConservationArea().getIsCcaa(),
-						IntelRecordObservationQuery.KEY.toLowerCase(Locale.ROOT),
-						q.getIconName());
-			queries.add(qp);
+	public List<QueryProxy> getQueries(Session session, Locale l, Boolean includeMyQueries) throws Exception{
+		List<String> langs = new ArrayList<>();
+		langs.add(l.getLanguage());
+		if (!l.getCountry().isEmpty()) {
+			langs.add(l.getLanguage() + "_" + l.getCountry()); //$NON-NLS-1$
+			if (l.getVariant().isEmpty()) langs.add(l.getLanguage() + "_" + l.getCountry() + "_" + l.getVariant()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
-		List<IntelEntitySummaryQuery> summQuery = QueryFactory.buildQuery(session, IntelEntitySummaryQuery.class).list();
-		for (IntelEntitySummaryQuery q : summQuery) {
-			QueryProxy qp = new QueryProxy(q.getUuid(), q.getName(), Messages.getString("QueryManager.AdvIntlEntitySummaryQueryTypeName", l), //$NON-NLS-1$
-						q.getConservationArea().getId(), 
-						"-",//$NON-NLS-1$
-						true,
-						q.getConservationArea().getUuid(),
-						q.getConservationArea().getIsCcaa(),
-						IntelEntitySummaryQuery.KEY.toLowerCase(Locale.ROOT),
-						q.getIconName());
-			queries.add(qp);
+		HashMap<QueryProxy, String> query2names = new HashMap<>();
+		String query = ""; //$NON-NLS-1$
+		
+		//hql doesn't support UNION
+		//so we do some hql->sql conversion here and use
+		//native queries instead.
+		int cnt = 0;
+		HashMap<String, Object> params = new HashMap<>();
+		
+		for (Class<? extends Query> q : queryClasses){
+			
+			Constructor<? extends Query> cq = q.getDeclaredConstructor();
+			cq.setAccessible(true);
+			Query c = cq.newInstance();
+			
+			String type = q.getSimpleName();
+			String typeKey = c.getTypeKey();
+			String icon = c.getIconName();
+			
+			if (!query.isEmpty()) query += " UNION "; //$NON-NLS-1$
+			
+			String querypart = "SELECT q.uuid, q.id, q.isShared, q.conservationArea.uuid, " //$NON-NLS-1$
+				+ "q.conservationArea.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon + "' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			 	+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or " //$NON-NLS-1$
+			 	+ "z.code in (:langs)) "; //$NON-NLS-1$
+	
+			QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
+			final SessionFactoryImplementor factory = (SessionFactoryImplementor) session.getSessionFactory();
+			final QueryTranslator translator = translatorFactory.createQueryTranslator(querypart, querypart, Collections.EMPTY_MAP, factory, null);
+			translator.compile(Collections.EMPTY_MAP, false);
+			String sql = translator.getSQLString();
+			sql = sql.replaceFirst("\\?", ":langs"+ cnt); //$NON-NLS-1$ //$NON-NLS-2$
+			params.put("langs" + cnt, langs); //$NON-NLS-1$
+			cnt++;
+			query += sql;
 		}
 		
-		List<IntelEntityRecordQuery> eQuery = QueryFactory.buildQuery(session, IntelEntityRecordQuery.class).list();
-		for (IntelEntityRecordQuery q : eQuery) {
-			QueryProxy qp = new QueryProxy(q.getUuid(), q.getName(), Messages.getString("QueryManager.AdvIntlEntityRecordQueryTypeName", l), //$NON-NLS-1$
-						q.getConservationArea().getId(), 
-						"-",//$NON-NLS-1$
-						true,
-						q.getConservationArea().getUuid(),
-						q.getConservationArea().getIsCcaa(),
-						IntelEntitySummaryQuery.KEY.toLowerCase(Locale.ROOT),
-						q.getIconName());
-			queries.add(qp);
+		NativeQuery<?> nq = session.createNativeQuery(query);
+		for (Entry<String, Object> param : params.entrySet()) {
+			nq.setParameter(param.getKey(),  param.getValue());
 		}
-		
-		Collections.sort(queries, new Comparator<QueryProxy>() {
+		//hack based on the hibernate query conversion; might be invalid in future versions of hibernate
+		//required for uuid data types
+		nq.addScalar("col_0_0_", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		nq.addScalar("col_1_0_"); //$NON-NLS-1$
+		nq.addScalar("col_2_0_"); //$NON-NLS-1$
+		nq.addScalar("col_3_0_", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		nq.addScalar("col_4_0_"); //$NON-NLS-1$
+		nq.addScalar("col_5_0_"); //$NON-NLS-1$
+		nq.addScalar("col_6_0_"); //$NON-NLS-1$
+		nq.addScalar("col_7_0_"); //$NON-NLS-1$
+		nq.addScalar("col_8_0_"); //$NON-NLS-1$
+		nq.addScalar("col_9_0_"); //$NON-NLS-1$
+		List<?> items = nq.list();
 
-			@Override
-			public int compare(QueryProxy o1, QueryProxy o2) {
-				Collator textCompare = Collator.getInstance(l);
-				return textCompare.compare(o1.getName(), o2.getName());
+		for (Object i : items) {
+			Object[] data = (Object[])i;
+			UUID uuid = (UUID) data[0];
+			String id = (String)data[1];
+			boolean isShared = (boolean)data[2];
+			
+			UUID cauuid = (UUID)data[3];
+			String caid = (String)data[4];
+			
+			String value = (String)data[5];
+			String code = (String)data[6];
+			
+			String type = (String)data[7];
+			String typekey = (String)data[8];
+			String icon = (String)data[9];
+				
+			if (isShared || includeMyQueries) {
+				QueryProxy qp = new QueryProxy(uuid, value, type, caid, id, isShared,cauuid, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon);
+					
+				if (!query2names.containsKey(qp)) {
+					query2names.put(qp, code);
+				}else {
+					String currentcode = query2names.get(qp);
+					int cindex = langs.indexOf(currentcode);
+					int nindex = langs.indexOf(code);
+					if ((cindex == -1 && nindex >= 0) || (cindex != -1 && nindex > cindex)) {
+						query2names.remove(qp);
+						query2names.put(qp, code);
+					}
+				}
 			}
-		});
-		return queries;
+		}
+
+		return new ArrayList<>(query2names.keySet());
 	}
+
+	public List<QueryProxy> getAdvanedIntelligenceQueries(Session session, Locale l) throws Exception{
+		List<String> langs = new ArrayList<>();
+		langs.add(l.getLanguage());
+		if (!l.getCountry().isEmpty()) {
+			langs.add(l.getLanguage() + "_" + l.getCountry()); //$NON-NLS-1$
+			if (l.getVariant().isEmpty()) langs.add(l.getLanguage() + "_" + l.getCountry() + "_" + l.getVariant()); //$NON-NLS-1$ //$NON-NLS-2$
+
+		}
+		
+		HashMap<QueryProxy, String> query2names = new HashMap<>();
+		String query = ""; //$NON-NLS-1$
+		
+		//hql doesn't support UNION
+		//so we do some hql->sql conversion here and use
+		//native queries instead.
+		int cnt = 0;
+		HashMap<String, Object> params = new HashMap<>();
+		
+		List<Class<? extends AbstractIntelQuery>> intelQueryClasses = new ArrayList<>();
+		intelQueryClasses.add(IntelRecordObservationQuery.class);
+		intelQueryClasses.add(IntelEntitySummaryQuery.class);
+		intelQueryClasses.add(IntelEntityRecordQuery.class);
+		
+		for (Class<? extends AbstractIntelQuery> q : intelQueryClasses){
+			
+			Constructor<? extends AbstractIntelQuery> cq = q.getDeclaredConstructor();
+			cq.setAccessible(true);
+			AbstractIntelQuery c = cq.newInstance();
+			
+			String type = q.getSimpleName();
+			String typeKey = c.getTypeKey();
+			String icon = c.getIconName();
+			
+			if (!query.isEmpty()) query += " UNION "; //$NON-NLS-1$
+			
+			String querypart = "SELECT q.uuid, q.conservationArea.uuid, " //$NON-NLS-1$
+				+ "q.conservationArea.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon + "' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			 	+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or " //$NON-NLS-1$
+			 	+ "z.code in (:langs)) "; //$NON-NLS-1$
+	
+			QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
+			final SessionFactoryImplementor factory = (SessionFactoryImplementor) session.getSessionFactory();
+			final QueryTranslator translator = translatorFactory.createQueryTranslator(querypart, querypart, Collections.EMPTY_MAP, factory, null);
+			translator.compile(Collections.EMPTY_MAP, false);
+			String sql = translator.getSQLString();
+			sql = sql.replaceFirst("\\?", ":langs"+ cnt);  //$NON-NLS-1$//$NON-NLS-2$
+			params.put("langs" + cnt, langs); //$NON-NLS-1$
+			cnt++;
+			query += sql;
+
+		}
+
+		NativeQuery<?> nq = session.createNativeQuery(query);
+		for (Entry<String, Object> param : params.entrySet()) {
+			nq.setParameter(param.getKey(),  param.getValue());
+		}
+		//hack based on the hibernate query conversion; might be invalid in future versions of hibernate
+		//required for uuid data types
+		nq.addScalar("col_0_0_", PostgresUUIDType.INSTANCE);  //$NON-NLS-1$
+		nq.addScalar("col_1_0_", PostgresUUIDType.INSTANCE);  //$NON-NLS-1$
+		nq.addScalar("col_2_0_"); //$NON-NLS-1$
+		nq.addScalar("col_3_0_"); //$NON-NLS-1$
+		nq.addScalar("col_4_0_"); //$NON-NLS-1$
+		nq.addScalar("col_5_0_"); //$NON-NLS-1$
+		nq.addScalar("col_6_0_"); //$NON-NLS-1$
+		nq.addScalar("col_7_0_"); //$NON-NLS-1$
+		List<?> items = nq.list();
+
+		for (Object i : items) {
+			Object[] data = (Object[])i;
+			UUID uuid = (UUID) data[0];
+			
+			UUID cauuid = (UUID)data[1];
+			String caid = (String)data[2];
+			
+			String value = (String)data[3];
+			String code = (String)data[4];
+			
+			String type = (String)data[5];
+			String typekey = (String)data[6];
+			String icon = (String)data[7];
+				
+			QueryProxy qp = new QueryProxy(uuid, value, type, caid, "-", true, cauuid, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon);  //$NON-NLS-1$
+					
+			if (!query2names.containsKey(qp)) {
+				query2names.put(qp, code);
+			}else {
+				String currentcode = query2names.get(qp);
+				int cindex = langs.indexOf(currentcode);
+				int nindex = langs.indexOf(code);
+				if (cindex == -1 && nindex >= 0) query2names.put(qp, code);
+				if (cindex != -1 && nindex > cindex) query2names.put(qp, code);
+			}
+		}
+
+		return new ArrayList<>(query2names.keySet());
+	}
+		
 	/**
 	 * Find the query engine for running the given query.
 	 * 

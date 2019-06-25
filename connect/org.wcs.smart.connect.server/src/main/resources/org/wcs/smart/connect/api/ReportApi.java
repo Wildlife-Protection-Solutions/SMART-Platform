@@ -29,12 +29,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -89,7 +86,6 @@ import org.wcs.smart.connect.report.query.ServerSmartConnection;
 import org.wcs.smart.connect.security.ReportAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.report.execute.ParameterFinder;
 import org.wcs.smart.report.model.Report;
@@ -369,34 +365,54 @@ public class ReportApi extends HttpServlet{
 		return allowed; 
 	}
 	
-	/**
-	 * Finds all reports
-	 * @param session
-	 * @param l
-	 * @param includeMyQueries
-	 * @return
-	 */
 	private List<ReportProxy> getReports(Session session, final Locale l, Boolean includeMyQueries){
-		List<ReportProxy> proxies = new ArrayList<ReportProxy>();
+		List<String> langs = new ArrayList<>();
+		langs.add(l.getLanguage());
+		if (!l.getCountry().isEmpty()) {
+			langs.add(l.getLanguage() + "_" + l.getCountry());
+			if (l.getVariant().isEmpty()) langs.add(l.getLanguage() + "_" + l.getCountry() + "_" + l.getVariant());
+		}
 		
-		List<Report> reports = QueryFactory.buildQuery(session, Report.class).list();
-		for (Report r : reports){
-			ReportProxy proxy = new ReportProxy(r.getUuid(), r.getName() == null ? "" : r.getName(),   //$NON-NLS-1$
-					r.getConservationArea().getId(), r.getId(), r.getShared(), 
-					r.getConservationArea().getUuid(),
-					r.getConservationArea().getIsCcaa());
-			if(r.getShared() || includeMyQueries){
-				proxies.add(proxy);
+		HashMap<ReportProxy, String> query2names = new HashMap<>();
+		
+		String querypart = "SELECT r.uuid, r.id, r.shared, r.conservationArea.uuid, r.conservationArea.id, l.value, z.code "
+				+ " FROM Report as r JOIN Label as l on l.id.element = r.uuid JOIN l.id.language as z "
+				+ " WHERE l.id.element = r.uuid and (z.default = true or z.code in (:langs)) ";
+		
+		List<?> results = session.createQuery(querypart)
+				.setParameterList("langs",  langs)
+				.list();
+		
+		for (Object i : results) {
+			Object[] data = (Object[])i;
+			
+			UUID ruuid = (UUID) data[0];
+			String rid = (String)data[1];
+			boolean isShared = (boolean)data[2];
+			
+			UUID cauuid = (UUID)data[3];
+			String caid = (String)data[4];
+			
+			String value = (String)data[5];
+			String code = (String)data[6];
+			
+			if (isShared || includeMyQueries) {
+				ReportProxy rp = new ReportProxy(ruuid, value, caid, rid, isShared, cauuid, cauuid.equals(ConservationArea.MULTIPLE_CA));
+					
+				if (!query2names.containsKey(rp)) {
+					query2names.put(rp, code);
+				}else {
+					String currentcode = query2names.get(rp);
+					int cindex = langs.indexOf(currentcode);
+					int nindex = langs.indexOf(code);
+					if ((cindex == -1 && nindex >= 0) || (cindex != -1 && nindex > cindex)){
+						query2names.remove(rp);
+						query2names.put(rp, code);
+					}
+				}
 			}
 		}
-		Collections.sort(proxies, new Comparator<ReportProxy>() {
-			@Override
-			public int compare(ReportProxy o1, ReportProxy o2) {
-				Collator textCompare = Collator.getInstance(l);
-				return textCompare.compare(o1.getName(), o2.getName());
-			}
-		});
-		return proxies;
+		return new ArrayList<>(query2names.keySet());
 	}
 	
 	/**

@@ -70,7 +70,7 @@ public class AdvIntelAction  implements ISmartConnectAction{
 	}
 
 	@Override
-	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l) {
+	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l) throws Exception{
 
 		if (actionKey.equals(RUNQUERY_KEY)) {
 			List<ResourceOption> ops = new ArrayList<ResourceOption>();
@@ -107,7 +107,7 @@ public class AdvIntelAction  implements ISmartConnectAction{
 	}
 	
 	@Override
-	public List<ResourceOption> getResourceOptionsForCas(String actionKey, Session s, Locale l, List<UUID> uuidList) {
+	public List<ResourceOption> getResourceOptionsForCas(String actionKey, Session s, Locale l, List<UUID> uuidList) throws Exception{
 		if (actionKey.equals(RUNQUERY_KEY)) {
 			List<ResourceOption> ops = new ArrayList<ResourceOption>();
 			
