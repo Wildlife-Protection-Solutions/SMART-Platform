@@ -10,13 +10,12 @@
   	
 	<properties>
 		<smart.version>7.0.0-SNAPSHOT</smart.version>
-        	<geotools.version>21.0</geotools.version>
-        	<jts.version>1.16.0</jts.version>
-        	<hibernate.version>5.4.1.Final</hibernate.version>
+        	<geotools.version>21.1</geotools.version>
+        	<jts.version>1.16.1</jts.version>
+		<hibernate.version>5.4.3.Final</hibernate.version>
         	<birt.version>4.6.0-20160607</birt.version>
         	<!--<birt.version>4.4.2</birt.version>-->
         	<udig.version>3.0.0-SNAPSHOT</udig.version>
-        	
         	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     	</properties>
     

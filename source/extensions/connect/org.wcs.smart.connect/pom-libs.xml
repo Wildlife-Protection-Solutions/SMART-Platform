@@ -17,7 +17,7 @@
 	
 	<properties>
 		<resteasy.version>4.0.0.Final</resteasy.version>
-    </properties>
+    	</properties>
     	
 	<dependencies>
 		<dependency>
@@ -26,9 +26,9 @@
 			<version>${resteasy.version}</version>
 		</dependency>
 		<dependency>
-    		<groupId>org.jboss.resteasy</groupId>
-    		<artifactId>resteasy-jackson2-provider</artifactId>
-    		<version>${resteasy.version}</version>
+    			<groupId>org.jboss.resteasy</groupId>
+    			<artifactId>resteasy-jackson2-provider</artifactId>
+    			<version>${resteasy.version}</version>
 		</dependency>
 	</dependencies>
 </project>
