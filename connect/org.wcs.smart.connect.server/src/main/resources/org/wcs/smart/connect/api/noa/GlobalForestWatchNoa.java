@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.servlet;
+package org.wcs.smart.connect.api.noa;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,19 +38,23 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.annotation.WebServlet;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.POST;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
+import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.GlobalForestWatchApi;
-import org.wcs.smart.connect.api.noa.ConnectNoaRESTApplication;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
 import org.wcs.smart.connect.model.GlobalForestWatch;
@@ -61,14 +65,17 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 /**
  * Servlet for processing global forest watch push requests
  * 
  * @author Emily
  *
  */
-@WebServlet(ConnectNoaRESTApplication.NO_AUTH_PATH  + GlobalForestWatchApi.PATH + "/*")
-public class GlobalForestWatchProcessorServlet extends HttpServlet {
+@javax.ws.rs.Path(ConnectRESTApplication.PATH_SEPERATOR + GlobalForestWatchApi.PATH)
+public class GlobalForestWatchNoa extends HttpServlet {
 	
 	
 	private static final long serialVersionUID = 1L;
@@ -96,44 +103,45 @@ public class GlobalForestWatchProcessorServlet extends HttpServlet {
 	private static final String ALERT_NAME_JSON_KEY = "alert_name"; //$NON-NLS-1$
 
 	
-	private final Logger logger = Logger.getLogger(GlobalForestWatchProcessorServlet.class.getName());
-
+	private final Logger logger = Logger.getLogger(GlobalForestWatchNoa.class.getName());
 	
+	@Context private ServletContext context;
+	@Context private HttpServletRequest request;
+
 	/**
 	 * Process Global Forest Watch post request
 	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
-		
-		String pathInfo = request.getPathInfo();
-		if (pathInfo.startsWith("/")) { //$NON-NLS-1$
-			pathInfo = pathInfo.substring(1);
-		}
-		
+	@POST
+    @javax.ws.rs.Path("{uuid}")
+	@Operation(description = "Processes global forest watch push requests, converting the notifications to SMART Connect Alerts.")
+	@ApiResponse(responseCode = "200", description="Request processed successfully")
+	@ApiResponse(responseCode = "400", description = "Invalid parameters supplied")
+	@ApiResponse(responseCode = "404", description = "Requested gfw configuration not found")
+	@ApiResponse(responseCode = "500", description = "Parsing or other internal server error")
+	public void postGfwData(@PathParam("uuid") String gfwuuid){
 		UUID gfwUuid = null;
 		try {
-			gfwUuid = UuidUtils.stringToUuid(pathInfo);
+			gfwUuid = UuidUtils.stringToUuid(gfwuuid);
 		}catch (Exception ex) {
-			response.setStatus(Status.BAD_REQUEST.getStatusCode());
-			return;
+			throw new SmartConnectException(Status.BAD_REQUEST, Messages.getString("GlobalForestWatchNoa.InvalidUuid", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
 		GlobalForestWatch gw = null;
-		Session s = HibernateManager.getSession(request.getServletContext());
+		Session s = HibernateManager.getSession(context);
 		try {
 			s.beginTransaction();
 			gw = s.get(GlobalForestWatch.class, gfwUuid);
 		
 			if (gw == null) {
-				response.setStatus(Status.NOT_FOUND.getStatusCode());
-				return;
+				throw new SmartConnectException(Status.NOT_FOUND, Messages.getString("GlobalForestWatchNoa.GFWNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			
 			gw.setLastDataDate(new Date());
 			StringBuilder json = new StringBuilder();
+
 			try(BufferedReader reader = request.getReader()){
 				reader.lines().forEach(e->json.append(e));
 			}
-			//logger.log(Level.SEVERE, json.toString());
 			
 			List<Alert> alerts = processJson(json.toString(), gw);
 			for (Alert a : alerts) {
@@ -145,6 +153,7 @@ public class GlobalForestWatchProcessorServlet extends HttpServlet {
 			s.getTransaction().commit();
 		}catch (Exception ex) {
 			logger.log(Level.SEVERE, "Error saving global forest watch alerts",  ex); //$NON-NLS-1$
+			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, ex.getMessage());
 		}finally {
 			if (s.getTransaction().isActive()) s.getTransaction().rollback();
 		}

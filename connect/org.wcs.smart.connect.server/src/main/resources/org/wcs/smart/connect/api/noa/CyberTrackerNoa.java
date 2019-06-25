@@ -177,40 +177,6 @@ public class CyberTrackerNoa {
 		}
 	}
 	
-//	/**
-//	 * Lists all CyberTracker packages uploaded to Connect.
-//	 */
-//	@GET
-//    @Path("/packages")
-//	@Produces({ MediaType.APPLICATION_JSON })
-//	@Operation(description = "List all CyberTracker packages uploaded to SMART Connect",
-//			security = {@SecurityRequirement(name="apikeyheader"), @SecurityRequirement(name="apikeyquery")})
-//	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(schema=@Schema(implementation=CyberTrackerPackageProxy.class)))})
-//	@ApiResponse(responseCode = "401", description = "Invalid authorization credientials")
-//	public List<CyberTrackerPackageProxy> getPackages(){
-//		List<CyberTrackerPackageProxy> proxies = new ArrayList<>();
-//		Session s = HibernateManager.getSession(context);
-//		s.beginTransaction();
-//		try{
-//			List<CyberTrackerPackage> items = QueryFactory.buildQuery(s, CyberTrackerPackage.class).getResultList();			
-//			for (CyberTrackerPackage ca : items) proxies.add(ca.asProxy());
-//			Collections.sort(proxies, (a,b)->{
-//				if (a.getCaUuid().equals(b.getCaUuid())) return a.getName().compareToIgnoreCase(b.getName());
-//				return a.getCaLabel().compareToIgnoreCase(b.getCaLabel());
-//			});
-//			
-//		}catch (Exception ex){
-//			logger.log(Level.SEVERE, ex.getMessage(), ex);
-//
-//			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
-//					"Could not list cybertracker packages", ex); //$NON-NLS-1$
-//		}finally{
-//			s.getTransaction().commit();
-//		}
-//		return proxies;
-//	}
-
-	
 	/**
 	 * Gets the cybertracker package
 	 */
@@ -391,7 +357,7 @@ public class CyberTrackerNoa {
 	
 	
 	/**
-	 * Create a new alert, or update the track position of an existing alert.
+	 * Create a new alert or update the track position of an existing alert.
 	 * 
 	 *  <p>
 	 *  If you are updating an existing track, call this API with the same usergenid more than once.
@@ -405,13 +371,26 @@ public class CyberTrackerNoa {
 	 * @param	usergenid	provided in the URL, the user generated ID of the alert. The system generates a UUID automatically.
 	 * @return Returns a JSON Alert object for the created alert
 	 */
-	
 	@PUT
     @Path("alert/{usergenid}")
-    public Alert addAlert(@PathParam("usergenid") String userGenId, GeoJsonAlert newGeoJsonAlert) {	
+	@Operation(description = "Creates a new alert or updates the position of an existing alert.  If you are "
+			+ "updating an existing alert call this API with the smae usergenid more than once. "
+			+ "If this case the system adds the past x,y coordinates to a historical track and overwrites the other "
+			+ "attributes with the latest data.  This is the way users can send a repetitive pings to keep the "
+			+ "last known location and past track of devices without creating a new alert each time the location is updated",
+		security = {@SecurityRequirement(name="apikeyheader"), @SecurityRequirement(name="apikeyquery")})
+		@ApiResponse(responseCode = "200", description="Package uploaded successfully")
+		@ApiResponse(responseCode = "400", description = "Invalid parameters or context")
+		@ApiResponse(responseCode = "401", description = "Invalid authorization credientials")
+    public Alert addAlert(
+    		@Parameter(description="The id to associated with the alert.  If this id already exists in the system the alert will be updated, otherwise a new alert with this id will be created ")
+    		@PathParam("usergenid") String userGenId, 
+    		@Parameter(description="The alert settings.") GeoJsonAlert newGeoJsonAlert) {	
+		
 		UUID tokenCaUuid = validateToken();
 
 		if (!tokenCaUuid.equals(newGeoJsonAlert.getCaUuid())) throw new SmartConnectException(Response.Status.FORBIDDEN);
+		
 		Alert newAlert = ConnectAlert.convertAndValidateAlert(newGeoJsonAlert, request);
 		newAlert.setCreatorUuid(null);
 		newAlert.setSource(Alert.Source.CYBERTRACKER);

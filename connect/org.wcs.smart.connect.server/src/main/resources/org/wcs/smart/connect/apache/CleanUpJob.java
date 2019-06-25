@@ -53,6 +53,7 @@ import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.connect.api.DataQueue;
 import org.wcs.smart.connect.api.ReportApi;
 import org.wcs.smart.connect.api.Uploader;
+import org.wcs.smart.connect.api.noa.GlobalForestWatchNoa;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -60,7 +61,6 @@ import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.model.WorkItem.Type;
-import org.wcs.smart.connect.servlet.GlobalForestWatchProcessorServlet;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 import org.wcs.smart.hibernate.QueryFactory;
 
@@ -350,7 +350,7 @@ public class CleanUpJob implements Runnable {
 	private void cleanUpGlobalForestWatchFiles(){
 		if (gfwCleanUpDays == null || gfwCleanUpDays <= 0) return;
 		
-		Path gfwPath = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(GlobalForestWatchProcessorServlet.LOG_DIRECTORY);
+		Path gfwPath = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(GlobalForestWatchNoa.LOG_DIRECTORY);
 		if (!Files.exists(gfwPath)) return;
 		
 		Date lastDate = new Date((new Date()).getTime() - gfwCleanUpDays * 24l * 60 *60 *1000);
@@ -365,7 +365,7 @@ public class CleanUpJob implements Runnable {
 						
 						String datetime = fileName.substring(firstIndex+1, lastIndex);
 						try {
-							SimpleDateFormat df = new SimpleDateFormat(GlobalForestWatchProcessorServlet.DATE_FORMAT);
+							SimpleDateFormat df = new SimpleDateFormat(GlobalForestWatchNoa.DATE_FORMAT);
 							Date dd = df.parse(datetime);
 							
 							if (dd.before(lastDate)) {

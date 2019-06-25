@@ -67,10 +67,12 @@ public class ConnectNoaRESTApplication extends Application {
 		Set<Class<?>> resources = new HashSet<>();
 		//api classes
 	    resources.add(CyberTrackerNoa.class);
+	    resources.add(GlobalForestWatchNoa.class);
 	    
 	    //exception mappers
 	    resources.add(SmartConnectExceptionMapper.class);
 		resources.add(GeneralExceptionMapper.class);
+		
 		
 	    return resources;
 	}
