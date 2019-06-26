@@ -35,8 +35,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -45,18 +47,18 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -85,9 +87,9 @@ public class RScriptListDialog extends SmartStyledTitleDialog {
 	private MenuItem mnuAdd;
 	private MenuItem mnuDelete;
 	
-	private Button btnNew;
-	private Button btnEdit;
-	private Button btnDelete;
+	private ToolItem tiNew;
+	private ToolItem tiEdit;
+	private ToolItem tiDelete;
 	 
 	private Job loadScript = new Job("load R scripts "){ //$NON-NLS-1$
 
@@ -122,7 +124,7 @@ public class RScriptListDialog extends SmartStyledTitleDialog {
 	@Override
 	protected Point getInitialSize() {
 		Point p = super.getInitialSize();
-		return new Point(p.x,(int)(p.y*2));
+		return new Point(p.x,(int)(p.y*1.2));
 	}
 	
 	@Override
@@ -132,7 +134,10 @@ public class RScriptListDialog extends SmartStyledTitleDialog {
 		parent.setLayout(new GridLayout(2, false));
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		cmbScripts = new TableViewer(parent);
+		Composite tcomp = new Composite(parent, SWT.NONE);
+		tcomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		cmbScripts = new TableViewer(tcomp);
 		cmbScripts.setContentProvider(ArrayContentProvider.getInstance());
 		cmbScripts.setLabelProvider(new NamedItemLabelProvider());
 		cmbScripts.setInput(new String[]{DialogConstants.LOADING_TEXT});
@@ -148,45 +153,35 @@ public class RScriptListDialog extends SmartStyledTitleDialog {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				btnEdit.setEnabled(!cmbScripts.getSelection().isEmpty());
-				btnDelete.setEnabled(!cmbScripts.getSelection().isEmpty());
+				tiEdit.setEnabled(!cmbScripts.getSelection().isEmpty());
+				tiDelete.setEnabled(!cmbScripts.getSelection().isEmpty());
 				mnuEdit.setEnabled(!cmbScripts.getSelection().isEmpty());
 				mnuDelete.setEnabled(!cmbScripts.getSelection().isEmpty());
 			}
 		});
 		
-		Composite buttonPanel = new Composite(parent, SWT.NONE);
-		buttonPanel.setLayout(new GridLayout());
-		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		TableColumn singleColumn = new TableColumn(cmbScripts.getTable(), SWT.NONE);
+		TableColumnLayout tableColumnLayout = new TableColumnLayout();
+		tableColumnLayout.setColumnData(singleColumn, new ColumnWeightData(100));
+		tcomp.setLayout(tableColumnLayout);
 		
-		btnNew = new Button(buttonPanel, SWT.PUSH);
-		btnNew.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		btnNew.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				add();
-			}
-		});
-		btnEdit = new Button(buttonPanel, SWT.PUSH);
-		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		btnEdit.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				edit();
-			}
-		});
+		ToolBar tb = new ToolBar(parent, SWT.VERTICAL | SWT.FLAT | SWT.RIGHT);
+		tb.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
-		btnDelete = new Button(buttonPanel, SWT.PUSH);
-		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		btnDelete.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				delete();
-			}
-		});
+		tiNew = new ToolItem(tb, SWT.PUSH);
+		tiNew.setText(DialogConstants.ADD_BUTTON_TEXT);
+		tiNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		tiNew.addListener(SWT.Selection,e->add());
+		
+		tiEdit = new ToolItem(tb, SWT.PUSH);
+		tiEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		tiEdit.addListener(SWT.Selection,e->edit());
+		
+		tiDelete = new ToolItem(tb, SWT.PUSH);
+		tiDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDelete.addListener(SWT.Selection,e->delete());
 		
 		Menu menu = new Menu(cmbScripts.getControl());
 		cmbScripts.getControl().setMenu(menu);
@@ -194,35 +189,21 @@ public class RScriptListDialog extends SmartStyledTitleDialog {
 		mnuAdd = new MenuItem(menu, SWT.DEFAULT);
 		mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		mnuAdd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				add();
-			}
-		});
+		mnuAdd.addListener(SWT.Selection,e->add());
 		
 		mnuEdit = new MenuItem(menu, SWT.DEFAULT);
 		mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RENAME_ICON));
-		mnuEdit.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				edit();
-			}
-		});
+		mnuEdit.addListener(SWT.Selection,e->edit());
+		
 		mnuDelete = new MenuItem(menu, SWT.DEFAULT);
 		mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		mnuDelete.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				delete();
-			}
-		});
+		mnuDelete.addListener(SWT.Selection,e-> delete());
 		
-		btnNew.setEnabled(true);
-		btnEdit.setEnabled(false);
-		btnDelete.setEnabled(false);
+		tiNew.setEnabled(true);
+		tiEdit.setEnabled(false);
+		tiDelete.setEnabled(false);
 		mnuAdd.setEnabled(true);
 		mnuEdit.setEnabled(false);
 		mnuDelete.setEnabled(false);

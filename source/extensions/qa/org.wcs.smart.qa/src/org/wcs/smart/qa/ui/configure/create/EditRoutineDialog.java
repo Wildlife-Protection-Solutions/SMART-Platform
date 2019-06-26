@@ -166,6 +166,8 @@ public class EditRoutineDialog extends SmartStyledTitleDialog{
 		Composite main = new Composite(composite, SWT.NONE);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)main.getLayout()).marginWidth = 0;
+		((GridLayout)main.getLayout()).marginHeight = 0;
 
 		CTabFolder tabs = new CTabFolder(main, SWT.FLAT);
 		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
