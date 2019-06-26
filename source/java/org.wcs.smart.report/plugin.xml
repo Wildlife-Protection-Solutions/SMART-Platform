@@ -207,7 +207,7 @@
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.query.menu.view">
          <command
                commandId="org.wcs.smart.command.showperspective"
-               icon="images/icons/etool16/report_view.png"
+               icon="images/icons/report@2x.png"
                id="org.wcs.smart.query.toolbar.report"
                label="%showreportperspective.menu.label1"
                mnemonic="%showreportperspective.menu.mnemonic"

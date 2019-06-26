@@ -115,7 +115,7 @@
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.analysis">
          <command
                commandId="org.wcs.smart.command.showperspective"
-               icon="images/icons/view16/querypatrol.gif"
+               icon="images/icons/query@2x.png"
                id="org.wcs.smart.query.menu.view"
                label="%perspectivetoolbar.showquery.command.label1"
                mode="FORCE_TEXT"
@@ -154,7 +154,7 @@
          </command>
          <command
                commandId="org.wcs.smart.command.showperspective"
-               icon="images/icons/view16/querypatrol.gif"
+               icon="images/icons/query@2x.png"
                id="org.wcs.smart.query.menu.view1"
                label="%perspectivetoolbar.showquery.command.label1"
                mode="FORCE_TEXT"
@@ -221,6 +221,10 @@
                      </or>
                   </with>
                </visibleWhen>
+               <parameter
+                     name="org.wcs.smart.query.source"
+                     value="org.wc.smart.query.create.dropdown.mi">
+               </parameter>
             </command>
             <command
                   commandId="org.wcs.smart.query.export"
@@ -543,28 +547,28 @@
                tooltip="%querylist.toolbar.delete.command.tooltip">
          </command>
          <command
-               commandId="org.wcs.smart.query.create.unknown"
-               id="org.wcs.smart.query.toolbar.menu.create"
-               label="%queryToolbar.createquery.command.label"
-               style="pulldown"
-               tooltip="%queryToolbar.createquery.command.toolbar">
+               commandId="org.wcs.smart.query.create.dropdown"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
+               id="org.wc.smart.query.create.dropdown.mi2"
+               style="push">
             <visibleWhen
                   checkEnabled="false">
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="analyst">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <or>
+                     <equals
+                           value="org.wcs.smart.query.persepectives.single">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.query.persepectives.multi">
+                     </equals>
+                  </or>
+               </with>
             </visibleWhen>
+            <parameter
+                  name="org.wcs.smart.query.source"
+                  value="org.wc.smart.query.create.dropdown.mi2">
+            </parameter>
          </command>
       </menuContribution>
       <menuContribution
@@ -986,7 +990,12 @@
       </command>
       <command
             id="org.wcs.smart.query.create.dropdown"
-            name="name">
+            name="New">
+         <commandParameter
+               id="org.wcs.smart.query.source"
+               name="Source Menu Item"
+               optional="true">
+         </commandParameter>
       </command>
    </extension>
    <extension

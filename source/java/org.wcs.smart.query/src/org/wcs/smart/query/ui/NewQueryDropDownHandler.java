@@ -24,22 +24,27 @@ package org.wcs.smart.query.ui;
 import java.net.URL;
 import java.util.HashMap;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.ParameterizedCommand;
 import org.eclipse.e4.core.commands.ECommandService;
 import org.eclipse.e4.core.commands.EHandlerService;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.model.application.commands.MCommand;
 import org.eclipse.e4.ui.model.application.commands.MParameter;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.model.application.ui.menu.MHandledMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenu;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuSeparator;
+import org.eclipse.e4.ui.model.application.ui.menu.MToolBar;
+import org.eclipse.e4.ui.model.application.ui.menu.MToolBarElement;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuEvent;
@@ -50,7 +55,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Handler specific to the create new query toolbar button. This drop
@@ -63,27 +68,31 @@ import org.eclipse.swt.widgets.Widget;
 @SuppressWarnings("restriction")
 public class NewQueryDropDownHandler {
 
+	private static final String SOURCE_ID = "org.wcs.smart.query.source"; //$NON-NLS-1$
+	
 	@Execute
 	public void execute(IEclipseContext context){
-		context.get(ESelectionService.class);
-		
 		EModelService m = context.get(EModelService.class);
-		MUIElement item = m.find("org.wcs.smart.query.toolbar1", context.get(MWindow.class)); //$NON-NLS-1$
-		if (item != null) {
-			Widget w = (Widget) item.getWidget();
-			if (w instanceof Composite) {
-				Composite cc = (Composite)w;
-				Point p = cc.getParent().toDisplay(cc.getLocation());
-				
-				ToolItem mi = null;
-				MUIElement miItem = m.find("org.wc.smart.query.create.dropdown.mi", context.get(MWindow.class)); //$NON-NLS-1$
-				if (miItem != null && miItem.getWidget() instanceof ToolItem) {
-					mi = (ToolItem) miItem.getWidget();
+		ToolItem mi = null;
+		MUIElement miItem = m.find((String)context.get(SOURCE_ID), context.get(MWindow.class)); 
+		if (miItem == null) {
+			//search toolbars
+			MToolBar menus = context.get(MPart.class).getToolbar();
+			for (MToolBarElement i : menus.getChildren()) {
+				if (i.getElementId().equals((String)context.get(SOURCE_ID))) {
+					miItem = i;
+					break;
 				}
-				
-				showMenu(p.x, p.y + cc.getSize().y, cc, mi, context);
 			}
 		}
+		if (miItem != null && miItem.getWidget() instanceof ToolItem) {
+			mi = (ToolItem) miItem.getWidget();
+		}
+		
+		Composite cc = mi.getParent();
+		
+		Point p = cc.getParent().toDisplay(cc.getLocation());
+		showMenu(p.x, p.y + cc.getSize().y, cc, mi, context);
 	}
 
 	
@@ -153,9 +162,26 @@ public class NewQueryDropDownHandler {
 		mnu.setVisible(true);
 	}
 	
-	public static class NewQueryDropDownHandlerWrapper extends DIHandler<NewQueryDropDownHandler> {
+	public static class NewQueryDropDownHandlerWrapper extends AbstractHandler {
+
+		private NewQueryDropDownHandler component;
+
 		public NewQueryDropDownHandlerWrapper() {
-			super(NewQueryDropDownHandler.class);
+			IEclipseContext context = getActiveContext();
+			component = ContextInjectionFactory.make(NewQueryDropDownHandler.class, context);
+		}
+
+		private static IEclipseContext getActiveContext() {
+			IEclipseContext parentContext = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+			return parentContext.getActiveLeaf();
+		}
+		
+		@Override
+		public Object execute(ExecutionEvent event) throws ExecutionException {
+			//Default di handler does not add parameters into context
+			IEclipseContext ctx = getActiveContext();
+			ctx.set(SOURCE_ID, event.getParameter(SOURCE_ID));
+			return ContextInjectionFactory.invoke(component, Execute.class, ctx);
 		}
 	}
 	
