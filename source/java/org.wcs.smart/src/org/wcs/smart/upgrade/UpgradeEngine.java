@@ -38,7 +38,7 @@ import org.wcs.smart.upgrade.v600.Upgrader500To600;
 import org.wcs.smart.upgrade.v600.Upgrader600To601;
 import org.wcs.smart.upgrade.v600.Upgrader601To610;
 import org.wcs.smart.upgrade.v600.Upgrader610To620;
-import org.wcs.smart.upgrade.v600.Upgrader620To700;
+import org.wcs.smart.upgrade.v700.Upgrader620To700;
 
 
 /**

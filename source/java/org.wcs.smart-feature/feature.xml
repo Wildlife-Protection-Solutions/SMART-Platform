@@ -16,36 +16,15 @@
    </copyright>
 
    <includes
-         id="org.eclipse.help"
-         version="0.0.0"/>
-
-   <includes
-         id="javax.media.jai_imageio-feature"
-         version="0.0.0"/>
-
-   <includes
-         id="org.wcs.smart.birt.feature"
-         version="0.0.0"/>
-
-   <includes
-         id="org.wcs.smart.p2.feature"
-         version="0.0.0"/>
-
-   <includes
-         id="org.wcs.smart.udig.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.wcs.smart.license.feature"
          version="0.0.0"/>
 
-   <includes
-         id="openjfx.swt.feature"
-         version="0.0.0"/>
-
-   <includes
-         id="openjfx.standard.feature"
-         version="0.0.0"/>
+   <plugin
+         id="org.wcs.smart.udig.customization"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
    <plugin
          id="org.wcs.smart.hibernate.libs"
@@ -56,55 +35,6 @@
 
    <plugin
          id="org.wcs.smart"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.transforms.xslt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.transforms.hook"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.udig.customization"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.css.swt.theme"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.ui.themes"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.e4.tools.compat"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.tools.services"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -147,13 +77,6 @@
 
    <plugin
          id="org.wcs.smart.observation.query.report"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.p2"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -216,13 +139,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.nebula.widgets.tablecombo"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.wcs.smart.birt.map"
          download-size="0"
          install-size="0"
@@ -244,34 +160,18 @@
          unpack="false"/>
 
    <plugin
-         id="com.google.inject"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.google.inject.multibindings"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.batik.ext.awt.extension"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.wcs.smart.dom.events"
          download-size="0"
          install-size="0"
          version="0.0.0"
          fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.p2"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>

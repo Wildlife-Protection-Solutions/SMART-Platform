@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.upgrade.v600;
+package org.wcs.smart.upgrade.v700;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -47,7 +47,7 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 					s.beginTransaction();
 					try {
 						c.setAutoCommit(false);
-						upgrade(c, s, monitor);
+						upgrade(c, monitor);
 						c.setAutoCommit(true);
 						s.getTransaction().commit();
 					} catch (final Exception e) {
@@ -62,7 +62,7 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 		monitor.done();
 	}
 
-	private void upgrade(Connection c, Session session, IProgressMonitor monitor)
+	private void upgrade(Connection c, IProgressMonitor monitor)
 			throws Exception {
 
 		String[] sql = new String[] {

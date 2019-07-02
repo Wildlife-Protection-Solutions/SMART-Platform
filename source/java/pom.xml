@@ -288,6 +288,7 @@
 				<module>org.wcs.smart-product</module>
 				<module>org.wcs.smart.hibernate.libs</module>
 				<module>org.wcs.smart</module>
+				
 				<module>org.wcs.smart-feature</module>
 				<module>org.wcs.smart.license.feature</module>
 				<module>org.wcs.smart.birt-feature</module>
@@ -317,6 +318,203 @@
 				<module>../extensions/qa/org.wcs.smart.qa.patrol</module>
 			</modules>
 		</profile>
+		
+		<profile>
+			<id>coreupdate</id>
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
+				<module>org.wcs.smart.upgrade</module>
+				<module>org.wcs.smart.upgrade.core.feature</module>
+				<module>org.wcs.smart.upgrade.feature</module>
+				
+				<module>org.wcs.smart</module>
+				<module>org.wcs.smart-feature</module>
+				<module>org.wcs.smart.birt-feature</module>
+				<module>org.wcs.smart.p2-feature</module>
+				<module>org.wcs.smart.udig-feature</module>
+				<module>org.wcs.smart.target</module>
+				<module>org.wcs.smart.p2</module>
+				<module>org.wcs.smart.dom.events</module>
+				<module>org.wcs.smart.udig.catalog.image.auxxml</module>
+        			<module>org.wcs.smart.udig.customization</module>
+        			<module>org.wcs.smart.birt</module>
+        			<module>org.wcs.smart.dataentry</module>	
+        			<module>org.wcs.smart.help</module>
+        			<module>org.wcs.smart.query</module>
+        			<module>org.wcs.smart.report</module>
+        			<module>org.wcs.smart.report.birt.query</module>
+        			<module>org.wcs.smart.observation</module>
+        			<module>org.wcs.smart.observation.query</module>
+        			<module>org.wcs.smart.observation.query.report</module>
+				<module>org.wcs.smart.birt.map</module>	
+        			<module>org.wcs.smart.patrol</module>
+        			<module>org.wcs.smart.patrol.query</module>
+        			<module>org.wcs.smart.patrol.query.report</module>
+        			<module>org.wcs.smart.reporttable</module>
+        			
+        			<module>../extensions/qa/org.wcs.smart.qa</module>
+				<module>../extensions/qa/org.wcs.smart.qa.patrol</module>
+			</modules>
+		</profile>
+		
+		<profile>
+			<id>plan</id>
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
+				<module>org.wcs.smart.plan</module>
+				<module>org.wcs.smart.plan.core.feature</module>
+				<module>org.wcs.smart.plan.feature</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>intel</id>
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
+				<module>org.wcs.smart.intelligence</module>
+				<module>org.wcs.smart.intelligence.query</module>
+				<module>org.wcs.smart.intelligence.query.report</module>
+				<module>org.wcs.smart.intelligence.core.feature</module>
+				<module>org.wcs.smart.intelligence.feature</module>
+			</modules>
+		</profile>
+		
+		<profile>
+			<id>incident</id>
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
+				<module>../extensions/qa/org.wcs.smart.qa.incident</module>
+				<module>org.wcs.smart.independentincident</module>
+				<module>org.wcs.smart.independentincident.feature</module>
+			</modules>
+		</profile>
+		
+		<profile>
+			<id>entity</id>
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
+				<module>../extensions/entity/org.wcs.smart.entity</module>
+				<module>../extensions/entity/org.wcs.smart.entity.query</module>
+				<module>../extensions/entity/org.wcs.smart.entity.query.report</module>
+				<module>../extensions/entity/org.wcs.smart.entity.core.feature</module>
+				<module>../extensions/entity/org.wcs.smart.entity.feature</module>
+			</modules>
+		</profile>
+		
+		<profile>
+			<id>er</id>
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
+				<module>../extensions/er/org.wcs.smart.er</module>
+				<module>../extensions/er/org.wcs.smart.er.feature</module>
+				<module>../extensions/er/org.wcs.smart.er.core.feature</module>
+				<module>../extensions/er/org.wcs.smart.er.query</module>
+				<module>../extensions/er/org.wcs.smart.er.query.report</module>
+				<module>../extensions/qa/org.wcs.smart.qa.er</module>
+			</modules>
+		</profile>
+		
+		<profile>
+			<id>cybertracker</id>
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.feature</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.core.feature</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.patrol</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.patrol.feature</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.patrol.core.feature</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey.feature</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey.core.feature</module>
+				
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident.feature</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>connect</id>
+			<modules>
+				<module>../extensions/connect/org.wcs.smart.connect</module>
+				<module>../extensions/connect/org.wcs.smart.connect.feature</module>
+				<module>../extensions/connect/org.wcs.smart.connect.core.feature</module>
+				
+				<module>../extensions/connect/org.wcs.smart.connect.cybertracker</module>
+				<module>../extensions/connect/org.wcs.smart.connect.cybertracker.feature</module>
+				<module>../extensions/connect/org.wcs.smart.connect.cybertracker.core.feature</module>
+				
+				<module>../extensions/connect/org.wcs.smart.connect.dataqueue</module>
+				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.core.feature</module>
+				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker</module>
+				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker.feature</module>
+
+				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.er</module>
+				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.er.feature</module>
+				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.feature</module>
+				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.independentincident</module>
+				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.independentincident.feature</module>
+				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.patrol</module>  
+				<module>../extensions/i2/org.wcs.smart.connect.dataqueue.i2</module>  
+				<module>../extensions/i2/org.wcs.smart.connect.dataqueue.i2.feature</module>  
+			</modules>
+		</profile>
+		
+		<profile>
+			<id>i2</id>
+			<modules>
+				<module>../extensions/i2/org.wcs.smart.i2</module>
+				<module>../extensions/i2/org.wcs.smart.i2.feature</module>
+				<module>../extensions/i2/org.wcs.smart.i2.core.feature</module>
+				 
+			</modules>
+		</profile>
+		
+		<profile>
+			<id>asset</id>
+			<modules>
+				<module>../extensions/asset/org.wcs.smart.asset</module>
+				<module>../extensions/asset/org.wcs.smart.asset.query</module>
+				<module>../extensions/asset/org.wcs.smart.asset.query.report</module>
+				<module>../extensions/asset/org.wcs.smart.asset.feature</module>
+				<module>../extensions/asset/org.wcs.smart.asset.core.feature</module>
+				 
+			</modules>
+		</profile>
+		
+		<profile>
+			<id>event</id>
+			<modules>
+				<module>../extensions/event/org.wcs.smart.event</module>
+				<module>../extensions/event/org.wcs.smart.event.core.feature</module>
+				<module>../extensions/event/org.wcs.smart.event.feature</module>
+				<module>../extensions/event/org.wcs.smart.event.i2</module>
+				<module>../extensions/event/org.wcs.smart.event.i2.feature</module>
+				 
+			</modules>
+		</profile>
+		
+		<profile>
+			<id>r</id>
+			<modules>
+				<module>../extensions/r/org.wcs.smart.r</module>
+				<module>../extensions/r/org.wcs.smart.r.core.feature</module>
+				<module>../extensions/r/org.wcs.smart.r.feature</module>
+				 
+			</modules>
+		</profile>
 		<profile>
 			<id>plugins</id>
 			
@@ -335,8 +533,8 @@
 				<module>org.wcs.smart.plan.feature</module>
 				
 				<module>org.wcs.smart.independentincident</module>
-				<module>../extensions/qa/org.wcs.smart.qa.incident</module>
 				<module>org.wcs.smart.independentincident.feature</module>
+				<module>../extensions/qa/org.wcs.smart.qa.incident</module>
 				
 				<module>../extensions/entity/org.wcs.smart.entity</module>
 				<module>../extensions/entity/org.wcs.smart.entity.query</module>

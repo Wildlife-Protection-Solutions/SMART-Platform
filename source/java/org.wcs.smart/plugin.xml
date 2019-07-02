@@ -700,7 +700,7 @@
                id="org.wcs.smart.perspectives">
             <command
                   commandId="org.wcs.smart.command.showperspective"
-                  icon="images/icons/obj32/map.32.png"
+                  icon="images/icons/map@2x.png"
                   label="%showmapperspective.command.label1"
                   mode="FORCE_TEXT"
                   style="radio"

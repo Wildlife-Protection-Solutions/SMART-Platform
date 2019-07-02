@@ -68,6 +68,7 @@ public class SmartPolicy extends Policy {
 		if (SmartDB.getCurrentEmployee() != null){
 			setRepositoriesVisible(UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN));
 		}
+		setRestartPolicy(RESTART_POLICY_FORCE);
 		Activator.getDefault().updateWithPreferences(this);
 	}
 
@@ -86,7 +87,7 @@ public class SmartPolicy extends Policy {
 		IProvisioningPlan plan = operation.getProvisioningPlan();
 		if (plan == null)
 			return false;
-
+		
 		// Check the preference to see whether to continue.
 		IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
 		String openPlan = prefs.getString(PreferenceConstants.PREF_OPEN_WIZARD_ON_ERROR_PLAN);

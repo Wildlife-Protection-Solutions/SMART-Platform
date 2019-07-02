@@ -323,7 +323,7 @@
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata">
          <command
                commandId="org.wcs.smart.observation.perspective.show"
-               icon="images/icons/etool16/patrol.png"
+               icon="images/icons/patrol@2x.png"
                id="org.wcs.smart.perspective.fielddata.patrol"
                label="%showpatrolperspective.command.label1"
                mnemonic="%showpatrolperspectivecommand.mnemonic"
