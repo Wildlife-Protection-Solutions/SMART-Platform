@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -109,7 +108,6 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
-import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
@@ -642,15 +640,13 @@ public class PatrolSummaryEditor extends EditorPart {
 				session.update(patrol);
 				for (PatrolLeg leg : patrol.getLegs()) {
 					for (PatrolLegDay pld : leg.getPatrolLegDays()) {
-						List<PatrolWaypoint> wps = pld.getWaypoints();
-						if (wps.isEmpty()) continue;
-						List<Date> dates = wps.stream().map(pwp -> pwp.getWaypoint().getDateTime()).collect(Collectors.toList());
-						Date minDate = Collections.min(dates);
-						Date mmaxDate = Collections.max(dates);
-						pld.setStartTime(new Time(minDate.getTime()));
-						pld.setEndTime(new Time(mmaxDate.getTime()));
-						session.saveOrUpdate(pld);
-						updatedLegDays.add(pld);
+						Time[] dates = pld.computeMinMaxDate();
+						if (dates != null) {
+							pld.setStartTime(dates[0]);
+							pld.setEndTime(dates[1]);
+							session.saveOrUpdate(pld);
+							updatedLegDays.add(pld);
+						}
 					}
 				}
 				session.getTransaction().commit();

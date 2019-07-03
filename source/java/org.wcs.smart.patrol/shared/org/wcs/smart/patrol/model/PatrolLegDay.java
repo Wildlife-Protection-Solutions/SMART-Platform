@@ -22,10 +22,15 @@
 package org.wcs.smart.patrol.model;
 
 import java.sql.Time;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -38,7 +43,9 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.BatchSize;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 
 /**
  * Patrol leg day object.
@@ -202,6 +209,39 @@ public class PatrolLegDay extends UuidItem {
 		boolean hasTrack = getTrack() != null;
 		boolean hasWaypoints = getWaypoints() != null && !getWaypoints().isEmpty();
 		return (hasTrack || hasWaypoints);
+	}
+	
+	/**
+	 * Returns an array of times (min, max) of the earliest date/time and latest date/time
+	 * of all the waypoints and trackpoints for this patrol leg day.
+	 * 
+	 * @return
+	 */
+	@Transient
+	public Time[] computeMinMaxDate() {
+		List<PatrolWaypoint> wps = getWaypoints();
+		List<Date> dates = new ArrayList<>();
+		if (!wps.isEmpty()) {
+			dates .addAll(wps.stream().map(pwp -> pwp.getWaypoint().getDateTime()).collect(Collectors.toList()));	
+		}
+		
+		if (getTrack() != null) {
+			try {
+				for (LineString ls : getTrack().getLineStrings()) {
+					DateFormat formatterUTC = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss"); //$NON-NLS-1$
+					formatterUTC.setTimeZone(TimeZone.getTimeZone("UTC")); //$NON-NLS-1$
+					DateFormat parserUTC = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss"); //$NON-NLS-1$
+					dates.add(parserUTC.parse(formatterUTC.format(new Date((long)ls.getCoordinateN(0).getZ()))));
+					dates.add(parserUTC.parse(formatterUTC.format(new Date((long)ls.getCoordinateN(ls.getNumPoints() - 1).getZ()))));
+				}
+			}catch (Exception ex) {
+				SmartPatrolPlugIn.log(ex.getMessage(), ex);
+			}
+		}
+		if (dates.isEmpty()) return null;
+		Date minDate = Collections.min(dates);
+		Date maxDate = Collections.max(dates);
+		return new Time[] {new Time(minDate.getTime()),new Time(maxDate.getTime())};
 	}
 	/**
 	 * Clones the patrol leg day 

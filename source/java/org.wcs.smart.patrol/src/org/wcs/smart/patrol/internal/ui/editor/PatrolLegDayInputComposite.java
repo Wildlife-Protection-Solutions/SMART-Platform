@@ -34,7 +34,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -679,14 +678,11 @@ public class PatrolLegDayInputComposite {
 	 * NOTE: Similar logic for all legs is located in {@link PatrolSummaryEditor} page
 	 */
 	protected void updateTimeWithWpData() {
-		List<PatrolWaypoint> wps = patrolLegDate.getWaypoints();
-		if (wps.isEmpty()) return;
-		//find min and max time among waypoints
-		List<Date> dates = wps.stream().map(pwp -> pwp.getWaypoint().getDateTime()).collect(Collectors.toList());
-		Date minDate = Collections.min(dates);
-		Date mmaxDate = Collections.max(dates);
-		patrolLegDate.setStartTime(new Time(minDate.getTime()));
-		patrolLegDate.setEndTime(new Time(mmaxDate.getTime()));
+		Time[] dates = patrolLegDate.computeMinMaxDate();
+		if (dates == null) return;
+		
+		patrolLegDate.setStartTime(dates[0]);
+		patrolLegDate.setEndTime(dates[1]);
 		setData(patrolLegDate);
 		editor.getPatrolEditor().save(patrolLegDate);
 		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
