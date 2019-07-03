@@ -475,7 +475,7 @@ public class AttachmentTable extends Composite implements Listener {
 							//EG: running this in async exec makes it work nicely on mac
 							if (resultSet instanceof IDesktopPagedImageResultSet) {
 								shell = new AttachmentTooltipShell(getShell(), (IDesktopPagedImageResultSet)resultSet, file);
-								shell.open(thumbGui.toDisplay(event.x+10, event.y));
+								shell.open(thumbGui.toDisplay(event.x, event.y + 15));
 								lastHover = this;
 							}
 						});
