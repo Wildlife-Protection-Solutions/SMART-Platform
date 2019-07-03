@@ -146,15 +146,27 @@ public class MapComposite extends Composite implements MapPart{
     private FlashFeatureListener selectFeatureListener = new FlashFeatureListener();
     private boolean flashFeatureRegistered = false;
 	
+    private LoadDefaultLayersJob initMapJob = null;
+    
 	public MapComposite(Composite parent, EditorPart parentEditor) {
 		super(parent, SWT.NONE);
 		this.editor = parentEditor;		
 		createPartControl();
 		
 		//add default layers
-		new LoadDefaultLayersJob(getMap()).schedule();
+		initMapJob = new LoadDefaultLayersJob(getMap());
+		initMapJob.schedule();
 	}
 
+	/**
+	 * Gets the load basemap job that is used to load
+	 * the basemap
+	 * 
+	 * @return
+	 */
+	public LoadDefaultLayersJob getBasemapJob() {
+		return this.initMapJob;
+	}
 	
 	
 	 /**

@@ -300,7 +300,7 @@ public class RecordSummaryPage extends EditorPart{
 				bits.setLayout(new GridLayout(2, false));
 				((GridLayout)bits.getLayout()).marginWidth = 0;
 				((GridLayout)bits.getLayout()).marginHeight = 0;
-				bits.setBackground(parent.getBackground());
+				bits.setBackground(bits.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 				bits.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 				
 				FontData fd = bits.getFont().getFontData()[0];

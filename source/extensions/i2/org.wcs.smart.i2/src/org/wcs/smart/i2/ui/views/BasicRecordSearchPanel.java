@@ -35,7 +35,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -69,6 +71,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -223,7 +226,10 @@ public class BasicRecordSearchPanel extends Composite {
 		searchCount = new Label(results, SWT.NONE);
 		searchCount.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		tblResults = new TableViewer(results, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
+		Composite wrapper = new Composite(results, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		tblResults = new TableViewer(wrapper, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
 		tblResults.getTable().setLinesVisible(false);
 		tblResults.setContentProvider(ArrayContentProvider.getInstance());
 		tblResults.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -233,8 +239,10 @@ public class BasicRecordSearchPanel extends Composite {
 				openSelection();
 			}
 		});
-		
-//		TableViewerColumn statusColumn = new TableViewerColumn(tblResults, SWT.NONE);
+		TableColumn tc = new TableColumn(tblResults.getTable(), SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(100));
+		wrapper.setLayout(layout);
 		
 		tblResults.setLabelProvider(new LabelProvider() {
 			@Override

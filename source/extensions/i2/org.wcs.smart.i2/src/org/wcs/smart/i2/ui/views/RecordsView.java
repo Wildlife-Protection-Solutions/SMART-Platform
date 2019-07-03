@@ -55,7 +55,9 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -89,6 +91,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
@@ -150,7 +153,6 @@ public class RecordsView {
 	private RecordViewerFilter filter;
 	private BasicRecordSearchPanel basicSearchPnl;
 
-	
 	private List<RecordLabelProvider> labelProviders = new ArrayList<>();
 	
 	private ISelectionChangedListener selectOne = new ISelectionChangedListener() {
@@ -208,29 +210,41 @@ public class RecordsView {
 		newRecords.setLayout(new GridLayout());
 		RecordLabelProvider provider = new RecordLabelProvider();
 		labelProviders.add(provider);
-		lstNewRecords = new TableViewer(newRecords, SWT.V_SCROLL | SWT.H_SCROLL| SWT.MULTI | SWT.BORDER | SWT.VIRTUAL);
+		
+		Composite wrapper = new Composite(newRecords, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		lstNewRecords = new TableViewer(wrapper, SWT.V_SCROLL | SWT.H_SCROLL| SWT.MULTI | SWT.BORDER | SWT.VIRTUAL);
 		lstNewRecords.setContentProvider(new RecordsViewContentProvider());
 		lstNewRecords.setLabelProvider(new RecordsViewLabelProvider(context));
 		lstNewRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstNewRecords.addDoubleClickListener(openListener);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		lstNewRecords.getControl().setLayoutData(gd);
 		lstNewRecords.addSelectionChangedListener(selectOne);
+
+		TableColumn tc = new TableColumn(lstNewRecords.getTable(), SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(100));
+		wrapper.setLayout(layout);
 		
 		Composite inProgress = toolkit.createComposite(tabPart);
 		provider = new RecordLabelProvider();
 		labelProviders.add(provider);
 		inProgress.setLayout(new GridLayout());
-		lstInProgress = new TableViewer(inProgress, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.VIRTUAL);
-	
+		
+		wrapper = new Composite(inProgress, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		lstInProgress = new TableViewer(wrapper, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.VIRTUAL);
 		lstInProgress.setContentProvider(new RecordsViewContentProvider());
 		lstInProgress.setLabelProvider(new RecordsViewLabelProvider(context));
 		lstInProgress.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstInProgress.addDoubleClickListener(openListener);
-		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		lstInProgress.getControl().setLayoutData(gd);
 		lstInProgress.addSelectionChangedListener(selectOne);
 		
+		tc = new TableColumn(lstInProgress.getTable(), SWT.NONE);
+		layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(100));
+		wrapper.setLayout(layout);
 		
 		Composite allRecords = toolkit.createComposite(tabPart);
 		allRecords.setLayout(new GridLayout());

@@ -185,12 +185,18 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		Job j = new Job("add location layers job"){ //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				
+				try {
+					mapPart.getBasemapJob().join();
+				} catch (InterruptedException e) {
+				}
+				
 				HashMap<String, Serializable> params = new HashMap<String,Serializable>();
 				params.put(IntelEntityServiceExtension.ENTITY_UUID_KEY, UuidUtils.uuidToString(editor.getEntity().getUuid()));
 				service = new IntelEntityService(params);
 				try {
 					Filter dateFilter = IntelEntityDataSource.createDateFilter(dFilters[0], dFilters[1]);
-					List<? extends IGeoResource> resources = service.resources(monitor);
+					List<? extends IGeoResource> resources = new ArrayList<>(service.resources(monitor));
 					for (Iterator<? extends IGeoResource> iterator = resources.iterator(); iterator.hasNext();) {
 						IGeoResource iGeoResource = (IGeoResource) iterator.next();
 						if (iGeoResource.getIdentifier().getRef().equals(LocationLayerType.ATTRIBUTE.name())){
@@ -198,7 +204,8 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 						}
 						
 					}
-					AddContentFilterLayersCommand cmd = new AddContentFilterLayersCommand(service.resources(monitor), 1, dateFilter){
+					Collections.reverse(resources);
+					AddContentFilterLayersCommand cmd = new AddContentFilterLayersCommand(resources, getMap().getLayersInternal().size(), dateFilter){
 						 public void run( IProgressMonitor monitor ) throws Exception {
 							 super.run(monitor);
 							 locationLayers.clear();
