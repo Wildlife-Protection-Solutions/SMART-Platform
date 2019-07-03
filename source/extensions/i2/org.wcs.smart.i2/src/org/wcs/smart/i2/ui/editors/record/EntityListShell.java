@@ -34,7 +34,9 @@ import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -47,6 +49,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -99,8 +102,9 @@ public class EntityListShell extends SmartShellDialog {
 		owner.setLayout(createGridLayoutNoMargin(1));
 		owner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		tblSearchEntityList = new TableViewer(owner, SWT.BORDER);
-		tblSearchEntityList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		Composite wrapper = new Composite(owner, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tblSearchEntityList = new TableViewer(wrapper, SWT.BORDER);
 		tblSearchEntityList.setContentProvider(ArrayContentProvider.getInstance());
 		tblSearchEntityList.setLabelProvider(new LabelProvider(){
 			@Override
@@ -115,6 +119,10 @@ public class EntityListShell extends SmartShellDialog {
 				return null;
 			}
 		});
+		TableColumn tc = new TableColumn(tblSearchEntityList.getTable(), SWT.NONE);
+		TableColumnLayout tableColumnLayout = new TableColumnLayout();
+		tableColumnLayout.setColumnData(tc, new ColumnWeightData(100));
+		wrapper.setLayout(tableColumnLayout);
 		
 		tblSearchEntityList.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -162,11 +170,18 @@ public class EntityListShell extends SmartShellDialog {
 	
 	
 	private void createEntityListTable(Composite parent){
-		tblEntityTypeList = new TableViewer(parent, SWT.BORDER);
-		tblEntityTypeList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		Composite wrapper = new Composite(parent, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+		tblEntityTypeList = new TableViewer(wrapper, SWT.BORDER);
 		tblEntityTypeList.setContentProvider(ArrayContentProvider.getInstance());
 		tblEntityTypeList.setLabelProvider(new EntityTypeLabelProvider());
 		tblEntityTypeList.getTable().setVisible(false);
+		TableColumn tc = new TableColumn(tblEntityTypeList.getTable(), SWT.NONE);
+		TableColumnLayout tableColumnLayout = new TableColumnLayout();
+		tableColumnLayout.setColumnData(tc, new ColumnWeightData(100));
+		wrapper.setLayout(tableColumnLayout);
+		
 		tblEntityTypeList.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -175,8 +190,9 @@ public class EntityListShell extends SmartShellDialog {
 				if (selection instanceof IntelEntityType){
 					if (tblEntityList == null){
 						
-						tblEntityList = new TableViewer(parent, SWT.BORDER);
-						tblEntityList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+						Composite wrapper = new Composite(parent, SWT.NONE);
+						wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+						tblEntityList = new TableViewer(wrapper, SWT.BORDER);
 						tblEntityList.setContentProvider(ArrayContentProvider.getInstance());
 						tblEntityList.setLabelProvider(new LabelProvider(){
 							@Override
@@ -185,6 +201,11 @@ public class EntityListShell extends SmartShellDialog {
 								return super.getText(element);
 							}
 						});
+						TableColumn tc = new TableColumn(tblEntityList.getTable(), SWT.NONE);
+						TableColumnLayout tableColumnLayout = new TableColumnLayout();
+						tableColumnLayout.setColumnData(tc, new ColumnWeightData(100));
+						wrapper.setLayout(tableColumnLayout);
+						
 						tblEntityList.addSelectionChangedListener(new ISelectionChangedListener() {
 							@Override
 							public void selectionChanged(SelectionChangedEvent event) {

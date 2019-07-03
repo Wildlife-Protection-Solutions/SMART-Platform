@@ -1337,7 +1337,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				};
 				int x = btnAddRelationship.getLocation().x + btnAddRelationship.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 				int y =  btnAddRelationship.getLocation().y;
-				shell.open(btnAddRelationship.toDisplay(x,y));
+				shell.open(btnAddRelationship.toDisplay(x,y), new Point(btnAddRelationship.getSize().x, 0), true);
 			}
 		});
 		

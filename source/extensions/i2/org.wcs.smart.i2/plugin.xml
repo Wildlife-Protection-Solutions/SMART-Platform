@@ -1004,7 +1004,7 @@
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.other2">
          <command
                commandId="org.wcs.smart.i2.command.perspective.open"
-               icon="images/icons/obj16/analysis.png"
+               icon="images/icons/profile@2x.png"
                label="%DataAnalysisModeCommandName3"
                mode="FORCE_TEXT"
                style="radio"
@@ -1025,7 +1025,7 @@
          </command>
          <command
                commandId="org.wcs.smart.i2.command.perspective.open"
-               icon="images/icons/obj16/assessment.png"
+               icon="images/icons/records@2x.png"
                label="%DataAssesmentModeCommandName3"
                mode="FORCE_TEXT"
                style="radio"

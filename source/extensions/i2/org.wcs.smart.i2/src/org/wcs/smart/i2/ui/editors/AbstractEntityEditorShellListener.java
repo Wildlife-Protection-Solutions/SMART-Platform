@@ -126,7 +126,7 @@ public abstract class AbstractEntityEditorShellListener<T,D extends SmartShellDi
 				shellDialog = d;
 				int height = shellDialog.getSize().y;
 				Point p = viewer.getControl().toDisplay(x, y);
-				shellDialog.open(new Point(p.x, p.y - height));
+				shellDialog.open(new Point(p.x+5, p.y));// - height));
 			}
 		}
 	}

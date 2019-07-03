@@ -521,7 +521,7 @@ public class EntityComparisonEditor extends EditorPart{
 					t.addListener(SWT.MouseHover, (event)->{
 						AttachmentPopoutShell popout = new AttachmentPopoutShell(getShell(), ea.getAttachment());
 						Point pnt = t.toDisplay(new Point(event.x, event.y));
-						popout.open(new Point(pnt.x, pnt.y - (popout.getSize().y/2)));
+						popout.open(new Point(pnt.x, pnt.y - (popout.getSize().y/2)), new Point(0, -popout.getSize().y/2), false );
 					});
 				});
 				

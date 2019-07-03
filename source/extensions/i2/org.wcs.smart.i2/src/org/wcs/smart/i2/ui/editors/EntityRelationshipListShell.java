@@ -28,7 +28,9 @@ import java.util.List;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -42,6 +44,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRelationshipType;
@@ -98,7 +101,11 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 	@Override
 	public void createContents(Composite parent){
 		parent.setLayout(new GridLayout(2, true));
-		TableViewer entityListTable = new TableViewer(parent, SWT.BORDER);
+		
+		Composite wrapper = new Composite(parent, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		TableViewer entityListTable = new TableViewer(wrapper, SWT.BORDER);
 		entityListTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		entityListTable.setContentProvider(ArrayContentProvider.getInstance());
 		entityListTable.setLabelProvider(new EntityTypeLabelProvider(){
@@ -117,6 +124,11 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 				return super.getText(element);
 			}
 		});
+		TableColumn tc = new TableColumn(entityListTable.getTable(), SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(100));
+		wrapper.setLayout(layout);
+		
 		entityListTable.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -151,10 +163,17 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 		});
 		entityListTable.setInput(entityOptions);
 		
-		types = new TableViewer(parent, SWT.BORDER);
+		wrapper = new Composite(parent, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		types = new TableViewer(wrapper, SWT.BORDER);
 		types.setContentProvider(ArrayContentProvider.getInstance());
 		types.setLabelProvider(new RelationshipTypeLabelProvider());
-		types.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		tc = new TableColumn(types.getTable(), SWT.NONE);
+		layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(100));
+		wrapper.setLayout(layout);
 		
 		types.addDoubleClickListener(new IDoubleClickListener() {
 			@Override

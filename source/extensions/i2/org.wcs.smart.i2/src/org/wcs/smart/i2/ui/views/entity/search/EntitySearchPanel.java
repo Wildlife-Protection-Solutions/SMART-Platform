@@ -34,7 +34,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -42,6 +44,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -51,6 +54,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
@@ -210,7 +214,7 @@ public abstract class EntitySearchPanel extends Composite {
 	private void showFilterMenu(Event e){
 		optionShell = new FilterOptionShell(getShell());
 		Rectangle r = btnAddFilter.getBounds();
-		optionShell.open(btnAddFilter.toDisplay(r.x + r.width, r.y));
+		optionShell.open(btnAddFilter.toDisplay(r.x + r.width, r.y), new Point(r.width,0), true);
 	}
 	
 	public String getQueryString() {
@@ -349,8 +353,11 @@ public abstract class EntitySearchPanel extends Composite {
 		@Override
 		public void createContents(Composite parent){
 			parent.setLayout(new GridLayout(2, true));
-			optionsTable = new TableViewer(parent, SWT.BORDER);
-			optionsTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			Composite wrapper = new Composite(parent, SWT.NONE);
+			wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+			optionsTable = new TableViewer(wrapper, SWT.BORDER);
 			optionsTable.setContentProvider(ArrayContentProvider.getInstance());
 			optionsTable.setLabelProvider(new LabelProvider(){
 				public String getText(Object element){
@@ -360,7 +367,10 @@ public abstract class EntitySearchPanel extends Composite {
 					return super.getText(element);
 				}
 			});
-			
+			TableColumn tc = new TableColumn(optionsTable.getTable(), SWT.NONE);
+			TableColumnLayout tableColumnLayout = new TableColumnLayout();
+			tableColumnLayout.setColumnData(tc, new ColumnWeightData(100));
+			wrapper.setLayout(tableColumnLayout);
 			optionsTable.setInput(FilterOption.values());
 			optionsTable.addDoubleClickListener(new IDoubleClickListener() {
 				@Override
@@ -385,8 +395,10 @@ public abstract class EntitySearchPanel extends Composite {
 			
 			optionsTable.addSelectionChangedListener(event-> processOptionSelection());
 			
-			
-			attributeTable = new TableViewer(parent, SWT.BORDER);
+			wrapper = new Composite(parent, SWT.NONE);
+			wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+			attributeTable = new TableViewer(wrapper, SWT.BORDER);
 			attributeTable.setContentProvider(ArrayContentProvider.getInstance());
 			attributeTable.setLabelProvider(new LabelProvider(){
 				private EntityTypeLabelProvider typeLabelProvider = new EntityTypeLabelProvider();
@@ -434,8 +446,10 @@ public abstract class EntitySearchPanel extends Composite {
 				}
 				
 			});
-			attributeTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			
+			tc = new TableColumn(attributeTable.getTable(), SWT.NONE);
+			tableColumnLayout = new TableColumnLayout();
+			tableColumnLayout.setColumnData(tc, new ColumnWeightData(100));
+			wrapper.setLayout(tableColumnLayout);
 			attributeTable.addDoubleClickListener(new IDoubleClickListener() {
 				@Override
 				public void doubleClick(DoubleClickEvent event) {
