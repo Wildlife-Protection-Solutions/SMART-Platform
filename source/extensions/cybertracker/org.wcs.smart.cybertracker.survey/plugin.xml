@@ -131,10 +131,6 @@
             id="org.wcs.smart.cybertracker.survey.export"
             name="%command.cybertracker.survey.export.name">
       </command>
-      <command
-            id="org.wcs.smart.cybertracker.survey.export.package"
-            name="%exportsurvey.command.name">
-      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -142,19 +138,11 @@
             class="org.wcs.smart.cybertracker.survey.handler.SurveyCTExportHandler$SurveyCTExportHandlerWrapper"
             commandId="org.wcs.smart.cybertracker.survey.export">
       </handler>
-      <handler
-            class="org.wcs.smart.cybertracker.survey.handler.ExportSurveyCtPackageHandler$ExportSurveyCtPackageHandlerWrapper"
-            commandId="org.wcs.smart.cybertracker.survey.export.package">
-      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
       <image
             commandId="org.wcs.smart.cybertracker.survey.export"
-            icon="images/etool16/export.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.cybertracker.survey.export.package"
             icon="images/etool16/export.png">
       </image>
    </extension>

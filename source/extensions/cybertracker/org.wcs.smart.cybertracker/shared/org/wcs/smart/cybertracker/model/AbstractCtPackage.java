@@ -149,7 +149,7 @@ public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 	@Transient
 	public void setBasemapToFiles() {
 		JSONObject obj = new JSONObject();
-		obj.put(BaseMapKeys.FILE.jsonkey, "true");
+		obj.put(BaseMapKeys.FILE.jsonkey, ICyberTrackerConstants.STR_TRUE);
 		setBasemapDef(obj.toJSONString());
 	}
 	

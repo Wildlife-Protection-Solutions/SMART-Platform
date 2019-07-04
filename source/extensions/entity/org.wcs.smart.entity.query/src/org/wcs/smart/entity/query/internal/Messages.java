@@ -45,14 +45,12 @@ public class Messages extends NLS {
 	public static String PatrolSummaryGroupByValuePanel_ValueError;
 	public static String Query_DefaultQueryName;
 	public static String QueryColumn_ObservationCategoryTableHeader;
-	public static String QueryDataSource_SchemaError;
 	public static String QueryDataSourceFactory_Description;
 	public static String QueryDataSourceFactory_DisplayName;
 	public static String QueryDataSourceFactory_queryUuidParameterName;
 	public static String QueryDataSourceFactory_ReadOnlyError;
 	public static String QueryFilterPanel_AreaFilters;
 	public static String QueryFilterPanel_RefreshTree_JobTitle;
-	public static String QueryFilterView_AddToQueryButton;
 	public static String QueryGeoResource_Error_NoDatasource;
 	public static String QueryGeoResource_ServiceError;
 	public static String QueryPlugIn_Error_DialogTitle;

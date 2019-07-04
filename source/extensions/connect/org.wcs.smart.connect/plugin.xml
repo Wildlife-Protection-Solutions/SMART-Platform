@@ -339,7 +339,7 @@
             locationURI="toolbar:org.wcs.smart.status.toolbar">
          <command
                commandId="org.wcs.smart.connect.server.changelog.sync"
-               label="Sync"
+               label="%command.sync.label"
                mode="FORCE_TEXT"
                style="push"
                tooltip="%sync.command.tooltip">

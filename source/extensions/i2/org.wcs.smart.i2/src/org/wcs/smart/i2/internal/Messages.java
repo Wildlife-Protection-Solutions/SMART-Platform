@@ -6,7 +6,6 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.i2.internal.messages"; //$NON-NLS-1$
 	public static String AbstractIntelEntityTypeListWizardPage_DatasetNotSupported;
 	public static String AbstractIntelEntityTypeListWizardPage_EntityTypeRequired;
-	public static String AbstractIntelEntityTypeListWizardPage_LinkParameter1;
 	public static String AbstractIntelEntityTypeListWizardPage_unauthorized;
 	public static String AddIntelligenceJob_InstallError;
 	public static String AddIntelligenceJob_JobName;
@@ -37,10 +36,7 @@ public class Messages extends NLS {
 	public static String AllPanel_EntityTypeColumn;
 	public static String AllPanel_ErrorLabel;
 	public static String AllPanel_loadresultstooltip;
-	public static String AllPanel_NotFoundMessage;
-	public static String AllPanel_NotFoundTitle;
 	public static String AllPanel_refreshJobName;
-	public static String AllPanel_showhidetooltip;
 	public static String AttachmentListComposite_AddAttachmentItem;
 	public static String AttachmentListComposite_AttachmentsLinked;
 	public static String AttachmentListComposite_LinkEntityItem;
@@ -159,7 +155,6 @@ public class Messages extends NLS {
 	public static String ConfigureRecordAttributesHandler_Title;
 	public static String ConservationAreaCloner_AttributeSubTask;
 	public static String ConservationAreaCloner_DiagramStylesSubTask;
-	public static String ConservationAreaCloner_EntityRecordSearchSubTask;
 	public static String ConservationAreaCloner_EntityTypeSubTask;
 	public static String ConservationAreaCloner_GroupsSubTask;
 	public static String ConservationAreaCloner_RelationshiptypesSubTask;
@@ -462,10 +457,8 @@ public class Messages extends NLS {
 	public static String EntitySearchShell_NoResultsFound;
 	public static String EntitySearchView_AdvSearchTab;
 	public static String EntitySearchView_AllLabel;
-	public static String EntitySearchView_AllTooltip;
 	public static String EntitySearchView_AllTypesOption;
 	public static String EntitySearchView_BasicSearchTab;
-	public static String EntitySearchView_BasicSearchTooltip;
 	public static String EntitySearchView_DeleteError;
 	public static String EntitySearchView_DeleteMessage;
 	public static String EntitySearchView_DeleteTitle;
@@ -483,7 +476,6 @@ public class Messages extends NLS {
 	public static String EntitySearchView_SearchLabel;
 	public static String EntitySearchView_SerachButton;
 	public static String EntitySearchView_SpatialSearchLabel;
-	public static String EntitySearchView_SpatialSearchTooltip;
 	public static String EntitySearchView_unauthorized;
 	public static String EntitySummaryContentProvider_AttributeTreeNode;
 	public static String EntitySummaryContentProvider_ConservationAreaGroupByOp;
@@ -941,7 +933,6 @@ public class Messages extends NLS {
 	public static String IntelRecordAttributesWizardPage_Name;
 	public static String IntelRecordAttributesWizardPage_NotConfigurable;
 	public static String IntelRecordAttributesWizardPage_unauthorized;
-	public static String IntelRecordDetailsWizardPage_LinkParameters1;
 	public static String IntelRecordDetailsWizardPage_message;
 	public static String IntelRecordDetailsWizardPage_Name;
 	public static String IntelRecordDetailsWizardPage_NoConfOptions;
@@ -1433,7 +1424,6 @@ public class Messages extends NLS {
 	public static String RelationshipGraphComposite_LayoutAlogorithm_Tree;
 	public static String RelationshipGraphComposite_Settings;
 	public static String RelationshipGraphComposite_Style;
-	public static String RelationshipGraphContentProvider_LoadDataError;
 	public static String RelationshipGraphEditor_Name;
 	public static String RelationshipGraphEditor_UpdateGraph_Job;
 	public static String RelationshipGraphFilterComposite_Depth;

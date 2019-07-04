@@ -438,7 +438,7 @@
                id="vertical.org.wcs.smart.er.toolbar2">
             <command
                   commandId="org.wcs.smart.er.mission.new"
-                  label="New Mission"
+                  label="%command.newmission.label"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%mission.command.tooltip">
@@ -463,10 +463,10 @@
             </command>
             <command
                   commandId="org.wcs.smart.er.survey.new"
-                  label="New Survey"
+                  label="%command.newsurvey.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="creates a new survey">
+                  tooltip="%command.newsurvey.tooltip">
                <visibleWhen>
                   <and>
                      <test
@@ -491,10 +491,10 @@
                id="vertical.org.wcs.smart.er.toolbar1">
             <command
                   commandId="org.wcs.smart.er.missionImportHandler"
-                  label="Import"
+                  label="%command.importmission.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="export mission(s) to files">
+                  tooltip="%command.exportmission.tooltip">
                <visibleWhen>
                   <and>
                      <test
@@ -516,10 +516,10 @@
             </command>
             <command
                   commandId="org.wcs.smart.er.missionExportHandler"
-                  label="Export"
+                  label="%command.exportmission.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="import missions from file">
+                  tooltip="%command.importmission.tooltip">
                <visibleWhen>
                   <and>
                      <test

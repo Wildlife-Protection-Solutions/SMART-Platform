@@ -158,11 +158,11 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 						try {
 							Files.delete(f);
 						} catch (IOException ex) {
-							CyberTrackerPlugIn.displayError("Error", MessageFormat.format("Unable to delete previously imported map files.  You should remove the file {0} manually." + "\n\n" + ex.getMessage(), f.toString()), ex);
+							CyberTrackerPlugIn.displayError(Messages.MapPackageUiContribution_ErrorTitle, MessageFormat.format(Messages.MapPackageUiContribution_DeleteFail + "\n\n" + ex.getMessage(), f.toString()), ex); //$NON-NLS-1$
 						}	
 					});
 				}catch (Exception ex) {
-					CyberTrackerPlugIn.displayError("Error", MessageFormat.format("Unable to delete previously imported map files.  You should remove the directory {0} manually." + "\n\n" + ex.getMessage(), dir.toString()), ex);
+					CyberTrackerPlugIn.displayError(Messages.MapPackageUiContribution_ErrorTitle, MessageFormat.format(Messages.MapPackageUiContribution_DeleteDirFail + "\n\n" + ex.getMessage(), dir.toString()), ex); //$NON-NLS-1$
 
 				}
 			}
@@ -176,7 +176,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 				try {
 					if (!mapfiles.isEmpty() && !Files.exists(dir))  Files.createDirectories(dir);
 				}catch (IOException ex) {
-					throw new Exception("Unable to create local directory for map files. " + ex.getMessage(),ex);
+					throw new Exception(Messages.MapPackageUiContribution_CreateDirFail + ex.getMessage(),ex);
 				}
 					
 				for (Path p : deletedfiles) {
@@ -185,7 +185,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 					try {
 						Files.delete(p);
 					} catch (IOException ex) {
-						CyberTrackerPlugIn.displayError("Error", MessageFormat.format("Unable to delete previously imported map files.  You should remove the file {0} manually." + "\n\n" + ex.getMessage(), p.toString()), ex);
+						CyberTrackerPlugIn.displayError(Messages.MapPackageUiContribution_ErrorTitle, MessageFormat.format(Messages.MapPackageUiContribution_DeleteFileError + "\n\n" + ex.getMessage(), p.toString()), ex); //$NON-NLS-1$
 					}
 				}
 				
@@ -200,13 +200,13 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 					if (Files.exists(target)) {
 						//fail here, otherwise the file will be overwritten  
 						//we do have a check below to try the prevent the users from doing this
-						throw new Exception(MessageFormat.format("A file with the name {0} has already been imported.  You cannot import another file with the same name.", target.getFileName().toString()));
+						throw new Exception(MessageFormat.format(Messages.MapPackageUiContribution_FileExists, target.getFileName().toString()));
 					}
 					try {
 						Files.copy(p, target);
 						newfiles.add(target);
 					} catch (IOException ex) {
-						CyberTrackerPlugIn.displayError("Error", MessageFormat.format("Unable to import the file {0} into the SMART filestore. This file will not be included in your package exports." + "\n\n" + ex.getMessage(), p.toString()), ex);
+						CyberTrackerPlugIn.displayError(Messages.MapPackageUiContribution_ErrorTitle, MessageFormat.format(Messages.MapPackageUiContribution_ImportError + "\n\n" + ex.getMessage(), p.toString()), ex); //$NON-NLS-1$
 					}
 					
 				}
@@ -252,11 +252,11 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		((GridLayout)top.getLayout()).marginHeight = 0;
 		
 		linkSmart = new Button(top,  SWT.RADIO);
-		linkSmart.setText(Messages.MapPackageContribution_BasemapOp); //$NON-NLS-1$ //$NON-NLS-2$
+		linkSmart.setText(Messages.MapPackageContribution_BasemapOp); 
 		linkSmart.setSelection(true);
 		
 		linkFile = new Button(top,  SWT.RADIO);
-		linkFile.setText( Messages.MapPackageContribution_FilesOp); //$NON-NLS-1$ //$NON-NLS-2$
+		linkFile.setText( Messages.MapPackageContribution_FilesOp);
 		
 		FontData boldFontData = linkFile.getFont().getFontData()[0];
 		boldFontData.setStyle(SWT.BOLD);
@@ -276,7 +276,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		((GridLayout)mapDirComp.getLayout()).marginHeight = 0;
 		
 		Label l = new Label(mapDirComp, SWT.NONE);
-		l.setText("Map Files:");
+		l.setText(Messages.MapPackageUiContribution_MapFilesLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		lstMapFiles = new ListViewer(mapDirComp, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
@@ -294,11 +294,11 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 
 		ToolItem tiAdd = new ToolItem(bt, SWT.PUSH);
 		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		tiAdd.setToolTipText("add basemap files");
+		tiAdd.setToolTipText(Messages.MapPackageUiContribution_addtooltip);
 		tiAdd.addListener(SWT.Selection, e->{
 			FileDialog fd = new FileDialog(mapDirComp.getShell(), SWT.OPEN | SWT.MULTI);
-			fd.setText("CyberTracker Basemap Files");
-			fd.setText("Select files for CyberTracker package basemap");
+			fd.setText(Messages.MapPackageUiContribution_FileDialogTitle);
+			fd.setText(Messages.MapPackageUiContribution_FileDialogMessage);
 			if (fd.open() == null) return;
 			
 			Path root = Paths.get(fd.getFilterPath());
@@ -316,7 +316,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 					}
 				}
 				if (isdup) {
-					MessageDialog.openWarning(bt.getShell(), "Duplicate", MessageFormat.format("A file with the name {0} has already been added.  You cannot add another file with the same name.", f.getFileName().toString()));
+					MessageDialog.openWarning(bt.getShell(), Messages.MapPackageUiContribution_DuplicateTitle, MessageFormat.format(Messages.MapPackageUiContribution_DuplciateMessage, f.getFileName().toString()));
 				}else {
 					mapfiles.add(f);
 				}
@@ -328,7 +328,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		
 		ToolItem tiClear = new ToolItem(bt, SWT.PUSH);
 		tiClear.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiClear.setToolTipText("remove selected files");
+		tiClear.setToolTipText(Messages.MapPackageUiContribution_removetooltip);
 		tiClear.addListener(SWT.Selection, e->{
 			for (Iterator<Object> iterator = lstMapFiles.getStructuredSelection().iterator(); iterator.hasNext();) {
 				Object item = (Object) iterator.next();
@@ -680,7 +680,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 							try(Stream<Path> items = Files.list(mapdir)){
 								items.forEach(i->mapfiles.add(i));
 							}catch (IOException ex) {
-								CyberTrackerPlugIn.displayError("Error", "Unable to read directory. " + ex.getMessage(), ex);
+								CyberTrackerPlugIn.displayError(Messages.MapPackageUiContribution_ErrorTitle, Messages.MapPackageUiContribution_DirReadError + ex.getMessage(), ex);
 							}
 						}
 					}

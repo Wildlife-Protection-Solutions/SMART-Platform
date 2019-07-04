@@ -318,7 +318,7 @@
             <command
                   commandId="org.wcs.smart.entitytype.new"
                   icon="images/icons/etool16/addentitytype.png"
-                  label="New"
+                  label="%command.newtype.label"
                   mnemonic="%newentity.command.mnemonic"
                   mode="FORCE_TEXT"
                   style="push"
@@ -352,7 +352,7 @@
                id="vertical.org.wcs.smart.entity.toolbar2">
             <command
                   commandId="org.wcs.smart.entitytype.import"
-                  label="Import"
+                  label="%command.importtype.label"
                   mnemonic="%importentitytype.command.mnemonic"
                   mode="FORCE_TEXT"
                   style="push"
@@ -383,7 +383,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.entitytype.export"
-                  label="Export"
+                  label="%command.exporttype.label"
                   mnemonic="%exportentitytype.command.mnemonic"
                   mode="FORCE_TEXT"
                   style="push"

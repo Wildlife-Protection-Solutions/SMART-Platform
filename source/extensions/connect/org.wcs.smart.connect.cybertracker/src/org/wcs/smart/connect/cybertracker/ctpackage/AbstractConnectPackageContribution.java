@@ -58,9 +58,9 @@ public abstract class AbstractConnectPackageContribution  implements IPackageCon
 				ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
 					@Override
 					protected Control createDialogArea(Composite parent) {
-						setTitle(Messages.ConnectCtPackageProperties_Title);
-						getShell().setText(Messages.ConnectCtPackageProperties_Title);
-						setMessage(Messages.ConnectCtPackageProperties_Message);	
+//						setTitle(Messages.ConnectCtPackageProperties_Title);
+//						getShell().setText(Messages.ConnectCtPackageProperties_Title);
+//						setMessage(Messages.ConnectCtPackageProperties_Message);	
 						return super.createDialogArea(parent);
 					}	
 				};

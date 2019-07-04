@@ -131,10 +131,6 @@
             id="org.wcs.smart.cybertracker.patrol.export"
             name="%command.cybertracker.patrol.export.name">
       </command>
-      <command
-            id="org.wcs.smart.cybertracker.patrol.export.package"
-            name="%exportpatrol.command.name">
-      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -142,19 +138,11 @@
             class="org.wcs.smart.cybertracker.patrol.handler.PatrolCTExportHandler$PatrolCTExportHandlerWrapper"
             commandId="org.wcs.smart.cybertracker.patrol.export">
       </handler>
-      <handler
-            class="org.wcs.smart.cybertracker.patrol.handler.ExportPatrolCtPackageHandler$ExportPatrolCtPackageHandlerWrapper"
-            commandId="org.wcs.smart.cybertracker.patrol.export.package">
-      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
       <image
             commandId="org.wcs.smart.cybertracker.patrol.export"
-            icon="images/etool16/export.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.cybertracker.patrol.export.package"
             icon="images/etool16/export.png">
       </image>
    </extension>

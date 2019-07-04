@@ -75,6 +75,7 @@ public abstract class LoadAlertTypesJob extends Job {
 	public abstract void typesLoaded(List<AlertType> types);
 	
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		List<AlertType> loadedTypes = (List<AlertType>) context.get(AlertType.class.toString());
@@ -88,23 +89,25 @@ public abstract class LoadAlertTypesJob extends Job {
 
 			}
 			if (loadedTypes == null) {
-				
-				
-				Display.getDefault().syncExec(()->{
-					ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
-						@Override
-						protected Control createDialogArea(Composite parent) {
-							setTitle(Messages.LoadAlertTypesJob_DialogTitle);
-							getShell().setText(Messages.LoadAlertTypesJob_DialogTitle);
-							setMessage(Messages.LoadAlertTypesJob_DialogMessage);	
-							return super.createDialogArea(parent);
-						}	
-					};
-					
-					if (cd.open() == Window.OK) {
-						SmartConnect connect = cd.getConnection();
-						if (context != null) context.set(SmartConnect.class, connect);
+				Display.getDefault().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
+							@Override
+							protected Control createDialogArea(Composite parent) {
+								setTitle(Messages.LoadAlertTypesJob_DialogTitle);
+								getShell().setText(Messages.LoadAlertTypesJob_DialogTitle);
+								setMessage(Messages.LoadAlertTypesJob_DialogMessage);	
+								return super.createDialogArea(parent);
+							}	
+						};
+						
+						if (cd.open() == Window.OK) {
+							SmartConnect connect = cd.getConnection();
+							if (context != null) context.set(SmartConnect.class, connect);
+						}
 					}
+					
 				});
 				SmartConnect connect = context.get(SmartConnect.class);
 				if (connect != null) {

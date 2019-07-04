@@ -168,7 +168,7 @@
       </command>
       <command
             id="org.wcs.smart.cybertracker.packages.show"
-            name="Ct Packages">
+            name="%command.ctpackages.name">
       </command>
       <command
             id="org.wcs.smart.cybertracker.export.device"

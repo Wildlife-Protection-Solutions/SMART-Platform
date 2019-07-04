@@ -112,7 +112,6 @@ public class Messages extends NLS {
 	public static String EntityListTable_FilterFieldTooltip;
 	public static String EntityListTable_IncludeInactiveLabel;
 	public static String EntityPlugIn_ErrorDialogTitle;
-	public static String EntityQueryDataSource_SchemaError;
 	public static String EntityQueryGeoResource_StyleError;
 	public static String EntityQueryGeoResourceInfo_SightingQueryTitle;
 	public static String EntityQueryService_Keyword1;
@@ -221,7 +220,6 @@ public class Messages extends NLS {
 	public static String EntityTypeFromXmlConverter_AttributeAlreadyExists;
 	public static String EntityTypeFromXmlConverter_AttributeTypeNoSupported;
 	public static String EntityTypeFromXmlConverter_AttributeTypesDifferent;
-	public static String EntityTypeListView_LoadingLabel;
 	public static String EntityTypeListView_LoadingProgress;
 	public static String EntityTypeListView_RefreshJobName;
 	public static String EntityTypeMerger_ErrorMergingEntityTypes;
@@ -263,7 +261,6 @@ public class Messages extends NLS {
 	public static String FileWizardPage_Title;
 	public static String FixedEntityDataSource_BuildSchemaJobName;
 	public static String FixedEntityDataSource_FeatureSchemaNotGenerated;
-	public static String FixedEntityDataSource_NoEntityTypeFound;
 	public static String FixedEntityDataSourceFactory_CaNotFoundError;
 	public static String FixedEntityDataSourceFactory_DataSourceDescription;
 	public static String FixedEntityDataSourceFactory_DataSourceName;

@@ -134,7 +134,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		tb.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		ToolItem tiExport = new ToolItem(tb, SWT.PUSH);
-		tiExport.setToolTipText("export selected packages");
+		tiExport.setToolTipText(Messages.ConfigurePackagesDialog_exporttooltip);
 		tiExport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
 		tiExport.addListener(SWT.Selection, e->exportPackages());
 		tiExport.setEnabled(false);

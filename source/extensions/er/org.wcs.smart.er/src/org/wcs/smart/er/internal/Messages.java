@@ -557,9 +557,7 @@ public class Messages extends NLS {
 	public static String SamplingUnitAttributeListItemDeleteAdvisor_InvalidObjectError;
 	public static String SamplingUnitCellEditor_LoadJobTitle;
 	public static String SamplingUnitCellEditor_None;
-
 	public static String SamplingUnitColumnLabelProvider_LengthError;
-	public static String SamplingUnitDataSource_TypeNotSupported;
 	public static String SamplingUnitDeleteAdvisor_TrackError;
 	public static String SamplingUnitDeleteAdvisor_WaypointError;
 	public static String SamplingUnitEditorPage_addLayerJobName;

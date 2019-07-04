@@ -63,6 +63,7 @@ public interface ICyberTrackerConstants {
 	public static final String SMART_CTX_FILENEME = "smart.ctx"; //$NON-NLS-1$
 	public static final String SMART_CTX_DOWNLOAD_FOLDER = "CyberTracker"; //$NON-NLS-1$
 	public static final String SMART_CTX_STORAGE_FOLDER = "storage"; //$NON-NLS-1$
+	public static final String SMART_PACKAGE_MAPFILES_FOLDER = "package_mapfiles"; //$NON-NLS-1$
 	public static final String CT_PACKAGE_FOLDER = "packages"; //$NON-NLS-1$
 	
 	public static final String XML_SCREENS = "Screens.xml"; //$NON-NLS-1$
@@ -182,14 +183,18 @@ public interface ICyberTrackerConstants {
 		return getCyberTrackerFolder(ca).resolve(ICyberTrackerConstants.SMART_CTX_STORAGE_FOLDER);
 	}
 	
+	/**
+	 * Returns the location of cybertracker basemap files for
+	 * the given cybertracker package.  This is used if users
+	 * want custom maps in their CyberTracker package
+	 * 
+	 * @param ctpackage
+	 * @return
+	 */
 	public static Path getBasemapFileStore(ICtPackage ctpackage) {
 		 return ICyberTrackerConstants.getCyberTrackerFolder(ctpackage.getConservationArea())
-				 .resolve("package_mapfiles")
+				 .resolve(SMART_PACKAGE_MAPFILES_FOLDER)
 				 .resolve(UuidUtils.uuidToString( ctpackage.getUuid()));
 	}
-	
-	
-	
-	
-	
+
 }

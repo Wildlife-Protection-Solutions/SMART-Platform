@@ -132,55 +132,17 @@ public class Messages extends NLS {
 	public static String PatrolCTExportDialog_ConfigurableModel;
 	public static String PatrolCTExportDialog_LoadConfModels_Error;
 	public static String PatrolCTExportDialog_Task_FetchConfigurableModel;
-	public static String PatrolCTPackageDialog_AllFileLbl;
 	public static String PatrolCTPackageDialog_CancelledMsg;
 	public static String PatrolCTPackageDialog_CancelledTitle;
 	public static String PatrolCTPackageDialog_CmLbl;
-	public static String PatrolCTPackageDialog_CmRequired;
-	public static String PatrolCTPackageDialog_CompleteMsg;
-	public static String PatrolCTPackageDialog_CompleteTitle;
 	public static String PatrolCTPackageDialog_CtProfileLbl;
-	public static String PatrolCTPackageDialog_DeviceLabel;
-
-	public static String PatrolCTPackageDialog_DialogTitle;
 	public static String PatrolCTPackageDialog_DmLbl;
-
 	public static String PatrolCTPackageDialog_DmToCmTaskName;
-	public static String PatrolCTPackageDialog_ErrorMsg;
-	public static String PatrolCTPackageDialog_ErrorTitle;
-
-	public static String PatrolCTPackageDialog_ExportDeviceError;
-
-	public static String PatrolCTPackageDialog_ExportDeviceNotSupported;
-
-	public static String PatrolCTPackageDialog_ExportDeviceOk;
-	public static String PatrolCTPackageDialog_FileDialogTitle;
-	public static String PatrolCTPackageDialog_FileExistsMsg;
-	public static String PatrolCTPackageDialog_FileLabel;
-
-	public static String PatrolCTPackageDialog_FileLbl1;
-	public static String PatrolCTPackageDialog_FileRequired;
-	public static String PatrolCTPackageDialog_MapDirectoryDialogTitle;
-	public static String PatrolCTPackageDialog_MapDirectoryLabel;
-	public static String PatrolCTPackageDialog_MapDirectoryTooltip;
 	public static String PatrolCTPackageDialog_PatrolConfigurationLabel;
-
 	public static String PatrolCTPackageDialog_ProfileLoadError;
-	public static String PatrolCTPackageDialog_ProfileRequired;
-	public static String PatrolCTPackageDialog_ShellMsg;
-	public static String PatrolCTPackageDialog_ShellTitle;
-
 	public static String PatrolCTPackageDialog_TaskName;
-
-	public static String PatrolCTPackageDialog_TempFileError;
-
-	public static String PatrolCTPackageDialog_warning;
-	public static String PatrolCTPackageDialog_WriteError;
-	public static String PatrolCTPackageDialog_ZipFileLbl;
 	public static String PatrolCtPackageManager_DefaultName;
-
 	public static String PatrolCtPackageManager_PatrolType;
-
 	public static String PatrolImporter_DuplicateMessage;
 	public static String PatrolImporter_ImportDialogTitle;
 	public static String PatrolImporter_Save_Error;
@@ -226,8 +188,6 @@ public class Messages extends NLS {
 	public static String PatrolMetadataPackageContribution_MandateRequired;
 
 	public static String PatrolMetadataPackageContribution_MemberMsg;
-
-	public static String PatrolMetadataPackageContribution_MemberRequired;
 
 	public static String PatrolMetadataPackageContribution_MembersLabel;
 

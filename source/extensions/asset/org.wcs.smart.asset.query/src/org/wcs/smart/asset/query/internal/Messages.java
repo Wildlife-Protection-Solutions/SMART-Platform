@@ -105,7 +105,6 @@ public class Messages extends NLS {
 	public static String AssetWaypointQueryType_WaypointQueryTypeName;
 	public static String Query_DefaultQueryName;
 	public static String QueryColumn_LoadingObservationColumnJobName;
-	public static String QueryColumn_LoadingAssetColumnJobName;
 	public static String QueryColumn_ObservationCategoryTableHeader1;
 	public static String QueryColumnCache_LoadingWPQueryColumnJobName;
 	public static String QueryDataSource_CannotCreateMapLayer;
@@ -118,7 +117,6 @@ public class Messages extends NLS {
 	public static String QueryFeatureSource_SchemaError;
 	public static String QueryFilterPanel_RefreshTree_JobTitle;
 	public static String QueryFilterPanel_TreeNodeLabel;
-	public static String QueryFilterView_AddToQueryButton;
 	public static String QueryGeoResource_Error_NoDatasource;
 	public static String QueryGeoResource_ServiceError;
 	public static String QueryPlugIn_Error_DialogTitle;

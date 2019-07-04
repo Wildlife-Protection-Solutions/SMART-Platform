@@ -290,7 +290,7 @@
                </visibleWhen>
             </command>
             <menu
-                  label="New Query">
+                  label="%menu.newquery.label">
                <command
                      commandId="org.wcs.smart.i2.command.query.record.new"
                      icon="images/icons/obj16/query_entity_record_add.png"
@@ -441,7 +441,7 @@
                </visibleWhen>
             </command>
             <menu
-                  label="Import/Export Data">
+                  label="%menu.importexportdata.label">
                <command
                      commandId="org.wcs.smart.i2.entity.import"
                      label="%ImportEntitiesCommandName"
@@ -587,7 +587,7 @@
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
                   icon="images/icons/obj16/entity2.png"
-                  label="Entity Mode"
+                  label="%command.entitymode.label"
                   style="push"
                   tooltip="%openentityperspectivetooltip">
                <parameter
@@ -624,9 +624,9 @@
          </menu>
          <menu
                id="org.wcs.smart.i2.menu.main"
-               label="Profiles">
+               label="%menu.label.profiles">
             <menu
-                  label="New Query">
+                  label="%menu.label.newquery">
                <command
                      commandId="org.wcs.smart.i2.command.query.record.new"
                      icon="images/icons/obj16/query_entity_record_add.png"
@@ -937,7 +937,7 @@
          <menu
                icon="images/icons/obj16/query_entity_record.png"
                id="org.wcs.smart.menu.query.newquery.i2queries"
-               label="Profile Queries"
+               label="%menu.label.profilequery"
                tooltip="%newprofilequerytooltip">
             <command
                   commandId="org.wcs.smart.i2.command.query.record.new"
@@ -1078,13 +1078,14 @@
             allPopups="false"
             locationURI="toolbar:org.eclipse.ui.main.toolbar?after=vertical.org.wcs.smart.patrol.toolbar2">
          <toolbar
-               id="vertical.org.wcs.smart.i2.toolbar1">
+               id="vertical.org.wcs.smart.i2.toolbar1"
+               label="">
             <command
                   commandId="org.wcs.smart.i2.command.entity.new"
-                  label="New Entity"
+                  label="%command.label.newentity"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="create a new entity">
+                  tooltip="%command.tooltip.newentity">
                <visibleWhen>
                   <and>
                      <test
@@ -1109,10 +1110,10 @@
                id="vertical.org.wcs.smart.i2.toolbar2">
             <command
                   commandId="org.wcs.smart.i2.command.entity.new"
-                  label="New Entity"
+                  label="%command.label.newentity2"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="create a new entity">
+                  tooltip="%command.tooltip.newentity2">
                <visibleWhen>
                   <and>
                      <test
@@ -1134,10 +1135,10 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.record.new"
-                  label="New Record"
+                  label="%command.label.newrecord"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="create a new record">
+                  tooltip="%command.tooltip.newrecord">
                <visibleWhen>
                   <and>
                      <test
@@ -1162,10 +1163,10 @@
                id="vertical.org.wcs.smart.i2.toolbar3">
             <command
                   commandId="org.wcs.smart.i2.command.entity.new"
-                  label="New Entity"
+                  label="%command.label.newentity3"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="create a new entity">
+                  tooltip="%command.tooltip.newentity3">
                <visibleWhen>
                   <and>
                      <test
@@ -1187,10 +1188,10 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.record.new"
-                  label="New Record"
+                  label="%command.label.newrecord2"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="create a new record">
+                  tooltip="%command.tooltip.newrecord3">
                <visibleWhen>
                   <and>
                      <test
@@ -1216,7 +1217,7 @@
             <command
                   commandId="org.wcs.smart.i2.command.query.record.new"
                   icon="images/icons/obj16/query_record_obs_add.png"
-                  label="Record Observation"
+                  label="%command.label.recordobsquery"
                   mode="FORCE_TEXT"
                   style="push">
                <visibleWhen
@@ -1246,7 +1247,7 @@
             <command
                   commandId="org.wcs.smart.i2.command.query.record.new"
                   icon="images/icons/obj16/query_entity_sum_add.png"
-                  label="Entity Summary"
+                  label="%command.label.entitysummaryquery"
                   mode="FORCE_TEXT"
                   style="push">
                <parameter
@@ -1276,7 +1277,7 @@
             <command
                   commandId="org.wcs.smart.i2.command.query.record.new"
                   icon="images/icons/obj16/query_entity_record_add.png"
-                  label="Entity"
+                  label="%command.label.entityrecordquery"
                   mode="FORCE_TEXT"
                   style="push">
                <parameter
@@ -1308,10 +1309,10 @@
                id="vertical.org.wcs.smart.i2.toolbar5">
             <command
                   commandId="org.eclipse.ui.file.save"
-                  label="Save"
+                  label="%command.label.save"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="create a new entity">
+                  tooltip="%command.tooltip.save">
                <visibleWhen>
                   <and>
                      <test
@@ -1337,10 +1338,10 @@
             </command>
             <command
                   commandId="org.eclipse.ui.file.saveAs"
-                  label="Save As"
+                  label="%command.label.saveas"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="create a new entity">
+                  tooltip="%command.tooltip.saveas">
                <visibleWhen>
                   <and>
                      <test
@@ -2845,7 +2846,7 @@
       <page
             class="org.wcs.smart.i2.birt.AdvancedIntelDataSourcePropertyPage"
             id="org.wcs.smart.i2.birt.datasource"
-            name="Profile Data Source">
+            name="%page.name.profiledatasource">
          <enabledWhen>
             <instanceof
                   value="org.eclipse.datatools.connectivity.IConnectionProfile">

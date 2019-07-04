@@ -104,7 +104,7 @@ import org.wcs.smart.util.UuidUtils;
  * @since 4.0.0
  */
 public class ConfigurableModelEditorConnectTab implements IConfigurableModelEditorTabContent {
-	
+		
 	private static final String LABEL_KEY = "label"; //$NON-NLS-1$
 
 	private static final String UUID_KEY = "uuid"; //$NON-NLS-1$

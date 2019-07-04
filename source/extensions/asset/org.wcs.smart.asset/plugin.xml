@@ -443,10 +443,10 @@
                id="vertical.org.wcs.smart.asset.toolbar2">
             <command
                   commandId="org.wcs.smart.asset.command.data.import"
-                  label="Import"
+                  label="%command.importfiles.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="import sensor data files">
+                  tooltip="%command.importfiles.tooltip">
                <visibleWhen>
                   <and>
                      <test
@@ -490,10 +490,10 @@
             </command>
             <command
                   commandId="org.wcs.smart.asset.command.overviewmap.show"
-                  label="Sensor Map"
+                  label="%command.sensormap.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="view sensor map">
+                  tooltip="%command.sensormap.tooltip">
                <visibleWhen>
                   <and>
                      <test

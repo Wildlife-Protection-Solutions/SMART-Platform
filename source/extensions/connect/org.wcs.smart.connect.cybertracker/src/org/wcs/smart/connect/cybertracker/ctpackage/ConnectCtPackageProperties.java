@@ -134,20 +134,23 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 		protected IStatus run(IProgressMonitor monitor) {
 			if (connect == null) {
 				if (context == null || context.get(SmartConnect.class) == null) {
-					Display.getDefault().syncExec(()->{
-						ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
-							@Override
-							protected Control createDialogArea(Composite parent) {
-								setTitle(Messages.ConnectCtPackageProperties_Title);
-								getShell().setText(Messages.ConnectCtPackageProperties_Title);
-								setMessage(Messages.ConnectCtPackageProperties_Message);	
-								return super.createDialogArea(parent);
-							}	
-						};
-						
-						if (cd.open() == Window.OK) {
-							connect = cd.getConnection();
-							if (context != null) context.set(SmartConnect.class, connect);
+					Display.getDefault().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
+								@Override
+								protected Control createDialogArea(Composite parent) {
+									setTitle(Messages.ConnectCtPackageProperties_Title);
+									getShell().setText(Messages.ConnectCtPackageProperties_Title);
+									setMessage(Messages.ConnectCtPackageProperties_Message);	
+									return super.createDialogArea(parent);
+								}	
+							};
+							
+							if (cd.open() == Window.OK) {
+								connect = cd.getConnection();
+								if (context != null) context.set(SmartConnect.class, connect);
+							}
 						}
 					});
 				}else {

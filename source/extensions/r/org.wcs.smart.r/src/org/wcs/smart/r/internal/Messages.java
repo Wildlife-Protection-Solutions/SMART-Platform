@@ -6,7 +6,6 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.r.internal.messages"; //$NON-NLS-1$
 	public static String AddRJob_Error;
 	public static String AddRJob_JobName;
-	public static String HeaderComposite_HeaderPart;
 	public static String HeaderComposite_NameToLongMessage;
 	public static String HeaderComposite_NameToLongTitle;
 	public static String HeaderComposite_QueryType;
@@ -89,7 +88,6 @@ public class Messages extends NLS {
 	public static String RunPage_Parameters;
 	public static String RunPage_RScriptLabel;
 	public static String RunPage_RunButton;
-	public static String RunPage_ScriptName;
 	public static String RunRScriptHandler_ErrorTitle;
 	public static String RunRScriptHandler_Message;
 	public static String RunRScriptHandler_NotFound;

@@ -401,8 +401,6 @@ public class Messages extends NLS {
 	public static String SyncMultipleCaWizard_UserpassDialogMessage;
 	public static String SyncMultipleCaWizard_UserpassDialogTitle;
 	public static String SyncMultipleCaWizard_ValidateSubtaskName;
-	public static String SyncMultipleCaWizard_WarningsDialogMessage;
-	public static String SyncMultipleCaWizard_WarningsDialogTitle;
 	public static String SyncMultiStartupOption_name;
 	public static String SyncOnStartupProcessor_DownMessage;
 	public static String SyncOnStartupProcessor_DownTitle;

@@ -79,9 +79,7 @@ public class Messages extends NLS {
 	public static String FiltersConfigurableModelContentProvider_LoadingText;
 	public static String GriddedDefinitionPanel_AllLabel;
 	public static String GriddedDefinitionPanel_Label;
-	public static String GriddedValueItemPanel_ButtonText;
 	public static String GriddedValueItemPanel_RefreshingJobName;
-	public static String GroupByValueItemPanel_AddToQueryButtonText;
 	public static String GroupByValueItemPanel_AreaGroupByNode;
 	public static String GroupByValueItemPanel_RefreshingJobName;
 	public static String MissionAttributeDropItem_LoadingLabel;
@@ -199,7 +197,6 @@ public class Messages extends NLS {
 	public static String SurveyFilter_SurveyNotFound;
 	public static String SurveyFilterDefintionPanel_AllSurveyLabel;
 	public static String SurveyFilterDefintionPanel_SurveyDesignLabel;
-	public static String SurveyFilterItemPanel_AddToQueryButton;
 	public static String SurveyFilterItemPanel_AreaFilterTreeNode;
 	public static String SurveyFilterItemPanel_JobName;
 	public static String SurveyFilterSqlGenerator_DateFilterNotSupported;
