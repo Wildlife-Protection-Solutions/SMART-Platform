@@ -18,6 +18,8 @@ public class Messages extends NLS {
 	public static String SmartPolicy_InstallQuestion;
 	public static String SmartPolicy_PreferencePageName;
 	public static String SmartPolicy_Question;
+	public static String UninstallProvisioningAction_errormsg;
+	public static String UninstallProvisioningAction_errortitle;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

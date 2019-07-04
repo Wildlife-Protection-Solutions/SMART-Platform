@@ -28,11 +28,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.internal.p2.engine.InstallableUnitOperand;
 import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.changetracking.ChangeLogInstaller;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.p2.PluginAdvisorManager;
+import org.wcs.smart.p2.internal.Messages;
 
 
 /**
@@ -49,8 +52,8 @@ public abstract class UninstallProvisioningAction extends ProvisioningAction {
 
 	@Override
 	public IStatus execute(Map<String, Object> parameters) {
-		String error = PluginAdvisorManager.INSTANCE.canUninstall();
-		if (error != null) throw new RuntimeException(error);
+
+		
 		
 		IInstallableUnit upgradeTo = null;
 		Object operand = parameters.get("operand"); //$NON-NLS-1$
@@ -62,6 +65,16 @@ public abstract class UninstallProvisioningAction extends ProvisioningAction {
 			// Ignore class not found in case InstallableUnitOperand is missing
 		}
 		if (upgradeTo == null) {
+			//check if we can uninstall plugins and if not 
+			//show an error message;  
+			String error = PluginAdvisorManager.INSTANCE.canUninstall();
+			if (error != null){
+				Display.getDefault().syncExec(()->{
+					MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.UninstallProvisioningAction_errortitle, Messages.UninstallProvisioningAction_errormsg + "\n\n" + error); //$NON-NLS-1$
+				});
+				throw new RuntimeException(error);
+			}
+			
 			// We have an unistallation, not an upgrade
 			try{
 				//remove all change log tracking
