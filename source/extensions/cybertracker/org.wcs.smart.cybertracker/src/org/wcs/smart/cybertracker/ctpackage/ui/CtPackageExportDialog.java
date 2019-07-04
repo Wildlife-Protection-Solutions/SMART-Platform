@@ -32,16 +32,16 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.ui.SmartStyledDialog;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -50,7 +50,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class CtPackageExportDialog extends SmartStyledDialog {
+public class CtPackageExportDialog extends SmartStyledTitleDialog {
 
 	private static final String KEY_SEP = "|"; //$NON-NLS-1$
 	private static final String ACTIONS_PREF_KEY = "org.wcs.smart.cybertracker.ctpackage.ui.CtPackageExportDialog.action"; //$NON-NLS-1$
@@ -73,10 +73,6 @@ public class CtPackageExportDialog extends SmartStyledDialog {
 	public boolean getDoGenerate() { return this.doGenerate; }
 	public List<ICtExportAction> getSelectedActions() { return this.selectedActions;}
 	
-	public Point getInitialSize() {
-		Point size = super.getInitialSize();
-		return new Point(350, size.y);
-	}
 	
 	@Override
 	public void okPressed() {
@@ -110,19 +106,23 @@ public class CtPackageExportDialog extends SmartStyledDialog {
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
-		((GridLayout)main.getLayout()).marginWidth = 0;
-		((GridLayout)main.getLayout()).marginHeight = 0;
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		main.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 
+		SmartUiUtils.createHeaderLabel(main, Messages.CtPackageExportDialog_LocationsLbl);
 		
 		actionButtons = new ArrayList<>();
 		
 		Color selectionColor = new Color(main.getDisplay(), 226, 241, 255);
 		main.addListener(SWT.Dispose, e-> selectionColor.dispose());
 
+		Composite inner = new Composite(main, SWT.NONE);
+		inner.setLayout(new GridLayout());
+		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)inner.getLayout()).marginHeight = 0;
+		
 		for (ICtExportAction a : actions) {
-			Composite small = new Composite(main, SWT.NONE);
+			Composite small = new Composite(inner, SWT.NONE);
 			small.setLayout(new GridLayout(3, false));
 			((GridLayout)small.getLayout()).marginWidth = 0;
 			((GridLayout)small.getLayout()).marginHeight = 0;
@@ -161,16 +161,19 @@ public class CtPackageExportDialog extends SmartStyledDialog {
 			
 			boolean dogenerate = InstanceScope.INSTANCE.getNode(CyberTrackerPlugIn.PLUGIN_ID).getBoolean(key, true);
 			btnAction.setSelection(dogenerate);
-			WidgetElement.setCSSClass(small, "donotstyle");
+			WidgetElement.setCSSClass(small, "donotstyle"); //$NON-NLS-1$
 			updateBackground(small, btnAction, selectionColor);
 			
 		}
 		
-
-		Label l = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		SmartUiUtils.createHeaderLabel(main, Messages.CtPackageExportDialog_OptionsLbl);
 		
-		btnGenerate = new Button(main, SWT.CHECK);
+		inner = new Composite(main, SWT.NONE);
+		inner.setLayout(new GridLayout());
+		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)inner.getLayout()).marginHeight = 0;
+		
+		btnGenerate = new Button(inner, SWT.CHECK);
 		btnGenerate.setEnabled(requireUpdateOp);
 		btnGenerate.setText(Messages.CtPackageExportDialog_RegenerateOp);
 		btnGenerate.setToolTipText(Messages.CtPackageExportDialog_regenerateTooltip);
@@ -182,6 +185,8 @@ public class CtPackageExportDialog extends SmartStyledDialog {
 			btnGenerate.setSelection(true);
 		}
 
+		setTitle(Messages.CtPackageExportDialog_Title);
+		setMessage(Messages.CtPackageExportDialog_DialogMsg);
 		getShell().setText(Messages.CtPackageExportDialog_Title);
 		return parent;
 	}

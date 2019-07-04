@@ -115,6 +115,9 @@ public class Messages extends NLS {
 	public static String CtDatabaseUpgrader_UpgradeTask;
 	public static String CtJsonExportUtils_EmployeePageLabel;
 	public static String CtJsonExportUtils_SmartCtSource;
+	public static String CtPackageExportDialog_DialogMsg;
+	public static String CtPackageExportDialog_LocationsLbl;
+	public static String CtPackageExportDialog_OptionsLbl;
 	public static String CtPackageExportDialog_RegenerateOp;
 	public static String CtPackageExportDialog_regenerateTooltip;
 	public static String CtPackageExportDialog_Title;
