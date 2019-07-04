@@ -45,7 +45,7 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.BatchSize;
 import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
+
 
 /**
  * Patrol leg day object.
@@ -235,7 +235,7 @@ public class PatrolLegDay extends UuidItem {
 					dates.add(parserUTC.parse(formatterUTC.format(new Date((long)ls.getCoordinateN(ls.getNumPoints() - 1).getZ()))));
 				}
 			}catch (Exception ex) {
-				SmartPatrolPlugIn.log(ex.getMessage(), ex);
+				
 			}
 		}
 		if (dates.isEmpty()) return null;
