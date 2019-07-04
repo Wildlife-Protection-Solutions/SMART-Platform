@@ -258,7 +258,7 @@
             <command
                   commandId="org.wcs.smart.incident.new"
                   icon="images/icons/etool16/add_incident.png"
-                  label="New"
+                  label="%command.label.newincident"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%newincident.command.tooltip2">
@@ -308,7 +308,7 @@
                id="vertical.org.wcs.smart.incident.toolbar2">
             <command
                   commandId="org.wcs.smart.independentincident.import"
-                  label="Import"
+                  label="%command.label.importincident"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%import.command.tooltip">
@@ -355,7 +355,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.independentincident.export"
-                  label="Export"
+                  label="%command.label.exportincident"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%export.command.tooltip">

@@ -193,14 +193,12 @@ public class Messages extends NLS {
 	public static String QueryColumn_LoadingPatrolColumnJobName;
 	public static String QueryColumn_ObservationCategoryTableHeader1;
 	public static String QueryColumnCache_LoadingWPQueryColumnJobName;
-	public static String QueryDataSource_SchemaError;
 	public static String QueryDataSourceFactory_Description;
 	public static String QueryDataSourceFactory_DisplayName;
 	public static String QueryDataSourceFactory_queryUuidParameterName;
 	public static String QueryDataSourceFactory_ReadOnlyError;
 	public static String QueryFilterPanel_RefreshTree_JobTitle;
 	public static String QueryFilterPanel_TreeNodeLabel;
-	public static String QueryFilterView_AddToQueryButton;
 	public static String QueryGeoResource_Error_NoDatasource;
 	public static String QueryGeoResource_ServiceError;
 	public static String QueryHibernateManager_LoadEmployeeError;

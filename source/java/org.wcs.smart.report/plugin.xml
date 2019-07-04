@@ -648,7 +648,7 @@
             <command
                   commandId="org.wcs.smart.report.newReport"
                   icon="images/icons/etool16/report_new.png"
-                  label="New"
+                  label="%command.label.new"
                   mnemonic="%report.menu.newreport.command.mnemonic"
                   mode="FORCE_TEXT"
                   style="push"
@@ -684,10 +684,10 @@
             <command
                   commandId="org.wcs.smart.report.editReport"
                   icon="images/icons/etool16/report_edit.png"
-                  label="Edit"
+                  label="%command.label.edit"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="edit report">
+                  tooltip="%command.tooltip.edit">
                <visibleWhen>
                   <and>
                      <with
@@ -748,7 +748,7 @@
                id="vertical.org.wcs.smart.report.toolbar2">
             <command
                   commandId="org.wcs.smart.report.importReport"
-                  label="Import"
+                  label="%command.label.import"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%report.menu.importreport.command.tooltip">
@@ -782,10 +782,10 @@
             </command>
             <command
                   commandId="org.wcs.smart.report.exportReport"
-                  label="Export"
+                  label="%command.label.export"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="export reports to file">
+                  tooltip="%command.tooltip.export">
                <parameter
                      name="org.wcs.smart.report.export.parameter.isMultiple"
                      value="true">

@@ -198,8 +198,6 @@ public class Messages extends NLS {
 	public static String WaypointInfoView_UpdateJobName;
 	public static String WaypointInfoView_WaypointIdLabel;
 
-	public static String WaypointSourceEngine_WaypointIdLabel;
-
 	
 	static {
 		// initialize resource bundle

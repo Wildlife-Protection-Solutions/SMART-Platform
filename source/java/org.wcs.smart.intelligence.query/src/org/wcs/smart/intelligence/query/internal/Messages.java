@@ -34,7 +34,6 @@ public class Messages extends NLS {
 	public static String IntelligenceSummaryCsvExporter_CSVLabel;
 	public static String IntelligenceSummaryCsvExporter_MustRunQuery;
 	public static String IntelligenceSummaryQueryType_TypeName;
-	public static String IntelQueryDataSource_SchemaError;
 	public static String ListFilterDropItem_Loading;
 	public static String ListFilterDropItem_loadingListJobName;
 	public static String QueryDataSourceFactory_Description;
@@ -43,7 +42,6 @@ public class Messages extends NLS {
 	public static String QueryDataSourceFactory_ReadOnly;
 	public static String QueryGeoResource_error;
 	public static String QueryGeoResource_notFound;
-	public static String QueryItemPanel_AddToQueryButton;
 	public static String QueryItemPanel_IntelligenceNodeName;
 	public static String QueryServiceInfo_Description;
 	public static String QueryServiceInfo_Key1;

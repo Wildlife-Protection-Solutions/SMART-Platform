@@ -65,7 +65,6 @@ public class Messages extends NLS {
 	public static String QueryFilterPanel_AreaFilters;
 	public static String QueryFilterPanel_GeneralFilters;
 	public static String QueryFilterPanel_RefreshTree_JobTitle;
-	public static String QueryFilterView_AddToQueryButton;
 	public static String QueryGeoResource_Error_NoDatasource;
 	public static String QueryGeoResource_ServiceError;
 	public static String QueryPlugIn_Error_DialogTitle;

@@ -203,10 +203,10 @@
                   commandId="org.wcs.smart.query.create.dropdown"
                   icon="images/icons/etool16/addquery.png"
                   id="org.wc.smart.query.create.dropdown.mi"
-                  label="New"
+                  label="%command.label.newquery"
                   mode="FORCE_TEXT"
                   style="radio"
-                  tooltip="create a new query">
+                  tooltip="%command.tooltip.newquery">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -228,10 +228,10 @@
             </command>
             <command
                   commandId="org.wcs.smart.query.export"
-                  label="Export Results"
+                  label="%command.label.exportresults"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="export the current query results">
+                  tooltip="%command.tooltip.exportresults">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -266,10 +266,10 @@
                id="vertical.org.wcs.smart.query.toolbar2">
             <command
                   commandId="org.wcs.smart.query.import"
-                  label="Import"
+                  label="%command.label.importquery"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="import query definitions">
+                  tooltip="%command.tooltip.importquery">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -287,10 +287,10 @@
             </command>
             <command
                   commandId="org.wcs.smart.query.exportmulti"
-                  label="Export"
+                  label="%command.label.exportdef"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="export query definitions">
+                  tooltip="%command.tooltip.exportdef">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -325,7 +325,7 @@
                id="vertical.org.wcs.smart.query.toolbar3">
             <command
                   commandId="org.eclipse.ui.file.save"
-                  label="Save"
+                  label="%command.label.save"
                   mode="FORCE_TEXT"
                   style="push">
                <visibleWhen
@@ -345,7 +345,7 @@
             </command>
             <command
                   commandId="org.eclipse.ui.file.saveAs"
-                  label="Save As"
+                  label="%command.label.saveas"
                   mode="FORCE_TEXT"
                   style="push">
                <visibleWhen
@@ -1231,7 +1231,7 @@
       <renderer
             class="org.wcs.smart.query.udig.render.SmartMemoryGridCoverageMetricsFactory"
             id="org.wcs.smart.udig.render.SmartGridRenderer"
-            name="SMART Raster Renderer">
+            name="%raster.renderer.name">
       </renderer>
    </extension>
    <extension

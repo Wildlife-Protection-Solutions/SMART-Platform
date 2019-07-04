@@ -378,7 +378,7 @@
             <command
                   commandId="org.wcs.smart.plan.NewPlan"
                   icon="images/icons/obj16/add_plan.png"
-                  label="New"
+                  label="%command.label.new"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%plan.menu.command.tooltip.newplan">
@@ -413,7 +413,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.plan.editor.exportPdf"
-                  label="PDF"
+                  label="%command.label.exportpdf"
                   mode="FORCE_TEXT"
                   style="push">
                <parameter

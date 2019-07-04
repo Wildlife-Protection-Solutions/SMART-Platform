@@ -578,10 +578,10 @@
                id="vertical.org.wcs.smart.patrol.toolbar1">
             <command
                   commandId="org.wcs.smart.patrol.newPatrol"
-                  label="New"
+                  label="%command.label.new"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="create a new patrol">
+                  tooltip="%command.tooltip.new">
                <visibleWhen>
                   <and>
                      <test
@@ -668,7 +668,7 @@
                id="vertical.org.wcs.smart.patrol.toolbar2">
             <command
                   commandId="org.wcs.smart.patrol.importPatrol"
-                  label="Import"
+                  label="%command.label.import"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%patrol.importpatrols.command.tooltip">
@@ -715,7 +715,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.patrol.exportPatrol"
-                  label="Export"
+                  label="%command.label.export"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%patrol.export.command.tooltip">
@@ -1259,7 +1259,7 @@
       <service
             class="org.wcs.smart.patrol.udig.catalog.PatrolServiceExtension"
             id="org.wcs.smart.patrol.service"
-            name="SMART Patrol Service Extension">
+            name="%map.service.name.patrol">
       </service>
    </extension>
 </plugin>

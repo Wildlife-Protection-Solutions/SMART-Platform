@@ -439,10 +439,10 @@
                id="vertical.org.wcs.smart.intelligence.toolbar2">
             <command
                   commandId="org.wcs.smart.intelligence.NewIntelligence"
-                  label="New"
+                  label="%command.label.newintel"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="create new intelligence record">
+                  tooltip="%command.tooltip.newintel">
                <visibleWhen
                      checkEnabled="false">
                   <and>
@@ -478,7 +478,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.intelligence.editor.exportPdf"
-                  label="PDF"
+                  label="%command.label.exportpdf"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%pdf.toolbar.command.tooltip">
@@ -501,7 +501,7 @@
                id="vertical.org.wcs.smart.intelligence.toolbar1">
             <command
                   commandId="org.wcs.smart.intelligence.import"
-                  label="Import"
+                  label="%command.label.import"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%import.command.tooltip">
@@ -540,7 +540,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.intelligence.export"
-                  label="Export"
+                  label="%command.label.export"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%export.command.tooltip">
