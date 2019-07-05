@@ -51,6 +51,9 @@
 
    <element name="processor">
       <complexType>
+         <sequence minOccurs="1" maxOccurs="unbounded">
+            <element ref="type" minOccurs="1" maxOccurs="unbounded"/>
+         </sequence>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
@@ -59,6 +62,23 @@
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.connect.dataqueue.process.IItemProcessor"/>
                </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="type">
+      <annotation>
+         <documentation>
+            The unique
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  A unique identifier that identifies the type of data file this processor supports.
+               </documentation>
             </annotation>
          </attribute>
       </complexType>

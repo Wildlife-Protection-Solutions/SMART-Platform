@@ -5,6 +5,9 @@
          point="org.wcs.smart.connect.dataqueue.processor">
       <processor
             class="org.wcs.smart.connect.dataqueue.patrol.PatrolDataQueueProcessor">
+         <type
+               id="PATROL_XML">
+         </type>
       </processor>
    </extension>
    <extension

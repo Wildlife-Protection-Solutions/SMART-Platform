@@ -3,11 +3,11 @@
 <plugin>
    <extension
          point="org.wcs.smart.connect.dataqueue.processor">
-      <datatype
-            key="I2_RECORD_XML">
-      </datatype>
       <processor
             class="org.wcs.smart.connect.dataqueue.i2.RecordProcessor">
+         <type
+               id="I2_RECORD_XML">
+         </type>
       </processor>
    </extension>
 

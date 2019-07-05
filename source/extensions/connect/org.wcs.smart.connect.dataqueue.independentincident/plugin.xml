@@ -5,6 +5,9 @@
          point="org.wcs.smart.connect.dataqueue.processor">
       <processor
             class="org.wcs.smart.connect.dataqueue.incident.IncidentProcessor">
+         <type
+               id="INCIDENT_XML">
+         </type>
       </processor>
    </extension>
 </plugin>

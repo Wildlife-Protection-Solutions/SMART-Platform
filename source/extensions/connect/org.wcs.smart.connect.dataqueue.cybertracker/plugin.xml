@@ -6,6 +6,12 @@
          point="org.wcs.smart.connect.dataqueue.processor">
       <processor
             class="org.wcs.smart.connect.dataqueue.cybertracker.CybertrackerItemProcessor">
+         <type
+               id="JSON_CT">
+         </type>
+         <type
+               id="JSON_ZLIB_CT">
+         </type>
       </processor>
    </extension>
 </plugin>
