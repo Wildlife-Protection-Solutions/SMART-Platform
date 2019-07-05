@@ -89,6 +89,8 @@ public class DataQueue {
 
 	private final Logger logger = Logger.getLogger(DataQueue.class.getName());
 	
+	public static final String UPLOAD_CONTENT_LENGTH_HEADER = "X-Upload-Content-Length"; //$NON-NLS-1$
+	
 	public static final String PATH = "dataqueue"; //$NON-NLS-1$
 	public static final String FILE_STORE_LOCATION = "dataqueue"; //$NON-NLS-1$
 	
@@ -333,6 +335,7 @@ public class DataQueue {
 	 * can be used for uploading the file.</p>
 	 * <p>URL: ../server/api/dataqueue/items/<br>
 	 * Call Type: POST<br>
+	 * Headers: X-Upload-Content-Length - the size in bytes of the file to upload <br>
 	 * Payload: a ServerDataQueueItem object
 	 * </p>
 	 *<pre>{
@@ -356,6 +359,20 @@ public class DataQueue {
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.TypeNotProvided", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
+		if (headers.getRequestHeader(UPLOAD_CONTENT_LENGTH_HEADER) == null || headers.getRequestHeader(UPLOAD_CONTENT_LENGTH_HEADER).isEmpty()) {
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length header required"); //$NON-NLS-1$
+		}
+		String lengthHeader = headers.getRequestHeader(UPLOAD_CONTENT_LENGTH_HEADER).get(0);
+		long totalBytes = -1;
+		try{
+			totalBytes = Long.parseLong(lengthHeader);
+		}catch (Exception ex){
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length invalid value", ex); //$NON-NLS-1$
+		}
+		if (totalBytes <= 0){
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length invalid value"); //$NON-NLS-1$
+		}
+		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -367,19 +384,6 @@ public class DataQueue {
 			}
 			if (ca.getStatus() == ConservationAreaInfo.Status.CCAA){
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("DataQueue.InvalidCaCCA", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-			}
-			String lengthHeader = headers.getRequestHeader("X-Upload-Content-Length").get(0); //$NON-NLS-1$
-			if (lengthHeader == null){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length not set"); //$NON-NLS-1$
-			}
-			long totalBytes = -1;
-			try{
-				totalBytes = Long.parseLong(lengthHeader);
-			}catch (Exception ex){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length invalid value", ex); //$NON-NLS-1$
-			}
-			if (totalBytes <= 0){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length invalid value"); //$NON-NLS-1$
 			}
 			
 			item.setStatus(ServerDataQueueItem.Status.UPLOADING);

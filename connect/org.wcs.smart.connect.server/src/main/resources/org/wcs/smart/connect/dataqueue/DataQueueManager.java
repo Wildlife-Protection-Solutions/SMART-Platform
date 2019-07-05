@@ -24,7 +24,6 @@ package org.wcs.smart.connect.dataqueue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,8 +71,11 @@ public enum DataQueueManager {
 			IExtensionPoint pnt = registry.getExtensionPoint("org.wcs.smart.connect.dataqueue.processor"); //$NON-NLS-1$
 			IConfigurationElement[] config = pnt.getConfigurationElements();
 			for (IConfigurationElement e : config) {
-				if (e.getName().equals("datatype")) { //$NON-NLS-1$
-					types.add(e.getAttribute("key").toUpperCase(Locale.ROOT)); //$NON-NLS-1$
+				if (e.getChildren() == null) continue;
+				for (IConfigurationElement kid : e.getChildren()) {
+					if (kid.getName().equals("type")) { //$NON-NLS-1$
+						types.add(kid.getAttribute("id").toUpperCase()); //$NON-NLS-1$
+					}
 				}
 			}
 			this.datatypes = types;
