@@ -541,7 +541,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				}
 			});
 		}else {
-			toolkit.createLabel(statsCmp, "");
+			toolkit.createLabel(statsCmp, ""); //$NON-NLS-1$
 		}
 		
 		lblStats = toolkit.createLabel(statsCmp, ""); //$NON-NLS-1$
