@@ -83,6 +83,8 @@ public class EmployeeSelectComposite extends MultipleSelectComposite<Employee> {
 		});
 		setLabelAllText(Messages.EmployeeSelectComposite_AddEmployee_Label);
 		setLabelSelectedText(Messages.EmployeeSelectComposite_SelectedEmployees);
+		
+		((GridData)selectedItemsListViewer.getControl().getLayoutData()).minimumWidth = 200;
 	}
 
 	protected void contributeToFromLabelSection(Composite parent) {
@@ -95,7 +97,7 @@ public class EmployeeSelectComposite extends MultipleSelectComposite<Employee> {
 				return super.getText(element);
 			}
 		});
-		cmbTeams.getControl().setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		cmbTeams.getControl().setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		((GridData)cmbTeams.getControl().getLayoutData()).widthHint = 150;
 		cmbTeams.setInput(Collections.singletonList(DialogConstants.LOADING_TEXT));
 		// nothing by default

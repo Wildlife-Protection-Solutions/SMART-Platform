@@ -116,10 +116,15 @@ public class MultipleSelectComposite<T> extends Composite {
 		setLayout(new GridLayout(3, false));
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		labelAll = createFromSectionLabel(this);
-		new Label(this, SWT.NONE);
+		Composite fromSection = createFromSectionLabel(this);
+		fromSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label l = new Label(this, SWT.NONE);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
 		labelSelected = new Label(this, SWT.NONE);
-
+		labelSelected.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		itemsListViewer = new TableViewer(this, SWT.MULTI | SWT.BORDER);
 		itemsListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		itemsListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -189,7 +194,7 @@ public class MultipleSelectComposite<T> extends Composite {
 		});
 	}
 
-	private Label createFromSectionLabel(Composite parent) {
+	private Composite createFromSectionLabel(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(2, false);
 		layout.horizontalSpacing = 0;
@@ -197,9 +202,8 @@ public class MultipleSelectComposite<T> extends Composite {
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
 		container.setLayout(layout);
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label label = new Label(container, SWT.NONE);
+		labelAll = new Label(container, SWT.NONE);
 
 		Composite contribution = new Composite(container, SWT.NONE);
 		GridLayout cLayout = new GridLayout(1, false);
@@ -209,9 +213,10 @@ public class MultipleSelectComposite<T> extends Composite {
 		cLayout.marginHeight = 0;
 		contribution.setLayout(cLayout);
 		contribution.setLayoutData(new GridData(SWT.END, SWT.FILL, true, false));
+		
 		contributeToFromLabelSection(contribution);
 		
-		return label;
+		return container;
 	}
 	
 	protected void contributeToFromLabelSection(Composite parent) {

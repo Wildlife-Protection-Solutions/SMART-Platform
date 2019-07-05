@@ -658,6 +658,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 		newTeam.setNames(new HashSet<>());
 		newTeam.setConservationArea(SmartDB.getCurrentConservationArea());
 		newTeam.setMembers(new ArrayList<>());
+		newTeam.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), "Team Name");
 		
 		CreateEditNamedItemDialog dialog = new CreateEditNamedItemDialog(getShell(), newTeam) {
 			protected Control createDialogArea(Composite parent) {
@@ -667,6 +668,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 				setMessage(Messages.EmployeePropertyPage_newteammessage);
 				return c;
 			}
+
 		};
 		if (dialog.open() != Window.OK) return;
 		
@@ -698,6 +700,15 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 				getShell().setText(Messages.EmployeePropertyPage_editteamtext);
 				setMessage(Messages.EmployeePropertyPage_editteammessage);
 				return c;
+			}
+
+			@Override
+			public Point getInitialSize() {
+				Point p = super.getInitialSize();
+				if (p.x > 500) {
+					p.x = 500;
+				}
+				return p;
 			}
 		};
 				
