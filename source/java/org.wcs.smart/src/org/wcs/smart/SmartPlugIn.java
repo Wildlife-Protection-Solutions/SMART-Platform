@@ -295,7 +295,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		System.setProperty("org.wcs.smart.version", context.getBundle().getVersion().toString()); //$NON-NLS-1$
-
+		
+		//rotate log files and set max size
+		System.setProperty("eclipse.log.size.max", "10000"); //$NON-NLS-1$ //$NON-NLS-2$
+		System.setProperty("eclipse.log.backup.max", "5"); //$NON-NLS-1$ //$NON-NLS-2$
+		
 		//lock on the plugin start mutex until the
 		//database has been initialized
 		//We don't want anything running until after the splash screen
