@@ -33,7 +33,8 @@ public class PatrolEventManager {
 		PATROL_MODIFIED, 
 		PATROL_SAVED,
 		WAYPOINT_MODIFIED,
-		WAYPOINT_DELETED
+		WAYPOINT_DELETED,
+		PATROL_ATTRIBUTES //when patrol custom patrol attributes are modified
 	}
 	
 	
@@ -110,6 +111,13 @@ public class PatrolEventManager {
 	 */
 	public void patrolAdded(Patrol patrol){
 		fireListeners(EventType.PATROL_ADDED, -1, patrol);
+	}
+	
+	/**
+	 * Fires a patrol added event
+	 */
+	public void customAttributesModified(){
+		fireListeners(EventType.PATROL_ATTRIBUTES, -1, null);
 	}
 	
 	/**

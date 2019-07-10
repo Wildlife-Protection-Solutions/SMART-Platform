@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.properties;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -61,6 +62,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolAttribute;
@@ -83,8 +85,11 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 	
 	private List<PatrolAttribute> attributes;
 	
+	private boolean modified;
+	
 	public PatrolAttributeDialog(Shell parentShell) {
 		super(parentShell);
+		this.modified = false;
 	}
 
 	@Override
@@ -92,6 +97,14 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
 	}
 
+	@Override
+	public void cancelPressed() {
+		if (modified) {
+			//fire change so patrol editors refresh
+			PatrolEventManager.getInstance().customAttributesModified();
+		}
+		super.cancelPressed();
+	}
 	
 	protected Control createDialogArea(Composite parent) {
 		Composite main = new Composite((Composite)super.createDialogArea(parent), SWT.NONE);
@@ -190,6 +203,7 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 		EditPatrolAttributeDialog dialog = new EditPatrolAttributeDialog(getShell(), ma, attributes);
 		dialog.open();
 		loadAttributesJob.schedule();
+		this.modified = true;
 	}
 
 	
@@ -207,6 +221,10 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 			session.beginTransaction();
 			try {
 				if (DeleteManager.canDelete(ma, session)){
+					session.createQuery("DELETE FROM PatrolAttributeValue WHERE id.patrolAttribute = :attribute") //$NON-NLS-1$
+						.setParameter("attribute", ma) //$NON-NLS-1$
+						.executeUpdate();
+					
 					session.delete(ma);
 					session.flush();
 				}
@@ -223,6 +241,7 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 			SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.PatrolAttributeDialog_deleteerror, new Object[]{ma.getName()}) + " " + ex.getMessage(), ex);  //$NON-NLS-1$
 		}
 		loadAttributesJob.schedule();
+		this.modified = true;
 	}
 	
 	private void editAttribute(){
@@ -231,6 +250,7 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 			EditPatrolAttributeDialog dialog = new EditPatrolAttributeDialog(getShell(), ma, attributes);
 			dialog.open();
 			loadAttributesJob.schedule();
+			this.modified = true;
 		}
 	}
 	
@@ -291,6 +311,7 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 			SmartPatrolPlugIn.displayLog(Messages.PatrolAttributeDialog_errorupdatingstate + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 		loadAttributesJob.schedule();
+		this.modified = true;
 	}
 	
 	@Override
@@ -327,7 +348,7 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 				attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 				attributes.forEach(e->e.getName());
 			}
-			
+			attributes.sort((a,b)->Collator.getInstance().compare(a.getName(),  b.getName()));
 			Display.getDefault().syncExec(()->{
 				if (lstAttributes.getControl().isDisposed()) return;
 				lstAttributes.setInput(attributes);

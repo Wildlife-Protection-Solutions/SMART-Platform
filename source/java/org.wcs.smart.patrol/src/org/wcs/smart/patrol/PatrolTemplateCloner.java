@@ -32,7 +32,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -67,8 +71,43 @@ public class PatrolTemplateCloner implements
 		clonePatrolTypes(engine);
 		progress.worked(1);
 		
+		progress.subTask(Messages.PatrolTemplateCloner_copycustomattributes);
+		cloneCustomAttributes(engine);
+		progress.worked(1);
+		
 	}
 
+	/*
+	 * clone custom patrol attribute 
+	 */
+	private void cloneCustomAttributes(ConservationAreaClonerEngine engine) throws Exception{
+		List<PatrolAttribute> attributes = QueryFactory.buildQuery(engine.getSession(), PatrolAttribute.class, 
+				new Object[] {"conservationArea", engine.getTemplateCa()}).list(); //$NON-NLS-1$
+		
+		for (PatrolAttribute a : attributes){
+			PatrolAttribute clone = new PatrolAttribute();
+			clone.setConservationArea(engine.getNewCa());
+			clone.setKeyId(a.getKeyId());
+			clone.setIsActive(a.getIsActive());
+			clone.setType(a.getType());
+			if (a.getType() == AttributeType.LIST && a.getAttributeList() != null) {
+				clone.setAttributeList(new ArrayList<>());
+				for (PatrolAttributeListItem li : a.getAttributeList()) {
+					PatrolAttributeListItem cloneitem = new PatrolAttributeListItem();
+					cloneitem.setAttribute(clone);
+					cloneitem.setIsActive(li.getIsActive());
+					cloneitem.setKeyId(li.getKeyId());
+					cloneitem.setListOrder(li.getListOrder());
+					engine.copyLabels(li, cloneitem);
+					clone.getAttributeList().add(cloneitem);
+				}
+			}
+			engine.copyLabels(a, clone);
+			engine.getSession().save(clone);
+		}
+		engine.getSession().flush();
+	}
+	
 	/*
 	 * clone patrol mandates
 	 */

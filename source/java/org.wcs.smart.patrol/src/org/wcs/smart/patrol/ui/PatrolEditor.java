@@ -113,6 +113,12 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	private CombinedSelectionProvider selectionProvider = new CombinedSelectionProvider();
 	
+	private IPatrolEventListener attributeModifiedListener = (att, source)->{
+			try(Session session = HibernateManager.openSession()){
+				summaryEditor.configureAttributes(session);
+			}
+	};
+	
 	private IPatrolEventListener saveListener = new IPatrolEventListener() {
 		@Override
 		public void eventFired(final int attributeChanged, Object source) {
@@ -206,6 +212,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		super();
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_SAVED, saveListener);
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_DELETED, patrolDeleteListener);
+		PatrolEventManager.getInstance().addListener(EventType.PATROL_ATTRIBUTES, attributeModifiedListener);
 	}
 
 	public Projection[] getAvailableProjections(){
@@ -218,6 +225,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_SAVED, saveListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolDeleteListener);
+		PatrolEventManager.getInstance().removeListener(EventType.PATROL_ATTRIBUTES, attributeModifiedListener);
 		this.saveListener = null;
 		this.patrolDeleteListener = null;
 		super.dispose();

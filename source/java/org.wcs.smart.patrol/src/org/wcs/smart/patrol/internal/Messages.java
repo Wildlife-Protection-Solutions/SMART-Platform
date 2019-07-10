@@ -273,6 +273,7 @@ public class Messages extends NLS {
 	public static String PatrolAttributeDialog_title;
 	public static String PatrolAttributeWizardPage_Message;
 	public static String PatrolAttributeWizardPage_Title;
+	public static String PatrolCaDeleteHandler_DeletePatrolAttributes;
 	public static String PatrolCaDeleteHandler_Progress_DeletingMandates;
 	public static String PatrolCaDeleteHandler_Progress_DeletingPatrols;
 	public static String PatrolCaDeleteHandler_Progress_DeletingTeams;
@@ -619,6 +620,7 @@ public class Messages extends NLS {
 	public static String PatrolSummaryEditor_Team_Label;
 	public static String PatrolSummaryEditor_TransportType_Label;
 	public static String PatrolSummaryEditor_YesDataLabel;
+	public static String PatrolTemplateCloner_copycustomattributes;
 	public static String PatrolTemplateCloner_ProgressCopyMandates;
 	public static String PatrolTemplateCloner_ProgressCopyTeams;
 	public static String PatrolTemplateCloner_ProgressCopyTypes;

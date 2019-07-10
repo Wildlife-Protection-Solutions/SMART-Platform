@@ -57,8 +57,20 @@ public class PatrolCaDeleteHandler implements ICaDeleteHandler{
 		deleteMandates(ca, session);		
 		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingTypes);
 		deletePatrolTypes(ca, session);		
+		monitor.subTask(Messages.PatrolCaDeleteHandler_DeletePatrolAttributes);
+		deleteCustomAttributes(ca, session);		
 	}
 
+	private void deleteCustomAttributes(ConservationArea ca, Session session) throws Exception{
+		Query<?> q = session.createQuery("delete from PatrolAttributeListItem where attribute in (FROM PatrolAttribute WHERE conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("delete from PatrolAttribute where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+	}
+	
 	private void deletePatrols(ConservationArea ca, Session session) throws Exception{
 		Query<?> q = session.createQuery("delete from Patrol where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$

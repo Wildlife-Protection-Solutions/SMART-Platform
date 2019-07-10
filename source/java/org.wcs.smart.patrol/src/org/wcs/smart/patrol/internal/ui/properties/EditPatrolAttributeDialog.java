@@ -110,6 +110,8 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 	
 	private PatrolAttribute pAttribute;
 	
+	private List<PatrolAttributeListItem> deleted;
+	
 	private boolean isDirty = false;
 
 	/**
@@ -126,6 +128,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 			Collection<? extends NamedKeyItem> siblings) {
 		
 		super(parentShell);
+		deleted = new ArrayList<>();
 		this.pAttribute = toUpdate;
 		
 		this.siblings = new ArrayList<NamedKeyItem>(siblings);
@@ -396,6 +399,12 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
+				for (PatrolAttributeListItem delete : deleted) {
+					//remove any references to this item
+					session.createQuery("DELETE FROM PatrolAttributeValue WHERE attributeListItem = :item") //$NON-NLS-1$
+						.setParameter("item", delete) //$NON-NLS-1$
+						.executeUpdate();
+				}
 				session.saveOrUpdate(pAttribute);
 				session.getTransaction().commit();
 				isDirty = false;
@@ -457,11 +466,11 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 		
 		try(Session session = HibernateManager.openSession()){
 			if (mi.getUuid() == null || DeleteManager.canDelete(mi, session)){
-				mi.setAttribute(null);
 				pAttribute.getAttributeList().remove(mi);
 				reorder();
 				lstViewer.refresh();		
 				setDirty(true);
+				deleted.add(mi);
 			}
 		}catch (Exception ex){
 			MessageDialog.openError(getShell(), Messages.EditPatrolAttributeDialog_deleteerrortitle, MessageFormat.format(Messages.EditPatrolAttributeDialog_deleteerrormsg, new Object[]{mi.getName()}) + "\n\n" + ex.getMessage());  //$NON-NLS-1$

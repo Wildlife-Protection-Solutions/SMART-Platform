@@ -173,6 +173,8 @@ public class PatrolSummaryEditor extends EditorPart {
 	private Hyperlink editLinkTransportType, editLinkMandate;
 	
 	private Composite customAttributes;
+	
+	private SashForm sashForm;
 
 	/**
 	 * listener for patrol change events.
@@ -242,28 +244,24 @@ public class PatrolSummaryEditor extends EditorPart {
 			lblWarning.setText(MessageFormat.format(Messages.PatrolSummaryEditor_Error_CannotEdit, new Object[]{ canEdit }));
 		}
 		
-		SashForm sashForm = new SashForm(frmPatrolSummary.getBody(), SWT.VERTICAL);
+		sashForm = new SashForm(frmPatrolSummary.getBody(), SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		toolkit.adapt(sashForm);
 		
 		Section patrolSection = toolkit.createSection(sashForm, Section.TITLE_BAR | Section.EXPANDED );
 		patrolSection.setText(Messages.PatrolSummaryEditor_PatrolInfo_SectionHeader);
 		patrolSection.setDescription(Messages.PatrolSummaryEditor_PatrolInfo_SectionDescription);
-		patrolSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		scrolltop = new ScrolledComposite(patrolSection, SWT.V_SCROLL | SWT.H_SCROLL);
-		scrolltop.setLayout(new GridLayout());
-		scrolltop.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		scrolltop.setExpandHorizontal(true);
 		scrolltop.setExpandVertical(true);
 				
 		patrolSection.setClient(scrolltop);
-		
-		top = toolkit.createComposite(scrolltop);
+
+		top = toolkit.createComposite(scrolltop, SWT.NONE);
 		top.setLayout(new GridLayout(2, true));
-		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)top.getLayout()).marginWidth = 0;
-		
+		((GridLayout)top.getLayout()).marginHeight = 0;
 		
 		scrolltop.setContent(top);
 		
@@ -297,6 +295,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		txtTransport = toolkit.createText(left, "", SWT.NONE); //$NON-NLS-1$
 		txtTransport.setEditable(false);
 		txtTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtTransport.getLayoutData()).widthHint = WIDTH_HINT;
 		editLinkTransportType = createEditLink(toolkit, left, new PatrolTransportComposite());
 		editLinkTransportType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
@@ -357,7 +356,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		employeeList = new TableViewer(employeeTable);
 		employeeList.setContentProvider(ArrayContentProvider.getInstance());
 		employeeList.setLabelProvider(new EmployeeLabelProvider());
-		employeeTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		
 		//note: layout data on employeeTable is set up below
 		
 		/* right side */
@@ -393,7 +392,8 @@ public class PatrolSummaryEditor extends EditorPart {
 		customAttributes.setLayout(new GridLayout());
 		((GridLayout)customAttributes.getLayout()).marginWidth = 0;
 		((GridLayout)customAttributes.getLayout()).marginHeight = 0;
-		customAttributes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
+		customAttributes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+		((GridData)customAttributes.getLayoutData()).widthHint = WIDTH_HINT;
 
 		/* ----- Patrol Days / Legs Section ------- */
 		Section dataSection = toolkit.createSection(sashForm, Section.TITLE_BAR | Section.EXPANDED  );
@@ -465,13 +465,17 @@ public class PatrolSummaryEditor extends EditorPart {
 		employeeTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		editEmployee = createEditLink(toolkit, left, new EmployeeLeaderPilotComposite());
 		editEmployee.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
-
+		((GridData)employeeTable.getLayoutData()).widthHint = WIDTH_HINT;
+		((GridData)employeeTable.getLayoutData()).heightHint = EMPLOYEE_LIST_HEIGHT_HINT;
+		
 		multiLegTextlbl = toolkit.createLabel(top, Messages.PatrolSummaryEditor_MultiLegPatrol_Label,SWT.WRAP);
-		multiLegTextlbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		multiLegTextlbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		((GridData)multiLegTextlbl.getLayoutData()).widthHint = 200;
 
 		if (editor.getPatrol().getLegs().size() <=1 ){
 			isMulti = false;
 			multiLegTextlbl.setVisible(false);
+			((GridData)multiLegTextlbl.getLayoutData()).exclude = true;
 		}else{
 			isMulti = true;
 			editEmployee.setVisible(false);
@@ -479,10 +483,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		}
 		
 		left.getParent().layout(true, true);
-		
-		((GridData)employeeTable.getLayoutData()).widthHint = WIDTH_HINT;
-		((GridData)employeeTable.getLayoutData()).heightHint = EMPLOYEE_LIST_HEIGHT_HINT;
-	
+
 		/* --- Patrol days table  ---*/
 		Composite compTable = toolkit.createComposite(compData);
 		compTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -559,12 +560,10 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		lblStats = toolkit.createLabel(statsCmp, ""); //$NON-NLS-1$
 		lblStats.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
-		
+
 		Point p = top.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		scrolltop.setMinSize(p.x, p.y+20);
-		
+		scrolltop.setMinSize(p.x, p.y);
 		sashForm.setWeights(new int[]{70,30});
-		
 		
 		initValues();
 	}
@@ -578,7 +577,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	 * @return hyperlink created
 	 */
 	private Hyperlink createEditLink(FormToolkit toolkit, Composite parent, final PatrolItemComposite partEditor ){
-		Hyperlink editLink = toolkit.createHyperlink(parent, EDIT_LABEL, SWT.WRAP);
+		Hyperlink editLink = toolkit.createHyperlink(parent, EDIT_LABEL, SWT.NONE);
 		FontData fnt = editLink.getFont().getFontData()[0];
 		fnt.setHeight(fnt.getHeight() - 1);
 		Font editFont = new Font(parent.getDisplay(), fnt);
@@ -679,6 +678,65 @@ public class PatrolSummaryEditor extends EditorPart {
 	}
 
 	/**
+	 * Update the custom attribute section, reloading attributes and values
+	 * from the database.
+	 * @param session
+	 */
+	public void configureAttributes(Session session) {
+		Patrol patrol = editor.getPatrol();
+
+		for (Control kid : customAttributes.getChildren()) kid.dispose();
+		
+		List<PatrolAttribute> attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
+				new Object[] {"conservationArea", patrol.getConservationArea()}).getResultList(); //$NON-NLS-1$
+		
+		if (!attributes.isEmpty()) {
+			attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+		
+			Section dataSection = toolkit.createSection(customAttributes, Section.TITLE_BAR | Section.EXPANDED );
+			dataSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			dataSection.setText(Messages.PatrolSummaryEditor_SectionName);
+			
+			Composite core = toolkit.createComposite(dataSection);
+			core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			dataSection.setClient(core);
+			core.setLayout(new GridLayout(3, false));
+			((GridLayout)core.getLayout()).marginWidth = 0;
+			((GridLayout)core.getLayout()).marginHeight = 0;
+		
+			List<PatrolAttribute> editAttributes = new ArrayList<>();
+			for (PatrolAttribute pa : attributes) {
+				if (pa.getAttributeList() != null) {
+					pa.getAttributeList().forEach(li->li.getName());
+				}
+				PatrolAttributeValue value = null;
+				for (PatrolAttributeValue v : patrol.getCustomAttributes()) {
+					if (v.getPatrolAttribute().equals(pa)) {
+						value = v;
+						break;
+					}
+				}
+				
+				if (!pa.getIsActive() && value == null) continue;
+				editAttributes.add(pa);
+				Label l = toolkit.createLabel(core, pa.getName() + ":"); //$NON-NLS-1$
+				if (pa.getName().length() > 25) {
+					l.setText(pa.getName().substring(0, 25) + "...:") ; //$NON-NLS-1$
+					l.setToolTipText(pa.getName());
+				}
+				Text txt = toolkit.createText(core, value == null ? "" : value.getAttributeValueAsString(Locale.getDefault())); //$NON-NLS-1$
+				txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				((GridData)txt.getLayoutData()).widthHint = WIDTH_HINT;
+				txt.setEditable(false);
+
+				createEditLink(toolkit, core, new PatrolAttributeComposite(editAttributes));
+			}
+		}
+
+		top.layout(true, true);
+		scrolltop.setMinSize(top.computeSize(SWT.DEFAULT,  SWT.DEFAULT));	
+	}
+	/**
 	 * Updates the widgets with the value from the patrol.
 	 */
 	private void initValues(){
@@ -760,60 +818,12 @@ public class PatrolSummaryEditor extends EditorPart {
 					}
 				}
 				
-				for (Control kid : customAttributes.getChildren()) kid.dispose();
-				List<PatrolAttribute> attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
-						new Object[] {"conservationArea", patrol.getConservationArea()}).getResultList(); //$NON-NLS-1$
-				if (!attributes.isEmpty()) {
-					attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-				
-					Section dataSection = toolkit.createSection(customAttributes, Section.TITLE_BAR | Section.EXPANDED );
-					dataSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-					dataSection.setText(Messages.PatrolSummaryEditor_SectionName);
-					
-					Composite core = toolkit.createComposite(dataSection);
-					core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-					dataSection.setClient(core);
-					core.setLayout(new GridLayout(3, false));
-					((GridLayout)core.getLayout()).marginWidth = 0;
-					((GridLayout)core.getLayout()).marginHeight = 0;
-					
-					List<PatrolAttribute> editAttributes = new ArrayList<>();
-					for (PatrolAttribute pa : attributes) {
-						if (pa.getAttributeList() != null) {
-							pa.getAttributeList().forEach(li->li.getName());
-						}
-						PatrolAttributeValue value = null;
-						for (PatrolAttributeValue v : patrol.getCustomAttributes()) {
-							if (v.getPatrolAttribute().equals(pa)) {
-								value = v;
-								break;
-							}
-						}
-						
-						if (!pa.getIsActive() && value == null) continue;
-						editAttributes.add(pa);
-						
-						Label l = toolkit.createLabel(core, pa.getName() + ":"); //$NON-NLS-1$
-						if (pa.getName().length() > 25) {
-							l.setText(pa.getName().substring(0, 25) + "...:") ; //$NON-NLS-1$
-							l.setToolTipText(pa.getName());
-						}
-						Text txt = toolkit.createText(core, value == null ? "" : value.getAttributeValueAsString(Locale.getDefault())); //$NON-NLS-1$
-						txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-						((GridData)txt.getLayoutData()).widthHint = 100;
-						txt.setEditable(false);
-
-						createEditLink(toolkit, core, new PatrolAttributeComposite(editAttributes));
-					}
-				}
-				customAttributes.layout(true);
-			
-				Point p = top.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-				scrolltop.setMinSize(p.x, p.y);
+				configureAttributes(session);
 			}finally{
 				session.getTransaction().rollback();
 			}
 		}
+		frmPatrolSummary.layout(true);
 	}
 	
 	private void updateDateTable(){
@@ -894,7 +904,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				TableViewerColumn tcolumn = tableColumns.get(PatrolLegDayColumn.PILOT);
 				collayout.setColumnData(tcolumn.getColumn(),new ColumnWeightData(0, 0, false));
 			}
-			if (editEmployee != null&& editor.canEdit() == null) editEmployee.setVisible(true);
+			if (editEmployee != null&& editor.canEdit() == null) editEmployee.setVisible(false);
 		}
 		
 		tblPatrolData.getTable().getParent().layout(true,true);
@@ -963,11 +973,10 @@ public class PatrolSummaryEditor extends EditorPart {
 	}
 	
 	private void recheckForMultiPatrol(){
-		refreshOrCreateEmployeeLink();
 		refreshPatrolSummaryTable();
 		
 		Patrol patrol = editor.getPatrol();
-		Control[] cs = new Control[]{txtTransport, transportTypelbl, editLinkMandate, txtMandate, mandateLbl, editLinkMandate};
+		Control[] cs = new Control[]{txtTransport, transportTypelbl, editLinkTransportType, editLinkMandate, txtMandate, mandateLbl, editLinkMandate};
 		
 		if (patrol.getLegs().size() <= 1){
 			for (Control c: cs){
@@ -981,6 +990,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			
 			editEmployee.setVisible(true);
 			multiLegTextlbl.setVisible(false);
+			((GridData)multiLegTextlbl.getLayoutData()).exclude = true;
 		}else{
 			for (Control c: cs){
 				c.setVisible(false);
@@ -988,14 +998,12 @@ public class PatrolSummaryEditor extends EditorPart {
 			}
 			editEmployee.setVisible(false);
 			multiLegTextlbl.setVisible(true);
-			
+			((GridData)multiLegTextlbl.getLayoutData()).exclude = false;
+			multiLegTextlbl.getParent().layout(true);
 			cs[0].getParent().layout(true, true);
 		}
 	}
-	
-	private void refreshOrCreateEmployeeLink() {
-		
-	}
+
 
 }
 
