@@ -117,6 +117,7 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolTrackEditDialog;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.SmartStyledWizardDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
@@ -908,7 +909,7 @@ public class PatrolLegDayInputComposite {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					monitor.setTaskName(LOAD_WIZARD_PROGRESS_MSG);
-					dialog = new WizardDialog(editor.getSite().getShell(), wizard);
+					dialog = new SmartStyledWizardDialog(editor.getSite().getShell(), wizard);
 					dialog.open();
 				}
 			});
@@ -931,7 +932,7 @@ public class PatrolLegDayInputComposite {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					monitor.setTaskName(LOAD_WIZARD_PROGRESS_MSG);
-					dialog = new WizardDialog(editor.getSite().getShell(), wizard);
+					dialog = new SmartStyledWizardDialog(editor.getSite().getShell(), wizard);
 					monitor.setTaskName(SHOW_WIZARD_PROGRESS_MSG);
 					if (dialog.open() == Window.OK) {
 						updateTimeWithWpData();

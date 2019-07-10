@@ -85,6 +85,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
@@ -105,10 +106,13 @@ import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolLegDayLabelProvider.PatrolLegDayColumn;
 import org.wcs.smart.patrol.internal.ui.editpatrol.EditPatrolItemDialog;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.ui.PatrolAttributeComposite;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.patrol.ui.StationComposite;
@@ -152,6 +156,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	private TableViewer employeeList;
 	private Form frmPatrolSummary;
 
+	private ScrolledComposite scrolltop ;
 	private PatrolEditor editor;
 	private TableViewer tblPatrolData;
 	private FormToolkit toolkit;
@@ -166,6 +171,8 @@ public class PatrolSummaryEditor extends EditorPart {
 	private Table employeeTable; 
 	private Label transportTypelbl, multiLegTextlbl, mandateLbl;
 	private Hyperlink editLinkTransportType, editLinkMandate;
+	
+	private Composite customAttributes;
 
 	/**
 	 * listener for patrol change events.
@@ -244,7 +251,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		patrolSection.setDescription(Messages.PatrolSummaryEditor_PatrolInfo_SectionDescription);
 		patrolSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		ScrolledComposite scrolltop = new ScrolledComposite(patrolSection, SWT.V_SCROLL | SWT.H_SCROLL);
+		scrolltop = new ScrolledComposite(patrolSection, SWT.V_SCROLL | SWT.H_SCROLL);
 		scrolltop.setLayout(new GridLayout());
 		scrolltop.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		scrolltop.setExpandHorizontal(true);
@@ -381,6 +388,12 @@ public class PatrolSummaryEditor extends EditorPart {
 		((GridData)txtComment.getLayoutData()).heightHint = 100;
 		editComment = createEditLink(toolkit, right, new CommentComposite());
 		editComment.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false,1,1));
+
+		customAttributes = toolkit.createComposite(right, SWT.NONE);
+		customAttributes.setLayout(new GridLayout());
+		((GridLayout)customAttributes.getLayout()).marginWidth = 0;
+		((GridLayout)customAttributes.getLayout()).marginHeight = 0;
+		customAttributes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 
 		/* ----- Patrol Days / Legs Section ------- */
 		Section dataSection = toolkit.createSection(sashForm, Section.TITLE_BAR | Section.EXPANDED  );
@@ -746,6 +759,57 @@ public class PatrolSummaryEditor extends EditorPart {
 						txtMandate.setText(Messages.PatrolSummaryEditor_NoMandateLabel);
 					}
 				}
+				
+				for (Control kid : customAttributes.getChildren()) kid.dispose();
+				List<PatrolAttribute> attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
+						new Object[] {"conservationArea", patrol.getConservationArea()}).getResultList(); //$NON-NLS-1$
+				if (!attributes.isEmpty()) {
+					attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+				
+					Section dataSection = toolkit.createSection(customAttributes, Section.TITLE_BAR | Section.EXPANDED );
+					dataSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					dataSection.setText(Messages.PatrolSummaryEditor_SectionName);
+					
+					Composite core = toolkit.createComposite(dataSection);
+					core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					dataSection.setClient(core);
+					core.setLayout(new GridLayout(3, false));
+					((GridLayout)core.getLayout()).marginWidth = 0;
+					((GridLayout)core.getLayout()).marginHeight = 0;
+					
+					List<PatrolAttribute> editAttributes = new ArrayList<>();
+					for (PatrolAttribute pa : attributes) {
+						if (pa.getAttributeList() != null) {
+							pa.getAttributeList().forEach(li->li.getName());
+						}
+						PatrolAttributeValue value = null;
+						for (PatrolAttributeValue v : patrol.getCustomAttributes()) {
+							if (v.getPatrolAttribute().equals(pa)) {
+								value = v;
+								break;
+							}
+						}
+						
+						if (!pa.getIsActive() && value == null) continue;
+						editAttributes.add(pa);
+						
+						Label l = toolkit.createLabel(core, pa.getName() + ":"); //$NON-NLS-1$
+						if (pa.getName().length() > 25) {
+							l.setText(pa.getName().substring(0, 25) + "...:") ; //$NON-NLS-1$
+							l.setToolTipText(pa.getName());
+						}
+						Text txt = toolkit.createText(core, value == null ? "" : value.getAttributeValueAsString(Locale.getDefault())); //$NON-NLS-1$
+						txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+						((GridData)txt.getLayoutData()).widthHint = 100;
+						txt.setEditable(false);
+
+						createEditLink(toolkit, core, new PatrolAttributeComposite(editAttributes));
+					}
+				}
+				customAttributes.layout(true);
+			
+				Point p = top.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+				scrolltop.setMinSize(p.x, p.y);
 			}finally{
 				session.getTransaction().rollback();
 			}

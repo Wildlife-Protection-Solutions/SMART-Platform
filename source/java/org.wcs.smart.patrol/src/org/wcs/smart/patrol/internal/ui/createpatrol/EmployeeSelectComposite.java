@@ -84,7 +84,7 @@ public class EmployeeSelectComposite extends MultipleSelectComposite<Employee> {
 		setLabelAllText(Messages.EmployeeSelectComposite_AddEmployee_Label);
 		setLabelSelectedText(Messages.EmployeeSelectComposite_SelectedEmployees);
 		
-		((GridData)selectedItemsListViewer.getControl().getLayoutData()).minimumWidth = 200;
+		((GridData)selectedItemsListViewer.getControl().getParent().getLayoutData()).minimumWidth = 200;
 	}
 
 	protected void contributeToFromLabelSection(Composite parent) {

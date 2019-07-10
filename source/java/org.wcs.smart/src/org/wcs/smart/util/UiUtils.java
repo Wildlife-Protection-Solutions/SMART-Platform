@@ -48,17 +48,18 @@ public class UiUtils {
 		dialogColor = Display.getDefault().getSystemColor(SWT.COLOR_WHITE);
 	}
 	
-	
-	
-	public static void colorDialog(Shell shell) {
+	/**
+	 * Assigns a transparent background to the given control
+	 * and all of it's children 
+	 * @param c
+	 */
+	public static void makeTransparent(Composite c) {
 		List<Composite> comps = new ArrayList<>();
-		comps.add(shell);
-		
-		shell.setBackground(dialogColor);
-		
+		comps.add(c);
+		Color transparent = c.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT);
 		while(!comps.isEmpty()) {
 			Composite item = comps.remove(0);
-			item.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			item.setBackground(transparent);
 			
 			for (Control kid : item.getChildren()) {
 				
@@ -68,23 +69,28 @@ public class UiUtils {
 				}
 				if (kid instanceof Table) continue;	//skip tables
 				if (kid instanceof Composite) comps.add((Composite)kid);
-				if (kid instanceof Label) kid.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				if (kid instanceof Text) kid.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				if (kid instanceof Link) kid.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				if (kid instanceof Hyperlink) kid.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				if (kid instanceof Label) kid.setBackground(transparent);
+				if (kid instanceof Text) kid.setBackground(transparent);
+				if (kid instanceof Link) kid.setBackground(transparent);
+				if (kid instanceof Hyperlink) kid.setBackground(transparent);
 				if (kid instanceof Button) {
-					if ((kid.getStyle() & SWT.CHECK) == SWT.CHECK || (kid.getStyle() & SWT.RADIO) == SWT.RADIO) kid.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+					if ((kid.getStyle() & SWT.CHECK) == SWT.CHECK || (kid.getStyle() & SWT.RADIO) == SWT.RADIO) kid.setBackground(transparent);
 				}
 			}
 			
 			if (item instanceof TabFolder) {
 				for (TabItem titem : ((TabFolder) item).getItems()) {
 					if (titem.getControl() instanceof Composite) comps.add((Composite)titem.getControl());
-					titem.getControl().setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-					titem.getControl().getParent().setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));			
+					titem.getControl().setBackground(transparent);
+					titem.getControl().getParent().setBackground(transparent);			
 				}
 			}
 		}
-		
+	}
+	public static void colorDialog(Shell shell) {
+		shell.setBackground(dialogColor);
+		for (Control kid : shell.getChildren()) {
+			if (kid instanceof Composite) makeTransparent((Composite)kid);
+		}
 	}
 }

@@ -34,7 +34,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.common.control.MultipleSelectComposite.IListChanged;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -50,7 +49,6 @@ import org.wcs.smart.patrol.model.Patrol;
 public class PatrolMotivationComposite extends Composite {
 
 	private Button btnMotivated;
-	private Label selectLabel;
 	private IntelligenceFilteredSelectComposite selectComposite;
 	
 	private List<IPartolMotivationChangeListener> inputListeners = new ArrayList<IPartolMotivationChangeListener>();
@@ -79,11 +77,8 @@ public class PatrolMotivationComposite extends Composite {
         		handleInputChanged();
         	}
         });
-        
-		selectLabel = new Label(this, SWT.NONE);
-		selectLabel.setText(Messages.PatrolMotivationComposite_Selector_Label);
 
-		selectComposite = new IntelligenceFilteredSelectComposite(this, SWT.NONE);
+        selectComposite = new IntelligenceFilteredSelectComposite(this, SWT.NONE);
 		selectComposite.addSelectionChangedListener(new IListChanged<Intelligence>() {
 			@Override
 			public void listChanged(List<Intelligence> items) {
@@ -99,7 +94,6 @@ public class PatrolMotivationComposite extends Composite {
      */
     private void applyCurrentState() {
 		boolean isMotivated = btnMotivated.getSelection();
-		selectLabel.setVisible(isMotivated);
 		selectComposite.setVisible(isMotivated);
     }	
 

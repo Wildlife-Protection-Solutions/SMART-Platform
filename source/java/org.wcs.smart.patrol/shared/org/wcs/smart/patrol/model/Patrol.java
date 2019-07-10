@@ -98,6 +98,7 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 	private String comment;
 	private PatrolFolder parentFolder;
 	
+	private List<PatrolAttributeValue> customAttributes;
 	
 	private List<PatrolLeg> legs;
 	
@@ -206,6 +207,14 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 	}
 	public void setLegs(List<PatrolLeg> legs){
 		this.legs = legs;
+	}
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.patrol", cascade={CascadeType.ALL}, orphanRemoval = true)
+	public List<PatrolAttributeValue> getCustomAttributes(){
+		return this.customAttributes;
+	}
+	public void setCustomAttributes(List<PatrolAttributeValue> attributes){
+		this.customAttributes = attributes;
 	}
 	
 	@ManyToOne(fetch = FetchType.LAZY)

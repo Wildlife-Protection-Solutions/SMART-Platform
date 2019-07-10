@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.UiUtils;
 
 /**
  * Wizard page for selecting GPX file to import and
@@ -165,6 +166,8 @@ public class ImportGpxWizardPage extends ImportOptionsWizardPage {
 		super.setTitle(Messages.ImportGpxWizardPage_PageTitle + ((ImportGpsDataWizard)getWizard()).getType().guiName);
 		super.setMessage(MessageFormat.format(Messages.ImportGpxWizardPage_PageMessage, new Object[]{ ((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() }));
 		super.setControl(comp);
+		
+		UiUtils.makeTransparent(comp);
 	}
 	
 	private void updateComplete(){

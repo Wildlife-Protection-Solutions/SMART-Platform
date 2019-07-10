@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.ui.ca.datamodel;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
@@ -54,13 +57,15 @@ public class NumericAttributeField implements IAttributeField<Double> {
 	
 	private Text txt;
 	private ControlDecoration cd;
-	
+
+	private Collection<Listener> listeners;
 	
 	/**
 	 * Creates a new numeric attribute field
 	 */
 	public NumericAttributeField(Attribute attribute){
 		this.attribute = attribute;
+		listeners = new ArrayList<>();
 	}
 	
 	/**
@@ -99,6 +104,7 @@ public class NumericAttributeField implements IAttributeField<Double> {
 				Double v = getValue();
 				isModified = !( (v== null && originalValue == null) || (v != null && originalValue != null && v.doubleValue() == originalValue.doubleValue()));
 				validate();
+				fireModified();
 			}});
 		
 		cd = new ControlDecoration(txt, SWT.LEFT | SWT.TOP);
@@ -108,6 +114,19 @@ public class NumericAttributeField implements IAttributeField<Double> {
 		validate();
 		this.isModified = false;
 		this.originalValue = null;
+	}
+	
+	/**
+	 * Fired when the valid is modified
+	 * @param listener
+	 */
+	public void addModifyListener(Listener listener) {
+		this.listeners.add(listener);
+	}
+	
+	protected void fireModified() {
+		Event evt = new Event();
+		for (Listener l : listeners)l.handleEvent(evt);
 	}
 
 	/**

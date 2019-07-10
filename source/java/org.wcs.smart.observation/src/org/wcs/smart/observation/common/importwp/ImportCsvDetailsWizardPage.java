@@ -38,6 +38,7 @@ import org.wcs.smart.observation.common.importwp.csv.CsvHeader;
 import org.wcs.smart.observation.common.importwp.csv.CsvImportEngine;
 import org.wcs.smart.observation.common.importwp.csv.ImportCSVDetailsComposite;
 import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.util.UiUtils;
 
 /**
  * Wizard page for gathering CSV column to 
@@ -102,6 +103,8 @@ public class ImportCsvDetailsWizardPage extends WizardPage implements IImportWiz
 		super.setTitle(Messages.ImportGpxWizardPage_PageTitle + ((ImportGpsDataWizard)getWizard()).getType().guiName);
 		super.setMessage(Messages.ImportCsvDetailsWizardPage_PageMessage);
 		super.setControl(comp);
+		
+		UiUtils.makeTransparent(comp);
 	}
 	
 		

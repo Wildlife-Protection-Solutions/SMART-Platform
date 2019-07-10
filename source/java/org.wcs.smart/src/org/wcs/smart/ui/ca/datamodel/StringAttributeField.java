@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.ui.ca.datamodel;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
@@ -51,12 +54,15 @@ public class StringAttributeField implements IAttributeField<String>{
 	private Text txt;
 	private ControlDecoration cd;
 	
+	private Collection<Listener> listeners;
+	
 	/**
 	 * creates a new string attribute field.
 	 * @param attribute
 	 */
 	public StringAttributeField(Attribute attribute){
 		this.attribute = attribute;
+		listeners = new ArrayList<>();
 	}
 	
 	/**
@@ -88,6 +94,7 @@ public class StringAttributeField implements IAttributeField<String>{
 			public void handleEvent(Event event) {
 				isModified = (!txt.getText().equals(originalValue));
 				validate();
+				fireModified();
 			}});
 		
 		cd = new ControlDecoration(txt, SWT.LEFT | SWT.TOP);
@@ -99,6 +106,19 @@ public class StringAttributeField implements IAttributeField<String>{
 		this.originalValue = ""; //$NON-NLS-1$
 	}
 
+	/**
+	 * Fired when the valid is modified
+	 * @param listener
+	 */
+	public void addModifyListener(Listener listener) {
+		this.listeners.add(listener);
+	}
+	
+	protected void fireModified() {
+		Event evt = new Event();
+		for (Listener l : listeners)l.handleEvent(evt);
+	}
+	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#validate()
 	 */

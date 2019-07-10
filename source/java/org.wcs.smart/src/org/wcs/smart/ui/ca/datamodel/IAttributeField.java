@@ -22,6 +22,7 @@
 package org.wcs.smart.ui.ca.datamodel;
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.ca.datamodel.Attribute;
 
 /**
@@ -54,6 +55,12 @@ public interface IAttributeField<T> {
 	 * @return error string or null if no error
 	 */
 	public String validate();
+	
+	/**
+	 * Fired when the valid is modified
+	 * @param listener
+	 */
+	public void addModifyListener(Listener listener);
 	
 	/**
 	 * @return the attribute represented by the field

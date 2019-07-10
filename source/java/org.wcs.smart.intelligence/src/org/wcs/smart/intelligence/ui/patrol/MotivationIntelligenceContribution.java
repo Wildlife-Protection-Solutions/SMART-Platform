@@ -31,7 +31,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -50,6 +52,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -98,15 +101,11 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 					if (intelligenceList.isEmpty()) {
 						label.setText(Messages.MotivationIntelligenceContribution_NotMotivated_Label);
 						tableViewer.getControl().setVisible(false);
-						((GridData)tableViewer.getControl().getLayoutData()).heightHint = 0;
-						((GridData)tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = false;
 						btnOpen.setVisible(false);
 					} else {
 						label.setText(Messages.MotivationIntelligenceContribution_Motivated_Label);
 						tableViewer.getControl().setVisible(true);
 						tableViewer.setInput(intelligenceList.toArray());
-						((GridData)tableViewer.getControl().getLayoutData()).heightHint = 75;
-						((GridData)tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = true;
 						btnOpen.setVisible(true);
 					}
 					main.getParent().getParent().layout(true,true);
@@ -144,11 +143,13 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 			label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2,1));
 		}
 		
-		Table reportedTable = toolkit.createTable(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		Composite wrapper = toolkit.createComposite(main);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		
+		Table reportedTable = toolkit.createTable(wrapper, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		tableViewer = new TableViewer(reportedTable);
 		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		tableViewer.setLabelProvider(new IntelligenceLabelProvider());
-		reportedTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		tableViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -162,6 +163,11 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 			}
 		});
 		tableViewer.setInput(new Object[]{Messages.MotivationIntelligenceContribution_LoadingText});
+		
+		TableColumn tc = new TableColumn(reportedTable, SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(100));
+		wrapper.setLayout(layout);
 		
 		btnOpen = toolkit.createButton(main, Messages.ReportedIntelligenceContribution_Open_Button, SWT.PUSH);
 		btnOpen.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));

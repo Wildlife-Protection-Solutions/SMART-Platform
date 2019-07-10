@@ -27,7 +27,9 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -43,6 +45,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -125,12 +128,14 @@ public class MultipleSelectComposite<T> extends Composite {
 		labelSelected = new Label(this, SWT.NONE);
 		labelSelected.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		itemsListViewer = new TableViewer(this, SWT.MULTI | SWT.BORDER);
+		Composite wrapper = new Composite(this, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)wrapper.getLayoutData()).widthHint = 100;
+		((GridData)wrapper.getLayoutData()).heightHint = 150;
+		
+		itemsListViewer = new TableViewer(wrapper, SWT.MULTI | SWT.BORDER);
 		itemsListViewer.setContentProvider(ArrayContentProvider.getInstance());
-		itemsListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		itemsListViewer.setInput(allItems);
-		((GridData)itemsListViewer.getControl().getLayoutData()).widthHint = 100;
-		((GridData)itemsListViewer.getControl().getLayoutData()).heightHint = 150;
 		itemsListViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -144,6 +149,10 @@ public class MultipleSelectComposite<T> extends Composite {
 			}
 		});
 		
+		TableColumn tc = new TableColumn(itemsListViewer.getTable(), SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(100));
+		wrapper.setLayout(layout);
 		
 		Composite btnComposite = new Composite(this, SWT.NONE);
 		btnComposite.setLayout(new GridLayout(1, false));
@@ -151,12 +160,14 @@ public class MultipleSelectComposite<T> extends Composite {
 		
 		createButtonComposite(btnComposite);
 		
-		selectedItemsListViewer = new TableViewer(this, SWT.MULTI | SWT.BORDER);
+		wrapper = new Composite(this, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)wrapper.getLayoutData()).widthHint = 100;
+		((GridData)wrapper.getLayoutData()).heightHint = 150;
+		
+		selectedItemsListViewer = new TableViewer(wrapper, SWT.MULTI | SWT.BORDER);
 		selectedItemsListViewer.setContentProvider(ArrayContentProvider.getInstance());
-		selectedItemsListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		selectedItemsListViewer.setInput(selectedItems);
-		((GridData)selectedItemsListViewer.getControl().getLayoutData()).widthHint = 100;
-		((GridData)selectedItemsListViewer.getControl().getLayoutData()).heightHint = 150;
 		selectedItemsListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -169,6 +180,10 @@ public class MultipleSelectComposite<T> extends Composite {
 				removeItems();
 			}
 		});
+		tc = new TableColumn(selectedItemsListViewer.getTable(), SWT.NONE);
+		layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(100));
+		wrapper.setLayout(layout);
 		updateButtonsState();
 	}
 	
@@ -286,6 +301,9 @@ public class MultipleSelectComposite<T> extends Composite {
 		selectedItemsListViewer.setInput(this.selectedItems);
 		selectedItemsListViewer.refresh();
 
+		itemsListViewer.getControl().getParent().layout(true);
+		selectedItemsListViewer.getControl().getParent().layout(true);
+		
 		fireChangeListeners();
 	}
 

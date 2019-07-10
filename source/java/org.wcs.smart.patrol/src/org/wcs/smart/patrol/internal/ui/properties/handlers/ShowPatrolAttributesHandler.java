@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2019 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,33 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui;
+package org.wcs.smart.patrol.internal.ui.properties.handlers;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.util.UiUtils;
+import org.wcs.smart.patrol.internal.ui.properties.PatrolAttributeDialog;
 
 /**
- * Extends TitleAreaDialog to color controls according to new 
- * SMART Style.  Also make dialog resizeable
+ * Handler for displaying custom patrol attributes page.
  * 
  * @author Emily
  * @since 7.0.0
  */
-public abstract class SmartStyledTitleDialog extends TitleAreaDialog {
+@SuppressWarnings("restriction")
+public class ShowPatrolAttributesHandler {
 
-	protected SmartStyledTitleDialog(Shell parent) {
-		super(parent);
-	}
-
-	@Override
-	public void create() {
-		super.create();
-		UiUtils.colorDialog(getShell());
+	@Execute
+	public void execute(Shell shell)  {
+		PatrolAttributeDialog dialog = new PatrolAttributeDialog(shell);
+		dialog.open();
 	}
 	
-	@Override
-	protected boolean isResizable() {
-		return true;
+	public static class ShowPatrolAttributesHandlerWrapper extends DIHandler<ShowPatrolAttributesHandler>{
+		public ShowPatrolAttributesHandlerWrapper(){
+			super(ShowPatrolAttributesHandler.class);
+		}
 	}
 }

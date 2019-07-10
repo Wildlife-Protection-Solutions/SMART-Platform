@@ -22,6 +22,9 @@
 package org.wcs.smart.ui.ca.datamodel;
 
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
@@ -32,7 +35,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.internal.Messages;
@@ -62,12 +67,15 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 	private Button btnUndefined;
 	private ControlDecoration cd;
 	
+	private Collection<Listener> listeners;
+	
 	SelectionListener validateListener = new SelectionAdapter() {
 		@Override
 		public void widgetSelected(SelectionEvent e) {
 			Boolean v = getValue();
 			isModified = !( (v== null && originalValue == null) || (v != null && originalValue != null && v == originalValue));
 			validate();
+			fireModified();
 		}
 	};
 	
@@ -77,6 +85,7 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 	 */
 	public BooleanAttributeField(Attribute attribute){
 		this.attribute = attribute;
+		listeners = new ArrayList<>();
 	}
 	
 	/**
@@ -135,6 +144,19 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 		originalValue = null;
 	}
 
+	/**
+	 * Fired when the valid is modified
+	 * @param listener
+	 */
+	public void addModifyListener(Listener listener) {
+		this.listeners.add(listener);
+	}
+	
+	protected void fireModified() {
+		Event evt = new Event();
+		for (Listener l : listeners)l.handleEvent(evt);
+	}
+	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#validate()
 	 */

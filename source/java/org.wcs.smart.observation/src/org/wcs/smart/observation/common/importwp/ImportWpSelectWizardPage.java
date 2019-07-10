@@ -45,6 +45,7 @@ import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
+import org.wcs.smart.util.UiUtils;
 
 /**
  * Wizard page to select the waypoints or track points to import.
@@ -134,6 +135,8 @@ public class ImportWpSelectWizardPage extends WizardPage implements IImportWizar
 		super.setTitle(Messages.ImportWpSelectWizardPage_PageTitle + ((ImportGpsDataWizard)getWizard()).getType().guiName);
 		super.setMessage(((ImportGpsDataWizard)getWizard()).getType().importDesc );
 		super.setControl(comp);
+		
+		UiUtils.makeTransparent(comp);
 	}
 	
 	@Override

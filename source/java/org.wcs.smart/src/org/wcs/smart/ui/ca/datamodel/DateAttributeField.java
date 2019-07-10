@@ -1,5 +1,7 @@
 package org.wcs.smart.ui.ca.datamodel;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -29,12 +31,16 @@ public class DateAttributeField implements IAttributeField<Date>{
 	private DateTime dtime;
 	private ControlDecoration cd;
 	
+	private Collection<Listener> listeners;
+
+	
 	/**
 	 * creates a new string attribute field.
 	 * @param attribute
 	 */
 	public DateAttributeField(Attribute attribute){
 		this.attribute = attribute;
+		listeners = new ArrayList<>();
 	}
 	
 	/**
@@ -78,8 +84,8 @@ public class DateAttributeField implements IAttributeField<Date>{
 				}else{
 					isModified = true;
 				}
-				
 				validate();
+				fireModified();
 			}
 
 		});
@@ -99,6 +105,7 @@ public class DateAttributeField implements IAttributeField<Date>{
 					isModified = true;
 				}
 				validate();
+				fireModified();
 			}});
 		
 		cd = new ControlDecoration(dtComp, SWT.LEFT | SWT.TOP);
@@ -112,6 +119,20 @@ public class DateAttributeField implements IAttributeField<Date>{
 		this.originalValue = null; 
 	}
 
+	/**
+	 * Fired when the valid is modified
+	 * @param listener
+	 */
+	public void addModifyListener(Listener listener) {
+		this.listeners.add(listener);
+	}
+	
+	protected void fireModified() {
+		Event evt = new Event();
+		for (Listener l : listeners)l.handleEvent(evt);
+	}
+	
+	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#validate()
 	 */

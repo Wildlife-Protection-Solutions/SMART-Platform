@@ -27,6 +27,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
@@ -51,7 +52,6 @@ public class TreeAttributeField extends TreeEditorField<AttributeTreeNode> imple
 	
 	private Attribute attribute;
 
-	
 	/**
 	 * Creates a new attribute tree field
 	 * @param attribute
@@ -110,6 +110,11 @@ public class TreeAttributeField extends TreeEditorField<AttributeTreeNode> imple
 		}else {
 			super.setSelectedValue(null);
 		}		
+	}
+
+	@Override
+	public void addModifyListener(Listener listener) {
+		super.addSelectionChangedListener(listener);
 	}
 
 }

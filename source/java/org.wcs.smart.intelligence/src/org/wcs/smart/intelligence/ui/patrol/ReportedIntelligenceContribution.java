@@ -32,7 +32,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -52,6 +54,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -123,15 +126,11 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 						label.setText(Messages.ReportedIntelligenceContribution_NothingReported_Label);
 						tableViewer.getControl().setVisible(false);
 						btnOpen.setVisible(false);
-						((GridData) tableViewer.getControl().getLayoutData()).heightHint = 0;
-						((GridData) tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = false;
 					} else {
 						label.setText(Messages.ReportedIntelligenceContribution_IntelligenceReported_Label);
 						tableViewer.getControl().setVisible(true);
 						tableViewer.setInput(data.toArray());
 						btnOpen.setVisible(true);
-						((GridData) tableViewer.getControl().getLayoutData()).heightHint = 75;
-						((GridData) tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = true;
 					}
 					main.getParent().getParent().layout(true, true);
 				}
@@ -165,11 +164,13 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 			label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		}
 		
-		Table reportedTable = toolkit.createTable(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		Composite wrapper = toolkit.createComposite(main);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		
+		Table reportedTable = toolkit.createTable(wrapper, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		tableViewer = new TableViewer(reportedTable);
 		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		tableViewer.setLabelProvider(new IntelligenceLabelProvider());
-		reportedTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -184,6 +185,11 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 		});
 		tableViewer.setInput(new String[]{Messages.ReportedIntelligenceContribution_LoadingText});
 
+		TableColumn tc = new TableColumn(reportedTable, SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(100));
+		wrapper.setLayout(layout);
+		
 		btnOpen = toolkit.createButton(main, Messages.ReportedIntelligenceContribution_Open_Button, SWT.PUSH);
 		btnOpen.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		btnOpen.addSelectionListener(new SelectionAdapter() {

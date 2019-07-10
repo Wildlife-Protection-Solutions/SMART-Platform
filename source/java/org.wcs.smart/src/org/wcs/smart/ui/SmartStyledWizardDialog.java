@@ -21,31 +21,31 @@
  */
 package org.wcs.smart.ui;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.util.UiUtils;
 
 /**
- * Extends TitleAreaDialog to color controls according to new 
- * SMART Style.  Also make dialog resizeable
+ * Extends WizardDialog to color controls according to new 
+ * SMART Style. 
  * 
  * @author Emily
  * @since 7.0.0
  */
-public abstract class SmartStyledTitleDialog extends TitleAreaDialog {
-
-	protected SmartStyledTitleDialog(Shell parent) {
-		super(parent);
+public class SmartStyledWizardDialog extends WizardDialog {
+	
+	public SmartStyledWizardDialog(Shell parentShell, IWizard newWizard) {
+		super(parentShell, newWizard);
 	}
 
 	@Override
-	public void create() {
-		super.create();
-		UiUtils.colorDialog(getShell());
+	protected Control createContents(Composite parent) {
+		Control c = super.createContents(parent);
+		UiUtils.colorDialog(c.getShell());
+		return c;
 	}
 	
-	@Override
-	protected boolean isResizable() {
-		return true;
-	}
 }

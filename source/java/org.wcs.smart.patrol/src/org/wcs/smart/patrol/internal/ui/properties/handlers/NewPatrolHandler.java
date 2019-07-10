@@ -32,6 +32,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -40,6 +41,7 @@ import org.wcs.smart.patrol.internal.ui.createpatrol.CreatePatrolWizard;
 import org.wcs.smart.patrol.internal.ui.views.PatrolListView;
 import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.ui.SmartStyledWizardDialog;
 
 /**
  * Handler to display new patrol wizard.
@@ -69,8 +71,13 @@ public class NewPatrolHandler {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					monitor.setTaskName(Messages.NewPatrolHandler_Progress_DisplayingWizard);
-					dialog = new WizardDialog(activeShell, wizard);
-
+					dialog = new SmartStyledWizardDialog(activeShell, wizard) {
+						public Point getInitialSize() {
+							Point p = super.getInitialSize();
+							if (p.y > 450) p.y = 450;
+							return p;
+						}
+					};
 				}
 			});
 		} catch (Exception ex) {

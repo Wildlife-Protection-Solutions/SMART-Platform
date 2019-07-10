@@ -36,6 +36,7 @@ public class PatrolEventManager {
 		WAYPOINT_DELETED
 	}
 	
+	
 	/**
 	 * Patrol station attribute
 	 */
@@ -90,6 +91,12 @@ public class PatrolEventManager {
 	 * EventType.WAYPOINT_DELETED and WAYPOINT_MODIFIED
 	 */
 	public static int WAYPOINT = 10;
+	
+	/**
+	 * Custom patrol attribute 
+	 */
+	public static int PATROL_CUSTOM_ATTRIBUTE = 11;
+	
 	/**
 	 * 
 	 * @return the patrol event manager instance

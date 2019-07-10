@@ -37,12 +37,15 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
@@ -171,6 +174,25 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.CreatePatrolWizard_ErrorCreatingWizardPages, ex);
 			return null;
+		}
+		
+		List<PatrolAttribute> attributes = null;
+		try(Session session = HibernateManager.openSession()){
+			attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+					new Object[] {"isActive", true}).list(); //$NON-NLS-1$
+			attributes.forEach(e->{
+				if (e.getAttributeList() != null) e.getAttributeList().forEach(li->li.getName());
+			});			
+		}
+		for (NewPatrolWizardPage p : thisitems) {
+			if (!p.getName().equals(PatrolAttributeWizardPage.ID)) continue;
+			if (attributes == null || attributes.isEmpty()) {
+				thisitems.remove(p);
+			}else {
+				((PatrolAttributeWizardPage)p).setAttributes(attributes);
+			}
+			break;
 		}
 		
 		//apply sort rules

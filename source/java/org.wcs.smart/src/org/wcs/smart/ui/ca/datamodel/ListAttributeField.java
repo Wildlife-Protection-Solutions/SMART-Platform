@@ -22,6 +22,7 @@
 package org.wcs.smart.ui.ca.datamodel;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -37,7 +38,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
@@ -65,12 +68,15 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 	private ComboViewer cmbViewer;
 	private ControlDecoration cd;
 	
+	private Collection<Listener> listeners;
+	
 	/**
 	 * Creates a new list field
 	 * @param attribute
 	 */
 	public ListAttributeField(Attribute attribute){
 		this.attribute = attribute;
+		listeners = new ArrayList<>();
 	}
 	
 	/**
@@ -103,22 +109,8 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 		cmbViewer = new ComboViewer(new Combo(parent, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY));
 		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)cmbViewer.getControl().getLayoutData()).horizontalIndent = 5;
-		
-		
-		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
-
-//		cmbViewer.getCombo().addFocusListener(new FocusListener() {
-//			@Override
-//			public void focusLost(FocusEvent e) {
-//			}
-//			
-//			@Override
-//			public void focusGained(FocusEvent e) {
-//				cmbViewer.getCombo().setListVisible(true);
-//				
-//			}
-//		});
-		
+		((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 250;
+		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());	
 		cmbViewer.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element){
@@ -134,6 +126,7 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 				AttributeListItem v = getValue();
 				isModified = !( (v== null && originalValue == null) || (v != null && originalValue != null && v.equals(originalValue)));
 				validate();
+				fireModified();
 			}
 		});
 		
@@ -152,6 +145,19 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 		originalValue = null;
 		isModified = false;
 		
+	}
+	
+	/**
+	 * Fired when the valid is modified
+	 * @param listener
+	 */
+	public void addModifyListener(Listener listener) {
+		this.listeners.add(listener);
+	}
+	
+	protected void fireModified() {
+		Event evt = new Event();
+		for (Listener l : listeners)l.handleEvent(evt);
 	}
 
 	/**
