@@ -357,6 +357,25 @@
         			<module>../extensions/qa/org.wcs.smart.qa</module>
 				<module>../extensions/qa/org.wcs.smart.qa.patrol</module>
 			</modules>
+			
+			<build>
+			<plugins><plugin>
+        			<groupId>com.coderplus.maven.plugins</groupId>
+        			<artifactId>copy-rename-maven-plugin</artifactId>
+        			<version>1.0</version>
+        			<executions>
+          			<execution>
+            			<id>copy-file</id>
+            			<phase>clean</phase>
+            			<goals><goal>copy</goal></goals>
+            			<configuration>
+              				<sourceFile>org.wcs.smart.updatesite/category.core.xml</sourceFile>
+              				<destinationFile>org.wcs.smart.updatesite/category.xml</destinationFile>
+            			</configuration>
+          			</execution>
+        			</executions>
+      			</plugin></plugins>
+  			</build>
 		</profile>
 		
 		<profile>
@@ -371,7 +390,7 @@
 			</modules>
 		</profile>
 		<profile>
-			<id>intel</id>
+			<id>intelligence</id>
 			<modules>
 				<module>org.wcs.smart.license.feature</module>
 				<module>org.wcs.smart.updatesite</module>
@@ -448,6 +467,9 @@
 		<profile>
 			<id>connect</id>
 			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
 				<module>../extensions/connect/org.wcs.smart.connect</module>
 				<module>../extensions/connect/org.wcs.smart.connect.feature</module>
 				<module>../extensions/connect/org.wcs.smart.connect.core.feature</module>
@@ -455,6 +477,14 @@
 				<module>../extensions/connect/org.wcs.smart.connect.cybertracker</module>
 				<module>../extensions/connect/org.wcs.smart.connect.cybertracker.feature</module>
 				<module>../extensions/connect/org.wcs.smart.connect.cybertracker.core.feature</module>
+
+			</modules>
+		</profile>
+		<profile>
+			<id>connectdq</id>
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
 				
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue</module>
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.core.feature</module>
@@ -471,10 +501,12 @@
 				<module>../extensions/i2/org.wcs.smart.connect.dataqueue.i2.feature</module>  
 			</modules>
 		</profile>
-		
 		<profile>
-			<id>i2</id>
+			<id>profile</id>
 			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
 				<module>../extensions/i2/org.wcs.smart.i2</module>
 				<module>../extensions/i2/org.wcs.smart.i2.feature</module>
 				<module>../extensions/i2/org.wcs.smart.i2.core.feature</module>
@@ -485,6 +517,9 @@
 		<profile>
 			<id>asset</id>
 			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
 				<module>../extensions/asset/org.wcs.smart.asset</module>
 				<module>../extensions/asset/org.wcs.smart.asset.query</module>
 				<module>../extensions/asset/org.wcs.smart.asset.query.report</module>
@@ -497,6 +532,9 @@
 		<profile>
 			<id>event</id>
 			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
 				<module>../extensions/event/org.wcs.smart.event</module>
 				<module>../extensions/event/org.wcs.smart.event.core.feature</module>
 				<module>../extensions/event/org.wcs.smart.event.feature</module>
@@ -509,6 +547,9 @@
 		<profile>
 			<id>r</id>
 			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
 				<module>../extensions/r/org.wcs.smart.r</module>
 				<module>../extensions/r/org.wcs.smart.r.core.feature</module>
 				<module>../extensions/r/org.wcs.smart.r.feature</module>

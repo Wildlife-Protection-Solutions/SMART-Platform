@@ -49,6 +49,8 @@ public class PatrolCaDeleteHandler implements ICaDeleteHandler{
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor)
 			throws Exception {
+		monitor.subTask(Messages.PatrolCaDeleteHandler_DeletePatrolAttributes);
+		deleteCustomAttributes(ca, session);	
 		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingPatrols);
 		deletePatrols(ca, session);
 		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingTeams);
@@ -57,12 +59,14 @@ public class PatrolCaDeleteHandler implements ICaDeleteHandler{
 		deleteMandates(ca, session);		
 		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingTypes);
 		deletePatrolTypes(ca, session);		
-		monitor.subTask(Messages.PatrolCaDeleteHandler_DeletePatrolAttributes);
-		deleteCustomAttributes(ca, session);		
 	}
 
 	private void deleteCustomAttributes(ConservationArea ca, Session session) throws Exception{
-		Query<?> q = session.createQuery("delete from PatrolAttributeListItem where attribute in (FROM PatrolAttribute WHERE conservationArea = :ca)"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from PatrolAttributeValue where id.patrolAttribute in (FROM PatrolAttribute WHERE conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery("delete from PatrolAttributeListItem where attribute in (FROM PatrolAttribute WHERE conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
