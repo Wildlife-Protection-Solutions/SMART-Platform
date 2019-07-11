@@ -64,47 +64,41 @@
 				</configuration>
       		</plugin>
 
-<plugin>
-  
-  <groupId>io.swagger.core.v3</groupId>
-  <artifactId>swagger-maven-plugin</artifactId>
-  <version>2.0.8</version>
+			<plugin>
+  				<groupId>io.swagger.core.v3</groupId>
+  				<artifactId>swagger-maven-plugin</artifactId>
+  				<version>2.0.8</version>
   
     
-	<configuration>
+				<configuration>
                     <outputFileName>smart-noa</outputFileName>
                     <outputPath>./swagger</outputPath>
                     <outputFormat>YAML</outputFormat>
-                    <!--<resourcePackages>
-                        <package>test.petstore</package>
+                    <resourcePackages>
+                    	<package>org.wcs.smart.connect.api.noa</package>
                     </resourcePackages>
-                    -->
-                    <resourcePackages>org.wcs.smart.connect.api.noa</resourcePackages>
                     <prettyPrint>TRUE</prettyPrint>
-	</configuration>
+				</configuration>
 
-    <executions>
-        <execution>
-            <phase>compile</phase>
-            <goals>
-                <!--<goal>generate</goal>-->
-                <goal>resolve</goal>
-            </goals>
-        </execution>
-    </executions>
-    <dependencies>
-        <!-- Adding dependency to swagger-hibernate-validations to enable the BeanValidator as a custom
-             model converter -->
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-hibernate-validations</artifactId>
-            <version>1.5.6</version>
-        </dependency>
-    </dependencies>
-</plugin>      		
-      		
-      		
-		</plugins>
+    			<executions>
+        			<execution>
+            			<phase>compile</phase>
+            			<goals>
+                			<!--<goal>generate</goal>-->
+                			<goal>resolve</goal>
+            			</goals>
+       				 </execution>
+    			</executions>
+    			<dependencies>
+        			<!-- Adding dependency to swagger-hibernate-validations to enable the BeanValidator as a custom model converter -->
+        			<dependency>
+            			<groupId>io.swagger</groupId>
+            			<artifactId>swagger-hibernate-validations</artifactId>
+            			<version>1.5.6</version>
+        			</dependency>
+    			</dependencies>
+			</plugin>      		
+      	</plugins>
 	</build>
 	<dependencies>
 
