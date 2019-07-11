@@ -26,7 +26,9 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -44,6 +46,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -131,18 +134,24 @@ public class MissionAttributeDialog extends SmartStyledTitleDialog implements Se
 		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		lstAttributes = new TableViewer(main, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		Composite wrapper = new Composite(main, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		lstAttributes = new TableViewer(wrapper, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		lstAttributes.setContentProvider(ArrayContentProvider.getInstance());
 		lstAttributes.setLabelProvider(new AttributeLabelProvider());
-		lstAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)lstAttributes.getControl().getLayoutData()).heightHint = 200;
-		((GridData)lstAttributes.getControl().getLayoutData()).widthHint = 300;
 		lstAttributes.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				editAttribute();	
 			}
 		});
+		
+		TableColumn tc = new TableColumn(lstAttributes.getTable(), SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(100));
+		wrapper.setLayout(layout);
+		
 		Composite btnComp = new Composite(main, SWT.NONE);
 		btnComp.setLayout(new GridLayout(1, false));
 		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
