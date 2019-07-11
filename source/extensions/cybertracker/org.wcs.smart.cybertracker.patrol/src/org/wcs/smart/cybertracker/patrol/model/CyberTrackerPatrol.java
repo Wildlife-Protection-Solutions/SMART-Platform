@@ -36,6 +36,7 @@ import org.wcs.smart.cybertracker.patrol.importer.PatrolCTLabelProvider;
 import org.wcs.smart.cybertracker.patrol.importer.PatrolCTLabelProvider.CTPatrolUIMeta;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
+import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -84,10 +85,20 @@ public class CyberTrackerPatrol extends AbstractCyberTrackerData {
 	private String ctPilot;
 	private List<String> ctMembers;
 
+	private List<PatrolAttributeValue> customAttributes;
+	
 	public CyberTrackerPatrol(Map<String, E> elementsMap, List<S> sData) {
 		super(elementsMap, sData);
+		customAttributes = new ArrayList<>();
 	}
 
+	public void addCustomAttributeValue(PatrolAttributeValue v) {
+		customAttributes.add(v);
+	}
+	public List<PatrolAttributeValue> getCustomAttributes(){
+		return this.customAttributes;
+	}
+	
 	public Station getStation() {
 		return station;
 	}

@@ -220,6 +220,8 @@ public class Messages extends NLS {
 	public static String PatrolMetadataPackageContribution_YesOption;
 
 	public static String PatrolPackageExporter_ArmedPageLabel;
+
+	public static String PatrolPackageExporter_attributeTypeNotSupported;
 	public static String PatrolPackageExporter_CommentPageLabel;
 	public static String PatrolPackageExporter_LeaderPageLabel;
 	public static String PatrolPackageExporter_MandatePageLabel;

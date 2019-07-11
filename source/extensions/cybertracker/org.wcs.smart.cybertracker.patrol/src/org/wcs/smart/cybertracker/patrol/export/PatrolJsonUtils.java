@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.cybertracker.patrol.export;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +33,7 @@ import org.json.simple.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.cybertracker.JsonUtils;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
@@ -37,7 +41,11 @@ import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil.JsonPatrolKey;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
@@ -50,14 +58,20 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class PatrolJsonUtils {
 	
+	public static DateFormat DATEFORMAT = new SimpleDateFormat("yyyy/MM/dd"); //$NON-NLS-1$
+	public static DateFormat TIMEFORMAT = new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
+	
+	public static final String ATTRIBUTE_PREFIX = "SMART_"; //$NON-NLS-1$
+	
 	/**
 	 * 
 	 * @param jsonDefaults default values 
 	 * @param jsonValues actual selected values
 	 * @param session
 	 * @return
+	 * @throws ParseException 
 	 */
-	public static CyberTrackerPatrol parsePatrolMetadata(JSONObject jsonDefaults, JSONObject jsonValues, ConservationArea ca, Session session){
+	public static CyberTrackerPatrol parsePatrolMetadata(JSONObject jsonDefaults, JSONObject jsonValues, ConservationArea ca, Session session) throws ParseException{
 		
 		if (jsonValues == null) jsonValues = new JSONObject();
 		
@@ -171,8 +185,39 @@ public class PatrolJsonUtils {
 			}else{
 				ctPatrol.setPatrolTransportType(transportObj);
 			}
+		}
+		
+		//custom attribute
+		List<PatrolAttribute> attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
+				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+		for (PatrolAttribute pa  : attributes) {
+			String key = ATTRIBUTE_PREFIX + UuidUtils.uuidToString( pa.getUuid() );
+			
+			Object value = jsonValues.get(key);
+			if (value == null) continue;
 			
 			
+			if (pa.getType() == Attribute.AttributeType.BOOLEAN) {
+				value = JsonUtils.convertToBoolean(value);
+			}else if (pa.getType() == Attribute.AttributeType.LIST) {
+				UUID uuid = UuidUtils.stringToUuid( (String)value );
+				for (PatrolAttributeListItem item : pa.getAttributeList()) {
+					if (item.getUuid().equals(uuid)) {
+						value = item;
+						break;
+					}
+				}
+				if (!(value instanceof PatrolAttributeListItem)) value = null;
+			}else if (pa.getType() == Attribute.AttributeType.DATE) {
+				value = DATEFORMAT.parse((String)value);
+			}
+			
+			if (value == null) continue;
+			
+			PatrolAttributeValue pav = new PatrolAttributeValue();
+			pav.setPatrolAttribute(pa);
+			pav.setAttributeValue(value);
+			ctPatrol.addCustomAttributeValue(pav);
 		}
 		return ctPatrol;
 	}

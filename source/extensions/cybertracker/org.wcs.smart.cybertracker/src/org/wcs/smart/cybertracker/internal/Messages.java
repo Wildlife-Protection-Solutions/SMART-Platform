@@ -111,8 +111,12 @@ public class Messages extends NLS {
 	public static String CreateNewProfileOpDialog_Template;
 	public static String CreateNewProfileOpDialog_Title;
 	public static String CtDatabaseUpgrader_UpgradeTask;
+	public static String CtJsonExportUtils_DataTypeLabel;
 	public static String CtJsonExportUtils_EmployeePageLabel;
+	public static String CtJsonExportUtils_IdentifierLabel;
 	public static String CtJsonExportUtils_SmartCtSource;
+	public static String CtJsonExportUtils_StartDateLabel;
+	public static String CtJsonExportUtils_StartTimeLabel;
 	public static String CtPackageExportDialog_DialogMsg;
 	public static String CtPackageExportDialog_LocationsLbl;
 	public static String CtPackageExportDialog_OptionsLbl;

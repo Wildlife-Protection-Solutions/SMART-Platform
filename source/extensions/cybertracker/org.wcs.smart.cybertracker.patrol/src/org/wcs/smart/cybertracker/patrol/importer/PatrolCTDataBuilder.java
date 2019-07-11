@@ -64,13 +64,16 @@ import org.wcs.smart.ui.SmartLabelProvider;
 public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 
 	protected CyberTrackerPatrol createDataRecord(Session session, Map<String, E> elementsMap, List<S> sData) {
-		CyberTrackerPatrol ctPatrol = new CyberTrackerPatrol(elementsMap, sData);
-		initMetaData(ctPatrol, session);
-		return ctPatrol;
-		
+		try {
+			CyberTrackerPatrol ctPatrol = new CyberTrackerPatrol(elementsMap, sData);
+			initMetaData(ctPatrol, session);
+			return ctPatrol;
+		}catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
 	}
 
-	private void initMetaData(CyberTrackerPatrol ctPatrol, Session session) {
+	private void initMetaData(CyberTrackerPatrol ctPatrol, Session session) throws ParseException {
 		List<S> patrolData = ctPatrol.getSData();
 		if (patrolData.isEmpty())
 			return;
@@ -161,7 +164,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 		}
 	}
 
-	private void recordPatrolData(CyberTrackerPatrol ctPatrol, E i, String v, Map<String, E> eMap, Session session) {
+	private void recordPatrolData(CyberTrackerPatrol ctPatrol, E i, String v, Map<String, E> eMap, Session session) throws ParseException {
 		String n = i.getN();
 		if (ScreensUtil.RESULT_DEFAULT_META_VALUES.equals(n)) {
 			if (ElementsUtil.isCtIdsList(v)) {
@@ -238,7 +241,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 		}		
 	}
 
-	private void recordAfter400DefaultMetaValues(CyberTrackerPatrol ctPatrol, String v, Map<String, E> eMap, Session session) {
+	private void recordAfter400DefaultMetaValues(CyberTrackerPatrol ctPatrol, String v, Map<String, E> eMap, Session session) throws ParseException {
 		try {
 			CyberTrackerPatrol defaultValue = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(v), null, SmartDB.getCurrentConservationArea(), session);
 			
@@ -283,7 +286,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 		}
 	}
 
-	private void recordBefore401DefaultMetaValues(CyberTrackerPatrol ctPatrol, String v, Map<String, E> eMap, Session session) {
+	private void recordBefore401DefaultMetaValues(CyberTrackerPatrol ctPatrol, String v, Map<String, E> eMap, Session session) throws ParseException {
 		//import for old versions (4.0.0 or lower)
 		String[] ctIdArray = v.split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
 		for (String ctid : ctIdArray) {

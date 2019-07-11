@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -43,10 +44,12 @@ import org.json.simple.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
+import org.wcs.smart.cybertracker.export.CtJsonExportUtils.Type;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
@@ -64,6 +67,8 @@ import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
@@ -361,7 +366,16 @@ public enum PatrolPackageExporter {
 		metadataScreens.add(CtJsonExportUtils.createDataType(PatrolMetadataField.PATROL_RESOURCE_ID));
 		metadataScreens.add(CtJsonExportUtils.createPatrolId());
 		metadataScreens.add(CtJsonExportUtils.createStartDate());
-		metadataScreens.add(CtJsonExportUtils.createEndDate());
+		metadataScreens.add(CtJsonExportUtils.createStartTime());
+		
+		//custom attributes
+		List<PatrolAttribute> attributes = QueryFactory.buildQuery(session, PatrolAttribute.class, 
+				new Object[] {"conservationArea", ctpackage.getConservationArea()}, //$NON-NLS-1$
+				new Object[] {"isActive", true}).getResultList(); //$NON-NLS-1$
+		
+		for (PatrolAttribute a : attributes) {
+			metadataScreens.add(covertPatrolAttribute(a, session));
+		}
 		
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
 			fw.write(metadataScreens.toJSONString());
@@ -431,5 +445,61 @@ public enum PatrolPackageExporter {
 		return stationTypeOp;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static JSONObject covertPatrolAttribute(PatrolAttribute pa, Session session) throws IOException {
+		
+		JSONObject optionType = new JSONObject();
+		
+		switch(pa.getType()) {
+		case BOOLEAN:
+			optionType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.BOOLEAN.name());
+			break;
+		case DATE:
+			optionType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.DATE.name());
+			break;
+		case LIST:
+			optionType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
+			break;
+		case NUMERIC:
+			optionType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.NUMERIC.name());
+			break;
+		case TEXT:
+			optionType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.TEXT.name());
+			break;
+		default:
+			throw new IOException(MessageFormat.format(Messages.PatrolPackageExporter_attributeTypeNotSupported, pa.getType()));
+		}
+		
+		optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY, pa.getName());
+		optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY + "_default", pa.getName()); //$NON-NLS-1$
+		for (Label l : pa.getNames()) {
+			optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY + "_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$
+		}
+		optionType.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, false);
+		optionType.put(CtJsonExportUtils.JSON_FIXED_PROP_KEY, false);
+		optionType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, true);
+		
+		if (pa.getType() == Attribute.AttributeType.LIST) {
+			JSONArray optionOptions = new JSONArray();
+			
+			for(PatrolAttributeListItem item : pa.getAttributeList()) {
+			
+				JSONObject ttype = new JSONObject();
+				ttype.put("uuid", UuidUtils.uuidToString(item.getUuid())); //$NON-NLS-1$
+				ttype.put("key", item.getKeyId()); //$NON-NLS-1$
+				ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY + "_default", item.findName(pa.getConservationArea().getDefaultLanguage())); //$NON-NLS-1$
+				for (Label l : item.getNames()) {
+					ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY + "_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$
+					
+				}
+				optionOptions.add(ttype);
+			}
+			optionType.put(CtJsonExportUtils.JSON_OPTION_PROP_KEY, optionOptions);
+		}
+		
+		JSONObject attributeOp = new JSONObject();
+		attributeOp.put(PatrolJsonUtils.ATTRIBUTE_PREFIX + UuidUtils.uuidToString(pa.getUuid()), optionType);
+		return attributeOp;
+	}
 	
 }

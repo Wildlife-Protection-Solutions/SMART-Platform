@@ -23,7 +23,6 @@ package org.wcs.smart.cybertracker.patrol.json;
 
 import java.io.File;
 import java.sql.Time;
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,6 +43,8 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -70,6 +71,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -80,9 +82,6 @@ import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.LineString;
-
 /**
  * Parser for parsing patrol data from CT JSON data. 
  * 
@@ -90,9 +89,6 @@ import org.locationtech.jts.geom.LineString;
  *
  */
 public class PatrolJsonProcessor implements IJsonProcessor {
-	
-	private DateFormat DATEFORMAT = new SimpleDateFormat("yyyy/MM/dd"); //$NON-NLS-1$
-	private DateFormat TIMEFORMAT = new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
 	
 	private static final IWaypointSource PATROL_WP_SRC = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
 			.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
@@ -569,7 +565,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		
 		
 		String startDate = (String)sighting.get(ScreensUtil.RESULT_START_DATE);		
-		Date dStartDate = DATEFORMAT.parse(startDate);
+		Date dStartDate = PatrolJsonUtils.DATEFORMAT.parse(startDate);
 		p.setEndDate(dStartDate);
 		p.setStartDate(dStartDate);
 		
@@ -580,9 +576,15 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		p.setStation(ct.getStation());
 		p.setTeam(ct.getTeam());
 		
-		String startTime = (String)sighting.get(ScreensUtil.RESULT_START_TIME);
-		Date startDateTime = SmartUtils.combineDateTime(dStartDate, TIMEFORMAT.parse(startTime));
+		//add custom attributes
+		p.setCustomAttributes(new ArrayList<>());
+		for (PatrolAttributeValue v : ct.getCustomAttributes()) {
+			v.setPatrol(p);
+			p.getCustomAttributes().add(v);
+		}
 		
+		String startTime = (String)sighting.get(ScreensUtil.RESULT_START_TIME);
+		Date startDateTime = SmartUtils.combineDateTime(dStartDate, PatrolJsonUtils.TIMEFORMAT.parse(startTime));
 		
 		PatrolLeg pl = addLegFromSighting(p, ct, sighting, deviceId, ctUuid, observationCounter, startDateTime, session);
 		

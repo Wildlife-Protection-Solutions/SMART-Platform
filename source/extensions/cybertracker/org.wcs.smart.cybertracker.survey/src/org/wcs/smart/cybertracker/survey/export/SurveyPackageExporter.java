@@ -313,7 +313,7 @@ public enum SurveyPackageExporter {
 		metadataScreens.add(CtJsonExportUtils.createDataType(SurveyScreensUtil.DATATYPE_SURVEY));
 		metadataScreens.add(CtJsonExportUtils.createPatrolId());
 		metadataScreens.add(CtJsonExportUtils.createStartDate());
-		metadataScreens.add(CtJsonExportUtils.createEndDate());
+		metadataScreens.add(CtJsonExportUtils.createStartTime());
 		metadataScreens.add(createSurveyDesign(design));
 				
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
