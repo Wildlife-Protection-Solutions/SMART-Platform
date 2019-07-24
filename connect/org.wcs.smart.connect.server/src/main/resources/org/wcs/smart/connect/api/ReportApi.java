@@ -91,6 +91,13 @@ import org.wcs.smart.report.execute.ParameterFinder;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.UuidUtils;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
+
 /**
  * SMART Connect Report REST API
  * @author Emily
@@ -98,6 +105,9 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ReportApi.PATH)
+@SecuritySchemes(value = {
+		@SecurityScheme(name="apikeyquery",  type = SecuritySchemeType.APIKEY,	in = SecuritySchemeIn.QUERY, paramName=SharedLinkApi.TOKEN_QUERY_PARAM)
+		})
 public class ReportApi extends HttpServlet{
 	
 	private static final long serialVersionUID = 1L;
@@ -115,7 +125,7 @@ public class ReportApi extends HttpServlet{
 	@Context private HttpServletRequest request;
 	
 	/**
-	 * <p>Runs a query and returns the results.</p>
+	 * <p>Runs a report and returns the results.</p>
 	 * <p>
 	 * URL: ../server/api/report/{reportuuid}<br>
 	 * Call Type: GET
@@ -130,10 +140,11 @@ public class ReportApi extends HttpServlet{
 	@SuppressWarnings("unchecked")
 	@GET
     @Path("/{reportuuid}")
-	public Response exectueReport(@PathParam("reportuuid") String reportUuid,
-			@QueryParam("cafilter") String cafilter,
-			@QueryParam("format") String format,
-			@QueryParam("parameterList") String parameterList){
+	@Operation(description="Runs a report and returns the results.")
+	public Response exectueReport(@Parameter(description="The report UUID") @PathParam("reportuuid") String reportUuid,
+			@Parameter(description="only run against CAs listed in this parameter, comma separated list of UUIDs.") @QueryParam("cafilter") String cafilter,
+			@Parameter(description="html, pdf, doc, odt are the options.") @QueryParam("format") String format,
+			@Parameter(description="any custom parameters in a comma separated list, eg. &parameterList=param1,value1,param2,value2") @QueryParam("parameterList") String parameterList){
 
 		UUID uuid = UuidUtils.stringToUuid(reportUuid);		
 		
@@ -316,20 +327,19 @@ public class ReportApi extends HttpServlet{
 	}
 	
 	/**
-	 * <p>Returns all reports the current user is able to view</p>
+	 * <p>Returns all report objects the current user is able to view</p>
 	 *<p>
 	 * URL: ../server/api/report<br>
 	 * Call Type: GET
 	 * </p>
-	 * 
-	 * @param username - The report UUID, passed in as part of the URL 
 	 * @return list of ReportProxy JSON objects
 	 *
 	 **/
 	@GET
     @Path("")
 	@Produces({ MediaType.APPLICATION_JSON })
-    public List<ReportProxy> getAllReportForUser( @QueryParam(value="username") String username){
+	@Operation(description="Returns all report objects the current user is able to view")
+    public List<ReportProxy> getAllReportForUser(){
 		List<ReportProxy> allowed = new ArrayList<ReportProxy>();
 
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
@@ -428,7 +438,8 @@ public class ReportApi extends HttpServlet{
 	@GET
 	@Path("/definition/{reportuuid}")
 	@Produces({ MediaType.APPLICATION_JSON })
-	public ReportProxy getReport(@PathParam("reportuuid") String reportUuid){
+	@Operation(description="Returns the report requested, not the results of the report, but the report object definition/DB row")
+	public ReportProxy getReport(@Parameter(description="the UUID of the report requested") @PathParam("reportuuid") String reportUuid){
 		UUID uuid = UuidUtils.stringToUuid(reportUuid);
 		
 		Session s = HibernateManager.getSession(context, request.getLocale());
@@ -463,7 +474,8 @@ public class ReportApi extends HttpServlet{
 	@GET
     @Path("/{reportuuid}/params")
 	@Produces({ MediaType.APPLICATION_JSON })
-	public List<ReportParameter> getReportsParameters(@PathParam("reportuuid") String reportUuid) throws SmartConnectException{
+	@Operation(description="Returns all of the parameters of the given report")
+	public List<ReportParameter> getReportsParameters(@Parameter(description="the report uuid") @PathParam("reportuuid") String reportUuid) throws SmartConnectException{
 		
 		UUID uuid = UuidUtils.stringToUuid(reportUuid);
 		Session s = HibernateManager.getSession(context, request.getLocale());

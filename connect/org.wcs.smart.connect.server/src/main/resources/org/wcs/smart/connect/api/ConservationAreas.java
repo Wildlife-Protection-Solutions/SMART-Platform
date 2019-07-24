@@ -94,6 +94,13 @@ import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
+
 
 /**
  * Smart Connect REST APU for conservation areas.
@@ -104,6 +111,9 @@ import org.wcs.smart.util.UuidUtils;
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConservationAreas.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
+@SecuritySchemes(value = {
+		@SecurityScheme(name="apikeyquery",  type = SecuritySchemeType.APIKEY,	in = SecuritySchemeIn.QUERY, paramName=SharedLinkApi.TOKEN_QUERY_PARAM)
+		})
 public class ConservationAreas extends HttpServlet{
 	
 	private static final String DATA_PARAM_CHANGELOG_VALUE = "changelog"; //$NON-NLS-1$
@@ -191,7 +201,7 @@ public class ConservationAreas extends HttpServlet{
 	}
 	
 	/**
-	 * <p>List all Conservation Areas</p>
+	 * <p>Lists all Conservation Areas</p>
 	 * <p>
 	 * URL: ../server/api/conservationarea/<br>
 	 * Call Type: GET
@@ -206,7 +216,8 @@ public class ConservationAreas extends HttpServlet{
 	 */
 	@GET
     @Path("/")
-    public List<ConservationAreaProxy> getConservationAreas(@QueryParam("organizationFilter") String organizationFilter, @QueryParam("caJsonFilter") String caJsonFilter, @QueryParam("includeSpatialBoundaries") Boolean includeSpatialBoundaries){
+	@Operation(description="Lists all Conservation Areas")
+    public List<ConservationAreaProxy> getConservationAreas(@Parameter(description="optional - only return CAs that have the provided text in the organization field")  @QueryParam("organizationFilter") String organizationFilter,@Parameter(description="optional - must be valid GeoJson polygon - only return CAs that are completely contained within this GeoJSON Polygon. ie. if a single point of the CA Boundary is outside of it, the ca will not be returned. be sure to encode the geojson, leave no spaces etc. An example of a simple polygon of the world:  caJsonFilter=%7B%22type%22%3A%22Polygon%22%2C%22coordinates%22%3A%5B%5B%5B-180%2C90%5D%2C%5B180%2C90%5D%2C%5B180%2C-90%5D%2C%5B-180%2C-90%5D%2C%5B-180%2C90%5D%5D%5D%7D   originally it is caJsonFilter={\'type\':\'Polygon\',\'coordinates\':[[[-180,90],[180,90],[180,-90],[-180,-90],[-180,90]]]}  use you local programming language urlencoder, or an online tool like this to do it out manually: http://meyerweb.com/eric/tools/dencoder/")  @QueryParam("caJsonFilter") String caJsonFilter,@Parameter(description="Boolean - true to get GeoJson data on CA boundaries, false to skip it as this can take a long time for lots of CAs and lots of boundaries.")  @QueryParam("includeSpatialBoundaries") Boolean includeSpatialBoundaries){
 		if(includeSpatialBoundaries == null)includeSpatialBoundaries=true;//default to send boundary data, since we used to, I don't want to break existing API user's stuff.
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -343,7 +354,8 @@ public class ConservationAreas extends HttpServlet{
 	 */
 	@GET
     @Path("/withdataonly/")
-    public List<ConservationAreaProxy> getConservationAreasWithData(@QueryParam("permission") String permissionFilter){
+	@Operation(description="List all Conservation Areas that have SMART data")
+    public List<ConservationAreaProxy> getConservationAreasWithData(@Parameter(description="Optional.  If provided it should be a comma delimited list of action strings that are applicable for the Conservation Area.  Only Conservation Areas that the user has the specific action permission for will be returned.  For example permission=updateca will only return ca's that the user has permission to update.")  @QueryParam("permission") String permissionFilter){
 		
 		String[] permissions = null;
 		if (permissionFilter != null) {
@@ -403,10 +415,21 @@ public class ConservationAreas extends HttpServlet{
 	 */
 	@GET
     @Path("/{cauuid}")
-    public Response getConservationArea(@PathParam("cauuid") String caUuid,
-    		@QueryParam("data") String data,
-    		@QueryParam("version") String version,
-    		@QueryParam("revision") String revision){
+	@Operation(description="This function returns different information depending on parameters\r\n" + 
+			"	 * provided:\r\n" + 
+			"	 *  <ul><li>If no parameters are provided it returns a JSON object\r\n" + 
+			"	 * with information about the conservation area.</li>  \r\n" + 
+			"	 * <li>If data, version, and revision\r\n" + 
+			"	 * are provided with a value of \"changelog\" for data then a zip file is\r\n" + 
+			"	 * returned containing the change log.  In data is provided with a value of \r\n" + 
+			"	 * \"all\" then a url is returned that represents the status of the ca download\r\n" + 
+			"	 * package process.</li>\r\n" + 
+			"	 * </ul>\r\n" + 
+			"	 * </p>")
+    public Response getConservationArea(@Parameter(description="the CA UUID") @PathParam("cauuid") String caUuid,
+    		@Parameter(description="the data") @QueryParam("data") String data,
+    		@Parameter(description="version number") @QueryParam("version") String version,
+    		@Parameter(description="revision number") @QueryParam("revision") String revision){
 		//user validation is done inside the various functions
 		if (data == null){
 			return getConservationAreaInfo(caUuid);
@@ -785,7 +808,7 @@ public class ConservationAreas extends HttpServlet{
 	 * Call Type: DELETE
 	 * </p>
 	 * 
-	 * @param	caUuid	provided in the URL, the ca UUID you wish to delete
+	 * @param	caUuid	provided in the URL, the UUID of the CA you wish to delete
 	 * @param dataonly String that indicates you only want to delete the desktop data, not the alerts and other Connect-based data.
 	 * @param username String a valid admin username
 	 * @param password String the password for the admin user.
@@ -795,11 +818,12 @@ public class ConservationAreas extends HttpServlet{
 	 */
 	@DELETE
     @Path("/{cauuid}")
-    public void deleteConservationArea(@PathParam("cauuid") String caUuid, 
-    		@QueryParam("dataonly") String dataonly,
-    		@QueryParam("username") String username,
-    		@QueryParam("password") String password,
-    		@QueryParam("version") String version){
+	@Operation(description="Deletes a given Conservation Area.")
+    public void deleteConservationArea(@Parameter(description="the UUID of the CA you wish to delete") @PathParam("cauuid") String caUuid, 
+    		@Parameter(description="Strings 'true' or 'false' indicate if you want to delete the desktop data only, not the alerts and other Connect-based data") @QueryParam("dataonly") String dataonly,
+    		@Parameter(description="must be a valid admin username") @QueryParam("username") String username,
+    		@Parameter(description="the admin password") @QueryParam("password") String password,
+    		@Parameter(description="a valid UUID formatted string, this can be retrieved from the getCAs call, you get something like: version=008ffc5a-7228-4d9c-a342-5dbf1fbec21e") @QueryParam("version") String version){
 		
 		if (username == null || password == null || username.length() == 0 || password.length() == 0){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.UserAndPasswordRequired", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
@@ -883,7 +907,8 @@ public class ConservationAreas extends HttpServlet{
 	 */
 	@POST
 	@Path("")
-	public void createConservationArea(@QueryParam("cauuid") String caUuid, @QueryParam("name") String name){
+	@Operation(description="Creates a new conservation area with no data.  Both parameters are optional and generated by the system if not provided.")
+	public void createConservationArea(@Parameter(description="The CA UUID you wish to create, leave it blank if you want the system to create one for you.") @QueryParam("cauuid") String caUuid,@Parameter(description="The CA Name")  @QueryParam("name") String name){
 		UUID uuid = null;
 		if (caUuid != null && !caUuid.trim().isEmpty()){
 			try{
@@ -929,12 +954,13 @@ public class ConservationAreas extends HttpServlet{
 	 * <p>Initiates an upload CA session. Used when uploading a full CA from SMART Desktop</p>
 	 * 
 	 * @param caUuid the Conservation Area uuid
-	 * @param versionUuid the  Conservation Area uuid version number as a string
+	 * @param versionUuid the Conservation Area uuid version number as a string
 	 * @return
 	 */
 	@POST
 	@Path("/{cauuid}")
-	public String createAndUploadConservationArea(@PathParam("cauuid") String caUuid, @QueryParam("version") String versionUuid){
+	@Operation(description="Initiates an upload CA session. Used when uploading a full CA from SMART Desktop")
+	public String createAndUploadConservationArea(@Parameter(description="The Conservation Area uuid") @PathParam("cauuid") String caUuid, @Parameter(description="the Conservation Area uuid version number as a string") @QueryParam("version") String versionUuid){
 		if (versionUuid == null){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.VersionNotSupplied", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
@@ -1056,7 +1082,8 @@ public class ConservationAreas extends HttpServlet{
 	 */
 	@PUT
 	@Path("/{cauuid}")
-	public String updateConservationArea(@PathParam("cauuid") String caUuid){
+	@Operation(description="Initiates an upload CA session")
+	public String updateConservationArea(@Parameter(description="the Conservation Area UUID as a string") @PathParam("cauuid") String caUuid){
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();

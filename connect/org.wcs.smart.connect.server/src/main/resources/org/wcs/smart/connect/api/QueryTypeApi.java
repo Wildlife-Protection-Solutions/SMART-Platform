@@ -35,6 +35,12 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.query.QueryManager;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
+
 
 /**
  * SMART Connect Query Type REST API
@@ -43,6 +49,9 @@ import org.wcs.smart.connect.query.QueryManager;
  *
  */
 @Path(ConnectRESTApplication.PATH_SEPERATOR + QueryTypeApi.PATH)
+@SecuritySchemes(value = {
+		@SecurityScheme(name="apikeyquery",  type = SecuritySchemeType.APIKEY,	in = SecuritySchemeIn.QUERY, paramName=SharedLinkApi.TOKEN_QUERY_PARAM)
+		})
 public class QueryTypeApi extends HttpServlet{
 	
 	private static final long serialVersionUID = 1L;
@@ -63,6 +72,7 @@ public class QueryTypeApi extends HttpServlet{
 	@GET
     @Path("/")
 	@Produces({ MediaType.APPLICATION_JSON })
+	@Operation(description="Gets all valid query types")
     public String[] getAllQueryTypes(){
 
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());

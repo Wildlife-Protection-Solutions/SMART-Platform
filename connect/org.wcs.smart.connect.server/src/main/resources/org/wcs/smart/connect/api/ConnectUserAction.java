@@ -71,6 +71,13 @@ import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.report.model.Report;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
+
 /**
  * SMART Connect REST API for configuring user and role
  * permissions and actions.
@@ -81,6 +88,9 @@ import org.wcs.smart.report.model.Report;
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectUserAction.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
+@SecuritySchemes(value = {
+		@SecurityScheme(name="apikeyquery",  type = SecuritySchemeType.APIKEY,	in = SecuritySchemeIn.QUERY, paramName=SharedLinkApi.TOKEN_QUERY_PARAM)
+		})
 public class ConnectUserAction extends HttpServlet {
 	
 	public static final String PATH = "privileges"; //$NON-NLS-1$
@@ -153,6 +163,7 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@GET
     @Path("/actions")
+	@Operation(description = "Lists all available actions. Returned as a list of SmartActionsProxy representing all actions in the system")
     public List<SmartActionsProxy> getActions(){
 		boolean restricted = false;
 		if( isAdmin() ){
@@ -227,6 +238,7 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@GET
     @Path("/roles")
+	@Operation(description = "Lists all available roles.")
     public List<SmartActionsProxy> getRoles(){
 		validateAdmin();
 		Session s = HibernateManager.getSession(context, request.getLocale());
@@ -261,7 +273,8 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@GET
     @Path("/user/{username}")
-    public List<SmartUserPermissionProxy> getUserPrivileges(@PathParam("username") String username){
+	@Operation(description = "Lists all roles and actions associated with a given user.")
+    public List<SmartUserPermissionProxy> getUserPrivileges(@Parameter(description="the username affected") @PathParam("username") String username){
 		boolean restricted = false;
 		if( isAdmin() ){
 			//do nothing, they are allowed
@@ -332,13 +345,14 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@DELETE
     @Path("/user/{username}/action/{action}")
-    public void deleteUserAction(@PathParam("username") String username,
-    		@PathParam("action") String action){
+	@Operation(description = "Removes an action from a given user.")
+    public void deleteUserAction(@Parameter(description="the username affected") @PathParam("username") String username,
+    		@Parameter(description="the action to remove") @PathParam("action") String action){
 		deleteUserActions(username, action, null);
 	}
 	
 	/**
-	 * <p>Removes an action and specific resource from a given user.</p>
+	 * <p>Removes an action for a specific resource from a given user.</p>
 	 * <p>
 	 * URL: /server/api/privileges/user/{username}/action/{action}/{resource}<br>
 	 * METHOD: DELETE
@@ -350,9 +364,10 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@DELETE
     @Path("/user/{username}/action/{action}/{resource}")
-    public void deleteUserActions(@PathParam("username") String username,
-    		@PathParam("action") String action,
-    		@PathParam("resource") String resource){
+	@Operation(description = "Removes an action for a specific resource from a given user.")
+    public void deleteUserActions(@Parameter(description="the username affected") @PathParam("username") String username,
+    		@Parameter(description="the action to remove") @PathParam("action") String action,
+    		@Parameter(description="the resource affected") @PathParam("resource") String resource){
 		boolean restricted;
 		restricted = false;
 		if( isAdmin() ){
@@ -403,7 +418,7 @@ public class ConnectUserAction extends HttpServlet {
 	
 	/**
 	 * <p>Creates a new role. Uses the name property of the action
-	 * object and generated a new uuid string as the role id.</p>
+	 * object and generates a new uuid string as the role id.</p>
 	 * 
 	 * <p>
 	 * URL: /server/api/privileges/roles<br>
@@ -414,6 +429,7 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@POST
     @Path("/roles")
+	@Operation(description = "Creates a new role. Uses the name property of the action object and generates a new uuid string as the role id.")
     public void createRole(SmartUserPermissionProxy action){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -449,7 +465,8 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@PUT
     @Path("/roles/{roleid}")
-    public void updateRole(@PathParam("roleid") String roleid,
+	@Operation(description = "Updates the role name. Uses the name property of the action object and generated a new uuid string as the role id.")
+    public void updateRole(@Parameter(description="the role id affected") @PathParam("roleid") String roleid,
     		SmartUserPermissionProxy action){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -488,7 +505,8 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@DELETE
     @Path("/roles/{roleid}")
-    public void deleteRole(@PathParam("roleid") String roleid){
+	@Operation(description = "Removes a role from the system, includes removing any user links to the role.")
+    public void deleteRole(@Parameter(description="the role id affected") @PathParam("roleid") String roleid){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -529,8 +547,9 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@DELETE
     @Path("/roles/{roleid}/action/{action}")
-    public void deleteRoleAction(@PathParam("roleid") String roleid,
-    		@PathParam("action") String action){
+	@Operation(description = "Removes an action from a given role.")
+    public void deleteRoleAction(@Parameter(description="the role id affected") @PathParam("roleid") String roleid,
+    		@Parameter(description="the action affected") @PathParam("action") String action){
 		deleteRoleActions(roleid, action, null);
 	}
 	
@@ -548,9 +567,10 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@DELETE
     @Path("/roles/{roleid}/action/{action}/{resource}")
-    public void deleteRoleActions(@PathParam("roleid") String roleid,
-    		@PathParam("action") String action,
-    		@PathParam("resource") String resource){
+	@Operation(description = "Removes an action and specific resource from a given role.")
+    public void deleteRoleActions(@Parameter(description="the role id affected") @PathParam("roleid") String roleid,
+    		@Parameter(description="the action to remove") @PathParam("action") String action,
+    		@Parameter(description="the resource affected") @PathParam("resource") String resource){
 		
 		validateAdmin();
 		
@@ -604,8 +624,9 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@POST
     @Path("/user/{username}/action/{action}")
-    public void addUserActions(@PathParam("username") String username,
-    		@PathParam("action") String actionKey){
+	@Operation(description = "Adds a new action for a given user.")
+    public void addUserActions(@Parameter(description="the username affected") @PathParam("username") String username,
+    		@Parameter(description="the action to add") @PathParam("action") String actionKey){
 		addUserActions(username, actionKey, null);
 	}
 	
@@ -623,9 +644,10 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@POST
     @Path("/user/{username}/action/{action}/{resource}")
-    public void addUserActions(@PathParam("username") String username,
-    		@PathParam("action") String actionKey,
-    		@PathParam("resource") String resourceKey){
+	@Operation(description = "Add a new action with a specific resource for a given user.")
+    public void addUserActions(@Parameter(description="the username affected") @PathParam("username") String username,
+    		@Parameter(description="the action to add") @PathParam("action") String actionKey,
+    		@Parameter(description="the resource affected") @PathParam("resource") String resourceKey){
 		boolean restricted = false;
 		if( isAdmin() ){
 			//do nothing, they are allowed
@@ -682,7 +704,8 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@GET
     @Path("/roles/{roleid}/action")
-    public List<SmartUserPermissionProxy> getRoleActions(@PathParam("roleid") String roleid){
+	@Operation(description = "Gets all actions associated with a given role")
+    public List<SmartUserPermissionProxy> getRoleActions(@Parameter(description="the role id affected") @PathParam("roleid") String roleid){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -729,8 +752,9 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@POST
     @Path("/roles/{roleid}/action/{action}")
-    public void addRoleAction(@PathParam("roleid") String roleid,
-    		@PathParam("action") String actionKey){
+	@Operation(description = "Adds a new action to a role.")
+    public void addRoleAction(@Parameter(description="the role id affected") @PathParam("roleid") String roleid,
+    		@Parameter(description="the action to add") @PathParam("action") String actionKey){
 		addRoleActions(roleid, actionKey, null);
 	}
 	
@@ -747,9 +771,10 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@POST
     @Path("/roles/{roleid}/action/{action}/{resource}")
-    public void addRoleActions(@PathParam("roleid") String roleid,
-    		@PathParam("action") String actionKey,
-    		@PathParam("resource") String resourceKey){
+	@Operation(description = "Add a new action with a specific resource to a role")
+    public void addRoleActions(@Parameter(description="the role to update") @PathParam("roleid") String roleid,
+    		@Parameter(description="the action to add") @PathParam("action") String actionKey,
+    		@Parameter(description="the resource affected") @PathParam("resource") String resourceKey){
 		validateAdmin();
 		
 		Session s = HibernateManager.getSession(context);
@@ -795,8 +820,9 @@ public class ConnectUserAction extends HttpServlet {
 	 */
 	@DELETE
     @Path("/user/{username}/role/{role}")
-    public void deleteUserRole(@PathParam("username") String username,
-    		@PathParam("role") String role){
+	@Operation(description = "Removes an role from a given user.")
+    public void deleteUserRole(@Parameter(description="the username to edit") @PathParam("username") String username,
+    		@Parameter(description="the role to remove") @PathParam("role") String role){
     		
 		validateAdmin();
 		
@@ -839,13 +865,14 @@ public class ConnectUserAction extends HttpServlet {
 	 * METHOD: POST
 	 * </p>
 	 * 
-	 * @param username the user to edit
+	 * @param username the username to edit
 	 * @param roleId the role to add
 	 */
 	@POST
     @Path("/user/{username}/role/{role}")
-    public void addUserRole(@PathParam("username") String username,
-    		@PathParam("role") String roleId){
+	@Operation(description = "Adds a new action for a given user.")
+    public void addUserRole(@Parameter(description="the username to edit") @PathParam("username") String username,
+    		@Parameter(description="the role id affected") @PathParam("role") String roleId){
 	
 		validateAdmin();
 		

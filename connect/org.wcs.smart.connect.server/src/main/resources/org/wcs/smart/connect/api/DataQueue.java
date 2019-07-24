@@ -76,6 +76,13 @@ import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
+
 /**
  * Data Processing Queue API functions
  * 
@@ -85,6 +92,9 @@ import org.wcs.smart.util.UuidUtils;
 @Path(ConnectRESTApplication.PATH_SEPERATOR + DataQueue.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
+@SecuritySchemes(value = {
+		@SecurityScheme(name="apikeyquery",  type = SecuritySchemeType.APIKEY,	in = SecuritySchemeIn.QUERY, paramName=SharedLinkApi.TOKEN_QUERY_PARAM)
+		})
 public class DataQueue {
 
 	private final Logger logger = Logger.getLogger(DataQueue.class.getName());
@@ -169,8 +179,9 @@ public class DataQueue {
 	
 	@GET
     @Path("/detailedItems")
-	public List<ServerDataQueueItemProxy> getDetailedItems(@QueryParam("cafilter") String caFilter,
-			@QueryParam("status") String status){
+	@Operation(description="Get details of data queue items that match provided filter")
+	public List<ServerDataQueueItemProxy> getDetailedItems(@Parameter(description="only show items from these CAs. A comma separated string of UUIDs") @QueryParam("cafilter") String caFilter,
+			@Parameter(description="comma separated list of status states to include.") @QueryParam("status") String status){
 		List<ServerDataQueueItem.Status> statusFilter = null;
 		List<ServerDataQueueItemProxy> proxyitems = new ArrayList<ServerDataQueueItemProxy>();
 		getProxyItems(caFilter, status, statusFilter, proxyitems);
@@ -191,8 +202,10 @@ public class DataQueue {
 	 */
 	@GET
     @Path("/items")
-	public List<DataQueueItem> getItems(@QueryParam("cafilter") String caFilter,
-			@QueryParam("status") String status){
+	@Operation(description="Get data queue items that match given filter. This will only return items that the user has permission to see")
+	public List<DataQueueItem> getItems(
+			@Parameter(description="a comma delimited list of Conservation Area uuids to filter on or NULL for all)") @QueryParam("cafilter") String caFilter,
+			@Parameter(description="comma delimited list of status values to filter on or NULL for all") @QueryParam("status") String status){
 		
 		List<ServerDataQueueItem.Status> statusFilter = null;
 		List<ServerDataQueueItemProxy> proxyitems = new ArrayList<ServerDataQueueItemProxy>();
@@ -286,11 +299,12 @@ public class DataQueue {
 	 * Call Type: DELETE
 	 * </p>
 	 * 
-	 * @param uuid data queue item to delete
+	 * @param uuid of the data queue item to delete
 	 */
 	@DELETE
     @Path("/items/{uuid}")
-	public ServerDataQueueItem deleteItem(@PathParam("uuid") String uuid){
+	@Operation(description="Deletes the given data queue item (and associated work item if applicable).")
+	public ServerDataQueueItem deleteItem(@Parameter(description="uuid of the data queue item to delete") @PathParam("uuid") String uuid){
 		
 		UUID itemUuid = parseUuid(uuid);
 		
@@ -350,6 +364,15 @@ public class DataQueue {
 	 */
 	@POST
     @Path("/items/")
+	@Operation(description="Creates an item and associated work item for file uploading.  Returns the URL that can be used for uploading the file. Call Type: POST<br>\r\n" + 
+			"	 * Headers: X-Upload-Content-Length - the size in bytes of the file to upload <br>\r\n" + 
+			"	 * Payload: a ServerDataQueueItem object\r\n" + 
+			"	 * </p>\r\n" + 
+			"	 *<pre>{\r\n" + 
+			"	 *   \"conservationArea\":\"8f7fbe1b-201a-4ef4-bda8-14f5581e65ce\",\r\n" + 
+			"	 *   \"type\":\"PATROL_XML\",\r\n" + 
+			"	 *   \"name\":\"patrol1234.xml\"\r\n" + 
+			"	 *}</pre>")
 	public String createItem(ServerDataQueueItem item){
 		
 		if (item.getConservationArea() == null){
@@ -444,7 +467,8 @@ public class DataQueue {
 	 */
 	@GET
 	@Path("/items/{uuid}")
-	public ServerDataQueueItem getItem(@PathParam("uuid") String uuid){
+	@Operation(description="Gets a particular data queue item.")
+	public ServerDataQueueItem getItem(@Parameter(description="the uuid of the item requested") @PathParam("uuid") String uuid){
 		UUID itemUuid = parseUuid(uuid);
 		
 		Session s = HibernateManager.getSession(context);
@@ -474,13 +498,14 @@ public class DataQueue {
 	 * </p>
 	 * 
 	 * @param uuid	the uuid from the item to update
-	 * @param newStatus the new status fro the data queue item
+	 * @param newStatus the new status from the data queue item
 	 * @return JSON representation of a DataQueueItem object 
 	 */
 	@PUT
 	@Path("/items/{uuid}/status/{status}")
-	public DataQueueItem updateItemStatus(@PathParam("uuid") String itemUuid, 
-			@PathParam("status") String newStatus){
+	@Operation(description="Updates the status of a data queue item")
+	public DataQueueItem updateItemStatus(@Parameter(description="the uuid from the item to update") @PathParam("uuid") String itemUuid, 
+			@Parameter(description="the new status from the data queue item") @PathParam("status") String newStatus){
 		
 		ServerDataQueueItem.Status serverStatus = null;
 		try{
@@ -538,7 +563,11 @@ public class DataQueue {
 	@Consumes({ MediaType.APPLICATION_JSON})
 	@PUT
 	@Path("/items/{uuid}/")
-	public DataQueueItem updateItem(@PathParam("uuid") String itemUuid, ServerDataQueueItem newItem){ 
+	@Operation(description="Updates the type and status of a data queue item, e.g. {\r\n" + 
+			"	 *   \"type\":\"MISSION_XML\",\r\n" + 
+			"	 *   \"status\":\"QUEUED\"\r\n" + 
+			"	 * }")
+	public DataQueueItem updateItem(@Parameter(description="the uuid of the item to update") @PathParam("uuid") String itemUuid, ServerDataQueueItem newItem){ 
 
 		UUID uuid = parseUuid(itemUuid);
 		Session s = HibernateManager.getSession(context);
@@ -575,7 +604,8 @@ public class DataQueue {
 
 	@GET
     @Path("/items/{uuid}/file")
-    public Response getDataQueueItemFile(@PathParam("uuid") String itemUuid){
+	@Operation(description="Used by SMART Desktop Only")
+    public Response getDataQueueItemFile(@Parameter(description="item UUID") @PathParam("uuid") String itemUuid){
 		UUID uuid = parseUuid(itemUuid);
 	
 		ServerDataQueueItem item = null;

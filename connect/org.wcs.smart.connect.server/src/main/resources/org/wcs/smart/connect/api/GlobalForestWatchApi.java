@@ -54,6 +54,13 @@ import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
+
 /**
  * API for configuring global forest watch  
  * 
@@ -61,6 +68,9 @@ import org.wcs.smart.hibernate.QueryFactory;
  *
  */
 @Path(ConnectRESTApplication.PATH_SEPERATOR + GlobalForestWatchApi.PATH)
+@SecuritySchemes(value = {
+		@SecurityScheme(name="apikeyquery",  type = SecuritySchemeType.APIKEY,	in = SecuritySchemeIn.QUERY, paramName=SharedLinkApi.TOKEN_QUERY_PARAM)
+		})
 public class GlobalForestWatchApi extends HttpServlet{
 	
 	private static final long serialVersionUID = 1L;
@@ -84,6 +94,7 @@ public class GlobalForestWatchApi extends HttpServlet{
 	@GET
     @Path("")
 	@Produces({ MediaType.APPLICATION_JSON })
+	@Operation(description="Get all GlobalForestWatch configurations")
     public List<GlobalForestWatchProxy> getGFWSettings(){
 		List<GlobalForestWatchProxy> proxies = new ArrayList<GlobalForestWatchProxy>();
 		
@@ -123,6 +134,7 @@ public class GlobalForestWatchApi extends HttpServlet{
 	@POST
     @Path("")
 	@Produces({ MediaType.APPLICATION_JSON })
+	@Operation(description="Create a new all GlobalForestWatch configurations")
     public GlobalForestWatchProxy createGFW(GlobalForestWatchProxy gfw,  @Context final HttpServletResponse response){
 		
 		if (gfw.getAlertUuid() == null) {
@@ -187,7 +199,8 @@ public class GlobalForestWatchApi extends HttpServlet{
 	@DELETE
 	@Path("/{gfwUuid}")
 	@Produces({ MediaType.APPLICATION_JSON })
-    public void deleteGFW(@PathParam("gfwUuid") UUID gfwUuid) {
+	@Operation(description="Delete a GlobalForestWatch configuration")
+    public void deleteGFW(@Parameter(description="the gfwUUID to delete") @PathParam("gfwUuid") UUID gfwUuid) {
 		if (gfwUuid == null) {
 			throw new SmartConnectException(Status.BAD_REQUEST);
 		}
@@ -217,7 +230,8 @@ public class GlobalForestWatchApi extends HttpServlet{
 	@POST
 	@Path("/{gfwUuid}")
 	@Produces({ MediaType.APPLICATION_JSON })
-    public GlobalForestWatchProxy updateGFW(@PathParam("gfwUuid") UUID gfwUuid, GlobalForestWatchProxy gfw){
+	@Operation(description="Update Global Forestwatch configuration")
+    public GlobalForestWatchProxy updateGFW(@Parameter(description="the GFWuuid to update") @PathParam("gfwUuid") UUID gfwUuid, GlobalForestWatchProxy gfw){
 		
 		if (gfw.getAlertUuid() == null) {
 			throw new SmartConnectException(Status.BAD_REQUEST, Messages.getString("GlobalForestWatchApi.AlertTypeRequired", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$

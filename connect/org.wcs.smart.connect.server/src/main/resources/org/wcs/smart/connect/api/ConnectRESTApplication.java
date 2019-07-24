@@ -30,6 +30,10 @@ import javax.ws.rs.core.Application;
 import org.wcs.smart.connect.exceptions.GeneralExceptionMapper;
 import org.wcs.smart.connect.exceptions.SmartConnectExceptionMapper;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.servers.Server;
+
 /**
  * SMART Connect REST application available that requires
  * login authorization before access is allowed.
@@ -38,6 +42,8 @@ import org.wcs.smart.connect.exceptions.SmartConnectExceptionMapper;
  *
  */
 @ApplicationPath(ConnectRESTApplication.PATH_SEPERATOR + ConnectRESTApplication.APP_PATH)
+@OpenAPIDefinition(servers = {@Server(url = "https://<connectserver>/connect/api/") }, 
+info = @Info(title = "SMART Connect API", description = "SMART Connect API", version = "7.0"))
 public class ConnectRESTApplication extends Application {
 	public static final String PATH_SEPERATOR = "/"; //$NON-NLS-1$
 	

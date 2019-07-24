@@ -64,6 +64,13 @@ import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.uploader.UploaderProcessor;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
+
 
 /**
  * REST API for uploading files.
@@ -72,6 +79,9 @@ import org.wcs.smart.connect.uploader.UploaderProcessor;
  *
  */
 @Path(ConnectRESTApplication.PATH_SEPERATOR + Uploader.PATH)
+@SecuritySchemes(value = {
+		@SecurityScheme(name="apikeyquery",  type = SecuritySchemeType.APIKEY,	in = SecuritySchemeIn.QUERY, paramName=SharedLinkApi.TOKEN_QUERY_PARAM)
+		})
 public class Uploader extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
@@ -98,7 +108,8 @@ public class Uploader extends HttpServlet {
 	@GET
 	@Path("/{uploaduuid}")
 	@Produces({ MediaType.APPLICATION_JSON })
-	public UploadStatus getStatus(@PathParam("uploaduuid") String uuid){
+	@Operation(description="Gets the status of the current upload.")
+	public UploadStatus getStatus(@Parameter(description="the uuid of the item") @PathParam("uploaduuid") String uuid){
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -152,7 +163,20 @@ public class Uploader extends HttpServlet {
 	@Path("/{uploaduuid}")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateFile(@PathParam("uploaduuid") String uuid, InputStream data) throws Exception{
+	@Operation(description="Uploads a file to the server's data Queue.</p>\r\n" + 
+			"	 * 	<p>\r\n" + 
+			"	 * URL: ../server/api/uploader/{uploaduuid}<br>\r\n" + 
+			"	 * Call Type: PUT<br>\r\n" + 
+			"	 * Payload: Multipart data containing an \"upload_file\" item\r\n" + 
+			"	 * 	</p>\r\n" + 
+			"	 * <pre> ------WebKitFormBoundaryYhW4Zu5MYMA5orxj\r\n" + 
+			"	 * Content-Disposition: form-data; name=\"upload_file\"; filename=\"Demo_00001.xml\"\r\n" + 
+			"	 * Content-Type: text/xml\r\n" + 
+			"	 * <?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n" + 
+			"	 * ....the rest of an XML file upload...\r\n" + 
+			"	 * ------WebKitFormBoundaryYhW4Zu5MYMA5orxj--\r\n" + 
+			"	 * </pre>")
+	public Response updateFile(@Parameter(description="the uuid of the workitem, you must first call the \"create work item\" API to generate this uuid: ../server/api/dataqueue/items/ , then you can upload the file.") @PathParam("uploaduuid") String uuid, InputStream data) throws Exception{
 		WorkItem item = null;
 		
 		item = getWorkItem(uuid);
@@ -278,7 +302,8 @@ public class Uploader extends HttpServlet {
 	@Path("/{uploaduuid}")
 	@Consumes("multipart/form-data")
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateFilePost(@PathParam("uploaduuid") String uuid, MultipartFormDataInput input) throws Exception{
+	@Operation(description="Uploads data to server via POST")
+	public Response updateFilePost(@Parameter(description="provided in the URL, uuid of the workItem this file upload belongs to") @PathParam("uploaduuid") String uuid, MultipartFormDataInput input) throws Exception{
 		WorkItem item;
 		item = getWorkItem(uuid);
 		

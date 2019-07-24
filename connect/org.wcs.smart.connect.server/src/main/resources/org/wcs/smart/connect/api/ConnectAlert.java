@@ -68,7 +68,15 @@ import com.ibm.icu.util.TimeZone;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 
 
 /**
@@ -83,6 +91,10 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectAlert.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
+@SecuritySchemes(value = {
+		@SecurityScheme(name="apikeyquery",  type = SecuritySchemeType.APIKEY,	in = SecuritySchemeIn.QUERY, paramName=SharedLinkApi.TOKEN_QUERY_PARAM)
+		})
+
 public class ConnectAlert extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
@@ -135,7 +147,8 @@ public class ConnectAlert extends HttpServlet {
 	 */
 	@GET
     @Path("/alertTypes/")
-	@Operation(description = "Lists all alert types configured")
+	@Operation(description = "Lists all alert types configured in SMART Connect")
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(schema = @Schema(implementation=AlertType.class)))})
     public List<AlertType> getAlertTypes(){
 		validateUser(AlertAction.VIEW_ALERTS_KEY);
 		Session s = HibernateManager.getSession(context);
@@ -160,7 +173,9 @@ public class ConnectAlert extends HttpServlet {
 	@GET
     @Path("/alertTypes/{uuid}")
 	@Operation(description = "Gets details for the given alert type")
-    public AlertType getAlertType(@PathParam("uuid") UUID uuid){
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=AlertType.class))})
+    public AlertType getAlertType(@Parameter(description = "unique identifier for alert type") @PathParam("uuid") UUID uuid){
+		
 		validateUser(AlertAction.VIEW_ALERTS_KEY);
 
 		Session s = HibernateManager.getSession(context);
@@ -204,7 +219,11 @@ public class ConnectAlert extends HttpServlet {
 	 */
 	@PUT
     @Path("/alertTypes/{uuid}")
-    public AlertType updateAlertType(@PathParam("uuid") UUID uuid, AlertType newAlertType) {
+	@Operation(description = "Updates an alert type.")
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=AlertType.class))})
+    public AlertType updateAlertType(
+    		@Parameter (description = "unique system identifier for the alert type to update") @PathParam("uuid") UUID uuid, 
+    		@Parameter (description = "New details for the alert type.  Only populate attributes to be updated. Attributes not provided will not be updated.") AlertType newAlertType) {
     	validateUser(AdminAccountAction.KEY);
     	
     	AlertType toUpdate = null;
@@ -279,9 +298,10 @@ public class ConnectAlert extends HttpServlet {
 	@POST
     @Path("/alertTypes/{label}")
 	@Operation(description = "Creates a new alert type")
-    public AlertType addAlertType(@Parameter(description = "The name for the new alert type", required = true) @PathParam("label") String label, 
-    		@RequestBody(description = "Alert Type object that needs to be added to the store.  Uuid field is ignored", required = true)
-    		AlertType newAlertType) {
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=AlertType.class))})
+    public AlertType addAlertType(
+    		@Parameter(description = "The name for the new alert type", required = true) @PathParam("label") String label, 
+    		@RequestBody(description = "Details of the new alert type. Uuid field is ignored", required = true) AlertType newAlertType) {
 		validateUser(AdminAccountAction.KEY);
 			
 		AlertType a = new AlertType();
@@ -330,7 +350,8 @@ public class ConnectAlert extends HttpServlet {
 	@DELETE
     @Path("/alertTypes/{uuid}")
 	@Operation(description = "Deletes the provided alert type")
-    public AlertType removeAlertType(@PathParam("uuid") UUID uuid) {
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=AlertType.class))})
+    public AlertType removeAlertType(@Parameter (description="unique system identifier of alert type to delete") @PathParam("uuid") UUID uuid) {
     	validateUser(AdminAccountAction.KEY);
     	AlertType toDelete = null;
     	Session s = HibernateManager.getSession(context);
@@ -387,6 +408,7 @@ public class ConnectAlert extends HttpServlet {
 	@GET
     @Path("")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Operation(description = "Get a filtered Alert List as GeoJSON")
     public String getAllAlerts( @QueryParam(value="levelFilter") String levelFilter, 
     			@QueryParam(value="typeUuidFilter") String typeUuidFilter,
     			@QueryParam(value="statusFilter") String statusFilter,    		
@@ -443,7 +465,9 @@ public class ConnectAlert extends HttpServlet {
 	 */
 	@GET
     @Path("/{alertUuid}")
-    public Alert getAlert(@PathParam("alertUuid") UUID alertUuid){
+	@Operation(description = "Get a specific alert")
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=Alert.class))})
+    public Alert getAlert(@Parameter(description="the unique system identifier of the alert to return") @PathParam("alertUuid") UUID alertUuid){
 		validateUser(AlertAction.VIEW_ALERTS_KEY);
 
 		Session s = HibernateManager.getSession(context);
@@ -475,7 +499,9 @@ public class ConnectAlert extends HttpServlet {
 	 */
 	@GET
     @Path("/ca/{caUuid}")
-    public List<Alert> getAlertsByCa(@PathParam("caUuid") UUID caUuid){
+	@Operation(description = "Get all alert for a given Conservation Area.")
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(schema = @Schema(implementation=Alert.class)))})
+    public List<Alert> getAlertsByCa(@Parameter(description="unique system identifier of the Conservation Area") @PathParam("caUuid") UUID caUuid){
 		validateUser(AlertAction.VIEW_ALERTS_KEY, caUuid);
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -538,7 +564,13 @@ public class ConnectAlert extends HttpServlet {
 	 */
 	@POST
     @Path("/{usergenid}")
-    public Alert addAlert(@PathParam("usergenid") String userGenId, GeoJsonAlert newGeoJsonAlert) {
+	@Operation(description = "Create a new Alert.  Note on Tracks / Updates: If you call this API with the same usergenid more than once, the systems adds the past x,y coordinates \r\n" + 
+			" to a historical \"track\" of sorts and overwrites the other attributes with the latest data. This is the way users can send a repetitive\r\n" + 
+			" \"ping\" to keep a last-known location and past track of devices without creating a new alert everytime the location is updated. ")
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=Alert.class))})
+    public Alert addAlert
+    	(@Parameter (description="user generated identifier for alert") @PathParam("usergenid") String userGenId, 
+    	@RequestBody(description="Details of the alert. \"Date\" is option and if left blank will be populated by the server.") GeoJsonAlert newGeoJsonAlert) {
 		
 		Alert newAlert = convertAndValidateAlert(newGeoJsonAlert, request);
 		newAlert.setCreatorUuid(getCreatorUuid());
@@ -604,7 +636,11 @@ public class ConnectAlert extends HttpServlet {
 	 */
 	@PUT
     @Path("/{usergenid}")
-    public Alert editAlert(@PathParam("usergenid") String oldAlertId, Alert newAlert) {
+	@Operation(description = "Updates a given alert")
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=Alert.class))})	
+    public Alert editAlert(
+    		@Parameter(description = "User generated unique identifier of the alert to update.") @PathParam("usergenid") String oldAlertId, 
+    		@RequestBody(description ="New values for alert.  Attributes that are not going to be updated can be left out.") Alert newAlert) {
 		newAlert.setCreatorUuid(getCreatorUuid());
 		Alert existingAlert = findAlert(oldAlertId, request);
 		if (existingAlert == null) {
@@ -637,7 +673,9 @@ public class ConnectAlert extends HttpServlet {
 	 */
     @DELETE
     @Path("/{alertUuid}")
-    public Alert removeAlert(@PathParam("alertUuid") UUID alertUuid) {
+	@Operation(description = "Deletes an alert")
+    @ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=Alert.class))})    
+    public Alert removeAlert(@Parameter (description = "system generated unique identifer of the alert to delete") @PathParam("alertUuid") UUID alertUuid) {
 
     	Alert toDelete = null;
     	Session s = HibernateManager.getSession(context);

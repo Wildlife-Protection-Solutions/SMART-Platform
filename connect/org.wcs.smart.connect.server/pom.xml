@@ -13,11 +13,7 @@
 	<artifactId>org.wcs.smart.connect.server</artifactId>
 	<packaging>war</packaging>
 	<name>SMART Connect Server</name>
-
-	<properties>
-		<smart.env>devel</smart.env>
-    </properties>
-    	
+   	
 	<build>
 		<sourceDirectory>src/main/resources</sourceDirectory>
 		<finalName>server</finalName>
@@ -53,7 +49,8 @@
 				<version>3.2.3</version>
 				<configuration>
 					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
-					<warSourceExcludes>**/context.xml</warSourceExcludes>
+					
+					<!--<warSourceExcludes>**/context.xml</warSourceExcludes>
 					<webResources>
 						<resource>
 							<directory>conf/${smart.env}</directory>
@@ -61,6 +58,7 @@
 							<includes><include>**/context.xml</include></includes>
 						</resource>
 					</webResources>
+					-->
 				</configuration>
       		</plugin>
 
@@ -68,27 +66,43 @@
   				<groupId>io.swagger.core.v3</groupId>
   				<artifactId>swagger-maven-plugin</artifactId>
   				<version>2.0.8</version>
-  
-    
-				<configuration>
-                    <outputFileName>smart-noa</outputFileName>
-                    <outputPath>./swagger</outputPath>
-                    <outputFormat>YAML</outputFormat>
-                    <resourcePackages>
-                    	<package>org.wcs.smart.connect.api.noa</package>
-                    </resourcePackages>
-                    <prettyPrint>TRUE</prettyPrint>
-				</configuration>
 
     			<executions>
-        			<execution>
+        			<!--<execution>
+        			 	<id>no authentication api</id>
             			<phase>compile</phase>
             			<goals>
-                			<!--<goal>generate</goal>-->
                 			<goal>resolve</goal>
             			</goals>
+            			<configuration>
+                    		<outputFileName>smart-noa</outputFileName>
+                    		<outputPath>./swagger</outputPath>
+                    		<outputFormat>YAML</outputFormat>
+                    		<resourcePackages>
+                    			<package>org.wcs.smart.connect.api.noa</package>
+                    		</resourcePackages>
+                    		<prettyPrint>TRUE</prettyPrint>
+						</configuration>
+       				 </execution>-->
+					<execution>
+						<id>authentication api</id>
+            			<phase>compile</phase>
+            			<goals>
+                			<goal>resolve</goal>
+            			</goals>
+            			<configuration>
+                    		<outputFileName>smart-core</outputFileName>
+                    		<outputPath>./swagger</outputPath>
+                    		<outputFormat>YAML</outputFormat>
+                    		<resourcePackages>
+                    			<package>org.wcs.smart.connect.api</package>
+                    		</resourcePackages>
+                    		<prettyPrint>TRUE</prettyPrint>
+						</configuration>
        				 </execution>
     			</executions>
+
+    			
     			<dependencies>
         			<!-- Adding dependency to swagger-hibernate-validations to enable the BeanValidator as a custom model converter -->
         			<dependency>

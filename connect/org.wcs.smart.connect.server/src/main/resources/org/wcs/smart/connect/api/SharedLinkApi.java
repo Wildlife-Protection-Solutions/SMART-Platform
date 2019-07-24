@@ -68,6 +68,13 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.UuidUtils;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
+
 /**
  * SMART Connect ShareLink REST API - allows you to create and disable shared links (aka: sessions aka: tokens)
  * 
@@ -78,9 +85,18 @@ import org.wcs.smart.util.UuidUtils;
 @Path(ConnectRESTApplication.PATH_SEPERATOR + SharedLinkApi.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
+@SecuritySchemes(value = {
+		@SecurityScheme(name="apikeyquery",  type = SecuritySchemeType.APIKEY,	in = SecuritySchemeIn.QUERY, paramName=SharedLinkApi.TOKEN_QUERY_PARAM)
+		})
 public class SharedLinkApi extends HttpServlet{
 	
 	public static final String PATH = "sharedlink"; //$NON-NLS-1$
+
+	/**
+	 * The api key parameter for authentication using a token 
+	 */
+	public static final String TOKEN_QUERY_PARAM = "token"; //$NON-NLS-1$
+
 	
 	private final Logger logger = Logger.getLogger(SharedLinkApi.class.getName());
 	
@@ -133,6 +149,7 @@ public class SharedLinkApi extends HttpServlet{
 	 */
 	@GET
     @Path("/")
+	@Operation(description="List all Shared Links")
     public List<SharedLink> getSharedLinks(){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -206,6 +223,7 @@ public class SharedLinkApi extends HttpServlet{
 	 */
 	@POST
     @Path("/")
+	@Operation(description="Create a new shared link. Expired Links are also cleaned up (deleted) when a new link is created.")
     public SharedLink createSharedLink(SharedLink newLink) {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -367,6 +385,9 @@ public class SharedLinkApi extends HttpServlet{
 	 */
 	@POST
     @Path("/token/")
+	@Operation(description="Create a new full-access user token. This allows you to pass a variable, &token=9dd23c7b-657c-492d-9857-9981713438b3  in a URL instead of using the basic auth. \r\n" + 
+			"	 * The access granted is the same as if the token creator was making the request themselves. This token is deleted the same way as SharedLinks, calling the removeSharedlinks with a token\r\n" + 
+			"	 * uuid will delete and invalid the token. Expired Links are also cleaned up (deleted) when a new link is created.")
     public SharedLink createToken(SharedLink newLink) {
 		if(!isCaAdminUser()){
 			isAdminUser();//throws an exception if invalid user.
@@ -427,7 +448,8 @@ public class SharedLinkApi extends HttpServlet{
 	 */
     @DELETE
     @Path("/{uuid}")
-    public SharedLink removeSharedLink(@PathParam("uuid") UUID uuid) {
+    @Operation(description="Delete a shared link")
+    public SharedLink removeSharedLink(@Parameter(description="the link's uuid to be deleted") @PathParam("uuid") UUID uuid) {
 
     	SharedLink toDelete = null;
     	Session s = HibernateManager.getSession(context);

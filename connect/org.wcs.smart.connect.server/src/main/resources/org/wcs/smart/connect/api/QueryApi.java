@@ -107,6 +107,13 @@ import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.UuidUtils;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
+
 
 /**
  * SMART Connect Query REST API
@@ -115,6 +122,9 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 @Path(ConnectRESTApplication.PATH_SEPERATOR + QueryApi.PATH)
+@SecuritySchemes(value = {
+		@SecurityScheme(name="apikeyquery",  type = SecuritySchemeType.APIKEY,	in = SecuritySchemeIn.QUERY, paramName=SharedLinkApi.TOKEN_QUERY_PARAM)
+		})
 public class QueryApi extends HttpServlet{
 	
 	private static final long serialVersionUID = 1L;
@@ -164,17 +174,20 @@ public class QueryApi extends HttpServlet{
 	 */
 	@GET
     @Path("/{queryuuid}")
-	public Response getQueryResults(@PathParam("queryuuid") String queryuuid, 
-			@QueryParam("format") String format,
-			@QueryParam("start_date") String start_date,
-			@QueryParam("end_date") String end_date,
-			@QueryParam("date_filter") String date_filter,
-			@QueryParam("delimiter") String delimiter,
-			@QueryParam("cafilter") String cafilter,
-			@QueryParam("sortcolumn") String sortcolumn,
-			@QueryParam("sortdirection") String sortdirection,
-			@QueryParam("srid") String srid,
-			@QueryParam("includeuuids") String includeuuids) throws SQLException{
+	@Operation(description="Runs a query and returns the results.")
+	public Response getQueryResults(@Parameter(description="the uuid of the query requested") @PathParam("queryuuid") String queryuuid, 
+			@Parameter(description="requested format, not all options makes sense for all query types: csv, shp, tif, geojson") @QueryParam("format") String format,
+			@Parameter(description="start date of query, in the form yyyy-MM-dd") @QueryParam("start_date") String start_date,
+			@Parameter(description="end date of query, in the form yyyy-MM-dd") @QueryParam("end_date") String end_date,
+			@Parameter(description="date field type, not all make sense for all queries: waypointdate, patrolstart, patrolend, missiontrackdate, missionstartdate, missionenddate, intellreceiveddate") @QueryParam("date_filter") String date_filter,
+			@Parameter(description="delimiter override to use in CSV format") @QueryParam("delimiter") String delimiter,
+			@Parameter(description="provided as a comma separated list of CA uuids, only runs the query against these CAs.") @QueryParam("cafilter") String cafilter,
+			@Parameter(description="the attribute key of the column you wish to sort by. It is tricky to know what columns are valid here as the queries are all very dynamic and there are many type. eg, &sortcolumn=wp_id \r\n" + 
+					"	 * 						for details of valid columns see here:  https://app.assembla.com/spaces/smart-cs/wiki/SMART_Connect_Query_Sorting_Fields  ") @QueryParam("sortcolumn") String sortcolumn,
+			@Parameter(description="set this to \"descending\" (or \"desc\") to get reverse order, otherwise you will get ascending order by default.  eg: &sortdirection=descending \r\n" + 
+					"	 * 			This parameter will be ignored if provided without a sortcolumn.") @QueryParam("sortdirection") String sortdirection,
+			@Parameter(description="the requested output projection SRID. The default is 4326 (WGS84, standard Lat/long coordinates). This parameter is ignored if the 'format' is not geojson or shp. (Note: for google map's projection you must use the official srid of 3857, 900913 doesn't work.") @QueryParam("srid") String srid,
+			@Parameter(description="optional; if \"true\" then the observation uuid and waypoint uuid are include in the results if appropriate for the query type; otherwise this parameter is ignored") @QueryParam("includeuuids") String includeuuids) throws SQLException{
 
 		UUID uuid = UuidUtils.stringToUuid(queryuuid);
 		QueryApi.Direction sortDirectionInt = QueryApi.Direction.UP;
@@ -669,9 +682,10 @@ public class QueryApi extends HttpServlet{
 	@GET
     @Path("")
 	@Produces({ MediaType.APPLICATION_JSON })
-    public List<QueryProxy> getAllQueriesForUser(@QueryParam("type") String typeFilter,
-			@QueryParam("ca") String caFilter,
-			@QueryParam("isccaa") Boolean isCcaaFilter){
+	@Operation(description="Returns all queries the current user is able to view/run")
+    public List<QueryProxy> getAllQueriesForUser(@Parameter(description="optional type String - only return queries that match the type key provided, see getAllQueryTypes for list of possible values. leave blank to get everything.") @QueryParam("type") String typeFilter,
+    		@Parameter(description="optional UUID - only return queries that match the CA UUID provided. leave blank to get everything.") @QueryParam("ca") String caFilter,
+    		@Parameter(description="optional boolean - only returns string that are CCAA queries when True, only ones that are not when False. leave blank to get everything.") @QueryParam("isccaa") Boolean isCcaaFilter){
 		List<QueryProxy> allowed = new ArrayList<QueryProxy>();
 
 
