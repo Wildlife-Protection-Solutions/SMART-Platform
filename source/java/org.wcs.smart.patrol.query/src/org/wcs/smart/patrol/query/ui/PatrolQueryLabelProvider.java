@@ -83,6 +83,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case NUM_PATROLS: return Messages.PatrolQueryOptions_ValueOpNumPatrols; 
 				case NUM_DAYS: return Messages.PatrolQueryOptions_ValueOpNumberDays;    
 				case NUM_NIGHTS: return Messages.PatrolQueryOptions_ValueOpNumberNights;
+				case NUM_CUSTOM: return "Number of <Custom Range>";
 				case DISTANCE: return Messages.PatrolQueryOptions_ValueOpDistance;    
 				case NUM_PATROLHOURS: return Messages.PatrolQueryOptions_ValueOpNumberPatrolHours;
 				case PATROLHOURS_TRACK: return Messages.PatrolQueryOptions_ValueOpNumberPatrolHours;

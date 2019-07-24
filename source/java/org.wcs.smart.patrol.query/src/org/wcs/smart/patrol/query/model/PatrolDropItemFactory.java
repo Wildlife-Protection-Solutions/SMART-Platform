@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.query.model;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -53,12 +54,14 @@ import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueIt
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemCustomDates;
 import org.wcs.smart.patrol.query.ui.PatrolOptionData;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGridNoDataFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGriddedQueryDefinitionPanel;
 import org.wcs.smart.patrol.query.ui.definition.PatrolSummaryGroupByValuePanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.BooleanPatrolDropItem;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.CustomHourRangeValueDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolDropItems;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolGroupByDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolIdDropItem;
@@ -173,12 +176,20 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	 * @return
 	 */
 	public DropItem createPatrolValueDropItem(PatrolValueItem item){
+		if (item.getPatrolValueOption() == PatrolValueOption.NUM_CUSTOM) {
+			CustomHourRangeValueDropItem di = new CustomHourRangeValueDropItem(item.getPatrolValueOption());
+			di.initializeData(Arrays.asList(((PatrolValueItemCustomDates)item).getStartTime(), ((PatrolValueItemCustomDates)item).getEndTime()));
+			return di;
+		}
 		PatrolValueDropItem di = new PatrolValueDropItem(item.getPatrolValueOption());
 		di.initializeData(item.includeNoData());
 		return di;
 	}
 	
 	public DropItem createPatrolValueDropItem(PatrolValueOption item){
+		if (item == PatrolValueOption.NUM_CUSTOM) {
+			return  new CustomHourRangeValueDropItem(item);
+		}
 		PatrolValueDropItem di = new PatrolValueDropItem(item);
 		return di;
 	}

@@ -41,10 +41,9 @@ import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
  * @since 1.0.0
  */
 public class PatrolValueDropItem extends AbstractValueDropItem{
-
 	
-	private PatrolValueOption item;
-	private String guiLabel;
+	protected PatrolValueOption item;
+	protected String guiLabel;
 	
 	private Button btnExcludeNoDataDays = null;
 	

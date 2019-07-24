@@ -46,21 +46,26 @@ public class PatrolValueItem implements IValueItem {
 	 * Creates a patrol value item from a key of the form
 	 * patrol:<aggregation>:patrolkey:nodata
 	 * 
-	 * The :nodata is option and if included then no data days
+	 * The :nodata is optional and if included then no data days
 	 * will be excluded from the query results.
 	 * 
 	 * @param part
 	 * @return
 	 */
 	public static final PatrolValueItem createItem(String key){
+		String[] bits = key.split(":"); //$NON-NLS-1$
+		if (bits[2].equalsIgnoreCase(PatrolValueOption.NUM_CUSTOM.getKeyPart())) {
+			return new PatrolValueItemCustomDates(key);	
+		}
 		return new PatrolValueItem(key);
 	}
 	
 
-	private String key = null;
-	private String aggregation = null;
-	private PatrolValueOption patrolOp;
-	private Boolean includeNoData = false; 
+	protected String key = null;
+	protected String aggregation = null;
+	protected PatrolValueOption patrolOp;
+	protected Boolean includeNoData = false; 
+	
 	
 	/**
 	 * Creates a patrol value item from a key of the form

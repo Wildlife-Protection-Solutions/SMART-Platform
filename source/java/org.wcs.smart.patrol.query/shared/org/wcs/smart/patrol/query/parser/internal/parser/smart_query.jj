@@ -173,8 +173,8 @@ TOKEN :
 /* Summary Query */
 TOKEN :
 {
-    < PATROL_VALUE_ITEM : ( "patrol:" < AGG > ":" < PATROL_VALUE_KEY > (":nodata")? ) >
-|  	 < PATROL_VALUE_KEY  : ( "numpatrols" | "numdays" | "numnights" | "distance" | "numhours" | "numpatrolhours" | "nummembers" | "manhours" | "mandays" | "numtrackpatrolhours") >
+    < PATROL_VALUE_ITEM : ( "patrol:" < AGG > ":" < PATROL_VALUE_KEY > ( (":nodata")? | (":" < NUMBER > ":" <NUMBER>)? ) ) >
+|  	 < PATROL_VALUE_KEY  : ( "numpatrols" | "numdays" | "numnights" | "numcustom" | "distance" | "numhours" | "numpatrolhours" | "nummembers" | "manhours" | "mandays" | "numtrackpatrolhours") >
 |  	 < PATROL_VALUE_ENCOUNTERRATE_KEY  : "patrol:" < AGG > ":" ( "totalnumpatrols" | "totalnumdays" | "totaldistance" | "totalnumhours" | "totalpatrolhours" | "totalmanhours" | "totalmandays") >
 |    < SUM_CAT_VALUE_KEY : "category:sum:" ("obs" | "wp") ":" ( < DM_KEY > | "") >
 |    < SUM_ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < DM_KEY > >
@@ -279,11 +279,15 @@ PatrolGridQueryDefinition GridQuery() :
 	(
 	  rateFilter = QueryFilterInternal()
 	)?
-	(		< QUERY_SPLITTER > 
-		< DM_KEY >		{		  zeroOp = PatrolGridQueryDefinition.ZeroFilterOption.fromKey(token.image);
+	(
+		< QUERY_SPLITTER > 
+		< DM_KEY >
+		{
+		  zeroOp = PatrolGridQueryDefinition.ZeroFilterOption.fromKey(token.image);
 		}
 		< QUERY_SPLITTER > 
-	  	(	  	  zeroFilter = QueryFilterInternal()
+	  	(
+	  	  zeroFilter = QueryFilterInternal()
 	  	)?
 	)?
 	< EOF >
@@ -614,15 +618,6 @@ IFilter NumberExpression():
   			filter = CategoryAttributeFilter.createValueFilter(key, op, value);
 		}
 	)
-		
-//	|
-// 		(< PATROL_VALUE_KEY > {key = token.image;}
-//	     StringOp()
-//	     < QUOTED_STRING >{key = token.image;}
-//	   )
-//		{
-//  		filter = PatrolFilter.createStringFilter(key, op, value);
-//		}
 	{
   		return filter;
 	}
