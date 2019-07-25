@@ -9,6 +9,7 @@ public class Messages extends NLS {
 	public static String AbstractColumnQueryPropertyProvider_ShowDataColumnsOnlyTooltip;
 	public static String AbstractPagedQueryResultSet_ErrorLoadingQueryResults;
 	public static String AbstractQueryColumnEditor_UpdateError;
+	public static String AbstractQueryItemPanel_AddToQueryItem;
 	public static String AbstractValueDropItem_ChangeRate;
 	public static String AbstractValueDropItem_ComputeRate;
 	public static String AbstractValueDropItem_EncounterRatePerRatio;

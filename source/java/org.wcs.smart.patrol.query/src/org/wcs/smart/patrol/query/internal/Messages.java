@@ -5,6 +5,7 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.patrol.query.internal.messages"; //$NON-NLS-1$
 	public static String AttributeValueItem_AggNoSupported;
+	public static String CustomHourRangeValueDropItem_timerangequeryop_tooltip;
 	public static String CustomHourRangeValueDropItem_tolabel;
 	public static String DeleteObservationResultInfoProvider_CancelBtn;
 	public static String DeleteObservationResultInfoProvider_DeleteMsg;

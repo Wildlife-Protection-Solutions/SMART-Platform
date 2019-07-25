@@ -82,7 +82,7 @@ public class QueryHeaderComposite extends Composite {
 	public QueryHeaderComposite(Composite parent, FormToolkit toolkit, Font headerFont, Color headerColor) {
 		super(parent, SWT.NONE);
 		toolkit.adapt(this);
-		WidgetElement.setCSSClass(this, "SMARTFormHeader");
+		WidgetElement.setCSSClass(this, "SMARTFormHeader"); //$NON-NLS-1$
 		createComposite(headerFont, headerColor, toolkit);
 		
 	}
