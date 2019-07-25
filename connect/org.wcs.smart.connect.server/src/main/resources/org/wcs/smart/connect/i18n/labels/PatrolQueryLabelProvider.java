@@ -92,6 +92,10 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case NUM_PATROLHOURS_TOTAL: return Messages.getString("PatrolQueryLabelProvider.TotalPatroHrsOp", l); //$NON-NLS-1$
 				case MAN_HOURS_TOTAL: return Messages.getString("PatrolQueryLabelProvider.TotalPersonFieldHrs", l); //$NON-NLS-1$
 				case MAN_DAYS_TOTAL: return Messages.getString("PatrolQueryLabelProvider.TotalPersonDaysOp", l); //$NON-NLS-1$
+				
+				case PATROLHOURS_TRACK: return Messages.getString("PatrolQueryLabelProvider.NumTrackHours", l); //$NON-NLS-1$
+				case NUM_CUSTOM: return Messages.getString("PatrolQueryLabelProvider.NumTimeRanges", l); //$NON-NLS-1$
+
 			}
 		}
 		if (item instanceof PatrolQueryOption){
