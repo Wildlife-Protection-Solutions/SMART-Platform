@@ -60,7 +60,7 @@ import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
  */
 public class QueryPlugIn extends AbstractUIPlugin {
 
-	private static final boolean LOG_QUERY = false;
+	private static final boolean LOG_QUERY = true;
 
 	
 	// The plug-in ID
@@ -138,6 +138,11 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 * The value num days icon
 	 */
 	public static final String VALUE_NUM_DAYS_ICON = "org.wcs.smart.query.valuenumdays"; //$NON-NLS-1$
+	
+	/**
+	 * The value number of time range icon
+	 */
+	public static final String VALUE_TIMERANGE_ICON = "org.wcs.smart.query.valuetimerange"; //$NON-NLS-1$
 	
 	/**
 	 * The value number of number of hours icon
@@ -280,6 +285,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		reg.put(VALUE_NUM_DAYS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numDays.png"));//$NON-NLS-1$
 		reg.put(VALUE_NUM_HOURS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numHours.png"));//$NON-NLS-1$
 		reg.put(VALUE_NUM_NIGHTS_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/value_numNights.png"));//$NON-NLS-1$
+		reg.put(VALUE_TIMERANGE_ICON,  imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/value_timerange.png")); //$NON-NLS-1$
 		reg.put(EXCLAMATION_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/exclamation.png"));//$NON-NLS-1$
 		reg.put(ROW_HEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/row_header.png"));//$NON-NLS-1$
 		reg.put(COLUMN_HEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/column_header.png"));//$NON-NLS-1$

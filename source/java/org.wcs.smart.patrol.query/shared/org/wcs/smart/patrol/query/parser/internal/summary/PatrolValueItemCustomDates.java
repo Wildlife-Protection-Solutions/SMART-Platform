@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2019 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,11 +22,11 @@
 package org.wcs.smart.patrol.query.parser.internal.summary;
 
 /**
- * ValueItem for patrol value that counts patrol days that overlap a given user
- * specified time.
+ * ValueItem for patrol value that counts the number of times a patrol overlaps
+ * the user specified time range.
  * 
  * @author egouge
- * @since 1.0.0
+ * @since 7.0.0
  */
 public class PatrolValueItemCustomDates extends PatrolValueItem {
 
@@ -61,7 +61,7 @@ public class PatrolValueItemCustomDates extends PatrolValueItem {
 	}
 	
 	/**
-	 * The start time in seconds
+	 * The user specified start time in seconds
 	 * @return
 	 */
 	public int getStartTime() {
@@ -69,12 +69,11 @@ public class PatrolValueItemCustomDates extends PatrolValueItem {
 	}
 	
 	/**
-	 * The end time in sections
+	 * The user specified end time in seconds
 	 * @return
 	 */
 	public int getEndTime() {
 		return this.endTime;
 	}
-	
 	
 }

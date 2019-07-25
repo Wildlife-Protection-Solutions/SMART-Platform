@@ -69,6 +69,7 @@ import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemCustomDates;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -494,7 +495,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				  it instanceof CategoryValueItem){
 			dataTable = getFilterTable(isValueItem, AreaFilterGeometryType.WAYPOINT, caFilter, c, monitor);
 		}else if (it instanceof CombinedValueItem){
-			//don't do anything here - each value is dealt with separatly in the getCombindValue function
+			//don't do anything here - each value is dealt with separately in the getCombindValue function
 		}
 			
 		monitor.subTask(MessageFormat.format(Messages.DerbySummaryEngine_ProgressValueProgressLabel,it.asString()));
@@ -504,7 +505,14 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			return results;
 		}
 		if (it instanceof PatrolValueItem){
-			results = (getPatrolSummaryValue(dataTable, c, s, groupBy, (PatrolValueItem)it, caFilter));
+			String customDateTable = null;
+			if (((PatrolValueItem)it).getPatrolValueOption() == PatrolValueOption.NUM_CUSTOM) {
+				//make custom data table
+				customDateTable = createNumberCustomDataTable(dataTable, c, s, ((PatrolValueItemCustomDates)it));
+			}
+			results = (getPatrolSummaryValue(dataTable, c, s, groupBy, (PatrolValueItem)it, caFilter, customDateTable));
+			//drop table
+			if (customDateTable != null) super.dropTable(c, customDateTable);
 		}else if (it instanceof AttributeValueItem){
 			results =  (getAttributeValue(dataTable, c, s, groupBy, (AttributeValueItem)it, caFilter));
 		}else if (it instanceof CategoryValueItem){
@@ -520,6 +528,99 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	}
 	
 	/**
+	 * Creates a temporary table with a patrol uuid and patrol leg uuid and
+	 * a date.  The date represents the user defined range the patrol leg falls
+	 * within.  By counting distinct dates we can count the number
+	 * of ranges the patrol fall in. 
+	 * 
+	 * @param filterTable
+	 * @param c
+	 * @param s
+	 * @param value
+	 * @return
+	 * @throws SQLException
+	 */
+	private String createNumberCustomDataTable(String filterTable, Connection c, Session s, PatrolValueItemCustomDates value) throws SQLException {
+		String temp = createTempTableName();
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("CREATE TABLE "); //$NON-NLS-1$
+		sb.append(temp);
+		sb.append("(p_uuid char(16) for bit data, pl_uuid char(16) for bit data, pdate date, stime integer, etime integer, is_start boolean default false, is_end boolean default false)"); //$NON-NLS-1$
+		QueryPlugIn.logSql(sb.toString());
+		c.createStatement().executeUpdate(sb.toString());
+		
+		sb = new StringBuilder();
+		sb.append(" INSERT INTO "); //$NON-NLS-1$
+		sb.append( temp );
+		sb.append(" (p_uuid, pl_uuid, pdate, stime, etime) "); //$NON-NLS-1$
+		sb.append(" SELECT "); //$NON-NLS-1$
+		sb.append(tablePrefix(Patrol.class) + ".uuid, ");  //$NON-NLS-1$
+		sb.append(tablePrefix(PatrolLeg.class) + ".uuid, "); //$NON-NLS-1$
+		sb.append(tablePrefix(PatrolLegDay.class) + ".patrol_day, "); //$NON-NLS-1$
+		sb.append("hour(" + tablePrefix(PatrolLegDay.class) + ".start_time) * 3600 + minute(" + tablePrefix(PatrolLegDay.class) + ".start_time) * 60 + second(" + tablePrefix(PatrolLegDay.class) + ".start_time), " ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		sb.append("hour(" + tablePrefix(PatrolLegDay.class) + ".end_time) * 3600 + minute(" + tablePrefix(PatrolLegDay.class) + ".end_time) * 60 + second(" + tablePrefix(PatrolLegDay.class) + ".end_time) " ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		sb.append(" FROM "); //$NON-NLS-1$
+		sb.append( filterTable + " a "); //$NON-NLS-1$
+		sb.append(" JOIN "); //$NON-NLS-1$
+		sb.append( tableNamePrefix(Patrol.class));
+		sb.append(" ON "); //$NON-NLS-1$
+		sb.append( tablePrefix(Patrol.class) + ".uuid = a.p_uuid"); //$NON-NLS-1$
+		sb.append(" JOIN "); //$NON-NLS-1$
+		sb.append( tableNamePrefix(PatrolLeg.class));
+		sb.append(" ON "); //$NON-NLS-1$
+		sb.append( tablePrefix(Patrol.class) + ".uuid = " + tablePrefix(PatrolLeg.class) + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(" JOIN "); //$NON-NLS-1$
+		sb.append( tableNamePrefix(PatrolLegDay.class));
+		sb.append(" ON "); //$NON-NLS-1$
+		sb.append( tablePrefix(PatrolLeg.class) + ".uuid = " + tablePrefix(PatrolLegDay.class) + ".patrol_leg_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		QueryPlugIn.logSql(sb.toString());
+		c.createStatement().executeUpdate(sb.toString());
+		
+		int start = value.getStartTime();
+		int end = value.getEndTime();
+		
+		if (end < start) end += 86400;
+		
+		sb = new StringBuilder();
+		sb.append("update "); //$NON-NLS-1$
+		sb.append(temp);
+		sb.append(" set is_start = case when stime < " + end + " and etime > " + start + " then true else false end, "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append(" is_end = case when stime < " + (end - 86400) + " and etime > " + (start - 86400) + " then true else false end"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		QueryPlugIn.logSql(sb.toString());
+		c.createStatement().executeUpdate(sb.toString());
+		
+		String temp2 = createTempTableName();
+
+		sb = new StringBuilder();
+		sb.append("CREATE TABLE "); //$NON-NLS-1$
+		sb.append(temp2);
+		sb.append("(cp_uuid char(16) for bit data, cpl_uuid char(16) for bit data, custom_pdate date)"); //$NON-NLS-1$
+		QueryPlugIn.logSql(sb.toString());
+		c.createStatement().executeUpdate(sb.toString());
+		
+		sb = new StringBuilder();
+		sb.append(" INSERT INTO "); //$NON-NLS-1$
+		sb.append(temp2);
+		sb.append(" select distinct * FROM ( " ); //$NON-NLS-1$
+		sb.append(" select p_uuid, pl_uuid, pdate FROM "); //$NON-NLS-1$
+		sb.append(temp);
+		sb.append(" WHERE is_start "); //$NON-NLS-1$
+		sb.append(" UNION " ); //$NON-NLS-1$
+		sb.append(" select p_uuid, pl_uuid, date({fn TIMESTAMPADD( SQL_TSI_DAY, -1, pdate)}) FROM "); //$NON-NLS-1$
+		sb.append(temp);
+		sb.append(" WHERE is_end "); //$NON-NLS-1$
+		sb.append(") foo");	 //$NON-NLS-1$
+		QueryPlugIn.logSql(sb.toString());
+		c.createStatement().executeUpdate(sb.toString());
+		
+		super.dropTable(c, temp);
+		
+		return temp2;
+	}
+	
+	
+	/**
 	 * Computes a patrol summary value 
 	 * @param c database connection
 	 * @param s hibernate session 
@@ -532,7 +633,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			String dataTableName,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			PatrolValueItem patrolItem, ConservationAreaFilter caFilter) throws SQLException{
+			PatrolValueItem patrolItem, ConservationAreaFilter caFilter, String customDateTable) throws SQLException{
 		
 		if (patrolItem.getPatrolValueOption().hasNoDataOption() && !patrolItem.includeNoData()) {
 			addHasDataColumn(c, dataTableName);
@@ -605,6 +706,11 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			fromSql.append( " on temp.pld_uuid = "); //$NON-NLS-1$
 			fromSql.append(tablePrefix(PatrolLegDay.class));
 			fromSql.append(".uuid "); //$NON-NLS-1$ 
+		}
+		if (option == PatrolValueOption.NUM_CUSTOM) {
+			fromSql.append(" left join "); //$NON-NLS-1$
+			fromSql.append(customDateTable + " c2 "); //$NON-NLS-1$
+			fromSql.append( " on c2.cpl_uuid = temp.pl_uuid"); //$NON-NLS-1$
 		}
 		
 		StringBuilder sql = new StringBuilder();
@@ -1385,6 +1491,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		case NUM_DAYS:
 		case NUM_DAYS_TOTAL:
 			return " count(pld_patrol_day)";  //$NON-NLS-1$
+		case NUM_CUSTOM:
+			return " count(custom_pdate)"; //$NON-NLS-1$
 		case NUM_NIGHTS:
 			return " count(pld_patrol_day) - count(distinct p_uuid) "; //$NON-NLS-1$
 		case DISTANCE:
@@ -1433,6 +1541,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				sbWhere.append(" has_data is not null "); //$NON-NLS-1$
 			}
 			return "pld_patrol_day"; //$NON-NLS-1$
+		case NUM_CUSTOM:
+			return " custom_pdate"; //$NON-NLS-1$
 		case NUM_NIGHTS:
 			if (!includeNoData) {
 				if (sbWhere.length() > 0) sbWhere.append(" AND "); //$NON-NLS-1$

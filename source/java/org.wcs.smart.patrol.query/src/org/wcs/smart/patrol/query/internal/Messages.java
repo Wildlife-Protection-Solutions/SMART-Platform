@@ -5,6 +5,7 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.patrol.query.internal.messages"; //$NON-NLS-1$
 	public static String AttributeValueItem_AggNoSupported;
+	public static String CustomHourRangeValueDropItem_tolabel;
 	public static String DeleteObservationResultInfoProvider_CancelBtn;
 	public static String DeleteObservationResultInfoProvider_DeleteMsg;
 	public static String DeleteObservationResultInfoProvider_DeleteObsBtn;
@@ -135,6 +136,7 @@ public class Messages extends NLS {
 	public static String PatrolQueryLabelProvider_AgencyLabel;
 	public static String PatrolQueryLabelProvider_LastModified_ColumnName;
 	public static String PatrolQueryLabelProvider_LastModifiedBy_ColumnName;
+	public static String PatrolQueryLabelProvider_NumTimeRanges;
 	public static String PatrolQueryLabelProvider_RankLabel;
 	public static String PatrolQueryLabelProvider_TotalActivePatrolHours;
 	public static String PatrolQueryMemoryResult_DeleteError;

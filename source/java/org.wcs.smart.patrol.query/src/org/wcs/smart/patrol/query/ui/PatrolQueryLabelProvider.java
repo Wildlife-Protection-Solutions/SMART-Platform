@@ -83,7 +83,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case NUM_PATROLS: return Messages.PatrolQueryOptions_ValueOpNumPatrols; 
 				case NUM_DAYS: return Messages.PatrolQueryOptions_ValueOpNumberDays;    
 				case NUM_NIGHTS: return Messages.PatrolQueryOptions_ValueOpNumberNights;
-				case NUM_CUSTOM: return "Number of <Custom Range>";
+				case NUM_CUSTOM: return Messages.PatrolQueryLabelProvider_NumTimeRanges;
 				case DISTANCE: return Messages.PatrolQueryOptions_ValueOpDistance;    
 				case NUM_PATROLHOURS: return Messages.PatrolQueryOptions_ValueOpNumberPatrolHours;
 				case PATROLHOURS_TRACK: return Messages.PatrolQueryOptions_ValueOpNumberPatrolHours;
@@ -157,6 +157,10 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case MAN_DAYS:
 			case MAN_DAYS_TOTAL:
 				return PatrolQueryPlugIn.getDefault().getImageRegistry().get(PatrolQueryPlugIn.VALUE_PERSON_DAYS_ICON);
+			case NUM_CUSTOM:
+				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_TIMERANGE_ICON);
+		default:
+			break;
 		}
 		return null;
 	}
