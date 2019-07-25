@@ -52,6 +52,7 @@ import org.wcs.smart.connect.apache.BcryptCredentialHandler;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.security.AdminAccountAction;
@@ -63,6 +64,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 
@@ -124,6 +129,7 @@ public class ConnectUser extends HttpServlet {
 	@GET
     @Path("")
 	@Operation(description = "Get all active Connect users.")
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(schema = @Schema(implementation=SmartUser.class)))})
     public List<SmartUser> getActiveUsers(){
 		if(!isCaAdminUser()){
 			isAdminUser();//throws an exception if invalid user.
@@ -152,6 +158,7 @@ public class ConnectUser extends HttpServlet {
 	@GET
     @Path("/getinactive/")
 	@Operation(description = "Gets all inactive users.")
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(schema = @Schema(implementation=SmartUser.class)))})
     public List<SmartUser> getInactiveUsers(){
 		if(!isCaAdminUser()){
 			isAdminUser();//throws an exception if invalid user.
@@ -178,6 +185,7 @@ public class ConnectUser extends HttpServlet {
 	@GET
     @Path("/iscurrentuseradmin/")
 	@Operation(description = "Returns whether the current user is an admin user or not.")
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=Boolean.class))})
     public boolean isCurrentUserAnAdmin(){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -200,6 +208,7 @@ public class ConnectUser extends HttpServlet {
 	@GET
     @Path("/getCurrent/")
 	@Operation(description = "Get the detailed information about the current user.")
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=SmartUser.class))})
     public SmartUser getCurrentUser(){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -232,6 +241,7 @@ public class ConnectUser extends HttpServlet {
 	@GET
     @Path("/{username}")
 	@Operation(description = "Get a users details.")
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=SmartUser.class))})
     public SmartUser getUser(
     		@Parameter(description="the username of the requested user") @PathParam("username") String username, 
     		@Parameter(description="optional, set to true if you only want to validate this user and not get their full details back") @QueryParam("validate") String validateOnly){
@@ -284,6 +294,7 @@ public class ConnectUser extends HttpServlet {
 	@POST
     @Path("/{username}")
 	@Operation(description = "Create a new user.")
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=SmartUser.class))})
     public SmartUser addUser(@Parameter(description="the username of the user") @PathParam("username") String user, 
     		@Parameter(description="other details about the user") SmartUser newUser) {
 
@@ -365,9 +376,10 @@ public class ConnectUser extends HttpServlet {
     @PUT
     @Path("/{username}")
     @Operation(description = "Update a user's details")
+    @ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=SmartUser.class))})
     public SmartUser updateUser(
     		@Parameter(description="the username of the requested user") @PathParam("username") String olduser,
-    		@Parameter(description="the new values for the user details") SmartUser newUser) {
+    		@Parameter(description="The new values for the user details.  Only non-null attributes are updated.  Use a value of 99999999-9999-9999-9999-999999999999 to update the home Conservation Area to null.") SmartUser newUser) {
     	
     	//if you are editing yourself, skip validation for admin-level user
     	if( !request.getUserPrincipal().getName().equals(olduser)){
@@ -468,6 +480,7 @@ public class ConnectUser extends HttpServlet {
     @PUT
     @Path("/activate/{username}")
     @Operation(description = "Activate an inactive user.")
+    @ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=SmartUser.class))})
     public SmartUser activateUser(
     		@Parameter(description="the username to activate") @PathParam("username") String username) {
     	
@@ -512,6 +525,7 @@ public class ConnectUser extends HttpServlet {
     @DELETE
     @Path("/activate/{username}")
     @Operation(description = "Deactivate a user.")
+    @ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=SmartUser.class))})
     public SmartUser deactivateUser(
     		@Parameter(description="the username to deactivate") @PathParam("username") String username) {
     	isAdminUser();
@@ -555,6 +569,7 @@ public class ConnectUser extends HttpServlet {
     @DELETE
     @Path("/{username}")
     @Operation(description = "Deletes a user.")
+    @ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=SmartUser.class))})
     public SmartUser removeUser(@Parameter(description="the username to delete") @PathParam("username") String username) {
     	isAdminUser();
     	SmartUser toDelete = null;

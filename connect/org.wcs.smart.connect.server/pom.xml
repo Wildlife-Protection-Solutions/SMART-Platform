@@ -68,23 +68,7 @@
   				<version>2.0.8</version>
 
     			<executions>
-        			<!--<execution>
-        			 	<id>no authentication api</id>
-            			<phase>compile</phase>
-            			<goals>
-                			<goal>resolve</goal>
-            			</goals>
-            			<configuration>
-                    		<outputFileName>smart-noa</outputFileName>
-                    		<outputPath>./swagger</outputPath>
-                    		<outputFormat>YAML</outputFormat>
-                    		<resourcePackages>
-                    			<package>org.wcs.smart.connect.api.noa</package>
-                    		</resourcePackages>
-                    		<prettyPrint>TRUE</prettyPrint>
-						</configuration>
-       				 </execution>-->
-					<execution>
+    				<execution>
 						<id>authentication api</id>
             			<phase>compile</phase>
             			<goals>
@@ -92,6 +76,7 @@
             			</goals>
             			<configuration>
                     		<outputFileName>smart-core</outputFileName>
+                    		<contextId>openapi-1</contextId>
                     		<outputPath>./swagger</outputPath>
                     		<outputFormat>YAML</outputFormat>
                     		<resourcePackages>
@@ -100,6 +85,25 @@
                     		<prettyPrint>TRUE</prettyPrint>
 						</configuration>
        				 </execution>
+       				 
+        			<execution>
+        			 	<id>no authentication api</id>
+            			<phase>compile</phase>
+            			<goals>
+                			<goal>resolve</goal>
+            			</goals>
+            			<configuration>
+                    		<outputFileName>smart-noa</outputFileName>
+                    		<contextId>openapi-2</contextId>
+                    		<outputPath>./swagger</outputPath>
+                    		<outputFormat>YAML</outputFormat>
+                    		<resourcePackages>
+                    			<package>org.wcs.smart.connect.api.noa</package>
+                    		</resourcePackages>
+                    		<prettyPrint>TRUE</prettyPrint>
+						</configuration>
+       				 </execution>
+					
     			</executions>
 
     			
