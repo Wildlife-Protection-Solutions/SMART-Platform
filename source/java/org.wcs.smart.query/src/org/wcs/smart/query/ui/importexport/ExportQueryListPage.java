@@ -25,15 +25,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -41,6 +41,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.TableColumn;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
@@ -97,48 +99,51 @@ public class ExportQueryListPage extends WizardPage {
 		lbl.setText(Messages.ExportQueryListPage_QueriesLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
+		Composite outer = new Composite(main, SWT.NONE);
+		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		queryList = new TableViewer(main, SWT.MULTI | SWT.BORDER);
-		queryList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		queryList = new TableViewer(outer, SWT.MULTI | SWT.BORDER);
 		queryList.setContentProvider(ArrayContentProvider.getInstance());
 		queryList.setLabelProvider(new QueryListLabelProvider());
 		queryList.setInput(queries);
 		
+		TableColumn tc = new TableColumn(queryList.getTable(), SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(100));
+		outer.setLayout(layout);
 		
 		Composite buttons = new Composite(main, SWT.NONE);
 		buttons.setLayout(new GridLayout());
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		
+		((GridLayout)buttons.getLayout()).marginWidth = 0;
+		((GridLayout)buttons.getLayout()).marginHeight = 0;
+
 		Button btnAdd = new Button(buttons, SWT.PUSH);
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnAdd.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				add();
-			}
-		});
-		
+		btnAdd.addListener(SWT.Selection, e->add());
+		btnAdd.setBackground(btnAdd.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+
 		Button btnRemove = new Button(buttons, SWT.PUSH);
 		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnRemove.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				remove();
-			}
-			
-		});
-		
+		btnRemove.addListener(SWT.Selection, e->remove());
+		btnRemove.setBackground(btnRemove.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+
 		Menu menu = new Menu(queryList.getControl());
 		queryList.getControl().setMenu(menu);
 		MenuItem add = new MenuItem(menu,SWT.DEFAULT);
 		add.setText(DialogConstants.ADD_BUTTON_TEXT);
 		add.addListener(SWT.Selection, e->add());
+		add.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		
 		MenuItem remove = new MenuItem(menu,SWT.DEFAULT);
 		remove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		remove.addListener(SWT.Selection, e->remove());
+		remove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		
 		menu.addMenuListener(new MenuListener() {
 			@Override
 			public void menuShown(MenuEvent e) {

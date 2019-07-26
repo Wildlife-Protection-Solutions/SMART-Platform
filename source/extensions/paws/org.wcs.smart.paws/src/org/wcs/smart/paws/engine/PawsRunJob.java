@@ -126,6 +126,7 @@ public class PawsRunJob extends Job{
 			handleError("Unable to package SMART data for PAWS analysis.", ex);
 			return Status.OK_STATUS;
 		}
+		System.out.println(packageDir.toString());
 		
 		//upload package to azure
 		//TODO: update the required jar files when new build is released
@@ -148,7 +149,8 @@ public class PawsRunJob extends Job{
 			if (this.token == null) throw new Exception("Invalid token");
 
 			TokenCredentials tc = new TokenCredentials(this.token);
-		    containerURL = new ContainerURL(new URL(ws.getContainerUrl()), StorageURL.createPipeline(tc, new PipelineOptions()));
+			String url = ws.getStorageAccountUrl() + "/" + ws.getContainer();
+			containerURL = new ContainerURL(new URL(url), StorageURL.createPipeline(tc, new PipelineOptions()));
 			
 	        //upload files
 	        for(Path p : engine.getDataFiles()) {
@@ -200,7 +202,7 @@ public class PawsRunJob extends Job{
 			String json = Files.readString(configJson);
 			System.out.println(json);
 			//TODO:
-//			PawsApi.INSTANCE.run(run.getConservationArea(), json);
+			PawsApi.INSTANCE.run(run, json);
 			
 			//{
 			 // "TaskId": "string",

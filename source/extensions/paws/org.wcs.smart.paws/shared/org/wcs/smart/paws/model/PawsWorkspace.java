@@ -39,7 +39,8 @@ public class PawsWorkspace extends UuidItem{
 	private ConservationArea ca;
 	private String clientId;
 	private String url;
-	private String containerUrl;
+	private String storageAccount;
+	private String containerName;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -69,19 +70,29 @@ public class PawsWorkspace extends UuidItem{
 		this.url = url;
 	}
 	
-	@Column(name="blob_url")
-	public String getContainerUrl() {
-		return this.containerUrl;
+	@Column(name="storage_account_url")
+	public String getStorageAccountUrl() {
+		return this.storageAccount;
 	}
 	
-	public void setContainerUrl(String url) {
-		this.containerUrl = url;
+	public void setStorageAccountUrl(String storageAccount) {
+		this.storageAccount = storageAccount;
+	}
+	
+	@Column(name="container_name")
+	public String getContainer() {
+		return this.containerName;
+	}
+	
+	public void setContainer(String containerName) {
+		this.containerName = containerName;
 	}
 	
 	@Transient
 	public boolean isConfigured() {
 		return !(getClientId() == null || getUrl() == null || getUrl().isBlank() || 
-				getClientId().isBlank() ||  getContainerUrl() == null || getContainerUrl().isBlank());
+				getClientId().isBlank() ||  getContainer() == null || getContainer().isBlank()
+				|| getStorageAccountUrl() == null || getStorageAccountUrl().isBlank());
 		
 	}
 }

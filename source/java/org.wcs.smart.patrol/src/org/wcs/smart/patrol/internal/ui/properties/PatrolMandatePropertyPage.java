@@ -72,6 +72,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
@@ -234,12 +235,14 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		});
 		Composite composite = new Composite(container, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
-		composite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false,
-				1, 1));
+		composite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false,1, 1));
+		((GridLayout)composite.getLayout()).marginWidth = 0;
+		((GridLayout)composite.getLayout()).marginHeight = 0;
 
 		Button btnAdd = new Button(composite, SWT.NONE);
-		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,
-				1, 1));
+		btnAdd.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,1, 1));
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -249,6 +252,8 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 
 		});
 		btnEditKey = new Button(composite, SWT.NONE);
+		btnEditKey.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEditKey.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEditKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1,1));
 		btnEditKey.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
 		btnEditKey.setEnabled(false);
@@ -259,8 +264,9 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		});
 		
 		btnDisable = new Button(composite, SWT.NONE);
-		btnDisable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
-				false, 1, 1));
+		btnDisable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		btnDisable.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 		btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 		btnDisable.setEnabled(false);
 		btnDisable.addSelectionListener(new SelectionAdapter() {
@@ -272,6 +278,8 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		btnDelete = new Button(composite, SWT.NONE);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,false, 1, 1));
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setEnabled(false);
 		btnDelete.addSelectionListener(new SelectionAdapter() {

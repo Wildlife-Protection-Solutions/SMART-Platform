@@ -60,6 +60,7 @@ public class PawsStatusJob extends Job {
 			try(Session session = HibernateManager.openSession()){
 				run = session.get(PawsRun.class, run.getUuid());
 			}
+			if (run == null) return Status.OK_STATUS;
 			if (run.getStatus() == PawsRun.Status.RUNNING){
 				//check status
 				try {

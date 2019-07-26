@@ -29,6 +29,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Handler that displays the query import wizard dialog.
@@ -45,7 +46,7 @@ public class ImportQueryHandler {
 		
 		
 		ImportQueryWizard wizard = new ImportQueryWizard();
-		WizardDialog wd = new WizardDialog(activeShell, wizard);
+		WizardDialog wd = new SmartWizardDialog(activeShell, wizard);
 		wd.open();
 	}
 

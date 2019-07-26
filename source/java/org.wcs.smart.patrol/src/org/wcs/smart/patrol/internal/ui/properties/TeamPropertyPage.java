@@ -67,6 +67,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -75,8 +76,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.UUIDGenerationStrategy;
@@ -112,7 +111,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	private LanguageViewer languageViewer;
 	private TableViewer tableViewer;
 	private TeamSorter sorter ; 
-	private ToolItem tiDisable, tiDelete, tiEditKey;
+	private Button btnDisable, btnDelete, btnEdit,btnAdd;
 	private MenuItem miDisable, miDelete, miEditKey;
 	private Composite container;
 	
@@ -255,30 +254,32 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			public void selectionChanged(SelectionChangedEvent event) {
 				Team team = (Team)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
 				if (team == null){
-					tiDisable.setEnabled(false);
-					tiDelete.setEnabled(false);
-					tiEditKey.setEnabled(false);
+					btnDisable.setEnabled(false);
+					btnDelete.setEnabled(false);
+					btnEdit.setEnabled(false);
 					miDisable.setEnabled(false);
 					miDelete.setEnabled(false);
 					miEditKey.setEnabled(false);
 					return;
 				}
-				tiDisable.setEnabled(true);
-				tiDelete.setEnabled(true);
-				tiEditKey.setEnabled(true);
+				btnDisable.setEnabled(true);
+				btnDelete.setEnabled(true);
+				btnEdit.setEnabled(true);
 				miDisable.setEnabled(true);
 				miDelete.setEnabled(true);
 				miEditKey.setEnabled(true);
 				if (!team.getIsActive()){
 					miDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 					miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
-					tiDisable.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
-					tiDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
+					btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+					btnDisable.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
+					btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 				}else{
 					miDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 					miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
-					tiDisable.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
-					tiDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+					btnDisable.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
+					btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+					btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 				}
 			}
 		});
@@ -293,31 +294,42 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 		
-		ToolBar tb = new ToolBar(container, SWT.FLAT | SWT.VERTICAL);
-		tb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		Composite composite = new Composite(container, SWT.NONE);
+		composite.setLayout(new GridLayout(1, false));
+		composite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false,1, 1));
+		((GridLayout)composite.getLayout()).marginWidth = 0;
+		((GridLayout)composite.getLayout()).marginHeight = 0;
+
+		btnAdd = new Button(composite, SWT.NONE);
+		btnAdd.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,1, 1));
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		btnAdd.addListener(SWT.Selection, e->addTeam());
 		
-		ToolItem tiAdd = new ToolItem(tb, SWT.NONE);
-		tiAdd.setToolTipText(DialogConstants.ADD_BUTTON_TEXT);
-		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		tiAdd.addListener(SWT.Selection, e->addTeam());
+		btnEdit = new Button(composite, SWT.NONE);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1,1));
+		btnEdit.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
+		btnEdit.setEnabled(false);
+		btnEdit.addListener(SWT.Selection, e->editKey());
 		
-		tiEditKey = new ToolItem(tb, SWT.NONE);
-		tiEditKey.setToolTipText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
-		tiEditKey.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		tiEditKey.setEnabled(false);
-		tiEditKey.addListener(SWT.Selection, e->editKey());
+		btnDisable = new Button(composite, SWT.NONE);
+		btnDisable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		btnDisable.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+		btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+		btnDisable.setEnabled(false);
+		btnDisable.addListener(SWT.Selection, e->disableTeam(btnDisable.getToolTipText().equals(DialogConstants.ENABLE_BUTTON_TEXT)));
 		
-		tiDisable = new ToolItem(tb, SWT.NONE);
-		tiDisable.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
-		tiDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
-		tiDisable.setEnabled(false);
-		tiDisable.addListener(SWT.Selection, e->disableTeam(tiDisable.getToolTipText().equals(DialogConstants.ENABLE_BUTTON_TEXT)));
-		
-		tiDelete = new ToolItem(tb, SWT.NONE);
-		tiDelete.setToolTipText(DialogConstants.DELETE_BUTTON_TEXT);
-		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiDelete.setEnabled(false);
-		tiDelete.addListener(SWT.Selection, e->deleteTeam());
+		btnDelete = new Button(composite, SWT.NONE);
+		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,false, 1, 1));
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.setEnabled(false);
+		btnDelete.addListener(SWT.Selection, e->deleteTeam());
 		
 		Menu mnu = new Menu(tableViewer.getTable());
 		tableViewer.getTable().setMenu(mnu);
@@ -337,7 +349,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		miDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 		miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 		miDisable.setEnabled(false);
-		miDisable.addListener(SWT.Selection, e->disableTeam(tiDisable.getToolTipText().equals(DialogConstants.ENABLE_BUTTON_TEXT)));
+		miDisable.addListener(SWT.Selection, e->disableTeam(btnDisable.getToolTipText().equals(DialogConstants.ENABLE_BUTTON_TEXT)));
 		
 		miDelete = new MenuItem(mnu, SWT.NONE);
 		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
@@ -469,13 +481,15 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		tableViewer.refresh();
 		
 		if (!enable){
-			tiDisable.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
-			tiDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
+			btnDisable.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
+			btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+			btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 			miDisable.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
 			miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));			
 		}else{
-			tiDisable.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
-			tiDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+			btnDisable.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
+			btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+			btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 			miDisable.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
 			miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 		}

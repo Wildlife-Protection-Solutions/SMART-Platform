@@ -32,6 +32,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.editor.IQueryEditor;
+import org.wcs.smart.ui.SmartWizardDialog;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -64,7 +65,7 @@ public class ExportQueryHandler {
 		if (query == null) return;
 
 		ExportQueryWizard wizard = new ExportQueryWizard(query);
-		WizardDialog wd = new WizardDialog(activeShell, wizard);
+		WizardDialog wd = new SmartWizardDialog(activeShell, wizard);
 		wd.open();
 	}
 

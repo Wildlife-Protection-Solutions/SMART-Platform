@@ -91,13 +91,14 @@ public class ExportQueryDefLocationPage extends WizardPage {
 		
 		Label lbl = new Label(main, SWT.NONE);
 		lbl.setText(Messages.ExportQueryDefLocationPage_DestinationLabel);
-		
+	
 		btnFolder = new Button(main, SWT.RADIO);
 		btnFolder.setText(Messages.ExportQueryDefLocationPage_FolderOpLabel);
-		
+		btnFolder.setBackground(btnFolder.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+	
 		btnCa = new Button(main, SWT.RADIO);
 		btnCa.setText(Messages.ExportQueryDefLocationPage_CaOpLabel);
-
+		btnCa.setBackground(btnCa.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		final Composite stack = new Composite(main, SWT.NONE);
 		stack.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
@@ -135,7 +136,6 @@ public class ExportQueryDefLocationPage extends WizardPage {
 		
 		final Composite caComp = new Composite(stack, SWT.NONE);
 		caComp.setLayout(new GridLayout());
-		
 		
 		caList = CheckboxTableViewer.newCheckList(caComp, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		caList.setContentProvider(ArrayContentProvider.getInstance());

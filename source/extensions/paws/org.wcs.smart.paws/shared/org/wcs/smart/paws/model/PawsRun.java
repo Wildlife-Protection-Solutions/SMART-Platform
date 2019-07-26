@@ -63,6 +63,7 @@ public class PawsRun extends UuidItem{
 	
 	private Status status;
 	private String statusmessage;
+	private String serverjson;
 	
 	private int teststartyear;
 	private int testendyear;
@@ -218,6 +219,15 @@ public class PawsRun extends UuidItem{
 	
 	public void setStatusMessage(String statusmessage) {
 		this.statusmessage = statusmessage;
+	}
+	
+	@Column(name="server_status_json")
+	public String getServerStatusJson() {
+		return this.serverjson;
+	}
+	
+	public void setServerStatusJson(String serverjson) {
+		this.serverjson = serverjson;
 	}
 	
 	@Column(name="status")

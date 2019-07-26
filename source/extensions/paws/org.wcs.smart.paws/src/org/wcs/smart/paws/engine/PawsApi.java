@@ -41,14 +41,16 @@ public enum PawsApi {
 	
 	public void run(PawsRun run, String json) throws Exception{
 		String surl = null;
+		String key = null;
 		try(Session session = HibernateManager.openSession()){
 			PawsService service = QueryFactory.buildQuery(session, PawsService.class,  
 					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
 				
-			if (service == null || service.getApiKey() == null || service.getUrl() == null){
+			if (service == null || !service.isConfigured()) {
 				throw new Exception("PAWS Service not configured.  You must first configure the PAWS Service before you can run paws analysis.");
 			}
-			surl = service.getUrl() + "/heatmap?subscription-key=" + service.getApiKey();
+			surl = service.getHeatmapApi();
+			key = service.getApiKey();
 		}
 		
 		//call the service with the json payload
@@ -57,11 +59,17 @@ public enum PawsApi {
 		try{
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Content-Type", "application/json");
+			conn.setRequestProperty("Ocp-Apim-Subscription-Key", key);
+			conn.setDoOutput(true);
+			//headers
 			OutputStream os = conn.getOutputStream();
 			os.write(json.getBytes(StandardCharsets.UTF_8));
 			os.flush();
 			
-			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && conn.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
+			
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && 
+					conn.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
+				
 				throw new Exception("Failed to run PAWS Service - HTTP error code : "
 					+ conn.getResponseCode());
 			}
@@ -98,6 +106,7 @@ public enum PawsApi {
 	
 	public boolean checkStatus(PawsRun run) throws Exception{
 		String surl = null;
+		String key = null;
 		try(Session session = HibernateManager.openSession()){
 			PawsRun r = (PawsRun)session.get(PawsRun.class, run.getUuid());
 			if (r == null) throw new Exception("No object found in database.");
@@ -105,10 +114,12 @@ public enum PawsApi {
 			PawsService service = QueryFactory.buildQuery(session, PawsService.class,  
 					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
 				
-			if (service == null || service.getApiKey() == null || service.getUrl() == null || service.getApiKey().isBlank() || service.getUrl().isBlank()){
+			if (service == null || !service.isConfigured()){
 				throw new Exception("PAWS Service not configured.");
 			}
-			surl = service.getUrl() + "/task/" + run.getTaskId() + "?subscription-key=" + service.getApiKey();
+			//TODO: header
+			surl = service.getTaskApi() + "/" + run.getTaskId();// + "?subscription-key=" + service.getApiKey();
+			key = service.getApiKey();
 		}
 		
 		//call the service with the json payload
@@ -118,7 +129,7 @@ public enum PawsApi {
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		try{
 			conn.setRequestMethod("GET");
-			
+			conn.setRequestProperty("Ocp-Apim-Subscription-Key", key);
 			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK ) {
 				throw new Exception("Failed to run PAWS Service - HTTP error code : " + conn.getResponseCode());
 			}
@@ -131,6 +142,19 @@ public enum PawsApi {
 				}
 			}
 			
+			try(Session session = HibernateManager.openSession()){
+				PawsRun r = (PawsRun)session.get(PawsRun.class, run.getUuid());
+				if (r != null) {
+					session.beginTransaction();
+					try {
+						r.setServerStatusJson(content.toString());
+						session.getTransaction().commit();
+					}catch (Exception ex) {
+						if (session.getTransaction().isActive()) session.getTransaction().rollback();
+						PawsPlugIn.displayLog(ex.getMessage(), ex);
+					}
+				}
+			}
 			PawsTask task = PawsTask.parse(content.toString());
 
 			//TODO: do something with task

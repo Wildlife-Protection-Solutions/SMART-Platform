@@ -142,7 +142,6 @@ public class ExportQueryLocationPage extends WizardPage {
 		
 		Label lbl = new Label(main, SWT.NONE);
 		lbl.setText(Messages.ExportQueryLocationPage_FileLabel);
-//		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		txtFile = new Text(main, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -191,8 +190,6 @@ public class ExportQueryLocationPage extends WizardPage {
 			}
 		});
 		
-
-		
 		setTitle(Messages.ExportQueryLocationPage_PageTitle + ": " + ((ExportQueryWizard)getWizard()).getQuery().getName()); //$NON-NLS-1$
 		setMessage(Messages.ExportQueryLocationPage_DialogMessage);
 		setPageComplete(false);
@@ -203,10 +200,13 @@ public class ExportQueryLocationPage extends WizardPage {
 		lblDelimiter = new Label(main, SWT.NONE);
 		lblDelimiter.setText(Messages.ExportQueryLocationPage_delimiterLabel);
 		lblDelimiter.setToolTipText(Messages.ExportQueryLocationPage_delimiterTooltip);
+		lblDelimiter.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		cmbDelimiter = new DelimiterCombo(main,  SWT.DROP_DOWN);
-	
+		cmbDelimiter.getControl().setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
 		lblSpacer = new Label(main, SWT.NONE);
+		lblSpacer.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 	}
 	
 	private void createProjectionOption(){
@@ -216,6 +216,7 @@ public class ExportQueryLocationPage extends WizardPage {
 		lblProjection = new Label(main, SWT.NONE);
 		lblProjection.setText(Messages.ExportQueryLocationPage_ProjectionLbl);
 		lblProjection.setToolTipText(Messages.ExportQueryLocationPage_ProjectionTooltip);
+		lblProjection.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		cmbProjection = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbProjection.setContentProvider(ArrayContentProvider.getInstance());
@@ -227,6 +228,8 @@ public class ExportQueryLocationPage extends WizardPage {
 		}else{
 			cmbProjection.setSelection(new StructuredSelection(wizard.getSupportedProjections().get(0)));
 		}
+		cmbProjection.getControl().setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 	}
 	
 	public Projection getProjection(){

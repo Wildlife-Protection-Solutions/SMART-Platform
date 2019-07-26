@@ -143,10 +143,14 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		Composite btnComp = new Composite(langComp, SWT.NONE);
 		btnComp.setLayout(new GridLayout(1,false));
 		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		((GridLayout)btnComp.getLayout()).marginWidth = 0;
+		((GridLayout)btnComp.getLayout()).marginHeight = 0;
 		
 		Button btnAdd = new Button(btnComp, SWT.PUSH);
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(btnComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -192,6 +196,8 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnRemove.setEnabled(false);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnRemove.setBackground(btnComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnRemove.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {

@@ -113,14 +113,14 @@ public class RunEditor extends MultiPageEditorPart {
 			if (data != null){
 				Collection<PawsRun> items = (Collection<PawsRun>)data;
 				for (PawsRun pc : items){
-					if (pc.getUuid().equals(getInputInternal().getUuid())) initEditor();
+					if (pc.getUuid().equals(getInputInternal().getUuid())) refresh();
 				}
 			}
 		});
 		
 		
 		subscribeToEvent(SmartPlugIn.E4_DATABASE_CHANGED_EVENT, e->{
-			initEditor();
+			refresh();
 		});
 	}
 	
@@ -182,10 +182,10 @@ public class RunEditor extends MultiPageEditorPart {
 			throw new RuntimeException(ex);
 		}
 		createEventHandlers();
-		initEditor();
+		refresh();
 	}
 	
-	private void initEditor(){
+	public void refresh() {
 		loadSettings.schedule();
 	}
 	

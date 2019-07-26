@@ -154,7 +154,7 @@ public class NewPawsRunHandler {
 				PawsService service = QueryFactory.buildQuery(session, PawsService.class,
 					new Object[]{"conservationArea", SmartDB.getCurrentConservationArea()})
 					.uniqueResult();
-				if (service == null || service.getApiKey() == null || service.getUrl() == null || service.getUrl().isBlank() || service.getApiKey().isBlank()){
+				if (service == null || !service.isConfigured()){
 					openconfig = true;
 				}
 			}

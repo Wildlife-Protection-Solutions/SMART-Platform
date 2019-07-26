@@ -36,6 +36,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Handler for the export query definition button.
@@ -64,7 +65,7 @@ public class ExportQueryDefHandler {
 		}
 
 		ExportQueryWizard wizard = new ExportQueryWizard(selectedQueries);
-		WizardDialog wd = new WizardDialog(activeShell, wizard);
+		WizardDialog wd = new SmartWizardDialog(activeShell, wizard);
 		wd.open();
 	}
 

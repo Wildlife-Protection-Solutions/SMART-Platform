@@ -27,6 +27,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
@@ -37,7 +38,8 @@ public class PawsService extends UuidItem{
 
 	private ConservationArea ca;
 	private String apikey;
-	private String url;
+	private String heatmapapi;
+	private String taskapi;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -58,12 +60,27 @@ public class PawsService extends UuidItem{
 		this.apikey = apikey;
 	}
 	
-	@Column(name="url")
-	public String getUrl() {
-		return this.url;
+	@Column(name="heatmap_api")
+	public String getHeatmapApi() {
+		return this.heatmapapi;
 	}
 	
-	public void setUrl(String url) {
-		this.url = url;
+	public void setHeatmapApi(String heatmapapi) {
+		this.heatmapapi = heatmapapi;
+	}
+	
+	@Column(name="task_api")
+	public String getTaskApi() {
+		return this.taskapi;
+	}
+	
+	public void setTaskApi(String taskapi) {
+		this.taskapi = taskapi;
+	}
+	
+	@Transient
+	public boolean isConfigured() {
+		if (taskapi == null || heatmapapi == null || apikey== null || taskapi.isEmpty() || heatmapapi.isBlank() || apikey.isBlank() ) return false;
+		return true;
 	}
 }

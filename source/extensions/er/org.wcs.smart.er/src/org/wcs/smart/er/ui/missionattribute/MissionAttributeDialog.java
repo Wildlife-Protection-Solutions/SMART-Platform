@@ -155,19 +155,27 @@ public class MissionAttributeDialog extends SmartStyledTitleDialog implements Se
 		Composite btnComp = new Composite(main, SWT.NONE);
 		btnComp.setLayout(new GridLayout(1, false));
 		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		((GridLayout)btnComp.getLayout()).marginWidth = 0;
+		((GridLayout)btnComp.getLayout()).marginHeight = 0;
 		
 		btnAdd = new Button(btnComp, SWT.PUSH);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(btnComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnAdd.addSelectionListener(this);
 		
 		btnEdit = new Button(btnComp, SWT.PUSH);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(btnComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnEdit.addSelectionListener(this);
 		
 		btnDelete = new Button(btnComp, SWT.PUSH);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.setBackground(btnComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnDelete.addSelectionListener(this);
 		

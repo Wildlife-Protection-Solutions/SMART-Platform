@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -158,7 +159,7 @@ public class PawsDataEngine {
 			if (ws == null || !ws.isConfigured()){
 				throw new Exception("PAWS Workspace not configured.  You must first configure the PAWS Workspace before you can run paws analysis.");
 			}
-			String url = ws.getUrl() + "?" + ws.getClientId();
+			String url = ws.getContainer();
 			config.put("container_name", url);
 			
 			config.put("run_id", run.getRunId());
@@ -169,7 +170,7 @@ public class PawsDataEngine {
 			
 			PawsParameter pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
 			//TODO: this needs to be in meters; so assuming the projection is in meters
-			config.put("spatial_resoltuion", pp.getValue());
+			config.put("spatial_resolution", pp.getValue());
 			
 			
 			//area_boundary
@@ -196,7 +197,7 @@ public class PawsDataEngine {
 			config.put("geo_feature_shape_files", shapefiles);
 			
 			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.LYR_BOUNDARY.name());
-			shapefiles.put("boundary_file_name", "ca_boundary");
+			shapefiles.put("boundary_layer_name", "ca_boundary");
 			shapefiles.put("boundary_file_name", "ca_boundary.zip");
 			
 			JSONArray other = new JSONArray();
@@ -239,10 +240,17 @@ public class PawsDataEngine {
 			
 			//illegal class mappings
 			JSONObject mappings = new JSONObject();
-			config.put("illegal_activith_class_mapping", mappings);
 			
-			config.put("protected_are_name", run.getConservationArea().getName());
+			//just add single mapping for now
+			Entry<String, String> firstmapping = classmappings.entrySet().iterator().next();
+			mappings.put("field_name", firstmapping.getKey());
+			mappings.put("classification_class", firstmapping.getValue());
+			JSONArray matches = new JSONArray();
+			mappings.put("matching_observations",firstmapping.getValue()); ;
 			
+			config.put("illegal_activity_class_mappings", mappings);
+			
+			config.put("protected_area_name", run.getConservationArea().getName());
 		
 			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.TRAINING_RES.name());
 			config.put("temporal_training_resolution", PawsParameter.TrainingResolution.valueOf(pp.getValue()).key);
@@ -258,9 +266,9 @@ public class PawsDataEngine {
 			modelexperimentation.put("test_end_year", run.getTestEndYear());
 			
 			JSONObject modelforecasting = new JSONObject();
-			config.put("model_forecasting", modelexperimentation);
-			modelforecasting.put("start_year", run.getForecastStartYear());
-			modelforecasting.put("end_year", run.getForecastEndYear());
+			config.put("model_forecasting", modelforecasting);
+			modelforecasting.put("start", run.getForecastStartYear());
+			modelforecasting.put("end", run.getForecastEndYear());
 			
 			
 		}
@@ -459,12 +467,14 @@ public class PawsDataEngine {
 				
 				int n = 1;
 				for (PawsSimpleClass pc : simple) {
-					create.append("pawsclass" + (n++) + " varchar(8192),");
+					create.append("pawsclass" + n + " varchar(8192),");
 					classmappings.put("pawsclass" + n, pc.getClassification());
+					n++;
 				}
 				for (PawsQueryClass qc : queries) {
-					create.append("pawsclass" + (n++) + " varchar(8192),");
+					create.append("pawsclass" + n + " varchar(8192),");
 					classmappings.put("pawsclass" + n, qc.getClassification());
+					n++;
 				}
 				create.deleteCharAt(create.length() - 1);
 				create.append(")");
@@ -483,7 +493,7 @@ public class PawsDataEngine {
 				System.out.println(create.toString());
 				session.createNativeQuery(create.toString()).executeUpdate();
 				
-				//populate add data table
+				//populate all data table
 				create = new StringBuilder();
 				create.append("INSERT INTO ");
 				create.append(alldata);

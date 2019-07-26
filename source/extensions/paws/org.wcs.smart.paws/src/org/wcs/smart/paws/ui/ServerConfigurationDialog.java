@@ -55,11 +55,13 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class ServerConfigurationDialog extends SmartStyledDialog {
 
-	private Text txtServerURL;
-	private Text txtWorkspaceURL;
+	private Text txtServiceHeatmapApi;
+	private Text txtServiceTaskApi;
+	private Text txtServiceKey;
 	
-	private Text txtServerKey;
-	private Text txtWorkspaceKey;
+	private Text txtWorkspaceLoginURL;
+	private Text txtWorkspaceClientId;
+	private Text txtWorkspaceStorageUrl;
 	private Text txtWorkspaceContainer;
 	
 	protected ServerConfigurationDialog(Shell parent) {
@@ -84,8 +86,9 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 					service = new PawsService();
 					service.setConservationArea(SmartDB.getCurrentConservationArea());
 				}
-				service.setApiKey(txtServerKey.getText());
-				service.setUrl(txtServerURL.getText());
+				service.setApiKey(txtServiceKey.getText());
+				service.setHeatmapApi(txtServiceHeatmapApi.getText());
+				service.setTaskApi(txtServiceTaskApi.getText());
 				session.saveOrUpdate(service);
 				
 				PawsWorkspace ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
@@ -94,9 +97,10 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 					ws = new PawsWorkspace();
 					ws.setConservationArea(SmartDB.getCurrentConservationArea());
 				}
-				ws.setClientId(txtWorkspaceKey.getText());
-				ws.setUrl(txtWorkspaceURL.getText());
-				ws.setContainerUrl(txtWorkspaceContainer.getText());
+				ws.setClientId(txtWorkspaceClientId.getText());
+				ws.setUrl(txtWorkspaceLoginURL.getText());
+				ws.setStorageAccountUrl(txtWorkspaceStorageUrl.getText());
+				ws.setContainer(txtWorkspaceContainer.getText());
 				session.saveOrUpdate(ws);
 				
 				session.getTransaction().commit();
@@ -134,21 +138,28 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 		infoMessage.setText("This is the PAWS service URL and API key.");
 		
 		Label l = new Label(paws, SWT.NONE);
-		l.setText("URL:");
+		l.setText("Heatmap API:");
 		
-		txtServerURL = new Text(paws, SWT.BORDER);
-		txtServerURL.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtServerURL.setText(DialogConstants.LOADING_TEXT);
-		txtServerURL.addListener(SWT.Modify, modifiedlistener);
+		txtServiceHeatmapApi = new Text(paws, SWT.BORDER);
+		txtServiceHeatmapApi.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtServiceHeatmapApi.setText(DialogConstants.LOADING_TEXT);
+		txtServiceHeatmapApi.addListener(SWT.Modify, modifiedlistener);
 		
+		l = new Label(paws, SWT.NONE);
+		l.setText("Task API:");
+		
+		txtServiceTaskApi = new Text(paws, SWT.BORDER);
+		txtServiceTaskApi.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtServiceTaskApi.setText(DialogConstants.LOADING_TEXT);
+		txtServiceTaskApi.addListener(SWT.Modify, modifiedlistener);
 		
 		l = new Label(paws, SWT.NONE);
 		l.setText("API Key:");
 		
-		txtServerKey = new Text(paws, SWT.BORDER);
-		txtServerKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtServerKey.setText(DialogConstants.LOADING_TEXT);
-		txtServerKey.addListener(SWT.Modify, modifiedlistener);
+		txtServiceKey = new Text(paws, SWT.BORDER);
+		txtServiceKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtServiceKey.setText(DialogConstants.LOADING_TEXT);
+		txtServiceKey.addListener(SWT.Modify, modifiedlistener);
 		
 		
 		SmartUiUtils.createHeaderLabel(main, "PAWS Workspace / Microsoft Azure Blob Storage");
@@ -167,23 +178,32 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 		l = new Label(pawws, SWT.NONE);
 		l.setText("OAuth 2.0 Enpoint (v1):");
 		
-		txtWorkspaceURL = new Text(pawws, SWT.BORDER);
-		txtWorkspaceURL.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtWorkspaceURL.setText(DialogConstants.LOADING_TEXT);
-		txtWorkspaceURL.setText("https://login.microsoftonline.com/common/oauth2");
-		txtWorkspaceURL.addListener(SWT.Modify, modifiedlistener);
+		txtWorkspaceLoginURL = new Text(pawws, SWT.BORDER);
+		txtWorkspaceLoginURL.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtWorkspaceLoginURL.setText(DialogConstants.LOADING_TEXT);
+		txtWorkspaceLoginURL.setText("https://login.microsoftonline.com/common/oauth2");
+		txtWorkspaceLoginURL.addListener(SWT.Modify, modifiedlistener);
 		
 		l = new Label(pawws, SWT.NONE);
-		l.setText("Client ID:");
+		l.setText("Application/Client ID:");
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
-		txtWorkspaceKey = new Text(pawws, SWT.BORDER );
-		txtWorkspaceKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtWorkspaceKey.setText(DialogConstants.LOADING_TEXT);
-		txtWorkspaceKey.addListener(SWT.Modify, modifiedlistener);
+		txtWorkspaceClientId = new Text(pawws, SWT.BORDER );
+		txtWorkspaceClientId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtWorkspaceClientId.setText(DialogConstants.LOADING_TEXT);
+		txtWorkspaceClientId.addListener(SWT.Modify, modifiedlistener);
 		
 		l = new Label(pawws, SWT.NONE);
-		l.setText("Container URL:");
+		l.setText("Storage Account URL:");
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		
+		txtWorkspaceStorageUrl = new Text(pawws, SWT.BORDER );
+		txtWorkspaceStorageUrl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtWorkspaceStorageUrl.setText(DialogConstants.LOADING_TEXT);
+		txtWorkspaceStorageUrl.addListener(SWT.Modify, modifiedlistener);
+		
+		l = new Label(pawws, SWT.NONE);
+		l.setText("Container Name:");
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		txtWorkspaceContainer = new Text(pawws, SWT.BORDER );
@@ -213,23 +233,24 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 			final PawsService fservice = service;
 			final PawsWorkspace fws = ws;
 			Display.getDefault().asyncExec(()->{
-				txtServerURL.setText("https://aiforearth-v2-eastus-01.regional.azure-api.net/paws");
-				if (fservice == null) {
-					txtServerURL.setText("");
-				}else {
-					txtServerKey.setText(fservice.getApiKey());
-					txtServerURL.setText(fservice.getUrl());
+				txtServiceHeatmapApi.setText("https://aiforearth-v2.azure-api.net/paws/heatmap");
+				txtServiceTaskApi.setText("https://aiforearth-v2.azure-api.net/taskmanagement/task/");
+				txtServiceKey.setText("");
+				if (fservice != null) {
+					txtServiceKey.setText(fservice.getApiKey() == null ? "" : fservice.getApiKey());
+					if (fservice.getHeatmapApi() != null) txtServiceHeatmapApi.setText(fservice.getHeatmapApi());
+					if (fservice.getTaskApi() != null) txtServiceTaskApi.setText(fservice.getTaskApi());
 				}
 				
-				txtWorkspaceContainer.setText("https://<yourblob>.blob.core.windows.net/<yourcontainer>");
-				if (fws == null) {
-					txtWorkspaceKey.setText("<Client ID>");
-					//txtWorkspaceURL.setText("");
+				txtWorkspaceStorageUrl.setText("https://<yourblob>.blob.core.windows.net");
+				txtWorkspaceClientId.setText("<Application/Client ID>");
+				txtWorkspaceContainer.setText("<Container Name>");
+				if (fws != null) {
+					if (fws.getUrl() != null) txtWorkspaceClientId.setText(fws.getClientId());
+					if (fws.getUrl() != null) txtWorkspaceLoginURL.setText(fws.getUrl());
 					
-				}else {
-					txtWorkspaceKey.setText(fws.getClientId());
-					txtWorkspaceURL.setText(fws.getUrl());
-					if (fws.getContainerUrl() != null)  txtWorkspaceContainer.setText(fws.getContainerUrl());
+					if (fws.getContainer() != null)  txtWorkspaceContainer.setText(fws.getContainer());
+					if (fws.getStorageAccountUrl() != null) txtWorkspaceStorageUrl.setText(fws.getStorageAccountUrl());
 				}
 				
 				getButton(IDialogConstants.OK_ID).setEnabled(false);

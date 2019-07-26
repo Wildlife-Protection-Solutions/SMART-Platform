@@ -372,7 +372,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			if (monitor.isCanceled()){
 				openInfo(MessageFormat.format(Messages.ExportQueryWizard_Cancelled, new Object[]{cnt, exportedQueries.size() * cas.size()}));
 			}else{
-				if (error.size() == 0){
+				if (cnt == exportedQueries.size() * cas.size()){
 					openInfo(MessageFormat.format(Messages.ExportQueryWizard_Complete, new Object[]{cnt, exportedQueries.size() * cas.size()}));
 				}else{
 					WarningDialog wd = new WarningDialog(getContainer().getShell(), 

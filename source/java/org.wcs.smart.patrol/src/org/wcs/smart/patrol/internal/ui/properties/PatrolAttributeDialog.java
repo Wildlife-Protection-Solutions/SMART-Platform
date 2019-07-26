@@ -46,6 +46,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -53,8 +54,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -80,7 +79,7 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 
 	private TableViewer lstAttributes;
 	
-	private ToolItem tiAdd, tiDelete, tiEdit, tiDisable;
+	private Button btnAdd, btnDelete, btnEdit, btnDisable;
 	private MenuItem miAdd, miDelete, miEdit, miDisable;
 	
 	private List<PatrolAttribute> attributes;
@@ -129,29 +128,42 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 		layout.setColumnData(tc, new ColumnWeightData(100));
 		wrapper.setLayout(layout);
 		
-		ToolBar tbButtons = new ToolBar(main, SWT.VERTICAL | SWT.FLAT);
-		tbButtons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		Composite composite = new Composite(main, SWT.NONE);
+		composite.setLayout(new GridLayout(1, false));
+		composite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false,1, 1));
+		((GridLayout)composite.getLayout()).marginWidth = 0;
+		((GridLayout)composite.getLayout()).marginHeight = 0;
+
+		btnAdd = new Button(composite, SWT.NONE);
+		btnAdd.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false,1, 1));
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		btnAdd.addSelectionListener(this);
 		
-		tiAdd = new ToolItem(tbButtons, SWT.PUSH);
-		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		tiAdd.setToolTipText(Messages.PatrolAttributeDialog_addtoolitp);
-		tiAdd.addSelectionListener(this);
+		btnEdit = new Button(composite, SWT.NONE);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1,1));
+		btnEdit.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
+		btnEdit.setEnabled(false);
+		btnEdit.addSelectionListener(this);
 		
-		tiEdit = new ToolItem(tbButtons, SWT.PUSH);
-		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		tiEdit.setToolTipText(Messages.PatrolAttributeDialog_edittooltip);
-		tiEdit.addSelectionListener(this);
+		btnDisable = new Button(composite, SWT.NONE);
+		btnDisable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		btnDisable.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+		btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+		btnDisable.setEnabled(false);
+		btnDisable.addSelectionListener(this);
 		
-		tiDisable = new ToolItem(tbButtons, SWT.PUSH);
-		tiDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
-		tiDisable.setToolTipText(Messages.PatrolAttributeDialog_disableenabletooltiptext);
-		tiDisable.addSelectionListener(this);
-		
-		tiDelete = new ToolItem(tbButtons, SWT.PUSH);
-		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiDelete.setToolTipText(Messages.PatrolAttributeDialog_deletetooltip);
-		tiDelete.addSelectionListener(this);
-		
+		btnDelete = new Button(composite, SWT.NONE);
+		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,false, 1, 1));
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.setEnabled(false);
+		btnDelete.addSelectionListener(this);
 		
 		Menu mnu = new Menu(lstAttributes.getControl());
 		
@@ -257,9 +269,9 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 	private void enableButtons(){
 		boolean isSelected = lstAttributes.getSelection().isEmpty();
 		
-		tiDelete.setEnabled(!isSelected);
-		tiEdit.setEnabled(!isSelected);
-		tiDisable.setEnabled(!isSelected);
+		btnDelete.setEnabled(!isSelected);
+		btnEdit.setEnabled(!isSelected);
+		btnDisable.setEnabled(!isSelected);
 		
 		miDelete.setEnabled(!isSelected);
 		miEdit.setEnabled(!isSelected);
@@ -269,13 +281,15 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 			PatrolAttribute pa = (PatrolAttribute) lstAttributes.getStructuredSelection().getFirstElement();
 			
 			if (pa.getIsActive()) {
-				tiDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
-				tiDisable.setToolTipText(Messages.PatrolAttributeDialog_disabletooltiptext);
+				btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+				btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+				btnDisable.setToolTipText(Messages.PatrolAttributeDialog_disabletooltiptext);
 				miDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 				miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));				
 			}else {
-				tiDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
-				tiDisable.setToolTipText(Messages.PatrolAttributeDialog_enabletooltiptext);
+				btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
+				btnDisable.setToolTipText(Messages.PatrolAttributeDialog_enabletooltiptext);
+				btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 				miDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 				miDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 			}
@@ -316,13 +330,13 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 	
 	@Override
 	public void widgetSelected(SelectionEvent e) {
-		if (e.widget == tiAdd || e.widget == miAdd){
+		if (e.widget == btnAdd || e.widget == miAdd){
 			addAttribute();
-		}else if (e.widget == tiDelete || e.widget == miDelete){
+		}else if (e.widget == btnDelete || e.widget == miDelete){
 			deleteAttribute();
-		}else if (e.widget == tiEdit || e.widget == miEdit){
+		}else if (e.widget == btnEdit || e.widget == miEdit){
 			editAttribute();
-		}else if (e.widget == miDisable || e.widget == tiDisable) {
+		}else if (e.widget == miDisable || e.widget == btnDisable) {
 			changeState();
 		}
 	}
