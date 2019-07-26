@@ -400,22 +400,8 @@ public class QuicklinkApi extends HttpServlet {
 		}
 		return addQuicklinkToUsersList(user.getUuid(), quicklinkUuid);
 	}
-	
-	/**
-	 * <p>Add a Quicklink to a user's homepage list - provide the user-uuid in the url, use this function when you don't have a browser session open and logged in.</p>
-	 * <p>
-	 * URL: ../server/api/quicklink/addtolist/{user uuid}<br>
-	 * Call Type: GET
-	 * </p>
-	 * @param uuid the user uuid to add the quicklink to
-	 * @param quicklinkUuid the quicklink uuid to add
-	 * 
-	 * @return the  JSON UserQuicklink object added
-	 */
-	
-	@GET
-    @Path("/addtolist/{uuid}")
-    public UserQuicklink addQuicklinkToUsersList(@PathParam("uuid") UUID uuid, UUID quicklinkUuid) {
+
+    private UserQuicklink addQuicklinkToUsersList(UUID uuid, UUID quicklinkUuid) {
 		UserQuicklink listEntry = new UserQuicklink();
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
