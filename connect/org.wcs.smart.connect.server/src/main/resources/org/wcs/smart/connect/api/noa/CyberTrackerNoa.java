@@ -28,7 +28,9 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -73,6 +75,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -176,6 +179,37 @@ public class CyberTrackerNoa {
 			s.getTransaction().commit();
 		}
 	}
+	
+
+	@GET
+    @Path("packages/")
+	@Produces({ MediaType.APPLICATION_JSON })
+	@Operation(description = "Gets the details about all CyberTracker packages authorized by the api key.",
+			security = {@SecurityRequirement(name="apikeyheader"), @SecurityRequirement(name="apikeyquery")})
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(arraySchema = @Schema(implementation=CyberTrackerPackageProxy.class)))})
+	@ApiResponse(responseCode = "401", description = "Invalid authorization credientials")
+	public List<CyberTrackerPackageProxy> getPackages( ){
+		
+		UUID tokenCaUuid = validateToken();
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			List<CyberTrackerPackage> ctpackages = QueryFactory.buildQuery(s, CyberTrackerPackage.class, 
+					"conservationArea.uuid", tokenCaUuid).list(); //$NON-NLS-1$
+		
+			List<CyberTrackerPackageProxy> proxies = new ArrayList<>();
+			
+			for (CyberTrackerPackage p : ctpackages) {
+				proxies.add(p.asProxy());
+			}
+		
+			return proxies;
+		}finally {
+			s.getTransaction().commit();
+		}
+	}
+	
 	
 	/**
 	 * Gets the cybertracker package
