@@ -220,7 +220,7 @@ public class HibernateManager {
 	}
 
 	public static List<Alert> getAlertsByCa(Session session, UUID caUuid) {
-		return QueryFactory.buildQuery(session, Alert.class, "caUuid", caUuid).list(); //$NON-NLS-1$
+		return QueryFactory.buildQuery(session, Alert.class, "ca.uuid", caUuid).list(); //$NON-NLS-1$
 	}
 	
 	public static List<MapLayer> getMapLayers(Session session) {
