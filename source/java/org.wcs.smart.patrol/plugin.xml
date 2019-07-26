@@ -104,7 +104,7 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.patrol.command1"
+                  commandId="org.wcs.smart.observation.perspective.show"
                   icon="images/icons/etool16/patrol.png"
                   label="%showpatrolperspective.command.label2"
                   mnemonic="%showpatrolperspectivecommand.mnemonic"
