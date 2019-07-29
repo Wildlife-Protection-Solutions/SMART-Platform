@@ -172,7 +172,6 @@ public class CmSmartToXmlConverter {
 			xmlConfig.setAttributeKey(config.getAttribute().getKeyId());
 			xmlConfig.setAttributeUuid(toString(config.getAttribute().getUuid()));
 			
-			
 			processCmListItems(config.getList(), config.getModel(), xmlConfig.getListItem(), llookup, includeDmIcon, monitor);
 			processCmTreeNodes(config.getTree(), config.getModel(), xmlConfig.getTreeNode(), llookup, includeDmIcon, monitor);
 			
@@ -287,6 +286,12 @@ public class CmSmartToXmlConverter {
 				at.setIsCustomImage(isCustomIcon(ca));
 				at.setImageFile(getImageFileRef(ca, node.getModel(), includeDmIcon));
 				
+				if (ca.getAttribute().getMinValue() != null) {
+					at.setMinValue(ca.getAttribute().getMinValue());
+				}
+				if (ca.getAttribute().getMaxValue() != null) {
+					at.setMaxValue(ca.getAttribute().getMaxValue());
+				}
 				for (CmAttributeOption option : ca.getCmAttributeOptions().values()) {
 					AttributeOptionType aot = new AttributeOptionType();
 					aot.setId(option.getOptionId());

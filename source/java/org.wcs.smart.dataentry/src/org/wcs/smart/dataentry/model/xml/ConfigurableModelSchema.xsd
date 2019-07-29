@@ -148,6 +148,8 @@ elementFormDefault="qualified">
     	</attribute>
     	<attribute name="imageFile" type="string"></attribute>
     	<attribute name="isCustomImage" type="boolean"></attribute>
+    	<attribute name="minValue" type="double"></attribute>
+    	<attribute name="maxValue" type="double"></attribute>
     </complexType>
 
     <complexType name="AttributeOptionType">

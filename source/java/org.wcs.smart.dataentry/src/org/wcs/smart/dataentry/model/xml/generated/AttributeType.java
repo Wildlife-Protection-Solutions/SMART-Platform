@@ -89,7 +89,10 @@ public class AttributeType {
     protected String imageFile;
     @XmlAttribute(name = "isCustomImage")
     protected Boolean isCustomImage;
-
+    @XmlAttribute(name = "minValue")
+    protected Double minValue;
+    @XmlAttribute(name = "maxValue")
+    protected Double maxValue;
     /**
      * Gets the value of the name property.
      * 
@@ -397,5 +400,54 @@ public class AttributeType {
     public void setIsCustomImage(Boolean value) {
         this.isCustomImage = value;
     }
+    
+    /**
+     * Gets the value of the minValue property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getMinValue() {
+        return minValue;
+    }
+
+    /**
+     * Sets the value of the minValue property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setMinValue(Double value) {
+        this.minValue = value;
+    }
+    
+    /**
+     * Gets the value of the maxValue property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getMaxValue() {
+        return maxValue;
+    }
+
+    /**
+     * Sets the value of the maxValue property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setMaxValue(Double value) {
+        this.maxValue = value;
+    }
+    
 
 }
