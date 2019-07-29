@@ -175,6 +175,7 @@ public class SelectAttributeDialog extends SmartStyledTitleDialog{
 			}
 		});
 		Button btnNew = new Button(parent, SWT.PUSH);
+		btnNew.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnNew.setText(Messages.SelectAttributeDialog_NewAttributeBtn);
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			

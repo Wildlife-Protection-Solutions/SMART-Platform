@@ -77,6 +77,7 @@ import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.selection.SelectCommand;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -342,7 +343,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 			
 			deleteItem = new ToolItem(tb, SWT.PUSH );
 			deleteItem.setToolTipText(Messages.SamplingUnitEditorPage_deleteTooltip);
-			deleteItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.DELETE_ICON));
+			deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			deleteItem.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e){
@@ -696,7 +697,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		});
 		
 		if (editor.canEdit()){
-			mgr.add(new Action(Messages.SamplingUnitEditorPage_DeleteMenuLabel, EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.DELETE_ICON)) {
+			mgr.add(new Action(Messages.SamplingUnitEditorPage_DeleteMenuLabel, SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DELETE_ICON)) {
 				@Override
 				public void run(){
 					deleteSuItems();

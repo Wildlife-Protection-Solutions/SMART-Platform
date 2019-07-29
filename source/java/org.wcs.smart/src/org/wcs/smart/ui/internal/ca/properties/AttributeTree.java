@@ -59,6 +59,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -310,6 +311,11 @@ public class AttributeTree {
 				super.dispose();
 				labelProvider.dispose();
 			}
+			
+			@Override
+			public Color getForeground(Object element) {
+				return labelProvider.getForeground(element);
+			}
 		});
 		
 		TreeViewerColumn iconColumn = new TreeViewerColumn(viewer, SWT.NONE);
@@ -392,9 +398,8 @@ public class AttributeTree {
 			buttonPanel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 			buttonPanel.setLayout(new GridLayout(1, false));
 			
-			final Button btnAdd = new Button(buttonPanel, SWT.NONE);
-			btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-			btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			final Button btnAdd = createButton(buttonPanel, DialogConstants.ADD_BUTTON_TEXT, 
+					SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			btnAdd.setEnabled(true);
 			btnAdd.setToolTipText(Messages.AttributeTree_AddButton_Tooltip);
 			btnAdd.addSelectionListener(new SelectionAdapter(){
@@ -404,10 +409,10 @@ public class AttributeTree {
 				}
 			});
 	
-			final Button btnEdit = new Button(buttonPanel, SWT.NONE);
+			
+			final Button btnEdit = createButton(buttonPanel, DialogConstants.EDIT_BUTTON_TEXT, 
+					SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			btnEdit.setEnabled(false);
-			btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-			btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 			btnEdit.setToolTipText(Messages.AttributeTree_EditButton_Tooltip);
 			btnEdit.addSelectionListener(new SelectionAdapter(){
 				@Override
@@ -416,9 +421,8 @@ public class AttributeTree {
 				}
 			});
 			
-			final Button btnImport = new Button(buttonPanel, SWT.NONE);
-			btnImport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-			btnImport.setText(Messages.AttributeTree_ImportButtonText);
+			final Button btnImport = createButton(buttonPanel, Messages.AttributeTree_ImportButtonText, 
+					SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
 			btnImport.setToolTipText(Messages.AttributeTree_ImportButtonTooltip);
 			btnImport.addSelectionListener(new SelectionAdapter(){
 				@Override
@@ -432,9 +436,7 @@ public class AttributeTree {
 				}
 			});
 			
-			final Button btnSort = new Button(buttonPanel, SWT.NONE);
-			btnSort.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-			btnSort.setText(Messages.AttributeTree_SortAllButton);
+			final Button btnSort = createButton(buttonPanel, Messages.AttributeTree_SortAllButton, null); 
 			btnSort.setToolTipText(Messages.AttributeTree_SortAllTooltip);
 			btnSort.addSelectionListener(new SelectionAdapter(){
 				@SuppressWarnings("unchecked")
@@ -458,11 +460,10 @@ public class AttributeTree {
 			Label lbl = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
 			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
-			final Button btnDisable = new Button(buttonPanel, SWT.NONE);
-			btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+			final Button btnDisable = createButton(buttonPanel, DialogConstants.DISABLE_BUTTON_TEXT, 
+					SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON)); 
 			btnDisable.setToolTipText(Messages.AttributeTree_DisableButton_ToolTip);
 			btnDisable.setEnabled(false);
-			btnDisable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			btnDisable.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -470,16 +471,17 @@ public class AttributeTree {
 					
 					if (btnDisable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT)){
 						btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+						btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 					}else{
 						btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+						btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 					}
 				}
 			});
 		
-			final Button btnDisableAll = new Button(buttonPanel, SWT.NONE);
-			btnDisableAll.setText(DialogConstants.DISABLEALL_BUTTON_TEXT);
+			final Button btnDisableAll = createButton(buttonPanel, DialogConstants.DISABLEALL_BUTTON_TEXT, 
+					SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 			btnDisableAll.setToolTipText(Messages.AttributeTree_DisableAll_Tooltip);
-			btnDisableAll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			btnDisableAll.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -493,10 +495,9 @@ public class AttributeTree {
 			});
 			
 			
-			final Button btnEnableeAll = new Button(buttonPanel, SWT.NONE);
-			btnEnableeAll.setText(DialogConstants.ENABLEALL_BUTTON_TEXT); 
+			final Button btnEnableeAll = createButton(buttonPanel, DialogConstants.ENABLEALL_BUTTON_TEXT, 
+					SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 			btnEnableeAll.setToolTipText(Messages.AttributeTree_EnableAll_Tooltip);
-			btnEnableeAll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			btnEnableeAll.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -513,11 +514,10 @@ public class AttributeTree {
 			lbl = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
 			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
-			final Button btnDelete = new Button(buttonPanel, SWT.NONE);
-			btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			final Button btnDelete = createButton(buttonPanel, DialogConstants.DELETE_BUTTON_TEXT, 
+					SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			btnDelete.setEnabled(false);
 			btnDelete.setToolTipText(Messages.AttributeTree_Delete_Tooltip);
-			btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			btnDelete.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -579,8 +579,10 @@ public class AttributeTree {
 						miEdit.setEnabled(true);
 						if (((AttributeTreeNode)x).getIsActive()){
 							btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+							btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 						}else{
 							btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+							btnDisable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 						}
 					}
 					
@@ -588,6 +590,15 @@ public class AttributeTree {
 			});
 		}
 		return comp;
+	}
+	
+	private Button createButton(Composite parent, String text, Image icon) {
+		Button btnMoveDown = new Button(parent, SWT.NONE);
+		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnMoveDown.setText(text);
+		btnMoveDown.setImage(icon);
+		btnMoveDown.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		return btnMoveDown;
 	}
 	
 	private void sortNodes(List<AttributeTreeNode> nodes, final Language lang){

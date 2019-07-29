@@ -59,6 +59,7 @@ public class FontSelector extends Composite {
 		fontLabel = new Label(this, SWT.NONE);
 
 		Button button = new Button(this, SWT.PUSH);
+		button.setBackground(getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		button.setText(Messages.FontSelector_Button_Select);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {

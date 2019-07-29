@@ -159,7 +159,7 @@ public class EditTreeDialog extends SmartStyledTitleDialog {
 		
 		addItem = new MenuItem(m1, SWT.PUSH);
 		addItem.setText(Messages.EditTreeDialog_AddNodeButton);
-		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+//		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		addItem.addListener(SWT.Selection, e->addToConfigurableTree());
 		addItem.setEnabled(false);
 		
@@ -175,6 +175,8 @@ public class EditTreeDialog extends SmartStyledTitleDialog {
 		btnComp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
 		
 		btnAdd = new Button(btnComp, SWT.PUSH);
+		btnAdd.setBackground(btnComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+//		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnAdd.setEnabled(false);
 		btnAdd.setText(Messages.EditTreeDialog_AddNodeButton);
@@ -187,6 +189,8 @@ public class EditTreeDialog extends SmartStyledTitleDialog {
 		});
 				
 		Button btnAddGrp = new Button(btnComp, SWT.PUSH);
+		btnAddGrp.setBackground(btnComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+//		btnAddGrp.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnAddGrp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnAddGrp.setText(Messages.EditTreeDialog_AddGroup);
 		btnAddGrp.setToolTipText(Messages.EditTreeDialog_NewGroupTooltip);
@@ -199,6 +203,8 @@ public class EditTreeDialog extends SmartStyledTitleDialog {
 		
 		btnRemove = new Button(btnComp, SWT.PUSH);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//		btnRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnRemove.setBackground(btnComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnRemove.setToolTipText(Messages.EditTreeDialog_DeleteTooltip);
 		btnRemove.setEnabled(false);
@@ -211,6 +217,8 @@ public class EditTreeDialog extends SmartStyledTitleDialog {
 		
 		btnEnable = new Button(btnComp, SWT.PUSH);
 		btnEnable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//		btnEnable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
+		btnEnable.setBackground(btnComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 		btnEnable.setToolTipText(Messages.EditTreeDialog_EnableTooltip);
 		btnEnable.setEnabled(false);
@@ -719,9 +727,11 @@ public class EditTreeDialog extends SmartStyledTitleDialog {
 	private void updateEnableButtonText(){
 		if (this.cmNode == null || this.cmNode.getIsActive()){
 			btnEnable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+//			btnEnable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 			miEnable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 		}else{
 			btnEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+//			btnEnable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 			miEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 		}
 	}

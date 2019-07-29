@@ -482,6 +482,8 @@ public class AssetTypeDialog extends SmartStyledTitleDialog {
 		((GridLayout)buttonComp.getLayout()).marginHeight = 0;
 		
 		Button btnAdd = new Button(buttonComp, SWT.NONE);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setText(Messages.AssetTypeDialog_AddAttributeMenuItem);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -492,6 +494,8 @@ public class AssetTypeDialog extends SmartStyledTitleDialog {
 		});
 		
 		Button btnEdit = new Button(buttonComp, SWT.NONE);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnEdit.setEnabled(false);
@@ -503,6 +507,8 @@ public class AssetTypeDialog extends SmartStyledTitleDialog {
 		});
 		
 		Button btnDelete = new Button(buttonComp, SWT.NONE);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnDelete.setEnabled(false);
@@ -517,6 +523,7 @@ public class AssetTypeDialog extends SmartStyledTitleDialog {
 		s.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Button btnMoveUp = new Button(buttonComp, SWT.NONE);
+		btnMoveUp.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnMoveUp.setText(Messages.AssetTypeDialog_MoveDown);
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveUp.setEnabled(false);
@@ -528,6 +535,7 @@ public class AssetTypeDialog extends SmartStyledTitleDialog {
 		});
 		
 		Button btnMoveDown = new Button(buttonComp, SWT.NONE);
+		btnMoveDown.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnMoveDown.setText(Messages.AssetTypeDialog_MoveUp);
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveDown.setEnabled(false);

@@ -128,8 +128,12 @@ public class WorkingSetListDialog extends SmartStyledTitleDialog {
 			Composite buttonComp = new Composite(parent, SWT.NONE);
 			buttonComp.setLayout(new GridLayout());
 			buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+			((GridLayout)buttonComp.getLayout()).marginWidth = 0;
+			((GridLayout)buttonComp.getLayout()).marginHeight = 0;
 			
 			Button btnAdd = new Button(buttonComp, SWT.PUSH);
+			btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			btnAdd.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 			btnAdd.setToolTipText(Messages.WorkingSetListDialog_addTooltip);
 			btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -141,6 +145,7 @@ public class WorkingSetListDialog extends SmartStyledTitleDialog {
 			});
 	
 			Button btnCopy = new Button(buttonComp, SWT.PUSH);
+			btnCopy.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnCopy.setText(Messages.WorkingSetListDialog_CopyLabel);
 			btnCopy.setToolTipText(Messages.WorkingSetListDialog_copytooltip);
 			btnCopy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -153,6 +158,8 @@ public class WorkingSetListDialog extends SmartStyledTitleDialog {
 			btnCopy.setEnabled(false);
 			
 			Button btnRename = new Button(buttonComp, SWT.PUSH);
+			btnRename.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+			btnRename.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnRename.setText(Messages.WorkingSetListDialog_RenameLabel);
 			btnRename.setToolTipText(Messages.WorkingSetListDialog_renametooltip);
 			btnRename.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -166,6 +173,8 @@ public class WorkingSetListDialog extends SmartStyledTitleDialog {
 			
 			
 			Button btnDelete = new Button(buttonComp, SWT.PUSH);
+			btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			btnDelete.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 			btnDelete.setToolTipText(Messages.WorkingSetListDialog_deletetooltip);
 			btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

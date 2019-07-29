@@ -209,6 +209,7 @@ public class ImageSelectionControl extends Composite {
 		
 		
 		Button buttonLoad = new Button(btnCmp, SWT.PUSH);
+		buttonLoad.setBackground(btnCmp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		buttonLoad.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		buttonLoad.setText(Messages.ImageSelectionControl_Button_Load);
 		buttonLoad.addSelectionListener(new SelectionAdapter() {
@@ -222,6 +223,7 @@ public class ImageSelectionControl extends Composite {
 		});
 
 		Button buttonClear = new Button(btnCmp, SWT.PUSH);
+		buttonClear.setBackground(btnCmp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		buttonClear.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		buttonClear.setText(Messages.ImageSelectionControl_ResetIconBtn);
 		buttonClear.addSelectionListener(new SelectionAdapter() {

@@ -139,6 +139,7 @@ public class TranslateNameComposite extends Composite {
 		});
 		
 		button = new Button(this, SWT.PUSH);
+		button.setBackground(this.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		button.setText(Messages.TranslateNameComposite_Button_Translate);
 		button.addSelectionListener(new SelectionAdapter() {
 			@Override

@@ -66,6 +66,7 @@ public class ColorSelector extends Composite {
 		colorLabel.addListener(SWT.Dispose, e->disposeColor());		
 
 		Button button = new Button(this, SWT.PUSH);
+		button.setBackground(getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		button.setText(Messages.ColorSelector_Button_Color);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {

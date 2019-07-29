@@ -64,6 +64,7 @@ public class DisplayModeComboViewer extends Composite {
 		
 		if (includeCascade) {
 			btnCascade = new Button(this, SWT.PUSH);
+			btnCascade.setBackground(getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnCascade.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			btnCascade.setText(Messages.DisplayModeComboViewer_cascadeButton);
 			btnCascade.setToolTipText(Messages.DisplayModeComboViewer_cascadeTooltip);	

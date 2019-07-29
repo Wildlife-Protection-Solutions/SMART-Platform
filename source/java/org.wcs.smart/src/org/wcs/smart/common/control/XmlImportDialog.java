@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 
@@ -134,6 +135,8 @@ public class XmlImportDialog  extends SmartStyledTitleDialog {
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, true));
 		
 		btnAdd = new Button(buttons, SWT.PUSH);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(buttons.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setText(Messages.XmlImportDialog_AddButton);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -160,6 +163,8 @@ public class XmlImportDialog  extends SmartStyledTitleDialog {
 		
 		btnRemove = new Button(buttons, SWT.PUSH);
 		btnRemove.setText(Messages.XmlImportDialog_RemoveButton);
+		btnRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnRemove.setBackground(buttons.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnRemove.addSelectionListener(new SelectionAdapter() {
 			@Override

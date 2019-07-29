@@ -212,20 +212,25 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 		compButtons.setLayout(new GridLayout(1, false));
 		compButtons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		btnRename = new Button(compButtons, SWT.PUSH);
-		btnRename.setText(Messages.BasemapPropertyPage_RenameButton);
-		btnRename.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnRename.addListener(SWT.Selection, e->rename());
-		
 		btnDefault = new Button(compButtons, SWT.PUSH);
 		btnDefault.setText(Messages.BasemapPropertyPage_SetDefaultButton);
 		btnDefault.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnDefault.addListener(SWT.Selection, e->setdefault());
+		btnDefault.setBackground(compButtons.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		btnRename = new Button(compButtons, SWT.PUSH);
+		btnRename.setText(Messages.BasemapPropertyPage_RenameButton);
+		btnRename.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnRename.addListener(SWT.Selection, e->rename());
+		btnRename.setBackground(compButtons.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnRename.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		
 		btnDelete = new Button(compButtons, SWT.PUSH);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnDelete.addListener(SWT.Selection,e->delete());
+		btnDelete.setBackground(compButtons.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		
 		loadData();
 		return comp;

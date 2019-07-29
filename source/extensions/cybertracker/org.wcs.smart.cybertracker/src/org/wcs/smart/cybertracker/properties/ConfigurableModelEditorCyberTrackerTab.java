@@ -171,6 +171,7 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		buttonsCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Button btnManage = new Button(buttonsCmp, SWT.PUSH);
+		btnManage.setBackground(buttonsCmp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnManage.setText(Messages.ConfigurableModelEditorCyberTrackerTab_Button_ManageProfiles);
 		btnManage.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -180,7 +181,9 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 		});
 		
 		Button btnCreate = new Button(buttonsCmp, SWT.PUSH);
+		btnCreate.setBackground(buttonsCmp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnCreate.setText(Messages.ConfigurableModelEditorCyberTrackerTab_Button_CreateProfile);
+		btnCreate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnCreate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -190,6 +193,8 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 
 		Button btnEdit = new Button(buttonsCmp, SWT.PUSH);
 		btnEdit.setText(Messages.ConfigurableModelEditorCyberTrackerTab_Button_EditProfile);
+		btnEdit.setBackground(buttonsCmp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

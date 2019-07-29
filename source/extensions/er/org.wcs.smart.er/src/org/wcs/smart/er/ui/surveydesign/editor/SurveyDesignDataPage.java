@@ -71,6 +71,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
@@ -183,7 +184,7 @@ public class SurveyDesignDataPage extends EditorPart {
 			
 			ToolItem deleteItem = new ToolItem(tools, SWT.PUSH);
 			deleteItem.setToolTipText(Messages.SurveyDesignDataPage_DeleteTooltip);
-			deleteItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.DELETE_ICON));
+			deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			deleteItem.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -342,7 +343,7 @@ public class SurveyDesignDataPage extends EditorPart {
 				}
 			});
 			
-			mgr.add(new Action(Messages.SurveyDesignDataPage_DeleteMenuLabel, EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.DELETE_ICON)) {
+			mgr.add(new Action(Messages.SurveyDesignDataPage_DeleteMenuLabel, SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DELETE_ICON)) {
 				@Override
 				public void run(){
 					deleteSelection();

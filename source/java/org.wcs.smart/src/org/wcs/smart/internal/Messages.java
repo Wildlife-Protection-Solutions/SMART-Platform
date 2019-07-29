@@ -773,6 +773,7 @@ public class Messages extends NLS {
 	public static String EmployeePropertyPage_newteamerror;
 	public static String EmployeePropertyPage_newteammessage;
 	public static String EmployeePropertyPage_newteamtext;
+	public static String EmployeePropertyPage_NewTeamName;
 	public static String EmployeePropertyPage_NewTeamTitle;
 	public static String EmployeePropertyPage_Op_IncludeInActive;
 	public static String EmployeePropertyPage_PageTitle;

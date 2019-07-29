@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -293,6 +294,8 @@ public class NameKeyComposite {
 			txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		
 			Button btnChangeKey = new Button(parent, SWT.NONE);
+			btnChangeKey.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			btnChangeKey.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			btnChangeKey.setText(Messages.NameKeyComposite_ChangeKey_Button_Label);
 			btnChangeKey.setToolTipText(Messages.NameKeyComposite_ChangeKey_Button_Tooltip);
 			btnChangeKey.addSelectionListener(new SelectionAdapter() {			

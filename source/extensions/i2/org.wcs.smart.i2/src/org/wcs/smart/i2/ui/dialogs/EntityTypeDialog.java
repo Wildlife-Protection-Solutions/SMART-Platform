@@ -412,6 +412,8 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
 		btnEditTemplate = new Button(parent, SWT.PUSH);
+		btnEditTemplate.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnEditTemplate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		btnEditTemplate.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEditTemplate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnEditTemplate.addSelectionListener(new SelectionAdapter() {
@@ -637,6 +639,8 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		btnAdd = new Button(buttonComp, SWT.NONE);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setText(Messages.EntityTypeDialog_AddAttributeAction);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -647,6 +651,8 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		});
 		
 		btnNewGroup = new Button(buttonComp, SWT.NONE);
+		btnNewGroup.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnNewGroup.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnNewGroup.setText(Messages.EntityTypeDialog_NewGroupBtn);
 		btnNewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnNewGroup.addSelectionListener(new SelectionAdapter() {
@@ -657,6 +663,8 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		});
 		
 		btnEdit = new Button(buttonComp, SWT.NONE);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnEdit.setEnabled(false);
@@ -668,6 +676,8 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		});
 		
 		btnDelete = new Button(buttonComp, SWT.NONE);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnDelete.setEnabled(false);
@@ -683,6 +693,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		
 		btnMoveUp = new Button(buttonComp, SWT.NONE);
 		btnMoveUp.setText(Messages.EntityTypeDialog_MoveDownBtn);
+		btnMoveUp.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveUp.setEnabled(false);
 		btnMoveUp.addSelectionListener(new SelectionAdapter() {
@@ -693,6 +704,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		});
 		
 		btnMoveDown = new Button(buttonComp, SWT.NONE);
+		btnMoveDown.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnMoveDown.setText(Messages.EntityTypeDialog_MoveUpBtn);
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveDown.setEnabled(false);
@@ -703,8 +715,8 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			}
 		});
 		
-		s = new Label(buttonComp, SWT.HORIZONTAL | SWT.SEPARATOR);
-		s.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+//		s = new Label(buttonComp, SWT.HORIZONTAL | SWT.SEPARATOR);
+//		s.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		setTitle(Messages.EntityTypeDialog_Title);
 		getShell().setText(Messages.EntityTypeDialog_Title);
@@ -795,7 +807,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			
 			
 			treeAttributes.refresh();
-			if (type.getIdAttribute() == null){
+			if (type.getIdAttribute() == null && !attributeList.isEmpty()){
 				type.setIdAttribute(attributeList.get(0).getAttribute());
 			}
 			refreshAttributeList();

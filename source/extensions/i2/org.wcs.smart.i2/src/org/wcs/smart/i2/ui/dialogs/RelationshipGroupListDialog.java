@@ -193,8 +193,12 @@ public class RelationshipGroupListDialog extends SmartStyledTitleDialog {
 		Composite buttonPanel = new Composite(parent, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout());
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		((GridLayout)buttonPanel.getLayout()).marginWidth = 0;
+		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
 		
 		btnNew = new Button(buttonPanel, SWT.PUSH);
+		btnNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnNew.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT)); 
 		btnNew.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnNew.addSelectionListener(new SelectionAdapter() {
@@ -204,6 +208,8 @@ public class RelationshipGroupListDialog extends SmartStyledTitleDialog {
 			}
 		});
 		btnEdit = new Button(buttonPanel, SWT.PUSH);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnEdit.addSelectionListener(new SelectionAdapter() {
@@ -214,6 +220,8 @@ public class RelationshipGroupListDialog extends SmartStyledTitleDialog {
 		});
 		
 		btnDelete = new Button(buttonPanel, SWT.PUSH);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnDelete.addSelectionListener(new SelectionAdapter() {

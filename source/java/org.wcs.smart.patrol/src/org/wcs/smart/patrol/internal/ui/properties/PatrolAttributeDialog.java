@@ -145,7 +145,7 @@ public class PatrolAttributeDialog extends SmartStyledTitleDialog implements Sel
 		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		btnEdit.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1,1));
-		btnEdit.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
+		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setEnabled(false);
 		btnEdit.addSelectionListener(this);
 		

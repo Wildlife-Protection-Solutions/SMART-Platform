@@ -208,17 +208,23 @@ public class StationPropertiesDialog extends SmartStyledTitleDialog {
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
 		
 		Button btnAdd = new Button(buttonPanel, SWT.PUSH);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setText((DialogConstants.ADD_BUTTON_TEXT));
 		btnAdd.addListener(SWT.Selection, a->addAttribute(type));
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Button btnEdit = new Button(buttonPanel, SWT.PUSH);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.addListener(SWT.Selection, a->editAttribute(type));
 		btnEdit.setEnabled(false);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Button btnDelete = new Button(buttonPanel, SWT.PUSH);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.addListener(SWT.Selection, a->removeAttributes(type));
 		btnDelete.setEnabled(false);
@@ -228,12 +234,14 @@ public class StationPropertiesDialog extends SmartStyledTitleDialog {
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Button btnMoveUp = new Button(buttonPanel, SWT.PUSH);
+		btnMoveUp.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnMoveUp.setText(Messages.StationPropertiesDialog_MoveUp);
 		btnMoveUp.addListener(SWT.Selection, a->moveAttribute(type, SWT.DOWN));
 		btnMoveUp.setEnabled(false);
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Button btnMoveDown = new Button(buttonPanel, SWT.PUSH);
+		btnMoveDown.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnMoveDown.setText(Messages.StationPropertiesDialog_MoveDown);
 		btnMoveDown.addListener(SWT.Selection, a->moveAttribute(type, SWT.UP));
 		btnMoveDown.setEnabled(false);

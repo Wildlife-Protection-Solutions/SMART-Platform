@@ -56,6 +56,8 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IResolve;
 import org.locationtech.udig.catalog.IService;
@@ -78,9 +80,6 @@ import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
 import org.wcs.smart.udig.catalog.smart.ui.DesktopSessionProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
-
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.io.WKBWriter;
 
 /**
  * Property page for managing conservation area

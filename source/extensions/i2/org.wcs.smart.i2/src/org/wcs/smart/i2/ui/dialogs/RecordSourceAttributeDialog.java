@@ -434,6 +434,8 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Button btnAdd = new Button(buttonPanel, SWT.PUSH);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addListener(SWT.Selection, e->{
@@ -441,6 +443,8 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 		});
 		
 		Button btnDelete = new Button(buttonPanel, SWT.PUSH);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnDelete.addListener(SWT.Selection, e->{
@@ -450,6 +454,7 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 		l = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		Button btnMoveUp = new Button(buttonPanel, SWT.PUSH);
+		btnMoveUp.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnMoveUp.setText(Messages.RecordSourceAttributeDialog_moveUpLabel);
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveUp.addListener(SWT.Selection, e->{
@@ -457,6 +462,7 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 		});
 		
 		Button btnMoveDown = new Button(buttonPanel, SWT.PUSH);
+		btnMoveDown.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnMoveDown.setText(Messages.RecordSourceAttributeDialog_moveDownLabel);
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveDown.addListener(SWT.Selection, e->{
@@ -642,6 +648,8 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 		buttonPanel.setLayoutData(new GridData(SWT.TOP, SWT.FILL, false, false));
 		
 		Button btnAdd = new Button(buttonPanel, SWT.PUSH);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addListener(SWT.Selection, e->{
@@ -649,6 +657,8 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 		});
 		
 		Button btnEdit = new Button(buttonPanel, SWT.PUSH);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnEdit.addListener(SWT.Selection, e->{
@@ -656,6 +666,8 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 		});
 		
 		Button btnDelete = new Button(buttonPanel, SWT.PUSH);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnDelete.addListener(SWT.Selection, e->{

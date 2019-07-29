@@ -64,6 +64,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
@@ -166,6 +167,8 @@ public class EditListDialog extends SmartStyledTitleDialog{
 		itemViewer.getControl().setMenu(listMenu);
 		
 		btnEnable = new Button(btnPanel, SWT.PUSH);
+		btnEnable.setBackground(btnPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnEnable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 		GridData gd = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
 		gd.verticalIndent = 2;
 		gd.horizontalIndent = 2;
@@ -456,9 +459,11 @@ public class EditListDialog extends SmartStyledTitleDialog{
 
 		if (this.cmNode == null || this.cmNode.getIsActive()){
 			btnEnable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+			btnEnable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 			miEnable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 		}else{
 			btnEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+			btnEnable.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 			miEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 		}
 	}

@@ -151,6 +151,14 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		all.setLayout(new GridLayout(1, false));
 		all.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		Composite t = new Composite(all, SWT.NONE);
+		t.setLayout(new GridLayout(2, false));
+		Label l = new Label(t, SWT.WRAP);
+		l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+		l = new Label(t, SWT.WRAP);
+		l.setText("These settings are only supported by CyberTracker Classic not SMART Mobile.");
+		
+		
 		dbAlertsList = loadInitialAlerts(dialog.getModel());
 		properties = loadInitialProperties();
 		
@@ -388,6 +396,8 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		});
 		
 		btnNew = new Button(innerLeft, SWT.PUSH);
+		btnNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnNew.setBackground(innerLeft.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnNew.setText(Messages.ConfigurableModelEditorConnectTab_Button_NewAlert);
 		btnNew.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false));
 		((GridData)btnNew.getLayoutData()).widthHint = 90;
@@ -456,6 +466,8 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 
 		btnEdit = new Button(buttonPanel, SWT.PUSH);
 		btnEdit.setText(Messages.ConfigurableModelEditorConnectTab_Button_Edit);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEdit.setLayoutData(new GridData(SWT.BEGINNING, SWT.BOTTOM, false, false));
 		((GridData)btnEdit.getLayoutData()).widthHint = 90;
 		btnEdit.addSelectionListener(new SelectionAdapter() {
@@ -466,6 +478,8 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		});
 
 		btnDelete = new Button(buttonPanel, SWT.PUSH);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(innerLeft.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDelete.setText(Messages.ConfigurableModelEditorConnectTab_Button_Delete);
 		btnDelete.setLayoutData(new GridData(SWT.BEGINNING, SWT.BOTTOM, false, false));
 		((GridData)btnDelete.getLayoutData()).widthHint = 90;
@@ -477,6 +491,8 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		});
 		
 		Button btnRefresh = new Button(buttonPanel, SWT.PUSH);
+		btnRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		btnRefresh.setBackground(innerLeft.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnRefresh.setText(Messages.ConfigurableModelEditorConnectTab_RefreshTypes);
 		btnRefresh.setToolTipText(Messages.ConfigurableModelEditorConnectTab_RefreshToolTip);
 		btnRefresh.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));

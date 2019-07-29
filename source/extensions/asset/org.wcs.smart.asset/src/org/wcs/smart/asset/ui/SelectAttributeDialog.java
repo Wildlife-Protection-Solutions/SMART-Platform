@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.ui.config.AttributeDialog;
@@ -175,6 +176,8 @@ public class SelectAttributeDialog extends SmartStyledTitleDialog{
 			}
 		});
 		Button btnNew = new Button(parent, SWT.PUSH);
+		btnNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnNew.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnNew.setText(Messages.SelectAttributeDialog_NewButton);
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			

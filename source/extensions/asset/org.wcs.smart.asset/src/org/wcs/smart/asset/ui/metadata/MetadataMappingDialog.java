@@ -221,13 +221,13 @@ public class MetadataMappingDialog extends SmartStyledTitleDialog{
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, true));
 
-		Button btnNew = createButton(buttonPanel, DialogConstants.ADD_BUTTON_TEXT, ()->addMapping());
-		Button btnEdit = createButton(buttonPanel, DialogConstants.EDIT_BUTTON_TEXT, ()->editMapping());
-		Button btnDelete = createButton(buttonPanel, DialogConstants.DELETE_BUTTON_TEXT, ()->deleteMappings());
+		Button btnNew = createButton(buttonPanel, DialogConstants.ADD_BUTTON_TEXT, SmartPlugIn.ADD_ICON, ()->addMapping());
+		Button btnEdit = createButton(buttonPanel, DialogConstants.EDIT_BUTTON_TEXT, SmartPlugIn.EDIT_ICON, ()->editMapping());
+		Button btnDelete = createButton(buttonPanel, DialogConstants.DELETE_BUTTON_TEXT, SmartPlugIn.DELETE_ICON, ()->deleteMappings());
 		Label l = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		Button btnMoveUp = createButton(buttonPanel, Messages.MetadataMappingDialog_MoveUp, ()->moveUp());
-		Button btnMoveDown = createButton(buttonPanel, Messages.MetadataMappingDialog_MoveDown, ()->moveDown());
+		Button btnMoveUp = createButton(buttonPanel, Messages.MetadataMappingDialog_MoveUp, null, ()->moveUp());
+		Button btnMoveDown = createButton(buttonPanel, Messages.MetadataMappingDialog_MoveDown, null, ()->moveDown());
 		
 		btnNew.setEnabled(true);
 		tblMappings.getControl().addListener(SWT.Selection, e->{
@@ -280,8 +280,10 @@ public class MetadataMappingDialog extends SmartStyledTitleDialog{
 		return parent;
 	}
 	
-	private Button createButton(Composite parent, String text, Callable<Void> event) {
+	private Button createButton(Composite parent, String text, String image, Callable<Void> event) {
 		Button button = new Button(parent, SWT.PUSH);
+		if (image != null)button.setImage(SmartPlugIn.getDefault().getImageRegistry().get(image));
+		button.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		button.setText(text);
 		button.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		button.addListener(SWT.Selection, e->{

@@ -353,6 +353,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		btnAddCategory = new Button(buttonPanel, SWT.PUSH);
 		btnAddCategory.setEnabled(false);
+		btnAddCategory.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAddCategory.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAddCategory.setText(Messages.DataModelPropertyPage_AddCategory_Button);
 		btnAddCategory.setToolTipText(Messages.DataModelPropertyPage_AddCategory_Tooltip);
 		btnAddCategory.addSelectionListener(new SelectionAdapter(){
@@ -364,6 +366,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		btnAddAttribute = new Button(buttonPanel, SWT.PUSH);
 		btnAddAttribute.setEnabled(false);
+		btnAddAttribute.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAddAttribute.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAddAttribute.setText(Messages.DataModelPropertyPage_AddAttribute_Button);
 		btnAddAttribute.setToolTipText(Messages.DataModelPropertyPage_AddAttribute_Tooltip);
 		btnAddAttribute.addSelectionListener(new SelectionAdapter(){
@@ -377,6 +381,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		btnDisableElement.setEnabled(false);
 		btnDisableElement.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 		btnDisableElement.setToolTipText(Messages.DataModelPropertyPage_Disable_Tooltip);
+		btnDisableElement.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+		btnDisableElement.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDisableElement.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -388,6 +394,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		btnDeleteElement = new Button(buttonPanel, SWT.NONE);
 		btnDeleteElement.setEnabled(false);
 		btnDeleteElement.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDeleteElement.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDeleteElement.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDeleteElement.setToolTipText(Messages.DataModelPropertyPage_Delete_Tooltip);
 		btnDeleteElement.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -424,6 +432,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		btnModifyElement = new Button(infoButtonPanel, SWT.NONE);
 		btnModifyElement.setEnabled(false);
 		btnModifyElement.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		btnModifyElement.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnModifyElement.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnModifyElement.setToolTipText(Messages.DataModelPropertyPage_Edit_Tooltip);
 		btnModifyElement.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -443,6 +453,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		Button mergeButton = new Button(bottomComp, SWT.PUSH);
 		mergeButton.setText(Messages.DataModelPropertyPage_MergeButton);
 		mergeButton.setToolTipText(Messages.DataModelPropertyPage_MergeTooltip);
+		mergeButton.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
+		mergeButton.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		mergeButton.addSelectionListener(new SelectionAdapter() {		
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -453,6 +465,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		//export 
 		Button exportButton = new Button(bottomComp, SWT.PUSH);
+		exportButton.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
+		exportButton.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		exportButton.setText(Messages.DataModelPropertyPage_ExportXml_Button);
 		exportButton.setToolTipText(Messages.DataModelPropertyPage_ExportTooltip);
 		exportButton.addSelectionListener(new SelectionAdapter() {		
@@ -1170,8 +1184,10 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			
 			if (((Category)o).getIsActive()){
 				btnDisableElement.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+				btnDisableElement.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 			}else{
 				btnDisableElement.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+				btnDisableElement.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 			}
 			btnDisableElement.setEnabled(true);
 		}else if (o instanceof CategoryAttribute){
@@ -1184,8 +1200,10 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			
 			if (((CategoryAttribute)o).getIsActive()){
 				btnDisableElement.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+				btnDisableElement.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 			}else{
 				btnDisableElement.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+				btnDisableElement.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 			}
 			btnDisableElement.setEnabled(true);
 		} else	if (o instanceof DataModelContentProvider.RootNode){

@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
@@ -92,6 +93,8 @@ public class PlanTargetComposite extends PlanComposite {
 		buttonPnl.setLayoutData(new GridData(SWT.TOP, SWT.FILL, false, false));
 		
 		Button btnNew = new Button(buttonPnl, SWT.NONE);
+		btnNew.setBackground(buttonPnl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnNew.setText(Messages.PlanTargetComposite_AddTarget_Button);
 		btnNew.addSelectionListener(new SelectionAdapter() {
@@ -109,6 +112,8 @@ public class PlanTargetComposite extends PlanComposite {
 		
 		
 		final Button btnEdit = new Button(buttonPnl, SWT.NONE);
+		btnEdit.setBackground(buttonPnl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnEdit.setText(Messages.PlanTargetComposite_EditTarget_Button);
 		btnEdit.addSelectionListener(new SelectionAdapter() {
@@ -129,6 +134,8 @@ public class PlanTargetComposite extends PlanComposite {
 		
 		
 		final Button btnDelete = new Button(buttonPnl, SWT.NONE);
+		btnDelete.setBackground(buttonPnl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnDelete.setText(Messages.PlanTargetComposite_DeleteTarget_Button);
 		btnDelete.addSelectionListener(new SelectionAdapter() {

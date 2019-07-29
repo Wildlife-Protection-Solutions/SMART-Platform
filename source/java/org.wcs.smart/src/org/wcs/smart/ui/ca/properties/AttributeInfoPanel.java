@@ -444,9 +444,7 @@ public class AttributeInfoPanel extends Composite {
 			buttonPanel.setLayout(new GridLayout(1, false));
 			buttonPanel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 			
-			Button btnAddList = new Button(buttonPanel, SWT.NONE);
-			btnAddList.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
-			btnAddList.setText(DialogConstants.ADD_BUTTON_TEXT);
+			Button btnAddList = createButton(buttonPanel, DialogConstants.ADD_BUTTON_TEXT, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			btnAddList.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -465,9 +463,10 @@ public class AttributeInfoPanel extends Composite {
 					validate();
 				}
 			});
-			final Button btnEditList = new Button(buttonPanel, SWT.NONE);
-			btnEditList.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
-			btnEditList.setText(DialogConstants.EDIT_BUTTON_TEXT);
+			
+			final Button btnEditList = createButton(buttonPanel, DialogConstants.EDIT_BUTTON_TEXT, 
+					SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+			btnEditList.setEnabled(false);
 			btnEditList.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -483,11 +482,10 @@ public class AttributeInfoPanel extends Composite {
 					validate();
 				}
 			});
-			btnEditList.setEnabled(false);
 			
-			btnDisableListItem = new Button(buttonPanel, SWT.NONE);
-			btnDisableListItem.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
-			btnDisableListItem.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+			btnDisableListItem = createButton(buttonPanel, DialogConstants.DISABLE_BUTTON_TEXT, 
+					SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
+			btnDisableListItem.setEnabled(false);
 			btnDisableListItem.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -503,11 +501,11 @@ public class AttributeInfoPanel extends Composite {
 					validate();
 				}
 			});
-			btnDisableListItem.setEnabled(false);
 			
-			btnDeleteListItem = new Button(buttonPanel, SWT.NONE);
-			btnDeleteListItem.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
-			btnDeleteListItem.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			
+			btnDeleteListItem = createButton(buttonPanel, DialogConstants.DELETE_BUTTON_TEXT, 
+					SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			btnDeleteListItem.setEnabled(false);
 			btnDeleteListItem.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e){
@@ -547,11 +545,9 @@ public class AttributeInfoPanel extends Composite {
 					});
 				}
 			});
-			btnDeleteListItem.setEnabled(false);
 			
-			btnMoveUp = new Button(buttonPanel, SWT.NONE);
-			btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
-			btnMoveUp.setText(Messages.AttributeInfoPanel_MoveUpBtn);
+			
+			btnMoveUp = createButton(buttonPanel, Messages.AttributeInfoPanel_MoveUpBtn, null);
 			btnMoveUp.setEnabled(false);
 			btnMoveUp.addSelectionListener(new SelectionAdapter(){
 				@Override
@@ -572,9 +568,7 @@ public class AttributeInfoPanel extends Composite {
 				}
 			});
 			
-			btnMoveDown = new Button(buttonPanel, SWT.NONE);
-			btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
-			btnMoveDown.setText(Messages.AttributeInfoPanel_MoveDownBtn);
+			btnMoveDown = createButton(buttonPanel, Messages.AttributeInfoPanel_MoveDownBtn, null);
 			btnMoveDown.setEnabled(false);
 			btnMoveDown.addSelectionListener(new SelectionAdapter(){
 				@Override
@@ -595,9 +589,7 @@ public class AttributeInfoPanel extends Composite {
 				}
 			});
 			
-			btnSort = new Button(buttonPanel, SWT.NONE);
-			btnSort.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-			btnSort.setText(Messages.AttributeInfoPanel_SortButton);
+			btnSort = createButton(buttonPanel, Messages.AttributeInfoPanel_SortButton, null);
 			btnSort.setToolTipText(Messages.AttributeInfoPanel_SortButtonTooltip);
 			btnSort.setEnabled(true);
 			btnSort.addSelectionListener(new SelectionAdapter(){
@@ -628,8 +620,10 @@ public class AttributeInfoPanel extends Composite {
 					btnMoveUp.setEnabled(it != null);
 					if (it != null && it.getIsActive()){
 						btnDisableListItem.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+						btnDisableListItem.setImage( SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON) );
 					}else{
 						btnDisableListItem.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+						btnDisableListItem.setImage( SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON) );
 					}
 				}
 			});
@@ -752,6 +746,15 @@ public class AttributeInfoPanel extends Composite {
 		});
 	}
 
+	private Button createButton(Composite parent, String text, Image icon) {
+		Button btnMoveDown = new Button(parent, SWT.NONE);
+		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnMoveDown.setText(text);
+		btnMoveDown.setImage(icon);
+		btnMoveDown.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		return btnMoveDown;
+	}
+	
 	private void resize() {
 		main.layout(true);
 		scroll.setMinSize(main.computeSize(scroll.getClientArea().width, SWT.DEFAULT));

@@ -578,8 +578,12 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 		Composite buttonComp = new Composite(attributeComp, SWT.NONE);
 		buttonComp.setLayout(new GridLayout());
 		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridLayout)buttonComp.getLayout()).marginWidth = 0;
+		((GridLayout)buttonComp.getLayout()).marginHeight = 0;
 		
 		btnAdd = new Button(buttonComp, SWT.NONE);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -590,6 +594,8 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 		});
 		
 		btnEdit = new Button(buttonComp, SWT.NONE);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnEdit.setEnabled(false);
@@ -601,6 +607,8 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 		});
 		
 		btnDelete = new Button(buttonComp, SWT.NONE);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnDelete.setEnabled(false);
@@ -615,6 +623,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 		s.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		btnMoveUp = new Button(buttonComp, SWT.NONE);
+		btnMoveUp.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnMoveUp.setText(Messages.RelationshipTypeDialog_MoveDown);
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveUp.setEnabled(false);
@@ -626,6 +635,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 		});
 		
 		btnMoveDown = new Button(buttonComp, SWT.NONE);
+		btnMoveDown.setBackground(buttonComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnMoveDown.setText(Messages.RelationshipTypeDialog_MoveUp);
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveDown.setEnabled(false);
@@ -901,6 +911,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 			attributeList.setFilters(new ViewerFilter[]{filter});
 			
 			Button btnNew = new Button(parent, SWT.PUSH);
+			btnNew.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnNew.setText(Messages.RelationshipTypeDialog_CreateNewOption);
 			btnNew.addSelectionListener(new SelectionAdapter() {
 				

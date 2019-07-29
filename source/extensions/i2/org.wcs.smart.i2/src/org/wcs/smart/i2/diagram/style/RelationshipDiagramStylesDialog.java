@@ -179,9 +179,13 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		Composite btnCmp = new Composite(main, SWT.NONE);
 		btnCmp.setLayout(new GridLayout(1, false));
 		btnCmp.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+		((GridLayout)btnCmp.getLayout()).marginWidth = 0;
+		((GridLayout)btnCmp.getLayout()).marginHeight = 0;
 		
 		btnCreate = new Button(btnCmp, SWT.PUSH);
-		btnCreate.setText(Messages.RelationshipDiagramStylesDialog_Button_Create);
+		btnCreate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnCreate.setBackground(btnCmp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnCreate.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnCreate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnCreate.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -191,6 +195,8 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		});
 
 		btnEdit = new Button(btnCmp, SWT.PUSH);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(btnCmp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEdit.setText(Messages.RelationshipDiagramStylesDialog_Button_Edit);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnEdit.addSelectionListener(new SelectionAdapter() {
@@ -201,6 +207,8 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		});
 		
 		btnDelete = new Button(btnCmp, SWT.PUSH);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(btnCmp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDelete.setText(Messages.RelationshipDiagramStylesDialog_Button_Delete);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnDelete.addSelectionListener(new SelectionAdapter() {

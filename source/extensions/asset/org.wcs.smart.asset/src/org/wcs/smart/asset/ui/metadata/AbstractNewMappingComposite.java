@@ -252,12 +252,16 @@ public abstract class AbstractNewMappingComposite {
 		btnPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		Button btnAdd = new Button(btnPanel, SWT.PUSH);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnAdd.addListener(SWT.Selection,  e->addTagMapping());
 		btnAdd.setEnabled(false);
 		
 		Button btnRemove = new Button(btnPanel, SWT.PUSH);
+		btnRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnRemove.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnRemove.addListener(SWT.Selection, e->removeExifValueMappings());
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

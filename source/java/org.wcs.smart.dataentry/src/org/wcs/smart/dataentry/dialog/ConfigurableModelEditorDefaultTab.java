@@ -200,14 +200,18 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 			mi.addListener(SWT.Selection, e->doControlButtonPress(cbtn));
 			mi.setEnabled(true);
 			
-			if (cbtn == ControlButton.ADD_CATEGORY || cbtn == ControlButton.ADD_GROUP) {
-				mi.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-			}else if (cbtn == ControlButton.DELETE) {
-				mi.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-			}
-			
 			Button btn = new Button(buttonPanel, SWT.PUSH);
 			btn.setText(cbtn.name);
+			btn.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			
+			if (cbtn == ControlButton.ADD_CATEGORY || cbtn == ControlButton.ADD_GROUP) {
+				mi.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+				btn.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			}else if (cbtn == ControlButton.DELETE) {
+				mi.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+				btn.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			}
+			
 			btn.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {

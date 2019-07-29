@@ -62,6 +62,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
@@ -312,11 +314,9 @@ public class ObservationDialog extends SmartStyledDialog {
 		});
 		
 		
-		Composite buttonPanel = new Composite(lower, SWT.NONE);
-		buttonPanel.setLayout(new GridLayout());
-		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
-		Button btnEdit = new Button(buttonPanel, SWT.PUSH);
+		ToolBar tb = new ToolBar(lower, SWT.VERTICAL | SWT.FLAT);
+		tb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		ToolItem btnEdit = new ToolItem(tb, SWT.PUSH);
 		btnEdit.setToolTipText(Messages.ObservationDialog_edittooltip);
 		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		btnEdit.addSelectionListener(new SelectionAdapter(){
@@ -326,7 +326,7 @@ public class ObservationDialog extends SmartStyledDialog {
 			}
 		});
 		
-		Button btnDelete = new Button(buttonPanel, SWT.PUSH);
+		ToolItem btnDelete = new ToolItem(tb, SWT.PUSH);
 		btnDelete.setToolTipText(Messages.ObservationDialog_deletetooltip);
 		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnDelete.addSelectionListener(new SelectionAdapter(){
@@ -381,7 +381,7 @@ public class ObservationDialog extends SmartStyledDialog {
 					 }
 				 }
 			 }
-			 
+
 			 btnAdd.setText(Messages.ObservationDialog_UpdateBtn);
 			 observationTable.refresh();
 		 }
@@ -496,6 +496,7 @@ public class ObservationDialog extends SmartStyledDialog {
 		}
 		
 		btnAdd = new Button(attributeComposite, SWT.NONE);
+		btnAdd.setBackground(attributeComposite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		btnAdd.setText(Messages.ObservationDialog_CreateButton);
 		btnAdd.addSelectionListener(new SelectionAdapter() {

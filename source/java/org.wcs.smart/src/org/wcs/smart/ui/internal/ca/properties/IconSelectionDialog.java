@@ -252,7 +252,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 			l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 			
 			Composite btn = new Composite(main, SWT.NONE);
-			btn.setLayout(new GridLayout());
+			btn.setLayout(new GridLayout(3, false));
 			btn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridLayout)btn.getLayout()).marginWidth = 0;
 			((GridLayout)btn.getLayout()).marginHeight = 0;
@@ -265,7 +265,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 			btnImport.setText(Messages.IconSelectionDialog_NewSrc);
 			
 			l = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
-			l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
 			btnLibrary.addListener(SWT.Selection, e->{
 				((StackLayout)stackPanel.getLayout()).topControl = iconLibraryPanel;
@@ -281,6 +281,8 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		stackPanel = new Composite(main, SWT.NONE);
 		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		stackPanel.setLayout(new StackLayout());
+		((StackLayout)stackPanel.getLayout()).marginWidth = 0;
+		((StackLayout)stackPanel.getLayout()).marginHeight = 0;
 		
 		if (type == Type.SELECT) {
 			iconLibraryPanel = createLibraryComposite(stackPanel, activeSets);
@@ -307,6 +309,8 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		Composite panel = new Composite(parent, SWT.NONE);
 		panel.setLayout(new GridLayout(2, false));
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)panel.getLayout()).marginWidth = 0;
+		((GridLayout)panel.getLayout()).marginHeight= 0;
 		
 		Label l = new Label(panel, SWT.NONE);
 		l.setText(Messages.IconSelectionDialog_NameLabel);
@@ -412,6 +416,8 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 	private Composite createLibraryComposite(Composite parent, List<IconSet> sets) {
 		Composite panel = new Composite(parent, SWT.NONE);
 		panel.setLayout(new GridLayout());
+		((GridLayout)panel.getLayout()).marginWidth = 0;
+		((GridLayout)panel.getLayout()).marginHeight= 0;
 		
 		tblIcons = new TableViewer(panel, SWT.FULL_SELECTION | SWT.SINGLE | SWT.BORDER | SWT.VIRTUAL);
 		tblIcons.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

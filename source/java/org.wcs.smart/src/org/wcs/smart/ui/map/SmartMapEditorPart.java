@@ -329,6 +329,7 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
         lblSeparator.setLayoutData(gd);
         
         lblSRID = new Button(infoArea, SWT.NONE);
+        lblSRID.setBackground(infoArea.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
         lblSRID.setText(map.getViewportModel().getCRS().getName().getCode());
         lblSRID.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
         lblSRID.addSelectionListener(new SelectionAdapter() {

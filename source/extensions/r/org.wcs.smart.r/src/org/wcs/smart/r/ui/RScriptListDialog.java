@@ -50,6 +50,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -57,8 +58,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -87,9 +86,7 @@ public class RScriptListDialog extends SmartStyledTitleDialog {
 	private MenuItem mnuAdd;
 	private MenuItem mnuDelete;
 	
-	private ToolItem tiNew;
-	private ToolItem tiEdit;
-	private ToolItem tiDelete;
+	private Button btnNew, btnEdit, btnDelete;
 	 
 	private Job loadScript = new Job("load R scripts "){ //$NON-NLS-1$
 
@@ -153,8 +150,8 @@ public class RScriptListDialog extends SmartStyledTitleDialog {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				tiEdit.setEnabled(!cmbScripts.getSelection().isEmpty());
-				tiDelete.setEnabled(!cmbScripts.getSelection().isEmpty());
+				btnEdit.setEnabled(!cmbScripts.getSelection().isEmpty());
+				btnDelete.setEnabled(!cmbScripts.getSelection().isEmpty());
 				mnuEdit.setEnabled(!cmbScripts.getSelection().isEmpty());
 				mnuDelete.setEnabled(!cmbScripts.getSelection().isEmpty());
 			}
@@ -165,23 +162,32 @@ public class RScriptListDialog extends SmartStyledTitleDialog {
 		tableColumnLayout.setColumnData(singleColumn, new ColumnWeightData(100));
 		tcomp.setLayout(tableColumnLayout);
 		
-		ToolBar tb = new ToolBar(parent, SWT.VERTICAL | SWT.FLAT | SWT.RIGHT);
-		tb.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		Composite btnComp = new Composite(parent, SWT.NONE);
+		btnComp.setLayout(new GridLayout());
+		((GridLayout)btnComp.getLayout()).marginWidth = 0;
+		((GridLayout)btnComp.getLayout()).marginHeight = 0;
+		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		tiNew = new ToolItem(tb, SWT.PUSH);
-		tiNew.setText(DialogConstants.ADD_BUTTON_TEXT);
-		tiNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		tiNew.addListener(SWT.Selection,e->add());
+		btnNew = new Button(btnComp, SWT.PUSH);
+		btnNew.setBackground(btnComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnNew.setText(DialogConstants.ADD_BUTTON_TEXT);
+		btnNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnNew.addListener(SWT.Selection,e->add());
+		btnNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		tiEdit = new ToolItem(tb, SWT.PUSH);
-		tiEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		tiEdit.addListener(SWT.Selection,e->edit());
+		btnEdit = new Button(btnComp, SWT.PUSH);
+		btnEdit.setBackground(btnComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.addListener(SWT.Selection,e->edit());
+		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		tiDelete = new ToolItem(tb, SWT.PUSH);
-		tiDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiDelete.addListener(SWT.Selection,e->delete());
+		btnDelete = new Button(btnComp, SWT.PUSH);
+		btnDelete.setBackground(btnComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.addListener(SWT.Selection,e->delete());
+		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Menu menu = new Menu(cmbScripts.getControl());
 		cmbScripts.getControl().setMenu(menu);
@@ -201,9 +207,9 @@ public class RScriptListDialog extends SmartStyledTitleDialog {
 		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		mnuDelete.addListener(SWT.Selection,e-> delete());
 		
-		tiNew.setEnabled(true);
-		tiEdit.setEnabled(false);
-		tiDelete.setEnabled(false);
+		btnNew.setEnabled(true);
+		btnEdit.setEnabled(false);
+		btnDelete.setEnabled(false);
 		mnuAdd.setEnabled(true);
 		mnuEdit.setEnabled(false);
 		mnuDelete.setEnabled(false);

@@ -161,6 +161,8 @@ public class AttributeListPanel extends Composite {
 		btnPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		btnAdd = new Button(btnPanel, SWT.PUSH);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(btnPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -171,6 +173,8 @@ public class AttributeListPanel extends Composite {
 		});
 		
 		btnEdit = new Button(btnPanel, SWT.PUSH);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(btnPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnEdit.setEnabled(false);
@@ -183,6 +187,8 @@ public class AttributeListPanel extends Composite {
 		
 		
 		btnRemove = new Button(btnPanel, SWT.PUSH);
+		btnRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnRemove.setBackground(btnPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnRemove.setEnabled(false);

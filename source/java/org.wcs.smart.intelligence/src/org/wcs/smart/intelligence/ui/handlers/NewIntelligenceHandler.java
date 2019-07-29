@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.intelligence.ui.IntelligencePerspective;
 import org.wcs.smart.intelligence.ui.wizard.NewIntelligenceWizard;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Handler for handling "Create New Intelligence" command
@@ -48,7 +49,7 @@ public class NewIntelligenceHandler {
 
 		// Show Create New Intelligence Wizard
 		final NewIntelligenceWizard wizard = new NewIntelligenceWizard();
-		WizardDialog dialog = new WizardDialog(activeShell, wizard);
+		WizardDialog dialog = new SmartWizardDialog(activeShell, wizard);
 		if (dialog.open() == Window.OK){
     		// open in editor
         	(new OpenIntelligenceHandler()).openIntelligence(wizard.getIntelligence().getUuid(), window);

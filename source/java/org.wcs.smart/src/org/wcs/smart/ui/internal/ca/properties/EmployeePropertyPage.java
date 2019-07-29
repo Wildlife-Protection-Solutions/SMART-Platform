@@ -658,7 +658,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 		newTeam.setNames(new HashSet<>());
 		newTeam.setConservationArea(SmartDB.getCurrentConservationArea());
 		newTeam.setMembers(new ArrayList<>());
-		newTeam.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), "Team Name");
+		newTeam.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), Messages.EmployeePropertyPage_NewTeamName);
 		
 		CreateEditNamedItemDialog dialog = new CreateEditNamedItemDialog(getShell(), newTeam) {
 			protected Control createDialogArea(Composite parent) {

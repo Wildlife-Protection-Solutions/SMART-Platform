@@ -217,7 +217,8 @@ public class SelectAttributeEntityTypeDialog extends SmartStyledTitleDialog{
 				
 			}
 		});
-		Button btnNew = new Button(parent, SWT.PUSH);
+		Button btnNew = new Button(parent, SWT.PUSH); 
+		btnNew.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnNew.setText(Messages.SelectAttributeEntityTypeDialog_NewAttributeBtn);
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			

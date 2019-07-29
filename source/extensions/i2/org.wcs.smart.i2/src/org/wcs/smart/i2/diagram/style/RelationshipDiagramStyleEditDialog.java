@@ -208,6 +208,7 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 		styleNameDecoration.hide();
 		
 		Button btnTranslate = new Button(topCmp, SWT.PUSH);
+		btnTranslate.setBackground(btnTranslate.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnTranslate.setText(Messages.RelationshipDiagramStyleEditDialog_Button_Translate);
 		btnTranslate.addSelectionListener(new SelectionAdapter() {
 			@Override
