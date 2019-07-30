@@ -29,9 +29,9 @@ import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -47,24 +47,17 @@ import org.wcs.smart.ui.SmartStyledTitleDialog;
  */
 public class RunDialog extends SmartStyledTitleDialog {
 
-	private CCombo dtTrainStart, dtTrainEnd, dtTestStart, dtTestEnd, dtForcastStart, dtForcastEnd;
+	private Combo dtTrainStart, dtTrainEnd, dtForcastStart, dtForcastEnd;
 	private Text txtId;
 	
 	private Integer trainStart;
 	private Integer trainEnd;
-	private Integer testStart;
-	private Integer testEnd;
+	
 	private Integer forcastStart;
 	private Integer forcastEnd;
 	
-	private LocalDate dataStart, dataEnd;
-	
-	private DateTime dtStart, dtEnd;
-	
 	private String id;
 	
-	private boolean startModified = false;
-	private boolean endModified = false;
 	private Color errorColor;
 	
 	protected RunDialog(Shell parent) {
@@ -72,31 +65,24 @@ public class RunDialog extends SmartStyledTitleDialog {
 
 	}
 
+	
 	public int getTrainStart(){ return this.trainStart; }
 	public int getTrainEnd(){ return this.trainEnd; }
-	public int getTestStart(){ return this.testStart; }
-	public int getTestEnd(){ return this.testEnd; }
 	public int getForcastStart(){ return this.forcastStart; }
 	public int getForcastEnd(){ return this.forcastEnd; }
-	public LocalDate getDataStart() {return this.dataStart; }
-	public LocalDate getDataEnd() {return this.dataEnd; }
 	
 	
-	public void setDates(int trainStart, int trainEnd, int testStart, int testEnd, int forcastStart, int forcastEnd, LocalDate dataStart, LocalDate dataEnd) {
+	public void setDates(int trainStart, int trainEnd, int forcastStart, int forcastEnd) {
 		this.trainStart = trainStart;
 		this.trainEnd = trainEnd;
-		this.testStart = testStart;
-		this.testEnd = testEnd;
 		this.forcastStart = forcastStart;
 		this.forcastEnd = forcastEnd;
-		this.dataStart = dataStart;
-		this.dataEnd = dataEnd;
 	}
 	
 	public void setId(String id){ this.id = id; }
 	public String getId(){ return this.id; }
 	
-	private boolean validateInt(CCombo txt){
+	private boolean validateInt(Combo txt){
 		try {
 			int item = Integer.valueOf(txt.getText());
 			if (item < 1950 || item > 2300) throw new Exception("value must be between 1950 and 2300");
@@ -112,8 +98,6 @@ public class RunDialog extends SmartStyledTitleDialog {
 		boolean error = false;
 		if (!validateInt(dtTrainStart)) error = true;
 		if (!validateInt(dtTrainEnd)) error = true;
-		if (!validateInt(dtTestStart)) error = true;
-		if (!validateInt(dtTestEnd)) error = true;
 		if (!validateInt(dtForcastStart)) error = true;
 		if (!validateInt(dtForcastEnd)) error = true;
 		
@@ -121,30 +105,20 @@ public class RunDialog extends SmartStyledTitleDialog {
 			MessageDialog.openInformation(getShell(), "Error", "You must resvole date error before continuing.  All years must be valid integers between 1950 and 2300");
 			return;
 		}
-		
+	
 		trainStart = Integer.valueOf(dtTrainStart.getText());
 		trainEnd = Integer.valueOf(dtTrainEnd.getText());
-		
-		testStart = Integer.valueOf(dtTestStart.getText());
-		testEnd = Integer.valueOf(dtTestEnd.getText());
 		
 		forcastStart = Integer.valueOf(dtForcastStart.getText());
 		forcastEnd = Integer.valueOf(dtForcastEnd.getText());
 		
-		this.dataStart = LocalDate.of(dtStart.getYear(), dtStart.getMonth()+1, dtStart.getDay());
-		this.dataEnd = LocalDate.of(dtEnd.getYear(), dtEnd.getMonth()+1, dtEnd.getDay());
-		
 		id = txtId.getText();
 		
-		if (trainStart > trainEnd){
-			MessageDialog.openError(getShell(), "Error", "Training End Date cannot be before the Start Date");
-			return;
-		}
-		
-		if (testStart > testEnd){			
+		if (trainStart > trainEnd){			
 			MessageDialog.openError(getShell(), "Error", "Testing End Date cannot be before the Start Date");
 			return;
 		}
+		
 		
 		if (forcastStart > forcastEnd){
 			MessageDialog.openError(getShell(), "Error", "Forcasting End Date cannot be before the Start Date");
@@ -161,17 +135,13 @@ public class RunDialog extends SmartStyledTitleDialog {
 
 		errorColor = new Color(main.getDisplay(), 255, 230, 230);
 		main.addListener(SWT.Dispose, e->errorColor.dispose());
-		
-		Composite outer = new Composite(main, SWT.NONE);
-		outer.setLayout(new GridLayout());
-		outer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 
-		Composite header = new Composite(outer, SWT.NONE);
+		Composite header = new Composite(main, SWT.NONE);
 		header.setLayout(new GridLayout(2, false));
 		header.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		Label l = new Label(header, SWT.NONE);
-		l.setText("Name:");
+		l.setText("Run Identifier:");
 		
 		txtId = new Text(header, SWT.BORDER);
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -181,22 +151,20 @@ public class RunDialog extends SmartStyledTitleDialog {
 			txtId.setText("New Run Identifier");
 		}
 		
-		Label spacer = new Label(outer, SWT.SEPARATOR | SWT.HORIZONTAL);
-		spacer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
-		
 		int year = LocalDate.now().getYear();
 		
-		Composite g = new Composite(outer, SWT.NONE);
-		g.setLayout(new GridLayout(4, false));
-		g.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-
-		l = new Label(g, SWT.NONE);
+		l = new Label(header, SWT.NONE);
 		l.setText("Training Years:");
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		Listener validate = e->validateInt((CCombo)e.widget);
+		Listener validate = e->validateInt((Combo)e.widget);
 		
-		dtTrainStart = createDateDropDown(g);
+		Composite dates = new Composite(header, SWT.NONE);
+		dates.setLayout(new GridLayout(3, false));
+		dates.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)dates.getLayout()).marginWidth = 0;
+		((GridLayout)dates.getLayout()).marginHeight = 0;
+		
+		dtTrainStart = createDateDropDown(dates);
 		dtTrainStart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		if (trainStart != null) {
 			dtTrainStart.setText(String.valueOf(trainStart));
@@ -205,10 +173,11 @@ public class RunDialog extends SmartStyledTitleDialog {
 		}
 		dtTrainStart.addListener(SWT.Modify, validate);
 		
-		l = new Label(g, SWT.NONE);
+		
+		l = new Label(dates, SWT.NONE);
 		l.setText("to");
 		
-		dtTrainEnd = createDateDropDown(g);
+		dtTrainEnd = createDateDropDown(dates);
 		dtTrainEnd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		if (trainEnd != null) {
 			dtTrainEnd.setText(String.valueOf(trainEnd));
@@ -217,33 +186,17 @@ public class RunDialog extends SmartStyledTitleDialog {
 		}
 		dtTrainEnd.addListener(SWT.Modify, validate);
 		
-		l = new Label(g, SWT.NONE);
-		l.setText("Test Years:");
-
-		dtTestStart = createDateDropDown(g);
-		dtTestStart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		if (testStart != null) {
-			dtTestStart.setText(String.valueOf(testStart));
-		}else {
-			dtTestStart.setText(String.valueOf(year - 1));
-		}
-		dtTestStart.addListener(SWT.Modify, validate);
 		
-		l = new Label(g, SWT.NONE);
-		l.setText("to");
-		dtTestEnd = createDateDropDown(g);
-		dtTestEnd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		if (testEnd != null) {
-			dtTestEnd.setText(String.valueOf(testEnd));
-		}else {
-			dtTestEnd.setText(String.valueOf(year));
-		}
-		dtTestEnd.addListener(SWT.Modify, validate);
-		
-		l = new Label(g, SWT.NONE);
+		l = new Label(header, SWT.NONE);
 		l.setText("Forecasting Years:");
 		
-		dtForcastStart = createDateDropDown(g);
+		dates = new Composite(header, SWT.NONE);
+		dates.setLayout(new GridLayout(3, false));
+		dates.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)dates.getLayout()).marginWidth = 0;
+		((GridLayout)dates.getLayout()).marginHeight = 0;
+		
+		dtForcastStart = createDateDropDown(dates);
 		dtForcastStart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		if (forcastStart != null) {
 			dtForcastStart.setText(String.valueOf(forcastStart));
@@ -253,9 +206,9 @@ public class RunDialog extends SmartStyledTitleDialog {
 		dtForcastStart.addListener(SWT.Modify, validate);
 		
 		
-		l = new Label(g, SWT.NONE);
+		l = new Label(dates, SWT.NONE);
 		l.setText("to");
-		dtForcastEnd = createDateDropDown(g);
+		dtForcastEnd = createDateDropDown(dates);
 		dtForcastEnd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		if (forcastEnd != null) {
 			dtForcastEnd.setText(String.valueOf(forcastEnd));
@@ -263,41 +216,12 @@ public class RunDialog extends SmartStyledTitleDialog {
 			dtForcastEnd.setText(String.valueOf(year + 2));
 		}
 		dtForcastEnd.addListener(SWT.Modify, validate);
-		
-		l = new Label(g, SWT.NONE);
-		l.setText("Data Dates:");
-
-		
-		dtStart = new DateTime(g, SWT.DROP_DOWN | SWT.MEDIUM);
-		dtStart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		dtStart.addListener(SWT.Selection, e->startModified=true);
-		if (dataStart != null) {
-			dtStart.setDate(dataStart.getYear(), dataStart.getMonthValue()-1, dataStart.getDayOfMonth());
-			startModified = true;
-		}else {
-			dtStart.setDate(year-5, 0, 1);
-		}
-		
-		l = new Label(g, SWT.NONE);
-		l.setText("to");
-		dtEnd = new DateTime(g, SWT.DROP_DOWN |  SWT.MEDIUM);
-		dtEnd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		dtEnd.addListener(SWT.Selection, e->endModified=true);
-		if (dataEnd != null) {
-			dtEnd.setDate(dataEnd.getYear(), dataEnd.getMonthValue()-1, dataEnd.getDayOfMonth());
-			endModified = true;
-		}else {
-			dtEnd.setDate(year, 0, 1);
-		}
-
-		dtTrainStart.addListener(SWT.Modify, e->{
-			if (startModified) return;
-			dtStart.setDate(Integer.valueOf(dtTrainStart.getText()), 0, 1);
-		});
-		dtTestEnd.addListener(SWT.Modify, e->{
-			if (endModified) return;
-			dtEnd.setDate(Integer.valueOf(dtTestEnd.getText()), 0, 1);
-		});
+	
+//		dtTrainStart.addListener(SWT.Modify, e->{
+//			if (startModified) return;
+//			dtStart.setDate(Integer.valueOf(dtTrainStart.getText()), 0, 1);
+//		});
+	
 		setTitle("PAWS Analysis");
 		getShell().setText("PAWS");
 		setMessage("The date range of data send to PAWS Analysis");
@@ -309,8 +233,8 @@ public class RunDialog extends SmartStyledTitleDialog {
 		return true;
 	}
 	
-	private CCombo createDateDropDown(Composite parent) {
-		CCombo dd = new CCombo(parent, SWT.DROP_DOWN | SWT.BORDER);
+	private Combo createDateDropDown(Composite parent) {
+		Combo dd = new Combo(parent, SWT.DROP_DOWN | SWT.BORDER);
 		
 		int year = LocalDate.now().getYear();
 		String[] items = new String[30];

@@ -43,11 +43,6 @@
             supportsCcaa="true">
       </class>
       <class
-            ca_property=".configuration.conservationArea"
-            class="org.wcs.smart.paws.model.PawsQueryClass"
-            supportsCcaa="true">
-      </class>
-      <class
             class="org.wcs.smart.paws.model.PawsRun"
             supportsCcaa="true">
       </class>
@@ -61,8 +56,8 @@
       </class>
       <class
             ca_property=".configuration.conservationArea"
-            class="org.wcs.smart.paws.model.PawsSimpleClass"
-            supportsCcaa="true">
+            class="org.wcs.smart.paws.model.PawsClassification"
+            supportsCcaa="false">
       </class>
    </extension>
    <extension

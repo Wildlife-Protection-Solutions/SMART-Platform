@@ -87,7 +87,7 @@ public class NewPawsRunHandler {
 		
 		RunDialog dialog = new RunDialog(context.get(Shell.class));
 
-		if (copy != null) dialog.setDates(copy.getTrainStartYear(), copy.getTrainEndYear(), copy.getTestStartYear(), copy.getTestEndYear(), copy.getForecastStartYear(), copy.getForecastEndYear(), copy.getDataStartDate(), copy.getDataEndDate());
+		if (copy != null) dialog.setDates(copy.getTrainStartYear(), copy.getTrainEndYear(), copy.getForecastStartYear(), copy.getForecastEndYear());
 		if (initName != null) dialog.setId(initName);
 		
 		if (dialog.open() != Window.OK) return;
@@ -95,12 +95,8 @@ public class NewPawsRunHandler {
 		PawsRun temp = new PawsRun();
 		temp.setTrainStartYear(dialog.getTrainStart());
 		temp.setTrainEndYear(dialog.getTrainEnd());
-		temp.setTestStartYear(dialog.getTestStart());
-		temp.setTestEndYear(dialog.getTestEnd());
 		temp.setForecastStartYear(dialog.getForcastStart());
 		temp.setForecastEndYear(dialog.getForcastEnd());
-		temp.setDataStartDate(dialog.getDataStart());
-		temp.setDataEndDate(dialog.getDataEnd());
 		
 		initName = dialog.getId();
 		
@@ -125,17 +121,11 @@ public class NewPawsRunHandler {
 			prun.setId(initName);
 				
 			prun.setStatus(PawsRun.Status.COMPILING_DATA);
-				
-			prun.setDataStartDate(copy.getDataStartDate());
-			prun.setDataEndDate(copy.getDataEndDate());
+
 			prun.setForecastEndYear(copy.getForecastEndYear());
 			prun.setForecastStartYear(copy.getForecastStartYear());
-			prun.setTestEndYear(copy.getTestEndYear());
-			prun.setTestStartYear(copy.getTestStartYear());
 			prun.setTrainEndYear(copy.getTrainEndYear());
 			prun.setTrainStartYear(copy.getTrainStartYear());
-				
-			
 		}
 		return prun;
 	}

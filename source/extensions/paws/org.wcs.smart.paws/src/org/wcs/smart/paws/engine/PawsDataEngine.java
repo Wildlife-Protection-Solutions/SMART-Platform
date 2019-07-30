@@ -55,12 +55,11 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsManager;
+import org.wcs.smart.paws.model.PawsClassification;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
-import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsRun.Status;
-import org.wcs.smart.paws.model.PawsSimpleClass;
 import org.wcs.smart.paws.model.PawsWorkspace;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
@@ -79,8 +78,7 @@ public class PawsDataEngine {
 	private static AtomicLong tableCnter = new AtomicLong();
 
 	private PawsRun run;
-	
-	private HashMap<String, String> classmappings;
+
 	private List<Path> packageFiles;
 	private CoordinateReferenceSystem targetCrs;
 	
@@ -228,9 +226,10 @@ public class PawsDataEngine {
 			JSONObject patrolobs = new JSONObject();
 			config.put("patrol_observations", patrolobs);
 			
+			
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-			patrolobs.put("start_date", formatter.format(run.getDataStartDate()));
-			patrolobs.put("end_date", formatter.format(run.getDataEndDate()));
+			patrolobs.put("start_date", formatter.format(run.getStartDataDate()));
+			patrolobs.put("end_date", formatter.format(run.getEndDataDate()));
 
 			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.TIMEZONE.name());
 			if (pp == null) throw new Exception("Timezone value must be provided.  Update the configuration and try again.");
@@ -242,11 +241,10 @@ public class PawsDataEngine {
 			JSONObject mappings = new JSONObject();
 			
 			//just add single mapping for now
-			Entry<String, String> firstmapping = classmappings.entrySet().iterator().next();
-			mappings.put("field_name", firstmapping.getKey());
-			mappings.put("classification_class", firstmapping.getValue());
+			mappings.put("field_name", "class");
+			mappings.put("classification_class", run.getConfiguration().getClassification().getClassification());
 			JSONArray matches = new JSONArray();
-			mappings.put("matching_observations",firstmapping.getValue()); ;
+			mappings.put("matching_observations",run.getConfiguration().getClassification().getClassification()); ;
 			
 			config.put("illegal_activity_class_mappings", mappings);
 			
@@ -262,15 +260,14 @@ public class PawsDataEngine {
 			config.put("model_experimentation", modelexperimentation);
 			modelexperimentation.put("train_start_year", run.getTrainStartYear());
 			modelexperimentation.put("train_end_year", run.getTrainEndYear());
-			modelexperimentation.put("test_start_year", run.getTestStartYear());
-			modelexperimentation.put("test_end_year", run.getTestEndYear());
+
+//			modelexperimentation.put("test_start_year", run.getTestStartYear());
+//			modelexperimentation.put("test_end_year", run.getTestEndYear());
 			
 			JSONObject modelforecasting = new JSONObject();
 			config.put("model_forecasting", modelforecasting);
 			modelforecasting.put("start", run.getForecastStartYear());
-			modelforecasting.put("end", run.getForecastEndYear());
-			
-			
+			modelforecasting.put("end", run.getForecastEndYear());	
 		}
 		
 		Files.write(configPath, Collections.singletonList(config.toJSONString()), StandardCharsets.UTF_8);
@@ -436,8 +433,6 @@ public class PawsDataEngine {
 	}
 	
 	private void packageData(Path datafile) throws Exception {
-		classmappings = new HashMap<>();
-		
 		List<String> tempTables = new ArrayList<>();
 		
 		String mastertable = createTempTable();
@@ -449,36 +444,13 @@ public class PawsDataEngine {
 			
 				PawsConfiguration configuration = session.get(PawsConfiguration.class, run.getConfiguration().getUuid());
 				
-				List<PawsSimpleClass> simple = QueryFactory.buildQuery(session, PawsSimpleClass.class, 
-						new Object[] {"configuration", configuration}).list();
-				
-				List<PawsQueryClass> queries = QueryFactory.buildQuery(session, PawsQueryClass.class, 
-						new Object[] {"configuration", configuration}).list();
-				
-				
-				
-				if (simple.isEmpty() && queries.isEmpty()) return;
+				if (configuration.getClassification() == null) return;
 				
 				//create a master table
 				StringBuilder create = new StringBuilder();
 				create.append("CREATE TABLE ");
 				create.append(mastertable);
-				create.append("( wp_uuid char(16) for bit data, obs_uuid char(16) for bit data, x double, y double, datetime timestamp,");
-				
-				int n = 1;
-				for (PawsSimpleClass pc : simple) {
-					create.append("pawsclass" + n + " varchar(8192),");
-					classmappings.put("pawsclass" + n, pc.getClassification());
-					n++;
-				}
-				for (PawsQueryClass qc : queries) {
-					create.append("pawsclass" + n + " varchar(8192),");
-					classmappings.put("pawsclass" + n, qc.getClassification());
-					n++;
-				}
-				create.deleteCharAt(create.length() - 1);
-				create.append(")");
-				
+				create.append("( wp_uuid char(16) for bit data, obs_uuid char(16) for bit data, x double, y double, datetime timestamp, pawsclass varchar(8192) )");
 				System.out.println(create.toString());
 				session.createNativeQuery(create.toString()).executeUpdate();
 				
@@ -500,12 +472,13 @@ public class PawsDataEngine {
 				create.append("(wp_uuid, obs_uuid, x, y, datetime)");
 				create.append(" SELECT a.uuid, obs.uuid, a.x, a.y, a.datetime ");
 				create.append(" FROM smart.waypoint a ");
-				create.append(" JOIN smart.wp_observation obs ON obs.wp_uuid = a.uuid " );
+				create.append(" LEFT JOIN smart.wp_observation obs ON obs.wp_uuid = a.uuid " );
 				create.append(" WHERE a.datetime between :start and :end ");
 				System.out.println(create.toString());
+				
 				session.createNativeQuery(create.toString())
-					.setParameter("start", run.getDataStartDate())
-					.setParameter("end", run.getDataEndDate())
+					.setParameter("start", run.getStartDataDate().atStartOfDay())
+					.setParameter("end", run.getEndDataDate().atTime(23, 59, 59))
 					.executeUpdate();
 				
 				create = new StringBuilder();
@@ -517,11 +490,11 @@ public class PawsDataEngine {
 				from.append(alldata);
 				from.append(" a ");
 				
+				if (configuration.getClassification().getType() == PawsClassification.Type.DATAMODEL) {
 				
-				for (PawsSimpleClass pc : simple) {
 					String table = createTempTable();
 					tempTables.add(table);
-					SimpleClassEngine e = new SimpleClassEngine(pc, run.getDataStartDate(), run.getDataEndDate());
+					SimpleClassEngine e = new SimpleClassEngine(configuration.getClassification(), run.getStartDataDate(), run.getEndDataDate());
 					e.process(session, table);
 					
 					create.append(",");
@@ -529,14 +502,13 @@ public class PawsDataEngine {
 					from.append(" LEFT JOIN " + table + " ON a.obs_uuid = " + table + ".obs_uuid ");
 				}
 				
-				List<QueryClassEngine> engines = new ArrayList<>();
-				for (PawsQueryClass pc : queries) {
-					QueryClassEngine e = new QueryClassEngine(pc, run.getDataStartDate(), run.getDataEndDate());
+				QueryClassEngine e = null;
+				if (configuration.getClassification().getType() == PawsClassification.Type.QUERY) {
+					e = new QueryClassEngine(configuration.getClassification(), run.getStartDataDate(), run.getEndDataDate());
 					e.process(session);
-					engines.add(e);
 					
 					create.append(",");
-					create.append(" case when " + e.getTable() + "." + e.getObsColumn() + " is null then null else '" + pc.getClassification() + "' end");
+					create.append(" case when " + e.getTable() + "." + e.getObsColumn() + " is null then null else '" + configuration.getClassification().getClassification() + "' end");
 					from.append(" LEFT JOIN " + e.getTable() + " ON a.obs_uuid = " + e.getTable() + "." + e.getObsColumn() + " ");
 				}
 				
@@ -548,7 +520,7 @@ public class PawsDataEngine {
 				session.createNativeQuery(create.toString()).executeUpdate();
 				
 				
-				writeToCsv(session, mastertable, datafile, simple.size() + queries.size());
+				writeToCsv(session, mastertable, datafile);
 				
 				packageFiles.add(datafile);
 				
@@ -557,7 +529,7 @@ public class PawsDataEngine {
 					System.out.println("DROP TABLE " + table);
 					session.createNativeQuery("DROP TABLE " + table).executeUpdate();
 				}
-				for (QueryClassEngine e : engines) e.dispose(session);
+				if (e != null) e.dispose(session);
 			}finally {
 				session.getTransaction().commit();
 			}
@@ -565,7 +537,7 @@ public class PawsDataEngine {
 		
 	}
 	
-	private void writeToCsv(Session session, String tablename, Path filename, int numclasses) throws IOException {
+	private void writeToCsv(Session session, String tablename, Path filename) throws IOException {
 		
 		
 		try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(filename, StandardCharsets.UTF_8))){
@@ -577,26 +549,16 @@ public class PawsDataEngine {
 			headers.add("Patrol ID");
 			headers.add("X");
 			headers.add("Y");
-			for (int i = 1; i <= classmappings.size(); i ++) {
-				headers.add("CLASS" + i);
-			}
+			headers.add("CLASS");
 			writer.writeNext(headers.toArray(new String[headers.size()]));
 			
 			//join to patrols to get start date, end date and patrol id if available
 			StringBuilder select = new StringBuilder();
-			select.append("SELECT a.*, p.id, p.start_date, p.end_date FROM ");
+			select.append("SELECT DISTINCT a.wp_uuid, a.x, a.y, a.datetime, a.pawsclass, p.id, p.start_date, p.end_date FROM ");
 			select.append(tablename);
 			select.append(" a LEFT JOIN smart.patrol_waypoint pw on pw.wp_uuid = a.wp_uuid LEFT JOIN smart.patrol_leg_day pld on pld.uuid = pw.leg_day_uuid ");
 			select.append(" left join smart.patrol_leg pl on pld.patrol_leg_uuid = pl.uuid ");
 			select.append(" left join smart.patrol p on p.uuid = pl.patrol_uuid ");
-			select.append(" WHERE ");
-			for (int i = 1; i <= numclasses; i ++) {
-				select.append("pawsclass" + i + " is not null OR ");
-			}
-			select.deleteCharAt(select.length() - 1);
-			select.deleteCharAt(select.length() - 1);
-			select.deleteCharAt(select.length() - 1);
-			
 			
 			try(ScrollableResults results = session.createNativeQuery(select.toString()).scroll()){
 				while(results.next()) {
@@ -605,10 +567,9 @@ public class PawsDataEngine {
 					Object[] items = results.get();
 					
 					byte[] wpuuid = (byte[]) items[0];
-					byte[] obsuuid = (byte[]) items[1];
-					double x = (double)items[2];
-					double y = (double)items[3];
-					Timestamp datetime = (Timestamp)items[4];
+					double x = (double)items[1];
+					double y = (double)items[2];
+					Timestamp datetime = (Timestamp)items[3];
 					
 					//Waypoint Date
 					int index = 0;
@@ -616,15 +577,23 @@ public class PawsDataEngine {
 					
 					//Start Date
 					//TODO
-					data[index++] = DateFormat.getDateInstance().format((Date)items[6 + classmappings.size() ]);
+					if (items[7] == null) {
+						data[index++] = "";
+					}else {
+						data[index++] = DateFormat.getDateInstance().format((Date)items[6]);
+					}
 					
 					//End Date
 					//TODO
-					data[index++] = DateFormat.getDateInstance().format((Date)items[7 + classmappings.size() ]);
+					if (items[8] == null) {
+						data[index++] = "";
+					}else {
+						data[index++] = DateFormat.getDateInstance().format((Date)items[7]);
+					}
 					
 					//PatrolID
 					//TODO
-					data[index++] = (String) items[5 + classmappings.size() ];
+					data[index++] = (String) items[5];
 					
 					//TODO: this needs to be reprojected to target CRS
 					Point pnt = ReprojectUtils.transform(x, y, targetCrs);
@@ -633,9 +602,8 @@ public class PawsDataEngine {
 					//Y
 					data[index++] = String.valueOf( pnt.getY() );					
 					
-					for (int i = 1; i <= classmappings.size(); i ++) {
-						data[index++] = (String)items[4+i];
-					}
+					data[index++] = (String)items[4];
+					
 					writer.writeNext(data);
 				}
 			}

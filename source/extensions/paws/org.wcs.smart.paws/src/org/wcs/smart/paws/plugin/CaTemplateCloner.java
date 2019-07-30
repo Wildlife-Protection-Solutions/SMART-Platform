@@ -31,10 +31,9 @@ import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.paws.model.PawsClassification;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
-import org.wcs.smart.paws.model.PawsQueryClass;
-import org.wcs.smart.paws.model.PawsSimpleClass;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -102,33 +101,24 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 					//will need to be redefined by user
 				}
 			}
-			session.save(clone);
 			
-			List<PawsSimpleClass> simpleMappings = QueryFactory.buildQuery(session, PawsSimpleClass.class,
-					new Object[]{"configuration", c}).getResultList();
-			for (PawsSimpleClass pw : simpleMappings){
-				PawsSimpleClass pwclone = new PawsSimpleClass();
+			PawsClassification pw = c.getClassification();
+			if (pw != null) {
+				PawsClassification pwclone = new PawsClassification();
 				pwclone.setCategoryHkey(pw.getCategoryHkey());
 				pwclone.setAttributeKey(pw.getAttributeKey());
 				pwclone.setAttributeListItemKey(pw.getAttributeListItemKey());
 				pwclone.setAttributeTreeNodeHkey(pw.getAttributeTreeNodeHkey());
 				pwclone.setClassification(pw.getClassification());
-				pwclone.setConfiguration(clone);
-				session.save(pwclone);
-			}
-			
-			List<PawsQueryClass> queryMappings = QueryFactory.buildQuery(session, PawsQueryClass.class,
-					new Object[]{"configuration", c}).getResultList();
-			for (PawsQueryClass pw : queryMappings){
-				UUID quuid = engine.getNewConservationItem(pw.getQueryUuid()).getUuid();
-				if (quuid == null) continue;
-				PawsQueryClass pwclone = new PawsQueryClass();
+				pwclone.setType(pwclone.getType());
 				pwclone.setQueryType(pw.getQueryType());
-				pwclone.setQueryUuid(quuid);
-				pwclone.setClassification(pw.getClassification());
+				pwclone.setQueryUuid(pw.getQueryUuid());
+				
 				pwclone.setConfiguration(clone);
-				session.save(pwclone);
+				
+				clone.setClassification(pwclone);
 			}
+			session.save(clone);
 		}
 	}
 }

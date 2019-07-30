@@ -32,6 +32,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
@@ -65,15 +66,15 @@ public class PawsRun extends UuidItem{
 	private String statusmessage;
 	private String serverjson;
 	
-	private int teststartyear;
-	private int testendyear;
+//	private int teststartyear;
+//	private int testendyear;
 	private int trainstartyear;
 	private int trainendyear;
 	private int forecaststartyear;
 	private int forecastendyear;
 	
-	private LocalDate dataStartDate;
-	private LocalDate dataEndDate;
+//	private LocalDate dataStartDate;
+//	private LocalDate dataEndDate;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -122,23 +123,33 @@ public class PawsRun extends UuidItem{
 		this.trainendyear = end;
 	}
 	
-	@Column(name="test_start_year")
-	public int getTestStartYear() {
-		return this.teststartyear;
+	@Transient
+	public LocalDate getStartDataDate() {
+		return LocalDate.of(getTrainStartYear(), 1, 1);
 	}
 	
-	public void setTestStartYear(int start) {
-		this.teststartyear = start;
+	@Transient
+	public LocalDate getEndDataDate() {
+		return LocalDate.of(getTrainEndYear(), 12, 31);
 	}
 	
-	@Column(name="test_end_year")
-	public int getTestEndYear() {
-		return this.testendyear;
-	}
-	
-	public void setTestEndYear(int end) {
-		this.testendyear = end;
-	}
+//	@Column(name="test_start_year")
+//	public int getTestStartYear() {
+//		return this.teststartyear;
+//	}
+//	
+//	public void setTestStartYear(int start) {
+//		this.teststartyear = start;
+//	}
+//	
+//	@Column(name="test_end_year")
+//	public int getTestEndYear() {
+//		return this.testendyear;
+//	}
+//	
+//	public void setTestEndYear(int end) {
+//		this.testendyear = end;
+//	}
 	
 	@Column(name="forecast_start_year")
 	public int getForecastStartYear() {
@@ -157,24 +168,7 @@ public class PawsRun extends UuidItem{
 	public void setForecastEndYear(int end) {
 		this.forecastendyear = end;
 	}
-	
-	@Column(name="data_start_date")
-	public LocalDate getDataStartDate() {
-		return this.dataStartDate;
-	}
-	
-	public void setDataStartDate(LocalDate dataStartDate) {
-		this.dataStartDate = dataStartDate;
-	}
-	
-	@Column(name="data_end_date")
-	public LocalDate getDataEndDate() {
-		return this.dataEndDate;
-	}
-	
-	public void setDataEndDate(LocalDate dataEndDate) {
-		this.dataEndDate = dataEndDate;
-	}
+
 	
 	@Column(name="id")
 	public String getId() {

@@ -262,9 +262,9 @@ public class PawsRunJob extends Job{
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
-				session.saveOrUpdate(run);
-				run.setStatus(PawsRun.Status.ERROR);
-				run.setStatusMessage(msg + ex.getMessage());
+				PawsRun r = session.get(PawsRun.class, run.getUuid());
+				r.setStatus(PawsRun.Status.ERROR);
+				r.setStatusMessage(msg + ex.getMessage());
 				session.getTransaction().commit();
 			}catch (Exception ex2){
 				PawsPlugIn.log(ex2.getMessage(), ex2);

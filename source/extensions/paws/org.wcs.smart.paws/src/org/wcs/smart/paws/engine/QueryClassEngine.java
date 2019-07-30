@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.paws.model.PawsQueryClass;
+import org.wcs.smart.paws.model.PawsClassification;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -20,7 +20,7 @@ import org.wcs.smart.query.model.filter.date.WaypointDateField;
 
 public class QueryClassEngine {
 
-	private PawsQueryClass pc;
+	private PawsClassification pc;
 	private LocalDate startDate;
 	private LocalDate endDate;
 	
@@ -29,7 +29,7 @@ public class QueryClassEngine {
 	private String temptable;
 	private String obcol;
 	
-	public QueryClassEngine(PawsQueryClass pc, LocalDate startDate, LocalDate endDate) {
+	public QueryClassEngine(PawsClassification pc, LocalDate startDate, LocalDate endDate) {
 		this.pc = pc;
 		this.startDate = startDate;
 		this.endDate = endDate;
@@ -54,6 +54,7 @@ public class QueryClassEngine {
 		}
 		
 		CustomDateFilter ff = new CustomDateFilter();
+
 		ff.setDates(java.sql.Date.valueOf(startDate), java.sql.Date.valueOf(endDate));
 		query.setDateFilter(new DateFilter(WaypointDateField.INSTANCE, ff));
 		

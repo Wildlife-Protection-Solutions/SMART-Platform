@@ -7,16 +7,15 @@ import java.time.LocalDate;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.paws.model.PawsSimpleClass;
+import org.wcs.smart.paws.model.PawsClassification;
 
 public class SimpleClassEngine {
 
-	
-	private PawsSimpleClass pc;
+	private PawsClassification pc;
 	private LocalDate startDate;
 	private LocalDate endDate;
 	
-	public SimpleClassEngine(PawsSimpleClass pc, LocalDate startDate, LocalDate endDate) {
+	public SimpleClassEngine(PawsClassification pc, LocalDate startDate, LocalDate endDate) {
 		this.pc = pc;
 		this.startDate = startDate;
 		this.endDate = endDate;
@@ -27,14 +26,12 @@ public class SimpleClassEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				// TODO Auto-generated method stub
 				StringBuilder sb = new StringBuilder();
 				sb.append("CREATE TABLE ");
 				sb.append( tablename );
 				sb.append( "(obs_uuid char(16) for bit data, pawsclass varchar(8192))");
 				System.out.println(sb.toString());
 				c.createStatement().execute(sb.toString());
-				
 				
 				sb = new StringBuilder();
 				sb.append(" INSERT INTO ");
@@ -75,8 +72,9 @@ public class SimpleClassEngine {
 					ps.setString(index++, pc.getAttributeTreeNodeHkey());
 					ps.setString(index++, pc.getAttributeTreeNodeHkey().substring(0, pc.getAttributeTreeNodeHkey().length() - 1) + "/");
 				}
-				ps.setDate(index++, java.sql.Date.valueOf(startDate));
-				ps.setDate(index++, java.sql.Date.valueOf(endDate));
+				
+				ps.setTimestamp(index++, java.sql.Timestamp.valueOf(startDate.atStartOfDay()));
+				ps.setTimestamp(index++, java.sql.Timestamp.valueOf(endDate.atTime(23, 59, 59)));
 				ps.setString(index++, pc.getCategoryHkey());
 				ps.setString(index++, pc.getCategoryHkey().substring(0, pc.getCategoryHkey().length() - 1) + "/");
 			
