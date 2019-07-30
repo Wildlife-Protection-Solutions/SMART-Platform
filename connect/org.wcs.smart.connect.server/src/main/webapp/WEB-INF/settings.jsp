@@ -417,7 +417,7 @@ font-size: 40px;</textarea>
   </div>
   
 <br><br><fmt:message key="settings.iconcredits"/><br>
-<div><fmt:message key="settings.hamburger"/><a href="https://www.iconfinder.com/icons/134216/hamburger_lines_menu_icon">Timothy Miller</a><fmt:message key="settings.hamburder2"/><a href="https://creativecommons.org/licenses/by-sa/3.0/legalcode">creative commons SA-3.0 license</a><fmt:message key="settings.hamburger3"/></div>
+<div><fmt:message key="settings.hamburger"/><a href="https://www.iconfinder.com/icons/134216/hamburger_lines_menu_icon">Timothy Miller</a><fmt:message key="settings.hamburger2"/><a href="https://creativecommons.org/licenses/by-sa/3.0/legalcode">creative commons SA-3.0 license</a><fmt:message key="settings.hamburger3"/></div>
 <div><fmt:message key="settings.othericon"/><a href="https://www.flaticon.com/authors/gregor-cresnar" title="Gregor Cresnar">Gregor Cresnar</a><fmt:message key="settings.othericon2"/><a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a><fmt:message key="settings.othericon3"/><a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
 
 </body>
