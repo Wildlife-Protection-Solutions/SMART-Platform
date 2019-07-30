@@ -426,6 +426,7 @@ public class WaypointInfoView {
 		private void createLastModifiedLabel(Composite parent, Waypoint wp) {
 			String data = null;
 			int width = infoSection.getBounds().width-30;
+			if (wp == null) return;
 			if (wp.getLastModifiedBy() != null) {
 				data = MessageFormat.format(Messages.WaypointInfoView_LastUpdated1, SmartLabelProvider.getShortLabel(wp.getLastModifiedBy()), DateFormat.getDateTimeInstance().format(wp.getLastModified()));
 			}else {

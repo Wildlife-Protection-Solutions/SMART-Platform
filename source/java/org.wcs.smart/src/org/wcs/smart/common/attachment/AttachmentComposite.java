@@ -27,7 +27,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -36,14 +38,15 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -71,8 +74,8 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 	private List<ISmartAttachment> other = new ArrayList<ISmartAttachment>();
 	private List<ISmartAttachment> all = new ArrayList<ISmartAttachment>();
 	
-	private Button btnRemove;
-	private Button btnOpen;
+	private Button btnRemove, btnOpen;
+	private MenuItem miRemove, miOpen;
 	
 	private List<IAttachmentsChangeListener> attachmentsChangeListeners = new ArrayList<IAttachmentsChangeListener>();
 
@@ -84,12 +87,17 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 	private void createControls() {
 		this.setLayout(new GridLayout(2, false));
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginHeight = 0;
 		
 		Label lblAttachments = new Label(this, SWT.NONE);
 		lblAttachments.setText(Messages.AttachmentComposite_Label_Attachments);
 		lblAttachments.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		tblAttachments = new TableViewer(this, SWT.MULTI | SWT.FULL_SELECTION | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+		Composite wrapper = new Composite(this, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		tblAttachments = new TableViewer(wrapper, SWT.MULTI | SWT.FULL_SELECTION | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		tblAttachments.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)tblAttachments.getTable().getLayoutData()).heightHint = 100;
 		((GridData)tblAttachments.getTable().getLayoutData()).widthHint = 200;
@@ -107,6 +115,10 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 				return super.getText(element);
 			}
 		});
+		TableColumn tc = new TableColumn(tblAttachments.getTable(), SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(100));
+		wrapper.setLayout(layout);
 		tblAttachments.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -120,7 +132,9 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 					
 				}
 				btnOpen.setEnabled(!tblAttachments.getSelection().isEmpty());
+				miOpen.setEnabled(!tblAttachments.getSelection().isEmpty());
 				btnRemove.setEnabled(!empty);
+				miRemove.setEnabled(!empty);
 				
 			}
 		});
@@ -137,72 +151,93 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 		Composite buttonPanel = new Composite(this, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(1, false));
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, false, false));
+		((GridLayout)buttonPanel.getLayout()).marginWidth = 0;
+		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
+		
 		Button btnAdd = new Button(buttonPanel, SWT.PUSH);
+		btnAdd.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnAdd.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				FileDialog fd = new FileDialog(AttachmentComposite.this.getShell(), SWT.MULTI);
-				
-				String file = fd.open();
-				if (file == null) {
-					return;
-				}
-				for (int i = 0; i < fd.getFileNames().length; i ++){
-					File f = new File(fd.getFilterPath() + File.separator +  fd.getFileNames()[i]);
-					if (!f.exists()){
-						SmartPlugIn.displayLog(MessageFormat.format(Messages.AttachmentComposite_Error_FileNotFound, new Object[]{f.getAbsolutePath()}), null);
-						return;
-					}
-					T wpa = createNewAttachement();
-					wpa.setCopyFromLocation(f);
-					wpa.setFilename(f.getName());
-					attachments.add(wpa);
-				}
-				fireAttachmentsChangeListeners();
-				refreshTable();
-			}
-		});
+		btnAdd.addListener(SWT.Selection, e->add());
 		
 		btnRemove = new Button(buttonPanel, SWT.PUSH);
+		btnRemove.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnRemove.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection sel = (IStructuredSelection)tblAttachments.getSelection();
-				if (!sel.isEmpty()) {
-					for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
-						ISmartAttachment type = (ISmartAttachment) iterator.next();
-						if (attachments.contains(type)){
-							attachments.remove(type);
-						}
-					}
-					fireAttachmentsChangeListeners();
-				}
-				refreshTable();
-			}
-		});
+		btnRemove.addListener(SWT.Selection, e->remove());
 		btnRemove.setEnabled(false);
 		
 		btnOpen = new Button(buttonPanel, SWT.PUSH);
 		btnOpen.setText(Messages.AttachmentComposite_Button_Open);
+		btnOpen.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnOpen.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnOpen.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection sel = (IStructuredSelection)tblAttachments.getSelection();
-				ISmartAttachment first = (ISmartAttachment) sel.getFirstElement();
-				AttachmentUtil.openAttachment(first);
-			}
-		});
+		btnOpen.addListener(SWT.Selection, e->open());
 		btnOpen.setEnabled(false);
+		
+		Menu mi = new Menu(tblAttachments.getControl());
+		tblAttachments.getControl().setMenu(mi);
+		
+		MenuItem miAdd = new MenuItem(mi, SWT.PUSH);
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miAdd.addListener(SWT.Selection, e->add());
+		
+		miRemove = new MenuItem(mi, SWT.PUSH);
+		miRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		miRemove.addListener(SWT.Selection, e->remove());
+		miRemove.setEnabled(false);
+		
+		miOpen = new MenuItem(mi, SWT.PUSH);
+		miOpen.setText(Messages.AttachmentComposite_Button_Open);
+		miOpen.addListener(SWT.Selection, e->open());
+		miOpen.setEnabled(false);
 		
 		tblAttachments.setInput(all);
 		tblAttachments.refresh();
 	}
 	
+	private void add() {
+		FileDialog fd = new FileDialog(AttachmentComposite.this.getShell(), SWT.MULTI);
+		
+		String file = fd.open();
+		if (file == null) {
+			return;
+		}
+		for (int i = 0; i < fd.getFileNames().length; i ++){
+			File f = new File(fd.getFilterPath() + File.separator +  fd.getFileNames()[i]);
+			if (!f.exists()){
+				SmartPlugIn.displayLog(MessageFormat.format(Messages.AttachmentComposite_Error_FileNotFound, new Object[]{f.getAbsolutePath()}), null);
+				return;
+			}
+			T wpa = createNewAttachement();
+			wpa.setCopyFromLocation(f);
+			wpa.setFilename(f.getName());
+			attachments.add(wpa);
+		}
+		fireAttachmentsChangeListeners();
+		refreshTable();
+	}
+	private void remove() {
+		IStructuredSelection sel = (IStructuredSelection)tblAttachments.getSelection();
+		if (!sel.isEmpty()) {
+			for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+				ISmartAttachment type = (ISmartAttachment) iterator.next();
+				if (attachments.contains(type)){
+					attachments.remove(type);
+				}
+			}
+			fireAttachmentsChangeListeners();
+		}
+		refreshTable();
+	}
+	private void open() {
+		IStructuredSelection sel = (IStructuredSelection)tblAttachments.getSelection();
+		ISmartAttachment first = (ISmartAttachment) sel.getFirstElement();
+		AttachmentUtil.openAttachment(first);
+	}
 	protected abstract T createNewAttachement();
 	
 	public void initAttachments(List<T> init){

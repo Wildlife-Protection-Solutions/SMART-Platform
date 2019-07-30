@@ -58,6 +58,8 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -255,6 +257,8 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
 			btnUpdate = new Button(buttons, SWT.PUSH);
+			btnUpdate.setBackground(buttons.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			btnUpdate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			btnUpdate.setText(Messages.AttributeWizardPage_UpdateObsButton);
 			btnUpdate.setLayoutData(new GridData(SWT.RIGHT , SWT.FILL, true, false));
 			btnUpdate.setEnabled(false);
@@ -265,6 +269,8 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				}
 			});
 			btnAdd = new Button(buttons, SWT.PUSH);
+			btnAdd.setBackground(buttons.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			btnAdd.setText(Messages.AttributeWizardPage_AddObservation_Button);
 			btnAdd.setLayoutData(new GridData(SWT.RIGHT , SWT.FILL, true, false));
 			btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -278,7 +284,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			Composite bottomPanel = new Composite(page, SWT.NONE);
 			bottomPanel.setLayout(new GridLayout(1, false));
 			bottomPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
+			((GridLayout)bottomPanel.getLayout()).marginWidth = 0;
+			((GridLayout)bottomPanel.getLayout()).marginHeight = 0;
+			
 			lbl = new Label(bottomPanel, SWT.HORIZONTAL | SWT.SEPARATOR);
 			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)lbl.getLayoutData()).verticalIndent = 10;
@@ -450,6 +458,8 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayout(new GridLayout(2,false));
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)comp.getLayout()).marginWidth = 0;
+		((GridLayout)comp.getLayout()).marginHeight = 0;
 		
 		Label lbl = new Label(comp, SWT.WRAP);
 		lbl.setText(SmartUtils.formatStringForLabel(
@@ -479,37 +489,28 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		
 		attributeTable.getControl().setMenu(mnu);
 		
-		Composite buttons = new Composite(comp, SWT.NONE);
-		buttons.setLayout(new GridLayout(1, false));
-		buttons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		ToolBar tb = new ToolBar(comp, SWT.FLAT | SWT.VERTICAL);
+		tb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		final Button btnEdit = new Button(buttons, SWT.PUSH);
-		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnEdit.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				editObservationBtn();
-			}
-		});
-		final Button btnDelete = new Button(buttons, SWT.PUSH);
-		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnDelete.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteObservationBtn();
-			}
-		});
-		btnDelete.setEnabled(false);
-		btnEdit.setEnabled(false);
+		ToolItem tiEdit = new ToolItem(tb, SWT.PUSH);
+		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		tiEdit.setToolTipText("edit selected observation");
+		tiEdit.addListener(SWT.Selection,e->editObservationBtn());
+		
+		ToolItem tiDelete = new ToolItem(tb, SWT.PUSH);
+		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDelete.setToolTipText("delete selected observation");
+		tiDelete.addListener(SWT.Selection, e->deleteObservationBtn());
+
+		tiDelete.setEnabled(false);
+		tiEdit.setEnabled(false);
 		editItem.setEnabled(false);
 		deleteItem.setEnabled(false);
 		attributeTable.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				btnDelete.setEnabled(!attributeTable.getSelection().isEmpty());
-				btnEdit.setEnabled(!attributeTable.getSelection().isEmpty());
+				tiDelete.setEnabled(!attributeTable.getSelection().isEmpty());
+				tiEdit.setEnabled(!attributeTable.getSelection().isEmpty());
 				editItem.setEnabled(!attributeTable.getSelection().isEmpty());
 				deleteItem.setEnabled(!attributeTable.getSelection().isEmpty());
 			}
@@ -659,58 +660,62 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		this.currentAttachments = new ArrayList<ObservationAttachment>();
 		attachmentViewer.setInput(this.currentAttachments);
 		
-		Composite btnPanel = new Composite(compAttach, SWT.NONE);
-		GridLayout gl = new GridLayout();
-		gl.marginWidth = gl.marginHeight = 0;
-		btnPanel.setLayout(gl);
-		btnPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		ToolBar tb = new ToolBar(compAttach, SWT.FLAT | SWT.VERTICAL);
+		tb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		ToolItem tiEdit = new ToolItem(tb, SWT.PUSH);
+		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		tiEdit.setToolTipText("add attachment to observation");
+		tiEdit.addListener(SWT.Selection,e->addAttachment());
 		
-		Button btnAdd = new Button(btnPanel, SWT.PUSH);
-		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnAdd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				//open add dialog
-				FileDialog fd = new FileDialog(getShell(), SWT.MULTI);
-				
-				String file = fd.open();
-				if (file == null) {
-					return;
-				}
-				for (int i = 0; i < fd.getFileNames().length; i ++){
-					File f = new File(fd.getFilterPath() + File.separator +  fd.getFileNames()[i]);
-					if (!f.exists()){
-						ObservationPlugIn.displayLog(MessageFormat.format(Messages.AttributeWizardPage_FileNotFoundError, new Object[]{f.getAbsolutePath()}), null);
-						return;
-					}
-					
-					ObservationAttachment oa = new ObservationAttachment();
-					oa.setCopyFromLocation(f);
-					oa.setFilename(f.getName());
-					currentAttachments.add(oa);
-				}
-				attachmentViewer.refresh();
-				attsModified = true;
-			}
-		});
-		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		
-		Button btnRemove = new Button(btnPanel, SWT.PUSH);
-		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnRemove.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				ISmartAttachment att = (ISmartAttachment) ((StructuredSelection)attachmentViewer.getSelection()).getFirstElement();
-				if (att != null){
-					currentAttachments.remove(att);
-					attsModified = true;
-				}
-				attachmentViewer.refresh();
-			}
-		});
-		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-	}
+		ToolItem tiDelete = new ToolItem(tb, SWT.PUSH);
+		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDelete.setToolTipText("remove selected attachment");
+		tiDelete.addListener(SWT.Selection, e->deleteAttachment());
 
+		Menu menu = new Menu(attachmentViewer.getControl());
+		attachmentViewer.getControl().setMenu(menu);
+		
+		MenuItem miEdit = new MenuItem(menu, SWT.PUSH);
+		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miEdit.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miEdit.addListener(SWT.Selection,e->addAttachment());
+		
+		MenuItem miDelete = new MenuItem(menu, SWT.PUSH);
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		miDelete.addListener(SWT.Selection, e->deleteAttachment());
+
+	}
+	private void deleteAttachment() {
+		ISmartAttachment att = (ISmartAttachment) ((StructuredSelection)attachmentViewer.getSelection()).getFirstElement();
+		if (att != null){
+			currentAttachments.remove(att);
+			attsModified = true;
+		}
+		attachmentViewer.refresh();
+	}
+	private void addAttachment() {
+		FileDialog fd = new FileDialog(getShell(), SWT.MULTI);
+		
+		String file = fd.open();
+		if (file == null) {
+			return;
+		}
+		for (int i = 0; i < fd.getFileNames().length; i ++){
+			File f = new File(fd.getFilterPath() + File.separator +  fd.getFileNames()[i]);
+			if (!f.exists()){
+				ObservationPlugIn.displayLog(MessageFormat.format(Messages.AttributeWizardPage_FileNotFoundError, new Object[]{f.getAbsolutePath()}), null);
+				return;
+			}
+			
+			ObservationAttachment oa = new ObservationAttachment();
+			oa.setCopyFromLocation(f);
+			oa.setFilename(f.getName());
+			currentAttachments.add(oa);
+		}
+		attachmentViewer.refresh();
+		attsModified = true;
+	}
 	/*
 	 * creates a waypoint observation from the given
 	 * attribute fields then clears the attribute fields

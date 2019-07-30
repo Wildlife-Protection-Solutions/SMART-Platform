@@ -25,8 +25,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 
@@ -50,11 +50,14 @@ public abstract class SmartFilterDialog extends SmartStyledTitleDialog {
 	}
 
 	protected Composite createGroupComposite(String title, Composite parent) {
-		Group comp = new Group(parent,  SWT.NONE);
-		comp.setText(title);
-		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		comp.setLayout(new GridLayout(1, false));
-		return comp;
+		SmartUiUtils.createHeaderLabel(parent, title);
+		
+		Composite c = new Composite(parent, SWT.NONE);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		c.setLayout(new GridLayout());
+		((GridLayout)c.getLayout()).marginWidth = 0;
+		((GridLayout)c.getLayout()).marginHeight = 0;
+		return c;
 	}
 	
 	@Override

@@ -189,6 +189,7 @@ public class MultipleSelectComposite<T> extends Composite {
 	
 	protected void createButtonComposite(Composite btnComposite) {
 		btnAdd = new Button(btnComposite, SWT.PUSH);
+		btnAdd.setBackground(btnComposite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setText(Messages.MultipleSelectComposite_Button_Add);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -199,6 +200,7 @@ public class MultipleSelectComposite<T> extends Composite {
 
 		});
 		btnRemove = new Button(btnComposite, SWT.PUSH);
+		btnRemove.setBackground(btnComposite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnRemove.setText(Messages.MultipleSelectComposite_Button_Remove);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		btnRemove.addSelectionListener(new SelectionAdapter() {

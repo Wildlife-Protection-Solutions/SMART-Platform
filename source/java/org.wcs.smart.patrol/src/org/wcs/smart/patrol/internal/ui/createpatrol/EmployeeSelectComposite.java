@@ -143,6 +143,7 @@ public class EmployeeSelectComposite extends MultipleSelectComposite<Employee> {
 
 	protected void createButtonComposite(Composite btnComposite) {
 		Button btnAddAll = new Button(btnComposite, SWT.PUSH);
+		btnAddAll.setBackground(btnComposite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAddAll.setText(Messages.EmployeeSelectComposite_AddAllButton);
 		btnAddAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		btnAddAll.addSelectionListener(new SelectionAdapter() {

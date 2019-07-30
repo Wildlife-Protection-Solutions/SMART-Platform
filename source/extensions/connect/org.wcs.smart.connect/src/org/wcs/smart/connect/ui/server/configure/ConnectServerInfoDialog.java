@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -124,6 +125,8 @@ public class ConnectServerInfoDialog extends SmartStyledTitleDialog {
 		((GridLayout)btnPanel.getLayout()).marginHeight = 0;
 		
 		btnEditServer = new Button(btnPanel, SWT.PUSH);
+		btnEditServer.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEditServer.setBackground(btnPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEditServer.setText(Messages.ConnectServerInfoDialog_editButton);
 		btnEditServer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnEditServer.addSelectionListener(new SelectionAdapter(){
@@ -135,6 +138,8 @@ public class ConnectServerInfoDialog extends SmartStyledTitleDialog {
 		btnEditServer.setToolTipText(Messages.ConnectServerInfoDialog_editTooltip);
 		
 		btnSet = new Button(btnPanel, SWT.PUSH);
+		btnSet.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		btnSet.setBackground(btnPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnSet.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)btnSet.getLayoutData()).widthHint = 50;
 		btnSet.addSelectionListener(new SelectionAdapter() {
@@ -195,8 +200,8 @@ public class ConnectServerInfoDialog extends SmartStyledTitleDialog {
 		
 		btnShowReplication = new Button(main, SWT.PUSH);
 		btnShowReplication.setText(Messages.ConnectServerInfoDialog_ReplicationBtn);
+		btnShowReplication.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnShowReplication.addSelectionListener(new SelectionAdapter() {
-			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ReplicationInfoDialog dialog = new ReplicationInfoDialog(getShell());

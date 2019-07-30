@@ -344,24 +344,42 @@ public enum PatrolPackageExporter {
 				PatrolMetadataField.MEMBERS.isRequired(), PatrolMetadataField.MEMBERS.isFixed(), 
 				session, ctpackage.getConservationArea()));
 		
+		//transport types that require pilot
+		List<PatrolTransportType> requiredBy = new ArrayList<>();
+		for (PatrolTransportType tt : QueryFactory.buildQuery(session, PatrolTransportType.class, 
+				new Object[] {"conservationArea", ctpackage.getConservationArea()}, //$NON-NLS-1$
+				new Object[] {"isActive", true}).list()) { //$NON-NLS-1$
+			if (tt.getPatrolType().requiresPilot()) requiredBy.add(tt);
+		}
+		
+		JSONArray items = new JSONArray();
+		requiredBy.forEach(e->items.add(UuidUtils.uuidToString(e.getUuid())));
+		JSONObject jr = new JSONObject();
+		jr.put(PatrolMetadataField.TRANSPORT.getJsonKey(), items);
+		
 		if (map.get(PatrolMetadataField.MEMBERS.name()) == null || map.get(PatrolMetadataField.MEMBERS.name()).isVisible()) {
 			//force leader and pilot to be visible as well; ticket #2690
 			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot((MetadataFieldValue)null, PatrolMetadataField.LEADER.getJsonKey(), 
 					Messages.PatrolPackageExporter_LeaderPageLabel, PatrolMetadataField.LEADER.isRequired(), 
 					PatrolMetadataField.LEADER.isFixed(), session, ctpackage.getConservationArea()));
 			
-			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot((MetadataFieldValue)null, PatrolMetadataField.PILOT.getJsonKey(), 
+			JSONObject oo = CtJsonExportUtils.convertLeaderPilot((MetadataFieldValue)null, PatrolMetadataField.PILOT.getJsonKey(), 
 					Messages.PatrolPackageExporter_PilotPageLabel, PatrolMetadataField.PILOT.isRequired(), 
-					PatrolMetadataField.PILOT.isFixed(), session, ctpackage.getConservationArea()));
+					PatrolMetadataField.PILOT.isFixed(), session, ctpackage.getConservationArea());
+			((JSONObject)oo.get(PatrolMetadataField.PILOT.getJsonKey())).put("required_by", jr);
+			metadataScreens.add(oo);
 		}else {
 			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(map.get(PatrolMetadataField.LEADER.name()),
 					PatrolMetadataField.LEADER.getJsonKey(), Messages.PatrolPackageExporter_LeaderPageLabel, 
 					PatrolMetadataField.LEADER.isRequired(), PatrolMetadataField.LEADER.isFixed(), session, 
 					ctpackage.getConservationArea()));
-			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(map.get(PatrolMetadataField.PILOT.name()), 
+			
+			JSONObject oo = CtJsonExportUtils.convertLeaderPilot(map.get(PatrolMetadataField.PILOT.name()), 
 					PatrolMetadataField.PILOT.getJsonKey(), Messages.PatrolPackageExporter_PilotPageLabel, 
 					PatrolMetadataField.PILOT.isRequired(), PatrolMetadataField.PILOT.isFixed(), session,
-					ctpackage.getConservationArea()));
+					ctpackage.getConservationArea());
+			((JSONObject)oo.get(PatrolMetadataField.PILOT.getJsonKey())).put("required_by", jr);
+			metadataScreens.add(oo);
 		}
 		metadataScreens.add(CtJsonExportUtils.createDataType(PatrolMetadataField.PATROL_RESOURCE_ID));
 		metadataScreens.add(CtJsonExportUtils.createPatrolId());

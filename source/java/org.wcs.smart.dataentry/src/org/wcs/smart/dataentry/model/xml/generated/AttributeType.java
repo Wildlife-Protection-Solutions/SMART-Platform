@@ -51,6 +51,8 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;attribute name="required" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *       &lt;attribute name="imageFile" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="isCustomImage" type="{http://www.w3.org/2001/XMLSchema}boolean" />
+ *       &lt;attribute name="minValue" type="{http://www.w3.org/2001/XMLSchema}double" />
+ *       &lt;attribute name="maxValue" type="{http://www.w3.org/2001/XMLSchema}double" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
