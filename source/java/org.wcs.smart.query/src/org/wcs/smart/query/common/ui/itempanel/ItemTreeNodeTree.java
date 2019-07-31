@@ -31,8 +31,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
+import org.wcs.smart.query.QueryFilterConfigManager;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 
 /**
@@ -125,7 +131,45 @@ public class ItemTreeNodeTree extends Composite {
 		};
 
 		FilteredTree fTree = new FilteredTree(this, SWT.H_SCROLL | SWT.V_SCROLL
-				| SWT.MULTI, patternFilter, true);
+				| SWT.MULTI, patternFilter, true) {
+			
+			
+			protected void createControl(Composite parent, int treeStyle) {
+				super.createControl(parent, treeStyle);
+				
+				Composite c = new Composite(filterComposite.getParent(), SWT.NONE);
+				c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				GridLayout layout = new GridLayout(2, false);
+				layout.marginWidth = 0;
+				layout.marginHeight = 0;
+				layout.verticalSpacing = 0;
+				layout.horizontalSpacing = 0;
+				c.setLayout(layout);
+				
+				c.moveAbove(filterComposite);
+				
+				filterComposite.setParent(c);
+				
+				ToolBar b = new ToolBar(c, SWT.FLAT);
+				
+				ToolItem tiSettings = new ToolItem(b, SWT.PUSH);
+				tiSettings.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.SETTINGS_ICON));
+				tiSettings.setToolTipText(Messages.ItemTreeNodeTree_configureSettings);
+				
+				Menu menu = new Menu(b);
+				
+				MenuItem miSettings = new MenuItem(menu, SWT.CHECK);
+				miSettings.setText(Messages.ItemTreeNodeTree_ShowInactiveFilterItems);
+				miSettings.addListener(SWT.Selection, e->{
+					QueryFilterConfigManager.getInstance().setShowInactiveItems(miSettings.getSelection());
+					
+				});
+				menu.addListener(SWT.Show, e->{
+					miSettings.setSelection(QueryFilterConfigManager.getInstance().isShowInactiveItems());
+				});
+				tiSettings.addListener(SWT.Selection, e->menu.setVisible(true));
+			}
+		};
 		fTree.setBackground(fTree.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		filterTreeViewer = fTree.getViewer();
 		filterTreeViewer.getTree().setLayoutData(

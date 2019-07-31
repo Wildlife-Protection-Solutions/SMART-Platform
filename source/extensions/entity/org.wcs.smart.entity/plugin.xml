@@ -317,7 +317,6 @@
                id="vertical.org.wcs.smart.entity.toolbar1">
             <command
                   commandId="org.wcs.smart.entitytype.new"
-                  icon="images/icons/etool16/addentitytype.png"
                   label="%command.newtype.label"
                   mnemonic="%newentity.command.mnemonic"
                   mode="FORCE_TEXT"
@@ -464,11 +463,11 @@
       </image>
       <image
             commandId="org.wcs.smart.entitytype.export"
-            icon="images/icons/etool16/exportentitytype.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/export.png">
       </image>
       <image
             commandId="org.wcs.smart.entitytype.import"
-            icon="images/icons/etool16/importentitytype.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
       </image>
    </extension>
    <extension

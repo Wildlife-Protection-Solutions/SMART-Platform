@@ -199,28 +199,6 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.connect.server.changelog.syncmulti"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.caSingle">
-                  </test>
-               </visibleWhen>
-            </command>
-            <separator
-                  name="org.wcs.smart.connect.separator4"
-                  visible="true">
-            </separator>
-            <command
-                  commandId="org.wcs.smart.connect.server.changelog.up"
-                  style="push">
-            </command>
-            <command
-                  commandId="org.wcs.smart.connect.server.changelog.down"
-                  style="push">
-            </command>
-            <command
                   commandId="org.wcs.smart.connect.server.exportca"
                   style="push">
                <visibleWhen
@@ -241,18 +219,6 @@
                               value="manager">
                         </test>
                      </or>
-                  </and>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.connect.server.downloadreplaceca"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <and>
-                     <test
-                           property="org.wcs.smart.caSingle">
-                     </test>
                   </and>
                </visibleWhen>
             </command>
@@ -281,6 +247,67 @@
                   </not>
                </visibleWhen>
             </command>
+            <menu
+                  label="%advancedop.menu.label">
+               <command
+                     commandId="org.wcs.smart.connect.server.changelog.syncmulti"
+                     style="push">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <test
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                  </visibleWhen>
+               </command>
+               <command
+                     commandId="org.wcs.smart.connect.server.changelog.up"
+                     style="push">
+               </command>
+               <command
+                     commandId="org.wcs.smart.connect.server.changelog.down"
+                     style="push">
+               </command>
+               <command
+                     commandId="org.wcs.smart.connect.server.downloadreplaceca"
+                     style="push">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <and>
+                        <test
+                              property="org.wcs.smart.caSingle">
+                        </test>
+                     </and>
+                  </visibleWhen>
+               </command>
+            </menu>
+            <menu
+                  id="org.wcs.smart.connect.configuration"
+                  label="%config.menu.label">
+               <command
+                     commandId="org.wcs.smart.connect.configuration.show"
+                     style="push"
+                     tooltip="%configure.command.tooltip">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </visibleWhen>
+               </command>
+            </menu>
+            <separator
+                  name="org.wcs.smart.connect.separator4"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.wcs.smart.connect.server.web"
                   style="push">
@@ -289,26 +316,6 @@
                   name="org.wcs.smart.connect.separator3"
                   visible="true">
             </separator>
-            <command
-                  commandId="org.wcs.smart.connect.configuration.show"
-                  style="push"
-                  tooltip="%configure.command.tooltip">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-               </visibleWhen>
-            </command>
             <visibleWhen
                   checkEnabled="false">
                <or>

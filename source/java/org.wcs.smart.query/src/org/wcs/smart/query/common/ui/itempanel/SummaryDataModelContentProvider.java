@@ -128,7 +128,7 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 	public SummaryDataModelContentProvider(Type type){
 		this.type = type;
 		QueryFilterConfigManager.getInstance().addChangeListener(queryConfChangeListener);
-		boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+		boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();
 		provider = new DataModelContentProvider(false, !showInactive, true);
 	}
 
@@ -200,7 +200,7 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 				return results;
 			}else if (parentElement == DataModelItem.ATTRIBUTES_GROUPBY){
 				//get all active attributes
-				boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();				
+				boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();				
 				List<Attribute> atts = QueryDataModelManager.getInstance().getAttributes(dataModel, !showInactive);
 				
 				//filter out numeric only
@@ -226,7 +226,7 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 				}
 				return Arrays.copyOf(results, cnt);			
 			}else if (parentElement == DataModelItem.ATTRIBUTES_VALUE){	
-				boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();				
+				boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();				
 				List<Attribute> atts = QueryDataModelManager.getInstance().getAttributes(dataModel, !showInactive);
 				
 				//filter out numeric only
@@ -395,7 +395,7 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 					try{
 						
 						List<AttributeTreeNode> nodes = null;
-						boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+						boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();
 						
 						if (parent.getObject() instanceof Attribute){
 							Attribute attribute = (Attribute)parent.getObject();
@@ -457,7 +457,7 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 				try(Session session = HibernateManager.openSession()){
 					session.beginTransaction();
 					try{
-						boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+						boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();
 						List<AttributeListItem> nodes = null;
 						if (parent.getObject() instanceof Attribute){
 							Attribute attribute = (Attribute)parent.getObject();

@@ -15,90 +15,100 @@
                mnemonic="%patrol.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.patrol.newPatrol"
-                  label="%patrol.newpatrol.command.label"
+                  id="org.wcs.smart.patrol.create"
+                  label="%newpatrol.command.label"
                   mnemonic="%patrol.newpatrol.command.mnemonic"
                   style="push"
                   tooltip="%patrol.newpatrol.command.tooltip">
-            </command>
-            <command
-                  commandId="org.wcs.smart.patrol.exportPatrol"
-                  label="%patrol.export.command.label"
-                  mnemonic="%patrol.export.command.mnemonic"
-                  style="push"
-                  tooltip="%patrol.export.command.tooltip">
-            </command>
-            <command
-                  commandId="org.wcs.smart.patrol.importPatrol"
-                  label="%patrol.importpatrols.command.label"
-                  mnemonic="%patrol.importpatrols.command.mnemonic"
-                  style="push"
-                  tooltip="%patrol.importpatrols.command.tooltip">
             </command>
             <separator
                   name="org.wcs.smart.patrol.separator1"
                   visible="true">
             </separator>
-            <command
-                  commandId="org.wcs.smart.patrol.patrolMandate"
-                  icon="images/icons/etool16/patrol_mandate.png"
-                  label="%patrol.mandates.command.label"
-                  mnemonic="%patrol.mandates.command.mnemonic"
-                  style="push"
-                  tooltip="%patrol.mandates.command.tooltip">
-               <visibleWhen
-                     checkEnabled="true">
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.patrol.patrolTypes"
-                  icon="images/icons/etool16/patrol.png"
-                  label="%patro.types.command.label"
-                  mnemonic="%patro.types.command.mnemonic"
-                  style="push"
-                  tooltip="%patro.types.command.tooltip">
-               <visibleWhen
-                     checkEnabled="true">
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.patrol.teamList"
-                  icon="images/icons/etool16/patrol_team.png"
-                  label="%patrols.teams.command.label"
-                  mnemonic="%patrols.teams.command.mnemonic"
-                  style="push"
-                  tooltip="%patrols.teams.command.tooltip">
-               <visibleWhen
-                     checkEnabled="true">
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.patrol.attributes"
-                  label="Custom Patrol Attributes..."
-                  style="push">
-               <visibleWhen
-                     checkEnabled="true">
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-               </visibleWhen>
-            </command>
+            <menu
+                  icon="images/icons/obj16/patrol.png"
+                  label="%patroldata.menu.label">
+               <command
+                     commandId="org.wcs.smart.patrol.exportPatrol"
+                     label="%patrol.export.command.label"
+                     mnemonic="%patrol.export.command.mnemonic"
+                     style="push"
+                     tooltip="%patrol.export.command.tooltip">
+               </command>
+               <command
+                     commandId="org.wcs.smart.patrol.importPatrol"
+                     label="%patrol.importpatrols.command.label"
+                     mnemonic="%patrol.importpatrols.command.mnemonic"
+                     style="push"
+                     tooltip="%patrol.importpatrols.command.tooltip">
+               </command>
+            </menu>
+            <menu
+                  icon="images/icons/obj16/patrol.png"
+                  id="org.wcs.smart.patrol.configuration"
+                  label="%patrolconfig.menu.label">
+               <command
+                     commandId="org.wcs.smart.patrol.patrolMandate"
+                     icon="images/icons/etool16/patrol_mandate.png"
+                     label="%patrol.mandates.command.label"
+                     mnemonic="%patrol.mandates.command.mnemonic"
+                     style="push"
+                     tooltip="%patrol.mandates.command.tooltip">
+                  <visibleWhen
+                        checkEnabled="true">
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                  </visibleWhen>
+               </command>
+               <command
+                     commandId="org.wcs.smart.patrol.patrolTypes"
+                     icon="images/icons/etool16/patrol.png"
+                     label="%patro.types.command.label"
+                     mnemonic="%patro.types.command.mnemonic"
+                     style="push"
+                     tooltip="%patro.types.command.tooltip">
+                  <visibleWhen
+                        checkEnabled="true">
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                  </visibleWhen>
+               </command>
+               <command
+                     commandId="org.wcs.smart.patrol.teamList"
+                     icon="images/icons/etool16/patrol_team.png"
+                     label="%patrols.teams.command.label"
+                     mnemonic="%patrols.teams.command.mnemonic"
+                     style="push"
+                     tooltip="%patrols.teams.command.tooltip">
+                  <visibleWhen
+                        checkEnabled="true">
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                  </visibleWhen>
+               </command>
+               <command
+                     commandId="org.wcs.smart.patrol.attributes"
+                     label="%customattributes.command.label"
+                     style="push">
+                  <visibleWhen
+                        checkEnabled="true">
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                  </visibleWhen>
+               </command>
+            </menu>
             <separator
                   name="org.wcs.smart.patrol.separator2"
                   visible="true">
@@ -106,6 +116,7 @@
             <command
                   commandId="org.wcs.smart.observation.perspective.show"
                   icon="images/icons/etool16/patrol.png"
+                  id="org.wcs.smart.patrol.view"
                   label="%showpatrolperspective.command.label2"
                   mnemonic="%showpatrolperspectivecommand.mnemonic"
                   style="push"
@@ -881,22 +892,22 @@
       </command>
       <command
             id="org.wcs.smart.patrol.attributes"
-            name="Custom Patrol Attributes">
+            name="%customattributes.command.name">
       </command>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
       <image
             commandId="org.wcs.smart.patrol.newPatrol"
-            icon="images/icons/etool16/patrol_add.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png">
       </image>
       <image
             commandId="org.wcs.smart.patrol.exportPatrol"
-            icon="images/icons/etool16/patrol_export.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/export.png">
       </image>
       <image
             commandId="org.wcs.smart.patrol.importPatrol"
-            icon="images/icons/etool16/patrol_import.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
       </image>
       <image
             commandId="org.wcs.smart.patrol.attributes"

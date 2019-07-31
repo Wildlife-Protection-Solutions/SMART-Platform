@@ -87,7 +87,7 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try{
-					boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+					boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();
 					List<AttributeListItem> litems = QueryDataModelManager.getInstance().getAttributeListItems(attribute, s, !showInactive);
 					for (AttributeListItem item : litems){
 						items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId(), item.getIsActive()));

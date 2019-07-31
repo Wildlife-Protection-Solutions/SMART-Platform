@@ -101,9 +101,16 @@ public class QueryFilterConfigManager {
 		}
 	}
 	
-	public QueryFilterConfiguration getCurrentConfig() {
-		return config;
+	
+	public boolean isShowInactiveItems() {
+		return config.isShowInactiveItems();
 	}
+
+	public void setShowInactiveItems(boolean showInactiveItems) {
+		config.setShowInactiveItems(showInactiveItems);
+		fireListeners();
+	}
+	
 	
 	/**
 	 * Interface to track configuration change events.

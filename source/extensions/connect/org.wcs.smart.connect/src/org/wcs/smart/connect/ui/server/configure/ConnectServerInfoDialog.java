@@ -141,7 +141,7 @@ public class ConnectServerInfoDialog extends SmartStyledTitleDialog {
 		btnSet.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		btnSet.setBackground(btnPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnSet.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		((GridData)btnSet.getLayoutData()).widthHint = 50;
+		((GridData)btnSet.getLayoutData()).widthHint = 70;
 		btnSet.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

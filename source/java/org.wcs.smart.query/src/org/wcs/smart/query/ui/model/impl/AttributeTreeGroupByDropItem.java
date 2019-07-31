@@ -148,7 +148,7 @@ public class AttributeTreeGroupByDropItem extends DropItem implements
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+				boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();
 				List<AttributeTreeNode> nodes = QueryDataModelManager.getInstance().getAttributeTreeNodes(session, attribute, level, !showInactive);
 				for (AttributeTreeNode it : nodes) {
 					String name = it.getName();

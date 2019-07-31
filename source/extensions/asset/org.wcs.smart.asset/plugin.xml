@@ -708,11 +708,19 @@
       </image>
       <image
             commandId="org.wcs.smart.asset.command.data.import"
-            icon="images/icons/obj16/import.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
       </image>
       <image
             commandId="org.wcs.smart.asset.command.overviewmap.show"
             icon="images/icons/obj16/asset_map.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.asset.command.model.xml.import"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.asset.command.model.xml.export"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/export.png">
       </image>
    </extension>
    <extension

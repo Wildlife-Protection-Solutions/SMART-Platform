@@ -88,6 +88,13 @@
                commandId="org.wcs.smart.paws.configuration.show"
                label="PAWS Server Configuration..."
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>
@@ -119,16 +126,6 @@
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
             targetID="org.wcs.smart.query.persepectives.single">
-         <view
-               id="org.wcs.smart.paws.view"
-               minimized="false"
-               relationship="stack"
-               relative="org.wcs.smart.query.parts.itemlist"
-               visible="true">
-         </view>
-      </perspectiveExtension>
-      <perspectiveExtension
-            targetID="org.wcs.smart.query.persepectives.multi">
          <view
                id="org.wcs.smart.paws.view"
                minimized="false"

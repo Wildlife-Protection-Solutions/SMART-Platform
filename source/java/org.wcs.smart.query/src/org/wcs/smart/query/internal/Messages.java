@@ -269,7 +269,9 @@ public class Messages extends NLS {
 	public static String IQueryResultInfoProvider_ErrorLabel;
 	public static String IQueryResultInfoProvider_GoToLabel;
 	public static String IQueryResultInfoProvider_OpNotSupported;
+	public static String ItemTreeNodeTree_configureSettings;
 	public static String ItemTreeNodeTree_Loading;
+	public static String ItemTreeNodeTree_ShowInactiveFilterItems;
 	public static String MonthDateGroupBy_MonthGroupByName;
 	public static String MultiCaDataModelManagerImpl_MergeError;
 	public static String NameCellEditor_CouldNotSaveFolderNameChange;

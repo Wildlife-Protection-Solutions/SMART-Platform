@@ -68,7 +68,6 @@
                mnemonic="%incident.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.incident.new"
-                  icon="images/icons/etool16/add_incident.png"
                   mnemonic="%newincident.command.mnemonic"
                   style="push"
                   tooltip="%newincident.command.tooltip2">
@@ -257,7 +256,6 @@
                id="vertical.org.wcs.smart.incident.toolbar1">
             <command
                   commandId="org.wcs.smart.incident.new"
-                  icon="images/icons/etool16/add_incident.png"
                   label="%command.label.newincident"
                   mode="FORCE_TEXT"
                   style="push"
@@ -446,11 +444,11 @@
       </image>
       <image
             commandId="org.wcs.smart.independentincident.export"
-            icon="images/icons/etool16/export_incident.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/export.png">
       </image>
       <image
             commandId="org.wcs.smart.independentincident.import"
-            icon="images/icons/etool16/import_incident.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
       </image>
    </extension>
    <extension

@@ -100,7 +100,7 @@ public class AttributeListGroupByDropItem extends DropItem implements
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
-				boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+				boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();
 				List<AttributeListItem> listitems = QueryDataModelManager.getInstance().getAttributeListItems(attribute, session, !showInactive);
 				for (AttributeListItem it : listitems){
 					items.add(new ListItem(null, it.getName(), it.getKeyId(), it.getIsActive()));

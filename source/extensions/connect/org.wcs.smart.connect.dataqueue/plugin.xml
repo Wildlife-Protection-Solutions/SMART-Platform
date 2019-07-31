@@ -7,7 +7,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.connect.menu?after=org.wcs.smart.connect.configuration.show">
+            locationURI="menu:org.wcs.smart.connect.configuration?after=org.wcs.smart.connect.configuration.show">
          <command
                commandId="org.wcs.smart.connect.dataqueue.options.show"
                icon="images/icons/obj16/dq_options.png"

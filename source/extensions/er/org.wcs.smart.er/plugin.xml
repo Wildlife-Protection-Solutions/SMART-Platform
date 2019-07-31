@@ -889,19 +889,19 @@
       </image>
       <image
             commandId="org.wcs.smart.er.surveydesignexport"
-            icon="images/icons/obj16/survey_design_export.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/export.png">
       </image>
       <image
             commandId="org.wcs.smart.er.surveydesignimport"
-            icon="images/icons/obj16/survey_design_import.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
       </image>
       <image
             commandId="org.wcs.smart.er.missionImportHandler"
-            icon="images/icons/obj16/mission_import.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
       </image>
       <image
             commandId="org.wcs.smart.er.missionExportHandler"
-            icon="images/icons/obj16/mission_export.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/export.png">
       </image>
       <image
             commandId="org.wcs.smart.er.editItem"

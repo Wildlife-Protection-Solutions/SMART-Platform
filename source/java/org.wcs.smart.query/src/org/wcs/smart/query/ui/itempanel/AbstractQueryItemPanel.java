@@ -63,6 +63,8 @@ public abstract class AbstractQueryItemPanel implements IQueryItemPanel{
 		filterTreeViewer.getControl().setMenu(m);
 		
 		Button btnAdd = new Button(parent, SWT.PUSH);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setText(Messages.AbstractQueryItemPanel_AddToQueryItem);
 		btnAdd.addListener(SWT.Selection, e->addItem());
 	}

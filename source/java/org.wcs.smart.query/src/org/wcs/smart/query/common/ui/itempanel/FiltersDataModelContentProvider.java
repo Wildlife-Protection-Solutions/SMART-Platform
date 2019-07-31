@@ -100,7 +100,7 @@ public class FiltersDataModelContentProvider implements ITreeContentProvider{
 	 */
 	public FiltersDataModelContentProvider(){
 		QueryFilterConfigManager.getInstance().addChangeListener(queryConfChangeListener);
-		boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+		boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();
 		provider = new DataModelContentProvider(false, !showInactive, true);
 	}
 
@@ -156,7 +156,7 @@ public class FiltersDataModelContentProvider implements ITreeContentProvider{
 			if (parentElement == DataModelItem.CATEGORIES){
 					return provider.getChildren(provider.getElements(null)[0]);	
 			}else if (parentElement == DataModelItem.ATTRIBUTES){
-				boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+				boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();
 				List<Attribute> atts = QueryDataModelManager.getInstance().getAttributes(this.dataModel, !showInactive);
 				
 				Collections.sort(atts, new Comparator<Attribute>() {

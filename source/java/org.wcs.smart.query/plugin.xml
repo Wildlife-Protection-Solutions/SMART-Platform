@@ -201,7 +201,7 @@
                id="org.wcs.smart.query.toolbar1">
             <command
                   commandId="org.wcs.smart.query.create.dropdown"
-                  icon="images/icons/etool16/addquery.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                   id="org.wc.smart.query.create.dropdown.mi"
                   label="%command.label.newquery"
                   mode="FORCE_TEXT"
@@ -578,8 +578,28 @@
                id="org.wcs.smart.menu.query"
                label="%menu.query.label"
                mnemonic="%menu.query.mnemonic">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="analyst">
+                  </test>
+               </or>
+            </visibleWhen>
             <menu
-                  icon="images/icons/etool16/addquery.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                   id="org.wcs.smart.menu.query.newquery"
                   label="%menu.query.menu.newquery.name"
                   mnemonic="%menu.query.menu.newquery.mnemonic">
@@ -631,65 +651,23 @@
             </command>
             <command
                   commandId="org.wcs.smart.query.import"
-                  icon="images/icons/etool16/importquery.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png"
                   label="%menu.query.importquery.command.label"
                   mnemonic="%menu.query.importquery.command.mnemonic"
                   style="push"
                   tooltip="%menu.query.importquery.command.tooltip">
             </command>
             <separator
-                  name="org.wcs.smart.query.separator1"
-                  visible="true">
-            </separator>
-            <command
-                  commandId="org.eclipse.ui.file.save"
-                  label="%menu.query.savequery.command.label"
-                  mnemonic="%menu.query.savequery.command.mnemonic"
-                  tooltip="%menu.query.savequery.command.tooltip">
-            </command>
-            <command
-                  commandId="org.eclipse.ui.file.saveAs"
-                  label="%menu.query.saveasquery.command.label"
-                  mnemonic="%menu.query.saveasquery.command.mnemonic"
-                  tooltip="%menu.query.saveasquery.command.tooltip">
-            </command>
-            <visibleWhen
-                  checkEnabled="false">
-               <or>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="analyst">
-                  </test>
-               </or>
-            </visibleWhen>
-            <separator
                   name="org.wcs.smart.query.separator2"
                   visible="true">
             </separator>
-            <command
-                  commandId="org.wcs.smart.query.showinactive"
-                  label="%command.showinactive.label"
-                  style="toggle"
-                  tooltip="%command.showinactive.tooltip">
-            </command>
             <separator
                   name="org.wcs.smart.query.separator.options"
                   visible="true">
             </separator>
             <command
                   commandId="org.wcs.smart.command.showperspective"
-                  icon="images/icons/view16/querypatrol.gif"
+                  icon="images/icons/query.png"
                   label="%showqueryperspective.command.name"
                   style="push"
                   tooltip="%perspectivetoolbar.showquery.command.tooltip">
@@ -726,7 +704,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.command.showperspective"
-                  icon="images/icons/view16/querypatrol.gif"
+                  icon="images/icons/query.png"
                   label="%showqueryperspective.command.name"
                   style="push"
                   tooltip="%perspectivetoolbar.showquery.command.tooltip">
@@ -918,7 +896,7 @@
       </image>
       <image
             commandId="org.wcs.smart.query.create.unknown"
-            icon="images/icons/etool16/addquery.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png">
       </image>
       <image
             commandId="org.wcs.smart.query.exportmulti"
@@ -926,7 +904,7 @@
       </image>
       <image
             commandId="org.wcs.smart.query.import"
-            icon="images/icons/etool16/importquery.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
       </image>
    </extension>
    <extension
@@ -990,7 +968,7 @@
       </command>
       <command
             id="org.wcs.smart.query.create.dropdown"
-            name="New">
+            name="%newquery.command.name">
          <commandParameter
                id="org.wcs.smart.query.source"
                name="Source Menu Item"

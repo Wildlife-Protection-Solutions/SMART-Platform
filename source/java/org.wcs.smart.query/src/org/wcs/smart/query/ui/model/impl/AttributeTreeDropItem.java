@@ -95,7 +95,7 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 			boolean showInactive = false;
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
-				showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+				showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();
 				try{
 					roots = showInactive ? QueryDataModelManager.getInstance().getAllAttributeTreeNodes(attribute, s) : QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, s);
 				}catch(Exception ex){
@@ -285,7 +285,7 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 			 return;
 		}
 		
-		boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+		boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();
 		AttributeTreeContentProvider cProvider = new AttributeTreeContentProvider(!showInactive, false);
 		treeviewer.getTreeViewer().setContentProvider(cProvider);
 		if (lProvider == null){
