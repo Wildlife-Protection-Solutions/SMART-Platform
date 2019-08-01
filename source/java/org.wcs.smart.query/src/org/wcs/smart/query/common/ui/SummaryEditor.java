@@ -431,6 +431,9 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 		dateFilterComposite = new QueryDateFilterComposite(queryProp, type.getDateFilterOptions(), IDateFilter.DATE_FILTERS);
 		dateFilterComposite.adapt(toolkit);
 		dateFilterComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		if (getInputInternal().getDateFilter() != null) {
+			dateFilterComposite.setDateFilter(getInputInternal().getDateFilter());
+		}
 		
 		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, Messages.SummaryEditor_PropertiesLabel,SWT.NONE);
 		editQueryProp.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));

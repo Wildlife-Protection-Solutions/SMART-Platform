@@ -57,6 +57,10 @@
             id="org.wcs.smart.report.translateItem"
             name="%translate.command.name">
       </command>
+      <command
+            id="org.wcs.smart.report.saveas"
+            name="%saveas.command.name">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -199,6 +203,10 @@
             class="org.wcs.smart.report.internal.ui.TranslateNamesHandler$TranslateNamesHandlerWrapper"
             commandId="org.wcs.smart.report.translateItem">
       </handler>
+      <handler
+            class="org.wcs.smart.report.internal.ui.SaveAsReportHandler$SaveAsReportHandlerWrapper"
+            commandId="org.wcs.smart.report.saveas">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -337,11 +345,9 @@
             </visibleWhen>
          </command>
          <command
-               commandId="org.wcs.smart.report.exportReport"
-               label="%reportlist.popupmenu.exportreport.command.name"
-               mnemonic="%reportlist.popupmenu.exportreport.command.mnemonic"
-               style="push"
-               tooltip="%reportlist.popupmenu.exportreport.command.tooltip">
+               commandId="org.wcs.smart.report.saveas"
+               id="Save As..."
+               style="push">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -349,10 +355,9 @@
                   <iterate
                         ifEmpty="false"
                         operator="or">
-                     <test
-                           args="export"
-                           property="org.wcs.smart.report.menu.editable">
-                     </test>
+                     <instanceof
+                           value="org.wcs.smart.report.model.Report">
+                     </instanceof>
                   </iterate>
                </with>
             </visibleWhen>
@@ -393,6 +398,27 @@
                         operator="or">
                      <test
                            args="rename"
+                           property="org.wcs.smart.report.menu.editable">
+                     </test>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.wcs.smart.report.exportReport"
+               label="%reportlist.popupmenu.exportreport.command.name"
+               mnemonic="%reportlist.popupmenu.exportreport.command.mnemonic"
+               style="push"
+               tooltip="%reportlist.popupmenu.exportreport.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="or">
+                     <test
+                           args="export"
                            property="org.wcs.smart.report.menu.editable">
                      </test>
                   </iterate>
@@ -1024,6 +1050,11 @@
       <image
             commandId="org.wcs.smart.report.importReport"
             icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.report.saveas"
+            disabledIcon="platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/saveas_edit.png"
+            icon="platform:/plugin/org.eclipse.ui/$nl$/icons/full/etool16/saveas_edit.png">
       </image>
    </extension>
    <extension

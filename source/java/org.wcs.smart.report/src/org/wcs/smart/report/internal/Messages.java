@@ -205,6 +205,11 @@ public class Messages extends NLS {
 	public static String RunReportJob_Error_NoReportFile;
 	public static String RunReportJob_Error_RunningReport1;
 	public static String RunReportJob_JobName;
+	public static String SaveAsReportHandler_Copy;
+	public static String SaveAsReportHandler_CopyLabel;
+	public static String SaveAsReportHandler_DialogMsg;
+	public static String SaveAsReportHandler_DialogTitle;
+	public static String SaveAsReportHandler_NameRequiredMsg;
 	public static String SmartDateParameterComponent_DateFilterNotSupported;
 	public static String SmartDateParameterComponent_DateRangeLabel;
 	public static String SmartDateParameterComponent_DateWarning;

@@ -33,6 +33,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.DateFilter;
 
 /**
  * A query input for query editors. 
@@ -47,6 +48,8 @@ public class QueryEditorInput implements IEditorInput {
 	private String id = null;
 	private boolean isShared;
 	private IQueryType type;
+	
+	private DateFilter initDate;
 	
 	/**
 	 * Creates a new query input.
@@ -233,5 +236,8 @@ public class QueryEditorInput implements IEditorInput {
 		return true;
 	}
 
+	public void setDateFilter(DateFilter dfilter) { this.initDate = dfilter; }
+	public DateFilter getDateFilter() { return this.initDate; }
+	
 
 }

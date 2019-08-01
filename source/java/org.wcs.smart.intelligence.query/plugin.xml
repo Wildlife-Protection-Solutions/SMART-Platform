@@ -34,6 +34,36 @@
             </command>
          </menu>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.wcs.smart.menu.query.popup.newquery?after=org.wcs.smart.query.newquery.separator1">
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/intelligence_summary.png"
+               label="%sumquery.command.label"
+               style="push"
+               tooltip="%sumquery.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="intelligencesummary">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/intelligence_record.png"
+               label="%recordquery.command.label"
+               style="push"
+               tooltip="%recordquery.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="intelligencerecord">
+            </parameter>
+         </command>
+         <separator
+               name="org.wcs.smart.intelligence.query.separator4"
+               visible="true">
+         </separator>
+      </menuContribution>
    </extension>
    <extension
          point="org.wcs.smart.query.queryType">

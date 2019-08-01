@@ -96,6 +96,7 @@ public class MapInfoAreaComposite extends Composite {
         lblSeparator.setLayoutData(gd);
         
         final Button lblSRID = new Button(this, SWT.NONE);
+        lblSRID.setBackground(getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
         lblSRID.setText(getMap().getViewportModel().getCRS().getName().getCode());
         lblSRID.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
         lblSRID.addSelectionListener(new SelectionAdapter() {

@@ -72,7 +72,7 @@ public class TimeValueComputer implements IValueComputer<Double> {
 				boolean contains2 = env.contains(c2);
 				if (contains2 && contains1) {
 					//both are inside
-					time += (c2.z - c1.z);
+					time += (c2.getZ() - c1.getZ());
 				}else {
 					//figure out what percentage of the line is inside and
 					//use the same percentage to compute hours
@@ -80,7 +80,7 @@ public class TimeValueComputer implements IValueComputer<Double> {
 					part =  part.intersection(bbox);
 					double l2 = part.getLength();
 					
-					double t2 = (c2.z - c1.z);
+					double t2 = (c2.getZ() - c1.getZ());
 					time += (l2 / l1) * t2;
 				}
 			}

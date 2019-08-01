@@ -145,6 +145,58 @@
             </command>
          </menu>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.wcs.smart.menu.query.popup.newquery?after=org.wcs.smart.query.newquery.separator1">
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/observation_query.png"
+               label="%command.label.newobservation"
+               style="pulldown"
+               tooltip="%command.tooltip.newobservation">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="observationobservation">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/waypoint_query.png"
+               label="%command.label.newincident"
+               style="push"
+               tooltip="%command.tooltip.newincident">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="observationwaypoint">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/summary_query.png"
+               label="%command.label.newsummary"
+               style="push"
+               tooltip="%command.tooltip.newsummary">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="observationsummary">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/gridded_query.png"
+               label="%command.label.newgrid"
+               style="push"
+               tooltip="%command.tooltip.newgrid">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="observationgrid">
+            </parameter>
+         </command>
+         <separator
+               name="org.wcs.smart.observation.query.separator2"
+               visible="true">
+         </separator>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.editors">

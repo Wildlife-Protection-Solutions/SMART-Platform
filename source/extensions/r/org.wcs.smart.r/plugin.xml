@@ -80,7 +80,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="popup:org.wcs.smart.query.parts.itemlist?after=org.wcs.smart.query.separator1">
+            locationURI="popup:org.wcs.smart.query.parts.itemlist?before=org.wcs.smart.query.separator1">
          <menu
                icon="images/icons/rlogo_16.png"
                id="org.wcs.smart.r.scripts.runlist"
@@ -98,11 +98,15 @@
                   label="%other.menu.command.label"
                   style="push">
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <iterate>
+                  <instanceof
+                        value="org.wcs.smart.query.ui.editor.QueryEditorInput">
+                  </instanceof>
+               </iterate>
+            </visibleWhen>
          </menu>
-         <separator
-               name="org.wcs.smart.query.r.separator"
-               visible="true">
-         </separator>
       </menuContribution>
    </extension>
    <extension

@@ -271,6 +271,69 @@
             </command>
          </menu>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.wcs.smart.menu.query.popup.newquery?after=org.wcs.smart.query.newquery.separator1">
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/observation_query.png"
+               label="%querytoolbar.createquery.menu.newobservationquery.command.label"
+               style="pulldown"
+               tooltip="%querytoolbar.createquery.menu.newobservationquery.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="patrolobservation">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/waypoint_query.png"
+               label="%querytoolbar.newincident.command.label"
+               style="push"
+               tooltip="%querytoolbar.newincident.command.tooltip.">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="patrolwaypoint">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/patrol_query.png"
+               label="%querytoolbar.createquery.menu.newpatrolquery.command.label"
+               style="push"
+               tooltip="%querytoolbar.createquery.menu.newpatrolquery.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="patrolquery">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/summary_query.png"
+               label="%querytoolbar.createquery.menu.newsummaryquery.command.label"
+               style="push"
+               tooltip="%querytoolbar.createquery.menu.newsummaryquery.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="patrolsummary">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/gridded_query.png"
+               label="%querytoolbar.createquery.menu.newgridsummary.command.label"
+               style="push"
+               tooltip="%querytoolbar.createquery.menu.newgridsummary.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="patrolgrid">
+            </parameter>
+         </command>
+         <separator
+               name="org.wcs.smart.patrol.query.separator1"
+               visible="true">
+         </separator>
+      </menuContribution>
    </extension>
    <extension
          point="org.wcs.smart.query.import">

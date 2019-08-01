@@ -31,6 +31,7 @@ import org.eclipse.birt.report.engine.api.IGetParameterDefinitionTask;
 import org.eclipse.birt.report.engine.api.IParameterDefnBase;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
+import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 
 /**
@@ -50,10 +51,7 @@ public enum ParameterFinder {
 	public HashMap<String, IParameterDefnBase> getParameters(Report report, IReportEngine engine) throws Exception{
 		HashMap<String, IParameterDefnBase> allParameters = new HashMap<String, IParameterDefnBase>();
 		
-		File reportFile = new File(report.getConservationArea().getFileDataStoreLocation()
-				+ File.separator
-				+ Report.REPORT_DIR + File.separator + report.getFilename());
-		
+		File reportFile = ReportManager.getPath(report).toFile();
 		final IReportRunnable design = engine.openReportDesign(reportFile.getAbsolutePath());
 		final IGetParameterDefinitionTask paramDefnTask = engine.createGetParameterDefinitionTask( design );
 		Collection<?> parameters = paramDefnTask.getParameterDefns(true);

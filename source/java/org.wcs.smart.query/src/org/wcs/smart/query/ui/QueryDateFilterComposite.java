@@ -117,7 +117,7 @@ public class QueryDateFilterComposite extends Composite {
 		this.fieldOps = fieldOps;
 		this.filterOps = filterOps;
 		
-		GridLayout layout = new GridLayout(4, false);
+		GridLayout layout = new GridLayout();
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 0;

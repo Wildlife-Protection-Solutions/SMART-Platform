@@ -405,8 +405,40 @@
             allPopups="false"
             locationURI="popup:org.wcs.smart.query.parts.itemlist">
          <command
+               commandId="org.wcs.smart.query.open"
+               label="%open.command.label"
+               mnemonic="%querylistview.popup.openquery.command.mnemonic"
+               style="push"
+               tooltip="%querylistview.popup.openquery.command.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <iterate>
+                  <instanceof
+                        value="org.wcs.smart.query.ui.editor.QueryEditorInput">
+                  </instanceof>
+               </iterate>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.openrun"
+               label="%run.command.label"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <iterate>
+                  <instanceof
+                        value="org.wcs.smart.query.ui.editor.QueryEditorInput">
+                  </instanceof>
+               </iterate>
+            </visibleWhen>
+         </command>
+         <separator
+               name="org.wcs.smart.query.separator7"
+               visible="true">
+         </separator>
+         <command
                commandId="org.wcs.smart.query.folder.add"
-               icon="images/icons/etool16/folder_add.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                label="%querylistview.popup.newfolder.command.label"
                mnemonic="%querylistview.popup.newfolder.command.mnemonic"
                style="push"
@@ -426,25 +458,34 @@
                </with>
             </visibleWhen>
          </command>
+         <menu
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
+               id="org.wcs.smart.menu.query.popup.newquery"
+               label="%menu.query.menu.newquery.name">
+            <separator
+                  name="org.wcs.smart.query.newquery.separator1"
+                  visible="true">
+            </separator>
+         </menu>
          <command
-               commandId="org.wcs.smart.query.open"
-               label="%querylistview.popup.openquery.command.label"
-               mnemonic="%querylistview.popup.openquery.command.mnemonic"
-               style="push"
-               tooltip="%querylistview.popup.openquery.command.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <iterate>
-                  <instanceof
-                        value="org.wcs.smart.query.ui.editor.QueryEditorInput">
-                  </instanceof>
-               </iterate>
-            </visibleWhen>
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/compound_query.png"
+               label="%newcompound.command.label.1"
+               style="pulldown"
+               tooltip="%newcompound.command.tooltip.1">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="compound">
+            </parameter>
          </command>
          <separator
                name="org.wcs.smart.query.separator1"
                visible="true">
          </separator>
+         <command
+               commandId="org.wcs.smart.query.saveas"
+               style="push">
+         </command>
          <command
                commandId="org.wcs.smart.query.folder.rename"
                label="%querylistview.popup.rename.command.label"
@@ -488,27 +529,29 @@
             </visibleWhen>
          </command>
          <command
-               commandId="org.wcs.smart.query.create.unknown"
-               icon="images/icons/obj16/compound_query.png"
-               label="%newcompound.command.label"
-               style="pulldown"
-               tooltip="%newcompound.command.tooltip">
-            <parameter
-                  name="org.wcs.smart.query.type"
-                  value="compound">
-            </parameter>
+               commandId="org.wcs.smart.query.runexport"
+               label="%runexport.command.label"
+               style="push">
             <visibleWhen
                   checkEnabled="false">
-               <with
-                     variable="selection">
-                  <iterate
-                        ifEmpty="false"
-                        operator="or">
-                     <adapt
-                           type="org.wcs.smart.query.model.IMappableQueryType">
-                     </adapt>
-                  </iterate>
-               </with>
+               <iterate>
+                  <instanceof
+                        value="org.wcs.smart.query.ui.editor.QueryEditorInput">
+                  </instanceof>
+               </iterate>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.exportmulti"
+               label="%exportdef.command.label"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <iterate>
+                  <instanceof
+                        value="org.wcs.smart.query.ui.editor.QueryEditorInput">
+                  </instanceof>
+               </iterate>
             </visibleWhen>
          </command>
          <separator
@@ -883,6 +926,28 @@
                visible="true">
          </separator>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.wcs.smart.menu.query.popup.newquery?before=org.wcs.smart.query.newquery.separator1">
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               id="org.wcs.smart.query.wizard"
+               label="%querywizard.command.label"
+               style="push"
+               tooltip="%querywizard.command.tooltip">
+         </command>
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/compound_query.png"
+               label="%newcompound.command.label.1"
+               style="pulldown"
+               tooltip="%newcompound.command.tooltip.1">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="compound">
+            </parameter>
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -892,7 +957,7 @@
       </image>
       <image
             commandId="org.wcs.smart.query.export"
-            icon="images/icons/etool16/exportquery.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/export.png">
       </image>
       <image
             commandId="org.wcs.smart.query.create.unknown"
@@ -905,6 +970,19 @@
       <image
             commandId="org.wcs.smart.query.import"
             icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.query.openrun"
+            icon="images/icons/etool16/bullet_go.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.query.runexport"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/export.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.query.saveas"
+            disabledIcon="platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/saveas_edit.png"
+            icon="platform:/plugin/org.eclipse.ui/$nl$/icons/full/etool16/saveas_edit.png">
       </image>
    </extension>
    <extension
@@ -974,6 +1052,18 @@
                name="Source Menu Item"
                optional="true">
          </commandParameter>
+      </command>
+      <command
+            id="org.wcs.smart.query.openrun"
+            name="%openrun.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.query.runexport"
+            name="%runexport.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.query.saveas"
+            name="%saveas.command.name">
       </command>
    </extension>
    <extension
@@ -1137,6 +1227,18 @@
       <handler
             class="org.wcs.smart.query.ui.NewQueryDropDownHandler$NewQueryDropDownHandlerWrapper"
             commandId="org.wcs.smart.query.create.dropdown">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.ui.OpenRunQueryHandler$OpenRunQueryHandlerWrapper"
+            commandId="org.wcs.smart.query.openrun">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.ui.RunExportQueryHandler$RunExportQueryHandlerWrapper"
+            commandId="org.wcs.smart.query.runexport">
+      </handler>
+      <handler
+            class="org.wcs.smart.query.ui.SaveAsQueryHandler$SaveAsQueryHandlerWrapper"
+            commandId="org.wcs.smart.query.saveas">
       </handler>
    </extension>
    <extension

@@ -130,6 +130,7 @@ public class QueryListView {
 
 				@Override
 				public void run() {
+					if (queryList.getControl().isDisposed()) return;
 					queryList.setInput(data);
 					focusCellManager.getFocusCell();
 					queryList.expandToLevel(2);

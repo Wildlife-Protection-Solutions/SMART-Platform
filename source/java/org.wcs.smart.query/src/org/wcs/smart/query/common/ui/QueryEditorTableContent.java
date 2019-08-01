@@ -263,6 +263,9 @@ public class QueryEditorTableContent {
 		dateComposite = new QueryDateFilterComposite(queryProp, type.getDateFilterOptions(), IDateFilter.DATE_FILTERS);
 		dateComposite.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 		dateComposite.adapt(toolkit);
+		if (editor.getInputInternal().getDateFilter() != null) {
+			dateComposite.setDateFilter(editor.getInputInternal().getDateFilter());
+		}
 		
 		Hyperlink editQueryProp = toolkit.createHyperlink(queryProp, Messages.QueryEditorTableContent_QueryPropertiesLable,SWT.NONE);
 		editQueryProp.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
