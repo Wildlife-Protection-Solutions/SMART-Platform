@@ -22,12 +22,15 @@
 package org.wcs.smart.cybertracker.ctpackage.ui;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.MobileDeviceUtils;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -58,12 +61,12 @@ public class ExportPackageToDeviceAction implements ICtExportAction {
 	}
 
 	private void exportLocal(List<ICtPackage> towrite, Shell shell) {
-		
 		// export all the packages
 		int cnt = 0;
+		String date = DateTimeFormatter.ofPattern("ddMMYYYY").format(LocalDate.now()); //$NON-NLS-1$
 		for (ICtPackage w : towrite) {
 			try {
-				MobileDeviceUtils.exportAppToDevice(w.getLocalFile());
+				MobileDeviceUtils.exportAppToDevice(w.getLocalFile(), URLUtils.cleanFilename(w.getName()) + "." + date + ".zip"); //$NON-NLS-1$ //$NON-NLS-2$
 				cnt++;
 			} catch (Exception e) {
 				CyberTrackerPlugIn.displayError(Messages.ExportPackageToDeviceAction_ErrorTitle, 

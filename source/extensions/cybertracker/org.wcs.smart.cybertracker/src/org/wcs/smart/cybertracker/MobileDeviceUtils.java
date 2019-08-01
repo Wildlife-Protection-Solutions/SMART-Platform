@@ -64,7 +64,7 @@ public class MobileDeviceUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static void exportAppToDevice(Path packageFile) throws Exception{
+	public static void exportAppToDevice(Path packageFile, String targetFilename) throws Exception{
 		if (!CyberTrackerPlugIn.getDefault().isWindows()) {
 			throw new Exception(Messages.MobileDeviceUtils_OsNotSupported);
 		}
@@ -80,7 +80,7 @@ public class MobileDeviceUtils {
 		items.add(exe.toString());
 		items.add("/upload"); //$NON-NLS-1$
 		items.add(packageFile.toString());
-		items.add("\\SMARTData\\" + packageFile.getFileName().toString()); //$NON-NLS-1$
+		items.add("\\" + DATA_FOLDER + "\\" + targetFilename); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		ProcessBuilder pb = new ProcessBuilder(items);
 		Process p = pb.start();
