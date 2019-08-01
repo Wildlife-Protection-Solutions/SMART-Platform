@@ -585,8 +585,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		sb = new StringBuilder();
 		sb.append("update "); //$NON-NLS-1$
 		sb.append(temp);
-		sb.append(" set is_start = case when stime < " + end + " and etime > " + start + " then true else false end, "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		sb.append(" is_end = case when stime < " + (end - 86400) + " and etime > " + (start - 86400) + " then true else false end"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append(" set is_start = case when stime <= " + end + " and etime >= " + start + " then true else false end, "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append(" is_end = case when stime <= " + (end - 86400) + " and etime >= " + (start - 86400) + " then true else false end"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		QueryPlugIn.logSql(sb.toString());
 		c.createStatement().executeUpdate(sb.toString());
 		

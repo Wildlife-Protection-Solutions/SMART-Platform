@@ -177,7 +177,7 @@ public class TimePicker extends Composite {
 	}
 	
 	/**
-	 * The selected time in seconds - the last second (59) of the selected
+	 * The selected time in seconds - the first second of the selected
 	 * hour/minute is returned.
 	 * 
 	 * @return
@@ -195,7 +195,7 @@ public class TimePicker extends Composite {
 			if (min < 0 || min > 59) min = 0;
 		}
 		
-		return hour * 3600 + min * 60 + 59;
+		return hour * 3600 + min * 60;
 	}
 	
 	private void hideHour() {
