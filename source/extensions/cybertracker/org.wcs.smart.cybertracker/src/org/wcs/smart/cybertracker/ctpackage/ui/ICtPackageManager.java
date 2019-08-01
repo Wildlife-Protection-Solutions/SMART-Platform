@@ -96,11 +96,6 @@ public interface ICtPackageManager {
 	 * @return
 	 */
 	public default void deletePackage(ICtPackage ctpackage, Session session) {
-		//delete all metadata
-		session.createQuery("DELETE FROM MetadataFieldValue WHERE ctPackage = :ctpackage") //$NON-NLS-1$
-			.setParameter("ctpackage", ctpackage) //$NON-NLS-1$
-			.executeUpdate();
-
 		//delete package
 		session.delete(ctpackage);
 
@@ -108,7 +103,7 @@ public interface ICtPackageManager {
 		if (ctpackage instanceof AbstractCtPackage) {
 			try {
 				Path p = ((AbstractCtPackage)ctpackage).getLocalFile();
-				if (Files.exists(p)){
+				if (p != null && Files.exists(p)){
 					Files.delete(p);
 				}
 			}catch (Exception ex) {
