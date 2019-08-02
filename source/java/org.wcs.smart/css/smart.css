@@ -59,18 +59,18 @@
 
 /* customized SMART tab bar*/
 .SMARTTabMouseOver{
-	background-color: #F6C78E;
+	background-color: #D4E5D6;
 }
 
 /* no tab bar */
 .SMARTTabBar{
-	background-color: #FCEDDA;
+	background-color: #ECF4ED;
 }
 .SMARTTab{
-	background-color: #FCEDDA;
+	background-color: #ECF4ED;
 }
 .SMARTTabSelected{
-	background-color: #F09F3F;
+	background-color: #BCD7BF;
 }
 /* there is probably a better way to do this but
 * I use these colors to get the selected and none selected
@@ -78,23 +78,23 @@
 * in the correct color
 */
 .SMARTTabColors{
-	background-color: #F09F3F; /* active color */
+	background-color: #BCD7BF; /* active color */
 	color: #EDEDED; /*non-active color */
 }
 /* active tab bar */
 .MPartStack.active .SMARTTabMouseOver{
-	background-color: #F6C78E;
+	background-color: #D4E5D6;
 }
 .MPartStack.active .SMARTTabSelected{
-	background-color: #F09F3F;
+	background-color: #BCD7BF;
 }
 
 .MPartStack.active .SMARTTabBar{
-	background-color: #FCEDDA;
+	background-color: #ECF4ED;
 }
 
 .MPartStack.active .SMARTTab{
-	background-color: #FCEDDA;
+	background-color: #ECF4ED;
 }
 
 /* inactive tab bar */
@@ -116,25 +116,25 @@
 
 
 .SMARTSection{
-	background-color: #D5E1A3;
+	background-color: #CEDEE1;
 }
 .SMARTSection Label{
-	background-color: #D5E1A3;
+	background-color: #CEDEE1;
 }
 
 .SMARTSection Hyperlink{
-	background-color: #D5E1A3;
+	background-color: #CEDEE1;
 }
 
 .SMARTSubSection{
-	background-color: #ECF1D5;
+	background-color: #E6EEF0;
 }
 .SMARTSubSection Label{
-	background-color: #ECF1D5;
+	background-color: #E6EEF0;
 }
 
 .SMARTSubSection Hyperlink{
-	background-color: #ECF1D5;
+	background-color: #E6EEF0;
 }
 
 Section {
@@ -145,38 +145,38 @@ Section {
 	visibility: visible;
 
   /* declared in CSS rules */
-	background-color-titlebar: #D5E1A3; /*#33446B;*/
-	background-color-gradient-titlebar: #D5E1A3;
+	background-color-titlebar: #CEDEE1; /*#33446B;*/
+	background-color-gradient-titlebar: #CEDEE1;
 	border-color-titlebar: #FFFFFF;
   	
   	color: #33446B;
 }
 
 .SMARTFormHeader Label{
-	background-color: #B9C77D;
+	background-color: '#A6C4C9';
 	color: #33446B;
 }
 
 .SMARTFormHeader IdFieldHeader{
-	background-color: #B9C77D;
+	background-color: '#A6C4C9';
 	color: #33446B;
 }
 
 .SMARTFormHeader IntelQueryNameLabel{
-	background-color: #B9C77D;
+	background-color: '#A6C4C9';
 	color: #33446B;
 }
 
 .SMARTFormHeader ToolBar{
-	background-color: #B9C77D;
+	background-color: '#A6C4C9';
 	color: #33446B;
 }
 .SMARTFormHeader{
-	background-color: #B9C77D;
+	background-color: '#A6C4C9';
 	color: #33446B;
 }
 FormHeading{
-	background-color: #B9C77D;
+	background-color: '#A6C4C9';
 	color: #33446B;
 }
 
@@ -208,14 +208,14 @@ ToolBar{
 CTabFolder{
 	swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
 	swt-corner-radius: 0px;
-	swt-selected-tab-fill: #F09F3F;
-	swt-unselected-hot-tab-color-background: #F6C78E;
-    swt-unselected-tabs-color:  #FCEDDA;
+	swt-selected-tab-fill: #BCD7BF;
+	swt-unselected-hot-tab-color-background: #D4E5D6;
+    swt-unselected-tabs-color:  #ECF4ED;
 
-    swt-outer-keyline-color: #FCEDDA;
-    swt-tab-outline: #F09F3F;
+    swt-outer-keyline-color: #ECF4ED;
+    swt-tab-outline: #BCD7BF;
     swt-shadow-visible: false;
-    swt-shadow-color: #FCEDDA;
+    swt-shadow-color: #ECF4ED;
     swt-simple: true;
     
     background-color:white;        
@@ -232,14 +232,14 @@ CTabItem:selected{
 .MPartStack.active CTabFolder{
 	swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
 	swt-corner-radius: 0px;
-	swt-selected-tab-fill: #F09F3F;
-	swt-unselected-hot-tab-color-background: #F6C78E;
-    swt-unselected-tabs-color:  #FCEDDA;
+	swt-selected-tab-fill: #BCD7BF;
+	swt-unselected-hot-tab-color-background: #D4E5D6;
+    swt-unselected-tabs-color:  #ECF4ED;
 
-    swt-outer-keyline-color: #FCEDDA;
-    swt-tab-outline: #F09F3F;
+    swt-outer-keyline-color: #ECF4ED;
+    swt-tab-outline: #BCD7BF;
     swt-shadow-visible: false;
-    swt-shadow-color: #FCEDDA;
+    swt-shadow-color: #ECF4ED;
     swt-simple: true;
     
     background-color:white;        

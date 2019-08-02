@@ -829,6 +829,7 @@
             locationURI="toolbar:org.wcs.smart.i2.ui.view.records">
          <command
                commandId="org.wcs.smart.i2.command.record.new"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                style="push">
             <visibleWhen
                   checkEnabled="false">
@@ -861,6 +862,7 @@
             locationURI="toolbar:org.wcs.smart.i2.view.entitysearch">
          <command
                commandId="org.wcs.smart.i2.command.entity.new"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                label="%NewEntityCommandName2"
                style="push">
             <visibleWhen
