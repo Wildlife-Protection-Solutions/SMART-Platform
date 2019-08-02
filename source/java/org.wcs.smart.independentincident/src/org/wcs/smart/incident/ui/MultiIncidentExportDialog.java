@@ -25,6 +25,7 @@ import java.io.File;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -147,34 +148,29 @@ public class MultiIncidentExportDialog extends XmlMultiExportDialog implements I
 		Job loadIncidents = new Job(Messages.MultiIncidentExportDialog_Loading){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				List<RowItem> data = new ArrayList<>();
 				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					try{
 						Query<?> q = currentFilter.buildQuery(s);
-						List<?> results = q.list();
-						final Object[][] data = new Object[results.size()][2];
-						int counter = 0;
-						for(Object x : results){
+						for(Object x : q.list()){
 							Object[] row = (Object[])x;
-							
 							String pname = row[1] + " [" + DateFormat.getDateInstance(DateFormat.SHORT).format((Timestamp)row[2]) + "]";   //$NON-NLS-1$ //$NON-NLS-2$
-							Object[] thisdata = {pname, (UUID)row[0], row[1]};
-							data[counter++] = thisdata;
-						}
-						
-						getShell().getDisplay().asyncExec(new Runnable(){
-							@Override
-							public void run() {
-								getTableViewer().setInput(data);
-								getTableViewer().refresh();
-							}
-						});
-						
+							data.add(new RowItem(pname, (UUID)row[0], row[1].toString()));
+						}						
 					}finally{
 						if (s.getTransaction().isActive()){
 							s.getTransaction().commit();
 						}
 					}
+					getShell().getDisplay().asyncExec(new Runnable(){
+						@Override
+						public void run() {
+							getTableViewer().setInput(data);
+							getTableViewer().refresh();
+						}
+					});
+
 				}
 				return Status.OK_STATUS;
 			}

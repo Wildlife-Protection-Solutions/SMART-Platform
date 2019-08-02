@@ -234,6 +234,11 @@
                style="push"
                tooltip="%popup.merge.command.tooltip">
          </command>
+         <command
+               commandId="org.wcs.smart.patrol.exportPatrol"
+               label="Export Patrols..."
+               style="push">
+         </command>
          <separator
                name="org.wcs.smart.patrol.separator2"
                visible="true">

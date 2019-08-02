@@ -23,6 +23,7 @@ package org.wcs.smart.intelligence.xml.export;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -142,33 +143,29 @@ public class MultiIntelligenceExportDialog extends XmlMultiExportDialog implemen
 		Job loadItelJob = new Job(Messages.MultiIntelligenceExportDialog_LoadJobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				List<RowItem> items = new ArrayList<>();
+				
 				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					try{
 						Query<?> q = currentFilter.buildQuery(s);
-						List<?> results = q.list();
-						final Object[][] data = new Object[results.size()][2];
-						int counter = 0;
-						for(Object x : results){
+						for(Object x : q.list()){
 							Object[] row = (Object[])x;
 							String dname = Intelligence.generateLabel((String)row[1], (Date)row[2]);
-							Object[] thisdata = {dname, (UUID)row[0], row[1]};
-							data[counter++] = thisdata;
+							items.add(new RowItem(dname, (UUID)row[0], (String)row[1]));
 						}
-						
-						getShell().getDisplay().asyncExec(new Runnable(){
-							@Override
-							public void run() {
-								getTableViewer().setInput(data);
-								getTableViewer().refresh();
-							}
-						});
-						
 					}finally{
 						if (s.getTransaction().isActive()){
 							s.getTransaction().commit();
 						}
 					}
+					getShell().getDisplay().asyncExec(new Runnable(){
+						@Override
+						public void run() {
+							getTableViewer().setInput(items);
+							getTableViewer().refresh();
+						}
+					});
 				}
 				return Status.OK_STATUS;
 			}

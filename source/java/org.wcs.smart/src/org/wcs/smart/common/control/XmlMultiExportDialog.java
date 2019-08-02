@@ -24,20 +24,17 @@ package org.wcs.smart.common.control;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -95,22 +92,20 @@ public abstract class XmlMultiExportDialog extends SmartStyledTitleDialog implem
 	protected void okPressed() {
 		this.objUuids = new ArrayList<UUID>();
 		Object[] checked = tableViewer.getCheckedElements();
-		int objNameIndex = 0;
-		if (checked.length > 0 && ((Object[])checked[0]).length >= 3) {
-			//expected table viewer input [gui name, uuid, object name]; if name is missing use gui name as object name
-			objNameIndex = 2; 
-		}
 		Map<String, String> file2Obj = new HashMap<String, String>();
+
 		for (int i = 0; i < checked.length; i ++){
-			String objName = String.valueOf(((Object[])checked[i])[objNameIndex]);
-			String fileName = SmartUtils.getFileName(objName);
+			RowItem ri = (RowItem) checked[i];
+			
+			String fileName = SmartUtils.getFileName(ri.filename);
 			if (file2Obj.containsKey(fileName)) {
 				//output file name conflict error (two exported items will try to write data in a same file)
-				MessageDialog.openWarning(getShell(), Messages.XmlMultiExportDialog_WarnDialog_Title, MessageFormat.format(Messages.XmlMultiExportDialog_FilenameConflict_Message, file2Obj.get(fileName), objName, fileName));
+				MessageDialog.openWarning(getShell(), Messages.XmlMultiExportDialog_WarnDialog_Title, MessageFormat.format(Messages.XmlMultiExportDialog_FilenameConflict_Message, file2Obj.get(fileName), ri.filename, fileName));
 				return;
 			}
-			file2Obj.put(fileName, objName);
-			objUuids.add( (UUID)((Object[])checked[i])[1] );
+			file2Obj.put(fileName, ri.filename);
+			objUuids.add(ri.uuid);
+			
 		}
 		super.okPressed();
 	}
@@ -237,8 +232,8 @@ public abstract class XmlMultiExportDialog extends SmartStyledTitleDialog implem
 		tableViewer.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element){
-				if (element instanceof Object[]){
-					return (String)((Object[])element)[0];
+				if (element instanceof RowItem){
+					return ((RowItem)element).name;
 				}
 				return super.getText(element);
 			}
@@ -311,4 +306,29 @@ public abstract class XmlMultiExportDialog extends SmartStyledTitleDialog implem
 		loadObjectData();
 	}
 	
+	public class RowItem{
+		public String name;
+		public UUID uuid;
+		public String filename;	//the object name for output files
+		
+		public RowItem(String name, UUID uuid, String filename) {
+			this.name = name;
+			this.uuid = uuid;
+			this.filename = filename;
+		}
+		public RowItem(UUID uuid) {
+			this(null, uuid, null);			
+		}
+		
+		public boolean equals(Object other) {
+			if (other == this) return true;
+			if (other == null) return false;
+			if (other.getClass() != getClass()) return false;
+			return Objects.equals(uuid,  ((RowItem)other).uuid);
+			
+		}
+		public int hashCode() {
+			return Objects.hash(uuid);
+		}
+	}
 }

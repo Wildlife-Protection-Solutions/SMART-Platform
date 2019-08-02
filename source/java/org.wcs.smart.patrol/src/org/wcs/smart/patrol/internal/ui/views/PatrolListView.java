@@ -254,6 +254,7 @@ public class PatrolListView implements IPatrolFilteringView {
 
 	@PostConstruct
 	public void createPartControl(Composite parent, final MApplication application) {
+		localPart.getContext().set(PatrolViewFilter.class, filter);
 		
 		((FillLayout)parent.getLayout()).marginHeight = 0;
 		((FillLayout)parent.getLayout()).marginWidth = 0;
@@ -315,41 +316,27 @@ public class PatrolListView implements IPatrolFilteringView {
 		MenuManager menuManager = new MenuManager();
 		menuService.populateContributionManager(menuManager, "popup:org.wcs.smart.patrol.ui.PatrolListView"); //$NON-NLS-1$
 		Menu menu = menuManager.createContextMenu(patrolListViewer.getControl());
+
+		MenuItem mnuCollapseAll = new MenuItem(menu, SWT.PUSH);
+		mnuCollapseAll.setText(Messages.PatrolListView_CollapseAllOp);
+		mnuCollapseAll.addListener(SWT.Selection, x->{
+			patrolListViewer.collapseAll();
+		});
+		
 		
 		menu.addMenuListener(new MenuListener() {
-			
+
 			MenuItem mnuCreateFolder = null;
 			MenuItem mnuEditFolder = null;
 			MenuItem mnuDeleteFolder = null;
-
 			MenuItem mnuCollapseAll = null;
 			MenuItem mnuExpandAll = null;
+			MenuItem sep1 = null;
+
 			@Override
 			public void menuShown(MenuEvent e) {
-				if (mnuCollapseAll == null){
-					new MenuItem(menu,  SWT.SEPARATOR);
 
-					mnuCreateFolder = new MenuItem(menu, SWT.PUSH);
-					mnuCreateFolder.setText(Messages.PatrolListView_CreateFolderOp);
-					mnuCreateFolder.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-					mnuCreateFolder.addListener(SWT.Selection, x->{
-						handleFolderCreate();
-					});
-
-					mnuEditFolder = new MenuItem(menu, SWT.PUSH);
-					mnuEditFolder.setText(Messages.PatrolListView_EditFolderOp);
-					mnuEditFolder.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-					mnuEditFolder.addListener(SWT.Selection, x->{
-						handleFolderEdit();
-					});
-
-					mnuDeleteFolder = new MenuItem(menu, SWT.PUSH);
-					mnuDeleteFolder.setText(Messages.PatrolListView_DeleteFolderOp);
-					mnuDeleteFolder.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-					mnuDeleteFolder.addListener(SWT.Selection, x->{
-						handleFolderDelete();
-					});
-					
+				if (mnuCollapseAll  == null) {
 					new MenuItem(menu,  SWT.SEPARATOR);
 					
 					mnuCollapseAll = new MenuItem(menu, SWT.PUSH);
@@ -365,6 +352,48 @@ public class PatrolListView implements IPatrolFilteringView {
 					});
 				}
 				
+				mnuCollapseAll.setEnabled(contentProvider.getGroupBy() != GroupByType.NONE);
+				mnuExpandAll.setEnabled(contentProvider.getGroupBy() != GroupByType.NONE);
+				
+				if (contentProvider.getGroupBy() != PatrolTreeContentProvider.GroupByType.FOLDER) {
+					if (mnuCreateFolder != null) mnuCreateFolder.dispose();
+					mnuCreateFolder = null;
+					if (mnuEditFolder != null) mnuEditFolder.dispose();
+					mnuEditFolder = null;
+					if (mnuDeleteFolder != null) mnuDeleteFolder.dispose();
+					mnuDeleteFolder = null;
+					if (sep1 != null) sep1.dispose();
+					sep1 = null;
+					
+					return;
+				}else if (mnuCreateFolder == null) {
+				
+					sep1 = new MenuItem(menu,  SWT.SEPARATOR, menu.getItemCount() - 3);
+
+					mnuCreateFolder = new MenuItem(menu, SWT.PUSH, menu.getItemCount() - 3);
+					mnuCreateFolder.setText(Messages.PatrolListView_CreateFolderOp);
+					mnuCreateFolder.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+					mnuCreateFolder.addListener(SWT.Selection, x->{
+						handleFolderCreate();
+					});
+
+					mnuEditFolder = new MenuItem(menu, SWT.PUSH, menu.getItemCount() - 3);
+					mnuEditFolder.setText(Messages.PatrolListView_EditFolderOp);
+					mnuEditFolder.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+					mnuEditFolder.addListener(SWT.Selection, x->{
+						handleFolderEdit();
+					});
+
+					mnuDeleteFolder = new MenuItem(menu, SWT.PUSH, menu.getItemCount() - 3);
+					mnuDeleteFolder.setText(Messages.PatrolListView_DeleteFolderOp);
+					mnuDeleteFolder.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+					mnuDeleteFolder.addListener(SWT.Selection, x->{
+						handleFolderDelete();
+					});
+					
+					
+				}
+				
 				ITreeSelection sel = patrolListViewer.getStructuredSelection();
 				boolean foldersSelected = !sel.isEmpty();
 				for (Iterator<?> it = sel.iterator(); it.hasNext();) {
@@ -377,9 +406,6 @@ public class PatrolListView implements IPatrolFilteringView {
 				mnuCreateFolder.setEnabled(contentProvider.getGroupBy() == GroupByType.FOLDER);
 				mnuEditFolder.setEnabled(contentProvider.getGroupBy() == GroupByType.FOLDER && sel.size() == 1 && foldersSelected);
 				mnuDeleteFolder.setEnabled(contentProvider.getGroupBy() == GroupByType.FOLDER && foldersSelected);
-
-				mnuCollapseAll.setEnabled(contentProvider.getGroupBy() != GroupByType.NONE);
-				mnuExpandAll.setEnabled(contentProvider.getGroupBy() != GroupByType.NONE);
 			}
 			
 			@Override

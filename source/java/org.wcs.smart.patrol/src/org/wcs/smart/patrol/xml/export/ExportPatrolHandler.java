@@ -24,24 +24,36 @@ package org.wcs.smart.patrol.xml.export;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+
+import javax.inject.Named;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.ui.views.PatrolListView;
+import org.wcs.smart.patrol.internal.ui.views.PatrolViewFilter;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -60,9 +72,30 @@ public class ExportPatrolHandler {
 
 	
 	@Execute
-	public void execute(final Shell shell){
+	public void execute(final Shell shell, @Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, EPartService pService){
 		
-		MultiPatrolExportDialog dialog = new MultiPatrolExportDialog(shell);
+		List<PatrolEditorInput> defaults = new ArrayList<>();
+		if (thisSelection != null) {
+			if (thisSelection instanceof Patrol) {
+				defaults.add(new PatrolEditorInput((Patrol)thisSelection));
+			}else if (thisSelection instanceof PatrolEditorInput) {
+				defaults.add((PatrolEditorInput)thisSelection);
+			}else if (thisSelection instanceof IStructuredSelection) {
+				for(Iterator<?> item = ((IStructuredSelection)thisSelection).iterator(); item.hasNext();) {
+					Object i = (Object)item.next();
+					if (i instanceof Patrol) defaults.add(new PatrolEditorInput((Patrol)i));
+					if (i instanceof PatrolEditorInput) defaults.add((PatrolEditorInput)i);
+				}
+			}
+		}
+		
+		PatrolViewFilter filter = null;
+		MPart pp = pService.findPart(PatrolListView.ID);
+		if (pp != null) {
+			filter = pp.getContext().get(PatrolViewFilter.class);
+		}
+		
+		MultiPatrolExportDialog dialog = new MultiPatrolExportDialog(shell, filter, defaults);
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;
 		}

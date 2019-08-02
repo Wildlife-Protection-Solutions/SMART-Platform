@@ -26,8 +26,10 @@ import java.io.File;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -49,6 +51,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.views.IPatrolFilteringView;
 import org.wcs.smart.patrol.internal.ui.views.PatrolFilterDialog;
 import org.wcs.smart.patrol.internal.ui.views.PatrolViewFilter;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -73,14 +76,17 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 
 	private PatrolViewFilter currentFilter = PatrolViewFilter.newInstance();
 	
+	private List<PatrolEditorInput> initValues;
 	/**
 	 * Creates a new dialog.
 	 * 
 	 * @param parentShell parent shell
 	 * @param patrol patrol to export
 	 */
-	public MultiPatrolExportDialog(Shell parentShell) {
+	public MultiPatrolExportDialog(Shell parentShell, PatrolViewFilter filter, List<PatrolEditorInput> initValues) {
 		super(parentShell, Messages.MultiPatrolExportDialog_ChangeFilter);
+		if (filter != null) this.currentFilter = filter;
+		this.initValues = initValues;
 	}
 
 	@Override
@@ -148,35 +154,36 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 		Job loadPatrols = new Job(Messages.MultiPatrolExportDialog_LoadPatrolJobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				List<RowItem> items = new ArrayList<>();
+				
 				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					try{
 						Query<?> q = currentFilter.buildQuery(s);
-						List<?> results = q.list();
-						final Object[][] data = new Object[results.size()][2];
-						int counter = 0;
-						for(Object x : results){
+						for(Object x : q.list()){
 							Object[] row = (Object[])x;
 							
 							String pname = (String)row[1] + " [" + DateFormat.getDateInstance(DateFormat.SHORT).format((Timestamp)row[3]) + " - " + DateFormat.getDateInstance(DateFormat.SHORT).format( (Timestamp)row[4]) + "]";   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							Object[] thisdata = {pname, (UUID)row[0], row[1]};
-							data[counter++] = thisdata;
+							items.add(new RowItem(pname, (UUID)row[0], (String)row[1]));
 						}
-						
-						getShell().getDisplay().asyncExec(new Runnable(){
-							@Override
-							public void run() {
-								getTableViewer().setInput(data);
-								getTableViewer().refresh();
-							}
-						});
-					
 					}finally{
 						if (s.getTransaction().isActive()){
 							s.getTransaction().commit();
 						}
 					}
 				}
+
+				getShell().getDisplay().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						getTableViewer().setInput(items);
+						if (initValues != null) {
+							Object[] i = initValues.stream().map(e->new RowItem(e.getUuid())).collect(Collectors.toList()).toArray();
+							getTableViewer().setCheckedElements(i);
+						}
+						getTableViewer().refresh();
+					}
+				});
 				return Status.OK_STATUS;
 			}
 			
