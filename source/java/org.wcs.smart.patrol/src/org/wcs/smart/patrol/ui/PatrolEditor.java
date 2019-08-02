@@ -114,6 +114,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	private CombinedSelectionProvider selectionProvider = new CombinedSelectionProvider();
 	
 	private IPatrolEventListener attributeModifiedListener = (att, source)->{
+			patrol = null;
+			getPatrol();
 			try(Session session = HibernateManager.openSession()){
 				summaryEditor.configureAttributes(session);
 			}
@@ -274,6 +276,10 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					} catch (Exception e) {
 						SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_AttachmentError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 					}
+					
+					if (this.patrol.getCustomAttributes() == null) this.patrol.setCustomAttributes(new ArrayList<>());
+					this.patrol.getCustomAttributes().forEach(a->a.getAttributeValue());
+					
 					session.getTransaction().commit();
 					if (ops == null){
 						ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
