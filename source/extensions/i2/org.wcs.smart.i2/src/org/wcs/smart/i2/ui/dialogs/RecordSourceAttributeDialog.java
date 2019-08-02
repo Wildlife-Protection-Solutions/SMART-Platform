@@ -38,12 +38,14 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -70,6 +72,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Hyperlink;
@@ -628,7 +631,10 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 		l.setText(Messages.RecordSourceAttributeDialog_RecordSourceLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		lstSources = new TableViewer(srcPanel, SWT.BORDER);
+		Composite outer = new Composite(srcPanel, SWT.NONE);
+		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		lstSources = new TableViewer(outer, SWT.BORDER);
 		lstSources.setContentProvider(ArrayContentProvider.getInstance());
 		lstSources.setLabelProvider(new RecordSourceLabelProvider());
 		lstSources.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -638,7 +644,10 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 				editSource();
 			}
 		});
-		
+		TableColumn tc = new TableColumn(lstSources.getTable(), SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(100));
+		outer.setLayout(layout);
 		
 		
 		Composite buttonPanel = new Composite(srcPanel, SWT.NONE);

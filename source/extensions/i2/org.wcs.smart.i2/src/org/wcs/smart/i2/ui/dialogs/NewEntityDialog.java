@@ -341,16 +341,19 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 		
 		Label ll = new Label(attributePanel, SWT.SEPARATOR | SWT.HORIZONTAL);
 		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
+		ll.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 		ScrolledComposite sc = new ScrolledComposite(attributePanel, SWT.V_SCROLL);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
+		sc.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		Composite content = new Composite(sc, SWT.NONE);
 		sc.setContent(content);
 		content.setLayout(new GridLayout(2, false));
 		((GridLayout)content.getLayout()).horizontalSpacing = 7;
+		content.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		type.getAttributes().stream()
 			.filter(a -> a.getAttributeGroup() != null)
 			.map(a -> a.getAttributeGroup())
@@ -409,7 +412,9 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 		});
 		
 		sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		attributePanel.layout(true);		
+		attributePanel.layout(true);	
+		
+		
 	}
 
 	

@@ -96,18 +96,17 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 	@SuppressWarnings("unchecked")
 	public synchronized EntityTableData generateData() {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
+				session.createNativeQuery("DROP TABLE " + DB_NAME_NAME).executeUpdate(); //$NON-NLS-1$
+				session.getTransaction().commit();
+			}catch(Exception ex) {
+				session.getTransaction().rollback();
+			}
 			
-				try {
-					session.createNativeQuery("DROP TABLE " + DB_NAME_NAME).executeUpdate(); //$NON-NLS-1$
-				}catch (Exception ex) {
-					//ignore; table likely doesn't exist
-					ex.printStackTrace();
-				}
-				
+			session.beginTransaction();
+			try {
 				//find all attributes
 				List<IntelEntityTypeAttribute> etattributes = session
 						.createQuery("FROM IntelEntityTypeAttribute WHERE id.attribute.conservationArea = :ca") //$NON-NLS-1$
@@ -180,13 +179,13 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				data.tableName = DB_NAME_NAME;
 				data.totalCount = count;
 				data.currentCount = count;
-				
 				return data;
+				
 			}catch(Exception ex){
 				ex.printStackTrace();
 				session.getTransaction().rollback();
+				return null;
 			}
-			return null;
 		}
 	}
 	

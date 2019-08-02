@@ -836,6 +836,8 @@ public class AttributeFieldEditor {
 			Label l = new Label(parent, SWT.NONE);
 			l.setText(this.name + ":"); //$NON-NLS-1$
 			l.setLayoutData(new GridData(SWT.RIGHT, attribute.getType() == AttributeType.TEXT ? SWT.TOP : SWT.CENTER, false, false));
+			l.setBackground(l.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 		}
 		
 		if (attribute.getType() == AttributeType.TEXT){
@@ -875,7 +877,8 @@ public class AttributeFieldEditor {
 				});
 				cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 				((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 100;
-				
+				cmbViewer.getControl().setBackground(cmbViewer.getControl().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 				cd = createDecoration(cmbViewer.getControl());
 			}else{
 				CheckBoxDropDown control = createMultiSelectWidget(parent);
@@ -901,7 +904,7 @@ public class AttributeFieldEditor {
 				});
 				cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 				((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 100;
-				
+				cmbViewer.getControl().setBackground(cmbViewer.getControl().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 				cd = createDecoration(cmbViewer.getControl());
 				
 			}else{
@@ -914,6 +917,7 @@ public class AttributeFieldEditor {
 			t.setLayout(new GridLayout(2, false));
 			((GridLayout)t.getLayout()).marginWidth = 0;
 			((GridLayout)t.getLayout()).marginHeight = 0;
+			t.setBackground(t.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			
 			btnChDateTime = new Button(t, SWT.CHECK);
 			btnChDateTime.setSelection(false);
@@ -940,11 +944,13 @@ public class AttributeFieldEditor {
 			t.setLayout(new GridLayout(2, false));
 			((GridLayout)t.getLayout()).marginWidth = 0;
 			((GridLayout)t.getLayout()).marginHeight = 0;
-			
+			t.setBackground(t.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 			btnChOnOff = new Button(t, SWT.CHECK);
 			btnChOnOff.setSelection(false);
 			
 			btnOnOff = new OnOffButton(t, SWT.TOGGLE);
+			btnOnOff.setBackground(btnOnOff.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));			
 			btnOnOff.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e){
@@ -968,7 +974,7 @@ public class AttributeFieldEditor {
 			((GridLayout)c.getLayout()).marginWidth = 1;
 			((GridLayout)c.getLayout()).marginHeight = 2;
 			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
+			c.setBackground(c.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			c.addListener(SWT.Paint, e->{
 				GC gc = e.gc;
 				if (c.getData(SELELECTION_KEY) != null && (boolean)c.getData(SELELECTION_KEY)){
@@ -988,6 +994,7 @@ public class AttributeFieldEditor {
 			Label l = new Label(c, SWT.NONE);
 			l.setText(":"); //$NON-NLS-1$
 			l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+			l.setBackground(l.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 
 			txtValue2 = new Text(c, SWT.NONE);
 			txtValue2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
@@ -1027,7 +1034,8 @@ public class AttributeFieldEditor {
 					selectOnMap(link.getShell());
 				}
 			});
-			
+			link.setBackground(link.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 			lblProj = new Label(c, SWT.NONE);
 			lblProj.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 //			((GridData)lblProj.getLayoutData()).widthHint = 20;
@@ -1036,6 +1044,8 @@ public class AttributeFieldEditor {
 			Font smaller = new Font(lblProj.getDisplay(), fc);
 			lblProj.setFont(smaller);
 			lblProj.addListener(SWT.Dispose, e-> smaller.dispose());
+			lblProj.setBackground(lblProj.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 		}
 	}
 	

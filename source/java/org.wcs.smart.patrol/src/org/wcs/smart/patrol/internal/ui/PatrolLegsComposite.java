@@ -212,6 +212,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		final Button btnChangeTransport = new Button(buttonPanel, SWT.PUSH);
 		btnChangeTransport.setText(Messages.PatrolLegsComposite_ChangeTransport_Button);
 		btnChangeTransport.setSelection(false);
+		btnChangeTransport.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnChangeTransport.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -232,6 +233,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		final Button btnAddLeg = new Button(buttonPanel, SWT.PUSH);
 		btnAddLeg.setText(Messages.PatrolLegsComposite_ChangeLeader_Button);
 		btnAddLeg.setSelection(false);
+		btnAddLeg.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAddLeg.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -254,6 +256,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		final Button btnSplit = new Button(buttonPanel, SWT.PUSH);
 		btnSplit.setText(Messages.PatrolLegsComposite_SplitPatrol_Button);
 		btnSplit.setSelection(false);
+		btnSplit.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnSplit.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -274,6 +277,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		final Button btnRemoveLeg = new Button(buttonPanel, SWT.PUSH);
 		btnRemoveLeg.setText(Messages.PatrolLegsComposite_RemoveLeg_Button);
+		btnRemoveLeg.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnRemoveLeg.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -283,6 +287,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		final Button btnEditLeg = new Button(buttonPanel, SWT.PUSH);
 		btnEditLeg.setText(Messages.PatrolLegsComposite_EditLeg_Button);
+		btnEditLeg.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEditLeg.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -293,6 +298,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		final Button btnmergeLegs = new Button(buttonPanel, SWT.PUSH);
 		btnmergeLegs.setText(Messages.PatrolLegsComposite_MergeLegs);
+		btnmergeLegs.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnmergeLegs.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -302,6 +308,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 
 		if (canEditDates){
 			btnMoveToNewPatrol = new Button(buttonPanel, SWT.PUSH);
+			btnMoveToNewPatrol.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnMoveToNewPatrol.setText(Messages.PatrolLegsComposite_0);
 			btnMoveToNewPatrol.addSelectionListener(new SelectionAdapter() {
 				@Override
