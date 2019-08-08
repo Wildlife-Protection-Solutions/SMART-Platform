@@ -362,19 +362,7 @@ public class AttributeInfoPanel extends Composite {
 			}
 		});
 		TableViewerColumn colLabel = new TableViewerColumn(lstAttributeList, SWT.NONE);
-		colLabel.setLabelProvider(new ColumnLabelProvider() {
-					AttributeListLabelProvider ll = new AttributeListLabelProvider();
-					@Override
-					public String getText(Object element) {
-						return ll.getText(element);
-					}
-					@Override
-					public void dispose() {
-						super.dispose();
-						ll.dispose();
-					}
-					
-		});
+		colLabel.setLabelProvider(new AttributeListLabelProvider());
 		
 		TableViewerColumn imageLabel = new TableViewerColumn(lstAttributeList, SWT.NONE);
 		
@@ -1304,7 +1292,7 @@ public class AttributeInfoPanel extends Composite {
 	/*
 	 * Label provided for attribute list
 	 */
-	class AttributeListLabelProvider extends LabelProvider implements IColorProvider {
+	class AttributeListLabelProvider extends ColumnLabelProvider {
 		@Override
 		public String getText(Object element) {
 			AttributeListItem it = (AttributeListItem) element;
