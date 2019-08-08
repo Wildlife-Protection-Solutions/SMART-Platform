@@ -187,7 +187,7 @@ public class UpgradeEngine {
 			sub1.subTask(Messages.UpgradeEngine_subprogress2);
 			for (int i = startIndex; i < UpgradeFromVersion.values().length; i ++){
 				UpgradeFromVersion v = UpgradeFromVersion.values()[i];
-				IDatabaseUpgrader upgrader = v.upgradeEngine.newInstance();
+				IDatabaseUpgrader upgrader = v.upgradeEngine.getConstructor().newInstance();
 				upgrader.upgrade(sub1.split(1));
 				upgradersRun.add(upgrader);
 				

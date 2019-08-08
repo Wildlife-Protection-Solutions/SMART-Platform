@@ -60,6 +60,7 @@ public class SmartQuery extends AbstractSmartBirtQuery {
 	 * </p>
 	 */
 	public void prepare(String queryText) throws OdaException {
+		queryText = queryText.strip();
 		parameters = new HashMap<Object, Object>();
 		
 		ParsedQuery parsed = null;

@@ -22,7 +22,10 @@
 package org.wcs.smart.report;
 
 import java.io.File;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,11 +39,6 @@ import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
@@ -50,6 +48,10 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
+import org.w3c.dom.ls.LSSerializer;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.control.WarningDialog;
@@ -208,8 +210,7 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 	 * @throws Exception
 	 */
 	public static void xmlUpdater(File file) throws Exception {
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory
-				.newInstance();
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 		Document doc = docBuilder.parse(file);
 
@@ -253,16 +254,26 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 		updateMap(doc, datasetname2extension);
 
 		// write the content into xml file
-		TransformerFactory transformerFactory = TransformerFactory
-				.newInstance();
-		Transformer transformer = transformerFactory.newTransformer();
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
-		transformer.setOutputProperty(
-				"{http://xml.apache.org/xslt}indent-amount", "2"); //$NON-NLS-1$ //$NON-NLS-2$
-
-		DOMSource source = new DOMSource(doc);
-		StreamResult result = new StreamResult(file);
-		transformer.transform(source, result);
+//		TransformerFactory transformerFactory = TransformerFactory.newInstance();
+//		Transformer transformer = transformerFactory.newTransformer();
+//		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+//		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2"); //$NON-NLS-1$ //$NON-NLS-2$
+//
+//		DOMSource source = new DOMSource(doc);
+//		StreamResult result = new StreamResult(file);
+//		transformer.transform(source, result);
+//		
+//		
+		final DOMImplementationLS dom = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
+		final LSSerializer serializer = dom.createLSSerializer();
+		serializer.setNewLine("\n");
+	
+		final LSOutput destination = dom.createLSOutput();
+		destination.setEncoding(StandardCharsets.UTF_8.name());
+		try(OutputStream fos = Files.newOutputStream(file.toPath())){
+			destination.setByteStream(fos);
+			serializer.write(doc, destination);
+		}
 	}
 	
 	private static void updateMap(Document doc, HashMap<String,String> dataSetTypeMapping) throws Exception{
