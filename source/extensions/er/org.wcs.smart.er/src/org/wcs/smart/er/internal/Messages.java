@@ -116,7 +116,9 @@ public class Messages extends NLS {
 	public static String DescriptionComposite_Label_Description;
 	public static String DescriptionComposite_Title;
 	public static String DistanceDirectionComposite_Description;
-	public static String DistanceDirectionComposite_Label;
+
+	public static String DistanceDirectionComposite_distancedirectiontooltip;
+	public static String DistanceDirectionComposite_Label1;
 
 	public static String DistanceDirectionComposite_RecordObserverOption;
 	public static String DistanceDirectionComposite_Title;
@@ -311,9 +313,9 @@ public class Messages extends NLS {
 	public static String MissionDayComposite_DeleteDialog_Message;
 	public static String MissionDayComposite_DeleteDialog_Title;
 	public static String MissionDayComposite_DeleteWaypoint;
-	public static String MissionDayComposite_Direction;
+	public static String MissionDayComposite_Direction1;
 	public static String MissionDayComposite_DisplayingWizard;
-	public static String MissionDayComposite_Distance;
+	public static String MissionDayComposite_Distance1;
 	public static String MissionDayComposite_DistanceTraveled;
 	public static String MissionDayComposite_EndTime;
 	public static String MissionDayComposite_Error;
@@ -331,6 +333,8 @@ public class Messages extends NLS {
 	public static String MissionDayComposite_None;
 	public static String MissionDayComposite_Observation;
 	public static String MissionDayComposite_ObservationsWaypoints;
+
+	public static String MissionDayComposite_PrjLocationColumnLabel;
 	public static String MissionDayComposite_RestMinutes;
 	public static String MissionDayComposite_SamplingUnit;
 	public static String MissionDayComposite_startBeforeEnd;
@@ -390,6 +394,12 @@ public class Messages extends NLS {
 	public static String MissionExportHandler_7;
 	public static String MissionExportHandler_8;
 	public static String MissionExportHandler_9;
+	public static String MissionFeatureSource_RawWaypointLayerName;
+
+	public static String MissionFeatureSource_TrackLayerName;
+
+	public static String MissionFeatureSource_WaypointLayerName;
+
 	public static String MissionFilterDialog_Dates;
 	public static String MissionFilterDialog_Message;
 	public static String MissionFilterDialog_Title;
@@ -437,6 +447,10 @@ public class Messages extends NLS {
 	public static String MissionImportHandler_9;
 	public static String MissionMapPage_AddLayersJob_Error;
 	public static String MissionMapPage_AddLayersJob_Title;
+	public static String MissionMapPage_EditMsg;
+
+	public static String MissionMapPage_EditMsgTitle;
+
 	public static String MissionMapPage_MoveDbError;
 
 	public static String MissionMapPage_MoveReprojectError;
@@ -722,7 +736,7 @@ public class Messages extends NLS {
 	public static String SurveyDesignSummaryEditorPage_ConfigurableModel;
 	public static String SurveyDesignSummaryEditorPage_Description;
 	public static String SurveyDesignSummaryEditorPage_DesignSectionLabel;
-	public static String SurveyDesignSummaryEditorPage_DistanceDirectionLabel;
+	public static String SurveyDesignSummaryEditorPage_DistanceDirectionLabel1;
 	public static String SurveyDesignSummaryEditorPage_EndDate;
 	public static String SurveyDesignSummaryEditorPage_Key;
 	public static String SurveyDesignSummaryEditorPage_Name;

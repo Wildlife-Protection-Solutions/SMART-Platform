@@ -305,8 +305,8 @@ public class DataGenerator implements IDataEngine{
 				
 				Waypoint trackPoint = new Waypoint();
 				trackPoint.setDateTime( Date.from(wpDateTime.atZone(ZoneId.systemDefault()).toInstant()));
-				trackPoint.setX(startc.x);
-				trackPoint.setY(startc.y);
+				trackPoint.setRawX(startc.x);
+				trackPoint.setRawY(startc.y);
 				trackpoints.add(trackPoint);
 
 				//move coordinate 

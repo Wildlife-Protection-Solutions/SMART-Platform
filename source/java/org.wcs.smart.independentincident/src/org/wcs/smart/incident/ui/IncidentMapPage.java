@@ -21,38 +21,56 @@
  */
 package org.wcs.smart.incident.ui;
 
+import java.awt.Color;
 import java.awt.Point;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.ecore.InternalEObject;
+import org.eclipse.emf.ecore.impl.ENotificationImpl;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.collection.ListFeatureCollection;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.referencing.CRS;
+import org.geotools.styling.Fill;
+import org.geotools.styling.Graphic;
+import org.geotools.styling.LineSymbolizer;
+import org.geotools.styling.Mark;
+import org.geotools.styling.PointSymbolizer;
+import org.geotools.styling.Rule;
+import org.geotools.styling.Stroke;
+import org.geotools.styling.Style;
+import org.geotools.styling.StyleBuilder;
+import org.geotools.styling.StyleFactory;
+import org.geotools.styling.Symbolizer;
+import org.geotools.util.factory.GeoTools;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
-import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.ProjectPackage;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.render.IViewportModel;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
-import org.opengis.style.Style;
+import org.opengis.filter.FilterFactory;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentFeatureFactory;
@@ -68,8 +86,6 @@ import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.ReprojectUtils;
 
-import org.locationtech.jts.geom.Coordinate;
-
 /**
  * Incident editor map page
  * @author Emily
@@ -79,12 +95,17 @@ public class IncidentMapPage extends SmartMapEditorPart {
 
 	private IncidentEditor parent;
 
-	
 	private SimpleFeatureType featureType;
 	private ListFeatureCollection featureCollection;
 	private FeatureStore<SimpleFeatureType,SimpleFeature> store;
 	private Layer pointLayer = null;
 	private IGeoResource pointResource;
+	
+	private SimpleFeatureType prjFeatureType = null;
+	private ListFeatureCollection prjFeatureCollection = null;
+	private FeatureStore<SimpleFeatureType,SimpleFeature> prjStore = null;
+	private Layer prjLayer = null;
+	private IGeoResource prjResource = null;
 	
 	/**
 	 * Creates a new map page
@@ -105,6 +126,8 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			
 		}
 		this.mapTools = tools.toArray(new String[tools.size()]);
+		
+		
 	}
 	
 	@Override
@@ -143,11 +166,17 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		
-		LoadDefaultLayersJob loadDefaultLayers = new LoadDefaultLayersJob(getMap());
+		LoadDefaultLayersJob loadDefaultLayers = new LoadDefaultLayersJob(getMap()) {
+			protected IStatus run(IProgressMonitor monitor) {
+				IStatus s = super.run(monitor);
+				Display.getDefault().asyncExec(()->{
+					addPointsLayer();
+					updatePointsLayer();	
+				});
+				return s;
+			}
+		};
 		loadDefaultLayers.schedule();
-		
-		addPointsLayer();
-		updatePointsLayer();
 		
 		if (this.parent.canEdit() == null){
         	getMap().getBlackboard().put(IMapEditManager.BLACKBOARD_KEY, getEditManager());
@@ -160,10 +189,23 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	 */
 	private void addPointsLayer() {
         try {
-			featureType = IncidentFeatureFactory.createSimpleIncidentSchema();
+			List<IGeoResource> layers = new ArrayList<IGeoResource>();
+
+			//normal point layer
+			featureType = IncidentFeatureFactory.createSimpleIncidentSchema(IncidentFeatureFactory.SMART_POINT_TYPE_NAME);
 			featureCollection = new ListFeatureCollection(featureType);
 			pointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
+			store = pointResource.resolve(FeatureStore.class, null);
+			layers.add(pointResource);
 			
+			if (parent.getOptions().getTrackDistanceDirection()) {
+				//projected point layer
+				prjFeatureType = IncidentFeatureFactory.createSimpleIncidentSchema(IncidentFeatureFactory.SMART_POINT_PRJ_TYPE_NAME);
+				prjFeatureCollection = new ListFeatureCollection(prjFeatureType);
+				prjResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(prjFeatureType);
+				prjStore = prjResource.resolve(FeatureStore.class, null);
+				layers.add(0, prjResource);
+			}
 		
 			//dispose of temporary layer when composite is disposed
 			super.mapViewer.getControl().addDisposeListener(new DisposeListener() {
@@ -173,29 +215,38 @@ public class IncidentMapPage extends SmartMapEditorPart {
 						if (pointLayer != null){
 							CatalogPlugin.getDefault().getLocalCatalog().remove(pointLayer.getGeoResource().service(null));
 						}
+						if (prjLayer != null) {
+							CatalogPlugin.getDefault().getLocalCatalog().remove(prjLayer.getGeoResource().service(null));
+						}
 					}catch (Exception ex){
 						IncidentPlugIn.log("Error removing incident service", ex); //$NON-NLS-1$
 					}
 					
 				}
 			});
-	        store = pointResource.resolve(FeatureStore.class, null);
-
-			List<IGeoResource> layers = new ArrayList<IGeoResource>();
-			layers.add(pointResource);
+	      ;
 			
-			AddLayersCommand command = new AddLayersCommand(layers, 0) {
+			AddLayersCommand command = new AddLayersCommand(layers, getMap().getLayersInternal().size()) {
 				@Override
 				public void run(IProgressMonitor monitor) throws Exception {
 					super.run(monitor);
 					//set custom style for points layer
-					Layer pointLayerEx = getLayers().get(0);
-					pointLayerEx.setName(Messages.IncidentMapPage_MapLayerName);
-					String sld = getStylingConfig();
-					XMLMemento memento = XMLMemento.createReadRoot(new StringReader(sld));
-					SLDContent c = new SLDContent();
-					Style style = (Style)c.load(memento);
-					pointLayerEx.getStyleBlackboard().put(SLDContent.ID, style);
+					int index = getLayers().size() == 1 ? 0 : 1;
+					pointLayer = getLayers().get(index);
+					pointLayer.setName(Messages.IncidentMapPage_MapLayerName);
+					pointLayer.getStyleBlackboard().put(SLDContent.ID, getStylingConfig());
+					pointLayer.setVisible(true);
+					
+					if (getLayers().size() > 1) {
+						prjLayer = getLayers().get(0);
+						prjLayer.setName("Independent Incident - Raw Points"); //$NON-NLS-1$
+						prjLayer.setVisible(false);
+						prjLayer.getStyleBlackboard().put(SLDContent.ID, getPrjStylingConfig());
+					}
+					
+					pointLayer.eNotify(new ENotificationImpl(
+							(InternalEObject) pointLayer, Notification.SET,
+							ProjectPackage.LAYER__VISIBLE, false, true));
 					
 				}
 			};
@@ -229,21 +280,28 @@ public class IncidentMapPage extends SmartMapEditorPart {
 				store.addFeatures(featureCollection);
 			}
 			
+			if (prjFeatureCollection != null) {
+				prjFeatureCollection.clear();
+				prjFeatureCollection.add(IncidentFeatureFactory.createSimpleIncidentFeature(prjFeatureType, parent.getIncident()));
+				try{
+					prjStore.removeFeatures(Filter.INCLUDE);
+					prjStore.addFeatures(prjFeatureCollection);
+				}catch (ConcurrentModificationException ex){
+					//try again - this should only happen once (udig removes listener)
+					//see SMART bug 1672
+					prjStore.removeFeatures(Filter.INCLUDE);
+					prjStore.addFeatures(prjFeatureCollection);
+				}
+				
+			}
 			
 		} catch (IOException e) {
 			IncidentPlugIn.displayLog(Messages.IncidentMapPage_Error2, e);
 		}
+		
 		//refresh map - only refresh point layer 
-		if (pointLayer == null){
-			for (ILayer layer : getMap().getMapLayers()){
-				if (layer.getGeoResource().getID().equals(pointResource.getID())){
-					pointLayer = (Layer)layer;
-				}
-			}
-		}
-		if (pointLayer != null){
-			pointLayer.refresh(null);
-		}
+		if (pointLayer != null) pointLayer.refresh(null);
+		if (prjLayer != null) prjLayer.refresh(null);
 		return;
 	}
 	
@@ -255,46 +313,78 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	 * Default style for the layer
 	 * @return
 	 */
-	private String getStylingConfig() {
-		return	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+ //$NON-NLS-1$
-		"<styleEntry version=\"1.0\" type=\"SLDStyle\">"+ //$NON-NLS-1$
-		"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;"+ //$NON-NLS-1$
-		"	&lt;sld:UserStyle xmlns=\"http://www.opengis.net/sld\""+ //$NON-NLS-1$
-		"		xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\""+ //$NON-NLS-1$
-		"		xmlns:gml=\"http://www.opengis.net/gml\"&gt;"+ //$NON-NLS-1$
-		"		&lt;sld:Name&gt;Default Styler&lt;/sld:Name&gt;"+ //$NON-NLS-1$
-		"		&lt;sld:Title /&gt;"+ //$NON-NLS-1$
-		"		&lt;sld:FeatureTypeStyle&gt;"+ //$NON-NLS-1$
-		"			&lt;sld:Name&gt;simple&lt;/sld:Name&gt;"+ //$NON-NLS-1$
-		"			&lt;sld:FeatureTypeName&gt;Feature&lt;/sld:FeatureTypeName&gt;"+ //$NON-NLS-1$
-		"			&lt;sld:SemanticTypeIdentifier&gt;generic:geometry&lt;/sld:SemanticTypeIdentifier&gt;"+ //$NON-NLS-1$
-		"			&lt;sld:SemanticTypeIdentifier&gt;simple&lt;/sld:SemanticTypeIdentifier&gt;"+ //$NON-NLS-1$
-		//rule for default style
-		"			&lt;sld:Rule&gt;"+ //$NON-NLS-1$
-		"				&lt;sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
-		"					&lt;sld:Graphic&gt;"+ //$NON-NLS-1$
-		"						&lt;sld:Mark&gt;"+ //$NON-NLS-1$
-		"							&lt;sld:WellKnownName&gt;star&lt;/sld:WellKnownName&gt;"+ //$NON-NLS-1$
-		"							&lt;sld:Fill&gt;"+ //$NON-NLS-1$
-		"								&lt;sld:CssParameter name=\"fill\"&gt;#FF0000&lt;/sld:CssParameter&gt;"+ //$NON-NLS-1$
-		"							&lt;/sld:Fill&gt;"+ //$NON-NLS-1$
-		"							&lt;sld:Stroke /&gt;"+ //$NON-NLS-1$
-		"						&lt;/sld:Mark&gt;"+ //$NON-NLS-1$
-		"						&lt;sld:Size&gt;10.0&lt;/sld:Size&gt;"+ //$NON-NLS-1$
-		"					&lt;/sld:Graphic&gt;"+ //$NON-NLS-1$
-		"				&lt;/sld:PointSymbolizer&gt;"+ //$NON-NLS-1$
-		"			&lt;/sld:Rule&gt;"+ //$NON-NLS-1$
-			"		&lt;/sld:FeatureTypeStyle&gt;"+ //$NON-NLS-1$
-		"	&lt;/sld:UserStyle&gt;"+ //$NON-NLS-1$
-		"</styleEntry>"; //$NON-NLS-1$
+	private Style getStylingConfig() {
+		
+		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+		StyleBuilder sb = new StyleBuilder(sf);
+        
+		Stroke circlestroke = sb.createStroke(new Color(0,0,0), 1);
+		Fill circlefill = sb.createFill(new Color(255,100,100));
+		Mark circlemark = sb.createMark(sb.literalExpression("circle"), circlefill, circlestroke); //$NON-NLS-1$
+		Graphic circleg = sb.createGraphic(null,  circlemark,  null);
+		circleg.setSize(sb.literalExpression(8));
+        PointSymbolizer endpoint = sb.createPointSymbolizer(circleg);
+		
+		Rule rr = sb.createRule(new Symbolizer[] {endpoint});
+		
+		org.geotools.styling.FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+    	fts.setName("Incident Style"); //$NON-NLS-1$
+    	fts.rules().add(rr);
+		
+		Style style = sf.createStyle();
+    	style.featureTypeStyles().add(fts);
+		return style;
+	}
 	
+	private Style getPrjStylingConfig() {
+		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+		StyleBuilder sb = new StyleBuilder(sf);
+        FilterFactory ff = CommonFactoryFinder.getFilterFactory(GeoTools.getDefaultHints());
+        
+		Stroke linestroke = sb.createStroke(new Color(91, 91, 91), 1, new float[] {5.0f, 2.0f});
+		LineSymbolizer lines = sb.createLineSymbolizer(linestroke);
+		
+		Stroke circlestroke = sb.createStroke(new Color(0,0,0), 1);
+		Fill circlefill = sb.createFill(new Color(255,100,100));
+		Mark circlemark = sb.createMark(sb.literalExpression("circle"), circlefill, circlestroke); //$NON-NLS-1$
+		Graphic circleg = sb.createGraphic(null,  circlemark,  null);
+		circleg.setSize(sb.literalExpression(8));
+        PointSymbolizer endpoint = sb.createPointSymbolizer(circleg);
+		endpoint.setGeometry(ff.function("endPoint", ff.property("geom")));  //$NON-NLS-1$ //$NON-NLS-2$
+		
+		Fill squarefill = sb.createFill(new Color(91, 91, 91));
+		Mark squaremark = sb.createMark(sb.literalExpression("square"), squarefill, null); //$NON-NLS-1$
+		Graphic squareg = sb.createGraphic(null,  squaremark,  null);
+		squareg.setSize(sb.literalExpression(8));
+        PointSymbolizer startpoint = sb.createPointSymbolizer(squareg);
+        startpoint.setGeometry(ff.function("startPoint", ff.property("geom")));  //$NON-NLS-1$ //$NON-NLS-2$
+		
+		Rule rr = sb.createRule(new Symbolizer[] {lines, endpoint, startpoint});
+		
+		org.geotools.styling.FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+    	fts.setName("Projection Style"); //$NON-NLS-1$
+    	fts.rules().add(rr);
+		
+		Style style = sf.createStyle();
+    	style.featureTypeStyles().add(fts);
+		return style;
 	}
 	
 	
 	private IMapEditManager getEditManager(){
     	return new IMapEditManager() {
     		private List<Object> undoCommands = new ArrayList<>();
-			@Override
+			
+    		private boolean showWarning = true;
+    		@Override
+    		public void activate() {
+    			if (parent.getOptions().getTrackDistanceDirection() && showWarning) {
+    				//down warning 
+    				showWarning = false;
+    				MessageDialog.openWarning(parent.getSite().getShell(), Messages.IncidentMapPage_EditWarningMsgTitle, Messages.IncidentMapPage_EditWarningMsg);
+    			}
+    		}
+    		@Override
 			public synchronized void moveFeature(Object feature, int x, int y, IViewportModel vm) {
 				if (!(feature instanceof Waypoint)) return ;
 				
@@ -310,15 +400,34 @@ public class IncidentMapPage extends SmartMapEditorPart {
 					}
 				}
 				
-				double origx = pw.getX();
-				double origy = pw.getY();
+				double origx = pw.getRawX();
+				double origy = pw.getRawY();
+				Float origdistance = pw.getDistance();
+				Float origdirection = pw.getDirection();
+				
+				double newx = origx;
+				double newy = origy;
+				Float newdistance = pw.getDistance();
+				Float newdirection = pw.getDirection();
+				if (pw.getDirection() != null && pw.getDistance() != null) {
+					//change the distance and direction not the coordinate
+					//but warn the user somehow
+					Float[] d = Waypoint.computeDistanceBearing(new Coordinate(origx, origy), crspx);
+					newdistance = d[0];
+					newdirection = d[1];
+				}else {
+					newx = crspx.x;
+					newy = crspx.y;
+				}
 				
 				boolean modified = false;
 				try(Session s = HibernateManager.openSession()){
 					try{
 						s.beginTransaction();
-						pw.setX(crspx.x);
-						pw.setY(crspx.y);
+						pw.setRawX(newx);
+						pw.setRawY(newy);
+						pw.setDirection(newdirection);
+						pw.setDistance(newdistance);
 						s.update(pw);
 						s.getTransaction().commit();
 						modified = true;
@@ -329,14 +438,14 @@ public class IncidentMapPage extends SmartMapEditorPart {
 							IncidentPlugIn.displayLog(Messages.IncidentMapPage_SaveError + ex.getMessage(), ex);
 							return;
 						}
-						pw.setX(origx);
-						pw.setY(origy);
+						pw.setRawX(origx);
+						pw.setRawY(origy);
+						pw.setDirection(origdirection);
+						pw.setDistance(origdistance);
 					}
 				}
 				if (modified){
-					addUndo(pw, origx, origy);
-					
-//					SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, pw.getMissionDay().getMission());
+					addUndo(pw, origx, origy, origdirection, origdistance);
 					WaypointEventManager.getInstance().waypointModified(pw);
 				}
 			}
@@ -360,16 +469,13 @@ public class IncidentMapPage extends SmartMapEditorPart {
 				}
 			}
 			
-			
-			
-			private void addUndo(Waypoint wp, double x, double y){
-				undoCommands.add(0, new Object[]{wp, x, y});
+			private void addUndo(Waypoint wp, double x, double y, Float direction, Float distance){
+				undoCommands.add(0, new Object[]{wp, x, y, distance, direction});
 				if (undoCommands.size() > 100){
 					undoCommands.remove(undoCommands.size() - 1);
 				}
 				updateToolbar();
 			}
-			
 			
 			@Override
 			public synchronized void undo() {
@@ -384,14 +490,17 @@ public class IncidentMapPage extends SmartMapEditorPart {
 						Waypoint pw = (Waypoint) data[0];
 						double x = (double) data[1];
 						double y = (double) data[2];
+						Float distance = (Float)data[3];
+						Float direction = (Float)data[4];
 						
-						pw.setX(x);
-						pw.setY(y);
+						pw.setRawX(x);
+						pw.setRawY(y);
+						pw.setDirection(direction);
+						pw.setDistance(distance);
 						s.update(pw);
 						s.getTransaction().commit();
 						
 						Display.getDefault().syncExec(()->{
-	//						SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, pw.getMissionDay().getMission());
 							WaypointEventManager.getInstance().waypointModified(pw);
 						});
 					}catch (Exception ex){

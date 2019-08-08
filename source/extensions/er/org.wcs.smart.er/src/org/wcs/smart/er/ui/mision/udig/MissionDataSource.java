@@ -29,8 +29,10 @@ import org.geotools.data.store.ContentDataStore;
 import org.geotools.data.store.ContentEntry;
 import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.feature.NameImpl;
+import org.hibernate.Session;
 import org.opengis.feature.type.Name;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Data source for mission observations and tracks.
@@ -43,6 +45,7 @@ public class MissionDataSource extends ContentDataStore{
 
 	public static final String MISSIONWAYPOINT_TYPE = "MissionPoint"; //$NON-NLS-1$
 	public static final String MISSIONTRACK_TYPE = "MissionTrack"; //$NON-NLS-1$
+	public static final String MISSIONRAWWAYPOINT_TYPE = "MissionPointRaw"; //$NON-NLS-1$
 	
 	private MissionService service;
 	
@@ -61,9 +64,14 @@ public class MissionDataSource extends ContentDataStore{
 	
 	@Override
 	protected List<Name> createTypeNames() throws IOException {
+		boolean dd = false;
+		try (Session session = HibernateManager.openSession()){
+			dd = session.get(Mission.class, service.getMissionUuid()).getSurvey().getSurveyDesign().getTrackDistanceDirection();
+		}
 		List<Name> names = new ArrayList<>();
 		names.add(new NameImpl(MISSIONWAYPOINT_TYPE));
 		names.add(new NameImpl(MISSIONTRACK_TYPE));
+		if (dd) names.add(new NameImpl(MISSIONRAWWAYPOINT_TYPE));
 		return names;
 	}
 

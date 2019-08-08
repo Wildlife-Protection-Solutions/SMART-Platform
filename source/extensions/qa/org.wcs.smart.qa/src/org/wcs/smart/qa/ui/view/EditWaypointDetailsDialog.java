@@ -165,8 +165,8 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 		isUpdating = true;
 		try{
 			setErrorMessage(null);
-			waypoint.setX(newPosition.x);
-			waypoint.setY(newPosition.y);
+			waypoint.setRawX(newPosition.x);
+			waypoint.setRawY(newPosition.y);
 			updateFeature(newPosition);
 			validate();
 		}finally{
@@ -243,10 +243,10 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 			try{
 				s.beginTransaction();
 				Waypoint wp = (Waypoint) s.get(Waypoint.class, waypointUuid);
-				wp.setX(waypoint.getX());
-				wp.setY(waypoint.getY());
-				waypoint.setX(wp.getX());
-				waypoint.setY(wp.getY());
+				wp.setRawX(waypoint.getX());
+				wp.setRawY(waypoint.getY());
+				waypoint.setRawX(wp.getX());
+				waypoint.setRawY(wp.getY());
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();

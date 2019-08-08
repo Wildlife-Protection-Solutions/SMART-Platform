@@ -41,6 +41,12 @@ public class PatrolFeatureFactory {
 	
 	private static final SimpleDateFormat TRACK_DT_FORMAT = new SimpleDateFormat("MMMddyyyy");  //$NON-NLS-1$
 	
+	public static SimpleFeatureType createWaypointPrjSchema() throws SchemaException{
+		String spec = "the_geom:LineString:srid=4326,fid:String,id:Integer,date:Date,time:Date,rawx:Double,rawy:Double,distance:Double,bearing:Double,x:Double,y:Double"; //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.WAYPOINT_PRJ_TYPE, spec);
+		return type;
+	}
+	
 	public static SimpleFeatureType createWaypointSchema() throws SchemaException{
 		String spec = "the_geom:Point:srid=4326,fid:String,id:Integer,date:Date,time:Date,observation:String,comment:String"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.WAYPOINT_TYPE, spec);
@@ -67,6 +73,31 @@ public class PatrolFeatureFactory {
 			data[5] = waypoint.getWaypoint().getObservationsAsString();
 		}
 		data[6] = waypoint.getWaypoint().getComment();
+		
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
+	}
+	
+	public static SimpleFeature getWaypointAsPrjFeature(SimpleFeatureType ftype, PatrolWaypoint waypoint){
+		//String spec = "geom:Point:srid=4326,fid:String,id:integer,date:Date,time:Time,comment:String";
+		Object data[] = new Object[11];
+		data[0] = GeometryFactoryProvider.getFactory().createLineString(new Coordinate[] {
+				new Coordinate(waypoint.getWaypoint().getRawX(), waypoint.getWaypoint().getRawY()),
+				new Coordinate(waypoint.getWaypoint().getX(), waypoint.getWaypoint().getY()),
+		});
+		data[1] = ftype.getName() + "." + waypoint.getWaypoint().getId() + "." + UuidUtils.uuidToString(waypoint.getWaypoint().getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+		data[2] = waypoint.getWaypoint().getId();
+		data[3] = waypoint.getPatrolLegDay() == null ? null : waypoint.getPatrolLegDay().getDate();
+		data[4] = waypoint.getWaypoint().getDateTime();
+		
+		data[5] = waypoint.getWaypoint().getRawX();
+		data[6] = waypoint.getWaypoint().getRawY();
+		
+		data[7] = waypoint.getWaypoint().getDistance();
+		data[8] = waypoint.getWaypoint().getDirection();
+		
+		data[9] = waypoint.getWaypoint().getX();
+		data[10] = waypoint.getWaypoint().getY();
+		
 		
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}

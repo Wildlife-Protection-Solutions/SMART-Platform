@@ -325,7 +325,10 @@ public class Messages extends NLS {
 	public static String PatrolExporter_Progress_Exporting;
 	public static String PatrolExporter_Progress_PackagingResults;
 	public static String PatrolExporter_Progress_WritingToFile;
-//	public static String PatrolFilterDialog_Apply_Button;
+public static String PatrolFeatureSource_ProjectedWaypointLayerName;
+	public static String PatrolFeatureSource_TrackLayerName;
+	public static String PatrolFeatureSource_WaypointLayerName;
+	//	public static String PatrolFilterDialog_Apply_Button;
 	public static String PatrolFilterDialog_DialogMessage;
 	public static String PatrolFilterDialog_DialogTitle;
 //	public static String PatrolFilterDialog_Error_DateMustBeSelected;
@@ -402,6 +405,7 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_AddWaypoint_Button;
 	public static String PatrolLegDayInputComposite_Attachment_ColumnHeader;
 	public static String PatrolLegDayInputComposite_AttachmentColumnLabel;
+	public static String PatrolLegDayInputComposite_bearingTooltip;
 	public static String PatrolLegDayInputComposite_Button_UpdateTime_Text;
 	public static String PatrolLegDayInputComposite_Button_UpdateTime_Tooltip;
 	public static String PatrolLegDayInputComposite_Comment_ColumnHeader;
@@ -410,8 +414,9 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_DeleteWaypoint_Button;
 	public static String PatrolLegDayInputComposite_DeleteWaypoint_DialogMessage;
 	public static String PatrolLegDayInputComposite_DeleteWaypoint_DialogTitle;
-	public static String PatrolLegDayInputComposite_Direction_ColumnHeader;
-	public static String PatrolLegDayInputComposite_Distance_ColumnHeader;
+	public static String PatrolLegDayInputComposite_Direction_ColumnHeader1;
+	public static String PatrolLegDayInputComposite_Distance_ColumnHeader1;
+	public static String PatrolLegDayInputComposite_distanceTooltip;
 	public static String PatrolLegDayInputComposite_DistanceTravelledLabel;
 	public static String PatrolLegDayInputComposite_EndTimeLabel;
 	public static String PatrolLegDayInputComposite_Error_DialogTitle;
@@ -431,6 +436,7 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_NoObservationsLabel;
 	public static String PatrolLegDayInputComposite_Observation_ColumnHeader;
 	public static String PatrolLegDayInputComposite_ObservationsWaypointsLabel;
+	public static String PatrolLegDayInputComposite_PrjLocationColumnHeader;
 	public static String PatrolLegDayInputComposite_Progress_DisplayingImportWizard;
 	public static String PatrolLegDayInputComposite_Progress_LoadingImportWizard;
 	public static String PatrolLegDayInputComposite_RestMinutesLabel;
@@ -559,6 +565,8 @@ public class Messages extends NLS {
 	public static String PatrolMandateWizardPage_PageMessage;
 	public static String PatrolMandateWizardPage_Title;
 	public static String PatrolMapPageEditor_AddLayersJobName;
+	public static String PatrolMapPageEditor_EditTitle;
+	public static String PatrolMapPageEditor_EditWarningMessage;
 	public static String PatrolMapPageEditor_Error_LoadingMapPage;
 	public static String PatrolMapPageEditor_Error_RefreshingLayers;
 	public static String PatrolMapPageEditor_MoveErrorDb;

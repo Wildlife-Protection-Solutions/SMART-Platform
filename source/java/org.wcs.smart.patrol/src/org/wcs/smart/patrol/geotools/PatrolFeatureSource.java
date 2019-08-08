@@ -44,6 +44,19 @@ public class PatrolFeatureSource extends ContentFeatureSource {
 		super(entry, null);
 	}
 
+	public boolean getDefaultVisibility() {
+		if (entry.getTypeName().equals(PatrolDataSource.TRACK_PART_TYPE)) return true;
+		if (entry.getTypeName().equals(PatrolDataSource.WAYPOINT_TYPE)) return true;
+		return false;
+	}
+	
+	public String getLayerName() {
+		if (entry.getTypeName().equals(PatrolDataSource.TRACK_PART_TYPE)) return Messages.PatrolFeatureSource_TrackLayerName;
+		if (entry.getTypeName().equals(PatrolDataSource.WAYPOINT_TYPE)) return Messages.PatrolFeatureSource_WaypointLayerName;
+		if (entry.getTypeName().equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) return Messages.PatrolFeatureSource_ProjectedWaypointLayerName;
+		return entry.getTypeName();
+	}
+	
 	
 	@Override
 	protected SimpleFeatureType buildFeatureType() throws IOException {
@@ -52,6 +65,8 @@ public class PatrolFeatureSource extends ContentFeatureSource {
 				return PatrolFeatureFactory.createWaypointSchema();
 			} else if (entry.getTypeName().equals(PatrolDataSource.TRACK_PART_TYPE)) {
 				return PatrolFeatureFactory.createTrackPartSchema();
+			} else if (entry.getTypeName().equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) {
+				return PatrolFeatureFactory.createWaypointPrjSchema();
 			}
 		}catch(SchemaException ex){
 			throw new IOException(Messages.PatrolDataSource_Error_CouldNoGenerateSchema + ex.getLocalizedMessage(), ex);

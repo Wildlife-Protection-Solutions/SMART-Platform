@@ -354,9 +354,9 @@ public class JsonCtParser {
 		//parse x and y may be null
 		Waypoint newWaypoint = new Waypoint();
 		Double x = (Double)properties.get(LONGITUDE_KEY);
-		if (x != null) newWaypoint.setX(x);
+		if (x != null) newWaypoint.setRawX(x);
 		Double y = (Double)properties.get(LATITUDE_KEY);
-		if (y != null) newWaypoint.setY(y);
+		if (y != null) newWaypoint.setRawY(y);
 			
 		Date dt = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(DATETIME_KEY));
 		newWaypoint.setDateTime(dt);

@@ -130,8 +130,8 @@ public class AddWaypointDialog extends SmartStyledTitleDialog{
 			Point point = gf.createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
 			Point p = (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, GeometryUtils.SMART_CRS));
 
-			newWaypoint.getWaypoint().setX(p.getX());
-			newWaypoint.getWaypoint().setY(p.getY());
+			newWaypoint.getWaypoint().setRawX(p.getX());
+			newWaypoint.getWaypoint().setRawY(p.getY());
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(Messages.AddWaypointDialog_SaveError + ex.getLocalizedMessage(), ex);
 			return;

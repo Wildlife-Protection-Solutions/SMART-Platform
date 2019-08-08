@@ -307,8 +307,8 @@ public class XMLtoMissionConverter {
 		}else{
 			wp.setDateTime(null);
 		}
-		wp.setX(xml.getX());
-		wp.setY(xml.getY());
+		wp.setRawX(xml.getX());
+		wp.setRawY(xml.getY());
 		if (attachmentLocation != null){
 			if (xml.getAttachments().size() > 0){
 				wp.setAttachments(new ArrayList<WaypointAttachment>());

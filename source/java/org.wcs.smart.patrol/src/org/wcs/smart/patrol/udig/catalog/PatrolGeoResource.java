@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.udig.catalog;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,12 +32,27 @@ import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
+import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.styling.Fill;
+import org.geotools.styling.Graphic;
+import org.geotools.styling.LineSymbolizer;
+import org.geotools.styling.Mark;
+import org.geotools.styling.PointSymbolizer;
+import org.geotools.styling.Rule;
+import org.geotools.styling.Stroke;
+import org.geotools.styling.Style;
+import org.geotools.styling.StyleBuilder;
+import org.geotools.styling.StyleFactory;
+import org.geotools.styling.Symbolizer;
+import org.geotools.util.factory.GeoTools;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.FilterFactory;
+import org.wcs.smart.patrol.geotools.PatrolDataSource;
 
 /**
  * Georesource for a smart patrol data.
@@ -65,6 +81,7 @@ public class PatrolGeoResource extends IGeoResource {
 	public String getType(){
 		return dataType;
 	}
+
 	
 	/**
 	 * @see org.locationtech.udig.catalog.IResolve#getStatus()
@@ -128,8 +145,6 @@ public class PatrolGeoResource extends IGeoResource {
         	 DataStore ds = ((PatrolService)service).getDataStore(monitor);
              if (ds != null) {
                  FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds.getFeatureSource(dataType);
-                 
-//                 CachingFeatureSource cfs = new CachingFeatureSource(fs);
                  if (fs != null)
                      return adaptee.cast(fs);
              }else{
@@ -144,7 +159,87 @@ public class PatrolGeoResource extends IGeoResource {
                  return adaptee.cast(fs);
              }
         }
+        if (adaptee.isAssignableFrom(Style.class)) {
+        	if (dataType.equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) return adaptee.cast(getWaypointPrjStyle());
+        	if (dataType.equals(PatrolDataSource.WAYPOINT_TYPE)) return adaptee.cast(getWaypointStyle());
+        	if (dataType.equals(PatrolDataSource.TRACK_PART_TYPE)) return adaptee.cast(getTrackStyle());
+
+        }
         return super.resolve(adaptee, monitor);
     }
+    
+	private static Style getWaypointPrjStyle() {
+		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+		StyleBuilder sb = new StyleBuilder(sf);
+        FilterFactory ff = CommonFactoryFinder.getFilterFactory(GeoTools.getDefaultHints());
+        
+		Stroke linestroke = sb.createStroke(new Color(91, 91, 91), 1, new float[] {5.0f, 2.0f});
+		LineSymbolizer lines = sb.createLineSymbolizer(linestroke);
+		
+		Stroke circlestroke = sb.createStroke(new Color(0,0,0), 1);
+		Fill circlefill = sb.createFill(new Color(255,100,100));
+		Mark circlemark = sb.createMark(sb.literalExpression("circle"), circlefill, circlestroke); //$NON-NLS-1$
+		Graphic circleg = sb.createGraphic(null,  circlemark,  null);
+		circleg.setSize(sb.literalExpression(8));
+        PointSymbolizer endpoint = sb.createPointSymbolizer(circleg);
+		endpoint.setGeometry(ff.function("endPoint", ff.property("the_geom")));  //$NON-NLS-1$ //$NON-NLS-2$
+		
+		Fill squarefill = sb.createFill(new Color(91, 91, 91));
+		Mark squaremark = sb.createMark(sb.literalExpression("square"), squarefill, null); //$NON-NLS-1$
+		Graphic squareg = sb.createGraphic(null,  squaremark,  null);
+		squareg.setSize(sb.literalExpression(8));
+        PointSymbolizer startpoint = sb.createPointSymbolizer(squareg);
+        startpoint.setGeometry(ff.function("startPoint", ff.property("the_geom")));  //$NON-NLS-1$ //$NON-NLS-2$
+		
+		Rule rr = sb.createRule(new Symbolizer[] {lines, endpoint, startpoint});
+		
+		org.geotools.styling.FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+    	fts.setName("Projection Style"); //$NON-NLS-1$
+    	fts.rules().add(rr);
+		
+		Style style = sf.createStyle();
+    	style.featureTypeStyles().add(fts);
+		return style;
+	}
+	
+	private static Style getWaypointStyle() {
+		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+		StyleBuilder sb = new StyleBuilder(sf);
+       
+		Stroke starstroke = sb.createStroke(new Color(0,0,0), 1);
+		Fill starfill = sb.createFill(new Color(255,100,100));
+		Mark starmark = sb.createMark(sb.literalExpression("circle"), starfill, starstroke); //$NON-NLS-1$
+		Graphic starg = sb.createGraphic(null,  starmark,  null);
+		starg.setSize(sb.literalExpression(8));
+        PointSymbolizer endpoint = sb.createPointSymbolizer(starg);
+		
+		Rule rr = sb.createRule(new Symbolizer[] {endpoint});
+		
+		org.geotools.styling.FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+    	fts.setName("Projection Style"); //$NON-NLS-1$
+    	fts.rules().add(rr);
+		
+		Style style = sf.createStyle();
+    	style.featureTypeStyles().add(fts);
+		return style;
+	}
+	
+	private static Style getTrackStyle() {
+		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+		StyleBuilder sb = new StyleBuilder(sf);
+       
+		Stroke linestroke = sb.createStroke(new Color(45, 150, 45), 1);
+		LineSymbolizer lines = sb.createLineSymbolizer(linestroke);
+		
+		Rule rr = sb.createRule(new Symbolizer[] {lines});
+		
+		org.geotools.styling.FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+    	fts.setName("Track Style"); //$NON-NLS-1$
+    	fts.rules().add(rr);
+		
+		Style style = sf.createStyle();
+    	style.featureTypeStyles().add(fts);
+		return style;
+	}
 
 }

@@ -123,8 +123,8 @@ public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 	@Override
 	protected void updateFeature(Coordinate newPosition){
 		try {
-			editWaypoint.getWaypoint().setX(newPosition.x);
-			editWaypoint.getWaypoint().setY(newPosition.y);
+			editWaypoint.getWaypoint().setRawX(newPosition.x);
+			editWaypoint.getWaypoint().setRawY(newPosition.y);
 			try{
 				editStore.removeFeatures(Filter.INCLUDE);
 			}catch (ConcurrentModificationException ex){

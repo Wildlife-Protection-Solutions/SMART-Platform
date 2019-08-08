@@ -49,16 +49,18 @@ public class DistanceDirectionComposite extends AbstractIncidentComposite {
 	public String validate() {
 		if (!txtDirection.getText().trim().isEmpty()){
 			try{
-				Float.parseFloat(txtDirection.getText());
+				float dir = Float.parseFloat(txtDirection.getText());
+				if (dir < 0 || dir >= 360) throw new Exception();
 			}catch (Exception ex){
-				return Messages.DistanceDirectionComposite_DirectionNumberRequired;
+				return Messages.DistanceDirectionComposite_DirectionNumberRequired1;
 			}
 		}
 		if (!txtDistance.getText().trim().isEmpty()){
 			try{
-				Float.parseFloat(txtDistance.getText());
+				float dis = Float.parseFloat(txtDistance.getText());
+				if (dis < 0) throw new Exception();
 			}catch (Exception ex){
-				return Messages.DistanceDirectionComposite_DistanceNumberRequired;
+				return Messages.DistanceDirectionComposite_DistanceNumberRequired1;
 			}
 		}
 		return null;
@@ -70,7 +72,8 @@ public class DistanceDirectionComposite extends AbstractIncidentComposite {
 		item.setLayout(new GridLayout(2, false));
 		
 		Label l = new Label(item, SWT.NONE);
-		l.setText(Messages.DistanceDirectionComposite_DistanceLabel);
+		l.setText(Messages.DistanceDirectionComposite_DistanceLbl);
+		l.setToolTipText(Messages.DistanceDirectionComposite_DistanceTooltip);
 		
 		txtDistance = new Text(item, SWT.BORDER);
 		txtDistance.addListener(SWT.Modify, new Listener() {
@@ -82,7 +85,8 @@ public class DistanceDirectionComposite extends AbstractIncidentComposite {
 		txtDistance.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		l = new Label(item, SWT.NONE);
-		l.setText(Messages.DistanceDirectionComposite_DirectionLabel);
+		l.setText(Messages.DistanceDirectionComposite_BearingLbl);
+		l.setToolTipText(Messages.DistanceDirectionComposite_BearingTooltip);
 		
 		txtDirection = new Text(item, SWT.BORDER);
 		txtDirection.addListener(SWT.Modify, new Listener() {

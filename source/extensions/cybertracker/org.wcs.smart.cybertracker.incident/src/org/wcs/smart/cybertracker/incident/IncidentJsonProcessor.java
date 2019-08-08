@@ -147,8 +147,8 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 					currentLink.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
 
 					//there is no position; likely skip on device; lets set to 0
-					if (currentLink.getWaypoint().getX() == null) currentLink.getWaypoint().setX(0);
-					if (currentLink.getWaypoint().getY() == null) currentLink.getWaypoint().setY(0);
+					if (currentLink.getWaypoint().getX() == null) currentLink.getWaypoint().setRawX(0);
+					if (currentLink.getWaypoint().getY() == null) currentLink.getWaypoint().setRawY(0);
 					
 					newIncidents.add(currentLink.getWaypoint());
 					

@@ -217,8 +217,10 @@ public class PatrolLegDayInputComposite {
 		EAST(Messages.PatrolLegDayInputComposite_Longitude_ColumnHeader, 2), 
 		NORTH(Messages.PatrolLegDayInputComposite_Latitude_ColumnHeader, 2), 
 		TIME(Messages.PatrolLegDayInputComposite_Time_ColumnHeader, 2), 
-		DIRECTION(Messages.PatrolLegDayInputComposite_Direction_ColumnHeader, 1), 
-		DISTANCE(Messages.PatrolLegDayInputComposite_Distance_ColumnHeader, 1), 
+		DIRECTION(Messages.PatrolLegDayInputComposite_Direction_ColumnHeader1, 1), 
+		DISTANCE(Messages.PatrolLegDayInputComposite_Distance_ColumnHeader1, 1),
+		PRJ(Messages.PatrolLegDayInputComposite_PrjLocationColumnHeader, 2),
+		
 		OBSERVATION(Messages.PatrolLegDayInputComposite_Observation_ColumnHeader, 4), 
 		COMMENT(Messages.PatrolLegDayInputComposite_Comment_ColumnHeader, 3), 
 		ATTACHMENTS(Messages.PatrolLegDayInputComposite_Attachment_ColumnHeader, 3),
@@ -859,7 +861,7 @@ public class PatrolLegDayInputComposite {
 		for (int i = 0; i < OtColumn.values().length; i++) {
 			final OtColumn columntype = OtColumn.values()[i];
 			if (!editor.getPatrolEditor().getOptions().getTrackDistanceDirection() && 
-					(columntype == OtColumn.DIRECTION || columntype == OtColumn.DISTANCE)){
+					(columntype == OtColumn.DIRECTION || columntype == OtColumn.DISTANCE || columntype == OtColumn.PRJ)){
 				continue;
 			}
 			
@@ -875,10 +877,15 @@ public class PatrolLegDayInputComposite {
 				if (PatrolManager.getInstance().canEditWaypointLocations() == null){
 					column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));	
 				}
-			}else{
+			}else if (columntype != OtColumn.PRJ){
 				column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));
 			}
-			
+			if (columntype == OtColumn.DISTANCE) {
+				column.getColumn().setToolTipText(Messages.PatrolLegDayInputComposite_distanceTooltip);
+			}
+			if (columntype == OtColumn.DIRECTION) {
+				column.getColumn().setToolTipText(Messages.PatrolLegDayInputComposite_bearingTooltip);
+			}
 			observationTableColumns.put(columntype, column);
 			
 			if (columntype == OtColumn.ID || columntype == OtColumn.TIME){
@@ -917,8 +924,7 @@ public class PatrolLegDayInputComposite {
 			dialog = null;
 			SmartPatrolPlugIn.displayLog(Messages.PatrolLegDayInputComposite_ErrorImportTracksWizard
 					+ ex.getLocalizedMessage(), ex);
-				}
-		
+		}
 	}
 	
 
@@ -955,12 +961,12 @@ public class PatrolLegDayInputComposite {
 			waypoint.setId((Integer)value);
 			needSave = true;
 		} else if (column == OtColumn.EAST) {
-			if (waypoint.getX() == ((Double)value).doubleValue()) return; // no change
-			waypoint.setX((Double)value);
+			if (waypoint.getRawX() == ((Double)value).doubleValue()) return; // no change
+			waypoint.setRawX((Double)value);
 			needSave = true;
 		} else if (column == OtColumn.NORTH) {
-			if (waypoint.getY() == ((Double)value).doubleValue()) return; // no change
-			waypoint.setY((Double)value);
+			if (waypoint.getRawY() == ((Double)value).doubleValue()) return; // no change
+			waypoint.setRawY((Double)value);
 			needSave = true;
 		} else if (column == OtColumn.TIME) {
 			if (value instanceof Date){
@@ -975,14 +981,18 @@ public class PatrolLegDayInputComposite {
 				
 				waypoint.setDirection(null);
 			}else{
-				waypoint.setDirection(( (Double)value).floatValue());
+				Double d = (Double)value;
+				if (d < 0 || d >= 360) return;	//invalid value
+				waypoint.setDirection(d.floatValue());
 			}
 		} else if (column == OtColumn.DISTANCE) {
 			if (waypoint.getDistance() == value) return; //no change
 			if (value == null){
 				waypoint.setDistance(null);
 			}else{
-				waypoint.setDistance( ( (Double)value).floatValue());
+				Double d = (Double)value;
+				if (d < 0) return;	//invalid value
+				waypoint.setDistance( d.floatValue());
 			}
 			needSave = true;
 		} else if (column == OtColumn.OBSERVATION) {
@@ -1041,15 +1051,17 @@ public class PatrolLegDayInputComposite {
 		if (column == OtColumn.ID) {
 			return wp.getId();
 		} else if (column == OtColumn.EAST) {
-			return wp.getX();
+			return wp.getRawX();
 		} else if (column == OtColumn.NORTH) {
-			return wp.getY();
+			return wp.getRawY();
 		} else if (column == OtColumn.TIME) {
 			return wp.getDateTime();
 		} else if (column == OtColumn.DIRECTION) {
 			return wp.getDirection();
 		} else if (column == OtColumn.DISTANCE) {
 			return wp.getDistance();
+		} else if (column == OtColumn.PRJ) {
+			return wp.getX() +", " + wp.getY(); //$NON-NLS-1$
 		} else if (column == OtColumn.OBSERVATION) {
 			return wp;
 		} else if (column == OtColumn.COMMENT) {
@@ -1075,9 +1087,11 @@ public class PatrolLegDayInputComposite {
 		if (column == OtColumn.ID) {
 			return String.valueOf(wp.getId());
 		} else if (column == OtColumn.EAST) {
-			return String.valueOf(ReprojectUtils.transform(wp.getX(), wp.getY(), prj.getParsedCoordinateReferenceSystem()).getX());
+			return String.valueOf(ReprojectUtils.transform(wp.getRawX(), wp.getRawY(), prj.getParsedCoordinateReferenceSystem()).getX());
 		} else if (column == OtColumn.NORTH) {
-			return String.valueOf(ReprojectUtils.transform(wp.getX(), wp.getY(), prj.getParsedCoordinateReferenceSystem()).getY());
+			return String.valueOf(ReprojectUtils.transform(wp.getRawX(), wp.getRawY(), prj.getParsedCoordinateReferenceSystem()).getY());
+		} else if (column == OtColumn.PRJ) {
+			return wp.getX() +", " + wp.getY(); //$NON-NLS-1$
 		} else if (column == OtColumn.TIME) {
 			if (wp.getDateTime() != null) {
 				return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(wp.getDateTime());

@@ -29,7 +29,11 @@ import org.geotools.data.store.ContentDataStore;
 import org.geotools.data.store.ContentEntry;
 import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.feature.NameImpl;
+import org.hibernate.Session;
 import org.opengis.feature.type.Name;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
@@ -41,6 +45,7 @@ public class PatrolDataSource extends ContentDataStore{
 
 	public static final String WAYPOINT_TYPE = "Waypoint"; //$NON-NLS-1$
 	public static final String TRACK_PART_TYPE = "Track"; //$NON-NLS-1$
+	public static final String WAYPOINT_PRJ_TYPE = "WaypointRawPoints"; //$NON-NLS-1$
 	
 	private Patrol patrol;
 	
@@ -62,9 +67,17 @@ public class PatrolDataSource extends ContentDataStore{
 	
 	@Override
 	protected List<Name> createTypeNames() throws IOException {
+		boolean dd = false;
+		try (Session session = HibernateManager.openSession()){
+			dd = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session).getTrackDistanceDirection();
+		}
+		
 		List<Name> names = new ArrayList<Name>();
 		names.add(new NameImpl(WAYPOINT_TYPE));
 		names.add(new NameImpl(TRACK_PART_TYPE));
+		if (dd) {
+			names.add(new NameImpl(WAYPOINT_PRJ_TYPE));
+		}
 		return names;
 	}
 	

@@ -158,6 +158,7 @@ public class EditPointTool extends AbstractModalTool{
 		}
 		
 		if (active){
+			if (getEditManager() != null) getEditManager().activate();
 			getContext().getViewportPane().getControl().addListener(SWT.KeyUp, cancelListener);
 		}else{
 			getContext().getViewportPane().getControl().removeListener(SWT.KeyUp, cancelListener);

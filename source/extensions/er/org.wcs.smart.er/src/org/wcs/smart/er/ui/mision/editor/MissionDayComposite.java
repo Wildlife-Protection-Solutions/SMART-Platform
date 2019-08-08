@@ -174,8 +174,9 @@ public class MissionDayComposite {
 		EAST(Messages.MissionDayComposite_X, 2),
 		NORTH(Messages.MissionDayComposite_Y, 2),
 		TIME(Messages.MissionDayComposite_Time, 2),
-		DIRECTION(Messages.MissionDayComposite_Direction, 1),
-		DISTANCE(Messages.MissionDayComposite_Distance, 1),
+		DIRECTION(Messages.MissionDayComposite_Direction1, 1),
+		DISTANCE(Messages.MissionDayComposite_Distance1, 1),
+		PRJ_POINT(Messages.MissionDayComposite_PrjLocationColumnLabel,1),
 		SAMPLING_UNIT(Messages.MissionDayComposite_SamplingUnit, 4),
 		OBSERVATION(Messages.MissionDayComposite_Observation, 4),
 		COMMENT(Messages.MissionDayComposite_Comment, 3),
@@ -538,7 +539,7 @@ public class MissionDayComposite {
 		for (int i = 0; i < OtColumn.values().length; i++) {
 			final OtColumn columntype = OtColumn.values()[i];
 			if (!editor.getMissionEditor().trackDistanceDirection() &&  
-					(columntype == OtColumn.DIRECTION || columntype == OtColumn.DISTANCE)){
+					(columntype == OtColumn.DIRECTION || columntype == OtColumn.DISTANCE || columntype == OtColumn.PRJ_POINT)){
 				continue;
 			}
 			
@@ -560,7 +561,7 @@ public class MissionDayComposite {
 				if (SurveyPermissionManager.INSTANCE.canEditWaypointLocations() == null){
 					column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));	
 				}
-			}else{
+			}else if (columntype != OtColumn.PRJ_POINT){
 				column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));
 			}
 			
@@ -924,9 +925,12 @@ public class MissionDayComposite {
 		if (column == OtColumn.ID) {
 			return String.valueOf(wp.getId());
 		} else if (column == OtColumn.EAST) {
-			return String.valueOf(ReprojectUtils.transform(wp.getX(), wp.getY(), lcrs).getX());
+			return String.valueOf(ReprojectUtils.transform(wp.getRawX(), wp.getRawY(), lcrs).getX());
 		} else if (column == OtColumn.NORTH) {
-			return String.valueOf(ReprojectUtils.transform(wp.getX(), wp.getY(), lcrs).getY());
+			return String.valueOf(ReprojectUtils.transform(wp.getRawX(), wp.getRawY(), lcrs).getY());
+		}else if (column == OtColumn.PRJ_POINT) {
+			org.locationtech.jts.geom.Point p = ReprojectUtils.transform(wp.getX(), wp.getY(), lcrs);
+			return p.getX() + ", " + p.getY(); //$NON-NLS-1$
 		} else if (column == OtColumn.TIME) {
 			if (wp.getDateTime() != null) {
 				return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(wp.getDateTime());
@@ -996,9 +1000,9 @@ public class MissionDayComposite {
 		if (column == OtColumn.ID) {
 			return wp.getId();
 		} else if (column == OtColumn.EAST) {
-			return wp.getX();
+			return wp.getRawX();
 		} else if (column == OtColumn.NORTH) {
-			return wp.getY();
+			return wp.getRawY();
 		} else if (column == OtColumn.TIME) {
 			return wp.getDateTime();
 		} else if (column == OtColumn.DIRECTION) {
@@ -1038,12 +1042,12 @@ public class MissionDayComposite {
 			waypoint.setId((Integer)value);
 			needSave = true;
 		} else if (column == OtColumn.EAST) {
-			if (waypoint.getX() == ((Double)value).doubleValue()) return; //no change
-			waypoint.setX((Double)value);
+			if (waypoint.getRawX() == ((Double)value).doubleValue()) return; //no change
+			waypoint.setRawX((Double)value);
 			needSave = true;
 		} else if (column == OtColumn.NORTH) {
-			if (waypoint.getY() == ((Double)value).doubleValue()) return; //no change 
-			waypoint.setY((Double)value);
+			if (waypoint.getRawY() == ((Double)value).doubleValue()) return; //no change 
+			waypoint.setRawY((Double)value);
 			needSave = true;
 		} else if (column == OtColumn.TIME) {
 			if (value instanceof Date){
@@ -1057,14 +1061,18 @@ public class MissionDayComposite {
 			if (value == null){
 				waypoint.setDirection(null);
 			}else{
-				waypoint.setDirection(( (Double)value).floatValue());
+				float f = ((Double)value).floatValue();
+				if (f < 0 || f >= 360) return ; // invalid
+				waypoint.setDirection( f );
 			}
 		} else if (column == OtColumn.DISTANCE) {
 			if (waypoint.getDistance() == value) return; //no change
 			if (value == null){
 				waypoint.setDistance(null);
 			}else{
-				waypoint.setDistance( ( (Double)value).floatValue());
+				float f = ((Double)value).floatValue();
+				if (f < 0 ) return ; // invalid
+				waypoint.setDistance( f );
 			}
 			needSave = true;
 		} else if (column == OtColumn.OBSERVATION) {

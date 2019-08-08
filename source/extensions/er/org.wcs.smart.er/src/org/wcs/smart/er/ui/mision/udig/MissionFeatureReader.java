@@ -28,15 +28,11 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.locationtech.jts.geom.Coordinate;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
-import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Feature reader for mission observation points.
@@ -49,14 +45,16 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 
 	private SimpleFeatureType featureType;
 	private Iterator<SurveyWaypoint> iterator;
+	private String typename;
 	
-	public MissionFeatureReader(Mission mission, SimpleFeatureType type){
+	public MissionFeatureReader(Mission mission, SimpleFeatureType type, String typename){
 		List<SurveyWaypoint> me = new ArrayList<SurveyWaypoint>();
 		for (MissionDay md : mission.getMissionDays()){
 			me.addAll(md.getWaypoints());
 		}
 		iterator = me.iterator();
 		this.featureType = type;
+		this.typename = typename;
 	}
 	
 	@Override
@@ -83,21 +81,11 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	//String spec = 
 	//"fid:String,id:Integer,date:Date,sampling_unit_id:String,observation:String,comment:String,geom:Point:srid=4326"; //$NON-NLS-1$
 	private SimpleFeature createFeature(SurveyWaypoint point){
-		String fid = point.getWaypoint().getId() + "." + UuidUtils.uuidToString(point.getWaypoint().getUuid()); //$NON-NLS-1$
-		
-		Object[] data = new Object[7];
-		data[0] = fid;
-		data[1] = point.getWaypoint().getId();
-		data[2] = point.getWaypoint().getDateTime();
-		if (point.getSamplingUnit() != null){
-			data[3] = point.getSamplingUnit().getId();
-		}else{
-			data[3] = ""; //$NON-NLS-1$
+		if (typename.equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)){
+			return SurveyFeatureFactory.createWaypointPrjFeature(featureType, point);
+		}else if (typename.equals(MissionDataSource.MISSIONWAYPOINT_TYPE)){ 	
+			return SurveyFeatureFactory.createWaypointFeature(featureType, point);
 		}
-		data[4] = point.getWaypoint().getObservationsAsString();
-		data[5] = point.getWaypoint().getComment();
-		data[6] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(point.getWaypoint().getX(),point.getWaypoint().getY()));		
-		
-		return new SurveyFeature(SimpleFeatureBuilder.build(featureType, data, fid));
+		return null;
 	}
 }

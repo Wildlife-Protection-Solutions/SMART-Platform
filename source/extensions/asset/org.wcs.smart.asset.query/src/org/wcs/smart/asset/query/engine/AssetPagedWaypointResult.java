@@ -341,8 +341,8 @@ public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implem
 	}
 	
 	private void updateWaypointPosition(Waypoint wp, double newX, double newY, Session session){
-		wp.setX(newX);
-		wp.setY(newY);
+		wp.setRawX(newX);
+		wp.setRawY(newY);
 		
 		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_x = :x, wp_y = :y WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		q.setParameter("x", newX); //$NON-NLS-1$

@@ -188,8 +188,8 @@ public class LocationComposite extends AbstractIncidentComposite {
 	public void updateIncident(Waypoint incident) {
 		try{
 			Coordinate z = getPoint();
-			incident.setX(z.x);
-			incident.setY(z.y);
+			incident.setRawX(z.x);
+			incident.setRawY(z.y);
 		}catch (Exception ex){
 			//this error should be caught in the validate function
 			IncidentPlugIn.log(Messages.LocationComposite_Error1, ex);

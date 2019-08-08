@@ -70,6 +70,10 @@ public interface IMapEditManager{
 	 */
 	public boolean canUndo();
 	
+	/**
+	 * Called when the edit tool is activated
+	 */
+	public default void activate() {}
 	
 	/**
 	 * Class used by edit manager to determine details about the feature object

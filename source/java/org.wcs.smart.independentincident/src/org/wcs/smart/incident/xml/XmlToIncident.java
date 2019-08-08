@@ -120,8 +120,8 @@ public class XmlToIncident {
 		incident.setDistance(xml.getDistance());
 		incident.setId(xml.getId());
 		incident.setDateTime(new SimpleDateFormat(IncidentToXml.DATE_FORMAT_STR).parse(xml.getDateTime()));
-		incident.setX(xml.getX());
-		incident.setY(xml.getY());
+		incident.setRawX(xml.getX());
+		incident.setRawY(xml.getY());
 		
 		if (attachmentLocation != null){
 			if (xml.getAttachments().size() > 0){

@@ -79,8 +79,8 @@ public class IncidentEditWaypointDialog extends EditWaypointDetailsDialog {
 	@Override
 	protected void updateFeature(Coordinate newPosition){
 		try {
-			editWaypoint.setX(newPosition.x);
-			editWaypoint.setY(newPosition.y);
+			editWaypoint.setRawX(newPosition.x);
+			editWaypoint.setRawY(newPosition.y);
 			try{
 				editStore.removeFeatures(Filter.INCLUDE);
 			}catch (ConcurrentModificationException ex){
@@ -112,7 +112,7 @@ public class IncidentEditWaypointDialog extends EditWaypointDetailsDialog {
 
 			//create edit feature
 			try{
-				wpSchema = IncidentFeatureFactory.createSimpleIncidentSchema();
+				wpSchema = IncidentFeatureFactory.createSimpleIncidentSchema(IncidentFeatureFactory.SMART_POINT_TYPE_NAME);
 				SimpleFeature editFeature = IncidentFeatureFactory.createSimpleIncidentFeature(wpSchema, pw);
 				
 				double offset = 0.01;

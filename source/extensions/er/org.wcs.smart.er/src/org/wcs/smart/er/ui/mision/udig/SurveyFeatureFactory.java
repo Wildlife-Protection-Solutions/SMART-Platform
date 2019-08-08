@@ -52,6 +52,12 @@ public class SurveyFeatureFactory {
 		return type;
 	}
 	
+	public static SimpleFeatureType createWaypointPrjSchema() throws SchemaException{
+		String spec = "fid:String,id:Integer,date:Date,sampling_unit_id:String,rawx:Double,rawy:Double,distance:Double,bearing:Double,x:Double,y:Double,geom:LineString:srid=4326"; //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType("smart." + MissionDataSource.MISSIONRAWWAYPOINT_TYPE, spec); //$NON-NLS-1$
+		return type;
+	}
+	
 	/**
 	 * Create feature schema for mission tracks
 	 * @return
@@ -88,6 +94,38 @@ public class SurveyFeatureFactory {
 		return new SurveyFeature(SimpleFeatureBuilder.build(ftype, data, fid));
 	}
 	
+	/**
+	 * creates a survey waypoint feature from a waypoint that represents a linestring
+	 * between the raw and projected point
+	 * @param ftype
+	 * @param point
+	 * @return
+	 */
+	public static SimpleFeature createWaypointPrjFeature(SimpleFeatureType ftype, SurveyWaypoint point){
+		String fid = point.getWaypoint().getId() + "." + UuidUtils.uuidToString(point.getWaypoint().getUuid()); //$NON-NLS-1$
+		
+		Object[] data = new Object[11];
+		data[0] = fid;
+		data[1] = point.getWaypoint().getId();
+		data[2] = point.getWaypoint().getDateTime();
+		if (point.getSamplingUnit() != null){
+			data[3] = point.getSamplingUnit().getId();
+		}else{
+			data[3] = ""; //$NON-NLS-1$
+		}
+		data[4] = point.getWaypoint().getRawX();
+		data[5] = point.getWaypoint().getRawY();
+		data[6] = point.getWaypoint().getDistance();
+		data[7] = point.getWaypoint().getDirection();
+		data[8] = point.getWaypoint().getX();
+		data[9] = point.getWaypoint().getY();
+		data[10] = GeometryFactoryProvider.getFactory().createLineString(new Coordinate[] {
+				new Coordinate(point.getWaypoint().getRawX(),point.getWaypoint().getRawY()),
+				new Coordinate(point.getWaypoint().getX(),point.getWaypoint().getY()),
+		});		
+		
+		return new SurveyFeature(SimpleFeatureBuilder.build(ftype, data, fid));
+	}
 	
 	/**
 	 * Creates a track feature from a mission track.  

@@ -21,27 +21,37 @@
  */
 package org.wcs.smart.er.ui.mision.udig;
 
+import java.awt.Color;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.ui.XMLMemento;
 import org.geotools.data.DataStore;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
+import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.styling.Fill;
+import org.geotools.styling.Graphic;
+import org.geotools.styling.LineSymbolizer;
+import org.geotools.styling.Mark;
+import org.geotools.styling.PointSymbolizer;
+import org.geotools.styling.Rule;
+import org.geotools.styling.Stroke;
 import org.geotools.styling.Style;
+import org.geotools.styling.StyleBuilder;
+import org.geotools.styling.StyleFactory;
+import org.geotools.styling.Symbolizer;
+import org.geotools.util.factory.GeoTools;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
-import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.opengis.filter.FilterFactory;
 
 /**
  * Mission observation and track GeoResource
@@ -155,6 +165,8 @@ public class MissionGeoResource extends IGeoResource {
         	Style s = null;
         	if (dataType.equals(MissionDataSource.MISSIONWAYPOINT_TYPE)){
         		s = createPointStyle();
+        	}if (dataType.equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)){
+        		s = createPointPrjStyle();
         	}else if (dataType.equals(MissionDataSource.MISSIONTRACK_TYPE)){
         		s = createLineStyle();
         	}
@@ -166,88 +178,77 @@ public class MissionGeoResource extends IGeoResource {
     }
     
     private Style createPointStyle(){
-    	String sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> " //$NON-NLS-1$
-    			+ "<styleEntry type=\"SLDStyle\" version=\"1.0\">" //$NON-NLS-1$
-    			+ "&lt;sld:StyledLayerDescriptor xmlns=\"http://www.opengis.net/sld\" xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" version=\"1.0.0\"&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:UserLayer&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:LayerFeatureConstraints&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:FeatureTypeConstraint/&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:LayerFeatureConstraints&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:UserStyle&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Name&gt;MissionPoint&lt;/sld:Name&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Title/&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:FeatureTypeStyle&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Name&gt;group 0&lt;/sld:Name&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:FeatureTypeName&gt;Feature&lt;/sld:FeatureTypeName&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:SemanticTypeIdentifier&gt;generic:geometry&lt;/sld:SemanticTypeIdentifier&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:SemanticTypeIdentifier&gt;simple&lt;/sld:SemanticTypeIdentifier&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Rule&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Name&gt;default rule&lt;/sld:Name&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:PointSymbolizer&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Graphic&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Mark&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:WellKnownName&gt;star&lt;/sld:WellKnownName&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Fill&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:CssParameter name=\"fill\"&gt;#FF0000&lt;/sld:CssParameter&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:Fill&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:Mark&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Size&gt;12&lt;/sld:Size&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:Graphic&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:PointSymbolizer&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:Rule&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:FeatureTypeStyle&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:UserStyle&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:UserLayer&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:StyledLayerDescriptor&gt;" //$NON-NLS-1$
-    			+ "</styleEntry>"; //$NON-NLS-1$
-
-		try {
-			XMLMemento memento = XMLMemento.createReadRoot(new StringReader(sld));
-			SLDContent c = new SLDContent();
-			Style style = (Style) c.load(memento);
-			return style;
-		} catch (Exception ex) {
-			EcologicalRecordsPlugIn.log("Error generating smart style", ex); //$NON-NLS-1$
-			return null;
-		}
+    	StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+		StyleBuilder sb = new StyleBuilder(sf);
+       
+		Stroke starstroke = sb.createStroke(new Color(0,0,0), 1);
+		Fill starfill = sb.createFill(new Color(255,100,100));
+		Mark starmark = sb.createMark(sb.literalExpression("circle"), starfill, starstroke); //$NON-NLS-1$
+		Graphic starg = sb.createGraphic(null,  starmark,  null);
+		starg.setSize(sb.literalExpression(8));
+        PointSymbolizer endpoint = sb.createPointSymbolizer(starg);
+		
+		Rule rr = sb.createRule(new Symbolizer[] {endpoint});
+		
+		org.geotools.styling.FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+    	fts.setName("Projection Style"); //$NON-NLS-1$
+    	fts.rules().add(rr);
+		
+		Style style = sf.createStyle();
+    	style.featureTypeStyles().add(fts);
+		return style;
     }
 
+    private static Style createPointPrjStyle() {
+		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+		StyleBuilder sb = new StyleBuilder(sf);
+        FilterFactory ff = CommonFactoryFinder.getFilterFactory(GeoTools.getDefaultHints());
+        
+		Stroke linestroke = sb.createStroke(new Color(91, 91, 91), 1, new float[] {5.0f, 2.0f});
+		LineSymbolizer lines = sb.createLineSymbolizer(linestroke);
+		
+		Stroke circlestroke = sb.createStroke(new Color(0,0,0), 1);
+		Fill circlefill = sb.createFill(new Color(255,100,100));
+		Mark circlemark = sb.createMark(sb.literalExpression("circle"), circlefill, circlestroke); //$NON-NLS-1$
+		Graphic circleg = sb.createGraphic(null,  circlemark,  null);
+		circleg.setSize(sb.literalExpression(8));
+        PointSymbolizer endpoint = sb.createPointSymbolizer(circleg);
+		endpoint.setGeometry(ff.function("endPoint", ff.property("geom")));  //$NON-NLS-1$ //$NON-NLS-2$
+		
+		Fill squarefill = sb.createFill(new Color(91, 91, 91));
+		Mark squaremark = sb.createMark(sb.literalExpression("square"), squarefill, null); //$NON-NLS-1$
+		Graphic squareg = sb.createGraphic(null,  squaremark,  null);
+		squareg.setSize(sb.literalExpression(8));
+        PointSymbolizer startpoint = sb.createPointSymbolizer(squareg);
+        startpoint.setGeometry(ff.function("startPoint", ff.property("geom")));  //$NON-NLS-1$ //$NON-NLS-2$
+		
+		Rule rr = sb.createRule(new Symbolizer[] {lines, endpoint, startpoint});
+		
+		org.geotools.styling.FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+    	fts.setName("Projection Style"); //$NON-NLS-1$
+    	fts.rules().add(rr);
+		
+		Style style = sf.createStyle();
+    	style.featureTypeStyles().add(fts);
+		return style;
+	}
+    
+    
     private Style createLineStyle(){
-    	String sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> " //$NON-NLS-1$
-    			+ "<styleEntry type=\"SLDStyle\" version=\"1.0\">" //$NON-NLS-1$
-    			+ "&lt;sld:StyledLayerDescriptor xmlns=\"http://www.opengis.net/sld\" xmlns:sld=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" version=\"1.0.0\"&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:UserLayer&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:LayerFeatureConstraints&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:FeatureTypeConstraint/&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:LayerFeatureConstraints&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:UserStyle&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Name&gt;MissionPoint&lt;/sld:Name&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Title/&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:FeatureTypeStyle&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Name&gt;group 0&lt;/sld:Name&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Rule&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Name&gt;default rule&lt;/sld:Name&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:LineSymbolizer&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:Stroke&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:CssParameter name=\"stroke\"&gt;#0080FF&lt;/sld:CssParameter&gt;" //$NON-NLS-1$
-		    	+ "&lt;sld:CssParameter name=\"stroke-width\"&gt;2.0&lt;/sld:CssParameter&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:Stroke&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:LineSymbolizer&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:Rule&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:FeatureTypeStyle&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:UserStyle&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:UserLayer&gt;" //$NON-NLS-1$
-		    	+ "&lt;/sld:StyledLayerDescriptor&gt;" //$NON-NLS-1$
-    			+ "</styleEntry>"; //$NON-NLS-1$
-
-		try {
-			XMLMemento memento = XMLMemento.createReadRoot(new StringReader(sld));
-			SLDContent c = new SLDContent();
-			Style style = (Style) c.load(memento);
-			return style;
-		} catch (Exception ex) {
-			EcologicalRecordsPlugIn.log("Error generating smart style", ex); //$NON-NLS-1$
-			return null;
-		}
+    	StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+		StyleBuilder sb = new StyleBuilder(sf);
+        
+		Stroke linestroke = sb.createStroke(new Color(0, 128, 255), 2, null);
+		LineSymbolizer lines = sb.createLineSymbolizer(linestroke);
+		
+		Rule rr = sb.createRule(new Symbolizer[] {lines});
+		
+		org.geotools.styling.FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+    	fts.setName("Track Style"); //$NON-NLS-1$
+    	fts.rules().add(rr);
+		
+		Style style = sf.createStyle();
+    	style.featureTypeStyles().add(fts);
+		return style;
     }
 }

@@ -331,8 +331,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				}
 				
 				//there is no position; likely skip on device; lets set to 0
-				if (wp.getX() == null) wp.setX(0);
-				if (wp.getY() == null) wp.setY(0);
+				if (wp.getX() == null) wp.setRawX(0);
+				if (wp.getY() == null) wp.setRawY(0);
 				
 				//We want to create a new waypoint and add it to the patrol
 				if (link == null){

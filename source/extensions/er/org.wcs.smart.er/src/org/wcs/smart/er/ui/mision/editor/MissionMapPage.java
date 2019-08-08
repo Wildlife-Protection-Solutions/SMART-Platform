@@ -32,17 +32,26 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.ecore.InternalEObject;
+import org.eclipse.emf.ecore.impl.ENotificationImpl;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.referencing.CRS;
+import org.geotools.styling.Style;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.ProjectPackage;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
+import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
 import org.locationtech.udig.project.render.IViewportModel;
+import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
@@ -53,10 +62,14 @@ import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.ui.mision.udig.MissionDataSource;
+import org.wcs.smart.er.ui.mision.udig.MissionFeatureSource;
+import org.wcs.smart.er.ui.mision.udig.MissionGeoResource;
 import org.wcs.smart.er.ui.mision.udig.MissionService;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.events.WaypointEventManager;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.udig.EditPointTool;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.udig.UndoTool;
@@ -91,6 +104,7 @@ public class MissionMapPage extends SmartMapEditorPart {
 			missionService = new MissionService(parentEditor.getMission());
 			suService = new SamplingUnitService(parentEditor.getMission().getSurvey().getSurveyDesign());
 
+			
 			try {
 				List<IGeoResource> allLayers = new ArrayList<IGeoResource>();
 				List<IGeoResource> tmp = (List<IGeoResource>) suService.resources(monitor);
@@ -104,9 +118,39 @@ public class MissionMapPage extends SmartMapEditorPart {
 					}		
 				}
 				
-				allLayers.addAll((List<IGeoResource>) missionService.resources(monitor));
+				List<IGeoResource> sortedLayers = new ArrayList<>();
+				List<? extends IGeoResource> layers = missionService.resources(monitor);
+	    		for (IGeoResource l : layers) if (((MissionGeoResource)l).getType().equals(MissionDataSource.MISSIONTRACK_TYPE)) sortedLayers.add(l);
+	    		for (IGeoResource l : layers) if (((MissionGeoResource)l).getType().equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)) sortedLayers.add(l);
+	    		for (IGeoResource l : layers) if (((MissionGeoResource)l).getType().equals(MissionDataSource.MISSIONWAYPOINT_TYPE)) sortedLayers.add(l);
+	    		
+				allLayers.addAll(sortedLayers);
 				
-	    		AddLayersCommand command = new AddLayersCommand(allLayers, 0);
+	    		AddLayersCommand command = new AddLayersCommand(allLayers, 0) {
+	    			public void run( IProgressMonitor monitor ) throws Exception {
+	    				
+	    				((RenderManagerImpl)getMap().getRenderManagerInternal()).disableRendering();
+	    				try {
+		    				super.run(monitor);
+		    				for (Layer l : getLayers()) {
+		    					Style s = l.getGeoResource().resolve(Style.class, monitor);
+		    					if (s != null) l.getStyleBlackboard().put(SLDContent.ID, s);			
+		    					MissionFeatureSource fs = l.getGeoResource().resolve(MissionFeatureSource.class, monitor);
+		    					if (fs == null) continue;
+		    					
+		    					l.setName(fs.getLayerName());
+		    					l.setVisible(fs.getDefaultVisibility());
+		    					l.eNotify(new ENotificationImpl(
+		    							(InternalEObject) l, Notification.SET,
+		    							ProjectPackage.LAYER__VISIBLE, false, l.isVisible()));	
+		    					
+		    				}
+	    				}finally {
+	    					((RenderManagerImpl)getMap().getRenderManagerInternal()).enableRendering();
+	    				}
+	    				getMap().getRenderManager().refresh(null);
+	    			}
+	    		};
 	    		getMap().sendCommandASync(command);
     		
 	    		addInitialZoomFunction();
@@ -209,6 +253,16 @@ public class MissionMapPage extends SmartMapEditorPart {
 	private IMapEditManager getEditManager(){
     	return new IMapEditManager() {
 			
+    		private boolean showWarning = true;
+    		@Override
+    		public void activate() {
+    			if (parentEditor.getMission().getSurvey().getSurveyDesign().getTrackDistanceDirection() && showWarning) {
+    				//down warning 
+    				showWarning = false;
+    				MessageDialog.openWarning(getSite().getShell(), Messages.MissionMapPage_EditMsgTitle, Messages.MissionMapPage_EditMsg);
+    			}
+    		}
+    		
 			@Override
 			public synchronized void moveFeature(Object feature, int x, int y, IViewportModel vm) {
 				if (!(feature instanceof SurveyWaypoint)) return ;
@@ -225,15 +279,34 @@ public class MissionMapPage extends SmartMapEditorPart {
 					}
 				}
 				
-				double origx = pw.getWaypoint().getX();
-				double origy = pw.getWaypoint().getY();
+				double origx = pw.getWaypoint().getRawX();
+				double origy = pw.getWaypoint().getRawY();
+				Float origdistance = pw.getWaypoint().getDistance();
+				Float origdirection = pw.getWaypoint().getDirection();
+				
+				double newx = origx;
+				double newy = origy;
+				Float newdistance = pw.getWaypoint().getDistance();
+				Float newdirection = pw.getWaypoint().getDirection();
+				if (pw.getWaypoint().getDirection() != null && pw.getWaypoint().getDistance() != null) {
+					//change the distance and direction not the coordinate
+					//but warn the user somehow
+					Float[] d = Waypoint.computeDistanceBearing(new Coordinate(origx, origy), crspx);
+					newdistance = d[0];
+					newdirection = d[1];
+				}else {
+					newx = crspx.x;
+					newy = crspx.y;
+				}
 				
 				boolean modified = false;
 				try(Session s = HibernateManager.openSession()){
 					try{
 						s.beginTransaction();
-						pw.getWaypoint().setX(crspx.x);
-						pw.getWaypoint().setY(crspx.y);
+						pw.getWaypoint().setRawX(newx);
+						pw.getWaypoint().setRawY(newy);
+						pw.getWaypoint().setDirection(newdirection);
+						pw.getWaypoint().setDistance(newdistance);
 						s.update(pw.getWaypoint());
 						s.getTransaction().commit();
 						modified = true;
@@ -244,12 +317,14 @@ public class MissionMapPage extends SmartMapEditorPart {
 							EcologicalRecordsPlugIn.displayLog(Messages.MissionMapPage_MoveDbError + ex.getMessage(), ex);
 							return;
 						}
-						pw.getWaypoint().setX(origx);
-						pw.getWaypoint().setY(origy);
+						pw.getWaypoint().setRawX(origx);
+						pw.getWaypoint().setRawY(origy);
+						pw.getWaypoint().setDirection(origdirection);
+						pw.getWaypoint().setDistance(origdistance);
 					}
 				}
 				if (modified){
-					addUndo(pw, origx, origy);
+					addUndo(pw, origx, origy, origdirection, origdistance);
 					SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, pw.getMissionDay().getMission());
 					WaypointEventManager.getInstance().waypointModified(pw.getWaypoint());
 				}
@@ -292,8 +367,8 @@ public class MissionMapPage extends SmartMapEditorPart {
 			
 			private List<Object> undoCommands = new ArrayList<>();
 			
-			private void addUndo(SurveyWaypoint wp, double x, double y){
-				undoCommands.add(0, new Object[]{wp, x, y});
+			private void addUndo(SurveyWaypoint wp, double x, double y, Float direction, Float distance){
+				undoCommands.add(0, new Object[]{wp, x, y, distance, direction});
 				if (undoCommands.size() > 100){
 					undoCommands.remove(undoCommands.size() - 1);
 				}
@@ -314,9 +389,13 @@ public class MissionMapPage extends SmartMapEditorPart {
 						SurveyWaypoint pw = (SurveyWaypoint) data[0];
 						double x = (double) data[1];
 						double y = (double) data[2];
+						Float distance = (Float)data[3];
+						Float direction = (Float)data[4];
 						
-						pw.getWaypoint().setX(x);
-						pw.getWaypoint().setY(y);
+						pw.getWaypoint().setRawX(x);
+						pw.getWaypoint().setRawY(y);
+						pw.getWaypoint().setDirection(direction);
+						pw.getWaypoint().setDistance(distance);
 						s.update(pw.getWaypoint());
 						s.getTransaction().commit();
 						

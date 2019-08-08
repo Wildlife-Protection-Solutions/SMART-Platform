@@ -32,6 +32,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.ecore.InternalEObject;
+import org.eclipse.emf.ecore.impl.ENotificationImpl;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -39,24 +43,34 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.referencing.CRS;
+import org.geotools.styling.Style;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.ProjectPackage;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
+import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
 import org.locationtech.udig.project.render.IViewportModel;
+import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.events.WaypointEventManager;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.geotools.PatrolDataSource;
+import org.wcs.smart.patrol.geotools.PatrolFeatureSource;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.udig.catalog.PatrolGeoResource;
 import org.wcs.smart.patrol.udig.catalog.PatrolService;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
@@ -68,8 +82,6 @@ import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.JobUtil;
 import org.wcs.smart.util.ReprojectUtils;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Page for the editor for displaying a map
@@ -95,7 +107,36 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	    	try {
 	    		List<IGeoResource> layers = (List<IGeoResource>) patrolService.resources(monitor);
 	    		
-	    		AddLayersCommand command = new AddLayersCommand(layers, 0);
+	    		List<IGeoResource> sortedLayers = new ArrayList<>();
+	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.TRACK_PART_TYPE)) sortedLayers.add(l);
+	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) sortedLayers.add(l);
+	    		for (IGeoResource l : layers) if (((PatrolGeoResource)l).getType().equals(PatrolDataSource.WAYPOINT_TYPE)) sortedLayers.add(l);
+	    		
+	    		AddLayersCommand command = new AddLayersCommand(sortedLayers, getMap().getLayersInternal().size()) {
+	    			public void run( IProgressMonitor monitor ) throws Exception {
+	    				
+	    				((RenderManagerImpl)getMap().getRenderManagerInternal()).disableRendering();
+	    				
+	    				super.run(monitor);
+	    				
+	    				for (Layer l : getLayers()) {
+	    					Style s = l.getGeoResource().resolve(Style.class, monitor);
+	    					if (s != null) l.getStyleBlackboard().put(SLDContent.ID, s);			
+	    					PatrolFeatureSource fs = l.getGeoResource().resolve(PatrolFeatureSource.class, monitor);
+	    					if (fs != null) {
+	    						l.setName(fs.getLayerName());
+	    						l.setVisible(fs.getDefaultVisibility());
+	    						l.eNotify(new ENotificationImpl(
+	    								(InternalEObject) l, Notification.SET,
+	    								ProjectPackage.LAYER__VISIBLE, false, l.isVisible()));	
+	    					}
+	    				}
+	    				
+	    				((RenderManagerImpl)getMap().getRenderManagerInternal()).enableRendering();
+	    				getMap().getRenderManager().refresh(null);
+	    			}
+					
+	    		};
 	    		getMap().sendCommandASync(command);
     		
 	    		addInitialZoomFunction();
@@ -181,12 +222,16 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	}
 
 	private void addLayers(){
-		addLayerJob.schedule();
-		
 		if (loadDefaultLayers != null){
 			loadDefaultLayers.cancel();			
 		}
-		loadDefaultLayers = new LoadDefaultLayersJob(getMap());
+		loadDefaultLayers = new LoadDefaultLayersJob(getMap()) {
+			protected IStatus run(IProgressMonitor monitor) {
+				IStatus r = super.run(monitor);
+				addLayerJob.schedule();
+				return r;
+			}
+		};
 		loadDefaultLayers.schedule();
 	}
 	
@@ -242,6 +287,16 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
     private IMapEditManager getEditManager(){
     	return new IMapEditManager() {
 			
+    		private boolean showWarning = true;
+    		@Override
+    		public void activate() {
+    			if (parentEditor.getOptions().getTrackDistanceDirection() && showWarning) {
+    				//down warning 
+    				showWarning = false;
+    				MessageDialog.openWarning(getSite().getShell(), Messages.PatrolMapPageEditor_EditTitle, Messages.PatrolMapPageEditor_EditWarningMessage);
+    			}
+    		}
+    		
 			@Override
 			public synchronized void moveFeature(Object feature, int x, int y, IViewportModel vm) {
 				if (!(feature instanceof PatrolWaypoint)) return ;
@@ -258,15 +313,36 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 					}
 				}
 				
-				double origx = pw.getWaypoint().getX();
-				double origy = pw.getWaypoint().getY();
+				double origx = pw.getWaypoint().getRawX();
+				double origy = pw.getWaypoint().getRawY();
+				Float origdistance = pw.getWaypoint().getDistance();
+				Float origdirection = pw.getWaypoint().getDirection();
+				
+				double newx = origx;
+				double newy = origy;
+				Float newdistance = pw.getWaypoint().getDistance();
+				Float newdirection = pw.getWaypoint().getDirection();
+				if (pw.getWaypoint().getDirection() != null && pw.getWaypoint().getDistance() != null) {
+					//change the distance and direction not the coordinate
+					//but warn the user somehow
+					Float[] d = Waypoint.computeDistanceBearing(new Coordinate(origx, origy), crspx);
+					newdistance = d[0];
+					newdirection = d[1];
+				}else {
+					newx = crspx.x;
+					newy = crspx.y;
+				}
 				
 				boolean modified = false;
 				try(Session s = HibernateManager.openSession()){
 					try{
 						s.beginTransaction();
-						pw.getWaypoint().setX(crspx.x);
-						pw.getWaypoint().setY(crspx.y);
+						
+						pw.getWaypoint().setRawX(newx);
+						pw.getWaypoint().setRawY(newy);
+						pw.getWaypoint().setDirection(newdirection);
+						pw.getWaypoint().setDistance(newdistance);
+						
 						s.update(pw.getWaypoint());
 						s.getTransaction().commit();
 						modified = true;
@@ -277,13 +353,14 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 							SmartPatrolPlugIn.displayLog(Messages.PatrolMapPageEditor_MoveErrorDb + ex.getMessage(), ex2);
 							return;
 						}
-						pw.getWaypoint().setX(origx);
-						pw.getWaypoint().setY(origy);
-						SmartPatrolPlugIn.displayLog(Messages.PatrolMapPageEditor_MoveErrorDb + ex.getMessage(), ex);
+						pw.getWaypoint().setRawX(origx);
+						pw.getWaypoint().setRawY(origy);
+						pw.getWaypoint().setDirection(origdirection);
+						pw.getWaypoint().setDistance(origdistance);
 					}
 				}
 				if (modified){
-					addUndo(pw, origx, origy);
+					addUndo(pw, origx, origy, origdirection, origdistance);
 					PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, pw.getPatrolLegDay());
 					WaypointEventManager.getInstance().waypointModified(pw.getWaypoint());
 				}
@@ -331,14 +408,13 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 			
 			private List<Object> undoCommands = new ArrayList<>();
 			
-			private void addUndo(PatrolWaypoint wp, double x, double y){
-				undoCommands.add(0, new Object[]{wp, x, y});
+			private void addUndo(PatrolWaypoint wp, double x, double y, Float direction, Float distance){
+				undoCommands.add(0, new Object[]{wp, x, y, distance, direction});
 				if (undoCommands.size() > 100){
 					undoCommands.remove(undoCommands.size() - 1);
 				}
 				updateToolbar();
 			}
-			
 			
 			@Override
 			public synchronized void undo() {
@@ -352,9 +428,14 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 						PatrolWaypoint pw = (PatrolWaypoint) data[0];
 						double x = (double) data[1];
 						double y = (double) data[2];
+						Float distance = (Float)data[3];
+						Float direction = (Float)data[4];
 						
-						pw.getWaypoint().setX(x);
-						pw.getWaypoint().setY(y);
+						
+						pw.getWaypoint().setRawX(x);
+						pw.getWaypoint().setRawY(y);
+						pw.getWaypoint().setDirection(direction);
+						pw.getWaypoint().setDistance(distance);
 						s.update(pw.getWaypoint());
 						s.getTransaction().commit();
 						

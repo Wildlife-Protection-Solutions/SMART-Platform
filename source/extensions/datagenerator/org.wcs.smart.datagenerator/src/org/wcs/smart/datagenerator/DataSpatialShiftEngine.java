@@ -84,8 +84,8 @@ public class DataSpatialShiftEngine implements IDataEngine{
 							//waypoints
 							for (PatrolWaypoint pw : pld.getWaypoints()) {
 								Coordinate c = adjustPoint(pw.getWaypoint().getX(), pw.getWaypoint().getY());
-								pw.getWaypoint().setX(c.x);
-								pw.getWaypoint().setY(c.y);
+								pw.getWaypoint().setRawX(c.x);
+								pw.getWaypoint().setRawY(c.y);
 								session.saveOrUpdate(pw.getWaypoint());
 							}
 							

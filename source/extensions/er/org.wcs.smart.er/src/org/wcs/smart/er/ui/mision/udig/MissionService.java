@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -71,6 +72,14 @@ public class MissionService extends IService {
 		
 	}
 	
+	/**
+	 * The unique mission identifier for this service
+	 * @return
+	 */
+	public UUID getMissionUuid(){
+		return UuidUtils.stringToUuid((String)params.get(MissionDataSourceFactory.MISSION_UUID.key));
+	}
+	
 	public Mission getMissionRecord(){
 		return mission;
 	}
@@ -84,6 +93,7 @@ public class MissionService extends IService {
 	 */
 	public void refresh(Mission newMission, IProgressMonitor monitor) throws IOException{
 		this.mission = newMission;
+		this.params.put(MissionDataSourceFactory.MISSION_UUID.key, UuidUtils.uuidToString(this.mission.getUuid()));
 		for (IGeoResource member : resources(monitor)){
 			((MissionGeoResourceInfo)member.getInfo(monitor)).computeBounds((MissionGeoResource)member, monitor);
 		}
@@ -130,8 +140,9 @@ public class MissionService extends IService {
 			synchronized (this) {
 				if (members == null){
 					ArrayList<MissionGeoResource> temp = new ArrayList<MissionGeoResource>();
-					temp.add(new MissionGeoResource(this, MissionDataSource.MISSIONWAYPOINT_TYPE));
-					temp.add(new MissionGeoResource(this, MissionDataSource.MISSIONTRACK_TYPE));
+					for (String tt : getDataStore(monitor).getTypeNames()) {
+						temp.add(new MissionGeoResource(this, tt));
+					}
 					this.members = temp;
 				}
 			}

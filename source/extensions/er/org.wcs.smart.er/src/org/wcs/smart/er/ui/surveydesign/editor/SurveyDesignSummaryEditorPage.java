@@ -191,7 +191,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		Composite opsComp = toolkit.createComposite(content);
 		opsComp.setLayout(new GridLayout(1, false));
 		
-		btnDistance = toolkit.createButton(opsComp, SmartUtils.formatStringForLabel(Messages.SurveyDesignSummaryEditorPage_DistanceDirectionLabel), SWT.CHECK); 
+		btnDistance = toolkit.createButton(opsComp, SmartUtils.formatStringForLabel(Messages.SurveyDesignSummaryEditorPage_DistanceDirectionLabel1), SWT.CHECK); 
 		btnDistance.setEnabled(false);
 		btnDistance .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		

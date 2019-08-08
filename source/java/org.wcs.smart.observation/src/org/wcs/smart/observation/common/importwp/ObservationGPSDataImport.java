@@ -123,8 +123,8 @@ public class ObservationGPSDataImport extends GPSDataImport{
 		if (wpdt != null){
 			waypoint.setDateTime(wpdt);
 		}
-		waypoint.setX(wptType.getLon().doubleValue());
-		waypoint.setY(wptType.getLat().doubleValue());
+		waypoint.setRawX(wptType.getLon().doubleValue());
+		waypoint.setRawY(wptType.getLat().doubleValue());
 		waypoint.setId(id);
 		waypoint.setComment(wptType.getCmt());
 		return waypoint;
@@ -206,8 +206,8 @@ public class ObservationGPSDataImport extends GPSDataImport{
 							try{
 								c.setId( Integer.parseInt(pnt.getName()) );
 							}catch (Exception ex){}
-							c.setX(x);
-							c.setY(y);
+							c.setRawX(x);
+							c.setRawY(y);
 							c.setDateTime(datetime);
 							c.setComment((trk.getName() == null ? "" : trk.getName()) + (pnt.getName() == null ? "" :  " - " + pnt.getName())); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							c.setSourceId(trk.getName());

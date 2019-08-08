@@ -323,8 +323,8 @@ public class DataImportPage {
 							wp.setDateTime(p.getImageDate());
 							wp.setId(1); //updated below
 							wp.setSourceId(AssetWaypointSource.KEY);
-							wp.setX(p.getX());
-							wp.setY(p.getY());
+							wp.setRawX(p.getX());
+							wp.setRawY(p.getY());
 							wp.setAttachments(new ArrayList<>());
 							wp.setComment(p.getWaypointComment());
 							

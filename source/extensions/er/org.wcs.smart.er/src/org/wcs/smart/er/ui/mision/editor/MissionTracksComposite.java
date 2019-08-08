@@ -132,8 +132,8 @@ public class MissionTracksComposite extends TracksComposite {
 			@Override
 			public int compare(MissionTrack o1, MissionTrack o2) {
 				try{
-					double z1 = o1.getLineString().getCoordinateN(0).z;
-					double z2 = o2.getLineString().getCoordinateN(0).z;
+					double z1 = o1.getLineString().getCoordinateN(0).getZ();
+					double z2 = o2.getLineString().getCoordinateN(0).getZ();
 					return Double.compare(z1, z2);
 				}catch (Exception ex){
 					return 0;
@@ -238,8 +238,8 @@ public class MissionTracksComposite extends TracksComposite {
 			@Override
 			public int compare(MissionTrack o1, MissionTrack o2) {
 				try{
-					double z1 = o1.getLineString().getCoordinateN(0).z;
-					double z2 = o2.getLineString().getCoordinateN(0).z;
+					double z1 = o1.getLineString().getCoordinateN(0).getZ();
+					double z2 = o2.getLineString().getCoordinateN(0).getZ();
 					return Double.compare(z1, z2);
 				}catch (Exception ex){
 					return 0;

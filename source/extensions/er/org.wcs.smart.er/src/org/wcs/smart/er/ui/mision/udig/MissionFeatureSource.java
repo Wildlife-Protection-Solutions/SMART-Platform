@@ -42,8 +42,6 @@ import org.wcs.smart.er.internal.Messages;
  */
 public class MissionFeatureSource extends ContentFeatureSource{
 
-	
-
 	public MissionFeatureSource(ContentEntry entry) {
 		super(entry, Query.ALL);
 	}
@@ -52,7 +50,19 @@ public class MissionFeatureSource extends ContentFeatureSource{
 		return (MissionDataSource)entry.getDataStore();
 	}
 
-
+	public boolean getDefaultVisibility() {
+		if (entry.getTypeName().equals(MissionDataSource.MISSIONTRACK_TYPE)) return true;
+		if (entry.getTypeName().equals(MissionDataSource.MISSIONWAYPOINT_TYPE)) return true;
+		return false;
+	}
+	
+	public String getLayerName() {
+		if (entry.getTypeName().equals(MissionDataSource.MISSIONTRACK_TYPE)) return Messages.MissionFeatureSource_TrackLayerName;
+		if (entry.getTypeName().equals(MissionDataSource.MISSIONWAYPOINT_TYPE)) return Messages.MissionFeatureSource_WaypointLayerName;
+		if (entry.getTypeName().equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)) return Messages.MissionFeatureSource_RawWaypointLayerName;
+		return entry.getTypeName();
+	}
+	
 	@Override
 	protected ReferencedEnvelope getBoundsInternal(Query query) throws IOException {
 		return null;
@@ -66,10 +76,13 @@ public class MissionFeatureSource extends ContentFeatureSource{
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getReaderInternal(Query query) throws IOException {
 		if (entry.getTypeName().equals(MissionDataSource.MISSIONWAYPOINT_TYPE)) {
-			return new MissionFeatureReader(getSource().getMission(), getSchema());
+			return new MissionFeatureReader(getSource().getMission(), getSchema(), entry.getTypeName());
 		}else if (entry.getTypeName().equals(MissionDataSource.MISSIONTRACK_TYPE)){
 			return new MissionTrackFeatureReader(getSource().getMission(), getSchema());
+		}else if (entry.getTypeName().equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)){
+			return new MissionFeatureReader(getSource().getMission(), getSchema(), entry.getTypeName());
 		}
+		
 		return null;
 	}
 
@@ -80,6 +93,8 @@ public class MissionFeatureSource extends ContentFeatureSource{
 				return SurveyFeatureFactory.createWaypointSchema();
 			}else if (entry.getTypeName().equals(MissionDataSource.MISSIONTRACK_TYPE)){
 				return  SurveyFeatureFactory.createTrackSchema();
+			}else if (entry.getTypeName().equals(MissionDataSource.MISSIONRAWWAYPOINT_TYPE)) {
+				return SurveyFeatureFactory.createWaypointPrjSchema();
 			}
 		}catch(SchemaException ex){
 			throw new IOException(Messages.MissionDataSource_SchemaNotSupported + ex.getLocalizedMessage(), ex);

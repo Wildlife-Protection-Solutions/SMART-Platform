@@ -385,8 +385,8 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		wp.setConservationArea(parent.getPatrolLeg().getPatrol().getConservationArea());
 		wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 		wp.setDateTime(SmartUtils.combineDateTime(parent.getDate(), xml.getTime().toGregorianCalendar().getTime()));
-		wp.setX(xml.getX());
-		wp.setY(xml.getY());
+		wp.setRawX(xml.getX());
+		wp.setRawY(xml.getY());
 		if (attachmentLocation != null){
 			if (xml.getAttachments().size() > 0){
 				wp.setAttachments(new ArrayList<WaypointAttachment>());

@@ -433,17 +433,17 @@ public class MissionImporter extends AbstractSmartImporter {
 		wp.setId(mday.getWaypoints().size()+1);
 		wp.setSourceId(SurveyWaypointSource.KEY);
 		wp.setConservationArea(SmartDB.getCurrentConservationArea());
-		wp.setX(0);
-		wp.setY(0);
+		wp.setRawX(0);
+		wp.setRawY(0);
 		for (A a : s.getA()) {
 			String i = a.getI();
 			if (ICyberTrackerConstants.TIME.equals(i)) {
 				Time t = Time.valueOf(a.getV());
 				wp.setDateTime(SmartUtils.combineDateTime(mday.getDate(), t));
 			} else if (ICyberTrackerConstants.LATITUDE.equals(i)) {
-				wp.setY(Double.valueOf(a.getV()));
+				wp.setRawY(Double.valueOf(a.getV()));
 			} else if (ICyberTrackerConstants.LONGITUDE.equals(i)) {
-				wp.setX(Double.valueOf(a.getV()));
+				wp.setRawX(Double.valueOf(a.getV()));
 			} else if (ScreensUtil.RESULT_NEW_WAYPOINT.equals(a.getN())) {
 				E e = eMap.get(a.getV());
 				newWp = ElementsUtil.BOOL_TRUE.equals(e.getTag0());

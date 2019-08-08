@@ -123,6 +123,7 @@ public class IncidentSummaryPage extends EditorPart {
 	private Text txtLocation;
 	private Label lblLocation;
 	private Text txtDistance;
+	private Text txtPrjLocation;
 	private Text txtDirection;
 	private Label lblLastModified;
 //	private Label lblLastModifiedBy;
@@ -223,10 +224,15 @@ public class IncidentSummaryPage extends EditorPart {
 			}catch(FactoryException ex){
 				IncidentPlugIn.log(ex.getMessage(), ex);
 			}
-			Point p = ReprojectUtils.transform(incident.getX(), incident.getY(), crs);
+			Point p = ReprojectUtils.transform(incident.getRawX(), incident.getRawY(), crs);
 			this.txtLocation.setText(p.getX() + Messages.IncidentSummaryPage_LocationSeparator + p.getY());
 			
 			if (editor.getOptions().getTrackDistanceDirection()){
+				
+				p = ReprojectUtils.transform(incident.getX(), incident.getY(), crs);
+				this.txtPrjLocation.setText(p.getX() + Messages.IncidentSummaryPage_LocationSeparator + p.getY());
+				
+				
 				if (incident.getDirection() == null){
 					this.txtDirection.setText(""); //$NON-NLS-1$
 				}else{
@@ -336,17 +342,24 @@ public class IncidentSummaryPage extends EditorPart {
 		createEdit(left, canEdit, LocationComposite.ID);
 
 		if (editor.getOptions().getTrackDistanceDirection()){
-			toolkit.createLabel(left, Messages.IncidentSummaryPage_DistanceLabel);
+			toolkit.createLabel(left, Messages.IncidentSummaryPage_DistanceLabel1);
 			txtDistance = toolkit.createText(left, ""); //$NON-NLS-1$
 			txtDistance.setEditable(false);
 			txtDistance.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			createEdit(left, canEdit, DistanceDirectionComposite.ID);
 		
-			toolkit.createLabel(left, Messages.IncidentSummaryPage_DirectionLabel);
+			Label l = toolkit.createLabel(left, Messages.IncidentSummaryPage_DirectionLabel1);
+			l.setToolTipText(Messages.IncidentSummaryPage_bearingtooltip);
 			txtDirection = toolkit.createText(left, ""); //$NON-NLS-1$
 			txtDirection.setEditable(false);
 			txtDirection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			createEdit(left, canEdit, DistanceDirectionComposite.ID);
+			
+			toolkit.createLabel(left, Messages.IncidentSummaryPage_PrjLocationLbl);
+			txtPrjLocation = toolkit.createText(left, ""); //$NON-NLS-1$
+			txtPrjLocation.setEditable(false);
+			txtPrjLocation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			toolkit.createLabel(left, ""); //$NON-NLS-1$
 		}
 		
 		Label l = toolkit.createLabel(right, Messages.IncidentSummaryPage_CommentsLabel);

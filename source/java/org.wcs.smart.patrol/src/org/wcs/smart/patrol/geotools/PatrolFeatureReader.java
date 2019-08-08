@@ -65,6 +65,16 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 				}
 			}
 			fIterator = pnts.iterator();
+		}else if (type.equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)){
+			List<PatrolWaypoint> pnts = new ArrayList<PatrolWaypoint>();
+			for (PatrolLeg l : patrol.getLegs()){
+				for (PatrolLegDay d : l.getPatrolLegDays()){
+					if (d.getWaypoints() != null){
+						pnts.addAll(d.getWaypoints());
+					}
+				}
+			}
+			fIterator = pnts.iterator();
 		}else if (type.equals(PatrolDataSource.TRACK_PART_TYPE)){
 			List<TrackPart> pnts = new ArrayList<>();
 			for (PatrolLeg l : patrol.getLegs()){
@@ -121,6 +131,8 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 			return new PatrolFeature(PatrolFeatureFactory.getWaypointAsFeature(ftype, (PatrolWaypoint)this.fIterator.next()));
 		}else if (thisType.equals(PatrolDataSource.TRACK_PART_TYPE)){
 			return new PatrolFeature(PatrolFeatureFactory.getTrackPartAsFeature(ftype, (TrackPart)this.fIterator.next()));
+		}else if (thisType.equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) {
+			return new PatrolFeature(PatrolFeatureFactory.getWaypointAsPrjFeature(ftype, (PatrolWaypoint)this.fIterator.next()));
 		}
 		return null;
 	}

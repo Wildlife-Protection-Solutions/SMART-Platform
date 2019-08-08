@@ -61,7 +61,8 @@ public class DistanceDirectionComposite extends SurveyDesignComposite {
 				fireChangeListeners();	
 			}
 		});
-		chDistance.setText(SmartUtils.formatStringForLabel(Messages.DistanceDirectionComposite_Label));
+		chDistance.setText(SmartUtils.formatStringForLabel(Messages.DistanceDirectionComposite_Label1));
+		chDistance.setToolTipText(Messages.DistanceDirectionComposite_distancedirectiontooltip);
 		
 		chObserver = new Button(inner, SWT.CHECK);
 		chObserver.addSelectionListener(new SelectionAdapter() {

@@ -41,6 +41,7 @@ import javax.persistence.Transient;
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.hibernate.annotations.BatchSize;
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
@@ -55,6 +56,9 @@ import org.wcs.smart.ca.datamodel.Category;
 @Table(name="smart.waypoint")
 public class Waypoint extends UuidItem {
 	
+	//earth raidus in meters
+	public static final int RADIUS = 6378100;//6371000;//6378.1;
+
 	public static final int COMMENT_MAX_LENGTH = 4096;
 	
 	private ConservationArea ca;
@@ -64,6 +68,12 @@ public class Waypoint extends UuidItem {
 	private int id;
 	private Double x;
 	private Double y;
+	
+	@Transient
+	private Double prjx;
+	@Transient
+	private Double prjy;
+	
 	private Date dateTime;
 	
 	private Date lastModifiedDate;
@@ -109,22 +119,59 @@ public class Waypoint extends UuidItem {
 	}
 
 	@Column(name="x")
-	public Double getX() {
+	public Double getRawX() {
 		return x;
 	}
 
-	public void setX(double x) {
+	public void setRawX(double x) {
 		this.x = x;
+		computePrj();
+//		System.out.println("x:" + this.x + " : " + x);
 	}
 
 	@Column(name="y")
-	public Double getY() {
+	public Double getRawY() {
 		return y;
 	}
 
-	public void setY(double y) {
+	public void setRawY(double y) {
 		this.y = y;
+		computePrj();
 	}
+
+	private void computePrj() {
+		
+		if (x == null || y == null) return;
+		if (direction == null || distance == null) {
+			prjx = x;
+			prjy = y;
+			return;
+		}
+		
+		//TODO: find a value for R
+		double a = Math.toRadians(direction);
+		double dR = distance/RADIUS;		
+		double ry = Math.toRadians(y);
+		double rx = Math.toRadians(x);
+		double prjy1 = Math.asin( Math.sin(ry)*Math.cos(dR) + Math.cos(ry)*Math.sin(dR)*Math.cos(a) );
+		double prjx1 = rx + Math.atan2(Math.sin(a)*Math.sin(dR)*Math.cos(ry), Math.cos(dR)-Math.sin(ry)*Math.sin(prjy1));
+		prjx = Math.toDegrees(prjx1);
+		prjy = Math.toDegrees(prjy1);
+//		System.out.println(x + ", " + y + ":" + prjx + "," + prjy);
+		
+	}
+	
+	@Transient
+	public Double getX() {
+		return prjx;
+		
+	}
+	
+	@Transient
+	public Double getY() {
+		return prjy;
+	}
+	
 
 	@Column(name="last_modified")
 	public Date getLastModified() {
@@ -180,6 +227,7 @@ public class Waypoint extends UuidItem {
 
 	public void setDirection(Float direction) {
 		this.direction = direction;
+		computePrj();
 	}
 
 	@Column(name="distance")
@@ -189,6 +237,7 @@ public class Waypoint extends UuidItem {
 
 	public void setDistance(Float distance) {
 		this.distance = distance;
+		computePrj();
 	}
 
 	@Column(name="wp_comment")
@@ -262,8 +311,8 @@ public class Waypoint extends UuidItem {
 		wp.setDistance(this.distance);
 		wp.setId(this.id);
 		wp.setDateTime(this.dateTime);		
-		wp.setX(this.x);
-		wp.setY(this.y);
+		wp.setRawX(this.x);
+		wp.setRawY(this.y);
 		wp.setConservationArea(this.ca);
 		wp.setSourceId(this.sourceId);
 		
@@ -306,4 +355,34 @@ public class Waypoint extends UuidItem {
 	}
 	
 
+	//https://www.movable-type.co.uk/scripts/latlong.html
+	/**
+	 * Computes the distance and bearing between two points.
+	 * 
+	 * @param c1
+	 * @param c2
+	 * @return array where the first element is the distance in meters and the
+	 * second is the bearing in degrees
+	 */
+	public static Float[] computeDistanceBearing(Coordinate c1, Coordinate c2) {
+		//initial bearing
+		double y = Math.sin(c2.x-c1.x) * Math.cos(c2.y);
+		double x = Math.cos(c1.y)*Math.sin(c2.y) -
+		        Math.sin(c1.y)*Math.cos(c2.y)*Math.cos(c2.x-c1.x);
+		double brng = Math.toDegrees( Math.atan2(y, x) );
+		brng = (brng + 360) % 360;
+				
+		//Distance haversine formula
+		var lat1 = Math.toRadians(c1.y);
+		var lat2 = Math.toRadians(c2.y);
+		var latdiff = Math.toRadians(c2.y-c1.y);
+		var longdiff = Math.toRadians(c2.x-c1.x);
+		var a = Math.sin(latdiff/2) * Math.sin(latdiff/2) +
+		        Math.cos(lat1) * Math.cos(lat2) *
+		        Math.sin(longdiff/2) * Math.sin(longdiff/2);
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+		var d = RADIUS * c;
+				
+		return new Float[] {(float)d, (float)brng};
+	}
 }

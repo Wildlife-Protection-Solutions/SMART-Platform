@@ -150,8 +150,12 @@ public class Messages extends NLS {
 	public static String ObservationCloner_ProgressName;
 
 	public static String ObservationCloner_TaskName;
+	public static String ObservationOptionsPropertyPage_DistanceBearingOpLabel;
+
 	public static String ObservationOptionsPropertyPage_ObserverDescription;
 	public static String ObservationOptionsPropertyPage_ObserverLabel;
+
+	public static String ObservationOptionsPropertyPage_ObserverOp;
 	public static String ObservationOptionsPropertyPage_WaypointOptionsLbl;
 
 	public static String PatrolHibernateManager_Error_CouldNoLoadPatrolOptions;
@@ -171,7 +175,7 @@ public class Messages extends NLS {
 	
 	public static String PatrolOptionsPropertyPage_DialogMessage;
 	public static String PatrolOptionsPropertyPage_DialogTitle;
-	public static String PatrolOptionsPropertyPage_DistanceDirection_DescLabel;
+	public static String PatrolOptionsPropertyPage_DistanceDirection_DescLabel1;
 	public static String PatrolOptionsPropertyPage_Error_CouldNotSave;
 	public static String PatrolOptionsPropertyPage_Error_EditTimeInvalid;
 	public static String PatrolOptionsPropertyPage_PageName;

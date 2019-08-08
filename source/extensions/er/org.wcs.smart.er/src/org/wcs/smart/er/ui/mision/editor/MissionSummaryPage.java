@@ -463,7 +463,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		
 		Object component = null;
 		try {
-			component = ((Class<?>)x).newInstance();
+			component = ((Class<?>)x).getConstructor().newInstance();
 		} catch (Exception ex) {
 			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 		}

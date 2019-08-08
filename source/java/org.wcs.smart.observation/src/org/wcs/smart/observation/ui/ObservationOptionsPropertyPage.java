@@ -31,7 +31,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -65,8 +64,6 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 	private Button btnTrackDistanceDirection;
 	private Button btnTrackObserver;
 	
-	private Font boldFont;
-	
 	private String errorEditTimeMessage = MessageFormat.format(Messages.PatrolOptionsPropertyPage_Error_EditTimeInvalid, -1, Short.MAX_VALUE);
 	
 	/**
@@ -95,14 +92,14 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		SmartUiUtils.createHeaderLabel(container, Messages.ObservationOptionsPropertyPage_WaypointOptionsLbl);
+		SmartUiUtils.createHeaderLabel(container, Messages.ObservationOptionsPropertyPage_DistanceBearingOpLabel);
 		
 		Composite g = new Composite(container, SWT.NONE);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(g, SWT.WRAP);
-		lbl.setText(Messages.PatrolOptionsPropertyPage_DistanceDirection_DescLabel);
+		lbl.setText(Messages.PatrolOptionsPropertyPage_DistanceDirection_DescLabel1);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		((GridData)lbl.getLayoutData()).widthHint = 350;
 		
@@ -115,8 +112,11 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		});
 		btnTrackDistanceDirection.setText(Messages.PatrolOptionsPropertyPage_RecordDistanceDirectory_Op);
 		
-		lbl = new Label(g, SWT.WRAP);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		SmartUiUtils.createHeaderLabel(container, Messages.ObservationOptionsPropertyPage_ObserverOp);
+
+		g = new Composite(container, SWT.NONE);
+		g.setLayout(new GridLayout(2, false));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		lbl = new Label(g, SWT.WRAP);
 		lbl.setText(Messages.ObservationOptionsPropertyPage_ObserverDescription);

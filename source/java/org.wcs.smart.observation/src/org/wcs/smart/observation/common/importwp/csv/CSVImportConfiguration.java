@@ -151,8 +151,8 @@ public class CSVImportConfiguration {
 					if(p.getY() > 90 || p.getY() < -90){
 						throw new Exception(MessageFormat.format(Messages.CSVImportConfiguration_0, new Object[]{counter, row[YColumn]}));
 					}
-				 	curWP.setX(p.getX());
-				 	curWP.setY(p.getY());
+				 	curWP.setRawX(p.getX());
+				 	curWP.setRawY(p.getY());
 
 				 	try {
 				 		String strTime = row[timeColumn].replaceAll("\\s+",""); //$NON-NLS-1$ //$NON-NLS-2$
