@@ -63,8 +63,6 @@ import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -911,6 +909,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 			attributeList.setFilters(new ViewerFilter[]{filter});
 			
 			Button btnNew = new Button(parent, SWT.PUSH);
+			btnNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			btnNew.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnNew.setText(Messages.RelationshipTypeDialog_CreateNewOption);
 			btnNew.addSelectionListener(new SelectionAdapter() {

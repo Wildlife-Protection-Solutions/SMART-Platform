@@ -1277,7 +1277,7 @@
                   label="%command.label.save"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="%command.tooltip.save">
+                  tooltip="save current changes">
                <visibleWhen>
                   <and>
                      <test
@@ -1306,7 +1306,7 @@
                   label="%command.label.saveas"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="%command.tooltip.saveas">
+                  tooltip="copy current changes to new item">
                <visibleWhen>
                   <and>
                      <test
@@ -1326,6 +1326,29 @@
                                  value="org.wcs.smart.i2.IntelEntityPerspective">
                            </equals>
                         </or>
+                     </with>
+                  </and>
+               </visibleWhen>
+            </command>
+         </toolbar>
+         <toolbar
+               id="vertical.org.wcs.smart.i2.toolbar6">
+            <command
+                  commandId="org.eclipse.ui.file.save"
+                  label="%command.label.save"
+                  mode="FORCE_TEXT"
+                  style="push">
+               <visibleWhen>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.i2.report.entity.edit">
+                        </equals>
                      </with>
                   </and>
                </visibleWhen>

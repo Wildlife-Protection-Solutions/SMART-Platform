@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.ui.dialogs;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -38,8 +37,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -54,6 +51,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -218,6 +216,7 @@ public class SelectAttributeEntityTypeDialog extends SmartStyledTitleDialog{
 			}
 		});
 		Button btnNew = new Button(parent, SWT.PUSH); 
+		btnNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnNew.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnNew.setText(Messages.SelectAttributeEntityTypeDialog_NewAttributeBtn);
 		btnNew.addSelectionListener(new SelectionAdapter() {
