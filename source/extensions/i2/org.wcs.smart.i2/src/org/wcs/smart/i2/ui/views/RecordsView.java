@@ -92,6 +92,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
@@ -199,9 +201,32 @@ public class RecordsView {
 			}
 		};
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.RecordsView_unprocessedSection, Messages.RecordsView_inprogressSection, Messages.RecordsView_allSection, Messages.RecordsView_basicSection}, thisParent, toolkit);
+		Composite headerMain = toolkit.createComposite(thisParent, SWT.NONE);
+		headerMain.setLayout(new GridLayout(2, false));
+		headerMain.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)headerMain.getLayout()).marginWidth = 0;
+		((GridLayout)headerMain.getLayout()).marginHeight = 0;
+		((GridLayout)headerMain.getLayout()).horizontalSpacing = 0;
+		
+		SectionTabHeader tabList = new SectionTabHeader(
+				new String[]{Messages.RecordsView_unprocessedSection, Messages.RecordsView_inprogressSection, Messages.RecordsView_allSection, Messages.RecordsView_basicSection}, 
+				headerMain, toolkit);
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
+		ToolBar tb = new ToolBar(headerMain, SWT.FLAT);
+		
+		if (IntelSecurityManager.INSTANCE.canCreateRecord()) {
+			ToolItem newRecord = new ToolItem(tb, SWT.PUSH);
+			newRecord.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			newRecord.setToolTipText(Messages.RecordsView_newrecordtooltip);
+			newRecord.addListener(SWT.Selection, e->(new NewRecordHandler()).createNewRecord(context));
+		}
+		
+		ToolItem tiRefresh = new ToolItem(tb, SWT.PUSH);
+		tiRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		tiRefresh.setToolTipText(Messages.RecordsView_refreshtooltip);
+		tiRefresh.addListener(SWT.Selection, e->refreshView());
+		
 		Composite tabPart = toolkit.createComposite(thisParent, SWT.NONE);
 		tabPart.setLayout(new StackLayout());
 		tabPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

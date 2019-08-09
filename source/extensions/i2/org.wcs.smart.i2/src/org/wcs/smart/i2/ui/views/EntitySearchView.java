@@ -90,6 +90,7 @@ import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.EntitySearchJob;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.dialogs.SaveSearchDialog;
+import org.wcs.smart.i2.ui.handler.NewEntityDialogHandler;
 import org.wcs.smart.i2.ui.views.entity.search.AdvancedEntitySearchPanel;
 import org.wcs.smart.i2.ui.views.entity.search.AllPanel;
 import org.wcs.smart.i2.ui.views.entity.search.BasicEntitySearchPanel;
@@ -245,6 +246,8 @@ public class EntitySearchView {
 		Composite header = toolkit.createComposite(searchSashForm);
 		header.setLayout(new GridLayout());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)header.getLayout()).marginWidth = 0;
+		((GridLayout)header.getLayout()).marginHeight = 0;
 		
 		createHeaderOptions(header);
 		
@@ -374,28 +377,33 @@ public class EntitySearchView {
 	
 	private void createHeaderOptions(Composite parent){
 		
+		Composite top = new Composite(parent, SWT.NONE);
+		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		top.setLayout(new GridLayout(2, false));
+		((GridLayout)top.getLayout()).marginWidth = 0;
+		((GridLayout)top.getLayout()).marginHeight = 0;
+		((GridLayout)top.getLayout()).horizontalSpacing = 0;
+
 		tabList = new SectionTabHeader(new String[]{
 				Messages.EntitySearchView_BasicSearchTab, 
 				Messages.EntitySearchView_AdvSearchTab, 
 				Messages.EntitySearchView_SavedSearchTab,
 				Messages.EntitySearchView_SpatialSearchLabel,
 				Messages.EntitySearchView_AllLabel
-		}, parent, toolkit);
+		}, top, toolkit);
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
+		ToolBar tb = new ToolBar(top, SWT.FLAT);
+		if (IntelSecurityManager.INSTANCE.canCreateEntity()) {
+			ToolItem tiAdd = new ToolItem(tb, SWT.PUSH);
+			tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			tiAdd.setToolTipText(Messages.EntitySearchView_newEntityTooltip);
+			tiAdd.addListener(SWT.Selection, e->(new NewEntityDialogHandler()).execute(top.getShell(), context));
+		}
+		
 		tabPart = toolkit.createComposite(parent, SWT.NONE);
 		tabPart.setLayout(new StackLayout());
 		tabPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-//		basicSearch.setToolTipText(Messages.EntitySearchView_BasicSearchTooltip);
-//		spatialSearch.setToolTipText(Messages.EntitySearchView_SpatialSearchTooltip);
-//		allTable.setToolTipText(Messages.EntitySearchView_AllTooltip);
-		
-//		basicSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
-//		advancedSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
-//		savedSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
-//		spatialSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
-//		allTable.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		
 		Composite b = createBasicSearch(tabPart);
 		Composite a = createAdvancedSearch(tabPart);

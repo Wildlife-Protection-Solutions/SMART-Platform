@@ -53,12 +53,12 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -257,11 +257,14 @@ public class RelationshipGraphComposite extends Composite {
 		Composite topCmp = toolkit.createComposite(topSection, SWT.NONE);
 		topCmp.setLayout(new GridLayout(2, false));
 		topCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)topCmp.getLayout()).marginWidth = 0;
+		((GridLayout)topCmp.getLayout()).marginHeight = 0;
 		topSection.setClient(topCmp);
 
 		cmpFilter = new RelationshipGraphFilterComposite(topCmp);
 		
-		Composite rightCmp = toolkit.createComposite(topCmp, SWT.NONE);
+		Group rightCmp = new Group(topCmp, SWT.NONE);
+		rightCmp.setText("Layout");
 		rightCmp.setLayout(new GridLayout(2, false));
 		rightCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)rightCmp.getLayoutData()).minimumWidth = 200; //NOTE: need this to fix layout issues caused by CheckBoxDropDown located in RelationshipGraphFilterComposite
@@ -321,25 +324,16 @@ public class RelationshipGraphComposite extends Composite {
 			}
 		});
 		
-		Composite mainCmp = new Composite(parent, SWT.NONE);
-		StackLayout stackLayout = new StackLayout();
-		stackLayout.marginHeight = stackLayout.marginWidth = 0;
-		mainCmp.setLayout(stackLayout);
+		
+		Composite mainCmp = toolkit.createComposite(parent, SWT.NONE);
+		mainCmp.setLayout(new FillLayout(SWT.VERTICAL));
 		mainCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		Composite sizingCmp = toolkit.createComposite(mainCmp, SWT.NONE);
-		sizingCmp.setLayout(new GridLayout());
-
-		Composite graphCmp = toolkit.createComposite(mainCmp, SWT.NONE);
-		graphCmp.setLayout(new FillLayout(SWT.VERTICAL));
-
-		((StackLayout)mainCmp.getLayout()).topControl = graphCmp; //NOTE: this is a hack to coordinate sizing of composites with GridLayout and FillLayout
 
 		graphContentProvider = new RelationshipGraphContentProvider();
 		graphLabelProvider = new RelationshipGraphLabelProvider(graphContentProvider);
-		
 		graphViewer = new ZestContentViewer(new ZestFxJFaceModule());
-		graphViewer.createControl(graphCmp, SWT.NONE);
+		graphViewer.createControl(mainCmp, SWT.NONE);
+		
 		graphViewer.setContentProvider(graphContentProvider);
 		graphViewer.setLabelProvider(graphLabelProvider);
 		graphViewer.setLayoutAlgorithm(defaultLayoutAlogorithm);
@@ -396,9 +390,12 @@ public class RelationshipGraphComposite extends Composite {
 			graphDelayedRefresh = false;
 			if (input != null) {
 				graphViewer.setInput(input);
-			} else if (refresh) {
+			} 
+			if (refresh) {
+				graphViewer.getControl().setBackground(graphViewer.getControl().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 				graphViewer.refresh();
 			}
+			
 		} else {
 			//graph is in non-active editor and can delay update for graph input
 			if (input != null) {

@@ -465,6 +465,7 @@ public class Messages extends NLS {
 	public static String EntitySearchView_DeleteTooltip;
 	public static String EntitySearchView_EtLabel;
 	public static String EntitySearchView_LoadButtonText;
+	public static String EntitySearchView_newEntityTooltip;
 	public static String EntitySearchView_RefreshJobName;
 	public static String EntitySearchView_RenameError1;
 	public static String EntitySearchView_RenameError2;
@@ -1316,7 +1317,9 @@ public class Messages extends NLS {
 	public static String RecordsView_inprogressSection;
 	public static String RecordsView_LoadingIntelRecordsJobName;
 	public static String RecordsView_NewRecordMenuItem;
+	public static String RecordsView_newrecordtooltip;
 	public static String RecordsView_OpenMenu;
+	public static String RecordsView_refreshtooltip;
 	public static String RecordsView_SelectFolder;
 	public static String RecordsView_SortByMenuItem;
 	public static String RecordsView_unauthorized;

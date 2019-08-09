@@ -826,26 +826,6 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.i2.ui.view.records">
-         <command
-               commandId="org.wcs.smart.i2.command.record.new"
-               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
-               style="push">
-            <visibleWhen
-                  checkEnabled="false">
-               <test
-                     property="org.wcs.smart.i2.permission"
-                     value="create_record">
-               </test>
-            </visibleWhen>
-         </command>
-         <command
-               commandId="org.wcs.smart.i2.command.record.view.refresh"
-               style="push">
-         </command>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
             locationURI="popup:outlinemenu?after=org.eclipse.birt.report.designer.ui.actions.NewJointDataSetAction">
          <separator
                name="org.wcs.smart.i2.entity.template.query.separator"
@@ -855,23 +835,6 @@
                commandId="org.wcs.smart.i2.entity.template.querybindings.fix"
                style="push"
                tooltip="%FixBindingTooltip">
-         </command>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:org.wcs.smart.i2.view.entitysearch">
-         <command
-               commandId="org.wcs.smart.i2.command.entity.new"
-               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
-               label="%NewEntityCommandName2"
-               style="push">
-            <visibleWhen
-                  checkEnabled="false">
-               <test
-                     property="org.wcs.smart.i2.permission"
-                     value="create_entity">
-               </test>
-            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution

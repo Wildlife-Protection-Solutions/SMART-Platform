@@ -177,8 +177,11 @@ public class WorkingSetView {
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite header = toolkit.createComposite(core);
-		header.setLayout(new GridLayout(3, false));
+		header.setLayout(new GridLayout(2, false));
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)header.getLayout()).marginWidth = 0;
+		((GridLayout)header.getLayout()).marginHeight = 0;
+		((GridLayout)header.getLayout()).horizontalSpacing = 0;
 		
 		lblWorkingSet = toolkit.createLabel(header, ""); //$NON-NLS-1$
 		lblWorkingSet.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
