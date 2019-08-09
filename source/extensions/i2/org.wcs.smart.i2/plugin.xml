@@ -1044,7 +1044,7 @@
             locationURI="toolbar:org.eclipse.ui.main.toolbar?after=vertical.org.wcs.smart.patrol.toolbar2">
          <toolbar
                id="vertical.org.wcs.smart.i2.toolbar1"
-               label="">
+               label="%toolbar.label">
             <command
                   commandId="org.wcs.smart.i2.command.entity.new"
                   label="%command.label.newentity"
@@ -1277,7 +1277,7 @@
                   label="%command.label.save"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="save current changes">
+                  tooltip="%command.save.tooltip">
                <visibleWhen>
                   <and>
                      <test
@@ -1306,7 +1306,7 @@
                   label="%command.label.saveas"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="copy current changes to new item">
+                  tooltip="%command.saveas.tooltip">
                <visibleWhen>
                   <and>
                      <test
