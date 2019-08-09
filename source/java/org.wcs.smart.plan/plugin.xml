@@ -328,6 +328,8 @@
                id="vertical.org.wcs.smart.plan.toolbar.3">
             <command
                   commandId="org.eclipse.ui.file.save"
+                  label="%command.label.save"
+                  mode="FORCE_TEXT"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -346,7 +348,7 @@
             locationURI="menu:org.wcs.smart.menu.patrol?before=org.wcs.smart.patrol.create">
          <command
                commandId="org.wcs.smart.plan.NewPlan"
-               label="New Plan"
+               label="%command.label.newplan"
                mnemonic="%plan.menu.command.mnemonic.newplan"
                style="push"
                tooltip="%plan.menu.command.tooltip.newplan">
@@ -375,7 +377,7 @@
          <command
                commandId="org.wcs.smart.command.showperspective"
                icon="images/icons/view16/plan.png"
-               label="View Plans"
+               label="%command.label.viewplans"
                style="push"
                tooltip="%plan.menu.command.tooltip.viewplans">
             <parameter
