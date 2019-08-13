@@ -139,6 +139,8 @@ public class Messages extends NLS {
 	public static String PatrolQueryLabelProvider_LastModifiedBy_ColumnName;
 	public static String PatrolQueryLabelProvider_NumTimeRanges;
 	public static String PatrolQueryLabelProvider_RankLabel;
+	public static String PatrolQueryLabelProvider_RawXColumnName;
+	public static String PatrolQueryLabelProvider_RawYColumnName;
 	public static String PatrolQueryLabelProvider_TotalActivePatrolHours;
 	public static String PatrolQueryMemoryResult_DeleteError;
 	public static String PatrolQueryOptions_CaGroupByOptionName;

@@ -222,8 +222,8 @@ public class PatrolGPSDataImport {
 			Date d = wp.getWaypoint().getDateTime();
 			
 			Waypoint tmp = new Waypoint();
-			tmp.setRawX(wp.getWaypoint().getX());
-			tmp.setRawY(wp.getWaypoint().getY());
+			tmp.setRawX(wp.getWaypoint().getRawX());
+			tmp.setRawY(wp.getWaypoint().getRawY());
 			tmp.setDateTime(d);
 			coords.add(tmp);
 		}

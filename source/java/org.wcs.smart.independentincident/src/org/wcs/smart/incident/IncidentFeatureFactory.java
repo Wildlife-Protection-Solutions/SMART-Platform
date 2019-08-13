@@ -40,10 +40,10 @@ import org.locationtech.jts.geom.Coordinate;
  */
 public class IncidentFeatureFactory {
 	
-	private static final String SMART_POINT_SPEC = "fid:String,id:Integer,geom:Point:srid=4326"; //$NON-NLS-1$
+	private static final String SMART_POINT_SPEC = "fid:String,id:Integer,the_geom:Point:srid=4326"; //$NON-NLS-1$
 	public  static final String SMART_POINT_TYPE_NAME = "smart.independentincident"; //$NON-NLS-1$
 	
-	private static final String SMART_POINT_PRJ_SPEC = "fid:String,id:Integer,rawx:Double,rawy:Double,x:Double,y:Double,geom:LineString:srid=4326"; //$NON-NLS-1$
+	private static final String SMART_POINT_PRJ_SPEC = "fid:String,id:Integer,rawx:Double,rawy:Double,x:Double,y:Double,the_geom:LineString:srid=4326"; //$NON-NLS-1$
 	public  static final String SMART_POINT_PRJ_TYPE_NAME = "smart.independentincidentprojected"; //$NON-NLS-1$
 	
 	

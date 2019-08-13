@@ -64,6 +64,8 @@ public class SurveyQueryLabelProvider implements ISurveyQueryLabelProvider {
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_TIME){ return Messages.getString("SurveyQueryLabelProvider.WpTimeLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_X){ return Messages.getString("SurveyQueryLabelProvider.WpXLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_Y){ return Messages.getString("SurveyQueryLabelProvider.WpYLabel", l);} //$NON-NLS-1$
+		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_RAWX){ return Messages.getString("SurveyQueryLabelProvider.WpRawXLabel", l);} //$NON-NLS-1$
+		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_RAWY){ return Messages.getString("SurveyQueryLabelProvider.WpRawYLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION){ return Messages.getString("SurveyQueryLabelProvider.DirLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE){ return Messages.getString("SurveyQueryLabelProvider.DistanceLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT){ return Messages.getString("SurveyQueryLabelProvider.CommentLabel", l);} //$NON-NLS-1$

@@ -24,6 +24,7 @@ package org.wcs.smart.observation.ui;
 import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
@@ -36,7 +37,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
@@ -49,6 +52,7 @@ import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
+import org.wcs.smart.util.GeometryUtils;
 
 /**
  * Property page for editing patrol options
@@ -98,10 +102,61 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label lbl = new Label(g, SWT.WRAP);
-		lbl.setText(Messages.PatrolOptionsPropertyPage_DistanceDirection_DescLabel1);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		((GridData)lbl.getLayoutData()).widthHint = 350;
+//		Label lbl = new Label(g, SWT.WRAP);
+//		lbl.setText(Messages.PatrolOptionsPropertyPage_DistanceDirection_DescLabel1);
+//		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+//		((GridData)lbl.getLayoutData()).widthHint = 350;
+		
+		Link lbl1 = new Link(g, SWT.WRAP);
+		lbl1.setText(Messages.PatrolOptionsPropertyPage_DistanceDirection_DescLabel1);
+		lbl1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		((GridData)lbl1.getLayoutData()).widthHint = 350;
+		lbl1.addListener(SWT.Selection, e->{
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append(Messages.ObservationOptionsPropertyPage_ComputationDetails);
+			sb.append("\n\n"); //$NON-NLS-1$
+			sb.append("d = distance (meters)"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("b = bearing (degrees)"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("RADIUS = " + GeometryUtils.EARTH_RADIUS); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("dR = d / RADIUS"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("rb = toRadians(b)"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("ry = toRadians(y)"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("rx = toRadians(x)"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("rprjy = asin( sin(ry) * cos(dR) + cos(ry) * sin(dR) * cos(rb) ) "); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("rprjx = rx + atan2( Math.sin(rb) * sin(dR) * cos(ry), cos(dR) - sin(ry) * sin(rprjy) )"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("prj_x = toDegrees(rprjx)"); //$NON-NLS-1$
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append("prj_y = toDegrees(rprjy)"); //$NON-NLS-1$
+			sb.append("\n\n"); //$NON-NLS-1$
+			
+			MessageDialog md = new MessageDialog(getShell(), Messages.ObservationOptionsPropertyPage_DistanceBearingTitle, null, null, MessageDialog.NONE, 0, IDialogConstants.OK_LABEL) {
+				@Override
+			    protected Control createCustomArea(Composite parent) {
+					parent.getParent().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+					parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+					
+			    	Text txtWarnings = new Text(parent, SWT.MULTI | SWT.BORDER);
+			    	txtWarnings.setEditable(false);
+			    	txtWarnings.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+			    	GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+			    	txtWarnings.setLayoutData(gd);
+			    	
+			    	txtWarnings.setText(sb.toString());
+			        return txtWarnings;
+			    }
+			};
+			md.open();
+		});
 		
 		btnTrackDistanceDirection = new Button(g, SWT.CHECK | SWT.WRAP);
 		btnTrackDistanceDirection.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
@@ -118,7 +173,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		lbl = new Label(g, SWT.WRAP);
+		Label lbl = new Label(g, SWT.WRAP);
 		lbl.setText(Messages.ObservationOptionsPropertyPage_ObserverDescription);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		((GridData)lbl.getLayoutData()).widthHint = 350;

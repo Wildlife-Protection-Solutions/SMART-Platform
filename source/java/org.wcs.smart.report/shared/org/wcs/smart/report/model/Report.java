@@ -21,12 +21,16 @@
  */
 package org.wcs.smart.report.model;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -144,5 +148,18 @@ public class Report extends NamedItem {
 	public void setFilename(String filename){
 		this.filename = filename;
 	}
+	
+	@Transient
+	/**
+	 * 
+	 * @param r
+	 * @return the full path to the report definition file
+	 */
+	public Path getFullPath() {
+		return Paths.get(getConservationArea().getFileDataStoreLocation())
+				.resolve(Report.REPORT_DIR)
+				.resolve(getFilename());
+	}
+	
 	
 }

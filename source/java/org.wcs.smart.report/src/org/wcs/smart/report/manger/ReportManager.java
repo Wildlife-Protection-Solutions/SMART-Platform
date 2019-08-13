@@ -22,8 +22,6 @@
 package org.wcs.smart.report.manger;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -198,17 +196,6 @@ public class ReportManager {
 			newId = df.format(x);
 		}
 		return newId;
-	}
-	
-	/**
-	 * 
-	 * @param r
-	 * @return the full path to the report definition file
-	 */
-	public static Path getPath(Report r) {
-		return Paths.get(r.getConservationArea().getFileDataStoreLocation())
-				.resolve(Report.REPORT_DIR)
-				.resolve(r.getFilename());
 	}
 	
 	/**

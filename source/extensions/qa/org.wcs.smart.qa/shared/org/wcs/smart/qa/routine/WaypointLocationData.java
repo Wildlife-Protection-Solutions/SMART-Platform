@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Wildlife Conservation Society
+ * Copyright (C) 2019 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,27 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.incident;
+package org.wcs.smart.qa.routine;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.qa.routine.ILocationRoutineData;
 
 /**
- * wrapper to support location qa routines for independent incidents
+ * Implementation of ILocationRoutine data that wraps a waypoint
  * 
  * @author Emily
+ * @since 7.0.0
  *
  */
-public class IncidentLocationData implements ILocationRoutineData {
+public class WaypointLocationData implements ILocationRoutineData {
 
-	private Waypoint wp;
-	private Coordinate c = null;
+	protected Waypoint wp;
+	protected Coordinate c = null;
+	protected Coordinate c2 = null;
 	
-	public IncidentLocationData(Waypoint wp) {
+	public WaypointLocationData(Waypoint wp) {
 		this.wp = wp;
-		c = new Coordinate(wp.getX(), wp.getY());
+		c = new Coordinate(wp.getRawX(), wp.getRawY());
+		
+		if (wp.getDirection() != null && wp.getDistance() != null) {
+			c2 = new Coordinate(wp.getX(), wp.getY());
+		}
 	}
 	
 	@Override
@@ -57,7 +62,13 @@ public class IncidentLocationData implements ILocationRoutineData {
 		return c;
 	}
 
+	@Override
+	public Coordinate getProjectedPoint() {
+		return c2;
+	}
+	
 	public Waypoint getWaypoint(){
 		return this.wp;
 	}
+
 }

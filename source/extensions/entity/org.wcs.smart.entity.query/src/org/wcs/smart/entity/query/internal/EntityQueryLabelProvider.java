@@ -45,6 +45,8 @@ public class EntityQueryLabelProvider implements IEntityQueryLabelProvider {
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME) return Messages.FixedQueryColumn_WaypointTimeColumnName;
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X) return Messages.FixedQueryColumn_xColumnName;
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_Y) return Messages.FixedQueryColumn_yColumnName;
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWX) return Messages.EntityQueryLabelProvider_RawXColumnLabel;
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWY) return Messages.EntityQueryLabelProvider_RawYColumnLabel;
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION) return Messages.FixedQueryColumn_DirectionColumnName;
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE) return Messages.FixedQueryColumn_DistanceColumnName;
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT) return Messages.FixedQueryColumn_CommentColumnName;

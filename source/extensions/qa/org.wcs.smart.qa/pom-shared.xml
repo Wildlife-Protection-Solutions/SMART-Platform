@@ -21,6 +21,11 @@
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.observation</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
     		<groupId>org.eclipse.scout.sdk.deps</groupId>
     		<artifactId>org.eclipse.ui.workbench</artifactId>
     		<version>3.108.0.v20160602-1232</version>

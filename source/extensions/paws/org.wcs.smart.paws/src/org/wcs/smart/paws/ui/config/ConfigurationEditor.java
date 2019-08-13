@@ -71,7 +71,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.ToolTip;
@@ -1436,7 +1435,7 @@ public class ConfigurationEditor extends EditorPart {
 			            Query temp = QueryHibernateManager.getInstance().findQuery(s, pc.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType( pc.getQueryType()));
 			            if (temp != null){
 			                pc.setCachedQuery(temp);
-			                pc.cacheLabel(PawsClassification.createLabel(temp));
+			                pc.cacheLabel(PawsManager.INSTANCE.createLabel(temp));
 							lblQuery.setData(SRC_VALUE, pc);
 			            }else{
 			                pc.cacheLabel( "QUERY NOT FOUND" );

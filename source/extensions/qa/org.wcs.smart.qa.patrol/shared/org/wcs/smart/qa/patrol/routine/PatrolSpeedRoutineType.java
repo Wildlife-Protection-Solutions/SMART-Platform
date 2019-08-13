@@ -53,6 +53,7 @@ import org.wcs.smart.qa.model.QaRoutineParameter;
 import org.wcs.smart.qa.patrol.ILabelProvider;
 import org.wcs.smart.qa.patrol.ILabelProvider.Key;
 import org.wcs.smart.qa.routine.ValidationTask;
+import org.wcs.smart.qa.routine.WaypointLocationData;
 
 /**
  * A QA routine that validates speed for track and waypoints.
@@ -189,10 +190,10 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 		if (index <= 0) return null;
 		Waypoint previous = allWaypoints.get(index-1).getWaypoint();
 		
-		double speed = computeSpeed(new Coordinate(previous.getX(), previous.getY(), previous.getDateTime().getTime()),  new Coordinate(pw.getWaypoint().getX(), pw.getWaypoint().getY(), pw.getWaypoint().getDateTime().getTime()), maxSpeed);
+		double speed = computeSpeed(new Coordinate(previous.getRawX(), previous.getRawY(), previous.getDateTime().getTime()),  new Coordinate(pw.getWaypoint().getRawX(), pw.getWaypoint().getRawY(), pw.getWaypoint().getDateTime().getTime()), maxSpeed);
 		if  (speed > maxSpeed){
 			String message = MessageFormat.format(ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_WpSpeedExceeded, task.getLocale()), DISTANCE_FORMATTER.format(speed), maxSpeed);
-			return createError(task, session, wp, GeometryFactoryProvider.getFactory().createPoint(new Coordinate(pw.getWaypoint().getX(), pw.getWaypoint().getY())), message);
+			return createError(task, session, wp, GeometryFactoryProvider.getFactory().createPoint(new Coordinate(pw.getWaypoint().getRawX(), pw.getWaypoint().getRawY())), message);
 		}
 		return null;
 	}

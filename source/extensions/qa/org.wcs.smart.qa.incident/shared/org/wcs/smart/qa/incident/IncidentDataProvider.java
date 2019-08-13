@@ -38,6 +38,7 @@ import org.wcs.smart.qa.incident.ILabelProvider.Key;
 import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.routine.LocationRoutineType;
+import org.wcs.smart.qa.routine.WaypointLocationData;
 
 /**
  * QA Data provider for independent incidents
@@ -60,7 +61,7 @@ public class IncidentDataProvider extends IQaDataProvider {
 	
 	@Override
 	public Collection<?> getData(Session session, ConservationArea ca, Date startDate, Date endDate) {
-		List<IncidentLocationData> waypoints = new ArrayList<>();
+		List<WaypointLocationData> waypoints = new ArrayList<>();
 		
 		Query<Waypoint> query = session.createQuery("FROM Waypoint WHERE conservationArea = :ca and sourceId = :source and dateTime between :start AND :end", Waypoint.class); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
@@ -69,7 +70,7 @@ public class IncidentDataProvider extends IQaDataProvider {
 		query.setParameter("end", endDate); //$NON-NLS-1$
 		List<Waypoint> pws = query.list();
 		for (Waypoint wp : pws){
-			waypoints.add(new IncidentLocationData(wp));
+			waypoints.add(new WaypointLocationData(wp));
 		}
 		
 		return waypoints;
@@ -77,7 +78,7 @@ public class IncidentDataProvider extends IQaDataProvider {
 
 	@Override
 	public String getFeatureId(Session session, Object obj, Locale l){
-		Waypoint waypoint = (Waypoint) session.get(Waypoint.class, ((IncidentLocationData)obj).getWaypoint().getUuid());
+		Waypoint waypoint = (Waypoint) session.get(Waypoint.class, ((WaypointLocationData)obj).getWaypoint().getUuid());
 		if (waypoint == null){
 			return ILabelProvider.getLabel(Key.IncidentDataProvder_IncidentNotFound, l);
 		}
@@ -99,7 +100,7 @@ public class IncidentDataProvider extends IQaDataProvider {
 
 	@Override
 	public UUID getFeatureSource(Session session, Object obj) {
-		return ((IncidentLocationData)obj).getWaypoint().getUuid();
+		return ((WaypointLocationData)obj).getWaypoint().getUuid();
 	}
 
 }

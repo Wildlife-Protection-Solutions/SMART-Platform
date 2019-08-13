@@ -45,9 +45,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.model.PawsClassification;
 import org.wcs.smart.query.QueryHibernateManager;
-import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
@@ -114,7 +114,7 @@ public class QueryDialog extends SmartStyledDialog {
 				item.setQueryUuid(c.getUuid());
 				Query q = QueryHibernateManager.getInstance().findQuery(session, c.getUuid(), c.getType());
 				item.setCachedQuery(q);
-				item.cacheLabel(PawsClassification.createLabel(q));
+				item.cacheLabel(PawsManager.INSTANCE.createLabel(q));
 				selectedItem = item;
 			}else {
 				MessageDialog.openWarning(getShell(), "Invalid Selection", MessageFormat.format("Selected item {0} cannot be added.  Please select a query.", dmObject.toString()));

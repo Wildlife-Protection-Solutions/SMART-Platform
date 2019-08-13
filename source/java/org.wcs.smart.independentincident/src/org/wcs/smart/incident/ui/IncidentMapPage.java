@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.incident.ui;
 
-import java.awt.Color;
 import java.awt.Point;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,20 +42,8 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.collection.ListFeatureCollection;
-import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.referencing.CRS;
-import org.geotools.styling.Fill;
-import org.geotools.styling.Graphic;
-import org.geotools.styling.LineSymbolizer;
-import org.geotools.styling.Mark;
-import org.geotools.styling.PointSymbolizer;
-import org.geotools.styling.Rule;
-import org.geotools.styling.Stroke;
 import org.geotools.styling.Style;
-import org.geotools.styling.StyleBuilder;
-import org.geotools.styling.StyleFactory;
-import org.geotools.styling.Symbolizer;
-import org.geotools.util.factory.GeoTools;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.catalog.CatalogPlugin;
@@ -70,7 +57,6 @@ import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentFeatureFactory;
@@ -85,6 +71,7 @@ import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.ReprojectUtils;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Incident editor map page
@@ -314,60 +301,11 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	 * @return
 	 */
 	private Style getStylingConfig() {
-		
-		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
-		StyleBuilder sb = new StyleBuilder(sf);
-        
-		Stroke circlestroke = sb.createStroke(new Color(0,0,0), 1);
-		Fill circlefill = sb.createFill(new Color(255,100,100));
-		Mark circlemark = sb.createMark(sb.literalExpression("circle"), circlefill, circlestroke); //$NON-NLS-1$
-		Graphic circleg = sb.createGraphic(null,  circlemark,  null);
-		circleg.setSize(sb.literalExpression(8));
-        PointSymbolizer endpoint = sb.createPointSymbolizer(circleg);
-		
-		Rule rr = sb.createRule(new Symbolizer[] {endpoint});
-		
-		org.geotools.styling.FeatureTypeStyle fts = sf.createFeatureTypeStyle();
-    	fts.setName("Incident Style"); //$NON-NLS-1$
-    	fts.rules().add(rr);
-		
-		Style style = sf.createStyle();
-    	style.featureTypeStyles().add(fts);
-		return style;
+		return SmartUtils.getDefaultWaypointStyle();
 	}
 	
 	private Style getPrjStylingConfig() {
-		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
-		StyleBuilder sb = new StyleBuilder(sf);
-        FilterFactory ff = CommonFactoryFinder.getFilterFactory(GeoTools.getDefaultHints());
-        
-		Stroke linestroke = sb.createStroke(new Color(91, 91, 91), 1, new float[] {5.0f, 2.0f});
-		LineSymbolizer lines = sb.createLineSymbolizer(linestroke);
-		
-		Stroke circlestroke = sb.createStroke(new Color(0,0,0), 1);
-		Fill circlefill = sb.createFill(new Color(255,100,100));
-		Mark circlemark = sb.createMark(sb.literalExpression("circle"), circlefill, circlestroke); //$NON-NLS-1$
-		Graphic circleg = sb.createGraphic(null,  circlemark,  null);
-		circleg.setSize(sb.literalExpression(8));
-        PointSymbolizer endpoint = sb.createPointSymbolizer(circleg);
-		endpoint.setGeometry(ff.function("endPoint", ff.property("geom")));  //$NON-NLS-1$ //$NON-NLS-2$
-		
-		Fill squarefill = sb.createFill(new Color(91, 91, 91));
-		Mark squaremark = sb.createMark(sb.literalExpression("square"), squarefill, null); //$NON-NLS-1$
-		Graphic squareg = sb.createGraphic(null,  squaremark,  null);
-		squareg.setSize(sb.literalExpression(8));
-        PointSymbolizer startpoint = sb.createPointSymbolizer(squareg);
-        startpoint.setGeometry(ff.function("startPoint", ff.property("geom")));  //$NON-NLS-1$ //$NON-NLS-2$
-		
-		Rule rr = sb.createRule(new Symbolizer[] {lines, endpoint, startpoint});
-		
-		org.geotools.styling.FeatureTypeStyle fts = sf.createFeatureTypeStyle();
-    	fts.setName("Projection Style"); //$NON-NLS-1$
-    	fts.rules().add(rr);
-		
-		Style style = sf.createStyle();
-    	style.featureTypeStyles().add(fts);
-		return style;
+		return SmartUtils.getDefaultPrjWaypointStyle();
 	}
 	
 	

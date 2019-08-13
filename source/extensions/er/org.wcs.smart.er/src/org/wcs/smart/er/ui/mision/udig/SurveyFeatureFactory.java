@@ -47,13 +47,13 @@ public class SurveyFeatureFactory {
 	 * @throws SchemaException
 	 */
 	public static SimpleFeatureType createWaypointSchema() throws SchemaException{
-		String spec = "fid:String,id:Integer,date:Date,sampling_unit_id:String,observation:String,comment:String,geom:Point:srid=4326"; //$NON-NLS-1$
+		String spec = "fid:String,id:Integer,date:Date,sampling_unit_id:String,observation:String,comment:String,the_geom:Point:srid=4326"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType("smart." + MissionDataSource.MISSIONWAYPOINT_TYPE, spec); //$NON-NLS-1$
 		return type;
 	}
 	
 	public static SimpleFeatureType createWaypointPrjSchema() throws SchemaException{
-		String spec = "fid:String,id:Integer,date:Date,sampling_unit_id:String,rawx:Double,rawy:Double,distance:Double,bearing:Double,x:Double,y:Double,geom:LineString:srid=4326"; //$NON-NLS-1$
+		String spec = "fid:String,id:Integer,date:Date,sampling_unit_id:String,rawx:Double,rawy:Double,distance:Double,bearing:Double,x:Double,y:Double,the_geom:LineString:srid=4326"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType("smart." + MissionDataSource.MISSIONRAWWAYPOINT_TYPE, spec); //$NON-NLS-1$
 		return type;
 	}
@@ -64,7 +64,7 @@ public class SurveyFeatureFactory {
 	 * @throws SchemaException
 	 */
 	public static SimpleFeatureType createTrackSchema() throws SchemaException{
-		String spec = "fid:String,id:String,date:Date,sampling_unit_id:String,mission_id:String,distance:Double,geom:LineString:srid=4326"; //$NON-NLS-1$
+		String spec = "fid:String,id:String,date:Date,sampling_unit_id:String,mission_id:String,distance:Double,the_geom:LineString:srid=4326"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType("smart." + MissionDataSource.MISSIONTRACK_TYPE, spec); //$NON-NLS-1$
 		return type;
 	}

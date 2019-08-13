@@ -64,6 +64,8 @@ public class SurveyQueryLabelProvider implements ISurveyQueryLabelProvider {
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_TIME){ return Messages.SurveyQueryColumn_WaypointTypeLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_X){ return Messages.SurveyQueryColumn_XLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_Y){ return Messages.SurveyQueryColumn_YLabel;}
+		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_RAWX){ return Messages.SurveyQueryLabelProvider_RawXColumnLabel;}
+		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_RAWY){ return Messages.SurveyQueryLabelProvider_RawYColumnLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION){ return Messages.SurveyQueryColumn_DirectionLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE){ return Messages.SurveyQueryColumn_DistanceLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT){ return Messages.SurveyQueryColumn_CommentLabel;}

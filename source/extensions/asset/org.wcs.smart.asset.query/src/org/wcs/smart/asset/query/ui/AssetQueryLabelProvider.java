@@ -48,8 +48,8 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 			case WAYPOINT_TIME: return Messages.FixedQueryColumn_WaypointTimeColumnName;
 			case WAYPOINT_X: return Messages.FixedQueryColumn_xColumnName;
 			case WAYPOINT_Y: return Messages.FixedQueryColumn_yColumnName;
-			case WAYPOINT_DIRECTION: return Messages.FixedQueryColumn_DirectionColumnName;
-			case WAYPOINT_DISTANCE: return Messages.FixedQueryColumn_DistanceColumnName;
+//			case WAYPOINT_DIRECTION: return Messages.FixedQueryColumn_DirectionColumnName;
+//			case WAYPOINT_DISTANCE: return Messages.FixedQueryColumn_DistanceColumnName;
 			case WAYPOINT_COMMENT: return Messages.FixedQueryColumn_CommentColumnName;
 			case ASSET: return Messages.AssetQueryLabelProvider_AssetsColumnName;
 			case LOCATION: return Messages.AssetQueryLabelProvider_LocationsColumnName;

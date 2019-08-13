@@ -32,7 +32,7 @@ import org.wcs.smart.qa.auto.AutoValidateJob;
 import org.wcs.smart.qa.patrol.routine.PatrolTrackDataProvider;
 import org.wcs.smart.qa.patrol.routine.PatrolWaypointDataProvider;
 import org.wcs.smart.qa.patrol.routine.TrackLocationData;
-import org.wcs.smart.qa.patrol.routine.WaypointLocationData;
+import org.wcs.smart.qa.routine.WaypointLocationData;
 
 /**
  * Hibernate listener for new patrol waypoint and track objects.  Registers

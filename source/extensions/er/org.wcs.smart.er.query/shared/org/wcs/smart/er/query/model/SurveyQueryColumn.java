@@ -83,6 +83,8 @@ public class SurveyQueryColumn extends QueryColumn {
 		WAYPOINT_Y( ColumnType.NUMBER, "waypoint:y"),  //$NON-NLS-1$
 		WAYPOINT_DIRECTION( ColumnType.NUMBER,"waypoint:direction"),  //$NON-NLS-1$
 		WAYPOINT_DISTANCE( ColumnType.NUMBER,"waypoint:distance"),  //$NON-NLS-1$
+		WAYPOINT_RAWX( ColumnType.NUMBER,"waypoint:rawx"),  //$NON-NLS-1$
+		WAYPOINT_RAWY( ColumnType.NUMBER, "waypoint:rawy"),  //$NON-NLS-1$
 		WAYPOINT_COMMENT( ColumnType.STRING,"waypoint:comment"),  //$NON-NLS-1$
 		WAYPOINT_OBSERVER( ColumnType.STRING, "waypoint:observer"),   //$NON-NLS-1$
 		WAYPOINT_LAST_MODIFIED(ColumnType.DATETIME, "waypoint:modified"), //$NON-NLS-1$
@@ -151,7 +153,9 @@ public class SurveyQueryColumn extends QueryColumn {
 				case WAYPOINT_DATE: return new Date(item.getWaypointDateTime().getTime());
 				case WAYPOINT_TIME: return new Time(item.getWaypointDateTime().getTime()); 
 				case WAYPOINT_X: return item.getWaypointX(getProjection()); 
-				case WAYPOINT_Y: return item.getWaypointY(getProjection()); 
+				case WAYPOINT_Y: return item.getWaypointY(getProjection());
+				case WAYPOINT_RAWX: return item.getWaypointRawX(getProjection()); 
+				case WAYPOINT_RAWY: return item.getWaypointRawY(getProjection());
 				case WAYPOINT_DIRECTION: return item.getWaypointDirection(); 
 				case WAYPOINT_DISTANCE: return item.getWaypointDistance(); 
 				case WAYPOINT_COMMENT: return item.getWaypointComment(); 

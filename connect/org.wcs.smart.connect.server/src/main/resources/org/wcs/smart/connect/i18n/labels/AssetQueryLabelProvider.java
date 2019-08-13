@@ -48,8 +48,8 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 			case WAYPOINT_TIME: return Messages.getString("AssetQueryLabelProvider.WpTimeColumnName", l); //$NON-NLS-1$
 			case WAYPOINT_X: return Messages.getString("AssetQueryLabelProvider.WpXColumnName", l); //$NON-NLS-1$
 			case WAYPOINT_Y: return Messages.getString("AssetQueryLabelProvider.WpYColumnName", l); //$NON-NLS-1$
-			case WAYPOINT_DIRECTION: return Messages.getString("AssetQueryLabelProvider.WpDirColumnName", l); //$NON-NLS-1$
-			case WAYPOINT_DISTANCE: return Messages.getString("AssetQueryLabelProvider.WpDisColumnName", l); //$NON-NLS-1$
+//			case WAYPOINT_DIRECTION: return Messages.getString("AssetQueryLabelProvider.WpDirColumnName", l); //$NON-NLS-1$
+//			case WAYPOINT_DISTANCE: return Messages.getString("AssetQueryLabelProvider.WpDisColumnName", l); //$NON-NLS-1$
 			case WAYPOINT_COMMENT: return Messages.getString("AssetQueryLabelProvider.WpCommentColumnName", l); //$NON-NLS-1$
 			case ASSET: return Messages.getString("AssetQueryLabelProvider.AssetsColumnName", l); //$NON-NLS-1$
 			case LOCATION: return Messages.getString("AssetQueryLabelProvider.LocationsColumnName", l); //$NON-NLS-1$

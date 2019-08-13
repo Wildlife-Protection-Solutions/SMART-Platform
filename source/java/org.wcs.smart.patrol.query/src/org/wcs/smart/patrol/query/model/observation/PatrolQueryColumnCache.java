@@ -120,7 +120,9 @@ public class PatrolQueryColumnCache {
 					FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
 					boolean add = true;
 					if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
-						item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+						item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE ||
+						item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWX ||
+						item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWY ){
 						add = patrolOps.getTrackDistanceDirection();
 						
 					}else if(item == FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE||
@@ -138,12 +140,22 @@ public class PatrolQueryColumnCache {
 						
 						if (item == FixedQueryColumn.FixedColumns.WAYPOINT_ID ||
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_X ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_Y ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT)
 							toAdd.setEdit(true);
+						
+						//if we are using distance and direction do not allow editing of x,y
+						if (patrolOps.getTrackDistanceDirection() && (
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWX ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWY ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE)){
+							toAdd.setEdit(true);
+						}
+						if (!patrolOps.getTrackDistanceDirection() && (
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_X ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_Y)) {
+							toAdd.setEdit(true);
+							
 						}
 					}
 				}
@@ -225,7 +237,9 @@ public class PatrolQueryColumnCache {
 					FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
 					boolean add = true;
 					if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
-						item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+						item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE ||
+						item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWX ||
+						item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWY ){
 						add = patrolOps.getTrackDistanceDirection();
 						
 					}else if(item == FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE||
@@ -243,12 +257,22 @@ public class PatrolQueryColumnCache {
 						
 						if (item == FixedQueryColumn.FixedColumns.WAYPOINT_ID ||
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_X ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_Y ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT)
 							toAdd.setEdit(true);
+						
+						//if we are using distance and direction do not allow editing of x,y
+						if (patrolOps.getTrackDistanceDirection() && (
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWX ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWY ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE)){
+							toAdd.setEdit(true);
+						}
+						if (!patrolOps.getTrackDistanceDirection() && (
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_X ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_Y)) {
+							toAdd.setEdit(true);
+							
 						}
 					}
 				}
@@ -299,6 +323,8 @@ public class PatrolQueryColumnCache {
 								boolean add = true;
 								if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X||  
 											item == FixedQueryColumn.FixedColumns.WAYPOINT_Y||
+											item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWX||
+											item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWY||
 											item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT||
 											item == FixedQueryColumn.FixedColumns.WAYPOINT_DATE||
 											item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION||

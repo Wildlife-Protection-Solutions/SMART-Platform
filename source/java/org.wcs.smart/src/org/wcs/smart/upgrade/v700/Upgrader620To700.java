@@ -100,6 +100,8 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 				"GRANT ALL PRIVILEGES ON smart.PATROL_ATTRIBUTE_LIST TO manager", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.PATROL_ATTRIBUTE_VALUE TO manager", //$NON-NLS-1$
 				
+	            "CREATE FUNCTION smart.waypointWithin(x double, y double, distance real, bearing real, x1 double, y1 double, x2 double, y2 double) returns boolean LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.GeometryUtils.waypointWithin' PARAMETER STYLE JAVA NO SQL", //$NON-NLS-1$
+
 		};
 
 		for (String s : sql) {

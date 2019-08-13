@@ -24,8 +24,10 @@ package org.wcs.smart.query.common.model;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -38,6 +40,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
@@ -132,7 +135,11 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 	}
 	
 	private void createColumnTable(Composite parent, Query query){
-		columnViewer = CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
+		Composite outer = new Composite(parent, SWT.NONE);
+		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)outer.getLayoutData()).heightHint = 150;
+		
+		columnViewer = CheckboxTableViewer.newCheckList(outer, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		
 		columnViewer.setContentProvider(ArrayContentProvider.getInstance());
 		columnViewer.setLabelProvider(new LabelProvider(){
@@ -158,7 +165,12 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 			columnViewer.setChecked(col, col.isVisible());
 		}
 		
-		columnViewer.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(columnViewer));		
+		columnViewer.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(columnViewer));
+		
+		TableColumn tc = new TableColumn(columnViewer.getTable(), SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(1));
+		outer.setLayout(layout);
 	}
 
 	protected void updateColumnTableState() {

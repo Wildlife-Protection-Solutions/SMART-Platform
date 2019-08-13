@@ -226,11 +226,11 @@ public class LocationComposite extends AbstractIncidentComposite {
 				projs.add(dbProjection);
 			}
 			cmbProjection.setInput(projs);
-			if (incident.getX() != null){
-				txtX.setText(String.valueOf(incident.getX()));
+			if (incident.getRawX() != null){
+				txtX.setText(String.valueOf(incident.getRawX()));
 			}
-			if (incident.getY() != null){
-				txtY.setText(String.valueOf(incident.getY()));
+			if (incident.getRawY() != null){
+				txtY.setText(String.valueOf(incident.getRawY()));
 			}
 		
 			currentProjection = dbProjection;

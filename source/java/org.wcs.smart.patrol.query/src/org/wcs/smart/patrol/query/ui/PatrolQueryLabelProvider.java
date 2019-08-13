@@ -70,6 +70,8 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case WAYPOINT_TIME: return Messages.FixedQueryColumn_WaypointTimeColumnName;
 			case WAYPOINT_X: return Messages.FixedQueryColumn_xColumnName;
 			case WAYPOINT_Y: return Messages.FixedQueryColumn_yColumnName;
+			case WAYPOINT_RAWX: return Messages.PatrolQueryLabelProvider_RawXColumnName;
+			case WAYPOINT_RAWY: return Messages.PatrolQueryLabelProvider_RawYColumnName;
 			case WAYPOINT_DIRECTION: return Messages.FixedQueryColumn_DirectionColumnName;
 			case WAYPOINT_DISTANCE: return Messages.FixedQueryColumn_DistanceColumnName;
 			case WAYPOINT_COMMENT: return Messages.FixedQueryColumn_CommentColumnName;

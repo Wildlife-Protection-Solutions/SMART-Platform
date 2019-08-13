@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.qa.ui.view;
 
-import java.awt.Color;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.UUID;
@@ -46,11 +45,18 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.referencing.CRS;
+import org.geotools.styling.Fill;
 import org.geotools.styling.Graphic;
+import org.geotools.styling.Mark;
 import org.geotools.styling.PointSymbolizer;
+import org.geotools.styling.Rule;
+import org.geotools.styling.Stroke;
 import org.geotools.styling.Style;
 import org.geotools.styling.StyleBuilder;
+import org.geotools.styling.StyleFactory;
+import org.geotools.styling.Symbolizer;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.project.internal.Map;
@@ -86,6 +92,7 @@ import org.wcs.smart.ui.map.tool.ZoomTool;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for editing waypoint details.
@@ -100,10 +107,16 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 	private Text txtX;
 	private Text txtY;
 	
+	private Text txtDistance, txtDirection;
+	private Label lblDistance, lblDirection;
+	
 	protected Waypoint waypoint = null;
 	
 	private Double originalX = null;
 	private Double originalY = null;
+	
+	private Float originalDistance = null;
+	private Float originalDirection = null;
 	
 	protected Map map;
 	protected MapViewer mapViewer;
@@ -131,7 +144,7 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 	 * 
 	 * @param newPosition
 	 */
-	protected abstract void updateFeature(Coordinate newPosition);
+	protected abstract void updateFeature();
 	
 	/**
 	 * Fire any additional events after saving changes to the waypoint.
@@ -160,14 +173,17 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 	 * does not update the text box values - call updateLabels()
 	 * to update the text box values.
 	 */
-	protected void updateWaypointLocation(Coordinate newPosition){
+	protected void updateWaypointLocation(Coordinate newPosition, Float distance, Float direction){
 		if (isUpdating) return;
 		isUpdating = true;
 		try{
 			setErrorMessage(null);
 			waypoint.setRawX(newPosition.x);
 			waypoint.setRawY(newPosition.y);
-			updateFeature(newPosition);
+			waypoint.setDirection(direction);
+			waypoint.setDistance(distance);
+
+			updateFeature();
 			validate();
 		}finally{
 			isUpdating = false;
@@ -182,7 +198,8 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 	protected void updateLabels(){
 		if (waypoint == null) return;
 		if (txtX.isDisposed()) return;
-		Coordinate display = new Coordinate(waypoint.getX(), waypoint.getY());
+		
+		Coordinate display = new Coordinate(waypoint.getRawX(), waypoint.getRawY());
 		try {
 			display = ReprojectUtils.reproject(display.x, display.y, SmartDB.DATABASE_CRS, getMap().getViewportModel().getCRS());
 		} catch (Exception e) {
@@ -192,6 +209,9 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 		try{
 			if (!txtX.getText().equals(String.valueOf(display.x))) txtX.setText(String.valueOf(display.x));
 			if (!txtY.getText().equals(String.valueOf(display.y))) txtY.setText(String.valueOf(display.y));
+			
+			if (txtDirection != null) txtDirection.setText(String.valueOf(waypoint.getDirection()));
+			if (txtDistance != null) txtDistance.setText(String.valueOf(waypoint.getDistance()));
 		}finally{
 			fireXYChange = true;
 		}
@@ -202,7 +222,7 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 	 * 
 	 */
 	protected void revert(){
-		updateWaypointLocation(new Coordinate(originalX, originalY));
+		updateWaypointLocation(new Coordinate(originalX, originalY), originalDistance, originalDirection);
 		updateLabels();
 	}
 	
@@ -214,12 +234,25 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 		try(Session s = HibernateManager.openSession()){
 			waypoint = (Waypoint) s.get(Waypoint.class, waypointUuid);
 			if (waypoint != null){
-				originalX = waypoint.getX();
-				originalY = waypoint.getY();
+				originalX = waypoint.getRawX();
+				originalY = waypoint.getRawY();
+				originalDirection = waypoint.getDirection();
+				originalDistance = waypoint.getDistance();
 			}else{
 				setErrorMessage(Messages.EditWaypointDetailsDialog_WaypointNotFound);
 				return;
 			}
+		}
+		if (waypoint.getDirection() == null || waypoint.getDistance() == null) {
+			if (txtDirection != null) {
+				txtDirection.dispose();
+				txtDistance.dispose();
+				lblDirection.dispose();
+				lblDistance.dispose();
+				txtDirection = txtDistance = null;
+				lblDirection = lblDistance = null;
+			}
+			txtX.getParent().layout(true);
 		}
 		updateLabels();
 		setTitle(MessageFormat.format(Messages.EditWaypointDetailsDialog_DialogTitle, waypoint.getId(), DateFormat.getDateTimeInstance().format(waypoint.getDateTime())));
@@ -243,10 +276,12 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 			try{
 				s.beginTransaction();
 				Waypoint wp = (Waypoint) s.get(Waypoint.class, waypointUuid);
-				wp.setRawX(waypoint.getX());
-				wp.setRawY(waypoint.getY());
-				waypoint.setRawX(wp.getX());
-				waypoint.setRawY(wp.getY());
+				
+				wp.setRawX(waypoint.getRawX());
+				wp.setRawY(waypoint.getRawY());
+				wp.setDirection(waypoint.getDirection());
+				wp.setDistance(waypoint.getDistance());
+				
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();
@@ -270,7 +305,7 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 		Composite composite = (Composite) super.createDialogArea(parent);
 		
 		Composite coordinateCmp = new Composite(composite, SWT.NONE);
-		coordinateCmp.setLayout(new GridLayout(5, false));
+		coordinateCmp.setLayout(new GridLayout(4, false));
 		coordinateCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(coordinateCmp, SWT.NONE);
@@ -297,6 +332,21 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 		txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtY.addModifyListener(validation);
 		txtY.addListener(SWT.FocusIn, e-> txtY.selectAll());
+		
+		lblDistance = new Label(coordinateCmp, SWT.NONE);
+		lblDistance.setText(Messages.EditWaypointDetailsDialog_DistanceLbl);
+		
+		txtDistance = new Text(coordinateCmp, SWT.BORDER);
+		txtDistance.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtDistance.addModifyListener(validation);
+		
+		lblDirection = new Label(coordinateCmp, SWT.NONE);
+		lblDirection.setText(Messages.EditWaypointDetailsDialog_BearingLbl);
+
+		txtDirection = new Text(coordinateCmp, SWT.BORDER);
+		txtDirection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtDirection.addModifyListener(validation);
+
 		
 		Composite mapComposite = new Composite(composite, SWT.NONE);
 		mapComposite.setLayout(new GridLayout(2, false));
@@ -372,9 +422,19 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 					Double y = Double.valueOf(txtY.getText());
 					Coordinate newC = new Coordinate(x,y);
 					newC = ReprojectUtils.reproject(x, y, getMap().getViewportModelInternal().getCRS(), SmartDB.DATABASE_CRS);
-					updateWaypointLocation(newC);
+					
+					Float distance = null;
+					Float direction = null;
+					if (txtDirection != null) {
+						direction = Float.valueOf(txtDirection.getText());
+						distance = Float.valueOf(txtDistance.getText());
+					}
+					updateWaypointLocation(newC, distance, direction);
+					getButton(IDialogConstants.OK_ID).setEnabled(true);
 				}catch (Exception ex){
+
 					setErrorMessage(Messages.EditWaypointDetailsDialog_ParseError);
+					getButton(IDialogConstants.OK_ID).setEnabled(false);
 				}
 			});			
 			return Status.OK_STATUS;
@@ -420,22 +480,20 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 	 * @return
 	 */
 	protected Style getStylingConfig() {
-		StyleBuilder sb = new StyleBuilder();
-		Graphic g = sb.createGraphic(null,  sb.createMark("circle", Color.RED), null, 1, 10, 0); //$NON-NLS-1$
-		PointSymbolizer ps = sb.createPointSymbolizer(g);
-		return sb.createStyle(ps);
-		
+		return SmartUtils.getDefaultWaypointStyle();
 	}
 	
 	/*
 	 * edit manager for moving waypoint on map
 	 */
 	 private IMapEditManager getEditManager(){
-	    	return new IMapEditManager() {
-				
+	    	
+		 return new IMapEditManager() {
 				@Override
 				public synchronized void moveFeature(Object feature, int x, int y, IViewportModel vm) {
 					if (!(feature instanceof Waypoint)) return ;
+					
+					Waypoint pw = (Waypoint) feature;
 					Coordinate crspx = vm.pixelToWorld(x, y);
 					//convert to lat/long
 					if (!CRS.equalsIgnoreMetadata(vm.getCRS(), SmartDB.DATABASE_CRS)){
@@ -446,25 +504,52 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 							return;
 						}
 					}
-					updateWaypointLocation(crspx);
+					
+					double newx = pw.getRawX();
+					double newy = pw.getRawY();
+					Float newdistance = pw.getDistance();
+					Float newdirection = pw.getDirection();
+					
+					if (pw.getSourceId() == null || pw.getDirection() == null || pw.getDistance() == null) {
+						//we are editing the raw point 
+						newx = crspx.x;
+						newy = crspx.y;
+					}else {
+						//edit the projected point
+						Float[] d = Waypoint.computeDistanceBearing(new Coordinate(pw.getRawX(), pw.getRawY()), crspx);
+						newdistance = d[0];
+						newdirection = d[1];
+					}
+					
+					updateWaypointLocation(new Coordinate(newx, newy), newdistance, newdirection);
 					updateLabels();
 				}
 				
 				@Override
 				public EditPoint findFeature(int x, int y, IViewportModel vm) {
 					try{
-						Coordinate crspx = vm.pixelToWorld(x, y);
-						//convert to lat/long
-						if (!CRS.equalsIgnoreMetadata(vm.getCRS(), SmartDB.DATABASE_CRS)){
-							crspx = ReprojectUtils.reproject(crspx.x, crspx.y, vm.getCRS(), SmartDB.DATABASE_CRS);
-						}
-
+						//check projected point
+						boolean hasDistanceDirection = waypoint.getDirection() != null && waypoint.getDistance() != null;
 						Coordinate pnt = ReprojectUtils.reproject(waypoint.getX(), waypoint.getY(), SmartDB.DATABASE_CRS, vm.getCRS());
 						java.awt.Point exitPnt = vm.worldToPixel(pnt);
-						if (Math.abs(exitPnt.getX() - x) > 5 || Math.abs(exitPnt.getY() - y) > 5) return null;
-
-						return new EditPoint(exitPnt, waypoint, null);
+						if (Math.abs(exitPnt.getX() - x) <= 5 && Math.abs(exitPnt.getY() - y) <= 5) return new EditPoint(exitPnt, waypoint, hasDistanceDirection ? Messages.EditWaypointDetailsDialog_UpdatesddTooltip : null);
 						
+						if (!hasDistanceDirection) return null;
+						
+						//check raw point
+						pnt = ReprojectUtils.reproject(waypoint.getRawX(), waypoint.getRawY(), SmartDB.DATABASE_CRS, vm.getCRS());
+						exitPnt = vm.worldToPixel(pnt);
+						if (Math.abs(exitPnt.getX() - x) <= 5 && Math.abs(exitPnt.getY() - y) <= 5) {
+							Waypoint temp = new Waypoint();
+							temp.setRawX(waypoint.getRawX());
+							temp.setRawY(waypoint.getRawY());
+							temp.setDirection(waypoint.getDirection());
+							temp.setDistance(waypoint.getDistance());
+							temp.setSourceId(null);
+							return new EditPoint(exitPnt, temp, Messages.EditWaypointDetailsDialog_updatesRawLocationtt);
+						}
+						
+						return null;
 					}catch (Exception ex){
 						QaPlugIn.log(ex.getMessage(), ex);
 						return null;
@@ -482,4 +567,26 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 				}
 			};
 	    }
+	 
+	 public static Style getOtherWaypointStyle() {
+			StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+			StyleBuilder sb = new StyleBuilder(sf);
+	       
+			Stroke starstroke = sb.createStroke(new java.awt.Color(20,100,50), 1);
+			Fill starfill = sb.createFill(new java.awt.Color(40,200,100));
+			Mark starmark = sb.createMark(sb.literalExpression("circle"), starfill, starstroke); //$NON-NLS-1$
+			Graphic starg = sb.createGraphic(null,  starmark,  null);
+			starg.setSize(sb.literalExpression(6));
+	        PointSymbolizer endpoint = sb.createPointSymbolizer(starg);
+			
+			Rule rr = sb.createRule(new Symbolizer[] {endpoint});
+			
+			org.geotools.styling.FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+	    	fts.setName("Waypoint Style"); //$NON-NLS-1$
+	    	fts.rules().add(rr);
+			
+			Style style = sf.createStyle();
+	    	style.featureTypeStyles().add(fts);
+			return style;
+		}
 }

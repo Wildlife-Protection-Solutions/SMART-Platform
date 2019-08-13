@@ -44,6 +44,7 @@ import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.patrol.ILabelProvider;
 import org.wcs.smart.qa.patrol.ILabelProvider.Key;
 import org.wcs.smart.qa.routine.LocationRoutineType;
+import org.wcs.smart.qa.routine.WaypointLocationData;
 
 /**
  * Data provider for patrol waypoints.

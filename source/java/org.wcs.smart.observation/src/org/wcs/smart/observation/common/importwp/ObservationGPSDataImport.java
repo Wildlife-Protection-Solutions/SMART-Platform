@@ -270,8 +270,7 @@ public class ObservationGPSDataImport extends GPSDataImport{
 					c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY),
 					c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
 
-			Coordinate c = new Coordinate(w.getX(), w.getY(), c2.getTime()
-					.getTime());
+			Coordinate c = new Coordinate(w.getRawX(), w.getRawY(), c2.getTime().getTime());
 			cs.add(c);
 		}
 

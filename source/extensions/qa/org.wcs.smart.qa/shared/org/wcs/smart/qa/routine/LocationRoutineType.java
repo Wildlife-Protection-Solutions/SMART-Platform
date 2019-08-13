@@ -210,10 +210,13 @@ public class LocationRoutineType implements IQaRoutineType {
 
 				if (wp.getType() == Type.POINT){
 					if (toCheck == null) toCheck = preprocess(g);
+					
+					//validate original point
 					boolean contains = false;
 					for(ProcessedPolygon pp : toCheck){
-						if (pp.isInside(wp.getPoint())){
+						if (pp.isInside(wp.getPoint())) {
 							contains = true;
+							break;
 						}
 					}
 					if (!contains){
@@ -236,6 +239,38 @@ public class LocationRoutineType implements IQaRoutineType {
 						}catch (Exception ex){
 							ex.printStackTrace();
 							error.setErrorDescription(ILabelProvider.getLabel(Key.LocationRoutineType_WpOutsideArea, task.getLocale()));
+						}
+					}else if (wp.getProjectedPoint() != null) {
+						//validate projected point
+						contains = false;
+						for(ProcessedPolygon pp : toCheck){
+							if (pp.isInside(wp.getProjectedPoint())) {
+								contains = true;
+								break;
+							}
+						}
+						if (!contains){
+							QaError error = new QaError();
+							error.setDataProviderId(task.getDataProvider().getId());
+							error.setConservationArea(task.getConservationArea());
+							error.setErrorDescription(ILabelProvider.getLabel(Key.LocationRoutineType_WpOutsideArea, task.getLocale()));
+							error.setErrorId( task.getDataProvider().getFeatureId(session, x, task.getLocale()));
+							error.setSourceId( task.getDataProvider().getFeatureSource(session, x));
+							error.setQaRoutine(routine);
+							error.setStatus(QaError.Status.NEW);
+							error.setValidateDate(new Date());
+							errors.add(error);
+							error.setGeometryObject(GeometryFactoryProvider.getFactory().createPoint(wp.getProjectedPoint()));
+							
+							try{
+								Coordinate[] minPnts = DistanceOp.nearestPoints(g, GeometryFactoryProvider.getFactory().createPoint(wp.getProjectedPoint()));
+								double distancekm = JTS.orthodromicDistance(minPnts[0], minPnts[1], GeometryUtils.SMART_CRS) / 1000.0;									
+								error.setErrorDescription(MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_PrjWpOutsideArea, task.getLocale()), DISTANCE_FORMATTER.format(distancekm)));
+										
+							}catch (Exception ex){
+								ex.printStackTrace();
+								error.setErrorDescription(ILabelProvider.getLabel(Key.LocationRoutineType_WpOutsideArea, task.getLocale()));
+							}
 						}
 					}
 						

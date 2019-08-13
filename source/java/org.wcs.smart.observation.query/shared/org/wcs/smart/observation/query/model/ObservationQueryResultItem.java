@@ -74,7 +74,6 @@ public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptab
 	
 	private UUID observationUuid;
 	
-
 	/**
 	 * the waypoint last modified date
 	 * @param lastModified
@@ -215,13 +214,62 @@ public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptab
 	}
 	
 	/**
-	 * @return waypoint x (longitude) position
+	 * Return the raw x location associated with the waypoint in the 
+	 * provided projection. 
+	 * @param crs optional if null the lat/long value will be returned
+	 * @return
 	 */
-	public double getWaypointX(CoordinateReferenceSystem crs) {
+	public double getWaypointRawX(CoordinateReferenceSystem crs) {
 		if (crs == null) return waypointX;
 		return ReprojectUtils.transform(waypointX, waypointY, crs).getX();
 	}
+	
 	/**
+	 * Return the raw y location associated with the waypoint in the 
+	 * provided projection. 
+	 * @param crs optional if null the lat/long value will be returned
+	 * @return
+	 */
+	public double getWaypointRawY(CoordinateReferenceSystem crs) {
+		if (crs == null) return waypointY;
+		return ReprojectUtils.transform(waypointX, waypointY, crs).getY();
+	}
+	
+	
+	/**
+	 * @param crs options - if null the lat/long value will be returned.
+	 * 
+	 * @return waypoint x (longitude) position  If a distance/direction value is
+	 * associated with this waypoint then this returns the projected value otherwise
+	 * it will return the original value.
+	 * 
+	 */
+	public double getWaypointX(CoordinateReferenceSystem crs) {
+		if (waypointDistance == null || waypointDirection == null) return getWaypointRawX(crs);
+		
+		Coordinate prj = Waypoint.projectPoint(new Coordinate(waypointX, waypointY), waypointDistance, waypointDirection); 		
+		if (crs == null) return prj.x;
+		return ReprojectUtils.transform(prj.x, prj.y, crs).getX();
+	}
+	
+	/**
+	 * @param crs options - if null the lat/long value will be returned.
+	 * 
+	 * @return waypoint y (latitude) position  If a distance/direction value is
+	 * associated with this waypoint then this returns the projected value otherwise
+	 * it will return the original value.
+	 * 
+	 */
+	public double getWaypointY(CoordinateReferenceSystem crs) {
+		if (waypointDistance == null || waypointDirection == null) return getWaypointRawY(crs);
+		
+		Coordinate prj = Waypoint.projectPoint(new Coordinate(waypointX, waypointY), waypointDistance, waypointDirection); 		
+		if (crs == null) return prj.y;
+		return ReprojectUtils.transform(prj.x, prj.y, crs).getY();
+	}
+	
+	/**
+	 * Sets the RAW waypoint location value
 	 * @param waypointX waypoint y (longitude)
 	 */
 	public void setWaypointX(double waypointX) {
@@ -230,13 +278,7 @@ public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptab
 	
 	
 	/**
-	 * @return the waypoint y (latitude)
-	 */
-	public double getWaypointY(CoordinateReferenceSystem crs) {
-		if (crs == null) return waypointY;
-		return ReprojectUtils.transform(waypointX, waypointY, crs).getY();
-	}
-	/**
+	 * Sets the RAW waypoint location value 
 	 * @param waypointY the waypoint y (latitude)
 	 */
 	public void setWaypointY(double waypointY) {

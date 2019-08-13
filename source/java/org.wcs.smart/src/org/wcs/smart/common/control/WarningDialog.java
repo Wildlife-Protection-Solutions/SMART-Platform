@@ -90,6 +90,7 @@ public class WarningDialog extends MessageDialog {
 		return super.getImage();
 	}
 	
+	@Override
     protected Control createCustomArea(Composite parent) {
     	Text txtWarnings = new Text(parent, SWT.MULTI | SWT.V_SCROLL | SWT.BORDER | SWT.H_SCROLL);
     	txtWarnings.setEditable(false);

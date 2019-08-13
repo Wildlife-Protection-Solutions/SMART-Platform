@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -98,6 +97,7 @@ import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.model.QaRoutineParameter;
 import org.wcs.smart.qa.routine.ValidationTask;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
+import org.wcs.smart.ui.SectionHeader;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -117,12 +117,11 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 	private ProgressAreaComposite progressComposite;
 	private Label infoLabel;
 	
-	private Font boldFont, normalFont;
-	
-	private StackPanelItem progressStackItem;
-	private StackPanelItem optionsStackItem;
-	private StackPanelItem resultsStackItem;
-	
+	private Font boldFont;
+	private Composite optionsPanel, resultsPanel;
+	private Composite progressPanel, resultsTablePanel;
+	private SectionHeader header;
+
 	private ValidationEngine lastValidationEngine;
 
 	private FormToolkit toolkit = null;
@@ -225,8 +224,10 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			infoLabel.dispose();
 			infoLabel = null;
 		}
+		selectResults();
 		progressComposite.setVisible(true);
-		progressStackItem.show();
+		((StackLayout)resultsPanel.getLayout()).topControl = progressPanel;
+		resultsPanel.layout();
 	}
 	
 	public void setResults(Collection<QaError> results){
@@ -236,8 +237,10 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			}
 		}
 		super.setResults(results);
-		resultsStackItem.show();
-	}	
+		selectResults();
+		((StackLayout)resultsPanel.getLayout()).topControl = resultsTablePanel;
+		resultsPanel.layout();
+	}
 	
 	/**
 	 * @see org.eclipse.ui.part.EditorPart#init(org.eclipse.ui.IEditorSite, org.eclipse.ui.IEditorInput)
@@ -272,54 +275,38 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		form.setText(Messages.ManualResultsEditor_FormName);		
 		form.getBody().setLayout(new GridLayout());
 	
-		Composite header = toolkit.createComposite(form.getBody());
+		Composite headerMain = toolkit.createComposite(form.getBody(), SWT.NONE);
+		headerMain.setLayout(new GridLayout());
+		headerMain.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)headerMain.getLayout()).marginWidth = 0;
+		((GridLayout)headerMain.getLayout()).marginHeight = 0;
+		
+		header = new SectionHeader(headerMain, SWT.NONE,
+				new String[] { Messages.ManualResultsEditor_OptionsHeaderLbl,Messages.ManualResultsEditor_ResultsHeaderLbl},
+				new Listener[] {
+						e->{
+							((StackLayout)stackPanel.getLayout()).topControl = optionsPanel;
+							stackPanel.layout();
+						},
+						e->{
+							((StackLayout)stackPanel.getLayout()).topControl = resultsPanel;
+							stackPanel.layout();
+						}
+				});
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		header.setLayout(new GridLayout(3, false));
-		((GridLayout)header.getLayout()).horizontalSpacing = 10;
-		WidgetElement.setCSSClass(header, "SMARTSection");
-		//((GridLayout)header.getLayout()).marginHeight = 8;
-//		header.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
-		
-		Hyperlink lOptions = toolkit.createHyperlink(header, Messages.ManualResultsEditor_OptionsHeaderLbl, SWT.NONE);
-		Hyperlink lResults = toolkit.createHyperlink(header, Messages.ManualResultsEditor_ResultsHeaderLbl, SWT.NONE);
-		Label spacer = toolkit.createLabel(header, ""); //$NON-NLS-1$
-		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		normalFont = lOptions.getFont();
-		FontData fd = normalFont.getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		boldFont = new Font(lOptions.getDisplay(), fd);
-		lOptions.addListener(SWT.Dispose, e->boldFont.dispose());
-		
-		lOptions.setBackground(header.getBackground());
-		lResults.setBackground(header.getBackground());
-		spacer.setBackground(header.getBackground());
-		
-		lOptions.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				optionsStackItem.show();
-			}
-		});
-		
-		lResults.addHyperlinkListener(new HyperlinkAdapter() {
-
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				resultsStackItem.show();
-			}
-		});
-
-		
+			
 		stackPanel = toolkit.createComposite(form.getBody(), SWT.NONE);
 		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		stackPanel.setLayout(new StackLayout());
 		
-		Composite optionsPanel = toolkit.createComposite(stackPanel);
+		optionsPanel = toolkit.createComposite(stackPanel);
 		optionsPanel.setLayout(new GridLayout());
 		createParameterArea(optionsPanel);
 		
-		Composite progressPanel = toolkit.createComposite(stackPanel);
+		resultsPanel = toolkit.createComposite(stackPanel);
+		resultsPanel.setLayout(new StackLayout());
+		
+		progressPanel = toolkit.createComposite(resultsPanel);
 		progressPanel.setLayout(new GridLayout());
 		infoLabel = toolkit.createLabel(progressPanel, Messages.ManualResultsEditor_InitialMessage);
 		
@@ -327,21 +314,25 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		progressComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		progressComposite.setVisible(false);
 		
-		Composite resultsPanel = toolkit.createComposite(stackPanel);
-		resultsPanel.setLayout(new GridLayout());
-		((GridLayout)resultsPanel.getLayout()).marginWidth = 0;
-		((GridLayout)resultsPanel.getLayout()).marginHeight = 0;
-		
-		resultsStackItem = new StackPanelItem(lResults, resultsPanel);
-		optionsStackItem = new StackPanelItem(lOptions, optionsPanel);
-		progressStackItem = new StackPanelItem(lResults, progressPanel);
+		resultsTablePanel = toolkit.createComposite(resultsPanel);
+		resultsTablePanel.setLayout(new GridLayout());
+		((GridLayout)resultsTablePanel.getLayout()).marginWidth = 0;
+		((GridLayout)resultsTablePanel.getLayout()).marginHeight = 0;
 
-		super.createPartControl(resultsPanel);
+		((StackLayout)resultsPanel.getLayout()).topControl = progressPanel;
 		
-		optionsStackItem.show();
+		super.createPartControl(resultsTablePanel);
+		
+		selectOptions();
+	}
+	
+	private void selectOptions() {
+		header.selectPanel(0);
 	}
 
-
+	private void selectResults() {
+		header.selectPanel(1);
+	}
 	
 	@Override
     public void dispose() {
@@ -562,6 +553,10 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 				updateRoutineDetails();
 			}
 		});
+		FontData fd = detailsComposite.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		boldFont = new Font(detailsComposite.getDisplay(), fd);
+		detailsComposite.addListener(SWT.Dispose, e->boldFont.dispose());
 		
 		//fix the size of the description column
 		tableArea.addListener(SWT.Resize, e->{
@@ -721,27 +716,27 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		public String getParameterDescription(){ return parameterDescription; }
 	}
 	
-	private class StackPanelItem{
-		Hyperlink  lblHeader;
-		Composite control;
-		
-		public StackPanelItem(Hyperlink  lblHeader, Composite control){
-			this.lblHeader = lblHeader;
-			this.control = control;
-		}
-		
-		public void show(){
-			for (Control c : lblHeader.getParent().getChildren()){
-				c.setFont(normalFont);
-			}
-			lblHeader.setFont(boldFont);
-			if (tblResults.getInput() == null && this == resultsStackItem){
-				((StackLayout)stackPanel.getLayout()).topControl = progressStackItem.control;
-			}else{
-				((StackLayout)stackPanel.getLayout()).topControl = this.control;
-			}
-			lblHeader.getParent().layout();
-			stackPanel.layout();
-		}
-	}
+//	private class StackPanelItem{
+//		Hyperlink  lblHeader;
+//		Composite control;
+//		
+//		public StackPanelItem(Hyperlink  lblHeader, Composite control){
+//			this.lblHeader = lblHeader;
+//			this.control = control;
+//		}
+//		
+//		public void show(){
+//			for (Control c : lblHeader.getParent().getChildren()){
+//				c.setFont(normalFont);
+//			}
+//			lblHeader.setFont(boldFont);
+//			if (tblResults.getInput() == null && this == resultsStackItem){
+//				((StackLayout)stackPanel.getLayout()).topControl = progressStackItem.control;
+//			}else{
+//				((StackLayout)stackPanel.getLayout()).topControl = this.control;
+//			}
+//			lblHeader.getParent().layout();
+//			stackPanel.layout();
+//		}
+//	}
 }

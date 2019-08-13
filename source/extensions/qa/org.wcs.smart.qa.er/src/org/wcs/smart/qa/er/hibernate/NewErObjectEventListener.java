@@ -31,7 +31,7 @@ import org.wcs.smart.qa.SingleItemDataProvider;
 import org.wcs.smart.qa.auto.AutoValidateJob;
 import org.wcs.smart.qa.er.ErWaypointDataProvider;
 import org.wcs.smart.qa.er.TrackLocationData;
-import org.wcs.smart.qa.er.WaypointLocationData;
+import org.wcs.smart.qa.routine.WaypointLocationData;
 
 
 /**

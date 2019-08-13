@@ -41,6 +41,8 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
 import org.wcs.smart.paws.model.PawsRun;
+import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.util.UuidUtils;
 
 
@@ -52,6 +54,10 @@ import org.wcs.smart.util.UuidUtils;
  */
 public enum PawsManager {
 	INSTANCE;
+	
+	public String createLabel(Query q) {
+		return q.getName() + " (" + QueryTypeManager.INSTANCE.findQueryType(q.getTypeKey()).getGuiName() + ")";
+	}
 	
 	public void deleteConfigurations(List<PawsConfiguration> configurations, IEventBroker broker) throws Exception{
 		

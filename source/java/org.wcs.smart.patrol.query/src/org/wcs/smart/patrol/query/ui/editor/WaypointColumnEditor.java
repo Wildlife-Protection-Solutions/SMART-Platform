@@ -55,6 +55,10 @@ public class WaypointColumnEditor extends AbstractQueryColumnEditor {
 			return getDoubleCellEditor(false);
 		case WAYPOINT_Y:
 			return getDoubleCellEditor(false);
+		case WAYPOINT_RAWX:
+			return getDoubleCellEditor(false);
+		case WAYPOINT_RAWY:
+			return getDoubleCellEditor(false);
 		default:
 			return null;
 		}

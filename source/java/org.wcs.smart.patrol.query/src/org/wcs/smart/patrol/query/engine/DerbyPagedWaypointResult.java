@@ -297,17 +297,33 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 							break;
 						case WAYPOINT_X:
 							if (value instanceof Double) {
-								if (!value.equals(wp.getX())) {
+								if (!value.equals(wp.getRawX())) {
 									change = true;
-									updateWaypointPosition(wp, (Double) value, wp.getY(), s);
+									updateWaypointPosition(wp, (Double) value, wp.getRawY(), wp.getDistance(), wp.getDirection(), s);
 								}
 							}
 							break;
 						case WAYPOINT_Y:
 							if (value instanceof Double) {
-								if (!value.equals(wp.getX())) {
+								if (!value.equals(wp.getRawY())) {
 									change = true;
-									updateWaypointPosition(wp, wp.getX(), (Double) value, s);
+									updateWaypointPosition(wp, wp.getRawX(), (Double) value, wp.getDistance(), wp.getDirection(), s);
+								}
+							}
+							break;
+						case WAYPOINT_RAWX:
+							if (value instanceof Double) {
+								if (!value.equals(wp.getRawX())) {
+									change = true;
+									updateWaypointPosition(wp, (Double) value, wp.getRawY(), wp.getDistance(), wp.getDirection(), s);
+								}
+							}
+							break;
+						case WAYPOINT_RAWY:
+							if (value instanceof Double) {
+								if (!value.equals(wp.getRawY())) {
+									change = true;
+									updateWaypointPosition(wp, wp.getRawX(), (Double) value, wp.getDistance(), wp.getDirection(), s);
 								}
 							}
 							break;
@@ -346,13 +362,17 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		q.executeUpdate();
 	}
 	
-	private void updateWaypointPosition(Waypoint wp, double newX, double newY, Session session){
+	private void updateWaypointPosition(Waypoint wp, double newX, double newY, Float distance, Float direction, Session session){
 		wp.setRawX(newX);
 		wp.setRawY(newY);
+		wp.setDirection(direction);
+		wp.setDistance(distance);
 		
-		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_x = :x, wp_y = :y WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_x = :x, wp_y = :y, wp_distance = :distance, wp_direction = :direction WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		q.setParameter("x", newX); //$NON-NLS-1$
 		q.setParameter("y", newY); //$NON-NLS-1$
+		q.setParameter("distance", distance, org.hibernate.type.FloatType.INSTANCE); //$NON-NLS-1$
+		q.setParameter("direction", direction, org.hibernate.type.FloatType.INSTANCE); //$NON-NLS-1$
 		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
 		
@@ -456,7 +476,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 	
 	
 	@Override
-	public boolean updateWaypointPosition(PatrolQueryResultItem item, Double x, Double y) throws Exception{
+	public boolean updateWaypointPosition(PatrolQueryResultItem item, Double x, Double y, Float distance, Float direction) throws Exception{
 		Waypoint wp = null;
 		Patrol p = null;
 		boolean change = false;
@@ -469,7 +489,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 					if (pw != null) {
 						p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
 						p.equals(p); //necessary for using outside session
-						updateWaypointPosition(wp, x, y, s);
+						updateWaypointPosition(wp, x, y, distance, direction, s);
 						change = true;
 					}
 				}
@@ -500,17 +520,11 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT * FROM "); //$NON-NLS-1$
 		sb.append(queryTempTable);
-		sb.append(" WHERE wp_x >= "); //$NON-NLS-1$
-		sb.append(Math.min(x1,x2));
-		sb.append(" AND wp_x <= "); //$NON-NLS-1$
-		sb.append(Math.max(x1,x2));
-		sb.append(" AND wp_y >= "); //$NON-NLS-1$
-		sb.append(Math.min(y1,y2));
-		sb.append(" AND wp_y <= "); //$NON-NLS-1$
-		sb.append(Math.max(y1,y2));
+		sb.append(" WHERE "); //$NON-NLS-1$
+		sb.append(" smart.waypointWithin(wp_x, wp_y, wp_distance, wp_direction,"); //$NON-NLS-1$
+		sb.append(x1 + "," + y1 + "," + x2 + "," + y2 +")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		
 		List<IResultItem> items = new ArrayList<IResultItem>();
-		
 		
 		try(Session session = HibernateManager.openSession()){
 			session.doWork(new Work(){
@@ -522,7 +536,6 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 						items.add(item);
 					}
 				}
-				
 			});
 		}catch (Exception ex){
 			PatrolQueryPlugIn.log(ex.getMessage(), ex);

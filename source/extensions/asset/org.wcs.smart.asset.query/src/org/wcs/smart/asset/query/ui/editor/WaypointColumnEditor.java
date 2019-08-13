@@ -43,10 +43,10 @@ public class WaypointColumnEditor extends AbstractQueryColumnEditor {
 		switch (((FixedQueryColumn)queryColumn).getColumn()) {
 		case WAYPOINT_COMMENT:
 			return getTextCellEditor();
-		case WAYPOINT_DIRECTION:
-			return getDoubleCellEditor(true);
-		case WAYPOINT_DISTANCE:
-			return getDoubleCellEditor(true);
+//		case WAYPOINT_DIRECTION:
+//			return getDoubleCellEditor(true);
+//		case WAYPOINT_DISTANCE:
+//			return getDoubleCellEditor(true);
 		case WAYPOINT_ID:
 			return getIntegerCellEditor();
 		case WAYPOINT_TIME:

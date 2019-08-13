@@ -159,7 +159,7 @@ public abstract class QueryResultsTable {
 				((QueryColumnLabelProvider)c.getLabelProvider()).setEditMode(editMode);
 			}
 			
-			if (editMode){
+			if (editMode && c.getColumn().canEdit()){
 				EditingSupport support = getEditingSupport(c.getTableColumn().getViewer(), c.getColumn());
 				if (support != null){
 					c.getTableColumn().setEditingSupport(support);

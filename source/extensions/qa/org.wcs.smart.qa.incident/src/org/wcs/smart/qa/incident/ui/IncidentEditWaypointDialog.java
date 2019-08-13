@@ -30,6 +30,7 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
@@ -39,6 +40,9 @@ import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IResolve;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.catalog.memory.MemoryServiceExtensionImpl;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
@@ -49,11 +53,13 @@ import org.opengis.filter.Filter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentFeatureFactory;
+import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.incident.internal.Messages;
 import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for editing independent incidents.
@@ -63,9 +69,9 @@ import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
  */
 public class IncidentEditWaypointDialog extends EditWaypointDetailsDialog {
 
-	private Waypoint editWaypoint;
 	private SimpleFeatureType wpSchema;
 	private FeatureStore<SimpleFeatureType, SimpleFeature> editStore;
+	private FeatureStore<SimpleFeatureType, SimpleFeature> prjStore;
 	
 	public IncidentEditWaypointDialog(Shell parentShell, UUID wpUuid) {
 		super(parentShell, wpUuid);
@@ -77,16 +83,24 @@ public class IncidentEditWaypointDialog extends EditWaypointDetailsDialog {
 	}
 	
 	@Override
-	protected void updateFeature(Coordinate newPosition){
+	protected void updateFeature(){
 		try {
-			editWaypoint.setRawX(newPosition.x);
-			editWaypoint.setRawY(newPosition.y);
 			try{
 				editStore.removeFeatures(Filter.INCLUDE);
 			}catch (ConcurrentModificationException ex){
 				editStore.removeFeatures(Filter.INCLUDE);
 			}
-			editStore.addFeatures(DataUtilities.collection(Collections.singletonList(IncidentFeatureFactory.createSimpleIncidentFeature(wpSchema, editWaypoint))));
+			editStore.addFeatures(DataUtilities.collection(Collections.singletonList(IncidentFeatureFactory.createSimpleIncidentFeature(wpSchema, waypoint))));
+			if (prjStore != null) {
+				try{
+					prjStore.removeFeatures(Filter.INCLUDE);
+				}catch (ConcurrentModificationException ex){
+					prjStore.removeFeatures(Filter.INCLUDE);
+				}
+				prjStore.addFeatures(DataUtilities.collection(Collections.singletonList(IncidentFeatureFactory.createSimpleIncidentFeature(prjStore.getSchema(), waypoint))));
+			}
+			
+			
 			getMap().getRenderManager().refresh(null);
 		} catch (IOException e) {
 			QaPlugIn.log(e.getMessage(), e);
@@ -97,14 +111,14 @@ public class IncidentEditWaypointDialog extends EditWaypointDetailsDialog {
 	@Override
 	protected void initBackgroundLayers() {
 		
+		
 		List<IGeoResource> referenceLayers = new ArrayList<>();	
 		IGeoResource editResource = null;
+		IGeoResource prjResource = null;
 		ReferencedEnvelope zoomEnv = null;	
-		
 		
 		try(Session s = HibernateManager.openSession()){
 			Waypoint pw = (Waypoint) s.get(Waypoint.class, waypointUuid);
-			editWaypoint = pw;
 			if (pw == null){
 				setErrorMessage(Messages.IncidentEditWaypointDialog_WpNotFound);
 				return;
@@ -122,6 +136,21 @@ public class IncidentEditWaypointDialog extends EditWaypointDetailsDialog {
 				editStore = editResource.resolve(FeatureStore.class, new NullProgressMonitor());
 				editStore.addFeatures(DataUtilities.collection(Collections.singletonList(editFeature)));
 				referenceLayers.add(editResource);
+				
+				
+				if (pw.getDirection() != null && pw.getDistance() != null) {
+					SimpleFeatureType ftype = IncidentFeatureFactory.createSimpleIncidentSchema(IncidentFeatureFactory.SMART_POINT_PRJ_TYPE_NAME);
+					SimpleFeature sfeature = IncidentFeatureFactory.createSimpleIncidentFeature(ftype, pw);
+					prjResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(ftype);
+					prjStore = prjResource.resolve(FeatureStore.class, new NullProgressMonitor());
+					prjStore.addFeatures(DataUtilities.collection(Collections.singletonList(sfeature)));
+					referenceLayers.add(prjResource);
+					
+					zoomEnv.expandToInclude(new Coordinate(pw.getRawX(), pw.getRawY()));
+					zoomEnv.expandBy(zoomEnv.getWidth() * 0.5);
+				}
+				
+				
 			}catch (Exception ex){
 				QaPlugIn.log(ex.getMessage(), ex);
 			}
@@ -130,7 +159,22 @@ public class IncidentEditWaypointDialog extends EditWaypointDetailsDialog {
 		}
 		
 		IGeoResource eResource = editResource;
+		IGeoResource pResource = prjResource;
 		ReferencedEnvelope eZoom = zoomEnv;
+		
+		getShell().addListener(SWT.Dispose, e->{
+			List<IResolve> items = CatalogPlugin.getDefault().getLocalCatalog().find(MemoryServiceExtensionImpl.URL, new NullProgressMonitor());
+			for (IResolve i : items) {
+				if (i.canResolve(IService.class)) {
+					try {
+						CatalogPlugin.getDefault().getLocalCatalog().remove(i.resolve(IService.class, new NullProgressMonitor()));
+					} catch (Exception e1) {
+						IncidentPlugIn.log(e1.getMessage(), e1);
+					}
+				}
+			}
+		});
+		
 		if (!referenceLayers.isEmpty()){
 			AddLayersCommand cmd = new AddLayersCommand(referenceLayers){
 				 public void run( IProgressMonitor monitor ) throws Exception {
@@ -139,6 +183,8 @@ public class IncidentEditWaypointDialog extends EditWaypointDetailsDialog {
 						 if (l.getGeoResource().getIdentifier().equals(eResource.getIdentifier())){
 							 Style style = getStylingConfig();
 							 l.getStyleBlackboard().put(SLDContent.ID, style);
+						 }else if (pResource != null && l.getGeoResource().getIdentifier().equals(pResource.getIdentifier())) {
+							 l.getStyleBlackboard().put(SLDContent.ID, SmartUtils.getDefaultPrjWaypointStyle());
 						 }
 					 }
 					 if (eZoom != null) getMap().sendCommandASync(new SetViewportBBoxCommand(new ReferencedEnvelope(eZoom)));
@@ -148,5 +194,4 @@ public class IncidentEditWaypointDialog extends EditWaypointDetailsDialog {
 			getMap().sendCommandASync(cmd);
 		}
 	}
-	
 }

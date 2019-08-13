@@ -96,7 +96,7 @@ public class SaveAsReportHandler {
 				
 				session.save(report);
 				
-				Files.copy(ReportManager.getPath(tocopy), ReportManager.getPath(report));
+				Files.copy(tocopy.getFullPath(), report.getFullPath());
 				
 				session.getTransaction().commit();
 			}catch (Exception ex) {

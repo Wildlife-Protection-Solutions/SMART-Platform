@@ -25,7 +25,9 @@ public class Messages extends NLS {
 	public static String EditRoutineDialog_ParametersTab;
 	public static String EditRoutineDialog_SaveError;
 	public static String EditRoutineDialog_ShellTitle;
+	public static String EditWaypointDetailsDialog_BearingLbl;
 	public static String EditWaypointDetailsDialog_DialogTitle;
+	public static String EditWaypointDetailsDialog_DistanceLbl;
 	public static String EditWaypointDetailsDialog_JobName;
 	public static String EditWaypointDetailsDialog_MapName;
 	public static String EditWaypointDetailsDialog_ParseError;
@@ -34,6 +36,8 @@ public class Messages extends NLS {
 	public static String EditWaypointDetailsDialog_SaveError;
 	public static String EditWaypointDetailsDialog_ShellMessage;
 	public static String EditWaypointDetailsDialog_ShellTitle;
+	public static String EditWaypointDetailsDialog_UpdatesddTooltip;
+	public static String EditWaypointDetailsDialog_updatesRawLocationtt;
 	public static String EditWaypointDetailsDialog_WaypointNotFound;
 	public static String EditWaypointDetailsDialog_XLabel;
 	public static String EditWaypointDetailsDialog_YLabel;
@@ -82,6 +86,7 @@ public class Messages extends NLS {
 	public static String QaLabelProvider_LocationWktParamLabel;
 	public static String QaLabelProvider_LocationWpOutsideArea;
 	public static String QaLabelProvider_LocationWpOutsideArea2;
+	public static String QaLabelProvider_PrjWpOutsideArea;
 	public static String QaLabelProvider_QaServiceDescription;
 	public static String QaLabelProvider_QaServiceName;
 	public static String QaLabelProvider_StatusDeleted;

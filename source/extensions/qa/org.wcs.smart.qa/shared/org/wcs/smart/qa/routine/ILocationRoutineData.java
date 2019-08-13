@@ -43,20 +43,25 @@ public interface ILocationRoutineData {
 	public Type getType();
 	
 	/**
-	 * Only valid for linestring types.  Can return
-	 * linestring or multilinestring geometry object
+	 * Only valid for LineString types.  Can return
+	 * LineString or MultiLineString geometry object
 	 * 
 	 * @return
 	 */
-	public Geometry getGeometry();
+	public default Geometry getGeometry() { return null; }
 	
 	/**
 	 * Only for point types
 	 * @return
 	 */
-	public Coordinate getPoint();
+	public default Coordinate getPoint() { return null; }
 	
-	
-	
-	
+	/**
+	 * The projected point location (or null if not applicable).
+	 * Only for point types.
+	 * 
+	 * @return
+	 */
+	public default Coordinate getProjectedPoint() { return null; }
+
 }

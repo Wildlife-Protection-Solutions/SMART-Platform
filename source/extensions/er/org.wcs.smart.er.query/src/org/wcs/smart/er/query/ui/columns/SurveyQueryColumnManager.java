@@ -138,6 +138,8 @@ public class SurveyQueryColumnManager {
 		if (sd == null || sd.getTrackDistanceDirection()){
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION, Locale.getDefault()));
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_RAWX, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_RAWY, Locale.getDefault()));
 		}
 		if (sd == null || sd.getTrackObserver()){
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_OBSERVER, Locale.getDefault()));
@@ -209,6 +211,8 @@ public class SurveyQueryColumnManager {
 		if (sd == null || sd.getTrackDistanceDirection()){
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION, Locale.getDefault()));
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_RAWX, Locale.getDefault()));
+			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_RAWY, Locale.getDefault()));
 		}
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT, Locale.getDefault()));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_LAST_MODIFIED, Locale.getDefault()));

@@ -111,9 +111,10 @@ public class AssetQueryColumnCache {
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME ||
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT ||
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_X ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_Y ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_Y 
+//								item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
+//								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE
+								){
 							toAdd.setEdit(true);
 						}
 					}
@@ -202,9 +203,10 @@ public class AssetQueryColumnCache {
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME ||
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT ||
 								item == FixedQueryColumn.FixedColumns.WAYPOINT_X ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_Y ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
-								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE ){
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_Y
+//								item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
+//								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE 
+								){
 							toAdd.setEdit(true);
 						}
 					}

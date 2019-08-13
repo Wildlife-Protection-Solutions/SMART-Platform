@@ -150,7 +150,11 @@ public class Messages extends NLS {
 	public static String ObservationCloner_ProgressName;
 
 	public static String ObservationCloner_TaskName;
+	public static String ObservationOptionsPropertyPage_ComputationDetails;
+
 	public static String ObservationOptionsPropertyPage_DistanceBearingOpLabel;
+
+	public static String ObservationOptionsPropertyPage_DistanceBearingTitle;
 
 	public static String ObservationOptionsPropertyPage_ObserverDescription;
 	public static String ObservationOptionsPropertyPage_ObserverLabel;

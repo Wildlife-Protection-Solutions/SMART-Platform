@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Display;
 import org.geotools.referencing.CRS;
 import org.locationtech.udig.project.render.IViewportModel;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.query.engine.IWaypointUpdateableResultSet;
 import org.wcs.smart.patrol.query.internal.Messages;
@@ -83,20 +84,48 @@ public class MapWaypointEditManager implements IMapEditManager {
 			}
 		}
 		
-		doMove(pw, crspx.x, crspx.y, true);
+		doMove(pw, crspx.x, crspx.y);
 	}
 
-	private void doMove(PatrolQueryResultItem pw, double x, double y, boolean addundo){
+	private void revert(PatrolQueryResultItem pw, double x, double y, Float distance, Float direction){
 		IQueryResult result = editor.getQuery().getCachedResults(); 
 		if (!(result instanceof IWaypointUpdateableResultSet)) return;
 		try {
-			double x1 = pw.getWaypointX(null);
-			double y1 = pw.getWaypointY(null);
+			if (((IWaypointUpdateableResultSet)result).updateWaypointPosition(pw, x, y, distance, direction)){
+				
+			}
+			editor.refreshResults();
+		} catch (Exception e) {
+			SmartPatrolPlugIn.displayLog(Messages.MapWaypointEditManager_MoveError + e.getMessage(), e);
+		}
+	
+	}
+	private void doMove(PatrolQueryResultItem pw, double x, double y){
+		IQueryResult result = editor.getQuery().getCachedResults(); 
+		if (!(result instanceof IWaypointUpdateableResultSet)) return;
+		try {
+			double x1 = pw.getWaypointRawX(null);
+			double y1 = pw.getWaypointRawY(null);
+			Float distance1 = pw.getWaypointDistance();
+			Float direction1 = pw.getWaypointDirection();
 			
-			if (((IWaypointUpdateableResultSet)result).updateWaypointPosition(pw, x, y)){
-				if (addundo){
-					addUndo(pw, x1, y1);
-				}
+			Float distancen = pw.getWaypointDistance();
+			Float directionn = pw.getWaypointDirection();
+			double xn = pw.getWaypointRawX(null);
+			double yn = pw.getWaypointRawY(null);
+			
+			if (distancen != null && directionn != null) {
+				//update distance and direction
+				Float[] data = Waypoint.computeDistanceBearing(new Coordinate(xn, yn), new Coordinate(x,y));
+				distancen = data[0];
+				directionn = data[1];
+			}else {
+				xn = x;
+				yn = y;
+			}
+				
+			if (((IWaypointUpdateableResultSet)result).updateWaypointPosition(pw, xn, yn, distancen, directionn)){
+				addUndo(pw, x1, y1, distance1, direction1);
 				editor.refreshResults();
 			}
 		} catch (Exception e) {
@@ -184,8 +213,8 @@ public class MapWaypointEditManager implements IMapEditManager {
 		
 	}
 
-	private void addUndo(PatrolQueryResultItem wp, double x, double y) {
-		undoCommands.add(0, new Object[] { wp, x, y });
+	private void addUndo(PatrolQueryResultItem wp, double x, double y, Float distance, Float direction) {
+		undoCommands.add(0, new Object[] { wp, x, y, distance, direction });
 		if (undoCommands.size() > 100) {
 			undoCommands.remove(undoCommands.size() - 1);
 		}
@@ -202,7 +231,9 @@ public class MapWaypointEditManager implements IMapEditManager {
 		PatrolQueryResultItem pw = (PatrolQueryResultItem) data[0];
 		double x = (double) data[1];
 		double y = (double) data[2];
-		Display.getDefault().syncExec(()->doMove(pw,x,y,false));
+		Float distance = (Float) data[3];
+		Float direction = (Float) data[4];
+		Display.getDefault().syncExec(()->revert(pw, x, y, distance, direction));
 	}
 
 

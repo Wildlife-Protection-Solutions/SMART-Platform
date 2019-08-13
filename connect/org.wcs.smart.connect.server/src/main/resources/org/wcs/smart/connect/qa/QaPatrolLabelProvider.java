@@ -69,8 +69,6 @@ public class QaPatrolLabelProvider extends ILabelProvider {
 			return Messages.getString("QaPatrolLabelProvider.WpIdLabel", l); //$NON-NLS-1$
 		case PatrolSpeedRoutineType_TrackError:
 			return Messages.getString("QaPatrolLabelProvider.TrackValidationError", l); //$NON-NLS-1$
-		default:
-			break;
 		}
 		return ""; //$NON-NLS-1$
 	}

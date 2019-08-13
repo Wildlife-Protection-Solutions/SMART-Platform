@@ -28,9 +28,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -39,7 +37,7 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DmObject;
-import org.wcs.smart.query.QueryTypeManager;
+
 import org.wcs.smart.query.model.Query;
 
 @Entity
@@ -49,7 +47,6 @@ public class PawsClassification extends UuidItem{
 	public enum Type{
 		DATAMODEL,QUERY
 	}
-	
 	
 	private String classification;
 	private PawsConfiguration config;
@@ -183,8 +180,5 @@ public class PawsClassification extends UuidItem{
 		sb.append( " (" + a.getName() + ") ");
 		sb.append(c.getFullCategoryName());
 		return sb.toString();
-	}
-	public static String createLabel(Query q) {
-		return q.getName() + " (" + QueryTypeManager.INSTANCE.findQueryType(q.getTypeKey()).getGuiName() + ")";
-	}
+	}	
 }

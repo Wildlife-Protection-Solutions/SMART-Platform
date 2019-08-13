@@ -49,6 +49,6 @@ public interface IWaypointUpdateableResultSet extends IUpdateableResultSet{
 	 * @return
 	 * @throws Exception
 	 */
-	boolean updateWaypointPosition(PatrolQueryResultItem  pw, Double x, Double y) throws Exception;
+	boolean updateWaypointPosition(PatrolQueryResultItem  pw, Double x, Double y, Float distance, Float direction) throws Exception;
 
 }

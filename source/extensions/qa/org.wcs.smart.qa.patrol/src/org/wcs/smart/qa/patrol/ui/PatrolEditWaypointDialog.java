@@ -42,6 +42,9 @@ import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IResolve;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.catalog.memory.MemoryServiceExtensionImpl;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
@@ -54,12 +57,14 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.geotools.PatrolFeatureFactory;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.patrol.internal.Messages;
 import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Extends of edit waypoint dialog specific to editing patrol waypoints.
@@ -70,9 +75,11 @@ import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
 public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 
 	private PatrolWaypoint editWaypoint;
+	
 	private SimpleFeatureType wpSchema;
 	private FeatureStore<SimpleFeatureType, SimpleFeature> editStore;
-	
+	private FeatureStore<SimpleFeatureType, SimpleFeature> prjStore;
+
 	private PatrolWaypoint previousWaypoint;
 	private PatrolWaypoint nextWaypoint;
 	
@@ -108,7 +115,7 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 		if (newY < -180) newY = -90;
 		if (newY > 180) newY = 90;
 		
-		updateWaypointLocation(new Coordinate(newX, newY));
+		updateWaypointLocation(new Coordinate(newX, newY), null, null);
 		updateLabels();
 	}
 	
@@ -121,16 +128,27 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 	}
 
 	@Override
-	protected void updateFeature(Coordinate newPosition){
+	protected void updateFeature(){
+		editWaypoint.getWaypoint().setDirection(waypoint.getDirection());
+		editWaypoint.getWaypoint().setDistance(waypoint.getDistance());
+		editWaypoint.getWaypoint().setRawX(waypoint.getRawX());
+		editWaypoint.getWaypoint().setRawY(waypoint.getRawY());
+		
 		try {
-			editWaypoint.getWaypoint().setRawX(newPosition.x);
-			editWaypoint.getWaypoint().setRawY(newPosition.y);
 			try{
 				editStore.removeFeatures(Filter.INCLUDE);
 			}catch (ConcurrentModificationException ex){
 				editStore.removeFeatures(Filter.INCLUDE);
 			}
 			editStore.addFeatures(DataUtilities.collection(Collections.singletonList(PatrolFeatureFactory.getWaypointAsFeature(wpSchema, editWaypoint))));
+			if (prjStore != null) {
+				try{
+					prjStore.removeFeatures(Filter.INCLUDE);
+				}catch (ConcurrentModificationException ex){
+					prjStore.removeFeatures(Filter.INCLUDE);
+				}
+				prjStore.addFeatures(DataUtilities.collection(Collections.singletonList(PatrolFeatureFactory.getWaypointAsPrjFeature(prjStore.getSchema(), editWaypoint))));
+			}
 			getMap().getRenderManager().refresh(null);
 		} catch (IOException e) {
 			QaPlugIn.log(e.getMessage(), e);
@@ -144,6 +162,8 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 		Track patrolTrack = null;
 		List<IGeoResource> referenceLayers = new ArrayList<>();	
 		IGeoResource editResource = null;
+		IGeoResource prjResource = null;
+		IGeoResource waypointResource = null;
 		ReferencedEnvelope zoomEnv = null;	
 		
 		try(Session s = HibernateManager.openSession()){
@@ -171,7 +191,7 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 				}
 				
 				if (time >= wpTime && (nextWaypoint == null || (time - wpTime) < nextDiff)){
-					nextDiff = time = wpTime;
+					nextDiff = time - wpTime;
 					nextWaypoint = ww;
 				}
 				
@@ -205,7 +225,7 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 						features.add(PatrolFeatureFactory.getWaypointAsFeature(schema, w));
 					}
 					
-					IGeoResource waypointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(schema);
+					waypointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(schema);
 					FeatureStore<SimpleFeatureType, SimpleFeature> fs = waypointResource.resolve(FeatureStore.class, new NullProgressMonitor());
 					fs.addFeatures(DataUtilities.collection(features));
 
@@ -227,6 +247,18 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 				editStore = editResource.resolve(FeatureStore.class, new NullProgressMonitor());
 				editStore.addFeatures(DataUtilities.collection(Collections.singletonList(editFeature)));
 				referenceLayers.add(editResource);
+				
+				if (editWaypoint.getWaypoint().getDirection() != null && editWaypoint.getWaypoint().getDistance() != null) {
+					SimpleFeatureType ftype = PatrolFeatureFactory.createWaypointPrjSchema();
+					SimpleFeature sfeature = PatrolFeatureFactory.getWaypointAsPrjFeature(ftype, editWaypoint);
+					prjResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(ftype);
+					prjStore = prjResource.resolve(FeatureStore.class, new NullProgressMonitor());
+					prjStore.addFeatures(DataUtilities.collection(Collections.singletonList(sfeature)));
+					referenceLayers.add(prjResource);
+					
+					zoomEnv.expandToInclude(new Coordinate(editWaypoint.getWaypoint().getRawX(), editWaypoint.getWaypoint().getRawY()));
+					zoomEnv.expandBy(zoomEnv.getWidth() * 0.5);
+				}
 			}catch (Exception ex){
 				QaPlugIn.log(ex.getMessage(), ex);
 			}
@@ -235,6 +267,8 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 		}
 		
 		IGeoResource eResource = editResource;
+		IGeoResource pResource = prjResource;
+		IGeoResource wResource = waypointResource;
 		ReferencedEnvelope eZoom = zoomEnv;
 		if (!referenceLayers.isEmpty()){
 			AddLayersCommand cmd = new AddLayersCommand(referenceLayers){
@@ -244,6 +278,10 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 						 if (l.getGeoResource().getIdentifier().equals(eResource.getIdentifier())){
 							 Style style = getStylingConfig();
 							 l.getStyleBlackboard().put(SLDContent.ID, style);
+						 }else if (pResource != null && l.getGeoResource().getIdentifier().equals(pResource.getIdentifier())) {
+							 l.getStyleBlackboard().put(SLDContent.ID, SmartUtils.getDefaultPrjWaypointStyle());
+						 }else if (wResource != null && l.getGeoResource().getIdentifier().equals(wResource.getIdentifier())) {
+							 l.getStyleBlackboard().put(SLDContent.ID, getOtherWaypointStyle());
 						 }
 					 }
 					 if (eZoom != null) getMap().sendCommandASync(new SetViewportBBoxCommand(new ReferencedEnvelope(eZoom)));
@@ -252,8 +290,21 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 			};
 			getMap().sendCommandASync(cmd);
 		}
-		
-		if (previousWaypoint == null || nextWaypoint == null || previousWaypoint.equals(nextWaypoint)){
+		getShell().addListener(SWT.Dispose, e->{
+			List<IResolve> items = CatalogPlugin.getDefault().getLocalCatalog().find(MemoryServiceExtensionImpl.URL, new NullProgressMonitor());
+			for (IResolve i : items) {
+				if (i.canResolve(IService.class)) {
+					try {
+						CatalogPlugin.getDefault().getLocalCatalog().remove(i.resolve(IService.class, new NullProgressMonitor()));
+					} catch (Exception e1) {
+						SmartPatrolPlugIn.log(e1.getMessage(), e1);
+					}
+				}
+			}
+		});		
+		//don't interpolate if distance and direction are supplied 
+		if (editWaypoint.getWaypoint().getDirection() != null || editWaypoint.getWaypoint().getDistance() != null 
+				|| previousWaypoint == null || nextWaypoint == null || previousWaypoint.equals(nextWaypoint)){
 			btnInterpolate.setEnabled(false);
 		}
 	}

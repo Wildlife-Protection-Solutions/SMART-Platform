@@ -47,8 +47,6 @@ public class QaErLabelProvider extends ILabelProvider {
 			return Messages.getString("QaErLabelProvider.WaypointIdLbl", l); //$NON-NLS-1$
 		case ErWaypointDataProvider_WpNotFound:
 			return Messages.getString("QaErLabelProvider.WaypointNotFound", l); //$NON-NLS-1$
-		default:
-		
 		}
 		return ""; //$NON-NLS-1$
 	}

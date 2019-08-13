@@ -43,7 +43,6 @@ import org.wcs.smart.birt.SmartRenderTask;
 import org.wcs.smart.birt.SmartRunAndRender;
 import org.wcs.smart.birt.SmartRunTask;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 
 /**
@@ -80,7 +79,7 @@ public enum SmartReportRunner {
 		
 		if (Files.exists(renderFile)) Files.delete(renderFile);
 		
-		File reportFile = ReportManager.getPath(report).toFile();
+		File reportFile = report.getFullPath().toFile();
 		
 		//temporary directory for decrypted attachments
 		Object temp = options.getOption(HTMLRenderOption.IMAGE_DIRECTROY);
@@ -137,7 +136,7 @@ public enum SmartReportRunner {
 	public void runReport(Report report, String currentUser, IReportEngine engine, IRenderOption options, 
 			Session session, HashMap<String, Object> reportParameters, int defaultDpi) throws Exception{
 		
-		File reportFile = ReportManager.getPath(report).toFile();
+		File reportFile = report.getFullPath().toFile();
 		runFile(reportFile, report.getConservationArea(), currentUser, engine, options, session, reportParameters, defaultDpi);
 	}
 	

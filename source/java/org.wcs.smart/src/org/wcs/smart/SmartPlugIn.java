@@ -455,7 +455,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(RESIZE_IMAGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/resize.png")); //$NON-NLS-1$
 
 	     
-	     reg.put(GOTO_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_right.png")); //$NON-NLS-1$
+	     reg.put(GOTO_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/goto.png")); //$NON-NLS-1$
 	     reg.put(EDIT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/edit.png")); //$NON-NLS-1$
 	     reg.put(FILTER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/filter.png")); //$NON-NLS-1$
 

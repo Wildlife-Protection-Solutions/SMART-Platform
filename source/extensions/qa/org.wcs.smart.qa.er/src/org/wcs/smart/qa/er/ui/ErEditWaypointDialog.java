@@ -42,6 +42,9 @@ import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IResolve;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.catalog.memory.MemoryServiceExtensionImpl;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
@@ -49,6 +52,7 @@ import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SurveyWaypoint;
@@ -60,6 +64,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.er.internal.Messages;
 import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Extends of edit waypoint dialog specific to editing patrol waypoints.
@@ -72,6 +77,8 @@ public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 	private SurveyWaypoint editWaypoint;
 	private SimpleFeatureType wpSchema;
 	private FeatureStore<SimpleFeatureType, SimpleFeature> editStore;
+	private FeatureStore<SimpleFeatureType, SimpleFeature> prjStore;
+
 	
 	private SurveyWaypoint previousWaypoint;
 	private SurveyWaypoint nextWaypoint;
@@ -91,15 +98,15 @@ public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 		if (previousWaypoint == null || nextWaypoint == null) return;
 		
 		double x2 = nextWaypoint.getWaypoint().getX();
-		double x1 = previousWaypoint.getWaypoint().getX();
 		double y2 = nextWaypoint.getWaypoint().getY();
-		double y1 = previousWaypoint.getWaypoint().getY();
-		
 		double t2 = nextWaypoint.getWaypoint().getDateTime().getTime();
+		
+		double x1 = previousWaypoint.getWaypoint().getX();
+		double y1 = previousWaypoint.getWaypoint().getY();
 		double t1 = previousWaypoint.getWaypoint().getDateTime().getTime();
 		
 		double tn = waypoint.getDateTime().getTime();
-		
+
 		double newX =  x2 - ( (t2 - tn) / (t2 - t1) ) * (x2 - x1);
 		double newY =  y2 - ( (t2 - tn) / (t2 - t1) ) * (y2 - y1);
 		
@@ -108,7 +115,7 @@ public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 		if (newY < -180) newY = -90;
 		if (newY > 180) newY = 90;
 		
-		updateWaypointLocation(new Coordinate(newX, newY));
+		updateWaypointLocation(new Coordinate(newX, newY), null, null);
 		updateLabels();
 	}
 	
@@ -121,16 +128,29 @@ public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 	}
 
 	@Override
-	protected void updateFeature(Coordinate newPosition){
+	protected void updateFeature(){
+		editWaypoint.getWaypoint().setRawX(waypoint.getRawX());
+		editWaypoint.getWaypoint().setRawY(waypoint.getRawY());
+		editWaypoint.getWaypoint().setDirection(waypoint.getDirection());
+		editWaypoint.getWaypoint().setDistance(waypoint.getDistance());
 		try {
-			editWaypoint.getWaypoint().setRawX(newPosition.x);
-			editWaypoint.getWaypoint().setRawY(newPosition.y);
+			
 			try{
 				editStore.removeFeatures(Filter.INCLUDE);
 			}catch (ConcurrentModificationException ex){
 				editStore.removeFeatures(Filter.INCLUDE);
 			}
 			editStore.addFeatures(DataUtilities.collection(Collections.singletonList(SurveyFeatureFactory.createWaypointFeature(wpSchema, editWaypoint))));
+			
+			if (prjStore != null) {
+				try{
+					prjStore.removeFeatures(Filter.INCLUDE);
+				}catch (ConcurrentModificationException ex){
+					prjStore.removeFeatures(Filter.INCLUDE);
+				}
+				prjStore.addFeatures(DataUtilities.collection(Collections.singletonList(SurveyFeatureFactory.createWaypointPrjFeature(prjStore.getSchema(), editWaypoint))));
+			}
+			
 			getMap().getRenderManager().refresh(null);
 		} catch (IOException e) {
 			QaPlugIn.log(e.getMessage(), e);
@@ -144,6 +164,8 @@ public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 		List<MissionTrack> tracks = null;
 		List<IGeoResource> referenceLayers = new ArrayList<>();	
 		IGeoResource editResource = null;
+		IGeoResource waypointResource  = null;
+		IGeoResource prjResource  = null;
 		ReferencedEnvelope zoomEnv = null;	
 		
 		
@@ -174,7 +196,7 @@ public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 				}
 				
 				if (time >= wpTime && (nextWaypoint == null || (time - wpTime) < nextDiff)){
-					nextDiff = time = wpTime;
+					nextDiff = time - wpTime;
 					nextWaypoint = ww;
 				}
 				
@@ -209,7 +231,7 @@ public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 						features.add(SurveyFeatureFactory.createWaypointFeature(schema, w));
 					}
 					
-					IGeoResource waypointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(schema);
+					waypointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(schema);
 					FeatureStore<SimpleFeatureType, SimpleFeature> fs = waypointResource.resolve(FeatureStore.class, new NullProgressMonitor());
 					fs.addFeatures(DataUtilities.collection(features));
 
@@ -231,6 +253,18 @@ public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 				editStore = editResource.resolve(FeatureStore.class, new NullProgressMonitor());
 				editStore.addFeatures(DataUtilities.collection(Collections.singletonList(editFeature)));
 				referenceLayers.add(editResource);
+				
+				if (editWaypoint.getWaypoint().getDirection() != null && editWaypoint.getWaypoint().getDistance() != null) {
+					SimpleFeatureType ftype = SurveyFeatureFactory.createWaypointPrjSchema();
+					SimpleFeature sfeature = SurveyFeatureFactory.createWaypointPrjFeature(ftype, editWaypoint);
+					prjResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(ftype);
+					prjStore = prjResource.resolve(FeatureStore.class, new NullProgressMonitor());
+					prjStore.addFeatures(DataUtilities.collection(Collections.singletonList(sfeature)));
+					referenceLayers.add(prjResource);
+					
+					zoomEnv.expandToInclude(new Coordinate(editWaypoint.getWaypoint().getRawX(), editWaypoint.getWaypoint().getRawY()));
+					zoomEnv.expandBy(zoomEnv.getWidth() * 0.5);
+				}
 			}catch (Exception ex){
 				QaPlugIn.log(ex.getMessage(), ex);
 			}
@@ -239,6 +273,8 @@ public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 		}
 		
 		IGeoResource eResource = editResource;
+		IGeoResource pResource = prjResource;
+		IGeoResource wResource = waypointResource;
 		ReferencedEnvelope eZoom = zoomEnv;
 		if (!referenceLayers.isEmpty()){
 			AddLayersCommand cmd = new AddLayersCommand(referenceLayers){
@@ -248,6 +284,10 @@ public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 						 if (l.getGeoResource().getIdentifier().equals(eResource.getIdentifier())){
 							 Style style = getStylingConfig();
 							 l.getStyleBlackboard().put(SLDContent.ID, style);
+						 }else if (pResource != null && l.getGeoResource().getIdentifier().equals(pResource.getIdentifier())) {
+							 l.getStyleBlackboard().put(SLDContent.ID, SmartUtils.getDefaultPrjWaypointStyle());
+						 }else if (wResource != null && l.getGeoResource().getIdentifier().equals(wResource.getIdentifier())) {
+							 l.getStyleBlackboard().put(SLDContent.ID, getOtherWaypointStyle());
 						 }
 					 }
 					 if (eZoom != null) getMap().sendCommandASync(new SetViewportBBoxCommand(new ReferencedEnvelope(eZoom)));
@@ -256,6 +296,18 @@ public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 			};
 			getMap().sendCommandASync(cmd);
 		}
+		getShell().addListener(SWT.Dispose, e->{
+			List<IResolve> items = CatalogPlugin.getDefault().getLocalCatalog().find(MemoryServiceExtensionImpl.URL, new NullProgressMonitor());
+			for (IResolve i : items) {
+				if (i.canResolve(IService.class)) {
+					try {
+						CatalogPlugin.getDefault().getLocalCatalog().remove(i.resolve(IService.class, new NullProgressMonitor()));
+					} catch (Exception e1) {
+						EcologicalRecordsPlugIn.log(e1.getMessage(), e1);
+					}
+				}
+			}
+		});		
 		
 		if (previousWaypoint == null || nextWaypoint == null || previousWaypoint.equals(nextWaypoint)){
 			btnInterpolate.setEnabled(false);

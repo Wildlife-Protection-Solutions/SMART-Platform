@@ -84,8 +84,12 @@ import org.locationtech.jts.linearref.LocationIndexedLine;
  * @since 1.0.0
  */
 public class GeometryUtils {
+	
 	private static Double MILLISEC_PER_HOUR = 3600000.0;
 	
+	//earth raidus in meters
+	public static final int EARTH_RADIUS = 6378100;//6371000;//6378.1;
+
 	public static CoordinateReferenceSystem SMART_CRS;
 	static{
 		try {
@@ -522,5 +526,79 @@ public class GeometryUtils {
 		LineString l1 = (LineString) ll.extractLine(ll.getStartIndex(), loc);
 		LineString l2 = (LineString) ll.extractLine(loc, ll.getEndIndex());
 		return new LineString[]{l1, l2};
+	}
+	
+	/**
+	 * Determines if the point represented by x,y,distance,direction is within
+	 * the bounding box represented by x1,y1,x2,y2
+	 * 
+	 * @param x
+	 * @param y
+	 * @param distance
+	 * @param direction
+	 * @param x1
+	 * @param y1
+	 * @param x2
+	 * @param y2
+	 * @return
+	 */
+	public static boolean waypointWithin(double x, double y, Float distance, Float direction, double x1, double y1, double x2, double y2) {
+		Coordinate c = new Coordinate(x, y);
+		if (distance != null && direction != null) {
+			c = projectPoint(c, distance, direction);
+		}
+		if (x2 < x1) {
+			double t = x2;
+			x2 = x1;
+			x1 = t;
+		}
+		if (y2 < y1) {
+			double t = y2;
+			y2 = y1;
+			y1 = t;
+		}
+		return c.x >= x1 && c.x <= x2 && c.y >= y1 && c.y <= y2;
+	}
+	
+	public static Coordinate projectPoint(Coordinate c, double distance, double direction) {
+		double a = Math.toRadians(direction);
+		double dR = distance/EARTH_RADIUS;		
+		double ry = Math.toRadians(c.y);
+		double rx = Math.toRadians(c.x);
+		double prjy1 = Math.asin( Math.sin(ry)*Math.cos(dR) + Math.cos(ry)*Math.sin(dR)*Math.cos(a) );
+		double prjx1 = rx + Math.atan2(Math.sin(a)*Math.sin(dR)*Math.cos(ry), Math.cos(dR)-Math.sin(ry)*Math.sin(prjy1));
+		double prjx = Math.toDegrees(prjx1);
+		double prjy = Math.toDegrees(prjy1);
+		return new Coordinate(prjx, prjy);
+	}
+	
+	/**
+	 * Computes the distance and bearing between two points.
+	 * 
+	 * @param c1
+	 * @param c2
+	 * @return array where the first element is the distance in meters and the
+	 * second is the bearing in degrees
+	 */
+	public static Float[] computeDistanceBearing(Coordinate c1, Coordinate c2) {
+		//initial bearing
+		double y = Math.sin(c2.x-c1.x) * Math.cos(c2.y);
+		double x = Math.cos(c1.y)*Math.sin(c2.y) -
+		        Math.sin(c1.y)*Math.cos(c2.y)*Math.cos(c2.x-c1.x);
+		double brng = Math.toDegrees( Math.atan2(y, x) );
+		brng = (brng + 360) % 360;
+				
+		//Distance haversine formula
+		double lat1 = Math.toRadians(c1.y);
+		double lat2 = Math.toRadians(c2.y);
+		double latdiff = Math.toRadians(c2.y-c1.y);
+		double longdiff = Math.toRadians(c2.x-c1.x);
+		double a = Math.sin(latdiff/2) * Math.sin(latdiff/2) +
+		        Math.cos(lat1) * Math.cos(lat2) *
+		        Math.sin(longdiff/2) * Math.sin(longdiff/2);
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+		double d = EARTH_RADIUS * c;
+				
+		return new Float[] {(float)d, (float)brng};
 	}
 }

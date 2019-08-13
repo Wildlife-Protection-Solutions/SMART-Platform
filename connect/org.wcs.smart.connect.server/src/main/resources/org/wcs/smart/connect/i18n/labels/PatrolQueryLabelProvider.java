@@ -65,6 +65,8 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case WAYPOINT_TIME: return Messages.getString("PatrolQueryLabelProvider.WPTime", l); //$NON-NLS-1$
 			case WAYPOINT_X: return Messages.getString("PatrolQueryLabelProvider.WPX", l); //$NON-NLS-1$
 			case WAYPOINT_Y: return Messages.getString("PatrolQueryLabelProvider.WPY", l); //$NON-NLS-1$
+			case WAYPOINT_RAWX: return Messages.getString("PatrolQueryLabelProvider.WPRAWX", l); //$NON-NLS-1$
+			case WAYPOINT_RAWY: return Messages.getString("PatrolQueryLabelProvider.WPRAWY", l); //$NON-NLS-1$
 			case WAYPOINT_DIRECTION: return Messages.getString("PatrolQueryLabelProvider.WPDirection", l); //$NON-NLS-1$
 			case WAYPOINT_DISTANCE: return Messages.getString("PatrolQueryLabelProvider.WPDistance", l); //$NON-NLS-1$
 			case WAYPOINT_COMMENT: return Messages.getString("PatrolQueryLabelProvider.WPComment", l); //$NON-NLS-1$

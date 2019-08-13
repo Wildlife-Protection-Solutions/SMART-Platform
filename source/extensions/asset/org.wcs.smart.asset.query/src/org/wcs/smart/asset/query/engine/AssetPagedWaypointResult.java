@@ -271,18 +271,18 @@ public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implem
 								}
 							}
 							break;
-						case WAYPOINT_DIRECTION:
-							if (value == null && wp.getDirection() == null) break;
-							if (value != null && wp.getDirection() != null && ((Double)value).floatValue() == wp.getDirection()) break;
-							change = true;
-							updateWaypointDirection(wp, value == null ? null : ((Double)value).floatValue(), s);
-							break;
-						case WAYPOINT_DISTANCE:
-							if (value == null && wp.getDistance() == null) break;
-							if (value != null && wp.getDistance() != null && ((Double)value).floatValue() == wp.getDistance()) break;
-							change = true;
-							updateWaypointDistance(wp, value == null ? null : ((Double)value).floatValue(), s);
-							break;
+//						case WAYPOINT_DIRECTION:
+//							if (value == null && wp.getDirection() == null) break;
+//							if (value != null && wp.getDirection() != null && ((Double)value).floatValue() == wp.getDirection()) break;
+//							change = true;
+//							updateWaypointDirection(wp, value == null ? null : ((Double)value).floatValue(), s);
+//							break;
+//						case WAYPOINT_DISTANCE:
+//							if (value == null && wp.getDistance() == null) break;
+//							if (value != null && wp.getDistance() != null && ((Double)value).floatValue() == wp.getDistance()) break;
+//							change = true;
+//							updateWaypointDistance(wp, value == null ? null : ((Double)value).floatValue(), s);
+//							break;
 						case WAYPOINT_ID:
 							if (value instanceof Integer) {
 								if (!value.equals(wp.getId())) {
@@ -351,25 +351,25 @@ public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		q.executeUpdate();
 		
 	}
-	private void updateWaypointDistance(Waypoint wp, Float newDistance, Session session){
-		wp.setDistance(newDistance);
-		
-		
-		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_distance = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		q.setParameter("id", newDistance, org.hibernate.type.FloatType.INSTANCE); //$NON-NLS-1$
-		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
-		q.executeUpdate();
-	}
-	
-	private void updateWaypointDirection(Waypoint wp, Float newDirection, Session session){
-		wp.setDirection(newDirection);
-		
-		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_direction = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("id", newDirection, org.hibernate.type.FloatType.INSTANCE); //$NON-NLS-1$
-		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
-		q.executeUpdate();	
-	}
+//	private void updateWaypointDistance(Waypoint wp, Float newDistance, Session session){
+//		wp.setDistance(newDistance);
+//		
+//		
+//		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_distance = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+//		
+//		q.setParameter("id", newDistance, org.hibernate.type.FloatType.INSTANCE); //$NON-NLS-1$
+//		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
+//		q.executeUpdate();
+//	}
+//	
+//	private void updateWaypointDirection(Waypoint wp, Float newDirection, Session session){
+//		wp.setDirection(newDirection);
+//		
+//		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_direction = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+//		q.setParameter("id", newDirection, org.hibernate.type.FloatType.INSTANCE); //$NON-NLS-1$
+//		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
+//		q.executeUpdate();	
+//	}
 	
 	private void updateWaypointId(Waypoint wp, int newId, Session session){
 		wp.setId(newId);

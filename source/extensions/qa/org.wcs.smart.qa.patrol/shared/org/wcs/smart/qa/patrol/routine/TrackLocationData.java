@@ -24,7 +24,6 @@ package org.wcs.smart.qa.patrol.routine;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.wcs.smart.patrol.model.Track;
@@ -58,11 +57,6 @@ public class TrackLocationData implements ILocationRoutineData {
 	@Override
 	public Type getType() {
 		return Type.LINESTRING;
-	}
-
-	@Override
-	public Coordinate getPoint() {
-		return null;
 	}
 
 	public Track getTrack(){

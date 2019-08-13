@@ -60,8 +60,9 @@ public class FixedQueryColumn extends QueryColumn {
 		INCIDENT_LENGTH(ColumnType.INTEGER,"waypoint:length"), //$NON-NLS-1$
 		WAYPOINT_X(ColumnType.NUMBER,"waypoint:x"), //$NON-NLS-1$
 		WAYPOINT_Y(ColumnType.NUMBER, "waypoint:y"), //$NON-NLS-1$
-		WAYPOINT_DIRECTION(ColumnType.NUMBER,"waypoint:direction"), //$NON-NLS-1$
-		WAYPOINT_DISTANCE( ColumnType.NUMBER,"waypoint:distance"), //$NON-NLS-1$
+//		WAYPOINT_DIRECTION(ColumnType.NUMBER,"waypoint:direction"), //$NON-NLS-1$
+//		WAYPOINT_DISTANCE( ColumnType.NUMBER,"waypoint:distance"), //$NON-NLS-1$
+
 		WAYPOINT_COMMENT(ColumnType.STRING,"waypoint:comment"), //$NON-NLS-1$
 		
 		WAYPOINT_LASTMODIFIED( ColumnType.DATETIME,"waypoint:modified"),   //$NON-NLS-1$
@@ -126,10 +127,10 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getWaypointComment();
 			case WAYPOINT_DATE:
 				return new Date(item.getWaypointDate().getTime());
-			case WAYPOINT_DIRECTION:
-				return item.getWaypointDirection();
-			case WAYPOINT_DISTANCE:
-				return item.getWaypointDistance();
+//			case WAYPOINT_DIRECTION:
+//				return item.getWaypointDirection();
+//			case WAYPOINT_DISTANCE:
+//				return item.getWaypointDistance();
 			case WAYPOINT_TIME:
 				return new Time(item.getWaypointDate().getTime());
 			case WAYPOINT_X:

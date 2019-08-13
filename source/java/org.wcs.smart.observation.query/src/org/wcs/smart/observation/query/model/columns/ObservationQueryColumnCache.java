@@ -116,7 +116,9 @@ public class ObservationQueryColumnCache {
 							item == FixedQueryColumn.FixedColumns.CA_NAME){
 						add = SmartDB.isMultipleAnalysis();
 					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
-						item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+						item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE ||
+						item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWX || 
+						item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWY){
 						add = obsOptions.getTrackDistanceDirection();
 					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
 						add = obsOptions.getTrackObserver();
@@ -200,7 +202,9 @@ public class ObservationQueryColumnCache {
 							item == FixedQueryColumn.FixedColumns.CA_NAME){
 						add = SmartDB.isMultipleAnalysis();
 					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
-							item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+							item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE ||
+							item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWX || 
+							item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWY){
 						add = obsOptions.getTrackDistanceDirection();
 					}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
 						add = false; //observer is associated with observation not waypoint

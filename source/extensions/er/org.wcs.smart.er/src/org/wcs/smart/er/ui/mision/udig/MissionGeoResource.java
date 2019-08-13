@@ -33,25 +33,20 @@ import org.geotools.data.FeatureStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.styling.Fill;
-import org.geotools.styling.Graphic;
 import org.geotools.styling.LineSymbolizer;
-import org.geotools.styling.Mark;
-import org.geotools.styling.PointSymbolizer;
 import org.geotools.styling.Rule;
 import org.geotools.styling.Stroke;
 import org.geotools.styling.Style;
 import org.geotools.styling.StyleBuilder;
 import org.geotools.styling.StyleFactory;
 import org.geotools.styling.Symbolizer;
-import org.geotools.util.factory.GeoTools;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.FilterFactory;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Mission observation and track GeoResource
@@ -178,59 +173,11 @@ public class MissionGeoResource extends IGeoResource {
     }
     
     private Style createPointStyle(){
-    	StyleFactory sf = CommonFactoryFinder.getStyleFactory();
-		StyleBuilder sb = new StyleBuilder(sf);
-       
-		Stroke starstroke = sb.createStroke(new Color(0,0,0), 1);
-		Fill starfill = sb.createFill(new Color(255,100,100));
-		Mark starmark = sb.createMark(sb.literalExpression("circle"), starfill, starstroke); //$NON-NLS-1$
-		Graphic starg = sb.createGraphic(null,  starmark,  null);
-		starg.setSize(sb.literalExpression(8));
-        PointSymbolizer endpoint = sb.createPointSymbolizer(starg);
-		
-		Rule rr = sb.createRule(new Symbolizer[] {endpoint});
-		
-		org.geotools.styling.FeatureTypeStyle fts = sf.createFeatureTypeStyle();
-    	fts.setName("Projection Style"); //$NON-NLS-1$
-    	fts.rules().add(rr);
-		
-		Style style = sf.createStyle();
-    	style.featureTypeStyles().add(fts);
-		return style;
+    	return SmartUtils.getDefaultWaypointStyle();
     }
 
     private static Style createPointPrjStyle() {
-		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
-		StyleBuilder sb = new StyleBuilder(sf);
-        FilterFactory ff = CommonFactoryFinder.getFilterFactory(GeoTools.getDefaultHints());
-        
-		Stroke linestroke = sb.createStroke(new Color(91, 91, 91), 1, new float[] {5.0f, 2.0f});
-		LineSymbolizer lines = sb.createLineSymbolizer(linestroke);
-		
-		Stroke circlestroke = sb.createStroke(new Color(0,0,0), 1);
-		Fill circlefill = sb.createFill(new Color(255,100,100));
-		Mark circlemark = sb.createMark(sb.literalExpression("circle"), circlefill, circlestroke); //$NON-NLS-1$
-		Graphic circleg = sb.createGraphic(null,  circlemark,  null);
-		circleg.setSize(sb.literalExpression(8));
-        PointSymbolizer endpoint = sb.createPointSymbolizer(circleg);
-		endpoint.setGeometry(ff.function("endPoint", ff.property("geom")));  //$NON-NLS-1$ //$NON-NLS-2$
-		
-		Fill squarefill = sb.createFill(new Color(91, 91, 91));
-		Mark squaremark = sb.createMark(sb.literalExpression("square"), squarefill, null); //$NON-NLS-1$
-		Graphic squareg = sb.createGraphic(null,  squaremark,  null);
-		squareg.setSize(sb.literalExpression(8));
-        PointSymbolizer startpoint = sb.createPointSymbolizer(squareg);
-        startpoint.setGeometry(ff.function("startPoint", ff.property("geom")));  //$NON-NLS-1$ //$NON-NLS-2$
-		
-		Rule rr = sb.createRule(new Symbolizer[] {lines, endpoint, startpoint});
-		
-		org.geotools.styling.FeatureTypeStyle fts = sf.createFeatureTypeStyle();
-    	fts.setName("Projection Style"); //$NON-NLS-1$
-    	fts.rules().add(rr);
-		
-		Style style = sf.createStyle();
-    	style.featureTypeStyles().add(fts);
-		return style;
+    	return SmartUtils.getDefaultPrjWaypointStyle();
 	}
     
     

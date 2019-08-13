@@ -48,6 +48,8 @@ public class ObservationQueryLabelProvider implements
 				case WAYPOINT_TIME: return Messages.getString("ObservationQueryLabelProvider.TimeLabel", l); //$NON-NLS-1$
 				case WAYPOINT_X: return Messages.getString("ObservationQueryLabelProvider.xLabel", l); //$NON-NLS-1$
 				case WAYPOINT_Y: return Messages.getString("ObservationQueryLabelProvider.yLabel", l); //$NON-NLS-1$
+				case WAYPOINT_RAWX: return Messages.getString("ObservationQueryLabelProvider.rawXLabel", l); //$NON-NLS-1$
+				case WAYPOINT_RAWY: return Messages.getString("ObservationQueryLabelProvider.rawYLabel", l); //$NON-NLS-1$
 				case WAYPOINT_DIRECTION: return Messages.getString("ObservationQueryLabelProvider.DirectionLabel", l); //$NON-NLS-1$
 				case WAYPOINT_DISTANCE: return Messages.getString("ObservationQueryLabelProvider.DistanceLabel", l); //$NON-NLS-1$
 				case WAYPOINT_COMMENT: return Messages.getString("ObservationQueryLabelProvider.CommentLabel", l); //$NON-NLS-1$

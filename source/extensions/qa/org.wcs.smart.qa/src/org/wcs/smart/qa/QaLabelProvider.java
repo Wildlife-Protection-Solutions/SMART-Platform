@@ -63,6 +63,8 @@ public class QaLabelProvider extends ILabelProvider {
 			return Messages.QaLabelProvider_LocationWpOutsideArea;
 		case LocationRoutineType_WpOutsideArea2:
 			return Messages.QaLabelProvider_LocationWpOutsideArea2;
+		case LocationRoutineType_PrjWpOutsideArea:
+			return Messages.QaLabelProvider_PrjWpOutsideArea;
 		case QaErrorGeoResourceInfo_Description:
 			return Messages.QaLabelProvider_GeoResourceDescription;
 		case QaErrorGeoResourceInfo_Name:

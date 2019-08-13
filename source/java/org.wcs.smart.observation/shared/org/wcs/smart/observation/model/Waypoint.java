@@ -46,6 +46,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.util.GeometryUtils;
 
 /**
  * Waypoint object
@@ -55,9 +56,6 @@ import org.wcs.smart.ca.datamodel.Category;
 @Entity
 @Table(name="smart.waypoint")
 public class Waypoint extends UuidItem {
-	
-	//earth raidus in meters
-	public static final int RADIUS = 6378100;//6371000;//6378.1;
 
 	public static final int COMMENT_MAX_LENGTH = 4096;
 	
@@ -148,17 +146,9 @@ public class Waypoint extends UuidItem {
 			return;
 		}
 		
-		//TODO: find a value for R
-		double a = Math.toRadians(direction);
-		double dR = distance/RADIUS;		
-		double ry = Math.toRadians(y);
-		double rx = Math.toRadians(x);
-		double prjy1 = Math.asin( Math.sin(ry)*Math.cos(dR) + Math.cos(ry)*Math.sin(dR)*Math.cos(a) );
-		double prjx1 = rx + Math.atan2(Math.sin(a)*Math.sin(dR)*Math.cos(ry), Math.cos(dR)-Math.sin(ry)*Math.sin(prjy1));
-		prjx = Math.toDegrees(prjx1);
-		prjy = Math.toDegrees(prjy1);
-//		System.out.println(x + ", " + y + ":" + prjx + "," + prjy);
-		
+		Coordinate c = projectPoint(new Coordinate(x, y), distance, direction);
+		prjx = c.x;
+		prjy = c.y;
 	}
 	
 	@Transient
@@ -350,10 +340,12 @@ public class Waypoint extends UuidItem {
 
 			}
 		}
-		
 		return wp;
 	}
 	
+	public static Coordinate projectPoint(Coordinate c, double distance, double direction) {
+		return GeometryUtils.projectPoint(c, distance, direction);
+	}
 
 	//https://www.movable-type.co.uk/scripts/latlong.html
 	/**
@@ -365,24 +357,6 @@ public class Waypoint extends UuidItem {
 	 * second is the bearing in degrees
 	 */
 	public static Float[] computeDistanceBearing(Coordinate c1, Coordinate c2) {
-		//initial bearing
-		double y = Math.sin(c2.x-c1.x) * Math.cos(c2.y);
-		double x = Math.cos(c1.y)*Math.sin(c2.y) -
-		        Math.sin(c1.y)*Math.cos(c2.y)*Math.cos(c2.x-c1.x);
-		double brng = Math.toDegrees( Math.atan2(y, x) );
-		brng = (brng + 360) % 360;
-				
-		//Distance haversine formula
-		var lat1 = Math.toRadians(c1.y);
-		var lat2 = Math.toRadians(c2.y);
-		var latdiff = Math.toRadians(c2.y-c1.y);
-		var longdiff = Math.toRadians(c2.x-c1.x);
-		var a = Math.sin(latdiff/2) * Math.sin(latdiff/2) +
-		        Math.cos(lat1) * Math.cos(lat2) *
-		        Math.sin(longdiff/2) * Math.sin(longdiff/2);
-		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-		var d = RADIUS * c;
-				
-		return new Float[] {(float)d, (float)brng};
+		return GeometryUtils.computeDistanceBearing(c1, c2);
 	}
 }

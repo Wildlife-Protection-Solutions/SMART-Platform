@@ -101,6 +101,7 @@ public class AssetSimpleQueryResultEditor extends QueryResultsEditor{
 	
 	@Override
 	protected EditingSupport getEditingSupport(ColumnViewer viewer, QueryColumn column) {
+		if (!column.canEdit()) return null;
 		EditingSupport s = QueryColumnEditingSupport.getCellEditor(viewer, column, this);
 		if (s != null) return s;
 		return super.getEditingSupport(viewer, column);

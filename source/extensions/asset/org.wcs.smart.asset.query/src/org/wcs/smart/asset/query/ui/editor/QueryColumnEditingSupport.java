@@ -57,9 +57,9 @@ public class QueryColumnEditingSupport {
 			column.getColumn() == FixedColumns.WAYPOINT_TIME ||
 			column.getColumn() == FixedColumns.WAYPOINT_X ||
 			column.getColumn() == FixedColumns.WAYPOINT_Y ||
-			column.getColumn() == FixedColumns.WAYPOINT_DISTANCE ||
-			column.getColumn() == FixedColumns.WAYPOINT_COMMENT ||
-			column.getColumn() == FixedColumns.WAYPOINT_DIRECTION){
+//			column.getColumn() == FixedColumns.WAYPOINT_DISTANCE ||
+//			column.getColumn() == FixedColumns.WAYPOINT_DIRECTION ||
+			column.getColumn() == FixedColumns.WAYPOINT_COMMENT){
 			
 			return new WaypointColumnEditor(viewer, column, editor);
 		}

@@ -30,7 +30,7 @@ import org.wcs.smart.qa.RoutineExtensionManager;
 import org.wcs.smart.qa.SingleItemDataProvider;
 import org.wcs.smart.qa.auto.AutoValidateJob;
 import org.wcs.smart.qa.incident.IncidentDataProvider;
-import org.wcs.smart.qa.incident.IncidentLocationData;
+import org.wcs.smart.qa.routine.WaypointLocationData;
 
 /**
  * Hibernate listener for new incidents.  Registers
@@ -51,7 +51,7 @@ public class NewIncidentObjectEventListener implements PostInsertEventListener{
 		Object x = event.getEntity();
 		if (x instanceof Waypoint && ((Waypoint)x).getSourceId().equals(IndepedentIncidentSource.KEY)){
 			//register waypoint for validation
-			IncidentLocationData data = new IncidentLocationData((Waypoint) x);
+			WaypointLocationData data = new WaypointLocationData((Waypoint) x);
 			SingleItemDataProvider provider = new SingleItemDataProvider(RoutineExtensionManager.INSTANCE.findDataProvider(IncidentDataProvider.ID), data);
 			AutoValidateJob.INSTANCE.addTask(provider);
 		}

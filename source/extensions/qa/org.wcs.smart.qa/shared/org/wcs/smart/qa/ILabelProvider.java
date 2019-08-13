@@ -53,6 +53,7 @@ public abstract class ILabelProvider {
 		LocationRoutineType_ValidatingDataTaskName,
 		LocationRoutineType_WpOutsideArea,
 		LocationRoutineType_WpOutsideArea2,
+		LocationRoutineType_PrjWpOutsideArea,
 		LocationRoutineType_TrackOutsideArea,
 		LocationRoutineType_TrackOutsideArea2,
 		QaError_Status_New,
