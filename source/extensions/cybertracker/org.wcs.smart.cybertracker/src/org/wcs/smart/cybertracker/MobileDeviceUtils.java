@@ -48,7 +48,7 @@ public class MobileDeviceUtils {
 	private static final String MPTCOPY_EXE = "mtpcopy.exe"; //$NON-NLS-1$
 	
 	/**
-	 * Folder continaing SMART Mobile exported data files.
+	 * Folder containing SMART Mobile exported data files.
 	 */
 	public static final String DATA_FOLDER = "SMARTdata"; //$NON-NLS-1$
 	
@@ -76,11 +76,13 @@ public class MobileDeviceUtils {
 			throw new Exception(Messages.MobileDeviceUtils_ExtractError, ex);
 		}
 		
+		//auto load works from the root direction not the data folder
 		List<String> items = new ArrayList<>();
 		items.add(exe.toString());
 		items.add("/upload"); //$NON-NLS-1$
 		items.add(packageFile.toString());
-		items.add("\\" + DATA_FOLDER + "\\" + targetFilename); //$NON-NLS-1$ //$NON-NLS-2$
+//		items.add("\\" + DATA_FOLDER + "\\" + targetFilename); //$NON-NLS-1$ //$NON-NLS-2$
+		items.add("\\" + targetFilename); //$NON-NLS-1$ 
 		
 		ProcessBuilder pb = new ProcessBuilder(items);
 		Process p = pb.start();
