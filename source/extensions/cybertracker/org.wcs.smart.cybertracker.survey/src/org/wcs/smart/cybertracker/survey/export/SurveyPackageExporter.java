@@ -173,7 +173,8 @@ public enum SurveyPackageExporter {
 				
 				sub.split(1);
 				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
-				profileToJson(ctpackage.getCtProfile(), modelToExport, session, context, profileFile);
+				
+				profileToJson(ctpackage.getCtProfile(), modelToExport, sd.getTrackDistanceDirection(), session, context, profileFile);
 				toIncludeInZip.add(profileFile.toFile());
 								
 				//get version number from output file
@@ -269,9 +270,9 @@ public enum SurveyPackageExporter {
 		}
 	}
 	
-	private void profileToJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, Session session, IEclipseContext context, Path outputFile) throws IOException {
+	private void profileToJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, boolean distanceDirection, Session session, IEclipseContext context, Path outputFile) throws IOException {
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
-			fw.write(CtJsonExportUtils.toJson(profile, cm, context, session));
+			fw.write(CtJsonExportUtils.toJson(profile, cm, distanceDirection, context, session));
 		}
 	}
 	

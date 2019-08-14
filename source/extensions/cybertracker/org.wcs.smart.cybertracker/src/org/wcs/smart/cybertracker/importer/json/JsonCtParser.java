@@ -95,6 +95,9 @@ public class JsonCtParser {
 	public static final String LATITUDE_KEY = "latitude"; //$NON-NLS-1$
 	public static final String DATETIME_KEY = "dateTime"; //$NON-NLS-1$
 
+	public static final String DISTANCE_KEY = "distance"; //$NON-NLS-1$
+	public static final String DIRECTION_KEY = "bearing"; //$NON-NLS-1$
+	
 	public static final String DEVICE_ID = "deviceId"; //$NON-NLS-1$
 	
 	private static final String JPEG_EXT = "jpeg"; //$NON-NLS-1$
@@ -300,6 +303,7 @@ public class JsonCtParser {
 	public List<WaypointObservationAttribute> getApplyToAdd(){
 		return applyToAllObservations;
 	}
+	
 	public Coordinate readXYFromProperties(JSONObject feature){
 		JSONObject properties = (JSONObject) feature.get(PROPERTIES_KEY);
 		Double x = (Double)properties.get(LONGITUDE_KEY);
@@ -358,6 +362,17 @@ public class JsonCtParser {
 		Double y = (Double)properties.get(LATITUDE_KEY);
 		if (y != null) newWaypoint.setRawY(y);
 			
+		Float direction = null;
+		Float distance = null;
+		if (properties.containsKey(DIRECTION_KEY) && properties.get(DIRECTION_KEY) != null) {
+			direction = ((Double)properties.get(DIRECTION_KEY)).floatValue();
+		}
+		if (properties.containsKey(DISTANCE_KEY) && properties.get(DISTANCE_KEY) != null) {
+			distance = ((Double)properties.get(DISTANCE_KEY)).floatValue();
+		}
+		newWaypoint.setDirection(direction);
+		newWaypoint.setDistance(distance);
+		
 		Date dt = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(DATETIME_KEY));
 		newWaypoint.setDateTime(dt);
 

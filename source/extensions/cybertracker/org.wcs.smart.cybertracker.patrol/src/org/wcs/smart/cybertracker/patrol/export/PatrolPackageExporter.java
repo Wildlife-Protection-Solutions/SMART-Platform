@@ -67,6 +67,9 @@ import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -180,10 +183,11 @@ public enum PatrolPackageExporter {
 				Path metadataFile = tempDir.resolve(PATROL_METADATA_FILE);
 				metadataToJson(localpackage, session,  metadataFile);
 				toIncludeInZip.add(metadataFile.toFile());
-				
+
 				sub.split(1);
 				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
-				profileToJson(session.get(CyberTrackerPropertiesProfile.class, localpackage.getCtProfile().getUuid()), session, context, profileFile, ctprofileAdditions);
+				ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+				profileToJson(session.get(CyberTrackerPropertiesProfile.class, localpackage.getCtProfile().getUuid()), ops.getTrackDistanceDirection(), session, context, profileFile, ctprofileAdditions);
 				toIncludeInZip.add(profileFile.toFile());
 				
 				
@@ -198,6 +202,8 @@ public enum PatrolPackageExporter {
 				
 				sub.split(1);
 				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
+				
+				
 				writeProjectFile(localpackage.getName(), modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
 				toIncludeInZip.add(projectFile.toFile());
 				
@@ -290,9 +296,9 @@ public enum PatrolPackageExporter {
 		CtJsonExportUtils.writeProjectJson(name, version, CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
 	}
 
-	private void profileToJson(CyberTrackerPropertiesProfile profile, Session session, IEclipseContext context, Path outputFile, HashMap<String, Object> additions ) throws IOException {
+	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, Session session, IEclipseContext context, Path outputFile, HashMap<String, Object> additions ) throws IOException {
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
-			fw.write(CtJsonExportUtils.toJson(profile, additions, context, session));
+			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, additions, context, session));
 		}
 	}
 
@@ -366,7 +372,7 @@ public enum PatrolPackageExporter {
 			JSONObject oo = CtJsonExportUtils.convertLeaderPilot((MetadataFieldValue)null, PatrolMetadataField.PILOT.getJsonKey(), 
 					Messages.PatrolPackageExporter_PilotPageLabel, PatrolMetadataField.PILOT.isRequired(), 
 					PatrolMetadataField.PILOT.isFixed(), session, ctpackage.getConservationArea());
-			((JSONObject)oo.get(PatrolMetadataField.PILOT.getJsonKey())).put("required_by", jr);
+			((JSONObject)oo.get(PatrolMetadataField.PILOT.getJsonKey())).put("required_by", jr); //$NON-NLS-1$
 			metadataScreens.add(oo);
 		}else {
 			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(map.get(PatrolMetadataField.LEADER.name()),
@@ -378,7 +384,7 @@ public enum PatrolPackageExporter {
 					PatrolMetadataField.PILOT.getJsonKey(), Messages.PatrolPackageExporter_PilotPageLabel, 
 					PatrolMetadataField.PILOT.isRequired(), PatrolMetadataField.PILOT.isFixed(), session,
 					ctpackage.getConservationArea());
-			((JSONObject)oo.get(PatrolMetadataField.PILOT.getJsonKey())).put("required_by", jr);
+			((JSONObject)oo.get(PatrolMetadataField.PILOT.getJsonKey())).put("required_by", jr); //$NON-NLS-1$
 			metadataScreens.add(oo);
 		}
 		metadataScreens.add(CtJsonExportUtils.createDataType(PatrolMetadataField.PATROL_RESOURCE_ID));

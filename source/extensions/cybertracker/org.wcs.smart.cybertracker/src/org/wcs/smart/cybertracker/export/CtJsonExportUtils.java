@@ -73,6 +73,11 @@ import org.wcs.smart.util.UuidUtils;
 public class CtJsonExportUtils {
 	
 	/**
+	 * Distance Direction option for profile file
+	 */
+	private static final String DISTANCE_DIRECTION_OP = "RECORD_DISTANCE_BEARING"; //$NON-NLS-1$
+
+	/**
 	 * JSON is required property key
 	 */
 	public static final String JSON_REQUIRED_PROP_KEY = "isRequired"; //$NON-NLS-1$
@@ -164,7 +169,7 @@ public class CtJsonExportUtils {
 	 * @param profile
 	 * @return
 	 */
-	public static String toJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, IEclipseContext context, Session session) {
+	public static String toJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, boolean distanceDirection, IEclipseContext context, Session session) {
 		JSONObject profileObj = new JSONObject();
 		
 		for (ProfileOptionID option : ProfileOptionID.values()) {
@@ -186,6 +191,7 @@ public class CtJsonExportUtils {
 				profileObj.put(option.name(), opValue.getStringValue());
 			}
 		}
+		profileObj.put(DISTANCE_DIRECTION_OP, distanceDirection); 
 		ConfigurationDataProvider connectProvider = new ConfigurationDataProvider(cm, session, context);
 		try {
 			DataTarget target = connectProvider.getDataTarget();
@@ -211,7 +217,7 @@ public class CtJsonExportUtils {
 	 * @param profile
 	 * @return
 	 */
-	public static String toJson(CyberTrackerPropertiesProfile profile, HashMap<String, Object> additions, IEclipseContext context, Session session) {
+	public static String toJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, HashMap<String, Object> additions, IEclipseContext context, Session session) {
 		JSONObject profileObj = new JSONObject();
 		
 		for (ProfileOptionID option : ProfileOptionID.values()) {
@@ -232,7 +238,8 @@ public class CtJsonExportUtils {
 				}
 			}
 		}
-		
+		profileObj.put(DISTANCE_DIRECTION_OP, distanceDirection); 
+		 
 		if(additions != null) {
 			for (Entry<String, Object> e : additions.entrySet()) {
 				profileObj.put(e.getKey(), e.getValue());
@@ -242,7 +249,8 @@ public class CtJsonExportUtils {
 	}
 
 	
-	public static void writeProjectJson(String projectName, String version, String cmFile, Path logoFile, Path outputFile, Path metadataFilename, HashMap<String, Object> projectAdditions) throws IOException {
+	public static void writeProjectJson(String projectName, String version, String cmFile, 
+			Path logoFile, Path outputFile, Path metadataFilename, HashMap<String, Object> projectAdditions) throws IOException {
 		JSONObject projectJSON = new JSONObject();
 		projectJSON.put("projectName",projectName); //$NON-NLS-1$
 		projectJSON.put("decoder","sourceparser_smartconfigurabledatamodel"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -252,7 +260,7 @@ public class CtJsonExportUtils {
 		if (version != null) projectJSON.put("version",  version); //$NON-NLS-1$ 
 		projectJSON.put("creation_date",new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date())); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("logo", (logoFile == null || !Files.exists(logoFile)) ? null : logoFile.getFileName().toString()); //$NON-NLS-1$
-
+		
 		if(projectAdditions != null) {
 			for (Entry<String, Object> e : projectAdditions.entrySet()) {
 				projectJSON.put(e.getKey(), e.getValue());

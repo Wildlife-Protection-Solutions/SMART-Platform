@@ -257,8 +257,8 @@ public class MissionJsonProcessor implements IJsonProcessor {
 						link = createMissionFromSighting(sighting, deviceId, ctMissionUuid, observationCounter, session);
 					}
 					
-					if (wp.getX() != null && wp.getY() != null){
-						addPointToTrack(link.getMission(), link.getSamplingUnit(), new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
+					if (wp.getRawX() != null && wp.getRawY() != null){
+						addPointToTrack(link.getMission(), link.getSamplingUnit(), new Coordinate(wp.getRawX(), wp.getRawY()), wp.getDateTime(), session);
 					}
 					//update last observation count
 					link.setLastObservationCnt(observationCounter);
@@ -287,8 +287,8 @@ public class MissionJsonProcessor implements IJsonProcessor {
 							link.setGroupStartTime(null);
 						}
 						
-						if(wp.getX() != null && wp.getY() != null){
-							addPointToTrack(link.getMission(), link.getSamplingUnit(), new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
+						if(wp.getRawX() != null && wp.getRawY() != null){
+							addPointToTrack(link.getMission(), link.getSamplingUnit(), new Coordinate(wp.getRawX(), wp.getRawY()), wp.getDateTime(), session);
 						}
 						link.setLastObservationCnt(observationCounter);
 						processedFeatures.add(feature);
@@ -319,8 +319,8 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				}
 				
 				//there is no position; likely skip on device; lets set to 0
-				if (wp.getX() == null) wp.setRawX(0);
-				if (wp.getY() == null) wp.setRawY(0);
+				if (wp.getRawX() == null) wp.setRawX(0);
+				if (wp.getRawY() == null) wp.setRawY(0);
 				
 				//We want to create a new waypoint and add it to the patrol
 				if (link == null){
@@ -333,7 +333,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				if (link.getMission().getUuid() != null) modifiedMissions.add(link.getMission());
 				
 				//add position to track log
-				addPointToTrack(link.getMission(), link.getSamplingUnit(), new Coordinate(wp.getX(), wp.getY()), wp.getDateTime(), session);
+				addPointToTrack(link.getMission(), link.getSamplingUnit(), new Coordinate(wp.getRawX(), wp.getRawY()), wp.getDateTime(), session);
 				
 				//update last observation count
 				link.setLastObservationCnt(observationCounter);
@@ -408,7 +408,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 			return 1;
 		}else{
 			if ("FALSE".equalsIgnoreCase((String)sighting.get(ScreensUtil.RESULT_END_WAYPOINT_GROUP))){ //$NON-NLS-1$
-				if (wp.getX() == null || wp.getY() == null){
+				if (wp.getRawX() == null || wp.getRawY() == null){
 					//no location; add to previous 
 					if (addWaypointToLastObservation(missionToUpdate, wp, session) != null) return 1;
 					return 0;
@@ -417,7 +417,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					return 2;
 				}
 			}else if ("TRUE".equalsIgnoreCase((String)sighting.get(ScreensUtil.RESULT_END_WAYPOINT_GROUP))){ //$NON-NLS-1$
-				if (wp.getX() == null || wp.getY() == null){
+				if (wp.getRawX() == null || wp.getRawY() == null){
 					//no location; add to previous 
 					SurveyWaypoint pw = addWaypointToLastObservation(missionToUpdate, wp, session);
 					if (pw != null){
