@@ -101,7 +101,9 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 					|| item == FixedQueryColumn.FixedColumns.CA_NAME) {
 				add = query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA);
 			} else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION
-					|| item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE) {
+					|| item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE 
+					|| item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWX 
+					|| item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWY) {
 				add = QueryColumnUtils.trackDistanceDirection(ops);
 			} else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
 				add = QueryColumnUtils.trackObserver(ops);
@@ -190,7 +192,9 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 					|| item == FixedQueryColumn.FixedColumns.CA_NAME) {
 				add = query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA);
 			} else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION
-					|| item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE) {
+					|| item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE 
+					|| item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWX 
+					|| item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWY) {
 				add = QueryColumnUtils.trackDistanceDirection(ops);
 			} else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
 				add = false;

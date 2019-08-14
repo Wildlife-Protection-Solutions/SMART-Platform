@@ -69,18 +69,20 @@ public class HtmlExporter {
 	public HtmlExporter(Locale l){
 		this.l = l;
 		htmlText = new StringBuilder();
-		htmlText.append("<html>"
-				+ "<head>"
-				+ "<style>"
-				+ "table { border-collapse: collapse; width: 50%; } th, td { text-align: left; padding: 8px; } tr:nth-child(even){background-color: #f2f2f2}"
-				+ "tr:hover {background-color: #e2f4ff;}"
-				+ "</style>"
-				+ "<link rel = stylesheet type = text/css href = smart.css>"
-				+ "<title>Query Results</title>"
-				+ "</head>"
-				+ "<body>");
 	}
 	
+	private void printHeader(String queryName) {
+		htmlText.append("<html>");
+		htmlText.append("<head>");
+		htmlText.append("<style>");
+		htmlText.append("table { border-collapse: collapse; width: 50%; } th, td { text-align: left; padding: 8px; } tr:nth-child(even){background-color: #f2f2f2}");
+		htmlText.append("tr:hover {background-color: #e2f4ff;}");
+		htmlText.append("</style>");
+		htmlText.append("<link rel = stylesheet type = text/css href = smart.css>");
+		htmlText.append("<title>" + queryName + "</title>");
+		htmlText.append("</head>");
+		htmlText.append("<body>");
+	}
 	/**
 	 * Exports simple queries whose results and represented by a database table.
 	 * 
@@ -93,6 +95,7 @@ public class HtmlExporter {
 		List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
 		
 		try{
+			printHeader(query.getName());
 			htmlText.append("<table>");
 			htmlText.append("<tr>");
 			//headers
@@ -127,8 +130,9 @@ public class HtmlExporter {
 	 * Exports advanced query results 
 	 * 
 	 */
-	public void exportResults(IPagedQueryResultSet results, Session session) throws Exception{
+	public void exportResults(IPagedQueryResultSet results, String queryName, Session session) throws Exception{
 		try{
+			printHeader(queryName);
 			htmlText.append("<table>");
 			htmlText.append("<tr>");
 			//headers
@@ -167,6 +171,7 @@ public class HtmlExporter {
 	 * @param session
 	 */
 	public void exportResults(GriddedQuery query, IMemoryTableResultSet<QueryGridResultItem> results, Session session) throws Exception{
+		printHeader(query.getName());
 		htmlText.append("<table>");
 		htmlText.append("<tr>");
 
@@ -194,6 +199,7 @@ public class HtmlExporter {
 	 * @throws SQLException
 	 */
 	public void exportResults(SimpleQuery query,IMemoryTableResultSet<IResultItem> results,Session session) throws SQLException{
+		printHeader(query.getName());
 		htmlText.append("<table>");
 		htmlText.append("<tr>");
 
@@ -231,6 +237,7 @@ public class HtmlExporter {
 	 * @throws SQLException
 	 */
 	public void exportResults(Query query,SummaryQueryResult results,Session session) throws SQLException{
+		printHeader(query.getName());
 		htmlText.append("<table>");
 		htmlText.append("<tr>");
 		
@@ -267,7 +274,8 @@ public class HtmlExporter {
 	
 	}
 	
-	public void exportResults(org.wcs.smart.i2.query.SummaryQueryResult results,Session session) throws SQLException{
+	public void exportResults(org.wcs.smart.i2.query.SummaryQueryResult results, String queryName, Session session) throws SQLException{
+		printHeader(queryName);
 		htmlText.append("<table>");
 		htmlText.append("<tr>");
 		

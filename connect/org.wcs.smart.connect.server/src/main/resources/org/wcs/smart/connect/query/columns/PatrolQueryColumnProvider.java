@@ -140,6 +140,8 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		if (QueryColumnUtils.trackDistanceDirection(ops)){
 			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION,l));
 			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE,l));
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_RAWX,l));
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_RAWY,l));
 		}
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT,l));
 		if (QueryColumnUtils.trackObserver(ops)){
@@ -183,6 +185,8 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		if (QueryColumnUtils.trackDistanceDirection(ops)){
 			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION,l));
 			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE,l));
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_RAWX,l));
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_RAWY,l));
 		}
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED,l));

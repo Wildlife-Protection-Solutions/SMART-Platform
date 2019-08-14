@@ -99,6 +99,7 @@ public class LoginServlet extends HttpServlet {
 			userCnt = QueryFactory.buildCountQuery(s, SmartUser.class);
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw ex;
 		}finally{
 			s.getTransaction().rollback();
 		}

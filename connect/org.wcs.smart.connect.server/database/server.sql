@@ -436,3 +436,20 @@ END;
 $$ language 'plpgsql';
 CREATE TRIGGER dq_last_modified_trigger BEFORE UPDATE ON connect.data_queue FOR EACH ROW EXECUTE PROCEDURE connect.dq_update_modified_column();
 
+
+
+
+insert into connect.connect_version (version) values ('4.0');
+
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart', '4.0.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.intelligence', '4.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.intelligence.query', '2.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.plan', '4.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.cybertracker', '4.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.entity.query', '3.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.entity', '2.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.er', '2.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.er.query', '3.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.connect', '1.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.connect.dataqueue', '1.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.connect.cybertracker', '1.0');

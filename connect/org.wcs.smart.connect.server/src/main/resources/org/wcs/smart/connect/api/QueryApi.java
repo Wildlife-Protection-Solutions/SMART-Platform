@@ -176,7 +176,7 @@ public class QueryApi extends HttpServlet{
     @Path("/{queryuuid}")
 	@Operation(description="Runs a query and returns the results.")
 	public Response getQueryResults(@Parameter(description="the uuid of the query requested") @PathParam("queryuuid") String queryuuid, 
-			@Parameter(description="requested format, not all options makes sense for all query types: csv, shp, tif, geojson") @QueryParam("format") String format,
+			@Parameter(description="requested format, not all options makes sense for all query types: csv, shp, html, tif, geojson") @QueryParam("format") String format,
 			@Parameter(description="start date of query, in the form yyyy-MM-dd") @QueryParam("start_date") String start_date,
 			@Parameter(description="end date of query, in the form yyyy-MM-dd") @QueryParam("end_date") String end_date,
 			@Parameter(description="date field type, not all make sense for all queries: waypointdate, patrolstart, patrolend, missiontrackdate, missionstartdate, missionenddate, intellreceiveddate") @QueryParam("date_filter") String date_filter,
@@ -539,7 +539,7 @@ public class QueryApi extends HttpServlet{
 						.build(), new NoDisposeQueryResult());
 			}else if (format.equalsIgnoreCase(HtmlExporter.FORMAT_KEY)){
 				HtmlExporter exporter = new HtmlExporter(request.getLocale());
-				exporter.exportResults( (IntelObservationQueryResults)result, s);
+				exporter.exportResults( (IntelObservationQueryResults)result, query.getName(), s);
 				return new QueryResult( Response
 						.status(Status.OK)
 						.header("Content-Type", MediaType.TEXT_HTML) //$NON-NLS-1$
@@ -558,7 +558,7 @@ public class QueryApi extends HttpServlet{
 				return new QueryResult(writeText(outputFile), new NoDisposeQueryResult());
 			}else if (format.equalsIgnoreCase(HtmlExporter.FORMAT_KEY)){
 				HtmlExporter exporter = new HtmlExporter(request.getLocale());
-				exporter.exportResults( (IntelEntityRecordQueryResults)result, s);
+				exporter.exportResults( (IntelEntityRecordQueryResults)result, query.getName(), s);
 				return new QueryResult( Response
 						.status(Status.OK)
 						.header("Content-Type", MediaType.TEXT_HTML) //$NON-NLS-1$
@@ -580,7 +580,7 @@ public class QueryApi extends HttpServlet{
 				return new QueryResult(writeText(outputFile), new NoDisposeQueryResult());
 			}else if (format.equalsIgnoreCase(HtmlExporter.FORMAT_KEY)) {
 				HtmlExporter exporter = new HtmlExporter(request.getLocale());
-				exporter.exportResults( (org.wcs.smart.i2.query.SummaryQueryResult )result, s);
+				exporter.exportResults( (org.wcs.smart.i2.query.SummaryQueryResult )result, query.getName(), s);
 				return new QueryResult( Response
 						.status(Status.OK)
 						.header("Content-Type", MediaType.TEXT_HTML) //$NON-NLS-1$
