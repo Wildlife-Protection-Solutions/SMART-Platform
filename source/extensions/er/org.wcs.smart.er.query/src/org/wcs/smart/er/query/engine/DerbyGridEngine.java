@@ -341,7 +341,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			AttributeValueItem tmp = (AttributeValueItem)value;
 				
 			String strAggValue = "number_value"; //$NON-NLS-1$
-			strAgg = tmp.getAttributeKey();
+			strAgg = tmp.getAggregationKey();
 			if (tmp.getAttributeType() == AttributeType.LIST || tmp.getAttributeType() == AttributeType.TREE){
 				strAgg="count";  //$NON-NLS-1$
 				strAggValue = "value";  //$NON-NLS-1$
@@ -378,7 +378,12 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			sql.append( tablePrefix.get(Waypoint.class));
 			sql.append(".x,");  //$NON-NLS-1$
 			sql.append( tablePrefix.get(Waypoint.class));
-			sql.append(".y," + p1 + "," + p2 + "," + p3 + "," + p4 + ") as tile_id");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			sql.append(".y,"); //$NON-NLS-1$
+			sql.append( tablePrefix.get(Waypoint.class));
+			sql.append(".distance,");  //$NON-NLS-1$
+			sql.append( tablePrefix.get(Waypoint.class));
+			sql.append(".direction,"); //$NON-NLS-1$
+			sql.append( p1 + "," + p2 + "," + p3 + "," + p4 + ") as tile_id");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			 
 			sql.append(" FROM "); //$NON-NLS-1$
 			sql.append(tableNames.get(WaypointObservation.class));
@@ -493,7 +498,11 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			String p2 = addParameterValue(gridDef.getOriginX());
 			String p3 = addParameterValue(gridDef.getOriginY());
 			String p4 = addParameterValue(gridDef.getCellSize());
-			sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x," + tablePrefix.get(Waypoint.class) + ".y,"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			sql.append("smart.computeTileId("); //$NON-NLS-1$
+			sql.append(tablePrefix.get(Waypoint.class) + ".x,"); //$NON-NLS-1$
+			sql.append(tablePrefix.get(Waypoint.class) + ".y,"); //$NON-NLS-1$
+			sql.append(tablePrefix.get(Waypoint.class) + ".distance,"); //$NON-NLS-1$
+			sql.append(tablePrefix.get(Waypoint.class) + ".direction,");  //$NON-NLS-1$
 			sql.append(p1 + ", " + p2 + ", " + p3 + ", " + p4 + ") as tile_id"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			
 			sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class)); //$NON-NLS-1$ //$NON-NLS-2$

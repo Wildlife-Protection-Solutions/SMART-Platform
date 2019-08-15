@@ -131,6 +131,8 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			sb.append("smart.pointinpolygon(" );  //$NON-NLS-1$
 			sb.append(engine.tablePrefix(Waypoint.class) + ".x, ");  //$NON-NLS-1$
 			sb.append(engine.tablePrefix(Waypoint.class) + ".y, ");  //$NON-NLS-1$
+			sb.append(engine.tablePrefix(Waypoint.class) + ".distance, ");  //$NON-NLS-1$
+			sb.append(engine.tablePrefix(Waypoint.class) + ".direction, ");  //$NON-NLS-1$			
 			sb.append( filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(")");  //$NON-NLS-1$
 		}else if (filter.getGeometryType() == AreaFilterGeometryType.TRACK){

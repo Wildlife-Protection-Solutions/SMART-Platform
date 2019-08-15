@@ -144,8 +144,7 @@ public class QueryGeoResource extends IGeoResource {
 		if (adaptee.isAssignableFrom(FeatureSource.class) || adaptee.isAssignableFrom(SimpleFeatureSource.class) ) {
 			DataStore ds = ((QueryService) service).getDataStore(monitor);
 			if (ds != null) {
-				FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds
-						.getFeatureSource(dataType);
+				FeatureSource<SimpleFeatureType, SimpleFeature> fs = ds.getFeatureSource(dataType);
 				if (fs != null)
 					return adaptee.cast(fs);
 			} else {

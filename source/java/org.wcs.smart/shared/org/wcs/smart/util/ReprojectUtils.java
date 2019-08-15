@@ -66,9 +66,14 @@ public class ReprojectUtils {
 	 * 
 	 * @throws Exception
 	 */
-	public static String computeTileId(double x, double y, String destCrsWkt,
+	public static String computeTileId(double x, double y, Float distance, Float direction, String destCrsWkt,
 			double originX, double originY, double gridSize) throws Exception{
-		Coordinate c = reproject(x, y, destCrsWkt);
+		
+		Coordinate c = new Coordinate(x,y);
+		if (distance != null && direction != null) {
+			c = GeometryUtils.projectPoint(c, distance, direction);
+		}
+		c = reproject(c.x, c.y, destCrsWkt);
 		long tileidx = (long)Math.floor( (c.x - originX) / gridSize) + 1;
 		long tileidy = (long)Math.floor( (c.y - originY) / gridSize) + 1;
 

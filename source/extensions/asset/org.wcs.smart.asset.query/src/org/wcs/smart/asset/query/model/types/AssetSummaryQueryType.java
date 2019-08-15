@@ -39,6 +39,7 @@ import org.wcs.smart.asset.query.ui.definition.AssetSummaryGroupByValuePanel;
 import org.wcs.smart.asset.query.ui.editor.AssetSummaryEditor;
 import org.wcs.smart.asset.query.ui.itempanel.SummaryFilterPanel;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
@@ -132,6 +133,11 @@ public class AssetSummaryQueryType implements IQueryType {
 							items = new DropItem[]{ createAreaGroupByDropItem((Area)source) };
 						}else {
 							items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.TRACK) };
+						}
+					}
+					if (source instanceof AreaType) {
+						if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
+							items = new DropItem[]{ createAreaGroupByDropItem((AreaType)source) };
 						}
 					}
 					return items;					

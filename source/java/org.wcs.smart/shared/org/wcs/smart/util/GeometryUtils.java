@@ -132,9 +132,9 @@ public class GeometryUtils {
 	 * @param wkb
 	 * @return
 	 */
-	public static boolean pointInPolygon(Double x, Double y, Blob wkb){
+	public static boolean pointInPolygon(Double x, Double y, Float distance, Float direction, Blob wkb){
 		try {
-			return pointInPolygon(x,y,wkb.getBytes(1, (int)wkb.length()));
+			return pointInPolygon(x, y, distance, direction, wkb.getBytes(1, (int)wkb.length()));
 		} catch (SQLException e) {
 			throw new RuntimeException( e );
 		}
@@ -151,10 +151,16 @@ public class GeometryUtils {
 	 * @param wkb
 	 * @return
 	 */
-	public static boolean pointInPolygon(Double x, Double y, byte[] wkb){
+	public static boolean pointInPolygon(Double x, Double y, Float distance, Float direction, byte[] wkb){
 		if (wkb == null || x == null || y == null) return false;
+		Coordinate c = null;
+		if (distance != null && direction != null) {
+			c = projectPoint(new Coordinate(x,y), distance, direction);
+		}else {
+			c = new Coordinate(x,y);
+		}
 		Geometry geom = gFromWKB(wkb);
-		return geom.intersects(GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x,y)));
+		return geom.intersects(GeometryFactoryProvider.getFactory().createPoint(c));
 	}
 	
 	/**
@@ -190,7 +196,7 @@ public class GeometryUtils {
 		try{
 			Geometry g1 = gFromWKB(track.getBytes(1, (int)track.length()));
 			if (g1.getLength() == 0){
-				return pointInPolygon(g1.getCoordinate().x, g1.getCoordinate().y, area);
+				return pointInPolygon(g1.getCoordinate().x, g1.getCoordinate().y, null, null, area);
 			}
 			Geometry g2 = gFromWKB(area.getBytes(1, (int)area.length()));
 			return g1.intersects(g2);

@@ -1147,6 +1147,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					fromSql.append(" on smart.pointinpolygon("); //$NON-NLS-1$
 					fromSql.append(tablePrefix(Waypoint.class) + ".x, "); //$NON-NLS-1$
 					fromSql.append(tablePrefix(Waypoint.class) + ".y, "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(Waypoint.class) + ".direction, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
 					fromSql.append(" and ");//$NON-NLS-1$

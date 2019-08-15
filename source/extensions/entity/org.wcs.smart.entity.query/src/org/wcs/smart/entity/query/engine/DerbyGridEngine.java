@@ -258,6 +258,10 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 				sql.append(".x,");  //$NON-NLS-1$
 				sql.append( tablePrefix.get(Waypoint.class));
 				sql.append(".y,"); //$NON-NLS-1$
+				sql.append( tablePrefix.get(Waypoint.class));
+				sql.append(".distance,");  //$NON-NLS-1$
+				sql.append( tablePrefix.get(Waypoint.class));
+				sql.append(".direction,"); //$NON-NLS-1$
 				sql.append(addParameterValue(gridDef.getCrs().toWKT()) + ","); //$NON-NLS-1$
 				sql.append(addParameterValue(minX) + ","); //$NON-NLS-1$
 				sql.append(addParameterValue(minY) + ","); //$NON-NLS-1$
@@ -384,7 +388,10 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 				
 				sql.append("smart.computeTileId("); //$NON-NLS-1$
 				sql.append(tablePrefix.get(Waypoint.class)+ ".x,"); //$NON-NLS-1$
-				sql.append(tablePrefix.get(Waypoint.class) + ".y," + p1 + "," + p2 + "," + p3 + "," + p4 + ") as tile_id"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				sql.append(tablePrefix.get(Waypoint.class) + ".y,"); //$NON-NLS-1$
+				sql.append(tablePrefix.get(Waypoint.class)+ ".distance,"); //$NON-NLS-1$
+				sql.append(tablePrefix.get(Waypoint.class) + ".direction,"); //$NON-NLS-1$
+				sql.append( p1 + "," + p2 + "," + p3 + "," + p4 + ") as tile_id"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class)); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append(" JOIN " + dataTable  //$NON-NLS-1$
 						+ " on " + tablePrefix.get(WaypointObservation.class) //$NON-NLS-1$

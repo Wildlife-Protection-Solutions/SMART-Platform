@@ -1272,11 +1272,13 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					fromSql.append(" on smart.pointinpolygon("); //$NON-NLS-1$
 					fromSql.append(tablePrefix(Waypoint.class) + ".x, "); //$NON-NLS-1$
 					fromSql.append(tablePrefix(Waypoint.class) + ".y, "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(Waypoint.class) + ".direction, "); //$NON-NLS-1$					
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
 					fromSql.append(" and "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".ca_uuid = x'" + UuidUtils.uuidToString(query.getConservationArea().getUuid()) + "' "); //$NON-NLS-1$ //$NON-NLS-2$
-//						
+						
 					String p1 = addParameterValue(agb.getAreaType().name());
 					fromSql.append(" and "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".area_type = " + p1); //$NON-NLS-1$ 

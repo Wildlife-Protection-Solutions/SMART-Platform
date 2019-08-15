@@ -75,8 +75,12 @@ public class QueryFeatureSource extends ContentFeatureSource{
 
 	@Override
 	protected SimpleFeatureType buildFeatureType() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			if (entry.getTypeName().equals(QueryDataSource.WAYPOINT_TYPE)) return createWaypointSchema();
+			return null;
+		}catch (SchemaException ex) {
+			throw new IOException(ex);
+		}
 	}
 	
 	private SimpleFeatureType createWaypointSchema() throws SchemaException{

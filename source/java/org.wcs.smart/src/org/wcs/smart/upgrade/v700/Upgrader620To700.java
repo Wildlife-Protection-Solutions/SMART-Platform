@@ -101,7 +101,18 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 				"GRANT ALL PRIVILEGES ON smart.PATROL_ATTRIBUTE_VALUE TO manager", //$NON-NLS-1$
 				
 	            "CREATE FUNCTION smart.waypointWithin(x double, y double, distance real, bearing real, x1 double, y1 double, x2 double, y2 double) returns boolean LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.GeometryUtils.waypointWithin' PARAMETER STYLE JAVA NO SQL", //$NON-NLS-1$
-
+	            
+	            "DROP FUNCTION smart.pointInPolygon",
+	            "CREATE FUNCTION smart.pointInPolygon(x double, y double, distance real, direction real, wkb blob) returns boolean LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.GeometryUtils.pointInPolygon' PARAMETER STYLE JAVA NO SQL",
+	            "GRANT EXECUTE ON FUNCTION smart.pointInPolygon TO analyst",
+				"GRANT EXECUTE ON FUNCTION smart.pointInPolygon TO manager",
+				"GRANT EXECUTE ON FUNCTION smart.pointInPolygon TO dataentry",
+				
+	            "DROP FUNCTION smart.computeTileId",
+	            "CREATE FUNCTION smart.computeTileId(x double, y double, distance real, direction real, destCrsWkt varchar(32672), originX double, originY double, gridSize double) returns varchar(32672) LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.ReprojectUtils.computeTileId' PARAMETER STYLE JAVA NO SQL", 
+	            "GRANT EXECUTE ON FUNCTION smart.computeTileId TO analyst",
+				"GRANT EXECUTE ON FUNCTION smart.computeTileId TO manager",
+				"GRANT EXECUTE ON FUNCTION smart.computeTileId TO dataentry",
 		};
 
 		for (String s : sql) {
