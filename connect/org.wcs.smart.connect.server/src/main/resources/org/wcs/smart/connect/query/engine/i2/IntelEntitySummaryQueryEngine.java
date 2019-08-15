@@ -184,7 +184,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			sb.append(" WHERE "); //$NON-NLS-1$
 			sb.append(" b.area_type = :areaType "); //$NON-NLS-1$
 			sb.append(" AND "); //$NON-NLS-1$
-			sb.append(" smart.pointinpolygon(v.double_value, v.double_value2, b.geom)"); //$NON-NLS-1$
+			sb.append(" smart.pointinpolygon(v.double_value, v.double_value2, null, null, b.geom)"); //$NON-NLS-1$
 			sb.append(" AND b.ca_uuid in (:cas)"); //$NON-NLS-1$
 			
 			logme(sb);

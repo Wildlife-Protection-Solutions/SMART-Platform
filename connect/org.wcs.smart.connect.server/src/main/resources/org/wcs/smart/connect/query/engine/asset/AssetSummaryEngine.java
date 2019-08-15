@@ -831,7 +831,6 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 		
 		//do something here with sql
 		logger.finest(sql.toString());
-		System.out.println(sql.toString());
 		ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
 		return createValueResults(rs, groupBy, categoryItem.asString());
 	}
@@ -914,15 +913,18 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 					fromSql.append(" on smart.pointinpolygon("); //$NON-NLS-1$
 					fromSql.append(tablePrefix(Waypoint.class) + ".x, "); //$NON-NLS-1$
 					fromSql.append(tablePrefix(Waypoint.class) + ".y, "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(Waypoint.class) + ".direction, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
 					fromSql.append(" and "); //$NON-NLS-1$
-					fromSql.append(areaPrefix + ".ca_uuid = x'" + UuidUtils.uuidToString(query.getConservationArea().getUuid()) + "' "); //$NON-NLS-1$ //$NON-NLS-2$
-//						
+					
+					String pa = addParameterValue(query.getConservationArea().getUuid()); 
+					fromSql.append(areaPrefix + ".ca_uuid = " + pa + " "); //$NON-NLS-1$ //$NON-NLS-2$
+						
 					String p1 = addParameterValue(agb.getAreaType().name());
 					fromSql.append(" and "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".area_type = " + p1); //$NON-NLS-1$ 
-					
 					
 					groupBySql.append(key);
 				}

@@ -1,3 +1,165 @@
+-- DISTANCE & BEARING(DIRECTION) SUPPORT
+CREATE OR REPLACE FUNCTION smart.projectPoint(x double precision, y double precision, distance float, direction float) RETURNS GEOMETRY AS $$
+DECLARE
+ a double precision;
+ dR double precision;
+ rx double precision;
+ ry double precision;
+ prjy1 double precision;
+ prjx1 double precision;
+ prjy double precision;
+ prjx double precision;
+BEGIN
+  a := radians(direction);
+  dR := distance / 6378100;		
+  ry := radians(y);
+  rx := radians(x);
+  prjy1 := asin( sin(ry) * cos(dR) + cos(ry) * sin(dR) * cos(a) );
+  prjx1 := rx + atan2(sin(a) * sin(dR) * cos(ry), cos(dR) - sin(ry) * sin(prjy1));
+  prjx := degrees(prjx1);
+  prjy := degrees(prjy1);
+  RETURN ST_MAKEPOINT(prjx, prjy);
+END;
+$$LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION smart.pointinpolygon(x double precision, y double precision, distance float, direction float, geom bytea) RETURNS BOOLEAN AS $$
+BEGIN
+	IF (distance IS NOT NULL AND direction IS NOT NULL) THEN
+		RETURN ST_INTERSECTS(smart.projectPoint(x, y, distance, direction), st_geomfromwkb(geom));
+	END IF;
+	RETURN ST_INTERSECTS(ST_MAKEPOINT(x, y), st_geomfromwkb(geom));
+
+END;
+$$LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION smart.trackIntersects(geom1 bytea, geom2 bytea) RETURNS BOOLEAN AS $$
+DECLARE
+  ls geometry;
+  pnt geometry;
+BEGIN
+	ls := st_geomfromwkb(geom1);
+	if not st_isvalid(ls) and st_length(ls) = 0 then
+		pnt = st_pointn(ls, 1);
+		return smart.pointinpolygon(st_x(pnt),st_y(pnt), null, null, geom2);
+	else
+		RETURN ST_INTERSECTS(ls, st_geomfromwkb(geom2));
+	end if;
+
+END;
+$$LANGUAGE plpgsql;
+
+-- also update to support track multilinestrings
+CREATE OR REPLACE FUNCTION smart.trackIntersects(geom1 bytea, geom2 bytea) RETURNS BOOLEAN AS $$
+DECLARE
+  ls geometry;
+  pnt geometry;
+BEGIN
+	ls := st_geomfromwkb(geom1);
+	
+	IF (UPPER(st_geometrytype(ls)) = 'ST_MULTILINESTRING' ) THEN
+		FOR i in 1..ST_NumGeometries(ls) LOOP
+			IF (smart.trackIntersects(st_geometryn(ls, i), geom2)) THEN
+				RETURN true;
+			END IF;
+		END LOOP;
+	END IF;
+	if not st_isvalid(ls) and st_length(ls) = 0 then
+		pnt = st_pointn(ls, 1);
+		return smart.pointinpolygon(st_x(pnt),st_y(pnt), null, null, geom2);
+	else
+		RETURN ST_INTERSECTS(ls, st_geomfromwkb(geom2));
+	end if;
+
+END;
+$$LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION smart.computeHoursPoly(polygon bytea, linestring bytea) RETURNS double precision AS $$
+DECLARE
+  ls geometry;
+  p geometry;
+  value double precision;
+  ctime double precision;
+  clength double precision;
+  i integer;
+  pnttemp geometry;
+  pnttemp2 geometry;
+  lstemp geometry;
+BEGIN
+	ls := st_geomfromwkb(linestring);
+	p := st_geomfromwkb(polygon);
+	
+	IF (UPPER(st_geometrytype(ls)) = 'ST_MULTILINESTRING' ) THEN
+		ctime = 0;
+		FOR i in 1..ST_NumGeometries(ls) LOOP
+			ctime := ctime + smart.computeHoursPoly(polygon, st_geometryn(ls, i));
+		END LOOP;
+		RETURN ctime;
+	END IF;
+	
+	--wholly contained use entire time
+	IF not st_isvalid(ls) and st_length(ls) = 0 THEN
+		pnttemp = st_pointn(ls, 1);
+		IF (smart.pointinpolygon(st_x(pnttemp),st_y(pnttemp), null, null, p)) THEN
+			RETURN (st_z(st_endpoint(ls)) - st_z(st_startpoint(ls))) / 3600000.0;
+		END IF;
+		RETURN 0;
+	END IF;
+	
+	IF (st_contains(p, ls)) THEN
+		return (st_z(st_endpoint(ls)) - st_z(st_startpoint(ls))) / 3600000.0;
+	END IF;
+	
+	value := 0;
+	FOR i in 1..ST_NumPoints(ls)-1 LOOP
+		pnttemp := st_pointn(ls, i);
+		pnttemp2 := st_pointn(ls, i+1);
+		lstemp := st_makeline(pnttemp, pnttemp2);	
+		IF (NOT st_intersects(st_envelope(ls), st_envelope(lstemp))) THEN
+			--do nothing; outside envelope
+		ELSE
+			IF (ST_COVERS(p, lstemp)) THEN
+				value := value + st_z(pnttemp2) - st_z(pnttemp);
+			ELSIF (ST_INTERSECTS(p, lstemp)) THEN
+				ctime := st_z(pnttemp2) - st_z(pnttemp);
+				clength := st_distance(pnttemp, pnttemp2);
+				IF (clength = 0) THEN
+					--points are the same and intersect so include the entire time
+					value := value + ctime;
+				ELSE
+					--part in part out so linearly interpolate
+					value := value + (ctime * (st_length(st_intersection(p, lstemp)) / clength));
+				END IF;
+			END IF;
+		END IF;
+	END LOOP;
+	RETURN value / 3600000.0;
+END;
+$$LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION smart.computeTileId(x double precision, y double precision, distance float, direction float, srid integer, originX double precision, originY double precision, gridSize double precision) RETURNS VARCHAR AS $$
+DECLARE 
+  pnt geometry;
+  tx integer;
+  ty integer;
+BEGIN
+	IF (distance is not null and direction is not null) THEN
+		pnt := st_transform(st_setsrid(smart.projectPoint(x,y,distance,direction), 4326), srid);
+	ELSE
+		pnt := st_transform(st_setsrid(st_makepoint(x,y), 4326), srid);
+	END IF;
+	tx := floor ( (st_x(pnt) - originX ) / gridSize) + 1;
+	ty := floor ( (st_y(pnt) - originY ) / gridSize) + 1;
+	RETURN tx || '_' || ty;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION smart.pointinpolygon(double precision, double precision, bytea);
+DROP FUNCTION smart.computetileid (double precision, double precision, integer, double precision, double precision, double precision);
+
+------- CT PACKAGES
+
 create table connect.ct_package(
   uuid UUID not null,
   package_uuid UUID not null,
