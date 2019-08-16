@@ -405,11 +405,9 @@
             allPopups="false"
             locationURI="popup:org.wcs.smart.query.parts.itemlist">
          <command
-               commandId="org.wcs.smart.query.open"
-               label="%open.command.label"
-               mnemonic="%querylistview.popup.openquery.command.mnemonic"
-               style="push"
-               tooltip="%querylistview.popup.openquery.command.tooltip">
+               commandId="org.wcs.smart.query.openrun"
+               label="%run.command.label"
+               style="push">
             <visibleWhen
                   checkEnabled="false">
                <iterate>
@@ -420,9 +418,11 @@
             </visibleWhen>
          </command>
          <command
-               commandId="org.wcs.smart.query.openrun"
-               label="%run.command.label"
-               style="push">
+               commandId="org.wcs.smart.query.open"
+               label="%open.command.label"
+               mnemonic="%querylistview.popup.openquery.command.mnemonic"
+               style="push"
+               tooltip="%querylistview.popup.openquery.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <iterate>

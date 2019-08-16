@@ -47,7 +47,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.hibernate.Session;
@@ -71,6 +71,7 @@ import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SectionHeader;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
 
@@ -113,6 +114,12 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 	
 	private List<CmAttributeConfig> deletedConfigs = new ArrayList<>();
 	
+	
+	private ScrolledComposite propertiesComp, helpComp;
+	private Composite  stackPanel;
+	private SectionHeader propertySectionHeader; 
+	private HelpContentComposite helpPanel;
+	
 	public ConfigurableModelEditorDefaultTab(ConfigurableModelEditDialog dialog) {
 		this.dialog = dialog;
 	}
@@ -127,6 +134,15 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		return Messages.ConfigurableModelEditorDefaultTab_TabName;
 	}
 
+	private void selectPropertiesPage() {
+		((StackLayout)stackPanel.getLayout()).topControl = propertiesComp;
+		stackPanel.layout(true);
+	}
+	private void selectHelpPage() {
+		((StackLayout)stackPanel.getLayout()).topControl = helpComp;
+		stackPanel.layout(true);
+	}
+	
 	@Override
 	public Composite createTabContent(Composite parent) {
 		ConfigurableModel model = dialog.getModel();
@@ -225,22 +241,28 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		}		
 		modelTreeViewer.getControl().setMenu(treeMenu);
 		
-		Group area = new Group(rightPanel, SWT.NONE);
-		((Group)area).setText(Messages.ConfigurableModelEditDialog_PropertiesLabel);
 		
-		area.setLayout(new GridLayout());
-		area.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridLayout)area.getLayout()).marginWidth = 0;
-		((GridLayout)area.getLayout()).marginHeight = 0;
-		ScrolledComposite scrolled = new ScrolledComposite(area, SWT.V_SCROLL | SWT.H_SCROLL );
-		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		propertySectionHeader = new SectionHeader(rightPanel, SWT.None, 
+				new String[] {Messages.ConfigurableModelEditorDefaultTab_PropertiesTabLabel, Messages.ConfigurableModelEditorDefaultTab_HelpContentTabLabel},
+				new Listener[] {
+						e->selectPropertiesPage(),
+						e->selectHelpPage()
+				});
+		propertySectionHeader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		stackPanel = new Composite(rightPanel, SWT.NONE);
+		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		stackPanel.setLayout(new StackLayout());
+		
+		propertiesComp = new ScrolledComposite(stackPanel, SWT.V_SCROLL | SWT.H_SCROLL );
+		propertiesComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		// always show the focus control
-		scrolled.setShowFocusedControl(true);
-		scrolled.setExpandHorizontal(true);
-		scrolled.setExpandVertical(true);
+		propertiesComp.setShowFocusedControl(true);
+		propertiesComp.setExpandHorizontal(true);
+		propertiesComp.setExpandVertical(true);
 		
-		infoInnerPanel = new Composite(scrolled, SWT.NONE);
+		infoInnerPanel = new Composite(propertiesComp, SWT.NONE);
 
 		StackLayout layout = new StackLayout();
 		layout.marginHeight = 2;
@@ -299,8 +321,26 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		container.setWeights(new int[]{40,60});
 		
 
-		scrolled.setContent(infoInnerPanel);
-		scrolled.setMinSize(infoInnerPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		propertiesComp.setContent(infoInnerPanel);
+		propertiesComp.setMinSize(infoInnerPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		
+		
+		helpComp = new ScrolledComposite(stackPanel, SWT.V_SCROLL | SWT.H_SCROLL );
+		helpComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		// always show the focus control
+		helpComp.setShowFocusedControl(true);
+		helpComp.setExpandHorizontal(true);
+		helpComp.setExpandVertical(true);
+		
+		helpPanel = new HelpContentComposite(helpComp, ()->dialog.notifyChangesMade());
+		
+		helpComp.setContent(helpPanel);
+		helpComp.setMinSize(helpPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		propertySectionHeader.selectPanel(0);
+		
 		//set  language
 		((ConfigurableModelLabelProvider)modelTreeViewer.getLabelProvider()).setLanguage(languageViewer.getCurrentSelection());
 		modelTreeViewer.refresh();
@@ -328,7 +368,9 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 			CmNodeInfoComposite cmp = node.isGroup() ? groupNodeComposite : categoryNodeComposite;
 			cmp.setSourceObject(node, languageViewer.getCurrentSelection());
 			((StackLayout)infoInnerPanel.getLayout()).topControl = cmp;
-			
+			propertySectionHeader.selectPanel(0);
+			propertySectionHeader.enableTab(1, false);
+			helpPanel.setAttribute(null);
 		} else if (obj instanceof CmAttribute) {
 			CmAttribute attr = (CmAttribute)obj;
 			CmAttributeInfoComposite attrComposite = attributeComposites.get(attr.getAttribute().getType());
@@ -338,13 +380,19 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 			} else {
 				((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
 			}
-
+			propertySectionHeader.enableTab(1, true);
+			helpPanel.setAttribute((CmAttribute)obj);
 		} else if (obj instanceof CmRootNode) {
 			rootNodeComposite.setSourceObject((CmRootNode)obj, languageViewer.getCurrentSelection());
 			((StackLayout)infoInnerPanel.getLayout()).topControl = rootNodeComposite;
-			
+			propertySectionHeader.selectPanel(0);
+			propertySectionHeader.enableTab(1, false);
+			helpPanel.setAttribute(null);
 		} else {
 			((StackLayout)infoInnerPanel.getLayout()).topControl = emptyComposite;
+			propertySectionHeader.selectPanel(0);
+			propertySectionHeader.enableTab(1, false);
+			helpPanel.setAttribute(null);
 		}
 		infoInnerPanel.layout();
 		

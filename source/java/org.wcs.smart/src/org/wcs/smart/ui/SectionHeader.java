@@ -148,6 +148,12 @@ public class SectionHeader extends Composite{
 		WidgetElement.applyStyles(this, true);
 	}
 	
+	public void enableTab(int index, boolean enable) {
+		links.get(index).setEnabled(enable);
+		if (!enable) links.get(index).setForeground(getShell().getDisplay().getSystemColor(SWT.COLOR_GRAY));
+		if (enable) links.get(index).setForeground(null);
+	}
+	
 	private CLabel createTab(String text, Listener action) {
 		
 		CLabel tab = new CLabel(this, SWT.NONE);

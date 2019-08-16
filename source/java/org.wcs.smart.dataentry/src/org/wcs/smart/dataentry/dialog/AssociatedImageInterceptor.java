@@ -25,9 +25,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.EmptyInterceptor;
@@ -36,9 +39,11 @@ import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.hibernate.type.Type;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * An interceptor for images associated with some of the objects.
@@ -47,6 +52,10 @@ import org.wcs.smart.dataentry.model.IImageAssociatedObject;
  * 
  * Must be applied to any hibernate session that modifies entity with associated image
  * in order for image files to be saved/removed correctly from the data store.
+ * 
+ * This interceptor also deals with saving the CmAttribute help images to 
+ * the filestore.
+ * 
  * 
  * @author elitvin
  * @since 4.0.0
@@ -58,7 +67,7 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 	//track files to delete/save; perform actions
 	//after transaction has been committed
 	//NOTE: we are interested only in last action for the object as it overwrites any previous activities
-	private Map<UUID, IOperation> operations = new HashMap<>();
+	private List<IOperation> operations = new ArrayList<>();
 	
 	protected boolean shouldIntercept(Object entity) {
 		return (entity instanceof IImageAssociatedObject);
@@ -67,7 +76,7 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 	@Override
 	public void afterTransactionCompletion(Transaction tx) {
 		if (tx.getStatus() == TransactionStatus.COMMITTED) {
-			for (IOperation op : operations.values()) {
+			for (IOperation op : operations) {
 				op.execute();
 			}
 		}
@@ -140,21 +149,31 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 		if (shouldIntercept(entity)) {
 			handleSaveOrUpdate((IImageAssociatedObject)entity);
 		}
+		if (entity instanceof CmAttributeOption) {
+			handleSaveOrUpdate( ((CmAttributeOption)entity).getCmAttribute());
+		}
 		return false;
 	}
 
 	
 	private void handleSaveOrUpdate(IImageAssociatedObject imgObject) {
-		IOperation lastOp = operations.get(imgObject.getUuid());
-		if (!(lastOp instanceof DeleteOperation)) {
-			//in case this object was deleted other operations do not make sense
-			operations.put(imgObject.getUuid(), new SaveOperation(imgObject));
-		}
+		operations.add(new SaveOperation(imgObject));
 	}
 
 	private void handleDelete(IImageAssociatedObject imgObject) {
 		File file = new File(imgObject.getImagePersistenceLocation());
-		operations.put(imgObject.getUuid(), new DeleteOperation(file));
+		
+		Object t = imgObject;
+		if (t instanceof CmAttributeOption) {
+			t = ((CmAttributeOption)t).getCmAttribute();
+		}
+		if (t instanceof CmAttribute) {
+			Path helpImage = ((CmAttribute) t).getHelpImage();
+			if (!helpImage.equals(((CmAttribute) t).getImportHelpFile()))
+				operations.add(new DeleteOperation(helpImage.toFile()));
+		}
+		
+		operations.add(new DeleteOperation(file));
 	}
 
 	/**
@@ -268,6 +287,60 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 			//reset img object file.  If we copy into the system this call will
 			//reset the object reference to the file copied in
 			imgObject.resetImageFile();
+			
+			
+			
+			if (imgObject instanceof CmAttribute || imgObject instanceof CmAttributeOption) {
+				//DO the same for the help image
+				CmAttribute att = null;
+				if (imgObject instanceof CmAttributeOption) {
+					att = ((CmAttributeOption)imgObject).getCmAttribute();
+				}else {
+					att = (CmAttribute)imgObject;
+				}
+
+				if (att.getImportHelpFile() != null) {
+					//delete all existinf iles
+					deleteFiles(Paths.get(att.getNode().getModel().getFileDataStoreLocation()), att.getHelpImageFileRootName());
+					//copy import to image path
+					try {
+						Path imagePath = Paths.get(att.getNode().getModel().getFileDataStoreLocation())
+								.resolve(att.getHelpImageFileRootName() + "." + att.getHelpFormat()); //$NON-NLS-1$
+						if (!Files.exists(imagePath.getParent())) Files.createDirectories(imagePath.getParent());
+						Files.copy(att.getImportHelpFile(), imagePath, StandardCopyOption.REPLACE_EXISTING);
+					} catch (IOException e) {
+						SmartPlugIn.log("Could not copy file: " + from.toString() + " to " + to.toString(), e); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+					att.setImportHelpFile(null);
+				}else if (att.getHelpFormat() == null) {
+					//no image; we want to delete any existing images that may be set for the node
+					deleteFiles(Paths.get(att.getNode().getModel().getFileDataStoreLocation()), att.getHelpImageFileRootName());
+				}
+			}
+		}
+	}
+	
+	private void deleteFiles(Path searchPath, String filename) {
+		
+		if (Files.exists(searchPath)) {
+			//delete any files in dir searchPath with the name fname
+			List<Path> toDelete = new ArrayList<>();
+			try(Stream<Path> kids = Files.list(searchPath)){
+				kids.forEach(kid->{
+					if (SharedUtils.getFilenameWithoutExtension(kid.getFileName().toString()).equals(filename)) {
+						toDelete.add(kid);
+					}
+				});
+			} catch (IOException e) {
+				SmartPlugIn.log("Could not list files in directory: " + searchPath.toString(), e); //$NON-NLS-1$ 
+			}
+			for (Path d : toDelete) {
+				try {
+					Files.deleteIfExists(d);
+				} catch (IOException e) {
+					SmartPlugIn.log("Could not delete file:" + d.toString(), e); //$NON-NLS-1$ 
+				}
+			}
 		}
 	}
 }

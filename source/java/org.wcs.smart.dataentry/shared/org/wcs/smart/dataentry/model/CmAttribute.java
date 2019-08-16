@@ -22,6 +22,8 @@
 package org.wcs.smart.dataentry.model;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,6 +46,7 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.model.CmAttributeOption.EnterOnceType;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -54,13 +57,20 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name = "smart.cm_attribute")
 public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 
+	public enum HelpImageLocation{
+		BEFORE,
+		AFTER
+	}
+	
 	private CmNode node;
 	private Attribute attribute;
 	private Map<String, CmAttributeOption> cmAttributeOptions;
 	private int order;
 	
 	private CmAttributeConfig config = null;
-
+	
+	@Transient
+	private Path importHelpFile;
 	@Transient
 	private File imageFile;
 	
@@ -110,7 +120,76 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 	public void setConfig(CmAttributeConfig config) {
 		this.config = config;
 	}
+	
 
+	@Transient
+	private String getStringOption(String optionid) {
+		CmAttributeOption op = getCmAttributeOptions().get(optionid);
+		if (op == null) return null;
+		return op.getStringValue();
+	}
+	@Transient
+	public void setStringOption(String optionid, String value) {
+		CmAttributeOption op = getCmAttributeOptions().get(optionid);
+		if (op == null) {
+			op = new CmAttributeOption();
+			op.setOptionId(optionid);
+			op.setCmAttribute(this);
+			getCmAttributeOptions().put(optionid, op);
+		}
+		op.setStringValue(value);
+	}
+
+	@Transient
+	public String getHelpText() {
+		return getStringOption(CmAttributeOption.ID_HELP_TEXT);
+	}
+	@Transient
+	public void setHelpText(String helpText) {
+		setStringOption(CmAttributeOption.ID_HELP_TEXT, helpText);
+	}
+	@Transient	
+	public String getHelpFormat() {
+		return getStringOption(CmAttributeOption.ID_HELP_IMAGE_FORMAT);
+	}
+	@Transient
+	public void setHelpFormat(String helpImageFormat) {
+		setStringOption(CmAttributeOption.ID_HELP_IMAGE_FORMAT, helpImageFormat);
+	}
+	@Transient	
+	public HelpImageLocation getHelpImageLocation() {
+		String v = getStringOption(CmAttributeOption.ID_HELP_IMAGE_LOCATION);
+		if (v == null) return null;
+		return HelpImageLocation.valueOf(v);
+	}
+	
+	@Transient
+	public void setHelpImageLocation(HelpImageLocation location) {
+		setStringOption(CmAttributeOption.ID_HELP_IMAGE_LOCATION, location.name());
+	}
+	
+	@Transient
+	public Path getHelpImage() {
+		if (getHelpFormat() == null) return null;
+		Path p = Paths.get(getNode().getModel().getFileDataStoreLocation())
+				.resolve(getHelpImageFileRootName() + "." + getHelpFormat()); //$NON-NLS-1$
+		if (!Files.exists(p)) return null;
+		return p;
+	}
+	
+	@Transient
+	public Path getImportHelpFile() {
+		return this.importHelpFile;
+	}
+	@Transient
+	public void setImportHelpFile(Path importHelpFile) {
+		if (importHelpFile != null) {
+			getCmAttributeOptions().put(CmAttributeOption.ID_HELP_IMAGE_FORMAT, null);
+			setHelpFormat(SharedUtils.getFilenameExtension(importHelpFile.getFileName().toString()));
+		}
+		this.importHelpFile = importHelpFile;
+	}
+	
 	/**
 	 * 
 	 * @return the nodes for the custom tree or the default tree depending on
@@ -253,4 +332,14 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 		this.imageFile = null;
 	}
 
+	/**
+	 * The root filename for the help image associated 
+	 * with this node.  This will be cm_help_<uuid>.  The image
+	 * extension is stored as an attribute see getHelpImageFormat.
+	 * @return
+	 */
+	@Transient
+	public String getHelpImageFileRootName() {
+		return "cm_help_" + UuidUtils.uuidToString(getUuid()); //$NON-NLS-1$
+	}
 }

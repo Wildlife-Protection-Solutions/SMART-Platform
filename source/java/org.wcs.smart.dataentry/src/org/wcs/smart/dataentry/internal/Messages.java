@@ -115,6 +115,8 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditDialog_SaveMessage;
 	public static String ConfigurableModelEditDialog_SaveTitle;
 	public static String ConfigurableModelEditDialog_Title;
+	public static String ConfigurableModelEditorDefaultTab_HelpContentTabLabel;
+	public static String ConfigurableModelEditorDefaultTab_PropertiesTabLabel;
 	public static String ConfigurableModelEditorDefaultTab_TabName;
 	public static String ConfigurableModelFactory_BlankCmTaskName;
 	public static String ConfigurableModelFactory_ProcessCmNode;
@@ -196,6 +198,16 @@ public class Messages extends NLS {
 	public static String EditTreeDialog_NewGroupTooltip;
 	public static String EditTreeDialog_NoPropertiesToDisplay;
 	public static String EditTreeDialog_TreeNodeProperties;
+	public static String HelpContentComposite_AllFilesOp;
+	public static String HelpContentComposite_ClearImageBtn;
+	public static String HelpContentComposite_DisplayAfterOp;
+	public static String HelpContentComposite_DisplayBeforeTextOp;
+	public static String HelpContentComposite_FormatNotSupportedText;
+	public static String HelpContentComposite_ImageFilesOp;
+	public static String HelpContentComposite_ImageLblSection;
+	public static String HelpContentComposite_NoImageText;
+	public static String HelpContentComposite_SelectImageBtn;
+	public static String HelpContentComposite_TextSectionHeader;
 	public static String ImageSelectionControl_BetaCtFormat;
 	public static String ImageSelectionControl_Button_Load;
 	public static String ImageSelectionControl_CustomIcon;
