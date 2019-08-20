@@ -156,7 +156,14 @@ public enum PatrolPackageExporter {
 				
 				Path cmFile = tempDir.resolve(CM_MODEL_FILE);
 				
+				
+				//convert to xml
 				org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convert(modelToExport, true, sub.split(1));
+
+				//create and add help files
+				toIncludeInZip.addAll( CtJsonExportUtils.addHelpFiles(xmlModel, tempDir) );
+
+				//write xml
 				try(OutputStream out = Files.newOutputStream(cmFile)){
 					CmXmlManager.writeDataModel(xmlModel, out);
 				}

@@ -22,13 +22,16 @@
 package org.wcs.smart.cybertracker.export;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,9 +58,14 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.ProfileOptionID;
 import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
+import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttribute.HelpImageLocation;
+import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.ScreenOptionUuid;
+import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
+import org.wcs.smart.dataentry.model.xml.generated.NodeType;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
@@ -680,5 +688,59 @@ public class CtJsonExportUtils {
 		JSONObject typeOp = new JSONObject();
 		typeOp.put(ScreensUtil.RESULT_DATATYPE, dataType);
 		return typeOp;
+	}
+	
+	public static List<File> addHelpFiles(org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel, Path targetDir) throws IOException {
+		//create html help files 
+		List<NodeType> xmlnodes = new ArrayList<>();
+		xmlnodes.addAll(xmlModel.getNodes().getNode());
+		List<File> filesToAdd = new ArrayList<>();
+		
+		while (!xmlnodes.isEmpty()) {
+			NodeType l = xmlnodes.remove(0);
+			xmlnodes.addAll(l.getNode());
+
+			for (org.wcs.smart.dataentry.model.xml.generated.AttributeType at : l.getAttribute()) {
+
+				String imageLocation = null;
+				String helpText = null;
+				String imageFormat = null;
+				UUID uuid = UuidUtils.stringToUuid(at.getId());
+
+				for (AttributeOptionType op : at.getOption()) {
+					if (op.getId().equals(CmAttributeOption.ID_HELP_IMAGE_FORMAT))
+						imageFormat = op.getStringValue();
+					if (op.getId().equals(CmAttributeOption.ID_HELP_IMAGE_LOCATION))
+						imageLocation = op.getStringValue();
+					if (op.getId().equals(CmAttributeOption.ID_HELP_TEXT))
+						helpText = op.getStringValue();
+				}
+				if (helpText == null && imageFormat == null)
+					continue;
+
+				if ((helpText != null && !helpText.strip().isEmpty()) || imageFormat != null) {
+					CmAttribute temp = new CmAttribute();
+					temp.setUuid(uuid);
+					temp.setHelpFormat(imageFormat);
+					temp.setHelpText(helpText);
+					temp.setHelpImageLocation(HelpImageLocation.valueOf(imageLocation));
+
+					String html = temp.getHelpTextAsHtml(false);
+					if (html == null || html.isEmpty())
+						continue;
+
+					Path p = targetDir.resolve(Paths.get("cm_help_" + UuidUtils.uuidToString(temp.getUuid()) + ".html")); //$NON-NLS-1$ //$NON-NLS-2$
+					Files.writeString(p, html);
+					filesToAdd.add(p.toFile());
+					
+					AttributeOptionType op = new AttributeOptionType();
+					op.setId("HELP_HTML_FILE"); //$NON-NLS-1$
+					op.setStringValue(p.getFileName().toString());
+					at.getOption().add(op);
+
+				}
+			}
+		}
+		return filesToAdd;
 	}
 }

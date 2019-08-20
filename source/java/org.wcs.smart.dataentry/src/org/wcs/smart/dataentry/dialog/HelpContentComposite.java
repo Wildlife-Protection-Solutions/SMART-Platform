@@ -24,12 +24,24 @@ package org.wcs.smart.dataentry.dialog;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -37,72 +49,137 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite.IModelChangedListener;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttribute.HelpImageLocation;
+import org.wcs.smart.dataentry.model.CmNode;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Composite for collecting help info for configurable model
- * attributes.
+ * Composite for collecting help info for configurable model attributes.
  * 
  * @author Emily
  * @since 7.0.0
  *
  */
-public class HelpContentComposite extends Composite{
+public class HelpContentComposite extends Composite {
+
+	private static int IMAGE_SIZE = 150;
+
+	private HelpSettings copyOptions = null;
 
 	private Text txtText;
 	private ComboViewer cmbImageLoc;
 	private Canvas lblImg;
-	
+
 	private CmAttribute attribute;
-	
+
 	private Image imgCache;
 	private Path imgPath;
-	
+
 	private IModelChangedListener listener;
-	
+
+	private ToolBar tb;
+	private ToolItem tiCopy, tiPaste, tiAssignAll, tiImport;
+
+	private Shell previewShell;
+	private Shell importShell;
+
 	public HelpContentComposite(Composite parent, IModelChangedListener listener) {
 		super(parent, SWT.NONE);
 		this.listener = listener;
 		createContent();
 		this.attribute = null;
 	}
-	
+
 	private void createContent() {
 		setLayout(new GridLayout(1, false));
-		((GridLayout)getLayout()).marginWidth = 0;
-		((GridLayout)getLayout()).marginHeight = 0;
-		
-		SmartUiUtils.createHeaderLabel(this, Messages.HelpContentComposite_ImageLblSection);
-		
+		((GridLayout) getLayout()).marginWidth = 0;
+		((GridLayout) getLayout()).marginHeight = 0;
+
+		Composite header = SmartUiUtils.createHeaderLabel(this, Messages.HelpContentComposite_ImageLblSection);
+		header.setLayout(new GridLayout(2, false));
+		((GridLayout) header.getLayout()).marginHeight = 0;
+		header.getChildren()[0].setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+		tb = new ToolBar(header, SWT.FLAT);
+
+		tiCopy = new ToolItem(tb, SWT.NONE);
+		tiCopy.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_COPY));
+		tiCopy.setToolTipText(Messages.HelpContentComposite_copytooltip);
+		tiCopy.setEnabled(true);
+		tiCopy.addListener(SWT.Selection, e -> {
+			copyOptions = new HelpSettings(txtText.getText(),
+					(HelpImageLocation) cmbImageLoc.getStructuredSelection().getFirstElement(), imgPath);
+			tiPaste.setEnabled(true);
+		});
+
+		tiPaste = new ToolItem(tb, SWT.NONE);
+		tiPaste.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_PASTE));
+		tiPaste.setToolTipText(Messages.HelpContentComposite_pastetooltip);
+		tiPaste.setEnabled(false);
+		tiPaste.addListener(SWT.Selection, e -> {
+			if (copyOptions == null)
+				return;
+			txtText.setText(copyOptions.text);
+			attribute.setHelpText(copyOptions.text);
+			cmbImageLoc.setSelection(new StructuredSelection(copyOptions.location));
+			attribute.setHelpImageLocation(copyOptions.location);
+
+			attribute.setImportHelpFile(copyOptions.imagePath);
+			refreshImage();
+			listener.modelChanged();
+		});
+
+		tiAssignAll = new ToolItem(tb, SWT.NONE);
+		tiAssignAll.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CREATECOPY_ICON));
+		tiAssignAll.setToolTipText(Messages.HelpContentComposite_assignalltooltip);
+		tiAssignAll.addListener(SWT.Selection, e -> assignAll());
+
+		tiImport = new ToolItem(tb, SWT.NONE);
+		tiImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
+		tiImport.setToolTipText(Messages.HelpContentComposite_importhelptooltip);
+		tiImport.addListener(SWT.Selection, e -> importHelp());
+
 		Composite temp = new Composite(this, SWT.NONE);
 		temp.setLayout(new GridLayout(2, false));
-		((GridLayout)temp.getLayout()).marginWidth = 0;
-		((GridLayout)temp.getLayout()).marginHeight = 0;
+		((GridLayout) temp.getLayout()).marginWidth = 0;
+		((GridLayout) temp.getLayout()).marginHeight = 0;
 		temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		
+
 		lblImg = new Canvas(temp, SWT.BORDER);
-		lblImg.setLayoutData(new GridData(SWT.TOP, SWT.FILL, false, false));
-		((GridData)lblImg.getLayoutData()).widthHint = 150;
-		((GridData)lblImg.getLayoutData()).heightHint = 150;
-		
-		lblImg.addListener(SWT.Dispose, e->{
+		lblImg.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData) lblImg.getLayoutData()).widthHint = IMAGE_SIZE;
+		((GridData) lblImg.getLayoutData()).heightHint = IMAGE_SIZE;
+
+		lblImg.addListener(SWT.Dispose, e -> {
 			if (imgCache != null) {
 				imgCache.dispose();
 				imgCache = null;
 			}
 		});
-		lblImg.addListener(SWT.Paint, e->{
+		lblImg.addListener(SWT.Paint, e -> {
 			if (imgPath == null) {
 				String text = Messages.HelpContentComposite_NoImageText;
 				Point size = e.gc.textExtent(text);
-				e.gc.drawText(text, (lblImg.getBounds().width - size.x) / 2, (lblImg.getBounds().height / 2)- size.y);
+				e.gc.drawText(text, (lblImg.getBounds().width - size.x) / 2, (lblImg.getBounds().height / 2) - size.y);
 				return;
 			}
 			if (imgCache != null) {
@@ -111,46 +188,50 @@ public class HelpContentComposite extends Composite{
 			}
 			String text = Messages.HelpContentComposite_FormatNotSupportedText;
 			Point size = e.gc.textExtent(text);
-			e.gc.drawText(text, (lblImg.getBounds().width - size.x) / 2, (lblImg.getBounds().height / 2)- size.y);
+			e.gc.drawText(text, (lblImg.getBounds().width - size.x) / 2, (lblImg.getBounds().height / 2) - size.y);
 		});
-		
+
 		Composite btnComp = new Composite(temp, SWT.NONE);
 		btnComp.setLayout(new GridLayout());
-		((GridLayout)btnComp.getLayout()).marginWidth = 0;
-		((GridLayout)btnComp.getLayout()).marginHeight = 0;
-		btnComp.setLayoutData(new GridData(SWT.TOP, SWT.FILL, false, false));
-		
+		((GridLayout) btnComp.getLayout()).marginWidth = 0;
+		((GridLayout) btnComp.getLayout()).marginHeight = 0;
+		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
 		cmbImageLoc = new ComboViewer(btnComp, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbImageLoc.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbImageLoc.setContentProvider(ArrayContentProvider.getInstance());
 		cmbImageLoc.setInput(CmAttribute.HelpImageLocation.values());
 		cmbImageLoc.setLabelProvider(new LabelProvider() {
 			@Override
 			public String getText(Object element) {
-				switch(((CmAttribute.HelpImageLocation)element)) {
-				case BEFORE: return Messages.HelpContentComposite_DisplayBeforeTextOp;
-				case AFTER: return Messages.HelpContentComposite_DisplayAfterOp;
+				switch (((CmAttribute.HelpImageLocation) element)) {
+				case BEFORE:
+					return Messages.HelpContentComposite_DisplayBeforeTextOp;
+				case AFTER:
+					return Messages.HelpContentComposite_DisplayAfterOp;
 				}
 				return super.getText(element);
 			}
 		});
 		cmbImageLoc.setSelection(new StructuredSelection(CmAttribute.HelpImageLocation.BEFORE));
-		cmbImageLoc.addSelectionChangedListener(e->{
-			if (attribute == null) return;
+		cmbImageLoc.addSelectionChangedListener(e -> {
+			if (attribute == null)
+				return;
 			attribute.setHelpImageLocation((HelpImageLocation) cmbImageLoc.getStructuredSelection().getFirstElement());
 			listener.modelChanged();
 		});
-		
+
 		Button btnSelect = new Button(btnComp, SWT.NONE);
 		btnSelect.setText(Messages.HelpContentComposite_SelectImageBtn);
 		btnSelect.setBackground(getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		btnSelect.addListener(SWT.Selection, e->selectImageFile());
+		btnSelect.addListener(SWT.Selection, e -> selectImageFile());
 		btnSelect.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
+
 		Button btnClear = new Button(btnComp, SWT.NONE);
 		btnClear.setText(Messages.HelpContentComposite_ClearImageBtn);
 		btnClear.setBackground(getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnClear.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnClear.addListener(SWT.Selection, e->{
+		btnClear.addListener(SWT.Selection, e -> {
 			if (attribute != null) {
 				attribute.setImportHelpFile(null);
 				attribute.setHelpFormat(null);
@@ -158,17 +239,37 @@ public class HelpContentComposite extends Composite{
 			refreshImage();
 			listener.modelChanged();
 		});
-		
+
 		SmartUiUtils.createHeaderLabel(this, Messages.HelpContentComposite_TextSectionHeader);
 
 		txtText = new Text(this, SWT.V_SCROLL | SWT.WRAP | SWT.BORDER);
 		txtText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		txtText.addListener(SWT.Modify, e->{
-			if (attribute == null) return;
+		txtText.addListener(SWT.Modify, e -> {
+			if (attribute == null)
+				return;
 			attribute.setHelpText(txtText.getText());
 			listener.modelChanged();
 		});
-		
+
+		Button btnPreview = new Button(this, SWT.NONE);
+		btnPreview.setText(Messages.HelpContentComposite_previewbutton);
+		btnPreview.setBackground(getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnPreview.addListener(SWT.Selection, e -> preview());
+		btnPreview.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+	}
+
+	private void preview() {
+		if (previewShell == null || previewShell.isDisposed()) {
+			previewShell = new Shell(getShell());
+			previewShell.setLayout(new GridLayout());
+			((GridLayout) previewShell.getLayout()).marginWidth = 0;
+			((GridLayout) previewShell.getLayout()).marginHeight = 0;
+			Browser b = new Browser(previewShell, SWT.NONE);
+			b.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			previewShell.setSize(400, 600);
+		}
+		((Browser) previewShell.getChildren()[0]).setText(attribute.getHelpTextAsHtml(true), true);
+		previewShell.open();
 	}
 
 	public void setAttribute(CmAttribute attribute) {
@@ -177,21 +278,200 @@ public class HelpContentComposite extends Composite{
 			imgCache.dispose();
 			imgCache = null;
 		}
-		
+
 		if (attribute != null) {
 			txtText.setText(attribute.getHelpText() == null ? "" : attribute.getHelpText()); //$NON-NLS-1$
 			if (attribute.getHelpImageLocation() != null) {
 				cmbImageLoc.setSelection(new StructuredSelection(attribute.getHelpImageLocation()));
 			}
-			
-		}else {
+			tiAssignAll.setToolTipText(MessageFormat
+					.format(Messages.HelpContentComposite_assignalltooltip2, attribute.getName()));
+		} else {
 			txtText.setText(""); //$NON-NLS-1$
 			cmbImageLoc.setSelection(new StructuredSelection(CmAttribute.HelpImageLocation.BEFORE));
 		}
 		refreshImage();
-		
 	}
+
+	private void importHelp() {
+		importShell = new Shell(getShell(), SWT.PRIMARY_MODAL | SWT.RESIZE);
+		importShell.setLayout(new GridLayout(2, true));
+		((GridLayout)importShell.getLayout()).marginWidth = 0;
+		((GridLayout)importShell.getLayout()).marginHeight = 0;
+
+		TableViewer lstAttribute = new TableViewer(importShell, SWT.V_SCROLL | SWT.H_SCROLL);
+		lstAttribute.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		lstAttribute.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof CmAttribute) {
+					StringBuilder sb = new StringBuilder();
+					CmAttribute a = (CmAttribute)element;
+					sb.append(a.getName());
+					sb.append(" ("); //$NON-NLS-1$
+					List<String> cats = new ArrayList<>();
+					CmNode node = a.getNode();
+					while(node != null) {
+						cats.add(0, node.getName());
+						node = node.getParent();
+					}
+					for (String s : cats) sb.append(s + " - "); //$NON-NLS-1$
+					sb.deleteCharAt(sb.length() - 1);
+					sb.deleteCharAt(sb.length() - 1);
+					sb.deleteCharAt(sb.length() - 1);
+					sb.append(")"); //$NON-NLS-1$
+					return sb.toString();
+				}
+				return super.getText(element);
+			}
+		});
+		lstAttribute.setContentProvider(ArrayContentProvider.getInstance());
+		lstAttribute.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				Object x = lstAttribute.getStructuredSelection().getFirstElement();
+				if (x == null) return;
+				if (!(x instanceof CmAttribute)) return;
+				CmAttribute a = (CmAttribute)x;
+				attribute.setHelpText(a.getHelpText());
+				attribute.setHelpImageLocation(a.getHelpImageLocation());
+				attribute.setImportHelpFile(a.getHelpImage());
+				
+				txtText.setText(attribute.getHelpText() == null ? "" : attribute.getHelpText()); //$NON-NLS-1$
+				if (attribute.getHelpImageLocation() != null) {
+					cmbImageLoc.setSelection(new StructuredSelection(attribute.getHelpImageLocation()));
+				}
+				imgPath = attribute.getImportHelpFile();
+				refreshImage();
+				listener.modelChanged();
+				importShell.dispose();
+				importShell = null;
+			}
+		});
+		Composite wrapper = new Composite(importShell, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		TableViewer lstCm = new TableViewer(wrapper, SWT.NONE);
+		lstCm.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		lstCm.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof ConfigurableModel) return ((ConfigurableModel)element).getName();
+				return super.getText(element);
+			}
+		});
+		TableColumn tc = new TableColumn(lstCm.getTable(), SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(1));
+		wrapper.setLayout(layout);
+		lstCm.setContentProvider(ArrayContentProvider.getInstance());
+		lstCm.setInput(DialogConstants.LOADING_TEXT);
+		lstCm.addSelectionChangedListener(e->{
+			lstAttribute.setInput(DialogConstants.LOADING_TEXT);
+			
+			Job j = new Job(Messages.HelpContentComposite_loadingattributesjob) {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					Object[] x = new Object[] {null};
+					Display.getDefault().syncExec(()->{
+						x[0] = lstCm.getStructuredSelection().getFirstElement();	
+					});
+					
+					if (!(x[0] instanceof ConfigurableModel)) return Status.OK_STATUS;
+					List<CmAttribute> nodes = new ArrayList<>();
+					ConfigurableModel cm = (ConfigurableModel)x[0];
+					try(Session session = HibernateManager.openSession()){
+						cm = session.get(ConfigurableModel.class, cm.getUuid());
+						List<CmNode> nn = new ArrayList<>();
+						nn.addAll(cm.getNodes());
+						while(!nn.isEmpty()) {
+							CmNode n = nn.remove(0);
+							if (n.getChildren() != null) nn.addAll(n.getChildren());
+							if (n.getCmAttributes() != null) {
+								for (CmAttribute att : n.getCmAttributes()) {
+									if (att.getAttribute().equals(attribute.getAttribute())) {
+										nodes.add(att);
+									}
+								}
+							}
+						}
+						for (CmAttribute n : nodes) {
+							n.getName();
+							n.getNode().getName();
+						}
+					}
+					
+					Display.getDefault().asyncExec(()->{
+						if (lstAttribute.getControl().isDisposed()) return;
+						lstAttribute.setInput(nodes);
+					});
+					return Status.OK_STATUS;
+				}		
+			};
+			j.schedule();
+		});
+		
+		importShell.setSize(500, 200);
+		Point p = tb.getLocation();
+		p.x = p.x + tb.getSize().x - 500;
+		p.y = p.y + tb.getSize().y;
+		p = tb.getParent().toDisplay(p);
 	
+		importShell.setLocation( p );
+		
+		importShell.open();
+		
+		Job loadCm = new Job(Messages.HelpContentComposite_loadingcmjobname) {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				List<ConfigurableModel> items = new ArrayList<>();
+				try(Session session = HibernateManager.openSession()){
+					items.addAll(QueryFactory.buildQuery(session, ConfigurableModel.class, 
+							new Object[] {"conservationArea", attribute.getNode().getModel().getConservationArea()}) //$NON-NLS-1$
+							.list());
+					items.remove(attribute.getNode().getModel());
+					items.forEach(e->e.getName());
+				}
+				Display.getDefault().asyncExec(()->{
+					lstCm.setInput(items);
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		loadCm.schedule();
+	}
+
+	private void assignAll() {
+		if (this.attribute == null)
+			return;
+
+		ConfigurableModel cm = attribute.getNode().getModel();
+		List<CmNode> toProcess = new ArrayList<>();
+		toProcess.addAll(cm.getNodes());
+		while (!toProcess.isEmpty()) {
+			CmNode node = toProcess.remove(0);
+
+			if (node.getChildren() != null)
+				toProcess.addAll(node.getChildren());
+
+			if (node.getCmAttributes() == null)
+				continue;
+			for (CmAttribute a : node.getCmAttributes()) {
+				if (a.equals(this.attribute))
+					continue;
+				if (a.getAttribute().equals(this.attribute.getAttribute())) {
+					// copy settings
+					a.setHelpText(this.attribute.getHelpText());
+					a.setHelpImageLocation(this.attribute.getHelpImageLocation());
+					a.setImportHelpFile(attribute.getImportHelpFile() != null ? attribute.getImportHelpFile()
+							: attribute.getHelpImage());
+				}
+			}
+		}
+		listener.modelChanged();
+	}
+
 	private void refreshImage() {
 		if (imgCache != null) {
 			imgCache.dispose();
@@ -201,27 +481,43 @@ public class HelpContentComposite extends Composite{
 		if (attribute != null) {
 			if (attribute.getImportHelpFile() != null) {
 				imgPath = attribute.getImportHelpFile();
-			}else {
+			} else {
 				imgPath = attribute.getHelpImage();
 			}
 			if (imgPath != null) {
-				imgCache = SmartUtils.getImage(imgPath, 150);	
+				imgCache = SmartUtils.getImage(imgPath, IMAGE_SIZE);
 			}
 		}
-		
-		getDisplay().asyncExec(()->lblImg.redraw());
+
+		getDisplay().asyncExec(() -> lblImg.redraw());
 	}
+
 	private void selectImageFile() {
 		FileDialog fd = new FileDialog(getShell());
 		String imageextensions = "*.png;*.jpeg;*.jpg;*.svg"; //$NON-NLS-1$
-		fd.setFilterExtensions(new String[] {imageextensions, "*.*"}); //$NON-NLS-1$
-		fd.setFilterNames(new String[] {MessageFormat.format(Messages.HelpContentComposite_ImageFilesOp, imageextensions), Messages.HelpContentComposite_AllFilesOp});
+		fd.setFilterExtensions(new String[] { imageextensions, "*.*" }); //$NON-NLS-1$
+		fd.setFilterNames(
+				new String[] { MessageFormat.format(Messages.HelpContentComposite_ImageFilesOp, imageextensions),
+						Messages.HelpContentComposite_AllFilesOp });
 		String filename = fd.open();
-		if (filename == null) return;
-		
+		if (filename == null)
+			return;
+
 		Path p = Paths.get(filename);
 		attribute.setImportHelpFile(p);
 		refreshImage();
 		listener.modelChanged();
+	}
+
+	private class HelpSettings {
+		String text;
+		CmAttribute.HelpImageLocation location;
+		Path imagePath;
+
+		public HelpSettings(String text, CmAttribute.HelpImageLocation location, Path imagePath) {
+			this.text = text;
+			this.location = location;
+			this.imagePath = imagePath;
+		}
 	}
 }

@@ -386,6 +386,9 @@ public class ConfigurableModelFactory {
 			clonedOp.setCmAttribute(clone);
 			clone.getCmAttributeOptions().put(clonedOp.getOptionId(), clonedOp);
 		}
+		if (attributeToClone.getHelpImage() != null) {
+			clone.setImportHelpFile(attributeToClone.getHelpImage());
+		}
 		
 		copyLabels(attributeToClone, clone);
 		clone.setOrder(attributeToClone.getOrder());

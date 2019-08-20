@@ -243,6 +243,8 @@ public class ConfigurableModelEditDialog extends SmartStyledTitleDialog {
 
 				Composite tabContainer = new Composite(tabFolder, SWT.NONE);
 				tabContainer.setLayout(new GridLayout(1, false));
+				((GridLayout)tabContainer.getLayout()).marginWidth = 0;
+				((GridLayout)tabContainer.getLayout()).marginHeight = 0;
 				tabContent.createTabContent(tabContainer);
 
 				tabItem.setControl(tabContainer);	

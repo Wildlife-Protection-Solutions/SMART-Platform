@@ -102,17 +102,19 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 				
 	            "CREATE FUNCTION smart.waypointWithin(x double, y double, distance real, bearing real, x1 double, y1 double, x2 double, y2 double) returns boolean LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.GeometryUtils.waypointWithin' PARAMETER STYLE JAVA NO SQL", //$NON-NLS-1$
 	            
-	            "DROP FUNCTION smart.pointInPolygon",
-	            "CREATE FUNCTION smart.pointInPolygon(x double, y double, distance real, direction real, wkb blob) returns boolean LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.GeometryUtils.pointInPolygon' PARAMETER STYLE JAVA NO SQL",
-	            "GRANT EXECUTE ON FUNCTION smart.pointInPolygon TO analyst",
-				"GRANT EXECUTE ON FUNCTION smart.pointInPolygon TO manager",
-				"GRANT EXECUTE ON FUNCTION smart.pointInPolygon TO dataentry",
+	            "DROP FUNCTION smart.pointInPolygon", //$NON-NLS-1$
+	            "CREATE FUNCTION smart.pointInPolygon(x double, y double, distance real, direction real, wkb blob) returns boolean LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.GeometryUtils.pointInPolygon' PARAMETER STYLE JAVA NO SQL", //$NON-NLS-1$
+	            "GRANT EXECUTE ON FUNCTION smart.pointInPolygon TO analyst", //$NON-NLS-1$
+				"GRANT EXECUTE ON FUNCTION smart.pointInPolygon TO manager", //$NON-NLS-1$
+				"GRANT EXECUTE ON FUNCTION smart.pointInPolygon TO dataentry", //$NON-NLS-1$
 				
-	            "DROP FUNCTION smart.computeTileId",
-	            "CREATE FUNCTION smart.computeTileId(x double, y double, distance real, direction real, destCrsWkt varchar(32672), originX double, originY double, gridSize double) returns varchar(32672) LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.ReprojectUtils.computeTileId' PARAMETER STYLE JAVA NO SQL", 
-	            "GRANT EXECUTE ON FUNCTION smart.computeTileId TO analyst",
-				"GRANT EXECUTE ON FUNCTION smart.computeTileId TO manager",
-				"GRANT EXECUTE ON FUNCTION smart.computeTileId TO dataentry",
+	            "DROP FUNCTION smart.computeTileId", //$NON-NLS-1$
+	            "CREATE FUNCTION smart.computeTileId(x double, y double, distance real, direction real, destCrsWkt varchar(32672), originX double, originY double, gridSize double) returns varchar(32672) LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.ReprojectUtils.computeTileId' PARAMETER STYLE JAVA NO SQL", //$NON-NLS-1$ 
+	            "GRANT EXECUTE ON FUNCTION smart.computeTileId TO analyst", //$NON-NLS-1$
+				"GRANT EXECUTE ON FUNCTION smart.computeTileId TO manager", //$NON-NLS-1$
+				"GRANT EXECUTE ON FUNCTION smart.computeTileId TO dataentry", //$NON-NLS-1$
+				
+				"alter table smart.cm_attribute_option alter column string_value set data type varchar(32672)", //$NON-NLS-1$
 		};
 
 		for (String s : sql) {

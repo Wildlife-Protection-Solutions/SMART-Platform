@@ -130,6 +130,10 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 	}
 	@Transient
 	public void setStringOption(String optionid, String value) {
+		if (value == null || value.isEmpty()) {
+			getCmAttributeOptions().remove(optionid);
+			return;
+		}
 		CmAttributeOption op = getCmAttributeOptions().get(optionid);
 		if (op == null) {
 			op = new CmAttributeOption();
@@ -140,6 +144,45 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 		op.setStringValue(value);
 	}
 
+	@Transient
+	public String getHelpTextAsHtml(boolean fullpath) {
+		if ( (getHelpText() == null || getHelpText().isEmpty()) &&
+				getHelpImage() == null) return ""; //$NON-NLS-1$
+				
+		StringBuilder sb = new StringBuilder();
+		sb.append("<html><head>"); //$NON-NLS-1$
+		sb.append("<title>"); //$NON-NLS-1$
+		sb.append(getName());
+		sb.append("</title>"); //$NON-NLS-1$
+		sb.append("</head>"); //$NON-NLS-1$
+		sb.append("<body>"); //$NON-NLS-1$
+		
+		Path p = null;
+		if (getHelpFormat() != null) {
+			if (getImportHelpFile() != null) {
+				p = getImportHelpFile();
+			}else {
+				p = getHelpImage();
+			}
+			if (fullpath) {
+				p = p.toAbsolutePath().normalize();
+			}else {
+				p = p.getFileName();
+			}
+		}
+		if (getHelpImageLocation() == CmAttribute.HelpImageLocation.AFTER) {
+			// after
+			sb.append(getHelpText());
+			if (p != null) sb.append("<br><img src='" + p.toString() + "'/>"); //$NON-NLS-1$ //$NON-NLS-2$
+		} else {
+			// before
+			if (p != null) sb.append("<br><img src='" + p.toString() + "'/>"); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(getHelpText());
+		}
+		sb.append("</body></html>"); //$NON-NLS-1$
+		return sb.toString();
+	}
+			
 	@Transient
 	public String getHelpText() {
 		return getStringOption(CmAttributeOption.ID_HELP_TEXT);
@@ -165,12 +208,14 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 	
 	@Transient
 	public void setHelpImageLocation(HelpImageLocation location) {
-		setStringOption(CmAttributeOption.ID_HELP_IMAGE_LOCATION, location.name());
+		setStringOption(CmAttributeOption.ID_HELP_IMAGE_LOCATION, location == null ? null : location.name());
 	}
 	
 	@Transient
 	public Path getHelpImage() {
 		if (getHelpFormat() == null) return null;
+		if (getNode() == null) return Paths.get( getHelpImageFileRootName() + "." + getHelpFormat() ); //$NON-NLS-1$
+		
 		Path p = Paths.get(getNode().getModel().getFileDataStoreLocation())
 				.resolve(getHelpImageFileRootName() + "." + getHelpFormat()); //$NON-NLS-1$
 		if (!Files.exists(p)) return null;
@@ -184,7 +229,7 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 	@Transient
 	public void setImportHelpFile(Path importHelpFile) {
 		if (importHelpFile != null) {
-			getCmAttributeOptions().put(CmAttributeOption.ID_HELP_IMAGE_FORMAT, null);
+			getCmAttributeOptions().remove(CmAttributeOption.ID_HELP_IMAGE_FORMAT);
 			setHelpFormat(SharedUtils.getFilenameExtension(importHelpFile.getFileName().toString()));
 		}
 		this.importHelpFile = importHelpFile;

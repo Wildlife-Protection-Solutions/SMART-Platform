@@ -80,6 +80,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.OptionSelectionDialog;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartFileUtils;
+import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
 /**
@@ -585,6 +586,14 @@ public class CmXmlToSmartImporter {
 			cmAttr.setAttribute(dmAttribute);
 			cmAttr.setOrder(i);
 			cmAttr.setCmAttributeOptions(processAttributeOptions(xmlAttr.getOption(), cmAttr));
+			
+			if (cmAttr.getHelpFormat() != null) {
+				CmAttribute temp = new CmAttribute();
+				temp.setUuid(UuidUtils.stringToUuid( xmlAttr.getId()) );
+				String helpFileName = temp.getHelpImageFileRootName() + "." + cmAttr.getHelpFormat(); //$NON-NLS-1$
+				File f = fileLookup.get(helpFileName);
+				if (f != null && f.exists()) cmAttr.setImportHelpFile(f.toPath());
+			}
 			if ( (xmlAttr.isIsCustomImage() == null || xmlAttr.isIsCustomImage() == Boolean.TRUE) && xmlAttr.getImageFile() != null) {
 				cmAttr.setImageFile(findFile(xmlAttr.getImageFile()));
 			}
