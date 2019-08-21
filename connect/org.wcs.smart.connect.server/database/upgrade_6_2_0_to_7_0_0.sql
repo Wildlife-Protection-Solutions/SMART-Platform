@@ -371,6 +371,9 @@ ALTER TABLE smart.paws_run ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_c
 
 --TODO: change log
 
+
+alter table smart.cm_attribute_option alter COLUMN string_value set data type varchar(32672);
+
 ------------ VERSIONS ------------
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';
