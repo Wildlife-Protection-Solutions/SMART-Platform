@@ -211,6 +211,7 @@ public class Messages extends NLS {
 	public static String HelpContentComposite_importhelptooltip;
 	public static String HelpContentComposite_loadingattributesjob;
 	public static String HelpContentComposite_loadingcmjobname;
+	public static String HelpContentComposite_NoAttributeFound;
 	public static String HelpContentComposite_NoImageText;
 	public static String HelpContentComposite_pastetooltip;
 	public static String HelpContentComposite_previewbutton;

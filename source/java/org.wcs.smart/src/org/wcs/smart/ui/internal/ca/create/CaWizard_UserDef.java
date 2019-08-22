@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
@@ -102,8 +103,15 @@ public class CaWizard_UserDef extends CaWizardPage{
 			super(parent, localStyle, agencies);
 			
 			//must create a smart user
+			super.lblSmartUser.setVisible(false);
 			super.chSmartUser.setVisible(false);
 			super.chSmartUser.setSelection(true);
+			
+			((GridData)lblSmartUser.getLayoutData()).heightHint = 0;
+			((GridData)chSmartUser.getLayoutData()).heightHint = 0;
+			
+			chSmartUser.getParent().layout(true, true);
+			
 			enableSmartUser(true);
 		}
 		

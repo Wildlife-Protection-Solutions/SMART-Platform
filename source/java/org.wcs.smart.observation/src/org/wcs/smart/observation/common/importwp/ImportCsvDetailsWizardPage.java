@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.opengis.referencing.FactoryException;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.common.importwp.csv.CSVImportConfiguration;
@@ -38,7 +39,6 @@ import org.wcs.smart.observation.common.importwp.csv.CsvHeader;
 import org.wcs.smart.observation.common.importwp.csv.CsvImportEngine;
 import org.wcs.smart.observation.common.importwp.csv.ImportCSVDetailsComposite;
 import org.wcs.smart.observation.internal.Messages;
-import org.wcs.smart.util.UiUtils;
 
 /**
  * Wizard page for gathering CSV column to 
@@ -104,7 +104,7 @@ public class ImportCsvDetailsWizardPage extends WizardPage implements IImportWiz
 		super.setMessage(Messages.ImportCsvDetailsWizardPage_PageMessage);
 		super.setControl(comp);
 		
-		UiUtils.makeTransparent(comp);
+		SmartUiUtils.makeTransparent(comp);
 	}
 	
 		

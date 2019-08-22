@@ -74,7 +74,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
@@ -91,6 +90,7 @@ import org.wcs.smart.ca.EmployeeTeam;
 import org.wcs.smart.ca.EmployeeTeamMember;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.SmartUserLevel;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -145,9 +145,11 @@ public class EmployeeComposite extends Composite {
 	private ControlDecoration cdSmartPassword2;
 	private ControlDecoration cdUserLevel;
 
-	private Group smartc = null;
 	protected Button chSmartUser = null;
+	protected Label lblSmartUser = null;
 
+	private List<Control> smartUserControls = new ArrayList<>();
+	
 	private List<Agency> agencies;
 	
 	public static final int AGENCY_RANK = 1 << 1;
@@ -171,6 +173,9 @@ public class EmployeeComposite extends Composite {
 
 	public void createControl(int localStyle) {
 		setLayout(new GridLayout(2, false));
+		((GridLayout)this.getLayout()).marginWidth = 0;
+		((GridLayout)this.getLayout()).marginHeight = 0;
+		
 		KeyListener validate = new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -184,6 +189,10 @@ public class EmployeeComposite extends Composite {
 				
 			}
 		};
+		
+		Composite c = SmartUiUtils.createHeaderLabel(this, "Employee Details");
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+				
 		Label lbl = createLabelField(this, SmartLabelProvider.EMP_ID + ":"); //$NON-NLS-1$
 		txtStaffId = createTextField(this, SWT.NONE,
 				Employee.MAX_ID_LENGTH, validate);
@@ -393,13 +402,21 @@ public class EmployeeComposite extends Composite {
 		}
 		
 		if ((localStyle & SMART_USER) == SMART_USER){
-			smartc = new Group(this, SWT.NONE );
+			
+			Composite header = SmartUiUtils.createHeaderLabel(this, Messages.EmployeeComposite_SmartUser_Label);
+			header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			
+			Composite smartc = new Composite(this, SWT.NONE );
 			smartc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			smartc.setLayout(new GridLayout(2, false));
+			((GridLayout)smartc.getLayout()).marginWidth = 0;
+			((GridLayout)smartc.getLayout()).marginHeight = 0;
+			
+			lblSmartUser = createLabelField(smartc, Messages.EmployeeComposite_IsSmartUser_Label + ":"); //$NON-NLS-1$
 			
 			chSmartUser = new Button(smartc, SWT.CHECK);
-			chSmartUser.setText(Messages.EmployeeComposite_IsSmartUser_Label);
-			chSmartUser.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2,1));
+			chSmartUser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			((GridData)chSmartUser.getLayoutData()).horizontalIndent = 8;
 			chSmartUser.addSelectionListener(new SelectionAdapter() {		
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -412,9 +429,11 @@ public class EmployeeComposite extends Composite {
 				}
 			});
 			if ((localStyle & SMART_USER_LEVEL) == SMART_USER_LEVEL){
-				createLabelField(smartc, SmartLabelProvider.EMP_SMART_USER_LEVEL + ":"); //$NON-NLS-1$
+				Label l = createLabelField(smartc, SmartLabelProvider.EMP_SMART_USER_LEVEL + ":"); //$NON-NLS-1$
+				smartUserControls.add(l);
 				
 				cmbUserLevel = new CheckBoxDropDown(smartc);
+				smartUserControls.add(cmbUserLevel);
 				cmbUserLevel.setLabelProvider(new LabelProvider(){
 					@Override
 					public String getText(Object element){
@@ -440,15 +459,17 @@ public class EmployeeComposite extends Composite {
 				
 			}
 			
-			smartc.setText(Messages.EmployeeComposite_SmartUser_Label);
-			createLabelField(smartc, SmartLabelProvider.EMP_SMART_USER + ":"); //$NON-NLS-1$
+			Label l = createLabelField(smartc, SmartLabelProvider.EMP_SMART_USER + ":"); //$NON-NLS-1$
+			smartUserControls.add(l);
 			txtSmartId = createTextField(smartc, SWT.NONE,
 					Employee.MAX_SMART_ID_LENGTH, validate);
-	
+			smartUserControls.add(txtSmartId);
 			
-			createLabelField(smartc, Messages.EmployeeComposite_Password_Label);
+			l = createLabelField(smartc, Messages.EmployeeComposite_Password_Label);
+			smartUserControls.add(l);
 			txtSmartPassword = createTextField(smartc, SWT.PASSWORD,
 					Employee.MAX_SMART_PASSWORD_LENGTH, validate);
+			smartUserControls.add(txtSmartPassword);
 			txtSmartPassword.setData(MODIFIED_KEY, Boolean.FALSE);
 			txtSmartPassword.addModifyListener(new ModifyListener() {
 				@Override
@@ -457,10 +478,11 @@ public class EmployeeComposite extends Composite {
 				}
 			});
 			
-			createLabelField(smartc, Messages.EmployeeComposite_Password2_Label);
+			l = createLabelField(smartc, Messages.EmployeeComposite_Password2_Label);
+			smartUserControls.add(l);
 			txtSmartPassword2 = createTextField(smartc, SWT.PASSWORD,
 					Employee.MAX_SMART_PASSWORD_LENGTH, validate);
-			
+			smartUserControls.add(txtSmartPassword2);
 			enableSmartUser(false);
 			chSmartUser.setSelection(false);
 		}
@@ -567,8 +589,7 @@ public class EmployeeComposite extends Composite {
 	 */
 	private Label createLabelField(Composite parent, String text) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1,
-				1));
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lbl.setText(text);
 		return lbl;
 	}
@@ -845,16 +866,7 @@ public class EmployeeComposite extends Composite {
 	}
 	
 	protected void enableSmartUser(boolean enable){
-		txtSmartId.setEditable(enable);
-
-		if (cmbUserLevel != null) cmbUserLevel.setEnabled(enable);
-		
-		if (txtSmartPassword != null){
-			txtSmartPassword.setEnabled(enable);
-		}
-		if (txtSmartPassword2 != null){
-			txtSmartPassword2.setEnabled(enable);
-		}
+		for (Control c : smartUserControls) c.setEnabled(enable);
 		if (enable){
 			validate();
 		}

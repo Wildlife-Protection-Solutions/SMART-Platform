@@ -23,7 +23,7 @@ package org.wcs.smart.ui;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.util.UiUtils;
+import org.wcs.smart.common.control.SmartUiUtils;
 
 /**
  * Extends TitleAreaDialog to color controls according to new 
@@ -41,7 +41,7 @@ public abstract class SmartStyledTitleDialog extends TitleAreaDialog {
 	@Override
 	public void create() {
 		super.create();
-		UiUtils.colorDialog(getShell());
+		SmartUiUtils.colorDialog(getShell());
 	}
 	
 	@Override

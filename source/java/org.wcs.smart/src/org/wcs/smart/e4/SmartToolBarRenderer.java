@@ -1,7 +1,13 @@
 package org.wcs.smart.e4;
 
+import java.net.URL;
+
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.SystemUtils;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.internal.workbench.swt.AbstractPartRenderer;
 import org.eclipse.e4.ui.internal.workbench.swt.CSSRenderingUtils;
@@ -17,12 +23,16 @@ import org.eclipse.e4.ui.workbench.renderers.swt.ToolBarManagerRenderer;
 import org.eclipse.e4.ui.workbench.renderers.swt.TrimBarLayout;
 import org.eclipse.jface.action.IContributionManagerOverrides;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.ToolBar;
+import org.osgi.framework.Bundle;
 
 /**
  * Extension of the default toolbar manager to display text below icons
@@ -64,9 +74,10 @@ public class SmartToolBarRenderer extends ToolBarManagerRenderer {
 			if (cssUtils != null) {
 				MUIElement modelElement = (MUIElement) newTB.getData(AbstractPartRenderer.OWNING_ME);
 				boolean draggable = ((modelElement != null) && (modelElement.getTags().contains(IPresentationEngine.DRAGGABLE)));
-				if (!draggable) {
+				if (!draggable && SystemUtils.IS_OS_WINDOWS) {
 					//had to add this otherwise the toolbar visiblity property does not get set
 					//properly and additional spacers get added to toolbar
+					//on non-windows this seems to cause a lot of errors and is not necessary
 					renderedCtrl = new ImageBasedFrame(newTB.getParent(), newTB, vertical, false);
 				}else {
 					renderedCtrl = cssUtils.frameMeIfPossible(newTB, null, vertical, draggable);
@@ -77,6 +88,16 @@ public class SmartToolBarRenderer extends ToolBarManagerRenderer {
 		return renderedCtrl;
 	}
 
+	private Image initDragHandleResource() {
+		Bundle bundle = org.eclipse.e4.ui.internal.workbench.swt.WorkbenchSWTActivator.getDefault().getBundle();
+		IPath path = new Path("$ws$/images/dragHandle.png");
+		URL url = FileLocator.find(bundle, path, null);
+		ImageDescriptor desc = ImageDescriptor.createFromURL(url);
+		if (desc != null)
+			JFaceResources.getImageRegistry().put( "org.eclipse.e4.ui.workbench.swt.DRAG_HANDLE", desc);
+		return JFaceResources.getImage( "org.eclipse.e4.ui.workbench.swt.DRAG_HANDLE");
+	}
+	
 	private ToolBar createToolbar(final MUIElement element, Composite parent) {
 		int orientation = getOrientation(element);
 		int style = orientation | SWT.WRAP | SWT.FLAT ;

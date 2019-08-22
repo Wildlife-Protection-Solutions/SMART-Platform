@@ -285,11 +285,6 @@ public class CmSmartToXmlConverter {
 				
 				at.setIsCustomImage(isCustomIcon(ca));
 				at.setImageFile(getImageFileRef(ca, node.getModel(), includeDmIcon));
-				
-//				String help = ca.getHelpTextAsHtml();
-//				if (help != null) {
-//					at.setHelpFileName("help_" + UuidUtils.uuidToString(ca.getUuid()) + ".html");
-//				}
 		
 				if (ca.getAttribute().getMinValue() != null) {
 					at.setMinValue(ca.getAttribute().getMinValue());

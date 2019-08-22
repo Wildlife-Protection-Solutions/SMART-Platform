@@ -24,7 +24,7 @@ package org.wcs.smart.ui;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.util.UiUtils;
+import org.wcs.smart.common.control.SmartUiUtils;
 
 /**
  * Smart Styled Wizard Dialog 
@@ -41,6 +41,6 @@ public class SmartWizardDialog extends WizardDialog{
 	@Override
 	public void create() {
 		super.create();
-		UiUtils.colorDialog(getShell());
+		SmartUiUtils.colorDialog(getShell());
 	}
 }

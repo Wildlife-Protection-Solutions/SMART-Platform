@@ -26,7 +26,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.util.UiUtils;
+import org.wcs.smart.common.control.SmartUiUtils;
 
 /**
  * Extends WizardDialog to color controls according to new 
@@ -44,7 +44,7 @@ public class SmartStyledWizardDialog extends WizardDialog {
 	@Override
 	protected Control createContents(Composite parent) {
 		Control c = super.createContents(parent);
-		UiUtils.colorDialog(c.getShell());
+		SmartUiUtils.colorDialog(c.getShell());
 		return c;
 	}
 	

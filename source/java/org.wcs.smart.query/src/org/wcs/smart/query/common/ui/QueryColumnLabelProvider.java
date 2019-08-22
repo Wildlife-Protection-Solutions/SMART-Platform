@@ -22,6 +22,7 @@
 package org.wcs.smart.query.common.ui;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
@@ -37,7 +38,7 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  *
  */
-public class QueryColumnLabelProvider extends ColumnLabelProvider{
+public class QueryColumnLabelProvider extends ColumnLabelProvider implements IColorProvider{
 
 	protected QueryColumn column;
 

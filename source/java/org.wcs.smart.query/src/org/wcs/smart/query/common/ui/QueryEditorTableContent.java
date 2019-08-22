@@ -340,8 +340,6 @@ public class QueryEditorTableContent {
 
 		TableViewer viewer = resultsTable.createTable(main);
 		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, size, 1));
-		toolkit.adapt(viewer.getTable());
-
 		editor.getSite().setSelectionProvider(viewer);
 		
 		return main;

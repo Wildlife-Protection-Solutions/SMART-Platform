@@ -41,7 +41,6 @@ import org.apache.derby.shared.common.error.StandardException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
@@ -58,6 +57,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartWizardDialog;
 import org.wcs.smart.ui.internal.ca.create.CreateCaWizard;
 
 /**
@@ -424,7 +424,7 @@ public class SmartStartUp {
 	 */
 	public static boolean openCreateNewCaWizard(Shell parent){
 		CreateCaWizard wizard = new CreateCaWizard();
-		WizardDialog wd = new WizardDialog(parent, wizard);
+		SmartWizardDialog wd = new SmartWizardDialog(parent, wizard);
 		wd.create();
 		wd.open();
 		return wizard.isCompletedOk();

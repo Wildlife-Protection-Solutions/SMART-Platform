@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -99,6 +100,8 @@ public class HelpContentComposite extends Composite {
 	private ToolBar tb;
 	private ToolItem tiCopy, tiPaste, tiAssignAll, tiImport;
 
+	private List<ConfigurableModel> otherConfigurableModels = new ArrayList<>();
+	
 	private Shell previewShell;
 	private Shell importShell;
 
@@ -157,7 +160,7 @@ public class HelpContentComposite extends Composite {
 		tiImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
 		tiImport.setToolTipText(Messages.HelpContentComposite_importhelptooltip);
 		tiImport.addListener(SWT.Selection, e -> importHelp());
-
+		tiImport.setEnabled(false);
 		Composite temp = new Composite(this, SWT.NONE);
 		temp.setLayout(new GridLayout(2, false));
 		((GridLayout) temp.getLayout()).marginWidth = 0;
@@ -286,15 +289,17 @@ public class HelpContentComposite extends Composite {
 			}
 			tiAssignAll.setToolTipText(MessageFormat
 					.format(Messages.HelpContentComposite_assignalltooltip2, attribute.getName()));
+			loadCm.schedule();
 		} else {
 			txtText.setText(""); //$NON-NLS-1$
 			cmbImageLoc.setSelection(new StructuredSelection(CmAttribute.HelpImageLocation.BEFORE));
 		}
 		refreshImage();
+		
 	}
 
 	private void importHelp() {
-		importShell = new Shell(getShell(), SWT.PRIMARY_MODAL | SWT.RESIZE);
+		importShell = new Shell(getShell(), SWT.PRIMARY_MODAL | SWT.RESIZE );
 		importShell.setLayout(new GridLayout(2, true));
 		((GridLayout)importShell.getLayout()).marginWidth = 0;
 		((GridLayout)importShell.getLayout()).marginHeight = 0;
@@ -348,7 +353,14 @@ public class HelpContentComposite extends Composite {
 				importShell = null;
 			}
 		});
-		Composite wrapper = new Composite(importShell, SWT.NONE);
+		Composite outer = new Composite(importShell, SWT.NONE);
+		outer.setLayout(new GridLayout());
+		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)outer.getLayout()).marginWidth = 0;
+		((GridLayout)outer.getLayout()).marginHeight = 0;
+		outer.setBackground(outer.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		Composite wrapper = new Composite(outer, SWT.NONE);
 		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		TableViewer lstCm = new TableViewer(wrapper, SWT.NONE);
@@ -365,7 +377,7 @@ public class HelpContentComposite extends Composite {
 		layout.setColumnData(tc, new ColumnWeightData(1));
 		wrapper.setLayout(layout);
 		lstCm.setContentProvider(ArrayContentProvider.getInstance());
-		lstCm.setInput(DialogConstants.LOADING_TEXT);
+		lstCm.setInput(otherConfigurableModels);
 		lstCm.addSelectionChangedListener(e->{
 			lstAttribute.setInput(DialogConstants.LOADING_TEXT);
 			
@@ -379,11 +391,11 @@ public class HelpContentComposite extends Composite {
 					
 					if (!(x[0] instanceof ConfigurableModel)) return Status.OK_STATUS;
 					List<CmAttribute> nodes = new ArrayList<>();
-					ConfigurableModel cm = (ConfigurableModel)x[0];
+					final ConfigurableModel cm = (ConfigurableModel)x[0];
 					try(Session session = HibernateManager.openSession()){
-						cm = session.get(ConfigurableModel.class, cm.getUuid());
+						ConfigurableModel cm2 = session.get(ConfigurableModel.class, cm.getUuid());
 						List<CmNode> nn = new ArrayList<>();
-						nn.addAll(cm.getNodes());
+						nn.addAll(cm2.getNodes());
 						while(!nn.isEmpty()) {
 							CmNode n = nn.remove(0);
 							if (n.getChildren() != null) nn.addAll(n.getChildren());
@@ -403,7 +415,11 @@ public class HelpContentComposite extends Composite {
 					
 					Display.getDefault().asyncExec(()->{
 						if (lstAttribute.getControl().isDisposed()) return;
-						lstAttribute.setInput(nodes);
+						if (nodes.isEmpty()) {
+							lstAttribute.setInput(new String[] {MessageFormat.format(Messages.HelpContentComposite_NoAttributeFound, attribute.getName(), cm.getName())});
+						}else {
+							lstAttribute.setInput(nodes);
+						}
 					});
 					return Status.OK_STATUS;
 				}		
@@ -411,6 +427,11 @@ public class HelpContentComposite extends Composite {
 			j.schedule();
 		});
 		
+		Button btnClose = new Button(outer, SWT.PUSH);
+		btnClose.setText(IDialogConstants.CLOSE_LABEL);
+		btnClose.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		btnClose.setBackground(outer.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnClose.addListener(SWT.Selection, e->{importShell.dispose();importShell=null;});
 		importShell.setSize(500, 200);
 		Point p = tb.getLocation();
 		p.x = p.x + tb.getSize().x - 500;
@@ -421,25 +442,7 @@ public class HelpContentComposite extends Composite {
 		
 		importShell.open();
 		
-		Job loadCm = new Job(Messages.HelpContentComposite_loadingcmjobname) {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				List<ConfigurableModel> items = new ArrayList<>();
-				try(Session session = HibernateManager.openSession()){
-					items.addAll(QueryFactory.buildQuery(session, ConfigurableModel.class, 
-							new Object[] {"conservationArea", attribute.getNode().getModel().getConservationArea()}) //$NON-NLS-1$
-							.list());
-					items.remove(attribute.getNode().getModel());
-					items.forEach(e->e.getName());
-				}
-				Display.getDefault().asyncExec(()->{
-					lstCm.setInput(items);
-				});
-				return Status.OK_STATUS;
-			}
-		};
-		loadCm.schedule();
+	
 	}
 
 	private void assignAll() {
@@ -508,6 +511,27 @@ public class HelpContentComposite extends Composite {
 		refreshImage();
 		listener.modelChanged();
 	}
+	
+	Job loadCm = new Job(Messages.HelpContentComposite_loadingcmjobname) {
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			if (!otherConfigurableModels.isEmpty()) return Status.OK_STATUS;
+			
+			try(Session session = HibernateManager.openSession()){
+				otherConfigurableModels.addAll(QueryFactory.buildQuery(session, ConfigurableModel.class, 
+						new Object[] {"conservationArea", attribute.getNode().getModel().getConservationArea()}) //$NON-NLS-1$
+						.list());
+				otherConfigurableModels.remove(attribute.getNode().getModel());
+				otherConfigurableModels.forEach(e->e.getName());
+			}
+			Display.getDefault().asyncExec(()->{
+				if (!otherConfigurableModels.isEmpty()) tiImport.setEnabled(true);
+			});
+			return Status.OK_STATUS;
+		}
+	};
+	
 
 	private class HelpSettings {
 		String text;

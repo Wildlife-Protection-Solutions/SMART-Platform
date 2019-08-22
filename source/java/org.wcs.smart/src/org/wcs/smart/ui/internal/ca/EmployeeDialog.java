@@ -52,7 +52,6 @@ import org.wcs.smart.ui.SmartStyledDialog;
  */
 public class EmployeeDialog extends SmartStyledDialog {
 
-
 	private Employee toUpdate;
 	private ConservationArea ca;
 	

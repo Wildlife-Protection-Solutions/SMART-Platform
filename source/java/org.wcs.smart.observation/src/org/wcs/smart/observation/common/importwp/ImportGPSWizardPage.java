@@ -41,11 +41,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.gpx.GPSBabel;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.internal.Messages;
-import org.wcs.smart.util.UiUtils;
 
 /**
  * Wizard page to select device type.
@@ -138,7 +138,7 @@ public class ImportGPSWizardPage extends ImportOptionsWizardPage {
 		super.setTitle(Messages.ImportGPSWizardPage_PageTitle + ((ImportGpsDataWizard)getWizard()).getType().guiName);
 		super.setMessage(Messages.ImportGPSWizardPage_DialogMessage);
 		
-		UiUtils.makeTransparent(comp);
+		SmartUiUtils.makeTransparent(comp);
 	}
 	
 	private void updateComplete(){

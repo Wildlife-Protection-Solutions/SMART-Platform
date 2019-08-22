@@ -41,11 +41,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Link;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
-import org.wcs.smart.util.UiUtils;
 
 /**
  * Wizard page to select the waypoints or track points to import.
@@ -136,7 +136,7 @@ public class ImportWpSelectWizardPage extends WizardPage implements IImportWizar
 		super.setMessage(((ImportGpsDataWizard)getWizard()).getType().importDesc );
 		super.setControl(comp);
 		
-		UiUtils.makeTransparent(comp);
+		SmartUiUtils.makeTransparent(comp);
 	}
 	
 	@Override

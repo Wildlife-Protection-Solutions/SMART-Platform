@@ -33,8 +33,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.observation.internal.Messages;
-import org.wcs.smart.util.UiUtils;
 
 /**
  * Wizard page to select waypoint import location option.
@@ -94,7 +94,7 @@ public class ImportWpTypeWizardPage extends WizardPage implements IImportWizardP
 		super.setMessage(MessageFormat.format(Messages.ImportWpTypeWizardPage_PageMessage, new Object[]{((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase()}));
 		super.setControl(comp);
 		
-		UiUtils.makeTransparent(comp);
+		SmartUiUtils.makeTransparent(comp);
 	}
 	
 	@Override

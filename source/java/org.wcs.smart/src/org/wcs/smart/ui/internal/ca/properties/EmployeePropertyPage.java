@@ -277,13 +277,15 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 		Composite employeeComp = createEmployeeArea(items);
 		listItem.setControl(employeeComp);
 		
-		
 		CTabItem teamItem = new CTabItem(items, SWT.NONE);
 		teamItem.setText(Messages.EmployeePropertyPage_TeamsTabLbl);
 		Composite teamComp = createTeamArea(items);
 		teamItem.setControl(teamComp);
 		
 		refresh();
+		
+		items.setSelection(listItem);
+		
 		return composite;
 	}
 	

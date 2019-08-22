@@ -37,13 +37,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.common.importwp.csv.CSVImportConfiguration;
 import org.wcs.smart.observation.common.importwp.csv.CsvHeader;
 import org.wcs.smart.observation.common.importwp.csv.CsvImportEngine;
 import org.wcs.smart.observation.common.importwp.csv.ImportCSVOptionsComposite;
 import org.wcs.smart.observation.internal.Messages;
-import org.wcs.smart.util.UiUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -113,7 +113,7 @@ public class ImportCsvWizardPage extends ImportOptionsWizardPage {
 		super.setMessage(MessageFormat.format(Messages.ImportGpxWizardPage_PageMessage, new Object[]{ ((ImportGpsDataWizard)getWizard()).getType().guiName.toLowerCase() }));
 		super.setControl(comp);
 		
-		UiUtils.makeTransparent(comp);
+		SmartUiUtils.makeTransparent(comp);
 	}
 	
 	private void updateComplete(){

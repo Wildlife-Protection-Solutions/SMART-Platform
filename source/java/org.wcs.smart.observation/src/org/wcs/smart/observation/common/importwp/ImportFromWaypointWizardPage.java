@@ -32,9 +32,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.internal.Messages;
-import org.wcs.smart.util.UiUtils;
 
 /**
  * Wizard page shown when user chooses to import tracks
@@ -93,7 +93,7 @@ public class ImportFromWaypointWizardPage extends ImportOptionsWizardPage {
 		super.setMessage(Messages.ImportFromWaypointWizardPage_PageMessage);
 		super.setControl(comp);
 		
-		UiUtils.makeTransparent(comp);
+		SmartUiUtils.makeTransparent(comp);
 	}
 	
 	private void updateComplete(){		
