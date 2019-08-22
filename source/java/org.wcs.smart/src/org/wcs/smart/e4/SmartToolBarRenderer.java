@@ -74,11 +74,14 @@ public class SmartToolBarRenderer extends ToolBarManagerRenderer {
 			if (cssUtils != null) {
 				MUIElement modelElement = (MUIElement) newTB.getData(AbstractPartRenderer.OWNING_ME);
 				boolean draggable = ((modelElement != null) && (modelElement.getTags().contains(IPresentationEngine.DRAGGABLE)));
-				if (!draggable && SystemUtils.IS_OS_WINDOWS) {
+				if (!draggable) {
 					//had to add this otherwise the toolbar visiblity property does not get set
 					//properly and additional spacers get added to toolbar
 					//on non-windows this seems to cause a lot of errors and is not necessary
 					renderedCtrl = new ImageBasedFrame(newTB.getParent(), newTB, vertical, false);
+					//some sort of image is required for mac/linux
+					Image handleImage = new Image(newTB.getDisplay(), 1, 1);
+					((ImageBasedFrame)renderedCtrl).setImages(null, null, handleImage);
 				}else {
 					renderedCtrl = cssUtils.frameMeIfPossible(newTB, null, vertical, draggable);
 				}
