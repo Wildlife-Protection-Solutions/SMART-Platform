@@ -134,7 +134,6 @@ public class SmartUiUtils {
 					if ((kid.getStyle() & SWT.CHECK) == SWT.CHECK || (kid.getStyle() & SWT.RADIO) == SWT.RADIO) {
 						if (!SystemUtils.IS_OS_MAC) kid.setBackground(transparent);
 					}
-					kid.setBackground(kid.getParent().getBackground());
 				}
 			}
 			
