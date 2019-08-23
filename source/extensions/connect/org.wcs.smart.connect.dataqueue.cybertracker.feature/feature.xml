@@ -11,6 +11,10 @@
       Core processing tools for processing JSON data sent by CyberTracker to Connect. Includes support for processing Patrol data.
    </description>
 
+   <requires>
+      <import feature="org.wcs.smart.connect.cybertracker.feature" version="7.0.0.qualifier"/>
+   </requires>
+
    <plugin
          id="org.wcs.smart.connect.dataqueue.cybertracker"
          download-size="0"
