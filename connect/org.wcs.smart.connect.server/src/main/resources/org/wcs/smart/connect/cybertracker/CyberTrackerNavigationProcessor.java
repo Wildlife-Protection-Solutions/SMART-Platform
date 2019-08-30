@@ -25,7 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
-import org.wcs.smart.connect.model.CyberTrackerPackage;
+import org.wcs.smart.connect.model.CyberTrackerNavigationLayer;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.model.WorkItem.Type;
@@ -38,13 +38,13 @@ import org.wcs.smart.hibernate.QueryFactory;
  * @author Emily
  *
  */
-public class CyberTrackerProcessor implements IUploadItemProcessor {
+public class CyberTrackerNavigationProcessor implements IUploadItemProcessor {
 
-	private final Logger logger = Logger.getLogger(CyberTrackerProcessor.class.getName());
+	private final Logger logger = Logger.getLogger(CyberTrackerNavigationProcessor.class.getName());
 	
 	@Override
 	public Type getSupportedType() {
-		return Type.UP_CTPACKAGE;
+		return Type.UP_NAVIGATION;
 	}
 
 	@Override
@@ -54,11 +54,11 @@ public class CyberTrackerProcessor implements IUploadItemProcessor {
 			session.beginTransaction();
 					
 			//cybertracker package
-			CyberTrackerPackage ctPackage = QueryFactory.buildQuery(session, CyberTrackerPackage.class, 
+			CyberTrackerNavigationLayer ctPackage = QueryFactory.buildQuery(session, CyberTrackerNavigationLayer.class, 
 						"workItem", item.getUuid()).uniqueResult(); //$NON-NLS-1$
 			
 			//package can now be downloaded
-			ctPackage.setStatus(CyberTrackerPackage.Status.READY);	
+			ctPackage.setStatus(CyberTrackerNavigationLayer.Status.READY);	
 			item.setStatus(Status.COMPLETE);
 			
 			session.saveOrUpdate(item);

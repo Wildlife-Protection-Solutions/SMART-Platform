@@ -218,7 +218,7 @@ CREATE TRIGGER trg_ct_survey_package AFTER INSERT OR UPDATE OR DELETE ON smart.c
 
 alter table connect.work_item drop constraint type_chk;
 ALTER TABLE connect.work_item ADD CONSTRAINT type_chk 
-	CHECK (type IN ('UP_CA', 'UP_SYNC', 'DOWN_CA', 'DOWN_SYNC', 'UP_DATAQUEUE', 'UP_CTPACKAGE'));
+	CHECK (type IN ('UP_CA', 'UP_SYNC', 'DOWN_CA', 'DOWN_SYNC', 'UP_DATAQUEUE', 'UP_CTPACKAGE', 'UP_NAVIGATION'));
 
 	
 CREATE TABLE smart.ct_metadata_value(uuid uuid not null, ca_uuid uuid not null, package_uuid uuid not null, keyid varchar(32) not null, is_visible boolean not null, string_value varchar(8192), boolean_value boolean, uuid_value uuid, primary key (uuid));
@@ -253,6 +253,19 @@ ALTER TABLE connect.ct_api_key ADD FOREIGN KEY (ca_uuid) REFERENCES connect.ca_i
 
 ALTER TABLE connect.alerts ADD COLUMN source VARCHAR(32) not null default 'USER';
 ALTER TABLE connect.alerts ALTER COLUMN creator_uuid DROP not null;
+
+create table connect.ct_navigation_layer(
+  uuid UUID not null,
+  ca_uuid UUID not null,
+  uploaded_date timestamp not null,
+  filename varchar(256) not null,
+  name varchar(256) not null,
+  status varchar(16) not null,
+  work_item_uuid uuid,
+  primary key(uuid)
+);
+ALTER TABLE connect.ct_navigation_layer ADD FOREIGN KEY (ca_uuid) REFERENCES connect.ca_info(ca_uuid) on DELETE CASCADE on UPDATE RESTRICT;
+
 
 ------------ EMPLOYEE TEAMS ----------------
 CREATE TABLE smart.employee_team (uuid uuid not null, ca_uuid uuid not null, primary key (uuid));

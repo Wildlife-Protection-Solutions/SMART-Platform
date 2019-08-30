@@ -54,7 +54,8 @@ public class WorkItem extends ConnectUuidItem {
 		DOWN_CA,
 		DOWN_SYNC,
 		UP_DATAQUEUE,
-		UP_CTPACKAGE;
+		UP_CTPACKAGE,
+		UP_NAVIGATION;
 	}
 	
 	public enum Status{
