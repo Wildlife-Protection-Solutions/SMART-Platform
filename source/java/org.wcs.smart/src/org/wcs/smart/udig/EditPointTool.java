@@ -30,11 +30,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import org.locationtech.udig.project.ui.tool.AbstractModalTool;
 import org.locationtech.udig.ui.graphics.ViewportGraphics;
 import org.wcs.smart.udig.IMapEditManager.EditPoint;
+
 
 /**
  * Tool for moving point features.  The tool looks for a IEditPointManager
@@ -105,7 +108,7 @@ public class EditPointTool extends AbstractModalTool{
 			if (hoverPoint != null){
 				graphics.setColor(Color.YELLOW);
 				graphics.setLineWidth(3);
-				graphics.drawOval(hoverPoint.getMapPoint().x - 6, hoverPoint.getMapPoint().y - 6, 12, 12);
+				graphics.drawOval(hoverPoint.getMapPoint().x - 7, hoverPoint.getMapPoint().y - 7, 12, 12);
 				
 				if(hoverPoint.getInfoString() == null) return;
 				int startX = hoverPoint.getMapPoint().x + 5;
@@ -174,13 +177,28 @@ public class EditPointTool extends AbstractModalTool{
      */
     public void mousePressed( MapMouseEvent e ) {
     	disposeHover();
-    	if ((e.buttons & MapMouseEvent.BUTTON1) != MapMouseEvent.BUTTON1) return;
+    	
     	IMapEditManager manager = getEditManager();
     	if (manager == null) return;
-
     	feature = manager.findFeature(e.x, e.y, getContext().getViewportModel());
     	if (feature == null) return;
-  
+    	
+    	if ((e.buttons & MapMouseEvent.BUTTON1) != MapMouseEvent.BUTTON1) {
+    		if (feature.getActions().isEmpty()) return;
+    		//display right click menu
+    		Menu m = new Menu(getContext().getViewportPane().getControl());
+    		for (IEditPointAction a : feature.getActions()) {
+    			MenuItem mi = new MenuItem(m, SWT.PUSH);
+    			mi.setText(a.getText());
+    			mi.setImage(a.getImage());
+    			mi.addListener(SWT.Selection, evt->a.run(feature));
+    		}
+    		//relative to display
+    		m.setLocation(getContext().getViewportPane().getControl().toDisplay( e.x, e.y ));
+    		m.setVisible(true);
+    		return;
+    	}
+    	
     	screenLocation = new Point(e.x, e.y);
     	startPoint = feature.getMapPoint();
     	if (feedbackCommand == null){
