@@ -19,48 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.ctpackage.ui;
+package org.wcs.smart.cybertracker.navigation;
 
 import java.util.List;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.cybertracker.model.NavigationLayer;
+
 /**
- * An extension point for proving properties to
- * cybertracker packages 
+ * Exports a cybertracker navigation layer.
  * 
  * @author Emily
  *
  */
-public interface ICtPackagePropertyProvider {
+public interface INavigationExportAction {
 
-	public static final String EXT_NAME = "ctpackageproperty"; //$NON-NLS-1$
+	public static final String EXT_NAME = "navigationexportaction"; //$NON-NLS-1$
+	
+	/**
+	 * Performs the export action
+	 */
+	public void doAction(List<NavigationLayer> layers, IEclipseContext context);
 	
 	/**
 	 * 
-	 * @return a group name for all the properties 
+	 * @return the name of the export action
 	 */
 	public String getName();
 	
 	/**
-	 * Gets all properties supported by this provided
-	 * @return
+	 * 
+	 * @return image representing the export action; can return null
 	 */
-	public List<ICtPackageProperty> getProperties();	
-	
-	/**
-	 * Refreshsed all properties values
-	 */
-	public void refresh();
-	
-	/**
-	 * Listeners that are fired when the property values are modified
-	 * or updated 
-	 * @param listener
-	 */
-	public void addPropertyUpdatedListener(IPropertyListener listener);
-			
-			
-	@FunctionalInterface
-	interface IPropertyListener{
-		public void propertyUpdated();
-	}
+	public Image getIcon();
 }

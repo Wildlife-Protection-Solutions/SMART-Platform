@@ -19,48 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.ctpackage.ui;
+package org.wcs.smart.cybertracker.navigation.ui;
 
-import java.util.List;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.swt.widgets.Shell;
 
 /**
- * An extension point for proving properties to
- * cybertracker packages 
+ * Handler for dislaying navigation layers dialog
  * 
  * @author Emily
+ * @since 7.0.0
  *
  */
-public interface ICtPackagePropertyProvider {
+@SuppressWarnings("restriction")
+public class ShowCtNavigationHandler {
 
-	public static final String EXT_NAME = "ctpackageproperty"; //$NON-NLS-1$
-	
-	/**
-	 * 
-	 * @return a group name for all the properties 
-	 */
-	public String getName();
-	
-	/**
-	 * Gets all properties supported by this provided
-	 * @return
-	 */
-	public List<ICtPackageProperty> getProperties();	
-	
-	/**
-	 * Refreshsed all properties values
-	 */
-	public void refresh();
-	
-	/**
-	 * Listeners that are fired when the property values are modified
-	 * or updated 
-	 * @param listener
-	 */
-	public void addPropertyUpdatedListener(IPropertyListener listener);
-			
-			
-	@FunctionalInterface
-	interface IPropertyListener{
-		public void propertyUpdated();
+	@Execute
+	public void execute (Shell shell, IEclipseContext context) {
+		Dialog dialog = new NavigationLayersDialog(shell);
+		ContextInjectionFactory.inject(dialog, context.createChild());
+		dialog.open();
+	}
+
+	public static class ShowCtNavigationHandlerWrapper extends DIHandler<ShowCtNavigationHandler>{
+		public ShowCtNavigationHandlerWrapper(){
+			super (ShowCtNavigationHandler.class);
+		}
 	}
 }

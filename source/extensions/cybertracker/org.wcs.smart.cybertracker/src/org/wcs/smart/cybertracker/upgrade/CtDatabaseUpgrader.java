@@ -80,13 +80,20 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 			upgrader30To40.upgrade(session);
 			update40to50(session);
 			update50to60(session);
+			update60to70(session);
 		}
 		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_4_0)) {
 			update40to50(session);
 			update50to60(session);
+			update60to70(session);
 		}
 		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_5_0)) {
 			update50to60(session);
+			update60to70(session);
+		}
+		
+		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_6_0)) {
+			update60to70(session);
 		}
 		
 	}
@@ -132,5 +139,24 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		}
 		
 		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_6_0, session);
+	}
+	
+	private static void update60to70(Session session) {
+		String[] sql = new String[] {
+				"CREATE TABLE smart.ct_navigation_layer(uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, name varchar(512), targets blob, created_date date not null, last_modified_date date, last_modified_by char(16) for bit data,  primary key (uuid))", //$NON-NLS-1$
+				
+				"ALTER TABLE smart.ct_navigation_layer ADD CONSTRAINT ct_navigation_layer_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area (UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.ct_navigation_layer ADD CONSTRAINT ct_navigation_layer_last_modified_by_fk FOREIGN KEY (last_modified_by) REFERENCES smart.employee(UUID) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+	
+				"GRANT ALL PRIVILEGES ON smart.ct_navigation_layer to data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_navigation_layer to manager", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_navigation_layer to analyst", //$NON-NLS-1$			
+		};
+		
+		for (String s : sql) {
+			session.createNativeQuery(s).executeUpdate();
+		}
+		
+		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_7_0, session);
 	}
 }

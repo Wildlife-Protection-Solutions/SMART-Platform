@@ -19,48 +19,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.ctpackage.ui;
+package org.wcs.smart.cybertracker.navigation;
 
-import java.util.List;
+import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider.IPropertyListener;
+import org.wcs.smart.cybertracker.model.NavigationLayer;
 
 /**
- * An extension point for proving properties to
- * cybertracker packages 
+ * Navigation target property contribution.
  * 
  * @author Emily
  *
  */
-public interface ICtPackagePropertyProvider {
-
-	public static final String EXT_NAME = "ctpackageproperty"; //$NON-NLS-1$
+public interface INavigationLayerProperty {
+	
+	public static final String EXT_NAME = "navigationlayerproperty"; //$NON-NLS-1$
 	
 	/**
-	 * 
-	 * @return a group name for all the properties 
-	 */
-	public String getName();
-	
-	/**
-	 * Gets all properties supported by this provided
-	 * @return
-	 */
-	public List<ICtPackageProperty> getProperties();	
-	
-	/**
-	 * Refreshsed all properties values
+	 * Reload property values
 	 */
 	public void refresh();
 	
 	/**
-	 * Listeners that are fired when the property values are modified
-	 * or updated 
+	 * 
+	 * @return the property name
+	 */
+	public String getName();
+	
+	/**
+	 * 
+	 * @param layer
+	 * @return the property value for the given navigationlayer
+	 */
+	public String getValue(NavigationLayer layer);
+	
+	/**
+	 * Listens for updates to the property values
+	 * 
 	 * @param listener
 	 */
 	public void addPropertyUpdatedListener(IPropertyListener listener);
-			
-			
-	@FunctionalInterface
-	interface IPropertyListener{
-		public void propertyUpdated();
-	}
 }

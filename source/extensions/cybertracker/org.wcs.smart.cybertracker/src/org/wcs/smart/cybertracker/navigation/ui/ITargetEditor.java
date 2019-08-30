@@ -19,48 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.ctpackage.ui;
+package org.wcs.smart.cybertracker.navigation.ui;
 
-import java.util.List;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
 
 /**
- * An extension point for proving properties to
- * cybertracker packages 
- * 
+ * Navigation Layer target editor
  * @author Emily
  *
  */
-public interface ICtPackagePropertyProvider {
+public interface ITargetEditor {
 
-	public static final String EXT_NAME = "ctpackageproperty"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.cybertracer.navigation.ui.targeteditor"; //$NON-NLS-1$
 	
 	/**
-	 * 
-	 * @return a group name for all the properties 
+	 * Add a new target at the given coordinate
+	 * @param c
 	 */
-	public String getName();
+	public void addPointTarget(Coordinate c);
 	
 	/**
-	 * Gets all properties supported by this provided
-	 * @return
+	 * Add a new linear target
+	 * @param ls
 	 */
-	public List<ICtPackageProperty> getProperties();	
-	
-	/**
-	 * Refreshsed all properties values
-	 */
-	public void refresh();
-	
-	/**
-	 * Listeners that are fired when the property values are modified
-	 * or updated 
-	 * @param listener
-	 */
-	public void addPropertyUpdatedListener(IPropertyListener listener);
-			
-			
-	@FunctionalInterface
-	interface IPropertyListener{
-		public void propertyUpdated();
-	}
+	public void addLinearTarget(LineString ls);
 }

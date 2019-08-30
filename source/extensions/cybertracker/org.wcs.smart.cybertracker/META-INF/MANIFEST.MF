@@ -24,8 +24,10 @@ Export-Package: org.wcs.smart.cybertracker,
  org.wcs.smart.cybertracker.model.filter,
  org.wcs.smart.cybertracker.model.reports,
  org.wcs.smart.cybertracker.model.screens,
+ org.wcs.smart.cybertracker.navigation,
  org.wcs.smart.cybertracker.properties,
  org.wcs.smart.cybertracker.updatesite,
  org.wcs.smart.cybertracker.util
 Bundle-Vendor: org.wcs.smart
 Automatic-Module-Name: org.wcs.smart.cybertracker
+Import-Package: org.locationtech.udig.style.sld
