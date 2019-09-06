@@ -187,13 +187,7 @@ public class CyberTracker extends HttpServlet{
 			for (CyberTrackerNavigationLayer ca : items) {
 				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CyberTrackerAction.KEY, ca.getConservationArea().getUuid())){
 					if (caUuid == null || caUuid.equals(ca.getConservationArea().getUuid())) {
-						CyberTrackerNavigationProxy n = new CyberTrackerNavigationProxy();
-						n.setCaLabel(ca.getConservationArea().getLabel());
-						n.setCaUuid(ca.getConservationArea().getUuid());
-						n.setName(ca.getName());
-						n.setUploadedDate(ca.getUploadedDate());
-						n.setUuid(ca.getUuid());
-						proxies.add(n);
+						proxies.add(ca.asProxy());
 					}
 				}
 			}

@@ -90,6 +90,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
+import org.wcs.smart.cybertracker.model.NavigationLayer;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
@@ -472,13 +473,13 @@ public enum SmartTable {
 	
 	PATROLCTPACKAGE(PatrolCtPackage.class, null),
 	SURVEYCTPACKAGE(SurveyCtPackage.class, null),
+	CTNAVIGATION(NavigationLayer.class, null), 
 	
 	METADATAVALUES(MetadataFieldValue.class, null),
 	METADTAVALUESUUID(MetadataFieldUuidValue.class, ".metadata.conservationArea"),
 	
 	EMPLOYEE_TEAM(EmployeeTeam.class, null),
 	EMPLOYEE_TEAM_MEMBER(EmployeeTeamMember.class, ".id.team.conservationArea"),
-	
 	
 	PAWS_CONFIG(PawsConfiguration.class, null),
 	PAWS_PARAM(PawsParameter.class, ".configuration.conservationArea"),

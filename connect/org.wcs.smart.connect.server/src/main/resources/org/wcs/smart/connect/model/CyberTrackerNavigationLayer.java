@@ -36,6 +36,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.connect.cybertracker.model.CyberTrackerNavigationProxy;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 
 /**
@@ -127,5 +128,15 @@ public class CyberTrackerNavigationLayer {
 		this.workItem = workItemUuid;
 	}
 	
+	@Transient
+	public CyberTrackerNavigationProxy asProxy() {
+		CyberTrackerNavigationProxy n = new CyberTrackerNavigationProxy();
+		n.setCaLabel(getConservationArea().getLabel());
+		n.setCaUuid(getConservationArea().getUuid());
+		n.setName(getName());
+		n.setUploadedDate(getUploadedDate());
+		n.setUuid(getUuid());
+		return n;
+	}
 	
 }

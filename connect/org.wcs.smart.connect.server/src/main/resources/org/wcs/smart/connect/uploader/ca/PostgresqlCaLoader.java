@@ -394,7 +394,7 @@ public class PostgresqlCaLoader {
 	 */
 	private HashMap<String, HashSet<String>> getTableConstraints(Session session){
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT tc.table_schema || '.' || tc.table_name as sourcetable, "); //$NON-NLS-1$
+		sql.append("SELECT distinct tc.table_schema || '.' || tc.table_name as sourcetable, "); //$NON-NLS-1$
 		sql.append("ccu.table_schema || '.' || ccu.table_name as requiredtable "); //$NON-NLS-1$
 		sql.append("FROM "); //$NON-NLS-1$
 		sql.append(" information_schema.table_constraints AS tc "); //$NON-NLS-1$
@@ -402,7 +402,7 @@ public class PostgresqlCaLoader {
 		sql.append(" ON tc.constraint_name = kcu.constraint_name "); //$NON-NLS-1$
 		sql.append(" JOIN information_schema.constraint_column_usage AS ccu "); //$NON-NLS-1$
 		sql.append(" ON ccu.constraint_name = tc.constraint_name "); //$NON-NLS-1$
-		sql.append(" WHERE tc.table_schema = 'smart'"); //$NON-NLS-1$
+		sql.append(" WHERE tc.table_schema = 'smart' and ccu.table_schema = 'smart'"); //$NON-NLS-1$
 		
 		HashMap<String, HashSet<String>> results = new HashMap<String, HashSet<String>>();
 		

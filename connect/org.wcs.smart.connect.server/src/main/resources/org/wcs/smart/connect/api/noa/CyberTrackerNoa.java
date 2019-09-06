@@ -57,6 +57,7 @@ import org.wcs.smart.connect.api.ConnectAlert;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.CyberTracker;
 import org.wcs.smart.connect.api.DataQueue;
+import org.wcs.smart.connect.cybertracker.model.CyberTrackerNavigationProxy;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem.Status;
@@ -66,6 +67,7 @@ import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.CyberTrackerApiKey;
+import org.wcs.smart.connect.model.CyberTrackerNavigationLayer;
 import org.wcs.smart.connect.model.CyberTrackerPackage;
 import org.wcs.smart.connect.model.GeoJsonAlert;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -277,7 +279,97 @@ public class CyberTrackerNoa {
 				.build();
 	}
 	
+	@GET
+    @Path("navigation/")
+	@Produces({ MediaType.APPLICATION_JSON })
+	@Operation(description = "Gets the details about all CyberTracker navigation layers authorized by the api key.",
+			security = {@SecurityRequirement(name="apikeyheader"), @SecurityRequirement(name="apikeyquery")})
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(arraySchema = @Schema(implementation=CyberTrackerPackageProxy.class)))})
+	@ApiResponse(responseCode = "401", description = "Invalid authorization credientials")
+	public List<CyberTrackerNavigationProxy> getNavigationLayers( ){
+		
+		UUID tokenCaUuid = validateToken();
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			List<CyberTrackerNavigationLayer> navigationlayers = QueryFactory.buildQuery(s, CyberTrackerNavigationLayer.class, 
+					"conservationArea.uuid", tokenCaUuid).list(); //$NON-NLS-1$
+			List<CyberTrackerNavigationProxy> proxies = new ArrayList<>();
+			for (CyberTrackerNavigationLayer p : navigationlayers) {
+				proxies.add(p.asProxy());
+			}
+			return proxies;
+		}finally {
+			s.getTransaction().commit();
+		}
+	}
 	
+	/**
+	 * Gets the navigation layer
+	 */
+	@GET
+    @Path("navigation/{uuid}")
+	@Operation(description = "Gets the entire Navigation layer as a zip file.",
+			security = {@SecurityRequirement(name="apikeyheader"), @SecurityRequirement(name="apikeyquery")})
+	@ApiResponse(responseCode = "200", description="Data returned successfully")
+	@ApiResponse(responseCode = "401", description = "Invalid authorization credientials")
+	@ApiResponse(responseCode = "404", description = "Requested navigation layer not found")
+	public Response getNavigationLayer(@PathParam("uuid") String uuid){
+		
+		UUID tokenCaUuid = validateToken();
+		
+		UUID navigationUuid = null;
+		try{
+			navigationUuid = UUID.fromString(uuid);
+		}catch (Exception ex) {
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Navigation layer not found");
+		}
+		java.nio.file.Path file = null;
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			CyberTrackerNavigationLayer layer = QueryFactory.buildQuery(s, CyberTrackerNavigationLayer.class, 
+					"uuid", navigationUuid).uniqueResult(); //$NON-NLS-1$
+			if (layer == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
+			if (!layer.getConservationArea().getUuid().equals(tokenCaUuid)) throw new SmartConnectException(Response.Status.FORBIDDEN); 
+			
+			file = DataStoreManager.INSTANCE.getRootDirectory()
+					.toPath().resolve(CyberTracker.CT_NAVIGATION_DATASTORE_LOCATION).resolve(layer.getFilename());
+		}finally {
+			s.getTransaction().commit();
+		}
+		
+		long size = 0;
+		if (file == null || !Files.exists(file)) {
+			logger.log(Level.SEVERE, "Navigation layer file not found"); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		try {
+			size = Files.size(file);
+		}catch (Exception ex) {
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		
+		final java.nio.file.Path ffile = file;
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream output) throws IOException {
+				try {
+					Files.copy(ffile, output);
+				} catch (Exception e) {
+					logger.log(Level.SEVERE, "Error writing to output stream." + e.getMessage(), e); //$NON-NLS-1$
+				}
+			}
+	    };
+		
+		return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM)
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName().toString() + "\"") //$NON-NLS-1$ //$NON-NLS-2$
+				.header(HttpHeaders.CONTENT_LENGTH, size)
+				.header("Accept-Ranges", "bytes") //$NON-NLS-1$ //$NON-NLS-2$
+				.build();
+	}
 	
 	/**
 	 * Upload CyberTracker observation package to data queue
