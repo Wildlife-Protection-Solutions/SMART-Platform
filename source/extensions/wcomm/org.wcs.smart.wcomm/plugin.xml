@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.wcomm.ui.WCommImportEditor"
+            default="false"
+            icon="images/nrt_logo.png"
+            id="org.wcs.smart.wcomsms.data.import"
+            name="WCoMM Data Import">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.wcomm.ui.ImportDataHandler$ImportDataHandlerWrapper"
+            commandId="org.wcs.smart.wcomms.importdata">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.wcomms.importdata"
+            name="Import WCoMM Data">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.fielddata?before=org.wcs.smart.fielddata.dataseparater2">
+         <command
+               commandId="org.wcs.smart.wcomms.importdata"
+               icon="images/nrt_logo.png"
+               label="Import WCoMM Data..."
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+
+</plugin>
