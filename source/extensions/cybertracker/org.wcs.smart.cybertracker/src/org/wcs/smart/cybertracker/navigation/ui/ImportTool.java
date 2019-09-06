@@ -47,6 +47,7 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.udig.project.ui.tool.AbstractActionTool;
 import org.opengis.feature.simple.SimpleFeature;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.gpx.xml.GpxType;
 import org.wcs.smart.gpx.xml.WptType;
@@ -72,20 +73,20 @@ public class ImportTool  extends AbstractActionTool {
 		String[] fnames = new String[] {null};
 		Display.getDefault().syncExec(()->{
 			FileDialog fd = new FileDialog(Display.getDefault().getActiveShell());
-			fd.setText("Import Targets");
-			fd.setFilterExtensions(new String[] {"*.shp;*.gpx", "*.shp", "*.gpx"});
-			fd.setFilterNames(new String[] {"Supported Files (*.shp, *.gpx)", "Shapefiles (*.shp)", "GPX (*.gpx)"});
+			fd.setText(Messages.ImportTool_ImportTitle);
+			fd.setFilterExtensions(new String[] {"*.shp;*.gpx", "*.shp", "*.gpx"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			fd.setFilterNames(new String[] {Messages.ImportTool_SupportedFiles, Messages.ImportTool_Shapefiles, Messages.ImportTool_GpxFiles});
 			fnames[0] = fd.open();
 			
 			if (fnames[0] == null) return;
 			
 			Path importFile = Paths.get(fnames[0]);
 			
-			if (importFile.getFileName().toString().endsWith(".shp")) {
+			if (importFile.getFileName().toString().endsWith(".shp")) { //$NON-NLS-1$
 				//read shapefile
 				try {
 					Map<String,Object> mps = new HashMap<>();
-					mps.put("url", importFile.toUri().toURL() );
+					mps.put("url", importFile.toUri().toURL() ); //$NON-NLS-1$
 					DataStore ds = DataStoreFinder.getDataStore(mps);
 					SimpleFeatureSource fsource = ds.getFeatureSource(ds.getTypeNames()[0]);
 					SimpleFeatureCollection fcollection = fsource.getFeatures();
@@ -98,10 +99,10 @@ public class ImportTool  extends AbstractActionTool {
 						}
 					}
 				}catch (Exception ex) {
-					CyberTrackerPlugIn.displayError("Error", "Unable to import targets from shapefile: " + ex.getMessage(), ex);
+					CyberTrackerPlugIn.displayError(Messages.ImportTool_ErrorTitle, Messages.ImportTool_ShpErrorMsg + ex.getMessage(), ex);
 				}
 				
-			}else if (importFile.getFileName().toString().endsWith(".gpx")) {
+			}else if (importFile.getFileName().toString().endsWith(".gpx")) { //$NON-NLS-1$
 				//read gpx
 				try {
 					JAXBContext context = JAXBContext.newInstance(GPSDataImport.GPX_METADATA_CLASSES);
@@ -115,7 +116,7 @@ public class ImportTool  extends AbstractActionTool {
 						target.addPointTarget(new Coordinate(cx,cy));
 					}
 				} catch (Exception ex) {
-					CyberTrackerPlugIn.displayError("Error", "Unable to import targets from gpx file: " + ex.getMessage(), ex);
+					CyberTrackerPlugIn.displayError(Messages.ImportTool_ErrorTitle, Messages.ImportTool_GpxErrorMsg + ex.getMessage(), ex);
 				}
 			}
 		});
@@ -140,7 +141,7 @@ public class ImportTool  extends AbstractActionTool {
 				target.addLinearTarget(pp);
 			}
 		}else {
-			throw new Exception(MessageFormat.format("Geometry type {0} not supported for targets", geom.getGeometryType()));
+			throw new Exception(MessageFormat.format(Messages.ImportTool_GeomNotSupported, geom.getGeometryType()));
 		}
 	}
 

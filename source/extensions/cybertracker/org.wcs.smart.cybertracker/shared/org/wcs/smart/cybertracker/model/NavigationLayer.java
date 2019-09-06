@@ -99,11 +99,12 @@ public class NavigationLayer extends UuidItem {
 		return Collections.unmodifiableList( ntargets );
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setTargets(List<NavigationTarget> targets) {
 		this.ntargets = targets;
 		
 		JSONObject json = new JSONObject();
-		json.put("type", "FeatureCollection");
+		json.put("type", "FeatureCollection"); //$NON-NLS-1$ //$NON-NLS-2$
 		JSONArray features = new JSONArray();
 		for (NavigationTarget t : targets) {
 			features.add(t.toJson());

@@ -475,6 +475,14 @@ public class Messages extends NLS {
 	public static String ImportDialog_ParseErrorMsg;
 	public static String ImportDialog_ReadError;
 	public static String ImportDialog_ShellText;
+	public static String ImportTool_ErrorTitle;
+	public static String ImportTool_GeomNotSupported;
+	public static String ImportTool_GpxErrorMsg;
+	public static String ImportTool_GpxFiles;
+	public static String ImportTool_ImportTitle;
+	public static String ImportTool_Shapefiles;
+	public static String ImportTool_ShpErrorMsg;
+	public static String ImportTool_SupportedFiles;
 	public static String InstallToDeviceDialog_AllFiles;
 	public static String InstallToDeviceDialog_APKFileLabel;
 	public static String InstallToDeviceDialog_APKFiles;

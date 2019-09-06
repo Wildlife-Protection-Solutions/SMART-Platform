@@ -58,9 +58,9 @@ public abstract class AbstractConnectPackageContribution  implements IPackageCon
 				ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
 					@Override
 					protected Control createDialogArea(Composite parent) {
-						setTitle("SMART Connect");
-						getShell().setText("SMART Connect");
-						setMessage("Enter SMART Connect creditentials");	
+						setTitle(Messages.AbstractConnectPackageContribution_ConnectTitle);
+						getShell().setText(Messages.AbstractConnectPackageContribution_ConnectTitle);
+						setMessage(Messages.AbstractConnectPackageContribution_ConnectMsg);	
 						return super.createDialogArea(parent);
 					}	
 					
@@ -68,7 +68,7 @@ public abstract class AbstractConnectPackageContribution  implements IPackageCon
 					public void createButtonsForButtonBar(Composite parent){
 						super.createButtonsForButtonBar(parent);
 						if (canskip) {
-							getButton(CANCEL).setText("Skip");
+							getButton(CANCEL).setText(Messages.AbstractConnectPackageContribution_SkipButtonTxt);
 						}
 					}
 				};

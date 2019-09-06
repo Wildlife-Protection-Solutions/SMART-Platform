@@ -1,6 +1,26 @@
+/*
+ * Copyright (C) 2019 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.cybertracker.navigation;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
@@ -29,6 +49,7 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.cybertracker.ctpackage.CtConnectClient;
+import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerNavigationProxy;
 import org.wcs.smart.connect.internal.server.FileUploaderJob;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
@@ -36,6 +57,12 @@ import org.wcs.smart.cybertracker.model.NavigationLayer;
 import org.wcs.smart.cybertracker.navigation.ExportNavigationManager;
 import org.wcs.smart.cybertracker.navigation.INavigationExportAction;
 
+/**
+ * Export navigation layers to connect.
+ * 
+ * @author Emily
+ *
+ */
 public class ExportNavigationLayerToConnect implements INavigationExportAction {
 
 	private List<Job> jobs = new ArrayList<>();
@@ -50,9 +77,9 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 				ConnectDialog cd = new ConnectDialog(context.get(Shell.class), true) {
 					@Override
 					protected Control createDialogArea(Composite parent) {
-						setTitle("Export Navigation Layer To Connect");
-						getShell().setText("Export Navigation Layer To Connect");
-						setMessage("Configure SMART Connect details for export");
+						setTitle(Messages.ExportNavigationLayerToConnect_ConnectDialogTitle);
+						getShell().setText(Messages.ExportNavigationLayerToConnect_ConnectDialogTitle);
+						setMessage(Messages.ExportNavigationLayerToConnect_ConnectDialogMsg);
 						return super.createDialogArea(parent);
 					}
 				};
@@ -99,7 +126,7 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 
 			total = layers.size();
 
-			Path tempDir = Files.createTempDirectory("smartnav");
+			Path tempDir = Files.createTempDirectory("smartnav"); //$NON-NLS-1$
 			System.out.println(tempDir);
 			for (NavigationLayer navigationlayer : layers) {
 				
@@ -118,10 +145,10 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 				}
 				String location = response.getHeaderString(HttpHeaders.LOCATION);
 				if (location == null) {
-					throw new Exception("Response does not contain upload url");
+					throw new Exception(Messages.ExportNavigationLayerToConnect_NotUrl);
 				}
 
-				FileUploaderJob job = new FileUploaderJob(location, tempFile, connect, "Upload SMART Navigation Layer") {
+				FileUploaderJob job = new FileUploaderJob(location, tempFile, connect, Messages.ExportNavigationLayerToConnect_UploadedJobName) {
 					@Override
 					protected void onUploadComplete(WorkItemStatus status) {
 						delete();
@@ -144,7 +171,7 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 					@Override
 					protected void onError(String errorMessage) {
 						delete();
-						ConnectPlugIn.displayLog("Error uploading Navigation Layer to Connect: " + errorMessage, null);
+						ConnectPlugIn.displayLog(Messages.ExportNavigationLayerToConnect_UploadError + errorMessage, null);
 					}
 
 					@Override
@@ -152,7 +179,7 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 						try {
 							super.uploadFile(monitor);
 						} catch (Exception e) {
-							ConnectPlugIn.displayLog("Error uploading Navigation Layer to Connect: " + e.getMessage(), e);
+							ConnectPlugIn.displayLog(Messages.ExportNavigationLayerToConnect_UploadError + e.getMessage(), e);
 						}
 						return Status.OK_STATUS;
 					}
@@ -164,7 +191,7 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 
 			}
 		} catch (Exception e) {
-			ConnectPlugIn.displayLog("Error uploading Navigation Layer to Connect: " + e.getMessage(), e);
+			ConnectPlugIn.displayLog(Messages.ExportNavigationLayerToConnect_UploadError + e.getMessage(), e);
 		}
 	}
 
@@ -174,18 +201,18 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 
 		shell.getDisplay().syncExec(() -> {
 			if (ok == total) {
-				MessageDialog.openInformation(shell, "Upload Complete",
-						MessageFormat.format("Uploaded {0} of {1} package(s) to connect.", ok, total));
+				MessageDialog.openInformation(shell, Messages.ExportNavigationLayerToConnect_UploadOk,
+						MessageFormat.format(Messages.ExportNavigationLayerToConnect_UploadOkMsg1, ok, total));
 			} else {
-				MessageDialog.openInformation(shell, "Upload Complete",
-						MessageFormat.format("Uploaded {0} of {1} package(s) to connect. See error logs for error details.", ok, total));
+				MessageDialog.openInformation(shell, Messages.ExportNavigationLayerToConnect_UploadOk,
+						MessageFormat.format(Messages.ExportNavigationLayerToConnect_UploadOkMsg2, ok, total));
 			}
 		});
 	}
 
 	@Override
 	public String getName() {
-		return "Export To Connect";
+		return Messages.ExportNavigationLayerToConnect_ActionName;
 	}
 
 	@Override

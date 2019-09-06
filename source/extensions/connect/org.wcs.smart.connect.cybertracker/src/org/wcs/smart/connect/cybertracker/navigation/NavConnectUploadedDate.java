@@ -1,8 +1,27 @@
+/*
+ * Copyright (C) 2019 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.cybertracker.navigation;
 
 import java.text.DateFormat;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,8 +52,13 @@ import org.wcs.smart.cybertracker.model.NavigationLayer;
 import org.wcs.smart.cybertracker.navigation.INavigationLayerProperty;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Navigation layer uploaded property date.
+ * 
+ * @author Emily
+ *
+ */
 public class NavConnectUploadedDate implements INavigationLayerProperty {
 
 	private SmartConnect connect = null;
@@ -50,7 +74,7 @@ public class NavConnectUploadedDate implements INavigationLayerProperty {
 	
 	@Override
 	public String getName() {
-		return "Connect Upload Date";
+		return Messages.NavConnectUploadedDate_PropertyName;
 	}
 
 	@Override
@@ -62,10 +86,10 @@ public class NavConnectUploadedDate implements INavigationLayerProperty {
 			}else if (loadProperties.getState() == Job.RUNNING  || loadProperties.getState() == Job.WAITING){
 				return DialogConstants.LOADING_TEXT;
 			}
-			return "No Connection";
+			return Messages.NavConnectUploadedDate_NoConnect;
 		}
 		if (values.containsKey(layer.getUuid())) return values.get(layer.getUuid());
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	
@@ -84,7 +108,7 @@ public class NavConnectUploadedDate implements INavigationLayerProperty {
 		listeners.forEach(l->l.propertyUpdated());
 	}
 
-	private Job loadProperties = new Job("Loading navigation target properties") {
+	private Job loadProperties = new Job(Messages.NavConnectUploadedDate_jobname) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -96,9 +120,9 @@ public class NavConnectUploadedDate implements INavigationLayerProperty {
 							ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
 								@Override
 								protected Control createDialogArea(Composite parent) {
-									setTitle("Navigation Layers");
-									getShell().setText("Navigation Layers");
-									setMessage("Configure SMART Connect details");	
+									setTitle(Messages.NavConnectUploadedDate_ConnectDialogTitle);
+									getShell().setText(Messages.NavConnectUploadedDate_ConnectDialogTitle);
+									setMessage(Messages.NavConnectUploadedDate_ConnectDialogMsg);	
 									return super.createDialogArea(parent);
 								}	
 							};
