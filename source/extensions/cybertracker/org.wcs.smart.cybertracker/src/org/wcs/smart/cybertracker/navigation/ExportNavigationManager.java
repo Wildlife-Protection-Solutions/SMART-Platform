@@ -61,12 +61,26 @@ public enum ExportNavigationManager {
 		return fname;
 	}
 	
+	/**
+	 * Exports navigation layer to file - exportFile will be a zip file
+	 * 
+	 * @param layer
+	 * @param exportFile
+	 * @throws IOException
+	 */
 	public void exportNavigationLayer(NavigationLayer layer, Path exportFile) throws IOException{
 		String fname = SharedUtils.getFilenameWithoutExtension(exportFile.getFileName().toString());
 		String json = new String(layer.getTargets(), StandardCharsets.UTF_8);
 		ZipUtil.writeToZip(exportFile, fname + ".json", json); //$NON-NLS-1$
 	}
 
+	/**
+	 * Exports all navigation layers to provided directory.
+	 * 
+	 * @param items
+	 * @param exportDir
+	 * @return
+	 */
 	public List<Path> exportNavigationLayers(List<NavigationLayer> items, Path exportDir) {
 		String datetime = DateTimeFormatter.ofPattern(FILENAME_DATE_FORMAT).format(LocalDateTime.now());
 		List<Path> paths = new ArrayList<>();
@@ -83,6 +97,14 @@ public enum ExportNavigationManager {
 		return paths;
 	}
 	
+	/**
+	 * Exports navigation layers
+	 * 
+	 * @param toExport
+	 * @param context
+	 * @return
+	 * @throws IOException
+	 */
 	public boolean doExport(List<NavigationLayer> toExport, IEclipseContext context) throws IOException {
 		List<INavigationExportAction> actions = getNavigationActions();
 		List<INavigationExportAction> doActions = new ArrayList<>(actions);
@@ -98,6 +120,11 @@ public enum ExportNavigationManager {
 		return true;
 	}
 
+	/**
+	 * Get all supported export navigation actions
+	 * 
+	 * @return
+	 */
 	public List<INavigationExportAction> getNavigationActions() {
 		List<INavigationExportAction> actions = new ArrayList<>();
 		actions.add(new ExportNavigationToDeviceAction());

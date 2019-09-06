@@ -57,8 +57,7 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 	//urls for package status and package
 	private static final String DATA_URL = "/noa/cybertracker/data/"; //$NON-NLS-1$
 	private static final String ALERT_URL = "/noa/cybertracker/alert/"; //$NON-NLS-1$
-		
-		
+	
 	public ConnectDataContribution() {
 	}
 
@@ -91,7 +90,7 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 		
 		String[] parts = null;
 		try {
-			parts = super.getServerDetails(context, ctpackage.getConservationArea());
+			parts = super.getServerDetails(context, ctpackage.getConservationArea(), false);
 		}catch (Exception ex) {
 			throw new IOException(ex);
 		}
@@ -101,7 +100,7 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 		String apikey = parts[1];
 				
 		PackageContribution cc = new PackageContribution();
-
+		
 		for (MetadataFieldValue mv : apackage.getMetadataValues()) {
 			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name())) {
 				if (mv.getBooleanValue()) {

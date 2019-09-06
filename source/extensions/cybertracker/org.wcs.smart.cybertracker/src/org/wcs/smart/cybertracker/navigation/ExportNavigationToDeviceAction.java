@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
@@ -64,22 +65,27 @@ public class ExportNavigationToDeviceAction implements INavigationExportAction {
 		try {
 			Path dir = Files.createTempDirectory("smartexport"); //$NON-NLS-1$
 			
-			List<Path> files = ExportNavigationManager.INSTANCE.exportNavigationLayers(towrite, dir);
-			
-			// export all the packages
-			int cnt = 0;
-			for (Path f : files) {
-				try {
-					MobileDeviceUtils.exportAppToDevice(f, f.getFileName().toString());
-					cnt++;
-				} catch (Exception e) {
-					CyberTrackerPlugIn.displayError(Messages.ExportNavigationToDeviceAction_ErrorTitle, 
-							MessageFormat.format(Messages.ExportNavigationToDeviceAction_WriteError, f.getFileName().toString(), e.getMessage()), e);
+			try {
+				List<Path> files = ExportNavigationManager.INSTANCE.exportNavigationLayers(towrite, dir);
+				
+				// export all the packages
+				int cnt = 0;
+				for (Path f : files) {
+					try {
+						MobileDeviceUtils.exportAppToDevice(f, f.getFileName().toString());
+						cnt++;
+					} catch (Exception e) {
+						CyberTrackerPlugIn.displayError(Messages.ExportNavigationToDeviceAction_ErrorTitle, 
+								MessageFormat.format(Messages.ExportNavigationToDeviceAction_WriteError, f.getFileName().toString(), e.getMessage()), e);
+					}
 				}
-			}
-			MessageDialog.openInformation(shell, Messages.ExportNavigationToDeviceAction_OkMsgTitle, MessageFormat
-					.format(Messages.ExportNavigationToDeviceAction_ExportOkMsg, cnt, towrite.size()));
+				MessageDialog.openInformation(shell, Messages.ExportNavigationToDeviceAction_OkMsgTitle, MessageFormat
+						.format(Messages.ExportNavigationToDeviceAction_ExportOkMsg, cnt, towrite.size()));
 
+			}finally {
+				FileUtils.deleteDirectory(dir.toFile());
+			}
+			
 		}catch (Exception ex) {
 			CyberTrackerPlugIn.displayError(Messages.ExportNavigationToDeviceAction_ErrorTitle, 
 					MessageFormat.format(Messages.ExportNavigationToDeviceAction_ExportErrorMsg, ex.getMessage()), ex);

@@ -395,6 +395,14 @@
             toolCursorId="org.wcs.smart.cross"
             tooltip="add navigation line">
       </modalTool>
+      <actionTool
+            categoryId="org.wcs.smart.udig.maptools"
+            class="org.wcs.smart.cybertracker.navigation.ui.ImportTool"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png"
+            id="org.wcs.smart.ui.map.navigation.import"
+            name="Import Targets"
+            tooltip="import targets from file">
+      </actionTool>
    </extension>
 
 </plugin>

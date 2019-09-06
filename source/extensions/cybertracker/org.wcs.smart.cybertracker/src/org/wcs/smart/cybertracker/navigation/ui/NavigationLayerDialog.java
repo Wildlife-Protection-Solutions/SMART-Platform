@@ -439,7 +439,8 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 				AddPointTool.ID,
 				AddLineTool.ID,
 				EditPointTool.ID,
-				UndoTool.ID};
+				UndoTool.ID,
+				ImportTool.ID};
 		
 		tools = new MapToolComposite(thisTools);
 		tools.createComposite(mapArea);

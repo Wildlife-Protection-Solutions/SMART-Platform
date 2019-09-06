@@ -1,5 +1,6 @@
 package org.wcs.smart.connect.cybertracker.navigation;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
@@ -98,8 +99,8 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 
 			total = layers.size();
 
-			Path tempDir = Files.createTempDirectory("smartnave");
-			
+			Path tempDir = Files.createTempDirectory("smartnav");
+			System.out.println(tempDir);
 			for (NavigationLayer navigationlayer : layers) {
 				
 				Path tempFile = tempDir.resolve(ExportNavigationManager.INSTANCE.getExportFileName(navigationlayer));
@@ -123,6 +124,7 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 				FileUploaderJob job = new FileUploaderJob(location, tempFile, connect, "Upload SMART Navigation Layer") {
 					@Override
 					protected void onUploadComplete(WorkItemStatus status) {
+						delete();
 					}
 
 					@Override
@@ -130,9 +132,19 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 						ok++;
 					}
 
+					private void delete() {
+						super.deleteLocalFile();
+						try {
+							if (Files.list(tempDir).count() == 0) Files.delete(tempDir);
+						}catch (Exception ex) {
+							ConnectPlugIn.log(ex.getMessage(), ex);
+						}
+					}
+					
 					@Override
 					protected void onError(String errorMessage) {
-						ConnectPlugIn.log("Error uploading Navigation Layer to Connect: " + errorMessage, null);
+						delete();
+						ConnectPlugIn.displayLog("Error uploading Navigation Layer to Connect: " + errorMessage, null);
 					}
 
 					@Override
@@ -140,7 +152,7 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 						try {
 							super.uploadFile(monitor);
 						} catch (Exception e) {
-							ConnectPlugIn.log("Error uploading Navigation Layer to Connect: " + e.getMessage(), e);
+							ConnectPlugIn.displayLog("Error uploading Navigation Layer to Connect: " + e.getMessage(), e);
 						}
 						return Status.OK_STATUS;
 					}
