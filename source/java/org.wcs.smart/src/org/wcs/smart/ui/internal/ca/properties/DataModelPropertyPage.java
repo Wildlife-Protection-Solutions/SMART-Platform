@@ -146,7 +146,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		for (Aggregation agg : DataModel.getAggregations()){
 			getSession().update(agg);
 		}
-		setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE);
 	}
 	
 	@Override
