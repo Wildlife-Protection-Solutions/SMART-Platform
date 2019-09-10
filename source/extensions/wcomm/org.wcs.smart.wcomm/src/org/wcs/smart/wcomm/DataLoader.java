@@ -295,10 +295,14 @@ public class DataLoader {
 				return a;
 			}
 		}
-		warnings.add(MessageFormat.format(Messages.DataLoader_AttributeNotFound, v, categoryKey));
+		addWarning(MessageFormat.format(Messages.DataLoader_AttributeNotFound, v, categoryKey));
 		return null;
 	}
 	
+	private void addWarning(String msg) {
+		if (warnings.contains(msg)) return;
+		warnings.add(msg);
+	}
 	
 	private String findMappedValue(String value, String attributekey) {
 		for (AttributeMapping m : mapping.getAttributeMapping()) {
@@ -319,7 +323,7 @@ public class DataLoader {
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 					new Object[] {"hkey", categoryKey}).uniqueResult(); //$NON-NLS-1$
 			if (c == null) {
-				warnings.add(MessageFormat.format(Messages.DataLoader_AttributeNotFoundWo, categoryKey));
+				addWarning(MessageFormat.format(Messages.DataLoader_AttributeNotFoundWo, categoryKey));
 				return;
 			}
 			
@@ -368,7 +372,7 @@ public class DataLoader {
 			while(true) {
 				data = reader.readNext();
 				if (data == null) break;
-				
+				if (data.length == 1 && data[0].trim().isEmpty()) continue;
 				double x = Double.valueOf( data[utmxcol] );
 				double y = Double.valueOf( data[utmycol] );
 				
@@ -415,7 +419,7 @@ public class DataLoader {
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 					new Object[] {"hkey", categoryKey}).uniqueResult(); //$NON-NLS-1$
 			if (c == null) {
-				warnings.add(MessageFormat.format(Messages.DataLoader_AttributeNotFoundEm, categoryKey));
+				addWarning(MessageFormat.format(Messages.DataLoader_AttributeNotFoundEm, categoryKey));
 				return;
 			}
 			
@@ -472,7 +476,7 @@ public class DataLoader {
 			while(true) {
 				data = reader.readNext();
 				if (data == null) break;
-				
+				if (data.length == 1 && data[0].trim().isEmpty()) continue;
 				String comment = null;
 				if (commentscol >= 0) comment = data[commentscol];
 				double x = Double.valueOf(data[utmxcol]);
@@ -523,7 +527,7 @@ public class DataLoader {
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 					new Object[] {"hkey", categoryKey}).uniqueResult(); //$NON-NLS-1$
 			if (c == null) {
-				warnings.add(MessageFormat.format(Messages.DataLoader_AttributeNotFoundOc, categoryKey));
+				addWarning(MessageFormat.format(Messages.DataLoader_AttributeNotFoundOc, categoryKey));
 				return;
 			}
 			
@@ -578,7 +582,7 @@ public class DataLoader {
 			while(true) {
 				data = reader.readNext();
 				if (data == null) break;
-				
+				if (data.length == 1 && data[0].trim().isEmpty()) continue;
 				String comment = null;
 				if (commentscol >= 0) comment = data[commentscol];
 				double x = Double.valueOf(data[utmxcol]);
@@ -630,7 +634,7 @@ public class DataLoader {
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 					new Object[] {"hkey", categoryKey}).uniqueResult(); //$NON-NLS-1$
 			if (c == null) {
-				warnings.add(MessageFormat.format(Messages.DataLoader_AttributeNotFoundHwc, categoryKey));
+				addWarning(MessageFormat.format(Messages.DataLoader_AttributeNotFoundHwc, categoryKey));
 				return;
 			}
 			
@@ -680,7 +684,7 @@ public class DataLoader {
 			while(true) {
 				data = reader.readNext();
 				if (data == null) break;
-				
+				if (data.length == 1 && data[0].trim().isEmpty()) continue;
 				String comment = null;
 				if (commentscol >= 0) comment = data[commentscol];
 				double x = Double.valueOf(data[utmxcol]);
@@ -793,7 +797,7 @@ public class DataLoader {
 					}
 				}
 				if (im == null) {
-					warnings.add(MessageFormat.format(Messages.DataLoader_MappingNotFoundIncident, value));
+					addWarning(MessageFormat.format(Messages.DataLoader_MappingNotFoundIncident, value));
 					continue;
 				}
 				
@@ -801,7 +805,7 @@ public class DataLoader {
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 						new Object[] {"hkey", im.category}).uniqueResult(); //$NON-NLS-1$
 				if (c == null) {
-					warnings.add(MessageFormat.format(Messages.DataLoader_Hkeynotfound, im.category));
+					addWarning(MessageFormat.format(Messages.DataLoader_Hkeynotfound, im.category));
 					continue;
 				}
 				
@@ -822,7 +826,7 @@ public class DataLoader {
 						}
 					}
 					if (found == null) {
-						warnings.add(MessageFormat.format(Messages.DataLoader_attributenotfound, im.attribute, im.category));
+						addWarning(MessageFormat.format(Messages.DataLoader_attributenotfound, im.attribute, im.category));
 						continue;
 					}
 				}
@@ -836,13 +840,13 @@ public class DataLoader {
 						}
 					}
 					if (li == null) {
-						warnings.add(MessageFormat.format(Messages.DataLoader_listitemnotfound, im.item, im.attribute, im.category));
+						addWarning(MessageFormat.format(Messages.DataLoader_listitemnotfound, im.item, im.attribute, im.category));
 						continue;
 					}
 				}
 				
 				if (found != null && li == null) {
-					warnings.add(MessageFormat.format(Messages.DataLoader_missinglistitem, found.getKeyId()));
+					addWarning(MessageFormat.format(Messages.DataLoader_missinglistitem, found.getKeyId()));
 				}
 								
 				if (found != null && li != null) {
@@ -870,13 +874,13 @@ public class DataLoader {
 			
 			String dmitem = findMappedValue(value, a.getKeyId());
 			if (dmitem == null) {
-				warnings.add(MessageFormat.format(Messages.DataLoader_missingmapping, a.getName(), value, page));
+				addWarning(MessageFormat.format(Messages.DataLoader_missingmapping, a.getName(), value, page));
 			}else {
 				AttributeListItem item = QueryFactory.buildQuery(session, AttributeListItem.class, 
 						new Object[] {"attribute", a}, //$NON-NLS-1$
 						new Object[] {"keyId", dmitem}).uniqueResult(); //$NON-NLS-1$
 				if (item == null) {
-					warnings.add(MessageFormat.format(Messages.DataLoader_listitemnotfoundforattribute, dmitem, a.getName(), page));
+					addWarning(MessageFormat.format(Messages.DataLoader_listitemnotfoundforattribute, dmitem, a.getName(), page));
 				}
 				if (item != null) {
 					woa.setAttributeListItem(item);
@@ -888,13 +892,13 @@ public class DataLoader {
 			
 			String dmitem = findMappedValue(value, a.getKeyId());
 			if (dmitem == null) {
-				warnings.add(MessageFormat.format(Messages.DataLoader_mappingmissing, a.getName(), value, page));
+				addWarning(MessageFormat.format(Messages.DataLoader_mappingmissing, a.getName(), value, page));
 			}else {
 				AttributeTreeNode node = QueryFactory.buildQuery(session, AttributeTreeNode.class, 
 						new Object[] {"attribute", a}, //$NON-NLS-1$
 						new Object[] {"hkey", dmitem}).uniqueResult(); //$NON-NLS-1$
 				if (node == null) {
-					warnings.add(MessageFormat.format(Messages.DataLoader_treenodenotfound, dmitem, a.getName(), page));
+					addWarning(MessageFormat.format(Messages.DataLoader_treenodenotfound, dmitem, a.getName(), page));
 				}
 				if (node != null) {
 					woa.setAttributeTreeNode(node);

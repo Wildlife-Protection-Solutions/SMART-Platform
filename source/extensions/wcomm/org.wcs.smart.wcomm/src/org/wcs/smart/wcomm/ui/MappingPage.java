@@ -303,6 +303,7 @@ public class MappingPage  extends EditorPart {
 		cmbWoCat.setContentProvider(ArrayContentProvider.getInstance());
 		cmbWoCat.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		cmbWoCat.setLabelProvider(categoryLabelProvider);
+		cmbWoCat.getControl().addListener(SWT.MouseWheel, e->e.doit = false);
 		cmbWoCat.getControl().setBackground(m.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		List<ComboViewer> attviewer = new ArrayList<>();
@@ -353,6 +354,8 @@ public class MappingPage  extends EditorPart {
 		cmbEmCat.setLabelProvider(categoryLabelProvider);
 		cmbEmCat.getControl().setBackground(m.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 
+		cmbEmCat.getControl().addListener(SWT.MouseWheel, e->e.doit = false);
+		
 		List<ComboViewer> attviewer = new ArrayList<>();
 		
 		toolkit.createLabel(m, Messages.MappingPage_emspecies);
@@ -415,6 +418,7 @@ public class MappingPage  extends EditorPart {
 		cmbOcCat.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		cmbOcCat.setLabelProvider(categoryLabelProvider);
 		cmbOcCat.getControl().setBackground(m.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		cmbOcCat.getControl().addListener(SWT.MouseWheel, e->e.doit = false);
 		
 		List<ComboViewer> attviewer = new ArrayList<>();
 		
@@ -476,6 +480,7 @@ public class MappingPage  extends EditorPart {
 		cmbHwcCat.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		cmbHwcCat.setLabelProvider(categoryLabelProvider);
 		cmbHwcCat.getControl().setBackground(m.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		cmbHwcCat.getControl().addListener(SWT.MouseWheel, e->e.doit = false);
 		
 		List<ComboViewer> attviewer = new ArrayList<>();
 		
@@ -537,6 +542,7 @@ public class MappingPage  extends EditorPart {
 		cmbCategory.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)cmbCategory.getControl().getLayoutData()).widthHint = 200;
 		cmbCategory.getControl().setBackground(cmbCategory.getControl().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		cmbCategory.getControl().addListener(SWT.MouseWheel, e->e.doit = false);
 		
 		ComboViewer cmbAttribute = new ComboViewer(incidentMappingItems, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbAttribute.setContentProvider(ArrayContentProvider.getInstance());
@@ -545,12 +551,14 @@ public class MappingPage  extends EditorPart {
 		cmbAttribute.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)cmbAttribute.getControl().getLayoutData()).widthHint = 200;
 		cmbAttribute.getControl().setBackground(cmbAttribute.getControl().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		cmbAttribute.getControl().addListener(SWT.MouseWheel, e->e.doit = false);
 		
 		ComboViewer cmbItem = new ComboViewer(incidentMappingItems, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbItem.setContentProvider(ArrayContentProvider.getInstance());
 		cmbItem.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)cmbItem.getControl().getLayoutData()).widthHint = 200;
 		cmbItem.getControl().setBackground(cmbItem.getControl().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		cmbItem.getControl().addListener(SWT.MouseWheel, e->e.doit = false);
 		cmbItem.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
 				if (element instanceof AttributeListItem) return ((AttributeListItem)element).getName();
@@ -705,7 +713,13 @@ public class MappingPage  extends EditorPart {
 			incidentMappingItems.getParent().layout(true);
 			form.reflow(true);
 			
+			
 			editor.getMapping().removeIncidentMapping(mm);
+			try {
+				editor.getMapping().save();
+			} catch (IOException e1) {
+				WCommPlugIn.displayError(e1.getMessage(), e1);
+			}
 		});
 		
 		incidentMappingItems.getParent().layout(true);
@@ -747,12 +761,14 @@ public class MappingPage  extends EditorPart {
 		cmbAttribute.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)cmbAttribute.getControl().getLayoutData()).widthHint = 200;
 		cmbAttribute.getControl().setBackground(cmbAttribute.getControl().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		cmbAttribute.getControl().addListener(SWT.MouseWheel, e->e.doit = false);
 		
 		ComboViewer cmbItem = new ComboViewer(attributeMappingItems, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbItem.setContentProvider(ArrayContentProvider.getInstance());
 		cmbItem.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)cmbItem.getControl().getLayoutData()).widthHint = 200;
 		cmbItem.getControl().setBackground(cmbItem.getControl().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		cmbItem.getControl().addListener(SWT.MouseWheel, e->e.doit = false);
 		cmbItem.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
 				if (element instanceof AttributeListItem) return ((AttributeListItem)element).getName();
@@ -865,6 +881,11 @@ public class MappingPage  extends EditorPart {
 			form.reflow(true);
 			
 			editor.getMapping().removeAttributeMapping(mm);
+			try {
+				editor.getMapping().save();
+			} catch (IOException e1) {
+				WCommPlugIn.displayError(e1.getMessage(), e1);
+			}
 		});
 		
 		attributeMappingItems.getParent().layout(true);
@@ -881,6 +902,7 @@ public class MappingPage  extends EditorPart {
 		((GridData)cmb.getControl().getLayoutData()).widthHint = 400;
 		cmb.getControl().setData("FIELD", field); //$NON-NLS-1$
 		cmb.addSelectionChangedListener(attListener);
+		cmb.getControl().addListener(SWT.MouseWheel, e->e.doit = false);		
 		cmbAttributes.add(cmb);
 		return cmb;
 	}
