@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.wcs.smart.plan.feature_7.0.0.qualifier.jar" id="org.wcs.smart.plan.feature" version="7.0.0.qualifier">
+      <category name="planning"/>
+   </feature>
+   
+   <category-def name="planning" label="SMART Planning Plug-in">
+      <description>
+         The SMART Planning plug-in contains a plan module that allows users to organize, maintain and query planning information. Plans allow for a set of targets (such as total distance patrolled or specific locations to visit) to be assigned to a patrol or series of patrols.
+      </description>
+   </category-def>
+  
+</site>

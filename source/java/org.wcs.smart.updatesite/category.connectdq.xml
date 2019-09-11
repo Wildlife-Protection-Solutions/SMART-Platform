@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+  
+   <feature url="features/org.wcs.smart.connect.dataqueue.er.feature_7.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.er.feature" version="7.0.0.qualifier">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.feature_7.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.feature" version="7.0.0.qualifier">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.independentincident.feature_7.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.independentincident.feature" version="7.0.0.qualifier">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.feature_7.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.feature" version="7.0.0.qualifier">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.i2.feature_7.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.i2.feature" version="7.0.0.qualifier">
+      <category name="connectdq"/>
+   </feature>
+   
+   <category-def name="connectdq" label="SMART Connect Data Queue">
+      <description>
+         The SMART Connect Data Queue plug-in allows SMART Desktop software to processes data files uploaded to a SMART Connect Server.
+      </description>
+   </category-def>
+ 
+</site>

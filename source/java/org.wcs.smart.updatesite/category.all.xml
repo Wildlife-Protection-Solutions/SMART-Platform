@@ -54,14 +54,14 @@
    <feature url="features/org.wcs.smart.cybertracker.incident.feature_7.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.incident.feature" version="7.0.0.qualifier">
       <category name="cybertracker"/>
    </feature>
+   <feature url="features/org.wcs.smart.cybertracker.plan.feature_7.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.plan.feature" version="7.0.0.qualifier">
+      <category name="cybertracker"/>
+   </feature>
    <feature url="features/org.wcs.smart.event.feature_7.0.0.qualifier.jar" id="org.wcs.smart.event.feature" version="7.0.0.qualifier">
       <category name="events"/>
    </feature>
    <feature url="features/org.wcs.smart.intelligence.feature_7.0.0.qualifier.jar" id="org.wcs.smart.intelligence.feature" version="7.0.0.qualifier">
       <category name="intelligence"/>
-   </feature>
-   <feature url="features/org.wcs.smart.cybertracker.plan.feature_7.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.plan.feature" version="7.0.0.qualifier">
-      <category name="cybertracker"/>
    </feature>
    <category-def name="intelligence" label="SMART Intelligence Plug-in">
       <description>

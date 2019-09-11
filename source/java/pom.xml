@@ -459,7 +459,8 @@
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey.core.feature</module>
-				
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.plan</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.plan.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident.feature</module>
 			</modules>
@@ -593,6 +594,8 @@
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.survey.core.feature</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.plan</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.plan.feature</module>
 				
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident.feature</module>
