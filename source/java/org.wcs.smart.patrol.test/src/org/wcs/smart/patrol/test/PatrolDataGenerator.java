@@ -16,6 +16,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -39,10 +42,6 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
 
 public class PatrolDataGenerator {
 
@@ -252,8 +251,8 @@ public class PatrolDataGenerator {
 
 					trackPnts[x] = new Coordinate(cx,cy, c2.getTime().getTime());
 					
-					wp.setX(cx);
-					wp.setY(cy);
+					wp.setRawX(cx);
+					wp.setRawY(cy);
 					
 					int size = random.nextInt(8);
 					for (int y = 0; y < size; y ++){
