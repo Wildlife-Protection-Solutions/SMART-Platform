@@ -88,6 +88,11 @@ public class NavigationTarget {
 	public Geometry getGeometry() {
 		return this.geometry;
 	}
+	
+	/**
+	 * 
+	 * @param geometry must be point or linestring
+	 */
 	public void setGeometry(Geometry geometry) {
 		this.geometry = geometry;
 	}

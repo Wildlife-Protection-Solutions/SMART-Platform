@@ -20,6 +20,7 @@
          <sequence>
             <element ref="navigationexportaction" minOccurs="0" maxOccurs="unbounded"/>
             <element ref="navigationlayerproperty" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="targetprovider" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -72,6 +73,21 @@
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.cybertracker.navigation.ui.INavigationLayerProperty"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="targetprovider">
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.cybertracker.navigation.ui.INavigationLayerTargetProvider"/>
                </appinfo>
             </annotation>
          </attribute>

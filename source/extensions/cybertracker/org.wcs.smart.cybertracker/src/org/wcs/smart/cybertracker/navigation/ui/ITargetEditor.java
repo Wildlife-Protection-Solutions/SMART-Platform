@@ -21,8 +21,11 @@
  */
 package org.wcs.smart.cybertracker.navigation.ui;
 
+import java.util.List;
+
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.LineString;
+import org.wcs.smart.cybertracker.model.NavigationTarget;
 
 /**
  * Navigation Layer target editor
@@ -38,6 +41,12 @@ public interface ITargetEditor {
 	 * @param c
 	 */
 	public void addPointTarget(Coordinate c);
+	
+	/**
+	 * Add a set of new targets 
+	 * @param c
+	 */
+	public void addTargets(List<NavigationTarget> target);
 	
 	/**
 	 * Add a new linear target

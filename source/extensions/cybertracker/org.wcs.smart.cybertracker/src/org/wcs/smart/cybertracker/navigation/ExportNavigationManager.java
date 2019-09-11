@@ -39,6 +39,7 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.NavigationLayer;
 import org.wcs.smart.cybertracker.navigation.ui.CtNavigationExportDialog;
+import org.wcs.smart.cybertracker.navigation.ui.INavigationLayerTargetProvider;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -159,6 +160,25 @@ public enum ExportNavigationManager {
 				}
 			}catch (Exception ex){
 				CyberTrackerPlugIn.displayError(Messages.ExportNavigationManager_ErrorTitle, Messages.ExportNavigationManager_LoadPropertiesError + ex.getMessage(), ex);
+			}
+		}
+		return props;
+
+	}
+	
+	public List<INavigationLayerTargetProvider> getTargetProviders() {
+		List<INavigationLayerTargetProvider> props = new ArrayList<>();
+		if (Platform.getExtensionRegistry() != null) {
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXT_ID);
+			try {
+				for (IConfigurationElement e : config) {
+					if (e.getName().equalsIgnoreCase("targetprovider")) { //$NON-NLS-1$
+						INavigationLayerTargetProvider ext = (INavigationLayerTargetProvider) e.createExecutableExtension("class"); //$NON-NLS-1$
+						props.add(ext);
+					}
+				}
+			}catch (Exception ex){
+				CyberTrackerPlugIn.displayError(Messages.ExportNavigationManager_ErrorTitle, Messages.ExportNavigationManager_targetprovidererror + ex.getMessage(), ex);
 			}
 		}
 		return props;

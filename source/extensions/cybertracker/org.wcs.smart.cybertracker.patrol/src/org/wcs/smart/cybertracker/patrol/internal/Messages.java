@@ -262,6 +262,18 @@ public class Messages extends NLS {
 	public static String PatrolSelectorDialog_AddAsPatrol;
 	public static String PatrolSelectorDialog_Message;
 	public static String PatrolSelectorDialog_Title;
+	public static String PatrolTrackNavigationTargetProvider_ProviderType;
+
+	public static String PatrolTrackWizardPage_Message;
+
+	public static String PatrolTrackWizardPage_PatrolLabel;
+
+	public static String PatrolTrackWizardPage_SelectPatrol;
+
+	public static String PatrolTrackWizardPage_Title;
+
+	public static String PatrolTrackWizardPage_TracksLabel;
+
 	public static String PatrolTypeSelectorDialog_Message;
 	public static String PatrolTypeSelectorDialog_PatrolType;
 	public static String PatrolTypeSelectorDialog_Title;

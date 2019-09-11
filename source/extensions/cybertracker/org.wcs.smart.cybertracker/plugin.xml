@@ -111,7 +111,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.cybertracker.navigation.show"
-                  label="Navigation Layers..."
+                  label="%command.navigationlayer.label"
                   style="push">
             </command>
             <separator
@@ -182,7 +182,7 @@
       </command>
       <command
             id="org.wcs.smart.cybertracker.navigation.show"
-            name="Ct Navigation Layers">
+            name="%command.ctnavigationlayers.name">
       </command>
    </extension>
    <extension
@@ -380,20 +380,20 @@
             class="org.wcs.smart.cybertracker.navigation.ui.AddPointTool"
             icon="images/etool16/nav_point_add.png"
             id="org.wcs.smart.ui.map.navigation.addpoint"
-            name="Navigation Layer Add Point Tool"
+            name="%addpoint.navigation.tool.name"
             onToolbar="false"
             toolCursorId="org.wcs.smart.cross"
-            tooltip="add navigation point">
+            tooltip="%addpoint.navigation.tooltip.name">
       </modalTool>
       <modalTool
             categoryId="org.wcs.smart.udig.maptools"
             class="org.wcs.smart.cybertracker.navigation.ui.AddLineTool"
             icon="images/etool16/nav_line_add.png"
             id="org.wcs.smart.ui.map.navigation.addline"
-            name="Navigation Layer Add Line Tool"
+            name="%addline.navigation.tool.name"
             onToolbar="false"
             toolCursorId="org.wcs.smart.cross"
-            tooltip="add navigation line">
+            tooltip="%addline.navigation.tooltip.name">
       </modalTool>
       <actionTool
             categoryId="org.wcs.smart.udig.maptools"
@@ -401,8 +401,14 @@
             icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png"
             id="org.wcs.smart.ui.map.navigation.import"
             name="Import Targets"
-            tooltip="import targets from file">
+            tooltip="import navigation layer targets ">
       </actionTool>
+   </extension>
+   <extension
+         point="org.wcs.smart.cybertracker.navigation">
+      <targetprovider
+            class="org.wcs.smart.cybertracker.navigation.ui.FileNavigationTargetProvider">
+      </targetprovider>
    </extension>
 
 </plugin>

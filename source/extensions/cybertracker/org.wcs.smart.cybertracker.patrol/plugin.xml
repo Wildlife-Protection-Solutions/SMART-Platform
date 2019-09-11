@@ -276,5 +276,10 @@
             class="org.wcs.smart.cybertracker.patrol.ui.PatrolCtPackageManager">
       </ctpackagemanager>
    </extension>
-
+   <extension
+         point="org.wcs.smart.cybertracker.navigation">
+      <targetprovider
+            class="org.wcs.smart.cybertracker.patrol.navigation.PatrolTrackNavigationTargetProvider">
+      </targetprovider>
+   </extension>
 </plugin>

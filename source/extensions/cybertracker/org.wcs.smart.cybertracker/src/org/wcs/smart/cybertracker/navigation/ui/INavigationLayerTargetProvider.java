@@ -21,41 +21,50 @@
  */
 package org.wcs.smart.cybertracker.navigation.ui;
 
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.widgets.Display;
-import org.locationtech.udig.project.ui.tool.AbstractActionTool;
-import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.ui.SmartWizardDialog;
+import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.cybertracker.model.NavigationTarget;
 
 /**
- * Import targets from shapefile or gpx file.
+ * Navigation layer target provider.
  * 
  * @author Emily
  *
  */
-public class ImportTool  extends AbstractActionTool {
+public interface INavigationLayerTargetProvider {
 
-	public static final String ID = "org.wcs.smart.ui.map.navigation.import"; //$NON-NLS-1$
-
+	/**
+	 * 
+	 * @return the name of the target types
+	 */
+	public String getTypeName();
 	
-	@Override
-	public void run() {
-		
-		Object x = super.getContext().getMap().getBlackboard().get(ITargetEditor.ID);
-		if ( x == null || !(x instanceof ITargetEditor) ) return;
-		ITargetEditor target = (ITargetEditor)x;
-		
-		Display.getDefault().syncExec(()->{
-			TargetImportWizard wd =  new TargetImportWizard(target);
-			WizardDialog dialog = new SmartWizardDialog(Display.getDefault().getActiveShell(), wd);
-			dialog.setTitle(Messages.ImportTool_wizardtitle);
-			dialog.open();
-		});
-		
-	}
+	/**
+	 * the image associated with the target provider or null 
+	 * @return
+	 */
+	public Image getImage();
+	
+	/**
+	 * 
+	 * @return the wizard pages necessary to collect the 
+	 * data required to get targets
+	 */
+	public List<WizardPage> getPages();
+	
+	/**
+	 * Gets the navigation targets specified by the data from the wizard pages
+	 * 
+	 * @return
+	 */
+	public List<NavigationTarget> getTargets(IProgressMonitor monitor);
 
-
-	@Override
-	public void dispose() {
-	}
+	/**
+	 * 
+	 * @return if can finish and get targets
+	 */
+	public boolean canFinish() ;
 }

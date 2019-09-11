@@ -214,5 +214,10 @@
             class="org.wcs.smart.cybertracker.survey.ui.SurveyCtPackageManager">
       </ctpackagemanager>
    </extension>
-  
+   <extension
+         point="org.wcs.smart.cybertracker.navigation">
+      <targetprovider
+            class="org.wcs.smart.cybertracker.survey.navigation.SamplingUnitNavigationTargetProvider">
+      </targetprovider>
+   </extension>
 </plugin>

@@ -710,6 +710,36 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 	}
 	
 	@Override
+	public void addTargets(List<NavigationTarget> targets) {
+		List<NavigationTarget> newTargets = new ArrayList<>();
+		int cnt = this.targets.size();
+		for (NavigationTarget ls : targets) {
+			String id = ls.getId() != null ? ls.getId() : MessageFormat.format(Messages.NavigationLayerDialog_DefaultTargetName, cnt++);
+			if (ls.getGeometry() instanceof org.locationtech.jts.geom.Point) {
+				NavigationTarget newTarget = new NavigationTarget(id, (org.locationtech.jts.geom.Point)ls.getGeometry());
+				newTargets.add(newTarget);
+			}else if (ls.getGeometry() instanceof LineString) {
+				NavigationTarget newTarget = new NavigationTarget(id, (LineString)ls.getGeometry());
+				newTargets.add(newTarget);
+			}
+		}
+		this.targets.addAll(newTargets);
+		
+		List<SimpleFeature> features = new ArrayList<>();
+		for (NavigationTarget newTarget : newTargets) {
+			SimpleFeature f = toFeature(newTarget);
+			features.add(f);
+		}			
+		try {
+			doLayerAction(()->fstore.addFeatures(DataUtilities.collection(features)));
+		}catch (Exception ex) {
+			CyberTrackerPlugIn.log(ex.getMessage(), ex);
+		}
+		Display.getDefault().syncExec(()->refreshTargets());
+
+	}
+	
+	@Override
 	public void addPointTarget(Coordinate c) {
 		NavigationTarget newTarget = new NavigationTarget(MessageFormat.format(Messages.NavigationLayerDialog_DefaultTargetName, targets.size()), GeometryFactoryProvider.getFactory().createPoint(c));
 		targets.add(newTarget);

@@ -77,6 +77,7 @@ public class Messages extends NLS {
 	public static String ConfigurePackagesDialog_AddMenuItem;
 	public static String ConfigurePackagesDialog_addtooltip;
 	public static String ConfigurePackagesDialog_CopyLabel;
+	public static String ConfigurePackagesDialog_CreateCopyLabel;
 	public static String ConfigurePackagesDialog_DateColumn;
 	public static String ConfigurePackagesDialog_DeleteConfirm;
 	public static String ConfigurePackagesDialog_DeleteErrorMsg;
@@ -391,6 +392,7 @@ public class Messages extends NLS {
 	public static String ExportNavigationManager_ExportErrorMsg;
 	public static String ExportNavigationManager_LoadActionsError;
 	public static String ExportNavigationManager_LoadPropertiesError;
+	public static String ExportNavigationManager_targetprovidererror;
 	public static String ExportNavigationToDeviceAction_ErrorTitle;
 	public static String ExportNavigationToDeviceAction_ExportErrorMsg;
 	public static String ExportNavigationToDeviceAction_ExportOkMsg;
@@ -426,6 +428,10 @@ public class Messages extends NLS {
 	public static String ExportPackageToFileAction_OptionNAme;
 	public static String ExportPackageToFileAction_OverwriteMessage;
 	public static String ExportPackageToFileAction_OverwriteTitle;
+	public static String FileNavigationTargetProvider_ProviderName;
+	public static String FileSelectionWizardPage_FileLabel;
+	public static String FileSelectionWizardPage_Message;
+	public static String FileSelectionWizardPage_Title;
 	public static String ImageProcessingOpDialog_autoOption;
 	public static String ImageProcessingOpDialog_autoTooltip;
 	public static String ImageProcessingOpDialog_doresizeoption;
@@ -483,6 +489,7 @@ public class Messages extends NLS {
 	public static String ImportTool_Shapefiles;
 	public static String ImportTool_ShpErrorMsg;
 	public static String ImportTool_SupportedFiles;
+	public static String ImportTool_wizardtitle;
 	public static String InstallToDeviceDialog_AllFiles;
 	public static String InstallToDeviceDialog_APKFileLabel;
 	public static String InstallToDeviceDialog_APKFiles;
@@ -616,6 +623,9 @@ public class Messages extends NLS {
 	public static String ResizeOptionComposite_infoLabel;
 	public static String ResizeOptionComposite_size;
 	public static String ResizeOptionComposite_widthLabel;
+	public static String SelectTargetProviderPage_ImportSource;
+	public static String SelectTargetProviderPage_Message;
+	public static String SelectTargetProviderPage_Title;
 	public static String SightsMultiObsUtil_GroupNotEndedProperly;
 	public static String SightsMultiObsUtil_GroupNotEndedProperlyEOF;
 	public static String SightsMultiObsUtil_NonendedGroup;

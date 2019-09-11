@@ -151,7 +151,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		tiDup.setToolTipText(Messages.ConfigurePackagesDialog_duplicatetooltip);
 		tiDup.addListener(SWT.Selection, e->duplicatePackage());
 		tiDup.setEnabled(false);
-		tiDup.setText("Create Copy");
+		tiDup.setText(Messages.ConfigurePackagesDialog_CreateCopyLabel);
 		
 		ToolItem tiEdit = new ToolItem(tb, SWT.PUSH);
 		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));

@@ -100,6 +100,12 @@ public class Messages extends NLS {
 	public static String MissionSelectorDialog_CreateMission;
 	public static String MissionSelectorDialog_Message;
 	public static String MissionSelectorDialog_Title;
+	public static String SamplingUnitNavigationTargetProvider_ProviderName;
+	public static String SamplingUnitWizardPage_Message;
+	public static String SamplingUnitWizardPage_SDLabel;
+	public static String SamplingUnitWizardPage_SelectSd;
+	public static String SamplingUnitWizardPage_SULabel;
+	public static String SamplingUnitWizardPage_Title;
 	public static String SurveyConfigurableModelProvider_Task_FetchConfigurableModel;
 	public static String SurveyCTDataBuilder_Error_DefaultValue;
 	public static String SurveyCTDataBuilder_Error_JsonDefaultValue;

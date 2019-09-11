@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Plan CyberTracker
+Bundle-SymbolicName: org.wcs.smart.cybertracker.plan;singleton:=true
+Bundle-Version: 7.0.0.qualifier
+Bundle-Activator: org.wcs.smart.cybertracker.plan.PlanCyberTrackerPlugIn
+Bundle-Vendor: org.wcs.smart
+Require-Bundle: org.eclipse.ui.forms,
+ org.wcs.smart.cybertracker;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.plan;bundle-version="[7.0.0,8.0.0)";visibility:=reexport
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.wcs.smart.cybertracker.plan
+Bundle-ClassPath: .
