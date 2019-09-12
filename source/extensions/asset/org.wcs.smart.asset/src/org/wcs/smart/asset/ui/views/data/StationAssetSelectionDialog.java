@@ -34,7 +34,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -50,6 +52,7 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
@@ -171,12 +174,18 @@ public class StationAssetSelectionDialog extends SmartStyledDialog{
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		if (type == Type.ASSET ) {
-			cmbAsset = new TableViewer(main, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
-			cmbAsset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-			((GridData)cmbAsset.getControl().getLayoutData()).heightHint = 100;
-			((GridData)cmbAsset.getControl().getLayoutData()).widthHint = 300;
+			Composite wrapper = new Composite(main, SWT.NONE);
+			wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+			wrapper.setLayout(new TableColumnLayout());
+			((GridData)wrapper.getLayoutData()).heightHint = 100;
+			((GridData)wrapper.getLayoutData()).widthHint = 300;
 			
+			cmbAsset = new TableViewer(wrapper, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
+			cmbAsset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 			cmbAsset.setContentProvider(ArrayContentProvider.getInstance());
+			TableColumn tc = new TableColumn(cmbAsset.getTable(), SWT.NONE);
+			((TableColumnLayout)wrapper.getLayout()).setColumnData(tc, new ColumnWeightData(100));
+			
 			cmbAsset.setLabelProvider(new LabelProvider() {
 				AssetTypeLabelProvider p2 = new AssetTypeLabelProvider();
 				@Override

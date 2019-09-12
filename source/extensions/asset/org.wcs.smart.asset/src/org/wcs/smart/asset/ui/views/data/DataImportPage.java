@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -349,8 +349,8 @@ public class DataImportPage {
 							
 							//add relations
 							List<FileProxy> relations = new ArrayList<>();
-							Set<Asset> assets = new HashSet<>();
-							assets.add(p.getAsset());
+							HashMap<Asset, AssetStationLocation> assets = new HashMap<>();
+							assets.put(p.getAsset(), p.getStationLocation());
 							relations.addAll(p.getRelations());
 							if (p.getFixedRelations() != null) relations.addAll(p.getFixedRelations());
 							Date minDate = wp.getDateTime();
@@ -388,8 +388,7 @@ public class DataImportPage {
 									assetAttachmentLink.put(pp.getAsset(), links);
 								}
 								links.add(wa);
-								
-								assets.add(pp.getAsset());
+								assets.put(pp.getAsset(), pp.getStationLocation());
 							}
 							
 							int incidentLength =  (int)Math.ceil( ( maxDate.getTime() - minDate.getTime()) / 1000.0);
@@ -397,8 +396,13 @@ public class DataImportPage {
 							session.save(wp);
 							session.flush();
 							
-							for (Asset asset : assets) {
-								AssetDeployment d = FileProcessor.findAssetDeployment(wp, asset, p.getStationLocation(), session, Locale.getDefault());
+							for (Entry<Asset, AssetStationLocation> entry : assets.entrySet()) {
+								Asset asset = entry.getKey();
+								//TODO: this is wrong p.getStationLocation is not the station/location for
+								//this asset
+								AssetDeployment d = FileProcessor.findAssetDeployment(wp, asset, 
+										entry.getValue(), session, Locale.getDefault());
+								
 								if (d.getUuid() == null) {
 									session.save(d);
 									session.flush();
