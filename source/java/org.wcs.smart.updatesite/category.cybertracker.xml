@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   
    <feature url="features/org.wcs.smart.cybertracker.patrol.feature_7.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.patrol.feature" version="7.0.0.qualifier">
       <category name="cybertracker"/>
    </feature>
    <feature url="features/org.wcs.smart.cybertracker.survey.feature_7.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.survey.feature" version="7.0.0.qualifier">
       <category name="cybertracker"/>
    </feature>
-   
    <feature url="features/org.wcs.smart.cybertracker.incident.feature_7.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.incident.feature" version="7.0.0.qualifier">
       <category name="cybertracker"/>
    </feature>
    <feature url="features/org.wcs.smart.cybertracker.plan.feature_7.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.plan.feature" version="7.0.0.qualifier">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature_7.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.feature" version="7.0.0.qualifier">
       <category name="cybertracker"/>
    </feature>
    <category-def name="cybertracker" label="SMART Cybertracker">
@@ -19,5 +20,4 @@
          The SMART CyberTracker (SMART-CT) plug-in provides compatibility with the CyberTracker application - which itself runs on a GPS-enabled handheld device. Using this plug-in, SMART users are able to create and deploy CyberTracker applications based on the Data Model or a Configurable Model (a simplified data model for the CyberTracker application). The plug-in also provides the ability to work directly with handheld devices while exporting/importing data, doing all of the interaction with CyberTracker in the background.
       </description>
    </category-def>
-   
 </site>
