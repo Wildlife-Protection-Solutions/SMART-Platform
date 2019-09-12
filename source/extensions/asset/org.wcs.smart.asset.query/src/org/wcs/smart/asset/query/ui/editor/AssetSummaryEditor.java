@@ -154,14 +154,20 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 		}
 	}
 
+	public void updatePartName(){
+		super.setPartName(page1.getEditorInput().getName());
+	}
+	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		page1.doSave(monitor);
+		updatePartName();
 	}
 
 	@Override
 	public void doSaveAs() {
 		page1.doSaveAs();
+		updatePartName();
 		
 	}
 
