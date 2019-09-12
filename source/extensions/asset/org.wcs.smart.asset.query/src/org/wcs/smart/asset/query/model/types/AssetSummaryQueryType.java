@@ -29,8 +29,11 @@ import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
+import org.wcs.smart.asset.query.map.udig.QueryService;
 import org.wcs.smart.asset.query.model.AssetDropItemFactory;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.parser.internal.parser.Parser;
@@ -41,8 +44,9 @@ import org.wcs.smart.asset.query.ui.itempanel.SummaryFilterPanel;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
@@ -57,7 +61,7 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  * @author Emily
  *
  */
-public class AssetSummaryQueryType implements IQueryType {
+public class AssetSummaryQueryType implements IMappableQueryType {
 		
 	private static IDropItemFactory dropItemFactory = null;
 	
@@ -229,5 +233,17 @@ public class AssetSummaryQueryType implements IQueryType {
 	 */
 	public boolean supportsReports(){
 		return true;
+	}
+
+	@Override
+	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider) {
+		try {
+			if (AssetSummaryQuery.canAddGeometry( ((AssetSummaryQuery)query).getQueryDefinition() )){
+				return new QueryService((AssetSummaryQuery) query);
+			}
+		}catch (Exception ex) {
+			AssetPlugIn.log(ex.getMessage(), ex);
+		}
+		return null;
 	}
 }

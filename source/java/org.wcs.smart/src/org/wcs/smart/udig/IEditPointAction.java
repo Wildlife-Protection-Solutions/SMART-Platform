@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2019 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,36 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.model;
+package org.wcs.smart.udig;
 
-import javax.persistence.Entity;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.udig.IMapEditManager.EditPoint;
 
 /**
- * Class for queries which can be styled.
  * 
+ * Action to associated with point editing tools.  
  * @author Emily
+ * @since 7.0.0
  *
  */
+public interface IEditPointAction {
 
-@Entity
-public abstract class StyledQuery extends Query implements IStyledQuery{
-
-	private String styleMemento;
+	/**
+	 * @return action name
+	 */
+	public String getText();
 	
 	/**
-	 * The string representation of the layer style
-	 * @return
+	 * 
+	 * @return action image
 	 */
-	public String getStyle(){
-		return this.styleMemento;
-	}
+	public Image getImage();
 	
 	/**
-	 * Sets the string representation of the layer style
-	 * @param style
+	 * performs the action on the given point.
+	 * 
+	 * @param point
 	 */
-	public void setStyle(String style){
-		this.styleMemento = style;
-	}
-		
+	public void run(EditPoint point);
 }

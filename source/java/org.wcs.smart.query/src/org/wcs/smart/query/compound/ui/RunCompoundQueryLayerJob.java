@@ -52,8 +52,8 @@ import org.wcs.smart.query.common.model.CompoundMapQueryResults;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IMappableQueryType;
+import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.QueryStyleParser;
-import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.udig.style.StyleManager;
 
 /**
@@ -147,8 +147,10 @@ public class RunCompoundQueryLayerJob extends Job{
 			if (item.getQueryType() instanceof IMappableQueryType){
 				//always create new service as query object will have changed
 				IService qService = (IService)((IMappableQueryType)item.getQueryType()).createQueryService(item.getQuery(), mapEditor);
-				tracker.addService((IQueryService) qService);
-				addLayers(qService, tracker, monitor);
+				if (qService != null) {
+					tracker.addService((IQueryService) qService);
+					addLayers(qService, tracker, monitor);
+				}
 			}
 		}catch (Exception ex){
 			QueryPlugIn.displayLog(MessageFormat.format(Messages.RunCompoundQueryLayerJob_MapLayerError,  item.getQueryName()), ex);
@@ -177,10 +179,10 @@ public class RunCompoundQueryLayerJob extends Job{
 				for (ILayer layer : getLayers()){
 					((Layer)layer).setName(item.getQueryName() + " (" + layer.getName() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				if (item.getQuery() instanceof StyledQuery){
+				if (item.getQuery() instanceof IStyledQuery){
 					String styleString = item.getCompoundMapQueryLayer().getQueryStyle();
 					if (styleString == null){
-						styleString = ((StyledQuery)item.getQuery()).getStyle();
+						styleString = ((IStyledQuery)item.getQuery()).getStyle();
 					}
 					if (styleString != null){
 						for (ILayer layer : getLayers()){
@@ -197,12 +199,11 @@ public class RunCompoundQueryLayerJob extends Job{
 							}
 						}
 					}
-					
 					//add style listeners
-					for (final ILayer layer : getLayers()){
-						layer.addListener(styleListener);
-						tracker.addLayer(layer);
-					}
+					for (final ILayer layer : getLayers()) layer.addListener(styleListener);
+				}
+				for (final ILayer layer : getLayers()){
+					tracker.addLayer(layer);
 				}
 			}
 		};

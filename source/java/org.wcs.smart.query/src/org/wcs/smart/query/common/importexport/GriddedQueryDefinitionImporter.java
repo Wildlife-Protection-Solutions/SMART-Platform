@@ -31,6 +31,7 @@ import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.importexport.AbstractXmlQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -103,7 +104,7 @@ public abstract class GriddedQueryDefinitionImporter extends AbstractXmlQueryImp
 				}
 			}else if (part.getKey().equalsIgnoreCase("crs")){ //$NON-NLS-1$
 				griddedQuery.setCrsDefinition(part.getValue());
-			}else if (part.getKey().equalsIgnoreCase(StyledQuery.QUERY_STYLE_KEY)){
+			}else if (part.getKey().equalsIgnoreCase(IStyledQuery.QUERY_STYLE_KEY)){
 				stylePart = part.getValue();
 			}
 		}		
@@ -111,7 +112,7 @@ public abstract class GriddedQueryDefinitionImporter extends AbstractXmlQueryImp
 		griddedQuery.setOwner(ImportQueryUtil.findEmployee(caImport));
 		griddedQuery.setConservationAreaFilter( (new ConservationAreaFilter(true, caImport)).asString());
 		
-		if (griddedQuery instanceof StyledQuery && stylePart != null){
+		if (griddedQuery instanceof IStyledQuery && stylePart != null){
 			griddedQuery.setStyle(stylePart);
 		}
 		

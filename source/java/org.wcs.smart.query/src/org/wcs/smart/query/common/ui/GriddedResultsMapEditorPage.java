@@ -58,6 +58,7 @@ import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.QueryStyleParser;
 import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
@@ -92,7 +93,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 		}
 		
 		private void updateStyle(ILayer layer) throws Exception{
-			StyledQuery sq = ((StyledQuery)parentEditor.getQueryProxy().getQuery());
+			IStyledQuery sq = ((IStyledQuery)parentEditor.getQueryProxy().getQuery());
 			QueryStyleParser.INSTANCE.updateStyle(sq, RESOURCE_KEY, (StyleBlackboard) layer.getStyleBlackboard());
 			getSite().getShell().getDisplay().syncExec(new Runnable(){
 				@Override
@@ -178,9 +179,9 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 				 public void run( IProgressMonitor monitor ) throws Exception {
 					super.run(monitor);
 
-					if (parentEditor.getQueryProxy().getQuery() instanceof StyledQuery) {
+					if (parentEditor.getQueryProxy().getQuery() instanceof IStyledQuery) {
 						// update layer style
-						final StyledQuery sq = ((StyledQuery) parentEditor.getQueryProxy().getQuery());
+						final IStyledQuery sq = ((IStyledQuery) parentEditor.getQueryProxy().getQuery());
 						ILayer layer = getLayers().get(0);
 						if (sq.getStyle() != null) {
 							QueryStyleParser.INSTANCE.applyStyle(sq, RESOURCE_KEY, (StyleBlackboard) layer.getStyleBlackboard());

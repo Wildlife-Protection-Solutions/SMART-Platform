@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2019 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,28 +27,25 @@ import javax.persistence.Entity;
  * Class for queries which can be styled.
  * 
  * @author Emily
+ * @since 7.0.0
  *
  */
 
 @Entity
-public abstract class StyledQuery extends Query implements IStyledQuery{
-
-	private String styleMemento;
+public interface IStyledQuery {
 	
+	String QUERY_STYLE_KEY = "queryStyle"; //$NON-NLS-1$
+
 	/**
 	 * The string representation of the layer style
 	 * @return
 	 */
-	public String getStyle(){
-		return this.styleMemento;
-	}
+	public String getStyle();
 	
 	/**
 	 * Sets the string representation of the layer style
 	 * @param style
 	 */
-	public void setStyle(String style){
-		this.styleMemento = style;
-	}
+	public void setStyle(String style);
 		
 }

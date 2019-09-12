@@ -48,8 +48,8 @@ import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.QueryStyleParser;
-import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
@@ -85,7 +85,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 		}
 		
 		private void updateStyle(ILayer layer) throws Exception{
-			StyledQuery sq = ((StyledQuery)parentEditor.getQueryProxy().getQuery());
+			IStyledQuery sq = ((IStyledQuery)parentEditor.getQueryProxy().getQuery());
 			
 			String dataType = layer.getGeoResource().getIdentifier().getRef();
 			if (dataType == null){
@@ -117,9 +117,9 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 					public void run(IProgressMonitor monitor) throws Exception {
 						super.run(monitor);
 						
-						if (parentEditor.getQueryProxy().getQuery() instanceof StyledQuery){
+						if (parentEditor.getQueryProxy().getQuery() instanceof IStyledQuery){
 							//update layer style
-							final StyledQuery sq = ((StyledQuery)parentEditor.getQueryProxy().getQuery());
+							final IStyledQuery sq = ((IStyledQuery)parentEditor.getQueryProxy().getQuery());
 							if (sq.getStyle() != null){
 								for (ILayer layer : getLayers()){
 									try{

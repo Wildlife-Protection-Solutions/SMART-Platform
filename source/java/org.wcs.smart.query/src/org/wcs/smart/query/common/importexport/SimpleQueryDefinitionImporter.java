@@ -33,6 +33,7 @@ import org.wcs.smart.query.importexport.AbstractXmlQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -105,7 +106,7 @@ public abstract class SimpleQueryDefinitionImporter extends AbstractXmlQueryImpo
 				}
 			}else if (part.getKey().equals("columns")){ //$NON-NLS-1$
 				strColumnFilter = part.getValue();
-			}else if (part.getKey().equals(StyledQuery.QUERY_STYLE_KEY)){
+			}else if (part.getKey().equals(IStyledQuery.QUERY_STYLE_KEY)){
 				stylePart = part.getValue();
 			}
 		}
@@ -117,7 +118,7 @@ public abstract class SimpleQueryDefinitionImporter extends AbstractXmlQueryImpo
 		
 		wq.setConservationAreaFilter( (new ConservationAreaFilter(true, importCa)).asString());
 		
-		if (wq instanceof StyledQuery && stylePart != null){
+		if (wq instanceof IStyledQuery && stylePart != null){
 			wq.setStyle(stylePart);
 		}
 		

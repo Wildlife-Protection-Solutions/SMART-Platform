@@ -24,6 +24,7 @@ package org.wcs.smart.asset.query.model;
 import java.io.Reader;
 import java.io.StringReader;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -32,6 +33,7 @@ import org.wcs.smart.asset.query.parser.internal.parser.Parser;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.query.common.model.SummaryQuery;
+import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 
@@ -43,10 +45,29 @@ import org.wcs.smart.query.model.summary.SumQueryDefinition;
  */
 @Entity
 @Table(name="smart.asset_summary_query")
-public class AssetSummaryQuery extends SummaryQuery {
+public class AssetSummaryQuery extends SummaryQuery implements IStyledQuery {
 
 	public static final String KEY = "assetsummary"; //$NON-NLS-1$
 	
+	private String styleMemento;
+
+	
+	/**
+	 * The string representation of the layer style
+	 * @return
+	 */
+	@Column(name="style")
+	public String getStyle(){
+		return this.styleMemento;
+	}
+	
+	/**
+	 * Sets the string representation of the layer style
+	 * @param style
+	 */
+	public void setStyle(String style){
+		this.styleMemento = style;
+	}
 	/**
 	 * Parse the string format of the query
 	 * into the filter format.
