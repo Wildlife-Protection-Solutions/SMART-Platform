@@ -26,6 +26,7 @@ import java.util.List;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.NavigationLayer;
 
 /**
  * Exports a cybertracker package.
@@ -40,7 +41,7 @@ public interface ICtExportAction {
 	/**
 	 * Performs the export action
 	 */
-	public void doAction(List<ICtPackage> ctpackage, IEclipseContext context);
+	public void doAction(List<ICtPackage> ctpackage, List<NavigationLayer> layers, IEclipseContext context);
 	
 	/**
 	 * 

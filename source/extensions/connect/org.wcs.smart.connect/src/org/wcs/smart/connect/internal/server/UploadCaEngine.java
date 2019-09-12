@@ -103,7 +103,7 @@ public class UploadCaEngine {
 					//check status
 					if (serverInfo != null){
 						if (serverInfo.getStatus() == ConservationAreaProxy.Status.ERROR){
-							throw new Exception("State of Conservation Area on server is unknown.  It may need to be removed from the server before you can uploaded.");
+							throw new Exception(Messages.UploadCaEngine_unknownState);
 						}
 						if (serverInfo.getStatus() == ConservationAreaProxy.Status.DATA){
 							throw new Exception(Messages.UploadCaEngine_CaAlreadyExists);

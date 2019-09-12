@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.ui.views.map;
 
 import java.text.Collator;
@@ -22,6 +43,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.AssetUtils;
+import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeValue;
@@ -34,15 +56,21 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Asset summary table in overview map
+ * 
+ * @author Emily
+ *
+ */
 public class AssetSummaryTable {
 
 	private enum Column {
-		ASSET_ID("ID"),
-		ASSET_STATUS("Status"),
-		ASSET_TYPE("Type"),
-		DEP_START("Start Date"),
-		DEP_END("End Date"),
-		DEP_TIME("Total Time");
+		ASSET_ID(Messages.AssetSummaryTable_IDColumnName),
+		ASSET_STATUS(Messages.AssetSummaryTable_StatusColumnName),
+		ASSET_TYPE(Messages.AssetSummaryTable_TypeColumnName),
+		DEP_START(Messages.AssetSummaryTable_StartColumnName),
+		DEP_END(Messages.AssetSummaryTable_EndColumnName),
+		DEP_TIME(Messages.AssetSummaryTable_TotalTimeColumnName);
 		
 		String label;
 		
@@ -73,10 +101,10 @@ public class AssetSummaryTable {
 	public void configureTable(Session session) {
 		
 		List<AssetTypeDeploymentAttribute> dattributes = QueryFactory.buildQuery(session,  AssetTypeDeploymentAttribute.class,  
-				new Object[] {"id.assetType.conservationArea", SmartDB.getCurrentConservationArea()}).list();
+				new Object[] {"id.assetType.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 		
 		List<AssetTypeAttribute> aattributes = QueryFactory.buildQuery(session,  AssetTypeAttribute.class,  
-				new Object[] {"id.assetType.conservationArea", SmartDB.getCurrentConservationArea()}).list();
+				new Object[] {"id.assetType.conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 		
 		List<TableColumn> columns = new ArrayList<>();
 		columns.add(new TableColumn(Column.ASSET_STATUS));
@@ -102,8 +130,8 @@ public class AssetSummaryTable {
 			}
 		}
 		List<Asset> assets = QueryFactory.buildQuery(session,  Asset.class, 
-				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-				new Object[] {"isRetired", false}).list();
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"isRetired", false}).list(); //$NON-NLS-1$
 		final List<DataWrapper> data = new ArrayList<>();
 		for (Asset a : assets) {
 			DataWrapper dw = new DataWrapper(a);
@@ -182,8 +210,8 @@ public class AssetSummaryTable {
 		public String getName() {
 			if (c != null) return c.label;
 			if (d != null) return d.getAttribute().getName();
-			if (a != null) return a.getAttribute().getName() + " (Asset)";
-			return "";
+			if (a != null) return a.getAttribute().getName() + Messages.AssetSummaryTable_AssetAttributePostFix;
+			return ""; //$NON-NLS-1$
 		}
 		public Image getImage(DataWrapper dw) {
 			if (c != null) {
@@ -199,23 +227,23 @@ public class AssetSummaryTable {
 				if (c == Column.ASSET_STATUS) return dw.asset.getCachedStatus().getGuiName(Locale.getDefault());
 				if (c == Column.ASSET_TYPE) return dw.asset.getAssetType().getName();
 				if (c == Column.DEP_END) {
-					if (dw.deployment == null) return "";
-					if (dw.deployment.getEndDate() == null) return "";
+					if (dw.deployment == null) return ""; //$NON-NLS-1$
+					if (dw.deployment.getEndDate() == null) return ""; //$NON-NLS-1$
 					return DateFormat.getDateInstance().format(dw.deployment.getEndDate());
 					
 				}
 				if (c == Column.DEP_START) {
-					if (dw.deployment == null) return "";
+					if (dw.deployment == null) return ""; //$NON-NLS-1$
 					return DateFormat.getDateInstance().format(dw.deployment.getStartDate());
 					
 				}
 				if (c == Column.DEP_TIME) {
-					if (dw.deployment == null) return "";
+					if (dw.deployment == null) return ""; //$NON-NLS-1$
 					return AssetUtils.formatTime(dw.deployment.getActiveTimeInSeconds());
 				}
 			}
 			if (d != null) {
-				if (dw.deployment == null) return "";
+				if (dw.deployment == null) return ""; //$NON-NLS-1$
 				AssetDeploymentAttributeValue value = null;
 				for (AssetDeploymentAttributeValue v : dw.deployment.getAttributeValues()) {
 					if (v.getAttribute().equals(d.getAttribute())){
@@ -223,7 +251,7 @@ public class AssetSummaryTable {
 						break;
 					}
 				}
-				if (value == null) return "";
+				if (value == null) return ""; //$NON-NLS-1$
 				return value.getAttributeValueAsString(Locale.getDefault(), SmartDB.DATABASE_CRS);
 			}
 			if (a != null) {
@@ -234,10 +262,10 @@ public class AssetSummaryTable {
 						break;
 					}
 				}
-				if (value == null) return "";
+				if (value == null) return ""; //$NON-NLS-1$
 				return value.getAttributeValueAsString(Locale.getDefault(), SmartDB.DATABASE_CRS);
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
 	

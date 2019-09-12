@@ -21,26 +21,46 @@
  */
 package org.wcs.smart.cybertracker.ctpackage.ui;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.NavigationLayer;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -63,6 +83,9 @@ public class CtPackageExportDialog extends SmartStyledTitleDialog {
 	
 	private boolean doGenerate = false;
 	private List<ICtExportAction> selectedActions;
+	private List<NavigationLayer> selectedNavLayers;
+	
+	private CheckboxTableViewer tblNavs;
 	
 	public CtPackageExportDialog(Shell parent, boolean requireUpdateOp,List<ICtExportAction> actions) {
 		super(parent);
@@ -71,8 +94,9 @@ public class CtPackageExportDialog extends SmartStyledTitleDialog {
 	}
 
 	public boolean getDoGenerate() { return this.doGenerate; }
-	public List<ICtExportAction> getSelectedActions() { return this.selectedActions;}
 	
+	public List<ICtExportAction> getSelectedActions() { return this.selectedActions;}
+	public List<NavigationLayer> getSelectedNavigationLayers() { return this.selectedNavLayers;}
 	
 	@Override
 	public void okPressed() {
@@ -87,6 +111,11 @@ public class CtPackageExportDialog extends SmartStyledTitleDialog {
 			}else {
 				InstanceScope.INSTANCE.getNode(CyberTrackerPlugIn.PLUGIN_ID).putBoolean(ACTIONS_PREF_KEY + KEY_SEP + action.getClass().getCanonicalName(), false); 
 			}
+		}
+		
+		selectedNavLayers = new ArrayList<>();
+		for (Object x : tblNavs.getCheckedElements()) {
+			if (x instanceof NavigationLayer) selectedNavLayers.add((NavigationLayer)x);
 		}
 		
 		InstanceScope.INSTANCE.getNode(CyberTrackerPlugIn.PLUGIN_ID).putBoolean(GENERATE_PREF_KEY, doGenerate);
@@ -106,7 +135,7 @@ public class CtPackageExportDialog extends SmartStyledTitleDialog {
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		main.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 
 		SmartUiUtils.createHeaderLabel(main, Messages.CtPackageExportDialog_LocationsLbl);
@@ -166,6 +195,27 @@ public class CtPackageExportDialog extends SmartStyledTitleDialog {
 			
 		}
 		
+		SmartUiUtils.createHeaderLabel(main, Messages.CtPackageExportDialog_NavLayerTitle);
+		
+		inner = new Composite(main, SWT.NONE);
+		inner.setLayout(new TableColumnLayout());
+		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)inner.getLayoutData()).heightHint = 100;
+		
+		tblNavs = CheckboxTableViewer.newCheckList(inner, SWT.FULL_SELECTION | SWT.MULTI | SWT.V_SCROLL);
+		tblNavs.setContentProvider(ArrayContentProvider.getInstance());
+		tblNavs.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(tblNavs));
+		
+		TableViewerColumn tc = new TableViewerColumn(tblNavs, SWT.CHECK);
+		((TableColumnLayout)inner.getLayout()).setColumnData(tc.getColumn(), new ColumnWeightData(100));
+		tc.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof NavigationLayer)  return ((NavigationLayer)element).getName();
+				return super.getText(element);
+			}
+		});
+		
 		SmartUiUtils.createHeaderLabel(main, Messages.CtPackageExportDialog_OptionsLbl);
 		
 		inner = new Composite(main, SWT.NONE);
@@ -184,7 +234,9 @@ public class CtPackageExportDialog extends SmartStyledTitleDialog {
 		}else {
 			btnGenerate.setSelection(true);
 		}
-
+		
+		loadNavs.schedule();
+		
 		setTitle(Messages.CtPackageExportDialog_Title);
 		setMessage(Messages.CtPackageExportDialog_DialogMsg);
 		getShell().setText(Messages.CtPackageExportDialog_Title);
@@ -202,4 +254,35 @@ public class CtPackageExportDialog extends SmartStyledTitleDialog {
 	public boolean isResizable() {
 		return true;
 	}
+	
+	private Job loadNavs = new Job("loading navigation layers") { //$NON-NLS-1$
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			List<NavigationLayer> layers = new ArrayList<>();
+			
+			try(Session session = HibernateManager.openSession()){
+				layers.addAll(QueryFactory.buildQuery(session,  NavigationLayer.class,
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
+				layers.forEach(l->{l.getName();l.getConservationArea().getName();});
+			}
+			
+			layers.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+			Display.getDefault().syncExec(()->{
+				if (layers.isEmpty()) {
+					tblNavs.setInput(new String[] {Messages.CtPackageExportDialog_NoNavLayers});
+					FontData fd = tblNavs.getControl().getFont().getFontData()[0];
+					fd.setStyle(SWT.ITALIC);
+					Font ff = new Font(tblNavs.getControl().getDisplay(), fd);
+					tblNavs.getControl().addListener(SWT.Dispose, e->ff.dispose());
+					tblNavs.getControl().setFont(ff);
+				}else {
+					tblNavs.setInput(layers);
+				}
+				tblNavs.getControl().getParent().layout(true);
+			});
+			return Status.OK_STATUS;
+		}
+		
+	};
 }

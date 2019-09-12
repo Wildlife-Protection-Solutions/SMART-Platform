@@ -123,6 +123,8 @@ public class Messages extends NLS {
 	public static String CtNavigationExportDialog_ShellTitle;
 	public static String CtPackageExportDialog_DialogMsg;
 	public static String CtPackageExportDialog_LocationsLbl;
+	public static String CtPackageExportDialog_NavLayerTitle;
+	public static String CtPackageExportDialog_NoNavLayers;
 	public static String CtPackageExportDialog_OptionsLbl;
 	public static String CtPackageExportDialog_RegenerateOp;
 	public static String CtPackageExportDialog_regenerateTooltip;
@@ -413,6 +415,7 @@ public class Messages extends NLS {
 	public static String ExportPackageToDeviceAction_ErrorTitle;
 	public static String ExportPackageToDeviceAction_ExportMsg;
 	public static String ExportPackageToDeviceAction_ExportMsgTitle;
+	public static String ExportPackageToDeviceAction_NavLayerExportError;
 	public static String ExportPackageToDeviceAction_OptionName;
 	public static String ExportPackageToFileAction_AllFilesType;
 	public static String ExportPackageToFileAction_DirectoryTextTitle;

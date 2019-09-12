@@ -330,7 +330,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		tiClear.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		tiClear.setToolTipText(Messages.MapPackageUiContribution_removetooltip);
 		tiClear.addListener(SWT.Selection, e->{
-			for (Iterator<Object> iterator = lstMapFiles.getStructuredSelection().iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = lstMapFiles.getStructuredSelection().iterator(); iterator.hasNext();) {
 				Object item = (Object) iterator.next();
 				if (mapfiles.remove(item)) deletedfiles.add((Path)item);
 			}

@@ -370,6 +370,7 @@ public class Messages extends NLS {
 	public static String StatusLineControl_NoLocalChanges;
 	public static String StatusLineControl_RefreshNowMneuItem;
 	public static String StatusLineControl_ServernotFound;
+	public static String StatusLineControl_StatusLabel;
 	public static String StatusLineControl_UnknownState;
 	public static String SyncChangeLogDialog_Message;
 	public static String SyncChangeLogDialog_ShellTitle;
@@ -424,6 +425,7 @@ public class Messages extends NLS {
 	public static String UploadCaEngine_packingTaskName;
 	public static String UploadCaEngine_StatusFailed;
 	public static String UploadCaEngine_TaskName;
+	public static String UploadCaEngine_unknownState;
 	public static String UploadCaEngine_UploadDialogTitle;
 	public static String UploadCaJob_InfoComplete;
 	public static String UploadCaJob_InfoDialogTitle;

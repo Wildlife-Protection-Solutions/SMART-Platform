@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.NavigationLayer;
 
 /**
  * Manager for exporting cybertracker packages
@@ -61,6 +62,7 @@ public class ExportCtPackageManager {
 		
 		boolean create = true;
 		List<ICtExportAction> doActions = new ArrayList<>(actions);
+		List<NavigationLayer> navLayers = new ArrayList<>();
 		if (actions.size() == 1) {
 			if (requireCreateOp) {
 				if (MessageDialog.openQuestion(shell, Messages.ExportCtPackageManager_ShellTitle,
@@ -75,17 +77,19 @@ public class ExportCtPackageManager {
 			if (dialog.open() != Window.OK) return false;
 			create = dialog.getDoGenerate();
 			doActions = dialog.getSelectedActions();
+			navLayers = dialog.getSelectedNavigationLayers();
 		}
 		
+		IEclipseContext workingContext = context.createChild();
 		List<ICtPackage> towrite;
 		if (create) {
-			towrite = createPackages(toExport, context);
+			towrite = createPackages(toExport, workingContext);
 		}else {
 			towrite = new ArrayList<>(toExport);
 		}
 		if (towrite.isEmpty()) return false;
 		for (ICtExportAction a : doActions) {
-			a.doAction(towrite, context);
+			a.doAction(towrite, navLayers, workingContext);
 		}
 		return true;
 	}

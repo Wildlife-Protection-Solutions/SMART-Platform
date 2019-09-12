@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.cybertracker.ctpackage.ui;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -35,6 +37,8 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.MobileDeviceUtils;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.NavigationLayer;
+import org.wcs.smart.cybertracker.navigation.ExportNavigationManager;
 
 /**
  * Exports cybertracker package to local filestore/device.
@@ -46,8 +50,8 @@ public class ExportPackageToDeviceAction implements ICtExportAction {
 
 	
 	@Override
-	public void doAction(List<ICtPackage> ctpackages, IEclipseContext context) {
-		exportLocal(ctpackages, context.get(Shell.class));
+	public void doAction(List<ICtPackage> ctpackages, List<NavigationLayer> navlayers, IEclipseContext context) {
+		exportLocal(ctpackages, navlayers, context.get(Shell.class));
 	}
 
 	@Override
@@ -60,7 +64,7 @@ public class ExportPackageToDeviceAction implements ICtExportAction {
 		return CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.ICON_DEVICE32);
 	}
 
-	private void exportLocal(List<ICtPackage> towrite, Shell shell) {
+	private void exportLocal(List<ICtPackage> towrite,  List<NavigationLayer> navlayers, Shell shell) {
 		// export all the packages
 		int cnt = 0;
 		String date = DateTimeFormatter.ofPattern("ddMMYYYY").format(LocalDate.now()); //$NON-NLS-1$
@@ -71,6 +75,23 @@ public class ExportPackageToDeviceAction implements ICtExportAction {
 			} catch (Exception e) {
 				CyberTrackerPlugIn.displayError(Messages.ExportPackageToDeviceAction_ErrorTitle, 
 						MessageFormat.format(Messages.ExportPackageToDeviceAction_ErrorMsg + "\n\n{1}", w.getName(), e.getMessage()), e); //$NON-NLS-1$
+			}
+		}
+		for (NavigationLayer nl : navlayers) {
+			String fname = ExportNavigationManager.INSTANCE.getExportFileName(nl);
+			try {
+				
+				Path temp = Files.createTempFile("smart", ""); //$NON-NLS-1$ //$NON-NLS-2$
+				try {
+					ExportNavigationManager.INSTANCE.exportNavigationLayer(nl, temp);
+					MobileDeviceUtils.exportAppToDevice(temp, fname);
+					cnt++;
+				}finally {
+					Files.deleteIfExists(temp);
+				}
+			} catch (Exception e) {
+				CyberTrackerPlugIn.displayError(Messages.ExportPackageToDeviceAction_ErrorTitle, 
+						MessageFormat.format(Messages.ExportPackageToDeviceAction_NavLayerExportError + "\n\n{1}", nl.getName(), e.getMessage()), e); //$NON-NLS-1$
 			}
 		}
 		MessageDialog.openInformation(shell, Messages.ExportPackageToDeviceAction_ExportMsgTitle, MessageFormat

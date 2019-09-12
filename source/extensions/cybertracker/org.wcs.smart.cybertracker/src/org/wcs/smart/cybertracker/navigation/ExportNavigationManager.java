@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
+import org.json.simple.JSONObject;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -69,10 +70,19 @@ public enum ExportNavigationManager {
 	 * @param exportFile
 	 * @throws IOException
 	 */
+	@SuppressWarnings("unchecked")
 	public void exportNavigationLayer(NavigationLayer layer, Path exportFile) throws IOException{
-		String fname = SharedUtils.getFilenameWithoutExtension(exportFile.getFileName().toString());
+		String fname = SharedUtils.getFilenameWithoutExtension(exportFile.getFileName().toString()) + ".json"; //$NON-NLS-1$
 		String json = new String(layer.getTargets(), StandardCharsets.UTF_8);
-		ZipUtil.writeToZip(exportFile, fname + ".json", json); //$NON-NLS-1$
+		
+		JSONObject projectJson = new JSONObject();
+		projectJson.put("projectName", layer.getName()); //$NON-NLS-1$
+		projectJson.put("decoder", "sourceparser_smartnavigationlayer"); //$NON-NLS-1$ //$NON-NLS-2$
+		projectJson.put("definition", fname + ".json"); //$NON-NLS-1$ //$NON-NLS-2$
+		String str = projectJson.toJSONString();
+		
+		ZipUtil.writeToZip(exportFile, new String[] {fname, json},
+					new String[] {"project.json", str}); //$NON-NLS-1$
 	}
 
 	/**

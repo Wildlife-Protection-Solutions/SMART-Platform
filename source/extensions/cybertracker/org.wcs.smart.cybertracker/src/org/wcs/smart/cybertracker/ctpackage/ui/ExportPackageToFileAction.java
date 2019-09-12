@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -38,6 +39,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.NavigationLayer;
+import org.wcs.smart.cybertracker.navigation.ExportNavigationManager;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -50,8 +53,8 @@ public class ExportPackageToFileAction implements ICtExportAction {
 
 	
 	@Override
-	public void doAction(List<ICtPackage> ctpackages, IEclipseContext context) {
-		exportLocal(ctpackages, context.get(Shell.class));
+	public void doAction(List<ICtPackage> ctpackages, List<NavigationLayer> navlayers, IEclipseContext context) {
+		exportLocal(ctpackages, navlayers, context.get(Shell.class));
 	}
 
 	@Override
@@ -64,18 +67,20 @@ public class ExportPackageToFileAction implements ICtExportAction {
 		return CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.ICON_FILE32);
 	}
 
-	private void exportLocal(List<ICtPackage> towrite, Shell shell) {
+	private void exportLocal(List<ICtPackage> towrite, List<NavigationLayer> navlayers, Shell shell) {
 		
 		// export all the packages
-		if (towrite.size() == 1) {
+		if (towrite.size() == 1 && navlayers.isEmpty()) {
 			// single package let the user pick the file name
 			FileDialog fd = new FileDialog(shell, SWT.SAVE);
 			fd.setText(Messages.ExportPackageToFileAction_FileDialogText);
 			fd.setFilterExtensions(new String[] { "*.zip", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$
 			fd.setFilterNames(new String[] { Messages.ExportPackageToFileAction_MobilePackageType, Messages.ExportPackageToFileAction_AllFilesType });
-			// fd.setFilterPath(string);
-			// fd.setfilename
 
+			String name = towrite.get(0).getName().replaceAll("[^a-zA-Z0-9]", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			name += "." + UuidUtils.uuidToString(towrite.get(0).getUuid()) + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
+			
+			fd.setFileName(name);
 			String output = fd.open();
 			if (output == null)
 				return;
@@ -125,7 +130,7 @@ public class ExportPackageToFileAction implements ICtExportAction {
 				try {
 					String name = w.getName().replaceAll("[^a-zA-Z0-9]", ""); //$NON-NLS-1$ //$NON-NLS-2$
 					Path export = exportPath.resolve(name + "." + UuidUtils.uuidToString(w.getUuid()) + ".zip"); //$NON-NLS-1$ //$NON-NLS-2$
-					Files.copy(w.getLocalFile(), export);
+					Files.copy(w.getLocalFile(), export, StandardCopyOption.REPLACE_EXISTING);
 					cnt++;
 
 				} catch (IOException e) {
@@ -133,8 +138,11 @@ public class ExportPackageToFileAction implements ICtExportAction {
 							e);
 				}
 			}
+			
+			List<Path> layers = ExportNavigationManager.INSTANCE.exportNavigationLayers(navlayers, exportPath);
+			
 			MessageDialog.openInformation(shell, Messages.ExportPackageToFileAction_ExportCompleteTitle, MessageFormat
-					.format(Messages.ExportPackageToFileAction_ExportCompleteMultiMessage, cnt, towrite.size(), exportPath.toString()));
+					.format(Messages.ExportPackageToFileAction_ExportCompleteMultiMessage, cnt, towrite.size(), layers.size(), navlayers.size(), exportPath.toString()));
 		}
 	}
 

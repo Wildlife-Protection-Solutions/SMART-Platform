@@ -381,7 +381,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 		body.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite headerComp = toolkit.createComposite(body);
-		WidgetElement.setCSSClass(headerComp, "SMARTFormHeader");
+		WidgetElement.setCSSClass(headerComp, "SMARTFormHeader"); //$NON-NLS-1$
 		headerComp.setLayout(new GridLayout(7, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		lblAssetTypeImage = toolkit.createLabel(headerComp,""); //$NON-NLS-1$

@@ -129,6 +129,7 @@ public class Messages extends NLS {
 	public static String ExportCtPackageToConnect_CompleteTitle;
 	public static String ExportCtPackageToConnect_Message;
 	public static String ExportCtPackageToConnect_Name;
+	public static String ExportCtPackageToConnect_NavUploadError;
 	public static String ExportCtPackageToConnect_NoUrl;
 	public static String ExportCtPackageToConnect_ShellTitle;
 	public static String ExportCtPackageToConnect_Title;

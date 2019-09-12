@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -182,7 +183,7 @@ public abstract class ChangeLogItemSerializer {
 					Clob clob = rs.getClob(i);
 					stream.writeLong(clob.length());
 					try(Reader reader = clob.getCharacterStream() ){
-						IOUtils.copy(reader, stream);
+						IOUtils.copy(reader, stream, StandardCharsets.UTF_8);
 					}
 				}else if (type == Types.DATE){
 					//serialization of dates does not include timezone which causes a problem when deserializing as
