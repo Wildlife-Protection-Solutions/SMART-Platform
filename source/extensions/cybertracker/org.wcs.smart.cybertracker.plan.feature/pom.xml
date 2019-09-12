@@ -10,7 +10,7 @@
 		<relativePath>../java</relativePath>
 	</parent>
 	
-	<artifactId>org.wcs.smart.cybertracker.patrol.feature</artifactId>
+	<artifactId>org.wcs.smart.cybertracker.plan.feature</artifactId>
   	<packaging>eclipse-feature</packaging>
 	<version>7.0.0-SNAPSHOT</version>
 	
