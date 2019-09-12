@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.tests.ca.datamodel;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Test;
 import org.wcs.smart.ca.datamodel.Category;
@@ -52,36 +52,4 @@ public class CategoryHkeyTest {
 		Assert.assertEquals("a.b.c.", Category.trimHkeyToLevel(2,"a.b.c."));
 	}
 
-	//	@Test
-//	public void testParentHkey(){
-//		Assert.assertNull(Category.computeParentHkey(null));
-//		Assert.assertNull(Category.computeParentHkey("abc"));
-//		Assert.assertNull(Category.computeParentHkey(""));
-//		Assert.assertNull(Category.computeParentHkey("   "));
-//		Assert.assertEquals("", Category.computeParentHkey("."));
-//		Assert.assertEquals("", Category.computeParentHkey("abc."));
-//		Assert.assertEquals("abc.", Category.computeParentHkey("abc.def."));
-//		Assert.assertEquals("abc.def.", Category.computeParentHkey("abc.def.ghi."));
-//		Assert.assertEquals("abc.def.ghi.three.four.", Category.computeParentHkey("abc.def.ghi.three.four.five."));
-//	}
-//	
-//	@Test
-//	public void testTrimHkeyToChild(){
-//		Assert.assertNull(Category.trimHkeyToChild(null,null));
-//		Assert.assertNull(Category.trimHkeyToChild("abc","abc."));
-//		Assert.assertNull(Category.trimHkeyToChild("abc.","abc"));
-//		Assert.assertNull(Category.trimHkeyToChild("", "abc."));
-//		Assert.assertNull(Category.trimHkeyToChild("abc.", ""));
-//		Assert.assertNull(Category.trimHkeyToChild("   ", "abc."));
-//		Assert.assertNull(Category.trimHkeyToChild("abc.", "   "));
-//		
-//		Assert.assertEquals("abc.def.", Category.trimHkeyToChild("abc.", "abc.def."));
-//		Assert.assertEquals("abc.def.", Category.trimHkeyToChild("abc.", "abc.def.ghi."));
-//		Assert.assertEquals("abc.def.", Category.trimHkeyToChild("abc.", "abc.def.ghi.lmo."));
-//		
-//		Assert.assertNull(Category.trimHkeyToChild("abc.def.", "abc.def."));
-//		Assert.assertEquals("abc.def.ghi.", Category.trimHkeyToChild("abc.def.", "abc.def.ghi."));
-//		Assert.assertEquals("abc.def.ghi.", Category.trimHkeyToChild("abc.def.", "abc.def.ghi.lmo."));
-//		
-//	}
 }

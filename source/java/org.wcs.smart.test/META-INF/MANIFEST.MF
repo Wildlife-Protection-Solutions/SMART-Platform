@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Smart Test
 Bundle-SymbolicName: org.wcs.smart.test
 Bundle-Version: 0.0.1
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.wcs.smart;bundle-version="0.0.1",
  org.junit
 Import-Package: org.apache.commons.logging,

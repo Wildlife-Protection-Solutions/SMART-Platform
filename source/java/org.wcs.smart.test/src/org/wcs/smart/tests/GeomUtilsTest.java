@@ -23,15 +23,14 @@ package org.wcs.smart.tests;
 
 import javax.sql.rowset.serial.SerialBlob;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.io.WKBWriter;
+import org.locationtech.jts.io.WKTReader;
 import org.wcs.smart.util.GeometryUtils;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.io.WKBWriter;
-import com.vividsolutions.jts.io.WKTReader;
+import org.junit.Assert;
 
 @SuppressWarnings({"nls"})
 public class GeomUtilsTest {
