@@ -271,23 +271,27 @@ public class ZipUtil {
 	}
     
     /**
-     * Writes a single to a zip file.
+     * Writes a single to a zip file. If the zip file exists it will add it
+     * as an entry to the existing file.
      * 
      * @param zipFile the zip file name
-     * @param filename the name of the zip file entry
-     * @param filecontents the contents of the zip file
+     * @param filecontents the contents to write, each array should contain the {filename, file contents}
      * 
      * @throws IOException
      */
-    public static void writeToZip(Path zipFile, String filename, String filecontents) throws IOException {
+    public static void writeToZip(Path zipFile, String[]... filecontents) throws IOException {
     	 try (OutputStream fOut = Files.newOutputStream(zipFile);
 	        	 BufferedOutputStream bOut = new BufferedOutputStream(fOut);
 	        	ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(bOut);){
-    		 
-    		 ZipArchiveEntry zipEntry = new ZipArchiveEntry(filename); 
-	         tOut.putArchiveEntry(zipEntry);
-	         IOUtils.copy(new ByteArrayInputStream(filecontents.getBytes(StandardCharsets.UTF_8)), tOut);
-	         tOut.closeArchiveEntry();
+    		 for (String[] item: filecontents) {
+    			 String fname = item[0];
+    			 String content = item[1];
+        		 ZipArchiveEntry zipEntry = new ZipArchiveEntry(fname); 
+    	         tOut.putArchiveEntry(zipEntry);
+    	         IOUtils.copy(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)), tOut);
+    	         tOut.closeArchiveEntry();
+    		 }
+
     	 }
     }
 }
