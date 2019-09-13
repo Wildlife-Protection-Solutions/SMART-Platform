@@ -113,6 +113,7 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 	private HashMap<ControlButton, Button> controlButtons = new HashMap<ControlButton, Button>();
 	
 	private List<CmAttributeConfig> deletedConfigs = new ArrayList<>();
+	private List<CmAttributeConfig> addedConfigs = new ArrayList<>();
 	
 	
 	private ScrolledComposite propertiesComp, helpComp;
@@ -302,11 +303,11 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TEXT, attrComposite);
 
-		attrComposite = new ListAttributeInfoComposite(infoInnerPanel, dialog, deletedConfigs);
+		attrComposite = new ListAttributeInfoComposite(infoInnerPanel, dialog, deletedConfigs, addedConfigs);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.LIST, attrComposite);
 
-		attrComposite = new TreeAttributeInfoComposite(infoInnerPanel, dialog, deletedConfigs);
+		attrComposite = new TreeAttributeInfoComposite(infoInnerPanel, dialog, deletedConfigs, addedConfigs);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TREE, attrComposite);
 

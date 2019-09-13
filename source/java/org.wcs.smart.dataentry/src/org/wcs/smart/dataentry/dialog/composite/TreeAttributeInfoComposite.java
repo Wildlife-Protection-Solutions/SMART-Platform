@@ -79,8 +79,8 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 	 * @param model
 	 * @param session
 	 */
-	public TreeAttributeInfoComposite(Composite parent, ConfigurableModelEditDialog dialog, List<CmAttributeConfig> deletedConfigs) {
-		super(parent, dialog, deletedConfigs);
+	public TreeAttributeInfoComposite(Composite parent, ConfigurableModelEditDialog dialog, List<CmAttributeConfig> deletedConfigs, List<CmAttributeConfig> addedConfigs) {
+		super(parent, dialog, deletedConfigs, addedConfigs);
 		this.dialog = dialog;
 	}
 

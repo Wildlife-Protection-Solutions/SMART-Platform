@@ -86,8 +86,10 @@ import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateNameComposite;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+import com.ibm.icu.text.MessageFormat;
+
 /**
- * Rename dialog for providing aliases for configurable model list attribute items.
+ * Dialog for editing configural mode list configurations. 
  * 
  * @author Emily
  * @author Evgeniy
@@ -118,8 +120,8 @@ public class EditListDialog extends SmartStyledTitleDialog{
 	protected Control createDialogArea(Composite parent) {
 		Composite main = (Composite) super.createDialogArea(parent);
 		
-		setTitle(attribute.getName());
-		setMessage(Messages.RenameListDialog_DialogMessage);
+		setTitle(MessageFormat.format("{0} - Attribute Configuration", attribute.getName()));
+		setMessage("Configure the list attribute.  This affects all locations where this configuration is used in the model.");
 		getShell().setText(Messages.ConfigurableModelEditDialog_Title);
 
 		createTopControls(main);
