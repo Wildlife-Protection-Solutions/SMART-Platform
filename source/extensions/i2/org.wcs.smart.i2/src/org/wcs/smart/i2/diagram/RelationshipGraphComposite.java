@@ -272,6 +272,7 @@ public class RelationshipGraphComposite extends Composite {
 		toolkit.createLabel(rightCmp, Messages.RelationshipGraphComposite_Style);
 
 		cmbStyle = new ComboViewer(rightCmp, SWT.READ_ONLY | SWT.BORDER);
+		cmbStyle.getControl().setBackground(cmbStyle.getControl().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		cmbStyle.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbStyle.setContentProvider(ArrayContentProvider.getInstance());
 		cmbStyle.setLabelProvider(new RelationshipDiagramStyleLabelProvider());
@@ -296,6 +297,7 @@ public class RelationshipGraphComposite extends Composite {
 		toolkit.createLabel(rightCmp, Messages.RelationshipGraphComposite_Layout);
 
 		cmbLayout = new ComboViewer(rightCmp, SWT.READ_ONLY | SWT.BORDER);
+		cmbLayout.getControl().setBackground(cmbLayout.getControl().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		cmbLayout.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbLayout.setContentProvider(ArrayContentProvider.getInstance());
 		cmbLayout.setLabelProvider(new LabelProvider() {

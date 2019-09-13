@@ -139,6 +139,7 @@ public class RelationshipGraphFilterComposite extends Composite {
 
 		cmbDepth = new ComboViewer(grp, SWT.READ_ONLY | SWT.BORDER);
 		cmbDepth.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		cmbDepth.getControl().setBackground(cmbDepth.getControl().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		cmbDepth.setContentProvider(ArrayContentProvider.getInstance());
 		cmbDepth.setInput(GRAPH_DEPTH_OPTIONS);
 		cmbDepth.setSelection(new StructuredSelection(filterData.getDepth()));
