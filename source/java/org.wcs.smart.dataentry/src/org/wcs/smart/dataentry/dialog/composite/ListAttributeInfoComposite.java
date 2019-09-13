@@ -201,7 +201,6 @@ public class ListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 					CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
 					if (option != null){
 						getSourceObject().getCmAttributeOptions().remove(option.getOptionId());
-						option.setCmAttribute(null);
 					}
 				}
 				if (!initializingControl){

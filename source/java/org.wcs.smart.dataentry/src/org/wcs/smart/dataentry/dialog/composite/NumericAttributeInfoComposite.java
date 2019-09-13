@@ -107,7 +107,6 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 						if (op != null){
 							//remove 
 							getSourceObject().getCmAttributeOptions().remove(op.getOptionId());
-							op.setCmAttribute(null);
 						}
 					}else{
 						if (op == null){
@@ -150,14 +149,11 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 			@Override
 			public void sourceObjectChanged(Object newObject, Language language) {
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(optionId);
-//				text.setVisible(option != null);
-//				label.setVisible(option != null);
-				if (option != null) {
-					Double value = option.getDoubleValue();
-					internalChange[0] = true;
-					text.setText(value != null ? value.toString() : ""); //$NON-NLS-1$
-					internalChange[0] = false;
-				}
+				String value = "";  //$NON-NLS-1$
+				if (option != null && option.getDoubleValue() != null) value = option.getDoubleValue().toString();
+				internalChange[0] = true;
+				text.setText(value);
+				internalChange[0] = false;
 			}
 		});
 		return text;

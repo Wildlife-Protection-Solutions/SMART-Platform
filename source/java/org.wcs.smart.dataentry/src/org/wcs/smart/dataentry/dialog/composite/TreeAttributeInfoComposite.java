@@ -188,7 +188,6 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 		}else{
 			if (option != null){
 				getSourceObject().getCmAttributeOptions().remove(option.getOptionId());
-				option.setCmAttribute(null);
 			}
 			defaultValueTreeField.setSelectedValue(null);
 		}
