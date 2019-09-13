@@ -283,20 +283,6 @@ create table connect.ct_navigation_layer(
 );
 ALTER TABLE connect.ct_navigation_layer ADD FOREIGN KEY (ca_uuid) REFERENCES connect.ca_info(ca_uuid) on DELETE CASCADE on UPDATE RESTRICT;
 
-
-create table connect.ct_navigation_layer(
-  uuid UUID not null,
-  ca_uuid UUID not null,
-  uploaded_date timestamp not null,
-  filename varchar(256) not null,
-  name varchar(256) not null,
-  status varchar(16) not null,
-  work_item_uuid uuid,
-  primary key(uuid)
-);
-ALTER TABLE connect.ct_navigation_layer ADD FOREIGN KEY (ca_uuid) REFERENCES connect.ca_info(ca_uuid) on DELETE CASCADE on UPDATE RESTRICT;
-
-
 ------------ EMPLOYEE TEAMS ----------------
 CREATE TABLE smart.employee_team (uuid uuid not null, ca_uuid uuid not null, primary key (uuid));
 CREATE TABLE smart.employee_team_member (employee_uuid uuid not null, team_uuid uuid not null, primary key(employee_uuid, team_uuid));
