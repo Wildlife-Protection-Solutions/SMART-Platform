@@ -701,7 +701,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		((GridLayout)trackTimer.getLayout()).marginWidth = 0;
 		((GridLayout)trackTimer.getLayout()).marginHeight = 0;
 		
-		cmbTrackTimer = new ComboViewer(trackTimer, SWT.DROP_DOWN);
+		cmbTrackTimer = new ComboViewer(trackTimer, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbTrackTimer.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
 				switch((CyberTrackerPropertiesProfileOption.TrackTimerOp)element) {
