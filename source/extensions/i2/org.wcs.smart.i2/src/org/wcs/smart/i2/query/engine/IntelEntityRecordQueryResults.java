@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.query.engine;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ import java.util.UUID;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
+import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -46,8 +48,6 @@ import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.i2.query.observation.filter.IColumnIdentifierProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.util.UuidUtils;
-
-import org.locationtech.jts.geom.Envelope;
 
 /**
  * Intelligence observation query results
@@ -130,7 +130,7 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 		EntityRecordQueryResultItem item = new EntityRecordQueryResultItem();
 		
 		item.setEntityUuid(asUuid(rowData[columnNameToIndex.get("entity_uuid")])); //$NON-NLS-1$
-		
+		item.setEntityLastModified((Timestamp)rowData[columnNameToIndex.get("date_modified")]);  //$NON-NLS-1$
 		String entityType = (String) rowData[columnNameToIndex.get("entity_type")]; //$NON-NLS-1$
 		item.setEntityTypeName(entityType);
 
