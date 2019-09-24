@@ -252,7 +252,7 @@ public class QueryApi extends HttpServlet{
 				AbstractIntelQuery query2 = QueryManager.INSTANCE.findIntelQuery(uuid, s);
 				if (query2 == null)  throw new SmartConnectException(Status.BAD_REQUEST, "Query not found."); //$NON-NLS-1$
 				validateDateFilter(query2.getTypeKey(), date_filter);
-				QueryResult results = executeAdvIntelQuery(query2, cafilter, df, srid, format, delimiter,  sortcolumn, sortDirectionInt, s);
+				QueryResult results = executeAdvIntelQuery(query2, cafilter, df, srid, format, delimiter,  sortcolumn, sortDirectionInt, includeUuids, s);
 				result = results.result;
 				return results.response;
 			}
@@ -453,7 +453,7 @@ public class QueryApi extends HttpServlet{
 	}
 	
 	
-	private QueryResult executeAdvIntelQuery(AbstractIntelQuery query, String cafilter, DateFilter df, String srid, String format, String delimiter, String sortColumnName, QueryApi.Direction sortDirectionInt, Session s) throws Exception {
+	private QueryResult executeAdvIntelQuery(AbstractIntelQuery query, String cafilter, DateFilter df, String srid, String format, String delimiter, String sortColumnName, QueryApi.Direction sortDirectionInt, boolean includeUuids, Session s) throws Exception {
 		org.wcs.smart.i2.query.IQueryResult result = null;
 		
 		if (query == null){
@@ -492,6 +492,8 @@ public class QueryApi extends HttpServlet{
 		params.put(Session.class.getName(), s);
 		params.put(Locale.class.getName(), request.getLocale());
 		params.put(ConservationArea.class.getName(), cas);
+		params.put(AbstractQueryEngine.INCLUDE_UUID_PARAMETER, includeUuids);
+
 		Date[] dateFilters = new Date[] {null, null};
 		if (df.getDateFilterOption().getDates() != null) {
 			dateFilters = df.getDateFilterOption().getDates();
