@@ -35,7 +35,6 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IStyledQuery;
-import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.Query;
 import org.wcs.smart.query.xml.model.QueryName;

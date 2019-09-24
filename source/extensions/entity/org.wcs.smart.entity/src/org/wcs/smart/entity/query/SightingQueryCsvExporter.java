@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.query;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +64,12 @@ public class SightingQueryCsvExporter extends CsvSimpleQueryExporter {
 				this.delimiter = (Character) parameters.get(DELIMITER_KEY);
 			}catch(Exception ex){}
 		}
+		
+		
+		if (parameters.containsKey(ENCODING_KEY)) {
+			cs = (Charset)parameters.get(ENCODING_KEY);
+		}
+		
 		//projection
 		IProjectionProvider provider = null;
 		if (parameters.get(IQueryExporter.PROJECTION_PARAM_KEY) != null){

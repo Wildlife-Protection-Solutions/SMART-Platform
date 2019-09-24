@@ -26,7 +26,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -41,6 +43,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.importexport.QueryExportEngine;
 import org.wcs.smart.query.internal.Messages;
@@ -78,10 +81,16 @@ public class ExportQueryTypePage extends WizardPage {
 		Label lbl = new Label(main, SWT.NONE);
 		lbl.setText(Messages.ExportQueryTypePage_SelectFormatLabel);
 		
-		outputOptions = new TableViewer(main, SWT.BORDER | SWT.SINGLE );
-		outputOptions.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		Composite wrapper = new Composite(main, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		wrapper.setLayout(new TableColumnLayout());
+		
+		outputOptions = new TableViewer(wrapper, SWT.BORDER | SWT.SINGLE );
 		outputOptions.setContentProvider(ArrayContentProvider.getInstance());
 		outputOptions.setLabelProvider(new QueryExportLabelProvider());
+		TableColumn tc = new TableColumn(outputOptions.getTable(), SWT.NONE);
+		((TableColumnLayout)wrapper.getLayout()).setColumnData(tc, new ColumnWeightData(100));
+		
 		List<IQueryExporter> exports = QueryExportEngine.getQueryExports(((ExportQueryWizard)getWizard()).getQuery() );
 		Collections.sort(exports, new Comparator<IQueryExporter>() {
 

@@ -24,6 +24,7 @@ package org.wcs.smart.query.common.importexport;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
@@ -93,9 +94,13 @@ public class CsvSummaryExporter implements ICsvQueryExporter {
 			}catch(Exception ex){}
 		}
 		
+		Charset cs = StandardCharsets.UTF_8;
+		if (parameters.containsKey(ENCODING_KEY)) {
+			cs = (Charset)parameters.get(ENCODING_KEY);
+		}
 		//column headers
 		try(CSVWriter writer = new CSVWriter(
-				new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8),
+				new OutputStreamWriter(new FileOutputStream(file), cs),
 				delimiter, '"',SharedUtils.LINE_SEPARATOR)){ 
 		
 			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
@@ -161,4 +166,8 @@ public class CsvSummaryExporter implements ICsvQueryExporter {
 		return false;
 	}
 
+	@Override
+	public boolean supportsCharEncodings() {
+		return true;
+	}
 }

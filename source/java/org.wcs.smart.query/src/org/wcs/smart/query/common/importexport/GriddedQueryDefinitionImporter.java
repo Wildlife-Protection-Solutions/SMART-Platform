@@ -33,7 +33,6 @@ import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.ui.importexport.ImportQueryUtil;

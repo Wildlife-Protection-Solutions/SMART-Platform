@@ -24,6 +24,7 @@ package org.wcs.smart.query.common.importexport;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -62,7 +63,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 
 	private CSVWriter writer = null;
 	protected char delimiter = DEFAULT_DELIMITER;
-	
+	protected Charset cs = StandardCharsets.UTF_8;
 	/**
 	 * Creates a new exporter that exports to csv format
 	 */
@@ -85,7 +86,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 	@Override
 	protected void init() throws Exception {
 		writer = new CSVWriter(
-				new OutputStreamWriter(new FileOutputStream(outputFile), StandardCharsets.UTF_8),
+				new OutputStreamWriter(new FileOutputStream(outputFile), cs),
 				delimiter, '"', SharedUtils.LINE_SEPARATOR); 
 		
 		String data[] = new String[queryColumns.size()]; 
@@ -156,6 +157,11 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 			}catch(Exception ex){}
 		}
 
+		
+		if (parameters.containsKey(ENCODING_KEY)) {
+			cs = (Charset)parameters.get(ENCODING_KEY);
+		}
+		
 		//projection
 		IProjectionProvider provider = null;
 		if (parameters.get(IQueryExporter.PROJECTION_PARAM_KEY) != null){
@@ -199,6 +205,11 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 	 */
 	@Override
 	public boolean supportsProjection() {
+		return true;
+	}
+
+	@Override
+	public boolean supportsCharEncodings() {
 		return true;
 	}
 }

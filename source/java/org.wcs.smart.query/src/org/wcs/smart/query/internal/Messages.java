@@ -150,6 +150,8 @@ public class Messages extends NLS {
 	public static String ExportQueryListPage_QueryRequired;
 	public static String ExportQueryLocationPage_AllFilesFilterName;
 	public static String ExportQueryLocationPage_BrowseButton;
+	public static String ExportQueryLocationPage_CharsetLabel;
+	public static String ExportQueryLocationPage_Charsettooltip;
 	public static String ExportQueryLocationPage_delimiterLabel;
 	public static String ExportQueryLocationPage_delimiterTooltip;
 	public static String ExportQueryLocationPage_DialogMessage;
