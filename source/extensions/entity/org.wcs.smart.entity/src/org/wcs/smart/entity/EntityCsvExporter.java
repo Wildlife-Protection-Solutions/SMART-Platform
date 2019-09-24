@@ -25,7 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;
 
@@ -110,11 +110,11 @@ public class EntityCsvExporter implements ICsvDataExporter {
 	
 	@Override
 	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca,
-			boolean headers, IProgressMonitor monitor, Session session)
+			boolean headers, Charset cs, IProgressMonitor monitor, Session session)
 			throws Exception {
 		
 		try (CSVWriter writer = new CSVWriter(
-					new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8), 
+					new OutputStreamWriter(new FileOutputStream(file), cs), 
 					delimiter, '"',SharedUtils.LINE_SEPARATOR)){
 			
 			List<Entity> stations = getEntities(session, activeOnly);

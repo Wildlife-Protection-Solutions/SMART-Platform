@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.record.importer;
 
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
@@ -80,7 +81,6 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 	private Composite mappingPanel;
 	private ScrolledComposite sc ;
 	private List<ComboViewer> mappings = null;
-	private Path lastFile = null;
 	
 	protected AttributeMappingWizardPage() {
 		super(FILE_PAGE);
@@ -160,16 +160,7 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			if (lastFile != null){
-				if (lastFile.equals(((ImportRecordCsvWizard)getWizard()).getImportConfiguration().getFile())){
-					//same type & same file; lets not update details 
-					return Status.OK_STATUS;
-				}
-			}
 			HashSet<IntelRecordSourceAttribute> recordattributes = new HashSet<IntelRecordSourceAttribute>();
-			
-			
-
 			try(Session s = HibernateManager.openSession()){
 				
 				CriteriaBuilder cb = s.getCriteriaBuilder();
@@ -182,9 +173,10 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 			//create the column headers from the csv file
 			Path file = ((ImportRecordCsvWizard)getWizard()).getImportConfiguration().getFile();
 			char delim = ((ImportRecordCsvWizard)getWizard()).getImportConfiguration().getDelimiter();
-			lastFile = file;
+			Charset cs = ((ImportRecordCsvWizard)getWizard()).getImportConfiguration().getCharset();
+
 			String[] headers = null;
-			try(CSVReader reader = new CSVReader(Files.newBufferedReader(file), delim)){
+			try(CSVReader reader = new CSVReader(Files.newBufferedReader(file, cs), delim)){
 				headers = reader.readNext();
 			}catch (Exception ex){
 				Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.AttributeMappingWizardPage1_FileReadError, file.toString(), ex.getMessage()), ex);

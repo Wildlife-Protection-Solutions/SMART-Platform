@@ -23,6 +23,7 @@ package org.wcs.smart.export.dialog;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -135,12 +136,13 @@ public abstract class AbstractCsvDialog extends SmartStyledTitleDialog {
 			if (IDialogConstants.OK_ID == buttonId) {
 				String fileName = csvComposite.getFileText();
 				char delimiter = csvComposite.getDelimiter();
-			
+				Charset cs = csvComposite.getCharacterSet();
+				
 				if (validateFilename(fileName)){
 					SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_DELIMITER_KEY, String.valueOf(delimiter));	
 					SmartPlugIn.getDefault().getDialogSettings().put(LAST_DIR_KEY, (new File(fileName)).getParent());
 				
-					if (process(fileName, delimiter)){
+					if (process(fileName, delimiter, cs)){
 						setReturnCode(OK);
 						close();
 					}
@@ -168,11 +170,11 @@ public abstract class AbstractCsvDialog extends SmartStyledTitleDialog {
 		return true;
 	}
 
-	protected boolean process(final String fileName, final char delimiter) {
+	protected boolean process(final String fileName, final char delimiter, final Charset cs) {
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
 		try {
 			boolean headers = csvComposite.getHeadersSelection();
-			ProcessingRunnable processRunnable = new ProcessingRunnable(fileName, delimiter, headers);
+			ProcessingRunnable processRunnable = new ProcessingRunnable(fileName, delimiter, headers, cs);
 			dialog.run(true, true, processRunnable);
 			
 			
@@ -206,7 +208,7 @@ public abstract class AbstractCsvDialog extends SmartStyledTitleDialog {
 	 * @throws Exception
 	 */
 	protected abstract boolean performAction(File file, char delimiter, 
-			boolean headers, IProgressMonitor monitor, Session session) throws Exception;
+			boolean headers, Charset cs, IProgressMonitor monitor, Session session) throws Exception;
 
 	/**
 	 * 
@@ -225,18 +227,20 @@ public abstract class AbstractCsvDialog extends SmartStyledTitleDialog {
 		private final boolean headers;
 		private final char delimiter;
 		private boolean success;
-
-		private ProcessingRunnable(String file, char delimiter, boolean headers) {
+		private final Charset cs;
+		
+		private ProcessingRunnable(String file, char delimiter, boolean headers, Charset cs) {
 			this.file = file;
 			this.headers = headers;
 			this.delimiter = delimiter;
+			this.cs = cs;
 		}
 
 		@Override
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 			
 			try (Session session = HibernateManager.openSession()){
-				boolean ok = performAction(new File(file), delimiter, headers, monitor, session);
+				boolean ok = performAction(new File(file), delimiter, headers, cs, monitor, session);
 				setSuccess(ok);
 			} catch (final Exception ex) {
 				setSuccess(false);

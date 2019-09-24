@@ -39,6 +39,7 @@ public interface IQueryExporter {
 	public enum ExportOption{
 		DELIMITER,
 		PROJECTION,
+		ENCODING,
 		LOCALE;
 	}
 

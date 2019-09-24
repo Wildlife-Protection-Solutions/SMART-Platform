@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.entity.importer;
 
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
@@ -79,10 +80,7 @@ public class AttributeMappingWizardPage extends WizardPage{
 	private ScrolledComposite sc ;
 	private List<ComboViewer> mappings = null;
 	private Font boldFont = null;
-	
-	private IntelEntityType lastType = null;
-	private Path lastFile = null;
-	
+
 	protected AttributeMappingWizardPage() {
 		super(FILE_PAGE);
 	}
@@ -150,19 +148,12 @@ public class AttributeMappingWizardPage extends WizardPage{
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			if (lastType != null && lastFile != null){
-				if (lastType.equals(((ImportEntityWizard)getWizard()).getImportConfiguration().getType()) &&
-						lastFile.equals(((ImportEntityWizard)getWizard()).getImportConfiguration().getFile())){
-					//same type & same file; lets not update details 
-					return Status.OK_STATUS;
-				}
-			}
+
 			HashMap<IntelEntityTypeAttributeGroup, List<IntelAttribute>> attributes = new HashMap<>();
 			String name;
 
 			try(Session s = HibernateManager.openSession()){
 				IntelEntityType type = (IntelEntityType) s.get(IntelEntityType.class, ((ImportEntityWizard)getWizard()).getImportConfiguration().getType().getUuid());
-				lastType = type;
 				name = type.getName();
 				type.getAttributes().forEach( a -> {
 					List<IntelAttribute> as = attributes.get(a.getAttributeGroup());
@@ -177,9 +168,9 @@ public class AttributeMappingWizardPage extends WizardPage{
 			//create the column headers from the csv file
 			Path file = ((ImportEntityWizard)getWizard()).getImportConfiguration().getFile();
 			char delim = ((ImportEntityWizard)getWizard()).getImportConfiguration().getDelimiter();
-			lastFile = file;
+			Charset cs = ((ImportEntityWizard)getWizard()).getImportConfiguration().getCharset();
 			String[] headers = null;
-			try(CSVReader reader = new CSVReader(Files.newBufferedReader(file), delim)){
+			try(CSVReader reader = new CSVReader(Files.newBufferedReader(file, cs), delim)){
 				headers = reader.readNext();
 			}catch (Exception ex){
 				Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.AttributeMappingWizardPage_FileReadError, file.toString(), ex.getMessage()), ex);

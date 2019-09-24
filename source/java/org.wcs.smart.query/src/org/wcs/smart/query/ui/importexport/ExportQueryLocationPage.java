@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.locationtech.udig.catalog.URLUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
@@ -232,9 +233,19 @@ public class ExportQueryLocationPage extends WizardPage {
 		});
 		cmbCharset.setInput( Charset.availableCharsets().values() );
 		cmbCharset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbCharset.setSelection(new StructuredSelection(StandardCharsets.UTF_8));
 		cmbCharset.getControl().setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		
+
+		Charset defaultcs = StandardCharsets.UTF_8;
+		try {
+			String cc = SmartPlugIn.getDefault().getDialogSettings().get(SmartPlugIn.DEFAULT_ENCODING_KEY);
+			if (cc != null && !cc.isBlank()) defaultcs = Charset.forName(cc);
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		cmbCharset.setSelection(new StructuredSelection(defaultcs));
+		cmbCharset.addSelectionChangedListener(e->{
+			SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_ENCODING_KEY, ((Charset)e.getStructuredSelection().getFirstElement()).name());
+		});
 		lblSpacer2 = new Label(main, SWT.NONE);
 		lblSpacer2.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 	}

@@ -22,6 +22,7 @@
 package org.wcs.smart.export.dialog;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -56,8 +57,8 @@ public class CsvExportDialog extends AbstractCsvDialog {
 	}
 
 	@Override
-	protected boolean performAction(File file, char delimiter, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
-		return config.getExporter().exportCsvFile(file, delimiter, SmartDB.getCurrentConservationArea(), headers, monitor, session);
+	protected boolean performAction(File file, char delimiter, boolean headers, Charset cs, IProgressMonitor monitor, Session session) throws Exception {
+		return config.getExporter().exportCsvFile(file, delimiter, SmartDB.getCurrentConservationArea(), headers, cs, monitor, session);
 	}
 
 	@Override

@@ -22,6 +22,7 @@
 package org.wcs.smart.export.dialog;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -51,8 +52,8 @@ public class CsvImportDialog extends AbstractCsvDialog {
 	}
 
 	@Override
-	protected boolean performAction(File file, char delimiter, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
-		return config.getImporter().importCsvFile(file, delimiter, headers, monitor, session);
+	protected boolean performAction(File file, char delimiter, boolean headers, Charset cs,  IProgressMonitor monitor, Session session) throws Exception {
+		return config.getImporter().importCsvFile(file, delimiter, headers, cs, monitor, session);
 	}
 	
 	@Override

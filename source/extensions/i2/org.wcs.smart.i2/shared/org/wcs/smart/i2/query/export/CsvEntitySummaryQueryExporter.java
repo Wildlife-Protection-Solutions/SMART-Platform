@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.query.export;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -61,7 +62,12 @@ public class CsvEntitySummaryQueryExporter implements IQueryExporter{
 			delimiter = (Character)exportOptions.get(ExportOption.DELIMITER);
 		}
 		
-		try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(destination, StandardCharsets.UTF_8), delimiter, '"',SharedUtils.LINE_SEPARATOR)){ 
+		Charset cs = StandardCharsets.UTF_8;
+		if (exportOptions.containsKey(ExportOption.ENCODING) && exportOptions.get(ExportOption.ENCODING) instanceof Charset){
+			cs = (Charset)exportOptions.get(ExportOption.ENCODING);
+		}
+		
+		try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(destination, cs), delimiter, '"',SharedUtils.LINE_SEPARATOR)){ 
 		
 			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
 				String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
@@ -109,6 +115,7 @@ public class CsvEntitySummaryQueryExporter implements IQueryExporter{
 	@Override
 	public boolean supportsOption(ExportOption option) {
 		if (option == ExportOption.DELIMITER) return true;
+		if (option == ExportOption.ENCODING) return true;
 		return false;
 	}
 }

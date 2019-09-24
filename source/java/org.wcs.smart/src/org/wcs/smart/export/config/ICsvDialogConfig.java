@@ -36,7 +36,7 @@ public interface ICsvDialogConfig {
 	 * @return
 	 */
 	public String getDefaultFileName();
-	
+		
 	/**
 	 * Indicates weather checkbox responsible for csv headers in present in gui
 	 * @return boolean

@@ -23,6 +23,7 @@ package org.wcs.smart.i2.query.export;
 
 import java.io.Serializable;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +43,9 @@ import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.udig.catalog.URLUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -57,10 +61,6 @@ import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.i2.udig.query.FeatureGenerator;
 import org.wcs.smart.util.GeometryUtils;
-
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 
 /**
  * Exports query results to shapefile 
@@ -85,7 +85,10 @@ public class ShpRecordQueryExporter implements IQueryExporter {
 		if (exportOptions.containsKey(ExportOption.PROJECTION) && exportOptions.get(ExportOption.PROJECTION) instanceof Projection){
 			pp= (Projection) exportOptions.get(ExportOption.PROJECTION);
 		}
-		
+		Charset cs = null;
+		if (exportOptions.containsKey(ExportOption.ENCODING) && exportOptions.get(ExportOption.ENCODING) instanceof Charset){
+			cs = (Charset) exportOptions.get(ExportOption.ENCODING);
+		}
 		List<SimpleFeature> pointFeatures = new ArrayList<SimpleFeature>();
 		List<SimpleFeature> polygonFeatures = new ArrayList<SimpleFeature>();
 		
@@ -132,6 +135,7 @@ public class ShpRecordQueryExporter implements IQueryExporter {
 			FileDataStoreFactorySpi factory = FileDataStoreFinder.getDataStoreFactory("shp"); //$NON-NLS-1$
 			Map<String, Serializable> params = new HashMap<String, Serializable>();
 			params.put(ShapefileDataStoreFactory.URLP.key, (URL)item[0]);
+			params.put(ShapefileDataStoreFactory.DBFCHARSET.key, cs.name());
 		
 			DataStore shapefile = factory.createNewDataStore(params);
 		
@@ -166,6 +170,7 @@ public class ShpRecordQueryExporter implements IQueryExporter {
 	public boolean supportsOption(ExportOption option) {
 		if (option == ExportOption.PROJECTION) return true;
 		if (option == ExportOption.LOCALE) return true;
+		if (option == ExportOption.ENCODING) return true;
 		return false;
 	}
 

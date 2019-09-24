@@ -454,6 +454,8 @@ public class Messages extends NLS {
 	public static String CsvExportDialog_CreateDirectory;
 	public static String CsvExportDialog_DialogTitle;
 	public static String CsvExportDialog_OverwriteFile;
+	public static String CsvFileComposite_CharsetLabel;
+	public static String CsvFileComposite_CharsetTooltip;
 	public static String CsvFileComposite_colon;
 	public static String CsvFileComposite_comma;
 	public static String CsvFileComposite_DelimiterLabel;

@@ -143,6 +143,7 @@ public class ImportRecordCsvWizard extends Wizard implements IPageChangingListen
 			config.setDelimiter(filePage.getDelimiter());
 			config.setSkipFileLine(filePage.getSkipFirstLine());
 			config.setProjection(filePage.getProjection());
+			config.setCharset(filePage.getCharacterSet());
 			config.setDateFormatString(filePage.getDateFormatStr());
 		}
 		

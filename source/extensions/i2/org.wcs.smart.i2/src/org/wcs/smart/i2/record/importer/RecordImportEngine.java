@@ -145,10 +145,10 @@ public enum RecordImportEngine {
 		monitor.subTask(Messages.RecordImportEngine_ReadingSubTask);
 		int lineCnt = 0;
 		int numcols = -1;
-		try(CSVReader reader = new CSVReader(Files.newBufferedReader(config.getFile()), config.getDelimiter())){
+		try(CSVReader reader = new CSVReader(Files.newBufferedReader(config.getFile(), config.getCharset()), config.getDelimiter())){
 			lineCnt = reader.readAll().size();
 		}
-		try(CSVReader reader = new CSVReader(Files.newBufferedReader(config.getFile()), config.getDelimiter())){
+		try(CSVReader reader = new CSVReader(Files.newBufferedReader(config.getFile(), config.getCharset()), config.getDelimiter())){
 			String[] ldata = reader.readNext();
 			numcols = ldata.length;
 		}
@@ -157,7 +157,7 @@ public enum RecordImportEngine {
 		
 		SubMonitor kidMonitor = monitor.split(1);
 		kidMonitor.setWorkRemaining(lineCnt);
-		try(CSVReader reader = new CSVReader(Files.newBufferedReader(config.getFile()), config.getDelimiter())){
+		try(CSVReader reader = new CSVReader(Files.newBufferedReader(config.getFile(), config.getCharset()), config.getDelimiter())){
 			kidMonitor.split(1);
 			
 			int line = 0;

@@ -30,7 +30,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -45,6 +47,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
 import org.wcs.smart.i2.query.export.CsvRecordQueryExporter;
@@ -83,8 +86,11 @@ public class QueryFormatPage extends WizardPage {
 		Label lbl = new Label(main, SWT.NONE);
 		lbl.setText(Messages.QueryFormatPage_FormatOp);
 		
-		outputOptions = new TableViewer(main, SWT.BORDER | SWT.SINGLE );
-		outputOptions.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		Composite wrapper = new Composite(main, SWT.NONE);
+		wrapper.setLayout(new TableColumnLayout());
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		outputOptions = new TableViewer(wrapper, SWT.BORDER | SWT.SINGLE );
 		outputOptions.setContentProvider(ArrayContentProvider.getInstance());
 		outputOptions.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
@@ -100,6 +106,9 @@ public class QueryFormatPage extends WizardPage {
 				return element == null ? "" : element.toString();//$NON-NLS-1$
 			}
 		});
+		TableColumn tc = new TableColumn(outputOptions.getTable(), SWT.NONE);
+		((TableColumnLayout)wrapper.getLayout()).setColumnData(tc, new ColumnWeightData(100));
+		
 		List<IQueryExporter> exports = new ArrayList<>();
 		exports.add(new CsvRecordQueryExporter());
 		exports.add(new ShpRecordQueryExporter());
