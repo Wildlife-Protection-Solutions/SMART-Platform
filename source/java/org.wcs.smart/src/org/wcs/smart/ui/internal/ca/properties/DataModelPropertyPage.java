@@ -170,17 +170,19 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		Session session = getSession();
 		try {
 			//evict all items from cache to ensure they are correctly loaded next time
-			session.getSessionFactory().getCache().evictEntityRegion(Category.class);
-			session.getSessionFactory().getCache().evictEntityRegion(Attribute.class);
-			session.getSessionFactory().getCache().evictEntityRegion(AttributeTreeNode.class);
-			session.getSessionFactory().getCache().evictEntityRegion(AttributeListItem.class);
-			session.getSessionFactory().getCache().evictEntityRegion(CategoryAttribute.class);
+			session.getSessionFactory().getCache().evictEntityData(Category.class);
+			session.getSessionFactory().getCache().evictEntityData(Attribute.class);
+			session.getSessionFactory().getCache().evictEntityData(AttributeTreeNode.class);
+			session.getSessionFactory().getCache().evictEntityData(AttributeListItem.class);
+			session.getSessionFactory().getCache().evictEntityData(CategoryAttribute.class);
 			
-			session.getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.Attribute.attributeList"); //$NON-NLS-1$
-			session.getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.Attribute.activeTreeNodes"); //$NON-NLS-1$
-			session.getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.Attribute.tree"); //$NON-NLS-1$
-			session.getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.AttributeTreeNode.children"); //$NON-NLS-1$
-			session.getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.AttributeTreeNode.activeChildren"); //$NON-NLS-1$
+			//https://stackoverflow.com/questions/9587169/evict-dependant-collections-together-with-parent-entity
+			//https://hibernate.atlassian.net/browse/HHH-4910
+			session.getSessionFactory().getCache().evictCollectionData("org.wcs.smart.ca.datamodel.Attribute.attributeList"); //$NON-NLS-1$
+			session.getSessionFactory().getCache().evictCollectionData("org.wcs.smart.ca.datamodel.Attribute.activeTreeNodes"); //$NON-NLS-1$
+			session.getSessionFactory().getCache().evictCollectionData("org.wcs.smart.ca.datamodel.Attribute.tree"); //$NON-NLS-1$
+			session.getSessionFactory().getCache().evictCollectionData("org.wcs.smart.ca.datamodel.AttributeTreeNode.children"); //$NON-NLS-1$
+			session.getSessionFactory().getCache().evictCollectionData("org.wcs.smart.ca.datamodel.AttributeTreeNode.activeChildren"); //$NON-NLS-1$
 			
 			if (currentTransaction != null && currentTransaction.isActive()) {
 				currentTransaction.rollback();
