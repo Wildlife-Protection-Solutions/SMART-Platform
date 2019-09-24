@@ -45,6 +45,24 @@ public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * 
+	 * In most cases users should use WaypointAttachmentInterceptor().  There are only a few special cases
+	 * when copying files within the filestore that this option should be used.  Attachments that are 
+	 * identified as not encryptable (see attachment.isEncrypted()) will never be
+	 * encrypted irregardless of this setting 
+	 * 
+	 * @param encryptFiles if the files are encrypted when they are copied from the source location
+	 */
+	public WaypointAttachmentInterceptor(boolean encyptfiles) {
+		super(encyptfiles);
+	}
+	
+	public WaypointAttachmentInterceptor() {
+		this(true);
+	}
+	
+	
+	/**
 	 * When a parent object is deleted it also deletes the file on disk.
 	 */
 	@Override

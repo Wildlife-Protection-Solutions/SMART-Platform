@@ -86,7 +86,7 @@ public class MergePatrolsHandler {
 		ArrayList<Patrol> patrols = new ArrayList<Patrol>();
 		
 		
-		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())) {
+		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor(false))) {
 			session.beginTransaction();
 			try{
 				for(PatrolEditorInput pei : toMerge){
