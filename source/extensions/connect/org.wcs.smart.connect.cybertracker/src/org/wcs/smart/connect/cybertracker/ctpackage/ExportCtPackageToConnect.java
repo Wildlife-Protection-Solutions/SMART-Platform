@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.cybertracker.ctpackage;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
@@ -49,11 +50,14 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
+import org.wcs.smart.connect.cybertracker.model.CyberTrackerNavigationProxy;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 import org.wcs.smart.connect.internal.server.FileUploaderJob;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtExportAction;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.NavigationLayer;
+import org.wcs.smart.cybertracker.navigation.ExportNavigationManager;
 
 /**
  * Export CyberTracker package to connect action.
@@ -71,7 +75,7 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 	
 	
 	@Override
-	public void doAction(List<ICtPackage> ctpackages, IEclipseContext context) {
+	public void doAction(List<ICtPackage> ctpackages, List<NavigationLayer> navlayers, IEclipseContext context) {
 		try {
 			SmartConnect connect = context.get(SmartConnect.class);
 			if (connect == null) {
@@ -121,7 +125,7 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 				public void aboutToRun(IJobChangeEvent event) {}
 			};
 			
-			total = ctpackages.size();
+			total = ctpackages.size() + navlayers.size();
 			
 			for (ICtPackage ctpackage: ctpackages) {			
 				Path file = ctpackage.getLocalFile();
@@ -176,8 +180,71 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 				job.schedule();
 				
 			}
+			
+			
+			for (NavigationLayer nlayer : navlayers) {
+				
+				Path tempFile = Files.createTempFile("smartnav", "zip"); //$NON-NLS-1$ //$NON-NLS-2$
+				ExportNavigationManager.INSTANCE.exportNavigationLayer(nlayer, tempFile);
+				
+				CyberTrackerNavigationProxy proxy = new CyberTrackerNavigationProxy();
+				proxy.setCaLabel(nlayer.getConservationArea().getName());
+				proxy.setCaUuid(nlayer.getConservationArea().getUuid());
+				proxy.setName(nlayer.getName());
+							
+				Response response = simple.uploadNavigationLayer(Files.size(tempFile), nlayer.getUuid().toString(), proxy);
+				if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+					throw new Exception(response.getStatusInfo().getReasonPhrase());
+				}
+				String location = response.getHeaderString(HttpHeaders.LOCATION);
+				if (location == null) {
+					throw new Exception(Messages.ExportCtPackageToConnect_NoUrl);
+				}
+				
+				FileUploaderJob job = new FileUploaderJob(location, tempFile, connect, Messages.ExportCtPackageToConnect_UploadJobName) {
+	
+					@Override
+					protected void onUploadComplete(WorkItemStatus status) {
+						removeFile();
+					}
+	
+					@Override
+					protected void onProcessingComplete(WorkItemStatus status) {
+						ok++;
+					}
+	
+					@Override
+					protected void onError(String errorMessage) {
+						ConnectPlugIn.log(Messages.ExportCtPackageToConnect_UploadError + errorMessage, null);
+						removeFile();
+					}
+					
+					private void removeFile() {
+						try {
+							Files.deleteIfExists(tempFile);
+						} catch (IOException e) {
+							ConnectPlugIn.log(e.getMessage(), e);
+						}
+					}
+	
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						try {
+							super.uploadFile(monitor);
+						} catch (Exception e) {
+							ConnectPlugIn.log(Messages.ExportCtPackageToConnect_UploadError +e.getMessage(), e);
+						}
+						return Status.OK_STATUS;
+					}
+					
+				};
+				jobs.add(job);
+				job.addJobChangeListener(jobListener);
+				job.schedule();
+				
+			}
 		} catch (Exception e) {
-			ConnectPlugIn.displayLog(Messages.ExportCtPackageToConnect_UploadError + e.getMessage(), e);
+			ConnectPlugIn.displayLog(Messages.ExportCtPackageToConnect_NavUploadError + e.getMessage(), e);
 		}
 	}
 	

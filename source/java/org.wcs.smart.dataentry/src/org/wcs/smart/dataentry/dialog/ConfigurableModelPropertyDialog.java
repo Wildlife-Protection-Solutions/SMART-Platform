@@ -24,6 +24,7 @@ package org.wcs.smart.dataentry.dialog;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -369,6 +370,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			s.beginTransaction();
 			try {
 				modelList = DataentryHibernateManager.getConfigurableModels(s);
+				modelList.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 				s.getTransaction().rollback();
 			} catch (Exception ex) {
 				SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);

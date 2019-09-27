@@ -22,11 +22,10 @@
 package org.wcs.smart.tests;
 
 import org.geotools.referencing.CRS;
+import org.junit.Assert;
 import org.junit.Test;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.util.ReprojectUtils;
-
-import com.vividsolutions.jts.util.Assert;
 
 /**
  * Test case for computing tile ids for gridded 
@@ -41,21 +40,21 @@ public class TileIdTest {
 		CoordinateReferenceSystem DATABASE_CRS = CRS.decode("EPSG:4326", true);
 		String tid = "";
 		
-		tid = ReprojectUtils.computeTileId(0, 0, DATABASE_CRS.toWKT(), 0, 0, 1);
-		Assert.equals("1_1", tid);
+		tid = ReprojectUtils.computeTileId(0, 0, null, null, DATABASE_CRS.toWKT(), 0, 0, 1);
+		Assert.assertEquals("1_1", tid);
 		
-		tid = ReprojectUtils.computeTileId(1.5, 0.5, DATABASE_CRS.toWKT(), 0, 0, 1);
-		Assert.equals("2_1", tid);
+		tid = ReprojectUtils.computeTileId(1.5, 0.5, 0f, 0f, DATABASE_CRS.toWKT(), 0, 0, 1);
+		Assert.assertEquals("2_1", tid);
 		
-		tid = ReprojectUtils.computeTileId(5.5, 6.78, DATABASE_CRS.toWKT(), 0, 0, 1);
-		Assert.equals("6_7", tid);
+		tid = ReprojectUtils.computeTileId(5.5, 6.78, null, null,  DATABASE_CRS.toWKT(), 0, 0, 1);
+		Assert.assertEquals("6_7", tid);
 		
 		CoordinateReferenceSystem BC_ALBERS = CRS.decode("EPSG:3005");
-		tid = ReprojectUtils.computeTileId(-123.4498, 48.4268, BC_ALBERS.toWKT(), 0, 0, 1000);
-		Assert.equals("1190_383", tid);
+		tid = ReprojectUtils.computeTileId(-123.4498, 48.4268,null, null,  BC_ALBERS.toWKT(), 0, 0, 1000);
+		Assert.assertEquals("1190_383", tid);
 		
 		
-		tid = ReprojectUtils.computeTileId(-123.4498, 48.4268, BC_ALBERS.toWKT(), 0, 0, 100);
-		Assert.equals("11891_3825", tid);
+		tid = ReprojectUtils.computeTileId(-123.4498, 48.4268, null, null, BC_ALBERS.toWKT(), 0, 0, 100);
+		Assert.assertEquals("11891_3825", tid);
 	}
 }

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.entity.importer;
 
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ public class EntityImportConfig {
 	private char delimiter;
 	private String dateFormatStr;
 	private Projection projection;
+	private Charset cs;
 	
 	public EntityImportConfig(){
 		
@@ -69,9 +71,15 @@ public class EntityImportConfig {
 	public void setProjection(Projection projection){
 		this.projection = projection;
 	}
-	
 	public Projection getProjection(){
 		return this.projection;
+	}
+	
+	public void setCharset(Charset cs){
+		this.cs = cs;
+	}
+	public Charset getCharset() {
+		return this.cs;
 	}
 	
 	public String getDateFormatString(){

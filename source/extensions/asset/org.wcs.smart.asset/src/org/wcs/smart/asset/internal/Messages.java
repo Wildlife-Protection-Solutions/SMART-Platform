@@ -344,6 +344,13 @@ public class Messages extends NLS {
 	public static String AssetSummaryServiceInfo_Keyword4;
 	public static String AssetSummaryServiceInfo_SummaryStatsDescription;
 	public static String AssetSummaryServiceInfo_SummaryStatsTitle;
+	public static String AssetSummaryTable_AssetAttributePostFix;
+	public static String AssetSummaryTable_EndColumnName;
+	public static String AssetSummaryTable_IDColumnName;
+	public static String AssetSummaryTable_StartColumnName;
+	public static String AssetSummaryTable_StatusColumnName;
+	public static String AssetSummaryTable_TotalTimeColumnName;
+	public static String AssetSummaryTable_TypeColumnName;
 	public static String AssetTypeDialog_attributeLabel;
 	public static String AssetTypeDialog_AddAttributeMenuItem;
 	public static String AssetTypeDialog_AddTitle;
@@ -652,6 +659,7 @@ public class Messages extends NLS {
 	public static String FileWizardPage_Title;
 	public static String FixedColumn_ActiveDaysColumnName;
 	public static String FixedColumn_AssetDaysColumnName;
+	public static String FixedColumn_CurrentAssetLabel;
 	public static String FixedColumn_IdColumnName;
 	public static String FixedColumn_IncidentCntColumnName;
 	public static String FixedColumn_StatusColumnName;

@@ -648,10 +648,8 @@ public class MissionDayComposite {
 						session.update(wp.getSamplingUnit());
 						wp.getSamplingUnit().getId();
 					}
-					
-					if (wp.getWaypoint().getObservations() != null){
-						wp.getWaypoint().getObservations().size();
-					}
+					//lazy load
+					wp.getWaypoint().getAllObservations();				
 				}
 				observationTable.setInput(missionDay.getWaypoints());
 				observationTable.refresh();
@@ -947,8 +945,7 @@ public class MissionDayComposite {
 			}
 			return ""; //$NON-NLS-1$
 		} else if (column == OtColumn.OBSERVATION) {
-			if (wp.getObservations() == null
-					|| wp.getObservations().size() == 0) {
+			if (wp.getAllObservations().isEmpty()) {
 				return Messages.MissionDayComposite_None;
 			} else {
 				return wp.getObservationsAsString();
@@ -960,12 +957,8 @@ public class MissionDayComposite {
 			return wp.getComment();
 		} else if (column == OtColumn.ATTACHMENTS) {
 			int wpCnt = 0;
-			if (wp.getObservations() != null){
-				for (WaypointObservation wo : wp.getObservations()){
-					if (wo.getAttachments() != null){
-						wpCnt += wo.getAttachments().size();
-					}
-				}
+			for (WaypointObservation wo : wp.getAllObservations()){
+				if (wo.getAttachments() != null) wpCnt += wo.getAttachments().size();
 			}
 			if (wp.getAttachments() != null){
 				wpCnt += wp.getAttachments().size();

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+  
+   <feature url="features/org.wcs.smart.event.i2.feature_7.0.0.qualifier.jar" id="org.wcs.smart.event.i2.feature" version="7.0.0.qualifier">
+      <category name="events"/>
+   </feature>
+     <feature url="features/org.wcs.smart.event.feature_7.0.0.qualifier.jar" id="org.wcs.smart.event.feature" version="7.0.0.qualifier">
+      <category name="events"/>
+   </feature>
+   <category-def name="events" label="SMART Triggers Plug-in">
+      <description>
+         The SMART Triggers plug-in is designed to work with the Profiles plug-in.  It allows users to automatically create new records in their Profiles system when particular types of observation data are imported into SMART. This allows users to automatically update their Profiles tracking system as soon as any relevant data is entered into SMART. Data that will trigger the system can come from any of the data inputs: patrol data, field sensors, independent incidents or ecological monitoring missions.
+      </description>
+   </category-def>
+  
+</site>

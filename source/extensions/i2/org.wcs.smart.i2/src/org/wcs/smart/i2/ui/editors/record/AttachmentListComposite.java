@@ -105,6 +105,7 @@ public class AttachmentListComposite extends Composite{
 		compAttachmentEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		final Button btnAddAttachment = toolkit.createButton(compAttachmentEdit, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
+		btnAddAttachment.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnAddAttachment.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {	

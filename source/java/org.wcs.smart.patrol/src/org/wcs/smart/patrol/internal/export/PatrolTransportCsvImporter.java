@@ -25,7 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -84,14 +84,14 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 	}
 	
 	@Override
-	public boolean importCsvFile(File file, char delimiter, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
+	public boolean importCsvFile(File file, char delimiter, boolean headers, Charset cs, IProgressMonitor monitor, Session session) throws Exception {
 		if (!file.exists()){
 			throw new IOException(MessageFormat.format(Messages.PatrolTransportCsvImporter_ErrorfileNotFound, new Object[]{file.toString()}));
 		}
 		
 		ArrayList<PatrolTransportType> types = new ArrayList<PatrolTransportType>();
 		
-		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), delimiter)){
+		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), cs), delimiter)){
 			//reading the first line with language codes
 			String[] headerRow = reader.readNext();
 			List<String> langCodes = getLanguageCodes(headerRow);

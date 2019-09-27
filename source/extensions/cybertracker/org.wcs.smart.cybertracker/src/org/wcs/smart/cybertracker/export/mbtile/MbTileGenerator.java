@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.export.mbtile;
 
+import java.awt.AlphaComposite;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -42,6 +43,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
@@ -56,9 +59,6 @@ import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.internal.settings.MapSettings;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Envelope;
 
 /*
  * References:
@@ -191,7 +191,7 @@ public class MbTileGenerator {
 				monitor.worked(1);
 				
 				//create images here 
-				BufferedImage tileimage = new BufferedImage(256, 256, BufferedImage.TYPE_INT_RGB);
+				BufferedImage tileimage = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
 				Graphics2D gc = tileimage.createGraphics();
 				
 				//populate tiles tables
@@ -216,13 +216,17 @@ public class MbTileGenerator {
 							Envelope r1 = minTile.getBoundsMercator();
 							r1.expandToInclude(maxTile.getBoundsMercator());
 							
-							BufferedImage img = new BufferedImage((maxTile.getTileX() - minTile.getTileX()+1)*TILESIZE,  (maxTile.getTileY() - minTile.getTileY()+1)*TILESIZE, BufferedImage.TYPE_INT_RGB);
+							int width = (maxTile.getTileX() - minTile.getTileX()+1)*TILESIZE;
+							int height = (maxTile.getTileY() - minTile.getTileY()+1)*TILESIZE;
+							BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 							Graphics2D gg = img.createGraphics();
-	
+							gg.setComposite(AlphaComposite.Clear);
+							gg.fillRect(0, 0, width, height);
+							gc.setComposite(AlphaComposite.Src);
 							ReferencedEnvelope rr = new ReferencedEnvelope(r1,  sphericalMercator);
 							BoundsStrategy bnds = new BoundsStrategy(rr);
 							try {
-								DrawMapParameter params = new ApplicationGIS.DrawMapParameter(gg,  new Dimension(img.getWidth(),img.getHeight()), thisMap, bnds, 92, SelectionStyle.IGNORE, new NullProgressMonitor());
+								DrawMapParameter params = new ApplicationGIS.DrawMapParameter(gg,  new Dimension(img.getWidth(),img.getHeight()), thisMap, bnds, 92, SelectionStyle.IGNORE, new NullProgressMonitor(), true, false);
 								ApplicationGIS.drawMap(params);
 								
 							}catch (Throwable t) {
@@ -237,7 +241,10 @@ public class MbTileGenerator {
 									Tile t = zz.getTile(x+i, y+j);
 									if (t == null) continue;
 								
-									gc.clearRect(0, 0, tileimage.getWidth(), tileimage.getHeight());
+//									gc.clearRect(0, 0, tileimage.getWidth(), tileimage.getHeight());
+									gc.setComposite(AlphaComposite.Clear);
+									gc.fillRect(0, 0, tileimage.getWidth(), tileimage.getHeight());
+									gc.setComposite(AlphaComposite.Src);
 									gc.drawImage(img, 0, 0, 256, 256, i * 256, j * 256, (i + 1) * 256, (j + 1) * 256, null);
 									writeTile(c, t, tileimage);
 									

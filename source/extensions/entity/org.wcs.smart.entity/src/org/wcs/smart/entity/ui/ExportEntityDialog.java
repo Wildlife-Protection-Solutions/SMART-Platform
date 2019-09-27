@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.ui;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -91,14 +92,14 @@ public class ExportEntityDialog extends AbstractCsvDialog {
 	}
 	
 	@Override
-	protected boolean performAction(File file, char delimiter, boolean headers,
+	protected boolean performAction(File file, char delimiter, boolean headers, Charset cs,
 			IProgressMonitor monitor, Session session) throws Exception {
 		
 		config.setActiveOnly(activeOnly);
 		config.setProjection(selectedPrj);
 		
 		return config.getDialogConfiguration().getExporter().exportCsvFile(file, delimiter, SmartDB.getCurrentConservationArea(), 
-				headers, monitor, session);
+				headers, cs, monitor, session);
 	}
 
 	@Override

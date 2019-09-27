@@ -54,7 +54,7 @@ public enum QueryStyleParser {
 	 * @param blackboard setting to null will remove style for the given layer
 	 * @throws IOException
 	 */
-	public void updateStyle(StyledQuery query, 
+	public void updateStyle(IStyledQuery query, 
 			String geoResourceKey, StyleBlackboard blackboard) throws IOException, WorkbenchException{
 		
 		Map<String, StyleBlackboard> queryStyles = StyleManager.INSTANCE.fromStringMap(query.getStyle());
@@ -90,7 +90,7 @@ public enum QueryStyleParser {
 	 * Applies the current query style to the given style blackboard
 	 * @param toUpdate
 	 */
-	public void applyStyle(StyledQuery query, String geoResourceKey, StyleBlackboard toUpdate) throws IOException, WorkbenchException{
+	public void applyStyle(IStyledQuery query, String geoResourceKey, StyleBlackboard toUpdate) throws IOException, WorkbenchException{
 		applyStyle(query.getStyle(), geoResourceKey, toUpdate);
 	}
 	/**

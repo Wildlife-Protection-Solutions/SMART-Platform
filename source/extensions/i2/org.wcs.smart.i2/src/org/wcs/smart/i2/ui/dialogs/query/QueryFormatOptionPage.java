@@ -22,6 +22,8 @@
 package org.wcs.smart.i2.ui.dialogs.query;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
@@ -30,6 +32,7 @@ import java.util.Locale;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -47,6 +50,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.locationtech.udig.catalog.URLUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.i2.internal.Messages;
@@ -68,8 +72,13 @@ public class QueryFormatOptionPage extends WizardPage {
 	private DelimiterCombo cmbDelimiter;
 	private Label lblSpacer;
 	
+	private ComboViewer cmbCharset;
+	private Label lblCharset;
+	private Label lblSpacer1;
+	
 	private ComboViewer cmbProjection;
 	private Label lblProjection;
+	private Label lblSpacer2;
 	
 	private Composite main;
 	
@@ -99,8 +108,9 @@ public class QueryFormatOptionPage extends WizardPage {
 
 		boolean isDelimiter = exporter.supportsOption(ExportOption.DELIMITER);
 		boolean isProjection = exporter.supportsOption(ExportOption.PROJECTION);
+		boolean isEncoding = exporter.supportsOption(ExportOption.ENCODING);
 		
-		Control[] ctrs = new Control[]{lblDelimiter, cmbDelimiter == null ? null : cmbDelimiter.getControl(), lblSpacer, lblProjection, cmbProjection == null ? null : cmbProjection.getControl()};
+		Control[] ctrs = new Control[]{lblDelimiter, cmbDelimiter == null ? null : cmbDelimiter.getControl(), lblSpacer, lblProjection, cmbProjection == null ? null : cmbProjection.getControl(), lblSpacer1, lblSpacer2, lblCharset, cmbCharset == null ? null : cmbCharset.getControl() };
 		for (Control c : ctrs){
 			if (c != null) c.dispose();
 		}
@@ -109,6 +119,8 @@ public class QueryFormatOptionPage extends WizardPage {
 		lblSpacer = null;
 		lblProjection = null;
 		cmbProjection = null;
+		lblSpacer1 = lblSpacer2 = lblCharset = null;
+		cmbCharset = null;
 		
 		if (isDelimiter){
 			createDelimiterOption();
@@ -118,6 +130,9 @@ public class QueryFormatOptionPage extends WizardPage {
 			createProjectionOption();
 		}
 		
+		if (isEncoding) {
+			createCharsetOption();
+		}
 		main.layout(true);
 		setPageComplete(false);
 	}
@@ -183,6 +198,7 @@ public class QueryFormatOptionPage extends WizardPage {
 		lblDelimiter = new Label(main, SWT.NONE);
 		lblDelimiter.setText(Messages.QueryFormatOptionPage_DelimiterOp);
 		lblDelimiter.setToolTipText(Messages.QueryFormatOptionPage_DelimiterTooltip);
+		lblDelimiter.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		cmbDelimiter = new DelimiterCombo(main,  SWT.DROP_DOWN);
 	
@@ -196,6 +212,7 @@ public class QueryFormatOptionPage extends WizardPage {
 		lblProjection = new Label(main, SWT.NONE);
 		lblProjection.setText(Messages.QueryFormatOptionPage_ProjectionOp);
 		lblProjection.setToolTipText(Messages.QueryFormatOptionPage_ProjectionTooltip);
+		lblProjection.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		cmbProjection = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbProjection.setContentProvider(ArrayContentProvider.getInstance());
@@ -207,11 +224,51 @@ public class QueryFormatOptionPage extends WizardPage {
 		}else{
 			cmbProjection.setSelection(new StructuredSelection(wizard.getSupportedProjections().get(0)));
 		}
+		cmbProjection.getControl().setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
+		lblSpacer1 = new Label(main, SWT.NONE);
+	}
+	
+	private void createCharsetOption() {
+		lblCharset = new Label(main, SWT.NONE);
+		lblCharset.setText("Character Set:");
+		lblCharset.setToolTipText("The character set to use when writing the file.  If unsure use UTF-8.");
+		lblCharset.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		cmbCharset = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbCharset.setContentProvider(ArrayContentProvider.getInstance());
+		cmbCharset.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				return ((Charset)element).displayName();
+			}
+		});
+		cmbCharset.setInput( Charset.availableCharsets().values() );
+		cmbCharset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbCharset.getControl().setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
+		Charset defaultcs = StandardCharsets.UTF_8;
+		try {
+			String cc = SmartPlugIn.getDefault().getDialogSettings().get(SmartPlugIn.DEFAULT_ENCODING_KEY);
+			if (cc != null && !cc.isBlank()) defaultcs = Charset.forName(cc);
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		cmbCharset.setSelection(new StructuredSelection(defaultcs));
+		cmbCharset.addSelectionChangedListener(e->{
+			SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_ENCODING_KEY, ((Charset)e.getStructuredSelection().getFirstElement()).name());
+		});
+		lblSpacer2 = new Label(main, SWT.NONE);
+		lblSpacer2.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 	}
 	
 	public Projection getProjection(){
 		if (cmbProjection == null) return null;
 		return (Projection)((StructuredSelection)cmbProjection.getSelection()).getFirstElement();
+	}
+	
+	public Charset getCharset(){
+		if (cmbCharset == null) return StandardCharsets.UTF_8;
+		return (Charset)((StructuredSelection)cmbCharset.getSelection()).getFirstElement();
 	}
 	
 	/**
@@ -235,6 +292,7 @@ public class QueryFormatOptionPage extends WizardPage {
 			}
 			ops.put(IQueryExporter.ExportOption.PROJECTION, p);
 		}
+		ops.put(IQueryExporter.ExportOption.ENCODING, getCharset());
 		return ops;
 	}
 	

@@ -36,21 +36,23 @@ import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.xml.model.LabelType;
-import org.wcs.smart.patrol.xml.model.v12.ObjectiveType;
-import org.wcs.smart.patrol.xml.model.v12.PatrolLegDayType;
-import org.wcs.smart.patrol.xml.model.v12.PatrolLegType;
-import org.wcs.smart.patrol.xml.model.v12.PatrolMemberType;
-import org.wcs.smart.patrol.xml.model.v12.PatrolType;
-import org.wcs.smart.patrol.xml.model.v12.TrackType;
-import org.wcs.smart.patrol.xml.model.v12.WaypointObservationAttributeType;
-import org.wcs.smart.patrol.xml.model.v12.WaypointObservationType;
-import org.wcs.smart.patrol.xml.model.v12.WaypointType;
+import org.wcs.smart.patrol.xml.model.v13.ObjectiveType;
+import org.wcs.smart.patrol.xml.model.v13.PatrolLegDayType;
+import org.wcs.smart.patrol.xml.model.v13.PatrolLegType;
+import org.wcs.smart.patrol.xml.model.v13.PatrolMemberType;
+import org.wcs.smart.patrol.xml.model.v13.PatrolType;
+import org.wcs.smart.patrol.xml.model.v13.TrackType;
+import org.wcs.smart.patrol.xml.model.v13.WaypointObservationAttributeType;
+import org.wcs.smart.patrol.xml.model.v13.WaypointObservationType;
+import org.wcs.smart.patrol.xml.model.v13.WaypointObservationGroupType;
+import org.wcs.smart.patrol.xml.model.v13.WaypointType;
 import org.wcs.smart.util.SmartUtils;
 
 public class PatrolToXmlConverter {
@@ -186,8 +188,13 @@ public class PatrolToXmlConverter {
 			xml.getAttachments().add(attach.getFilename());
 		}
 		
-		for (WaypointObservation ob : wp.getWaypoint().getObservations()){
-			xml.getObservations().add(convertObservation(ob));
+		for (WaypointObservationGroup g : wp.getWaypoint().getObservationGroups()) {
+			WaypointObservationGroupType xmlg = new WaypointObservationGroupType();
+			xml.getGroups().add(xmlg);
+		
+			for (WaypointObservation ob : g.getObservations()){
+				xmlg.getObservations().add(convertObservation(ob));
+			}
 		}
 		return xml;
 	}

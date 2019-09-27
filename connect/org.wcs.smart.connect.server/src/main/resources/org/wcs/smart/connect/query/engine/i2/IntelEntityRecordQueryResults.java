@@ -24,6 +24,7 @@ package org.wcs.smart.connect.query.engine.i2;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -138,6 +139,7 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 		EntityRecordQueryResultItem item = new EntityRecordQueryResultItem();
 		
 		item.setEntityUuid(asUuid(rowData[columnNameToIndex.get("entity_uuid") + 1])); //$NON-NLS-1$
+		item.setEntityLastModified((Timestamp)(rowData[columnNameToIndex.get("date_modified") + 1])); //$NON-NLS-1$
 		
 		String entityType = (String) rowData[columnNameToIndex.get("entity_type")+ 1]; //$NON-NLS-1$
 		item.setEntityTypeName(entityType);

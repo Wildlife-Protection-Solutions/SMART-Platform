@@ -397,7 +397,7 @@ public class StationEditor extends EditorPart implements MapPart {
 		body.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite headerComp = toolkit.createComposite(body);
-		WidgetElement.setCSSClass(headerComp, "SMARTFormHeader");
+		WidgetElement.setCSSClass(headerComp, "SMARTFormHeader");  //$NON-NLS-1$
 		headerComp.setLayout(new GridLayout(5, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		

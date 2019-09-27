@@ -62,6 +62,11 @@ public class CyberTrackerCaDeleteHandler implements ICaDeleteHandler {
 		session.createQuery("DELETE FROM MetadataFieldValue WHERE conservationArea = :ca") //$NON-NLS-1$
 		.setParameter("ca", ca) //$NON-NLS-1$
 		.executeUpdate();
+		
+		//remove navigation layers
+		session.createQuery("DELETE FROM NavigationLayer WHERE conservationArea = :ca") //$NON-NLS-1$
+		.setParameter("ca", ca) //$NON-NLS-1$
+		.executeUpdate();
 	}
 
 	private void deleteCTRegistryKey(ConservationArea ca) throws Exception {

@@ -80,7 +80,11 @@ public class AttachmentDialog extends SmartStyledTitleDialog{
 	public Control createDialogArea(Composite parent){
 		Composite composite = (Composite)super.createDialogArea(parent);
 		
-		attachmentComposite = new AttachmentComposite<WaypointAttachment>(composite, SWT.NONE) {
+		Composite spacer = new Composite(composite, SWT.NONE);
+		spacer.setLayout(new GridLayout());
+		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		attachmentComposite = new AttachmentComposite<WaypointAttachment>(spacer, SWT.NONE) {
 			@Override
 			protected WaypointAttachment createNewAttachement() {
 				return new WaypointAttachment();
@@ -97,16 +101,13 @@ public class AttachmentDialog extends SmartStyledTitleDialog{
 		}
 		
 		List<ISmartAttachment> obs = new ArrayList<ISmartAttachment>();
-		if (waypoint.getObservations() != null) {
-			for (WaypointObservation o : waypoint.getObservations()){
-				if (o.getAttachments() != null){
-					obs.addAll(o.getAttachments());
-				}
-			}
+		
+		for (WaypointObservation o : waypoint.getAllObservations()) {
+			if (o.getAttachments() != null) obs.addAll(o.getAttachments());
 		}
 		attachmentComposite.initOtherAttachments(obs);
 		
-		Composite c = new Composite(composite, SWT.NONE);
+		Composite c = new Composite(spacer, SWT.NONE);
 		c.setLayout(new GridLayout());
 		
 		Label l = new Label(c, SWT.NONE);

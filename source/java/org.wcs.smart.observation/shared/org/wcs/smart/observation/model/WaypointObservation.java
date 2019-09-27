@@ -51,7 +51,7 @@ import org.wcs.smart.ca.datamodel.Category;
 @Table(name="smart.wp_observation")
 public class WaypointObservation extends UuidItem {
 	
-	private Waypoint waypoint = null;
+	private WaypointObservationGroup obsgroup = null;
 	private Category category = null;
 	
 	private List<WaypointObservationAttribute> attributes = null; 
@@ -63,13 +63,18 @@ public class WaypointObservation extends UuidItem {
 		
 	}
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="wp_uuid", referencedColumnName="uuid")
-	public Waypoint getWaypoint(){
-		return this.waypoint;
+	@Transient
+	public Waypoint getWaypoint() {
+		return this.getObservationGroup().getWaypoint();
 	}
-	public void setWaypoint(Waypoint waypoint){
-		this.waypoint = waypoint;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="wp_group_uuid", referencedColumnName="uuid")
+	public WaypointObservationGroup getObservationGroup(){
+		return this.obsgroup;
+	}
+	public void setObservationGroup(WaypointObservationGroup obsgroup){
+		this.obsgroup = obsgroup;
 	}
 	
 	@ManyToOne(fetch = FetchType.LAZY)

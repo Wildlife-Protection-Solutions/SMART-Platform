@@ -27,12 +27,12 @@
          <toolbar
                id="vertical.org.wcs.smart.cybertracker.patrol.toolbar1">
             <command
-                  commandId="org.wcs.smart.cybertracker.json.import"
-                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/import.png"
-                  label="%command.import.label"
+                  commandId="org.wcs.smart.cybertracker.packages.show"
+                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/export.png"
+                  label="%command.export.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="%command.import.tooltip">
+                  tooltip="%command.export.tooltip">
                <visibleWhen>
                   <and>
                      <test
@@ -75,12 +75,67 @@
                </visibleWhen>
             </command>
             <command
-                  commandId="org.wcs.smart.cybertracker.packages.show"
-                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/export.png"
-                  label="%command.export.label"
+                  commandId="org.wcs.smart.cybertracker.navigation.show"
+                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/navigation_export.png"
+                  label="Export"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="%command.export.tooltip">
+                  tooltip="export SMART Mobile navigation layers">
+               <visibleWhen>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.observation.FieldDataPerspective">
+                        </equals>
+                     </with>
+                     <test
+                           property="org.wcs.smart.fielddata.focusview"
+                           value="org.wcs.smart.patrol.ui.PatrolListView">
+                     </test>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="analyst">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+         </toolbar>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=vertical.org.wcs.smart.cybertracker.patrol.toolbar1">
+         <toolbar
+               id="vertical.org.wcs.smart.cybertracker.patrol.toolbar2">
+            <command
+                  commandId="org.wcs.smart.cybertracker.json.import"
+                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/import.png"
+                  label="%command.import.label"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="%command.import.tooltip">
                <visibleWhen>
                   <and>
                      <test
@@ -221,5 +276,10 @@
             class="org.wcs.smart.cybertracker.patrol.ui.PatrolCtPackageManager">
       </ctpackagemanager>
    </extension>
-
+   <extension
+         point="org.wcs.smart.cybertracker.navigation">
+      <targetprovider
+            class="org.wcs.smart.cybertracker.patrol.navigation.PatrolTrackNavigationTargetProvider">
+      </targetprovider>
+   </extension>
 </plugin>

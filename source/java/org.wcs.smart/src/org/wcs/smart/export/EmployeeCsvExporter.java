@@ -24,7 +24,7 @@ package org.wcs.smart.export;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -52,9 +52,9 @@ import au.com.bytecode.opencsv.CSVWriter;
 public class EmployeeCsvExporter implements ICsvDataExporter {
 
 	@Override
-	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
+	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, Charset cs, IProgressMonitor monitor, Session session) throws Exception {
 		try (CSVWriter writer = new CSVWriter(
-					new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8),  
+					new OutputStreamWriter(new FileOutputStream(file), cs),  
 					delimiter, '"',SharedUtils.LINE_SEPARATOR)){
 			if (headers) {
 				// WriteHeaders

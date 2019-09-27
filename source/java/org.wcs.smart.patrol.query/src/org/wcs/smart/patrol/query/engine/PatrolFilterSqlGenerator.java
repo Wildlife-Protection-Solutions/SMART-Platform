@@ -33,6 +33,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.query.engine.DerbyPatrolQueryEngine.FilterTable;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
 import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
 import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
@@ -127,9 +128,9 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	@Override
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
+		FilterTable col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+			return col.tablename + "." + col.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);
 	}
@@ -140,9 +141,9 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	@Override
 	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
+		FilterTable col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
-			return col + ".wp_uuid is not null ";  //$NON-NLS-1$
+			return col.tablename + "." + col.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);
 	}
@@ -152,9 +153,9 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	@Override
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
+		FilterTable col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+			return col.tablename + "." + col.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);	
 	}

@@ -6,6 +6,7 @@
    <extension-point id="org.wcs.smart.cybertracker.json.processor" name="Cybertracker JSON Processor" schema="schema/org.wcs.smart.cybertracker.json.processor.exsd"/>
    <extension-point id="org.wcs.smart.cybertracker.export.package.contribution" name="Export Package Contribution" schema="schema/org.wcs.smart.cybertracker.export.package.contribution.exsd"/>
    <extension-point id="org.wcs.smart.cybertracker.ctpackage" name="Cybertracker Package Extensions" schema="schema/org.wcs.smart.cybertracker.ctpackage.exsd"/>
+   <extension-point id="org.wcs.smart.cybertracker.navigation" name="Cybertracker Navigation Layer Extensions" schema="schema/org.wcs.smart.cybertracker.navigation.exsd"/>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
@@ -108,6 +109,11 @@
                   label="%command.packages.show.label"
                   style="push">
             </command>
+            <command
+                  commandId="org.wcs.smart.cybertracker.navigation.show"
+                  label="%command.navigationlayer.label"
+                  style="push">
+            </command>
             <separator
                   name="org.wcs.smart.cybertracker2.separator.import"
                   visible="true">
@@ -174,6 +180,10 @@
             id="org.wcs.smart.cybertracker.export.device"
             name="%installdevice.command.name">
       </command>
+      <command
+            id="org.wcs.smart.cybertracker.navigation.show"
+            name="%command.ctnavigationlayers.name">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -200,6 +210,10 @@
       <handler
             class="org.wcs.smart.cybertracker.handler.InstallOnDeviceHandler$InstallOnDeviceHandlerWrapper"
             commandId="org.wcs.smart.cybertracker.export.device">
+      </handler>
+      <handler
+            class="org.wcs.smart.cybertracker.navigation.ui.ShowCtNavigationHandler$ShowCtNavigationHandlerWrapper"
+            commandId="org.wcs.smart.cybertracker.navigation.show">
       </handler>
    </extension>
    <extension
@@ -240,6 +254,10 @@
             class="org.wcs.smart.cybertracker.model.AbstractCtPackage"
             supportsCcaa="false">
       </class>
+      <class
+            class="org.wcs.smart.cybertracker.model.NavigationLayer"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
@@ -275,6 +293,10 @@
       <image
             commandId="org.wcs.smart.cybertracker.packages.show"
             icon="images/etool16/package.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.cybertracker.navigation.show"
+            icon="images/etool16/navigation.png">
       </image>
    </extension>
    <extension
@@ -350,6 +372,43 @@
       <loginHandler
             clazz="org.wcs.smart.cybertracker.CleanUpLoginHandler">
       </loginHandler>
+   </extension>
+   <extension
+         point="org.locationtech.udig.project.ui.tool">
+      <modalTool
+            categoryId="org.wcs.smart.udig.maptools"
+            class="org.wcs.smart.cybertracker.navigation.ui.AddPointTool"
+            icon="images/etool16/nav_point_add.png"
+            id="org.wcs.smart.ui.map.navigation.addpoint"
+            name="%addpoint.navigation.tool.name"
+            onToolbar="false"
+            toolCursorId="org.wcs.smart.cross"
+            tooltip="%addpoint.navigation.tooltip.name">
+      </modalTool>
+      <modalTool
+            categoryId="org.wcs.smart.udig.maptools"
+            class="org.wcs.smart.cybertracker.navigation.ui.AddLineTool"
+            icon="images/etool16/nav_line_add.png"
+            id="org.wcs.smart.ui.map.navigation.addline"
+            name="%addline.navigation.tool.name"
+            onToolbar="false"
+            toolCursorId="org.wcs.smart.cross"
+            tooltip="%addline.navigation.tooltip.name">
+      </modalTool>
+      <actionTool
+            categoryId="org.wcs.smart.udig.maptools"
+            class="org.wcs.smart.cybertracker.navigation.ui.ImportTool"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png"
+            id="org.wcs.smart.ui.map.navigation.import"
+            name="Import Targets"
+            tooltip="import navigation layer targets ">
+      </actionTool>
+   </extension>
+   <extension
+         point="org.wcs.smart.cybertracker.navigation">
+      <targetprovider
+            class="org.wcs.smart.cybertracker.navigation.ui.FileNavigationTargetProvider">
+      </targetprovider>
    </extension>
 
 </plugin>

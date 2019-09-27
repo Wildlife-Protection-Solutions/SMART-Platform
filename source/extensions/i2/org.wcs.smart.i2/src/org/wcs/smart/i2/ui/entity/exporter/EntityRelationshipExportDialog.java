@@ -23,6 +23,8 @@ package org.wcs.smart.i2.ui.entity.exporter;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,6 +35,10 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -44,6 +50,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.entity.exporter.EntityRelationshipExporter;
@@ -67,6 +74,7 @@ public class EntityRelationshipExportDialog extends SmartStyledTitleDialog{
 	private Text txtOutput;
 	private Text txtDegree;
 	private DelimiterCombo cmbDelimiters;
+	private ComboViewer cmbCharset;
 	
 	public EntityRelationshipExportDialog(IntelEntity entity, Shell parentShell) {
 		super(parentShell);
@@ -124,6 +132,32 @@ public class EntityRelationshipExportDialog extends SmartStyledTitleDialog{
 		cmbDelimiters = new DelimiterCombo (main, SWT.DROP_DOWN);
 		cmbDelimiters.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
+		Label lblCharset = new Label(main, SWT.NONE);
+		lblCharset.setText("Character Set:");
+		lblCharset.setToolTipText("The character encoding of the file.  If unsure try UTF-8.");
+		lblCharset.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		cmbCharset = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbCharset.setContentProvider(ArrayContentProvider.getInstance());
+		cmbCharset.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				return ((Charset)element).displayName();
+			}
+		});
+		cmbCharset.setInput( Charset.availableCharsets().values() );
+		cmbCharset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Charset defaultcs = StandardCharsets.UTF_8;
+		try {
+			String cc = SmartPlugIn.getDefault().getDialogSettings().get(SmartPlugIn.DEFAULT_ENCODING_KEY);
+			if (cc != null && !cc.isBlank()) defaultcs = Charset.forName(cc);
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		cmbCharset.setSelection(new StructuredSelection(defaultcs));
+		cmbCharset.addSelectionChangedListener(e->{
+			SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_ENCODING_KEY, ((Charset)e.getStructuredSelection().getFirstElement()).name());
+		});
+		cmbCharset.getControl().setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		setTitle(MessageFormat.format(Messages.EntityRelationshipExportDialog_Title,entity.getIdAttributeAsText()));
 		getShell().setText(Messages.EntityRelationshipExportDialog_ShellTitle);
@@ -217,6 +251,7 @@ public class EntityRelationshipExportDialog extends SmartStyledTitleDialog{
 			}
 		}
 		
+		final Charset cs = (Charset) cmbCharset.getStructuredSelection().getFirstElement();
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
 			char delimiter = cmbDelimiters.getDelimiter();
@@ -228,7 +263,7 @@ public class EntityRelationshipExportDialog extends SmartStyledTitleDialog{
 					
 					EntityRelationshipExporter exporter = new EntityRelationshipExporter();
 					try{
-						if (!exporter.exportEntity(entity, degrees, outputDir, delimiter, monitor)){
+						if (!exporter.exportEntity(entity, degrees, outputDir, delimiter, cs, monitor)){
 							isOk[0] = false;
 						}else{
 							isOk[0] = true;

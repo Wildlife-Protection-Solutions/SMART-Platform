@@ -56,11 +56,11 @@ public interface ICtPackagePropertyProvider {
 	 * or updated 
 	 * @param listener
 	 */
-	public void addPropertyUpdatedListener(IPackagePropertyListener listener);
+	public void addPropertyUpdatedListener(IPropertyListener listener);
 			
 			
 	@FunctionalInterface
-	interface IPackagePropertyListener{
+	interface IPropertyListener{
 		public void propertyUpdated();
 	}
 }

@@ -24,6 +24,8 @@ package org.wcs.smart.query.common.importexport;
 import java.io.File;
 import java.io.Serializable;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,6 +45,7 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.udig.catalog.URLUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -65,8 +68,6 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 
-import org.locationtech.jts.geom.Geometry;
-
 /**
  * Shapefile query exporter.  Exports
  * the results of a query to a shapefile.
@@ -82,6 +83,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
     
     private IQueryType cachedQueryType;
     protected SimpleFeatureType cachedFeatureType;
+    protected Charset cs;
     
     /**
      * Creates new shapefile exporter
@@ -96,6 +98,11 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	 * @return shapefile exports support reprojection
 	 */
 	public boolean supportsProjection(){
+		return true;
+	}
+	
+	@Override
+	public boolean supportsCharEncodings() {
 		return true;
 	}
 	
@@ -131,6 +138,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 		FileDataStoreFactorySpi factory = FileDataStoreFinder.getDataStoreFactory("shp"); //$NON-NLS-1$
         Map<String, Serializable> params = new HashMap<String, Serializable>();
 		params.put(ShapefileDataStoreFactory.URLP.key, shpFileURL);
+		params.put(ShapefileDataStoreFactory.DBFCHARSET.key, cs.name());
 		
 		DataStore shapefile = factory.createNewDataStore(params);
 		
@@ -205,6 +213,12 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 				return outputPrj;
 			}
 		};
+		
+		cs = StandardCharsets.UTF_8;
+		if (parameters.containsKey(IQueryExporter.ENCODING_KEY)){
+			cs = (Charset)parameters.get(IQueryExporter.ENCODING_KEY);
+		}
+			
 		List<QueryColumn> columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, provider);
 		boolean isDataFiltering = query instanceof IColumnAutoConfigQuery && results instanceof IColumnInfoProvider && ((IColumnAutoConfigQuery)query).isShowDataColumnsOnly();
 		for (Iterator<QueryColumn> iterator = columns.iterator(); iterator.hasNext();) {

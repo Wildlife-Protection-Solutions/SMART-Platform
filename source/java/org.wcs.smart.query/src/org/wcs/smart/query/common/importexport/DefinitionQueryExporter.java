@@ -34,7 +34,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.StyledQuery;
+import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.Query;
 import org.wcs.smart.query.xml.model.QueryName;
@@ -128,11 +128,11 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 		
 		writeQuerySpecifics(query, xmlQuery);
 		
-		if (query instanceof StyledQuery){
-			String styleString = ((StyledQuery) query).getStyle();
+		if (query instanceof IStyledQuery){
+			String styleString = ((IStyledQuery) query).getStyle();
 			if (styleString != null){
 				QueryPart style = new QueryPart();
-				style.setKey(StyledQuery.QUERY_STYLE_KEY);
+				style.setKey(IStyledQuery.QUERY_STYLE_KEY);
 				style.setValue(styleString);
 			
 				xmlQuery.getQueryPart().add(style);

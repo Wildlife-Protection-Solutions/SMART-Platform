@@ -44,7 +44,7 @@ import org.wcs.smart.query.model.filter.IFilter;
  */
 public abstract class AbstractDerbyObservationQueryEngine extends AbstractQueryEngine{
 
-	protected HashMap<IFilter, String> filterTables = new HashMap<IFilter, String>();
+	protected HashMap<IFilter, FilterTable> filterTables = new HashMap<IFilter, FilterTable>();
 
 	/**
 	 * Create the select statement to populate the temporary table
@@ -114,6 +114,8 @@ public abstract class AbstractDerbyObservationQueryEngine extends AbstractQueryE
 	protected IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query){
 		if (filterType == IFilter.FilterType.OBSERVATION){
 			return new FilterProcessor(queryDataTable, this, query);
+		}else if (filterType == IFilter.FilterType.GROUP){
+			return new WaypointGroupFilterProcessor(queryDataTable, this, query);
 		}else{
 			return new WaypointFilterProcessor(queryDataTable, this, query);
 		}
@@ -125,4 +127,14 @@ public abstract class AbstractDerbyObservationQueryEngine extends AbstractQueryE
 	 * @throws SQLException
 	 */
 	public abstract void dropTables(Connection c) throws SQLException;
+	
+	public static class FilterTable{
+		String tablename;
+		String columnname;
+		
+		public FilterTable(String tablename, String columnname) {
+			this.tablename = tablename;
+			this.columnname = columnname;
+		}
+	}
 }

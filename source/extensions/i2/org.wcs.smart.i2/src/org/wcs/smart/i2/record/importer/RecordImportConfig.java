@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.record.importer;
 
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -63,6 +64,7 @@ public class RecordImportConfig {
 	private Projection projection;
 	private Path file;
 	private String dateFormatStr;
+	private Charset charset;
 	
 	public RecordImportConfig(){
 		
@@ -140,6 +142,14 @@ public class RecordImportConfig {
 	
 	public void setProjection(Projection projection){
 		this.projection = projection;
+	}
+	
+	public Charset getCharset(){
+		return this.charset;
+	}
+	
+	public void setCharset(Charset charset){
+		this.charset = charset;
 	}
 
 	public boolean skipFirstLine(){

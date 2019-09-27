@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.query.export;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -29,6 +31,7 @@ import java.util.Locale;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Projection;
@@ -44,8 +47,6 @@ import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.util.GeometryUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
-
-import org.locationtech.jts.geom.Geometry;
 
 /**
  * Exports query results to csv file.
@@ -81,7 +82,12 @@ public class CsvRecordQueryExporter implements IQueryExporter{
 			transform = CRS.findMathTransform(GeometryUtils.SMART_CRS, pp.getParsedCoordinateReferenceSystem());
 		}
 		
-		try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(destination), delimiter)){
+		Charset cs = StandardCharsets.UTF_8;
+		if (exportOptions.containsKey(ExportOption.ENCODING) && exportOptions.get(ExportOption.ENCODING) instanceof Charset){
+			cs = (Charset)exportOptions.get(ExportOption.ENCODING);
+		}
+		
+		try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(destination, cs), delimiter)){
 			
 			//headers
 			int dataSize = results.getQueryColumns().size();
@@ -90,6 +96,7 @@ public class CsvRecordQueryExporter implements IQueryExporter{
 				data[i] = results.getQueryColumns().get(i).getColumnName();
 			}
 			writer.writeNext(data);
+			
 			
 			PagedResultSetIterator iterator = new PagedResultSetIterator(results, session);
 			while(iterator.hasNext()){
@@ -128,6 +135,7 @@ public class CsvRecordQueryExporter implements IQueryExporter{
 	@Override
 	public boolean supportsOption(ExportOption option) {
 		if (option == ExportOption.DELIMITER) return true;
+		if (option == ExportOption.ENCODING) return true;
 		if (option == ExportOption.PROJECTION) return true;
 		if (option == ExportOption.LOCALE) return true;
 		return false;

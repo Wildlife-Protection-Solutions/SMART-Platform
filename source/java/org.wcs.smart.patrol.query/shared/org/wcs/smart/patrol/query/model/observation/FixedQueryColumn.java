@@ -29,6 +29,7 @@ import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Class represents one of the fixed table columns that
@@ -82,8 +83,8 @@ public class FixedQueryColumn extends QueryColumn {
 		WAYPOINT_COMMENT(ColumnType.STRING,"waypoint:comment"), //$NON-NLS-1$
 		WAYPOINT_OBSERVER( ColumnType.STRING,"ob:observer"),   //$NON-NLS-1$
 		WAYPOINT_LASTMODIFIED( ColumnType.DATETIME,"waypoint:modified"),   //$NON-NLS-1$
-		WAYPOINT_LASTMODIFIEDBY( ColumnType.STRING,"waypoint:modifiedby");   //$NON-NLS-1$
-		
+		WAYPOINT_LASTMODIFIEDBY( ColumnType.STRING,"waypoint:modifiedby"),   //$NON-NLS-1$
+		OBS_GROUP_ID(ColumnType.STRING,"ob:groupid"); //$NON-NLS-1$
 		
 		private ColumnType type;
 		private String key;
@@ -165,6 +166,9 @@ public class FixedQueryColumn extends QueryColumn {
 				return  SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(item.getPatrolType(), l);
 			case WAYPOINT_ID:
 				return item.getWaypointId();
+			case OBS_GROUP_ID:
+				if (item.getObservationGroupUuid() == null) return "";
+				return UuidUtils.uuidToString(item.getObservationGroupUuid());
 			case TRANSPORT_TYPE:
 				return item.getTransportType();
 			case WAYPOINT_COMMENT:

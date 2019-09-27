@@ -25,7 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -52,6 +52,7 @@ import au.com.bytecode.opencsv.CSVWriter;
  * @since 1.0.0
  */
 public class AgencyCsvExporter implements ICsvDataExporter {
+	
 	protected List<Language> languages;
 	public ConservationArea ca;
 	
@@ -63,13 +64,13 @@ public class AgencyCsvExporter implements ICsvDataExporter {
 	}
 
 	@Override
-	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) {
+	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, Charset cs, IProgressMonitor monitor, Session session) {
 		this.ca = ca;
 		languages = new ArrayList<Language>(ca.getLanguages());
 
 		try (
 			CSVWriter writer = new CSVWriter(
-					new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8),
+					new OutputStreamWriter(new FileOutputStream(file), cs),
 					delimiter, '"',SharedUtils.LINE_SEPARATOR)){ 
 			List<Agency> agencies = getAgencies(session);
 

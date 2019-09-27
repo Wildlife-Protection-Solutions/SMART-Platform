@@ -107,9 +107,11 @@ public class EntityListComposite extends Composite{
 		
 		if (IntelSecurityManager.INSTANCE.canViewEntities()) {
 			Button btnAdd = toolkit.createButton(compEntityEdit, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
+			btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			btnAdd.addListener(SWT.Selection, e->addEntity(btnAdd));
 			
 			Button btnSearch = toolkit.createButton(compEntityEdit, Messages.EntityListComposite_SearchButton, SWT.PUSH);
+			btnSearch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			btnSearch.addListener(SWT.Selection, e->searchEntity());
 			btnSearch.setToolTipText(Messages.EntityListComposite_SearchTooltip);
 			Menu mnuTemp = new Menu(compEntityEdit);

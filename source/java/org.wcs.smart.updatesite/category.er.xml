@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   
+   <feature url="features/org.wcs.smart.er.feature_7.0.0.qualifier.jar" id="org.wcs.smart.er.feature" version="7.0.0.qualifier">
+      <category name="ecologicalrecords"/>
+   </feature>
+   
+   <category-def name="ecologicalrecords" label="SMART Ecological Records Plug-in">
+      <description>
+         The SMART Ecological Records (SMART-ER) plug-in extends the SMART capability to more scientific data collection and analysis of species, their habitats and disturbances. The Ecological Records plug-in is used for recording and analysing field survey data.
+      </description>
+   </category-def>
+   
+</site>

@@ -22,10 +22,13 @@
 package org.wcs.smart.query.ui.importexport;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -45,6 +48,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.locationtech.udig.catalog.URLUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
@@ -67,8 +71,13 @@ public class ExportQueryLocationPage extends WizardPage {
 	private DelimiterCombo cmbDelimiter;
 	private Label lblSpacer;
 	
+	private Label lblCharset;
+	private ComboViewer cmbCharset;
+	private Label lblSpacer2;
+	
 	private ComboViewer cmbProjection;
 	private Label lblProjection;
+	private Label lblSpacer3;
 	
 	private Composite main;
 	
@@ -110,22 +119,35 @@ public class ExportQueryLocationPage extends WizardPage {
 
 		boolean isDelimiter =  ((ExportQueryWizard)getWizard()).getQueryExporter() instanceof ICsvQueryExporter;
 		
-		Control[] ctrs = new Control[]{lblDelimiter, cmbDelimiter == null ? null : cmbDelimiter.getControl(), lblSpacer, lblProjection, cmbProjection == null ? null : cmbProjection.getControl()};
-		for (Control c : ctrs){
-			if (c != null) c.dispose();
+		Object[] ctrs = new Object[]{lblDelimiter, cmbDelimiter, lblSpacer, lblSpacer3, lblProjection, cmbProjection, lblSpacer2, cmbCharset, lblCharset};
+		
+		for (Object c : ctrs){
+			if (c == null) continue;
+			if (c instanceof Control) ((Control) c).dispose();
+			if (c instanceof ComboViewer) ((ComboViewer)c).getControl().dispose();
+			if (c instanceof DelimiterCombo) ((DelimiterCombo)c).getControl().dispose();
 		}
+		
 		lblDelimiter = null;
 		cmbDelimiter = null;
 		lblSpacer = null;
 		lblProjection = null;
 		cmbProjection = null;
+		lblCharset = null;
+		lblSpacer2 = null;
+		lblSpacer3 = null;
+		cmbCharset = null;
 		
 		if (isDelimiter){
-			createDelimiterOption();
+			createDelimiterOption();	
 		}
 		
 		if (exporter != null && exporter.supportsProjection()){
 			createProjectionOption();
+		}
+		
+		if (exporter != null && exporter.supportsCharEncodings()){
+			createCharsetOption();
 		}
 		
 		main.layout(true);
@@ -196,6 +218,38 @@ public class ExportQueryLocationPage extends WizardPage {
 		setControl(main);
 	}
 
+	private void createCharsetOption() {
+		lblCharset = new Label(main, SWT.NONE);
+		lblCharset.setText(Messages.ExportQueryLocationPage_CharsetLabel);
+		lblCharset.setToolTipText(Messages.ExportQueryLocationPage_Charsettooltip);
+		lblCharset.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		cmbCharset = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbCharset.setContentProvider(ArrayContentProvider.getInstance());
+		cmbCharset.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				return ((Charset)element).displayName();
+			}
+		});
+		cmbCharset.setInput( Charset.availableCharsets().values() );
+		cmbCharset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbCharset.getControl().setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
+		Charset defaultcs = StandardCharsets.UTF_8;
+		try {
+			String cc = SmartPlugIn.getDefault().getDialogSettings().get(SmartPlugIn.DEFAULT_ENCODING_KEY);
+			if (cc != null && !cc.isBlank()) defaultcs = Charset.forName(cc);
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		cmbCharset.setSelection(new StructuredSelection(defaultcs));
+		cmbCharset.addSelectionChangedListener(e->{
+			SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_ENCODING_KEY, ((Charset)e.getStructuredSelection().getFirstElement()).name());
+		});
+		lblSpacer2 = new Label(main, SWT.NONE);
+		lblSpacer2.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+	}
+	
 	private void createDelimiterOption(){
 		lblDelimiter = new Label(main, SWT.NONE);
 		lblDelimiter.setText(Messages.ExportQueryLocationPage_delimiterLabel);
@@ -230,6 +284,8 @@ public class ExportQueryLocationPage extends WizardPage {
 		}
 		cmbProjection.getControl().setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 
+		lblSpacer3 = new Label(main, SWT.NONE);
+		lblSpacer3.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 	}
 	
 	public Projection getProjection(){
@@ -256,6 +312,10 @@ public class ExportQueryLocationPage extends WizardPage {
 			}
 			ops.put(IQueryExporter.PROJECTION_PARAM_KEY, getProjection());
 		}
+		if (cmbCharset != null) {
+			ops.put(IQueryExporter.ENCODING_KEY, cmbCharset.getStructuredSelection().getFirstElement());
+		}
+		
 		if (ops.isEmpty()) return null;
 		return ops;
 		

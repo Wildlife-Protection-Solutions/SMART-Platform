@@ -22,11 +22,16 @@
 package org.wcs.smart.util;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -264,4 +269,29 @@ public class ZipUtil {
 		}
 
 	}
+    
+    /**
+     * Writes a single to a zip file. If the zip file exists it will add it
+     * as an entry to the existing file.
+     * 
+     * @param zipFile the zip file name
+     * @param filecontents the contents to write, each array should contain the {filename, file contents}
+     * 
+     * @throws IOException
+     */
+    public static void writeToZip(Path zipFile, String[]... filecontents) throws IOException {
+    	 try (OutputStream fOut = Files.newOutputStream(zipFile);
+	        	 BufferedOutputStream bOut = new BufferedOutputStream(fOut);
+	        	ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(bOut);){
+    		 for (String[] item: filecontents) {
+    			 String fname = item[0];
+    			 String content = item[1];
+        		 ZipArchiveEntry zipEntry = new ZipArchiveEntry(fname); 
+    	         tOut.putArchiveEntry(zipEntry);
+    	         IOUtils.copy(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)), tOut);
+    	         tOut.closeArchiveEntry();
+    		 }
+
+    	 }
+    }
 }

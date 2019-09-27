@@ -56,7 +56,11 @@ public class RemoveCyberTrackerJob extends Job {
 			"CT_PROPERTIES_OPTION",  //$NON-NLS-1$
 			"CT_PROPERTIES_PROFILE_OPTION",  //$NON-NLS-1$
 			"CT_PROPERTIES_PROFILE", //$NON-NLS-1$
-			"CT_INCIDENT_LINK"}; //$NON-NLS-1$
+			"CT_INCIDENT_LINK", //$NON-NLS-1$
+			"CT_METADATA_VALUE_UUID", //$NON-NLS-1$
+			"CT_METADATA_VALUE", //$NON-NLS-1$
+			"CT_NAVIGATION_LAYER" //$NON-NLS-1$
+		};
 		
 		try(final Session session = HibernateManager.openSession()){
 

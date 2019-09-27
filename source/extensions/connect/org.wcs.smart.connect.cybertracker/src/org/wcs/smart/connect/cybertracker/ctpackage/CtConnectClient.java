@@ -34,10 +34,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.wcs.smart.connect.api.ConnectClient;
+import org.wcs.smart.connect.cybertracker.model.CyberTrackerNavigationProxy;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 
 /**
- * Client for cybertracker api
+ * Client for cybertracker api for managing packages and navigation layers
  * @author Emily
  *
  */
@@ -53,6 +54,16 @@ public interface CtConnectClient extends ConnectClient{
     @Path("/cybertracker/packages")
     public List<CyberTrackerPackageProxy> getCtPackages(@QueryParam("cauuid") String caUuid);
 
+	@POST
+	@Path("/cybertracker/navigationlayers/{uuid}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response uploadNavigationLayer(@HeaderParam("X-Upload-Content-Length") Long length, 
+			@PathParam("uuid") String navigationuuid, CyberTrackerNavigationProxy proxy);
+
+	@GET
+    @Path("/cybertracker/navigationlayers")
+    public List<CyberTrackerNavigationProxy> getNavigationLayers(@QueryParam("cauuid") String caUuid);
+	
 	@GET
     @Path("/cybertracker/apikey/{cauuid}")
     public String getApiKey(@PathParam("cauuid") String caUuid);

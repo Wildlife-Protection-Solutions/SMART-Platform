@@ -107,11 +107,12 @@ public class EntityRecordObservationFilterProcessor {
 			String entityTable = SqlGenerator.createTempTableName();
 					
 			StringBuilder tableColumns = new StringBuilder();
-			tableColumns.append("entity_uuid uuid, entity_type_key varchar(128)"); //$NON-NLS-1$
+			tableColumns.append("entity_uuid uuid, date_modified timestamp, entity_type_key varchar(128)"); //$NON-NLS-1$
 			tableColumns.append(",ca_id varchar(8), ca_name varchar(256)"); //$NON-NLS-1$
 
 			List<String> tableColumnNames = new ArrayList<>();
 			tableColumnNames.add("entity_uuid"); //$NON-NLS-1$
+			tableColumnNames.add("date_modified"); //$NON-NLS-1$
 			tableColumnNames.add("entity_type_key"); //$NON-NLS-1$
 			tableColumnNames.add("ca_id"); //$NON-NLS-1$
 			tableColumnNames.add("ca_name"); //$NON-NLS-1$
@@ -131,7 +132,7 @@ public class EntityRecordObservationFilterProcessor {
 					
 			sql = new StringBuilder();
 			sql.append("INSERT INTO " + entityTable); //$NON-NLS-1$
-			sql.append(" SELECT l.uuid, o.keyid, ca.id, ca.name  FROM smart.i_entity l "); //$NON-NLS-1$
+			sql.append(" SELECT l.uuid, l.date_modified, o.keyid, ca.id, ca.name  FROM smart.i_entity l "); //$NON-NLS-1$
 			sql.append(" JOIN smart.i_entity_type o on l.entity_type_uuid = o.uuid "); //$NON-NLS-1$
 			sql.append(" JOIN smart.conservation_area ca on l.ca_uuid = ca.uuid " ); //$NON-NLS-1$
 			sql.append( " WHERE "); //$NON-NLS-1$
@@ -373,16 +374,14 @@ public class EntityRecordObservationFilterProcessor {
 			sql.append(" JOIN smart.i_entity_location l on l.entity_uuid = a.entity_uuid "); //$NON-NLS-1$
 			sql.append(" JOIN smart.i_observation o on l.location_uuid = o.location_uuid and a.obs_uuid = o.uuid "); //$NON-NLS-1$
 			sql.append(" JOIN smart.dm_category c on c.uuid = o.category_uuid "); //$NON-NLS-1$
-			sql.append(" WHERE (c.hkey >= :hkey1 and c.hkey < :hkey2 ) "); //$NON-NLS-1$
-			String hkey1 = filter.getCategoryKey();
-			String hkey2 = filter.getCategoryKey().substring(0, filter.getCategoryKey().length() - 1) + "/"; //$NON-NLS-1$
+			sql.append(" WHERE (c.hkey like :hkey1 ) "); //$NON-NLS-1$
+			String hkey1 = filter.getCategoryKey() + "%"; //$NON-NLS-1$
 			
 			logString(hkey1);
-			logString(hkey2);
 			
 			NativeQuery<?> query = s.createNativeQuery(sql.toString());
 			query.setParameter("hkey1", hkey1); //$NON-NLS-1$
-			query.setParameter("hkey2", hkey2); //$NON-NLS-1$
+			
 			logString(sql.toString());
 			query.executeUpdate();
 			
@@ -428,7 +427,7 @@ public class EntityRecordObservationFilterProcessor {
 		}
 		sql.append(" WHERE dma.keyId = :attributeKey "); //$NON-NLS-1$
 		if (filter.getCategoryKey() != null){
-			sql.append(" AND (c.hkey >= :hkey1 and c.hkey < :hkey2) "); //$NON-NLS-1$
+			sql.append(" AND (c.hkey like :hkey1) "); //$NON-NLS-1$
 		}
 		sql.append(" AND "); //$NON-NLS-1$
 		
@@ -453,7 +452,7 @@ public class EntityRecordObservationFilterProcessor {
 			sql.append(" ia.string_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
 			break;
 		case TREE:
-			sql.append( " ( ta.hkey >= :tree1 and ta.hkey < :tree2 ) "); //$NON-NLS-1$
+			sql.append( " ( ta.hkey like :tree1 ) "); //$NON-NLS-1$
 			break;
 		default:
 			break;
@@ -463,13 +462,9 @@ public class EntityRecordObservationFilterProcessor {
 		logString(filter.getAttributeKey());
 		
 		if (filter.getCategoryKey() != null){
-			String hkey1 = filter.getCategoryKey();
-			String hkey2 = filter.getCategoryKey().substring(0, filter.getCategoryKey().length() - 1) + "/"; //$NON-NLS-1$
+			String hkey1 = filter.getCategoryKey() + "%"; //$NON-NLS-1$
 			logString(hkey1);
-			logString(hkey2);
-			
 			query.setParameter("hkey1", hkey1); //$NON-NLS-1$
-			query.setParameter("hkey2", hkey2); //$NON-NLS-1$
 		}
 		switch(filter.getAttributeType()){
 		case BOOLEAN:
@@ -487,12 +482,9 @@ public class EntityRecordObservationFilterProcessor {
 			}
 			break;
 		case TREE:
-			String tree1 = filter.getKeyValue();
-			String tree2 = tree1.substring(0, tree1.length() - 1) + "/"; //$NON-NLS-1$
+			String tree1 = filter.getKeyValue() + "%"; //$NON-NLS-1$
 			logString(tree1);
-			logString(tree2);
 			query.setParameter("tree1", tree1); //$NON-NLS-1$
-			query.setParameter("tree2", tree2); //$NON-NLS-1$
 			break;
 		case NUMERIC:
 			logString(filter.getNumberValue().toString());
@@ -1191,16 +1183,10 @@ public class EntityRecordObservationFilterProcessor {
 		sql.append("ALTER TABLE " + tempTable + " RENAME TO " + newname); //$NON-NLS-1$ //$NON-NLS-2$
 		SqlGenerator.logString(sql.toString());
 		s.createNativeQuery(sql.toString()).executeUpdate();
-		
-		if (entityIndex){
+
+		if (entityIndex || observationIndex){
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX " + SqlGenerator.createIndexName(obsTable) + "_entity_uuid_idx on " + obsTable + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			SqlGenerator.logString(sql.toString());
-			s.createNativeQuery(sql.toString()).executeUpdate();
-		}
-		if (observationIndex){
-			sql = new StringBuilder();
-			sql.append("CREATE INDEX " + SqlGenerator.createIndexName( obsTable ) + " on " + obsTable + " (obs_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			SqlGenerator.logString(sql.toString());
 			s.createNativeQuery(sql.toString()).executeUpdate();
 		}

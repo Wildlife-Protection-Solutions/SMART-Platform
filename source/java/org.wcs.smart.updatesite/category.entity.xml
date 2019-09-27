@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.wcs.smart.entity.feature_7.0.0.qualifier.jar" id="org.wcs.smart.entity.feature" version="7.0.0.qualifier">
+      <category name="entity"/>
+   </feature>
+   
+   <category-def name="entity" label="SMART Entity Tracking Plug-in">
+      <description>
+         The SMART Entity Tracking plug-in provides the ability to record and track specific entities that move (such as individual animals) or fixed entities (such as a gate or bridge), record their attributes, and record observations associated with the entities.
+      </description>
+   </category-def>
+  
+</site>

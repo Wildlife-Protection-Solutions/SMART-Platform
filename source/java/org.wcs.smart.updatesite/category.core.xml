@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.wcs.smart.feature_7.0.0.qualifier.jar" id="org.wcs.smart.feature" version="7.0.0.qualifier">
+      <category name="coreupdates"/>
+   </feature>
+   <!--<feature url="features/org.wcs.smart.upgrade.feature_7.0.2.qualifier.jar" id="org.wcs.smart.upgrade.feature" version="7.0.2.qualifier">
+      <category name="coreupdates"/>
+   </feature>-->
+   <category-def name="coreupdates" label="SMART Core Updates">
+      <description>
+         Updates to the core SMART modules.
+      </description>
+   </category-def>
+</site>

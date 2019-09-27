@@ -23,7 +23,9 @@ package org.wcs.smart.connect.query.engine.i2;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,6 +37,8 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
@@ -47,8 +51,10 @@ import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.IntelAttributeQueryColumn;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
+import org.wcs.smart.i2.query.engine.EntityRecordQueryResultItem;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for intelligence observation queries.
@@ -60,6 +66,8 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 
 	
 	private IntelEntityRecordQueryResults queryResults;
+	private boolean adduuids = false;
+	private Locale locale;
 	
 	/**
 	 * Parameters required are session, monitor, and date filter object
@@ -73,9 +81,13 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		
 		Session session = (Session) parameters.get(Session.class.getName());
 
-		Locale locale = (Locale) parameters.get(Locale.class.getName());
+		locale = (Locale) parameters.get(Locale.class.getName());
 		if (locale == null){
 			locale = Locale.getDefault();
+		}
+		
+		if (parameters.containsKey(AbstractQueryEngine.INCLUDE_UUID_PARAMETER)) {
+			adduuids = (Boolean)parameters.get(AbstractQueryEngine.INCLUDE_UUID_PARAMETER);
 		}
 		
 		@SuppressWarnings("unchecked")
@@ -169,6 +181,69 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 			}
 		}
 
+
+		if (adduuids) {
+			IQueryColumn entityUuid = new IQueryColumn() {
+				@Override
+				public String getColumnName() {
+					return Messages.getString("IntelEntityRecordQueryEngine.EntityUuidColumnName", locale); //$NON-NLS-1$
+				}
+				@Override
+				public Type getDataType() {
+					return Type.STRING;
+				}
+				@Override
+				public String getKey() {
+					return "entity_uuid"; //$NON-NLS-1$
+				}
+				@Override
+				public Object getValue(org.wcs.smart.i2.query.IResultItem item) {
+					if (((EntityRecordQueryResultItem)item).getEntityUuid() == null) return ""; //$NON-NLS-1$
+					return UuidUtils.uuidToString( ((EntityRecordQueryResultItem)item).getEntityUuid());
+				}
+				@Override
+				public String getValue(org.wcs.smart.i2.query.IResultItem item, Locale arg1) {
+					return (String)getValue(item);
+				}
+				@Override
+				public boolean isVisible() {
+					return true;
+				}
+			};
+			IQueryColumn entityLastModified = new IQueryColumn() {
+				@Override
+				public String getColumnName() {
+					return Messages.getString("IntelEntityRecordQueryEngine.EntityLastModifiedColumnName", locale); //$NON-NLS-1$
+				}
+				@Override
+				public Type getDataType() {
+					return Type.DATE;
+				}
+				@Override
+				public String getKey() {
+					return "entity_last_modified"; //$NON-NLS-1$
+				}
+				@Override
+				public Object getValue(org.wcs.smart.i2.query.IResultItem item) {
+					if (((EntityRecordQueryResultItem)item).getEntityLastModified() == null) return null; 
+					return ((EntityRecordQueryResultItem)item).getEntityLastModified();
+				}
+				@Override
+				public String getValue(org.wcs.smart.i2.query.IResultItem item, Locale locale) {
+					Date d = (Date) getValue(item);
+					if (d == null) return ""; //$NON-NLS-1$
+					return DateTimeFormatter.ISO_DATE_TIME.format(  (new java.sql.Timestamp(d.getTime())).toLocalDateTime());
+				}
+				
+				@Override
+				public boolean isVisible() {
+					return true;
+				}
+			};
+			
+			columns.add(entityUuid);
+			columns.add(entityLastModified);
+		}
 		queryResults.setQueryColumns(columns);
 	}
 	
@@ -234,6 +309,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		
 		int columnIndex = 0;
 		columnNameToIndex.put("entity_uuid", columnIndex++); //$NON-NLS-1$
+		columnNameToIndex.put("date_modified", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("entity_type_key", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("ca_id", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("ca_name", columnIndex++); //$NON-NLS-1$

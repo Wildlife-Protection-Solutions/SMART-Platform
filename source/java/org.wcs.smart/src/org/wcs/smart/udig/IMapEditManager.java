@@ -22,6 +22,8 @@
 package org.wcs.smart.udig;
 
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.locationtech.udig.project.IEditManager;
 import org.locationtech.udig.project.render.IViewportModel;
@@ -88,6 +90,8 @@ public interface IMapEditManager{
 		private Point mapPoint;
 		private String infoString;
 		
+		private List<IEditPointAction> actions;
+		
 		/**
 		 * Creates a new edit point.
 		 * @param mapPoint the geometry of the point in map coordinates
@@ -107,17 +111,38 @@ public interface IMapEditManager{
 			this.feature = feature;
 			this.mapPoint = mapPoint;
 			this.infoString = infoString;
+			this.actions = new ArrayList<>();
 		}
+		
 		
 		public String getInfoString(){
 			return infoString;
 		}
+		
 		public Object getFeature(){
 			return this.feature;
 		}
 		
 		public Point getMapPoint(){
 			return this.mapPoint;
+		}
+		
+		/**
+		 * Add an edit point action. These are displayed in 
+		 * a right click menu on the map.
+		 * 
+		 * @param action
+		 */
+		public void addAction(IEditPointAction action) {
+			this.actions.add(action);
+		}
+		
+		/**
+		 * Get all actions associated with this edit point
+		 * @return
+		 */
+		public List<IEditPointAction> getActions(){
+			return this.actions;
 		}
 	}
 }

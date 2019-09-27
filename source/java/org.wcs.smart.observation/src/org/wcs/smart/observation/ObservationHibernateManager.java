@@ -29,6 +29,7 @@ import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 
 /**
  * Extension of the smart hibernate manager for observation related data.
@@ -73,14 +74,12 @@ public class ObservationHibernateManager extends HibernateManager{
 				a.computeFileLocation(session);
 			}
 		}
-		if (wp.getObservations() != null){
-			for (WaypointObservation wo : wp.getObservations()){
-				if (wo.getAttachments() != null){
-					for (ISmartAttachment a : wo.getAttachments()){
-						a.computeFileLocation(session);
-					}
+		for (WaypointObservation wo : wp.getAllObservations()){
+			if (wo.getAttachments() != null){
+				for (ISmartAttachment a : wo.getAttachments()){
+					a.computeFileLocation(session);
 				}
-			}
+			}		
 		}
 	}
 	

@@ -214,7 +214,7 @@ public class PatrolWaypointQueryType implements IMappableQueryType {
 		return new IQueryResultInfoProvider[]{
 				new PatrolResultInfoProvider(),
 				new PatrolZoomToResultProvider(),
-				new ShowInTableInfoProvider(),
+				new PatrolQueryShowInTableResultProvider(),
 				new DeleteObservationResultInfoProvider()
 		};
 	}

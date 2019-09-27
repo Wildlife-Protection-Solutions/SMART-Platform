@@ -35,6 +35,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -80,17 +81,23 @@ public class SaveWaypointJob extends Job {
 					saveSession.saveOrUpdate(wp);
 					
 					// remove observations with no data
-					if (wp.getWaypoint().getObservations() != null) {
-						for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
-							List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
-							for (WaypointObservationAttribute att : wo.getAttributes()) {
-								if (!att.hasValue()) {
-									toDelete.add(att);
-								}
+					for (WaypointObservation wo : wp.getWaypoint().getAllObservations()) {
+						List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
+						for (WaypointObservationAttribute att : wo.getAttributes()) {
+							if (!att.hasValue()) {
+								toDelete.add(att);
 							}
-							wo.getAttributes().removeAll(toDelete);
 						}
+						wo.getAttributes().removeAll(toDelete);
 					}
+					
+					//remove groups with no data
+					List<WaypointObservationGroup> gdelete = new ArrayList<>();
+					for (WaypointObservationGroup g : wp.getWaypoint().getObservationGroups()) {
+						if (g.getObservations() == null || g.getObservations().isEmpty()) gdelete.add(g);
+					}
+					wp.getWaypoint().getObservationGroups().removeAll(gdelete);
+					
 					ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), saveSession);
 				}
 				saveSession.getTransaction().commit();

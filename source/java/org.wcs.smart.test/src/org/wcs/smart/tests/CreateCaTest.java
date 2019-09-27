@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 
@@ -34,12 +35,12 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
+import org.wcs.smart.user.UserLevelManager;
 
 /**
  * 
@@ -74,25 +75,24 @@ public class CreateCaTest {
 		e1.setGender('F');
 		e1.setSmartUserId("smart");
 		e1.setSmartPassword("smart");
-		e1.setSmartUserLevel(SmartUserLevel.ADMIN);
+		e1.setSmartUserLevel(Collections.singletonList( UserLevelManager.ADMIN) );
 		e1.setBirthDate(new Date());
 		e1.setStartEmploymentDate(new Date());
 		e1.setConservationArea(ca);
 		ca.setEmployees(new ArrayList<Employee>());
 		ca.getEmployees().add(e1);
 		
-		Session session = Hibernate.openSession();
-		session.beginTransaction();
-		try{
-			session.save(ca);
-			Hibernate.generateEmployeeId(e1, session);
-			session.save(e1);
-			session.getTransaction().commit();
-		}catch (Exception ex){
-			session.getTransaction().rollback();
-			ex.printStackTrace();
-		}finally{
-			session.close();
+		try(Session session = Hibernate.openSession()){
+			session.beginTransaction();
+			try{
+				session.save(ca);
+				Hibernate.generateEmployeeId(e1, session);
+				session.save(e1);
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				session.getTransaction().rollback();
+				ex.printStackTrace();
+			}
 		}
 		
 		DataModel dm = null;
@@ -108,11 +108,11 @@ public class CreateCaTest {
 		}
 		
 		//try saving data model
-		session = Hibernate.openSession();
-		session.beginTransaction();
-		dm.save(session, new NullProgressMonitor());
-		session.getTransaction().commit();
-		session.close();
+		try(Session session = Hibernate.openSession()){
+			session.beginTransaction();
+			dm.save(session, new NullProgressMonitor());
+			session.getTransaction().commit();
+		}
 		
 		try{
 			testExportDataModel(dm, ca);
@@ -127,7 +127,7 @@ public class CreateCaTest {
 		DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();
 		InputStream is = this.getClass().getClassLoader().getResourceAsStream("IUCN_Threats.xml");
 		Assert.assertNotNull(is);
-		DataModel dm = converter.convert(is, ca, false);
+		DataModel dm = converter.convert(is, ca, Collections.emptyList(), false);
 		return dm;
 	}
 	
@@ -146,7 +146,7 @@ public class CreateCaTest {
 		
 		//can we read it back in?
 		DataModelXmlToSmartConverter converter2 = new DataModelXmlToSmartConverter();
-		DataModel dm2 = converter2.convert(f, ca, false);
+		DataModel dm2 = converter2.convert(f, ca, Collections.emptyList(), false);
 		Assert.assertNotNull(dm2);
 		Assert.assertNotNull(dm2.getCategories());
 		Assert.assertNotNull(dm2.getAttributes());

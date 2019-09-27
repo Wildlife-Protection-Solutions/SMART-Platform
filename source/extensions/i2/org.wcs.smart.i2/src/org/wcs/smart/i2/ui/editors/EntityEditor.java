@@ -229,7 +229,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private Label lblModified;
 	private Label lblIdentifier;
 	private Label lblType;
-	private Hyperlink lnkNewRecord;
+	private Button lnkNewRecord;
 
 	private Composite compAttributes;
 	private Composite compAttachments;
@@ -773,10 +773,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		compRecords = toolkit.createComposite(tabPart, SWT.NONE);
 		compRecords.setLayout(new GridLayout());
+		((GridLayout)compRecords.getLayout()).marginHeight = 0;
 		createRecordsPanel(compRecords);
 		
 		compRelationships = toolkit.createComposite(tabPart, SWT.NONE);
 		compRelationships.setLayout(new GridLayout());
+		((GridLayout)compRelationships.getLayout()).marginHeight = 0;
 		createRelationshipPanel(compRelationships);
 		addEntityDropTarget(compRelationships);
 
@@ -1204,7 +1206,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		if (lnkNewRecord != null && !lnkNewRecord.isDisposed()){
 			if (isEdit) {
 				lnkNewRecord.setVisible(true);
-				((GridData)lnkNewRecord.getLayoutData()).heightHint = 20;
+				((GridData)lnkNewRecord.getLayoutData()).heightHint = lnkNewRecord.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 			}else {
 				lnkNewRecord.setVisible(false);
 				((GridData)lnkNewRecord.getLayoutData()).heightHint = 0;
@@ -1320,39 +1322,32 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private void createRelationshipPanel(Composite parent){
 
 		relationshipEditPanel = toolkit.createComposite(parent, SWT.NONE);
-		relationshipEditPanel.setLayout(createGridLayoutNoMargin(2));
-		relationshipEditPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		relationshipEditPanel.setLayout(createGridLayoutNoMargin(3));
+		relationshipEditPanel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		Button btnAddRelationship = toolkit.createButton(relationshipEditPanel, Messages.EntityEditor_NewRelationshipBtn, SWT.PUSH);
-		btnAddRelationship.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		btnAddRelationship.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				EntityRelationshipListShell shell = new EntityRelationshipListShell(getSite().getShell(), entity, context){
-					protected void doEvent(){
-						if (getRelationshipType() != null){
-							addRelationship(getRelationshipType(), getTargetEntity());
-							close();
-						}
+		Button addRelationship = toolkit.createButton(relationshipEditPanel, Messages.EntityEditor_NewRelationshipBtn, SWT.PUSH);
+		addRelationship.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		addRelationship.setToolTipText(Messages.EntityEditor_deleteRelationshiptooltip);
+		addRelationship.addListener(SWT.Selection, e->{
+			EntityRelationshipListShell shell = new EntityRelationshipListShell(getSite().getShell(), entity, context){
+				protected void doEvent(){
+					if (getRelationshipType() != null){
+						addRelationship(getRelationshipType(), getTargetEntity());
+						close();
 					}
-				};
-				int x = btnAddRelationship.getLocation().x + btnAddRelationship.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-				int y =  btnAddRelationship.getLocation().y;
-				shell.open(btnAddRelationship.toDisplay(x,y), new Point(btnAddRelationship.getSize().x, 0), true);
-			}
-		});
-		
-		
-		ToolBar toolbar = new ToolBar(relationshipEditPanel, SWT.FLAT);
-		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-		
-		ToolItem deleteRelationship = new ToolItem(toolbar, SWT.NONE);
+				}
+			};
+			int x = addRelationship.getLocation().x + addRelationship.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+			int y =  addRelationship.getLocation().y;
+			shell.open(addRelationship.toDisplay(x,y), new Point(addRelationship.getSize().x, 0), true);
+		} );
+				
+		Button deleteRelationship = toolkit.createButton(relationshipEditPanel, DialogConstants.DELETE_BUTTON_TEXT, SWT.PUSH);
 		deleteRelationship.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		deleteRelationship.setToolTipText(Messages.EntityEditor_deleteRelationshiptooltip);
 		deleteRelationship.addListener(SWT.Selection, e-> deleteRelationship());
 		
-		ToolItem editRelationship = new ToolItem(toolbar, SWT.NONE);
+		Button editRelationship = toolkit.createButton(relationshipEditPanel, DialogConstants.EDIT_BUTTON_TEXT, SWT.PUSH);
 		editRelationship.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
 		editRelationship.setToolTipText(Messages.EntityEditor_editRelationshiptooltip);
 		editRelationship.addListener(SWT.Selection, e-> {
@@ -1575,19 +1570,10 @@ public class EntityEditor extends EditorPart implements MapPart{
 	}
 	
 	private void createRecordsPanel(Composite parent){
-		lnkNewRecord = toolkit.createHyperlink(parent, Messages.EntityEditor_NewRecordLabel, SWT.NONE);
-		lnkNewRecord.addHyperlinkListener(new IHyperlinkListener() {
-			@Override
-			public void linkExited(HyperlinkEvent e) { }
-			@Override
-			public void linkEntered(HyperlinkEvent e) { }
-			
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				createNewRecord();
-			}
-		});
 		
+		lnkNewRecord = toolkit.createButton(parent, Messages.EntityEditor_NewRecordLabel, SWT.NONE);
+		lnkNewRecord.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		lnkNewRecord.addListener(SWT.Selection, e->createNewRecord());
 		lnkNewRecord.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		if (!getEditMode()) {
 			((GridData)lnkNewRecord.getLayoutData()).heightHint = 0;
@@ -1712,6 +1698,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		attachmentEditPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Button btnAddAttachment = toolkit.createButton(attachmentEditPanel, Messages.EntityEditor_AddAttachmentBtn, SWT.PUSH);
+		btnAddAttachment.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnAddAttachment.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {	

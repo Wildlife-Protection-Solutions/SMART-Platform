@@ -125,7 +125,7 @@ public enum EntityImportEngine {
 		
 		monitor.subTask(Messages.EntityImportEngine_ReadTaskName);
 		int lineCnt = 0;
-		try(CSVReader reader = new CSVReader(Files.newBufferedReader(config.getFile()), config.getDelimiter())){
+		try(CSVReader reader = new CSVReader(Files.newBufferedReader(config.getFile(), config.getCharset()), config.getDelimiter())){
 			lineCnt = reader.readAll().size();
 		}
 		monitor.worked(1);
@@ -133,7 +133,7 @@ public enum EntityImportEngine {
 		
 		SubMonitor kidMonitor = monitor.split(1);
 		kidMonitor.setWorkRemaining(lineCnt);
-		try(CSVReader reader = new CSVReader(Files.newBufferedReader(config.getFile()), config.getDelimiter())){
+		try(CSVReader reader = new CSVReader(Files.newBufferedReader(config.getFile(), config.getCharset()), config.getDelimiter())){
 			kidMonitor.worked(1);
 			kidMonitor.checkCanceled();
 			int line = 0;

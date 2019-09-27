@@ -284,6 +284,7 @@ public class NewAssetHandler {
 			
 			txtId = new Text(main, SWT.BORDER);
 			txtId.setText(""); //$NON-NLS-1$
+			txtId.setTextLimit(Asset.ID_MAX_LENGTH);
 			txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			if (defaultId != null) {
 				txtId.setText(defaultId);

@@ -67,11 +67,10 @@ public class PatrolFeatureFactory {
 		data[2] = waypoint.getWaypoint().getId();
 		data[3] = waypoint.getPatrolLegDay() == null ? null : waypoint.getPatrolLegDay().getDate();
 		data[4] = waypoint.getWaypoint().getDateTime();
-		if (waypoint.getWaypoint().getObservations() == null || waypoint.getWaypoint().getObservations().size() == 0){
-			data[5] = ""; //$NON-NLS-1$
-		}else{ 
-			data[5] = waypoint.getWaypoint().getObservationsAsString();
-		}
+		String obs = waypoint.getWaypoint().getObservationsAsString();
+		if (obs == null) obs = ""; //$NON-NLS-1$
+		data[5] = obs;
+		
 		data[6] = waypoint.getWaypoint().getComment();
 		
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);

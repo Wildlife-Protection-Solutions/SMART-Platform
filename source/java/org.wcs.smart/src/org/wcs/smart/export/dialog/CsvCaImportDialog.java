@@ -23,6 +23,7 @@ package org.wcs.smart.export.dialog;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,21 +87,21 @@ public class CsvCaImportDialog extends AbstractCsvDialog {
 	}
 
 	@Override
-	protected boolean performAction(File file, char delimiter, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
+	protected boolean performAction(File file, char delimiter, boolean headers, Charset cs, IProgressMonitor monitor, Session session) throws Exception {
 		boolean result = false;
 		if (isImportFromCa) {
 			File tmpFile = File.createTempFile("tempImport", ".csv"); //$NON-NLS-1$ //$NON-NLS-2$
 			try {
-				result = config.getExporter().exportCsvFile(tmpFile,  DelimiterCombo.Delimiter.COMMA.value, caToExportFrom, false, monitor, session);
+				result = config.getExporter().exportCsvFile(tmpFile,  DelimiterCombo.Delimiter.COMMA.value, caToExportFrom, false, cs, monitor, session);
 				if (result) {
-					result = config.getImporter().importCsvFile(tmpFile, DelimiterCombo.Delimiter.COMMA.value, false, monitor, session);
+					result = config.getImporter().importCsvFile(tmpFile, DelimiterCombo.Delimiter.COMMA.value, false, cs, monitor, session);
 				}
 				
 			} finally {
 				tmpFile.deleteOnExit();
 			}
 		}else{
-			result = config.getImporter().importCsvFile(file, delimiter, headers, monitor, session);
+			result = config.getImporter().importCsvFile(file, delimiter, headers, cs, monitor, session);
 		}
 		return result;
 	}

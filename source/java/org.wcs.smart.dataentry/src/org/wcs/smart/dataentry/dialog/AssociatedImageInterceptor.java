@@ -169,7 +169,7 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 		}
 		if (t instanceof CmAttribute) {
 			Path helpImage = ((CmAttribute) t).getHelpImage();
-			if (!helpImage.equals(((CmAttribute) t).getImportHelpFile()))
+			if (helpImage != null && !helpImage.equals(((CmAttribute) t).getImportHelpFile()))
 				operations.add(new DeleteOperation(helpImage.toFile()));
 		}
 		

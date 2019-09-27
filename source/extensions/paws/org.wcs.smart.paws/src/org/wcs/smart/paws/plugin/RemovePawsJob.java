@@ -91,7 +91,7 @@ public class RemovePawsJob extends Job {
 			"paws_query_class", //$NON-NLS-1$
 			"paws_run", //$NON-NLS-1$
 			"paws_service", //$NON-NLS-1$
-			"paws_simple_classification", //$NON-NLS-1$
+			"paws_classification", //$NON-NLS-1$
 			"paws_workspace" //$NON-NLS-1$
 		};
 		

@@ -49,7 +49,7 @@ public abstract class AbstractConnectPackageContribution  implements IPackageCon
 	 * @return Two element array; first is the connect url the second is the ct api key; null if the user cancels
 	 * @throws exception if cannot connect (invalid username etc.)
 	 */
-	protected String[] getServerDetails(IEclipseContext context, ConservationArea ca) throws Exception{
+	protected String[] getServerDetails(IEclipseContext context, ConservationArea ca, boolean canskip) throws Exception{
 		connect = (SmartConnect) context.get(SmartConnect.class);
 
 		if (connect == null) {
@@ -58,11 +58,19 @@ public abstract class AbstractConnectPackageContribution  implements IPackageCon
 				ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
 					@Override
 					protected Control createDialogArea(Composite parent) {
-//						setTitle(Messages.ConnectCtPackageProperties_Title);
-//						getShell().setText(Messages.ConnectCtPackageProperties_Title);
-//						setMessage(Messages.ConnectCtPackageProperties_Message);	
+						setTitle(Messages.AbstractConnectPackageContribution_ConnectTitle);
+						getShell().setText(Messages.AbstractConnectPackageContribution_ConnectTitle);
+						setMessage(Messages.AbstractConnectPackageContribution_ConnectMsg);	
 						return super.createDialogArea(parent);
 					}	
+					
+					@Override
+					public void createButtonsForButtonBar(Composite parent){
+						super.createButtonsForButtonBar(parent);
+						if (canskip) {
+							getButton(CANCEL).setText(Messages.AbstractConnectPackageContribution_SkipButtonTxt);
+						}
+					}
 				};
 				if (cd.open() == Window.OK) {
 					connect = cd.getConnection();

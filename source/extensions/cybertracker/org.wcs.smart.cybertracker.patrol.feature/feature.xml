@@ -18,11 +18,11 @@ on Cybertracker.
    </copyright>
 
    <includes
-         id="org.wcs.smart.cybertracker.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.wcs.smart.cybertracker.patrol.core.feature"
          version="0.0.0"/>
+
+   <requires>
+      <import feature="org.wcs.smart.cybertracker.feature" version="7.0.0.qualifier"/>
+   </requires>
 
 </feature>

@@ -42,6 +42,23 @@
     <a id="refreshnow" href="#">refresh</a>
   </div>	
   
+  <!-- Navigation Layer Table -->
+  <p class="top-spacer label-header" style="border-top:1px solid; padding-top:4px">Navigation Layers</p>
+  
+  <div class="top-spacer" >
+    <div id="navlayertable" class="table-cell smart-table">
+  	  <div class="table-row smart-table-header">
+		  <div class="table-cell smart-table-cell">Name</div>
+		  <div class="table-cell smart-table-cell">Conservation Area</div>
+		  <div class="table-cell smart-table-cell">Date Uploaded</div>
+		  <div class="table-cell smart-table-cell"></div>
+		  <div class="table-cell smart-table-cell"></div>
+	  </div>
+    </div>
+    <a id="navrefreshnow" href="#">refresh</a>
+  </div>
+  
+  <!--  API Key Table -->
   <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.apikeys"/></p>
   <p><fmt:message key="cybertracker.apikeysmessage"/></p>
    <div class="top-spacer" >
@@ -72,6 +89,19 @@
 	  </form>
   </div>
   
+  <div id="deleteNavDialog" style="display: none;" class="dialog">
+	  <div class="dialog-title"><fmt:message key="cybertracker.deletepackage"/></div>
+	  <div id="dialogerror" class="errorsection"></div>
+	  
+	  <form id="deletenavform" onsubmit="return deleteNavigation();" >
+	    <input type="hidden" name="navuuid"/>
+	   	<p>Are you sure you want to the delete the selected navigation layers?</p>
+	   	<div class="block top-spacer" style="text-align:right">
+	     <input class="button" type="submit" value="Delete" />
+	     <input class="button" type="button" value="Cancel" onclick="closeDialog('deleteNavDialog')" />
+	    </div>
+	  </form>
+  </div>
   
   	<div id="resetApiDialog" style="display: none;" class="dialog">
 	  <div class="dialog-title"><fmt:message key="cybertracker.resetkey"/></div>

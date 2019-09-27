@@ -218,7 +218,7 @@ CREATE TRIGGER trg_ct_survey_package AFTER INSERT OR UPDATE OR DELETE ON smart.c
 
 alter table connect.work_item drop constraint type_chk;
 ALTER TABLE connect.work_item ADD CONSTRAINT type_chk 
-	CHECK (type IN ('UP_CA', 'UP_SYNC', 'DOWN_CA', 'DOWN_SYNC', 'UP_DATAQUEUE', 'UP_CTPACKAGE'));
+	CHECK (type IN ('UP_CA', 'UP_SYNC', 'DOWN_CA', 'DOWN_SYNC', 'UP_DATAQUEUE', 'UP_CTPACKAGE', 'UP_NAVIGATION'));
 
 	
 CREATE TABLE smart.ct_metadata_value(uuid uuid not null, ca_uuid uuid not null, package_uuid uuid not null, keyid varchar(32) not null, is_visible boolean not null, string_value varchar(8192), boolean_value boolean, uuid_value uuid, primary key (uuid));
@@ -253,6 +253,35 @@ ALTER TABLE connect.ct_api_key ADD FOREIGN KEY (ca_uuid) REFERENCES connect.ca_i
 
 ALTER TABLE connect.alerts ADD COLUMN source VARCHAR(32) not null default 'USER';
 ALTER TABLE connect.alerts ALTER COLUMN creator_uuid DROP not null;
+
+
+CREATE TABLE smart.ct_navigation_layer(
+  uuid uuid not null, 
+  ca_uuid uuid not null, 
+  name varchar(512), 
+  targets bytea, 
+  created_date date not null, 
+  last_modified_date date, 
+  last_modified_by uuid,  
+primary key (uuid));
+
+ALTER TABLE smart.ct_navigation_layer ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.ct_navigation_layer ADD FOREIGN KEY (last_modified_by) REFERENCES smart.employee(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+CREATE TRIGGER trg_ct_navigation_layer AFTER INSERT OR UPDATE OR DELETE ON smart.ct_navigation_layer FOR EACH ROW execute procedure connect.trg_changelog_common();
+
+
+
+create table connect.ct_navigation_layer(
+  uuid UUID not null,
+  ca_uuid UUID not null,
+  uploaded_date timestamp not null,
+  filename varchar(256) not null,
+  name varchar(256) not null,
+  status varchar(16) not null,
+  work_item_uuid uuid,
+  primary key(uuid)
+);
+ALTER TABLE connect.ct_navigation_layer ADD FOREIGN KEY (ca_uuid) REFERENCES connect.ca_info(ca_uuid) on DELETE CASCADE on UPDATE RESTRICT;
 
 ------------ EMPLOYEE TEAMS ----------------
 CREATE TABLE smart.employee_team (uuid uuid not null, ca_uuid uuid not null, primary key (uuid));
@@ -354,19 +383,17 @@ CREATE TRIGGER trg_patrol_attribute_value AFTER INSERT OR UPDATE OR DELETE ON sm
 ------------ PAWS ----------------
 CREATE TABLE smart.paws_configuration(uuid uuid NOT NULL, ca_uuid uuid NOT NULL, name varchar(8192) NOT NULL, PRIMARY KEY (uuid));
 CREATE TABLE smart.paws_parameter( uuid uuid NOT NULL, config_uuid uuid NOT NULL, keyid varchar(8192) NOT NULL, value varchar(8192), PRIMARY KEY (uuid));
-CREATE TABLE smart.paws_query_class(uuid uuid NOT NULL, config_uuid uuid NOT NULL, query_uuid uuid NOT NULL, query_type varchar(32) NOT NULL, date_range varchar(512), classification varchar(512) NOT NULL, PRIMARY KEY (uuid));
 CREATE TABLE smart.paws_run(uuid uuid NOT NULL, ca_uuid uuid NOT NULL, config_uuid uuid, id varchar(256) NOT NULL, server_run_id varchar(256), run_date timestamp, package_file varchar(256), result_location varchar(256), status varchar(32) NOT NULL, status_message varchar(8192),  server_status_json varchar(8192), data_start_date date, data_end_date date, train_start_year smallint, train_end_year smallint, test_start_year smallint, test_end_year smallint, forecast_start_year smallint, forecast_end_year smallint, paws_task_id varchar(8192), PRIMARY KEY (uuid));
 CREATE TABLE smart.paws_service(uuid uuid NOT NULL, ca_uuid uuid NOT NULL UNIQUE, heatmap_api varchar(8192), task_api varchar(8192), api_key varchar(8192), PRIMARY KEY (uuid));
-CREATE TABLE smart.paws_simple_class(uuid uuid NOT NULL, config_uuid uuid NOT NULL, classification varchar(512) NOT NULL, date_range varchar(512), category_hkey varchar(32672) NOT NULL, attribute_key varchar(128), list_key varchar(128), tree_hkey varchar(32672), PRIMARY KEY (uuid));
 CREATE TABLE smart.paws_workspace(uuid uuid NOT NULL, ca_uuid uuid NOT NULL UNIQUE, url varchar(8192), client_id varchar(8192), storage_account_url varchar(8192), container_name varchar(8192), PRIMARY KEY (uuid));
-				
+CREATE TABLE smart.paws_classification	(uuid uuid NOT NULL,config_uuid uuid NOT NULL,class_type varchar(16) NOT NULL,classification varchar(512) NOT NULL, query_uuid uuid, query_type varchar(32), category_hkey varchar(32672), attribute_key varchar(128), list_key varchar(128), tree_hkey varchar(32672), PRIMARY KEY (uuid));  
+
+ALTER TABLE smart.paws_classification ADD FOREIGN KEY(config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_configuration ADD FOREIGN KEY(ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_run ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_service ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_workspace ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_parameter ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE CASCADE  DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE smart.paws_query_class ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE CASCADE  DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE smart.paws_simple_class ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE CASCADE  DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_run ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED;
 
 --TODO: change log

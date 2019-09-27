@@ -156,7 +156,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		Label l = new Label(t, SWT.WRAP);
 		l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
 		l = new Label(t, SWT.WRAP);
-		l.setText("These settings are only supported by CyberTracker Classic not SMART Mobile.");
+		l.setText(Messages.ConfigurableModelEditorConnectTab_SettingsWarning);
 		
 		
 		dbAlertsList = loadInitialAlerts(dialog.getModel());

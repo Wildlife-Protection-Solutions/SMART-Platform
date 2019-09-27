@@ -24,8 +24,10 @@ package org.wcs.smart.i2.ui.views;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -67,6 +69,7 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 	private boolean sourceAndStatusImg = false;
 	//combined images for case where sourceAndStatusImg is true
 	private HashMap<String, Image> images = new HashMap<String,Image>();
+	private List<Image> todispose = new ArrayList<>();
 	private Image NULL_IMAGE;
 	
 	private IEventBroker eventBroker;
@@ -74,7 +77,7 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 		@Override
 		public void handleEvent(Event event) {
 			srcProvider.disposeImages();
-			for (Image i : images.values()) i.dispose();
+			for (Image i : todispose) i.dispose();
 			images.clear();
 		}
 	};
@@ -107,7 +110,7 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 		labelProvider.dispose();
 		srcProvider.dispose();
 		//dispose images
-		images.values().forEach(w->w.dispose());
+		todispose.forEach(w->w.dispose());
 		
 		eventBroker.unsubscribe(refreshImages);
 	}
@@ -126,6 +129,7 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 		//merge images
 		Image img1 = RecordLabelProvider.getRecordStatusImage(status);
 		Image img2 = srcProvider.getImage(source);
+		if (img2 != null) todispose.add(img2);
 		if (img1 == null && img2 == null) return null;
 		if (img1 == null) {
 			images.put(key, img2);

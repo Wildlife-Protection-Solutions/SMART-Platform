@@ -121,7 +121,7 @@ public class SurveyCtPackageManager implements ICtPackageManager {
 						SubMonitor work = progress.split(1);
 						if (contributions != null) {
 							for (IPackageContribution cc : PackageContributionManager.INSTANCE.getContributionItems()) {
-								IPackageContribution.PackageContribution update = cc.packageFiles(ppackage, context.createChild(), work);
+								IPackageContribution.PackageContribution update = cc.packageFiles(ppackage, context, work);
 								if (update != null) updates.add(update);
 							}
 						}

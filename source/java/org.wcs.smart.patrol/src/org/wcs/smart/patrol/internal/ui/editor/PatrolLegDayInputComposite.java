@@ -102,6 +102,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.observation.ui.AttachmentCellEditor;
 import org.wcs.smart.observation.ui.ObservationCellEditor;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -726,9 +727,9 @@ public class PatrolLegDayInputComposite {
 				
 				//ensure minimum is loaded for the patrol mapping service which assumes
 				//to a minimum that this information is already loaded 
-				if (cloned.getObservations() != null && cloned.getObservations().size() > 0){
-					for (WaypointObservation ob : cloned.getObservations()){
-						ob.getCategory().getName();
+				if (cloned.getObservationGroups() != null && cloned.getObservationGroups().size() > 0){
+					for (WaypointObservationGroup g : cloned.getObservationGroups()){
+						for (WaypointObservation ob : g.getObservations()) ob.getCategory().getName();
 					}
 				}
 				
@@ -1108,12 +1109,9 @@ public class PatrolLegDayInputComposite {
 			}
 			return ""; //$NON-NLS-1$
 		} else if (column == OtColumn.OBSERVATION) {
-			if (wp.getObservations() == null
-					|| wp.getObservations().size() == 0) {
-				return Messages.PatrolLegDayInputComposite_NoObservationsLabel;
-			} else {
-				return wp.getObservationsAsString();
-			}
+			String x = wp.getObservationsAsString();
+			if (x == null) return Messages.PatrolLegDayInputComposite_NoObservationsLabel;
+			return x;
 		} else if (column == OtColumn.COMMENT) {
 			if (wp.getComment() == null) {
 				return ""; //$NON-NLS-1$
@@ -1121,12 +1119,8 @@ public class PatrolLegDayInputComposite {
 			return wp.getComment();
 		} else if (column == OtColumn.ATTACHMENTS) {
 			int wpCnt = 0;
-			if (wp.getObservations() != null){
-				for (WaypointObservation wo : wp.getObservations()){
-					if (wo.getAttachments() != null){
-						wpCnt += wo.getAttachments().size();
-					}
-				}
+			for (WaypointObservation wo : wp.getAllObservations()) {
+				if (wo.getAttachments() != null) wpCnt += wo.getAttachments().size();
 			}
 			if (wp.getAttachments() != null){
 				wpCnt += wp.getAttachments().size();

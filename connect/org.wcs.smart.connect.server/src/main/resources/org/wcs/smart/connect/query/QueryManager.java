@@ -529,6 +529,9 @@ public enum QueryManager {
 			if (e.canExecute(queryTypeKey)) return true;
 		}
 		if (queryTypeKey.equalsIgnoreCase(IntelRecordObservationQuery.KEY)) return true;
+		if (queryTypeKey.equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) return true;
+		if (queryTypeKey.equalsIgnoreCase(IntelEntityRecordQuery.KEY)) return true;
+		
 		return false;
 	}
 	

@@ -187,7 +187,6 @@ public class DateAttributeInfoComposite extends CmAttributeInfoComposite {
 			if (!chSet.getSelection()){
 				if (op != null){
 					getSourceObject().getCmAttributeOptions().remove(op.getOptionId());
-					op.setCmAttribute(null);
 				}
 			}else{
 				if (op == null){

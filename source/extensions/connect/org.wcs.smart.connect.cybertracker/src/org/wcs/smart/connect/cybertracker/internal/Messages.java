@@ -4,7 +4,10 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.connect.cybertracker.internal.messages"; //$NON-NLS-1$
+	public static String AbstractConnectPackageContribution_ConnectMsg;
+	public static String AbstractConnectPackageContribution_ConnectTitle;
 	public static String AbstractConnectPackageContribution_KeyRequired;
+	public static String AbstractConnectPackageContribution_SkipButtonTxt;
 	public static String AddConnectCtJob_CreateTablesTaskName;
 	public static String AddConnectCtJob_ErrorDialogMessage;
 	public static String AddConnectCtJob_ErrorDialogTitle;
@@ -46,6 +49,7 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorConnectTab_RefreshForLabels;
 	public static String ConfigurableModelEditorConnectTab_RefreshToolTip;
 	public static String ConfigurableModelEditorConnectTab_RefreshTypes;
+	public static String ConfigurableModelEditorConnectTab_SettingsWarning;
 	public static String ConfigurableModelEditorConnectTab_TabName;
 	public static String ConfigurableModelEditorConnectTab_TypeMustBeSelected;
 	public static String ConfigurableModelEditorConnectTab_TypeNotValid;
@@ -125,6 +129,7 @@ public class Messages extends NLS {
 	public static String ExportCtPackageToConnect_CompleteTitle;
 	public static String ExportCtPackageToConnect_Message;
 	public static String ExportCtPackageToConnect_Name;
+	public static String ExportCtPackageToConnect_NavUploadError;
 	public static String ExportCtPackageToConnect_NoUrl;
 	public static String ExportCtPackageToConnect_ShellTitle;
 	public static String ExportCtPackageToConnect_Title;
@@ -132,11 +137,25 @@ public class Messages extends NLS {
 	public static String ExportCtPackageToConnect_UploadError;
 	public static String ExportCtPackageToConnect_UploadJobName;
 	public static String ExportCtPackageToConnect_UplodeCompleteMsg;
+	public static String ExportNavigationLayerToConnect_ActionName;
+	public static String ExportNavigationLayerToConnect_ConnectDialogMsg;
+	public static String ExportNavigationLayerToConnect_ConnectDialogTitle;
+	public static String ExportNavigationLayerToConnect_NotUrl;
+	public static String ExportNavigationLayerToConnect_UploadedJobName;
+	public static String ExportNavigationLayerToConnect_UploadError;
+	public static String ExportNavigationLayerToConnect_UploadOk;
+	public static String ExportNavigationLayerToConnect_UploadOkMsg1;
+	public static String ExportNavigationLayerToConnect_UploadOkMsg2;
 	public static String LoadAlertTypesJob_DialogMessage;
 	public static String LoadAlertTypesJob_DialogTitle;
 	public static String LoadAlertTypesJob_LoadingAlertType;
 	public static String LoadAlertTypesJob_WarningMessage;
 	public static String LoadAlertTypesJob_WarningTitle;
+	public static String NavConnectUploadedDate_ConnectDialogMsg;
+	public static String NavConnectUploadedDate_ConnectDialogTitle;
+	public static String NavConnectUploadedDate_jobname;
+	public static String NavConnectUploadedDate_NoConnect;
+	public static String NavConnectUploadedDate_PropertyName;
 	public static String RemoveConnectCtJob_Title;
 	public static String RemoveConnectCtJob_UninstallError;
 	static {

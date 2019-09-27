@@ -93,7 +93,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 		}
 
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Status");
+		l.setText(Messages.StatusLineControl_StatusLabel);
 		l.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, contribs.length, 1));
 		return main;
 	}

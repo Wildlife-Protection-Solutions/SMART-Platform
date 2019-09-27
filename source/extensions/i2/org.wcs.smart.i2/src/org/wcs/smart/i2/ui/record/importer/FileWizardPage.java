@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.ui.record.importer;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -54,6 +56,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -74,6 +77,7 @@ public class FileWizardPage extends WizardPage{
 	private Button chSkipFirstLine;
 	private DelimiterCombo delimCombo;
 	private ComboViewer cmbProjection;
+	private ComboViewer cmbCharset;
 	private ComboViewer cmbDateFormat;
 	
 	protected FileWizardPage() {
@@ -98,6 +102,10 @@ public class FileWizardPage extends WizardPage{
 	
 	public Projection getProjection(){
 		return (Projection) ((IStructuredSelection)cmbProjection.getSelection()).getFirstElement();
+	}
+	
+	public Charset getCharacterSet(){
+		return (Charset) ((IStructuredSelection)cmbCharset.getSelection()).getFirstElement();
 	}
 	
 	public String getDateFormatStr(){
@@ -173,6 +181,33 @@ public class FileWizardPage extends WizardPage{
 		
 		delimCombo = new DelimiterCombo(upper, SWT.DEFAULT);
 		delimCombo.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2, 1));
+		
+		Label lblCharset = new Label(upper, SWT.NONE);
+		lblCharset.setText("Character Set:");
+		lblCharset.setToolTipText("The character encoding of the file.  If unsure try UTF-8.");
+		lblCharset.setBackground(upper.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		cmbCharset = new ComboViewer(upper, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbCharset.setContentProvider(ArrayContentProvider.getInstance());
+		cmbCharset.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				return ((Charset)element).displayName();
+			}
+		});
+		cmbCharset.setInput( Charset.availableCharsets().values() );
+		cmbCharset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		Charset defaultcs = StandardCharsets.UTF_8;
+		try {
+			String cc = SmartPlugIn.getDefault().getDialogSettings().get(SmartPlugIn.DEFAULT_ENCODING_KEY);
+			if (cc != null && !cc.isBlank()) defaultcs = Charset.forName(cc);
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		cmbCharset.setSelection(new StructuredSelection(defaultcs));
+		cmbCharset.addSelectionChangedListener(e->{
+			SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_ENCODING_KEY, ((Charset)e.getStructuredSelection().getFirstElement()).name());
+		});
+		cmbCharset.getControl().setBackground(upper.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		l = new Label(upper, SWT.NONE);
 		l.setText(Messages.FileWizardPage1_SkipLabel);

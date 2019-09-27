@@ -51,6 +51,12 @@ public interface IQueryExporter {
 	public static final String PROJECTION_PARAM_KEY = "projection"; //$NON-NLS-1$
 	
 	/**
+	 * Option key for the encoding to export the file in.  The
+	 * value for this parameter must be java.nio.charset.Charset
+	 */
+	public static final String ENCODING_KEY = "ENCODING_KEY"; //$NON-NLS-1$
+	
+	/**
 	 * 
 	 * @return unique exporter identifier 
 	 */
@@ -61,6 +67,12 @@ public interface IQueryExporter {
 	 * @return true if the exporter supports projections
 	 */
 	public boolean supportsProjection();
+	
+	/**
+	 * 
+	 * @return true if the exporter supports different character encodings
+	 */
+	public default boolean supportsCharEncodings() { return false; }
 	
 	/**
 	 * @return the exporter name

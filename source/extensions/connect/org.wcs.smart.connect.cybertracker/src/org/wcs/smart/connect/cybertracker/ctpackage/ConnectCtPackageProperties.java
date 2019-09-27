@@ -71,7 +71,7 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 	
 	private HashMap<UUID, String[]> values = null;
 	
-	private List<IPackagePropertyListener> listeners = new ArrayList<>();
+	private List<IPropertyListener> listeners = new ArrayList<>();
 	private AtomicBoolean isScheduled = new AtomicBoolean(false);
 	
 	@Inject
@@ -98,7 +98,7 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 	}
 
 	@Override
-	public void addPropertyUpdatedListener(IPackagePropertyListener listener) {
+	public void addPropertyUpdatedListener(IPropertyListener listener) {
 		listeners.add(listener);
 	}
 

@@ -80,6 +80,9 @@ c3p0 -  Eclipse Public License (EPL) version 1.0 (http://www.eclipse.org/legal/e
 RESTEasy - Apache License, version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 Jackson - Apache License, version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
+Packaged SMART downloads also include:
+GPS Babel - GNU Public License (http://www.gnu.org/copyleft/gpl.html) .  SMART access this program through its command line interface to import data from GPS devices.  See: https://www.gpsbabel.org/FAQ.html#not_library
+
 ++++++
 
 Eclipse Distribution License - v 1.0
@@ -128,9 +131,9 @@ limitations under the License.
       <feature id="openjfx.swt.feature" installMode="root"/>
       <feature id="org.eclipse.help" installMode="root"/>
       <feature id="org.wcs.smart.feature" installMode="root"/>
-      <feature id="org.wcs.smart.birt.feature"  installMode="root"/>
-      <feature id="org.wcs.smart.udig.feature"  installMode="root"/>
-      <feature id="org.wcs.smart.p2.feature"  installMode="root"/>
+      <feature id="org.wcs.smart.birt.feature" installMode="root"/>
+      <feature id="org.wcs.smart.udig.feature" installMode="root"/>
+      <feature id="org.wcs.smart.p2.feature" installMode="root"/>
    </features>
 
    <configurations>

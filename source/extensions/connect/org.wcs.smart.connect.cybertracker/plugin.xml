@@ -93,6 +93,15 @@
             class="org.wcs.smart.connect.cybertracker.ctpackage.ConnectCtPackageProperties">
       </ctpackageproperty>
    </extension>
+    <extension
+         point="org.wcs.smart.cybertracker.navigation">
+      <navigationexportaction
+            class="org.wcs.smart.connect.cybertracker.navigation.ExportNavigationLayerToConnect">
+      </navigationexportaction>
+	  <navigationlayerproperty
+            class="org.wcs.smart.connect.cybertracker.navigation.NavConnectUploadedDate">
+      </navigationlayerproperty>
+   </extension>
    <extension
          point="org.wcs.smart.cybertracker.export.package.contribution">
       <contribution

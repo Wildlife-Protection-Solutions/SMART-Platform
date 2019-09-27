@@ -63,6 +63,7 @@ import org.wcs.smart.observation.common.importwp.ObservationGPSDataImport;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
@@ -126,7 +127,7 @@ public class DataGenerator implements IDataEngine{
 				for (int i = 0; i < config.getNumberOfPatrols(); i ++) {
 					Patrol p = generatePatrol(session, progress.split(1));
 					session.save(p);
-					p.getLegs().forEach(leg->leg.getPatrolLegDays().forEach(pld->pld.getWaypoints().forEach(pw->session.save(pw))));
+					p.getLegs().forEach(leg->leg.getPatrolLegDays().forEach(pld->pld.getWaypoints().forEach(pw->{session.save(pw.getWaypoint());session.save(pw);})));
 					newPatrols.add(p);
 					session.flush();
 					progress.checkCanceled();
@@ -336,13 +337,17 @@ public class DataGenerator implements IDataEngine{
 				wp.setConservationArea(p.getConservationArea());
 				wp.setId(i+1);
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-				wp.setObservations(new ArrayList<WaypointObservation>());
+				wp.setObservationGroups(new ArrayList<>());
 				session.save(wp);
 				
 				PatrolWaypoint pw = new PatrolWaypoint();
 				pw.setPatrolLegDay(pld);
 				pw.setWaypoint(wp);
 				pld.getWaypoints().add(pw);
+				
+				WaypointObservationGroup group = new WaypointObservationGroup();
+				group.setWaypoint(wp);
+				group.setObservations(new ArrayList<>());
 				
 				//add observations to the waypoint
 				if (!config.getMappings().isEmpty()) {
@@ -360,9 +365,9 @@ public class DataGenerator implements IDataEngine{
 						
 						//create an observation that matches the observation mapping
 						WaypointObservation wo = new WaypointObservation();
-						wo.setWaypoint(wp);
+						wo.setObservationGroup(group);
 						wo.setAttributes(new ArrayList<>());
-						wp.getObservations().add(wo);
+						group.getObservations().add(wo);
 						wo.setCategory(m.getObservation().getCategory());
 						for (Attribute a : m.getAttributes()) {
 							a = session.get(Attribute.class,  a.getUuid());
@@ -394,6 +399,7 @@ public class DataGenerator implements IDataEngine{
 						}
 					}
 				}
+				if (!group.getObservations().isEmpty()) wp.getObservationGroups().add(group);
 			}
 			
 			//move a bit away from this last waypoint for the day to the next waypoint for the day

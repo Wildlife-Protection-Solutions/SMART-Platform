@@ -381,8 +381,8 @@ public class ObservationCellEditor extends DialogCellEditor {
 	protected void updateContents(Object value) {
 		String text = Messages.ObservationCellEditor_NoObservations_Label;
 		if (value != null && value instanceof Waypoint
-				&& ((Waypoint) value).getObservations() != null
-				&& ((Waypoint) value).getObservations().size() > 0) {
+				&& ((Waypoint) value).getObservationGroups() != null
+				&& ((Waypoint) value).getObservationGroups().size() > 0) {
 			text = ((Waypoint)value).getObservationsAsString();
 		}
 		fireModify = false;
@@ -428,7 +428,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 	protected void doSetValue(Object value) {
 		if (value instanceof Waypoint) {
 			this.wp = (Waypoint) value;
-			this.isEditable = this.wp.getObservations() == null || this.wp.getObservations().size() == 0;
+			this.isEditable = this.wp.getObservationGroups() == null || this.wp.getObservationGroups().size() == 0;
 			txtFilter.setEditable(isEditable);
 		}
 		super.doSetValue(value);
@@ -444,7 +444,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 			treeDropDown.hide();
 		}
 		Waypoint wp = (Waypoint) super.getValue();
-		if(wp.getObservations() == null)wp.setObservations(new ArrayList<>());
+		if(wp.getObservationGroups() == null)wp.setObservationGroups(new ArrayList<>());
 		final ObservationWizard wizard = new ObservationWizard(wp, this.observers, this.cmModel);
 		if (currentSelection != null){
 			wizard.setCategoriesToProcess(currentSelection);
@@ -455,6 +455,8 @@ public class ObservationCellEditor extends DialogCellEditor {
 			if (dialog.open() == Window.CANCEL) {
 				return null;
 			}
+			this.wp.getObservationGroups().clear();
+			this.wp.getObservationGroups().addAll(wizard.getWaypoint().getObservationGroups());
 			return wp;
 		}finally{
 			dialogOpen = false;

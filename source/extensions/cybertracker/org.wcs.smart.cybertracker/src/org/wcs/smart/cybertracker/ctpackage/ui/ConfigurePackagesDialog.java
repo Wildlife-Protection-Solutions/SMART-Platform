@@ -129,13 +129,14 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		
 		parent.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
-		ToolBar tb = new ToolBar(parent, SWT.FLAT);
+		ToolBar tb = new ToolBar(parent, SWT.FLAT | SWT.RIGHT);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		tb.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		ToolItem tiExport = new ToolItem(tb, SWT.PUSH);
 		tiExport.setToolTipText(Messages.ConfigurePackagesDialog_exporttooltip);
 		tiExport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
+		tiExport.setText(DialogConstants.EXPORT_BUTTON_TEXT);
 		tiExport.addListener(SWT.Selection, e->exportPackages());
 		tiExport.setEnabled(false);
 		
@@ -143,24 +144,28 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		tiAdd.setToolTipText(Messages.ConfigurePackagesDialog_addtooltip);
 		tiAdd.addListener(SWT.Selection, e->addPackage());
+		tiAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		
 		ToolItem tiDup = new ToolItem(tb, SWT.PUSH);
 		tiDup.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CREATECOPY_ICON));
 		tiDup.setToolTipText(Messages.ConfigurePackagesDialog_duplicatetooltip);
 		tiDup.addListener(SWT.Selection, e->duplicatePackage());
 		tiDup.setEnabled(false);
+		tiDup.setText(Messages.ConfigurePackagesDialog_CreateCopyLabel);
 		
 		ToolItem tiEdit = new ToolItem(tb, SWT.PUSH);
 		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		tiEdit.setToolTipText(Messages.ConfigurePackagesDialog_edittooltip);
 		tiEdit.addListener(SWT.Selection, e->editPackage());
 		tiEdit.setEnabled(false);
+		tiEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		
 		ToolItem tiDelete = new ToolItem(tb, SWT.PUSH);
 		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		tiDelete.setToolTipText(Messages.ConfigurePackagesDialog_deleteTooltip);
 		tiDelete.addListener(SWT.Selection, e->deletePackage());
 		tiDelete.setEnabled(false);
+		tiDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		
 		SashForm sash = new SashForm(parent, SWT.HORIZONTAL);
 		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

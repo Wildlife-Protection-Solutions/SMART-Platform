@@ -21,12 +21,10 @@
  */
 package org.wcs.smart.connect.cybertracker;
 
-import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
-import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.CyberTrackerPackage;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;

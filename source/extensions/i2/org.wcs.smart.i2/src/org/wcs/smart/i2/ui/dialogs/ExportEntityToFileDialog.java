@@ -22,6 +22,8 @@
 package org.wcs.smart.i2.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -54,6 +56,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -81,6 +84,7 @@ public class ExportEntityToFileDialog extends SmartStyledTitleDialog {
 	private Text txtOutputFile;
 
 	private DelimiterCombo cmbDelimiters;
+	private ComboViewer cmbCharset;
 	private List<UUID> entityUuids;
 	private ComboViewer cmbFormat;
 	
@@ -156,6 +160,7 @@ public class ExportEntityToFileDialog extends SmartStyledTitleDialog {
 			final boolean includeRelationships = btnIncludeRelationships.getSelection();
 			final boolean includeRecordXml = btnIncludeRecordXml.getSelection();
 			final char delimiter = cmbDelimiters.getDelimiter();
+			final Charset cs = (Charset) cmbCharset.getStructuredSelection().getFirstElement();
 			
 			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 			pmd.run(true, true, new IRunnableWithProgress() {
@@ -176,8 +181,9 @@ public class ExportEntityToFileDialog extends SmartStyledTitleDialog {
 							EntityToXml hh = new EntityToXml(s);
 							hh.export(outFile, entityUuids, includeRecords, includeRelationships, includeRecordXml, progress.split(1));
 						}else if (format == Format.CSV) {
+							
 							EntityRelationshipExporter exporter = new EntityRelationshipExporter();
-							exporter.exportEntities(entityUuids, 0, outFile, delimiter, progress.split(1));
+							exporter.exportEntities(entityUuids, 0, outFile, delimiter, cs, progress.split(1));
 						}
 						// export to file complete
 						getShell().getDisplay().syncExec(() -> MessageDialog.openInformation(getShell(),
@@ -272,6 +278,33 @@ public class ExportEntityToFileDialog extends SmartStyledTitleDialog {
 		
 		cmbDelimiters = new DelimiterCombo (csvOp, SWT.DROP_DOWN);
 		cmbDelimiters.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label lblCharset = new Label(csvOp, SWT.NONE);
+		lblCharset.setText("Character Set:");
+		lblCharset.setToolTipText("The character encoding of the file.  If unsure try UTF-8.");
+		lblCharset.setBackground(csvOp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		cmbCharset = new ComboViewer(csvOp, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbCharset.setContentProvider(ArrayContentProvider.getInstance());
+		cmbCharset.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				return ((Charset)element).displayName();
+			}
+		});
+		cmbCharset.setInput( Charset.availableCharsets().values() );
+		cmbCharset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Charset defaultcs = StandardCharsets.UTF_8;
+		try {
+			String cc = SmartPlugIn.getDefault().getDialogSettings().get(SmartPlugIn.DEFAULT_ENCODING_KEY);
+			if (cc != null && !cc.isBlank()) defaultcs = Charset.forName(cc);
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		cmbCharset.setSelection(new StructuredSelection(defaultcs));
+		cmbCharset.addSelectionChangedListener(e->{
+			SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_ENCODING_KEY, ((Charset)e.getStructuredSelection().getFirstElement()).name());
+		});
+		cmbCharset.getControl().setBackground(csvOp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		Composite xmlOp = new Composite(optionsComposite, SWT.NONE);
 		xmlOp.setLayout(new GridLayout());

@@ -40,6 +40,8 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -48,9 +50,12 @@ import org.wcs.smart.i2.query.CcaaQueryItemProvider;
 import org.wcs.smart.i2.query.DataModelColumn;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IQueryItemProvider;
+import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
+import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for intelligence observation queries.
@@ -62,6 +67,8 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 
 	
 	private IntelObservationQueryResults queryResults;
+	private boolean adduuids = false;
+	private Locale locale;
 	
 	/**
 	 * Parameters required are session, monitor, and date filter object
@@ -77,9 +84,13 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 		Date[] dfilter = (Date[]) parameters.get(Date.class.getName());
 		if (dfilter == null) return null;
 		
-		Locale locale = (Locale) parameters.get(Locale.class.getName());
+		locale = (Locale) parameters.get(Locale.class.getName());
 		if (locale == null){
 			locale = Locale.getDefault();
+		}
+		
+		if (parameters.containsKey(AbstractQueryEngine.INCLUDE_UUID_PARAMETER)) {
+			adduuids = (Boolean)parameters.get(AbstractQueryEngine.INCLUDE_UUID_PARAMETER);
 		}
 		
 		Collection<ConservationArea> cas = (Collection<ConservationArea>)parameters.get(ConservationArea.class.getName());
@@ -180,6 +191,78 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 			}
 			
 		}
+		
+		if (adduuids) {
+			IQueryColumn recorduuid = new IQueryColumn() {
+
+				@Override
+				public String getColumnName() {
+					return Messages.getString("IntelObservationQueryEngine.RecordUuidColumnName", locale); //$NON-NLS-1$
+				}
+
+				@Override
+				public Type getDataType() {
+					return Type.STRING;
+				}
+
+				@Override
+				public String getKey() {
+					return "record_uuid"; //$NON-NLS-1$
+				}
+
+				@Override
+				public Object getValue(IResultItem item) {
+					if (((IntelObservationResultItem)item).getRecordUuid() == null) return ""; //$NON-NLS-1$
+					return UuidUtils.uuidToString( ((IntelObservationResultItem)item).getRecordUuid());
+				}
+
+				@Override
+				public String getValue(IResultItem item, Locale arg1) {
+					return getValue(item).toString();
+				}
+
+				@Override
+				public boolean isVisible() {
+					return true;
+				}};
+				IQueryColumn obsuuid = new IQueryColumn() {
+
+					@Override
+					public String getColumnName() {
+						return Messages.getString("IntelObservationQueryEngine.ObsUuidColumName", locale); //$NON-NLS-1$
+					}
+
+					@Override
+					public Type getDataType() {
+						return Type.STRING;
+					}
+
+					@Override
+					public String getKey() {
+						return "observation_uuid"; //$NON-NLS-1$
+					}
+
+					@Override
+					public Object getValue(IResultItem item) {
+						if (((IntelObservationResultItem)item).getObservationUuid() == null) return ""; //$NON-NLS-1$
+						return UuidUtils.uuidToString( ((IntelObservationResultItem)item).getObservationUuid());
+					}
+
+					@Override
+					public String getValue(IResultItem item, Locale arg1) {
+						return getValue(item).toString();
+					}
+
+					@Override
+					public boolean isVisible() {
+						return true;
+					}
+				};
+		
+				columns.add(recorduuid);
+				columns.add(obsuuid);
+		}
+		
 		queryResults.setQueryColumns(columns);
 	}
 	

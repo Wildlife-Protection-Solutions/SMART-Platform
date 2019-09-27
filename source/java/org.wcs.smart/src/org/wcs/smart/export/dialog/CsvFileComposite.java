@@ -21,6 +21,13 @@
  */
 package org.wcs.smart.export.dialog;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -31,6 +38,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.export.config.ICsvDialogConfig;
 import org.wcs.smart.internal.Messages;
 
@@ -52,6 +60,9 @@ public class CsvFileComposite extends Composite {
 	private Label lblDelimiter;
 	private DelimiterCombo cmbDelimiters;
 
+	private Label lblCharset;
+	private ComboViewer cmbCharset;
+	
 	public CsvFileComposite(Composite parent, int style, ICsvDialogConfig config) {
 		super(parent, style);
 		this.config = config;
@@ -97,6 +108,35 @@ public class CsvFileComposite extends Composite {
 		
 		cmbDelimiters = new DelimiterCombo(this, SWT.DROP_DOWN);
 		
+		new Label(this, SWT.NONE);
+		
+		lblCharset = new Label(this, SWT.NONE);
+		lblCharset.setText(Messages.CsvFileComposite_CharsetLabel);
+		lblCharset.setToolTipText(Messages.CsvFileComposite_CharsetTooltip);
+		lblCharset.setBackground(this.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		cmbCharset = new ComboViewer(this, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbCharset.setContentProvider(ArrayContentProvider.getInstance());
+		cmbCharset.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				return ((Charset)element).displayName();
+			}
+		});
+		cmbCharset.setInput( Charset.availableCharsets().values() );
+		cmbCharset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Charset defaultcs = StandardCharsets.UTF_8;
+		try {
+			String cc = SmartPlugIn.getDefault().getDialogSettings().get(SmartPlugIn.DEFAULT_ENCODING_KEY);
+			if (cc != null && !cc.isBlank()) defaultcs = Charset.forName(cc);
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		cmbCharset.setSelection(new StructuredSelection(defaultcs));
+		cmbCharset.addSelectionChangedListener(e->{
+			SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_ENCODING_KEY, ((Charset)e.getStructuredSelection().getFirstElement()).name());
+		});
+		cmbCharset.getControl().setBackground(this.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
 		if (config.includeHasHeader()){
 			btnHasHeader = new Button(this, SWT.CHECK);
 			String hasHeaderText = config.getHasHeaderText();
@@ -126,6 +166,10 @@ public class CsvFileComposite extends Composite {
 		return cmbDelimiters.getDelimiter();
 	}
 	
+	public Charset getCharacterSet() throws Exception{
+		return (Charset) cmbCharset.getStructuredSelection().getFirstElement();
+	}
+	
 	/**
 	 * Sets the file name text box value
 	 * @param fileName
@@ -149,6 +193,8 @@ public class CsvFileComposite extends Composite {
 		txtInfo.setEnabled(enabled);
 		btnBrowse.setEnabled(enabled);
 		lblDelimiter.setEnabled(enabled);
+		lblCharset.setEnabled(enabled);
+		cmbCharset.getControl().setEnabled(enabled);
 		cmbDelimiters.getControl().setEnabled(enabled);
 		if (btnHasHeader != null){
 			btnHasHeader.setEnabled(enabled);

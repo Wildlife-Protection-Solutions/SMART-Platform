@@ -122,7 +122,7 @@ public class AssetModelDataToXml {
 	private void writeToFile(AssetData data, Path xmlFile) throws JAXBException {
 		JAXBContext context = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName());
 		Marshaller marshaller = context.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, new Boolean(true));
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		
 		ObjectFactory objFactor = new ObjectFactory();
 		

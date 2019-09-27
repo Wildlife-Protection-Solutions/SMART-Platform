@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+  
+   <feature url="features/org.wcs.smart.i2.feature_7.0.0.qualifier.jar" id="org.wcs.smart.i2.feature" version="7.0.0.qualifier">
+      <category name="profiles"/>
+   </feature>
+  
+   <category-def name="profiles" label="SMART Profiles Plug-in">
+      <description>
+         The SMART Profiles plug-in allows users to create a system in their Conservation Area for tracking a variety of items. The flexible design allows users to create their own definition of what they want to track and what attributes to collect for each item.(examples include offenders, animals, cases, cars, employees).  The Profies plug-in allows the tracking of relationships, sightings and updates so you can build up a comprehensive understanding of the item being tracked, how they related to other items, and what is changing over time. This can be used as an Investigative Intelligence System, an Animal Population Tracking System, or any other applications that are developed.
+      </description>
+   </category-def>
+
+</site>

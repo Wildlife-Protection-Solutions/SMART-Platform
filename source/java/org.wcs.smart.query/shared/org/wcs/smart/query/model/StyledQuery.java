@@ -31,10 +31,8 @@ import javax.persistence.Entity;
  */
 
 @Entity
-public abstract class StyledQuery extends Query {
+public abstract class StyledQuery extends Query implements IStyledQuery{
 
-	public static final String QUERY_STYLE_KEY = "queryStyle"; //$NON-NLS-1$
-	
 	private String styleMemento;
 	
 	/**

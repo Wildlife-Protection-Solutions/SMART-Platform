@@ -47,6 +47,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -225,7 +226,7 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 		}
 		
 		setTitle(Messages.EditObservationDialog_Title);
-		if (toEdit.getWaypoint() == null){
+		if (toEdit.getObservationGroup() == null){
 			setMessage(Messages.EditObservationDialog_NewMessage);
 		}else{
 			setMessage(MessageFormat.format(Messages.EditObservationDialog_EditMessage, DateFormat.getDateTimeInstance().format(toEdit.getWaypoint().getDateTime()), toEdit.getWaypoint().getId()));
@@ -254,7 +255,6 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 		attributeKidComposite = new Composite(attributeComposite, SWT.NONE);
 		attributeKidComposite.setLayout(new GridLayout(2, false));
 		attributeKidComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
 		attributeComposite.setContent(attributeKidComposite);
 		
 		attributeFields = new ArrayList<>();
@@ -273,6 +273,7 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 			}
 		}
 		
+		SmartUiUtils.makeTransparent(attributeKidComposite);
 		attributeComposite.layout(true,true);
 		attributeComposite.setMinSize(attributeKidComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}

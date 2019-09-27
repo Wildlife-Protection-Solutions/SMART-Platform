@@ -637,7 +637,7 @@
                   id="org.wcs.smart.query.toolbar.report"
                   label="%showreportperspective.menu.label2"
                   mnemonic="%showreportperspective.menu.mnemonic"
-                  style="radio"
+                  style="push"
                   tooltip="%showreportperspective.menu.tooltip">
                <visibleWhen
                      checkEnabled="false">

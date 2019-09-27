@@ -106,7 +106,6 @@ public class TextAttributeInfoComposite extends CmAttributeInfoComposite {
 					if (text.getText().trim().length() == 0){
 						if (op != null){
 							getSourceObject().getCmAttributeOptions().remove(op.getOptionId());
-							op.setCmAttribute(null);
 						}
 					}else{
 						if (op == null){
@@ -146,13 +145,11 @@ public class TextAttributeInfoComposite extends CmAttributeInfoComposite {
 			@Override
 			public void sourceObjectChanged(Object newObject, Language language) {
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(optionId);
-//				text.setVisible(option != null);
-//				label.setVisible(option != null);
-				if (option != null) {
-					internalChange[0] = true;
-					text.setText(option.getStringValue() != null ? option.getStringValue() : ""); //$NON-NLS-1$
-					internalChange[0] = false;
-				}
+				String value = ""; //$NON-NLS-1$
+				if (option != null && option.getStringValue() != null) value = option.getStringValue();
+				internalChange[0] = true;
+				text.setText(value);
+				internalChange[0] = false;
 			}
 		});
 		return text;

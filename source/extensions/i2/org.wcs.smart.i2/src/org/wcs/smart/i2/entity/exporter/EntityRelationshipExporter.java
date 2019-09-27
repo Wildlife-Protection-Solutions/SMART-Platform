@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.entity.exporter;
 
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
@@ -77,14 +78,14 @@ public class EntityRelationshipExporter {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean exportEntities(Collection<UUID> entities, int degrees, Path csvFile, char delimiter, IProgressMonitor monitor) throws Exception{
+	public boolean exportEntities(Collection<UUID> entities, int degrees, Path csvFile, char delimiter, Charset cs, IProgressMonitor monitor) throws Exception{
 		String name = csvFile.getFileName().toString();
 		int idx = name.lastIndexOf('.');
 		if (idx > 0) {
 			name = name.substring(0,idx);
 		}
 		Path entityFile = csvFile;
-		return doExport(entities, degrees, entityFile, null, delimiter, monitor);
+		return doExport(entities, degrees, entityFile, null, delimiter, cs, monitor);
 	}
 	
 	
@@ -99,10 +100,10 @@ public class EntityRelationshipExporter {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean exportEntity(IntelEntity entity, int degrees, Path outputDirectory, char delimiter, IProgressMonitor monitor) throws Exception{
+	public boolean exportEntity(IntelEntity entity, int degrees, Path outputDirectory, char delimiter, Charset cs, IProgressMonitor monitor) throws Exception{
 		Path entities = getEntityFile(outputDirectory, entity.getIdAttributeAsText());
 		Path relationships = getRelationshipFile(outputDirectory, entity.getIdAttributeAsText());
-		return doExport(Collections.singletonList(entity.getUuid()), degrees, entities, relationships, delimiter, monitor);
+		return doExport(Collections.singletonList(entity.getUuid()), degrees, entities, relationships, delimiter, cs, monitor);
 	}
 	
 	/**
@@ -114,7 +115,7 @@ public class EntityRelationshipExporter {
 	 * @param monitor
 	 * @return
 	 */
-	private boolean doExport(Collection<UUID> entities, int degrees, Path entityFile, Path relationshipFile, char delimiter, IProgressMonitor monitor) throws Exception {
+	private boolean doExport(Collection<UUID> entities, int degrees, Path entityFile, Path relationshipFile, char delimiter, Charset cs, IProgressMonitor monitor) throws Exception {
 		if (monitor == null) monitor = new NullProgressMonitor();
 		
 		monitor.beginTask(Messages.EntityRelationshipExporter_ProgressMsg, 4);
@@ -197,7 +198,7 @@ public class EntityRelationshipExporter {
 			monitor.worked(1);
 			monitor.setTaskName(Messages.EntityRelationshipExporter_TaskMsg3);
 						
-			try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(entityFile), delimiter)){
+			try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(entityFile, cs), delimiter)){
 				String[] data = new String[entityAttributes.size() + 3];
 				int i = 0;
 				data[i++] = Messages.EntityRelationshipExporter_UuidColumnName;
@@ -231,7 +232,7 @@ public class EntityRelationshipExporter {
 			monitor.setTaskName(Messages.EntityRelationshipExporter_TaskMsg4);
 			
 			if (relationshipFile != null) {
-				try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(relationshipFile), delimiter)){
+				try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(relationshipFile, cs), delimiter)){
 					String[] data = new String[relationshipAttributes.size() + 6];
 					int i = 0;
 					data[i++] = Messages.EntityRelationshipExporter_RelationshipUuidColumnName;

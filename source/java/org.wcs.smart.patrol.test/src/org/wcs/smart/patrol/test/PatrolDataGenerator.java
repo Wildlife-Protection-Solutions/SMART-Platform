@@ -16,6 +16,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -27,6 +30,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -39,10 +43,6 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
 
 public class PatrolDataGenerator {
 
@@ -236,7 +236,11 @@ public class PatrolDataGenerator {
 					
 					wp.setId(x+1);
 					wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-					wp.setObservations(new ArrayList<WaypointObservation>());
+					wp.setObservationGroups(new ArrayList<>());
+					
+					WaypointObservationGroup group = new WaypointObservationGroup();
+					
+					group.setObservations(new ArrayList<WaypointObservation>());
 					
 					cx += ((random.nextInt(1000)) / 100000.0) * (random.nextInt(10) <= 5 ? -1 : 1);
 					cy += ((random.nextInt(1000)) / 100000.0) * (random.nextInt(10) <= 5 ? -1 : 1);
@@ -252,14 +256,14 @@ public class PatrolDataGenerator {
 
 					trackPnts[x] = new Coordinate(cx,cy, c2.getTime().getTime());
 					
-					wp.setX(cx);
-					wp.setY(cy);
+					wp.setRawX(cx);
+					wp.setRawY(cy);
 					
 					int size = random.nextInt(8);
 					for (int y = 0; y < size; y ++){
 						WaypointObservation ob = new WaypointObservation();
-						ob.setWaypoint(wp);
-						wp.getObservations().add(ob);
+						ob.setObservationGroup(group);
+						group.getObservations().add(ob);
 					
 						Category cat = categories.get(  random.nextInt(categories.size()-1)  );
 						ob.setCategory(cat);

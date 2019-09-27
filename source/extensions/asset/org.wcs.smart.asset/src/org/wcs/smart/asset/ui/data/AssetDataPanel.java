@@ -637,8 +637,8 @@ public abstract class AssetDataPanel {
 							e.printStackTrace();
 						}});
 					}
-					if (wp.getObservations() != null) {
-						wp.getObservations().forEach(e->{
+					if (wp.getAllObservations() != null) {
+						wp.getAllObservations().forEach(e->{
 							e.getCategory().getFullCategoryName();	
 							if (e.getAttachments() != null) e.getAttachments().forEach(a->{try {
 								a.computeFileLocation(session);

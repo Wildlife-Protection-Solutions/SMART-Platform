@@ -38,7 +38,7 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
-import org.wcs.smart.incident.xml.model.WaypointType;
+import org.wcs.smart.incident.xml.model.v21.WaypointType;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -147,7 +147,7 @@ public class IncidentExporter {
 			if (incident.getAttachments() != null){
 				all.addAll(incident.getAttachments());
 			}
-			for (WaypointObservation wo : incident.getObservations()){
+			for (WaypointObservation wo : incident.getAllObservations()){
 				if (wo.getAttachments() != null){
 					all.addAll(wo.getAttachments());
 				}

@@ -15,12 +15,9 @@
       Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
 
-   <plugin
-         id="org.wcs.smart.i2"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+   <requires>
+      <import feature="org.wcs.smart.i2.feature" version="7.0.0.qualifier"/>
+   </requires>
 
    <plugin
          id="org.wcs.smart.event.i2"

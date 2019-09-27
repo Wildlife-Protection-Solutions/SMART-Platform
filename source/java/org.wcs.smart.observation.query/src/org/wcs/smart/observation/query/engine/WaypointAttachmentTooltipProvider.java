@@ -42,6 +42,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.common.engine.IQueryImageData;
 
@@ -84,7 +85,8 @@ public class WaypointAttachmentTooltipProvider extends Job {
 			}else {
 				WaypointAttachment obw = s.get(WaypointAttachment.class,  data.getAttachment().getUuid());
 				wp = obw.getWaypoint();
-				for (WaypointObservation wo : wp.getObservations()) {
+				
+				for (WaypointObservation wo : wp.getAllObservations()) {
 					if (wo.getAttributes() != null) {
 						for (WaypointObservationAttribute a : wo.getAttributes()) {
 							a.getAttribute().getName();
@@ -93,7 +95,6 @@ public class WaypointAttachmentTooltipProvider extends Job {
 					}
 					wo.getCategory().getFullCategoryName();
 				}
-				
 			}
 			if (wp != null) {
 				wp.getSourceId();
@@ -179,7 +180,7 @@ public class WaypointAttachmentTooltipProvider extends Job {
 						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					}
 				}
-			}else if (fwp.getObservations() != null) {
+			}else if (fwp.getObservationGroups() != null) {
 				
 				l = new Label(main, SWT.NONE);
 				l.setText(Messages.WaypointAttachmentTooltipProvider_WpObsLbl);
@@ -192,26 +193,27 @@ public class WaypointAttachmentTooltipProvider extends Job {
 				other.setBackground(details.getBackground());
 				((GridLayout)other.getLayout()).marginWidth = 0;
 				((GridLayout)other.getLayout()).marginHeight = 0;
-				
-				for (WaypointObservation wo : fwp.getObservations()) {
-					l = new Label(other, SWT.SEPARATOR | SWT.HORIZONTAL);
-					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-					
-					l = new Label(other, SWT.NONE);
-					l.setText(wo.getCategory().getFullCategoryName());
-					l.setBackground(details.getBackground());
-					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-					
-					if (wo.getAttributes() != null) {
-						for (WaypointObservationAttribute a : wo.getAttributes()) {
-							l = new Label(other, SWT.NONE);
-							l.setText(a.getAttribute().getName()+":"); //$NON-NLS-1$
-							l.setBackground(details.getBackground());
-							
-							l = new Label(other, SWT.NONE);
-							l.setText(a.getAttributeValueAsString(Locale.getDefault()));
-							l.setBackground(details.getBackground());
-							l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				for (WaypointObservationGroup g : fwp.getObservationGroups()) {
+					for (WaypointObservation wo : g.getObservations()) {
+						l = new Label(other, SWT.SEPARATOR | SWT.HORIZONTAL);
+						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+						
+						l = new Label(other, SWT.NONE);
+						l.setText(wo.getCategory().getFullCategoryName());
+						l.setBackground(details.getBackground());
+						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+						
+						if (wo.getAttributes() != null) {
+							for (WaypointObservationAttribute a : wo.getAttributes()) {
+								l = new Label(other, SWT.NONE);
+								l.setText(a.getAttribute().getName()+":"); //$NON-NLS-1$
+								l.setBackground(details.getBackground());
+								
+								l = new Label(other, SWT.NONE);
+								l.setText(a.getAttributeValueAsString(Locale.getDefault()));
+								l.setBackground(details.getBackground());
+								l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+							}
 						}
 					}
 				}

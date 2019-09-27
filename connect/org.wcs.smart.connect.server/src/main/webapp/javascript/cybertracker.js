@@ -5,8 +5,10 @@ window.onload = function(){
 	
 	refreshPackageList();
 	refreshApiKeyTable();
+	refreshNavigationList();
 	
 	document.querySelector("#refreshnow").onclick=function(){refreshPackageList(); return false;};
+	document.querySelector("#navrefreshnow").onclick=function(){refreshNavigationList(); return false;};
 }
 
 function confirmResetApi(){
@@ -243,6 +245,142 @@ function packageDeleted(){
 function downloadPackage(){
 	var uuid = this.dataset.uuid;
 	var url = CTURL + "/packages/" + uuid;
+	window.open(url, "_self");
+	return false;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function refreshNavigationList(){
+	
+	//clear current table
+	var objects = document.querySelectorAll("div.ctrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+
+	var parent = document.querySelector("#navlayertable");
+	var row = document.createElement("div");
+	row.className="navrow";
+	row.innerHTML=i18n("cybertracker.loadingpackagesmsg");
+	parent.appendChild(row);
+		
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = createNavigationTable;
+ 	oReq.open("Get", CTURL + "/navigationlayers", true);
+ 	oReq.send();
+}
+
+
+function createNavigationTable(){
+	if (this.status != 200) {
+		var msg = i18n("cybertracker.loadingpackageserror");
+		if (this.status == 401){
+			msg += i18n("cybertracker.unauthorized");
+		}
+		try {
+			msg += JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	//clear current table
+	var objects = document.querySelectorAll("div.navrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	
+	var parent = document.querySelector("#navlayertable");
+ 	var packages = JSON.parse(this.responseText);
+ 	
+ 	for (var i = 0; i < packages.length; i ++){
+ 		var upDate = new Date( Date.parse(packages[i].uploadedDate) );
+ 		
+ 		var row = tableCreateRow(parent, 
+ 				[packages[i].name, packages[i].caLabel, upDate.toLocaleString(),  null, null], 
+ 				"navrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 		
+ 		row.dataset.packageuuid = packages[i].uuid;
+ 		
+ 		
+	 	var downloadca = document.createElement("a");
+	 	downloadca.className="download-icon";
+	 	downloadca.title="download package";
+	 	downloadca.dataset.uuid = packages[i].uuid;
+	 	downloadca.onclick = downloadNavigation;
+	 	downloadca.href="";
+	 	row.childNodes[3].appendChild(downloadca);
+ 		
+ 		var deleteicon = document.createElement("a");
+ 		deleteicon.className="delete-icon";
+ 		deleteicon.title="delete package";
+ 		deleteicon.dataset.uuid = packages[i].uuid;
+ 		deleteicon.onclick = deleteNavigationValidate;
+ 		deleteicon.href="";
+ 		row.childNodes[4].appendChild(deleteicon);
+ 	}
+}
+
+function deleteNavigationValidate(){
+	var uuid = this.dataset.uuid;
+	
+	var formUuidElement = document.querySelector("#deletenavform > input[name=navuuid]");
+	formUuidElement.setAttribute("value", uuid);
+	
+	displayDialog('deleteNavDialog', 'main');
+	
+	return false;
+}
+
+function deleteNavigation(){
+	closeDialog('deleteNavDialog');
+	var uuid = document.querySelector("#deletenavform > input[name=navuuid]").value;
+	var oReq = new XMLHttpRequest();
+ 	oReq.onload = navigationDeleted;
+ 	oReq.open("Delete", CTURL + "/navigationlayers/" + uuid, true);
+ 	oReq.send();
+ 	return false;
+}
+
+
+function navigationDeleted(){
+	if (this.status != 204) {
+		var msg = i18n("cybertracker.packagedeleteerror");
+		if (this.status == 401){
+			msg += i18n("cybertracker.unauthorized");
+		}
+		try {
+			msg += JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	displayInfo(i18n("cybertracker.packagedeletemsg"));
+	refreshNavigationList();
+}
+
+function downloadNavigation(){
+	var uuid = this.dataset.uuid;
+	var url = CTURL + "/navigationlayers/" + uuid;
 	window.open(url, "_self");
 	return false;
 }

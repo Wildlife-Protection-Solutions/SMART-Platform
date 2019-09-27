@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   
+   <feature url="features/org.wcs.smart.connect.feature_7.0.0.qualifier.jar" id="org.wcs.smart.connect.feature" version="7.0.0.qualifier">
+      <category name="connect"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.cybertracker.feature_7.0.0.qualifier.jar" id="org.wcs.smart.connect.cybertracker.feature" version="7.0.0.qualifier">
+      <category name="connect"/>
+   </feature>
+  
+   <category-def name="connect" label="SMART Connect">
+      <description>
+         The SMART Connect plug-in allows SMART Desktop software to communicate and share data over the Internet with a SMART Connect Server.
+      </description>
+   </category-def>
+  
+</site>

@@ -40,6 +40,7 @@ import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 
 /**
  * Job fo saving a set of waypoints to the database.
@@ -79,16 +80,18 @@ public class SaveWaypointJob extends Job {
 					saveSession.saveOrUpdate(wp);
 					
 					// remove observations with no data
-					if (wp.getWaypoint().getObservations() != null) {
-						for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
-							List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
-							for (WaypointObservationAttribute att : wo
-									.getAttributes()) {
-								if (!att.hasValue()) {
-									toDelete.add(att);
+					if (wp.getWaypoint().getObservationGroups() != null) {
+						for (WaypointObservationGroup group : wp.getWaypoint().getObservationGroups()) {
+							for (WaypointObservation wo : group.getObservations()) {
+								List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
+								for (WaypointObservationAttribute att : wo
+										.getAttributes()) {
+									if (!att.hasValue()) {
+										toDelete.add(att);
+									}
 								}
+								wo.getAttributes().removeAll(toDelete);
 							}
-							wo.getAttributes().removeAll(toDelete);
 						}
 					}
 					ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), saveSession);

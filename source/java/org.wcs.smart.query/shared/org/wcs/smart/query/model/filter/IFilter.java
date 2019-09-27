@@ -30,6 +30,7 @@ public interface IFilter {
 
 	public enum FilterType{
 		OBSERVATION("observation"),  //$NON-NLS-1$
+		GROUP("obsgroup"), //$NON-NLS-1$
 		WAYPOINT("waypoint"); //$NON-NLS-1$
 	
 		private String key;
@@ -41,9 +42,8 @@ public interface IFilter {
 			return this.key;
 		}		
 		public static FilterType parse(String type){
-			if (type.equals(WAYPOINT.key)){
-				return WAYPOINT;
-			}
+			if (type.equals(WAYPOINT.key)) return WAYPOINT;
+			if (type.equals(GROUP.key)) return GROUP;
 			return OBSERVATION;
 		}
 	};

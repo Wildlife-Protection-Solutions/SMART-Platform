@@ -47,7 +47,8 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	public static final String DB_VERSION_4_0 = "4.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_5_0 = "5.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_6_0 = "6.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_6_0; //current active version
+	public static final String DB_VERSION_7_0 = "7.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_7_0; //current active version
 	
 	//image registry key for cybertracker dialog image
 	public static final String CT_WIZARD_BANNER = "org.wcs.smart.cybertracker.wizban"; //$NON-NLS-1$
@@ -55,6 +56,7 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	
 	public static final String ICON_DEVICE32 = "org.wcs.smart.cybertracker.icon.device32"; //$NON-NLS-1$
 	public static final String ICON_FILE32 = "org.wcs.smart.cybertracker.icon.file32"; //$NON-NLS-1$
+	public static final String ICON_NAVIGATION = "org.wcs.smart.cybertracker.icon.navigation"; //$NON-NLS-1$
 
 	/**
 	 * Extension id
@@ -130,6 +132,8 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	     
 	     reg.put(ICON_DEVICE32, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool32/device32.png")); //$NON-NLS-1$
 	     reg.put(ICON_FILE32, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool32/file32.png")); //$NON-NLS-1$
+	     
+	     reg.put(ICON_NAVIGATION, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool16/navigation.png")); //$NON-NLS-1$
 	}
 	
 	public static void displayInfo(final String title, final String message) {

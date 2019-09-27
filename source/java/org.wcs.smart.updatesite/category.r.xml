@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+  
+   <feature url="features/org.wcs.smart.r.feature_7.0.0.qualifier.jar" id="org.wcs.smart.r.feature" version="7.0.0.qualifier">
+      <category name="r"/>
+   </feature>
+  
+   <category-def name="r" label="SMART R Scripts Plug-in">
+      <description>
+         The SMART R Script plug-in supports the use of R within the SMART Desktop environment.  R Scripts can be imported into and run from within SMART using the results from queries as parameters to the scripts.
+      </description>
+   </category-def>
+</site>

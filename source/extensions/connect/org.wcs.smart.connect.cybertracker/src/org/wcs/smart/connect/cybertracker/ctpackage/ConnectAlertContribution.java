@@ -82,7 +82,7 @@ public class ConnectAlertContribution extends AbstractConnectPackageContribution
 		
 		String[] parts = null;
 		try {
-			parts = super.getServerDetails(context, ctpackage.getConservationArea());
+			parts = super.getServerDetails(context, ctpackage.getConservationArea(), false);
 		}catch (Exception ex) {
 			throw new IOException(ex);
 		}

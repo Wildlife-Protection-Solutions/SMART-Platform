@@ -31,6 +31,7 @@ import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.importexport.AbstractXmlQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
@@ -78,7 +79,8 @@ public abstract class SummaryQueryDefinitionImporter extends AbstractXmlQueryImp
 		for (UuidItemType type : xmlQuery.getUuiditem()){
 			uuidLookup.put(type.getUuid(), type);
 		}
-		
+		String stylePart = null;
+
 		for (QueryPart part : xmlQuery.getQueryPart()) {
 			
 			if (part.getKey().equals("definition")) { //$NON-NLS-1$
@@ -96,10 +98,14 @@ public abstract class SummaryQueryDefinitionImporter extends AbstractXmlQueryImp
 						}
 					}
 				}
+			}else if (part.getKey().equals(IStyledQuery.QUERY_STYLE_KEY)) {
+				stylePart = part.getValue();
 			}
 		}
 		
-		
+		if (summaryQuery instanceof IStyledQuery && stylePart != null){
+			((IStyledQuery)summaryQuery).setStyle(stylePart);
+		}
 		summaryQuery.setConservationArea(ca);
 		summaryQuery.setOwner(ImportQueryUtil.findEmployee(ca));
 		

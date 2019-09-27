@@ -90,7 +90,7 @@ public class PatrolAttachmentTooltipProvider extends Job {
 				wp = obw.getWaypoint();
 				pw = QueryFactory.buildQuery(s,  PatrolWaypoint.class, "id.waypoint", obw.getWaypoint()).uniqueResult(); //$NON-NLS-1$
 				pw.getPatrolLegDay().getPatrolLeg().getPatrol().getId();
-				for (WaypointObservation wo : wp.getObservations()) {
+				for (WaypointObservation wo : wp.getAllObservations()) {
 					if (wo.getAttributes() != null) {
 						for (WaypointObservationAttribute a : wo.getAttributes()) {
 							a.getAttribute().getName();
@@ -180,7 +180,7 @@ public class PatrolAttachmentTooltipProvider extends Job {
 						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					}
 				}
-			}else if (fpw.getWaypoint().getObservations() != null) {
+			}else if (!fpw.getWaypoint().getAllObservations().isEmpty()) {
 //				l = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
 //				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
@@ -196,7 +196,7 @@ public class PatrolAttachmentTooltipProvider extends Job {
 				((GridLayout)other.getLayout()).marginWidth = 0;
 				((GridLayout)other.getLayout()).marginHeight = 0;
 				
-				for (WaypointObservation wo : fpw.getWaypoint().getObservations()) {
+				for (WaypointObservation wo : fpw.getWaypoint().getAllObservations()) {
 					l = new Label(other, SWT.SEPARATOR | SWT.HORIZONTAL);
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 					

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+  
+   <feature url="features/org.wcs.smart.asset.feature_7.0.0.qualifier.jar" id="org.wcs.smart.asset.feature" version="7.0.0.qualifier">
+      <category name="asset"/>
+   </feature>
+  
+   <category-def name="asset" label="SMART Field Sensors (Cameras etc) Plug-in">
+      <description>
+         The SMART Field Sensor plug-in is designed to allow users to load data from sensors they have deployed to the field. The plug-in is built for generic sensors, but data loading is focused on camera traps. Users can configure the system to automatically read image metadata and generate observation data based on the information in the image.
+      </description>
+   </category-def>
+  
+</site>

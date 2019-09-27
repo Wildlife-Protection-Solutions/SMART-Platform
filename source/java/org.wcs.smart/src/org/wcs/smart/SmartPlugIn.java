@@ -83,6 +83,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * dialog setting key for csv file delimiter
 	 */
 	public static final String DEFAULT_DELIMITER_KEY = "CSV_FILE_DELIMITER"; //$NON-NLS-1$
+
+	/**
+	 * dialog setting key for csv file encoding
+	 */
+	public static final String DEFAULT_ENCODING_KEY = "CSV_FILE_ENCODING"; //$NON-NLS-1$
 	
 	/**
 	 * Image descriptor key for smart employee

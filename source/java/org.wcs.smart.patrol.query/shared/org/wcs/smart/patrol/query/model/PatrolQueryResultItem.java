@@ -108,7 +108,9 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private String lastModifiedBy;
 	private Date lastModified;
 	
+	private UUID groupUuid;
 	private UUID observationUuid;
+	
 	private List<byte[]> tracks = null;
 	
 
@@ -117,6 +119,20 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 */
 	public String getPatrolId() {
 		return patrolId;
+	}
+	
+	/**
+	 * @param observationUuid the observation uuid
+	 */
+	public void setObservationGroupUuid(UUID groupUuid){
+		this.groupUuid = groupUuid;
+	}
+	
+	/**
+	 * @return the observation uuid
+	 */
+	public UUID getObservationGroupUuid(){
+		return this.groupUuid;
 	}
 	
 	/**
