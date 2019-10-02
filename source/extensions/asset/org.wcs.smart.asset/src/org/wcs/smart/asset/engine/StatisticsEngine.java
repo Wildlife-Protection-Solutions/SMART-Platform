@@ -133,7 +133,7 @@ public enum StatisticsEngine {
 	}
 	
 	private Long computeNumberOfUnTagged(Session session, AssetDeployment deployment) {
-		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.waypoint w WHERE aw.assetDeployment=:deployment AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservation)"; //$NON-NLS-1$
+		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.waypoint w WHERE aw.assetDeployment=:deployment AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservationGroup)"; //$NON-NLS-1$
 		Query<?> query = session.createQuery(hql).setParameter("deployment",  deployment); //$NON-NLS-1$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
@@ -141,7 +141,7 @@ public enum StatisticsEngine {
 	
 	@SuppressWarnings("unchecked")
 	private List<Object[]> computeStatsPerCategory(Session session, AssetDeployment deployment) {
-		String sql = "SELECT c.category_uuid, count(*) FROM  (SELECT distinct a.uuid, c.CATEGORY_UUID FROM smart.asset_waypoint aw join smart.waypoint a on aw.wp_uuid = a.uuid join smart.WP_OBSERVATION c on a.uuid = c.WP_UUID and aw.asset_deployment_uuid = :uuid) c group by c.category_uuid"; //$NON-NLS-1$
+		String sql = "SELECT c.category_uuid, count(*) FROM  (SELECT distinct a.uuid, c.CATEGORY_UUID FROM smart.asset_waypoint aw join smart.waypoint a on aw.wp_uuid = a.uuid join smart.wp_observation_group g on a.uuid = g.wp_uuid join smart.WP_OBSERVATION c on g.uuid = c.wp_group_uuid and aw.asset_deployment_uuid = :uuid) c group by c.category_uuid"; //$NON-NLS-1$
 		
 		List<Object> data = session.createNativeQuery(sql).setParameter("uuid", deployment.getUuid()).list(); //$NON-NLS-1$
 		
@@ -243,7 +243,7 @@ public enum StatisticsEngine {
 	
 	
 	private Long computeNumberOfUnTagged(Session session, AssetStation station) {
-		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.assetDeployment d JOIN aw.id.waypoint w WHERE d.stationLocation.station=:station AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservation)"; //$NON-NLS-1$
+		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.assetDeployment d JOIN aw.id.waypoint w WHERE d.stationLocation.station=:station AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservationGroup)"; //$NON-NLS-1$
 		Query<?> query = session.createQuery(hql).setParameter("station",  station); //$NON-NLS-1$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
@@ -256,7 +256,9 @@ public enum StatisticsEngine {
 		sb.append("SELECT distinct a.uuid, c.CATEGORY_UUID ");  //$NON-NLS-1$
 		sb.append(" FROM smart.asset_waypoint aw join smart.ASSET_DEPLOYMENT d on aw.asset_deployment_uuid = d.uuid ");  //$NON-NLS-1$
 		sb.append(" join smart.asset_station_location l on l.uuid = d.station_location_uuid and l.station_uuid = :station ");  //$NON-NLS-1$
-		sb.append(" join smart.waypoint a on aw.wp_uuid = a.uuid join smart.WP_OBSERVATION c on a.uuid = c.WP_UUID ) c group by c.category_uuid"); //$NON-NLS-1$
+		sb.append(" join smart.waypoint a on aw.wp_uuid = a.uuid "); //$NON-NLS-1$
+		sb.append(" join smart.wp_observation_group g on g.wp_uuid = a.uuid "); //$NON-NLS-1$
+		sb.append(" join smart.WP_OBSERVATION c on g.uuid = c.wp_group_uuid ) c group by c.category_uuid"); //$NON-NLS-1$
 		
 		List<Object> data = session.createNativeQuery(sb.toString()).setParameter("station", station.getUuid()).list(); //$NON-NLS-1$
 		
@@ -354,7 +356,7 @@ public enum StatisticsEngine {
 	}
 	
 	private Long computeNumberOfUnTagged(Session session, AssetStationLocation location) {
-		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.assetDeployment d JOIN aw.id.waypoint w WHERE d.stationLocation=:location AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservation)"; //$NON-NLS-1$
+		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.assetDeployment d JOIN aw.id.waypoint w WHERE d.stationLocation=:location AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservationGroup)"; //$NON-NLS-1$
 		Query<?> query = session.createQuery(hql).setParameter("location",  location); //$NON-NLS-1$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
@@ -367,7 +369,9 @@ public enum StatisticsEngine {
 		sb.append("SELECT distinct a.uuid, c.CATEGORY_UUID ");  //$NON-NLS-1$
 		sb.append(" FROM smart.asset_waypoint aw join smart.ASSET_DEPLOYMENT d on aw.asset_deployment_uuid = d.uuid ");  //$NON-NLS-1$
 		sb.append(" AND d.station_location_uuid = :location ");  //$NON-NLS-1$
-		sb.append(" join smart.waypoint a on aw.wp_uuid = a.uuid join smart.WP_OBSERVATION c on a.uuid = c.WP_UUID ) c group by c.category_uuid"); //$NON-NLS-1$
+		sb.append(" join smart.waypoint a on aw.wp_uuid = a.uuid "); //$NON-NLS-1$
+		sb.append(" join smart.wp_observation_group g on g.uuid = a.uuid " ); //$NON-NLS-1$
+		sb.append(" join smart.WP_OBSERVATION c on g.uuid = c.wp_group_uuid ) c group by c.category_uuid"); //$NON-NLS-1$
 		
 		List<Object> data = session.createNativeQuery(sb.toString()).setParameter("location", location.getUuid()).list(); //$NON-NLS-1$
 		

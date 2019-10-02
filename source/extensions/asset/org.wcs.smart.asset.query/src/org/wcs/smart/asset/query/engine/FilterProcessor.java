@@ -50,8 +50,10 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.query.common.engine.visitors.AttributeFilterCollectorVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.model.Query;
@@ -100,8 +102,8 @@ public class FilterProcessor implements IFilterProcessor {
 	public void dropTemporaryTables(Connection c){
 		engine.dropTable(c, observationTable);
 		
-		for (String tableName: engine.filterTables.values()){
-			engine.dropTable(c,  tableName);
+		for (FilterTable tableName: engine.filterTables.values()){
+			engine.dropTable(c,  tableName.tablename);
 		}
 	}
 
@@ -131,7 +133,7 @@ public class FilterProcessor implements IFilterProcessor {
 		}
 		qFilter.accept(observationFilterVisitor);	
 		
-		Map<AssetFilter, String> assetFilterToTableName = processAssetTables(c, qFilter, dateFilter, caFilter, progress.split(1));
+		Map<AssetFilter, FilterTable> assetFilterToTableName = processAssetTables(c, qFilter, dateFilter, caFilter, progress.split(1));
 		
 		SubMonitor sub = progress.split(1);
 		if (observationFilterVisitor.hasAttributeFilter()){
@@ -205,7 +207,7 @@ public class FilterProcessor implements IFilterProcessor {
 			DateFilter dateFilter, 
 			ConservationAreaFilter caFilter,
 			Connection c,
-			boolean populateObservation, Map<AssetFilter,String> assetFilterTables)
+			boolean populateObservation, Map<AssetFilter, FilterTable> assetFilterTables)
 			throws SQLException {
 
 		AssetFilterCollector assetVisitor = new AssetFilterCollector();
@@ -226,10 +228,10 @@ public class FilterProcessor implements IFilterProcessor {
 		usedTables.add(Waypoint.class);
 		sql.append(namePrefix(Waypoint.class));
 		
-		for (String t : assetFilterTables.values()) {
+		for (FilterTable t : assetFilterTables.values()) {
 			sql.append(" left join "); //$NON-NLS-1$
-			sql.append(t);
-			sql.append(" on " + t + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			sql.append(t.tablename);
+			sql.append(" on " + t.tablename + "." + t.columnname + " = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 		
 		engine.filterTables.clear();
@@ -240,13 +242,22 @@ public class FilterProcessor implements IFilterProcessor {
 				observationFilterVisitor.hasCategoryFilter()){
 		
 			sql.append(" left join "); //$NON-NLS-1$
-			sql.append(namePrefix(WaypointObservation.class));
-			usedTables.add(WaypointObservation.class);
+			sql.append(namePrefix(WaypointObservationGroup.class));
+			usedTables.add(WaypointObservationGroup.class);
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(prefix(Waypoint.class));
 			sql.append(".uuid = "); //$NON-NLS-1$
-			sql.append(prefix(WaypointObservation.class));
+			sql.append(prefix(WaypointObservationGroup.class));
 			sql.append(".wp_uuid "); //$NON-NLS-1$
+			
+			sql.append(" left join "); //$NON-NLS-1$
+			sql.append(namePrefix(WaypointObservation.class));
+			usedTables.add(WaypointObservation.class);
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationGroup.class));
+			sql.append(".uuid = "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservation.class));
+			sql.append(".wp_group_uuid "); //$NON-NLS-1$
 		}	
 		
 		if (observationFilterVisitor.hasAttributeFilter() || 
@@ -385,14 +396,17 @@ public class FilterProcessor implements IFilterProcessor {
 
 				sql.append("FROM "); //$NON-NLS-1$
 				sql.append(namePrefix(Waypoint.class));
-			
-
 
 				sql.append(" join "); //$NON-NLS-1$
-				sql.append(name(WaypointObservation.class)
-						+ " as " + prefix(WaypointObservation.class)); //$NON-NLS-1$
-				sql.append(" on " + prefix(Waypoint.class) + ".uuid = " + prefix(WaypointObservation.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				sql.append(name(WaypointObservationGroup.class));
+				sql.append(" as " + prefix(WaypointObservationGroup.class)); //$NON-NLS-1$
+				sql.append(" on " + prefix(Waypoint.class) + ".uuid = " + prefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(name(WaypointObservation.class));
+				sql.append(" as " + prefix(WaypointObservation.class)); //$NON-NLS-1$
+				sql.append(" on " + prefix(WaypointObservationGroup.class) + ".uuid = " + prefix(WaypointObservation.class) + ".wp_group_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
 				sql.append(" join "); //$NON-NLS-1$
 				sql.append(name(WaypointObservationAttribute.class)
 						+ " as " + prefix(WaypointObservationAttribute.class)); //$NON-NLS-1$
@@ -504,7 +518,7 @@ public class FilterProcessor implements IFilterProcessor {
 	 * @param monitor
 	 * @throws SQLException
 	 */
-	private Map<AssetFilter, String> processAssetTables(Connection c, IFilter filter, 
+	private Map<AssetFilter, FilterTable> processAssetTables(Connection c, IFilter filter, 
 			DateFilter dateFilter, ConservationAreaFilter caFilter, IProgressMonitor monitor)
 			throws SQLException {
 		
@@ -515,13 +529,13 @@ public class FilterProcessor implements IFilterProcessor {
 		filter.accept(collector);
 		Collection<AssetFilter> filters = collector.getFilters();
 		
-		Map<AssetFilter, String> filterToTableName = new HashMap<>();
+		Map<AssetFilter, FilterTable> filterToTableName = new HashMap<>();
 		
 		for (AssetFilter assetFilter : filters) {
 			engine.clearParameters();
 			
 			String assetTable = engine.createTempTableName();
-			filterToTableName.put(assetFilter, assetTable);
+			filterToTableName.put(assetFilter, new FilterTable(assetTable, "wp_uuid")); //$NON-NLS-1$
 
 			// -- build temporary table
 			StringBuilder sql = new StringBuilder();

@@ -47,6 +47,7 @@ public class Messages extends NLS {
 	public static String AssetAttachmentTooltipProvider_LocationsLabel;
 	public static String AssetAttachmentTooltipProvider_ObservationLabel;
 	public static String AssetAttachmentTooltipProvider_ObservationsLabel;
+	public static String AssetAttachmentTooltipProvider_ObsGroupLabel;
 	public static String AssetAttachmentTooltipProvider_StationLabel;
 	public static String AssetAttachmentTooltipProvider_WpIDLabel;
 	public static String AssetAttributeValueItem_AttributeNotFound;
@@ -79,6 +80,7 @@ public class Messages extends NLS {
 	public static String AssetQueryLabelProvider_LastModifiedByColumnName;
 	public static String AssetQueryLabelProvider_LastModifiedColumnName;
 	public static String AssetQueryLabelProvider_LocationsColumnName;
+	public static String AssetQueryLabelProvider_ObsGroupColumnName;
 	public static String AssetQueryLabelProvider_StationColumnName;
 	public static String AssetQueryLabelProvider_StationLocationFilterOptoin;
 	public static String AssetQueryLabelProvider_TotalHoursColumnName;

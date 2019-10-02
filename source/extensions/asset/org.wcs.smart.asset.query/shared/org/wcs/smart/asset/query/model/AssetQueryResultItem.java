@@ -70,6 +70,7 @@ public class AssetQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private String waypointObserver;
 	private Date waypointDate;
 	
+	private UUID observationGroupUuid;
 	private UUID observationUuid;
 	private String[] observationCategory;
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
@@ -108,6 +109,21 @@ public class AssetQueryResultItem implements IGeometryResultItem, IAdaptable{
 	public int getIncidentLength() {
 		return this.incidentLength;
 	}
+	
+	/**
+	 * @param groupUuid the observation group uuid
+	 */
+	public void setObservationGroupUuid(UUID groupUuid){
+		this.observationGroupUuid = groupUuid;
+	}
+	
+	/**
+	 * @return the observation group uuid
+	 */
+	public UUID getObservationGroupUuid(){
+		return this.observationGroupUuid;
+	}
+	
 	
 	/**
 	 * @param observationUuid the observation uuid

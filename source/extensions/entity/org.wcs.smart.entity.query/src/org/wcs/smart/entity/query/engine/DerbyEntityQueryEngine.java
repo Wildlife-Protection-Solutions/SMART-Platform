@@ -53,7 +53,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public abstract class DerbyEntityQueryEngine extends AbstractQueryEngine{
 
-	protected HashMap<IFilter, String> filterTables = new HashMap<IFilter, String>();
+	protected HashMap<IFilter, FilterTable> filterTables = new HashMap<>();
 
 	static {
 		tablePrefix.put(Entity.class, "e"); //$NON-NLS-1$
@@ -141,7 +141,9 @@ public abstract class DerbyEntityQueryEngine extends AbstractQueryEngine{
 	protected IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query){
 		if (filterType == IFilter.FilterType.OBSERVATION){
 			return new FilterProcessor(queryDataTable, this, query);
-		}else{
+		}else if (filterType == IFilter.FilterType.GROUP) {
+			return new WaypointGroupFilterProcessor(queryDataTable, this, query);
+		}else {
 			return new WaypointFilterProcessor(queryDataTable, this, query);
 		}
 	}

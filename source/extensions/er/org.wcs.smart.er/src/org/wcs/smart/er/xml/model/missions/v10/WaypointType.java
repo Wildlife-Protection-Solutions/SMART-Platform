@@ -6,7 +6,7 @@
 //
 
 
-package org.wcs.smart.er.xml.model.missions;
+package org.wcs.smart.er.xml.model.missions.v10;
 
 import java.util.ArrayList;
 import java.util.List;

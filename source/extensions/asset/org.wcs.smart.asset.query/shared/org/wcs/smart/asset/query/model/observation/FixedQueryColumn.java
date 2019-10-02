@@ -30,6 +30,7 @@ import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.ui.IQueryAssetLabelProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Class represents one of the fixed table columns that
@@ -66,7 +67,8 @@ public class FixedQueryColumn extends QueryColumn {
 		WAYPOINT_COMMENT(ColumnType.STRING,"waypoint:comment"), //$NON-NLS-1$
 		
 		WAYPOINT_LASTMODIFIED( ColumnType.DATETIME,"waypoint:modified"),   //$NON-NLS-1$
-		WAYPOINT_LASTMODIFIEDBY( ColumnType.STRING,"waypoint:modifiedby");   //$NON-NLS-1$
+		WAYPOINT_LASTMODIFIEDBY( ColumnType.STRING,"waypoint:modifiedby"),   //$NON-NLS-1$
+		OBS_GROUP_ID(ColumnType.STRING,"ob:groupid"); //$NON-NLS-1$
 		
 		private ColumnType type;
 		private String key;
@@ -147,6 +149,9 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getLastModifiedDate();
 			case WAYPOINT_LASTMODIFIEDBY:
 				return item.getLastModifiedBy();
+			case OBS_GROUP_ID:
+				if (item.getObservationGroupUuid() == null) return ""; //$NON-NLS-1$
+				return UuidUtils.uuidToString(item.getObservationGroupUuid());
 			}
 		}
 		return ""; //$NON-NLS-1$

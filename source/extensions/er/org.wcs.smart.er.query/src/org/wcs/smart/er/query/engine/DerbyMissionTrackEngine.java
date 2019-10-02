@@ -462,8 +462,4 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		super.buildTemporaryTableIndexes(c, tableName);	
 	}
 	
-	@Override
-	public String getFilterTablesJoinColum(){
-		return "missiontrack_uuid"; //$NON-NLS-1$
-	}
 }

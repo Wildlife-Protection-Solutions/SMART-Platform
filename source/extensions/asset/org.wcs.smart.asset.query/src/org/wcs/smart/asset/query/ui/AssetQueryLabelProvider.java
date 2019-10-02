@@ -57,6 +57,7 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 			case INCIDENT_LENGTH: return Messages.AssetQueryLabelProvider_IncidentLengthColumnName;
 			case WAYPOINT_LASTMODIFIED: return Messages.AssetQueryLabelProvider_LastModifiedColumnName;
 			case WAYPOINT_LASTMODIFIEDBY: return Messages.AssetQueryLabelProvider_LastModifiedByColumnName;
+			case OBS_GROUP_ID: return Messages.AssetQueryLabelProvider_ObsGroupColumnName;
 			}
 		}
 		if (item instanceof AssetValueOption){

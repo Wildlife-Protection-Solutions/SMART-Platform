@@ -29,6 +29,7 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.er.query.ISurveyQueryLabelProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Class represents one of the fixed table columns that
@@ -88,7 +89,9 @@ public class SurveyQueryColumn extends QueryColumn {
 		WAYPOINT_COMMENT( ColumnType.STRING,"waypoint:comment"),  //$NON-NLS-1$
 		WAYPOINT_OBSERVER( ColumnType.STRING, "waypoint:observer"),   //$NON-NLS-1$
 		WAYPOINT_LAST_MODIFIED(ColumnType.DATETIME, "waypoint:modified"), //$NON-NLS-1$
-		WAYPOINT_LAST_MODIFIED_BY(ColumnType.STRING, "waypoint:modifiedby"); //$NON-NLS-1$
+		WAYPOINT_LAST_MODIFIED_BY(ColumnType.STRING, "waypoint:modifiedby"), //$NON-NLS-1$
+		OBS_GROUP_ID(ColumnType.STRING,"ob:groupid"); //$NON-NLS-1$
+
 		
 		private ColumnType type;
 		private String key;
@@ -162,6 +165,7 @@ public class SurveyQueryColumn extends QueryColumn {
 				case WAYPOINT_OBSERVER: return item.getWaypointObserver();
 				case WAYPOINT_LAST_MODIFIED: return item.getLastModifiedDate();
 				case WAYPOINT_LAST_MODIFIED_BY: return item.getLastModifiedBy();
+				case OBS_GROUP_ID: return item.getObservationGroupUuid() == null ? "" : UuidUtils.uuidToString(item.getObservationGroupUuid()); //$NON-NLS-1$
 				default: return null;
 			}
 		}else if (queryResultItem instanceof MissionTrackResultItem){

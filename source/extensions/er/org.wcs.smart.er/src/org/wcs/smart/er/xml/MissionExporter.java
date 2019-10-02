@@ -41,7 +41,7 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
-import org.wcs.smart.er.xml.model.missions.MissionType;
+import org.wcs.smart.er.xml.model.missions.v11.MissionType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -160,7 +160,7 @@ public class MissionExporter {
 					if (wp.getWaypoint().getAttachments() != null){
 						allAttach.addAll(wp.getWaypoint().getAttachments());
 					}
-					for (WaypointObservation wo : wp.getWaypoint().getObservations()){
+					for (WaypointObservation wo : wp.getWaypoint().getAllObservations()){
 						if (wo.getAttachments() != null){
 							allAttach.addAll(wo.getAttachments());
 						}

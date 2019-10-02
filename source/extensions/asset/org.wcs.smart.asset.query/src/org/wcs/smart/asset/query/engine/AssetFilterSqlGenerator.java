@@ -28,6 +28,7 @@ import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.common.engine.IQueryEngine;
+import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
 import org.wcs.smart.query.model.filter.AttributeFilter;
@@ -97,10 +98,9 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	@Override
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((AssetQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
-		}
+		FilterTable t = ((AssetQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$
+		
 		return super.asSql(filter, engine);
 	}
 	
@@ -110,10 +110,8 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	@Override
 	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((AssetQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null ";  //$NON-NLS-1$
-		}
+		FilterTable t = ((AssetQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$\
 		return super.asSql(filter, engine);
 	}
 	
@@ -122,10 +120,8 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	@Override
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((AssetQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
-		}
+		FilterTable t = ((AssetQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$\
 		return super.asSql(filter, engine);	
 	}
 		
@@ -133,10 +129,9 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * Asset Filter
 	 */
 	protected String asSql(AssetFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((AssetQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
-		}
+		FilterTable t = ((AssetQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$
+		
 		throw new SQLException(Messages.AssetFilterSqlGenerator_AssetFilterError);	
 	}
 	

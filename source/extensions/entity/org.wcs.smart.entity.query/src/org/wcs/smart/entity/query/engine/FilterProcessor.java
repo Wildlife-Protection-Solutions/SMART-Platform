@@ -40,6 +40,7 @@ import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.model.Query;
@@ -248,15 +249,23 @@ public class FilterProcessor implements IFilterProcessor {
 				observationFilterVisitor.hasAttributeFilter() || 
 				observationFilterVisitor.hasCategoryFilter()){
 		
-		
+			sql.append(" left join "); //$NON-NLS-1$
+			sql.append(namePrefix(WaypointObservationGroup.class));
+			usedTables.add(WaypointObservationGroup.class);
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(Waypoint.class));
+			sql.append(".uuid = "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationGroup.class));
+			sql.append(".wp_uuid "); //$NON-NLS-1$
+			
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(namePrefix(WaypointObservation.class));
 			usedTables.add(WaypointObservation.class);
 			sql.append(" on "); //$NON-NLS-1$
-			sql.append(prefix(Waypoint.class));
+			sql.append(prefix(WaypointObservationGroup.class));
 			sql.append(".uuid = "); //$NON-NLS-1$
 			sql.append(prefix(WaypointObservation.class));
-			sql.append(".wp_uuid "); //$NON-NLS-1$
+			sql.append(".wp_group_uuid "); //$NON-NLS-1$
 		}	
 		
 		if (observationFilterVisitor.hasAttributeFilter() || 
@@ -410,9 +419,14 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append(prefix(Waypoint.class)); 
 	
 				sql.append(" join "); //$NON-NLS-1$
-				sql.append(name(WaypointObservation.class)
-						+ " as " + prefix(WaypointObservation.class)); //$NON-NLS-1$
-				sql.append(" on " + prefix(Waypoint.class) + ".uuid = " + prefix(WaypointObservation.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				sql.append(name(WaypointObservationGroup.class));
+				sql.append(" as " + prefix(WaypointObservationGroup.class)); //$NON-NLS-1$
+				sql.append(" on " + prefix(Waypoint.class) + ".uuid = " + prefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(name(WaypointObservation.class));
+				sql.append(" as " + prefix(WaypointObservation.class)); //$NON-NLS-1$
+				sql.append(" on " + prefix(WaypointObservationGroup.class) + ".uuid = " + prefix(WaypointObservation.class) + ".wp_group_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
 				if (caFilter != null) {
 					String cfilter = EntityFilterToSqlGenerator.INSTANCE.toSql(caFilter, engine);

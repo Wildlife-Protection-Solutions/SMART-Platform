@@ -22,8 +22,8 @@
 package org.wcs.smart.er.xml;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -51,7 +51,6 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.ui.mision.editor.WaypointAttachmentInterceptor;
-import org.wcs.smart.er.xml.model.missions.MissionType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SharedUtils;
@@ -91,7 +90,7 @@ public class MissionImporter {
 		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_MISSION_TASKNAME, 4);
 		
 		progress.split(1);
-		MissionType ptype = null;
+		
 		String[] files;
 		File directory;
 		if (SmartUtils.isZip(zipFile)){
@@ -109,7 +108,10 @@ public class MissionImporter {
 		}
 		
 		progress.split(1);
+		IXmlToMissionConverter converter = null;
+		Path xmlFile = null;
 		if (files != null){
+			//search for xml file
 			progress.subTask(Messages.MissionImporter_2);
 			for (int i = 0; i < files.length; i ++){
 				File f;
@@ -119,21 +121,17 @@ public class MissionImporter {
 					f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
 				}
 				if (f.isFile()){
-					//lets try reading the
-					try(FileInputStream in = new FileInputStream(f)){
-						ptype = MissionXmlManager.readDataModel(in);
-					}catch (Exception ex){
-						EcologicalRecordsPlugIn.log(null, ex);
-						ptype = null;
+					try {
+						converter = MissionXmlManager.findXmlConverter(f);
+						xmlFile = f.toPath();
+					}catch (Exception ex) {
+						
 					}
-					if (ptype != null){
-						//we've found it!
-						break;
-					}
+					if (converter != null) break; //found it
 				}
 			}
 		}
-		if (ptype == null){
+		if (converter == null){
 			try{
 				if(directory.isDirectory()){
 					FileUtils.deleteDirectory(directory);
@@ -144,7 +142,7 @@ public class MissionImporter {
 			throw new Exception (Messages.MissionImporter_3);
 		}
 		
-		Mission m = convertAndSave(ptype, keepIDs, directory, progress.split(2));
+		Mission m = convertAndSave(converter, xmlFile, keepIDs, directory, progress.split(2));
 		
 		progress.subTask(Messages.MissionImporter_4);
 		try{
@@ -174,15 +172,18 @@ public class MissionImporter {
 	 * @return created mission or null
 	 * @throws Exception
 	 */
-	private static Mission  convertAndSave(MissionType xmlMission, final boolean keepIDs, File attachmentDirectory, IProgressMonitor monitor) throws Exception {
+	private static Mission  convertAndSave(IXmlToMissionConverter converter, Path file, final boolean keepIDs, File attachmentDirectory, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_MISSION_TASKNAME, 3);
-		XMLtoMissionConverter converter = new XMLtoMissionConverter();
 		
 		try (Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
 			progress.split(1);
 			progress.subTask(Messages.MissionImporter_5);
+			
+			converter.fromXml(file, keepIDs, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
+			
+			Mission xmlMission = converter.getImportedMission();
 			//check if a mission in the database with the given mission id already exists
-			if (xmlMission.getId() != null){
+			if (xmlMission != null && xmlMission.getId() != null){
 				if (SurveyHibernateManager.isDuplicateId(xmlMission.getId(), SmartDB.getCurrentConservationArea(), session)){
 					
 					//duplicate mission id
@@ -211,7 +212,7 @@ public class MissionImporter {
 				}
 			}		
 			progress.subTask(Messages.MissionImporter_9);
-			converter.fromXml(xmlMission, keepIDs, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
+			
 		}
 
 		progress.split(1);

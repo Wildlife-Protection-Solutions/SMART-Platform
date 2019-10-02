@@ -53,6 +53,7 @@ import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -523,6 +524,13 @@ public class AssetPagedObservationResult extends AssetPagedWaypointResult implem
 				wp = wo.getWaypoint();
 				s.delete(wo);
 
+				//delete empty observation groups
+				wo.getObservationGroup().getObservations().remove(wo);
+				if (wo.getObservationGroup().getObservations().isEmpty()) {
+					s.delete(wo.getObservationGroup());
+					wo.getObservationGroup().getWaypoint().getObservationGroups().remove(wo.getObservationGroup());
+				}
+				
 				//update category names in query results table
 				StringBuilder sql = new StringBuilder();
 				sql.append("SELECT count(*) FROM " + queryTempTable + " WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -539,7 +547,7 @@ public class AssetPagedObservationResult extends AssetPagedWaypointResult implem
 					((AssetObservationEngine) engine).updateResultCount(s, this);
 				}else{
 					sql = new StringBuilder();
-					sql.append(" UPDATE " + queryTempTable + " SET ob_uuid = null,"); //$NON-NLS-1$ //$NON-NLS-2$
+					sql.append(" UPDATE " + queryTempTable + " SET ob_uuid = null, wp_group_uuid = null, "); //$NON-NLS-1$ //$NON-NLS-2$
 					for (int j = 0; j < ((AssetObservationEngine)engine).getCategoryCount(); j++) {
 						sql.append("category_" + j + " = null, "); //$NON-NLS-1$ //$NON-NLS-2$
 					}
@@ -578,11 +586,22 @@ public class AssetPagedObservationResult extends AssetPagedWaypointResult implem
 				if (newOb.getUuid() == null){
 					//new
 					Waypoint wp = (Waypoint) s.get(Waypoint.class, item.getWaypointUuid());
-					if (wp.getObservations() == null) wp.setObservations(new ArrayList<>());
+					if (wp.getObservationGroups() == null)  wp.setObservationGroups(new ArrayList<>());
+					if (wp.getObservationGroups().isEmpty()) {
+						WaypointObservationGroup g = new WaypointObservationGroup();
+						g.setObservations(new ArrayList<>());
+						g.setWaypoint(wp);
+						wp.getObservationGroups().add(g);
+						s.save(g);
+						item.setObservationGroupUuid(g.getUuid());
+					}
+					//add to first group
+					WaypointObservationGroup first = wp.getObservationGroups().get(0);
 					wo = newOb;
-					wp.getObservations().add(wo);
-					wo.setWaypoint(wp);
+					wo.setObservationGroup(first);
+					first.getObservations().add(wo);
 					s.save(wo);
+					
 				}else{
 					wo = (WaypointObservation) s.get(WaypointObservation.class, newOb.getUuid());
 					if (wo == null) return false;
@@ -614,6 +633,9 @@ public class AssetPagedObservationResult extends AssetPagedWaypointResult implem
 				if (item.getObservationUuid()==null){
 					sql.append("ob_uuid = :obuuid, "); //$NON-NLS-1$
 					params.put("obuuid", wo.getUuid()); //$NON-NLS-1$
+					
+					sql.append("wp_group_uuid = :grpuuid, "); //$NON-NLS-1$
+					params.put("grpuuid", wo.getObservationGroup().getUuid()); //$NON-NLS-1$
 				}
 				
 				for (int j = 0; j < ((AssetObservationEngine)engine).getCategoryCount(); j++) {

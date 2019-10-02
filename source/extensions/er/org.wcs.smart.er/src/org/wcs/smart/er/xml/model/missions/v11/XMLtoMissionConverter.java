@@ -19,9 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.xml;
+package org.wcs.smart.er.xml.model.missions.v11;
 
 import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -29,6 +32,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.hibernate.Session;
@@ -55,15 +62,18 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
-import org.wcs.smart.er.xml.model.missions.MembersType;
-import org.wcs.smart.er.xml.model.missions.MissionDayType;
-import org.wcs.smart.er.xml.model.missions.MissionPropertyValuesType;
-import org.wcs.smart.er.xml.model.missions.MissionType;
-import org.wcs.smart.er.xml.model.missions.SurveyWaypointsType;
-import org.wcs.smart.er.xml.model.missions.TracksType;
-import org.wcs.smart.er.xml.model.missions.WaypointObservationAttributeType;
-import org.wcs.smart.er.xml.model.missions.WaypointObservationType;
-import org.wcs.smart.er.xml.model.missions.WaypointType;
+import org.wcs.smart.er.xml.IXmlToMissionConverter;
+import org.wcs.smart.er.xml.MissionXmlManager;
+import org.wcs.smart.er.xml.model.missions.v11.MembersType;
+import org.wcs.smart.er.xml.model.missions.v11.MissionDayType;
+import org.wcs.smart.er.xml.model.missions.v11.MissionPropertyValuesType;
+import org.wcs.smart.er.xml.model.missions.v11.MissionType;
+import org.wcs.smart.er.xml.model.missions.v11.SurveyWaypointsType;
+import org.wcs.smart.er.xml.model.missions.v11.TracksType;
+import org.wcs.smart.er.xml.model.missions.v11.WaypointObservationAttributeType;
+import org.wcs.smart.er.xml.model.missions.v11.WaypointObservationType;
+import org.wcs.smart.er.xml.model.missions.v11.WaypointObservationGroupType;
+import org.wcs.smart.er.xml.model.missions.v11.WaypointType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -71,6 +81,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 
 /**
  * Converts an xml mission file to a
@@ -79,7 +90,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
  * @author Emily, Jeff
  * @since 1.0.0, 4.0
  */
-public class XMLtoMissionConverter {
+public class XMLtoMissionConverter implements IXmlToMissionConverter{
 	
 	private Session session;
 	private ConservationArea ca;
@@ -110,7 +121,14 @@ public class XMLtoMissionConverter {
 		return mission;
 	}
 	
-	
+	private MissionType readDataModel(InputStream file) throws JAXBException{
+		JAXBContext context = JAXBContext.newInstance("org.wcs.smart.er.xml.model.missions.v11"); //$NON-NLS-1$
+		Unmarshaller un = context.createUnmarshaller();	
+		@SuppressWarnings("unchecked")
+		JAXBElement<MissionType> o = (JAXBElement<MissionType>) un.unmarshal(file);
+		MissionType x = o.getValue();
+		return x;
+	}
 	/**
 	 * Imports a mission from an xml object.
 	 * <p>
@@ -126,7 +144,13 @@ public class XMLtoMissionConverter {
 	 * @param attachmentLocation
 	 * @throws Exception
 	 */
-	public void fromXml(MissionType xml, boolean keepIDs, Session session, ConservationArea ca, File attachmentLocation) throws Exception {
+	public void fromXml(Path xmlPath, boolean keepIDs, Session session, ConservationArea ca, File attachmentLocation) throws Exception {
+		
+		MissionType xml = null;
+		try(InputStream is = Files.newInputStream(xmlPath)){
+			xml = readDataModel(is);
+		}
+		
 		this.session = session;
 		this.ca = ca;
 		this.attachmentLocation = attachmentLocation;
@@ -330,21 +354,27 @@ public class XMLtoMissionConverter {
 			}
 		}
 		
-		if (xml.getObservations().size () > 0){
-			wp.setObservations(new ArrayList<WaypointObservation>());
-			for (WaypointObservationType type : xml.getObservations()){
-				WaypointObservation ob = convertWaypointObservation(type, wp);
-				if (ob != null){
-					wp.getObservations().add(ob);
-				}
+		wp.setObservationGroups(new ArrayList<>());
+		
+		for (WaypointObservationGroupType xmlgroup : xml.getGroups()) {
+			WaypointObservationGroup group = new WaypointObservationGroup();
+			group.setWaypoint(wp);
+			group.setObservations(new ArrayList<WaypointObservation>());
+			for (WaypointObservationType type : xmlgroup.getObservations()){
+				WaypointObservation ob = convertWaypointObservation(type, group, wp);
+				if (ob != null) group.getObservations().add(ob);
+			}
+			
+			if (!group.getObservations().isEmpty()) {
+				wp.getObservationGroups().add(group);	
 			}
 		}
 		return wp;
 	}
 	
-	private WaypointObservation convertWaypointObservation(WaypointObservationType xml, Waypoint parent ){
+	private WaypointObservation convertWaypointObservation(WaypointObservationType xml, WaypointObservationGroup parent, Waypoint wp ){
 		WaypointObservation ob = new WaypointObservation();
-		ob.setWaypoint(parent);
+		ob.setObservationGroup(parent);
 		
 		if (attachmentLocation != null){
 			if (xml.getAttachments().size() > 0){
@@ -384,7 +414,7 @@ public class XMLtoMissionConverter {
 		Category cat = findCategory(xml.getCategoryKey());
 		if (cat == null){
 			warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_2,
-					new Object[]{xml.getCategoryKey(),parent.getId() ,DateFormat.getDateTimeInstance().format(parent.getDateTime())  }) 
+					new Object[]{xml.getCategoryKey(),wp.getId() ,DateFormat.getDateTimeInstance().format(wp.getDateTime())  }) 
 					);
 			return null;
 		}else{
@@ -406,13 +436,13 @@ public class XMLtoMissionConverter {
 					}else{
 						warnings.add(
 								MessageFormat.format(Messages.XMLtoMissionConverter_3,
-										new Object[]{parent.getId(), DateFormat.getDateTimeInstance().format(parent.getDateTime()), attribute.getAttribute().getKeyId()})); 
+										new Object[]{wp.getId(), DateFormat.getDateTimeInstance().format(wp.getDateTime()), attribute.getAttribute().getKeyId()})); 
 										
 					}
 				}else{
 					warnings.add(MessageFormat.format(
 						Messages.XMLtoMissionConverter_4, new Object[]{
-							parent.getId(),DateFormat.getDateTimeInstance().format(parent.getDateTime()) }) 
+							wp.getId(),DateFormat.getDateTimeInstance().format(wp.getDateTime()) }) 
 					);
 					
 				}

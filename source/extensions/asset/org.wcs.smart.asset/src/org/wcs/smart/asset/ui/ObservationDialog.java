@@ -24,6 +24,7 @@ package org.wcs.smart.asset.ui;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -33,9 +34,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -49,6 +50,7 @@ import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
@@ -79,6 +81,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.ca.datamodel.AttributeFieldFactory;
 import org.wcs.smart.ui.ca.datamodel.IAttributeField;
@@ -101,7 +104,7 @@ public class ObservationDialog extends SmartStyledDialog {
 	private TableViewer observationTable;
 	private WaypointObservation editObs = null;
 	
-	private List<WaypointObservation> observations;
+	private List<WaypointObservationGroup> groups;
 	
 	private Button btnAdd;
 	private boolean hasChanges = false;
@@ -120,32 +123,39 @@ public class ObservationDialog extends SmartStyledDialog {
 	public ObservationDialog(Shell parentShell, Waypoint waypoint) {
 		super(parentShell);
 		this.waypoint = waypoint;
-		if (waypoint.getObservations() == null){
-			waypoint.setObservations(new ArrayList<WaypointObservation>());
-		}
+		if (waypoint.getObservationGroups() == null) waypoint.setObservationGroups(new ArrayList<>());
 		
 		//clone observations for editing so we can cancel this dialog
-		observations = new ArrayList<WaypointObservation>();
-		for (WaypointObservation o : waypoint.getObservations()){
-			if (toEdit != null && o.getUuid().equals(toEdit.getUuid())) toEdit = o;
-			WaypointObservation copy = new WaypointObservation();
-			copy.setCategory(o.getCategory());
-			copy.setWaypoint(waypoint);
-			copy.setUuid(o.getUuid());
-			copy.setAttributes(new ArrayList<WaypointObservationAttribute>());
-			if (o.getAttributes() != null){
-				for (WaypointObservationAttribute a : o.getAttributes()){
-					WaypointObservationAttribute acopy = new WaypointObservationAttribute();
-					acopy.setAttribute(a.getAttribute());
-					acopy.setAttributeListItem(a.getAttributeListItem());
-					acopy.setAttributeTreeNode(a.getAttributeTreeNode());
-					acopy.setNumberValue(a.getNumberValue());
-					acopy.setObservation(copy);
-					acopy.setStringValue(a.getStringValue());
-					copy.getAttributes().add(acopy);
+		groups = new ArrayList<>();
+		
+		for (WaypointObservationGroup g : waypoint.getObservationGroups()) {
+			WaypointObservationGroup clone = new WaypointObservationGroup();
+			clone.setUuid(g.getUuid());
+			clone.setObservations(new ArrayList<>());
+			clone.setWaypoint(waypoint);
+			
+			for (WaypointObservation o : g.getObservations()) {
+				if (toEdit != null && o.getUuid().equals(toEdit.getUuid())) toEdit = o;
+				WaypointObservation copy = new WaypointObservation();
+				copy.setCategory(o.getCategory());
+				copy.setObservationGroup(clone);
+				copy.setUuid(o.getUuid());
+				copy.setAttributes(new ArrayList<WaypointObservationAttribute>());
+				if (o.getAttributes() != null){
+					for (WaypointObservationAttribute a : o.getAttributes()){
+						WaypointObservationAttribute acopy = new WaypointObservationAttribute();
+						acopy.setAttribute(a.getAttribute());
+						acopy.setAttributeListItem(a.getAttributeListItem());
+						acopy.setAttributeTreeNode(a.getAttributeTreeNode());
+						acopy.setNumberValue(a.getNumberValue());
+						acopy.setObservation(copy);
+						acopy.setStringValue(a.getStringValue());
+						copy.getAttributes().add(acopy);
+					}
 				}
+				clone.getObservations().add(copy);
 			}
-			observations.add(copy);
+			groups.add(clone);
 		}
 	}
 
@@ -172,7 +182,7 @@ public class ObservationDialog extends SmartStyledDialog {
 				Display.getDefault().syncExec(()->{
 					dmTreeViewer.setInput(fdm);
 					dmTreeViewer.expandToLevel(3);
-					observationTable.setInput(observations);
+					observationTable.setInput(groups);
 					
 					if (toEdit != null) {
 						observationTable.setSelection(new StructuredSelection(toEdit));
@@ -237,8 +247,26 @@ public class ObservationDialog extends SmartStyledDialog {
 		lower.setLayout(new GridLayout(2, false));
 		((GridLayout)lower.getLayout()).marginHeight = 0;
 		
-		observationTable = new TableViewer(lower, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
-		observationTable.setContentProvider(ArrayContentProvider.getInstance());
+		observationTable = new TableViewer(lower, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
+		observationTable.setContentProvider(new IStructuredContentProvider() {
+			
+			@Override
+			public Object[] getElements(Object inputElement) {
+				if (inputElement instanceof List) {
+					List<Object> all = new ArrayList<>();
+					List<WaypointObservationGroup> items  = (List<WaypointObservationGroup>)inputElement;
+					for (WaypointObservationGroup g : items) {
+						all.add(g);
+						for (WaypointObservation wo : g.getObservations()) {
+							all.add(wo);
+						}
+					}
+					return all.toArray();
+				}else {
+					return new Object[] {inputElement};
+				}
+			}
+		});
 		observationTable.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		observationTable.setInput(DialogConstants.LOADING_TEXT);
 		observationTable.getTable().setHeaderVisible(true);
@@ -253,8 +281,22 @@ public class ObservationDialog extends SmartStyledDialog {
 			public String getText(Object element) {
 				if (element instanceof WaypointObservation){
 					return ((WaypointObservation) element).getCategory().getName();
+				}else if (element instanceof WaypointObservationGroup) {
+					return Messages.ObservationDialog_ObservationGroupLabel;
 				}
 				return super.getText(element);
+			}
+			
+			@Override
+			public Color getBackground(Object element) {
+				if (element instanceof WaypointObservationGroup) return getShell().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+				return null;
+			}
+			
+			@Override
+			public Color getForeground(Object element) {
+				if (element instanceof WaypointObservationGroup) return getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE);
+				return null;
 			}
 		});
 		
@@ -264,6 +306,7 @@ public class ObservationDialog extends SmartStyledDialog {
 		attributeColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
+				if (element instanceof WaypointObservationGroup) return ""; //$NON-NLS-1$
 				if (element instanceof WaypointObservation){
 					StringBuilder sb = new StringBuilder();
 					WaypointObservation oo = (WaypointObservation)element;
@@ -279,6 +322,11 @@ public class ObservationDialog extends SmartStyledDialog {
 					return sb.toString();
 				}
 				return super.getText(categoryColumn);
+			}
+			@Override
+			public Color getBackground(Object element) {
+				if (element instanceof WaypointObservationGroup) return getShell().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+				return null;
 			}
 		});
 		
@@ -304,16 +352,26 @@ public class ObservationDialog extends SmartStyledDialog {
 			}
 		});
 		
-		observationMnu.addMenuListener(new MenuAdapter() {
+		final MenuItem groupItem = new MenuItem(observationMnu, SWT.PUSH);
+		groupItem.setText(Messages.ObservationDialog_NewObsGroupText);
+		groupItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GROUP_ICON));
+		groupItem.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void menuShown(MenuEvent e) {
-				boolean isempty = observationTable.getSelection().isEmpty();
-				editItem.setEnabled(!isempty);
-				deleteItem.setEnabled(!isempty);
+			public void widgetSelected(SelectionEvent e) {
+				groupObservations();
 			}
 		});
 		
+		observationMnu.addMenuListener(new MenuAdapter() {
+			@Override
+			public void menuShown(MenuEvent e) {			
+				editItem.setEnabled (observationTable.getStructuredSelection().getFirstElement() instanceof WaypointObservation) ;
+				deleteItem.setEnabled (observationTable.getStructuredSelection().getFirstElement() instanceof WaypointObservation);
+				groupItem.setEnabled (observationTable.getStructuredSelection().getFirstElement() instanceof WaypointObservation);
+			}
+		});
 		
+
 		ToolBar tb = new ToolBar(lower, SWT.VERTICAL | SWT.FLAT);
 		tb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		ToolItem btnEdit = new ToolItem(tb, SWT.PUSH);
@@ -334,6 +392,22 @@ public class ObservationDialog extends SmartStyledDialog {
 			public void widgetSelected(SelectionEvent e){
 				deleteObservation();
 			}
+		});
+		
+		ToolItem btnGroup = new ToolItem(tb, SWT.PUSH);
+		btnGroup.setToolTipText(Messages.ObservationDialog_NewObsGroupTooltip);
+		btnGroup.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GROUP_ICON));
+		btnGroup.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				groupObservations();
+			}
+		});
+		
+		observationTable.addSelectionChangedListener(e->{
+			btnEdit.setEnabled (observationTable.getStructuredSelection().getFirstElement() instanceof WaypointObservation) ;
+			btnDelete.setEnabled (observationTable.getStructuredSelection().getFirstElement() instanceof WaypointObservation);
+			btnGroup.setEnabled (observationTable.getStructuredSelection().getFirstElement() instanceof WaypointObservation);
 		});
 		
 		main.setWeights(new int[]{70,30});
@@ -388,18 +462,50 @@ public class ObservationDialog extends SmartStyledDialog {
 	}
 		
 	private void deleteObservation() {
-		Object x = ((IStructuredSelection)observationTable.getSelection()).getFirstElement();
-		 if (x != null && x instanceof WaypointObservation){
-			 if (x.equals(editObs)){
-				 Category c = editObs.getCategory();
-				 editObs = null;
-				 createAttributePanel(c);
-			 }
-			 
-			 observations.remove(x);
-			 observationTable.refresh();
-			 hasChanges = true;
-		 }
+		IStructuredSelection sel = observationTable.getStructuredSelection();
+		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+			Object x = iterator.next();
+			if (x instanceof WaypointObservation){
+				 WaypointObservation wo = (WaypointObservation)x;
+				 if (x.equals(editObs)){
+					 Category c = editObs.getCategory();
+					 editObs = null;
+					 createAttributePanel(c);
+				 }
+				 wo.getObservationGroup().getObservations().remove(wo);	 
+				 observationTable.refresh();
+				 hasChanges = true;
+			}
+		}
+	}
+	
+	private void groupObservations() {
+		IStructuredSelection sel = observationTable.getStructuredSelection();
+		List<WaypointObservation> toGroup = new ArrayList<>();
+		
+		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+			Object x = iterator.next();
+			if (x instanceof WaypointObservation) toGroup.add((WaypointObservation)x);
+		}
+		
+		if (toGroup.isEmpty()) return;
+		
+		WaypointObservationGroup g = new WaypointObservationGroup();
+		g.setObservations(new ArrayList<>());
+		g.setWaypoint(this.waypoint);
+		groups.add(0, g);
+		for (WaypointObservation wo : toGroup) {
+			wo.getObservationGroup().getObservations().remove(wo);
+			wo.setObservationGroup(g);
+			g.getObservations().add(wo);
+		}
+		
+		List<WaypointObservationGroup> empty = new ArrayList<>();
+		for (WaypointObservationGroup group : groups) if (group.getObservations().isEmpty()) empty.add(group);
+		groups.removeAll(empty);
+		
+		observationTable.refresh();
+		hasChanges = true;
 	}
 	
 	@Override
@@ -516,7 +622,13 @@ public class ObservationDialog extends SmartStyledDialog {
 		}
 		
 		oo.setCategory((Category)attributeComposite.getData(Category.class.getName()));
-		oo.setWaypoint(waypoint);
+		if (groups.isEmpty()) {
+			WaypointObservationGroup g = new WaypointObservationGroup();
+			g.setObservations(new ArrayList<>());
+			g.setWaypoint(waypoint);
+			groups.add(g);
+		}
+		oo.setObservationGroup(groups.get(0));
 		oo.setAttributes(new ArrayList<WaypointObservationAttribute>());
 		List<IAttributeField<?>> fields = (List<IAttributeField<?>>) attributeComposite.getData(IAttributeField.class.getName());
 		for (IAttributeField<?> f : fields){
@@ -565,7 +677,7 @@ public class ObservationDialog extends SmartStyledDialog {
 			f.clear();
 		}
 		if (editObs == null){
-			observations.add(oo);
+			groups.get(0).getObservations().add(oo);
 		}
 		editObs = null;
 		observationTable.refresh(); 
@@ -587,7 +699,7 @@ public class ObservationDialog extends SmartStyledDialog {
 	@Override
 	public void okPressed(){
 		if (!confirmSave()) return;
-		waypoint.setObservations(observations);
+		waypoint.setObservationGroups(groups);
 		super.okPressed();
 	}
 }

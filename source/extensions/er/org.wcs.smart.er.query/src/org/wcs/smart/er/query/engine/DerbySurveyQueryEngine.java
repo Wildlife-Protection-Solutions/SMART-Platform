@@ -59,7 +59,7 @@ import org.wcs.smart.query.model.filter.IFilter;
  */
 public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 	
-	protected HashMap<IFilter, String> filterTables = new HashMap<IFilter, String>();
+	protected HashMap<IFilter, FilterTable> filterTables = new HashMap<IFilter, FilterTable>();
 	
 	static {
 		tablePrefix.put(SurveyDesign.class, "sd"); //$NON-NLS-1$
@@ -132,7 +132,7 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 	protected abstract String getTemporaryTableCreateClause(String tableName);
 	
 	
-	protected abstract String getFilterTablesJoinColum();
+//	protected abstract String getFilterTablesJoinColum();
 	
 	/**
 	 * A string to append to the from clause of the select
@@ -172,6 +172,8 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 			Query query){
 		if (filterType == IFilter.FilterType.OBSERVATION){
 			return new FilterProcessor(queryDataTable, this, designFilter, query);
+		}else if (filterType == IFilter.FilterType.GROUP){
+			return new WaypointGroupFilterProcessor(queryDataTable, this, designFilter, query);
 		}else{
 			return new WaypointFilterProcessor(queryDataTable, this, designFilter, query);
 		}
@@ -183,4 +185,5 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 	 * @throws SQLException
 	 */
 	public abstract void dropTables(Connection c) throws SQLException;
+	
 }

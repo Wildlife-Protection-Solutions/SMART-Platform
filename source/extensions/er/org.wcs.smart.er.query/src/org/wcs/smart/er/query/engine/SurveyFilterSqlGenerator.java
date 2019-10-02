@@ -52,6 +52,7 @@ import org.wcs.smart.er.query.filter.SurveyFilter;
 import org.wcs.smart.er.query.filter.TrackTypeFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.AreaFilter;
@@ -156,9 +157,9 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	@Override
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + "." + ((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
+		FilterTable t = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
+		if (t != null){
+			return t.tablename + "." + t.columnname + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);
 	}
@@ -195,9 +196,9 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	@Override
 	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + "." + ((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
+		FilterTable t = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
+		if (t != null){
+			return t.tablename + "." + t.columnname + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);
 	}
@@ -207,11 +208,11 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	@Override
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + "." + ((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
+		FilterTable t = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
+		if (t != null){
+			return t.tablename + "." + t.columnname + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		return super.asSql(filter, engine);	
+		return super.asSql(filter, engine);
 	}
 		
 	
@@ -289,10 +290,11 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * Sampling unit attribute filter
 	 */
 	protected String asSql(SamplingUnitAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + "." + ((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
+		FilterTable t = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
+		if (t != null){
+			return t.tablename + "." + t.columnname + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		
 		if (filter.getAttributeType() == AttributeType.NUMERIC){
 			String p1 = engine.addParameterValue((Double)filter.getValue());
 			return " (sua.sua_" + filter.getSamplingUnitAttributeKey() + " " + asSql(filter.getOperator()) + " " + p1 + ") ";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -355,9 +357,9 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	protected String asSql(MissionPropertyFilter filter, IQueryEngine engine)
 			throws SQLException {
-		String col = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + "." + ((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
+		FilterTable t = ((DerbySurveyQueryEngine)engine).filterTables.get(filter);
+		if (t != null){
+			return t.tablename + "." + t.columnname + " is not null "; //((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		String attprefix = engine.tablePrefix(MissionAttribute.class);

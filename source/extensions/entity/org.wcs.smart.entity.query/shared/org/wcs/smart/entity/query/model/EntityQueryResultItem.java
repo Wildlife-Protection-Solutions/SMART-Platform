@@ -71,6 +71,7 @@ public class EntityQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	private HashMap<String, Object> entityAttributes = new HashMap<String, Object>();
 	
+	private UUID groupUuid;
 	private UUID observationUuid;
 	
 	private String lastModifiedBy;
@@ -89,6 +90,21 @@ public class EntityQueryResultItem implements IGeometryResultItem, IAdaptable{
 	public UUID getObservationUuid(){
 		return this.observationUuid;
 	}
+	
+	/**
+	 * @param observationUuid the observation uuid
+	 */
+	public void setObservationGroupUuid(UUID groupUuid){
+		this.groupUuid = groupUuid;
+	}
+	
+	/**
+	 * @return the observation uuid
+	 */
+	public UUID getObservationGroupUuid(){
+		return this.groupUuid;
+	}
+	
 	/**
 	 * the waypoint last modified date
 	 * @param lastModified

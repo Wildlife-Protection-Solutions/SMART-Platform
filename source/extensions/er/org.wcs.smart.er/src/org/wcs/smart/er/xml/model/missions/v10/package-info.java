@@ -6,4 +6,4 @@
 //
 
 @javax.xml.bind.annotation.XmlSchema(namespace = "http://www.example.org/Mission/")
-package org.wcs.smart.er.xml.model.missions;
+package org.wcs.smart.er.xml.model.missions.v10;

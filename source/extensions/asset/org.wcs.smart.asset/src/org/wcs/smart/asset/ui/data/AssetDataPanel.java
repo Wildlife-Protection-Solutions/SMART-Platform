@@ -108,6 +108,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.ui.AttachmentPropertiesDialog;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -988,14 +989,48 @@ public abstract class AssetDataPanel {
 						}
 					}
 					//copy over observations
-					if (from.getWaypoint().getObservations() != null) {
-						for (WaypointObservation wo : from.getWaypoint().getObservations()) {
-							if (!AssetUtils.containsObservation(wo, core.getWaypoint().getObservations())) {
-								WaypointObservation woClone = wo.clone(session);
-								core.getWaypoint().getObservations().add(woClone);
-								woClone.setWaypoint(core.getWaypoint());
+					if (from.getWaypoint().getObservationGroups() != null) {
+						
+						if (core.getWaypoint().getObservationGroups() == null) core.getWaypoint().setObservationGroups(new ArrayList<>());
+						
+						
+						
+						for (WaypointObservationGroup fromgroup : from.getWaypoint().getObservationGroups()) {
+							
+							WaypointObservationGroup g = null;
+							if (from.getWaypoint().getObservationGroups().size() == 1 && core.getWaypoint().getObservationGroups().size() < 2) {
+								//copy everything into existing group
+								if (core.getWaypoint().getObservationGroups().isEmpty()) {
+									g = new WaypointObservationGroup();
+									g.setObservations(new ArrayList<>());
+									g.setWaypoint(core.getWaypoint());
+									core.getWaypoint().getObservationGroups().add(g);
+								}else {
+									g = core.getWaypoint().getObservationGroups().get(0);
+								}
+								
+							}else {
+								//make a new group
+								g = new WaypointObservationGroup();
+								g.setWaypoint(core.getWaypoint());
+								g.setObservations( new ArrayList<>() );
+								core.getWaypoint().getObservationGroups().add(g);
+							}
+							for (WaypointObservation wo : fromgroup.getObservations()) {
+								if (!AssetUtils.containsObservation(wo, g.getObservations())) {
+									WaypointObservation woClone = wo.clone(session);
+									g.getObservations().add(woClone);
+									woClone.setObservationGroup(g);
+								}
 							}
 						}
+						
+						List<WaypointObservationGroup> empty = new ArrayList<>();
+						for (WaypointObservationGroup g : core.getWaypoint().getObservationGroups()) {
+							if (g.getObservations().isEmpty()) empty.add(g);
+						}
+						core.getWaypoint().getObservationGroups().removeAll(empty);
+						
 					}
 
 					for (AssetWaypoint aw : from.getAssetLinks()) {
@@ -1449,8 +1484,8 @@ public abstract class AssetDataPanel {
 						}
 					}
 				}
-				if (waypoint.getWaypoint().getObservations() != null) {
-					waypoint.getWaypoint().getObservations().forEach(o->{
+				if (waypoint.getWaypoint().getAllObservations() != null) {
+					waypoint.getWaypoint().getAllObservations().forEach(o->{
 						if (o.getAttachments() != null) {
 							o.getAttachments().forEach(a->otherFiles.add(a));
 						}
@@ -1583,8 +1618,8 @@ public abstract class AssetDataPanel {
 					}
 				}
 			}
-			if (waypoint.getWaypoint().getObservations() != null) {
-				waypoint.getWaypoint().getObservations().forEach(o->{
+			if (waypoint.getWaypoint().getAllObservations() != null) {
+				waypoint.getWaypoint().getAllObservations().forEach(o->{
 					if (o.getAttachments() != null) {
 						o.getAttachments().forEach(a->otherFiles.add(a));
 					}

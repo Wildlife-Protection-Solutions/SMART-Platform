@@ -207,7 +207,7 @@ public class EntityMapping {
 		case EMPLOYEE:
 			return SmartLabelProvider.getShortLabel(fixedEmployee);
 		case LIST:
-			if (intelListItem == null) return "";
+			if (intelListItem == null) return ""; //$NON-NLS-1$
 			return intelListItem.getName();
 		case NUMERIC:
 			return fixedDoubleValue1.toString();

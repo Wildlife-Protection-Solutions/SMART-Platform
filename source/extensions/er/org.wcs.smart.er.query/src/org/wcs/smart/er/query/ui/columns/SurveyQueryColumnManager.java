@@ -174,7 +174,8 @@ public class SurveyQueryColumnManager {
 		for (QueryColumn q : getDataModelColumns()){
 			cols.add(q.clone());
 		}
-		
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.OBS_GROUP_ID, Locale.getDefault()));
+
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 

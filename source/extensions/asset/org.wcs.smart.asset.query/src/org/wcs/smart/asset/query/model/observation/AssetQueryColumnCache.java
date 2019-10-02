@@ -145,6 +145,12 @@ public class AssetQueryColumnCache {
 					toAdd.setEdit(true);
 					cols.add(toAdd);
 				}
+				
+				QueryColumn qc = new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, Locale.getDefault());
+				qc.setEdit(false);
+				cols.add(qc);
+
+				
 				queryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				
 				
