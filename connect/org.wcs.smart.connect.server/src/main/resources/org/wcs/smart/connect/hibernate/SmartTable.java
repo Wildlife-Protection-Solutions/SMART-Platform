@@ -190,6 +190,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
@@ -387,6 +388,7 @@ public enum SmartTable {
 	WAYPOINT(Waypoint.class,null),
 	WAYPOINTATTACHMENT(WaypointAttachment.class,".waypoint.conservationArea"),
 	WAYPOINTOBSERVATION(WaypointObservation.class,".waypoint.conservationArea"),
+	WAYPOINTOBSERVATIONGROUP(WaypointObservationGroup.class,".observationGroup.waypoint.conservationArea"),
 	WAYPOINTOBSERVATIONATTRIBUTE(WaypointObservationAttribute.class,".id.observation.waypoint.conservationArea"),
 	WAYPOINTQUERY(WaypointQuery.class, null),
 	

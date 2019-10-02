@@ -35,9 +35,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerNavigationProxy;
-import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 
 /**
  * Database cybertracker navigation layer

@@ -116,7 +116,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	protected final Logger logger = Logger.getLogger(AbstractQueryEngine.class.getName());
 	
 	protected Map<String, Object> currentParameters = new HashMap<String, Object>();
-	public HashMap<IFilter, String> filterTables = new HashMap<IFilter, String>();
+	public HashMap<IFilter, FilterTable> filterTables = new HashMap<>();
 	protected Session session;
 	protected Locale locale = Locale.getDefault();
 	protected int categoryCount = -1;
@@ -904,5 +904,15 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 */
 	public ConservationAreaFilter getCaFilter(){
 		return this.caFilter;
+	}
+	
+	public static class FilterTable{
+		public String tablename;
+		public String columnname;
+		
+		public FilterTable(String tablename, String columnname) {
+			this.tablename = tablename;
+			this.columnname = columnname;
+		}
 	}
 }

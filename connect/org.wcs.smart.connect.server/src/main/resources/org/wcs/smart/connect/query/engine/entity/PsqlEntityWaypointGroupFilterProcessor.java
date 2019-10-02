@@ -23,7 +23,6 @@ package org.wcs.smart.connect.query.engine.entity;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
@@ -34,11 +33,10 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
+import org.wcs.smart.connect.query.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
-import org.wcs.smart.connect.query.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
@@ -67,22 +65,23 @@ import org.wcs.smart.query.model.filter.Operator;
  * @author Emily
  *
  */
-public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
+public class PsqlEntityWaypointGroupFilterProcessor implements IFilterProcessor{
 
-	private final Logger logger = Logger.getLogger(PsqlEntityWaypointFilterProcessor.class.getName());
+	private final Logger logger = Logger.getLogger(PsqlEntityWaypointGroupFilterProcessor.class.getName());
 	
+
 	private String tableName;
 	private String waypointTable;
 	
 	private AbstractQueryEngine engine;
-
+	
 	/**
 	 * Creates a new process filter
 	 * 
 	 * @param tableName the output temporary table name
 	 * @param engine query engine
 	 */
-	public PsqlEntityWaypointFilterProcessor(String tableName, AbstractQueryEngine engine){
+	public PsqlEntityWaypointGroupFilterProcessor(String tableName, AbstractQueryEngine engine){
 		this.tableName = tableName;
 		this.engine = engine;
 		this.waypointTable = engine.createTempTableName();
@@ -92,6 +91,7 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 	 * 
 	 * drops temporary tables created during process of creating the main data table.
 	 * Does not drop the main table.
+	 * @throws SQLException 
 	 */
 	@Override
 	public void dropTemporaryTables(Connection c) throws SQLException{
@@ -115,18 +115,15 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 	 */
 	@Override
 	public void processFilter(Connection c, IFilter queryFilter, 
-			DateFilter dateFilter, Query query, ConservationAreaFilter caFilter, 
-			boolean populateObservation,
-			boolean includeEmptyObservations) throws SQLException{
+				DateFilter dateFilter, Query query, ConservationAreaFilter caFilter, 
+				boolean populateObservation,
+				boolean includeEmptyObservations) throws SQLException{	
 		IFilter qFilter = queryFilter;
 		
-		if (qFilter == null){
-			qFilter = EmptyFilter.INSTANCE;
-		}
+		if (qFilter == null) qFilter = EmptyFilter.INSTANCE;
 		createWaypointTable(c, qFilter, dateFilter, caFilter);
 		createTemporaryTable(c);
-		populateTemporaryTable(qFilter, dateFilter, query, caFilter, 
-				includeEmptyObservations, c, populateObservation);
+		populateTemporaryTable(query, qFilter, dateFilter, caFilter, includeEmptyObservations, c, populateObservation);
 
 	}
 	
@@ -142,15 +139,7 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 		
 		engine.buildTemporaryTableIndexes(c, tableName);
 	}
-	
-	
-	/*
-	 * return the table name for the associate object 
-	 */
-	private String name(Class<?> clazz){
-		return engine.tableName(clazz);
-	}
-	
+		
 	/*
 	 * return the sql prefix for the given class
 	 */
@@ -185,18 +174,17 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 	 * 
 	 * @throws SQLException
 	 */
-	private void populateTemporaryTable(IFilter queryFilter,
+	private void populateTemporaryTable(Query query, IFilter queryFilter,
 			DateFilter dateFilter, 
-			Query query,
 			ConservationAreaFilter caFilter,
 			boolean onlyObservations,
 			Connection c,
 			boolean populateObservation)
 			throws SQLException {
 
-		engine.clearParameters();
 		StringBuilder sql = new StringBuilder();
 		
+		engine.clearParameters();
 		sql.append("INSERT INTO " + tableName ); //$NON-NLS-1$
 		// ---- SELECT CLAUSE -----
 		sql.append(engine.getTemporaryTableSelectClause(populateObservation));
@@ -207,10 +195,15 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(namePrefix(Waypoint.class));
 		sql.append(" join "); //$NON-NLS-1$
-		sql.append(waypointTable + " as waypointTable "); //$NON-NLS-1$
+		sql.append(namePrefix(WaypointObservationGroup.class));
 		sql.append(" on "); //$NON-NLS-1$
 		sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
-		sql.append("waypointTable.wp_uuid "); //$NON-NLS-1$
+		sql.append(prefix(WaypointObservationGroup.class) + ".wp_uuid"); //$NON-NLS-1$
+		sql.append(" join "); //$NON-NLS-1$
+		sql.append(waypointTable + " as waypointTable "); //$NON-NLS-1$
+		sql.append(" on "); //$NON-NLS-1$
+		sql.append(prefix(WaypointObservationGroup.class) + ".uuid = "); //$NON-NLS-1$
+		sql.append("waypointTable.wp_group_uuid "); //$NON-NLS-1$
 		
 		if (caFilter != null) {
 			String filter = PsqlFilterToSqlGenerator.INSTANCE.toSql(caFilter, engine);
@@ -230,11 +223,6 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 		}
 		
 		if (populateObservation){
-			sql.append(" left join "); //$NON-NLS-1$
-			sql.append(namePrefix(WaypointObservationGroup.class));
-			sql.append(" on "); //$NON-NLS-1$
-			sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
-			sql.append(prefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$
 			
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(namePrefix(WaypointObservation.class));
@@ -249,7 +237,7 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 			sql.append(t.tablename);
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(t.tablename +"." + t.columnname + " = "); //$NON-NLS-1$ //$NON-NLS-2$
-			sql.append(prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationGroup.class) + ".uuid "); //$NON-NLS-1$
 		}
 			
 		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine, query.getConservationArea());
@@ -265,6 +253,7 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 			    sql.append(filter);
 			}
 		}
+		
 		logger.finest(sql.toString());
 		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
 			ps.executeUpdate();
@@ -275,18 +264,17 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 	private void createWaypointTable(Connection c, IFilter filter, 
 			DateFilter dateFilter, ConservationAreaFilter caFilter)
 			throws SQLException {
-		
 		//HashMap<IFilter, String> filter2Column = new HashMap<IFilter, String>();
 		
 		// -- build temporary table
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + waypointTable + " (wp_uuid UUID)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE TABLE " + waypointTable + " (wp_group_uuid char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
 		// -- create index
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX " + engine.getIndexName(waypointTable) + "_wpuuid_idx on " + waypointTable + " (wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append("CREATE INDEX " + waypointTable + "_wpuuid_idx on " + waypointTable + " (wp_group_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 
@@ -295,40 +283,29 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 		sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
 		sql.append(waypointTable);
-		sql.append("(wp_uuid) SELECT "); //$NON-NLS-1$
-		sql.append(prefix(Waypoint.class));
+		sql.append("(wp_group_uuid) SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append(prefix(WaypointObservationGroup.class));
 		sql.append(".uuid "); //$NON-NLS-1$
 		sql.append("FROM "); //$NON-NLS-1$
 
-		
+		sql.append(namePrefix(Waypoint.class));
 
-		sql.append(name(Waypoint.class));
-		sql.append(" as ");//$NON-NLS-1$
-		sql.append(prefix(Waypoint.class)); 
+		sql.append(" join "); //$NON-NLS-1$
+		sql.append(namePrefix(WaypointObservationGroup.class));
+		sql.append(" on " + prefix(Waypoint.class) + ".uuid = " + prefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
-		boolean where = true;
 		if (caFilter != null) {
 			String cfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(caFilter, engine);
 			if (cfilter.length() > 0) {
-				sql.append(" WHERE "); //$NON-NLS-1$
-				where = false;
-				sql.append(" ( "); //$NON-NLS-1$
+				sql.append(" and "); //$NON-NLS-1$
 				sql.append(cfilter);
-				sql.append( " ) "); //$NON-NLS-1$
 			}
 		}
-		
 		if (dateFilter != null) {
 			String dfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, engine);
 			if (dfilter.length() > 0) {
-				if (where){
-					sql.append(" WHERE "); //$NON-NLS-1$
-				}else{
-					sql.append(" and "); //$NON-NLS-1$
-				}
-				sql.append(" ( "); //$NON-NLS-1$
+				sql.append(" and "); //$NON-NLS-1$
 				sql.append(dfilter);
-				sql.append( " ) "); //$NON-NLS-1$
 			}
 		}
 
@@ -336,17 +313,16 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
 			ps.executeUpdate();
 		}
-		
+
 		IFilterVisitor attProcessor = new IFilterVisitor() {
 			@Override
 			public void visit(IFilter filter) {
 				if ( filter instanceof AttributeFilter ||
 					filter instanceof CategoryFilter  ||	
-					filter instanceof CategoryAttributeFilter ||
-					filter instanceof EntityAttributeFilter){						
+					filter instanceof CategoryAttributeFilter ){						
 					
 					String colName = engine.createTempTableName();
-					engine.filterTables.put(filter, new FilterTable(colName, "wp_uuid")); //$NON-NLS-1$
+					engine.filterTables.put(filter, new FilterTable(colName, "wp_group_uuid")); //$NON-NLS-1$
 				}
 			}
 		};
@@ -355,6 +331,8 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 		for (Entry<IFilter, FilterTable> cols : engine.filterTables.entrySet()){
 			IFilter lfilter = cols.getKey();
 			FilterTable t = cols.getValue();
+			
+			engine.clearParameters();
 			
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
@@ -367,17 +345,17 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX "); //$NON-NLS-1$
 			sql.append(t.tablename + "_wp_uuid_idx on "); //$NON-NLS-1$
-			sql.append(t.tablename + "(wp_uuid) "); //$NON-NLS-1$
+			sql.append(t.tablename + "(" + t.columnname + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());
 			
-			engine.clearParameters();
+			
 			sql = new StringBuilder();
 			sql.append("INSERT INTO "); //$NON-NLS-1$
 			sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 			sql.append(" SELECT distinct ");  //$NON-NLS-1$
-			sql.append(prefix(WaypointObservationGroup.class));
-			sql.append(".wp_uuid");  //$NON-NLS-1$
+			sql.append(prefix(WaypointObservation.class));
+			sql.append(".wp_group_uuid");  //$NON-NLS-1$
 			
 			AttributeFilter attfilter = null;
 			CategoryFilter catfilter = null;
@@ -392,20 +370,13 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 			
 			sql.append(" FROM ");  //$NON-NLS-1$
 			sql.append(waypointTable);
-			sql.append(" join ");  //$NON-NLS-1$
-
-			sql.append(" join ");  //$NON-NLS-1$
-			sql.append(namePrefix(WaypointObservationGroup.class));
-			sql.append(" on " + waypointTable + ".wp_uuid = "); //$NON-NLS-1$  //$NON-NLS-2$
-			sql.append(prefix(WaypointObservationGroup.class));
-			sql.append(".wp_uuid "); //$NON-NLS-1$
 			
 			sql.append(" join ");  //$NON-NLS-1$
 			sql.append(namePrefix(WaypointObservation.class));
 			sql.append(" on "); //$NON-NLS-1$
-			sql.append(prefix(WaypointObservationGroup.class));
-			sql.append(".uuid = "); //$NON-NLS-1$
 			sql.append(prefix(WaypointObservation.class));
+			sql.append(".wp_group_uuid = "); //$NON-NLS-1$
+			sql.append(waypointTable);
 			sql.append(".wp_group_uuid "); //$NON-NLS-1$
 
 			if (catfilter != null){
@@ -482,7 +453,7 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 					sql.append(engine.tablePrefix(AttributeTreeNode.class));
 					sql.append(".hkey");  //$NON-NLS-1$
 				}else{
-					throw new RuntimeException(MessageFormat.format(Messages.getString("PsqlEntityWaypointFilterProcessor.AttributeTypeNotSupported", engine.getLocale()), new Object[]{ff.getAttributeType()})); //$NON-NLS-1$
+					throw new RuntimeException("Attribute type " + ff.getAttributeType().name() + " not supported"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				sql.append(" as value FROM "); //$NON-NLS-1$
 				sql.append(engine.tableNamePrefix(EntityType.class));
@@ -548,11 +519,11 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 					if (efilter.getOperator() == Operator.STR_CONTAINS || 
 							efilter.getOperator() == Operator.STR_NOTCONTAINS){
 						String p1 = engine.addParameterValue("%" + val + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-						queryStr = "( LOWER(foo.value) " + PsqlFilterToSqlGenerator.asSql(efilter.getOperator()) + " lower(" + p1 + ") )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+						queryStr = "( LOWER(foo.value) " + PsqlFilterToSqlGenerator.asSql(efilter.getOperator()) + " LOWER(" + p1 + ") )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 						
 					}else if (efilter.getOperator() == Operator.STR_EQUALS){
 						String p1 = engine.addParameterValue(val);
-						queryStr = "( LOWER(foo.value) " + PsqlFilterToSqlGenerator.asSql(efilter.getOperator()) + " lower(" + p1 + ") )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+						queryStr = "( LOWER(foo.value) " + PsqlFilterToSqlGenerator.asSql(efilter.getOperator()) + " LOWER(" + p1 + ") )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 					}
 					sql.append( queryStr);
 				}else if (efilter.getAttributeType() == AttributeType.DATE){
@@ -575,34 +546,35 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 						sql.append( "( foo.value " + PsqlFilterToSqlGenerator.asSql(efilter.getOperator()) + " " + p1 + " )" );  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 					}
 				}else if (efilter.getAttributeType() == AttributeType.TREE){
-					String p1 = engine.addParameterValue((String)efilter.getValue()+ "%"); //$NON-NLS-1$
-					sql.append( "( foo.value like " + p1 + " ) ");  //$NON-NLS-1$ //$NON-NLS-2$ 
+					String p1 = engine.addParameterValue((String)efilter.getValue());
+					String p2 = engine.addParameterValue(((String)efilter.getValue()).substring(0,  ((String)efilter.getValue()).length() -1) + "/"); //$NON-NLS-1$
+					sql.append( "( foo.value >= " + p1 + " and foo.value < " + p2 + " ) ");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 				}
 			}
 			if (catfilter != null){
 				String keyPart = catfilter.getCategoryKey();
-				String p1 = engine.addParameterValue(keyPart + "%"); //$NON-NLS-1$
-				
+				String p1 = engine.addParameterValue(keyPart);
+				String p2 = engine.addParameterValue(keyPart.substring(0,  keyPart.length() -1) + "/"); //$NON-NLS-1$
 				sql.append(" ( "); //$NON-NLS-1$
 				sql.append(prefix(Category.class));
-				sql.append(".hkey like " + p1 ); //$NON-NLS-1$
-				sql.append(" )"); //$NON-NLS-1$ 
-				
+				sql.append(".hkey >= " + p1 + " and "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(prefix(Category.class));
+				sql.append(".hkey <  " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			if (attfilter != null){
 				if (catfilter != null){
 					sql.append(" AND "); //$NON-NLS-1$
 				}
-				String p2 = engine.addParameterValue(attfilter.getAttributeKey());
-				sql.append(prefix(Attribute.class) + ".keyid= " + p2 + " AND "); //$NON-NLS-1$ //$NON-NLS-2$
-				
+				String p1 = engine.addParameterValue(attfilter.getAttributeKey());
+				sql.append(prefix(Attribute.class) + ".keyid = " + p1 + "  AND "); //$NON-NLS-1$ //$NON-NLS-2$ 
 				if (attfilter.getAttributeType() == AttributeType.NUMERIC){
-					String p1 = engine.addParameterValue((Double)attfilter.getValue());
 					sql.append("("); //$NON-NLS-1$
 					sql.append(prefix(WaypointObservationAttribute.class));
 					sql.append(".number_value "); //$NON-NLS-1$
 					sql.append(PsqlFilterToSqlGenerator.asSql(attfilter.getOperator()));
-					sql.append(" " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
+					String p2 = engine.addParameterValue((Double)attfilter.getValue());
+					sql.append(p2 + " )"); //$NON-NLS-1$
+					
 				}else if (attfilter.getAttributeType() == AttributeType.BOOLEAN){
 					sql.append("("); //$NON-NLS-1$
 					sql.append(prefix(WaypointObservationAttribute.class));
@@ -614,11 +586,11 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 					sql.append(".string_value) "); //$NON-NLS-1$
 					
 					if (attfilter.getOperator() == Operator.STR_CONTAINS || attfilter.getOperator() == Operator.STR_NOTCONTAINS){
-						String p1 = engine.addParameterValue("%" + ((String)attfilter.getValue()) + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-						sql.append(PsqlFilterToSqlGenerator.asSql(attfilter.getOperator()) + " lower(" + p1 + ") )"); //$NON-NLS-1$ //$NON-NLS-2$
+						String p2 = engine.addParameterValue("%" + ((String)attfilter.getValue()) + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+						sql.append(PsqlFilterToSqlGenerator.asSql(attfilter.getOperator()) + " LOWER(" + p2 + ") )"); //$NON-NLS-1$ //$NON-NLS-2$  	
 					}else if (attfilter.getOperator() == Operator.STR_EQUALS){
-						String p1 = engine.addParameterValue(((String)attfilter.getValue()));
-						sql.append(PsqlFilterToSqlGenerator.asSql(attfilter.getOperator()) + " lower(" + p1 + ") )");  //$NON-NLS-1$ //$NON-NLS-2$ 
+						String p2 = engine.addParameterValue(((String)attfilter.getValue()));
+						sql.append(PsqlFilterToSqlGenerator.asSql(attfilter.getOperator()) + " LOWER(" + p2 + ") )");  //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}else if (attfilter.getAttributeType() == AttributeType.LIST){
 					sql.append("("); //$NON-NLS-1$
@@ -629,30 +601,34 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 						sql.append (" is not null "); //$NON-NLS-1$
 					}else{
 						sql.append(PsqlFilterToSqlGenerator.asSql(attfilter.getOperator()));
-						String p1 = engine.addParameterValue(((String)attfilter.getValue()));
-						sql.append(" " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
+						String p2 = engine.addParameterValue((String)attfilter.getValue());
+						sql.append(p2);
 					}
 					sql.append(") "); //$NON-NLS-1$
-					
 				}else if (attfilter.getAttributeType() == AttributeType.TREE){
-					String p1 = engine.addParameterValue(((String)attfilter.getValue())+ "%"); //$NON-NLS-1$
+					String p2 = engine.addParameterValue(((String)attfilter.getValue()));
+					String p3 = engine.addParameterValue(((String)attfilter.getValue()).substring(0,  ((String)attfilter.getValue()).length() -1) + "/"); //$NON-NLS-1$
 					sql.append("("); //$NON-NLS-1$
 					sql.append(prefix(AttributeTreeNode.class));
-					sql.append(".hkey like " + p1 + " ) " );  //$NON-NLS-1$ //$NON-NLS-2$
+					sql.append(".hkey >= " + p2 + " and " );  //$NON-NLS-1$ //$NON-NLS-2$ 
+					sql.append(prefix(AttributeTreeNode.class));
+					sql.append(".hkey < " + p3 + " ) ");  //$NON-NLS-1$ //$NON-NLS-2$  
 				}else if (attfilter.getAttributeType() == AttributeType.DATE){
-					String p1 = engine.addParameterValue(attfilter.getValue());
-					p2 = engine.addParameterValue(attfilter.getValue2());
+					String p2 = engine.addParameterValue(attfilter.getValue());
+					String p3 = engine.addParameterValue(attfilter.getValue2());
 					sql.append("("); //$NON-NLS-1$
 					sql.append(" DATE ("); //$NON-NLS-1$
 					sql.append(prefix(WaypointObservationAttribute.class));
 					sql.append(".string_value ) "); //$NON-NLS-1$
 					sql.append(PsqlFilterToSqlGenerator.asSql(attfilter.getOperator()));
-					sql.append(" CAST(" + p1 + " as DATE) "); //$NON-NLS-1$ //$NON-NLS-2$
+					sql.append(" CAST(" + p2 + " as date) "); //$NON-NLS-1$ //$NON-NLS-2$
 					sql.append(PsqlFilterToSqlGenerator.asSql(Operator.AND));
-					sql.append(" CAST(" + p2 + " AS DATE) )"); //$NON-NLS-1$ //$NON-NLS-2$;
+					sql.append(" CAST(" + p3 + " as date) "); //$NON-NLS-1$ //$NON-NLS-2$
+					sql.append(") "); //$NON-NLS-1$
+					
 				}
 			}
-		
+			
 			logger.finest(sql.toString());
 			engine.parseQueryString(c, sql.toString()).executeUpdate();
 		}

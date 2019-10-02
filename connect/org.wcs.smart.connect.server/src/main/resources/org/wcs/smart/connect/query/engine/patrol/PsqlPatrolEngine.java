@@ -60,6 +60,16 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	private String filterTable;
 	private String queryDataTable;
 	
+	public static IFilterProcessor getFilterProcessor(FilterType filterType, String queryDataTable, AbstractQueryEngine engine) {
+		if (filterType == IFilter.FilterType.OBSERVATION){
+			return new PatrolFilterProcessor(queryDataTable, engine);
+		}else if (filterType == IFilter.FilterType.GROUP) {
+			return new PatrolWaypointGroupFilterProcessor(queryDataTable, engine);
+		}else{
+			return new PatrolWaypointFilterProcessor(queryDataTable, engine);
+		}
+	}
+	
 	public String getQueryDataTable() {
 		return queryDataTable;
 	}
@@ -132,7 +142,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 				
 				IFilterProcessor filterer = null;
 				try{
-					filterer = getFilterProcessor(query.getFilter().getFilterType(), filterTable);
+					filterer = PsqlPatrolEngine.getFilterProcessor(query.getFilter().getFilterType(), filterTable, PsqlPatrolEngine.this);
 				}catch (Exception ex){
 					throw new SQLException (ex);
 				}
@@ -446,15 +456,6 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	@Override
 	public String getSurveySamplingUnitJoinFieldName() {
 		return null;
-	}
-
-	protected IFilterProcessor getFilterProcessor(FilterType filterType,
-			String queryDataTable) {
-		if (filterType == IFilter.FilterType.OBSERVATION){
-			return new PatrolFilterProcessor(queryDataTable, this);
-		}else{
-			return new PatrolWaypointFilterProcessor(queryDataTable, this);
-		}
 	}
 	
 	@Override

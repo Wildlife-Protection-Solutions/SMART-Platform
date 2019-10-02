@@ -262,7 +262,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		for (QueryColumn q : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(query))){
 			cols.add(q);
 		}
-		
+		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.OBS_GROUP_ID, l));
 		return cols;
 	}
 	

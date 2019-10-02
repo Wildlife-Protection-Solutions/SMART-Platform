@@ -38,6 +38,7 @@ import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -48,8 +49,6 @@ import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 
@@ -90,8 +89,7 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				IFilterProcessor filterer = null;
 				try {
-					filterer = PsqlPatrolObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
-					
+					filterer = PsqlPatrolEngine.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, PsqlPatrolObservationEngine.this);
 					parseConservationAreaFilterInternal(lquery);
 					
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
@@ -280,6 +278,7 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by, "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservationGroup.class) + ".wp_group_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid, "); //$NON-NLS-1$
@@ -322,6 +321,7 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby uuid,"); //$NON-NLS-1$
 		
+		sql.append("wp_group_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_observer_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid uuid,"); //$NON-NLS-1$
@@ -357,15 +357,6 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 	@Override
 	public String getSurveySamplingUnitJoinFieldName() {
 		return null;
-	}
-
-	protected IFilterProcessor getFilterProcessor(FilterType filterType,
-			String queryDataTable) {
-		if (filterType == IFilter.FilterType.OBSERVATION){
-			return new PatrolFilterProcessor(queryDataTable, this);
-		}else{
-			return new PatrolWaypointFilterProcessor(queryDataTable, this);
-		}
 	}
 	
 	@Override

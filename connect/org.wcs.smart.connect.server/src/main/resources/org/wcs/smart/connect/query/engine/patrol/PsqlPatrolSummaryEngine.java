@@ -85,8 +85,6 @@ import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
@@ -441,8 +439,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			//update filter type
 			af.changeGeometryType(geomType);
 		}
-		IFilterProcessor rfilterer = PsqlPatrolSummaryEngine.this.getFilterProcessor(
-				qFilter.getFilterType(), tableName);
+		IFilterProcessor rfilterer = PsqlPatrolEngine.getFilterProcessor(qFilter.getFilterType(), tableName, PsqlPatrolSummaryEngine.this);
 		try{
 			rfilterer.processFilter(c, qFilter.getFilter(), localDateFilter, query, caFilter, needsObservationRate, false);
 		}finally{
@@ -1857,15 +1854,6 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 	public void cleanUp(Session session) {
 	}
 
-	protected IFilterProcessor getFilterProcessor(FilterType filterType,
-			String queryDataTable) {
-		if (filterType == IFilter.FilterType.OBSERVATION){
-			return new PatrolFilterProcessor(queryDataTable, this);
-		}else{
-			return new PatrolWaypointFilterProcessor(queryDataTable, this);
-		}
-	}
-	
 	@Override
 	public String getDateFilterTable() throws SQLException{
 		return tablePrefix(PatrolLegDay.class);

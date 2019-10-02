@@ -146,6 +146,8 @@ public abstract class AssetQueryEngine extends AbstractQueryEngine {
 	protected IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query){
 		if (filterType == IFilter.FilterType.OBSERVATION){
 			return new AssetFilterProcessor(queryDataTable, this, query);
+		}else if (filterType == IFilter.FilterType.GROUP){
+				return new AssetWaypointGroupFilterProcessor(queryDataTable, this, query);
 		}else{
 			return new AssetWaypointFilterProcessor(queryDataTable, this, query);
 		}

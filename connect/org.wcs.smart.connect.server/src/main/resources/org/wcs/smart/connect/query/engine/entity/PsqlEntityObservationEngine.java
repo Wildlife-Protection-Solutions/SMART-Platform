@@ -359,10 +359,11 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 		return null;
 	}
 
-	protected IFilterProcessor getFilterProcessor(FilterType filterType,
-			String queryDataTable) {
+	private IFilterProcessor getFilterProcessor(FilterType filterType, String queryDataTable) {
 		if (filterType == IFilter.FilterType.OBSERVATION){
 			return new PsqlEntityFilterProcessor(queryDataTable, this);
+		}else if (filterType == IFilter.FilterType.GROUP){
+			return new PsqlEntityWaypointGroupFilterProcessor(queryDataTable, this);
 		}else{
 			return new PsqlEntityWaypointFilterProcessor(queryDataTable, this);
 		}

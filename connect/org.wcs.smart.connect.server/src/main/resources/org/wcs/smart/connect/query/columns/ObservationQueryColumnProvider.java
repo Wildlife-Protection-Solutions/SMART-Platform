@@ -90,6 +90,8 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 				add = QueryColumnUtils.trackDistanceDirection(ops);
 			}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
 				add = QueryColumnUtils.trackObserver(ops);
+			}else if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID){
+				add = false;
 			}
 			if (add){
 				keys.add(new FixedQueryColumn(item, l));
@@ -99,6 +101,7 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 		for (QueryColumn cq : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(q))){
 			keys.add(cq);
 		}
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, l));
 		
 		return keys;
 	}

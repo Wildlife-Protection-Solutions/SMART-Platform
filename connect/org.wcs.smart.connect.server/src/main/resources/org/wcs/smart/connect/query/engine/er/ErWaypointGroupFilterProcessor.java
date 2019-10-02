@@ -72,28 +72,30 @@ import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.Operator;
 
 /**
- * Processes an query filter creating a temporary table
+ * Processes an query filter that queries across observation
+ * groups, creating a temporary table
  * of the data that matches the filter.
  * 
  * @author Emily
  *
  */
-public class ErWaypointFilterProcessor implements IFilterProcessor{
+public class ErWaypointGroupFilterProcessor implements IFilterProcessor{
 
 	private final Logger logger = Logger.getLogger(ErWaypointFilterProcessor.class.getName());
-	
+
 	private String tableName;
 	private String waypointTable;
 	private SurveyDesignFilter designFilter;
 	private AbstractQueryEngine engine;
 
+	
 	/**
 	 * Creates a new process filter
 	 * 
 	 * @param tableName the output temporary table name
 	 * @param engine query engine
 	 */
-	public ErWaypointFilterProcessor(String tableName, AbstractQueryEngine engine,SurveyDesignFilter designFilter){
+	public ErWaypointGroupFilterProcessor(String tableName, AbstractQueryEngine engine, SurveyDesignFilter designFilter){
 		this.designFilter = designFilter;
 		this.tableName = tableName;
 		this.engine = engine;
@@ -104,6 +106,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 	 * 
 	 * drops temporary tables created during process of creating the main data table.
 	 * Does not drop the main table.
+	 * @throws SQLException 
 	 */
 	@Override
 	public void dropTemporaryTables(Connection c) throws SQLException{
@@ -131,14 +134,14 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 			ConservationAreaFilter caFilter, 
 			boolean populateObservation,
 			boolean includeEmptyObservations) throws SQLException{
+
+		
 		IFilter qFilter = queryFilter;
-		if (qFilter == null){
-			qFilter = EmptyFilter.INSTANCE;
-		}
+		if (qFilter == null) qFilter = EmptyFilter.INSTANCE;
 		createWaypointTable(c, qFilter, dateFilter, caFilter);
 		createTemporaryTable(c);
-		populateTemporaryTable(qFilter, dateFilter, query, caFilter, 
-				includeEmptyObservations, c, populateObservation);
+		populateTemporaryTable(query, qFilter, dateFilter, caFilter, includeEmptyObservations, c, populateObservation);
+		
 	}
 	
 	
@@ -196,9 +199,8 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 	 * 
 	 * @throws SQLException
 	 */
-	private void populateTemporaryTable(IFilter queryFilter,
+	private void populateTemporaryTable(Query query, IFilter queryFilter,
 			DateFilter dateFilter, 
-			Query query,
 			ConservationAreaFilter caFilter,
 			boolean onlyObservations,
 			Connection c,
@@ -290,6 +292,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 			}
 		}
 		
+		
 		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(namePrefix(Waypoint.class));
 		sql.append(" on "); //$NON-NLS-1$
@@ -297,10 +300,17 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		sql.append(prefix(SurveyWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$
 		
 		sql.append(" left join "); //$NON-NLS-1$
-		sql.append(waypointTable + " as waypointTable "); //$NON-NLS-1$
+		sql.append(namePrefix(WaypointObservationGroup.class));
 		sql.append(" on "); //$NON-NLS-1$
 		sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
-		sql.append("waypointTable.wp_uuid "); //$NON-NLS-1$
+		sql.append(prefix(WaypointObservationGroup.class) + ".wp_uuid"); //$NON-NLS-1$
+		
+		
+		sql.append(" left join "); //$NON-NLS-1$
+		sql.append(waypointTable + " as waypointTable "); //$NON-NLS-1$
+		sql.append(" on "); //$NON-NLS-1$
+		sql.append(prefix(WaypointObservationGroup.class) + ".uuid = "); //$NON-NLS-1$
+		sql.append("waypointTable.wp_group_uuid "); //$NON-NLS-1$
 		
 		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(namePrefix(SamplingUnit.class));
@@ -311,11 +321,6 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		sql.append(".uuid "); //$NON-NLS-1$
 		
 		if (populateObservation){
-			sql.append(" left join "); //$NON-NLS-1$
-			sql.append(namePrefix(WaypointObservationGroup.class));
-			sql.append(" on "); //$NON-NLS-1$
-			sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
-			sql.append(prefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$
 			
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(namePrefix(WaypointObservation.class));
@@ -323,14 +328,14 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 			sql.append(prefix(WaypointObservationGroup.class) + ".uuid = "); //$NON-NLS-1$
 			sql.append(prefix(WaypointObservation.class) + ".wp_group_uuid "); //$NON-NLS-1$
 		}
-	
+			
 		for (Entry<IFilter, FilterTable> cols : engine.filterTables.entrySet()){
 			FilterTable t = cols.getValue();
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(t.tablename);
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(t.tablename +"." + t.columnname + " = "); //$NON-NLS-1$ //$NON-NLS-2$
-			sql.append(prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationGroup.class) + ".uuid "); //$NON-NLS-1$
 		}
 			
 		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine, usedTables, query.getConservationArea());
@@ -356,16 +361,15 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 	private void createWaypointTable(Connection c, IFilter filter, 
 			DateFilter dateFilter, ConservationAreaFilter caFilter)
 			throws SQLException {
-		
 		// -- build temporary table
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + waypointTable + " (wp_uuid UUID)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE TABLE " + waypointTable + " (wp_group_uuid char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
 		// -- create index
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX " + engine.getIndexName(waypointTable) + "_wpuuid_idx on " + waypointTable + " (wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append("CREATE INDEX " + waypointTable + "_wpuuid_idx on " + waypointTable + " (wp_group_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 
@@ -374,8 +378,8 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
 		sql.append(waypointTable);
-		sql.append("(wp_uuid) SELECT "); //$NON-NLS-1$
-		sql.append(prefix(Waypoint.class));
+		sql.append("(wp_group_uuid) SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append(prefix(WaypointObservationGroup.class));
 		sql.append(".uuid "); //$NON-NLS-1$
 		sql.append("FROM "); //$NON-NLS-1$
 
@@ -427,6 +431,12 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		sql.append(prefix(Waypoint.class)); 
 		sql.append(" on " + prefix(SurveyWaypoint.class) + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
+		sql.append(" join "); //$NON-NLS-1$
+		sql.append(name(WaypointObservationGroup.class));
+		sql.append(" as ");//$NON-NLS-1$
+		sql.append(prefix(WaypointObservationGroup.class)); 
+		sql.append(" on " + prefix(Waypoint.class) + ".uuid = " + prefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		
 		logger.finest(sql.toString());
 		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
 			ps.executeUpdate();
@@ -437,20 +447,19 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 			public void visit(IFilter filter) {
 				if ( filter instanceof AttributeFilter ||
 					filter instanceof CategoryFilter  ||	
-					filter instanceof CategoryAttributeFilter || 
-					filter instanceof MissionPropertyFilter ||
-					filter instanceof SamplingUnitAttributeFilter){						
+					filter instanceof CategoryAttributeFilter ){						
 					
 					String colName = engine.createTempTableName();
-					engine.filterTables.put(filter, new FilterTable(colName, "wp_uuid")); //$NON-NLS-1$
+					engine.filterTables.put(filter, new FilterTable(colName, "wp_group_uuid")); //$NON-NLS-1$
 				}
 			}
 		};
 		filter.accept(attProcessor);
-		
 		for (Entry<IFilter, FilterTable> cols : engine.filterTables.entrySet()){
 			IFilter lfilter = cols.getKey();
 			FilterTable t = cols.getValue();
+			
+			engine.clearParameters();
 			
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
@@ -467,6 +476,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());
 			
+			
 			if ( lfilter instanceof AttributeFilter ||
 					lfilter instanceof CategoryFilter  ||	
 					lfilter instanceof CategoryAttributeFilter){
@@ -480,15 +490,15 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		}
 	}
 	
-	private void processCategoryAttributeFilter(IFilter lfilter, FilterTable ft, Connection c) throws SQLException{
+	private void processCategoryAttributeFilter(IFilter lfilter, FilterTable t, Connection c) throws SQLException{
 		engine.clearParameters();
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(ft.tablename + " (" + ft.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 		sql.append(" SELECT distinct ");  //$NON-NLS-1$
-		sql.append(prefix(WaypointObservationGroup.class));
-		sql.append(".wp_uuid");  //$NON-NLS-1$
+		sql.append(prefix(WaypointObservation.class));
+		sql.append(".wp_group_uuid");  //$NON-NLS-1$
 		
 		AttributeFilter attfilter = null;
 		CategoryFilter catfilter = null;
@@ -503,12 +513,12 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		
 		sql.append(" FROM ");  //$NON-NLS-1$
 		sql.append(waypointTable);
-
+		
 		sql.append(" join ");  //$NON-NLS-1$
 		sql.append(namePrefix(WaypointObservationGroup.class));
-		sql.append(" on " + waypointTable + ".wp_uuid = "); //$NON-NLS-1$  //$NON-NLS-2$
+		sql.append(" on " + waypointTable + ".wp_group_uuid = "); //$NON-NLS-1$  //$NON-NLS-2$
 		sql.append(prefix(WaypointObservationGroup.class));
-		sql.append(".wp_uuid "); //$NON-NLS-1$
+		sql.append(".uuid "); //$NON-NLS-1$
 		
 		sql.append(" join ");  //$NON-NLS-1$
 		sql.append(namePrefix(WaypointObservation.class));
@@ -517,7 +527,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		sql.append(".uuid = "); //$NON-NLS-1$
 		sql.append(prefix(WaypointObservation.class));
 		sql.append(".wp_group_uuid "); //$NON-NLS-1$
-		
+
 		if (catfilter != null){
 			sql.append(" join "); //$NON-NLS-1$
 			sql.append(namePrefix(Category.class));
@@ -556,10 +566,13 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		sql.append(" WHERE "); //$NON-NLS-1$
 		if (catfilter != null){
 			String keyPart = catfilter.getCategoryKey();
-			String p1 = engine.addParameterValue(keyPart + "%"); //$NON-NLS-1$
+			String p1 = engine.addParameterValue(keyPart);
+			String p2 = engine.addParameterValue(keyPart.substring(0,  keyPart.length() -1) + "/"); //$NON-NLS-1$
 			sql.append(" ( "); //$NON-NLS-1$
 			sql.append(prefix(Category.class));
-			sql.append(".hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(".hkey >= " + p1 + " and "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(prefix(Category.class));
+			sql.append(".hkey < " + p2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (attfilter != null){
 			if (catfilter != null){
@@ -587,7 +600,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 				if (attfilter.getOperator() == Operator.STR_CONTAINS || attfilter.getOperator() == Operator.STR_NOTCONTAINS){
 					p1 = engine.addParameterValue("%" + ((String)attfilter.getValue()) + "%"); //$NON-NLS-1$ //$NON-NLS-2$
 				}else if (attfilter.getOperator() == Operator.STR_EQUALS){
-					p1 = engine.addParameterValue(((String)attfilter.getValue())); 
+					p1 = engine.addParameterValue(((String)attfilter.getValue()) ); 
 				}
 				sql.append(PsqlFilterToSqlGenerator.asSql(attfilter.getOperator()) + " lower(" + p1 + ") )"); //$NON-NLS-1$ //$NON-NLS-2$ 
 				
@@ -605,10 +618,13 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 				}
 				sql.append(") "); //$NON-NLS-1$
 			}else if (attfilter.getAttributeType() == AttributeType.TREE){
-				String p1 = engine.addParameterValue(((String)attfilter.getValue()) + "%"); //$NON-NLS-1$
+				String p1 = engine.addParameterValue(((String)attfilter.getValue()));
+				String p2 = engine.addParameterValue(((String)attfilter.getValue()).substring(0,  ((String)attfilter.getValue()).length() -1) + "/'");  //$NON-NLS-1$
 				sql.append("("); //$NON-NLS-1$
 				sql.append(prefix(AttributeTreeNode.class));
-				sql.append(".hkey like " + p1 + " ) " );  //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(".hkey >= " + p1 + " and " );  //$NON-NLS-1$ //$NON-NLS-2$ 
+				sql.append(prefix(AttributeTreeNode.class));
+				sql.append(".hkey < " + p2 + " ) ");  //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (attfilter.getAttributeType() == AttributeType.DATE){
 				String p1 = engine.addParameterValue(attfilter.getValue());
 				String p2 = engine.addParameterValue(attfilter.getValue2());
@@ -629,12 +645,12 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		}
 	}
 	
-	private void processMissionFilter(MissionPropertyFilter lfilter, FilterTable ft, Connection c) throws SQLException{
+	private void processMissionFilter(MissionPropertyFilter lfilter, FilterTable t, Connection c) throws SQLException{
 		engine.clearParameters();
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(ft.tablename + " (" + ft.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(" SELECT distinct ");  //$NON-NLS-1$
 		sql.append(prefix(SurveyWaypoint.class));
 		sql.append(".wp_uuid");  //$NON-NLS-1$
@@ -697,7 +713,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 			p1 = ""; //$NON-NLS-1$
 			if (lfilter.getOperator() == Operator.STR_CONTAINS || 
 					lfilter.getOperator() == Operator.STR_NOTCONTAINS){
-				p1 = engine.addParameterValue("%" + lfilter.getValue().toString()+ "%"); //$NON-NLS-1$ //$NON-NLS-2$
+				p1 = engine.addParameterValue("%" + lfilter.getValue().toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (lfilter.getOperator() == Operator.STR_EQUALS){
 				p1 = engine.addParameterValue(lfilter.getValue().toString());
 			}
@@ -724,14 +740,14 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 	}
 	
 	
-	private void processSamplingUnitAttributeFilter(SamplingUnitAttributeFilter lfilter, FilterTable ft, Connection c) throws SQLException{
+	private void processSamplingUnitAttributeFilter(SamplingUnitAttributeFilter lfilter, FilterTable t, Connection c) throws SQLException{
 		engine.clearParameters();
 		
 		if (lfilter.getSource() == Source.TRACK){
 			//observation
 			StringBuilder sql = new StringBuilder();
 			sql.append("INSERT INTO "); //$NON-NLS-1$
-			sql.append(ft.tablename + " (" + ft.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+			sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 			sql.append(" SELECT distinct ");  //$NON-NLS-1$
 			sql.append(prefix(SurveyWaypoint.class));
 			sql.append(".wp_uuid");  //$NON-NLS-1$
@@ -835,7 +851,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		//observation
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append(ft.tablename + " (" + ft.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(" SELECT distinct ");  //$NON-NLS-1$
 		sql.append(prefix(SurveyWaypoint.class));
 		sql.append(".wp_uuid");  //$NON-NLS-1$
@@ -914,8 +930,6 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		}
 		
 		logger.finest(sql.toString());
-		try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
-			ps.executeUpdate();
-		}
+		engine.parseQueryString(c, sql.toString()).executeUpdate();
 	}
 }

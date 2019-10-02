@@ -70,6 +70,7 @@ public class AssetQueryColumnProvider implements IAssetQueryColumnProvider{
 			
 			for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 				FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+				if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID) continue;
 				boolean add = true;
 				if (item == FixedQueryColumn.FixedColumns.CA_ID || item == FixedQueryColumn.FixedColumns.CA_NAME){
 					add = query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA);
@@ -83,6 +84,7 @@ public class AssetQueryColumnProvider implements IAssetQueryColumnProvider{
 			for (QueryColumn qc : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(query))){
 				cols.add(qc);
 			}
+			cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, Locale.getDefault()));
 			return cols.toArray(new QueryColumn[cols.size()]);
 	}
 		
