@@ -49,6 +49,7 @@ import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -164,12 +165,20 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 						}
 					}
 					
-					if (currentLink.getWaypoint().getObservations() == null) currentLink.getWaypoint().setObservations(new ArrayList<>());
-					if (parsedWp.getObservations() != null) {
-						for (WaypointObservation wo : parsedWp.getObservations()) {
-							wo.setWaypoint(currentLink.getWaypoint());
-							currentLink.getWaypoint().getObservations().add(wo);
+					if (currentLink.getWaypoint().getObservationGroups() == null) currentLink.getWaypoint().setObservationGroups(new ArrayList<>());
+					if (parsedWp.getObservationGroups()  != null) {
+						for (WaypointObservationGroup g : parsedWp.getObservationGroups()) {
+							WaypointObservationGroup newg = new WaypointObservationGroup();
+							currentLink.getWaypoint().getObservationGroups().add(newg);
+							newg.setWaypoint(currentLink.getWaypoint());
+							newg.setObservations(new ArrayList<>());
+							
+							for (WaypointObservation wo : g.getObservations()) {
+								wo.setObservationGroup(newg);
+								newg.getObservations().add(wo);
+							}
 						}
+						
 					}
 					modifiedIncidents.add(currentLink.getWaypoint());
 				}

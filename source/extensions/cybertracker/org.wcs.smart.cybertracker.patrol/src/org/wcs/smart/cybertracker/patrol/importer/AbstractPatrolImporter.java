@@ -243,7 +243,7 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 
 		PatrolWaypoint pwp = new PatrolWaypoint();
 		Waypoint wp = new Waypoint();
-		wp.setObservations(new ArrayList<WaypointObservation>());
+		wp.setObservationGroups(new ArrayList<>());
 		wp.setId(pld.getWaypoints().size()+1);
 		wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 		wp.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -336,8 +336,8 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 					for (WaypointAttachment attachment : pw.getWaypoint().getAttachments()){
 						attachments.add(attachment);
 					}
-					if (pw.getWaypoint().getObservations() != null){
-						for (WaypointObservation wo : pw.getWaypoint().getObservations()){
+					if (pw.getWaypoint().getAllObservations() != null){
+						for (WaypointObservation wo : pw.getWaypoint().getAllObservations()){
 							if (wo.getAttachments() == null) continue;
 							for (ObservationAttachment attachment : wo.getAttachments()){
 								attachments.add(attachment);

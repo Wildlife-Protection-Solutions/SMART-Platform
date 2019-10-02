@@ -81,6 +81,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -402,7 +403,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 	private int processGroup(JSONObject sighting, Mission missionToUpdate, Waypoint wp, SamplingUnit su, List<WaypointObservationAttribute> applyAll, Date groupStartTime, Session session) throws Exception{
 		if (!sighting.containsKey(ScreensUtil.RESULT_END_WAYPOINT_GROUP)){
 			//clear observations associated with 
-			wp.getObservations().clear();
+			wp.getObservationGroups().clear();
 			addToExistingMission(missionToUpdate, wp, su, session);
 			
 			return 1;
@@ -421,7 +422,9 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					//no location; add to previous 
 					SurveyWaypoint pw = addWaypointToLastObservation(missionToUpdate, wp, session);
 					if (pw != null){
-						addAttributesToObservation(pw.getWaypoint().getObservations(), applyAll);
+						if (!pw.getWaypoint().getObservationGroups().isEmpty()) {
+							addAttributesToObservation(pw.getWaypoint().getObservationGroups().get(0).getObservations(), applyAll);
+						}
 						return 1;
 					}
 					return 0;
@@ -433,7 +436,11 @@ public class MissionJsonProcessor implements IJsonProcessor {
 						for (SurveyWaypoint pw : pld.getWaypoints()){
 							if (pw.getWaypoint().getDateTime().equals(groupStartTime) || 
 									pw.getWaypoint().getDateTime().after(groupStartTime)){
-								addAttributesToObservation(pw.getWaypoint().getObservations(), applyAll);
+								
+								if (!pw.getWaypoint().getObservationGroups().isEmpty()) {
+									addAttributesToObservation(pw.getWaypoint().getObservationGroups().get(0).getObservations(), applyAll);
+								}
+
 							}
 						}
 					}
@@ -491,10 +498,22 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		}
 		
 		//merge observations into a single waypoint
-		for (WaypointObservation wo : wp.getObservations()){
-			wo.setWaypoint(lastWaypoint.getWaypoint());
-			lastWaypoint.getWaypoint().getObservations().add(wo);
+		Waypoint addTo = lastWaypoint.getWaypoint();
+		if (addTo.getObservationGroups().isEmpty()) {
+			WaypointObservationGroup first = new WaypointObservationGroup();
+			first.setObservations(new ArrayList<>());
+			first.setWaypoint(addTo);
+			addTo.getObservationGroups().add(first);
 		}
+		WaypointObservationGroup addToGroup = addTo.getObservationGroups().get(0);
+		
+		for(WaypointObservationGroup g : wp.getObservationGroups()) {
+			for (WaypointObservation wo : g.getObservations()){
+				wo.setObservationGroup(addToGroup);
+				addToGroup.getObservations().add(wo);
+			}
+		}
+		
 		//merge attachments
 		if (wp.getAttachments() != null && !wp.getAttachments().isEmpty()){
 			if (lastWaypoint.getWaypoint().getAttachments() == null){
@@ -664,14 +683,12 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					
 				}
 			}
-			if (wp.getObservations() != null){
-				for(WaypointObservation wo : wp.getObservations()){
-					if (wo.getAttachments() != null){
-						for (ObservationAttachment a : wo.getAttachments()){
-							a.computeFileLocation(new File(new File(
-									SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-									SURVEY_WP_SRC.getDatastoreFileLocation(addTo, session)), a.getFilename()));
-						}
+			for(WaypointObservation wo : wp.getAllObservations()){
+				if (wo.getAttachments() != null){
+					for (ObservationAttachment a : wo.getAttachments()){
+						a.computeFileLocation(new File(new File(
+								SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
+							SURVEY_WP_SRC.getDatastoreFileLocation(addTo, session)), a.getFilename()));
 					}
 				}
 			}

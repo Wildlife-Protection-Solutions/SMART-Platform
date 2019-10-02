@@ -68,6 +68,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.Patrol;
@@ -418,7 +419,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 	private int processGroup(JSONObject sighting, PatrolLeg legToUpdate, Waypoint wp, List<WaypointObservationAttribute> applyAll, Date groupStartTime, Session session) throws Exception{
 		if (!sighting.containsKey(ScreensUtil.RESULT_END_WAYPOINT_GROUP)){
 			//clear observations associated with 
-			wp.getObservations().clear();
+			wp.getObservationGroups().clear();
 			addToExistingLeg(legToUpdate, wp, session);
 			
 			return 1;
@@ -437,7 +438,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					//no location; add to previous 
 					PatrolWaypoint pw = addWaypointToLastObservation(legToUpdate, wp, session);
 					if (pw != null){
-						addAttributesToObservation(pw.getWaypoint().getObservations(), applyAll);
+						if (!pw.getWaypoint().getObservationGroups().isEmpty())
+							addAttributesToObservation(pw.getWaypoint().getObservationGroups().get(0).getObservations(), applyAll);
 						return 1;
 					}
 					return 0;
@@ -449,7 +451,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						for (PatrolWaypoint pw : pld.getWaypoints()){
 							if (pw.getWaypoint().getDateTime().equals(groupStartTime) || 
 									pw.getWaypoint().getDateTime().after(groupStartTime)){
-								addAttributesToObservation(pw.getWaypoint().getObservations(), applyAll);
+								
+								if (!pw.getWaypoint().getObservationGroups().isEmpty())
+									addAttributesToObservation(pw.getWaypoint().getObservationGroups().get(0).getObservations(), applyAll);
 							}
 						}
 					}
@@ -506,10 +510,19 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			return null;
 		}
 		
+		if (lastWaypoint.getWaypoint().getObservationGroups().isEmpty()) {
+			WaypointObservationGroup g = new WaypointObservationGroup();
+			g.setWaypoint(lastWaypoint.getWaypoint());
+			lastWaypoint.getWaypoint().getObservationGroups().add(g);
+			g.setObservations(new ArrayList<>());
+		}
+		WaypointObservationGroup toadd = lastWaypoint.getWaypoint().getObservationGroups().get(0);
 		//merge observations into a single waypoint
-		for (WaypointObservation wo : wp.getObservations()){
-			wo.setWaypoint(lastWaypoint.getWaypoint());
-			lastWaypoint.getWaypoint().getObservations().add(wo);
+		for (WaypointObservationGroup grp : wp.getObservationGroups()){
+			for (WaypointObservation wo : grp.getObservations()){
+				wo.setObservationGroup(toadd);
+				toadd.getObservations().add(wo);
+			}
 		}
 		//merge attachments
 		if (wp.getAttachments() != null && !wp.getAttachments().isEmpty()){
@@ -644,17 +657,17 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					
 				}
 			}
-			if (wp.getObservations() != null){
-				for(WaypointObservation wo : wp.getObservations()){
-					if (wo.getAttachments() != null){
-						for (ObservationAttachment a : wo.getAttachments()){
-							a.computeFileLocation(new File(new File(
-									SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-									PATROL_WP_SRC.getDatastoreFileLocation(addTo.getPatrol(), session)), a.getFilename()));
-						}
+			
+			for(WaypointObservation wo : wp.getAllObservations()){
+				if (wo.getAttachments() != null){
+					for (ObservationAttachment a : wo.getAttachments()){
+						a.computeFileLocation(new File(new File(
+								SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
+								PATROL_WP_SRC.getDatastoreFileLocation(addTo.getPatrol(), session)), a.getFilename()));
 					}
 				}
 			}
+			
 			session.saveOrUpdate(wp);
 			session.save(pw);
 			session.saveOrUpdate(addToD.getPatrolLeg().getPatrol());
