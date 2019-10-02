@@ -99,6 +99,8 @@ public class AssetQueryColumnCache {
 				
 				for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 					FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+					if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID) continue;
+					
 					boolean add = true;
 					if (item == FixedQueryColumn.FixedColumns.CA_ID || item == FixedQueryColumn.FixedColumns.CA_NAME){
 						add = SmartDB.isMultipleAnalysis();
