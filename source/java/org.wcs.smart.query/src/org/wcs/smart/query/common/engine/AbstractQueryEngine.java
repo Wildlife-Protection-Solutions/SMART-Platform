@@ -347,4 +347,14 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		return true; //it is safer to assume that column that we were unable to find may have values and display it to user
 	}
 	
+	public static class FilterTable{
+		public String tablename;
+		public String columnname;
+		
+		public FilterTable(String tablename, String columnname) {
+			this.tablename = tablename;
+			this.columnname = columnname;
+		}
+	}
+	
 }

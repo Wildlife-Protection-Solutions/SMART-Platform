@@ -166,14 +166,4 @@ public abstract class DerbyPatrolQueryEngine extends AbstractQueryEngine impleme
 	 */
 	public abstract void dropTables(Connection c) throws SQLException;
 
-	
-	public static class FilterTable{
-		String tablename;
-		String columnname;
-		
-		public FilterTable(String tablename, String columnname) {
-			this.tablename = tablename;
-			this.columnname = columnname;
-		}
-	}
 }

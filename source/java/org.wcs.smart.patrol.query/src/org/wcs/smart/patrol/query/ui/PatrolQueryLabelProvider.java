@@ -66,7 +66,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case PATROL_LEG_END_DATE: return Messages.FixedQueryColumn_LegEndDateColumnName;
 			case TRANSPORT_TYPE: return Messages.FixedQueryColumn_TransportColumnName;
 			case WAYPOINT_ID: return Messages.FixedQueryColumn_WaypointIdColumnName;
-			case OBS_GROUP_ID: return "Observation Group";
+			case OBS_GROUP_ID: return Messages.PatrolQueryLabelProvider_ObsGroupColumnName;
 			case WAYPOINT_DATE: return Messages.FixedQueryColumn_WaypointDateColumnName;
 			case WAYPOINT_TIME: return Messages.FixedQueryColumn_WaypointTimeColumnName;
 			case WAYPOINT_X: return Messages.FixedQueryColumn_xColumnName;

@@ -379,7 +379,7 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 		
 		btnGroup = new Button(filterTypeComp, SWT.RADIO);
 		btnGroup.setText(BasicDropItemFactory.INSTANCE.getFilterTypeName(IFilter.FilterType.GROUP));
-		btnGroup.setToolTipText("filters results by observation graoup which may contain multiple observation");
+		btnGroup.setToolTipText(Messages.BasicFilterDefintionPanel_obsGroupTooltip);
 		btnGroup.setSelection(false);
 		btnGroup.addListener(SWT.Selection, selectListener);
 		

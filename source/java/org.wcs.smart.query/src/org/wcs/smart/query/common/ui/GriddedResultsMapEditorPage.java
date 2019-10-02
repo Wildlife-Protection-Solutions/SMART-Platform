@@ -60,7 +60,6 @@ import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IStyledQuery;
 import org.wcs.smart.query.model.QueryStyleParser;
-import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;

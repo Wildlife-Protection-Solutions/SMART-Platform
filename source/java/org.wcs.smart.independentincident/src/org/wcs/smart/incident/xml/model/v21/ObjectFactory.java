@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    public final static QName _Waypoint_QNAME = new QName("http://www.smartconservationsoftware.org/xml/2.1/independentincident", "Waypoint");
+    public final static QName _Waypoint_QNAME = new QName("http://www.smartconservationsoftware.org/xml/2.1/independentincident", "Waypoint"); //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.smartconservationsoftware.xml._2_1.independentincident

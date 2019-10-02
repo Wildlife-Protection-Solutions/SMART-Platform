@@ -51,7 +51,6 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;

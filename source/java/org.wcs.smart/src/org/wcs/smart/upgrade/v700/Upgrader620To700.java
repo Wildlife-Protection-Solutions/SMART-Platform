@@ -66,7 +66,7 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 			throws Exception {
 
 		try {
-			String s = "CREATE FUNCTION smart.uuid() returns char(16) for bit data LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.DerbyUtils.createUuid' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT";
+			String s = "CREATE FUNCTION smart.uuid() returns char(16) for bit data LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.DerbyUtils.createUuid' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT"; //$NON-NLS-1$
 			SmartPlugIn.logInfo(s);
 			c.createStatement().execute(s);
 		}catch (Exception ex) {
@@ -138,7 +138,7 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 				//TODO: foreign keys and test performace
 				"UPDATE smart.wp_observation SET wp_group_uuid = (select a.uuid from smart.wp_observation_group a where a.wp_uuid = smart.wp_observation.wp_uuid)", //$NON-NLS-1$
 				
-				"alter table smart.wp_observation drop column wp_uuid"
+				"alter table smart.wp_observation drop column wp_uuid" //$NON-NLS-1$
 		};
 
 		for (String s : sql) {

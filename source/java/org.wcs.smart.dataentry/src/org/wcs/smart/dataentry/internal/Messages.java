@@ -179,6 +179,8 @@ public class Messages extends NLS {
 	public static String DropdownScreenOptionComposite_EmptyValue;
 	public static String EditListDialog_ConfigurationName;
 	public static String EditListDialog_DisplayMode;
+	public static String EditListDialog_editmsg;
+	public static String EditListDialog_edittitle;
 	public static String EditListDialog_Image;
 	public static String EditTreeDialog_AddGroup;
 	public static String EditTreeDialog_AddNodeButton;
@@ -229,6 +231,7 @@ public class Messages extends NLS {
 	public static String ListAttributeInfoComposite_defaultTooltip;
 	public static String ListAttributeInfoComposite_MultiselectHint;
 	public static String ListAttributeInfoComposite_multiSelectTooltip;
+	public static String MetaConfigDialog_MetadataPages;
 	public static String MetaConfigDialog_SaveError;
 	public static String NumericAttributeInfoComposite_defaultTooltip;
 	public static String NumericAttributeInfoComposite_ErrorDialogTitle;

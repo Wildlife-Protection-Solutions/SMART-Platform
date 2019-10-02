@@ -283,10 +283,10 @@ public class Waypoint extends UuidItem {
 				}
 				added.put(ob.getCategory(), x+1);
 			}
-			for (Entry<Category, Integer> item : added.entrySet()){
-				text.append(item.getKey().getName() + " (" + item.getValue() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-				text.append("; "); //$NON-NLS-1$
-			}	
+		}
+		for (Entry<Category, Integer> item : added.entrySet()){
+			text.append(item.getKey().getName() + " (" + item.getValue() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			text.append("; "); //$NON-NLS-1$
 		}
 		if (text.length() > 1) text.delete(text.length() - 2, text.length());
 		
@@ -323,11 +323,12 @@ public class Waypoint extends UuidItem {
 		wp.setRawY(this.y);
 		wp.setConservationArea(this.ca);
 		wp.setSourceId(this.sourceId);
+		wp.setObservationGroups(new ArrayList<WaypointObservationGroup>());
 		
 		if (this.groups != null && !this.groups.isEmpty()) {
-			wp.setObservationGroups(new ArrayList<WaypointObservationGroup>());
 			for (WaypointObservationGroup g : this.groups) {
 				WaypointObservationGroup groupclone = new WaypointObservationGroup();
+				groupclone.setWaypoint(wp);
 				wp.getObservationGroups().add(groupclone);
 				groupclone.setObservations(new ArrayList<>());
 				for (WaypointObservation wobp : g.getObservations()){

@@ -29,7 +29,6 @@ import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationGroup;
 
 /**
  * Extension of the smart hibernate manager for observation related data.

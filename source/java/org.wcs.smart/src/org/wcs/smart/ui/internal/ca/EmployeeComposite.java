@@ -190,7 +190,7 @@ public class EmployeeComposite extends Composite {
 			}
 		};
 		
-		Composite c = SmartUiUtils.createHeaderLabel(this, "Employee Details");
+		Composite c = SmartUiUtils.createHeaderLabel(this, Messages.EmployeeComposite_DetailsSection);
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 				
 		Label lbl = createLabelField(this, SmartLabelProvider.EMP_ID + ":"); //$NON-NLS-1$

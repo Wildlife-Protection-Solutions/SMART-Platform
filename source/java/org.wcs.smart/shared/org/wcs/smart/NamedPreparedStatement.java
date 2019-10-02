@@ -114,7 +114,7 @@ public class NamedPreparedStatement implements AutoCloseable{
                         indexList=new ArrayList<Integer>();
                         indexMap.put(":" + name, indexList); //$NON-NLS-1$
                     }
-                    indexList.add(new Integer(index));
+                    indexList.add(Integer.valueOf(index));
 
                     index++;
                 }

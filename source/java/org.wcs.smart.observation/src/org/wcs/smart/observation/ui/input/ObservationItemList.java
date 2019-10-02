@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.observation.ui.input;
 
 import java.text.MessageFormat;
@@ -29,18 +50,23 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Widget;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.icon.IconFile;
-import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.common.control.SmartUiUtils;
-import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
+/**
+ * Displays a list of observations group by waypoint observation group
+ * 
+ * @author Emily
+ * @since 7.0.0
+ *
+ */
 public class ObservationItemList {
 
-	
 	private Color selectionColor = null;
 	private Color mouseOverColor = null;
 	private Font boldFont= null;
@@ -79,7 +105,7 @@ public class ObservationItemList {
 		obsMenu = new Menu(parent);
 		
 		MenuItem miGroup = new MenuItem(obsMenu, SWT.PUSH);
-		miGroup.setText("Group Selection");
+		miGroup.setText(Messages.ObservationItemList_GroupMenuItem);
 		miGroup.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		miGroup.addListener(SWT.Selection, e->{
 			List<ObservationItem> selections = new ArrayList<>();
@@ -103,7 +129,7 @@ public class ObservationItemList {
 		new MenuItem(obsMenu, SWT.SEPARATOR);
 		
 		MenuItem miHideDetails = new MenuItem(obsMenu, SWT.PUSH);
-		miHideDetails.setText("Hide Details");
+		miHideDetails.setText(Messages.ObservationItemList_HideDetails);
 		miHideDetails.addListener(SWT.Selection, e->{
 			this.hideDetails = !hideDetails;
 			buildObservations();
@@ -136,8 +162,8 @@ public class ObservationItemList {
 			}
 			if (wos.isEmpty()) return;
 			
-			if (!MessageDialog.openConfirm(parent.getShell(), "Delete", 
-					MessageFormat.format("Are you sure you want to delete the {0} selected observations?", wos.size()))) 
+			if (!MessageDialog.openConfirm(parent.getShell(), Messages.ObservationItemList_DeleteTitle, 
+					MessageFormat.format(Messages.ObservationItemList_DeleteMsg, wos.size()))) 
 				return;
 			
 			for (WaypointObservation wo : wos) {
@@ -163,9 +189,9 @@ public class ObservationItemList {
 				miDelete.setEnabled(hasSelection);
 				
 				if (hideDetails) {
-					miHideDetails.setText("Show Details");
+					miHideDetails.setText(Messages.ObservationItemList_ShowDetails);
 				}else {
-					miHideDetails.setText("Hide Details");
+					miHideDetails.setText(Messages.ObservationItemList_HideDetails);
 				}
 			}
 		});
@@ -195,7 +221,7 @@ public class ObservationItemList {
 			});
 			
 			if (number > 1 ) {
-				SmartUiUtils.createHeaderLabel(groupc, "Observation Group");
+				SmartUiUtils.createHeaderLabel(groupc, Messages.ObservationItemList_ObsGroupHeader);
 			}
 			for (int j = 0; j < g.getObservations().size(); j ++) {
 				ObservationItem item = new ObservationItem(groupc, g.getObservations().get(j));
@@ -260,7 +286,7 @@ public class ObservationItemList {
 			clabel.setText(SmartUtils.formatStringForLabel(wo.getCategory().getName()));
 			
 			Label clabel2 = new Label(left, SWT.NONE);
-			clabel2.setText(wo.getCategory().getParent() == null ? "" :SmartUtils.formatStringForLabel(wo.getCategory().getParent().getFullCategoryName()) );
+			clabel2.setText(wo.getCategory().getParent() == null ? "" :SmartUtils.formatStringForLabel(wo.getCategory().getParent().getFullCategoryName()) ); //$NON-NLS-1$
 
 			clabel.setFont(boldFont);
 			
@@ -280,7 +306,7 @@ public class ObservationItemList {
 			
 			for (WaypointObservationAttribute a : wo.getAttributes()) {
 				Label l = new Label(attributes, SWT.NONE);
-				l.setText(SmartUtils.formatStringForLabel(a.getAttribute().getName()) +":");
+				l.setText(SmartUtils.formatStringForLabel(a.getAttribute().getName()) +":"); //$NON-NLS-1$
 				l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 
 				l = new Label(attributes, SWT.NONE);
@@ -289,18 +315,18 @@ public class ObservationItemList {
 				
 				cnt++;
 				if (cnt >= 2 && hideDetails) {
-					l.setText( l.getText() + "   ...");
+					l.setText( l.getText() + "   ..."); //$NON-NLS-1$
 					break;
 				}
 			}
 			if (cnt < 2 || !hideDetails) {
 				Label l = new Label(attributes, SWT.NONE);
-				l.setText("Attachments:");
+				l.setText(Messages.ObservationItemList_Attachments);
 				l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
 				l = new Label(attributes, SWT.NONE);
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				l.setText(MessageFormat.format("{0}", wo.getAttachments().size()));
+				l.setText(MessageFormat.format("{0}", wo.getAttachments().size())); //$NON-NLS-1$
 			}
 			
 			ToolBar btns = new ToolBar(right, SWT.VERTICAL);
@@ -316,7 +342,7 @@ public class ObservationItemList {
 			tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			tiDelete.setToolTipText(DialogConstants.DELETE_BUTTON_TEXT);
 			tiDelete.addListener(SWT.Selection, e->{
-				if (!MessageDialog.openConfirm(getShell(), "Delete", "Are you sure you want to delete this observation?")) 
+				if (!MessageDialog.openConfirm(getShell(), Messages.ObservationItemList_DeleteTitle, Messages.ObservationItemList_DeleteObsMsg)) 
 					return;
 				wizard.removeObservation(wo);
 				buildObservations();

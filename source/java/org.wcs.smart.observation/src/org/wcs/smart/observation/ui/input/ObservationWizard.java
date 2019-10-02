@@ -131,8 +131,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 			this.wp = session.get(Waypoint.class, waypoint.getUuid());
 			
 			iset = QueryFactory.buildQuery(session, IconSet.class, 
-					new Object[] {"conservationArea", wp.getConservationArea()},
-					new Object[] {"isDefault", true}).uniqueResult();
+					new Object[] {"conservationArea", wp.getConservationArea()}, //$NON-NLS-1$
+					new Object[] {"isDefault", true}).uniqueResult(); //$NON-NLS-1$
 			for (WaypointObservationGroup g : wp.getObservationGroups()) {
 				for (WaypointObservation ob : g.getObservations()) {
 					ob.getAttributes().forEach(a->a.getAttributeValueAsString(Locale.getDefault()));

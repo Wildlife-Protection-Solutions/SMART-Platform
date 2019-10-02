@@ -43,10 +43,10 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
-import org.wcs.smart.patrol.query.engine.DerbyPatrolQueryEngine.FilterTable;
 import org.wcs.smart.patrol.query.engine.visitors.AreaFilterVisitor;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AttributeFilter;
@@ -399,12 +399,6 @@ public class WaypointGroupFilterProcessor implements IFilterProcessor{
 		sql.append(prefix(Waypoint.class)); 
 		sql.append(" on " + prefix(PatrolWaypoint.class) + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
-		sql.append(" join "); //$NON-NLS-1$
-		sql.append(name(WaypointObservationGroup.class));
-		sql.append(" as ");//$NON-NLS-1$
-		sql.append(prefix(WaypointObservationGroup.class)); 
-		sql.append(" on " + prefix(Waypoint.class) + ".uuid = " + prefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		
 		if (dateFilter != null) {
 			String dfilter = PatrolFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
 			if (dfilter.length() > 0) {
@@ -412,6 +406,12 @@ public class WaypointGroupFilterProcessor implements IFilterProcessor{
 				sql.append(dfilter);
 			}
 		}
+		
+		sql.append(" join "); //$NON-NLS-1$
+		sql.append(name(WaypointObservationGroup.class));
+		sql.append(" as ");//$NON-NLS-1$
+		sql.append(prefix(WaypointObservationGroup.class)); 
+		sql.append(" on " + prefix(Waypoint.class) + ".uuid = " + prefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		QueryPlugIn.logSql(sql.toString());
 		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){

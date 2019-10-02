@@ -424,6 +424,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	/*
 	 * adds a new observation
 	 */
+	@SuppressWarnings("unchecked")
 	private boolean addObservation(){
 		WaypointObservation wo = createObservationAndClear();		
 		if (wo != null){
@@ -511,12 +512,12 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		
 		ToolItem tiEdit = new ToolItem(tb, SWT.PUSH);
 		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		tiEdit.setToolTipText("edit selected observation");
+		tiEdit.setToolTipText(Messages.AttributeWizardPage_editObsTooltip);
 		tiEdit.addListener(SWT.Selection,e->editObservationBtn());
 		
 		ToolItem tiDelete = new ToolItem(tb, SWT.PUSH);
 		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiDelete.setToolTipText("delete selected observation");
+		tiDelete.setToolTipText(Messages.AttributeWizardPage_deleteObsTooltip);
 		tiDelete.addListener(SWT.Selection, e->deleteObservationBtn());
 
 		tiDelete.setEnabled(false);
@@ -681,12 +682,12 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		tb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		ToolItem tiEdit = new ToolItem(tb, SWT.PUSH);
 		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		tiEdit.setToolTipText("add attachment to observation");
+		tiEdit.setToolTipText(Messages.AttributeWizardPage_addAttachmentTooltip);
 		tiEdit.addListener(SWT.Selection,e->addAttachment());
 		
 		ToolItem tiDelete = new ToolItem(tb, SWT.PUSH);
 		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiDelete.setToolTipText("remove selected attachment");
+		tiDelete.setToolTipText(Messages.AttributeWizardPage_removeAttachmenttooltip);
 		tiDelete.addListener(SWT.Selection, e->deleteAttachment());
 
 		Menu menu = new Menu(attachmentViewer.getControl());

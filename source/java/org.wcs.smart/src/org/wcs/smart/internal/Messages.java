@@ -613,6 +613,7 @@ public class Messages extends NLS {
 	public static String DeleteConservationArea_UserNameConfirmation_DialogButton;
 	public static String DeleteConservationArea_UserNameConfirmation_DialogMessage;
 	public static String DeleteConservationArea_UserNameConfirmation_DialogTitle;
+	public static String DeleteConservationAreaHandler_deleteTeamsTaskName;
 	public static String DeleteConservationAreaHandler_Progress_AgencyRank;
 	public static String DeleteConservationAreaHandler_Progress_DataModel;
 	public static String DeleteConservationAreaHandler_Progress_Employees;
@@ -693,6 +694,7 @@ public class Messages extends NLS {
 	public static String Employee_SmartUserLevel_Label;
 	public static String EmployeeComposite_addtooltip;
 	public static String EmployeeComposite_AutoAssignId_Label;
+	public static String EmployeeComposite_DetailsSection;
 	public static String EmployeeComposite_Error_EmployeeId;
 	public static String EmployeeComposite_Error_InvalidBirthDate;
 	public static String EmployeeComposite_Error_InvalidEndDate;

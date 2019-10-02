@@ -21,6 +21,8 @@ public class Messages extends NLS {
 
 	public static String AttributeTreeNodeDMAdvisor_DeleteError;
 	public static String AttributeTreeNodeDMAdvisor_InvalidObjectType;
+	public static String AttributeWizardPage_addAttachmentTooltip;
+
 	public static String AttributeWizardPage_AddObservation_Button;
 
 	public static String AttributeWizardPage_AttachmentsLabel;
@@ -28,6 +30,10 @@ public class Messages extends NLS {
 	public static String AttributeWizardPage_CategoryObservations_Label;
 	public static String AttributeWizardPage_DataObservations_DialogMessage;
 	public static String AttributeWizardPage_DataObservations_DialogTitle;
+
+	public static String AttributeWizardPage_deleteObsTooltip;
+
+	public static String AttributeWizardPage_editObsTooltip;
 	public static String AttributeWizardPage_Error_DialogTitle;
 
 	public static String AttributeWizardPage_FileNotFoundError;
@@ -35,6 +41,8 @@ public class Messages extends NLS {
 	public static String AttributeWizardPage_PageName;
 	public static String AttributeWizardPage_PageNumberLabel;
 	public static String AttributeWizardPage_PageTitle;
+
+	public static String AttributeWizardPage_removeAttachmenttooltip;
 	public static String AttributeWizardPage_SaveModificationsWarningMessage;
 	public static String AttributeWizardPage_UpdateObsButton;
 	public static String AttributeWizardPage_Warning_DialogTitle;
@@ -150,6 +158,22 @@ public class Messages extends NLS {
 	public static String ObservationCloner_ProgressName;
 
 	public static String ObservationCloner_TaskName;
+	public static String ObservationItemList_Attachments;
+
+	public static String ObservationItemList_DeleteMsg;
+
+	public static String ObservationItemList_DeleteObsMsg;
+
+	public static String ObservationItemList_DeleteTitle;
+
+	public static String ObservationItemList_GroupMenuItem;
+
+	public static String ObservationItemList_HideDetails;
+
+	public static String ObservationItemList_ObsGroupHeader;
+
+	public static String ObservationItemList_ShowDetails;
+
 	public static String ObservationOptionsPropertyPage_ComputationDetails;
 
 	public static String ObservationOptionsPropertyPage_DistanceBearingOpLabel;
@@ -203,6 +227,8 @@ public class Messages extends NLS {
 	public static String WaypointInfoView_LastUpdated2;
 
 	public static String WaypointInfoView_LoadingThumbnails;
+
+	public static String WaypointInfoView_ObsGroupHeader;
 	public static String WaypointInfoView_UpdateJobName;
 	public static String WaypointInfoView_WaypointIdLabel;
 

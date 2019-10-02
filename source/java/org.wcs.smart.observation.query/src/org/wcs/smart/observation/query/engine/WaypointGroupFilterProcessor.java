@@ -38,10 +38,10 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
-import org.wcs.smart.observation.query.engine.AbstractDerbyObservationQueryEngine.FilterTable;
 import org.wcs.smart.observation.query.engine.visitor.AreaFilterVisitor;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AttributeFilter;
@@ -297,10 +297,6 @@ public class WaypointGroupFilterProcessor implements IFilterProcessor{
 		sql.append("FROM "); //$NON-NLS-1$
 
 		sql.append(namePrefix(Waypoint.class));
-		
-		
-		
-		
 		sql.append(" join "); //$NON-NLS-1$
 		sql.append(namePrefix(WaypointObservationGroup.class));
 		sql.append(" on " + prefix(Waypoint.class) + ".uuid = " + prefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

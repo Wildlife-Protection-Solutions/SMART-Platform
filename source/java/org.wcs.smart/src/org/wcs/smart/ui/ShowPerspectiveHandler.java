@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.ui;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.inject.Named;

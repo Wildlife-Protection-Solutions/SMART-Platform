@@ -39,6 +39,7 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
+import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -64,8 +65,6 @@ import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
-
-import org.locationtech.jts.geom.Envelope;
 
 public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implements IUpdateableResultSet, IWaypointUpdateableResultSet, ISearchabledResultSet, IDesktopPagedImageResultSet{
 

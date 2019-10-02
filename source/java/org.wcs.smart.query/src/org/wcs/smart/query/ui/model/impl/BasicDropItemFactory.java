@@ -94,7 +94,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 		}else if (type == FilterType.OBSERVATION){
 			return Messages.IFilter_ObservationFilterName;
 		}else if (type == FilterType.GROUP){
-			return "Observation Group Filter";
+			return Messages.BasicDropItemFactory_ObsGroupFilterName;
 		}
 		throw new IllegalStateException("Invalid filter type."); //$NON-NLS-1$
 	}

@@ -167,7 +167,7 @@ public class FixedQueryColumn extends QueryColumn {
 			case WAYPOINT_ID:
 				return item.getWaypointId();
 			case OBS_GROUP_ID:
-				if (item.getObservationGroupUuid() == null) return "";
+				if (item.getObservationGroupUuid() == null) return ""; //$NON-NLS-1$
 				return UuidUtils.uuidToString(item.getObservationGroupUuid());
 			case TRANSPORT_TYPE:
 				return item.getTransportType();

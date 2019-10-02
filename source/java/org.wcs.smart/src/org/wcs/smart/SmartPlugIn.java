@@ -176,13 +176,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String STYLE_ICON = "org.wsc.smart.STYLE_ICON"; //$NON-NLS-1$
 	
-	/**
-	 * Image descriptor for map  icon
-	 */
 	public static final String DELETE_ICON = "org.wsc.smart.DELETE_ICON"; //$NON-NLS-1$
 	public static final String ADD_ICON = "org.wsc.smart.ADD_ICON"; //$NON-NLS-1$
 	public static final String ENABLE_ICON = "org.wsc.smart.ENABLE_ICON"; //$NON-NLS-1$
 	public static final String DISABLE_ICON = "org.wsc.smart.DISABLE_ICON"; //$NON-NLS-1$
+	public static final String GROUP_ICON = "org.wsc.smart.GROUP_ICON"; //$NON-NLS-1$
 	/**
 	 * Image descriptor for map  icon
 	 */
@@ -443,6 +441,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(CROSSCA_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/eview16/crossca.png")); //$NON-NLS-1$
 	     
 	     reg.put(DELETE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/delete.png")); //$NON-NLS-1$
+	     reg.put(GROUP_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/group.png")); //$NON-NLS-1$
 	     
 	     reg.put(IMG_DEC_FIELD_ERROR, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/ovr16/error_ovr.png")); //$NON-NLS-1$
 	     reg.put(IMG_DEC_FIELD_WARNING, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/ovr16/warning_ovr.png")); //$NON-NLS-1$
