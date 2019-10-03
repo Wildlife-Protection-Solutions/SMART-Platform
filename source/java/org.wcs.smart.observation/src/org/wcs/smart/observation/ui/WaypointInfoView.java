@@ -240,7 +240,7 @@ public class WaypointInfoView {
 							((GridLayout)spacer.getLayout()).marginWidth = 0;
 							((GridLayout)spacer.getLayout()).marginHeight = 0;
 							
-							if (lcurrentWp.getObservationGroups().size() > 1) {
+							if (showText && lcurrentWp.getObservationGroups().size() > 1) {
 								SmartUiUtils.createHeaderLabel(spacer, Messages.WaypointInfoView_ObsGroupHeader);
 							}
 							
@@ -285,6 +285,7 @@ public class WaypointInfoView {
 										obsThumbs.add(tc);
 									}
 								}
+								if (attributeComp.getChildren().length == 0) attributeComp.dispose();
 										
 								if (showText) {
 									Label l = toolkit.createLabel(spacer, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
