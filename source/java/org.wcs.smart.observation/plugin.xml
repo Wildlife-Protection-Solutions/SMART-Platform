@@ -213,6 +213,17 @@
                style="toggle"
                tooltip="%command.toggletext.tooltip">
          </command>
+         <separator
+               name="org.wcs.smart.observation.separator1"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.wcs.smart.observation.waypointinfoview.refresh"
+               icon="platform:/plugin/org.wcs.smart/images/icons/etool16/arrow_refresh.png"
+               label="Refresh"
+               style="push"
+               tooltip="refresh waypoint details">
+         </command>
       </menuContribution>
    </extension>
    <extension
@@ -264,6 +275,10 @@
                      id="org.eclipse.ui.commands.toggleState">
                </state>
       </command>
+            <command
+                  id="org.wcs.smart.observation.waypointinfoview.refresh"
+                  name="Refresh">
+            </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -294,6 +309,10 @@
       <handler
             class="org.wcs.smart.observation.ui.ShowFieldDataPerspective$ShowFieldDataPerspectiveWrapper"
             commandId="org.wcs.smart.observation.perspective.show">
+      </handler>
+      <handler
+            class="org.wcs.smart.observation.ui.WpInfoViewRefreshHandler$WpInfoViewRefreshHandlerWrapper"
+            commandId="org.wcs.smart.observation.waypointinfoview.refresh">
       </handler>
    </extension>
    <extension

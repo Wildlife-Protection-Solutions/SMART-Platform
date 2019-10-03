@@ -132,8 +132,6 @@ public class WaypointInfoView {
 				return Status.OK_STATUS;
 			}
 			final List<Thumbnail> thumbnails = new ArrayList<Thumbnail>();
-			
-//			final Map<UUID, Map<Category, List<WaypointObservation>>> data = new HashMap<>();
 
 			Waypoint currentWp = null;
 			
@@ -472,6 +470,10 @@ public class WaypointInfoView {
 		WaypointEventManager.getInstance().addListener(EventType.WAYPOINT_MODIFIED, waypointListener);
 	}
 
+	public void refresh() {
+		forceRefresh();
+	}
+	
 	public void setImagesVisible(boolean isVisible) {
 		this.showImages = isVisible;
 		forceRefresh();
@@ -629,7 +631,7 @@ public class WaypointInfoView {
 		if (wp != null){
 			updateContents(wp);
 		}else{
-			clearContents();
+			//clearContents();
 		}
 	}
 	
