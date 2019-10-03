@@ -135,10 +135,11 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 				"INSERT INTO smart.wp_observation_group (uuid, wp_uuid) SELECT smart.uuid(), uuid FROM smart.waypoint WHERE uuid in (SELECT wp_uuid FROM smart.wp_observation)", //$NON-NLS-1$
 				
 				"ALTER TABLE smart.wp_observation ADD COLUMN wp_group_uuid char(16) for bit data", //$NON-NLS-1$
-				//TODO: foreign keys and test performace
 				"UPDATE smart.wp_observation SET wp_group_uuid = (select a.uuid from smart.wp_observation_group a where a.wp_uuid = smart.wp_observation.wp_uuid)", //$NON-NLS-1$
-				
-				"alter table smart.wp_observation drop column wp_uuid" //$NON-NLS-1$
+				"alter table smart.wp_observation drop column wp_uuid", //$NON-NLS-1$
+				"ALTER table smart.wp_observation_group ADD CONSTRAINT wo_obs_grp_wp_uuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER table smart.wp_observation ADD CONSTRAINT wo_ob_group_uuid_fk FOREIGN KEY (wp_group_uuid) REFERENCES smart.wp_observation_group (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
 		};
 
 		for (String s : sql) {

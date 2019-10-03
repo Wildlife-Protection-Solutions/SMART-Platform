@@ -84,6 +84,7 @@ import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -131,6 +132,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tablePrefix = new HashMap<Class<?>, String>();
 		tablePrefix.put(ConservationArea.class, "ca"); //$NON-NLS-1$
 		tablePrefix.put(Waypoint.class, "wp"); //$NON-NLS-1$
+		tablePrefix.put(WaypointObservationGroup.class, "wpg"); //$NON-NLS-1$
 		tablePrefix.put(WaypointObservation.class, "wpo"); //$NON-NLS-1$
 		tablePrefix.put(WaypointObservationAttribute.class, "wpoa"); //$NON-NLS-1$
 		tablePrefix.put(Attribute.class, "a"); //$NON-NLS-1$
@@ -190,6 +192,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(ConservationArea.class, "smart.conservation_area"); //$NON-NLS-1$
 		tableNames.put(Waypoint.class, "smart.waypoint"); //$NON-NLS-1$
 		tableNames.put(WaypointObservation.class, "smart.wp_observation"); //$NON-NLS-1$
+		tableNames.put(WaypointObservationGroup.class, "smart.wp_observation_group"); //$NON-NLS-1$
 		tableNames.put(WaypointObservationAttribute.class, "smart.wp_observation_attributes"); //$NON-NLS-1$
 		tableNames.put(Attribute.class, "smart.dm_attribute"); //$NON-NLS-1$
 		tableNames.put(Category.class, "smart.dm_category"); //$NON-NLS-1$

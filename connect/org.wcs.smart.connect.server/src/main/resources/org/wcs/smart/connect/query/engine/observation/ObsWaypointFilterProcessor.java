@@ -352,14 +352,14 @@ public class ObsWaypointFilterProcessor implements IFilterProcessor{
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(t.tablename);
-			sql.append("(" + t.columnname + " char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("(" + t.columnname + " uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());
 
 
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX "); //$NON-NLS-1$
-			sql.append(t.tablename + "_wp_uuid_idx on "); //$NON-NLS-1$
+			sql.append(engine.getIndexName(t.tablename) + "_wp_uuid_idx on "); //$NON-NLS-1$
 			sql.append(t.tablename + "(" + t.columnname + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());

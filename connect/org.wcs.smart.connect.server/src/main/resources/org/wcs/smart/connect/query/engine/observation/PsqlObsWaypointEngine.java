@@ -210,7 +210,7 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 			String queryDataTable) {
 		if (filterType == IFilter.FilterType.OBSERVATION){
 			return new ObsFilterProcessor(queryDataTable, this);
-		}else if (filterType == IFilter.FilterType.OBSERVATION){
+		}else if (filterType == IFilter.FilterType.GROUP){
 			return new ObsWaypointGroupFilterProcessor(queryDataTable, this);
 		}else{
 			return new ObsWaypointFilterProcessor(queryDataTable, this);

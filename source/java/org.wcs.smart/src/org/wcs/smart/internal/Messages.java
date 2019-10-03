@@ -42,8 +42,8 @@ public class Messages extends NLS {
 	public static String AddAttributeDialog1_DialogTitle;
 	public static String AddAttributeDialog1_LoadingAttributesText;
 	public static String AddAttributeDialog1_NewAttributeTitle;
-	public static String AddAttributeDialog1_OpAddExisting;
 	public static String AddAttributeDialog1_OpCreateNew;
+	public static String AddAttributeDialog1_OpAddExisting;
 	public static String AddAttributeDialog1_SelectAttribute_Label;
 	public static String AddAttributeDialog2_DialogTitle;
 	public static String AddAttributeDialog2_Edit_DialogMessage2;
@@ -1116,7 +1116,7 @@ public class Messages extends NLS {
 	public static String RestoreHandler_DialogTitle;
 	public static String RestoreHandler_Error_DialogTitle;
 	public static String RestoreHandler_Error_Message;
-	public static String RestoreHandler_ReportComplete_DialogMessage2;
+	public static String RestoreHandler_ReportComplete_DialogMessage3;
 	public static String RestoreHandler_ReportComplete_DialogTitle;
 	public static String RestoreHandler_ReportFailed_Message;
 	public static String RestoreHandler_RestoreButton;

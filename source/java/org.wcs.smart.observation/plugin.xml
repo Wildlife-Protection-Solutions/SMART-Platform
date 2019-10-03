@@ -51,12 +51,12 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".id.observation.waypoint.conservationArea"
+            ca_property=".id.observation.observationGroup.waypoint.conservationArea"
             class="org.wcs.smart.observation.model.WaypointObservationAttribute"
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".observation.waypoint.conservationArea"
+            ca_property=".observation.observationGroup.waypoint.conservationArea"
             class="org.wcs.smart.observation.model.ObservationAttachment"
             supportsCcaa="false">
       </class>

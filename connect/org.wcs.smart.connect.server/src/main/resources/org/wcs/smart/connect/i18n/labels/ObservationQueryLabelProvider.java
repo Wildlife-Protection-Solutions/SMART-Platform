@@ -57,7 +57,6 @@ public class ObservationQueryLabelProvider implements
 				case WAYPOINT_LAST_MODIFIED: return Messages.getString("ObservationQueryLabelProvider.LastModifiedLabel", l);	 //$NON-NLS-1$
 				case WAYPOINT_LAST_MODIFIED_BY: return Messages.getString("ObservationQueryLabelProvider.LastModifiedByLabel", l); //$NON-NLS-1$
 				case OBS_GROUP_ID: return Messages.getString("ObservationQueryLabelProvider.ObsGroupColumnName", l); //$NON-NLS-1$
-				
 			}
 		}
 		return null;

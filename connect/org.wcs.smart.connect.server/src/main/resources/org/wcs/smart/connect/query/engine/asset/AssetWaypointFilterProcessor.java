@@ -313,13 +313,13 @@ public class AssetWaypointFilterProcessor implements IFilterProcessor{
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(t.tablename);
-			sql.append("(" + t.columnname + " char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("(" + t.columnname + " uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());
 
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX "); //$NON-NLS-1$
-			sql.append(t.tablename + "_wp_uuid_idx on "); //$NON-NLS-1$
+			sql.append(engine.getIndexName(t.tablename) + "_wp_uuid_idx on "); //$NON-NLS-1$
 			sql.append(t.tablename + "(" + t.columnname + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());
@@ -408,7 +408,7 @@ public class AssetWaypointFilterProcessor implements IFilterProcessor{
 		sql.append("INSERT INTO "); //$NON-NLS-1$
 		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
 		sql.append(" SELECT distinct ");  //$NON-NLS-1$
-		sql.append(prefix(WaypointObservation.class));
+		sql.append(prefix(WaypointObservationGroup.class));
 		sql.append(".wp_uuid");  //$NON-NLS-1$
 			
 		sql.append(" FROM ");  //$NON-NLS-1$
@@ -466,13 +466,11 @@ public class AssetWaypointFilterProcessor implements IFilterProcessor{
 		sql.append(" WHERE "); //$NON-NLS-1$
 		if (catfilter != null){
 			String keyPart = catfilter.getCategoryKey();
-			String p1 = engine.addParameterValue(keyPart);
-			String p2 = engine.addParameterValue(keyPart.substring(0,  keyPart.length() -1) + "/"); //$NON-NLS-1$
+			String p1 = engine.addParameterValue(keyPart + "%"); //$NON-NLS-1$
 			sql.append(" ( "); //$NON-NLS-1$
 			sql.append(prefix(Category.class));
-			sql.append(".hkey >= " + p1 + " and "); //$NON-NLS-1$ //$NON-NLS-2$
-			sql.append(prefix(Category.class));
-			sql.append(".hkey <  " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(".hkey like " + p1 ); //$NON-NLS-1$
+			sql.append(" )"); //$NON-NLS-1$ 
 		}
 		if (attfilter != null){
 			if (catfilter != null){
@@ -519,13 +517,10 @@ public class AssetWaypointFilterProcessor implements IFilterProcessor{
 				}
 				sql.append(") "); //$NON-NLS-1$
 			}else if (attfilter.getAttributeType() == AttributeType.TREE){
-				String p2 = engine.addParameterValue(((String)attfilter.getValue()));
-				String p3 = engine.addParameterValue(((String)attfilter.getValue()).substring(0,  ((String)attfilter.getValue()).length() -1) + "/"); //$NON-NLS-1$
+				String p2 = engine.addParameterValue(((String)attfilter.getValue())+ "%"); //$NON-NLS-1$
 				sql.append("("); //$NON-NLS-1$
 				sql.append(prefix(AttributeTreeNode.class));
-				sql.append(".hkey >= " + p2 + " and " );  //$NON-NLS-1$ //$NON-NLS-2$ 
-				sql.append(prefix(AttributeTreeNode.class));
-				sql.append(".hkey < " + p3 + " ) ");  //$NON-NLS-1$ //$NON-NLS-2$  
+				sql.append(".hkey like " + p2 + " ) " );  //$NON-NLS-1$ //$NON-NLS-2$ 
 			}else if (attfilter.getAttributeType() == AttributeType.DATE){
 				String p2 = engine.addParameterValue(attfilter.getValue());
 				String p3 = engine.addParameterValue(attfilter.getValue2());

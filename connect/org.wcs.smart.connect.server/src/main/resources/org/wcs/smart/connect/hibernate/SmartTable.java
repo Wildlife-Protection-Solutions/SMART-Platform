@@ -323,7 +323,7 @@ public enum SmartTable {
 	NAMEDITEM(NamedItem.class,null),
 	NAMEDKEYITEM(NamedKeyItem.class,null),
 	NUMERICPLANTARGET(NumericPlanTarget.class,".plan.conservationArea"),
-	OBSERVATIONATTACHMENT(ObservationAttachment.class,".observation.waypoint.conservationArea"),
+	OBSERVATIONATTACHMENT(ObservationAttachment.class,".observation.observationGroup.waypoint.conservationArea"),
 	OBSERVATIONGRIDDEDQUERY(ObservationGriddedQuery.class,null),
 	OBSERVATIONOPTIONS(ObservationOptions.class,".uuid"),
 	OBSERVATIONQUERY(ObservationQuery.class,null),
@@ -389,7 +389,7 @@ public enum SmartTable {
 	WAYPOINTATTACHMENT(WaypointAttachment.class,".waypoint.conservationArea"),
 	WAYPOINTOBSERVATION(WaypointObservation.class,".waypoint.conservationArea"),
 	WAYPOINTOBSERVATIONGROUP(WaypointObservationGroup.class,".observationGroup.waypoint.conservationArea"),
-	WAYPOINTOBSERVATIONATTRIBUTE(WaypointObservationAttribute.class,".id.observation.waypoint.conservationArea"),
+	WAYPOINTOBSERVATIONATTRIBUTE(WaypointObservationAttribute.class,".id.observation.observationGroup.waypoint.conservationArea"),
 	WAYPOINTQUERY(WaypointQuery.class, null),
 	
 	I2_ATTACHMENT(IntelAttachment.class, null),
