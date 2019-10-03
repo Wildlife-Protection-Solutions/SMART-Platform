@@ -573,6 +573,7 @@ public class Messages extends NLS {
 	public static String NavigationLayerDialog_CreatedDateField;
 	public static String NavigationLayerDialog_DefaultTargetName;
 	public static String NavigationLayerDialog_DeleteTargetActionName;
+	public static String NavigationLayerDialog_ErrorDialogTitle;
 	public static String NavigationLayerDialog_ErrorTitle;
 	public static String NavigationLayerDialog_MapName;
 	public static String NavigationLayerDialog_ModifiedByField;

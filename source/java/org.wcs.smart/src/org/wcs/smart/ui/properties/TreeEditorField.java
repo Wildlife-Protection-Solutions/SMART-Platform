@@ -100,7 +100,16 @@ public class TreeEditorField<T>  {
 		listeners = new ArrayList<Listener>();
 	}
 	
-	
+	/**
+	 * Disables, enables the control
+	 * 
+	 * @param enabled
+	 */
+	public void setEnabled(boolean enabled) {
+		if (txtText != null) txtText.setEnabled(enabled);
+		if (btnDownArrow != null) btnDownArrow.setEnabled(enabled);
+		if (tree != null) tree.getTreeViewer().getControl().setEnabled(enabled);
+	}
 	/**
 	 * Gets the value selected from the tree
 	 */

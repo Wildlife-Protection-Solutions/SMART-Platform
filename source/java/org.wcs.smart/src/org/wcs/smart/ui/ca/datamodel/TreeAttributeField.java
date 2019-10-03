@@ -50,6 +50,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class TreeAttributeField extends TreeEditorField<AttributeTreeNode> implements IAttributeField<AttributeTreeNode> {
 	
+	private Label lbl;
 	private Attribute attribute;
 
 	/**
@@ -61,12 +62,18 @@ public class TreeAttributeField extends TreeEditorField<AttributeTreeNode> imple
 		this.attribute = attribute;
 	}
 
+	@Override
+	public void setEnabled(boolean enabled) {
+		if (lbl != null) lbl.setEnabled(enabled);
+		super.setEnabled(enabled);
+	}
+	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public void createComposite(Composite parent) {		
-		Label lbl = new Label(parent, SWT.NONE);
+		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		

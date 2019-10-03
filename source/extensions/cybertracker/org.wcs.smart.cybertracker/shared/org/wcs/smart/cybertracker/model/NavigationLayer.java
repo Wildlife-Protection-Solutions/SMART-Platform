@@ -75,7 +75,7 @@ public class NavigationLayer extends UuidItem {
 	}
 
 	@Transient
-	public List<NavigationTarget> getTargetsAsJson() {
+	public List<NavigationTarget> getTargetsAsJson() throws ParseException{
 		if (ntargets != null) return ntargets;
 		
 		byte[] trgs = getTargets();
@@ -83,14 +83,9 @@ public class NavigationLayer extends UuidItem {
 		
 		ntargets = new ArrayList<>();
 		String v = new String(trgs, StandardCharsets.UTF_8);
-		JSONObject features = null;
-		try {
-			features = (JSONObject) (new JSONParser()).parse(v);
-		}catch (ParseException ex) {
-			//TODO;
-		}
-		if (features == null) return ntargets;
+		JSONObject features = (JSONObject) (new JSONParser()).parse(v);
 		
+		if (features == null) return ntargets;
 		JSONArray items = (JSONArray) features.get(JSON_FEATURES_KEY); 
 		for(int i = 0; i < items.size(); i ++) {
 			NavigationTarget t = NavigationTarget.parse((JSONObject)items.get(i));

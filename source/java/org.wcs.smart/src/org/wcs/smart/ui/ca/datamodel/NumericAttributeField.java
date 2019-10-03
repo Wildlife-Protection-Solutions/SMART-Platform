@@ -55,6 +55,7 @@ public class NumericAttributeField implements IAttributeField<Double> {
 	private boolean isModified;
 	private Double originalValue;
 	
+	private Label lbl;
 	private Text txt;
 	private ControlDecoration cd;
 
@@ -84,12 +85,18 @@ public class NumericAttributeField implements IAttributeField<Double> {
 		}
 	}
 
+	@Override
+	public void setEnabled(boolean enabled) {
+		if (txt != null) txt.setEnabled(enabled);
+		if (lbl != null) lbl.setEnabled(enabled);
+	}
+	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public void createComposite(Composite parent) {
-		Label lbl = new Label(parent, SWT.NONE);
+		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		

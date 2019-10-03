@@ -86,8 +86,7 @@ public class EntityMapping {
 		try {
 			json = (JSONArray) (new JSONParser()).parse(jsonstring);
 		}catch (Exception ex) {
-			//TODO:
-			ex.printStackTrace();
+			EventPlugIn.log(ex.getMessage(), ex);
 			return null;
 		}
 		List<EntityMapping> mappings = new ArrayList<>();

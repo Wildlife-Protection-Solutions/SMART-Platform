@@ -102,6 +102,7 @@ import org.geotools.styling.StyleBuilder;
 import org.geotools.styling.StyleFactory;
 import org.geotools.styling.Symbolizer;
 import org.hibernate.Session;
+import org.json.simple.parser.ParseException;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineSegment;
@@ -209,7 +210,11 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 	public NavigationLayerDialog(Shell parentShell, NavigationLayer nav) {
 		super(parentShell);
 		this.nav = nav;
-		targets.addAll(nav.getTargetsAsJson());
+		try {
+			targets.addAll(nav.getTargetsAsJson());
+		} catch (ParseException e) {
+			CyberTrackerPlugIn.displayError(Messages.NavigationLayerDialog_ErrorDialogTitle, e.getMessage(), e);
+		}
 	}
 	
 	@Override

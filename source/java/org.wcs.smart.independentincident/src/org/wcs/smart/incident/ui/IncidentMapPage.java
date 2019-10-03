@@ -135,8 +135,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 				IService service = pointResource.service(new NullProgressMonitor());
 				if (service != null) CatalogPlugin.getDefault().getLocalCatalog().remove(service);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				IncidentPlugIn.log(e.getMessage(), e);
 			}
 			
 		}

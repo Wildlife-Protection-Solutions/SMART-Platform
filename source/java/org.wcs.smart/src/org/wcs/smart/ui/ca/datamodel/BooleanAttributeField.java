@@ -66,6 +66,7 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 	private Button btnNo;
 	private Button btnUndefined;
 	private ControlDecoration cd;
+	private Label lbl;
 	
 	private Collection<Listener> listeners;
 	
@@ -103,12 +104,20 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 		return null;
 	}
 
+	@Override
+	public void setEnabled(boolean enabled) {
+		if (btnYes != null) btnYes.setEnabled(enabled);
+		if (btnNo != null) btnNo.setEnabled(enabled);
+		if (btnUndefined != null) btnUndefined.setEnabled(enabled);
+		if (lbl != null) lbl.setEnabled(enabled);
+	}
+	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public void createComposite(Composite parent) {
-		Label lbl = new Label(parent, SWT.NONE);
+		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
@@ -118,21 +127,24 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 		GridLayout gl = new GridLayout(3, false);
 		gl.verticalSpacing = gl.marginHeight = 0;
 		comp.setLayout(gl);
-		
+		comp.setBackground(comp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		btnYes = new Button(comp, SWT.RADIO);
 		btnYes.setText(SmartLabelProvider.BOOLEAN_TRUE_LABEL);
 		btnYes.addSelectionListener(validateListener);
+		btnYes.setBackground(btnYes.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		btnNo = new Button(comp, SWT.RADIO);
 		btnNo.setText(SmartLabelProvider.BOOLEAN_FALSE_LABEL);
 		btnNo.addSelectionListener(validateListener);
+		btnNo.setBackground(btnNo.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		if (!attribute.getIsRequired()){
 			btnUndefined = new Button(comp, SWT.RADIO);
 			btnUndefined.setText(Messages.BooleanAttributeField_UnderfinedBooleanOption);
 			btnUndefined.setSelection(true);
 			btnUndefined.addSelectionListener(validateListener);
+			btnUndefined.setBackground(btnUndefined.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		}
 		
 		cd = new ControlDecoration(comp, SWT.LEFT | SWT.TOP);

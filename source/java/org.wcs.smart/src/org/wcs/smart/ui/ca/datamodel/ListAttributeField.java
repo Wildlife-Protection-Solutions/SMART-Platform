@@ -67,6 +67,7 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 	/* ui fields */
 	private ComboViewer cmbViewer;
 	private ControlDecoration cd;
+	private Label lbl;
 	
 	private Collection<Listener> listeners;
 	
@@ -97,12 +98,18 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 		}
 	}
 
+	@Override
+	public void setEnabled(boolean enabled) {
+		if (cmbViewer != null) cmbViewer.getControl().setEnabled(enabled);
+		if (lbl != null) lbl.setEnabled(enabled);
+	}
+	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public void createComposite(Composite parent) {
-		Label lbl = new Label(parent, SWT.NONE);
+		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		

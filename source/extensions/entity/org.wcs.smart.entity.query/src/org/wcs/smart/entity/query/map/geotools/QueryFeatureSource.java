@@ -61,7 +61,6 @@ public class QueryFeatureSource extends ContentFeatureSource{
 
 	@Override
 	protected int getCountInternal(Query query) throws IOException {
-		// TODO Auto-generated method stub
 		return -1;
 	}
 

@@ -327,10 +327,14 @@ public class NavigationLayersDialog extends SmartStyledTitleDialog {
 		((GridLayout)c.getLayout()).verticalSpacing = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		((GridLayout)c.getLayout()).marginWidth = 5;
-		for (NavigationTarget t : ctpackage.getTargetsAsJson()) {
-			l = new Label(c, SWT.NONE);
-			l.setText(t.getId());
-			l.setBackground(l.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		try {
+			for (NavigationTarget t : ctpackage.getTargetsAsJson()) {
+				l = new Label(c, SWT.NONE);
+				l.setText(t.getId());
+				l.setBackground(l.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			}
+		}catch (Exception ex) {
+			CyberTrackerPlugIn.log(ex.getMessage(),ex);
 		}
 		detailsSection.layout(true);
 	}

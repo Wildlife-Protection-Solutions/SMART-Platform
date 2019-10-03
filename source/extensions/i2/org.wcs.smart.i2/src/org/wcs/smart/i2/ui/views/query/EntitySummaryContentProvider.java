@@ -408,7 +408,6 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 				return new DropItem[] { new ValueDropItem((ValuePart.ValueOption) item) };
 			}
 			if (item == SubRootNode.CA) {
-				//TODO:
 				return new DropItem[] { new ConservationAreaGroupByDropItem() };
 			}
 			if (item == OperatorNode.NOT) {
