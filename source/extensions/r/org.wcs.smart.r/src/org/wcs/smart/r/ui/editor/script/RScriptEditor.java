@@ -22,6 +22,7 @@
 package org.wcs.smart.r.ui.editor.script;
 
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -48,6 +49,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.QueryPerspective;
 import org.wcs.smart.r.RPlugIn;
 import org.wcs.smart.r.RScriptManager;
+import org.wcs.smart.r.engine.QueryConfiguration;
 import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.r.model.RQuery;
 import org.wcs.smart.r.model.RScript;
@@ -152,7 +154,9 @@ public class RScriptEditor extends MultiPageEditorPart {
 		newQuery.setName(Messages.RScriptEditor_CopyOfName + query.getName());
 		newQuery.updateName(SmartDB.getCurrentLanguage(), newQuery.getName());
 		newQuery.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), newQuery.getName());
+		newQuery.setConservationArea(query.getConservationArea());
 		newQuery.setScript(query.getScript());
+		
 		this.query = newQuery;
 		
 		page1.updateQuery(query);
@@ -293,7 +297,7 @@ public class RScriptEditor extends MultiPageEditorPart {
 				tempquery.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), tempquery.getName());
 				tempquery.setScript(temp);
 				tempquery.setConservationArea(SmartDB.getCurrentConservationArea());
-				
+				tempquery.setConfiguration(QueryConfiguration.toConfigurationString(temp.getDefaultParameters(), Collections.emptyList()));
 				RScriptEditor.this.query = tempquery;
 			}
 			

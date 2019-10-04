@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.r.ui;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
@@ -86,27 +88,17 @@ public class RPreferencePage extends PreferencePage implements IWorkbenchPrefere
 			return true;
 		}
 		
-		File f = new File(rLocation.getStringValue());
-		if (!f.exists()) {
+		Path path = Paths.get(rLocation.getStringValue());
+		if (!Files.exists(path)) {
 			if (!MessageDialog.openConfirm(getShell(),
-					Messages.RPreferencePage_WaringTitle, MessageFormat.format(Messages.RPreferencePage_NotFoundWarning,new Object[] { f.toString() }))) {
+					Messages.RPreferencePage_WaringTitle, MessageFormat.format(Messages.RPreferencePage_NotFoundWarning,new Object[] { path.toString() }))) {
 				return false;
 			}
 		}
-		// try to keep relative location of gps babel
-		String newLocation = f.toString();
+		
+		rLocation.setStringValue(path.toString());
 		try {
-			newLocation = f.getCanonicalPath();
-			String appLoc = new File(".").getCanonicalPath(); //$NON-NLS-1$
-			if (newLocation.startsWith(appLoc)) {
-				newLocation = "." + newLocation.substring(appLoc.length()); //$NON-NLS-1$
-			}
-			rLocation.setStringValue(newLocation);
-		} catch (Exception ex) {
-		}
-
-		try {
-			setSystemProperty(newLocation);
+			setSystemProperty(path.toString());
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(
 					Messages.RPreferencePage_UpdateError +ex.getMessage(), ex);
@@ -130,7 +122,7 @@ public class RPreferencePage extends PreferencePage implements IWorkbenchPrefere
 		rLocation.setStringValue(getRSystemProperty());
 		
 		Label l = new Label(main, SWT.WRAP);
-		l.setText("*" + Messages.RPreferencePage_RInfo); //$NON-NLS-1$
+		l.setText("*" + Messages.RPreferencePage_RInfo2); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		((GridData)l.getLayoutData()).verticalIndent = 5;
 		((GridData)l.getLayoutData()).widthHint = 150;

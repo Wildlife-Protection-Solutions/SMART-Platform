@@ -60,6 +60,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -280,6 +281,14 @@ public class RScriptListDialog extends SmartStyledTitleDialog {
 
 						for (RScript t : toDelete){
 							monitor.subTask(t.getName());
+							try {
+								DeleteManager.canDelete(t, s);
+							}catch (Exception ex) {
+								//cannot delete
+								getShell().getDisplay().syncExec(()->MessageDialog.openError(getShell(), DialogConstants.ERROR_STRING, ex.getMessage()));
+								continue;
+							}
+							
 							s.beginTransaction();
 							try{
 								s.delete(t);
