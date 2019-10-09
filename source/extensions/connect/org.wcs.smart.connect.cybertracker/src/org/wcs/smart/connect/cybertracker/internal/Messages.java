@@ -149,6 +149,7 @@ public class Messages extends NLS {
 	public static String LoadAlertTypesJob_DialogMessage;
 	public static String LoadAlertTypesJob_DialogTitle;
 	public static String LoadAlertTypesJob_LoadingAlertType;
+	public static String LoadAlertTypesJob_NoConnectServer;
 	public static String LoadAlertTypesJob_WarningMessage;
 	public static String LoadAlertTypesJob_WarningTitle;
 	public static String NavConnectUploadedDate_ConnectDialogMsg;

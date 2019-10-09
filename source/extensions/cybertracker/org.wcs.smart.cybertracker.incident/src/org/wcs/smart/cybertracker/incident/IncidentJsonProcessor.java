@@ -23,7 +23,6 @@ package org.wcs.smart.cybertracker.incident;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -67,7 +66,7 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 	//resize value for apply to all option
 	private Point allSize = null;
 	
-	private HashMap<UUID, CtIncidentLink> groupMappings;
+	private List<CtIncidentLink> groupMappings;
 	
 	public IncidentJsonProcessor() {
 		warnings = new ArrayList<String>();
@@ -77,7 +76,7 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
 		newIncidents = new HashSet<>();
 		modifiedIncidents = new HashSet<>();
-		groupMappings = new HashMap<>();
+		groupMappings = new ArrayList<>();
 		
 		List<JSONObject> processedFeatures = new ArrayList<JSONObject>();;
 		
@@ -99,7 +98,8 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 				}
 				
 				CtIncidentLink currentLink = null;
-				
+				CtIncidentLink rootLink = null;
+
 				//read observation counter
 				Integer observationCounter = parser.parseObservationCounter(sighting);
 				if (observationCounter == null) continue;
@@ -110,27 +110,50 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 
 				UUID groupUuid = parseUuid(strGroupId);
 
+				String rootId = ((String)properties.get(JsonCtParser.ROOT_ID_KEY));
 				//lets see if there is a waypoint to add to (based on groupid)
-				currentLink = groupMappings.get(groupUuid);
-				if (currentLink == null) {
+				
+				if (rootId == null) {
+					//this is the old way
 					currentLink = findWaypointMapping(groupUuid, session);
-					
 					if (currentLink == null) {
 						currentLink = new CtIncidentLink();
 						currentLink.setIncidentGroupId(groupUuid);
 					}
-				}
-			
-				if (currentLink.getLastObservationCounter() == null) {
-					if (observationCounter != 1)  continue; //not the first observation in the group; cannot process
-					currentLink.setLastObservationCounter(observationCounter);
-				}else if (currentLink.getLastObservationCounter() + 1 != observationCounter) {
-					//not the next observation in the group; cannot process
-					continue;
+					
 				}else {
-					currentLink.setLastObservationCounter(observationCounter);
+					UUID rootUuid = parseUuid(rootId);
+					
+					//lets see if there is a waypoint to add to (based on groupid)
+					rootLink = findRootWaypointMapping(rootUuid, session);
+					if (rootLink == null) {
+						rootLink = new CtIncidentLink();
+						rootLink.setRootId(rootUuid);
+						//rootLink.setWaypoint(waypoint);
+						groupMappings.add(rootLink);
+					}
+					
+					currentLink = findWaypointMapping(groupUuid, rootUuid, session);
+					if (currentLink == null) {
+						currentLink = new CtIncidentLink();	
+						currentLink.setRootId(rootUuid);
+						currentLink.setIncidentGroupId(groupUuid);
+						//currentLink.setObservationGroup();
+						currentLink.setWaypoint(rootLink.getWaypoint());
+						groupMappings.add(rootLink);
+					}
 				}
-			
+//			
+//				if (currentLink.getLastObservationCounter() == null) {
+//					if (observationCounter != 1)  continue; //not the first observation in the group; cannot process
+//					currentLink.setLastObservationCounter(observationCounter);
+//				}else if (currentLink.getLastObservationCounter() + 1 != observationCounter) {
+//					//not the next observation in the group; cannot process
+//					continue;
+//				}else {
+//					currentLink.setLastObservationCounter(observationCounter);
+//				}
+//			
 			
 				//Parse the waypoint information 				
 				Waypoint parsedWp = parser.createWaypoint(feature, SmartDB.getCurrentConservationArea(), session);
@@ -138,6 +161,8 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 				
 				if (currentLink.getWaypoint() == null) {
 					currentLink.setWaypoint(parsedWp);
+					if (rootLink != null) rootLink.setWaypoint(parsedWp);
+					if (currentLink.getRootId() != null && currentLink.getIncidentGroupId() != null) currentLink.setObservationGroup(parsedWp.getObservationGroups().get(0));
 					
 					Long cnt = QueryFactory.buildCountQuery(session, Waypoint.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
@@ -153,10 +178,8 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 					
 					newIncidents.add(currentLink.getWaypoint());
 					
-					//do we need to flush first?
-					groupMappings.put(currentLink.getIncidentGroupId(), currentLink);
-				}else {
-					//add observations/attachments from parsedWp to add to Wp
+				}else if (currentLink.getWaypoint() !=  null && currentLink.getObservationGroup() == null){
+					//merge all observations into first group
 					if (currentLink.getWaypoint().getAttachments() == null) currentLink.getWaypoint().setAttachments(new ArrayList<>());
 					if (parsedWp.getAttachments() != null) {
 						for (WaypointAttachment a : parsedWp.getAttachments()) {
@@ -164,28 +187,51 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 							a.setWaypoint(currentLink.getWaypoint());
 						}
 					}
-					
-					if (currentLink.getWaypoint().getObservationGroups() == null) currentLink.getWaypoint().setObservationGroups(new ArrayList<>());
-					if (parsedWp.getObservationGroups()  != null) {
-						for (WaypointObservationGroup g : parsedWp.getObservationGroups()) {
-							WaypointObservationGroup newg = new WaypointObservationGroup();
-							currentLink.getWaypoint().getObservationGroups().add(newg);
-							newg.setWaypoint(currentLink.getWaypoint());
-							newg.setObservations(new ArrayList<>());
-							
-							for (WaypointObservation wo : g.getObservations()) {
-								wo.setObservationGroup(newg);
-								newg.getObservations().add(wo);
-							}
-						}
-						
+					WaypointObservationGroup mgroup = null;
+					if (currentLink.getIncidentGroupId() != null && currentLink.getRootId() != null) {
+						//copy all observations into new group
+						mgroup = new WaypointObservationGroup();
+						mgroup.setWaypoint(currentLink.getWaypoint());
+						currentLink.getWaypoint().getObservationGroups().add(mgroup);
+						mgroup.setObservations(new ArrayList<>());
+					}else {
+						//copy all observations into existing group
+						mgroup = currentLink.getWaypoint().getObservationGroups().get(0);
 					}
+					
+					for (WaypointObservationGroup g : parsedWp.getObservationGroups()) {
+						for (WaypointObservation wo : g.getObservations()) {
+							wo.setObservationGroup(mgroup);
+							mgroup.getObservations().add(wo);
+						}
+					}
+					
+					modifiedIncidents.add(currentLink.getWaypoint());
+				}else if (currentLink.getWaypoint() != null && currentLink.getObservationGroup() != null) {
+					//merge all observations into observation group
+					
+					if (currentLink.getWaypoint().getAttachments() == null) currentLink.getWaypoint().setAttachments(new ArrayList<>());
+					if (parsedWp.getAttachments() != null) {
+						for (WaypointAttachment a : parsedWp.getAttachments()) {
+							currentLink.getWaypoint().getAttachments().add(a);
+							a.setWaypoint(currentLink.getWaypoint());
+						}
+					}
+					//copy all observations into this group
+					for (WaypointObservationGroup g : parsedWp.getObservationGroups()) {
+						for (WaypointObservation wo : g.getObservations()) {
+							wo.setObservationGroup(currentLink.getObservationGroup());
+							currentLink.getObservationGroup().getObservations().add(wo);
+						}
+					}
+					
 					modifiedIncidents.add(currentLink.getWaypoint());
 				}
 				warnings.addAll(parser.getWarnings());
 			
 				session.saveOrUpdate(currentLink.getWaypoint());
 				session.saveOrUpdate(currentLink);
+				if (rootLink != null) session.saveOrUpdate(rootLink);
 				
 				processedFeatures.add(feature);
 				
@@ -209,14 +255,44 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 	
 	@SuppressWarnings("unchecked")
 	private CtIncidentLink findWaypointMapping(UUID incidentGroupId, Session session) {
-		List<CtIncidentLink> links = session.createQuery("FROM CtIncidentLink WHERE incidentGroupId = :groupid ") //$NON-NLS-1$
+		for (CtIncidentLink l : groupMappings) {
+			if (l.getRootId() == null && l.getIncidentGroupId() != null && l.getIncidentGroupId().equals(incidentGroupId)) {
+				return l;
+			}
+		}
+		List<CtIncidentLink> links = session.createQuery("FROM CtIncidentLink WHERE incidentGroupId = :groupid and rootId is null") //$NON-NLS-1$
 				.setParameter("groupid",  incidentGroupId) //$NON-NLS-1$
 				.list();
 		if (links.isEmpty()) return null;
 		return links.get(0);
 	}
-
-	
+	@SuppressWarnings("unchecked")
+	private CtIncidentLink findWaypointMapping(UUID incidentGroupId, UUID rootId, Session session) {
+		for (CtIncidentLink l : groupMappings) {
+			if (l.getIncidentGroupId()!= null && l.getIncidentGroupId().equals(incidentGroupId) && l.getRootId() != null && l.getRootId().equals(rootId)) {
+				return l;
+			}
+		}
+		List<CtIncidentLink> links = session.createQuery("FROM CtIncidentLink WHERE incidentGroupId = :groupid and rootId = :rootid ") //$NON-NLS-1$
+				.setParameter("groupid",  incidentGroupId) //$NON-NLS-1$
+				.setParameter("rootid",  rootId) //$NON-NLS-1$
+				.list();
+		if (links.isEmpty()) return null;
+		return links.get(0);
+	}
+	@SuppressWarnings("unchecked")
+	private CtIncidentLink findRootWaypointMapping(UUID rootId, Session session) {
+		for (CtIncidentLink l : groupMappings) {
+			if (l.getIncidentGroupId() == null && l.getRootId() != null &&  l.getRootId().equals(rootId)) {
+				return l;
+			}
+		}
+		List<CtIncidentLink> links = session.createQuery("FROM CtIncidentLink WHERE  rootId = :rootid and incidentGroupId is null ") //$NON-NLS-1$
+				.setParameter("rootid",  rootId) //$NON-NLS-1$
+				.list();
+		if (links.isEmpty()) return null;
+		return links.get(0);
+	}
 	/*
 	 * displays warning dialog to user allowing them to cancel the processing
 	 */

@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -59,6 +60,7 @@ import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
 import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil.JsonSurveyKey;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
+import org.wcs.smart.cybertracker.survey.model.CtMissionWpLink;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
@@ -85,8 +87,6 @@ import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Parser for parsing patrol data from CT JSON data. 
@@ -268,69 +268,164 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					
 				}
 				
-				if (!sighting.containsKey(ScreensUtil.RESULT_NEW_WAYPOINT)){
-					//assume this is a group attribute
-					
-					if (link == null){
-						//create a new patrol
-						link = createMissionFromSighting(sighting, deviceId, ctMissionUuid, observationCounter, session);
-					}
-
-					Date groupStartTime = link.getGroupStartTime();
-					int groupResult = processGroup(sighting, link.getMission(), wp, link.getSamplingUnit(), parser.getApplyToAdd(), groupStartTime, session);
-					if (groupResult > 0){
-						
-						if (groupResult == 2){
-							if (link.getGroupStartTime() == null){
-								link.setGroupStartTime(wp.getDateTime());
-							}
-						}else if (groupResult == 3){
-							link.setGroupStartTime(null);
-						}
-						
-						if(wp.getRawX() != null && wp.getRawY() != null){
-							addPointToTrack(link.getMission(), link.getSamplingUnit(), new Coordinate(wp.getRawX(), wp.getRawY()), wp.getDateTime(), session);
-						}
-						link.setLastObservationCnt(observationCounter);
-						processedFeatures.add(feature);
-					}
-					continue;
-				}
-				
-				//Determine if this is a "Add to Last Waypoint" option
-				boolean addToLast = false;
-				Object v = sighting.get(ScreensUtil.RESULT_NEW_WAYPOINT);
-				Boolean isNew = JsonUtils.convertToBoolean(v);
-				if (isNew == null) {
-					addToLast = false;
-				}else {
-					addToLast = (isNew == false);
-				}
-				if (addToLast){
-					if (link == null){
-						//we have nothing to add this to; this is an error
-						warnings.add(Messages.MissionJsonProcessor_MissionNotFound);
-						continue;
-					}
-					
-					if (addWaypointToLastObservation(link.getMission(), wp, session) == null) continue;
-					link.setLastObservationCnt(observationCounter);
-					processedFeatures.add(feature);
-					continue;
-				}
-				
 				//there is no position; likely skip on device; lets set to 0
 				if (wp.getRawX() == null) wp.setRawX(0);
 				if (wp.getRawY() == null) wp.setRawY(0);
 				
-				//We want to create a new waypoint and add it to the patrol
-				if (link == null){
-					link = createMissionFromSighting(sighting, deviceId, ctMissionUuid, observationCounter, session);
+				//here we have two versions - the add to last option that
+				//is the old ct and smart mobile way OR we have a rootId/sighting
+				//group id (SMART7)
+				UUID ctRootId = null;
+				UUID ctObsGroup = null;
+				if (properties.containsKey(JsonCtParser.ROOT_ID_KEY)) ctRootId = UuidUtils.stringToUuid((String)properties.get(JsonCtParser.ROOT_ID_KEY));
+				if (sighting.containsKey(ScreensUtil.RESULT_SIGHTINGGROUPID)) ctObsGroup = UuidUtils.stringToUuid((String)sighting.get(ScreensUtil.RESULT_SIGHTINGGROUPID));
+				
+				if (ctRootId == null || ctObsGroup == null) {
+					//the old version
+					
+					if (!sighting.containsKey(ScreensUtil.RESULT_NEW_WAYPOINT)){
+						//assume this is a group attribute
+						
+						if (link == null){
+							//create a new patrol
+							link = createMissionFromSighting(sighting, deviceId, ctMissionUuid, observationCounter, session);
+						}
+	
+						Date groupStartTime = link.getGroupStartTime();
+						int groupResult = processGroup(sighting, link.getMission(), wp, link.getSamplingUnit(), parser.getApplyToAdd(), groupStartTime, session);
+						if (groupResult > 0){
+							
+							if (groupResult == 2){
+								if (link.getGroupStartTime() == null){
+									link.setGroupStartTime(wp.getDateTime());
+								}
+							}else if (groupResult == 3){
+								link.setGroupStartTime(null);
+							}
+							
+							if(wp.getRawX() != null && wp.getRawY() != null){
+								addPointToTrack(link.getMission(), link.getSamplingUnit(), new Coordinate(wp.getRawX(), wp.getRawY()), wp.getDateTime(), session);
+							}
+							link.setLastObservationCnt(observationCounter);
+							processedFeatures.add(feature);
+						}
+						continue;
+					}
+					
+					//Determine if this is a "Add to Last Waypoint" option
+					boolean addToLast = false;
+					Object v = sighting.get(ScreensUtil.RESULT_NEW_WAYPOINT);
+					Boolean isNew = JsonUtils.convertToBoolean(v);
+					if (isNew == null) {
+						addToLast = false;
+					}else {
+						addToLast = (isNew == false);
+					}
+					if (addToLast){
+						if (link == null){
+							//we have nothing to add this to; this is an error
+							warnings.add(Messages.MissionJsonProcessor_MissionNotFound);
+							continue;
+						}
+						
+						if (addWaypointToLastObservation(link.getMission(), wp, session) == null) continue;
+						link.setLastObservationCnt(observationCounter);
+						processedFeatures.add(feature);
+						continue;
+					}
+					
+				
+					//We want to create a new waypoint and add it to the patrol
+					if (link == null){
+						link = createMissionFromSighting(sighting, deviceId, ctMissionUuid, observationCounter, session);
+					}
+					
+					//add these observation to the selected patrol leg
+					//TODO: potentially we could validate metadata
+					addToExistingMission(link.getMission(), wp, link.getSamplingUnit(), session);
+				}else {
+					//new way of processings waypoints/observation groups
+					//we want to find the waypoint and/or observation group to add to
+					//first see if we can find the waypoint and observation group					
+					Waypoint mwp = null;
+					WaypointObservationGroup mwpg = null;
+					if(link != null && link.getWaypointLinks() != null) {
+						UUID tomerge = null;
+						UUID obsmerge = null;
+						for (CtMissionWpLink l : link.getWaypointLinks()) {
+							if (l.getCtRootId().equals(ctRootId)) {
+								tomerge = l.getWaypointUuid();
+								if (l.getCtGroupId().equals(ctObsGroup)) {
+									obsmerge = l.getObservationGroupUuid();
+								}
+							}
+						}
+						
+						if (tomerge != null) {
+							mwp = session.get(Waypoint.class, tomerge);
+							if (obsmerge != null) {
+								for (WaypointObservationGroup g : mwp.getObservationGroups()) {
+									if (g.getUuid().equals(obsmerge)) {
+										mwpg = g;
+										break;
+									}
+								}
+							}
+						}
+					}
+					
+					if (mwpg != null) {
+						if (mwpg.getObservations() == null) mwpg.setObservations(new ArrayList<>());
+						//merge wp observations with this group
+						for (WaypointObservation wo : wp.getAllObservations()) {
+							wo.setObservationGroup(mwpg);
+							mwpg.getObservations().add(wo);
+						}
+					}else if (mwp != null) {
+						//create a new group with these observations
+						if (mwp.getObservationGroups() == null) mwp.setObservationGroups(new ArrayList<>());
+						WaypointObservationGroup newGroup = new WaypointObservationGroup();
+						newGroup.setObservations(new ArrayList<>());
+						newGroup.setWaypoint(mwp);
+						mwp.getObservationGroups().add(newGroup);
+						for (WaypointObservation wo : wp.getAllObservations()) {
+							wo.setObservationGroup(newGroup);
+							newGroup.getObservations().add(wo);
+						}
+						
+						session.save(newGroup);
+						
+						//update patrol links
+						CtMissionWpLink wplink = new CtMissionWpLink();
+						wplink.setLink(link);
+						wplink.setCtGroupId(ctObsGroup);
+						wplink.setCtRootId(ctRootId);
+						wplink.setWaypointUuid(mwp.getUuid());
+						wplink.setObservationGroupUuid(newGroup.getUuid());
+						link.getWaypointLinks().add(wplink);
+
+						
+					}else {
+						if (link == null){
+							link = createMissionFromSighting(sighting, deviceId, ctMissionUuid, observationCounter, session);
+						}
+						//add these observation to the selected patrol leg
+						addToExistingMission(link.getMission(), wp, link.getSamplingUnit(), session);
+						
+						session.saveOrUpdate(wp);
+						
+						//update patrol links
+						CtMissionWpLink wplink = new CtMissionWpLink();
+						wplink.setLink(link);
+						wplink.setCtGroupId(ctObsGroup);
+						wplink.setCtRootId(ctRootId);
+						wplink.setWaypointUuid(wp.getUuid());
+						wplink.setObservationGroupUuid(wp.getObservationGroups().get(0).getUuid());
+						link.getWaypointLinks().add(wplink);
+					}
 				}
 				
-				//add these observation to the selected patrol leg
-				//TODO: potentially we could validate metadata
-				addToExistingMission(link.getMission(), wp, link.getSamplingUnit(), session);
+				
 				if (link.getMission().getUuid() != null) modifiedMissions.add(link.getMission());
 				
 				//add position to track log

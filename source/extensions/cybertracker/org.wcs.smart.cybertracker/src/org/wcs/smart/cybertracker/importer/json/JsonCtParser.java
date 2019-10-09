@@ -95,6 +95,7 @@ public class JsonCtParser {
 	public static final String LONGITUDE_KEY = "longitude"; //$NON-NLS-1$
 	public static final String LATITUDE_KEY = "latitude"; //$NON-NLS-1$
 	public static final String DATETIME_KEY = "dateTime"; //$NON-NLS-1$
+	public static final String ROOT_ID_KEY = "rootId"; //$NON-NLS-1$
 
 	public static final String DISTANCE_KEY = "distance"; //$NON-NLS-1$
 	public static final String DIRECTION_KEY = "bearing"; //$NON-NLS-1$

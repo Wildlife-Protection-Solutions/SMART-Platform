@@ -460,6 +460,7 @@ public class Messages extends NLS {
 	public static String ImportDialog_CopyError;
 	public static String ImportDialog_deleteFileMenu;
 	public static String ImportDialog_deletefiletooltip;
+	public static String ImportDialog_DetailsBtn;
 	public static String ImportDialog_DeviceImportError;
 	public static String ImportDialog_DeviceMsg;
 	public static String ImportDialog_DeviceOption;

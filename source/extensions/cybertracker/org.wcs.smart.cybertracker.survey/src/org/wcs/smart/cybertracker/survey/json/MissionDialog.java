@@ -58,6 +58,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
+import org.wcs.smart.cybertracker.survey.model.CtMissionWpLink;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
@@ -258,6 +259,12 @@ public class MissionDialog extends SmartStyledTitleDialog {
 		link.setLastObservationCnt(newMissionLink.getLastObservationCnt());
 		link.setGroupStartTime(newMissionLink.getGroupStartTime());
 		link.setSamplingUnit(newMissionLink.getSamplingUnit());
+		link.setWaypointLinks(new ArrayList<>());
+		for (CtMissionWpLink l : newMissionLink.getWaypointLinks()) {
+			l.setLink(link);
+			link.getWaypointLinks().add(l);
+		}
+		newMissionLink.getWaypointLinks().clear();
 		session.save(link);
 	}
 	
@@ -298,6 +305,12 @@ public class MissionDialog extends SmartStyledTitleDialog {
 		link.setLastObservationCnt(mission.getLastObservationCnt());
 		link.setGroupStartTime(mission.getGroupStartTime());
 		link.setSamplingUnit(mission.getSamplingUnit());
+		link.setWaypointLinks(new ArrayList<>());
+		for (CtMissionWpLink l : mission.getWaypointLinks()) {
+			l.setLink(link);
+			link.getWaypointLinks().add(l);
+		}
+		mission.getWaypointLinks().clear();
 		session.save(link);
 		
 		return newMission;

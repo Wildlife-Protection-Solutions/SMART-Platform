@@ -169,24 +169,37 @@ public class ImportDialog extends SmartStyledTitleDialog{
 		});
 		lstFiles.setInput(new ArrayList<>());
 		
-		ToolBar tb = new ToolBar(fileStack, SWT.VERTICAL | SWT.FLAT);
-		tb.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
-		ToolItem btnAdd = new ToolItem(tb, SWT.PUSH);
+		Composite btns = new Composite(fileStack, SWT.NONE);
+		btns.setLayout(new GridLayout());
+		((GridLayout)btns.getLayout()).marginHeight = 0;
+		((GridLayout)btns.getLayout()).marginWidth = 0;
+		btns.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		Button btnAdd = new Button(btns, SWT.PUSH);
 		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setToolTipText(Messages.ImportDialog_addfiletooltip);
 		btnAdd.addListener(SWT.Selection,e->addFile());
+		btnAdd.setBackground(btns.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		ToolItem btnDelete = new ToolItem(tb, SWT.PUSH);
+		Button btnDelete = new Button(btns, SWT.PUSH);
 		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnDelete.setToolTipText(Messages.ImportDialog_deletefiletooltip);
 		btnDelete.addListener(SWT.Selection,e->deleteFile());
 		btnDelete.setEnabled(false);
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.setBackground(btns.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		ToolItem btnInfo = new ToolItem(tb, SWT.PUSH);
+		Button btnInfo = new Button(btns, SWT.PUSH);
 		btnInfo.setImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.ICON_INFO));
 		btnInfo.setToolTipText(Messages.ImportDialog_fileinfotooltip);
 		btnInfo.addListener(SWT.Selection,e->viewDetails((Path)lstFiles.getStructuredSelection().getFirstElement()));
 		btnInfo.setEnabled(false);
+		btnInfo.setText(Messages.ImportDialog_DetailsBtn);
+		btnInfo.setBackground(btns.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Menu m = new Menu(lstFiles.getControl());
 		MenuItem addFile = new MenuItem(m, SWT.PUSH);

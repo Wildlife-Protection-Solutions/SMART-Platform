@@ -150,7 +150,12 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 	
 				"GRANT ALL PRIVILEGES ON smart.ct_navigation_layer to data_entry", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.ct_navigation_layer to manager", //$NON-NLS-1$
-				"GRANT ALL PRIVILEGES ON smart.ct_navigation_layer to analyst", //$NON-NLS-1$			
+				"GRANT ALL PRIVILEGES ON smart.ct_navigation_layer to analyst", //$NON-NLS-1$	
+				
+				"ALTER TABLE smart.ct_incident_link drop column last_cnt", //$NON-NLS-1$
+				"ALTER TABLE smart.ct_incident_link add column ct_root_id char(16) for bit data", //$NON-NLS-1$
+				"ALTER TABLE smart.ct_incident_link add column obs_group_uuid char(16) for bit data", //$NON-NLS-1$
+				"ALTER TABLE smart.CT_INCIDENT_LINK alter column ct_group_id drop not null", //$NON-NLS-1$
 		};
 		
 		for (String s : sql) {

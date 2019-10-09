@@ -22,14 +22,17 @@
 package org.wcs.smart.cybertracker.patrol.model;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -54,6 +57,8 @@ public class CtPatrolLink {
 	
 	private Date groupStartTime;
 	
+	private List<CtPatrolWpLink> wplinks;
+	
 	@Id
 	@Column(name="ct_uuid")
 	public UUID getCtUuid(){
@@ -62,6 +67,15 @@ public class CtPatrolLink {
 	
 	public void setCtUuid(UUID ctUuid){
 		this.ctUuid = ctUuid;
+	}
+	
+	@OneToMany(cascade= {CascadeType.ALL}, orphanRemoval = true)
+	@JoinColumn(name="ct_patrol_link_uuid", referencedColumnName="ct_uuid")
+	public List<CtPatrolWpLink> getWaypointLinks(){
+		return this.wplinks;
+	}
+	public void setWaypointLinks(List<CtPatrolWpLink> links) {
+		this.wplinks = links;
 	}
 	
 	@ManyToOne(fetch=FetchType.LAZY)

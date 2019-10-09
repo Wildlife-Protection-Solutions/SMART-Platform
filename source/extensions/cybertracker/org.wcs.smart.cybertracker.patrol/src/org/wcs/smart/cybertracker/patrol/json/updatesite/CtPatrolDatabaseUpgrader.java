@@ -88,6 +88,12 @@ public class CtPatrolDatabaseUpgrader implements IDatabaseUpgrader {
 				"GRANT ALL PRIVILEGES ON smart.ct_patrol_package to data_entry", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.ct_patrol_package to manager", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.ct_patrol_package to analyst", //$NON-NLS-1$ 
+								
+				"create table smart.ct_patrol_wplink(uuid char(16) for bit data not null, ct_patrol_link_uuid char(16) for bit data, ct_root_id char(16) for bit data, ct_group_id char(16) for bit data,  wp_uuid char(16) for bit data, obs_group_uuid char(16) for bit data, primary key (uuid))", //$NON-NLS-1$
+				"ALTER TABLE SMART.ct_patrol_wplink ADD CONSTRAINT ct_patrol_link_uuid_fk FOREIGN KEY (ct_patrol_link_uuid) REFERENCES smart.ct_patrol_link(CT_UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$		
+				"GRANT ALL PRIVILEGES ON smart.ct_patrol_wplink to data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_patrol_wplink to manager", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.ct_patrol_wplink to analyst", //$NON-NLS-1$
 		};
 		
 		for (String s : sql) {

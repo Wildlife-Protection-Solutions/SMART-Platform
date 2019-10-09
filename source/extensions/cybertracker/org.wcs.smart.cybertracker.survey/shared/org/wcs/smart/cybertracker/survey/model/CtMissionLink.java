@@ -22,14 +22,17 @@
 package org.wcs.smart.cybertracker.survey.model;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -57,6 +60,9 @@ public class CtMissionLink {
 	
 	private SamplingUnit lastSamplingUnit;
 	
+	private List<CtMissionWpLink> wplinks;
+
+	
 	@Id
 	@Column(name="ct_uuid")
 	public UUID getCtUuid(){
@@ -65,6 +71,15 @@ public class CtMissionLink {
 	
 	public void setCtUuid(UUID ctUuid){
 		this.ctUuid = ctUuid;
+	}
+	
+	@OneToMany(cascade= {CascadeType.ALL}, orphanRemoval = true)
+	@JoinColumn(name="ct_mission_link_uuid", referencedColumnName="ct_uuid")
+	public List<CtMissionWpLink> getWaypointLinks(){
+		return this.wplinks;
+	}
+	public void setWaypointLinks(List<CtMissionWpLink> links) {
+		this.wplinks = links;
 	}
 	
 	@ManyToOne(fetch=FetchType.LAZY)

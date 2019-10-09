@@ -166,6 +166,11 @@
             class="org.wcs.smart.cybertracker.survey.model.SurveyCtPackage"
             supportsCcaa="false">
       </class>
+      <class
+            ca_property=".link.mission.survey.surveyDesign.conservationArea"
+            class="org.wcs.smart.cybertracker.survey.model.CtMissionWpLink"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.cybertracker.json.processor">
