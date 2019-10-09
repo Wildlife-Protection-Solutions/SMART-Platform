@@ -278,11 +278,14 @@ public class IncidentSummaryPage extends EditorPart {
 			Employee obs = null;
 			if (!incident.getAllObservations().isEmpty()) obs = incident.getAllObservations().get(0).getObserver();
 			
-			Label obsl = toolkit.createLabel(observationComp, 
-					MessageFormat.format(Messages.IncidentSummaryPage_ObserverLbl, 
-						obs == null ? " " :  //$NON-NLS-1$
-						SmartLabelProvider.getShortLabel(obs)));
-			obsl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			
+			if (editor.getOptions().getTrackObserver()) {
+				Label obsl = toolkit.createLabel(observationComp, 
+						MessageFormat.format(Messages.IncidentSummaryPage_ObserverLbl, 
+							obs == null ? " " :  //$NON-NLS-1$
+							SmartLabelProvider.getShortLabel(obs)));
+				obsl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			}
 			
 			IconSet iset = QueryFactory.buildQuery(session, IconSet.class, 
 					new Object[] {"conservationArea", incident.getConservationArea()}, //$NON-NLS-1$
