@@ -92,8 +92,10 @@ import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.model.NavigationLayer;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
+import org.wcs.smart.cybertracker.patrol.model.CtPatrolWpLink;
 import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
+import org.wcs.smart.cybertracker.survey.model.CtMissionWpLink;
 import org.wcs.smart.cybertracker.survey.model.SurveyCtPackage;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
@@ -287,6 +289,10 @@ public enum SmartTable {
 	CTPATROLLINK(CtPatrolLink.class, ".patrolLeg.patrol.conservationArea"),
 	CTMISSIONLINK(CtMissionLink.class, ".mission.survey.surveyDesign.conservationArea"),
 	CTINCIDENTLINK(CtIncidentLink.class, ".waypoint.conservationArea"),
+	
+	CTPATROLWPLINK(CtPatrolWpLink.class, ".link.patrolLeg.patrol.conservationArea"),
+	CTMISSIONWPLINK(CtMissionWpLink.class, ".link.mission.survey.surveyDesign.conservationArea"),
+	
 	CMPTPROPPROFILE(ConfigurableModelCtPropertiesProfile.class, ".id.model.conservationArea"),
 	DASHBOARD(Dashboard.class, null),
 	DMOBJECT(DmObject.class,null),
@@ -387,8 +393,8 @@ public enum SmartTable {
 	USERSDEFAULTDASHBOARD(UsersDefaultDashboard.class, null),
 	WAYPOINT(Waypoint.class,null),
 	WAYPOINTATTACHMENT(WaypointAttachment.class,".waypoint.conservationArea"),
-	WAYPOINTOBSERVATION(WaypointObservation.class,".waypoint.conservationArea"),
-	WAYPOINTOBSERVATIONGROUP(WaypointObservationGroup.class,".observationGroup.waypoint.conservationArea"),
+	WAYPOINTOBSERVATION(WaypointObservation.class,".observationGroup.waypoint.conservationArea"),
+	WAYPOINTOBSERVATIONGROUP(WaypointObservationGroup.class,".waypoint.conservationArea"),
 	WAYPOINTOBSERVATIONATTRIBUTE(WaypointObservationAttribute.class,".id.observation.observationGroup.waypoint.conservationArea"),
 	WAYPOINTQUERY(WaypointQuery.class, null),
 	
