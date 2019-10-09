@@ -45,6 +45,8 @@ public class EntityQueryLabelProvider implements IEntityQueryLabelProvider {
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME) return Messages.getString("EntityQueryLabelProvider.Time", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X) return Messages.getString("EntityQueryLabelProvider.X", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_Y) return Messages.getString("EntityQueryLabelProvider.Y", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWX) return Messages.getString("EntityQueryLabelProvider.RawX", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWY) return Messages.getString("EntityQueryLabelProvider.RawY", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION) return Messages.getString("EntityQueryLabelProvider.Direction", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE) return Messages.getString("EntityQueryLabelProvider.Distance", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT) return Messages.getString("EntityQueryLabelProvider.comment", l); //$NON-NLS-1$

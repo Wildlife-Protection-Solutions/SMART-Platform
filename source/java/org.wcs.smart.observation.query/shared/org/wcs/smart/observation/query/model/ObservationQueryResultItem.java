@@ -72,6 +72,7 @@ public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptab
 	private String lastModifiedBy;
 	private Date lastModified;
 	
+	private UUID groupUuid;
 	private UUID observationUuid;
 	
 	/**
@@ -113,6 +114,19 @@ public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptab
 		return this.observationUuid;
 	}
 
+	/**
+	 * @param observationUuid the observation group uuid
+	 */
+	public void setObservationGroupUuid(UUID groupUuid){
+		this.groupUuid = groupUuid;
+	}
+	
+	/**
+	 * @return the observation group uuid
+	 */
+	public UUID getObservationGroupUuid(){
+		return this.groupUuid;
+	}
 	
 	/**
 	 * Each item is associated with a single category.  This

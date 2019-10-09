@@ -401,6 +401,88 @@ ALTER TABLE smart.paws_run ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_c
 
 alter table smart.cm_attribute_option alter COLUMN string_value set data type varchar(32672);
 
+---- Observation Groups -----
+
+CREATE TABLE smart.wp_observation_group (uuid uuid not null, wp_uuid uuid not null, primary key (uuid));
+INSERT INTO smart.wp_observation_group (uuid, wp_uuid) SELECT uuid_generate_v4(), uuid FROM smart.waypoint WHERE uuid in (SELECT o.wp_uuid FROM smart.wp_observation o);
+ALTER TABLE smart.wp_observation ADD COLUMN wp_group_uuid uuid;
+UPDATE smart.wp_observation SET wp_group_uuid = (select a.uuid from smart.wp_observation_group a where a.wp_uuid = smart.wp_observation.wp_uuid);
+ALTER table smart.wp_observation drop column wp_uuid;
+ALTER table smart.wp_observation_group ADD FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER table smart.wp_observation ADD FOREIGN KEY (wp_group_uuid) REFERENCES smart.wp_observation_group (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+DROP TRIGGER IF EXISTS trg_wp_observation ON smart.wp_observation;                                                                              
+DROP FUNCTION IF EXISTS connect.trg_wp_observation();
+DROP TRIGGER IF EXISTS trg_observation_attachment on smart.observation_attachment;
+DROP FUNCTION IF EXISTS connect.trg_observation_attachment();
+
+CREATE OR REPLACE FUNCTION connect.trg_observation_attachment() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, wp.CA_UUID 
+ 		FROM smart.wp_observation ob, smart.waypoint wp, smart.wp_observation_group g where ob.wp_group_uuid = g.uuid and g.wp_uuid = wp.uuid and ob.uuid = ROW.obs_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE TRIGGER trg_observation_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.observation_attachment FOR EACH ROW execute procedure connect.trg_observation_attachment();
+
+CREATE OR REPLACE FUNCTION connect.trg_wp_observation() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, wp.CA_UUID 
+ 		FROM smart.waypoint wp, smart.wp_observation_group g WHERE wp.uuid = g.wp_uuid and g.uuid = ROW.wp_group_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+CREATE TRIGGER trg_wp_observation AFTER INSERT OR UPDATE OR DELETE ON smart.wp_observation FOR EACH ROW execute procedure connect.trg_wp_observation();
+
+CREATE OR REPLACE FUNCTION connect.trg_wp_group_observation() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, wp.CA_UUID 
+ 		FROM smart.waypoint wp WHERE wp.uuid = ROW.wp_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+CREATE TRIGGER trg_wp_group_observation AFTER INSERT OR UPDATE OR DELETE ON smart.wp_observation_group FOR EACH ROW execute procedure connect.trg_wp_group_observation();
+
+
+-- ct observation groups
+
+CREATE TABLE smart.ct_patrol_wplink(uuid uuid not null, ct_patrol_link_uuid uuid, ct_root_id uuid, ct_group_id uuid,  wp_uuid uuid, obs_group_uuid uuid, primary key (uuid));
+ALTER TABLE SMART.ct_patrol_wplink ADD FOREIGN KEY (ct_patrol_link_uuid) REFERENCES smart.ct_patrol_link(CT_UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+
+CREATE TABLE smart.ct_mission_wplink(uuid uuid not null, ct_mission_link_uuid uuid, ct_root_id uuid, ct_group_id uuid,  wp_uuid uuid, obs_group_uuid uuid, primary key (uuid));
+ALTER TABLE SMART.ct_mission_wplink ADD FOREIGN KEY (ct_mission_link_uuid) REFERENCES smart.ct_mission_link(CT_UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;		
+	
+CREATE OR REPLACE FUNCTION connect.trg_ct_patrol_wplink() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, pp.CA_UUID 
+ 		FROM smart.patrol pp, smart.patrol_leg pl, smart.cT_patrol_wplink l WHERE pl.patrol_uuid = pp.uuid and pl.uuid = l.patrol_leg_uuid and l.ct_uuid = row.ct_patrol_link_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_ct_patrol_wplink AFTER INSERT OR UPDATE OR DELETE ON smart.ct_patrol_wplink FOR EACH ROW execute procedure connect.trg_ct_patrol_wplink();
+	
+			
+
+CREATE OR REPLACE FUNCTION connect.trg_ct_mission_wplink() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID 
+ 		FROM smart.mission mm, smart.survey s, smart.survey_design sd, smart.ct_mission_wplink l WHERE mm.survey_uuid = s.uuid and s.survey_design_uuid = sd.uuid and mm.uuid = l.mission_uuid and l.ct_uuid = row.ct_mission_link.uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_ct_mission_wplink AFTER INSERT OR UPDATE OR DELETE ON smart.ct_mission_wplink FOR EACH ROW execute procedure connect.trg_ct_mission_wplink();
+
+ALTER TABLE smart.ct_incident_link drop column last_cnt;
+ALTER TABLE smart.ct_incident_link add column ct_root_id uuid;
+ALTER TABLE smart.ct_incident_link add column obs_group_uuid uuid;
+ALTER TABLE smart.ct_incident_link alter column ct_group_id drop not null;
+
+
+
+
+---- change ca version so users cannot sync with this and cause problems ---- 
+update connect.ca_info SET version = uuid_generate_v4();
+delete from connect.change_log;
+delete from connect.change_log_history;
+				
 ------------ VERSIONS ------------
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';

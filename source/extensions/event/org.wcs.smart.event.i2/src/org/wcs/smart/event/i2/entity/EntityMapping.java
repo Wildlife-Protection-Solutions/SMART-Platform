@@ -86,8 +86,7 @@ public class EntityMapping {
 		try {
 			json = (JSONArray) (new JSONParser()).parse(jsonstring);
 		}catch (Exception ex) {
-			//TODO:
-			ex.printStackTrace();
+			EventPlugIn.log(ex.getMessage(), ex);
 			return null;
 		}
 		List<EntityMapping> mappings = new ArrayList<>();
@@ -207,7 +206,7 @@ public class EntityMapping {
 		case EMPLOYEE:
 			return SmartLabelProvider.getShortLabel(fixedEmployee);
 		case LIST:
-			if (intelListItem == null) return "";
+			if (intelListItem == null) return ""; //$NON-NLS-1$
 			return intelListItem.getName();
 		case NUMERIC:
 			return fixedDoubleValue1.toString();

@@ -56,8 +56,8 @@ public class AssetQueryShowInTableResultProvider extends ShowInTableInfoProvider
 					WaypointAttachment wa = s.get(WaypointAttachment.class, ((IQueryImageData)resultItem).getAttachment().getUuid());
 					wpUuid = wa.getWaypoint().getUuid();
 					//pick a random observation to zoom to
-					if (!wa.getWaypoint().getObservations().isEmpty()) {
-						obsUuid = wa.getWaypoint().getObservations().get(0).getUuid();
+					if (!wa.getWaypoint().getObservationGroups().isEmpty() && !wa.getWaypoint().getObservationGroups().get(0).getObservations().isEmpty()) {
+						obsUuid = wa.getWaypoint().getObservationGroups().get(0).getObservations().get(0).getUuid();
 					}
 				}else {
 					obsUuid = a.getObservation().getUuid();

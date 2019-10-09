@@ -23,8 +23,6 @@ package org.wcs.smart.observation.ui.input;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,10 +38,12 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.events.WaypointEventManager;
@@ -52,6 +52,7 @@ import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 
 /**
  * Wizard for collecting observation information for a given
@@ -65,27 +66,27 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
  */
 public class ObservationWizard extends Wizard implements IPageChangingListener{
 
-	private Waypoint wp;
+	
 	private ObservationWizardDialog wizardDialog;
 	
-	private WaypointObservation toEdit;
-	
 	private DataModel dm = null;
+	private ConfigurableModel cm = null;
+	
 	public boolean canFinish = false;
 	private boolean isModified = false;
 	
 	private List<Employee> observers;
 	private Employee observer = null;
-	
-	private ConfigurableModel cm;
-	
 	private boolean trackObserver = false;
 	
-	private HashMap<Category, List<WaypointObservation>> observations;
+	private Waypoint wp;
 	private List<WaypointObservation> deletedObservations;
 	private List<ObservationAttachment> deletedAttachments;
+	
+	private WaypointObservation toEdit;
 	private List<Category> selectedCategories;
 	
+	private IconSet iset;
 
 	//category counter for tracking categories 
 	private int categoryIndex = 0;
@@ -110,9 +111,9 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 * @param observers observer list; if null observer will not be recorded
 	 * @param cm configurable model
 	 */
-	public ObservationWizard(Waypoint wp, List<Employee> observers, ConfigurableModel cm){
+	public ObservationWizard(Waypoint waypoint, List<Employee> observers, ConfigurableModel cm){
 		
-		setWindowTitle(MessageFormat.format(Messages.ObservationWizard_PageName, new Object[]{String.valueOf(wp.getId())}));
+		setWindowTitle(MessageFormat.format(Messages.ObservationWizard_PageName, new Object[]{String.valueOf(waypoint.getId())}));
 		this.cm = cm;
 		
 		super.setForcePreviousAndNextButtons(true);
@@ -124,62 +125,62 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		
 		deletedObservations = new ArrayList<>();
 		deletedAttachments = new ArrayList<>();
-		observations = new HashMap<>();
-		this.wp = wp;
+
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){			
 			//load observation, categories, and attribute details	
-			session.saveOrUpdate(wp);
-			for (WaypointObservation ob : wp.getObservations()) {
-				Category c = session.get(Category.class,  ob.getCategory().getUuid());
-				ob.setCategory(c);
-				
-				List<WaypointObservation> cobs = observations.get(ob.getCategory());
-				if (cobs == null) {
-					cobs = new ArrayList<>();
-					observations.put(ob.getCategory() , cobs);
-				}
-				cobs.add(ob);
-				ob.getAttributes().forEach(a->a.getAttributeValueAsString(Locale.getDefault()));
-				
-				for (ObservationAttachment oa : ob.getAttachments()) {
-					try {
-						oa.computeFileLocation(session);
-					}catch (Exception ex) {
-						ObservationPlugIn.log(ex.getMessage(), ex);
+			this.wp = session.get(Waypoint.class, waypoint.getUuid());
+			
+			iset = QueryFactory.buildQuery(session, IconSet.class, 
+					new Object[] {"conservationArea", wp.getConservationArea()}, //$NON-NLS-1$
+					new Object[] {"isDefault", true}).uniqueResult(); //$NON-NLS-1$
+			for (WaypointObservationGroup g : wp.getObservationGroups()) {
+				for (WaypointObservation ob : g.getObservations()) {
+					ob.getAttributes().forEach(a->a.getAttributeValueAsString(Locale.getDefault()));
+					
+					if (ob.getCategory().getIcon() != null && ob.getCategory().getIcon().getIconFile(iset) != null) {
+						ob.getCategory().getIcon().getIconFile(iset).computeFileLocation(session);
 					}
-				}
-				ob.getCategory().getFullCategoryName();
-				ob.getCategory().getName();
-				for (CategoryAttribute ca : ob.getCategory().getAttributes()) {
-					ca.getAttribute().getType();
-					ca.getAttribute().getName();
-				}
-				Category temp = ob.getCategory();
-				while(temp != null) {
-					temp.getAttributes().forEach(a->{
-						a.getAttribute().getName();
-						if (a.getAttribute().getAttributeList() != null) a.getAttribute().getAttributeList().forEach(li->li.getName());
-						if (a.getAttribute().getActiveTreeNodes() != null) {
-							List<AttributeTreeNode> tovisit = new ArrayList<AttributeTreeNode>();
-							tovisit.addAll(a.getAttribute().getActiveTreeNodes());
-							while(!tovisit.isEmpty()) {
-								AttributeTreeNode n = tovisit.remove(0);
-								n.getName();
-								if (n.getActiveChildren() != null) tovisit.addAll(n.getActiveChildren());
-							}
+					
+					for (ObservationAttachment oa : ob.getAttachments()) {
+						try {
+							oa.computeFileLocation(session);
+						}catch (Exception ex) {
+							ObservationPlugIn.log(ex.getMessage(), ex);
 						}
-					});
-					temp = temp.getParent();
-				}
-				
-				for (WaypointObservationAttribute woa : ob.getAttributes()) {
-					woa.getAttribute().getName();
-				}
-				
-				if (ob.getObserver() != null) {
-					ob.getObserver().getFamilyName();
-					ob.getObserver().getGivenName();
-					this.observer = ob.getObserver();
+					}
+					ob.getCategory().getFullCategoryName();
+					ob.getCategory().getName();
+					for (CategoryAttribute ca : ob.getCategory().getAttributes()) {
+						ca.getAttribute().getType();
+						ca.getAttribute().getName();
+					}
+					Category temp = ob.getCategory();
+					while(temp != null) {
+						temp.getAttributes().forEach(a->{
+							a.getAttribute().getName();
+							if (a.getAttribute().getAttributeList() != null) a.getAttribute().getAttributeList().forEach(li->li.getName());
+							if (a.getAttribute().getActiveTreeNodes() != null) {
+								List<AttributeTreeNode> tovisit = new ArrayList<AttributeTreeNode>();
+								tovisit.addAll(a.getAttribute().getActiveTreeNodes());
+								while(!tovisit.isEmpty()) {
+									AttributeTreeNode n = tovisit.remove(0);
+									n.getName();
+									if (n.getActiveChildren() != null) tovisit.addAll(n.getActiveChildren());
+								}
+							}
+						});
+						temp = temp.getParent();
+					}
+					
+					for (WaypointObservationAttribute woa : ob.getAttributes()) {
+						woa.getAttribute().getName();
+					}
+					
+					if (ob.getObserver() != null) {
+						ob.getObserver().getFamilyName();
+						ob.getObserver().getGivenName();
+						this.observer = ob.getObserver();
+					}
 				}
 			}
 			
@@ -202,14 +203,29 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		}
 	}
 	
+	public IconSet getIconSet() {
+		return this.iset;
+	}
+	public Waypoint getWaypoint() {
+		return this.wp;
+	}
+	
+	/**
+	 * Opens the edit wizard page.
+	 * 
+	 * @param category
+	 */
+	void editCategory(Category category) {
+		AttributeWizardPage wizardPage = new AttributeWizardPage(this, category);
+		getContainer().showPage( wizardPage );
+	}
+	void editCategory(WaypointObservation wo){
+		AttributeWizardPage wizardPage = new AttributeWizardPage(this, wo);
+		getContainer().showPage( wizardPage );
+	}
+	
 	public void setToEdit(WaypointObservation toEdit) {
-		for (List<WaypointObservation> wos : observations.values()) {
-			for (WaypointObservation wo : wos) {
-				if (wo.getUuid().equals(toEdit.getUuid())) {
-					this.toEdit = wo;
-				}
-			}
-		}
+		this.toEdit = toEdit;
 	}
 	
 	/**
@@ -295,38 +311,24 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		return selectedCategories;
 	}
 	
-	/**
-	 * Gets the waypoint observations for a given category 
-	 * @param category category
-	 * @return set of waypoint observations
-	 */
-	public Collection<WaypointObservation> getWaypointObservation(Category category){
-		List<WaypointObservation> cobs = observations.get(category);
-		if (cobs == null) {
-			cobs = new ArrayList<>();
-			observations.put(category, cobs);
-		}
-		return cobs;
-	}
 	
-	/**
-	 * @return all observations make at this waypoint
-	 */
-	public HashMap<Category, List<WaypointObservation>> getAllObservations(){
-		return observations;
-	}
 	
 	/**
 	 * Adds a new observation
 	 * @param newObs
 	 */
 	public void addObservation(WaypointObservation newObs) {
-		List<WaypointObservation> cobs = observations.get(newObs.getCategory());
-		if (cobs == null) {
-			cobs = new ArrayList<>();
-			observations.put(newObs.getCategory(), cobs);
+		if (newObs.getObservationGroup() == null) {
+			if (wp.getObservationGroups().isEmpty()) {
+				WaypointObservationGroup group = new WaypointObservationGroup();
+				group.setObservations(new ArrayList<>());
+				group.setWaypoint(wp);
+				wp.getObservationGroups().add(group);
+			}
+			WaypointObservationGroup g = wp.getObservationGroups().get(0);
+			g.getObservations().add(newObs);
+			newObs.setObservationGroup(g);
 		}
-		cobs.add(newObs);
 	}
 	
 	/**
@@ -334,9 +336,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 * @param newObs
 	 */
 	public void removeObservation(WaypointObservation newObs) {
-		List<WaypointObservation> cobs = observations.get(newObs.getCategory());
-		cobs.remove(newObs);
 		deletedObservations.add(newObs);
+		newObs.getObservationGroup().getObservations().remove(newObs);
 	}
 	
 	/**
@@ -347,16 +348,6 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		this.deletedAttachments.add(attachment);
 	}
 	
-	/**
-	 * Removes all observations associated with the given category
-	 * @param category
-	 */
-	public void removeObservations(Category category){
-		this.isModified = true;
-		List<WaypointObservation> cobs = observations.get(category);
-		deletedObservations.addAll(cobs);
-		cobs.clear();
-	}
 	
 	/**
 	 * Sets the wizard dialog.
@@ -407,6 +398,10 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 					cc.getName();
 					cc.getAttributes().size();
 					if (cc.getActiveChildren() != null) cats.addAll(cc.getActiveChildren());
+					
+					if (cc.getIcon() != null && cc.getIcon().getIconFile(iset) != null) {
+						cc.getIcon().getIconFile(iset).computeFileLocation(session);
+					}
 				}
 			}
 		}
@@ -430,7 +425,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	@Override
     public void addPages() {
 		((WizardDialog)getContainer()).addPageChangingListener(this);
-		if (observations.size() == 0){
+		if (wp.getObservationGroups().size() == 0){
 			new ObservationWizardPage(this);
 		}else{
 			if (toEdit == null) {
@@ -471,23 +466,36 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
 			try {
-				wp.getObservations().removeAll(deletedObservations);
+				for (WaypointObservationGroup g : wp.getObservationGroups()) {
+					g.getObservations().removeAll(deletedObservations);
+				}
 				for (WaypointObservation wo : deletedObservations){
 					if (wo.getUuid() != null) session.delete(wo);
 				}
 				for (ObservationAttachment a : deletedAttachments) {
 					session.delete(a);
 				}
-				session.saveOrUpdate(wp);
-				for (List<WaypointObservation> wos : observations.values()){
-					for (WaypointObservation wo : wos) {
-						wo.setWaypoint(wp);
-						session.saveOrUpdate(wo);
-						if (!wp.getObservations().contains(wo)) wp.getObservations().add(wo);
+				
+				List<WaypointObservationGroup> gdelete = new ArrayList<>();
+				for (WaypointObservationGroup g : wp.getObservationGroups()) {
+					if (g.getObservations().isEmpty()) {
+						gdelete.add(g);
 					}
 				}
+				wp.getObservationGroups().removeAll(gdelete);
 				
-				for (WaypointObservation wo : wp.getObservations()) {
+				session.saveOrUpdate(wp);
+				
+				
+//				for (List<WaypointObservation> wos : observations.values()){
+//					for (WaypointObservation wo : wos) {
+//						wo.setWaypoint(wp);
+//						session.saveOrUpdate(wo);
+//						if (!wp.getObservations().contains(wo)) wp.getObservations().add(wo);
+//					}
+//				}
+				
+				for (WaypointObservation wo : wp.getAllObservations()) {
 					wo.setObserver(observer);
 				}
 				session.flush();

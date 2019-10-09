@@ -469,7 +469,7 @@ public class SpatialShiftComposite  extends Composite{
 			Envelope env = null;
 			try(Session s = HibernateManager.openSession()){
 				
-				Object[] data = (Object[]) s.createQuery("SELECT min(x), min(y), max(x), max(y) FROM Waypoint WHERE sourceId = :source AND conservationArea = :ca") //$NON-NLS-1$
+				Object[] data = (Object[]) s.createQuery("SELECT min(rawX), min(rawY), max(rawX), max(rawY) FROM Waypoint WHERE sourceId = :source AND conservationArea = :ca") //$NON-NLS-1$
 					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.setParameter("source", PatrolWaypointSource.PATROL_WP_SOURCE_ID)  //$NON-NLS-1$
 					.uniqueResult();

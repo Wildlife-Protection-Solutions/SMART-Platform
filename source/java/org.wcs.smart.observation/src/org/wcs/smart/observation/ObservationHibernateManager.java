@@ -73,14 +73,12 @@ public class ObservationHibernateManager extends HibernateManager{
 				a.computeFileLocation(session);
 			}
 		}
-		if (wp.getObservations() != null){
-			for (WaypointObservation wo : wp.getObservations()){
-				if (wo.getAttachments() != null){
-					for (ISmartAttachment a : wo.getAttachments()){
-						a.computeFileLocation(session);
-					}
+		for (WaypointObservation wo : wp.getAllObservations()){
+			if (wo.getAttachments() != null){
+				for (ISmartAttachment a : wo.getAttachments()){
+					a.computeFileLocation(session);
 				}
-			}
+			}		
 		}
 	}
 	

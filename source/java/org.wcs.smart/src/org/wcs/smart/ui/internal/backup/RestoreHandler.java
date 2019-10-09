@@ -108,7 +108,7 @@ public class RestoreHandler {
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								MessageDialog.openInformation(shell, Messages.RestoreHandler_ReportComplete_DialogTitle, Messages.RestoreHandler_ReportComplete_DialogMessage2);
+								MessageDialog.openInformation(shell, Messages.RestoreHandler_ReportComplete_DialogTitle, Messages.RestoreHandler_ReportComplete_DialogMessage3);
 								
 							}});		
 						ok[0] = true;

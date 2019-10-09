@@ -92,8 +92,10 @@ import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.model.NavigationLayer;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
+import org.wcs.smart.cybertracker.patrol.model.CtPatrolWpLink;
 import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
+import org.wcs.smart.cybertracker.survey.model.CtMissionWpLink;
 import org.wcs.smart.cybertracker.survey.model.SurveyCtPackage;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
@@ -190,6 +192,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
@@ -286,6 +289,10 @@ public enum SmartTable {
 	CTPATROLLINK(CtPatrolLink.class, ".patrolLeg.patrol.conservationArea"),
 	CTMISSIONLINK(CtMissionLink.class, ".mission.survey.surveyDesign.conservationArea"),
 	CTINCIDENTLINK(CtIncidentLink.class, ".waypoint.conservationArea"),
+	
+	CTPATROLWPLINK(CtPatrolWpLink.class, ".link.patrolLeg.patrol.conservationArea"),
+	CTMISSIONWPLINK(CtMissionWpLink.class, ".link.mission.survey.surveyDesign.conservationArea"),
+	
 	CMPTPROPPROFILE(ConfigurableModelCtPropertiesProfile.class, ".id.model.conservationArea"),
 	DASHBOARD(Dashboard.class, null),
 	DMOBJECT(DmObject.class,null),
@@ -322,7 +329,7 @@ public enum SmartTable {
 	NAMEDITEM(NamedItem.class,null),
 	NAMEDKEYITEM(NamedKeyItem.class,null),
 	NUMERICPLANTARGET(NumericPlanTarget.class,".plan.conservationArea"),
-	OBSERVATIONATTACHMENT(ObservationAttachment.class,".observation.waypoint.conservationArea"),
+	OBSERVATIONATTACHMENT(ObservationAttachment.class,".observation.observationGroup.waypoint.conservationArea"),
 	OBSERVATIONGRIDDEDQUERY(ObservationGriddedQuery.class,null),
 	OBSERVATIONOPTIONS(ObservationOptions.class,".uuid"),
 	OBSERVATIONQUERY(ObservationQuery.class,null),
@@ -386,8 +393,9 @@ public enum SmartTable {
 	USERSDEFAULTDASHBOARD(UsersDefaultDashboard.class, null),
 	WAYPOINT(Waypoint.class,null),
 	WAYPOINTATTACHMENT(WaypointAttachment.class,".waypoint.conservationArea"),
-	WAYPOINTOBSERVATION(WaypointObservation.class,".waypoint.conservationArea"),
-	WAYPOINTOBSERVATIONATTRIBUTE(WaypointObservationAttribute.class,".id.observation.waypoint.conservationArea"),
+	WAYPOINTOBSERVATION(WaypointObservation.class,".observationGroup.waypoint.conservationArea"),
+	WAYPOINTOBSERVATIONGROUP(WaypointObservationGroup.class,".waypoint.conservationArea"),
+	WAYPOINTOBSERVATIONATTRIBUTE(WaypointObservationAttribute.class,".id.observation.observationGroup.waypoint.conservationArea"),
 	WAYPOINTQUERY(WaypointQuery.class, null),
 	
 	I2_ATTACHMENT(IntelAttachment.class, null),

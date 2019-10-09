@@ -58,6 +58,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -412,20 +413,26 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		}
 		
 		if (xml.getObservations().size () > 0){
-			wp.setObservations(new ArrayList<WaypointObservation>());
+			WaypointObservationGroup g = new WaypointObservationGroup();
+			g.setWaypoint(wp);
+			
+			wp.setObservationGroups(new ArrayList<>());
+			wp.getObservationGroups().add(g);
+			
+			g.setObservations(new ArrayList<WaypointObservation>());
 			for (WaypointObservationType type : xml.getObservations()){
-				WaypointObservation ob = convertWaypointObservation(type, wp);
+				WaypointObservation ob = convertWaypointObservation(type, g);
 				if (ob != null){
-					wp.getObservations().add(ob);
+					g.getObservations().add(ob);
 				}
 			}
 		}
 		return wp;
 	}
 	
-	private WaypointObservation convertWaypointObservation(WaypointObservationType xml, Waypoint parent ){
+	private WaypointObservation convertWaypointObservation(WaypointObservationType xml, WaypointObservationGroup parent ){
 		WaypointObservation ob = new WaypointObservation();
-		ob.setWaypoint(parent);
+		ob.setObservationGroup(parent);
 		
 		if (attachmentLocation != null){
 			if (xml.getAttachments().size() > 0){
@@ -464,7 +471,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		Category cat = findCategory(xml.getCategoryKey());
 		if (cat == null){
 			warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_CategoryNotFound,
-					new Object[]{xml.getCategoryKey(),parent.getId() ,DateFormat.getDateTimeInstance().format(parent.getDateTime())  }) 
+					new Object[]{xml.getCategoryKey(),parent.getWaypoint().getId() ,DateFormat.getDateTimeInstance().format(parent.getWaypoint().getDateTime())  }) 
 					);
 			return null;
 		}else{
@@ -486,13 +493,13 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 					}else{
 						warnings.add(
 								MessageFormat.format(Messages.XmlToPatrolConverter_DuplicateAttributesError,
-										new Object[]{parent.getId(), DateFormat.getDateTimeInstance().format(parent.getDateTime()), attribute.getAttribute().getKeyId()})); 
+										new Object[]{parent.getWaypoint().getId(), DateFormat.getDateTimeInstance().format(parent.getWaypoint().getDateTime()), attribute.getAttribute().getKeyId()})); 
 										
 					}
 				}else{
 					warnings.add(MessageFormat.format(
 						Messages.XmlToPatrolConverter_Warning_NotAllDataImported, new Object[]{
-							parent.getId(),DateFormat.getDateTimeInstance().format(parent.getDateTime()) }) 
+							parent.getWaypoint().getId(),DateFormat.getDateTimeInstance().format(parent.getWaypoint().getDateTime()) }) 
 					);
 					
 				}

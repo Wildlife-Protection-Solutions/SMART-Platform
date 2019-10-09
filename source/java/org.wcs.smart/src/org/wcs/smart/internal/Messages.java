@@ -42,8 +42,8 @@ public class Messages extends NLS {
 	public static String AddAttributeDialog1_DialogTitle;
 	public static String AddAttributeDialog1_LoadingAttributesText;
 	public static String AddAttributeDialog1_NewAttributeTitle;
-	public static String AddAttributeDialog1_OpAddExisting;
 	public static String AddAttributeDialog1_OpCreateNew;
+	public static String AddAttributeDialog1_OpAddExisting;
 	public static String AddAttributeDialog1_SelectAttribute_Label;
 	public static String AddAttributeDialog2_DialogTitle;
 	public static String AddAttributeDialog2_Edit_DialogMessage2;
@@ -613,6 +613,7 @@ public class Messages extends NLS {
 	public static String DeleteConservationArea_UserNameConfirmation_DialogButton;
 	public static String DeleteConservationArea_UserNameConfirmation_DialogMessage;
 	public static String DeleteConservationArea_UserNameConfirmation_DialogTitle;
+	public static String DeleteConservationAreaHandler_deleteTeamsTaskName;
 	public static String DeleteConservationAreaHandler_Progress_AgencyRank;
 	public static String DeleteConservationAreaHandler_Progress_DataModel;
 	public static String DeleteConservationAreaHandler_Progress_Employees;
@@ -665,6 +666,7 @@ public class Messages extends NLS {
 	public static String DialogConstants_EditLinkLabel;
 	public static String DialogConstants_EnableAllButton_Label;
 	public static String DialogConstants_EnableButton_Label;
+	public static String DialogConstants_ErrorText;
 	public static String DialogConstants_ExportButton_Label;
 	public static String DialogConstants_ImportButton_Label;
 	public static String DialogConstants_LoadingText;
@@ -693,6 +695,7 @@ public class Messages extends NLS {
 	public static String Employee_SmartUserLevel_Label;
 	public static String EmployeeComposite_addtooltip;
 	public static String EmployeeComposite_AutoAssignId_Label;
+	public static String EmployeeComposite_DetailsSection;
 	public static String EmployeeComposite_Error_EmployeeId;
 	public static String EmployeeComposite_Error_InvalidBirthDate;
 	public static String EmployeeComposite_Error_InvalidEndDate;
@@ -1114,7 +1117,7 @@ public class Messages extends NLS {
 	public static String RestoreHandler_DialogTitle;
 	public static String RestoreHandler_Error_DialogTitle;
 	public static String RestoreHandler_Error_Message;
-	public static String RestoreHandler_ReportComplete_DialogMessage2;
+	public static String RestoreHandler_ReportComplete_DialogMessage3;
 	public static String RestoreHandler_ReportComplete_DialogTitle;
 	public static String RestoreHandler_ReportFailed_Message;
 	public static String RestoreHandler_RestoreButton;

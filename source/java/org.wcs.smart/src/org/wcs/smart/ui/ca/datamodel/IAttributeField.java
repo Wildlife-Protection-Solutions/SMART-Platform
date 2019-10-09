@@ -46,6 +46,12 @@ public interface IAttributeField<T> {
 	public void createComposite(Composite parent);
 	
 	/**
+	 * Sets if the field is enabled or not
+	 * @param enabled
+	 */
+	public void setEnabled(boolean enabled);
+	
+	/**
 	 * Validates the value selected by the user for the given attribute.
 	 * <p>This validates a value is entered if required and 
 	 * validates it meets the qa parameters provided

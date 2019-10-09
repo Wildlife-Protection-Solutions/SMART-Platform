@@ -108,6 +108,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 	}
 	
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public PackageContribution packageFiles(ICtPackage ctpackage, IEclipseContext context, IProgressMonitor monitor) throws IOException {
 		if (!(ctpackage instanceof AbstractCtPackage)) return null;

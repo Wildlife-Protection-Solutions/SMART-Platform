@@ -539,12 +539,10 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 									wa.computeFileLocation(new File(rootFolder, wa.getFilename()));
 								}
 							}
-							if (wp.getWaypoint().getObservations() != null){
-								for (WaypointObservation wo : wp.getWaypoint().getObservations()){
-									if (wo.getAttachments() != null){
-										for (ObservationAttachment wa : wo.getAttachments()){
-											wa.computeFileLocation(new File(rootFolder, wa.getFilename()));
-										}
+							for (WaypointObservation wo : wp.getWaypoint().getAllObservations()){
+								if (wo.getAttachments() != null){
+									for (ObservationAttachment wa : wo.getAttachments()){
+										wa.computeFileLocation(new File(rootFolder, wa.getFilename()));
 									}
 								}
 							}
@@ -554,17 +552,16 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 							
 							
 							// remove observations with no data
-							if (wp.getWaypoint().getObservations() != null) {
-								for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
-									List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
-									for (WaypointObservationAttribute att : wo.getAttributes()) {
-										if (!att.hasValue()) {
-											toDelete.add(att);
-										}
+							for (WaypointObservation wo : wp.getWaypoint().getAllObservations()){
+								List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
+								for (WaypointObservationAttribute att : wo.getAttributes()) {
+									if (!att.hasValue()) {
+										toDelete.add(att);
 									}
-									wo.getAttributes().removeAll(toDelete);
 								}
+								wo.getAttributes().removeAll(toDelete);
 							}
+
 						}
 						
 						saveSession.getTransaction().commit();
@@ -585,12 +582,10 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 								wa.computeFileLocation(s);
 							}
 						}
-						if (wp.getWaypoint().getObservations() != null){
-							for (WaypointObservation wo : wp.getWaypoint().getObservations()){
-								if (wo.getAttachments() != null){
-									for (ObservationAttachment wa : wo.getAttachments()){
-										wa.computeFileLocation(s);
-									}
+						for (WaypointObservation wo : wp.getWaypoint().getAllObservations()){
+							if (wo.getAttachments() != null){
+								for (ObservationAttachment wa : wo.getAttachments()){
+									wa.computeFileLocation(s);
 								}
 							}
 						}

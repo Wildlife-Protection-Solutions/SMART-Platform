@@ -391,6 +391,7 @@ public class ConfigurableModelFactory {
 		}
 		
 		copyLabels(attributeToClone, clone);
+		cloneImages(attributeToClone, clone);
 		clone.setOrder(attributeToClone.getOrder());
 		o2iMap.put(attributeToClone.getUuid(), clone);
 		clone.setConfig(cloneCmAttributeConfig(attributeToClone.getConfig(), cm, o2iMap));

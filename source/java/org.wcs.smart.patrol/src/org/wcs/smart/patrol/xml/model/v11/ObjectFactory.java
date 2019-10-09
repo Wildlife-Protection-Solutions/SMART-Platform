@@ -37,7 +37,7 @@ import org.wcs.smart.patrol.xml.model.LabelType;
 @XmlRegistry
 public class ObjectFactory {
 
-    public final static QName _Patrol_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.1/patrol", "patrol");
+    public final static QName _Patrol_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.1/patrol", "patrol"); //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.patrol.xml.model

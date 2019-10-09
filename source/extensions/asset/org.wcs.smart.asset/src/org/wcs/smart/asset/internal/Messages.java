@@ -772,7 +772,10 @@ public class Messages extends NLS {
 	public static String ObservationDialog_edittooltip;
 	public static String ObservationDialog_loadingdatamodeljob;
 	public static String ObservationDialog_NewMessage;
+	public static String ObservationDialog_NewObsGroupText;
+	public static String ObservationDialog_NewObsGroupTooltip;
 	public static String ObservationDialog_NewObsLabel;
+	public static String ObservationDialog_ObservationGroupLabel;
 	public static String ObservationDialog_SaveMessage;
 	public static String ObservationDialog_Save;
 	public static String ObservationDialog_SaveTitle;
@@ -992,6 +995,7 @@ public class Messages extends NLS {
 	public static String WaypointAttributeTable_addobstooltip;
 	public static String WaypointAttributeTable_deletetooltip;
 	public static String WaypointAttributeTable_edittooltip;
+	public static String WaypointAttributeTable_ObsGroupHeader;
 	public static String WaypointAttributeTable_SaveError;
 	public static String XmlFileWizardPage_AllFiles;
 	public static String XmlFileWizardPage_CanceledMsg;

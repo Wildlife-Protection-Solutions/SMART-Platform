@@ -81,6 +81,7 @@ public class Messages extends NLS {
 	public static String GriddedFilterPanel_RefreshJobName;
 	public static String GriddedQuery_DefaultQueryName;
 	public static String PatrolAttachmentTooltipProvider_ObservationLbl;
+	public static String PatrolAttachmentTooltipProvider_ObsGroupHeader;
 	public static String PatrolAttachmentTooltipProvider_PatrolIdLbl;
 	public static String PatrolAttachmentTooltipProvider_WpDateLbl;
 	public static String PatrolAttachmentTooltipProvider_WpIdLbl;
@@ -138,6 +139,7 @@ public class Messages extends NLS {
 	public static String PatrolQueryLabelProvider_LastModified_ColumnName;
 	public static String PatrolQueryLabelProvider_LastModifiedBy_ColumnName;
 	public static String PatrolQueryLabelProvider_NumTimeRanges;
+	public static String PatrolQueryLabelProvider_ObsGroupColumnName;
 	public static String PatrolQueryLabelProvider_RankLabel;
 	public static String PatrolQueryLabelProvider_RawXColumnName;
 	public static String PatrolQueryLabelProvider_RawYColumnName;

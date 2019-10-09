@@ -198,7 +198,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 				try(NamedPreparedStatement ps = new NamedPreparedStatement(connection, sb.toString())){
 					log ( sb.toString() );
 					for (Entry<String,Object> parameter : namesToValues.entrySet()) {
-						log( parameter.getKey() + ":" + (parameter.getValue() == null ? "" : parameter.getValue().toString() )); //$NON-NLS-1$
+						log( parameter.getKey() + ":" + (parameter.getValue() == null ? "" : parameter.getValue().toString() )); //$NON-NLS-1$  //$NON-NLS-2$
 						ps.setObject(parameter.getKey(), parameter.getValue());
 					}
 					try(ResultSet rs = ps.executeQuery()){
@@ -323,7 +323,8 @@ public class CategoryColumnEngine implements IColumnEngine {
 		sb.append(waypointFilterTable);
 		sb.append(" (wp_uuid, ob_uuid, c_hkey) "); //$NON-NLS-1$
 		sb.append(" SELECT a.uuid as wp_uuid, b.uuid as obs_uuid, c.hkey "); //$NON-NLS-1$
-		sb.append(" FROM smart.waypoint a JOIN smart.WP_OBSERVATION b ON a.uuid = b.wp_uuid "); //$NON-NLS-1$
+		sb.append(" FROM smart.waypoint a JOIN smart.wp_observation_group g on a.uuid = g.wp_uuid "); //$NON-NLS-1$
+		sb.append(" join smart.WP_OBSERVATION b ON g.uuid = b.wp_group_uuid "); //$NON-NLS-1$
 		sb.append(" JOIN smart.dm_category c ON c.uuid = b.category_uuid "); //$NON-NLS-1$
 		sb.append(" WHERE "); //$NON-NLS-1$
 		sb.append(" a.ca_uuid = ? "); //$NON-NLS-1$
@@ -352,7 +353,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 	}
 	
 	private void log(String message) {
-		System.out.println(message);
+//		System.out.println(message);
 	}
 	
 	private String asSql(BracketExpression filter, HashMap<String, Object> namesToValues) throws Exception{

@@ -48,6 +48,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
@@ -212,8 +213,11 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 			s.append(" FROM "); //$NON-NLS-1$
 			s.append(tableNamePrefix(Waypoint.class));
 			s.append(" JOIN "); //$NON-NLS-1$
+			s.append(tableNamePrefix(WaypointObservationGroup.class));
+			s.append(" ON " + tablePrefix(Waypoint.class) + ".uuid = " + tablePrefix(WaypointObservationGroup.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			s.append(" JOIN "); //$NON-NLS-1$
 			s.append(tableNamePrefix(WaypointObservation.class));
-			s.append(" ON " + tablePrefix(Waypoint.class) + ".uuid = " + tablePrefix(WaypointObservation.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+			s.append(" ON " + tablePrefix(WaypointObservationGroup.class) + ".uuid = " + tablePrefix(WaypointObservation.class) + ".wp_group_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 			s.append(" join "); //$NON-NLS-1$
 			s.append(tableNamePrefix(WaypointObservationAttribute.class));
 			s.append(" on " + tablePrefix(WaypointObservation.class) + ".uuid = " + tablePrefix(WaypointObservationAttribute.class) + ".observation_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -282,8 +286,11 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		sql.append(tableNamePrefix(ConservationArea.class));
 		sql.append(" on " + tablePrefix(Waypoint.class) + ".ca_uuid = " + tablePrefix(ConservationArea.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		sql.append(" join "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(WaypointObservationGroup.class));
+		sql.append(" on " + tablePrefix(Waypoint.class) + ".uuid = " + tablePrefix(WaypointObservationGroup.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append(" join "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(WaypointObservation.class));
-		sql.append(" on " + tablePrefix(Waypoint.class) + ".uuid = " + tablePrefix(WaypointObservation.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append(" on " + tablePrefix(WaypointObservationGroup.class) + ".uuid = " + tablePrefix(WaypointObservation.class) + ".wp_group_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		sql.append(" join "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(WaypointObservationAttribute.class));
 		sql.append(" on " + tablePrefix(WaypointObservation.class) + ".uuid = " + tablePrefix(WaypointObservationAttribute.class) + ".observation_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

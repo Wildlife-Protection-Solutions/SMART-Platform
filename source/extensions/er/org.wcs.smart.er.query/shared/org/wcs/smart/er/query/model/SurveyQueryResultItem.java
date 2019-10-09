@@ -101,6 +101,7 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private String lastModifiedBy;
 	private Date lastModified;
 	
+	private UUID groupUuid;
 	private UUID observationUuid;
 	
 	private List<LineString> tracks;
@@ -110,6 +111,20 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 */
 	public void setObservationUuid(UUID observationUuid){
 		this.observationUuid = observationUuid;
+	}
+	
+	/**
+	 * @param observationUuid the observation uuid
+	 */
+	public void setObservationGroupUuid(UUID groupUuid){
+		this.groupUuid = groupUuid;
+	}
+	
+	/**
+	 * @return the observation uuid
+	 */
+	public UUID getObservationGroupUuid(){
+		return this.groupUuid;
 	}
 	
 	/**

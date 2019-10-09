@@ -93,16 +93,15 @@ public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
 							}
 						}
 					}
-					if (wp.getWaypoint().getObservations() != null){
-						for (WaypointObservation wo : wp.getWaypoint().getObservations()){
-							if (wo.getAttachments()!= null){
-								for (ObservationAttachment att : wo.getAttachments()){
-									try {
-										att.computeFileLocation(session);
-										toDelete.add(att.getAttachmentFile());
-									} catch (Exception e) {
-										SmartPatrolPlugIn.log(e.getMessage(), e);
-									}
+					
+					for (WaypointObservation wo : wp.getWaypoint().getAllObservations()){
+						if (wo.getAttachments()!= null){
+							for (ObservationAttachment att : wo.getAttachments()){
+								try {
+									att.computeFileLocation(session);
+									toDelete.add(att.getAttachmentFile());
+								} catch (Exception e) {
+									SmartPatrolPlugIn.log(e.getMessage(), e);
 								}
 							}
 						}

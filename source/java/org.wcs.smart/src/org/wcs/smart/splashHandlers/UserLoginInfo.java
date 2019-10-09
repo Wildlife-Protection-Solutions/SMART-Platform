@@ -53,7 +53,7 @@ public class UserLoginInfo implements Comparable<UserLoginInfo> {
 	public UserLoginInfo(String username) {
 		Assert.isNotNull(username);
 		this.username = username;
-		this.lastUsed = new Long(System.currentTimeMillis() / 10000).intValue();
+		this.lastUsed = Long.valueOf(System.currentTimeMillis() / 10000).intValue();
 	}
 
 	@Override

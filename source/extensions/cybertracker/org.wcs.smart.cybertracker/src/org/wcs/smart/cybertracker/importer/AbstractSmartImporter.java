@@ -76,6 +76,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.SharedUtils;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -232,9 +233,17 @@ public abstract class AbstractSmartImporter {
 		
 		Employee observer = fetchObserver(splitResult.getObserver(), eMap, session);
 		
+		if (wp.getObservationGroups().isEmpty()) {
+			WaypointObservationGroup grp = new WaypointObservationGroup();
+			wp.getObservationGroups().add(grp);
+			grp.setWaypoint(wp);
+			grp.setObservations(new ArrayList<>());
+		}
+		WaypointObservationGroup grp = wp.getObservationGroups().get(0);
+		
 		for (List<A> attrList : splitResult.getAttributes()) {
 			WaypointObservation obs = new WaypointObservation();
-			obs.setWaypoint(wp);
+			obs.setObservationGroup(grp);
 			obs.setCategory(category);
 			obs.setObserver(observer);
 			
@@ -257,8 +266,11 @@ public abstract class AbstractSmartImporter {
 			}
 			obs.setAttributes(toAdd);
 			
-			wp.getObservations().add(obs);
+			grp.getObservations().add(obs);
 		}
+		
+		//if there are no observations remove the group
+		if (grp.getObservations().isEmpty()) grp.getWaypoint().getObservationGroups().remove(grp);
 	}
 
 	/**

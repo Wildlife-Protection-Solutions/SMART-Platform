@@ -26,7 +26,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -65,6 +64,7 @@ import org.locationtech.udig.project.AdaptableFeature;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.events.IWaypointEventListener;
@@ -76,6 +76,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.util.SmartUtils;
@@ -131,8 +132,6 @@ public class WaypointInfoView {
 				return Status.OK_STATUS;
 			}
 			final List<Thumbnail> thumbnails = new ArrayList<Thumbnail>();
-			
-			final HashMap<Category, List<DisplayData>> data = new HashMap<Category, List<DisplayData>>();
 
 			Waypoint currentWp = null;
 			
@@ -143,49 +142,42 @@ public class WaypointInfoView {
 					currentWp = (Waypoint) s.get(Waypoint.class, selectedWaypointUuid);	//reload waypoint to get latest info
 					if (currentWp != null) {
 						if (currentWp.getLastModifiedBy() != null) currentWp.getLastModifiedBy().getGender();
-						if (currentWp.getObservations() != null) {
-							for (WaypointObservation wo : currentWp.getObservations()) {
-								DisplayData dd = new DisplayData();
-								
-								List<DisplayData> cData = data.get(wo.getCategory());
-								if (cData == null){
-									cData = new ArrayList<DisplayData>();
-									data.put(wo.getCategory(), cData);
-								}
-								cData.add(dd);
-								
-								dd.categoryLabel = wo.getCategory().getFullCategoryName();
-								
-								//sort observation attribute based on data model order
-								Category c = (Category) s.load(Category.class, wo.getCategory().getUuid());
-								final List<Attribute> attributes = new ArrayList<Attribute>();
-								c.getAllAttribute(attributes, null);
-								List<WaypointObservationAttribute> tmp = new ArrayList<WaypointObservationAttribute>();
-								tmp.addAll(wo.getAttributes());
-								Collections.sort(tmp, new Comparator<WaypointObservationAttribute>() {
-									@Override
-									public int compare(
-											WaypointObservationAttribute o1,
-											WaypointObservationAttribute o2) {
-										int index1 = attributes.indexOf(o1.getAttribute());
-										int index2 = attributes.indexOf(o2.getAttribute());
-										if (index1 == index2){
-											return 0;
+						if (currentWp.getObservationGroups() != null) {
+							
+							for (WaypointObservationGroup g : currentWp.getObservationGroups()) {
+								for (WaypointObservation wo : g.getObservations()) {
+									wo.getCategory().getFullCategoryName();
+									
+									//sort observation attribute based on data model order
+									Category c = (Category) s.load(Category.class, wo.getCategory().getUuid());
+									final List<Attribute> attributes = new ArrayList<Attribute>();
+									c.getAllAttribute(attributes, null);
+									List<WaypointObservationAttribute> tmp = new ArrayList<WaypointObservationAttribute>();
+									tmp.addAll(wo.getAttributes());
+									Collections.sort(tmp, new Comparator<WaypointObservationAttribute>() {
+										@Override
+										public int compare(
+												WaypointObservationAttribute o1,
+												WaypointObservationAttribute o2) {
+											int index1 = attributes.indexOf(o1.getAttribute());
+											int index2 = attributes.indexOf(o2.getAttribute());
+											if (index1 == index2){
+												return 0;
+											}
+											if (index1 > index2) return 1;
+											return -1;
 										}
-										if (index1 > index2) return 1;
-										return -1;
+									});
+									for (WaypointObservationAttribute woa : tmp) {
+										woa.getAttribute().getName();
+										woa.getAttributeValueAsString(Locale.getDefault());
 									}
-								});
-								for (WaypointObservationAttribute woa : tmp) {
-									dd.attributeLabels.add(woa.getAttribute().getName());
-									dd.attributeValues.add(woa.getAttributeValueAsString(Locale.getDefault()));
-								}
-								for (ObservationAttachment att: wo.getAttachments()){
-									try{
-										att.computeFileLocation(s);
-										dd.attchmentFileNames.add(att);
-									}catch (Exception ex){
-										ObservationPlugIn.log(ex.getMessage(), ex);
+									for (ObservationAttachment att: wo.getAttachments()){
+										try{
+											att.computeFileLocation(s);
+										}catch (Exception ex){
+											ObservationPlugIn.log(ex.getMessage(), ex);
+										}
 									}
 								}
 							}
@@ -239,32 +231,43 @@ public class WaypointInfoView {
 						lblWaypointId.setText(String.valueOf(lcurrentWp.getId()));
 						lblDateTime.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lcurrentWp.getDateTime())); 
 
+						int widthHint = infoSection.getBody().getBounds().width - 20;		
 						
-						int widthHint = infoSection.getBody().getBounds().width - 20;						
-						for (List<DisplayData> d : data.values()) {
-							if (showText) {
-								Label lbl = toolkit.createLabel(infoSection.getBody(), SmartUtils.formatStringForLabel(d.get(0).categoryLabel), SWT.WRAP);
-								lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-								((GridData) lbl.getLayoutData()).widthHint = widthHint;
-								lbl.setFont(boldFont);
-								categoryLabels.add(lbl);
+						for (WaypointObservationGroup g : lcurrentWp.getObservationGroups()) {
+							
+							Composite spacer = toolkit.createComposite(infoSection.getBody(), SWT.NONE );
+							spacer.setLayout(new GridLayout());
+							((GridLayout)spacer.getLayout()).marginWidth = 0;
+							((GridLayout)spacer.getLayout()).marginHeight = 0;
+							
+							if (showText && lcurrentWp.getObservationGroups().size() > 1) {
+								SmartUiUtils.createHeaderLabel(spacer, Messages.WaypointInfoView_ObsGroupHeader);
 							}
+							
+							for (WaypointObservation wo : g.getObservations()) {
 
-							Composite attributeComp = toolkit.createComposite(infoSection.getBody());
-							attributeComp.setLayout(new GridLayout(2, false));
-							((GridLayout) attributeComp.getLayout()).marginLeft = 5;
-
-							attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-							for (int i = 0 ; i < d.size(); i ++){
 								if (showText) {
-									for (int k = 0; k < d.get(i).attributeLabels.size(); k ++){
-										Label l = toolkit.createLabel(attributeComp,SmartUtils.formatStringForLabel(d.get(i).attributeLabels.get(k) + ":"), SWT.WRAP); //$NON-NLS-1$
+									Label lbl = toolkit.createLabel(spacer, SmartUtils.formatStringForLabel(wo.getCategory().getFullCategoryName()), SWT.WRAP);
+									lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+									((GridData) lbl.getLayoutData()).widthHint = widthHint;
+									lbl.setFont(boldFont);
+									categoryLabels.add(lbl);
+								}
+		
+								Composite attributeComp = toolkit.createComposite(spacer);
+								attributeComp.setLayout(new GridLayout(2, false));
+								((GridLayout) attributeComp.getLayout()).marginLeft = 5;
+		
+								attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+								if (showText) {
+									for (WaypointObservationAttribute woa : wo.getAttributes()) {
+										Label l = toolkit.createLabel(attributeComp,SmartUtils.formatStringForLabel(woa.getAttribute().getName() + ":"), SWT.WRAP); //$NON-NLS-1$
 										l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 										((GridData) l.getLayoutData()).widthHint = 100;
 										attributeLabels.add(l);
-	
-										l = toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(d.get(i).attributeValues.get(k)), SWT.WRAP);
+			
+										l = toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(woa.getAttributeValueAsString(Locale.getDefault())), SWT.WRAP);
 										l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 										((GridData) l.getLayoutData()).widthHint = 100;
 										attributeValuesLabels.add(l);
@@ -272,25 +275,24 @@ public class WaypointInfoView {
 								}
 								if (showImages) {
 									//Waypoint Composite
-									if (d.get(i).attchmentFileNames.size() > 0){
+									List<ISmartAttachment> files = new ArrayList<>();
+									for (ObservationAttachment att : wo.getAttachments()) files.add(att);
+									if (!files.isEmpty()) {
 										ThumbnailComposite tc = new ThumbnailComposite(attributeComp);
 										tc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 										toolkit.adapt(tc);
-										tc.setFiles(d.get(i).attchmentFileNames);
+										tc.setFiles(files);
 										obsThumbs.add(tc);
 									}
 								}
-								
-								
-								if (showText && i < d.size() - 1) {
-									Label l = toolkit.createLabel(attributeComp, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
+								if (attributeComp.getChildren().length == 0) attributeComp.dispose();
+										
+								if (showText) {
+									Label l = toolkit.createLabel(spacer, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 									l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 								}
-							}	
-							if (showText) {
-								Label l2 = toolkit.createLabel(infoSection.getBody(),"", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
-								l2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 							}
+
 						}
 					}
 					
@@ -469,6 +471,10 @@ public class WaypointInfoView {
 		WaypointEventManager.getInstance().addListener(EventType.WAYPOINT_MODIFIED, waypointListener);
 	}
 
+	public void refresh() {
+		forceRefresh();
+	}
+	
 	public void setImagesVisible(boolean isVisible) {
 		this.showImages = isVisible;
 		forceRefresh();
@@ -626,23 +632,7 @@ public class WaypointInfoView {
 		if (wp != null){
 			updateContents(wp);
 		}else{
-			clearContents();
-		}
-	}
-	
-	/*
-	 * A class for tracking display data
-	 */
-	private class DisplayData {
-		String categoryLabel;
-		List<String> attributeLabels;
-		List<String> attributeValues;
-		List<ISmartAttachment> attchmentFileNames;
-		
-		public DisplayData(){
-			attributeLabels = new ArrayList<String>();
-			attributeValues = new ArrayList<String>();
-			attchmentFileNames = new ArrayList<ISmartAttachment>();
+			//clearContents();
 		}
 	}
 	

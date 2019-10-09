@@ -120,8 +120,8 @@ public class EditListDialog extends SmartStyledTitleDialog{
 	protected Control createDialogArea(Composite parent) {
 		Composite main = (Composite) super.createDialogArea(parent);
 		
-		setTitle(MessageFormat.format("{0} - Attribute Configuration", attribute.getName()));
-		setMessage("Configure the list attribute.  This affects all locations where this configuration is used in the model.");
+		setTitle(MessageFormat.format(Messages.EditListDialog_edittitle, attribute.getName()));
+		setMessage(Messages.EditListDialog_editmsg);
 		getShell().setText(Messages.ConfigurableModelEditDialog_Title);
 
 		createTopControls(main);

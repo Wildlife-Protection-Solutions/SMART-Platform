@@ -90,6 +90,7 @@ import org.wcs.smart.i2.ui.handler.OpenAttachmentViewHandler;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.util.E3Utils;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Displays the entity search results in a table.
@@ -144,8 +145,8 @@ public class EntitySearchResultTable extends Composite {
 		this.context = context;
 				
 		Color color = parent.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION);
-		selectionColor = new Color(parent.getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 75));
-		mouseOverColor = new Color(parent.getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 90));
+		selectionColor = new Color(parent.getDisplay(), SmartUtils.blend(new RGB(255, 255, 255), color.getRGB(), 75));
+		mouseOverColor = new Color(parent.getDisplay(), SmartUtils.blend(new RGB(255, 255, 255), color.getRGB(), 90));
 		addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
@@ -953,27 +954,4 @@ public class EntitySearchResultTable extends Composite {
 		}
 	}
 	
-    private static int blend(int v1, int v2, int ratio) {
-        int b = (ratio * v1 + (100 - ratio) * v2) / 100;
-        return Math.min(255, b);
-    }
-
-    /**
-     * Blends c1 and c2 based in the provided ratio.
-     * 
-     * @param c1
-     *            first color
-     * @param c2
-     *            second color
-     * @param ratio
-     *            percentage of the first color in the blend (0-100)
-     * @return the RGB value of the blended color
-     * @since 3.1
-     */
-    private static RGB blend(RGB c1, RGB c2, int ratio) {
-        int r = blend(c1.red, c2.red, ratio);
-        int g = blend(c1.green, c2.green, ratio);
-        int b = blend(c1.blue, c2.blue, ratio);
-        return new RGB(r, g, b);
-    }
 }

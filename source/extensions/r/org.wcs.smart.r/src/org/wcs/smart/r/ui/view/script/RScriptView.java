@@ -54,6 +54,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
@@ -65,6 +66,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
@@ -77,6 +79,7 @@ import org.wcs.smart.r.internal.Messages;
 import org.wcs.smart.r.model.RQuery;
 import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.r.ui.OpenRScriptHandler;
+import org.wcs.smart.r.ui.RScriptDialog;
 import org.wcs.smart.r.ui.RunRScriptHandler;
 import org.wcs.smart.r.ui.editor.script.RScriptEditor;
 import org.wcs.smart.r.ui.editor.script.RScriptEditorInput;
@@ -241,7 +244,27 @@ public class RScriptView {
 					miNew.setText(Messages.RScriptView_NewQueryLabel);
 					miNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 					miNew.addListener(SWT.Selection, s->newQuery((UuidItem)x));
+					
+					new MenuItem(mnu, SWT.SEPARATOR);
+					
+					MenuItem miNewScript = new MenuItem(mnu, SWT.PUSH);
+					miNewScript.setText(Messages.RScriptView_NewRScriptMenuItem);
+					miNewScript.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+					miNewScript.addListener(SWT.Selection, s->newScript());
+					
+					MenuItem miEdit = new MenuItem(mnu, SWT.PUSH);
+					miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+					miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+					
+					miEdit.addListener(SWT.Selection, s->editScript((UuidItem)x));
+				}else if (x == SCRIPT_NODE) {
+					MenuItem miNewScript = new MenuItem(mnu, SWT.PUSH);
+					miNewScript.setText(Messages.RScriptView_NewRScriptMenuItem);
+					miNewScript.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+					miNewScript.addListener(SWT.Selection, s->newScript());
 				}
+				
+				
 			}
 			
 			@Override
@@ -250,6 +273,18 @@ public class RScriptView {
 		});
 	
 		updateContent();
+	}
+	
+	private void newScript() {
+		RScriptDialog dialog = new RScriptDialog(context.get(Shell.class));
+		if (dialog.open() == Window.OK) updateContent();
+	}
+	
+	private void editScript(UuidItem item) {
+		RScript type = new RScript();
+		type.setUuid(item.uuid);
+		RScriptDialog dialog = new RScriptDialog(context.get(Shell.class), type);
+		if (dialog.open() == Window.OK) updateContent();
 	}
 	
 	private void deleteQueries() {

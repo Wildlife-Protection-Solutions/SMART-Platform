@@ -111,6 +111,7 @@ public class Messages extends NLS {
 	public static String IncidentSummaryPage_CannotEdit;
 	public static String IncidentSummaryPage_CategoryLabel;
 	public static String IncidentSummaryPage_ObserverLabel;
+	public static String IncidentSummaryPage_ObserverLbl;
 	public static String IncidentSummaryPage_CommentsLabel;
 	public static String IncidentSummaryPage_DateLabel;
 	public static String IncidentSummaryPage_DirectionLabel1;

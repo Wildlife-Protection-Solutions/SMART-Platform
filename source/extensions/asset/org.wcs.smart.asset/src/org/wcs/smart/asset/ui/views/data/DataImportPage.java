@@ -90,6 +90,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -335,17 +336,20 @@ public class DataImportPage {
 							wa.setCopyFromLocation(p.getFile().toFile());
 							wa.setFilename(p.getFile().getFileName().toString());
 							wp.getAttachments().add(wa);
-							wp.setObservations(new ArrayList<>());
+							wp.setObservationGroups(new ArrayList<>());
 							wp.setId(0);
-							
 							
 							assetAttachmentLink.put(p.getAsset(), new ArrayList<>(Collections.singleton(wa)));
 							
+							WaypointObservationGroup g = new WaypointObservationGroup();
+							g.setObservations(new ArrayList<>());
+							g.setWaypoint(wp);
 							for (WaypointObservation wo : p.getObservations()) {
 								WaypointObservation clone = wo.clone(session);
-								clone.setWaypoint(wp);
-								wp.getObservations().add(clone);
+								clone.setObservationGroup(g);
+								g.getObservations().add(clone);
 							}
+							
 							
 							//add relations
 							List<FileProxy> relations = new ArrayList<>();
@@ -375,10 +379,10 @@ public class DataImportPage {
 								wp.getAttachments().add(wa);
 								
 								for (WaypointObservation nextobs : pp.getObservations()) {
-									if (!AssetUtils.containsObservation(nextobs, wp.getObservations())) {
+									if (!AssetUtils.containsObservation(nextobs, g.getObservations())) {
 										WaypointObservation clone = nextobs.clone(session);
-										clone.setWaypoint(wp);
-										wp.getObservations().add(clone);
+										clone.setObservationGroup(g);
+										g.getObservations().add(clone);
 									}
 								}
 								
@@ -389,6 +393,10 @@ public class DataImportPage {
 								}
 								links.add(wa);
 								assets.put(pp.getAsset(), pp.getStationLocation());
+							}
+							
+							if (!g.getObservations().isEmpty()) {
+								wp.getObservationGroups().add(g);
 							}
 							
 							int incidentLength =  (int)Math.ceil( ( maxDate.getTime() - minDate.getTime()) / 1000.0);

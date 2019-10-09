@@ -118,6 +118,8 @@ public class PatrolQueryColumnCache {
 				
 				for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 					FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+					if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID) continue;
+
 					boolean add = true;
 					if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
 						item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE ||
@@ -185,6 +187,12 @@ public class PatrolQueryColumnCache {
 					toAdd.setEdit(true);
 					cols.add(toAdd);
 				}
+				
+				//observation group 
+				QueryColumn toAdd = new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, Locale.getDefault());
+				toAdd.setEdit(false);
+				cols.add(toAdd);
+				
 				queryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				
 				
@@ -235,6 +243,8 @@ public class PatrolQueryColumnCache {
 				
 				for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 					FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+					if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID) continue;
+					
 					boolean add = true;
 					if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
 						item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE ||

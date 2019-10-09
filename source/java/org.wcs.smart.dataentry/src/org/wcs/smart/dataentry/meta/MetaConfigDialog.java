@@ -89,7 +89,7 @@ public abstract class MetaConfigDialog<T> extends AbstractPropertyJHeaderDialog 
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Group g = new Group(container, SWT.NONE);
-		g.setText("Metadata Pages");
+		g.setText(Messages.MetaConfigDialog_MetadataPages);
 		g.setLayout(new GridLayout());
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)g.getLayout()).marginHeight = 0;

@@ -51,6 +51,7 @@ public class StringAttributeField implements IAttributeField<String>{
 	private boolean isModified = false;
 	private String originalValue = null;
 	
+	private Label lbl;
 	private Text txt;
 	private ControlDecoration cd;
 	
@@ -77,12 +78,18 @@ public class StringAttributeField implements IAttributeField<String>{
 		return txt.getText().trim();
 	}
 
+	@Override
+	public void setEnabled(boolean enabled) {
+		if (txt != null) txt.setEnabled(enabled);
+		if (lbl != null) lbl.setEnabled(enabled);
+	}
+	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public void createComposite(Composite parent) {
-		Label lbl = new Label(parent, SWT.NONE);
+		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		

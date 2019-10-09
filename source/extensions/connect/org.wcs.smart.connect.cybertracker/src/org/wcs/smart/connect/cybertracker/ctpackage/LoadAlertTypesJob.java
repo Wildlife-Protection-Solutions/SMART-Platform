@@ -35,10 +35,14 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
+import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.AlertType;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
+import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Job for loading support alert types from Connect server
@@ -89,26 +93,34 @@ public abstract class LoadAlertTypesJob extends Job {
 
 			}
 			if (loadedTypes == null) {
-				Display.getDefault().syncExec(new Runnable() {
-					@Override
-					public void run() {
-						ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
-							@Override
-							protected Control createDialogArea(Composite parent) {
-								setTitle(Messages.LoadAlertTypesJob_DialogTitle);
-								getShell().setText(Messages.LoadAlertTypesJob_DialogTitle);
-								setMessage(Messages.LoadAlertTypesJob_DialogMessage);	
-								return super.createDialogArea(parent);
-							}	
-						};
-						
-						if (cd.open() == Window.OK) {
-							SmartConnect connect = cd.getConnection();
-							if (context != null) context.set(SmartConnect.class, connect);
+				ConnectServer cs = null;
+				try(Session s = HibernateManager.openSession()){
+					cs = ConnectHibernateManager.getConnectServer(s);
+				}
+				if (cs != null) {
+					Display.getDefault().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
+								@Override
+								protected Control createDialogArea(Composite parent) {
+									setTitle(Messages.LoadAlertTypesJob_DialogTitle);
+									getShell().setText(Messages.LoadAlertTypesJob_DialogTitle);
+									setMessage(Messages.LoadAlertTypesJob_DialogMessage);	
+									return super.createDialogArea(parent);
+								}	
+							};
+							
+							if (cd.open() == Window.OK) {
+								SmartConnect connect = cd.getConnection();
+								if (context != null) context.set(SmartConnect.class, connect);
+							}
 						}
-					}
-					
-				});
+						
+					});
+				}else if (forceReload) {
+					Display.getDefault().syncExec(()->MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.LoadAlertTypesJob_DialogTitle, Messages.LoadAlertTypesJob_NoConnectServer));
+				}
 				SmartConnect connect = context.get(SmartConnect.class);
 				if (connect != null) {
 					try {

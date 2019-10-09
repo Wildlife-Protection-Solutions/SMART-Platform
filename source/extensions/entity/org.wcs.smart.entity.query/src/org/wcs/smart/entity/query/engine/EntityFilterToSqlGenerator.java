@@ -28,6 +28,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
+import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.AttributeFilter;
@@ -88,11 +89,9 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 	
 	
 	public String asSql(EntityAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
-		}
-		
+		FilterTable t = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
+				
 		String tableName = filter.getEntityKey() + "_" + filter.getEntityAttributeKey(); //$NON-NLS-1$
 	
 		if (filter.getAttributeType() == AttributeType.BOOLEAN){
@@ -140,10 +139,8 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 	 */
 	@Override
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
-		}
+		FilterTable t = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		return super.asSql(filter, engine);
 	}
 	
@@ -153,10 +150,8 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 	 */
 	@Override
 	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null ";  //$NON-NLS-1$
-		}
+		FilterTable t = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		return super.asSql(filter, engine);
 	}
 	
@@ -165,10 +160,8 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 	 */
 	@Override
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
-		}
+		FilterTable t = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		return super.asSql(filter, engine);	
 	}
 }

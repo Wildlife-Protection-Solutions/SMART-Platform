@@ -546,7 +546,6 @@ public class DataGeneratorView {
 		colObservation.getColumn().setWidth(500);
 		colObservation.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
-				//TODO: better string representation of observation
 				if (element instanceof ObservationConfiguration) return ((ObservationConfiguration)element).asText();
 				return super.getText(element);
 			}
@@ -858,24 +857,6 @@ public class DataGeneratorView {
 		saveConfig();
 	}
 	
-	//TODO: ideally this code would be available via the IAttributeField interface; however
-	//this is not the case for 6.2 so we must do it this way instead.  For 7 would
-	//should add setEnabled function to IAttributeField
-	private void enableAttributeField(Control control, boolean enable) {
-		List<Control> items = new ArrayList<>();
-		items.add(control);
-		while(!items.isEmpty()) {
-			Control c = items.remove(0);
-			c.setEnabled(enable);
-			if (c instanceof Composite) {
-				for (Control kid: ((Composite) c).getChildren()) {
-					items.add(kid);
-				}
-			}
-		}
-	}
-	
-	
 	private void updateAttributePanel(Composite attributePanel, Category category, List<Attribute> attributes) {
 		attributePanel.setRedraw(false);
 		attributePanel.setVisible(false);
@@ -900,14 +881,15 @@ public class DataGeneratorView {
 				//hack to move the combo viewer after the attribute name
 				toolkit.adapt(attributePanel.getChildren()[index+1], false, false);
 				v.getControl().moveBelow(attributePanel.getChildren()[index + 1]);
-				Control fieldPart = attributePanel.getChildren()[index + 2];
-				enableAttributeField(fieldPart, false);
-				
+//				Control fieldPart = attributePanel.getChildren()[index + 2];
+//				enableAttributeField(fieldPart, false);
+				field.setEnabled(false);
 				v.addSelectionChangedListener(new ISelectionChangedListener() {
 					@Override
 					public void selectionChanged(SelectionChangedEvent event) {
 						Object x = v.getStructuredSelection().getFirstElement();
-						enableAttributeField(fieldPart, x == ObservationConfiguration.Type.FIXED);
+//						enableAttributeField(fieldPart, x == ObservationConfiguration.Type.FIXED);
+						field.setEnabled(x == ObservationConfiguration.Type.FIXED);
 					}
 				});
 			}

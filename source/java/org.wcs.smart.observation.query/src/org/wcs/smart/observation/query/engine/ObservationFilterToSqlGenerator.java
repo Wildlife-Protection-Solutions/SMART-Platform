@@ -30,6 +30,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
+import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.AttributeFilter;
@@ -89,9 +90,9 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 	 */
 	@Override
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((AbstractDerbyObservationQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+		FilterTable t = ((AbstractDerbyObservationQueryEngine)engine).filterTables.get(filter);
+		if (t != null){
+			return t.tablename + "." + t.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);
 	}
@@ -102,9 +103,9 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 	 */
 	@Override
 	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((AbstractDerbyObservationQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null ";  //$NON-NLS-1$
+		FilterTable t = ((AbstractDerbyObservationQueryEngine)engine).filterTables.get(filter);
+		if (t != null){
+			return t.tablename + "." + t.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);
 	}
@@ -114,9 +115,9 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 	 */
 	@Override
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((AbstractDerbyObservationQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+		FilterTable t = ((AbstractDerbyObservationQueryEngine)engine).filterTables.get(filter);
+		if (t != null){
+			return t.tablename + "." + t.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);	
 	}

@@ -38,6 +38,7 @@ import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -223,6 +224,7 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by, "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservationGroup.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid "); //$NON-NLS-1$
@@ -246,6 +248,7 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby uuid,"); //$NON-NLS-1$
+		sql.append("wp_group_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_observer_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid uuid"); //$NON-NLS-1$
@@ -281,10 +284,12 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 		return null;
 	}
 
-	protected IFilterProcessor getFilterProcessor(FilterType filterType,
+	private IFilterProcessor getFilterProcessor(FilterType filterType,
 			String queryDataTable) {
 		if (filterType == IFilter.FilterType.OBSERVATION){
 			return new ObsFilterProcessor(queryDataTable, this);
+		}else if (filterType == IFilter.FilterType.GROUP){
+			return new ObsWaypointGroupFilterProcessor(queryDataTable, this);
 		}else{
 			return new ObsWaypointFilterProcessor(queryDataTable, this);
 		}

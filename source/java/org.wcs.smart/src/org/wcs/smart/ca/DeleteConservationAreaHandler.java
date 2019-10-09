@@ -43,7 +43,7 @@ public class DeleteConservationAreaHandler implements ICaDeleteHandler{
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
 		
-		monitor.subTask("Delete Employee Teams");
+		monitor.subTask(Messages.DeleteConservationAreaHandler_deleteTeamsTaskName);
 		deleteEmployeeTeams(ca, session);
 		monitor.subTask(Messages.DeleteConservationAreaHandler_Progress_Employees);
 		deleteEmployees(ca, session);

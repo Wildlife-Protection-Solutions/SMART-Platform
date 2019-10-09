@@ -72,6 +72,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -94,6 +95,7 @@ public class JsonCtParser {
 	public static final String LONGITUDE_KEY = "longitude"; //$NON-NLS-1$
 	public static final String LATITUDE_KEY = "latitude"; //$NON-NLS-1$
 	public static final String DATETIME_KEY = "dateTime"; //$NON-NLS-1$
+	public static final String ROOT_ID_KEY = "rootId"; //$NON-NLS-1$
 
 	public static final String DISTANCE_KEY = "distance"; //$NON-NLS-1$
 	public static final String DIRECTION_KEY = "bearing"; //$NON-NLS-1$
@@ -181,14 +183,13 @@ public class JsonCtParser {
 					attachments.add(attachment);
 			}
 		}
-		if (waypoint.getObservations() != null){
-			for (WaypointObservation wo : waypoint.getObservations()){
-				if (wo.getAttachments() == null) continue;
-				for (ObservationAttachment attachment : wo.getAttachments()){
-					if (attachment.getCopyFromLocation().length() >= maxsizebytes)
-						attachments.add(attachment);
-				}						
-			}
+		
+		for (WaypointObservation wo : waypoint.getAllObservations()){
+			if (wo.getAttachments() == null) continue;
+			for (ObservationAttachment attachment : wo.getAttachments()){
+				if (attachment.getCopyFromLocation().length() >= maxsizebytes)
+					attachments.add(attachment);
+			}						
 		}
 		
 		
@@ -376,7 +377,7 @@ public class JsonCtParser {
 		Date dt = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(DATETIME_KEY));
 		newWaypoint.setDateTime(dt);
 
-		newWaypoint.setObservations(new ArrayList<WaypointObservation>());
+		newWaypoint.setObservationGroups(new ArrayList<>());
 
 		//observations are saved in the sightings object
 		JSONObject observations = (JSONObject)properties.get(SIGHTINGS_KEY);
@@ -490,12 +491,21 @@ public class JsonCtParser {
 				}
 			}
 		}
+		
+		if (newWaypoint.getObservationGroups().isEmpty()) {
+			WaypointObservationGroup g = new WaypointObservationGroup();
+			g.setWaypoint(newWaypoint);
+			newWaypoint.getObservationGroups().add(g);
+			g.setObservations(new ArrayList<>());
+		}
+		WaypointObservationGroup grp = newWaypoint.getObservationGroups().get(0);
+		
 		if (attributes.entrySet().isEmpty()){
 			//create an observation with only default attribute values
 			WaypointObservation wp = new WaypointObservation();
 			wp.setObserver(observer);
-			wp.setWaypoint(newWaypoint);
-			newWaypoint.getObservations().add(wp);
+			wp.setObservationGroup(grp);
+			grp.getObservations().add(wp);
 			wp.setCategory(category);
 			wp.setAttributes(new ArrayList<WaypointObservationAttribute>());
 			for (WaypointObservationAttribute ob : applyAllObs){
@@ -511,8 +521,8 @@ public class JsonCtParser {
 						
 				WaypointObservation wp = new WaypointObservation();
 				wp.setObserver(observer);
-				wp.setWaypoint(newWaypoint);
-				newWaypoint.getObservations().add(wp);
+				wp.setObservationGroup(grp);
+				grp.getObservations().add(wp);
 				wp.setCategory(category);
 				
 				wp.setAttributes(new ArrayList<WaypointObservationAttribute>());

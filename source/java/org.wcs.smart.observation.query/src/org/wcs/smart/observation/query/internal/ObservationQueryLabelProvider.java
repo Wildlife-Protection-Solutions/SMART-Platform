@@ -43,6 +43,7 @@ public class ObservationQueryLabelProvider implements
 				case CA_NAME: return Messages.FixedQueryColumn_CaNameColumnName;
 				case WAYPOINT_SOURCE: return Messages.FixedQueryColumn_WaypointSourceColumnName;
 				case WAYPOINT_ID: return Messages.FixedQueryColumn_WaypointIdColumnName;
+				case OBS_GROUP_ID: return Messages.ObservationQueryLabelProvider_ObsGroupColumnName;
 				case WAYPOINT_DATE: return Messages.FixedQueryColumn_WaypointDateColumnName;
 				case WAYPOINT_TIME: return Messages.FixedQueryColumn_WaypointTimeColumnName;
 				case WAYPOINT_X: return Messages.FixedQueryColumn_xColumnName;

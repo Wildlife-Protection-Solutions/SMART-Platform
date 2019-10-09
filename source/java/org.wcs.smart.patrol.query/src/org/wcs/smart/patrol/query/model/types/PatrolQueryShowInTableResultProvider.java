@@ -59,9 +59,9 @@ public class PatrolQueryShowInTableResultProvider extends ShowInTableInfoProvide
 				//TODO: this is only applicable for observation queries
 				if (wo != null) {
 					tmp.setObservationUuid(wo.getUuid());
-				}else if (!pw.getWaypoint().getObservations().isEmpty()) {
+				}else if (!pw.getWaypoint().getAllObservations().isEmpty()) {
 					//this attachment is associated with a waypoint so pick any random observation to zoom to
-					tmp.setObservationUuid(pw.getWaypoint().getObservations().get(0).getUuid());
+					tmp.setObservationUuid(pw.getWaypoint().getAllObservations().get(0).getUuid());
 				}
 				resultItem = tmp;
 			}

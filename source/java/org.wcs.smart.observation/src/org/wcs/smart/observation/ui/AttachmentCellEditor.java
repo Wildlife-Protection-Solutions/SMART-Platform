@@ -39,6 +39,7 @@ import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 
 /**
  * Cell editor for editing attachments for a given waypoint.
@@ -119,10 +120,10 @@ public class AttachmentCellEditor extends DialogCellEditor{
 		}
 		int wpCnt = 0;
 		Waypoint wp = (Waypoint)value;
-		if (wp.getObservations() != null) {
-			for (WaypointObservation wo : wp.getObservations()){
-				if (wo.getAttachments() != null){
-					wpCnt += wo.getAttachments().size();
+		if (wp.getObservationGroups() != null) {
+			for(WaypointObservationGroup g : wp.getObservationGroups()) {
+				for (WaypointObservation wo : g.getObservations()){
+					if (wo.getAttachments() != null) wpCnt += wo.getAttachments().size();
 				}
 			}
 		}

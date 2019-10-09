@@ -45,8 +45,6 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 /**
@@ -100,7 +98,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 			public PatrolWaypointQueryResult execute(Connection c) throws SQLException {
 				IFilterProcessor filterer = null;
 				try{
-					filterer = PsqlPatrolWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+					filterer = PsqlPatrolEngine.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, PsqlPatrolWaypointEngine.this);
 				}catch (Exception ex){
 					throw new SQLException (ex);
 				}
@@ -309,15 +307,6 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 	@Override
 	public void cleanUp(Session session) throws SQLException {
 		dropTable(session, queryDataTable);
-	}
-
-	protected IFilterProcessor getFilterProcessor(FilterType filterType,
-			String queryDataTable) {
-		if (filterType == IFilter.FilterType.OBSERVATION){
-			return new PatrolFilterProcessor(queryDataTable, this);
-		}else{
-			return new PatrolWaypointFilterProcessor(queryDataTable, this);
-		}
 	}
 	
 	@Override

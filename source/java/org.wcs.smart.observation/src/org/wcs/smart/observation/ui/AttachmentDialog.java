@@ -101,12 +101,9 @@ public class AttachmentDialog extends SmartStyledTitleDialog{
 		}
 		
 		List<ISmartAttachment> obs = new ArrayList<ISmartAttachment>();
-		if (waypoint.getObservations() != null) {
-			for (WaypointObservation o : waypoint.getObservations()){
-				if (o.getAttachments() != null){
-					obs.addAll(o.getAttachments());
-				}
-			}
+		
+		for (WaypointObservation o : waypoint.getAllObservations()) {
+			if (o.getAttachments() != null) obs.addAll(o.getAttachments());
 		}
 		attachmentComposite.initOtherAttachments(obs);
 		

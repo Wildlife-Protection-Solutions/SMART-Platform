@@ -295,7 +295,12 @@ public class PatrolObservationQueryResult extends AbstractDbFeatureResultSet {
 		}else{
 			it.setObservationUuid(t); 
 		}
-		
+		t = (UUID)rs.getObject("wp_group_uuid"); //$NON-NLS-1$
+		if (t == null){
+			it.setObservationGroupUuid(null);
+		}else{
+			it.setObservationGroupUuid(t); 
+		}
 		//build categories
 		List<String> categories = new ArrayList<String>();
 		for (int i = 0; i < engine.getCategoryCnt(); i ++){

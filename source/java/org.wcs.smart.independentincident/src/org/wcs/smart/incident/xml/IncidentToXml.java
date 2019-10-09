@@ -26,15 +26,17 @@ import java.text.SimpleDateFormat;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.incident.xml.model.EmployeeType;
-import org.wcs.smart.incident.xml.model.WaypointObservationAttributeType;
-import org.wcs.smart.incident.xml.model.WaypointObservationType;
-import org.wcs.smart.incident.xml.model.WaypointType;
+import org.wcs.smart.incident.xml.model.v21.EmployeeType;
+import org.wcs.smart.incident.xml.model.v21.WaypointObservationAttributeType;
+import org.wcs.smart.incident.xml.model.v21.WaypointObservationType;
+import org.wcs.smart.incident.xml.model.v21.WaypointType;
+import org.wcs.smart.incident.xml.model.v21.WaypointObservationGroupType;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 
 /**
  * Utilities for converting a waypoint to xml waypoint.
@@ -60,61 +62,65 @@ public class IncidentToXml {
 			wt.getAttachments().add(attach.getFilename());
 		}
 		
+		for (WaypointObservationGroup g : incident.getObservationGroups()) {
+			WaypointObservationGroupType gt = new WaypointObservationGroupType();
+			wt.getGroups().add(gt);
 		
-		for (WaypointObservation ob  : incident.getObservations()){
-			WaypointObservationType wot = new WaypointObservationType();
-			wot.setCategoryKey(ob.getCategory().getHkey());
-			
-			if (ob.getObserver() != null){
-				EmployeeType observer = new EmployeeType();
-				observer.setEmployeeId(ob.getObserver().getId());
-				observer.setFamilyName(ob.getObserver().getFamilyName());
-				observer.setGivenName(ob.getObserver().getGivenName());
-				wot.setObserver(observer);
-			}
-			
-			for (ObservationAttachment attach : ob.getAttachments()){
-				wot.getAttachments().add(attach.getFilename());
-			}
-			
-			for (WaypointObservationAttribute att : ob.getAttributes()){
-				WaypointObservationAttributeType xml2 = new WaypointObservationAttributeType();
-				xml2.setAttributeKey(att.getAttribute().getKeyId());
+			for (WaypointObservation ob  : g.getObservations()){
+				WaypointObservationType wot = new WaypointObservationType();
+				wot.setCategoryKey(ob.getCategory().getHkey());
 				
-				boolean add = false;
-				if (att.getAttribute().getType().equals(AttributeType.BOOLEAN)){
-					if (att.getNumberValue() != null){
-						xml2.setBValue(att.getNumberValue() >= 0.5);
-						add = true;
-					}
-				}else if (att.getAttribute().getType().equals(AttributeType.LIST)){
-					if (att.getAttributeListItem() != null){
-						xml2.setItemKey(att.getAttributeListItem().getKeyId());
-						add = true;
-					}
-				}else if (att.getAttribute().getType().equals(AttributeType.NUMERIC)){
-					if (att.getNumberValue() != null){
-						xml2.setDValue(att.getNumberValue());
-						add = true;
-					}
-				}else if (att.getAttribute().getType().equals(AttributeType.TEXT) ||
-						 att.getAttribute().getType().equals(AttributeType.DATE)){
-					if (att.getStringValue() != null){
-						xml2.setSValue(att.getStringValue());
-						add = true;
-					}
-				}else if (att.getAttribute().getType().equals(AttributeType.TREE)){
-					if (att.getAttributeTreeNode() != null){
-						xml2.setItemKey(att.getAttributeTreeNode().getHkey());
-						add = true;
-					}
+				if (ob.getObserver() != null){
+					EmployeeType observer = new EmployeeType();
+					observer.setEmployeeId(ob.getObserver().getId());
+					observer.setFamilyName(ob.getObserver().getFamilyName());
+					observer.setGivenName(ob.getObserver().getGivenName());
+					wot.setObserver(observer);
 				}
 				
-				if (add){
-					wot.getAttributes().add(xml2);
+				for (ObservationAttachment attach : ob.getAttachments()){
+					wot.getAttachments().add(attach.getFilename());
 				}
-			}		
-			wt.getObservations().add(wot);
+				
+				for (WaypointObservationAttribute att : ob.getAttributes()){
+					WaypointObservationAttributeType xml2 = new WaypointObservationAttributeType();
+					xml2.setAttributeKey(att.getAttribute().getKeyId());
+					
+					boolean add = false;
+					if (att.getAttribute().getType().equals(AttributeType.BOOLEAN)){
+						if (att.getNumberValue() != null){
+							xml2.setBValue(att.getNumberValue() >= 0.5);
+							add = true;
+						}
+					}else if (att.getAttribute().getType().equals(AttributeType.LIST)){
+						if (att.getAttributeListItem() != null){
+							xml2.setItemKey(att.getAttributeListItem().getKeyId());
+							add = true;
+						}
+					}else if (att.getAttribute().getType().equals(AttributeType.NUMERIC)){
+						if (att.getNumberValue() != null){
+							xml2.setDValue(att.getNumberValue());
+							add = true;
+						}
+					}else if (att.getAttribute().getType().equals(AttributeType.TEXT) ||
+							 att.getAttribute().getType().equals(AttributeType.DATE)){
+						if (att.getStringValue() != null){
+							xml2.setSValue(att.getStringValue());
+							add = true;
+						}
+					}else if (att.getAttribute().getType().equals(AttributeType.TREE)){
+						if (att.getAttributeTreeNode() != null){
+							xml2.setItemKey(att.getAttributeTreeNode().getHkey());
+							add = true;
+						}
+					}
+					
+					if (add){
+						wot.getAttributes().add(xml2);
+					}
+				}		
+				gt.getObservations().add(wot);
+			}
 		}
 		
 		return wt;

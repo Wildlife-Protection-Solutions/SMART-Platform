@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Configuration_QNAME = new QName("http://smartconservationtools.org/xml/1.0/EventActions", "configuration");
+    private final static QName _Configuration_QNAME = new QName("http://smartconservationtools.org/xml/1.0/EventActions", "configuration"); //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.event.xml.model

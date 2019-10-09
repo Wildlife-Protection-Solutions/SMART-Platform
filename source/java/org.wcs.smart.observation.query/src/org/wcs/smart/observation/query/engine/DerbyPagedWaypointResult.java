@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
+import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
@@ -44,8 +45,6 @@ import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
 import org.wcs.smart.query.common.ui.image.PagedImageQueryResults;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
-
-import org.locationtech.jts.geom.Envelope;
 
 public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implements IDesktopPagedImageResultSet{
 

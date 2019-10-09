@@ -11,6 +11,7 @@ import javax.persistence.Table;
 
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 
 /**
  * Links cybertracker incident ids to waypoint uuids;
@@ -22,19 +23,28 @@ import org.wcs.smart.observation.model.Waypoint;
 @Table(name = "smart.ct_incident_link")
 public class CtIncidentLink extends UuidItem {
 	
-	private UUID incidentGroupId;
-	
+	private UUID ctIncidentGroupId;
+	private UUID ctRootId;
+
 	private Waypoint waypoint;
+	private WaypointObservationGroup obsGroup;
 	
-	private Integer lastObservationId;
+	@Column(name="ct_root_id")
+	public UUID getRootId() {
+		return this.ctRootId;
+	}
+	
+	public void setRootId(UUID ctRootId) {
+		this.ctRootId = ctRootId;
+	}
 	
 	@Column(name="ct_group_id")
 	public UUID getIncidentGroupId() {
-		return this.incidentGroupId;
+		return this.ctIncidentGroupId;
 	}
 	
 	public void setIncidentGroupId(UUID incidentGroupId) {
-		this.incidentGroupId = incidentGroupId;
+		this.ctIncidentGroupId = incidentGroupId;
 	}
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -47,12 +57,15 @@ public class CtIncidentLink extends UuidItem {
 		this.waypoint = waypoint;
 	}
 	
-	@Column(name="last_cnt")
-	public Integer getLastObservationCounter() {
-		return this.lastObservationId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="obs_group_uuid", referencedColumnName="uuid")
+	public WaypointObservationGroup getObservationGroup() {
+		return this.obsGroup;
 	}
 	
-	public void setLastObservationCounter(Integer counter) {
-		this.lastObservationId = counter;
+	public void setObservationGroup(WaypointObservationGroup obsGroup) {
+		if (obsGroup != null) setWaypoint(obsGroup.getWaypoint());
+		this.obsGroup = obsGroup;
 	}
+
 }

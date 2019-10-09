@@ -72,6 +72,7 @@ public class SurveyQueryLabelProvider implements ISurveyQueryLabelProvider {
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_OBSERVER){ return Messages.getString("SurveyQueryLabelProvider.ObserverLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_LAST_MODIFIED) return Messages.getString("SurveyQueryLabelProvider.LastModifiedLabel", l); //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_LAST_MODIFIED_BY) return Messages.getString("SurveyQueryLabelProvider.LastModifiedByLabel", l); //$NON-NLS-1$
+		if (item == SurveyQueryColumn.FixedColumns.OBS_GROUP_ID) return Messages.getString("SurveyQueryLabelProvider.ObsGroupColumnName", l); //$NON-NLS-1$
 				
 		if (item == ValueItem.TRACK_LENGTH){ return Messages.getString("SurveyQueryLabelProvider.TrackDistanctOp", l);} //$NON-NLS-1$
 		if (item == ValueItem.MISSION_COUNT){ return Messages.getString("SurveyQueryLabelProvider.NumMissionsOp", l);} //$NON-NLS-1$

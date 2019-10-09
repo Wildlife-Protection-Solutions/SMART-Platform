@@ -56,6 +56,7 @@ import org.hibernate.Session;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
+import org.wcs.smart.cybertracker.patrol.model.CtPatrolWpLink;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
@@ -169,6 +170,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			link.setDeviceId(newPatrolLink.getDeviceId());
 			link.setLastObservationCnt(-1);
 			link.setGroupStartTime(null);
+			link.setWaypointLinks(new ArrayList<>());
 			session.save(link);
 		}
 				
@@ -178,6 +180,12 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 		link.setDeviceId(newPatrolLink.getDeviceId());
 		link.setLastObservationCnt(newPatrolLink.getLastObservationCnt());
 		link.setGroupStartTime(newPatrolLink.getGroupStartTime());
+		link.setWaypointLinks(new ArrayList<>());
+		for (CtPatrolWpLink l : newPatrolLink.getWaypointLinks()) {
+			l.setLink(link);
+			link.getWaypointLinks().add(l);
+		}
+		newPatrolLink.getWaypointLinks().clear();
 		session.save(link);
 	}
 	
@@ -206,6 +214,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			link.setDeviceId(patrol.getDeviceId());
 			link.setLastObservationCnt(-1);
 			link.setGroupStartTime(null);
+			link.setWaypointLinks(new ArrayList<>());
 			session.save(link);
 		}
 		
@@ -215,6 +224,12 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 		link.setDeviceId(patrol.getDeviceId());
 		link.setLastObservationCnt(patrol.getLastObservationCnt());
 		link.setGroupStartTime(patrol.getGroupStartTime());
+		link.setWaypointLinks(new ArrayList<>());
+		for (CtPatrolWpLink l : patrol.getWaypointLinks()) {
+			l.setLink(link);
+			link.getWaypointLinks().add(l);
+		}
+		patrol.getWaypointLinks().clear();
 		session.save(link);
 		
 		return newPatrol;

@@ -193,5 +193,12 @@
             directory="rscripts">
       </FilestoreDirectory>
    </extension>
+   <extension
+         point="org.wcs.smart.caDeleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.r.ScriptDeleteAdvisor"
+            class="org.wcs.smart.r.model.RScript">
+      </DeleteAdvisor>
+   </extension>
 
 </plugin>

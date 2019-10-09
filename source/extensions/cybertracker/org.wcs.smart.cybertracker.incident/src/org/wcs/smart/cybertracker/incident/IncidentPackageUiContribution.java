@@ -62,6 +62,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class IncidentPackageUiContribution implements IPackageUiContribution{
 
 	//data model 

@@ -32,6 +32,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.connect.query.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.connect.query.engine.er.PsqlErGridEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErMissionEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErMissionTrackEngine;
@@ -216,10 +217,9 @@ public enum PsqlFilterToSqlGenerator {
 	 * Asset Filter
 	 */
 	protected String asSql(AssetFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
-		}
+		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
+		
 		throw new SQLException("Cannot process asset filter, no table data found.");	 //$NON-NLS-1$
 	}
 	
@@ -286,10 +286,8 @@ public enum PsqlFilterToSqlGenerator {
 	 * Attribute filter
 	 */
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
-		}
+		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
 		
 		String attprefix = engine.tablePrefix(Attribute.class);
 		if (attprefix == null){
@@ -357,10 +355,8 @@ public enum PsqlFilterToSqlGenerator {
 	 * Category filter
 	 */
 	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null ";  //$NON-NLS-1$
-		}
+		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
 		
 		String keyPart = filter.getCategoryKey();
 		String prefix = engine.tablePrefix(Category.class);
@@ -376,10 +372,8 @@ public enum PsqlFilterToSqlGenerator {
 	 * Category attribute filter
 	 */
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
-		}
+		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
 		return "( " + toSql(filter.getCategoryFilter(), engine) + " " + asSql(Operator.AND) + " " + toSql(filter.getAttributeFilter(), engine) + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$	
 	}
 	
@@ -729,10 +723,8 @@ public enum PsqlFilterToSqlGenerator {
 	
 	
 	public String asSql(EntityAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
-		}
+		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
 		
 		String tableName = filter.getEntityKey() + "_" + filter.getEntityAttributeKey(); //$NON-NLS-1$
 	
@@ -883,10 +875,8 @@ public enum PsqlFilterToSqlGenerator {
 	 * Sampling unit attribute filter
 	 */
 	protected String asSql(SamplingUnitAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + "." + ((AbstractQueryEngine)engine).getSurveySamplingUnitJoinFieldName() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
-		}
+		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
 		if (filter.getAttributeType() == AttributeType.NUMERIC){
 			String p1 = engine.addParameterValue((Double)filter.getValue());
 			return " (sua.sua_" + filter.getSamplingUnitAttributeKey() + " " + asSql(filter.getOperator()) + " " + p1 + ") ";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -949,14 +939,8 @@ public enum PsqlFilterToSqlGenerator {
 	 */
 	protected String asSql(MissionPropertyFilter filter, IQueryEngine engine)
 			throws SQLException {
-		String col = ((AbstractQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col + "." + ((AbstractQueryEngine)engine).getSurveySamplingUnitJoinFieldName() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		
-//		String attprefix = engine.tablePrefix(MissionAttribute.class);
-//		String attObprefix = engine.tablePrefix(MissionProperty.class);
-		
+		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null ";  //$NON-NLS-1$//$NON-NLS-2$
 
 		if (filter.getAttributeType() == AttributeType.NUMERIC) {
 			String p1 = engine.addParameterValue((Double) filter.getValue());

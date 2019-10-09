@@ -43,6 +43,7 @@ import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolUuidFilter;
+import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.AreaFilter;
@@ -127,9 +128,9 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	@Override
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
+		FilterTable col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+			return col.tablename + "." + col.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);
 	}
@@ -140,9 +141,9 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	@Override
 	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
+		FilterTable col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
-			return col + ".wp_uuid is not null ";  //$NON-NLS-1$
+			return col.tablename + "." + col.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);
 	}
@@ -152,9 +153,9 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	@Override
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
+		FilterTable col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
-			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+			return col.tablename + "." + col.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.asSql(filter, engine);	
 	}

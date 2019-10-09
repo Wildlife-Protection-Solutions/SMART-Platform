@@ -30,6 +30,7 @@ public class DateAttributeField implements IAttributeField<Date>{
 	private Button chSet;
 	private DateTime dtime;
 	private ControlDecoration cd;
+	private Label lbl;
 	
 	private Collection<Listener> listeners;
 
@@ -55,12 +56,19 @@ public class DateAttributeField implements IAttributeField<Date>{
 		return SmartUtils.getDate(dtime);
 	}
 
+	@Override
+	public void setEnabled(boolean enabled) {
+		if (chSet != null) chSet.setEnabled(enabled);
+		if (dtime != null) dtime.setEnabled(enabled);
+		if (lbl != null) lbl.setEnabled(enabled);
+	}
+	
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public void createComposite(Composite parent) {
-		Label lbl = new Label(parent, SWT.NONE);
+		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
@@ -70,8 +78,10 @@ public class DateAttributeField implements IAttributeField<Date>{
 		((GridLayout)dtComp.getLayout()).marginWidth = 0;
 		dtComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)dtComp.getLayoutData()).horizontalIndent = 5;
-		
+		dtComp.setBackground(dtComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
 		chSet = new Button(dtComp,SWT.CHECK);
+		chSet.setBackground(chSet.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		chSet.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -92,7 +102,7 @@ public class DateAttributeField implements IAttributeField<Date>{
 		
 		dtime = new DateTime(dtComp, SWT.DROP_DOWN | SWT.DATE | SWT.MEDIUM);
 		dtime.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
-		
+		dtime.setBackground(dtime.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		dtime.addListener(SWT.Modify, new Listener(){
 			@Override
 			public void handleEvent(Event event) {

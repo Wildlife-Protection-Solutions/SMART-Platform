@@ -35,7 +35,7 @@ public class Messages extends NLS {
 	public static String RPreferencePage_Licence;
 	public static String RPreferencePage_NoMods;
 	public static String RPreferencePage_NotFoundWarning;
-	public static String RPreferencePage_RInfo;
+	public static String RPreferencePage_RInfo2;
 	public static String RPreferencePage_RInstall;
 	public static String RPreferencePage_RLabel;
 	public static String RPreferencePage_UpdateError;
@@ -81,6 +81,7 @@ public class Messages extends NLS {
 	public static String RScriptView_DeleteMssage;
 	public static String RScriptView_DeleteTitle;
 	public static String RScriptView_NewQueryLabel;
+	public static String RScriptView_NewRScriptMenuItem;
 	public static String RScriptView_OpenLabel;
 	public static String RScriptView_RefreshJobName;
 	public static String RScriptView_RQueryLabel;
@@ -92,6 +93,7 @@ public class Messages extends NLS {
 	public static String RunRScriptHandler_Message;
 	public static String RunRScriptHandler_NotFound;
 	public static String RunRScriptHandler_Title;
+	public static String ScriptDeleteAdvisor_RQueryDeleteError;
 	public static String ScriptPage_editlink;
 	public static String ScriptPage_edittooltip;
 	public static String ScriptPage_NotFound;

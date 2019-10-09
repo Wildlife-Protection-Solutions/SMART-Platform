@@ -88,6 +88,7 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 	
 	private Button btnWaypoint;
 	private Button btnObservation;
+	private Button btnGroup;
 	
 	/**
 	 * Creates a new drop target panel.
@@ -135,9 +136,15 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 		if (filterType.equals(FilterType.WAYPOINT)){
 			btnWaypoint.setSelection(true);
 			btnObservation.setSelection(false);
+			btnGroup.setSelection(false);
+		}else if (filterType.equals(FilterType.GROUP)) {
+			btnWaypoint.setSelection(false);
+			btnObservation.setSelection(false);
+			btnGroup.setSelection(true);
 		}else{
 			btnObservation.setSelection(true);
 			btnWaypoint.setSelection(false);
+			btnGroup.setSelection(false);
 		}
 	}
 
@@ -191,6 +198,8 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 				//if non-empty filter then include filter type
 				if (btnWaypoint.getSelection()){
 					query.append(IFilter.FilterType.WAYPOINT.getKey());
+				}else if (btnGroup.getSelection()) {
+					query.append(IFilter.FilterType.GROUP.getKey());
 				}else{
 					query.append(IFilter.FilterType.OBSERVATION.getKey());
 				}
@@ -345,7 +354,7 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 	protected void createFilterTypeComposite(Composite parent){
 		Composite filterTypeComp = new Composite(parent, SWT.NONE);
 		filterTypeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		GridLayout layout = new GridLayout(4, false);
+		GridLayout layout = new GridLayout(5, false);
 		layout.horizontalSpacing = 5;
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 5;
@@ -368,10 +377,17 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 		btnWaypoint.setSelection(true);
 		btnWaypoint.addListener(SWT.Selection, selectListener);
 		
+		btnGroup = new Button(filterTypeComp, SWT.RADIO);
+		btnGroup.setText(BasicDropItemFactory.INSTANCE.getFilterTypeName(IFilter.FilterType.GROUP));
+		btnGroup.setToolTipText(Messages.BasicFilterDefintionPanel_obsGroupTooltip);
+		btnGroup.setSelection(false);
+		btnGroup.addListener(SWT.Selection, selectListener);
+		
 		btnObservation = new Button(filterTypeComp, SWT.RADIO);
 		btnObservation.setText(BasicDropItemFactory.INSTANCE.getFilterTypeName(IFilter.FilterType.OBSERVATION));
 		btnObservation.addListener(SWT.Selection, selectListener);
 		btnObservation.setToolTipText(Messages.FilterDropTargetPanel_observationtooltip);
+		
 		Label lspacer = new Label(filterTypeComp, SWT.NONE);
 		lspacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		

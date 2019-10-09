@@ -460,6 +460,7 @@ public class Messages extends NLS {
 	public static String ImportDialog_CopyError;
 	public static String ImportDialog_deleteFileMenu;
 	public static String ImportDialog_deletefiletooltip;
+	public static String ImportDialog_DetailsBtn;
 	public static String ImportDialog_DeviceImportError;
 	public static String ImportDialog_DeviceMsg;
 	public static String ImportDialog_DeviceOption;
@@ -573,6 +574,7 @@ public class Messages extends NLS {
 	public static String NavigationLayerDialog_CreatedDateField;
 	public static String NavigationLayerDialog_DefaultTargetName;
 	public static String NavigationLayerDialog_DeleteTargetActionName;
+	public static String NavigationLayerDialog_ErrorDialogTitle;
 	public static String NavigationLayerDialog_ErrorTitle;
 	public static String NavigationLayerDialog_MapName;
 	public static String NavigationLayerDialog_ModifiedByField;

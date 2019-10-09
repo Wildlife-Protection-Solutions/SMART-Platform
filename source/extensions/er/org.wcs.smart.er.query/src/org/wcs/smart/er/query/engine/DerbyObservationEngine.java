@@ -54,6 +54,7 @@ import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
@@ -681,6 +682,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by, "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservationGroup.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid "); //$NON-NLS-1$
@@ -722,7 +724,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby char(16) for bit data,"); //$NON-NLS-1$
-
+		sql.append("wp_group_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_observer_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid char(16) for bit data"); //$NON-NLS-1$
@@ -767,6 +769,13 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		it.setWaypointObserver(rs.getString("ob_observer")); //$NON-NLS-1$
 		it.setObservationUuid(UuidUtils.byteToUUID(rs.getBytes("ob_uuid"))); //$NON-NLS-1$
 		
+		byte[] t = rs.getBytes("wp_group_uuid"); //$NON-NLS-1$
+		if (t == null){
+			it.setObservationGroupUuid(null);
+		}else{
+			it.setObservationGroupUuid(UuidUtils.byteToUUID(t)); 
+		}
+		
 		//build categories
 		List<String> categories = new ArrayList<String>();
 		for (int i = 0; i < categoryCount; i ++){
@@ -798,8 +807,4 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		
 	}
 	
-	@Override
-	public String getFilterTablesJoinColum(){
-		return "wp_uuid"; //$NON-NLS-1$
-	}
 }

@@ -475,14 +475,12 @@ public class PatrolHibernateManager extends HibernateManager{
 													src.getDatastoreFileLocation(patrol, session)), wa.getFilename()));
 										}
 									}
-									if (wp.getWaypoint().getObservations() != null){
-										for (WaypointObservation wo : wp.getWaypoint().getObservations()){
-											if (wo.getAttachments() != null){
-												for (ObservationAttachment wa : wo.getAttachments()){
-													wa.computeFileLocation(new File(new File(
-															SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-															src.getDatastoreFileLocation(patrol, session)), wa.getFilename()));
-												}
+									for (WaypointObservation wo : wp.getWaypoint().getAllObservations()){
+										if (wo.getAttachments() != null){
+											for (ObservationAttachment wa : wo.getAttachments()){
+												wa.computeFileLocation(new File(new File(
+														SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
+														src.getDatastoreFileLocation(patrol, session)), wa.getFilename()));
 											}
 										}
 									}

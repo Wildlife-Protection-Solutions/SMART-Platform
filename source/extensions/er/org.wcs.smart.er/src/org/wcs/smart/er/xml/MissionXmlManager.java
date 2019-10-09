@@ -21,18 +21,20 @@
  */
 package org.wcs.smart.er.xml;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.wcs.smart.er.xml.model.missions.MissionType;
-import org.wcs.smart.er.xml.model.missions.ObjectFactory;
+import org.w3c.dom.Document;
+import org.wcs.smart.er.xml.model.missions.v11.MissionType;
+import org.wcs.smart.er.xml.model.missions.v11.ObjectFactory;
 
 
 /**
@@ -41,28 +43,10 @@ import org.wcs.smart.er.xml.model.missions.ObjectFactory;
  * @since 4.0.0
  */
 public class MissionXmlManager {
-	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.er.xml.model.missions"; //$NON-NLS-1$
+	
+	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.er.xml.model.missions.v11"; //$NON-NLS-1$
 	
 	public static final String ATTACHMENT_DIR_NAME = "attachments"; //$NON-NLS-1$
-	
-	/**
-	 * Reads patrol data from an xml file.
-	 * <p>
-	 * User is required to close input stream.
-	 * </p>
-	 * 
-	 * @param file input stream to read patrol data from
-	 * @return
-	 * @throws JAXBException
-	 */
-	public static MissionType readDataModel(InputStream file) throws JAXBException{
-		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
-		Unmarshaller un = context.createUnmarshaller();	
-		@SuppressWarnings("unchecked")
-		JAXBElement<MissionType> o = (JAXBElement<MissionType>) un.unmarshal(file);
-		MissionType x = o.getValue();
-		return x;
-	}
 	
 	/**
 	 * Writes a xml patrol object to a file.
@@ -83,5 +67,34 @@ public class MissionXmlManager {
 		
 		JAXBElement<MissionType> element = objFactor.createMission(mission);
 		marshaller.marshal(element, file);
+	}
+	
+	/**
+	 * Finds the xml converter to use based on the version in the xml file.
+	 * @param xmlFile
+	 * @return
+	 */
+	public static IXmlToMissionConverter findXmlConverter(File xmlFile){
+		try{
+			DocumentBuilderFactory factory =
+					DocumentBuilderFactory.newInstance();
+					DocumentBuilder builder = factory.newDocumentBuilder();
+			Document doc = builder.parse(xmlFile);
+			String nodeName = doc.getFirstChild().getNodeName();
+			String ns = ""; //$NON-NLS-1$
+			if (nodeName.indexOf(':') > 0){
+				ns = ":" + nodeName.substring(0, nodeName.indexOf(':')); //$NON-NLS-1$
+			}
+			String version = doc.getFirstChild().getAttributes().getNamedItem("xmlns" + ns).getTextContent(); //$NON-NLS-1$
+			if (version.equals(org.wcs.smart.er.xml.model.missions.v11.ObjectFactory._Mission_QNAME.getNamespaceURI())){
+				return new org.wcs.smart.er.xml.model.missions.v11.XMLtoMissionConverter();
+			}else if (version.equals(org.wcs.smart.er.xml.model.missions.v10.ObjectFactory._Mission_QNAME.getNamespaceURI())){
+				return new org.wcs.smart.er.xml.model.missions.v10.XMLtoMissionConverter();
+			}
+		}catch (Exception ex){
+			//invalid xml file
+			return null;
+		}
+		return null;
 	}
 }

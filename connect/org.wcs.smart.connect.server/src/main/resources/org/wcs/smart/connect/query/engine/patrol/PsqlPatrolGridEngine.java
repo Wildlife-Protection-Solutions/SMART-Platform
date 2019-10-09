@@ -91,8 +91,6 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
@@ -102,6 +100,7 @@ import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 
 public class PsqlPatrolGridEngine extends AbstractQueryEngine{
+	
 	private final Logger logger = Logger.getLogger(PsqlPatrolGridEngine.class.getName());
 	
 	private GridQueryResults result = null;
@@ -291,7 +290,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 				needsObservation = true;
 			}
 			
-			IFilterProcessor filterer = getFilterProcessor(filter.getFilterType(), dataTable);
+			IFilterProcessor filterer = PsqlPatrolEngine.getFilterProcessor(filter.getFilterType(), dataTable, this);
 			try{
 				filterer.processFilter(c, filter.getFilter(), dateFilter, query, caFilter, needsObservation, false);
 			}finally{
@@ -366,7 +365,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 				sql.append(".distance,");  //$NON-NLS-1$
 				sql.append( tablePrefix.get(Waypoint.class));
 				sql.append(".direction,"); //$NON-NLS-1$
-				sql.append( p1 + "," + p2 + "," + p3 + ", " + p4 + " ) as tile_id");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$				
+				sql.append( p1 + "," + p2 + "," + p3 + ", " + p4 + " ) as tile_id");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$				
 				 
 				sql.append(" FROM "); //$NON-NLS-1$
 				sql.append(tableNames.get(WaypointObservation.class));
@@ -565,7 +564,8 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 		if (ov.hasAttributeFilter() || ov.hasCategoryFilter()){
 			needsObservation = true;
 		}
-		IFilterProcessor filterer = getFilterProcessor(filter.getFilterType(), dataTable);
+		
+		IFilterProcessor filterer = PsqlPatrolEngine.getFilterProcessor(filter.getFilterType(), dataTable, this);
 		try{
 			filterer.processFilter(c, filter.getFilter(), dateFilter, query, caFilter, needsObservation, false);
 		}finally{
@@ -859,15 +859,6 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 
 	@Override
 	public void cleanUp(Session session) {
-	}
-
-	protected IFilterProcessor getFilterProcessor(FilterType filterType,
-			String queryDataTable) {
-		if (filterType == IFilter.FilterType.OBSERVATION){
-			return new PatrolFilterProcessor(queryDataTable, this);
-		}else{
-			return new PatrolWaypointFilterProcessor(queryDataTable, this);
-		}
 	}
 	
 	@Override

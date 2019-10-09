@@ -277,7 +277,12 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 		}else{
 			it.setObservationUuid(obuuid); 
 		}
-		
+		UUID guuid = (UUID) rs.getObject("wp_group_uuid"); //$NON-NLS-1$
+		if (guuid == null){
+			it.setObservationGroupUuid(null);
+		}else{
+			it.setObservationGroupUuid(guuid); 
+		}
 		//build categories
 		List<String> categories = new ArrayList<String>();
 		for (int i = 0; i < engine.getCategoryCnt(); i ++){

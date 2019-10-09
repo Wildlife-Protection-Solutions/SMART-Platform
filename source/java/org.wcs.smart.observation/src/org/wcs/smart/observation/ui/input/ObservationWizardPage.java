@@ -123,7 +123,7 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 	@Override
 	public IWizardPage getPreviousPage() {
 		moveNext = false;
-		if (((ObservationWizard)getWizard()).getAllObservations().size() > 0){
+		if (!((ObservationWizard)getWizard()).getWaypoint().getAllObservations().isEmpty()){
 			return new ObservationSummaryWizardPage((Wizard) getWizard());
 		}
 		return null;

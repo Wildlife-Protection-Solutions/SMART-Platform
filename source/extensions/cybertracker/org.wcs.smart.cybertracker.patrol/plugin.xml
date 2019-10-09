@@ -228,6 +228,11 @@
             class="org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage"
             supportsCcaa="false">
       </class>
+      <class
+            ca_property=".link.patrolLeg.patrol.conservationArea"
+            class="org.wcs.smart.cybertracker.patrol.model.CtPatrolWpLink"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.eclipse.equinox.p2.engine.actions">

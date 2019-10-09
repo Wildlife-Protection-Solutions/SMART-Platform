@@ -429,7 +429,7 @@ public class MissionImporter extends AbstractSmartImporter {
 
 		SurveyWaypoint swp = new SurveyWaypoint();
 		Waypoint wp = new Waypoint();
-		wp.setObservations(new ArrayList<WaypointObservation>());
+		wp.setObservationGroups(new ArrayList<>());
 		wp.setId(mday.getWaypoints().size()+1);
 		wp.setSourceId(SurveyWaypointSource.KEY);
 		wp.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -589,14 +589,14 @@ public class MissionImporter extends AbstractSmartImporter {
 				for (WaypointAttachment attachment : pw.getWaypoint().getAttachments()){
 					attachments.add(attachment);
 				}
-				if (pw.getWaypoint().getObservations() != null){
-					for (WaypointObservation wo : pw.getWaypoint().getObservations()){
-						if (wo.getAttachments() == null) continue;
-						for (ObservationAttachment attachment : wo.getAttachments()){
-							attachments.add(attachment);
-						}
-					}		
-				}
+				
+				for (WaypointObservation wo : pw.getWaypoint().getAllObservations()){
+					if (wo.getAttachments() == null) continue;
+					for (ObservationAttachment attachment : wo.getAttachments()){
+						attachments.add(attachment);
+					}
+				}		
+				
 			}
 		}
 		

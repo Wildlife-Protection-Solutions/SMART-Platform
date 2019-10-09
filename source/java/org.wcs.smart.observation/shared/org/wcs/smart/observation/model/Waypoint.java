@@ -82,7 +82,7 @@ public class Waypoint extends UuidItem {
 	private String comment;
 	
 	private List<WaypointAttachment> attachments;
-	private List<WaypointObservation> observations;
+	private List<WaypointObservationGroup> groups;
 	
 	
 	public Waypoint(){
@@ -250,11 +250,11 @@ public class Waypoint extends UuidItem {
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="waypoint", orphanRemoval=true, cascade={CascadeType.ALL})
 	@BatchSize(size=500)
-	public List<WaypointObservation> getObservations(){
-		return this.observations;
+	public List<WaypointObservationGroup> getObservationGroups(){
+		return this.groups;
 	}
-	public void setObservations(List<WaypointObservation> observations){
-		this.observations = observations;
+	public void setObservationGroups(List<WaypointObservationGroup> groups){
+		this.groups = groups;
 	}
 	
 	/**
@@ -269,27 +269,45 @@ public class Waypoint extends UuidItem {
 	 */
 	@Transient
 	public String getObservationsAsString(){
-		if (getObservations() == null || getObservations().size() == 0){
+		if (getObservationGroups() == null || getObservationGroups().size() == 0){
 			return null;
 		}
 		StringBuilder text = new StringBuilder();
 		HashMap<Category, Integer> added = new HashMap<Category, Integer>();
 		
-		for (WaypointObservation ob : getObservations()){
-			Integer x = added.get(ob.getCategory());
-			if (x == null){
-				x = 0;
+		for (WaypointObservationGroup grp : getObservationGroups()) {
+			for (WaypointObservation ob : grp.getObservations()){
+				Integer x = added.get(ob.getCategory());
+				if (x == null){
+					x = 0;
+				}
+				added.put(ob.getCategory(), x+1);
 			}
-			added.put(ob.getCategory(), x+1);
-			
 		}
 		for (Entry<Category, Integer> item : added.entrySet()){
 			text.append(item.getKey().getName() + " (" + item.getValue() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			text.append("; "); //$NON-NLS-1$
 		}
-		text.delete(text.length() - 2, text.length());
+		if (text.length() > 1) text.delete(text.length() - 2, text.length());
+		
 		return text.toString();
 	}
+	
+	/**
+	 * 
+	 * @return all waypoints associated with any group.  Will
+	 * never return null.
+	 */
+	@Transient
+	public List<WaypointObservation> getAllObservations(){
+		List<WaypointObservation> all = new ArrayList<>();
+		if (getObservationGroups() == null) return all;
+		for (WaypointObservationGroup g : getObservationGroups()) {
+			for (WaypointObservation o : g.getObservations()) all.add(o);
+		}
+		return all;
+	}
+	
 	
 	public Waypoint clone(Session session) {
 		
@@ -305,15 +323,20 @@ public class Waypoint extends UuidItem {
 		wp.setRawY(this.y);
 		wp.setConservationArea(this.ca);
 		wp.setSourceId(this.sourceId);
+		wp.setObservationGroups(new ArrayList<WaypointObservationGroup>());
 		
-		if (this.observations != null && this.observations.size() > 0){
-			wp.setObservations(new ArrayList<WaypointObservation>());
-			for (WaypointObservation wobp : this.observations){
-				
-				WaypointObservation cloned = wobp.clone(session);
-				cloned.setUuid(null);
-				cloned.setWaypoint(wp);
-				wp.getObservations().add(cloned);
+		if (this.groups != null && !this.groups.isEmpty()) {
+			for (WaypointObservationGroup g : this.groups) {
+				WaypointObservationGroup groupclone = new WaypointObservationGroup();
+				groupclone.setWaypoint(wp);
+				wp.getObservationGroups().add(groupclone);
+				groupclone.setObservations(new ArrayList<>());
+				for (WaypointObservation wobp : g.getObservations()){
+					WaypointObservation cloned = wobp.clone(session);
+					cloned.setUuid(null);
+					cloned.setObservationGroup(groupclone);
+					groupclone.getObservations().add(cloned);
+				}
 			}
 		}
 		

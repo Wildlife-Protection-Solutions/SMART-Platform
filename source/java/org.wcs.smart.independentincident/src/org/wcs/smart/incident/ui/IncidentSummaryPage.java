@@ -37,14 +37,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -52,12 +48,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.ISharedImages;
@@ -70,16 +63,20 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
@@ -97,13 +94,13 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.observation.ui.input.ObservationWizard;
 import org.wcs.smart.observation.ui.input.ObservationWizardDialog;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.ReprojectUtils;
-
-import org.locationtech.jts.geom.Point;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Incident editor summary page
@@ -129,7 +126,8 @@ public class IncidentSummaryPage extends EditorPart {
 //	private Label lblLastModifiedBy;
 	
 	private ListViewer attachments;
-	private TreeViewer dataViewer  = null;
+	
+	private Composite observationComp;
 	
 	public IncidentSummaryPage(IncidentEditor editor){
 		this.editor = editor;
@@ -249,13 +247,13 @@ public class IncidentSummaryPage extends EditorPart {
 			//include all attachments 
 			List<ISmartAttachment> allAtts = new ArrayList<ISmartAttachment>();
 			allAtts.addAll(incident.getAttachments());
-			if (incident.getObservations() != null){
-				for (WaypointObservation wo : incident.getObservations()){
-					if (wo.getAttachments() != null) {
-						allAtts.addAll(wo.getAttachments());
-					}
+			
+			for (WaypointObservation wo : incident.getAllObservations()){
+				if (wo.getAttachments() != null) {
+					allAtts.addAll(wo.getAttachments());
 				}
 			}
+			
 			Collections.sort(allAtts, new Comparator<ISmartAttachment>() {
 
 				@Override
@@ -269,14 +267,105 @@ public class IncidentSummaryPage extends EditorPart {
 				}
 			});
 			this.attachments.setInput(allAtts);
-			List<WaypointObservation> obs = new ArrayList<>();
-			obs.addAll(incident.getObservations());
-			obs.sort((a,b)->Collator.getInstance().compare(a.getCategory().getName(), b.getCategory().getName()));
-			this.dataViewer.setInput(obs);
-			this.dataViewer.expandAll();
-		}
-		
+			
+			
+			for (Control k : observationComp.getChildren()) k.dispose();
+			
+			((GridLayout)observationComp.getLayout()).verticalSpacing = 10;
+			((GridLayout)observationComp.getLayout()).marginWidth = 0;
+			((GridLayout)observationComp.getLayout()).marginHeight = 0;
+			
+			Employee obs = null;
+			if (!incident.getAllObservations().isEmpty()) obs = incident.getAllObservations().get(0).getObserver();
+			
+			
+			if (editor.getOptions().getTrackObserver()) {
+				Label obsl = toolkit.createLabel(observationComp, 
+						MessageFormat.format(Messages.IncidentSummaryPage_ObserverLbl, 
+							obs == null ? " " :  //$NON-NLS-1$
+							SmartLabelProvider.getShortLabel(obs)));
+				obsl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			}
+			
+			IconSet iset = QueryFactory.buildQuery(session, IconSet.class, 
+					new Object[] {"conservationArea", incident.getConservationArea()}, //$NON-NLS-1$
+					new Object[] {"isDefault", true}).uniqueResult(); //$NON-NLS-1$
+			
+			for (WaypointObservationGroup g : incident.getObservationGroups()) {
+				
+				Composite group = toolkit.createComposite(observationComp, SWT.BORDER);
+				group.setLayout(new GridLayout(2, true));
+				group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				
+				for (int i = 0; i < g.getObservations().size(); i ++) {
+					WaypointObservation wo = g.getObservations().get(i);
+				
+					Composite left = toolkit.createComposite(group);
+					left.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+					
+					if (iset != null && wo.getCategory().getIcon() != null) {
+						wo.getCategory().getIcon().getIconFile(iset).computeFileLocation(session);
+						
+						left.setLayout(new GridLayout(2, false));
+						IconFile file = wo.getCategory().getIcon().getIconFile(iset);
+						if (file != null) {
+							Label img = new Label(left, SWT.NONE);
+							img.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 2));
+							img.setBackground(left.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+							Image image = SmartUtils.getImage(file.getAttachmentFile().toPath(), 32);
+							img.setImage(image);
+							img.addListener(SWT.Dispose, e->image.dispose());
+						}
+					}else {
+						left.setLayout(new GridLayout(1, false));
+					}
+					((GridLayout)left.getLayout()).marginWidth = 0;
+					((GridLayout)left.getLayout()).marginHeight = 0;
+					
+					toolkit.createLabel(left, SmartUtils.formatStringForLabel(wo.getCategory().getName()));
+					toolkit.createLabel(left, wo.getCategory().getParent() == null ? "" :SmartUtils.formatStringForLabel(wo.getCategory().getParent().getFullCategoryName()) );	 //$NON-NLS-1$
+//					clabel.setFont(boldFont);
+					
+					Composite right = toolkit.createComposite(group);
+					right.setLayout(new GridLayout(2, false));
+					right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					((GridLayout)right.getLayout()).marginWidth = 0;
+					((GridLayout)right.getLayout()).marginHeight = 0;
+					
+					Composite attributes = toolkit.createComposite(right);
+					attributes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					attributes.setLayout(new GridLayout(2, false));
+					((GridLayout)attributes.getLayout()).marginWidth = 0;
+					((GridLayout)attributes.getLayout()).marginHeight = 0;
+					
+					
+					for (WaypointObservationAttribute a : wo.getAttributes()) {
+						Label l = toolkit.createLabel(attributes,SmartUtils.formatStringForLabel(a.getAttribute().getName()) +":"); //$NON-NLS-1$
+						l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+	
+						l = toolkit.createLabel(attributes, SmartUtils.formatStringForLabel(a.getAttributeValueAsString(Locale.getDefault())));
+						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+						
+					}
+					
+					Label l = toolkit.createLabel(attributes,Messages.IncidentSummaryPage_AttachmentsLabel);
+					l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+				
+					l = toolkit.createLabel(attributes, MessageFormat.format("{0}", wo.getAttachments().size())); //$NON-NLS-1$
+					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				
+					if (i < g.getObservations().size() - 1) {
+						l = toolkit.createLabel(group, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
+						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+					}
+				}			
+			}
+			observationComp.layout(true);
+			((ScrolledComposite)observationComp.getParent()).setMinSize(observationComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			observationComp.getParent().layout(true);
+		}		
 	}
+	
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
@@ -413,145 +502,20 @@ public class IncidentSummaryPage extends EditorPart {
 		((GridLayout)observationTableComp.getLayout()).marginHeight = 0;
 		observationSection.setClient(observationTableComp);
 		
-		Tree dataTree = new Tree(observationTableComp, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
-		dataTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		dataTree.setHeaderVisible(true);
-		dataTree.setLinesVisible(true);
-		
-		dataViewer = new TreeViewer(dataTree);
-		dataViewer.setContentProvider(new ITreeContentProvider(){
-			private List<WaypointObservation> elements;
-			
-			public Object[] getChildren(Object element) {
-				if (element instanceof WaypointObservation){
-					return ((WaypointObservation) element).getAttributes().toArray();
-				}
-				return null;
-			}
+		ScrolledComposite scroll = new ScrolledComposite(observationTableComp, SWT.V_SCROLL| SWT.H_SCROLL);
+		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-			public Object getParent(Object element) {
-				if (element instanceof WaypointObservation) return null;
-				if (element instanceof WaypointObservationAttribute){
-					return ((WaypointObservationAttribute) element).getObservation();
-				}
-				return null;
-			}
-
-			public boolean hasChildren(Object element) {
-				if (element instanceof WaypointObservation) return true;
-				return false;
-			}
-
-			public Object[] getElements(Object parent) {
-				if (elements == null){
-					return new String[]{Messages.IncidentSummaryPage_LoadingLabel};
-				}
-				return elements.toArray();
-			}
-
-			public void dispose() {
-			}
-
-			public void inputChanged(Viewer viewer, Object oldInput,
-					Object newInput) {
-				if (newInput instanceof List){
-					elements = (List<WaypointObservation>) newInput;
-				}
-			}
-		});
+		scroll.setExpandHorizontal(true);
+		scroll.setExpandVertical(true);
 		
-		final int[] colIndex = {0,1,2,3,4};
+		observationComp = toolkit.createComposite(scroll);
+		scroll.setContent(observationComp);
+		observationComp.setLayout(new GridLayout());
+//		observationComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)observationComp.getLayout()).marginWidth = 0;
+		((GridLayout)observationComp.getLayout()).marginHeight = 0;
 		
-		TreeColumn column1 = new TreeColumn(dataViewer.getTree(), SWT.LEFT);
-		column1.setText(Messages.IncidentSummaryPage_CategoryLabel);
-		column1.setWidth(150);
-		
-		TreeColumn column2 = new TreeColumn(dataViewer.getTree(), SWT.LEFT);
-		column2.setText(Messages.IncidentSummaryPage_AttributeLabel);
-		column2.setWidth(100);
-		
-		TreeColumn column3 = new TreeColumn(dataViewer.getTree(), SWT.LEFT);
-		column3.setText(Messages.IncidentSummaryPage_ValueLabel);
-		column3.setWidth(100);
-		
-		if (editor.getOptions().getTrackObserver()){
-			TreeColumn column4 = new TreeColumn(dataViewer.getTree(), SWT.LEFT);
-			column4.setText(Messages.IncidentSummaryPage_ObserverLabel);
-			column4.setWidth(150);
-		}else{
-			colIndex[3] = -1;
-			colIndex[4] = 3;
-		}
-		
-		TreeColumn column5 = new TreeColumn(dataViewer.getTree(), SWT.LEFT);
-		column5.setText(Messages.IncidentSummaryPage_AttachmentsColumnName);
-		column5.setWidth(100);
-		
-		
-		
-		dataViewer.setLabelProvider(new ITableLabelProvider() {
-			
-			@Override
-			public void removeListener(ILabelProviderListener listener) {
-			}
-			
-			@Override
-			public boolean isLabelProperty(Object element, String property) {
-				return false;
-			}
-			
-			@Override
-			public void dispose() {}
-			
-			@Override
-			public void addListener(ILabelProviderListener listener) {}
-			
-			@Override
-			public String getColumnText(Object element, int columnIndex) {
-				if (element instanceof String){
-					return (String) element;
-				}
-				if (columnIndex == colIndex[0]){
-					//category
-					if (element instanceof WaypointObservation){
-						return ((WaypointObservation) element).getCategory().getName();
-					}
-				}else if (columnIndex == colIndex[1]){
-					//attribute
-					if (element instanceof WaypointObservationAttribute){
-						return ((WaypointObservationAttribute) element).getAttribute().getName();
-					}
-				}else  if (columnIndex == colIndex[2]){
-					//value
-					if (element instanceof WaypointObservationAttribute){
-						return ((WaypointObservationAttribute) element).getAttributeValueAsString(Locale.getDefault());
-					}
-				}else  if (columnIndex == colIndex[3]){
-					//observer
-					if (element instanceof WaypointObservation){
-						WaypointObservation o = (WaypointObservation)element;
-						if (o.getObserver() != null){
-							return SmartLabelProvider.getFullLabel(((WaypointObservation) element).getObserver());
-						}
-					}
-				}else if (columnIndex == colIndex[4]){
-					//attachements
-					if (element instanceof WaypointObservation){
-						WaypointObservation o = (WaypointObservation)element;
-						if (o.getAttachments() != null && o.getAttachments().size() > 0){				  
-							return MessageFormat.format(Messages.IncidentSummaryPage_AttachmentsColumnContent, new Object[]{String.valueOf(o.getAttachments().size())});
-						}
-					}
-				}
-				return ""; //$NON-NLS-1$
-			}
-			
-			@Override
-			public Image getColumnImage(Object element, int columnIndex) {
-				
-				return null;
-			}
-		});
+//		observationComp.setSize(observationComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		Composite bottomComp = toolkit.createComposite(observationTableComp);
 		bottomComp.setLayout(new GridLayout(2, false));
@@ -561,6 +525,7 @@ public class IncidentSummaryPage extends EditorPart {
 		
 		if (canEdit == null){
 			Button btnEdit = toolkit.createButton(bottomComp, Messages.IncidentSummaryPage_EditButtonName, SWT.PUSH);
+			btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			btnEdit.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -568,12 +533,6 @@ public class IncidentSummaryPage extends EditorPart {
 				}
 			});
 			
-			dataViewer.addDoubleClickListener(new IDoubleClickListener() {
-				@Override
-				public void doubleClick(DoubleClickEvent event) {
-					editIncident(null);
-				}
-			});
 		}
 		lblLastModified = toolkit.createLabel(bottomComp, ""); //$NON-NLS-1$
 		if (canEdit != null) {
@@ -581,23 +540,23 @@ public class IncidentSummaryPage extends EditorPart {
 		}else {
 			lblLastModified.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
 		}
-		Menu observationMenu = new Menu(dataViewer.getControl());
-		
-		MenuItem editItem = new MenuItem(observationMenu, SWT.PUSH);
-		editItem.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		editItem.addListener(SWT.Selection, e->{
-			Object x = dataViewer.getStructuredSelection().getFirstElement();
-			WaypointObservation wo = null;
-			if (x instanceof WaypointObservation) {
-				wo = (WaypointObservation)x;
-			}else if (x instanceof WaypointObservationAttribute) {
-				wo = ((WaypointObservationAttribute)x).getObservation();
-			}
-			editIncident(wo);
-			
-		});
-		dataViewer.getControl().setMenu(observationMenu);
+//		Menu observationMenu = new Menu(dataViewer.getControl());
+//		
+//		MenuItem editItem = new MenuItem(observationMenu, SWT.PUSH);
+//		editItem.setText(DialogConstants.EDIT_BUTTON_TEXT);
+//		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+//		editItem.addListener(SWT.Selection, e->{
+//			Object x = dataViewer.getStructuredSelection().getFirstElement();
+//			WaypointObservation wo = null;
+//			if (x instanceof WaypointObservation) {
+//				wo = (WaypointObservation)x;
+//			}else if (x instanceof WaypointObservationAttribute) {
+//				wo = ((WaypointObservationAttribute)x).getObservation();
+//			}
+//			editIncident(wo);
+//			
+//		});
+//		dataViewer.getControl().setMenu(observationMenu);
 		
 		initData(editor.getIncident());
 	}

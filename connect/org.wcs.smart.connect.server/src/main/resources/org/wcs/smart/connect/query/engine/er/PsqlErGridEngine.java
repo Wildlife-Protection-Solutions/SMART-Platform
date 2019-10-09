@@ -880,12 +880,14 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		return "wp_uuid"; //$NON-NLS-1$
 	}
 
-	protected IFilterProcessor getFilterProcessor(FilterType filterType,
+	private IFilterProcessor getFilterProcessor(FilterType filterType,
 			String queryDataTable,
 			SurveyDesignFilter sdFilter) {
 
 		if (filterType == IFilter.FilterType.OBSERVATION){
 			return new ErFilterProcessor(queryDataTable, this, sdFilter);
+		}else if (filterType == IFilter.FilterType.GROUP){
+				return new ErWaypointGroupFilterProcessor(queryDataTable, this, sdFilter);
 		}else{
 			return new ErWaypointFilterProcessor(queryDataTable, this, sdFilter);
 		}

@@ -48,7 +48,7 @@ import org.wcs.smart.query.model.filter.IFilter;
  */
 public abstract class AssetQueryEngine extends AbstractQueryEngine implements IAssetQueryEngine{
 	
-	protected HashMap<IFilter, String> filterTables = new HashMap<IFilter, String>();
+	protected HashMap<IFilter, FilterTable> filterTables = new HashMap<>();
 	
 	static {
 		tablePrefix.put(AssetWaypoint.class, "aw"); //$NON-NLS-1$
@@ -124,6 +124,8 @@ public abstract class AssetQueryEngine extends AbstractQueryEngine implements IA
 	protected IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query){
 		if (filterType == IFilter.FilterType.OBSERVATION){
 			return new FilterProcessor(queryDataTable, this, query);
+		}else if (filterType == IFilter.FilterType.GROUP) {
+			return new WaypointGroupFilterProcessor(queryDataTable, this, query);
 		}else{
 			return new WaypointFilterProcessor(queryDataTable, this, query);
 		}

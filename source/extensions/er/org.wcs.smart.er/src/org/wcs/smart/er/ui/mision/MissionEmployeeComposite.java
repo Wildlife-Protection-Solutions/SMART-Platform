@@ -344,6 +344,7 @@ public class MissionEmployeeComposite extends MissionComposite {
 			Button btnAddAll = new Button(btnComposite, SWT.PUSH);
 			btnAddAll.setText(Messages.MissionEmployeeComposite_AddAllButton);
 			btnAddAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			btnAddAll.setBackground(btnAddAll.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnAddAll.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					List<Employee> items = getSelectedItemsAsList();

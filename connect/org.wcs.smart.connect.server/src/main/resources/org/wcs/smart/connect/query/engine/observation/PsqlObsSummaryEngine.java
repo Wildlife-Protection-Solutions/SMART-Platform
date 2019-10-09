@@ -1086,10 +1086,12 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 		return null;
 	}
 
-	protected IFilterProcessor getFilterProcessor(FilterType filterType,
+	private IFilterProcessor getFilterProcessor(FilterType filterType,
 			String queryDataTable) {
 		if (filterType == IFilter.FilterType.OBSERVATION){
 			return new ObsFilterProcessor(queryDataTable, this);
+		}else if (filterType == IFilter.FilterType.GROUP){
+			return new ObsWaypointGroupFilterProcessor(queryDataTable, this);
 		}else{
 			return new ObsWaypointFilterProcessor(queryDataTable, this);
 		}

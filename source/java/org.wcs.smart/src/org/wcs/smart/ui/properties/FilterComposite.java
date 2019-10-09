@@ -430,7 +430,7 @@ public class FilterComposite extends Composite {
 			Text testText = null;
 			try {
 				testText = new Text(composite, SWT.SEARCH | SWT.ICON_CANCEL);
-				useNativeSearchField = new Boolean((testText.getStyle() & SWT.ICON_CANCEL) != 0);
+				useNativeSearchField = Boolean.valueOf((testText.getStyle() & SWT.ICON_CANCEL) != 0);
 			} finally {
 				if (testText != null) {
 					testText.dispose();

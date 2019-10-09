@@ -32,6 +32,7 @@ import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 
 /**
  * An extension of the default attachment interceptor
@@ -79,15 +80,17 @@ public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
 								}
 							}
 						}
-						if (wp.getWaypoint().getObservations() != null){
-							for (WaypointObservation wo : wp.getWaypoint().getObservations()){
-								if (wo.getAttachments()!= null){
-									for (ObservationAttachment att : wo.getAttachments()){
-										try {
-											att.computeFileLocation(session);
-											toDelete.add(att.getAttachmentFile());
-										} catch (Exception e) {
-											EcologicalRecordsPlugIn.log(e.getMessage(), e);
+						if (wp.getWaypoint().getObservationGroups() != null){
+							for (WaypointObservationGroup g : wp.getWaypoint().getObservationGroups()){
+								for (WaypointObservation wo : g.getObservations()){
+									if (wo.getAttachments()!= null){
+										for (ObservationAttachment att : wo.getAttachments()){
+											try {
+												att.computeFileLocation(session);
+												toDelete.add(att.getAttachmentFile());
+											} catch (Exception e) {
+												EcologicalRecordsPlugIn.log(e.getMessage(), e);
+											}
 										}
 									}
 								}

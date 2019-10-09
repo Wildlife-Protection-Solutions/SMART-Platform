@@ -39,6 +39,7 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
+import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -64,8 +65,6 @@ import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
-
-import org.locationtech.jts.geom.Envelope;
 
 public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implements IUpdateableResultSet, IWaypointUpdateableResultSet, ISearchabledResultSet, IDesktopPagedImageResultSet{
 
@@ -583,8 +582,9 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 				sb.append(" a join "); //$NON-NLS-1$
 				sb.append("(SELECT uuid, wp_uuid as wp_uuid FROM smart.wp_attachments "); //$NON-NLS-1$
 				sb.append(" UNION "); //$NON-NLS-1$
-				sb.append("SELECT b.uuid, c.wp_uuid as wp_uuid FROM smart.wp_observation c join "); //$NON-NLS-1$
-				sb.append("smart.observation_attachment b on c.uuid = b.obs_uuid) e "); //$NON-NLS-1$
+				sb.append("SELECT b.uuid, g.wp_uuid as wp_uuid FROM "); //$NON-NLS-1$
+				sb.append(" smart.wp_observation_group g join smart.wp_observation c on c.wp_group_uuid = g.uuid "); //$NON-NLS-1$
+				sb.append(" join smart.observation_attachment b on c.uuid = b.obs_uuid) e "); //$NON-NLS-1$
 				sb.append("on a.wp_uuid = e.wp_uuid"); //$NON-NLS-1$
 				sb.append(" ORDER BY a.wp_date desc, a.wp_id ) z "); //$NON-NLS-1$
 				

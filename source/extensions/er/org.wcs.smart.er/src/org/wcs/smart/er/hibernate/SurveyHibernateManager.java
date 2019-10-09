@@ -55,6 +55,7 @@ import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 
 public class SurveyHibernateManager {
 
@@ -124,13 +125,15 @@ public class SurveyHibernateManager {
 										src.getDatastoreFileLocation(mission, session)), wa.getFilename()));
 							}
 						}
-						if (wp.getWaypoint().getObservations() != null){
-							for (WaypointObservation wo : wp.getWaypoint().getObservations()){
-								if (wo.getAttachments() != null){
-									for (ObservationAttachment wa : wo.getAttachments()){
-										wa.computeFileLocation(new File(new File(
-												SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-												src.getDatastoreFileLocation(mission, session)), wa.getFilename()));
+						if (wp.getWaypoint().getObservationGroups() != null){
+							for (WaypointObservationGroup grp : wp.getWaypoint().getObservationGroups()){
+								for (WaypointObservation wo : grp.getObservations()){
+									if (wo.getAttachments() != null){
+										for (ObservationAttachment wa : wo.getAttachments()){
+											wa.computeFileLocation(new File(new File(
+													SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
+													src.getDatastoreFileLocation(mission, session)), wa.getFilename()));
+										}
 									}
 								}
 							}

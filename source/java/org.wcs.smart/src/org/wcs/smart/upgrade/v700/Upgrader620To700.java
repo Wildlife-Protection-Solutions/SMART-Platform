@@ -65,6 +65,14 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 	private void upgrade(Connection c, IProgressMonitor monitor)
 			throws Exception {
 
+		try {
+			String s = "CREATE FUNCTION smart.uuid() returns char(16) for bit data LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.DerbyUtils.createUuid' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT"; //$NON-NLS-1$
+			SmartPlugIn.logInfo(s);
+			c.createStatement().execute(s);
+		}catch (Exception ex) {
+			//function already exists
+		}
+		
 		String[] sql = new String[] {
 				"CREATE TABLE smart.employee_team (uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, primary key (uuid))", //$NON-NLS-1$
 				"CREATE TABLE smart.employee_team_member (employee_uuid char(16) for bit data not null, team_uuid char(16) for bit data not null, primary key(employee_uuid, team_uuid))", //$NON-NLS-1$
@@ -115,6 +123,23 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 				"GRANT EXECUTE ON FUNCTION smart.computeTileId TO dataentry", //$NON-NLS-1$
 				
 				"alter table smart.cm_attribute_option alter column string_value set data type varchar(32672)", //$NON-NLS-1$
+				
+
+
+				//sub-incidents
+				"CREATE TABLE smart.wp_observation_group (uuid char(16) for bit data not null, wp_uuid char(16) for bit data not null, primary key (uuid))", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.wp_observation_group TO manager", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.wp_observation_group TO analyst", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.wp_observation_group TO data_entry", //$NON-NLS-1$
+				
+				"INSERT INTO smart.wp_observation_group (uuid, wp_uuid) SELECT smart.uuid(), uuid FROM smart.waypoint WHERE uuid in (SELECT wp_uuid FROM smart.wp_observation)", //$NON-NLS-1$
+				
+				"ALTER TABLE smart.wp_observation ADD COLUMN wp_group_uuid char(16) for bit data", //$NON-NLS-1$
+				"UPDATE smart.wp_observation SET wp_group_uuid = (select a.uuid from smart.wp_observation_group a where a.wp_uuid = smart.wp_observation.wp_uuid)", //$NON-NLS-1$
+				"alter table smart.wp_observation drop column wp_uuid", //$NON-NLS-1$
+				"ALTER table smart.wp_observation_group ADD CONSTRAINT wo_obs_grp_wp_uuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER table smart.wp_observation ADD CONSTRAINT wo_ob_group_uuid_fk FOREIGN KEY (wp_group_uuid) REFERENCES smart.wp_observation_group (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
 		};
 
 		for (String s : sql) {

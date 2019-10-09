@@ -52,7 +52,9 @@ public class Messages extends NLS {
 	public static String AttributeValueItem_categorynotfound;
 	public static String AttributeValueItem_listitemnotfound;
 	public static String AttributeValueItem_treenodenotfound;
+	public static String BasicDropItemFactory_ObsGroupFilterName;
 	public static String BasicFilterDefintionPanel_FiltersPanelName;
+	public static String BasicFilterDefintionPanel_obsGroupTooltip;
 	public static String BasicGridDefinitionPanel_IncreaseSize;
 	public static String BasicGridDefinitionPanel_InvalidCrs;
 	public static String BasicGridDefinitionPanel_InvalidSize;

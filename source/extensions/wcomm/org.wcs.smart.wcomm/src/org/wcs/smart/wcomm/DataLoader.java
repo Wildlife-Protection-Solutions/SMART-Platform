@@ -59,6 +59,7 @@ import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -388,14 +389,19 @@ public class DataLoader {
 				wp.setRawX(x);
 				wp.setRawY(y);
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-				wp.setObservations(new ArrayList<>());
+				wp.setObservationGroups(new ArrayList<>());
 				waypoints.add(wp);
+				
+				WaypointObservationGroup group = new WaypointObservationGroup();
+				wp.getObservationGroups().add(group);
+				group.setWaypoint(wp);;
+				group.setObservations(new ArrayList<>());
 				
 				WaypointObservation wo = new WaypointObservation();
 				wo.setCategory(c);
-				wo.setWaypoint(wp);
+				wo.setObservationGroup(group);
 				wo.setAttributes(new ArrayList<>());
-				wp.getObservations().add(wo);
+				group.getObservations().add(wo);
 				
 				for (Attribute a : attributes) {
 					if (att2col.get(a) == null) continue;
@@ -495,15 +501,20 @@ public class DataLoader {
 				wp.setRawX(x);
 				wp.setRawY(y);
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-				wp.setObservations(new ArrayList<>());
 				wp.setComment(comment);
+				wp.setObservationGroups(new ArrayList<>());
 				waypoints.add(wp);
+				
+				WaypointObservationGroup group = new WaypointObservationGroup();
+				wp.getObservationGroups().add(group);
+				group.setWaypoint(wp);;
+				group.setObservations(new ArrayList<>());
 				
 				WaypointObservation wo = new WaypointObservation();
 				wo.setCategory(c);
-				wo.setWaypoint(wp);
+				wo.setObservationGroup(group);
 				wo.setAttributes(new ArrayList<>());
-				wp.getObservations().add(wo);
+				group.getObservations().add(wo);
 				
 				for (Attribute a : field2attribute.values()) {
 					if (att2col.get(a) == null) continue;
@@ -601,15 +612,20 @@ public class DataLoader {
 				wp.setRawX(x);
 				wp.setRawY(y);
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-				wp.setObservations(new ArrayList<>());
 				wp.setComment(comment);
+				wp.setObservationGroups(new ArrayList<>());
 				waypoints.add(wp);
+				
+				WaypointObservationGroup group = new WaypointObservationGroup();
+				wp.getObservationGroups().add(group);
+				group.setWaypoint(wp);;
+				group.setObservations(new ArrayList<>());
 				
 				WaypointObservation wo = new WaypointObservation();
 				wo.setCategory(c);
-				wo.setWaypoint(wp);
+				wo.setObservationGroup(group);
 				wo.setAttributes(new ArrayList<>());
-				wp.getObservations().add(wo);
+				group.getObservations().add(wo);
 				
 				for (Attribute a : field2attribute.values()) {
 					if (att2col.get(a) == null) continue;
@@ -710,15 +726,20 @@ public class DataLoader {
 				wp.setRawX(x);
 				wp.setRawY(y);
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-				wp.setObservations(new ArrayList<>());
+				wp.setObservationGroups(new ArrayList<>());
 				wp.setComment(comment);
 				waypoints.add(wp);
 				
+				WaypointObservationGroup group = new WaypointObservationGroup();
+				wp.getObservationGroups().add(group);
+				group.setWaypoint(wp);;
+				group.setObservations(new ArrayList<>());
+				
 				WaypointObservation wo = new WaypointObservation();
 				wo.setCategory(c);
-				wo.setWaypoint(wp);
+				wo.setObservationGroup(group);
 				wo.setAttributes(new ArrayList<>());
-				wp.getObservations().add(wo);
+				group.getObservations().add(wo);
 				
 				for (Attribute a : field2attribute.values()) {
 					if (att2col.get(a) == null) continue;
@@ -784,7 +805,7 @@ public class DataLoader {
 				wp.setRawX(x);
 				wp.setRawY(y);
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-				wp.setObservations(new ArrayList<>());
+				wp.setObservationGroups(new ArrayList<>());
 				wp.setComment(comment);
 				waypoints.add(wp);
 				
@@ -809,11 +830,16 @@ public class DataLoader {
 					continue;
 				}
 				
+				WaypointObservationGroup group = new WaypointObservationGroup();
+				wp.getObservationGroups().add(group);
+				group.setWaypoint(wp);;
+				group.setObservations(new ArrayList<>());
+				
 				WaypointObservation wo = new WaypointObservation();
 				wo.setCategory(c);
-				wo.setWaypoint(wp);
+				wo.setObservationGroup(group);
 				wo.setAttributes(new ArrayList<>());
-				wp.getObservations().add(wo);
+				group.getObservations().add(wo);
 				
 				Attribute found = null;
 				if (im.attribute != null) {

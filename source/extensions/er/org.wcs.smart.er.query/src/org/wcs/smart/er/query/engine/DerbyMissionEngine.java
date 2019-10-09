@@ -439,9 +439,4 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 			throws SQLException {
 		super.buildTemporaryTableIndexes(c, tableName);	
 	}
-	
-	@Override
-	public String getFilterTablesJoinColum(){
-		return "wp_uuid"; //$NON-NLS-1$
-	}
 }

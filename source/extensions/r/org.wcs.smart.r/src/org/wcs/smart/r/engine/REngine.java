@@ -147,28 +147,25 @@ public class REngine {
 					writeString("-----------------------------------------------------------------------------------------------"); //$NON-NLS-1$
 				}
 				
-				StringBuilder sb = new StringBuilder();
-				sb.append("\""); //$NON-NLS-1$
-				sb.append(RPreferencePage.getRSystemProperty());
-				sb.append("\" \""); //$NON-NLS-1$
-				sb.append(RScriptManager.INSTANCE.getScriptPath(script).toAbsolutePath().toString());
-				sb.append("\""); //$NON-NLS-1$
-				if (rParameters != null) {
-					sb.append(" "); //$NON-NLS-1$
-					sb.append(rParameters);
-					sb.append(" "); //$NON-NLS-1$
+				List<String> params = new ArrayList<>();
+				
+				params.add(RPreferencePage.getRSystemProperty());
+				params.add(RScriptManager.INSTANCE.getScriptPath(script).toRealPath().toString());
+				if (rParameters != null && !rParameters.strip().isBlank()) {
+					String[] parts = rParameters.strip().split("\\s+"); //$NON-NLS-1$
+					for(String b : parts) if (!b.strip().isBlank()) params.add(b);
 				}
 				for (Path p : queryFiles) {
-					sb.append(" \""); //$NON-NLS-1$
-					sb.append(p.toString());
-					sb.append("\""); //$NON-NLS-1$
+					params.add(p.toRealPath().toString());
 				}
 				
+				StringBuilder sb = new StringBuilder();
+				for (String p : params) sb.append("\"" + p + "\" ");  //$NON-NLS-1$//$NON-NLS-2$
 				writeString(Messages.REngine_CommandLabel + sb.toString());
 				writeString("---------------------------------------- " + Messages.REngine_ScriptOutput + "----------------------------------------"); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				//run command
-				runCommand(sb.toString(), outStream);
+				runCommand(params, outStream);
 				
 			}catch (Exception ex) {
 				try {
@@ -191,10 +188,9 @@ public class REngine {
 		
 	};
 	
-	private void runCommand(String command, OutputStream outStream) {
+	private void runCommand(List<String> parameters, OutputStream outStream) {
 		try {  
-	        Process p = Runtime.getRuntime().exec(command);
-	        
+	        Process p = (new ProcessBuilder(parameters)).start();
 	        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
 	        BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 

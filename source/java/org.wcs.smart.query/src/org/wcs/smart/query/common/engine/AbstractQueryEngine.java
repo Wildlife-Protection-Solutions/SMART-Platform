@@ -50,6 +50,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query;
@@ -78,6 +79,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tablePrefix.put(ConservationArea.class, "ca"); //$NON-NLS-1$
 		tablePrefix.put(Waypoint.class, "wp"); //$NON-NLS-1$
 		tablePrefix.put(WaypointObservation.class, "wpo"); //$NON-NLS-1$
+		tablePrefix.put(WaypointObservationGroup.class, "wpg"); //$NON-NLS-1$
 		tablePrefix.put(WaypointObservationAttribute.class, "wpoa"); //$NON-NLS-1$
 		tablePrefix.put(Attribute.class, "a"); //$NON-NLS-1$
 		tablePrefix.put(Category.class, "c"); //$NON-NLS-1$
@@ -98,6 +100,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(ConservationArea.class, "smart.conservation_area"); //$NON-NLS-1$
 		tableNames.put(Waypoint.class, "smart.waypoint"); //$NON-NLS-1$
 		tableNames.put(WaypointObservation.class, "smart.wp_observation"); //$NON-NLS-1$
+		tableNames.put(WaypointObservationGroup.class, "smart.wp_observation_group"); //$NON-NLS-1$
 		tableNames.put(WaypointObservationAttribute.class, "smart.wp_observation_attributes"); //$NON-NLS-1$
 		tableNames.put(Attribute.class, "smart.dm_attribute"); //$NON-NLS-1$
 		tableNames.put(Category.class, "smart.dm_category"); //$NON-NLS-1$
@@ -342,6 +345,16 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			}
 		}
 		return true; //it is safer to assume that column that we were unable to find may have values and display it to user
+	}
+	
+	public static class FilterTable{
+		public String tablename;
+		public String columnname;
+		
+		public FilterTable(String tablename, String columnname) {
+			this.tablename = tablename;
+			this.columnname = columnname;
+		}
 	}
 	
 }

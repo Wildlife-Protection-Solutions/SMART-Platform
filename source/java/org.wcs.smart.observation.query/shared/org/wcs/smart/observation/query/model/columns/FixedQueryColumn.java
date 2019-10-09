@@ -30,6 +30,7 @@ import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.view.IObservationQueryLabelProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Class represents one of the fixed table columns that
@@ -66,7 +67,8 @@ public class FixedQueryColumn extends QueryColumn {
 		WAYPOINT_COMMENT(ColumnType.STRING,"waypoint:comment"), //$NON-NLS-1$
 		WAYPOINT_OBSERVER(ColumnType.STRING,"ob:observer"),  //$NON-NLS-1$
 		WAYPOINT_LAST_MODIFIED(ColumnType.DATETIME, "waypoint:modified"), //$NON-NLS-1$
-		WAYPOINT_LAST_MODIFIED_BY(ColumnType.STRING, "waypoint:modifiedby"); //$NON-NLS-1$
+		WAYPOINT_LAST_MODIFIED_BY(ColumnType.STRING, "waypoint:modifiedby"), //$NON-NLS-1$
+		OBS_GROUP_ID(ColumnType.STRING,"ob:groupid"); //$NON-NLS-1$
 		
 		private ColumnType type;
 		private String key;
@@ -114,6 +116,9 @@ public class FixedQueryColumn extends QueryColumn {
 			
 			case WAYPOINT_ID:
 				return item.getWaypointId();
+			case OBS_GROUP_ID:
+				if (item.getObservationGroupUuid() == null) return ""; //$NON-NLS-1$
+				return UuidUtils.uuidToString(item.getObservationGroupUuid());
 			case WAYPOINT_SOURCE:
 				return item.getSourceId();
 			case WAYPOINT_COMMENT:

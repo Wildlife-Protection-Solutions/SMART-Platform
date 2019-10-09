@@ -60,6 +60,7 @@ import org.wcs.smart.r.internal.Messages;
  * @author egouge
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class HeaderComposite extends Composite {
 	
 	private static final int MAX_NAME_LENGTH = 1024;

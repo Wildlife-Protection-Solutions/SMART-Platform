@@ -153,7 +153,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		for (QueryColumn qc : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(q))){
 			keys.add(qc);
 		}
-		
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, l));
 		return keys;
 	}
 	
