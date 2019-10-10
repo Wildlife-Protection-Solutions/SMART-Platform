@@ -270,7 +270,7 @@ public class ObservationItemList {
 				IconFile file = wo.getCategory().getIcon().getIconFile(wizard.getIconSet());
 				if (file != null) {
 					Label img = new Label(left, SWT.NONE);
-					img.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 2));
+					img.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 2));
 					
 					Image image = SmartUtils.getImage(file.getAttachmentFile().toPath(), 32);
 					img.setImage(image);
@@ -285,8 +285,10 @@ public class ObservationItemList {
 			Label clabel = new Label(left, SWT.NONE);
 			clabel.setText(SmartUtils.formatStringForLabel(wo.getCategory().getName()));
 			
-			Label clabel2 = new Label(left, SWT.NONE);
-			clabel2.setText(wo.getCategory().getParent() == null ? "" :SmartUtils.formatStringForLabel(wo.getCategory().getParent().getFullCategoryName()) ); //$NON-NLS-1$
+			Label clabel2 = new Label(left, SWT.WRAP );
+			clabel2.setText(wo.getCategory().getParent() == null ? "" :SmartUtils.formatStringForLabel(wo.getCategory().getParent().getFullCategoryName(true)) ); //$NON-NLS-1$
+			clabel2.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+			((GridData)clabel2.getLayoutData()).widthHint = 100;
 
 			clabel.setFont(boldFont);
 			

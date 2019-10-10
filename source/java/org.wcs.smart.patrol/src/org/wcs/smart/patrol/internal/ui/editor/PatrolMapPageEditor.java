@@ -228,7 +228,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 		loadDefaultLayers = new LoadDefaultLayersJob(getMap()) {
 			protected IStatus run(IProgressMonitor monitor) {
 				IStatus r = super.run(monitor);
-				addLayerJob.schedule();
+				if (addLayerJob != null) addLayerJob.schedule();
 				return r;
 			}
 		};

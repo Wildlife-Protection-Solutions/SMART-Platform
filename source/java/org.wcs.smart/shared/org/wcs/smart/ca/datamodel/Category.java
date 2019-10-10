@@ -405,10 +405,25 @@ RETURNS NULL ON NULL INPUT;
 	 */
 	@Transient
 	public String getFullCategoryName(){
+		return getFullCategoryName(false);
+	}
+	
+	/**
+	 * 
+	 * @return the category name concatenated with
+	 * all parent category names.
+	 */
+	@Transient
+	public String getFullCategoryName(boolean rootfirst){
 		if (parent == null){
 			return getName();
 		}else{
-			return getName() + FULL_NAME_SEPARATOR + parent.getFullCategoryName(); 
+			if (rootfirst) {
+				return parent.getFullCategoryName(rootfirst) + FULL_NAME_SEPARATOR + getName() ;
+
+			}else {
+				return getName() + FULL_NAME_SEPARATOR + parent.getFullCategoryName(rootfirst);
+			}
 		}
 	}
 	
