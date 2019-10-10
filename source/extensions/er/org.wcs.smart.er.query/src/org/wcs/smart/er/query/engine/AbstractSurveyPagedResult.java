@@ -100,6 +100,8 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 			key = SurveyQueryColumn.getDbColumnName(key);
 			if (sortColumn.getKey().equals(SurveyQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
 				result = "order by CAST(r." + key + " as TIME)"; //$NON-NLS-1$ //$NON-NLS-2$
+			}else if (((SurveyQueryColumn)sortColumn).getKey().equals(SurveyQueryColumn.FixedColumns.OBS_GROUP_ID.getKey())) {
+				result = "order by r."+key; //$NON-NLS-1$
 			}else if (sortColumn.getType() == ColumnType.STRING){
 				result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$	
 			}else{

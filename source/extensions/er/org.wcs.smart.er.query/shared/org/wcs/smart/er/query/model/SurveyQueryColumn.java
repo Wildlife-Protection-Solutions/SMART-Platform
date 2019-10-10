@@ -211,6 +211,8 @@ public class SurveyQueryColumn extends QueryColumn {
 			key = "waypoint:lastmodified"; //$NON-NLS-1$
 		}else if (key.equals(FixedColumns.WAYPOINT_LAST_MODIFIED_BY.getKey() )){
 			key = "waypoint:lastmodifiedbyname"; //$NON-NLS-1$
+		}else if (key.equals(FixedColumns.OBS_GROUP_ID.getKey() )){
+			key = "wp:group_uuid"; //$NON-NLS-1$
 		}
 		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {

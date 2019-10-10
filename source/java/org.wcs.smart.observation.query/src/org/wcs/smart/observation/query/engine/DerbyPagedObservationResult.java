@@ -331,6 +331,8 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 			key = FixedQueryColumn.getDbColumnName(key);
 			if (sortColumn.getKey().equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
 				result = "order by CAST(r." + key + " as TIME)"; //$NON-NLS-1$ //$NON-NLS-2$
+			}else if (((FixedQueryColumn)sortColumn).getKey().equals(FixedQueryColumn.FixedColumns.OBS_GROUP_ID.getKey())) {
+				result = "order by r."+key; //$NON-NLS-1$
 			}else if (sortColumn.getType() == ColumnType.STRING){
 				result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
