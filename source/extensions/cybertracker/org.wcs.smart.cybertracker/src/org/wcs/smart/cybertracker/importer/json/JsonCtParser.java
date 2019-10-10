@@ -114,6 +114,12 @@ public class JsonCtParser {
 	public static final String OBSERVATION_TYPE_END_PATROL_KEY = "StopPatrol"; //$NON-NLS-1$
 	public static final String OBSERVATION_TYPE_CHANGE_PATROL_KEY = "ChangePatrol"; //$NON-NLS-1$
 	
+	/**
+	 * The number of months old a patrol is before all links to
+	 * this patrol and removed from the database
+	 */
+	public static final int CLEANUP_MONTHS = 6;
+	
 	public static List<JSONObject> parseFeaturesFromJsonString(String json) throws Exception{
 		JSONObject jsonData = null; 
 		try {

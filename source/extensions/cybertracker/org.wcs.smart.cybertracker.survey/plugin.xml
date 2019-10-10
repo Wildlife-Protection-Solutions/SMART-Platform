@@ -177,6 +177,9 @@
       <JsonProcessor
             class="org.wcs.smart.cybertracker.survey.json.MissionJsonProcessor">
       </JsonProcessor>
+      <JsonPostProcessor
+            class="org.wcs.smart.cybertracker.survey.json.MissionJsonPostProcessor">
+      </JsonPostProcessor>
    </extension>
    <extension
          point="org.wcs.smart.dbUpgrade">

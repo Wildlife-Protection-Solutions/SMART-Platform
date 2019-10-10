@@ -12,6 +12,9 @@
       <JsonProcessor
             class="org.wcs.smart.cybertracker.incident.IncidentJsonProcessor">
       </JsonProcessor>
+      <JsonPostProcessor
+            class="org.wcs.smart.cybertracker.incident.IncidentJsonPostProcessor">
+      </JsonPostProcessor>
    </extension>
 
 </plugin>

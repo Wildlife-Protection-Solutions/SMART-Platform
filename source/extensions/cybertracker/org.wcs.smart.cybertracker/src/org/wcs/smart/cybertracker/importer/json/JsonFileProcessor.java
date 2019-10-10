@@ -57,6 +57,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class JsonFileProcessor {
 	
 	private static volatile List<IJsonProcessor> jsonProcessors;
+	private static volatile List<IJsonPostProcessor> jsonPostProcessors;
 	
 	/**
 	 * Status of the file processed
@@ -151,7 +152,7 @@ public class JsonFileProcessor {
 							}
 						}
 					}
-					
+					postProcess();
 				}
 				
 			});
@@ -268,6 +269,20 @@ public class JsonFileProcessor {
 		}
 	
 	}
+	
+	private void postProcess() {
+		try (Session session = HibernateManager.openSession()){
+			for (IJsonPostProcessor p : getPostProcessors()) {
+				try {
+					p.postProcess(session);
+				}catch (Exception ex) {
+					CyberTrackerPlugIn.log(ex.getMessage(), ex);
+				}
+			}
+		}catch (Exception ex) {
+			CyberTrackerPlugIn.log(ex.getMessage(), ex);
+		}
+	}
 
 	private static List<IJsonProcessor> getProcessors() throws Exception{
 		if (jsonProcessors == null){
@@ -290,6 +305,32 @@ public class JsonFileProcessor {
 		}
 		List<IJsonProcessor> copy = new ArrayList<IJsonProcessor>(jsonProcessors.size());
 		for (IJsonProcessor p : jsonProcessors){
+			copy.add(p.getClass().getConstructor().newInstance());
+		}
+		return copy;
+	}
+	
+	private static List<IJsonPostProcessor> getPostProcessors() throws Exception{
+		if (jsonPostProcessors == null){
+			synchronized (JsonFileProcessor.class) {
+				if (jsonPostProcessors == null){
+					ArrayList<IJsonPostProcessor> temp2 = new ArrayList<IJsonPostProcessor>();					
+					IConfigurationElement[] config = Platform.getExtensionRegistry()
+							.getConfigurationElementsFor(IJsonProcessor.EXTENSION_ID);
+					
+					for (IConfigurationElement e : config) {
+						if (e.getName().equalsIgnoreCase("JsonPostProcessor")){ //$NON-NLS-1$
+							IJsonPostProcessor proc = (IJsonPostProcessor) e.createExecutableExtension("class"); //$NON-NLS-1$
+							temp2.add(proc);
+						}
+					}
+					jsonPostProcessors = temp2;
+				}
+			}
+			
+		}
+		List<IJsonPostProcessor> copy = new ArrayList<IJsonPostProcessor>(jsonPostProcessors.size());
+		for (IJsonPostProcessor p : jsonPostProcessors){
 			copy.add(p.getClass().getConstructor().newInstance());
 		}
 		return copy;
