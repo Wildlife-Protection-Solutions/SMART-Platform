@@ -764,7 +764,8 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 			ApplicationGIS.getToolManager().setCurrentEditor((MapPart)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart());	
 		}
 		tblResults.refresh();
-		clearSelection();
+		tblResults.setSelection(tblResults.getSelection());
+		//clearSelection();
 		updateResultsTableFilter();
 	}
 	
