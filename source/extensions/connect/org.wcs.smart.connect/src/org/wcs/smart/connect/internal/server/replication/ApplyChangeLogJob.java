@@ -357,8 +357,10 @@ public class ApplyChangeLogJob extends Job {
 				session.saveOrUpdate(serverInfo);
 				session.getTransaction().commit();
 			}catch(Exception ex){
-				if (session.getTransaction().isActive()){
-					session.getTransaction().rollback();
+				try {
+					if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				}catch (Exception e2) {
+					ConnectPlugIn.log(e2.getMessage(), e2);	
 				}
 				throw ex;
 			}
