@@ -429,6 +429,9 @@
       <Exporter
             class="org.wcs.smart.er.query.importexport.SurveyShapeQueryExporter">
       </Exporter>
+      <Exporter
+            class="org.wcs.smart.er.query.export.distance.DistanceQueryExporter">
+      </Exporter>
    </extension>
    <extension
          point="org.wcs.smart.query.import">
