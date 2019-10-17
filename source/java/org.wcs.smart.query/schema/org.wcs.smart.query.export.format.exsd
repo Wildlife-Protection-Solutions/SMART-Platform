@@ -8,7 +8,6 @@
       <documentation>
          This extension point allows users to write additional export formats for queries.  
 Any exports which export query definitions should have an id that starts with IQueryExporter.QUERY_DEFINITION_EXPORTER_ID (org.wcs.smart.query.export.definition).  This allows the report plug-in to determine which exporter to use when exporting reports and associated queries.
-
       </documentation>
    </annotation>
 
@@ -57,7 +56,7 @@ Any exports which export query definitions should have an id that starts with IQ
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.wcs.smart.query.export.IQueryExporter"/>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.query.importexport.IQueryExporter"/>
                </appinfo>
             </annotation>
          </attribute>
