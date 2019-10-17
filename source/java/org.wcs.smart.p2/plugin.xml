@@ -38,6 +38,18 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.menu.file?before=org.wcs.smart.file.separator1">
          <command
+               commandId="org.eclipse.equinox.p2.ui.sdk.update"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.smartAdminUser"
+                     value="admin">
+               </test>
+            </visibleWhen>
+         </command>
+         <command
                commandId="org.wcs.smart.p2.ui.install"
                style="push">
             <visibleWhen

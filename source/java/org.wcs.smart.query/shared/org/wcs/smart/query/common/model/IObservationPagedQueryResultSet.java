@@ -38,7 +38,16 @@ public interface IObservationPagedQueryResultSet extends IPagedQueryResultSet, I
 	 */
 	public int getWpCount();
 	
+	/**
+	 * 
+	 * @return the temporary table containing the query results
+	 */
 	public String getResultsTable();
 	
+	/**
+	 * The observation uuid column in the results.  Defaults to ob_uuid
+	 * 
+	 * @return
+	 */
 	public default String getObservationColumn() { return "ob_uuid"; } //$NON-NLS-1$
 }

@@ -10,7 +10,8 @@ Require-Bundle: org.eclipse.equinox.p2.ui,
  org.eclipse.equinox.p2.core,
  org.eclipse.equinox.p2.engine;visibility:=reexport,
  org.eclipse.equinox.p2.operations,
- org.eclipse.equinox.p2.metadata
+ org.eclipse.equinox.p2.metadata,
+ org.eclipse.equinox.p2.ui.sdk;bundle-version="1.1.100"
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/policy_component.xml, OSGI-INF/licenseManager_component.xml
 Bundle-RequiredExecutionEnvironment: JavaSE-11
