@@ -4,6 +4,12 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.er.query.internal.messages"; //$NON-NLS-1$
+	public static String DistanceQueryExporter_CrossDesignNotSupported;
+	public static String DistanceQueryExporter_DateNotSupported;
+	public static String DistanceQueryExporter_EffortColumnName;
+	public static String DistanceQueryExporter_ExporterName;
+	public static String DistanceQueryExporter_LengthColumnName;
+	public static String DistanceQueryExporter_SurveyDesignNotFound;
 	public static String AbstractSurveyPagedResult_missionAttributeTypeNotSupportedSort;
 	public static String AbstractSurveyPagedResult_suAttributeTypeNotSupportedSort;
 	public static String AddERQueryJob_ErrorMsg;

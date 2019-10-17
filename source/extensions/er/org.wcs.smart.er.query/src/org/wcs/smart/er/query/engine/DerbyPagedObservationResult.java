@@ -76,6 +76,10 @@ public class DerbyPagedObservationResult extends AbstractSurveyPagedResult imple
 		this.engine = engine;
 	}
 	
+	public DerbySurveyQueryEngine getEngine() {
+		return this.engine;
+	}
+	
 	@Override
 	public String getResultsTable() {
 		return queryTempTable;
