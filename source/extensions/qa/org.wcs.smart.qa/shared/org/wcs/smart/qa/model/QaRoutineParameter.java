@@ -41,6 +41,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.qa_routine_parameter")
 public class QaRoutineParameter extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	private QaRoutine routine;
 	private String parameterId;
 	

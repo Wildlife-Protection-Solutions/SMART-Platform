@@ -42,6 +42,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.i_diagram_entity_type_style")
 public class RelationshipDiagramEntityTypeStyle extends UuidItem {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private RelationshipDiagramStyle style;
 	private IntelEntityType entityType;
 	private String options;

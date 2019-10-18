@@ -47,6 +47,8 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 @Table(name="smart.sampling_unit_attribute")
 public class SamplingUnitAttribute extends NamedKeyItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * Maximum length of string attribute value
 	 */

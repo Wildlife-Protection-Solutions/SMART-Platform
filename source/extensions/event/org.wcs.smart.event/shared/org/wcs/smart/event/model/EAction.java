@@ -45,6 +45,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.e_action")
 public class EAction extends UuidItem{
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final int MAX_ID_LENGTH = 128; 
 			
 	private ConservationArea ca;

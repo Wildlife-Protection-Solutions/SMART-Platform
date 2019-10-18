@@ -114,7 +114,7 @@ public class SmartSection extends Composite{
 		((GridLayout)header.getLayout()).marginWidth = 2;
 		((GridLayout)header.getLayout()).marginHeight = 2;
 		
-		WidgetElement.setCSSClass(header, "SMARTSection");
+		WidgetElement.setCSSClass(header, "SMARTSection");  //$NON-NLS-1$
 		
 		img = new Twistie(header, SWT.NONE){
 			@Override

@@ -55,6 +55,7 @@ import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 @Table(name="smart.i_entity")
 public class IntelEntity extends UuidItem implements IIntelAuditItem{
 
+	private static final long serialVersionUID = 1L;
 	
 	private Date dateCreated;
 	private Date dateModified;

@@ -44,6 +44,8 @@ import org.wcs.smart.ca.NamedItem;
 @Table(name="smart.r_script")
 public class RScript extends NamedItem {
 
+	private static final long serialVersionUID = 1L;
+
 	public static final String KEY = "rscript"; //$NON-NLS-1$
 	
 	public static final int MAX_DEFAULT_PARAM_SIZE = 32672;

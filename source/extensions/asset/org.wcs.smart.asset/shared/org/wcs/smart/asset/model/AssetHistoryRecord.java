@@ -41,6 +41,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.asset_history_record")
 public class AssetHistoryRecord extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	private Asset asset;
 	private Date date;
 	private String comment;

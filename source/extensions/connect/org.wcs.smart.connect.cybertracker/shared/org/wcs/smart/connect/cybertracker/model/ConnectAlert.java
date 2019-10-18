@@ -45,6 +45,8 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 @Table(name="smart.connect_alert")
 public class ConnectAlert extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	/*
 	 * Values for connect alert level
 	 */

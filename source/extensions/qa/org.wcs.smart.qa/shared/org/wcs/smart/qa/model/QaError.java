@@ -59,6 +59,8 @@ import org.wcs.smart.qa.RoutineExtensionManager;
 @Table(name="smart.qa_error")
 public class QaError extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	public enum Status{
 		NEW,
 		IGNORED,

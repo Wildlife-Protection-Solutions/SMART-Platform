@@ -44,6 +44,8 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 @Table(name="smart.i_attachment")
 public class IntelAttachment extends ISmartAttachment{
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String INTELLIGENCE_FS_DIR = "intelligence2"; //$NON-NLS-1$
 	
 	private ConservationArea ca;

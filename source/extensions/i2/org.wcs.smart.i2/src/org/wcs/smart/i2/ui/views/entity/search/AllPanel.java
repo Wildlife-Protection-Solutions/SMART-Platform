@@ -106,9 +106,6 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class AllPanel extends Composite {
 
-	private static final String WEIGHTS_DATAKEY = "WEIGHTS"; //$NON-NLS-1$
-	private static final String FILTER_DATAKEY = "FILTER"; //$NON-NLS-1$
-
 	/*
 	 * Preference store key for the last entity search run
 	 */

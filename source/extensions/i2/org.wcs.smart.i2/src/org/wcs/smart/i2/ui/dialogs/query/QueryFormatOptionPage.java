@@ -231,8 +231,8 @@ public class QueryFormatOptionPage extends WizardPage {
 	
 	private void createCharsetOption() {
 		lblCharset = new Label(main, SWT.NONE);
-		lblCharset.setText("Character Set:");
-		lblCharset.setToolTipText("The character set to use when writing the file.  If unsure use UTF-8.");
+		lblCharset.setText(Messages.QueryFormatOptionPage_CharSetLbl);
+		lblCharset.setToolTipText(Messages.QueryFormatOptionPage_CharSetTooltip);
 		lblCharset.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		cmbCharset = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);

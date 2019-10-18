@@ -99,6 +99,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	private List<IPropsChangeListener> listeners = new ArrayList<IPropsChangeListener>();
 	private boolean isPopulating = false;
 
+	private Button btnOpen;
 	private Button btnAutoNext;
 
 	private Button btnUseTitleBar;
@@ -170,6 +171,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	private ControlDecoration cdImageWidth, cdImageHeight;
 	private Button btnOpResize;
 	
+	private List<Control> controls;
+	
 	public CyberTrackerPropertiesComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -180,6 +183,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	}
 
 	private void createContent(Composite parent) {
+		controls = new ArrayList<>();
 		
 		tabFolder = new CTabFolder (parent, SWT.NONE);
 		Rectangle clientArea = parent.getClientArea ();
@@ -289,6 +293,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
+		controls.add(btnUseTitleBar);
 		
 		Label lblLargeTitles = new Label(generalContainer, SWT.NONE);
 		lblLargeTitles.setText(Messages.CyberTrackerPropertiesDialog_6);
@@ -296,7 +301,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 
 		btnLargeTitles = new Button(generalContainer, SWT.CHECK);
 		btnLargeTitles.setToolTipText(Messages.CyberTrackerPropertiesDialog_7);
-		btnUseTitleBar.addSelectionListener(new SelectionListener() {
+		btnLargeTitles.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				changesMade();
@@ -306,6 +311,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
+		controls.add(btnLargeTitles);
 		
 		Label lblLargeScrollBars = new Label(generalContainer, SWT.NONE);
 		lblLargeScrollBars.setText(Messages.CyberTrackerPropertiesDialog_LargeScrollBars);
@@ -323,6 +329,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
+		controls.add(btnLargeScrollBars);
 		
 		Label lblLargeTabs = new Label(generalContainer, SWT.NONE);
 		lblLargeTabs.setText(Messages.CyberTrackerPropertiesDialog_9);
@@ -340,7 +347,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
-
+		controls.add(btnLargeTabs);
 
 
 		Label lblAutoNext = new Label(generalContainer, SWT.NONE);
@@ -359,7 +366,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
-
+		controls.add(btnAutoNext);
 		
 		Label lblShowEdit = new Label(generalContainer, SWT.NONE);
 		lblShowEdit.setText(Messages.CyberTrackerPropertiesDialog_ShowEdit1);
@@ -377,7 +384,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
-
+		controls.add(btnShowEdit);
+		
 		Label lblShowGPS = new Label(generalContainer, SWT.NONE);
 		lblShowGPS.setText(Messages.CyberTrackerPropertiesDialog_ShowGPS);
 		lblShowGPS.setToolTipText(Messages.CyberTrackerPropertiesDialog_ShowGPS_Tooltip);
@@ -394,7 +402,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
-		
+		controls.add(btnShowGPS);
 		
 		Label lblKioskMode = new Label(generalContainer, SWT.NONE);
 		lblKioskMode.setText(Messages.CyberTrackerPropertiesDialog_KioskMode);
@@ -412,7 +420,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
-
+		controls.add(btnKioskMode);
 		
 		Label lblSimpleCamera = new Label(generalContainer, SWT.NONE);
 		lblSimpleCamera.setText(Messages.CyberTrackerPropertiesDialog_SimpleCamera);
@@ -430,7 +438,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
-
+		controls.add(btnSimpleCamera);
 		
 		Label lblCanPause = new Label(generalContainer, SWT.NONE);
 		lblCanPause.setText(Messages.CyberTrackerPropertiesDialog_CanPause);
@@ -448,7 +456,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
-
+		controls.add(btnCanPause);
 		
 		Label lblEditing= new Label(generalContainer, SWT.NONE);
 		lblEditing.setText(Messages.CyberTrackerPropertiesDialog_12);
@@ -466,7 +474,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
-		
+		controls.add(btnDisableEditing);
 
 		Label lblSdCard= new Label(generalContainer, SWT.NONE);
 		lblSdCard.setText(Messages.CyberTrackerPropertiesDialog_15);
@@ -484,7 +492,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
-
+		controls.add(btnSdCard);
+		
 		Label lblTestTime= new Label(generalContainer, SWT.NONE);
 		lblTestTime.setText(Messages.CyberTrackerPropertiesDialog_18);
 		lblTestTime.setToolTipText(Messages.CyberTrackerPropertiesDialog_19);
@@ -501,7 +510,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
-		
+		controls.add(btnTestTime);
 		
 		Label lblResetOnSync= new Label(generalContainer, SWT.NONE);
 		lblResetOnSync.setText(Messages.CyberTrackerPropertiesDialog_21);
@@ -519,6 +528,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
+		controls.add(btnResetOnSync);
 		
 		Label lblResetOnNext= new Label(generalContainer, SWT.NONE);
 		lblResetOnNext.setText(Messages.CyberTrackerPropertiesDialog_24);
@@ -536,6 +546,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
+		controls.add(btnResetOnNext);
 		
 		Label lblExitPin = new Label(generalContainer, SWT.NONE);
 		lblExitPin.setText(Messages.CyberTrackerPropertiesDialog_ExitPin);
@@ -555,7 +566,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				changesMade();
 			}
 		});
-
+		controls.add(txtExitPin);
+		
 		exitPinDecoration = new ControlDecoration(txtExitPin, SWT.LEFT);
 		exitPinDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
@@ -584,7 +596,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			}
 
 		});
-
+		controls.add(txtMaxPhotoCount);
+		
 		maxPhotoCountDecoration = new ControlDecoration(txtMaxPhotoCount, SWT.LEFT);
 		maxPhotoCountDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
@@ -610,6 +623,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			}
 		});
 		cmbDataFormat.addSelectionChangedListener(e->changesMade());
+		controls.add(cmbDataFormat.getControl());
 		
 		Label lblSigtingAccuracy = new Label(gpsContainer, SWT.NONE);
 		lblSigtingAccuracy.setText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy);
@@ -629,7 +643,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				changesMade();
 			}
 		});
-
+		controls.add(txtSightingAccuracy);
+		
 		sightingAccuracyDecoration = new ControlDecoration(txtSightingAccuracy, SWT.LEFT);
 		sightingAccuracyDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
@@ -656,6 +671,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				changesMade();
 			}
 		});
+		controls.add(txtSightingFixCount);
 		
 		Label lblTrackAccuracy = new Label(gpsContainer, SWT.NONE);
 		lblTrackAccuracy.setText(Messages.CyberTrackerPropertiesDialog_27);
@@ -675,7 +691,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				changesMade();
 			}
 		});
-
+		controls.add(txtTrackAccuracy);
+		
 		TrackAccuracyDecoration = new ControlDecoration(txtTrackAccuracy, SWT.LEFT);
 		TrackAccuracyDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
@@ -690,6 +707,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		sightingFixCountDecoration.setShowHover(true);
 		sightingFixCountDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SightingFixCountInvalid, CyberTrackerPropertiesProfile.SIGHTING_FIX_COUNT_MIN_VALUE, CyberTrackerPropertiesProfile.SIGHTING_FIX_COUNT_MAX_VALUE));
 		sightingFixCountDecoration.hide();
+		
 		
 		Label lblTrackTimer = new Label(gpsContainer, SWT.NONE);
 		lblTrackTimer.setText(Messages.CyberTrackerPropertiesDialog_TrackTimer1);
@@ -722,6 +740,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			}
 			changesMade();
 		});
+		controls.add(cmbTrackTimer.getControl());
+		
 		txtTrackTimer = new Text(trackTimer, SWT.BORDER);
 		txtTrackTimer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtTrackTimer.setToolTipText(Messages.CyberTrackerPropertiesDialog_TrackTimer_Tooltip);
@@ -736,7 +756,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				changesMade();
 			}
 		});
-
+		controls.add(txtTrackTimer);
+		
 		trackTimerDecoration = new ControlDecoration(txtTrackTimer, SWT.LEFT);
 		trackTimerDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
@@ -762,7 +783,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
-		
+		controls.add(btnUseGpsTime);
 		
 		
 		
@@ -782,7 +803,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				changesMade();
 			}
 		});
-		
+		controls.add(timeOffset.getControl());
 		
 		
 		
@@ -802,7 +823,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				changesMade();
 			}
 		});
-		
+		controls.add(cbProjection.getControl());
 		
 		
 		Label lblUtmZome = new Label(gpsContainer, SWT.NONE);
@@ -810,6 +831,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		lblUtmZome.setToolTipText(Messages.CyberTrackerPropertiesDialog_UtmZone_Tooltip);
 
 		txtUtmZome = new Text(gpsContainer, SWT.BORDER);
+		controls.add(txtUtmZome);
 		txtUtmZome.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtUtmZome.setToolTipText(Messages.CyberTrackerPropertiesDialog_UtmZone_Tooltip);
 		txtUtmZome.addModifyListener(new ModifyListener() {
@@ -839,6 +861,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		lblSkipButtonTimeout.setToolTipText(Messages.CyberTrackerPropertiesDialog_SkipButtonTimeout_Tooltip);
 
 		txtSkipButtonTimeout = new Text(gpsContainer, SWT.BORDER);
+		controls.add(txtSkipButtonTimeout);
 		txtSkipButtonTimeout.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtSkipButtonTimeout.setToolTipText(Messages.CyberTrackerPropertiesDialog_SkipButtonTimeout_Tooltip);
 		txtSkipButtonTimeout.addModifyListener(new ModifyListener() {
@@ -866,6 +889,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		lblUseMapOnSkip.setToolTipText(Messages.CyberTrackerPropertiesDialog_49);
 
 		btnUseMapOnSkip = new Button(gpsContainer, SWT.CHECK);
+		controls.add(btnUseMapOnSkip);
 		btnUseMapOnSkip.setToolTipText(Messages.CyberTrackerPropertiesDialog_49);
 		btnUseMapOnSkip.addSelectionListener(new SelectionListener() {
 			@Override
@@ -884,6 +908,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		lblManualGPS.setToolTipText(Messages.CyberTrackerPropertiesDialog_35);
 
 		btnManualGPS = new Button(gpsContainer, SWT.CHECK);
+		controls.add(btnManualGPS);
 		btnManualGPS.setToolTipText(Messages.CyberTrackerPropertiesDialog_35);
 		btnManualGPS.addSelectionListener(new SelectionListener() {
 			@Override
@@ -902,6 +927,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		lblAllowSkipManual.setToolTipText(Messages.CyberTrackerPropertiesDialog_38);
 
 		btnAllowSkipManual = new Button(gpsContainer, SWT.CHECK);
+		controls.add(btnAllowSkipManual);
 		btnAllowSkipManual.setToolTipText(Messages.CyberTrackerPropertiesDialog_38);
 		btnAllowSkipManual.addSelectionListener(new SelectionListener() {
 			@Override
@@ -935,7 +961,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				changesMade();
 			}
 		});
-
+		controls.add(txtDilutionOfPrecision);
+		
 		dilutionOfPrecisionDecoration = new ControlDecoration(txtDilutionOfPrecision, SWT.LEFT);
 		dilutionOfPrecisionDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
@@ -969,7 +996,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				changesMade();
 			}
 		});
-		
+		controls.add(txtFileName);
 	    
 	    FileNameDecoration = new ControlDecoration(txtFileName, SWT.LEFT);
 	    FileNameDecoration.setImage(FieldDecorationRegistry.getDefault()
@@ -980,11 +1007,11 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	    
 	    
 	    
-	    Button open = new Button(fileContainer, SWT.PUSH);
-		open.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false));
-		((GridData)open.getLayoutData()).heightHint = 10;
-	    open.setText(Messages.CyberTrackerPropertiesDialog_42);
-	    open.addSelectionListener(new SelectionAdapter() {
+	    btnOpen = new Button(fileContainer, SWT.PUSH);
+	    btnOpen.setLayoutData(new GridData(SWT.RIGHT,SWT.FILL,false,false));
+		((GridData)btnOpen.getLayoutData()).heightHint = 10;
+		btnOpen.setText(Messages.CyberTrackerPropertiesDialog_42);
+		btnOpen.addSelectionListener(new SelectionAdapter() {
 		
 	    	@Override
 	    	public void widgetSelected(SelectionEvent e) {
@@ -998,7 +1025,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	    		changesMade();
 	    	}
 	    });
-
+		controls.add(btnOpen);
 		
 		Label lblLock100= new Label(fieldmapContainer, SWT.NONE);
 		lblLock100.setText(Messages.CyberTrackerPropertiesDialog_45);
@@ -1016,7 +1043,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});	
-		
+		controls.add(btnLock100);
 		
 		
 		generalScroll.setMinSize(generalContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -1162,6 +1189,11 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			changesMade();
 		});
 		
+		controls.add(txtHeight);
+		controls.add(txtWidth);
+		controls.add(cmbSizes.getControl());
+		controls.add(btnOpResize);
+		
 	}
 	
 	
@@ -1182,11 +1214,14 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			if (btnTrackColor.getData(COLOR_KEY) != null) e.gc.drawRectangle(0, 0, btnTrackColor.getBounds().width-1, btnTrackColor.getBounds().height-1);
 		});
 		WidgetElement.setCSSClass(btnTrackColor, "customcolor"); //$NON-NLS-1$
+		controls.add(btnTrackColor);
 		
 		Button btnSetTrackColor = new Button(part, SWT.PUSH);
 		btnSetTrackColor.setText("..."); //$NON-NLS-1$
+		controls.add(btnSetTrackColor);
 		
 		Button btnTrackClear = new Button(part, SWT.PUSH);
+		controls.add(btnTrackClear);
 		btnTrackClear.setText(Messages.CyberTrackerPropertiesComposite_ClearButton);
 		btnTrackClear.addListener(SWT.Selection, e->{
 			disposeColor(btnTrackColor);
@@ -1223,12 +1258,15 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			colorLabel.addListener(SWT.Paint, e->{
 				if (colorLabel.getData(COLOR_KEY) != null) e.gc.drawRectangle(0, 0, colorLabel.getBounds().width-1, colorLabel.getBounds().height-1);
 			});
-			
+			controls.add(colorLabel);
+
 			Button btnColor = new Button(part, SWT.PUSH);
 			btnColor.setText("..."); //$NON-NLS-1$
-			
+			controls.add(btnColor);
+
 			Button btnClear = new Button(part, SWT.PUSH);
 			btnClear.setText(Messages.CyberTrackerPropertiesComposite_ClearButton);
+			controls.add(btnClear);
 			btnClear.addListener(SWT.Selection, e->{
 				disposeColor(colorLabel);
 				colorLabel.setBackground(null);
@@ -1347,12 +1385,14 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				cmbSizes.setSelection(new StructuredSelection(PhotoSize.CUSTOM));
 				txtHeight.setText(String.valueOf(h));
 				txtWidth.setText(String.valueOf(w));
-				for (Control kid : txtWidth.getParent().getChildren()) kid.setEnabled(true);
+				for (Control kid : txtWidth.getParent().getChildren()) kid.setEnabled(btnOpResize.isEnabled());
 			}
-			cmbSizes.getControl().setEnabled(true);
+			if (btnOpResize.isEnabled())cmbSizes.getControl().setEnabled(true);
 		}else {
-			cmbSizes.getControl().setEnabled(false);
-			for (Control kid : txtWidth.getParent().getChildren()) kid.setEnabled(false);
+			if (btnOpResize.isEnabled()) {
+				cmbSizes.getControl().setEnabled(false);
+				for (Control kid : txtWidth.getParent().getChildren()) kid.setEnabled(false);
+			}
 		}
 		
 		isPopulating = false;
@@ -1441,18 +1481,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	}
 	
 	public void setReadOnly(boolean isReadOnly) {
-		Control[] controls = new Control[] {btnAutoNext,
-				btnLargeScrollBars, btnKioskMode, btnSimpleCamera, btnCanPause, txtExitPin,
-				txtSightingAccuracy, txtSightingFixCount, txtTrackTimer, timeOffset.getControl(),
-				cbProjection.getControl(), txtUtmZome, txtSkipButtonTimeout, txtDilutionOfPrecision,
-				btnShowEdit, btnShowGPS, txtMaxPhotoCount,
-				btnUseTitleBar, btnLargeTitles, btnLargeTabs, btnDisableEditing, btnSdCard,
-				btnTestTime, btnResetOnSync, btnResetOnNext, txtTrackAccuracy, btnUseGpsTime,
-				btnManualGPS, btnAllowSkipManual, txtFileName, btnLock100, btnUseMapOnSkip}; 
-
-		for (Control control : controls) {
-			control.setEnabled(!isReadOnly);
-		}
+		for (Control control : controls) control.setEnabled(!isReadOnly);
 	}
 
 	private boolean isExitPinValid() {

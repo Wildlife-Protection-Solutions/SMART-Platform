@@ -48,6 +48,8 @@ import org.wcs.smart.ca.NamedItem;
 @Table(name = "smart.i_diagram_style")
 public class RelationshipDiagramStyle extends NamedItem {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea conservationArea;
 	private boolean isDefault = false;
 	private String options;

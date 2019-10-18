@@ -41,6 +41,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.survey_design_property")
 public class SurveyDesignProperty extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private SurveyDesign design;
 	private String name;
 	private String value;

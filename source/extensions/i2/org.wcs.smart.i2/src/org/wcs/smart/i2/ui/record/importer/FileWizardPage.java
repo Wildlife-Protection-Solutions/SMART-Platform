@@ -183,8 +183,8 @@ public class FileWizardPage extends WizardPage{
 		delimCombo.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2, 1));
 		
 		Label lblCharset = new Label(upper, SWT.NONE);
-		lblCharset.setText("Character Set:");
-		lblCharset.setToolTipText("The character encoding of the file.  If unsure try UTF-8.");
+		lblCharset.setText(Messages.FileWizardPage_CharSetLbl);
+		lblCharset.setToolTipText(Messages.FileWizardPage_CharSetTooltip);
 		lblCharset.setBackground(upper.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		cmbCharset = new ComboViewer(upper, SWT.DROP_DOWN | SWT.READ_ONLY);

@@ -121,10 +121,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.IFormColors;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
@@ -923,9 +920,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		Composite header = toolkit.createComposite(rightPart);
 		header.setLayout(new GridLayout(2, false));
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-//		((GridLayout)header.getLayout()).marginWidth = 2;
-//		((GridLayout)header.getLayout()).marginHeight = 2;
-		WidgetElement.setCSSClass(header, "SMARTFormHeader");
+		WidgetElement.setCSSClass(header, "SMARTFormHeader");  //$NON-NLS-1$
 		
 		lblIdentifier = toolkit.createLabel(header, ""); //$NON-NLS-1$
 		lblIdentifier.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));

@@ -49,6 +49,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name="smart.asset_attribute")
 public class AssetAttribute  extends NamedKeyItem{
 	
+	private static final long serialVersionUID = 1L;
+	
 	public enum AttributeType{
 		NUMERIC("n"), //$NON-NLS-1$
 		TEXT("s"),  //$NON-NLS-1$

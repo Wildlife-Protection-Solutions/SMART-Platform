@@ -23,6 +23,8 @@ import org.wcs.smart.observation.model.WaypointObservationGroup;
 @Table(name = "smart.ct_incident_link")
 public class CtIncidentLink extends UuidItem {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private UUID ctIncidentGroupId;
 	private UUID ctRootId;
 

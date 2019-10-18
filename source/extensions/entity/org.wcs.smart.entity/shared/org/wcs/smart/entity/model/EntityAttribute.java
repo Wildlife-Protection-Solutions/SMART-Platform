@@ -43,6 +43,8 @@ import org.wcs.smart.ca.datamodel.Attribute;
 @Table(name="smart.entity_attribute")
 public class EntityAttribute extends NamedKeyItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private Attribute dmAttribute;
 	private EntityType entityType;
 	private boolean isRequired;

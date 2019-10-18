@@ -44,6 +44,7 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.ct_patrol_wplink")
 public class CtPatrolWpLink extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
 
 	private CtPatrolLink link;
 	

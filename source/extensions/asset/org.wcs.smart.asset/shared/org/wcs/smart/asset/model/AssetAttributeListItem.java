@@ -36,6 +36,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name="smart.asset_attribute_list_item")
 public class AssetAttributeListItem extends NamedKeyItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private AssetAttribute attribute;
 
 	/**

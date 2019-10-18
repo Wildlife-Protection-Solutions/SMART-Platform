@@ -264,7 +264,7 @@ public class RelationshipGraphComposite extends Composite {
 		cmpFilter = new RelationshipGraphFilterComposite(topCmp);
 		
 		Group rightCmp = new Group(topCmp, SWT.NONE);
-		rightCmp.setText("Layout");
+		rightCmp.setText(Messages.RelationshipGraphComposite_LayoutLbl);
 		rightCmp.setLayout(new GridLayout(2, false));
 		rightCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)rightCmp.getLayoutData()).minimumWidth = 200; //NOTE: need this to fix layout issues caused by CheckBoxDropDown located in RelationshipGraphFilterComposite

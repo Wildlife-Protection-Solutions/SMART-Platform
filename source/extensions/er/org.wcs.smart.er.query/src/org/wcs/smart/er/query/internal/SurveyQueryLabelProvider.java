@@ -72,7 +72,7 @@ public class SurveyQueryLabelProvider implements ISurveyQueryLabelProvider {
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_OBSERVER){ return Messages.SurveyQueryColumn_ObserverLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_LAST_MODIFIED){ return Messages.SurveyQueryLabelProvider_LastModifiedLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.WAYPOINT_LAST_MODIFIED_BY){ return Messages.SurveyQueryLabelProvider_LastModifiedByLabel;}
-		if (item == SurveyQueryColumn.FixedColumns.OBS_GROUP_ID){ return "Observation Group"; }
+		if (item == SurveyQueryColumn.FixedColumns.OBS_GROUP_ID){ return Messages.SurveyQueryLabelProvider_ObservationGroupColumnName; }
 				
 		if (item == ValueItem.TRACK_LENGTH){ return Messages.MissionLegnthValueDropItem_TrackLengthLabel;}
 		if (item == ValueItem.MISSION_COUNT){ return Messages.MissionValueItem_NumberOfMissionsLabel;}

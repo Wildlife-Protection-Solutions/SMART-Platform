@@ -51,6 +51,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name="smart.i_relationship_type")
 public class IntelRelationshipType extends NamedKeyItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea ca;
 	private byte[] icon;
 	private IntelRelationshipGroup group;

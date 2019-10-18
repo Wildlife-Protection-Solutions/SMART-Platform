@@ -86,7 +86,7 @@ public class OpenAttachmentViewHandler {
 			EPartService pService = context.get(EPartService.class);
 			EModelService mService = context.get(EModelService.class);
 			
-			MPart viewPart = MBasicFactory.INSTANCE.createInputPart();
+			MPart viewPart = MBasicFactory.INSTANCE.createPart();
 			viewPart.setContributionURI("bundleclass://org.wcs.smart.i2/org.wcs.smart.i2.ui.views.AttachmentView"); //$NON-NLS-1$
 			viewPart.setCloseable(true);
 			viewPart.setContext(kid);

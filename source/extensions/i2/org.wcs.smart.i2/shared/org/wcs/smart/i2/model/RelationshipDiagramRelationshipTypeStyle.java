@@ -42,6 +42,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.i_diagram_relationship_type_style")
 public class RelationshipDiagramRelationshipTypeStyle extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private RelationshipDiagramStyle style;
 	private IntelRelationshipType relationshipType;
 	private String options;

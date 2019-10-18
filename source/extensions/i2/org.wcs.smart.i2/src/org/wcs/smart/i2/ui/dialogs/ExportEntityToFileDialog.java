@@ -280,8 +280,8 @@ public class ExportEntityToFileDialog extends SmartStyledTitleDialog {
 		cmbDelimiters.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lblCharset = new Label(csvOp, SWT.NONE);
-		lblCharset.setText("Character Set:");
-		lblCharset.setToolTipText("The character encoding of the file.  If unsure try UTF-8.");
+		lblCharset.setText(Messages.ExportEntityToFileDialog_CharacterSetOp);
+		lblCharset.setToolTipText(Messages.ExportEntityToFileDialog_CharacterSetTooltip);
 		lblCharset.setBackground(csvOp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		cmbCharset = new ComboViewer(csvOp, SWT.DROP_DOWN | SWT.READ_ONLY);

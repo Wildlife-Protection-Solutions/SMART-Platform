@@ -40,6 +40,8 @@ import org.wcs.smart.ca.NamedItem;
 @Table(name="smart.r_query")
 public class RQuery extends NamedItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * JSON Keys for serializing queries parameters for rquery
 	 */

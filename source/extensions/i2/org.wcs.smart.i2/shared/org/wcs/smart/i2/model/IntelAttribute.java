@@ -52,6 +52,8 @@ import org.wcs.smart.i2.IIntelligenceLabelProvider;
 @Table(name="smart.i_attribute")
 public class IntelAttribute extends NamedKeyItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final int MAX_TEXT_LENGTH = 1024; 
 			
 	public enum AttributeType{

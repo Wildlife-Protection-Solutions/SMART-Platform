@@ -50,6 +50,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name="smart.i_recordsource")
 public class IntelRecordSource extends NamedKeyItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea ca;
 	private byte[] icon;
 	private List<IntelRecordSourceAttribute> attributes;

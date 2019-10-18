@@ -40,22 +40,15 @@ import org.wcs.smart.ca.UuidItem;
 @Entity
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 public class DataQueueItem extends UuidItem{
-
-//	public enum Type{
-//		PATROL_XML,
-//		INCIDENT_XML,
-//		MISSION_XML,
-//		JSON_CT,
-//		JSON_ZLIB_CT,
-//	}
 	
+	private static final long serialVersionUID = 1L;
+
 	private String type;
 	private UUID caUuid;
 	private String name;
 
 	
 	@Column(name="type")
-//	@Enumerated(EnumType.STRING)
 	public String getType(){
 		return this.type;
 	}

@@ -48,6 +48,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.i_entity_relationship")
 public class IntelEntityRelationship extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	public enum Source{
 		ENTITY,
 		RECORD

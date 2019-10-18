@@ -280,7 +280,7 @@ public class RelationshipDiagramStyleEditDialog extends AbstractPropertyJHeaderD
 		emptyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		emptyComposite.setLayout(new GridLayout());
 		Label l = new Label(emptyComposite, SWT.NONE);
-		l.setText("No style options for selected item.");
+		l.setText(Messages.RelationshipDiagramStyleEditDialog_NoStyles);
 		
 		defaultComposite = new RelationshipDiagramDefaultStyleComposite(infoInnerPanel);
 		defaultComposite.addOptionsChangeListener(new IStyleOptionsChangeListener() {

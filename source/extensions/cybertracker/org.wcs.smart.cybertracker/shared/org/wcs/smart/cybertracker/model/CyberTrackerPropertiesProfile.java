@@ -50,6 +50,8 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.Prof
 @Table(name = "smart.ct_properties_profile")
 public class CyberTrackerPropertiesProfile extends NamedItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final int EXIT_PIN_MIN_VALUE = 1;
 	public static final int EXIT_PIN_MAX_VALUE = 99999999;
 	

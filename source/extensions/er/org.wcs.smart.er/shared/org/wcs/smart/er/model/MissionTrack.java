@@ -53,6 +53,8 @@ import org.wcs.smart.util.GeometryUtils;
 @Table(name="smart.mission_track")
 public class MissionTrack extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final int MAX_ID_LENGTH = 128;
 	
 	public static TimeZone ZTIMEZONE = TimeZone.getTimeZone("GMT"); //$NON-NLS-1$

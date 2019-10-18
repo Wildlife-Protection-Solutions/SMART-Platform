@@ -119,7 +119,7 @@ public class RecordDescriptionPage extends EditorPart{
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 5;
 		((GridLayout)buttonPanel.getLayout()).horizontalSpacing = 0;
 		
-		WidgetElement.setCSSClass(buttonPanel, "SMARTFormHeader");
+		WidgetElement.setCSSClass(buttonPanel, "SMARTFormHeader");  //$NON-NLS-1$
 		
 		headerLabel = toolkit.createLabel(buttonPanel, ""); //$NON-NLS-1$
 		

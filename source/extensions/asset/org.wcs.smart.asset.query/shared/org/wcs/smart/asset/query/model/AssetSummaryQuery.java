@@ -47,6 +47,8 @@ import org.wcs.smart.query.model.summary.SumQueryDefinition;
 @Table(name="smart.asset_summary_query")
 public class AssetSummaryQuery extends SummaryQuery implements IStyledQuery {
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "assetsummary"; //$NON-NLS-1$
 	
 	private String styleMemento;

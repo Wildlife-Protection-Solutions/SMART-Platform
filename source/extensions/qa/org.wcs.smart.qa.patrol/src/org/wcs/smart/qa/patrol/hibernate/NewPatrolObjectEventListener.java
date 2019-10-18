@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.qa.patrol.hibernate;
 
+import org.hibernate.event.spi.PostCommitInsertEventListener;
 import org.hibernate.event.spi.PostInsertEvent;
-import org.hibernate.event.spi.PostInsertEventListener;
 import org.hibernate.persister.entity.EntityPersister;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
@@ -41,7 +41,7 @@ import org.wcs.smart.qa.routine.WaypointLocationData;
  * @author Emily
  *
  */
-public class NewPatrolObjectEventListener implements PostInsertEventListener{
+public class NewPatrolObjectEventListener implements PostCommitInsertEventListener{
 
 	/**
 	 * 
@@ -67,5 +67,10 @@ public class NewPatrolObjectEventListener implements PostInsertEventListener{
 	@Override
 	public boolean requiresPostCommitHanding(EntityPersister persister) {
 		return true;
+	}
+
+	@Override
+	public void onPostInsertCommitFailed(PostInsertEvent arg0) {
+		
 	}
 }

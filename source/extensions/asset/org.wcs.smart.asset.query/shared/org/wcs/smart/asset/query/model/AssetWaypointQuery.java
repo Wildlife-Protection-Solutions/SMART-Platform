@@ -47,7 +47,8 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 @Table(name="smart.asset_waypoint_query")
 public class AssetWaypointQuery extends WaypointQuery{
 
-
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "assetwaypoint"; //$NON-NLS-1$
 	
 	/**

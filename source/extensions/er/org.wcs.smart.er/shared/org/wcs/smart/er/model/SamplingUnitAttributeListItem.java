@@ -44,6 +44,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name="smart.sampling_unit_attribute_list")
 public class SamplingUnitAttributeListItem extends NamedKeyItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private int listOrder;			//order of item in list
 	private SamplingUnitAttribute attribute;	//attribute item is associated with
 	

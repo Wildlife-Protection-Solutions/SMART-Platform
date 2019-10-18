@@ -44,6 +44,8 @@ import org.wcs.smart.ca.datamodel.Category;
 @Table(name="smart.i_observation")
 public class IntelObservation extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	private IntelLocation location;
 	private Category category;
 	private List<IntelObservationAttribute> attributes;

@@ -57,6 +57,8 @@ import org.wcs.smart.util.GeometryUtils;
 @Table(name="smart.sampling_unit")
 public class SamplingUnit extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * Maximum id length
 	 */

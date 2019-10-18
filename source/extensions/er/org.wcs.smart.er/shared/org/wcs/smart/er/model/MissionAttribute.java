@@ -54,6 +54,8 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 @Table(name="smart.mission_attribute")
 public class MissionAttribute extends NamedKeyItem{
 	
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea ca;
 	
 	private Attribute.AttributeType type;

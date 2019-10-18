@@ -48,6 +48,8 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 @Table(name="smart.survey_mission_track_query")
 public class MissionTrackQuery extends SimpleQuery implements IPagedQuery, ISurveyQuery{
 
+	private static final long serialVersionUID = 1L;
+	
 	protected String surveyDesignKey;
 	
 	public static final String KEY = "surveymissiontrack"; //$NON-NLS-1$

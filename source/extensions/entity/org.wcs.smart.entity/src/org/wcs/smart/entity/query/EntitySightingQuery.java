@@ -48,6 +48,8 @@ import org.wcs.smart.query.model.filter.DateFilter;
  */
 public class EntitySightingQuery extends Query{
 
+	private static final long serialVersionUID = 1L;
+	
 	private DateFilter dateFilter;
 	private EntityType entityType;
 	private EntityFilter entityFilter;

@@ -57,6 +57,7 @@ import org.locationtech.jts.geom.Coordinate;
 @Table(name="smart.i_record_attribute_value")
 public class IntelRecordAttributeValue extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
 	
 	private IntelRecord record;
 	private IntelRecordSourceAttribute attribute;

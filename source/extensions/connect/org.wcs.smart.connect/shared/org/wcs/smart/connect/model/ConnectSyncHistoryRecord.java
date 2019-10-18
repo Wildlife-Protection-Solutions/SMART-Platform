@@ -49,10 +49,9 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name="smart.connect_sync_history")
 public class ConnectSyncHistoryRecord extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String PACKAGE_FILESTORE_DIR = "filestore"; //$NON-NLS-1$
-	
-	
-
 	public static final String METADATA_FILE_SUFFIX = ".changelog.metadata"; //$NON-NLS-1$
 	public static final String CHANGELOG_FILE_SUFFIX = ".changelog"; //$NON-NLS-1$
 	

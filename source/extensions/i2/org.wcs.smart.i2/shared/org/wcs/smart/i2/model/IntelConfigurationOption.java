@@ -42,6 +42,7 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.i_config_option")
 public class IntelConfigurationOption extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
 	/**
 	 * For the menu keys the default value will have a key of "mainmenu" but 
 	 * values for other languages will have the key "mainmenu.<langcode>"

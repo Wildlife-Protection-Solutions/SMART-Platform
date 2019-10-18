@@ -53,6 +53,8 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 @Table(name="smart.survey_design")
 public class SurveyDesign extends NamedKeyItem {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final int DESCRIPTION_LENGTH = 32700;
 	
 	public static final int PROPERTY_NAME_LENGTH = 256;

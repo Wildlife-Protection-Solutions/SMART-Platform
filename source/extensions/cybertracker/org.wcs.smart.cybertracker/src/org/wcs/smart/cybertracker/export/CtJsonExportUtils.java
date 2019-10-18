@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.export;
 
+import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -191,6 +192,9 @@ public class CtJsonExportUtils {
 			
 			if (isBoolean(option)) {
 				profileObj.put(option.name(), opValue.getBooleanValue());
+			}else if (isColor(option) && opValue.getIntegerValue() != null) {
+				Color c = new Color(opValue.getIntegerValue());
+				profileObj.put(option.name(), Integer.toHexString(c.getRGB()).substring(2));
 			}else if (opValue.getDoubleValue() != null) {
 				profileObj.put(option.name(), opValue.getDoubleValue());
 			}else if (opValue.getIntegerValue() != null) {
@@ -237,6 +241,9 @@ public class CtJsonExportUtils {
 			}else {
 				if (isBoolean(option)) {
 					profileObj.put(option.name(), opValue.getBooleanValue());
+				}else if (isColor(option) && opValue.getIntegerValue() != null) {
+					Color c = new Color(opValue.getIntegerValue());
+					profileObj.put(option.name(), Integer.toHexString(c.getRGB()).substring(2));
 				}else if (opValue.getDoubleValue() != null) {
 					profileObj.put(option.name(), opValue.getDoubleValue());
 				}else if (opValue.getIntegerValue() != null) {
@@ -301,7 +308,13 @@ public class CtJsonExportUtils {
 		});
 		return targetDir;
 	}
-	
+	private static boolean isColor(ProfileOptionID option) {
+		return option == ProfileOptionID.THEME_COLOR_1 
+				|| option == ProfileOptionID.THEME_COLOR_2
+				|| option == ProfileOptionID.THEME_COLOR_3
+				|| option == ProfileOptionID.THEME_COLOR_4
+				|| option == ProfileOptionID.TRACK_COLOR;
+	}
 	/**
 	 * Identify which options are boolean as boolean options
 	 * appear the same as integer options in the database.

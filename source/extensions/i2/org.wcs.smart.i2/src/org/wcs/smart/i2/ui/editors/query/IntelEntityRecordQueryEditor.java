@@ -301,7 +301,7 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		headerComp.setLayout(new GridLayout(2, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		WidgetElement.setCSSClass(headerComp, "SMARTFormHeader");
+		WidgetElement.setCSSClass(headerComp, "SMARTFormHeader");  //$NON-NLS-1$
 
 		header = new IntelQueryNameLabel(headerComp, toolkit, pageForm.getFont(), pageForm.getForeground());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));

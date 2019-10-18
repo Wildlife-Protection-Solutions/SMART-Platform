@@ -47,6 +47,8 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 @Table(name="smart.ct_patrol_package")
 public class PatrolCtPackage extends AbstractCtPackage implements ICmProvider{
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String TYPE_NAME = "PATROL"; //$NON-NLS-1$
 
 	private ConfigurableModel cm;

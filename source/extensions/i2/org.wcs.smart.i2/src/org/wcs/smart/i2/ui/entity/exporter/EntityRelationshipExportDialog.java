@@ -133,8 +133,8 @@ public class EntityRelationshipExportDialog extends SmartStyledTitleDialog{
 		cmbDelimiters.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
 		Label lblCharset = new Label(main, SWT.NONE);
-		lblCharset.setText("Character Set:");
-		lblCharset.setToolTipText("The character encoding of the file.  If unsure try UTF-8.");
+		lblCharset.setText(Messages.EntityRelationshipExportDialog_CharSetLbl);
+		lblCharset.setToolTipText(Messages.EntityRelationshipExportDialog_CharSetTooltip);
 		lblCharset.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		cmbCharset = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);

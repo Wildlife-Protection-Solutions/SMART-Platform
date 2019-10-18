@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.qa.incident.hibernate;
 
+import org.hibernate.event.spi.PostCommitInsertEventListener;
 import org.hibernate.event.spi.PostInsertEvent;
-import org.hibernate.event.spi.PostInsertEventListener;
 import org.hibernate.persister.entity.EntityPersister;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.observation.model.Waypoint;
@@ -39,7 +39,7 @@ import org.wcs.smart.qa.routine.WaypointLocationData;
  * @author Emily
  *
  */
-public class NewIncidentObjectEventListener implements PostInsertEventListener{
+public class NewIncidentObjectEventListener implements PostCommitInsertEventListener{
 
 	/**
 	 * 
@@ -60,5 +60,9 @@ public class NewIncidentObjectEventListener implements PostInsertEventListener{
 	@Override
 	public boolean requiresPostCommitHanding(EntityPersister persister) {
 		return true;
+	}
+
+	@Override
+	public void onPostInsertCommitFailed(PostInsertEvent arg0) {		
 	}
 }

@@ -49,6 +49,8 @@ import org.wcs.smart.observation.model.Waypoint;
 @Table(name="smart.asset_waypoint")
 public class AssetWaypoint extends UuidItem implements IAdaptable{
 	
+	private static final long serialVersionUID = 1L;
+	
 	public enum State{
 		DIRTY,
 		OK

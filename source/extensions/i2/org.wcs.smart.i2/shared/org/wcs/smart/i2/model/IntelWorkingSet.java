@@ -47,6 +47,8 @@ import org.wcs.smart.ca.NamedItem;
 @Table(name="smart.i_working_set")
 public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
  
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea ca;
 
 	private Date dateCreated;

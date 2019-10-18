@@ -49,6 +49,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.asset_station_location")
 public class AssetStationLocation extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private AssetStation station;
 	private String id;
 	private Double x;

@@ -51,6 +51,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name="smart.i_entity_type")
 public class IntelEntityType extends NamedKeyItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea ca;
 	private IntelAttribute idAttribute;
 	private byte[] icon;

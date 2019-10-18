@@ -45,6 +45,8 @@ import org.wcs.smart.query.model.summary.GridQueryDefinition;
 @Table(name="smart.entity_gridded_query")
 public class EntityGriddedQuery extends GriddedQuery {
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "entitygrid"; //$NON-NLS-1$
 
 	@Override

@@ -44,6 +44,7 @@ import org.wcs.smart.ca.NamedItem;
 @Table(name="smart.i_entity_search")
 public class IntelEntitySearch extends NamedItem {
 
+	private static final long serialVersionUID = 1L;
 
 	public enum Type{
 		BASIC("basic"), //$NON-NLS-1$

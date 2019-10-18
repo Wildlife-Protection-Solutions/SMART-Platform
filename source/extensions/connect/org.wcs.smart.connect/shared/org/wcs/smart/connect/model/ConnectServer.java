@@ -50,6 +50,8 @@ import org.wcs.smart.connect.ConnectDatastore;
 @Table(name="smart.connect_server")
 public class ConnectServer extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * The certificate file path for any connect server if it is defined.
 	 * @param ca the conservation area

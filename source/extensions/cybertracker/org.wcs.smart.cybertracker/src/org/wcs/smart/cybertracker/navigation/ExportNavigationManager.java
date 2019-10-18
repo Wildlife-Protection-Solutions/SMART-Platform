@@ -78,7 +78,7 @@ public enum ExportNavigationManager {
 		JSONObject projectJson = new JSONObject();
 		projectJson.put("projectName", layer.getName()); //$NON-NLS-1$
 		projectJson.put("decoder", "sourceparser_smartnavigationlayer"); //$NON-NLS-1$ //$NON-NLS-2$
-		projectJson.put("definition", fname + ".json"); //$NON-NLS-1$ //$NON-NLS-2$
+		projectJson.put("definition", fname); //$NON-NLS-1$ 
 		String str = projectJson.toJSONString();
 		
 		ZipUtil.writeToZip(exportFile, new String[] {fname, json},

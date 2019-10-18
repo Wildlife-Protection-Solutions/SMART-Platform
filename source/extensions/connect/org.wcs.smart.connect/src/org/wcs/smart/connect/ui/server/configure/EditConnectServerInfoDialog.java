@@ -77,6 +77,7 @@ public class EditConnectServerInfoDialog extends SmartStyledTitleDialog{
 
 	private boolean validateServer(){
 		ConnectServer temp = new ConnectServer(){
+			private static final long serialVersionUID = 1L;
 			Path cert = null;
 			@Override
 			public void setCertificateFile(Path newFile) throws Exception{

@@ -40,6 +40,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.e_event_action")
 public class EActionEvent extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private EAction action;
 	private EFilter filter;
 	

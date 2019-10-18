@@ -49,6 +49,8 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 @Table(name="smart.entity")
 public class Entity extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final int NAME_MAX_LENGTH = 1014;
 	public static final int ID_MAX_LENGTH = 32;
 	public static final int KEY_MAX_LENGTH = 128;

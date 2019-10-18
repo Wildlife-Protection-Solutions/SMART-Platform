@@ -42,6 +42,8 @@ import org.wcs.smart.i2.query.observation.parser.Parser;
 @Table(name="smart.i_entity_summary_query")
 public class IntelEntitySummaryQuery extends AbstractIntelQuery {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "I2_ENTITY_SUMM_QUERY"; //$NON-NLS-1$
 
 	public static final String PART_SEPERATOR = "|"; //$NON-NLS-1$

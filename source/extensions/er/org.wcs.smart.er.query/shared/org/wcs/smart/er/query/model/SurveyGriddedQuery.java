@@ -45,6 +45,8 @@ import org.wcs.smart.query.model.summary.GridQueryDefinition;
 @Table(name="smart.survey_gridded_query")
 public class SurveyGriddedQuery extends GriddedQuery implements ISurveyQuery{
 	
+	private static final long serialVersionUID = 1L;
+	
 	protected String surveyDesignKey;
 
 	public static final String KEY = "surveygrid"; //$NON-NLS-1$

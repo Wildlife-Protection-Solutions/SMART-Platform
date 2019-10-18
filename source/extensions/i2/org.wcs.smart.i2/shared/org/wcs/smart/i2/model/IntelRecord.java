@@ -49,6 +49,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.i_record")
 public class IntelRecord extends UuidItem implements IIntelAuditItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final int MAX_TITLE_LENGTH = 1024;
 	
 	public enum Status{

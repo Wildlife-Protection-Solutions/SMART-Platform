@@ -50,6 +50,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.asset")
 public class Asset extends UuidItem {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final int ID_MAX_LENGTH = 128;
 	
 	/*

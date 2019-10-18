@@ -47,6 +47,9 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 @Entity
 @Table(name="smart.entity_waypoint_query")
 public class EntityWaypointQuery extends WaypointQuery {
+	
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "entitywaypoint"; //$NON-NLS-1$
 
 	/**

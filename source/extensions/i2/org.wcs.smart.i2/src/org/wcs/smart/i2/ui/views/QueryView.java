@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.ui.views;
 
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;

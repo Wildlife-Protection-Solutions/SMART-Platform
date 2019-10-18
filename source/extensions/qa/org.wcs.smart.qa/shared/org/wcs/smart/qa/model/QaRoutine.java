@@ -47,6 +47,8 @@ import org.wcs.smart.qa.RoutineExtensionManager;
 @Table(name="smart.qa_routine")
 public class QaRoutine extends NamedItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final int MAX_DESC_LENGTH = 32600;
 	
 	private ConservationArea conservationArea;

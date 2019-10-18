@@ -39,15 +39,19 @@ import org.wcs.smart.util.UuidUtils;
 public class PdaUtil {
 
 	public static String getCTAppPath() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		return WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER,
+		String appPath = WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER,
 				ICyberTrackerConstants.REG_KEY_PATH, ICyberTrackerConstants.REG_KEY_NAME);
+		System.out.println(appPath);
+		return appPath;
 	}
 
 	public static String getCTMediaFolder() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 //		String path = System.getProperty("user.home"); //$NON-NLS-1$
 //		return path + "\\Documents\\CyberTracker\\ExportMedia\\"; //$NON-NLS-1$
-		return WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER,
+		String media = WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER,
 				ICyberTrackerConstants.REG_KEY_PATH, ICyberTrackerConstants.REG_KEY_EXPORT_MEDIA);
+		System.out.println(media);
+		return media;
 	}
 	
 	public static File createTempDirectory() throws IOException {
@@ -63,12 +67,12 @@ public class PdaUtil {
 		if (!folder.exists())
 			folder.mkdirs();
 
-		WinRegistry.writeStringValue(WinRegistry.HKEY_CURRENT_USER, ICyberTrackerConstants.REG_KEY_PATH,
-				getRegistryKey(ca), folder.getCanonicalPath());
+//		WinRegistry.writeStringValue(WinRegistry.HKEY_CURRENT_USER, ICyberTrackerConstants.REG_KEY_PATH,
+//				getRegistryKey(ca), folder.getCanonicalPath());
 	}
 
 	public static void deleteRegistryKey(ConservationArea ca) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		WinRegistry.deleteValue(WinRegistry.HKEY_CURRENT_USER, ICyberTrackerConstants.REG_KEY_PATH, getRegistryKey(ca));
+//		WinRegistry.deleteValue(WinRegistry.HKEY_CURRENT_USER, ICyberTrackerConstants.REG_KEY_PATH, getRegistryKey(ca));
 	}
 	
 	public static int uploadPda(File file) throws Exception {

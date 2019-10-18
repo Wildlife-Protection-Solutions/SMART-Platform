@@ -50,6 +50,8 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 @Table(name="smart.survey_waypoint_query")
 public class SurveyWaypointQuery extends WaypointQuery implements ISurveyQuery{
 
+	private static final long serialVersionUID = 1L;
+	
 	protected String surveyDesignKey;
 	
 	public static final String KEY = "surveywaypoint"; //$NON-NLS-1$

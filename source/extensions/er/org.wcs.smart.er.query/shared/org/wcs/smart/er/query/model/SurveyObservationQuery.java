@@ -50,6 +50,8 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 @Table(name="smart.survey_observation_query")
 public class SurveyObservationQuery extends ObservationQuery implements ISurveyQuery{
 
+	private static final long serialVersionUID = 1L;
+	
 	protected String surveyDesignKey;
 	protected SurveyDesign surveyDesign;
 	

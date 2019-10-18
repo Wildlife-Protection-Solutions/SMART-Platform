@@ -40,6 +40,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table
 @Entity(name="smart.asset_module_settings")
 public class AssetModuleSettings extends UuidItem {
+	
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Value to be stored in meters

@@ -46,8 +46,9 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.ct_properties_option")
 public class CyberTrackerPropertiesOption extends UuidItem {
 	
-	public static final String PROP_SEP = ";"; //$NON-NLS-1$
+	private static final long serialVersionUID = 1L;
 	
+	public static final String PROP_SEP = ";"; //$NON-NLS-1$
 
 	public enum Protocol{
 		GEOJSON(4),

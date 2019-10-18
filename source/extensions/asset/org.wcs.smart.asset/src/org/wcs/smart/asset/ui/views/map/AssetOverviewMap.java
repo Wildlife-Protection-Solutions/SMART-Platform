@@ -759,6 +759,8 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	};
 	
 	class DefaultAssetMapStyle extends AssetMapStyle {
+		private static final long serialVersionUID = 1L;
+		
 		private Style style;
 		
 		public DefaultAssetMapStyle() {

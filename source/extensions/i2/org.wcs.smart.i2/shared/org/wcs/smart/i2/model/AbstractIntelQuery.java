@@ -47,6 +47,8 @@ import org.wcs.smart.ca.NamedItem;
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 public abstract class AbstractIntelQuery extends NamedItem implements IIntelAuditItem {
 	
+	private static final long serialVersionUID = 1L;
+	
 	protected ConservationArea ca;
 	protected String queryString;
 	

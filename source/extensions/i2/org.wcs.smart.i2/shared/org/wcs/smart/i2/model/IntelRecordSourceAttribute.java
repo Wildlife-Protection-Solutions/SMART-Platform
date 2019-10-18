@@ -42,6 +42,8 @@ import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 @Table(name="smart.i_recordsource_attribute")
 public class IntelRecordSourceAttribute extends NamedItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	private IntelRecordSource source;
 	private IntelAttribute attribute;
 	private IntelEntityType type;

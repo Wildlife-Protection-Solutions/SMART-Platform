@@ -55,6 +55,8 @@ import org.wcs.smart.entity.IEntityLabelProvider;
 @Table(name="smart.entity_type")
 public class EntityType extends NamedKeyItem{
 	
+	private static final long serialVersionUID = 1L;
+	
 	public enum Type{
 		FIXED,TRANSIENT;
 

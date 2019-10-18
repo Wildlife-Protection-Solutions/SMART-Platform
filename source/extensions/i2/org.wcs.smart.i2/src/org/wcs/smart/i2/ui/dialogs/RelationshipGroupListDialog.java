@@ -75,7 +75,6 @@ import org.wcs.smart.i2.RelationshipTypeManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
-import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.SmartStyledTitleDialog;

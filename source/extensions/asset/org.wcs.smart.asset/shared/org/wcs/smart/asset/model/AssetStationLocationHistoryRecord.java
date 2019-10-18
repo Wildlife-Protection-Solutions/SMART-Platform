@@ -41,6 +41,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.asset_station_location_history")
 public class AssetStationLocationHistoryRecord extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	private AssetStationLocation location;
 	private Date date;
 	private String comment;

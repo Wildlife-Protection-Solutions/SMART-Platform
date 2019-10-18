@@ -42,6 +42,8 @@ import org.wcs.smart.event.filter.ParsedFilter;
 @Table(name = "smart.e_event_filter")
 public class EFilter extends UuidItem{
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final int MAX_ID_LENGTH = 128;
 	
 	private String id;

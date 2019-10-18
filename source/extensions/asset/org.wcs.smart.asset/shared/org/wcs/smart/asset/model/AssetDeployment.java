@@ -48,6 +48,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.asset_deployment")
 public class AssetDeployment extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private Asset asset;
 	private AssetStationLocation location;
 

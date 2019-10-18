@@ -20,6 +20,8 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 @Table(name="smart.entity_observation_query")
 public class EntityObservationQuery extends ObservationQuery {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "entityobservation"; //$NON-NLS-1$
 
 

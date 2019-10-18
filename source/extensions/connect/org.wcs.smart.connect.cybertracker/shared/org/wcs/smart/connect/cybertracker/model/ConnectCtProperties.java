@@ -43,6 +43,8 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 @Table(name="smart.connect_ct_properties")
 public class ConnectCtProperties extends UuidItem {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final int FREQUENCY_MIN_VALUE = 0;
 	public static final int FREQUENCY_MAX_VALUE = 9999;
 	public static final int FREQUENCY_DEFAULT_VALUE = 0;

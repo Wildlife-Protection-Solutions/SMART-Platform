@@ -50,6 +50,8 @@ import org.wcs.smart.util.UuidUtils;
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 
+	private static final long serialVersionUID = 1L;
+	
 	public enum BaseMapKeys{
 		FILE("file"), //$NON-NLS-1$
 		BM("smartbasemap"), //$NON-NLS-1$

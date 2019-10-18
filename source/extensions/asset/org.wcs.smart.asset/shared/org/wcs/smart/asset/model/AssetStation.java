@@ -52,6 +52,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.asset_station")
 public class AssetStation extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final int MAX_LENGTH = 128;
 			
 	private ConservationArea conservationArea;

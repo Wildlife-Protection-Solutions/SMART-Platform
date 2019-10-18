@@ -74,6 +74,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 		String certificateFile = ((ServerWizardPage)getPage(ServerWizardPage.NAME)).getCertificateFile();
 				
 		ConnectServer server = new ConnectServer(){
+			private static final long serialVersionUID = 1L;
 			public Path getLocalCertificateFile(){
 				return Paths.get(getCertificateFileName());
 			}

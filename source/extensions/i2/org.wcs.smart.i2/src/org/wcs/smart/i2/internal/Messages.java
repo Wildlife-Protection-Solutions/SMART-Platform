@@ -369,6 +369,8 @@ public class Messages extends NLS {
 	public static String EntityRelationshipDetailsShell_UnknownLabel;
 	public static String EntityRelationshipExportDialog_CanceledMsg;
 	public static String EntityRelationshipExportDialog_CanceledTitle;
+	public static String EntityRelationshipExportDialog_CharSetLbl;
+	public static String EntityRelationshipExportDialog_CharSetTooltip;
 	public static String EntityRelationshipExportDialog_CompleteMsg;
 	public static String EntityRelationshipExportDialog_DDMessage;
 	public static String EntityRelationshipExportDialog_DDTitle;
@@ -541,6 +543,8 @@ public class Messages extends NLS {
 	public static String EntityTypeListDialog_Title;
 	public static String EntityTypeManager_DeleteError;
 	public static String EntityTypeTreeFilterItem_EntitiesLabel;
+	public static String ExportEntityToFileDialog_CharacterSetOp;
+	public static String ExportEntityToFileDialog_CharacterSetTooltip;
 	public static String ExportEntityToFileDialog_includeRecordXmls;
 	public static String ExportEntityXmlDialog_AllFiles;
 	public static String ExportEntityXmlDialog_CanceledMsg;
@@ -612,6 +616,10 @@ public class Messages extends NLS {
 	public static String FileWizardPage1_24;
 	public static String FileWizardPage_AllFileName;
 	public static String FileWizardPage1_allFiles;
+	public static String FileWizardPage_CharSetLbl;
+	public static String FileWizardPage1_CharSetLbl;
+	public static String FileWizardPage_CharSetTooltip;
+	public static String FileWizardPage1_CharSetTooltip;
 	public static String FileWizardPage_CSVFileName;
 	public static String FileWizardPage1_CSVFileType;
 	public static String FileWizardPage_DateFormat;
@@ -1081,6 +1089,8 @@ public class Messages extends NLS {
 	public static String QueryDataSourceFactory_DisplayName;
 	public static String QueryDataSourceFactory_ParamName;
 	public static String QueryFormatOptionPage_AllFileDialogOp;
+	public static String QueryFormatOptionPage_CharSetLbl;
+	public static String QueryFormatOptionPage_CharSetTooltip;
 	public static String QueryFormatOptionPage_DelimiterOp;
 	public static String QueryFormatOptionPage_DelimiterTooltip;
 	public static String QueryFormatOptionPage_LocationTitle;
@@ -1397,6 +1407,7 @@ public class Messages extends NLS {
 	public static String RelationshipDiagramStyleEditDialog_ErrorDialog_Title;
 	public static String RelationshipDiagramStyleEditDialog_LoadingStyle_Error;
 	public static String RelationshipDiagramStyleEditDialog_LoadingStyle_Task;
+	public static String RelationshipDiagramStyleEditDialog_NoStyles;
 	public static String RelationshipDiagramStyleEditDialog_RootNode_Info;
 	public static String RelationshipDiagramStyleEditDialog_StyleName;
 	public static String RelationshipDiagramStyleEditDialog_StyleName_MaxLength_Error;
@@ -1425,6 +1436,7 @@ public class Messages extends NLS {
 	public static String RelationshipGraphComposite_LayoutAlogorithm_Sugiyama;
 	public static String RelationshipGraphComposite_Layout;
 	public static String RelationshipGraphComposite_LayoutAlogorithm_Tree;
+	public static String RelationshipGraphComposite_LayoutLbl;
 	public static String RelationshipGraphComposite_Settings;
 	public static String RelationshipGraphComposite_Style;
 	public static String RelationshipGraphEditor_Name;

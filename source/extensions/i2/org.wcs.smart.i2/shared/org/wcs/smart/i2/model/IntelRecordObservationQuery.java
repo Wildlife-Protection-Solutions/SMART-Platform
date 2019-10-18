@@ -45,6 +45,8 @@ import org.wcs.smart.i2.query.observation.parser.Parser;
 @Table(name="smart.i_record_obs_query")
 public class IntelRecordObservationQuery extends AbstractIntelQuery {
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "I2_OBS_QUERY"; //$NON-NLS-1$
 	
 	private String style;

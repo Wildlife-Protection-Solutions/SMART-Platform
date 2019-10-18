@@ -48,6 +48,8 @@ import org.wcs.smart.er.model.SurveyDesign;
 @Table(name="smart.ct_survey_package")
 public class SurveyCtPackage extends AbstractCtPackage implements ICmProvider{
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String TYPE_NAME = "SURVEY"; //$NON-NLS-1$
 
 	private SurveyDesign sd;

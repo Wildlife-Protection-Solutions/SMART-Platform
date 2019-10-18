@@ -197,7 +197,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						//create a new link
 						if (!newPatrolLinks.values().contains(link)) {
 							CtPatrolLink oldLink = new CtPatrolLink();
-							oldLink.setCtUuid(UUID.randomUUID());//TOOD
+							oldLink.setCtUuid(UUID.randomUUID());//TODO
 							oldLink.setPatrolLeg(link.getPatrolLeg());
 							oldLink.setDeviceId(link.getDeviceId());
 							oldLink.setLastObservationCnt(-1);

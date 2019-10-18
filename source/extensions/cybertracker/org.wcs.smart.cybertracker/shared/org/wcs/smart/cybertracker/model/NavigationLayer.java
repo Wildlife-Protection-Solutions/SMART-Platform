@@ -53,6 +53,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.ct_navigation_layer")
 public class NavigationLayer extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private static final String JSON_FEATURES_KEY = "features"; //$NON-NLS-1$
 	
 	protected ConservationArea ca;

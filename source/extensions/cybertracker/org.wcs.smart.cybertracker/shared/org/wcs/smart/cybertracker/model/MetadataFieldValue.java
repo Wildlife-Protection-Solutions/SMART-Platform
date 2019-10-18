@@ -47,6 +47,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.ct_metadata_value")
 public class MetadataFieldValue extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea ca;
 	
 	//key identifying the metadata field

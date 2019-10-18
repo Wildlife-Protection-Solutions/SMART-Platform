@@ -42,6 +42,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.ct_metadata_value_uuid")
 public class MetadataFieldUuidValue extends UuidItem {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private MetadataFieldValue screenOption;
 	private UUID uuidValue;
 	

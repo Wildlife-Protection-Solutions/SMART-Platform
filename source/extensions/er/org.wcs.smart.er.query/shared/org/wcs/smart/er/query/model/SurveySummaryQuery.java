@@ -45,6 +45,8 @@ import org.wcs.smart.query.model.summary.SumQueryDefinition;
 @Table(name="smart.survey_summary_query")
 public class SurveySummaryQuery extends SummaryQuery implements ISurveyQuery{
 
+	private static final long serialVersionUID = 1L;
+	
 	protected String surveyDesignKey;
 	
 	public static final String KEY = "surveysummary"; //$NON-NLS-1$

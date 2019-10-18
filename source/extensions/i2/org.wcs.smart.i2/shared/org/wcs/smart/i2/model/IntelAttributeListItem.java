@@ -37,6 +37,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name="smart.i_attribute_list_item")
 public class IntelAttributeListItem extends NamedKeyItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private IntelAttribute attribute;
 	private int listOrder;			//order of item in list
 

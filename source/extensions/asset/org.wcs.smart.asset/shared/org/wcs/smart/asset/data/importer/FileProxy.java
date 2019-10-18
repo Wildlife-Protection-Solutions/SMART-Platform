@@ -55,6 +55,8 @@ import org.wcs.smart.util.GeometryUtils;
  */
 public class FileProxy extends ISmartAttachment{
 
+	private static final long serialVersionUID = 1L;
+	
 	public static enum ErrorMessage{
 		ASSET_NOT_FOUND,
 		DATE_NOT_FOUND,

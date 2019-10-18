@@ -44,6 +44,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name="smart.mission_attribute_list")
 public class MissionAttributeListItem extends NamedKeyItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private int listOrder;			//order of item in list
 	private MissionAttribute attribute;	//attribute item is associated with
 	

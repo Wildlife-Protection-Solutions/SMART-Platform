@@ -54,6 +54,7 @@ public enum DropItemFactory {
 	INSTANCE;
 	
 	public static final AttributeListItem ANY_ATTRIBUTE = new AttributeListItem() {
+		private static final long serialVersionUID = 1L;
 		@Override
 		public String getKeyId() {
 			return AttributeFilter.ANY_OPTION_KEY;

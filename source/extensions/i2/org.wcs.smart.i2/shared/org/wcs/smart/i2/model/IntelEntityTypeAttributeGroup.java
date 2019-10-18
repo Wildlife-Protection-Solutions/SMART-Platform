@@ -33,6 +33,8 @@ import org.wcs.smart.ca.NamedItem;
 @Table(name="smart.i_entity_type_attribute_group")
 public class IntelEntityTypeAttributeGroup extends NamedItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private int order;
 	private IntelEntityType type;
 	

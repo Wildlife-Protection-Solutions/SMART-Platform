@@ -44,6 +44,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.mission_day")
 public class MissionDay extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	private Date date;
 	
 	private Mission mission;

@@ -51,6 +51,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name="smart.asset_type")
 public class AssetType extends NamedKeyItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea conservationArea;
 	private byte[] icon;
 	private Integer incidentCutoff;

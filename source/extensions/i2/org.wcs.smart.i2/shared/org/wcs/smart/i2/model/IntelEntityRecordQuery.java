@@ -44,6 +44,8 @@ import org.wcs.smart.i2.query.observation.parser.Parser;
 @Table(name="smart.i_entity_record_query")
 public class IntelEntityRecordQuery extends AbstractIntelQuery {
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "I2_ENTITY_RECORD_QUERY"; //$NON-NLS-1$
 	
 	/**

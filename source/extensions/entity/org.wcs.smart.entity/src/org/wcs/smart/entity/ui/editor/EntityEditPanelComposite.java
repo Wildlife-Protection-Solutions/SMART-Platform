@@ -540,6 +540,8 @@ public class EntityEditPanelComposite extends Composite{
 	
 	private class EntityAttributeWrapper extends Attribute{
 		
+		private static final long serialVersionUID = 1L;
+		
 		private EntityAttribute wrapped;
 		
 		/**

@@ -52,6 +52,8 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name="smart.mission")
 public class Mission extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * Maximum mission id length
 	 */

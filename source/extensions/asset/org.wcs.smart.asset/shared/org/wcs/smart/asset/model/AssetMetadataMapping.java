@@ -51,6 +51,8 @@ import org.wcs.smart.ca.datamodel.Category;
 @Table(name="smart.asset_metadata_mapping")
 public class AssetMetadataMapping extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	public enum AssetProperty{
 		ASSET_ID,
 		STATION_ID,

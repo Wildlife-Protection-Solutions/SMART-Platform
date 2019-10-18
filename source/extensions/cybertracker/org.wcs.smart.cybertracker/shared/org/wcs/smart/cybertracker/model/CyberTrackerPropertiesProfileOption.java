@@ -44,6 +44,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.ct_properties_profile_option")
 public class CyberTrackerPropertiesProfileOption extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	public enum ProfileOptionID {
 		APP_NAME,
 		LARGE_SCROLL_BARS,

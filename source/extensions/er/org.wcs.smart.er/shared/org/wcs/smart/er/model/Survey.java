@@ -47,6 +47,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.survey")
 public class Survey extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final int ID_MAX_LENGTH = 128;
 	
 	private String id;

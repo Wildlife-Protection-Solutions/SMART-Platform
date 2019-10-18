@@ -48,6 +48,8 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 @Table(name="smart.asset_observation_query")
 public class AssetObservationQuery extends ObservationQuery{
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "assetobservation"; //$NON-NLS-1$
 
 	/**

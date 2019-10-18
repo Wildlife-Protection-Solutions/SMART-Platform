@@ -48,6 +48,8 @@ import org.wcs.smart.connect.dataqueue.internal.Messages;
 @Table(name="smart.connect_data_queue")
 public class LocalDataQueueItem extends DataQueueItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	public enum Status{
 		QUEUED (Messages.LocalDataQueueItem_QueuedStatusLabel),
 		REQUEUED (Messages.LocalDataQueueItem_RequeuedStatusLabel),
