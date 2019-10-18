@@ -33,6 +33,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
+import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IDesktopPagedImageResultSet;
@@ -157,7 +159,10 @@ public class DerbyPagedObservationResult extends AbstractSurveyPagedResult imple
 
 	@Override
 	public boolean isDataColumn(QueryColumn column) {
-		return dataColumns != null && dataColumns.contains(column.getKey());
+		if (dataColumns == null) return true;
+		if (column instanceof SamplingUnitAttributeQueryColumn) return true;
+		if (column instanceof MissionPropertyQueryColumn) return true;
+		return dataColumns.contains(column.getKey());
 	}
 	
 	public void setDataColumns(Set<String> dataColumns) {
