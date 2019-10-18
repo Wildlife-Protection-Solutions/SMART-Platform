@@ -173,10 +173,7 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		}
 
 		Label.LabelItemPK id = new Label.LabelItemPK();
-		UuidItem h = new UuidItem();
-		h.setUuid(elementuuid);
-		id.setElement(h);
-
+		id.setElement(new UuidItem(elementuuid));
 		for (ConservationArea c : SmartDB.getConservationAreaConfiguration().getConservationAreas()) {
 			if (c.getUuid().equals(cauuid)) {
 				Language l = SmartUtils.findLanguageMatch(c.getLanguages());

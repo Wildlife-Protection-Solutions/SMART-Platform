@@ -21,9 +21,7 @@
  */
 package org.wcs.smart.query.common.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.MappedSuperclass;
 
 import org.wcs.smart.query.model.IPagedQuery;
 
@@ -35,10 +33,11 @@ import org.wcs.smart.query.model.IPagedQuery;
  * @author Emily
  * @since 1.0.0
  */
-@Entity
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
 public abstract class WaypointQuery extends SimpleQuery  implements IPagedQuery{
 		
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * Creates a new observation query with the default
 	 * conservation area filter and no date filter

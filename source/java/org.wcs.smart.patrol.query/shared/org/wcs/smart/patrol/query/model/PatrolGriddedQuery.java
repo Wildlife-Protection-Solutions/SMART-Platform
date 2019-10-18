@@ -43,6 +43,8 @@ import org.wcs.smart.query.common.model.IQueryColumnProvider;
 @Table(name="smart.gridded_query")
 public class PatrolGriddedQuery extends GriddedQuery {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "patrolgrid"; //$NON-NLS-1$
 	
 	/**

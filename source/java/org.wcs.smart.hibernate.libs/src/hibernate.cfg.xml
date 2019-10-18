@@ -9,7 +9,7 @@
 
 		<!--  (should not use built in connection pool; we use c3p0 here) -->
 		<!--  <property name="connection.pool_size">5</property>-->
-		<property name="connection.release_mode">on_close</property> 
+		<property name="hibernate.connection.handling_mode">DELAYED_ACQUISITION_AND_HOLD</property> 
 		<property name="connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
 		<property name="c3p0.min_size">1</property>
 		<property name="c3p0.max_size">5</property>
@@ -18,18 +18,20 @@
 		<property name="c3p0.idle_test_period">3000</property>
 		
 		<!-- SQL dialect -->
-		<property name="dialect">org.hibernate.dialect.DerbyDialect</property>
+		<property name="dialect">org.hibernate.dialect.DerbyTenSevenDialect</property>
 
 		<!-- Echo all executed SQL to stdout -->
 		<property name="show_sql">false</property> 
 		
-		<property name="hibernate.current_session_context_class">org.hibernate.context.ThreadLocalSessionContext</property>
+		<property name="hibernate.current_session_context_class">org.hibernate.context.internal.ThreadLocalSessionContext</property>
 
-		<property name="cache.use_second_level_cache">true</property>
-		<property name="cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</property>
-		<property name="cache.use_query_cache">true</property> 
-		<!-- <property name="cache.use_minimal_puts">true</property> --> 
-
+		<!-- cache -->
+		<property name="hibernate.cache.use_second_level_cache">false</property>
+		<property name="hibernate.cache.use_second_level_cache.use_query_cache">false</property>
+		<property name="cache.region.factory_class">org.hibernate.cache.jcache.JCacheRegionFactory</property>
+		<property name="hibernate.javax.cache.provider">org.ehcache.jsr107.EhcacheCachingProvider</property>
+		<property name="hibernate.javax.cache.uri">jcache.xml</property>
+		 
 				
 	</session-factory>
 </hibernate-configuration>

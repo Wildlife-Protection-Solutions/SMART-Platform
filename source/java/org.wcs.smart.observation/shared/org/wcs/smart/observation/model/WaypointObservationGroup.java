@@ -44,6 +44,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.wp_observation_group")
 public class WaypointObservationGroup extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private Waypoint waypoint = null;
 
 	private List<WaypointObservation> observations;

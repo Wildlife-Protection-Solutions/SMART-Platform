@@ -42,6 +42,8 @@ import javax.persistence.Table;
 @Table(name ="smart.agency")
 public class Agency extends NamedKeyItem{
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final Integer MAX_AGENCY_LENGTH = 128;
 	
 	private ConservationArea ca;

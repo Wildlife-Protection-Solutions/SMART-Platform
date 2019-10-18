@@ -42,7 +42,9 @@ import javax.persistence.Transient;
  */
 @Entity
 @Table(name = "smart.employee_team_member")
-public class EmployeeTeamMember {
+public class EmployeeTeamMember implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
 	private EmployeeTeamMemeberPk id = new EmployeeTeamMemeberPk();	
 	

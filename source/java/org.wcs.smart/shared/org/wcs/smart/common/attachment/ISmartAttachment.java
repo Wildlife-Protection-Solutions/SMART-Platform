@@ -24,9 +24,7 @@ package org.wcs.smart.common.attachment;
 import java.io.File;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
 import org.hibernate.Session;
@@ -42,9 +40,10 @@ import org.wcs.smart.ca.UuidItem;
  * @author elitvin
  * @since 1.0.0
  */
-@Entity
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
 public abstract class ISmartAttachment extends UuidItem{
+	
+	private static final long serialVersionUID = 1L;
 	
 	private String filename;
 	

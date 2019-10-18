@@ -56,6 +56,8 @@ import org.wcs.smart.util.GeometryUtils;
 @Entity
 @Table(name="smart.waypoint")
 public class Waypoint extends UuidItem {
+	
+	private static final long serialVersionUID = 1L;
 
 	public static final int COMMENT_MAX_LENGTH = 4096;
 	

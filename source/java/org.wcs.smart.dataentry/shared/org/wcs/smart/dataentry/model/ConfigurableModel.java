@@ -57,6 +57,8 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name = "smart.configurable_model")
 public class ConfigurableModel extends NamedItem {
 
+	private static final long serialVersionUID = 1L;
+	
     private ConservationArea conservationArea;
 	private DisplayMode displayMode; //display mode for the root nodes
     private List<CmNode> nodes; //the root nodes for the data model

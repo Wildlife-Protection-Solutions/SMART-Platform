@@ -22,10 +22,10 @@
 package org.wcs.smart.query.model;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
@@ -42,8 +42,10 @@ import org.wcs.smart.query.model.filter.DateFilter;
  * @since 1.0.0
  */
 
-@Entity
+@MappedSuperclass
 public abstract class Query extends NamedItem {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private Employee owner = null;
 	private ConservationArea conservationArea = null;

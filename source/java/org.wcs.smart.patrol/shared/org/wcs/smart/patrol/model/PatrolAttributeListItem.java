@@ -39,6 +39,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Entity
 @Table(name = "smart.patrol_attribute_list")
 public class PatrolAttributeListItem extends NamedKeyItem{
+	
+	private static final long serialVersionUID = 1L;
 
 	private int listOrder;			//order of item in list
 	private boolean isActive;		//if item is active or not

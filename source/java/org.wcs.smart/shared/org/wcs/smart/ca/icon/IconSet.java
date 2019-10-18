@@ -42,6 +42,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name="smart.iconset")
 public class IconSet extends NamedKeyItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea ca;
 	private boolean isDefaut;
 	

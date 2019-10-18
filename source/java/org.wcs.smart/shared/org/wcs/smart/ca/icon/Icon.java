@@ -46,6 +46,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name="smart.icon")
 public class Icon extends NamedKeyItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea ca;
 	
 	private List<IconFile> files;

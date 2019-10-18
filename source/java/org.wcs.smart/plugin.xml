@@ -1310,14 +1310,6 @@
             supportsCcaa="false">
       </class>
       <class
-            class="org.wcs.smart.ca.UuidItem"
-            supportsCcaa="false">
-      </class>
-      <class
-            class="org.wcs.smart.ca.NamedDescriptionItem"
-            supportsCcaa="false">
-      </class>
-      <class
             class="org.wcs.smart.ca.DescriptionLabel"
             supportsCcaa="false">
       </class>
@@ -1361,6 +1353,10 @@
       <class
             ca_property=".id.team.conservationArea"
             class="org.wcs.smart.ca.EmployeeTeamMember"
+            supportsCcaa="false">
+      </class>
+      <class
+            class="org.wcs.smart.ca.UuidItem"
             supportsCcaa="false">
       </class>
    </extension>

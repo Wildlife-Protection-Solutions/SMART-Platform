@@ -48,7 +48,8 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 @Table(name="smart.obs_waypoint_query")
 public class ObservationWaypointQuery extends WaypointQuery {
 
-
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "observationwaypoint"; //$NON-NLS-1$
 
 

@@ -60,6 +60,8 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name="smart.patrol")
 public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * Location of patrol data in the filestore
 	 */

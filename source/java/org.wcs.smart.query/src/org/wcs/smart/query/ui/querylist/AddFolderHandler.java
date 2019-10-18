@@ -79,9 +79,9 @@ public class AddFolderHandler {
 		parent.getChildren().add(newFolder);
 
 		Label lbl = new Label();
-		lbl.setElement(newFolder);
 		lbl.setLanguage(SmartDB.getCurrentLanguage());
 		lbl.setValue(Messages.AddFolderHandler_DefaultNewFolderName);
+		lbl.setElement(newFolder);
 		newFolder.setNames(new HashSet<Label>());
 		newFolder.getNames().add(lbl);
 		newFolder.setName(lbl.getValue());

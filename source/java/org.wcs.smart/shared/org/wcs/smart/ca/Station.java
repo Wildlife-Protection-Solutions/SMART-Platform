@@ -38,7 +38,9 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "smart.station")
 public class Station extends NamedDescriptionItem {
-	
+
+	private static final long serialVersionUID = 1L;
+			
 	/**
 	 * Maximum length of station name
 	 */

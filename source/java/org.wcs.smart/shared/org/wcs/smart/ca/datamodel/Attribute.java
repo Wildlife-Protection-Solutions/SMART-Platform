@@ -41,8 +41,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
@@ -56,8 +54,10 @@ import org.wcs.smart.ca.icon.Icon;
  */
 @Entity
 @Table(name = "smart.dm_attribute")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Attribute extends DmObject{
+	
+	private static final long serialVersionUID = 1L;
+	
 	public static final int STRING_ATTRIBUTE_MAX_LENGTH = 1024;
 	public static final String DATE_FORMAT = "yyyy-mm-dd"; //$NON-NLS-1$
 	
@@ -295,7 +295,6 @@ public class Attribute extends DmObject{
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade={CascadeType.ALL}, orphanRemoval=true)
 	@OrderBy(clause = "list_order")
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<AttributeListItem> getAttributeList(){
 		return this.attributeList;
 	}
@@ -316,7 +315,6 @@ public class Attribute extends DmObject{
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
 	@Where(clause = "parent_uuid is null")
 	@OrderBy(clause = "node_order")
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<AttributeTreeNode> getTree(){
 		return this.rootTreeNodes;
 	}
@@ -337,8 +335,6 @@ public class Attribute extends DmObject{
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute")
 	@Where(clause = "parent_uuid is null and is_active")
 	@OrderBy(clause = "node_order")
-	//@BatchSize(size=200)
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<AttributeTreeNode> getActiveTreeNodes(){
 		return this.activeTootTreeNodes;
 	}

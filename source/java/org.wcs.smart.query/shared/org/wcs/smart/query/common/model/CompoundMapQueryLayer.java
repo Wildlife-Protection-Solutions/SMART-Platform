@@ -41,6 +41,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.compound_query_layer")
 public class CompoundMapQueryLayer extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	//The owning compound map query
 	private CompoundMapQuery mapQuery;
 	//query uuid

@@ -48,6 +48,8 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 @Table(name="smart.intel_record_query")
 public class IntelligenceRecordQuery extends SimpleQuery implements IPagedQuery{
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "intelligencerecord"; //$NON-NLS-1$
 	
 	@Transient

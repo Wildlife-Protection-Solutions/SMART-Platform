@@ -45,6 +45,8 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 @Table(name="smart.patrol_query")
 public class PatrolQuery extends SimpleQuery implements IMemoryQuery{
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "patrolquery"; //$NON-NLS-1$
 	
 	/**

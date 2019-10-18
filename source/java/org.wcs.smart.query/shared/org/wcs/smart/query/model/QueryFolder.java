@@ -49,6 +49,8 @@ import org.wcs.smart.ca.NamedItem;
 @Table(name="smart.query_folder")
 public class QueryFolder extends NamedItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private QueryFolder parentFolder;
 	private Employee employee;
 	private ConservationArea conservationArea;

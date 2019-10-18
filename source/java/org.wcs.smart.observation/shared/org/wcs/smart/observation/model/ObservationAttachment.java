@@ -47,6 +47,8 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name="smart.observation_attachment")
 public class ObservationAttachment extends ISmartAttachment {
 
+	private static final long serialVersionUID = 1L;
+	
 	private WaypointObservation observation;
 
     

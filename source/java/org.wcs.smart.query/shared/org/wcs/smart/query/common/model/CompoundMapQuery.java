@@ -45,6 +45,8 @@ import org.wcs.smart.query.model.filter.DateFilter;
 @Table(name="smart.compound_query")
 public class CompoundMapQuery extends Query{
 
+	private static final long serialVersionUID = 1L;
+
 	public static final String TYPE_KEY = "compound"; //$NON-NLS-1$
 	
 	private DateFilter dateFilter;

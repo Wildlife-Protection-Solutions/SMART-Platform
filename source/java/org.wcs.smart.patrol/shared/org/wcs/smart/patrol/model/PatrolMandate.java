@@ -41,6 +41,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name = "smart.patrol_mandate")
 public class PatrolMandate extends NamedKeyItem{
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final Integer MAX_NAME_LENGTH = 64;
 	
 	private boolean isActive = true;

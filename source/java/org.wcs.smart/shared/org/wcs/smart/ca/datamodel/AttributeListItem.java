@@ -29,8 +29,6 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.icon.Icon;
 
@@ -42,9 +40,10 @@ import org.wcs.smart.ca.icon.Icon;
  */
 @Entity
 @Table(name = "smart.dm_attribute_list")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AttributeListItem extends DmObject{
 
+	private static final long serialVersionUID = 1L;
+	
 	private int listOrder;			//order of item in list
 	private boolean isActive;		//if item is active or not
 	private Attribute attribute;	//attribute item is associated with

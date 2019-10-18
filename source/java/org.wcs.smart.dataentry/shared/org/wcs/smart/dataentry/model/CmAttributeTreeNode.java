@@ -57,6 +57,8 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name = "smart.cm_attribute_tree_node")
 public class CmAttributeTreeNode extends NamedItem implements IImageAssociatedObject {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private AttributeTreeNode dmTreeNode;
 
 	private CmAttributeConfig config;

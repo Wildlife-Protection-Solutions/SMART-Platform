@@ -45,6 +45,8 @@ import org.wcs.smart.query.model.summary.GridQueryDefinition;
 @Table(name="smart.obs_gridded_query")
 public class ObservationGriddedQuery extends GriddedQuery {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "observationgrid"; //$NON-NLS-1$
 	
 	/**

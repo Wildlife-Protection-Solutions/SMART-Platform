@@ -19,50 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ca;
+package org.wcs.smart.observation.ui;
 
-import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.wcs.smart.util.E3Utils;
 
 /**
- * Employee Team Object.  An employee team consists of a set of 
- * employees.  It is not related to the "Patrol Team" concept.
  * 
  * @author Emily
  * @since 7.0.0
  *
  */
-@Entity
-@Table(name="smart.employee_team")
-public class EmployeeTeam extends NamedItem {
+@SuppressWarnings("restriction")
+public class WpInfoViewRefreshHandler  {
 
-	private static final long serialVersionUID = 1L;
-	
-	private ConservationArea ca;
-	private List<EmployeeTeamMember> members;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
-	public ConservationArea getConservationArea() {
-		return this.ca;
-	}
-	
-	public void setConservationArea(ConservationArea ca){
-		this.ca = ca;
+	@Execute
+	public void execute(@Optional IEclipseContext context)  {
+		EPartService pService = context.get(EPartService.class);
+		MPart p = pService.findPart(WaypointInfoView.ID);
+		((WaypointInfoView)E3Utils.getSourceObject(p)).refresh();
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.team", orphanRemoval=true, cascade={CascadeType.ALL})
-	public List<EmployeeTeamMember> getMembers(){
-		return this.members;
-	}
-	public void setMembers(List<EmployeeTeamMember> members) {
-		this.members = members;
+	public static class WpInfoViewRefreshHandlerWrapper extends DIHandler<WpInfoViewRefreshHandler>{
+		public WpInfoViewRefreshHandlerWrapper(){
+			super(WpInfoViewRefreshHandler.class);
+		}
 	}
 }

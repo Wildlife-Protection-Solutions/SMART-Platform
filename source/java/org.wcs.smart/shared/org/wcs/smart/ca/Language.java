@@ -41,6 +41,7 @@ import org.wcs.smart.util.I18nUtil;
 @Table(name="smart.language")
 public class Language extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
 	
 	private String code;
 	private ConservationArea ca;

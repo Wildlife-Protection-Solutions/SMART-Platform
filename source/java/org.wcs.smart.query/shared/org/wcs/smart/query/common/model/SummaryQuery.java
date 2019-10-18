@@ -25,9 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
 import org.wcs.smart.query.model.Query;
@@ -41,10 +39,11 @@ import org.wcs.smart.query.model.summary.SumQueryDefinition;
  * @author Emily
  * @since 1.0.0
  */
-@Entity
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
 public abstract class SummaryQuery extends Query {
 
+	private static final long serialVersionUID = 1L;
+	
 	/* db fields */
 	protected String strQuery;	
 	

@@ -39,6 +39,8 @@ import javax.persistence.Table;
 @Table(name = "smart.saved_maps")
 public class BasemapDefinition extends NamedItem{
 		
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea conservationArea;
 	
 	private String mapDef;

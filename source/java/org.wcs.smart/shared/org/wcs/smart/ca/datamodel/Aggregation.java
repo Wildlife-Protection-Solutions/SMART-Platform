@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ca.datamodel;
 
+import java.io.Serializable;
 import java.util.Locale;
 
 import javax.persistence.Cacheable;
@@ -42,10 +43,11 @@ import org.wcs.smart.util.I18nUtil;
  */
 @Entity
 @Table(name = "smart.dm_aggregation")
-
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-public class Aggregation {
+public class Aggregation implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * short name of aggregation used as key

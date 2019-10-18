@@ -54,7 +54,9 @@ import org.wcs.smart.util.UuidUtils;
 @Entity
 @Table(name="smart.conservation_area")
 public class ConservationArea extends UuidItem {
-
+	
+	private static final long serialVersionUID = 1L;
+	
 	public static final UUID MULTIPLE_CA = UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR);
 
 	/**

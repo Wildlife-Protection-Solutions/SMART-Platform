@@ -28,9 +28,7 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
 import org.geotools.referencing.CRS;
@@ -50,9 +48,10 @@ import org.wcs.smart.util.UuidUtils;
  * @author Jeff
  * @since 1.0.0
  */
-@Entity
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
 public abstract class GriddedQuery extends StyledQuery {
+	
+	private static final long serialVersionUID = 1L;
 	
 	protected String strQuery;			//query string stored in db
 	protected String crsDefinition;	//query crs definition stored in db

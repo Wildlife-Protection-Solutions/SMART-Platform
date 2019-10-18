@@ -47,6 +47,8 @@ import org.wcs.smart.ca.NamedItem;
 @Table(name="smart.report_folder")
 public class ReportFolder extends NamedItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private ReportFolder parentFolder;
 	private Employee employee;
 	private ConservationArea conservationArea;

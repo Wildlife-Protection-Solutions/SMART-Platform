@@ -1,9 +1,7 @@
 package org.wcs.smart.ca;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.MappedSuperclass;
 
 
 /**
@@ -15,9 +13,13 @@ import javax.persistence.InheritanceType;
  * @author Emily
  *
  */
-@Entity
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+//@Entity
+//@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
 public class NamedKeyItem extends NamedItem {
+	
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * Maximum length of the key identifier
 	 */

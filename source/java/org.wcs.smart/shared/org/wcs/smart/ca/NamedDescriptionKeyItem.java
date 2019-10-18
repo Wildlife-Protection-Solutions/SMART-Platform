@@ -26,9 +26,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
 import org.hibernate.Session;
@@ -40,10 +38,13 @@ import org.wcs.smart.hibernate.QueryFactory;
  * @author Emily
  *
  */
-@Entity
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+//@Entity
+//@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
 public class NamedDescriptionKeyItem extends NamedKeyItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private UUID descuuid;
 	
 	private String description;

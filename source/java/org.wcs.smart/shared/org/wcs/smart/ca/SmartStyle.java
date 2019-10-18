@@ -39,7 +39,9 @@ import javax.persistence.Table;
 @Entity
 @Table(name ="smart.map_styles")
 public class SmartStyle extends NamedItem{
-
+	
+	private static final long serialVersionUID = 1L;
+	
 	private String styleString;
 	private ConservationArea ca;
 	

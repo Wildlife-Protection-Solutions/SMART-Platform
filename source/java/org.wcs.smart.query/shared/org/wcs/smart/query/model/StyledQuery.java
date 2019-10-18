@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.model;
 
-import javax.persistence.Entity;
+import javax.persistence.MappedSuperclass;
 
 /**
  * Class for queries which can be styled.
@@ -29,10 +29,11 @@ import javax.persistence.Entity;
  * @author Emily
  *
  */
-
-@Entity
+@MappedSuperclass
 public abstract class StyledQuery extends Query implements IStyledQuery{
 
+	private static final long serialVersionUID = 1L;
+	
 	private String styleMemento;
 	
 	/**

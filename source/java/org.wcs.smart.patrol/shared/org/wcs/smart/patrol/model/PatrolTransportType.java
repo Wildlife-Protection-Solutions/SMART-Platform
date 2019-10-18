@@ -44,6 +44,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name = "smart.patrol_transport")
 public class PatrolTransportType extends NamedKeyItem{
 	
+	private static final long serialVersionUID = 1L;
+	
 	private boolean isActive = true;
 	private ConservationArea ca;
 	private PatrolType.Type patrol_type;

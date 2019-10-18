@@ -27,9 +27,7 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
 import org.hibernate.Session;
@@ -54,10 +52,11 @@ import org.wcs.smart.query.model.filter.QueryFilter;
  * @author egouge 
  * 
  */
-@Entity
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
 public abstract class SimpleQuery extends StyledQuery {
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String COLUMN_SPLITTER = ","; //$NON-NLS-1$
 	
 	/* db fields */

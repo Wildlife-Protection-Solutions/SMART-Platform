@@ -57,6 +57,8 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name = "smart.cm_attribute")
 public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 
+	private static final long serialVersionUID = 1L;
+	
 	public enum HelpImageLocation{
 		BEFORE,
 		AFTER

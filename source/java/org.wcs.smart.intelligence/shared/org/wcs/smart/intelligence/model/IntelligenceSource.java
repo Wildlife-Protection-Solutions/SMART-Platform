@@ -41,6 +41,8 @@ import org.wcs.smart.ca.NamedKeyItem;
 @Table(name = "smart.intelligence_source")
 public class IntelligenceSource extends NamedKeyItem {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final String PATROL_KEY = "patrol"; //$NON-NLS-1$
 	public static final String INFORMANT_KEY = "informant"; //$NON-NLS-1$
 

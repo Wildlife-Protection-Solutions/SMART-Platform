@@ -47,6 +47,8 @@ import org.wcs.smart.query.model.summary.SumQueryDefinition;
 @Table(name="smart.obs_summary_query")
 public class ObservationSummaryQuery extends SummaryQuery {
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String KEY = "observationsummary"; //$NON-NLS-1$
 	
 	/**

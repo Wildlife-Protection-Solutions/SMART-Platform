@@ -56,6 +56,8 @@ import org.locationtech.jts.io.WKBWriter;
 @Table(name="smart.track")
 public class Track extends UuidItem {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static TimeZone ZTIMEZONE = TimeZone.getTimeZone("GMT"); //$NON-NLS-1$
 	
 	private byte[] geom;

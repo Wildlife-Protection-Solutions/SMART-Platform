@@ -51,6 +51,8 @@ import org.wcs.smart.ca.datamodel.Category;
 @Table(name="smart.wp_observation")
 public class WaypointObservation extends UuidItem {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private WaypointObservationGroup obsgroup = null;
 	private Category category = null;
 	

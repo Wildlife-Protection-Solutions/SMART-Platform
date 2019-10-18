@@ -35,8 +35,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
@@ -59,9 +57,10 @@ import org.wcs.smart.ca.icon.Icon;
  */
 @Entity
 @Table(name = "smart.dm_category")
-
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+//@Cache(region="org.wcs.smart.ca.datamodel.Category", usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Category extends DmObject implements HkeyObject{
+	
+	private static final long serialVersionUID = 1L;
 	
 	private static final String FULL_NAME_SEPARATOR = " - "; //$NON-NLS-1$
 	private boolean isMultiple;			//if multiple observations can be recorded
@@ -196,7 +195,6 @@ RETURNS NULL ON NULL INPUT;
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent", cascade={CascadeType.ALL}, orphanRemoval = true)
 	@OrderBy(clause = "cat_order")
-//	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<Category> getChildren(){
 		return this.children;
 	}
@@ -216,7 +214,6 @@ RETURNS NULL ON NULL INPUT;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="parent")
 	@Where(clause = "is_active")
 	@OrderBy(clause = "cat_order")
-//	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<Category> getActiveChildren(){
 		return this.activeChildren;
 	}
@@ -298,7 +295,6 @@ RETURNS NULL ON NULL INPUT;
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.category", cascade={CascadeType.ALL}, orphanRemoval = false)
 	@OrderBy(clause = "att_order")
-//	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<CategoryAttribute> getAttributes(){
 		return this.attributes;
 	}

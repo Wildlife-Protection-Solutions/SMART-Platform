@@ -51,6 +51,8 @@ import org.wcs.smart.ca.NamedItem;
 @Table(name="smart.patrol_folder")
 public class PatrolFolder extends NamedItem implements IFolder {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea conservationArea;
 	private PatrolFolder parentFolder;
 	private List<PatrolFolder> childFolders;

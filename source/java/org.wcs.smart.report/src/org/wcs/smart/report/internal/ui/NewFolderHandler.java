@@ -72,6 +72,7 @@ public class NewFolderHandler {
 					lbl.setLanguage(SmartDB.getCurrentLanguage());
 					lbl.setValue(Messages.NewFolderHandler_DefaultNewFolderName);
 					lbl.setElement(newFolder);
+					
 					newFolder.setNames(new HashSet<Label>());
 					newFolder.getNames().add(lbl);
 					newFolder.setName(lbl.getValue());

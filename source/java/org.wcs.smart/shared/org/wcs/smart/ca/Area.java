@@ -58,6 +58,8 @@ import org.locationtech.jts.io.WKBReader;
 @Table(name ="smart.area_geometries")
 public class Area extends NamedItem{
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final int KEY_MAX_LENGTH = 256;
 	public static final int NAME_MAX_LENGTH = 256;
 	

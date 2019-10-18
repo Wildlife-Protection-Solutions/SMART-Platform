@@ -53,6 +53,8 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name="smart.iconfile")
 public class IconFile extends ISmartAttachment{
 
+	private static final long serialVersionUID = 1L;
+	
 	private static final String PLATFORM_IMAGE = "platform:/plugin"; //$NON-NLS-1$
 
 	public static final String ICON_DIR = "icons"; //$NON-NLS-1$

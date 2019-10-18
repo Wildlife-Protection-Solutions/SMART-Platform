@@ -57,6 +57,8 @@ import org.wcs.smart.util.SharedUtils;
 @Table(name="smart.patrol_leg")
 public class PatrolLeg extends UuidItem {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final int ID_MAX_SIZE = 50;
 	private Patrol patrol;
 	private Date startDate;

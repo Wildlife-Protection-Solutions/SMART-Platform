@@ -51,6 +51,8 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name = "smart.cm_node")
 public class CmNode extends NamedItem implements IImageAssociatedObject {
 
+	private static final long serialVersionUID = 1L;
+	
 	private ConfigurableModel model; 
 	private Category category; 
 	private CmNode parent;

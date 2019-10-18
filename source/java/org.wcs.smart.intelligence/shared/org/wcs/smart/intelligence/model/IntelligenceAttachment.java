@@ -42,6 +42,8 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 @Table(name="smart.intelligence_attachment")
 public class IntelligenceAttachment extends ISmartAttachment {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private Intelligence intelligence;
 	
 	@ManyToOne(fetch = FetchType.LAZY)

@@ -50,6 +50,7 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
 public class DropdownScreenOptionComposite extends ScreenOptionComposite {
 
 	public static final NamedItem EMPTY_DROP_OPTION = new NamedItem() {
+		private static final long serialVersionUID = 1L;
 		public UUID getUuid() {
 			return null;
 		}

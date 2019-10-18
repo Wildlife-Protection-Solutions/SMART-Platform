@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ca;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -59,7 +60,10 @@ import org.wcs.smart.util.UuidUtils;
  * org.hibernate.PropertyAccessException: IllegalArgumentException occurred while calling setter of org.wcs.smart.ca.Employee.conservationArea
  * So this class is not extending UuidItem for now.
  */
-public class Employee {
+public class Employee implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * UUID for the 'shared' employee.  This employee uuid
 	 * is associated with the CrossCA Conservation Area.

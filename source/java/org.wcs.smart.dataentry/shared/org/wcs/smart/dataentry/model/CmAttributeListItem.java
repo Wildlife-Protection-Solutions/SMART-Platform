@@ -46,6 +46,8 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name = "smart.cm_attribute_list")
 public class CmAttributeListItem extends NamedItem implements IImageAssociatedObject {
 
+	private static final long serialVersionUID = 1L;
+	
 	private boolean isActive;
 	
 	private AttributeListItem listItem;

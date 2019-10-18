@@ -36,6 +36,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 @Table(name="smart.ca_projection")
 public class Projection extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final int MAX_NAME_LENGTH = 1024;
 	public static final int MAX_DEF_LENGTH = 32672;
 

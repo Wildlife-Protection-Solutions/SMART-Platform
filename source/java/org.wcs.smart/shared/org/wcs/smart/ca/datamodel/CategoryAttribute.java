@@ -55,8 +55,10 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 		joinColumns = @JoinColumn(name = "category_uuid")) })
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class CategoryAttribute {
+public class CategoryAttribute implements Serializable{
 
+	private static final long serialVersionUID = 1L;
+	
 	private CategoryAttributePk id = new CategoryAttributePk();	
 	private boolean isActive;
 	private int order;

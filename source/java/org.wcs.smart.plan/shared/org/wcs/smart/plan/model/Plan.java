@@ -56,6 +56,8 @@ import org.wcs.smart.plan.IPlanLabelProvider;
 @Table(name="smart.plan")
 public class Plan extends NamedItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final int MAX_ID_LENGTH = 32;
 	public static final int MAX_DESC_LENGTH = 256;
 	public static final int MAX_COMMENT_LENGTH = 32700;

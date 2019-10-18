@@ -51,6 +51,8 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name = "smart.intelligence")
 public class Intelligence extends NamedItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String  INTELLIGENCE_DIR = "intelligence"; //$NON-NLS-1$
 	
 	

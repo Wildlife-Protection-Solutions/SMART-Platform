@@ -53,9 +53,10 @@ import javax.persistence.Transient;
 
 @Entity 
 @Table (name="smart.i18n_label")
+public class DescriptionLabel implements Serializable {
 
-public class DescriptionLabel {
-
+	private static final long serialVersionUID = 1L;
+	
 	private DescLabelItemPK id;
 	private String value;
 

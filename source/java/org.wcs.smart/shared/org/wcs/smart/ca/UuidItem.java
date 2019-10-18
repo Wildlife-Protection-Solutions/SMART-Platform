@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ca;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import javax.persistence.Entity;
@@ -44,7 +45,14 @@ import org.hibernate.annotations.GenericGenerator;
  */
 @Entity
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public class UuidItem {
+//@Cache(region="uuidCache", usage = CacheConcurrencyStrategy.READ_WRITE)
+public class UuidItem implements Serializable{
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	
 	private UUID uuid;
 	

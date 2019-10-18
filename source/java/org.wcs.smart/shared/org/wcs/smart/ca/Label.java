@@ -24,6 +24,7 @@ package org.wcs.smart.ca;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.AssociationOverride;
@@ -60,7 +61,9 @@ import org.wcs.smart.util.I18nUtil;
 		joinColumns = @JoinColumn(name = "element_uuid")) })
 
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-public class Label  {
+public class Label implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static final int MAX_LENGTH = 1024;
 	
@@ -139,31 +142,16 @@ public class Label  {
 		
 		@Override
 		public boolean equals(Object key) {
-			if (! (key instanceof LabelItemPK)){
-				return false;
-			}
-			LabelItemPK p = (LabelItemPK)key;
-			
-			if (p.getLanguage() == null || this.getLanguage() == null ||
-				p.getElement() == null || this.getElement() == null ){
-				
-				if (p.getLanguage() == null && this.getLanguage() == null && 
-					p.getElement() == null && this.getElement() == null){
-						return true;
-				}
-				return false;
-			}
-			
-			return p.getLanguage().equals(this.getLanguage())
-					&& p.getElement().getUuid().equals(this.getElement().getUuid());
+			if (this == key) return true;
+			if (key == null) return false;
+			if (key.getClass() != getClass()) return false;
+			return Objects.equals(getLanguage(), ((LabelItemPK)key).getLanguage()) 
+					&& Objects.equals(getElement(), ((LabelItemPK)key).getElement());
 		}
 		
 		@Override
 		public int hashCode() {
-		    int code = 0;
-		    if (getLanguage() != null) {code += getLanguage().getUuid().hashCode();}
-		    if (getElement() != null && getElement().getUuid() != null) {code += getElement().getUuid().hashCode(); }
-		    return code;
+			return Objects.hash(getLanguage(), getElement());
 		  }
 	}
 	
@@ -224,10 +212,7 @@ public class Label  {
 		}
 		
 		Label.LabelItemPK id = new Label.LabelItemPK();
-		UuidItem h = new UuidItem();
-		h.setUuid(elementuuid);
-		id.setElement(h);
-		
+		id.setElement(new UuidItem(elementuuid));
 		Language ltmp = (Language) session.get(Language.class, lang);
 		id.setLanguage(ltmp);
 

@@ -47,6 +47,8 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name="smart.wp_attachments")
 public class WaypointAttachment extends ISmartAttachment {
 
+	private static final long serialVersionUID = 1L;
+	
 	private Waypoint wp;
 
 	public WaypointAttachment(){

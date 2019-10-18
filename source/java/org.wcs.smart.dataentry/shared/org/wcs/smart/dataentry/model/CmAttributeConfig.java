@@ -56,6 +56,8 @@ import org.wcs.smart.ca.datamodel.Attribute;
 @Table(name = "smart.cm_attribute_config")
 public class CmAttributeConfig extends NamedItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private ConfigurableModel model; 
 	private Attribute attribute;
 	private DisplayMode displayMode;

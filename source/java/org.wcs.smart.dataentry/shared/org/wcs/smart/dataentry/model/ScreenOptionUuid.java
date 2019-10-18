@@ -42,6 +42,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.screen_option_uuid")
 public class ScreenOptionUuid extends UuidItem {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private ScreenOption screenOption;
 	private UUID uuidValue;
 	

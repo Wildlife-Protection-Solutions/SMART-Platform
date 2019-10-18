@@ -41,6 +41,7 @@ import org.wcs.smart.ca.NamedDescriptionKeyItem;
 @Table(name="smart.team")
 public class Team extends NamedDescriptionKeyItem{
 
+	private static final long serialVersionUID = 1L;
 	
 	public static final int MAX_NAME_LENGTH = 64;
 	

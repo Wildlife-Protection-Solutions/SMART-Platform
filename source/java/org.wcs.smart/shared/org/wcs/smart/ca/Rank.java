@@ -36,7 +36,9 @@ import javax.persistence.Table;
 @Entity
 @Table(name ="smart.rank")
 public class Rank extends NamedItem{
-
+	
+	private static final long serialVersionUID = 1L;
+	
 	private Agency agency;
 	
 	/**

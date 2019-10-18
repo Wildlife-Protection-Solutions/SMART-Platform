@@ -183,6 +183,7 @@ public class XmlDataModelValidator {
 	}
 	
 	class DmObjectWrapper extends DmObject{
+		private static final long serialVersionUID = 1L;
 		public DmObjectWrapper(){
 			super();
 		}

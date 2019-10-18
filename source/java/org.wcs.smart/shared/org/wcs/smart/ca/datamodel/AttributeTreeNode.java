@@ -36,8 +36,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
@@ -51,9 +49,10 @@ import org.wcs.smart.ca.icon.Icon;
  */
 @Entity
 @Table(name = "smart.dm_attribute_tree")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class AttributeTreeNode extends DmObject implements HkeyObject{
 
+	private static final long serialVersionUID = 1L;
+	
 	private static final String FULL_NAME_SEPARATOR = " - "; //$NON-NLS-1$
 	
 	private Attribute attribute = null;
@@ -137,7 +136,6 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent", cascade = {CascadeType.ALL}, orphanRemoval = true)
 	@OrderBy(clause = "node_order")
 	@BatchSize(size=200)
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<AttributeTreeNode> getChildren(){
 		return this.children;
 	}
@@ -150,7 +148,6 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	@Where(clause = "is_active")
 	@OrderBy(clause = "node_order")
 	@BatchSize(size=200)
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 	public List<AttributeTreeNode> getActiveChildren(){
 		return this.activeChildren;
 	}
@@ -165,7 +162,6 @@ public class AttributeTreeNode extends DmObject implements HkeyObject{
 	 */
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="parent_uuid")
-//	@Cascade({CascadeType.SAVE_UPDATE})	
 	public AttributeTreeNode getParent(){
 		return this.parent;
 	}

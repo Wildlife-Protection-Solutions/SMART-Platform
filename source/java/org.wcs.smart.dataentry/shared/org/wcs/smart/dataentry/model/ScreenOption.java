@@ -48,6 +48,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.screen_option")
 public class ScreenOption extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea ca;
 	
 	//key identifying the metadata field

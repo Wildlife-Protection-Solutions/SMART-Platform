@@ -24,12 +24,10 @@ package org.wcs.smart.ca.datamodel;
 import java.util.Collection;
 import java.util.HashSet;
 
-import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
@@ -45,10 +43,12 @@ import org.wcs.smart.ca.icon.Icon;
  * @since 1.0.0
  */
 
-@Entity
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+//@Entity
+//@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
 public class DmObject extends NamedKeyItem{
 	
+	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * Maximum length of the name identifier

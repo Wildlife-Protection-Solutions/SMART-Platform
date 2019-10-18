@@ -42,6 +42,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.cm_attribute_option")
 public class CmAttributeOption extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String ID_IS_VISIBLE = "IS_VISIBLE"; //$NON-NLS-1$
 	public static final String ID_DEFAULT_VALUE = "DEFAULT_VALUE"; //$NON-NLS-1$
 	public static final String ID_MULTISELECT = "MULTISELECT"; //$NON-NLS-1$

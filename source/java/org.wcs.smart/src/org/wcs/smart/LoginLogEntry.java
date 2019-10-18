@@ -38,8 +38,10 @@ import org.wcs.smart.ca.UuidItem;
  */
 @Entity
 @Table(name = "smart.login_log")
-
 public class LoginLogEntry extends UuidItem{
+	
+	private static final long serialVersionUID = 1L;
+	
 	private String smartUserId;
 	private String userLevels;
 	private Timestamp loginTimestamp;

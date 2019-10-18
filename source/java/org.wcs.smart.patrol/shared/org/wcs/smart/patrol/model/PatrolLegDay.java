@@ -62,6 +62,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.patrol_leg_day")
 public class PatrolLegDay extends UuidItem {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private Date date;
 
 	private List<PatrolWaypoint> waypoints;

@@ -1,4 +1,5 @@
 /*
+
  * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -27,10 +28,8 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
@@ -46,10 +45,12 @@ import org.hibernate.annotations.Type;
  * @author Emily
  *
  */
-@Entity
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+//@Entity
+//@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
 public class NamedItem extends UuidItem {
 
+	private static final long serialVersionUID = 1L;
 	
 	private Set<Label> names;
 	private String name;

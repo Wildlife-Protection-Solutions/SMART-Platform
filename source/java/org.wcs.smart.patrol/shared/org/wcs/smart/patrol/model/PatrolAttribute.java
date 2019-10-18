@@ -54,6 +54,8 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 @Table(name = "smart.patrol_attribute")
 public class PatrolAttribute extends NamedKeyItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea conservationArea;
 	private Attribute.AttributeType type;
 	private boolean isActive;
