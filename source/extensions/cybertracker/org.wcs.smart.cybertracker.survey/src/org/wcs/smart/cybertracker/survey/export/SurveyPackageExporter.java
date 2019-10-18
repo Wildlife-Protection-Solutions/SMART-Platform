@@ -124,6 +124,8 @@ public enum SurveyPackageExporter {
 				
 				//contribution files
 				HashMap<String, Object> projectAdditions = new HashMap<>();
+				HashMap<String, Object> ctprofileAdditions = new HashMap<>();
+
 				for (IPackageContribution.PackageContribution update : contributions) {
 					for (Path p : update.getAddedFiles()) {
 						if (Files.isDirectory(p)) {
@@ -140,6 +142,9 @@ public enum SurveyPackageExporter {
 					}
 					if (update.getProjectMetadata() != null) {
 						projectAdditions.putAll(update.getProjectMetadata());
+					}
+					if (update.getProfileMetadata() != null) {
+						ctprofileAdditions.putAll(update.getProfileMetadata());
 					}
 				}
 				
@@ -181,7 +186,8 @@ public enum SurveyPackageExporter {
 				sub.split(1);
 				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
 				
-				profileToJson(ctpackage.getCtProfile(), modelToExport, sd.getTrackDistanceDirection(), session, context, profileFile);
+				profileToJson(ctpackage.getCtProfile(), sd.getTrackDistanceDirection(), session, context, profileFile, ctprofileAdditions);
+
 				toIncludeInZip.add(profileFile.toFile());
 								
 				//get version number from output file
@@ -277,12 +283,11 @@ public enum SurveyPackageExporter {
 		}
 	}
 	
-	private void profileToJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, boolean distanceDirection, Session session, IEclipseContext context, Path outputFile) throws IOException {
+	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, Session session, IEclipseContext context, Path outputFile, HashMap<String, Object> additions ) throws IOException {
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
-			fw.write(CtJsonExportUtils.toJson(profile, cm, distanceDirection, context, session));
+			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, additions, context, session));
 		}
 	}
-	
 	
 	@SuppressWarnings("unchecked")
 	private void metadataToJson(AbstractCtPackage ctpackage, SurveyDesign design, Session session, Path outputFile) throws IOException {

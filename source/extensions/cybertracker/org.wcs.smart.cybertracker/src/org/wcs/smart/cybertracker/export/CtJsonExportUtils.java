@@ -51,8 +51,6 @@ import org.wcs.smart.ca.EmployeeTeam;
 import org.wcs.smart.ca.EmployeeTeamMember;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.NamedKeyItem;
-import org.wcs.smart.cybertracker.export.alert.ConfigurationDataProvider;
-import org.wcs.smart.cybertracker.export.alert.IDataTargetProvider.DataTarget;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
@@ -62,7 +60,6 @@ import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttribute.HelpImageLocation;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.ScreenOptionUuid;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
@@ -172,56 +169,6 @@ public class CtJsonExportUtils {
 	
 	public static final String PROJECT_FILE = "project.json"; //$NON-NLS-1$
 	
-	/**
-	 * Convert cybertracker properties profile to JSON string.
-	 * 
-	 * @param profile
-	 * @return
-	 */
-	public static String toJson(CyberTrackerPropertiesProfile profile, ConfigurableModel cm, boolean distanceDirection, IEclipseContext context, Session session) {
-		JSONObject profileObj = new JSONObject();
-		
-		for (ProfileOptionID option : ProfileOptionID.values()) {
-			CyberTrackerPropertiesProfileOption opValue = profile.getOptions().get(option);
-			if (opValue == null) {
-				//write the default value and continue
-				Object value = profile.getDefaultValue(option);
-				profileObj.put(option.name(), value);
-				continue;
-			}
-			
-			if (isBoolean(option)) {
-				profileObj.put(option.name(), opValue.getBooleanValue());
-			}else if (isColor(option) && opValue.getIntegerValue() != null) {
-				Color c = new Color(opValue.getIntegerValue());
-				profileObj.put(option.name(), Integer.toHexString(c.getRGB()).substring(2));
-			}else if (opValue.getDoubleValue() != null) {
-				profileObj.put(option.name(), opValue.getDoubleValue());
-			}else if (opValue.getIntegerValue() != null) {
-				profileObj.put(option.name(), opValue.getIntegerValue());
-			}else if (opValue.getStringValue() != null) {
-				profileObj.put(option.name(), opValue.getStringValue());
-			}
-		}
-		profileObj.put(DISTANCE_DIRECTION_OP, distanceDirection); 
-		ConfigurationDataProvider connectProvider = new ConfigurationDataProvider(cm, session, context);
-		try {
-			DataTarget target = connectProvider.getDataTarget();
-			if (target != null) {
-				JSONObject serverDetails = new JSONObject();
-				serverDetails.put(JSON_SERVER_URL_KEY, target.getUrl());
-				serverDetails.put(JSON_SERVER_PROTOCOL_KEY, target.getProtocol().name());
-				serverDetails.put(JSON_SERVER_USERNAME_KEY, target.getUsername());
-				serverDetails.put(JSON_SERVER_PASSWORD_KEY, target.getPassword());
-				serverDetails.put(JSON_SERVER_FREQUENCY_KEY, target.getFrequency());
-				
-				profileObj.put(JSON_SERVER_DATA_KEY, serverDetails);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return profileObj.toJSONString();
-	}
 
 	/**
 	 * Convert cybertracker properties profile to JSON string.
