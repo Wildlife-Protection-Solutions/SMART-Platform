@@ -412,7 +412,10 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 								}
 							}
 						}
-					}else if (qc instanceof SurveyQueryColumn && ((SurveyQueryColumn)qc).getKey().equals(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT.getKey())) {
+					}else if (qc.getKey().equals("su:length") || qc.getKey().contentEquals("su:effort")) { //$NON-NLS-1$ //$NON-NLS-2$
+						data[i] = qc.getValueAsString(qc.getValue(ri));
+					}else if (qc instanceof SurveyQueryColumn
+							&& ((SurveyQueryColumn)qc).getKey().equals(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT.getKey())) {
 						data[i] = qc.getValueAsString(qc.getValue(ri));
 					}
 				}

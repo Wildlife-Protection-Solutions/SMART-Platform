@@ -218,7 +218,10 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					if ( sq.getSurveyDesign() == null ) return Status.OK_STATUS;
+					if ( sq.getSurveyDesign() == null ) {
+						Display.getDefault().syncExec(()->refreshPanel(null));
+						return Status.OK_STATUS;
+					}
 					
 					try(Session s = HibernateManager.openSession()){
 						List<SurveyDesign> results = QueryFactory.buildQuery(s, SurveyDesign.class,
