@@ -398,7 +398,7 @@ public class PatrolLegDayInputComposite {
 		});
 		if (editor.getPatrolEditor().canEdit() == null) {
 			Hyperlink btnUpdateTime = toolkit.createHyperlink(c, Messages.PatrolLegDayInputComposite_Button_UpdateTime_Text, SWT.NONE);
-			btnUpdateTime.setToolTipText(Messages.PatrolLegDayInputComposite_Button_UpdateTime_Tooltip);
+			btnUpdateTime.setToolTipText(Messages.PatrolLegDayInputComposite_Button_UpdateTime1_Tooltip);
 			btnUpdateTime.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false, 2, 1));
 			btnUpdateTime.addHyperlinkListener(new IHyperlinkListener() {
 				
@@ -412,7 +412,7 @@ public class PatrolLegDayInputComposite {
 				
 				@Override
 				public void linkActivated(HyperlinkEvent e) {
-					if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Title, Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Message)) {
+					if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Title, Messages.PatrolLegDayInputComposite_ConfDialog_UpdateTime_Message1)) {
 						updateTimeWithWpData();
 					}
 				}

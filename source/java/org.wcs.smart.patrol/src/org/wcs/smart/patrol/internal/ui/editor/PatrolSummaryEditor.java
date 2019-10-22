@@ -539,7 +539,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		if (editor.canEdit() == null) {
 			Hyperlink btnUpdateTime = toolkit.createHyperlink(statsCmp, Messages.PatrolSummaryEditor_Button_UpdateTime, SWT.NONE);
 			btnUpdateTime.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
-			btnUpdateTime.setToolTipText(Messages.PatrolSummaryEditor_Button_UpdateTime_Tooltip);
+			btnUpdateTime.setToolTipText(Messages.PatrolSummaryEditor_Button_UpdateTime_Tooltip1);
 			btnUpdateTime.addHyperlinkListener(new IHyperlinkListener() {
 				@Override
 				public void linkExited(HyperlinkEvent e) {}
@@ -549,7 +549,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				
 				@Override
 				public void linkActivated(HyperlinkEvent e) {
-					if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolSummaryEditor_ConfDialog_UpdateTime_Title, Messages.PatrolSummaryEditor_ConfDialog_UpdateTime_Message)) {
+					if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.PatrolSummaryEditor_ConfDialog_UpdateTime_Title, Messages.PatrolSummaryEditor_ConfDialog_UpdateTime_Message1)) {
 						updateTimeWithWpData();
 					}
 				}
