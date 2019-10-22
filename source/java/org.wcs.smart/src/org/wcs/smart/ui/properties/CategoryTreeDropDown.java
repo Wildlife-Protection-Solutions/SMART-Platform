@@ -127,6 +127,7 @@ public class CategoryTreeDropDown  {
 	 * Updates the ui text field with the given selection.
 	 */
 	private void updateSelection(Category selection){
+		if (lastValidSelection == selection) return;
 		if (selection == null){
 			txtText.setText(""); //$NON-NLS-1$
 			txtText.setData(null);

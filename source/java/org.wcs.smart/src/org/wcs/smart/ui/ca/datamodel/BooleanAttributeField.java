@@ -119,7 +119,7 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 	public void createComposite(Composite parent) {
 		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -133,11 +133,13 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 		btnYes.setText(SmartLabelProvider.BOOLEAN_TRUE_LABEL);
 		btnYes.addSelectionListener(validateListener);
 		btnYes.setBackground(btnYes.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnYes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 		
 		btnNo = new Button(comp, SWT.RADIO);
 		btnNo.setText(SmartLabelProvider.BOOLEAN_FALSE_LABEL);
 		btnNo.addSelectionListener(validateListener);
 		btnNo.setBackground(btnNo.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnNo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 		
 		if (!attribute.getIsRequired()){
 			btnUndefined = new Button(comp, SWT.RADIO);
@@ -145,6 +147,7 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 			btnUndefined.setSelection(true);
 			btnUndefined.addSelectionListener(validateListener);
 			btnUndefined.setBackground(btnUndefined.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			btnUndefined.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 		}
 		
 		cd = new ControlDecoration(comp, SWT.LEFT | SWT.TOP);
