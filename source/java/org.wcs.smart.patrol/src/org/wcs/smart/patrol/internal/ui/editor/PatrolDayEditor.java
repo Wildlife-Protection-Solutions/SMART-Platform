@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -188,9 +189,11 @@ public class PatrolDayEditor extends EditorPart {
 	
 						@Override
 						public int compare(PatrolLegDay o1, PatrolLegDay o2) {
-							if (o1.getStartTime().before(o2.getStartTime())){
+							Date d1 = o1.getStartTime();
+							Date d2 = o2.getStartTime();
+							if (d1.before(d2)){
 								return -1;
-							}else if (o1.getStartTime().after(o2.getStartTime())){
+							}else if (d2.before(d1)) {
 								return 1;
 							}else{
 								return Collator.getInstance().compare(o1.getPatrolLeg().getId(),o2.getPatrolLeg().getId());

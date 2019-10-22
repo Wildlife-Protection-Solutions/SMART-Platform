@@ -120,6 +120,9 @@ public class PatrolLegDay extends UuidItem {
 		return this.startTime;
 	}
 	public void setStartTime(Time startTime){
+		if (startTime.getTime() < 0) {
+			startTime = new Time(startTime.getTime() + 86_400_000);
+		}
 		this.startTime = startTime;
 	}
 	
