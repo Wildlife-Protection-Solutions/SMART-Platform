@@ -127,7 +127,8 @@ public class Messages extends NLS {
 	public static String TableMapQaErrorComposite_DateLbl;
 	public static String TableMapQaErrorComposite_DescriptionColumName;
 	public static String TableMapQaErrorComposite_DescriptionLbl;
-	public static String TableMapQaErrorComposite_filterTooltip;
+	public static String TableMapQaErrorComposite_filterShowTooltip;
+	public static String TableMapQaErrorComposite_filterHideTooltip;
 	public static String TableMapQaErrorComposite_FixColumnName;
 	public static String TableMapQaErrorComposite_FixLbl;
 	public static String TableMapQaErrorComposite_ResultsLabel;

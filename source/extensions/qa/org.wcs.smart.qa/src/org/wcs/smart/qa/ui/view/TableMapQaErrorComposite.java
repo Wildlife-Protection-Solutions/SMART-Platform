@@ -363,11 +363,16 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		ToolBar tb = new ToolBar(topComp, SWT.NONE);
 		
 		btnIncludeFixed = new ToolItem(tb,  SWT.CHECK);
-		btnIncludeFixed.setSelection(false);
+		btnIncludeFixed.setSelection(true);
 		btnIncludeFixed.addListener(SWT.Selection, e->{
 			updateResultsTableFilter();
+			if (btnIncludeFixed.getSelection()) {
+				btnIncludeFixed.setToolTipText(Messages.TableMapQaErrorComposite_filterHideTooltip);		
+			}else {
+				btnIncludeFixed.setToolTipText(Messages.TableMapQaErrorComposite_filterShowTooltip);
+			}
 		});
-		btnIncludeFixed.setToolTipText(Messages.TableMapQaErrorComposite_filterTooltip);
+		btnIncludeFixed.setToolTipText(Messages.TableMapQaErrorComposite_filterHideTooltip);
 		btnIncludeFixed.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.FILTER_ICON));
 		
 		ToolItem btnOrderSelection = new ToolItem(tb,  SWT.PUSH);
