@@ -64,16 +64,10 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 
 	private void upgrade(Connection c, IProgressMonitor monitor)
 			throws Exception {
-
-		try {
-			String s = "CREATE FUNCTION smart.uuid() returns char(16) for bit data LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.DerbyUtils.createUuid' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT"; //$NON-NLS-1$
-			SmartPlugIn.logInfo(s);
-			c.createStatement().execute(s);
-		}catch (Exception ex) {
-			//function already exists
-		}
 		
 		String[] sql = new String[] {
+				"CREATE FUNCTION smart.tempuuid() returns char(16) for bit data LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.DerbyUtils.createUuid' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
+				
 				"CREATE TABLE smart.employee_team (uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, primary key (uuid))", //$NON-NLS-1$
 				"CREATE TABLE smart.employee_team_member (employee_uuid char(16) for bit data not null, team_uuid char(16) for bit data not null, primary key(employee_uuid, team_uuid))", //$NON-NLS-1$
 				
@@ -124,22 +118,60 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 				
 				"alter table smart.cm_attribute_option alter column string_value set data type varchar(32672)", //$NON-NLS-1$
 				
-
-
 				//sub-incidents
 				"CREATE TABLE smart.wp_observation_group (uuid char(16) for bit data not null, wp_uuid char(16) for bit data not null, primary key (uuid))", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.wp_observation_group TO manager", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.wp_observation_group TO analyst", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.wp_observation_group TO data_entry", //$NON-NLS-1$
 				
-				"INSERT INTO smart.wp_observation_group (uuid, wp_uuid) SELECT smart.uuid(), uuid FROM smart.waypoint WHERE uuid in (SELECT wp_uuid FROM smart.wp_observation)", //$NON-NLS-1$
+				"INSERT INTO smart.wp_observation_group (uuid, wp_uuid) SELECT smart.tempuuid(), uuid FROM smart.waypoint WHERE uuid in (SELECT wp_uuid FROM smart.wp_observation)", //$NON-NLS-1$
 				
 				"ALTER TABLE smart.wp_observation ADD COLUMN wp_group_uuid char(16) for bit data", //$NON-NLS-1$
 				"UPDATE smart.wp_observation SET wp_group_uuid = (select a.uuid from smart.wp_observation_group a where a.wp_uuid = smart.wp_observation.wp_uuid)", //$NON-NLS-1$
 				"alter table smart.wp_observation drop column wp_uuid", //$NON-NLS-1$
-				"ALTER table smart.wp_observation_group ADD CONSTRAINT wo_obs_grp_wp_uuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				"ALTER table smart.wp_observation ADD CONSTRAINT wo_ob_group_uuid_fk FOREIGN KEY (wp_group_uuid) REFERENCES smart.wp_observation_group (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
+				//configure foreign keys - note we have to drop and recreate most of them to ensure 
+				//they are created correctly
+				"alter table smart.WP_OBSERVATION drop constraint obs_employee_uuid_fk", //$NON-NLS-1$
+				"alter table smart.WP_OBSERVATION drop constraint observation_category_uuid_fk", //$NON-NLS-1$
 
+				"alter table smart.DM_CATEGORY drop constraint dm_category_ca_uuid_fk", //$NON-NLS-1$
+				"alter table smart.DM_ATTRIBUTE drop constraint dm_attribute_ca_uuid_fk", //$NON-NLS-1$
+
+				"alter table smart.dm_category drop constraint dmcat_iconuuid_fk", //$NON-NLS-1$
+				"alter table smart.dm_attribute drop constraint dmatt_iconuuid_fk", //$NON-NLS-1$
+				"alter table smart.dm_attribute_list drop constraint dmattlist_iconuuid_fk", //$NON-NLS-1$
+				"alter table smart.dm_attribute_tree drop constraint dmatttree_iconuuid_fk", //$NON-NLS-1$
+
+				"alter table smart.configurable_model drop constraint cm_iconset_uuid_fk", //$NON-NLS-1$
+				"alter table smart.iconset drop constraint iconset_cauuid_fk", //$NON-NLS-1$
+				"alter table smart.icon drop constraint icon_cauuid_fk", //$NON-NLS-1$
+				"alter table smart.iconfile drop constraint iconfile_iconuuid_fk", //$NON-NLS-1$
+				"alter table smart.iconfile drop constraint iconfile_iconsetuuid_fk", //$NON-NLS-1$
+
+				"ALTER table smart.wp_observation ADD CONSTRAINT wo_ob_group_uuid_fk FOREIGN KEY (wp_group_uuid) REFERENCES smart.wp_observation_group (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER table smart.wp_observation_group ADD CONSTRAINT wo_obs_grp_wp_uuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint (uuid) ON UPDATE RESTRICT ON DELETE CASCADE  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"alter table smart.wp_observation add constraint obs_employee_uuid_fk foreign key (employee_uuid) REFERENCES smart.employee (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"alter table smart.wp_observation add constraint observation_category_uuid_fk foreign key (category_uuid) REFERENCES smart.dm_category (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
+				"alter table smart.dm_category add constraint dm_category_ca_uuid_fk foreign key (ca_uuid) references smart.CONSERVATION_AREA(uuid) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"alter table smart.DM_ATTRIBUTE add constraint dm_attribute_ca_uuid_fk foreign key (ca_uuid) references smart.CONSERVATION_AREA(uuid) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
+
+				"ALTER TABLE smart.dm_attribute ADD CONSTRAINT dmatt_iconuuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON DELETE SET NULL ON UPDATE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.dm_attribute_list ADD CONSTRAINT dmattlist_iconuuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.dm_attribute_tree ADD CONSTRAINT dmatttree_iconuuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON DELETE SET NULL ON UPDATE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.dm_category ADD CONSTRAINT dmcat_iconuuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+								
+
+				"ALTER TABLE smart.configurable_model ADD CONSTRAINT cm_iconset_uuid_fk FOREIGN KEY (iconset_uuid) REFERENCES smart.iconset(uuid) ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+								
+				"ALTER TABLE smart.iconset ADD CONSTRAINT iconset_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.icon ADD CONSTRAINT icon_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.iconfile ADD CONSTRAINT iconfile_iconuuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.iconfile ADD CONSTRAINT iconfile_iconsetuuid_fk FOREIGN KEY (iconset_uuid) REFERENCES smart.iconset(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
+				"DROP FUNCTION smart.tempuuid" //$NON-NLS-1$
 		};
 
 		for (String s : sql) {

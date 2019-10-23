@@ -192,8 +192,17 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 	private Patrol createNewPatrol(UUID ctUuid, CtPatrolLink patrol) throws Exception{
 		Patrol newPatrol = patrol.getPatrolLeg().getPatrol();
 		newPatrol.setConservationArea(SmartDB.getCurrentConservationArea());
-		newPatrol.setStartDate(newPatrol.getFirstLeg().getStartDate());
-		newPatrol.setEndDate(newPatrol.getFirstLeg().getEndDate());
+		
+		//this shouldn't be necessary with the CT Mobile, but 
+		//may be required for old CT support
+		Date start = newPatrol.getFirstLeg().getStartDate();
+		Date end = newPatrol.getFirstLeg().getEndDate();
+		for (PatrolLeg pl : newPatrol.getLegs()) {
+			if (pl.getStartDate().before(start)) start = pl.getStartDate();
+			if (pl.getEndDate().after(end)) end = pl.getEndDate();
+		}
+		newPatrol.setStartDate(start);
+		newPatrol.setEndDate(end);
 		
 		newPatrol.setId(PatrolHibernateManager.generatePatrolId(newPatrol, session));
 		if (newPatrol.getPatrolType() == null){
@@ -292,13 +301,14 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			Label l = new Label(main, SWT.WRAP);
 			StringBuilder lbl = new StringBuilder();
 			Patrol p = e.getValue().getPatrolLeg().getPatrol();
-			Date startDt = null;
-			for (PatrolLegDay day1 : pl.getPatrolLegDays()){
-				if (SharedUtils.isSameDate(day1.getDate(), pl.getStartDate())){
-					startDt = SmartUtils.combineDateTime(day1.getDate(), day1.getStartTime());
-					break;
+			Date startDt = SmartUtils.combineDateTime(p.getFirstLeg().getStartDate(), p.getFirstLeg().getPatrolLegDays().get(0).getStartTime());
+			for (PatrolLeg ppl : p.getLegs()) {
+				for (PatrolLegDay pld : ppl.getPatrolLegDays()) {
+					Date d = SmartUtils.combineDateTime(pld.getDate(), pld.getStartTime());
+					if (d.before(startDt)) startDt = d;
 				}
 			}
+			
 			lbl.append(p.getId());
 			lbl.append("\n"); //$NON-NLS-1$
 			lbl.append(Messages.PatrolDialog_StartDateLabel);
