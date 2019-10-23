@@ -93,6 +93,7 @@ public class SaveWaypointJob extends Job {
 					
 					//remove groups with no data
 					List<WaypointObservationGroup> gdelete = new ArrayList<>();
+					if (wp.getWaypoint().getObservationGroups() == null) wp.getWaypoint().setObservationGroups(new ArrayList<>());
 					for (WaypointObservationGroup g : wp.getWaypoint().getObservationGroups()) {
 						if (g.getObservations() == null || g.getObservations().isEmpty()) gdelete.add(g);
 					}
