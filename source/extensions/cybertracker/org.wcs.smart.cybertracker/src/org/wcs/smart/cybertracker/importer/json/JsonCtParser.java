@@ -112,6 +112,8 @@ public class JsonCtParser {
 	public static final String OBSERVATION_TYPE_START_PATROL_KEY = "NewPatrol"; //$NON-NLS-1$
 	public static final String OBSERVATION_TYPE_OBSERVATION_KEY = "Observation"; //$NON-NLS-1$
 	public static final String OBSERVATION_TYPE_END_PATROL_KEY = "StopPatrol"; //$NON-NLS-1$
+	public static final String OBSERVATION_TYPE_PAUSE_PATROL_KEY = "PausePatrol"; //$NON-NLS-1$
+	public static final String OBSERVATION_TYPE_RESUME_PATROL_KEY = "ResumePatrol"; //$NON-NLS-1$
 	public static final String OBSERVATION_TYPE_CHANGE_PATROL_KEY = "ChangePatrol"; //$NON-NLS-1$
 	
 	/**

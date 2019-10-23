@@ -26,6 +26,9 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -241,7 +244,73 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				
 				boolean noObservation = false;
 				//patrol paused; no observation; record only as track point
-				noObservation = sighting.containsKey(ScreensUtil.RESULT_PAUSED);
+				boolean isPaused = false;
+				boolean isResumed = false;
+				if (sighting.containsKey(ScreensUtil.RESULT_PAUSED)) {
+					isPaused = true;
+				}else if (sighting.containsKey(JsonCtParser.OBSERVATION_TYPE_KEY)) {
+					if (((String) sighting.get(JsonCtParser.OBSERVATION_TYPE_KEY)).trim().equalsIgnoreCase(JsonCtParser.OBSERVATION_TYPE_PAUSE_PATROL_KEY)) {
+						isPaused = true;
+					}
+					if (((String) sighting.get(JsonCtParser.OBSERVATION_TYPE_KEY)).trim().equalsIgnoreCase(JsonCtParser.OBSERVATION_TYPE_RESUME_PATROL_KEY)) {
+						isResumed = true;
+					}
+				}
+				
+				if (isResumed) {
+					//compute rest times
+					if (link != null) {
+						Date dt = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(JsonCtParser.DATETIME_KEY));
+						
+						MissionDay currentDay = findDay(link.getMission(), dt, true, new Time(SmartUtils.getMidnight().getTime()), session);
+						//the pause event is recorded as a track point; not a waypoint
+						//so find the previous track point
+						List<MissionDay> sorts = new ArrayList<MissionDay>(currentDay.getMission().getMissionDays());
+						sorts.sort((a,b)->-1*a.getDate().compareTo(b.getDate()));
+						Date pausepoint = null;
+						for (MissionDay d : sorts) {
+							if (d.getTracks() == null) continue;
+							
+							List<Double> lastValues = new ArrayList<>();
+							for (MissionTrack t : d.getTracks()) {
+								lastValues.add(t.getLineString().getCoordinateN(t.getLineString().getNumPoints() - 1).getZ());
+							}
+							lastValues.sort((a,b)->-1*a.compareTo(b));
+							pausepoint = new Date(lastValues.get(0).longValue());	
+						}
+						DateFormat dd = DateFormat.getDateTimeInstance();
+						dd.setTimeZone(MissionTrack.ZTIMEZONE);
+						pausepoint = DateFormat.getDateTimeInstance().parse(dd.format(pausepoint));
+						
+						LocalDateTime end = (new java.sql.Timestamp(dt.getTime())).toLocalDateTime();
+						LocalDateTime start = (new java.sql.Timestamp(pausepoint.getTime())).toLocalDateTime();
+						LocalDateTime c = start;
+						LocalDate lde = LocalDate.from(end);
+						while(c.isBefore(end)) {
+							LocalDate ld = LocalDate.from(c);
+							if (ld.isEqual(lde)) {
+								MissionDay cd = findDay(link.getMission(), java.sql.Date.valueOf(ld), true, new Time(SmartUtils.getMidnight().getTime()), session);
+								long resttime = Math.round( ChronoUnit.SECONDS.between(c,end) / 60.0 );
+								resttime += cd.getRestMinutes() == null ? 0 : cd.getRestMinutes();
+								cd.setRestMinutes((int)resttime);
+								//time from ld to end 
+								break;
+							}else {
+								MissionDay cd = findDay(link.getMission(), java.sql.Date.valueOf(ld), true, new Time(SmartUtils.getMidnight().getTime()), session);
+								//time from start to end of day c to end of day
+								LocalDateTime endofday = c.withHour(23).withMinute(59).withSecond(59).withNano(999999);
+								long resttime = Math.round( ChronoUnit.SECONDS.between(c,endofday) / 60.0 );
+								resttime += cd.getRestMinutes() == null ? 0 : cd.getRestMinutes();
+								cd.setRestMinutes((int)resttime);
+							}
+							
+							//set current time to mighnight plus one day
+							c = c.withHour(0).withMinute(0).withSecond(0).withNano(0).plus(1, ChronoUnit.DAYS);
+						}
+					}
+				}
+				
+				noObservation = isPaused | isResumed;
 				if (!noObservation) {
 					//check if this is the start of the patrol
 					if (sighting.containsKey(JsonCtParser.OBSERVATION_TYPE_KEY)) {
