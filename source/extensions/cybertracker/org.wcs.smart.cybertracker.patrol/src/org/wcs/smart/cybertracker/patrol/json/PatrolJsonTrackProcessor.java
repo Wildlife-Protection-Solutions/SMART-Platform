@@ -24,6 +24,7 @@ package org.wcs.smart.cybertracker.patrol.json;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -34,6 +35,8 @@ import java.util.Set;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.cybertracker.JsonUtils;
 import org.wcs.smart.cybertracker.importer.json.IJsonProcessor;
 import org.wcs.smart.cybertracker.importer.json.JsonCtParser;
@@ -45,9 +48,6 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.util.SharedUtils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.LineString;
 
 /**
  * For processing track log points.  This attempts to find a patrol
@@ -118,12 +118,33 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 				}
 			}
 
-			if (matches.isEmpty()){
-				continue;
-			}else{
-				if (matches.size() == 1){
-					//this is simple
-					PatrolLegDay pld = matches.get(0);
+			
+			if (matches.size() == 2) {
+				//if matches start point of one, and end point of other 
+				//then add to the end point one
+				LocalTime dlt = (new java.sql.Time(dt.getTime())).toLocalTime();
+				
+				PatrolLegDay first = matches.get(0);
+				PatrolLegDay second = matches.get(1);
+				
+				LocalTime firste = first.getEndTime().toLocalTime();
+				LocalTime firsts = first.getStartTime().toLocalTime();
+				LocalTime seconde = second.getEndTime().toLocalTime();
+				LocalTime seconds = second.getStartTime().toLocalTime();
+				
+				if (firste.equals(dlt) && seconds.equals(dlt)) {
+					//remove second
+					matches.remove(1);
+				}else if (firsts.equals(dlt) && seconde.equals(dlt)) {
+					//remove first
+					matches.remove(0);
+				}
+			}
+			
+			if (matches.isEmpty()) continue;
+			
+			if (matches.size() == 1){
+				for (PatrolLegDay pld : matches) {
 					Track t = pld.getTrack();
 					if (t == null){
 						t = new Track();
@@ -140,22 +161,23 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 						LineString newLs = JsonTrackUtils.addPointToTrack(null, new Coordinate(x,y), dt);
 						t.setLineStrings(Arrays.asList(newLs));
 					}
-
+	
 					processed.add(feature);
-					
+						
 					if (pld.getPatrolLeg().getPatrol().getUuid() != null) modifiedPatrols.add(pld.getPatrolLeg().getPatrol());
-				}else{
-					StringBuilder sb = new StringBuilder();
-					for (PatrolLegDay pld : matches){
-						sb.append(pld.getPatrolLeg().getPatrol().getId() + "(" + DateFormat.getDateInstance().format(pld.getDate()) + "), "); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-					sb.deleteCharAt(sb.length() - 1);
-					sb.deleteCharAt(sb.length() - 1);
-					
-					warnings.add(MessageFormat.format(Messages.PatrolJsonTrackProcessor_MultiplePnts, DateFormat.getDateTimeInstance().format(dt), sb.toString()));
 				}
+			}else{
+				StringBuilder sb = new StringBuilder();
+				for (PatrolLegDay pld : matches){
+					sb.append(pld.getPatrolLeg().getPatrol().getId() + "(" + DateFormat.getDateInstance().format(pld.getDate()) + "), "); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				sb.deleteCharAt(sb.length() - 1);
+				sb.deleteCharAt(sb.length() - 1);
 				
+				warnings.add(MessageFormat.format(Messages.PatrolJsonTrackProcessor_MultiplePnts, DateFormat.getDateTimeInstance().format(dt), sb.toString()));
 			}
+				
+			
 		}
 		return processed;
 
