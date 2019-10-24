@@ -79,7 +79,7 @@ public class CaReplicationDeleteHandler implements ICaDeleteHandler {
 							try (Session s = HibernateManager.openSession()){
 								s.beginTransaction();
 								try {
-									DerbyReplicationManager.INSTANCE.enableReplication(session);
+									DerbyReplicationManager.INSTANCE.enableReplication(s);
 									s.getTransaction().commit();
 								}catch (Exception ex){
 									resetException = ex;
