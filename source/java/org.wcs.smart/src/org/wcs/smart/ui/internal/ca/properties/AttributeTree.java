@@ -808,6 +808,7 @@ public class AttributeTree {
 			
 			AttributeTreeNode it = new AttributeTreeNode();
 			it.setParent(parent);
+			it.setAttribute(attribute);
 			
 			AttributeItemDialog dd = new AttributeItemDialog(Display.getCurrent().getActiveShell(), it, siblings, currentLanguage);
 			int ret = dd.open();
