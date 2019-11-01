@@ -236,7 +236,7 @@ public class TranslateSimpleListItemDialog extends SmartStyledTitleDialog {
 //		composite.setLayout(new GridLayout(2, false));
 		composite.setLayout(new TableColumnLayout());
 		
-		tblViewer = new TableViewer(composite, SWT.BORDER | SWT.FULL_SELECTION);
+		tblViewer = new TableViewer(composite, SWT.FULL_SELECTION);
 		tblViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		TableViewerColumn viewerColumn = new TableViewerColumn(tblViewer,SWT.NONE);
