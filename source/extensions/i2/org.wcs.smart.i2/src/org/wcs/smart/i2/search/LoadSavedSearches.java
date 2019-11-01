@@ -53,7 +53,6 @@ public abstract class LoadSavedSearches extends Job{
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		beforeSearch();
 		List<SearchProxy> searches = new ArrayList<SearchProxy>();
 		try(Session session = HibernateManager.openSession()){
 			List<IntelEntitySearch> objects = QueryFactory.buildQuery(session,IntelEntitySearch.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList();  //$NON-NLS-1$
@@ -69,10 +68,6 @@ public abstract class LoadSavedSearches extends Job{
 		return Status.OK_STATUS;
 	}
 
-	/**
-	 * Executed before the search is performed
-	 */
-	protected void beforeSearch(){ }
 	
 	protected abstract void searchesLoaded(List<SearchProxy> queries);
 

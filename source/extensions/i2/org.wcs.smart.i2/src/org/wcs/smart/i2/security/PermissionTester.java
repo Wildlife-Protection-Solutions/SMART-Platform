@@ -85,19 +85,21 @@ public class PermissionTester extends PropertyTester {
 			for (SmartUserLevel l : intelUserLevels) {
 				if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), l)) return true;
 			}
+			
+			
 			return false;
 		case CONFIGURE:
-			return IntelSecurityManager.INSTANCE.canConfigure();
+			return IntelSecurityManager.INSTANCE.canConfigureAny();
 		case CREATE_ENTITY:
-			return IntelSecurityManager.INSTANCE.canCreateEntity();
+			return IntelSecurityManager.INSTANCE.canCreateEntityAny();
 		case CREATE_QUERY:
 			return IntelSecurityManager.INSTANCE.canCreateQuery();
 		case CREATE_RECORD:
-			return IntelSecurityManager.INSTANCE.canCreateRecord();
+			return IntelSecurityManager.INSTANCE.canCreateRecordAny();
 		case EXPORT_DATA:
 			break;
 		case IMPORT_DATA:
-			return IntelSecurityManager.INSTANCE.canConfigure();
+			return IntelSecurityManager.INSTANCE.canConfigureAny();
 		}
 		return false;
 	}

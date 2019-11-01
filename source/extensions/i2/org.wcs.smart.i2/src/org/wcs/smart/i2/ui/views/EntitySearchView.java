@@ -138,16 +138,9 @@ public class EntitySearchView {
 	private Composite allResults;
 	private Composite entityListResults;
 	
-	
+	private ISelection lastSelection;
 	private LoadSavedSearches loadSearchJob = new LoadSavedSearches() {
-		ISelection lastSelection;
-		@Override
-		protected void beforeSearch(){
-			Display.getDefault().syncExec(()->{
-				lastSelection = cmbSavedSearch.getSelection();
-				cmbSavedSearch.setInput(new String[]{DialogConstants.LOADING_TEXT});
-			});
-		}
+		
 		@Override
 		protected  void searchesLoaded(List<SearchProxy> queries) {
 			Display.getDefault().asyncExec(()->{
@@ -271,8 +264,7 @@ public class EntitySearchView {
 		entityList = new EntitySearchResultTable(entityListResults, toolkit, context);
 		entityList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		loadSearchJob.schedule();
-		
+		loadSearches();
 		
 		
 		//enforce a minimum size
@@ -394,7 +386,7 @@ public class EntitySearchView {
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		ToolBar tb = new ToolBar(top, SWT.FLAT);
-		if (IntelSecurityManager.INSTANCE.canCreateEntity()) {
+		if (IntelSecurityManager.INSTANCE.canCreateEntityAny()) {
 			ToolItem tiAdd = new ToolItem(tb, SWT.PUSH);
 			tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			tiAdd.setToolTipText(Messages.EntitySearchView_newEntityTooltip);
@@ -429,7 +421,7 @@ public class EntitySearchView {
 		delete.addListener(SWT.Selection, (event)->deleteSavedSearch());
 		delete.setToolTipText(Messages.EntitySearchView_DeleteTooltip);
 		delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		delete.setEnabled(IntelSecurityManager.INSTANCE.canEditEntity());
+		delete.setEnabled(IntelSecurityManager.INSTANCE.canEditEntityAny());
 		
 		ToolItem rename = new ToolItem(tb, SWT.PUSH);
 		rename.addListener(SWT.Selection, (event)->{
@@ -456,13 +448,13 @@ public class EntitySearchView {
 		});
 		rename.setToolTipText(Messages.EntitySearchView_renametooltip);
 		rename.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
-		rename.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		rename.setEnabled(IntelSecurityManager.INSTANCE.canViewEntityAny());
 		
 		ToolItem refresh = new ToolItem(tb, SWT.PUSH);
-		refresh.addListener(SWT.Selection, (event)->loadSearchJob.schedule());
+		refresh.addListener(SWT.Selection, (event)->loadSearches());
 		refresh.setToolTipText(Messages.EntitySearchView_refreshtooltip);
 		refresh.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
-		refresh.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		refresh.setEnabled(IntelSecurityManager.INSTANCE.canViewEntityAny());
 		
 		toolkit.createLabel(core, Messages.EntitySearchView_SavedSearchLabel);
 		
@@ -480,12 +472,12 @@ public class EntitySearchView {
 			}
 		});
 		cmbSavedSearch.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		cmbSavedSearch.getControl().setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		cmbSavedSearch.getControl().setEnabled(IntelSecurityManager.INSTANCE.canViewEntityAny());
 		
 		Button btnLoad = toolkit.createButton(core, Messages.EntitySearchView_LoadButtonText, SWT.PUSH);
 		btnLoad.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 2, 1));
 		btnLoad.addListener(SWT.Selection, (event)->loadSearch());
-		btnLoad.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		btnLoad.setEnabled(IntelSecurityManager.INSTANCE.canViewEntityAny());
 		
 		return core;
 	}
@@ -634,7 +626,7 @@ public class EntitySearchView {
 	@Inject
 	@Optional
 	private void searchModified(@UIEventTopic(IntelEvents.ENTITY_SEARCH_ALL) IntelEntitySearch search){
-		loadSearchJob.schedule();
+		loadSearches();
 	}
 	
 	@Inject
@@ -664,11 +656,15 @@ public class EntitySearchView {
 	private void dbModified(@EventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
 		basicPanel.refresh();
 		allPanel.refresh(searchDelay);
-		loadSearchJob.schedule();
+		loadSearches();
 		doSearch(null, searchDelay);
 	}
 	
-	
+	private void loadSearches() {
+		lastSelection = cmbSavedSearch.getSelection();
+		cmbSavedSearch.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		loadSearchJob.schedule();
+	}
 	/*
 	 * Saves a search
 	 */
@@ -707,7 +703,7 @@ public class EntitySearchView {
 	 * executes search
 	 */
 	private void doSearch(IIntelEntitySearch search, long delay){
-		if (!IntelSecurityManager.INSTANCE.canViewEntities()) {
+		if (!IntelSecurityManager.INSTANCE.canViewEntityAny()) {
 			entityList.setSearchError(new Exception(Messages.EntitySearchView_unauthorized));
 			return;
 		}

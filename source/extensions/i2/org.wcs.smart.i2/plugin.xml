@@ -173,6 +173,25 @@
             class="org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle"
             supportsCcaa="false">
       </class>
+      <class
+            class="org.wcs.smart.i2.model.IntelProfile"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".id.profile.conservationArea"
+            class="org.wcs.smart.i2.model.IntelProfileEntityType"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".id.profile.conservationArea"
+            class="org.wcs.smart.i2.model.IntelProfileRecordType"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".id.employee.conservationArea"
+            class="org.wcs.smart.i2.model.IntelPermission"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.caDeleteAdvisor">
@@ -423,6 +442,11 @@
                   name="org.wcs.smart.i2.separator2"
                   visible="true">
             </separator>
+            <command
+                  commandId="org.wcs.smart.i2.command.profiles.show"
+                  label="Manage Profiles..."
+                  style="push">
+            </command>
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
                   icon="images/icons/obj16/template.png"
@@ -1354,6 +1378,38 @@
                </visibleWhen>
             </command>
          </toolbar>
+         <toolbar
+               id="vertical.org.wcs.smart.i2.toolbar7">
+            <command
+                  commandId="org.wcs.smart.i2.command.profile.filter"
+                  id="org.wcs.smart.i2.menu.profile.filter"
+                  label="Profiles Filter"
+                  mode="FORCE_TEXT"
+                  style="radio">
+               <visibleWhen>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <or>
+                           <equals
+                                 value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+                           </equals>
+                           <equals
+                                 value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+                           </equals>
+                           <equals
+                                 value="org.wcs.smart.i2.IntelEntityPerspective">
+                           </equals>
+                        </or>
+                     </with>
+                  </and>
+               </visibleWhen>
+            </command>
+         </toolbar>
       </menuContribution>
       
    </extension>
@@ -1572,6 +1628,14 @@
             id="org.wcs.smart.i2.command.config.show"
             name="%ModuleSettingsCommandName">
       </command>
+      <command
+            id="org.wcs.smart.i2.command.profiles.show"
+            name="Manage Profiles...">
+      </command>
+      <command
+            id="org.wcs.smart.i2.command.profile.filter"
+            name="Profile Filter">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -1708,6 +1772,14 @@
                   value="configure">
             </test>
          </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.ShowProfilesHandler$ShowProfilesHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.profiles.show">
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.ProfileFilterHandler$ProfileFilterHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.profile.filter">
       </handler>
    </extension>
    <extension

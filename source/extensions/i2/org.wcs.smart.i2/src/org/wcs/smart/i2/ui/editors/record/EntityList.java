@@ -206,10 +206,12 @@ public class EntityList extends Composite {
 	}
 	
 	private void openEntity(){
-		if (!IntelSecurityManager.INSTANCE.canViewEntities()) return;
-		if (!getCurrentSelection().isEmpty()){
-			(new OpenEntityHandler()).openEntity(getCurrentSelection().get(0), listParent.getEditor().getContext());
-		}
+		if (getCurrentSelection().isEmpty()) return;
+		
+		IntelEntity ie = getCurrentSelection().get(0);
+		if (!IntelSecurityManager.INSTANCE.canViewEntities(ie.getProfile())) return;
+		(new OpenEntityHandler()).openEntity(ie, listParent.getEditor().getContext());
+		
 	}
 	
 	private void createMenu(Composite parent){
@@ -244,10 +246,9 @@ public class EntityList extends Composite {
 						mnuRelationship.dispose();
 						mnuRelationship = null;
 					}
-					if (IntelSecurityManager.INSTANCE.canEditEntity()) {
-						if (!getCurrentSelection().isEmpty()){
-							
-							final IntelEntity srcEntity = getCurrentSelection().get(0);
+					if (!getCurrentSelection().isEmpty()) {
+						final IntelEntity srcEntity = getCurrentSelection().get(0);
+						if (IntelSecurityManager.INSTANCE.canEditEntity(srcEntity.getProfile())){							
 							List<IntelEntity> targets = listParent.getEditor().getRecord().getEntities()
 								.stream()
 								.map(ie->ie.getEntity())
@@ -334,7 +335,7 @@ public class EntityList extends Composite {
 			}
 		});
 		
-		if (IntelSecurityManager.INSTANCE.canViewEntities()) {
+		if (IntelSecurityManager.INSTANCE.canViewEntityAny()) { //TODO fix this
 			mnuOpen = new MenuItem(mnuEntities, SWT.PUSH);
 			mnuOpen.setText(Messages.EntityList_OpenItem);
 			mnuOpen.addSelectionListener(new SelectionAdapter() {

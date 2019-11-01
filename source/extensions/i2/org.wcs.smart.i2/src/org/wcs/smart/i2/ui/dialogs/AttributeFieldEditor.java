@@ -1187,14 +1187,15 @@ public class AttributeFieldEditor {
 				items.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getFullLabel(a), SmartLabelProvider.getFullLabel(b)));
 			}
 			Display.getDefault().syncExec(()->{
-				if (cmbViewer != null) {
+				
+				if (cmbViewer != null && !cmbViewer.getControl().isDisposed()) {
 					List<Object> allItems = new ArrayList<>();
 					allItems.add(0, ""); //$NON-NLS-1$
 					allItems.addAll(items);
 					cmbViewer.setInput(allItems);
 					Object defaultv = cmbViewer.getControl().getData(DEFAULT_VALUE_KEY);
 					initEmployeeControl(defaultv);
-				}else if (cmbMultiSelect != null) {
+				}else if (cmbMultiSelect != null && !cmbMultiSelect.isDisposed()) {
 					cmbMultiSelect.setInput(items);
 					Object defaultv = cmbMultiSelect.getData(DEFAULT_VALUE_KEY);
 					initEmployeeControl(defaultv);

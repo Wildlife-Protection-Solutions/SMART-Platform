@@ -608,7 +608,7 @@ public class AllPanel extends Composite {
 			}
 		});
 		
-		if (IntelSecurityManager.INSTANCE.canDeleteEntity()){
+		if (IntelSecurityManager.INSTANCE.canDeleteEntityAny()){
 			MenuItem mnuDelete = new MenuItem(menu, SWT.PUSH);
 			mnuDelete.setText(Messages.EntitySearchResultTable_DeleteMenuItem);
 			mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
@@ -661,7 +661,7 @@ public class AllPanel extends Composite {
 					}
 				}
 				
-				if (IntelSecurityManager.INSTANCE.canCreateRecord()) {
+				if (IntelSecurityManager.INSTANCE.canCreateRecordAny()) {
 					MenuItem createRecord = new MenuItem(subRecord, SWT.PUSH);
 					createRecord.setText(Messages.AllPanel_CreateRecord);
 					createRecord.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
@@ -674,7 +674,7 @@ public class AllPanel extends Composite {
 					});
 				}
 				
-				if (IntelSecurityManager.INSTANCE.canEditRecord()) {
+				if (IntelSecurityManager.INSTANCE.canEditRecordAny()) {
 					Collection<MPart> parts = context.get(EPartService.class).getParts();
 					boolean first = false;
 					for (MPart p : parts){

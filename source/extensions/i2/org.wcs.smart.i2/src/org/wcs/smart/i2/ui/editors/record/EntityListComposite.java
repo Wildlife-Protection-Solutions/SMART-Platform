@@ -105,7 +105,7 @@ public class EntityListComposite extends Composite{
 		((GridLayout)compEntityEdit.getLayout()).marginHeight = 0 ;
 		((GridLayout)compEntityEdit.getLayout()).marginWidth = 0 ;
 		
-		if (IntelSecurityManager.INSTANCE.canViewEntities()) {
+		if (IntelSecurityManager.INSTANCE.canViewEntityAny()) {
 			Button btnAdd = toolkit.createButton(compEntityEdit, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
 			btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			btnAdd.addListener(SWT.Selection, e->addEntity(btnAdd));

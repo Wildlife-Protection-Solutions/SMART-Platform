@@ -93,6 +93,7 @@ import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
@@ -164,6 +165,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						closeEditor();
 						return Status.OK_STATUS; //not found
 					}
+					temp.getProfile().getName();
 					temp.getCreatedBy().getFamilyName();
 					temp.getLastModifiedBy().getFamilyName();
 					if (temp.getAttachments().size() > 0){
@@ -268,6 +270,9 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		
 	};
 	
+	public RecordEditorInput getInputInternal() {
+		return (RecordEditorInput)this.getEditorInput();
+	}
 	@Override
 	public void dispose(){
 		IEventBroker event = parentContext.get(IEventBroker.class);
@@ -774,29 +779,8 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		infodialog.open();	
 	}
 	
-	private Image lastIcon = null;
 	private void updateImageIcon(){
-		if (lastIcon != null){
-			lastIcon.dispose();
-			lastIcon = null;
-		}
-		if (record.getRecordSource() == null){
-			super.setTitleImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD));
-		}else{
-			
-			try {
-				if (record.getRecordSource().getIcon() != null){
-					lastIcon = AWTSWTImageUtils.createSWTImage(record.getRecordSource().getIconAsImage());
-					super.setTitleImage(lastIcon);
-				}else{
-					super.setTitleImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD));
-				}
-			} catch (Exception e) {
-				//e.printStackTrace();
-				super.setTitleImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD));
-			}
-			
-		}
+		super.setTitleImage(Resources.INSTANCE.getImage(record.getRecordSource()));
 	}
     
     

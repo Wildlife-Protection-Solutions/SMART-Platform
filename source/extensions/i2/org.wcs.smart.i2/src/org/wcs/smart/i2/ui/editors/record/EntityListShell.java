@@ -54,7 +54,6 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -141,7 +140,7 @@ public class EntityListShell extends SmartShellDialog {
 					tblEntityTypeList.setInput(new String[]{DialogConstants.LOADING_TEXT});
 					loadEntityTypesJob.schedule();
 				}else if (selection == NEW_ENTITY){
-					NewEntityDialog dialog = new NewEntityDialog(editor.getSite().getShell(), false);
+					NewEntityDialog dialog = new NewEntityDialog(editor.getSite().getShell(), false, editor.getRecord().getProfile());
 					ContextInjectionFactory.inject(dialog, context);
 					if (dialog.open() == NewEntityDialog.OK){
 						editor.linkEntity(dialog.getNewEntity());
@@ -153,7 +152,7 @@ public class EntityListShell extends SmartShellDialog {
 		
 		List<Object> allItems = new ArrayList<Object>();
 		allItems.add(ALL_ENTITIES);
-		if (IntelSecurityManager.INSTANCE.canCreateEntity()) allItems.add(NEW_ENTITY);
+		if (IntelSecurityManager.INSTANCE.canCreateEntityAny()) allItems.add(NEW_ENTITY);
 		
 		if (editor.getContext() != null) {
 			
@@ -161,7 +160,12 @@ public class EntityListShell extends SmartShellDialog {
 			if (part != null) {
 				EntitySearchView view  = (EntitySearchView) E3Utils.getSourceObject(part);
 				List<? extends Object> entities = view.getEntities();
-				allItems.addAll(entities);
+				//filter entities on profile
+				for (Object x : entities) {
+					if (x instanceof IntelEntity && ((IntelEntity)x).getProfile().getUuid().equals(editor.getInputInternal().getRecordProfileUuid())) {
+						allItems.add(x);
+					}
+				}
 			}
 		}
 		
@@ -247,8 +251,12 @@ public class EntityListShell extends SmartShellDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelEntityType> types = new ArrayList<IntelEntityType>();
 			try(Session s = HibernateManager.openSession()){
-				types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
+				types.addAll (s.createQuery("SELECT t FROM IntelEntityType t join t.profiles p WHERE t.conservationArea = :ca and p.uuid = :profile", IntelEntityType.class)
+				.setParameter("ca", SmartDB.getCurrentConservationArea())
+				.setParameter("profile", editor.getInputInternal().getRecordProfileUuid())
+				.list() );
 			}
+			
 			Display.getDefault().syncExec(() -> {if (!tblEntityTypeList.getTable().isDisposed()){tblEntityTypeList.setInput(types);}});
 			return Status.OK_STATUS;
 		}
@@ -262,7 +270,10 @@ public class EntityListShell extends SmartShellDialog {
 			List<IntelEntity> entities = new ArrayList<IntelEntity>();
 			if (lastSelectedType != null){
 				try(Session s = HibernateManager.openSession()){					
-					entities.addAll( QueryFactory.buildQuery(s,IntelEntity.class, "entityType", lastSelectedType).getResultList()); //$NON-NLS-1$
+					entities.addAll( QueryFactory.buildQuery(s, IntelEntity.class, 
+							new Object[]{"entityType", lastSelectedType},
+							new Object[] {"profile.uuid", editor.getInputInternal().getRecordProfileUuid()})
+							.getResultList()); //$NON-NLS-1$
 					for (IntelEntity e : entities){
 						e.getIdAttributeAsText();
 						if (e.getPrimaryAttachment() != null){

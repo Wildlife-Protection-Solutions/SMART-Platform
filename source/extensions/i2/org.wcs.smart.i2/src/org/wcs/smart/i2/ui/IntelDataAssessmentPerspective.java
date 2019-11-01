@@ -48,8 +48,8 @@ public class IntelDataAssessmentPerspective implements IPerspectiveFactory {
 		
 		IFolderLayout right = layout.createFolder("org.wcs.smart.i2.assessment.right", IPageLayout.RIGHT, 0.7f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		
-		if (IntelSecurityManager.INSTANCE.canViewRecords() || 
-				IntelSecurityManager.INSTANCE.canEditRecord()) {
+		if (IntelSecurityManager.INSTANCE.canViewRecordAny() || 
+				IntelSecurityManager.INSTANCE.canEditRecordAny()) {
 			layout.addView(RecordsView.ID, IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA);
 			right.addPlaceholder(RecordNarrativeView.ID);
 			layout.getViewLayout(RecordsView.ID).setCloseable(false);
@@ -61,8 +61,8 @@ public class IntelDataAssessmentPerspective implements IPerspectiveFactory {
 			layout.getViewLayout(WorkingSetView.ID).setCloseable(false);
 		}
 		
-		if (IntelSecurityManager.INSTANCE.canViewEntities() || 
-				IntelSecurityManager.INSTANCE.canEditEntity()) {
+		if (IntelSecurityManager.INSTANCE.canViewEntityAny() || 
+				IntelSecurityManager.INSTANCE.canEditEntityAny()) {
 			right.addView(EntitySearchView.ID);
 			right.addView(LayersView.ID);
 			layout.getViewLayout(EntitySearchView.ID).setCloseable(false);

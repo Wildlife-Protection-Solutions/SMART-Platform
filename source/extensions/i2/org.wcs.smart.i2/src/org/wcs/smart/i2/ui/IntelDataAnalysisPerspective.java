@@ -55,13 +55,13 @@ public class IntelDataAnalysisPerspective implements IPerspectiveFactory {
 
 		IFolderLayout rightFolder = layout.createFolder("org.wcs.smart.i2.analysis.right", IPageLayout.RIGHT, 0.7f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		if (!SmartDB.isMultipleAnalysis()) {
-			if (IntelSecurityManager.INSTANCE.canViewEntities() || 
-					IntelSecurityManager.INSTANCE.canEditEntity()) {
+			if (IntelSecurityManager.INSTANCE.canViewEntityAny() || 
+					IntelSecurityManager.INSTANCE.canEditEntityAny()) {
 				rightFolder.addView(EntitySearchView.ID);
 				layout.getViewLayout(EntitySearchView.ID).setCloseable(false);
 			}
-			if (IntelSecurityManager.INSTANCE.canViewRecords() || 
-					IntelSecurityManager.INSTANCE.canEditRecord()) {
+			if (IntelSecurityManager.INSTANCE.canViewRecordAny() || 
+					IntelSecurityManager.INSTANCE.canEditRecordAny()) {
 				rightFolder.addView(RecordsView.ID);
 				layout.getViewLayout(RecordsView.ID).setCloseable(false);
 			}

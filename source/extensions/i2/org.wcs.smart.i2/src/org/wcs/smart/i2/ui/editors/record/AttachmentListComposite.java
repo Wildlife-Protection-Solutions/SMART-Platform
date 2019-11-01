@@ -62,6 +62,7 @@ import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.FileLocationParser;
 import org.wcs.smart.i2.ui.IntelAttachmentPropertiesDialog;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.editors.AttachmentTable;
 import org.wcs.smart.i2.ui.editors.IMenuCreator;
 import org.wcs.smart.i2.ui.handler.OpenAttachmentViewHandler;
@@ -245,8 +246,7 @@ public class AttachmentListComposite extends Composite{
 							MenuItem eItem = new MenuItem(mnuEntities, SWT.DEFAULT);
 							eItem.setText(entity.getEntity().getIdAttributeAsText());
 							if (entity.getEntity().getEntityType().getIcon() != null){
-								eItem.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntity().getEntityType()).createImage());
-								eItem.addListener(SWT.Dispose, (event) -> {if (eItem.getImage() != null) eItem.getImage().dispose();});
+								eItem.setImage(Resources.INSTANCE.getImage(entity.getEntity().getEntityType()));
 							}
 							eItem.addSelectionListener(new SelectionAdapter() {
 								
@@ -313,8 +313,7 @@ public class AttachmentListComposite extends Composite{
 								MenuItem eItem = new MenuItem(mnuEntitiesUnlink, SWT.DEFAULT);
 								eItem.setText(ea.getIdAttributeAsText());
 								if (ea.getEntityType().getIcon() != null){
-									eItem.setImage(EntityTypeLabelProvider.createImageDescriptor(ea.getEntityType()).createImage());
-									eItem.addListener(SWT.Dispose, (event) -> {if (eItem.getImage() != null) eItem.getImage().dispose();});
+									eItem.setImage(Resources.INSTANCE.getImage(ea.getEntityType()));
 								}
 								
 								eItem.addSelectionListener(new SelectionAdapter() {

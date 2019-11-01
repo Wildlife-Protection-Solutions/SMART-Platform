@@ -21,33 +21,99 @@
  */
 package org.wcs.smart.i2.security;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.model.IntelPermission;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.user.UserLevelManager;
 
 public enum IntelSecurityManager {
 
 	INSTANCE;
 	
+	private volatile HashMap<UUID, Integer> permissions = null;
+	
+	private void loadPermissions() {
+		if (permissions != null) return;
+		synchronized (INSTANCE) {
+			if (permissions != null) return;
+			
+			HashMap<UUID, Integer> temp = new HashMap<>();
+			try(Session session = HibernateManager.openSession()){
+				List<IntelPermission> items = QueryFactory.buildQuery(session, IntelPermission.class, 
+						new Object[] {"employee", SmartDB.getCurrentEmployee()}).list();
+				for (IntelPermission p : items) temp.put(p.getProfile().getUuid(), p.getPermission());
+			}
+			permissions = temp;
+		}
+		
+	}
+	
+	
+	private boolean supportsPermission(UUID profileUuid, int permission) {
+//		if (permissions == null) loadPermissions();
+//		
+//		if (!permissions.containsKey(p)) return false;
+//		if ((permissions.get(p) & permission) != 0) return true;
+//		return false;
+		return true;
+	}
+	private boolean supportsPermissionAny(int permission) {
+//		if (permissions == null) loadPermissions();
+//		for (Integer p : permissions.values()) {
+//			if ( (p.intValue() & permission) != 0 ) return true;
+//		}
+//		return false;
+		return true;
+	}
+	
 	/**
 	 * Determine if the current user can configure the intelligence module; this includes items such
 	 * as configuring attributes, entity types, relationship types etc.
 	 * @return
 	 */
-	public boolean canConfigure() {
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE);
+	public boolean canConfigure(IntelProfile p) {
+		return canConfigure(p.getUuid());
 	}
+	public boolean canConfigure(UUID profileUuid) {
+		return supportsPermission(profileUuid, IntelPermission.ADMIN);
+	}
+	
+	
+	public boolean canConfigureAny() {
+		return supportsPermissionAny(IntelPermission.ADMIN);
+	}
+	
 	
 	/**
 	 * Determine if the current user can view records
 	 * @return
 	 */
-	public boolean canViewRecords(){
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelViewRecordsUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelEditRecordUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelEditRecordWithStatusUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelDeleteRecordUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelReadOnlyUserLevel.INSTANCE);
+	public boolean canViewRecords(IntelProfile p){
+		return canViewRecords(p.getUuid());				
+	}
+	
+	public boolean canViewRecords(UUID profileUuid){
+		return supportsPermission(profileUuid, IntelPermission.ADMIN) ||
+				supportsPermission(profileUuid, IntelPermission.READ_ONLY) ||
+				supportsPermission(profileUuid, IntelPermission.RECORD_EDIT_ALL) ||
+				supportsPermission(profileUuid, IntelPermission.RECORD_EDIT_NOTSTATUS) ||
+				supportsPermission(profileUuid, IntelPermission.RECORD_VIEW) ||
+				supportsPermission(profileUuid, IntelPermission.RECORD_DELETE);
+
+		
+//		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
+//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelViewRecordsUserLevel.INSTANCE) ||
+//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelEditRecordUserLevel.INSTANCE) ||
+//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelEditRecordWithStatusUserLevel.INSTANCE) ||
+//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelDeleteRecordUserLevel.INSTANCE) ||
+//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelReadOnlyUserLevel.INSTANCE);
 				
 	}
 	
@@ -55,33 +121,51 @@ public enum IntelSecurityManager {
 	 * Determine if the current user can view entities
 	 * @return
 	 */
-	public boolean canViewEntities(){
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelViewEntityUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelEditEntityUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDeleteEntityUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelReadOnlyUserLevel.INSTANCE);
+	public boolean canViewEntities(UUID profileUuid){
+		return supportsPermission(profileUuid, IntelPermission.ADMIN) ||
+				supportsPermission(profileUuid, IntelPermission.READ_ONLY) ||
+				supportsPermission(profileUuid, IntelPermission.ENTITY_VIEW) ||
+				supportsPermission(profileUuid, IntelPermission.ENTITY_EDIT) ||
+				supportsPermission(profileUuid, IntelPermission.ENTITY_DELETE);
 		
+//		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
+//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelViewEntityUserLevel.INSTANCE) ||
+//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelEditEntityUserLevel.INSTANCE) ||
+//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDeleteEntityUserLevel.INSTANCE) ||
+//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelReadOnlyUserLevel.INSTANCE);
+		
+	}
+	public boolean canViewEntities(IntelProfile p){
+		return canViewEntities(p.getUuid());	
 	}
 	
 	/**
 	 * Determine if the current user can delete records
 	 * @return
 	 */
-	public boolean canDeleteRecord(){
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDeleteRecordUserLevel.INSTANCE);
+	public boolean canDeleteRecord(IntelProfile p){
+		return canDeleteRecord(p.getUuid());
+	}
+	public boolean canDeleteRecord(UUID profileUuid){
+		return supportsPermission(profileUuid, IntelPermission.ADMIN) ||
+				supportsPermission(profileUuid, IntelPermission.RECORD_DELETE);
 	}
 	
 	/**
 	 * Determine if the current user can delete entities
 	 * @return
 	 */
-	public boolean canDeleteEntity(){
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDeleteEntityUserLevel.INSTANCE);
+	public boolean canDeleteEntity(IntelProfile p){
+		return canDeleteEntity(p.getUuid());
 	}
-	
+	/**
+	 * Determine if the current user can delete entities
+	 * @return
+	 */
+	public boolean canDeleteEntity(UUID profileUuid){
+		return supportsPermission(profileUuid, IntelPermission.ADMIN) ||
+				supportsPermission(profileUuid, IntelPermission.ENTITY_DELETE);
+	}
 	/**
 	 * Determine if the current user can edit working set
 	 * @return
@@ -121,20 +205,29 @@ public enum IntelSecurityManager {
 	 * Determine if the current user can edit entities records
 	 * @return
 	 */
-	public boolean canEditEntity(){
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelEditEntityUserLevel.INSTANCE);
+	public boolean canEditEntity(IntelProfile p ){
+		return canEditEntity(p.getUuid());
+	}
+	/**
+	 * Determine if the current user can edit entities records
+	 * @return
+	 */
+	public boolean canEditEntity(UUID profileUuid){
+		return supportsPermission(profileUuid, IntelPermission.ADMIN) ||
+				supportsPermission(profileUuid, IntelPermission.ENTITY_EDIT);
 	}
 	
 	/**
 	 * Determine if the current user can create entities
 	 * @return
 	 */
-	public boolean canCreateEntity(){
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelCreateEntityUserLevel.INSTANCE);
+	public boolean canCreateEntity(IntelProfile p){
+		return canCreateEntity(p.getUuid());
 	}
-	
+	public boolean canCreateEntity(UUID profileUuid){
+		return supportsPermission(profileUuid, IntelPermission.ADMIN) ||
+				supportsPermission(profileUuid, IntelPermission.ENTITY_CREATE);
+	}
 	
 	/**
 	 * Determine if the current user can create query
@@ -149,12 +242,51 @@ public enum IntelSecurityManager {
 	 * Determine if the current user can create record
 	 * @return
 	 */
-	public boolean canCreateRecord(){
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
-//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDataEntryUserLevel.INSTANCE)||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelCreateRecordUserLevel.INSTANCE);
+	public boolean canCreateRecord(IntelProfile p){
+		return canCreateRecord(p.getUuid());
+	}
+	public boolean canCreateRecord(UUID profileUuid){
+		return supportsPermission(profileUuid, IntelPermission.ADMIN) ||
+				supportsPermission(profileUuid, IntelPermission.RECORD_CREATE);
 	}
 	
+	public boolean canEditRecordAny(){
+		return supportsPermissionAny(IntelPermission.ADMIN) ||
+				supportsPermissionAny(IntelPermission.RECORD_EDIT_ALL) ;
+	}
+	public boolean canCreateRecordAny(){
+		return supportsPermissionAny(IntelPermission.ADMIN) ||
+				supportsPermissionAny(IntelPermission.RECORD_CREATE);
+	}
+	
+	public boolean canDeleteRecordAny(){
+		return supportsPermissionAny(IntelPermission.ADMIN) ||
+				supportsPermissionAny(IntelPermission.RECORD_DELETE);
+	}
+	
+	public boolean canViewRecordAny(){
+		return supportsPermissionAny(IntelPermission.ADMIN) ||
+				supportsPermissionAny(IntelPermission.RECORD_VIEW);
+	}
+	
+	public boolean canCreateEntityAny(){
+		return supportsPermissionAny(IntelPermission.ADMIN) ||
+				supportsPermissionAny(IntelPermission.ENTITY_CREATE);
+	}
+	
+	public boolean canDeleteEntityAny(){
+		return supportsPermissionAny(IntelPermission.ADMIN) ||
+				supportsPermissionAny(IntelPermission.ENTITY_DELETE);
+	}
+	
+	public boolean canViewEntityAny(){
+		return supportsPermissionAny(IntelPermission.ADMIN) ||
+				supportsPermissionAny(IntelPermission.ENTITY_VIEW);
+	}
+	public boolean canEditEntityAny(){
+		return supportsPermissionAny(IntelPermission.ADMIN) ||
+				supportsPermissionAny(IntelPermission.ENTITY_EDIT);
+	}
 	/**
 	 * Determine if the current user can view and modify
 	 * working sets
@@ -185,27 +317,38 @@ public enum IntelSecurityManager {
 	 * 
 	 * @return
 	 */
-	public boolean canEditRecordStatus(){
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
-			UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelEditRecordWithStatusUserLevel.INSTANCE);
+	public boolean canEditRecordStatus(IntelProfile p){
+		return canEditRecordStatus(p.getUuid());
 	}
-	
+	public boolean canEditRecordStatus(UUID profileUuid){
+		
+		return supportsPermission(profileUuid, IntelPermission.ADMIN) ||
+				supportsPermission(profileUuid, IntelPermission.RECORD_EDIT_ALL);
+	}
 	/**
 	 * Determine if the current user can
 	 * edit the record 
 	 * 
 	 * @return
 	 */
-	public boolean canEditRecord(){
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelEditRecordUserLevel.INSTANCE) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelEditRecordWithStatusUserLevel.INSTANCE);
+	public boolean canEditRecord(IntelProfile p){
+//		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
+//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelEditRecordUserLevel.INSTANCE) ||
+//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  IntelEditRecordWithStatusUserLevel.INSTANCE);
+		return canEditRecord(p.getUuid());
 	}
 	
+	public boolean canEditRecord(UUID profileUuid){
+		return supportsPermission(profileUuid, IntelPermission.ADMIN) ||
+				supportsPermission(profileUuid, IntelPermission.RECORD_EDIT_NOTSTATUS);
+		
+	}
 	public boolean canAccessFieldData(){
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ANALYST) ||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  UserLevelManager.MANAGER)||
-				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  UserLevelManager.DATA_ENTRY); 
+		//TODO:
+		return true;
+//		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN) ||
+//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ANALYST) ||
+//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  UserLevelManager.MANAGER)||
+//				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),  UserLevelManager.DATA_ENTRY); 
 	}
 }

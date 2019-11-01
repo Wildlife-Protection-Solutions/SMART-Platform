@@ -130,7 +130,7 @@ public class SpatialSearchPanel extends Composite{
 	}
 	
 	private boolean validate() {
-		if (!IntelSecurityManager.INSTANCE.canViewEntities()) {
+		if (!IntelSecurityManager.INSTANCE.canViewEntityAny()) {
 			btnSearch.setEnabled(false);
 			return false;
 		}
@@ -192,7 +192,7 @@ public class SpatialSearchPanel extends Composite{
 		Object r = cmbLocations.getStructuredSelection().getFirstElement();
 		if (r instanceof RecordEditorInput && ((RecordEditorInput) r).getUuid().equals(recordUuid)) return;
 		
-		RecordEditorInput temp = new RecordEditorInput(null, recordUuid,  null,  null,  null);
+		RecordEditorInput temp = new RecordEditorInput(null, recordUuid,  null,  null,  null, null);
 		cmbLocations.setSelection(new StructuredSelection(temp));
 	}
 	private void createControls() {
@@ -339,7 +339,7 @@ public class SpatialSearchPanel extends Composite{
 		btnSearch.addListener(SWT.Selection, (event)->{
 			doSearch();
 		});
-		btnSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		btnSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntityAny());
 		btnSearch.setEnabled(false);
 		
 		loadEntityTypes.schedule();

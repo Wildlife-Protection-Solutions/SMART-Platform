@@ -29,6 +29,7 @@ import org.eclipse.ui.IPersistableElement;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.ui.Resources;
 
 public class EntityEditorInput implements IEditorInput{
 
@@ -74,7 +75,7 @@ public class EntityEditorInput implements IEditorInput{
 	public ImageDescriptor getImageDescriptor() {
 		if (getType().getIcon() == null) return null;
 		try {
-			return AWTSWTImageUtils.createImageDescriptor(getType().getIconAsImage());
+			return ImageDescriptor.createFromImage(Resources.INSTANCE.getImage(getType()));
 		} catch (Exception e) {
 			Intelligence2PlugIn.log(e.getMessage(), e);
 		}

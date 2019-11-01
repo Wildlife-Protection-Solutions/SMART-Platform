@@ -42,15 +42,17 @@ public class RecordEditorInput implements IEditorInput{
 	private Date date;
 	private IntelRecord record;
 	private UUID sourceUuid;
+	private UUID profileUuid;
 	private IntelRecord.Status status;
 	
 	private boolean initMode;
 	
-	public RecordEditorInput(String name, UUID uuid, Date date, UUID sourceUuid, IntelRecord.Status status){
+	public RecordEditorInput(String name, UUID uuid, Date date, UUID sourceUuid, UUID profileUuid, IntelRecord.Status status){
 		this.name = name;
 		this.uuid = uuid;
 		this.date = date;
 		this.sourceUuid = sourceUuid;
+		this.profileUuid = profileUuid;
 		this.status = status;
 	}
 	
@@ -60,11 +62,17 @@ public class RecordEditorInput implements IEditorInput{
 		this.date = record.getDateCreated();
 		if (record.getRecordSource() != null) this.sourceUuid = record.getRecordSource().getUuid();
 		this.status = record.getStatus();
+		this.profileUuid = record.getProfile().getUuid();
 	}
 	
 	public IntelRecord.Status getStatus(){
 		return this.status;
 	}
+	
+	public UUID getRecordProfileUuid(){
+		return this.profileUuid;
+	}
+	
 	
 	public UUID getRecordSourceUuid(){
 		return this.sourceUuid;

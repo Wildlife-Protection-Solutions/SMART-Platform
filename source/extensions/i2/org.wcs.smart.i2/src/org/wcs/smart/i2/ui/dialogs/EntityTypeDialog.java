@@ -26,8 +26,10 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -48,6 +50,7 @@ import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -94,6 +97,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
@@ -101,8 +105,11 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
+import org.wcs.smart.i2.ui.ProfileLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
@@ -122,6 +129,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 	private IconComposite icon;
 	private List<IntelEntityType> entityTypeSiblings;
 	private TreeViewer treeAttributes;
+	private CheckboxTableViewer tblProfiles;
 	private ComboViewer idAttribute;
 	
 	private MenuItem editItem;
@@ -185,11 +193,25 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		boolean isNew = type.getUuid() == null;
 		boolean attributesModified = false;
 		
+		Object[] checkeditems = tblProfiles.getCheckedElements();
+		Set<IntelProfile> newc = new HashSet<>();
+		for (Object xx : checkeditems) {
+			if (xx instanceof IntelProfile) newc.add((IntelProfile)xx);
+		}
+		Set<IntelProfile> todelete = new HashSet<>();
+		for (IntelProfile xx : type.getProfiles()) {
+			if (!newc.contains(xx)) todelete.add(xx);
+		}
+		type.getProfiles().removeAll(todelete);
+		type.getProfiles().addAll(newc);
+		for (IntelProfile c : type.getProfiles()) {
+			c.getEntityTypes().add(type);
+		}
+		
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				s.saveOrUpdate(type);
-				
+				s.saveOrUpdate(type);			
 				//set order and update groups
 				for (int i = 0; i < groups.size(); i ++){
 					groups.get(i).setOrder(i);
@@ -292,6 +314,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			
 		}
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		Resources.INSTANCE.clearEntityTypeImageCache();
 		
 	}
 
@@ -428,6 +451,19 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			btnEditTemplate.setEnabled(false);
 			l.setToolTipText(Messages.EntityTypeDialog_SaveRequired);
 		}
+		
+		l = new Label(parent, SWT.NONE);
+		l.setText("Profiles:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		
+		tblProfiles = CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
+		tblProfiles.setContentProvider(ArrayContentProvider.getInstance());
+		tblProfiles.setLabelProvider(new ProfileLabelProvider());
+		tblProfiles.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		((GridData)tblProfiles.getControl().getLayoutData()).heightHint = 50;
+		tblProfiles.addSelectionChangedListener(e->{
+			modified();
+		});
 		
 		l = new Label(parent, SWT.NONE);
 		l.setText(Messages.EntityTypeDialog_AttributesLabel);
@@ -958,8 +994,11 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 				monitor.beginTask(Messages.EntityTypeDialog_LoadingTaskName, 4);
 				
 				monitor.worked(1);
+				List<IntelProfile> profiles = new ArrayList<>();
 				try(Session s = HibernateManager.openSession()){
-
+					
+					profiles.addAll(ProfilesManager.INSTANCE.getProfiles(s));
+					profiles.forEach(p->p.getEntityTypes().forEach(e->e.getName()));
 					if (type.getUuid() != null){
 						type = (IntelEntityType) s.get(IntelEntityType.class, type.getUuid());
 						type.getNames().size();
@@ -971,6 +1010,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 							monitor.subTask(MessageFormat.format(Messages.EntityTypeDialog_AttributeSubTask2, a.getAttribute().getName()));
 							kid1.worked(1);
 						}
+						type.getProfiles().forEach(e->e.getName());
 					}
 					monitor.subTask(Messages.EntityTypeDialog_EntityTypeSubTask);
 					entityTypeSiblings = EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea());
@@ -995,9 +1035,12 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 						if (type.getIcon() != null){
 							icon.setImage(type.getIcon());
 						}
+						tblProfiles.setInput(profiles);
 						attributeList.addAll(type.getAttributes());
 						treeAttributes.setInput(attributeList);
-						
+						for (IntelProfile c : type.getProfiles()) {
+							tblProfiles.setChecked(c, true);
+						}
 						refreshAttributeList();
 						
 						nameKeyInfo.initFields(type, entityTypeSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());					

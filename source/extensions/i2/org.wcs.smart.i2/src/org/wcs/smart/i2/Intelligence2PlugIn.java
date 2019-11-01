@@ -35,6 +35,7 @@ import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.handlers.DeleteCaHandler;
 import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.query.engine.QueryEngineFactory;
+import org.wcs.smart.i2.ui.Resources;
 
 
 /**
@@ -88,6 +89,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_VALUES = "org.wcs.smart.i2.query.value"; //$NON-NLS-1$
 	public static final String ICON_FILTERS = "org.wcs.smart.i2.query.filters"; //$NON-NLS-1$
 	public static final String ICON_CONFIGURE = "org.wcs.smart.i2.configure"; //$NON-NLS-1$
+	public static final String ICON_CHECK = "org.wcs.smart.i2.check"; //$NON-NLS-1$
 
 	
 	public static final String ICON_QUERY_RECORDOBS = "org.wcs.smart.i2.query.recordobs"; //$NON-NLS-1$
@@ -161,6 +163,9 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 
 		reg.put(ICON_SYSTEM_DATEATTRIBUTE,  imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/system_attribute_date.png")); //$NON-NLS-1$
 		reg.put(ICON_OPERATOR,  imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/operator.png")); //$NON-NLS-1$
+		
+		reg.put(ICON_CHECK,  imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/check_green.png")); //$NON-NLS-1$
+
 	}
 	
 	/*
@@ -183,6 +188,9 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+		
+		Resources.INSTANCE.dispose();
+		
 		plugin = null;
 		super.stop(context);
 	}

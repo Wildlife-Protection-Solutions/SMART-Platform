@@ -24,7 +24,7 @@ package org.wcs.smart.i2.security;
 import org.wcs.smart.ca.SmartUserLevel;
 
 /**
- * Read only usere level for intelligence module 
+ * Read only user level for intelligence module 
  * 
  * @author Emily
  *

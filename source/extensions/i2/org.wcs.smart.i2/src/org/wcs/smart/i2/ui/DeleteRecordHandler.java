@@ -51,10 +51,11 @@ public class DeleteRecordHandler {
 	public boolean deleteRecords(Collection<Object> toDelete, IEclipseContext context){
 		if (toDelete.isEmpty()) return false;
 		
-		if (!IntelSecurityManager.INSTANCE.canDeleteRecord()) {
-			MessageDialog.openError(context.get(Shell.class), Messages.DeleteRecordHandler_PrivilegeTitle, Messages.DeleteRecordHandler_PrivilegeMessage);
-			return false;
-		}
+		//TODO: check permission here for each objet
+//		if (!IntelSecurityManager.INSTANCE.canDeleteRecord()) {
+//			MessageDialog.openError(context.get(Shell.class), Messages.DeleteRecordHandler_PrivilegeTitle, Messages.DeleteRecordHandler_PrivilegeMessage);
+//			return false;
+//		}
 		
 		String confirmMessage = MessageFormat.format(Messages.DeleteRecordHandler_DeleteConfirmMulti,  toDelete.size());
 		if (toDelete.size() == 1){

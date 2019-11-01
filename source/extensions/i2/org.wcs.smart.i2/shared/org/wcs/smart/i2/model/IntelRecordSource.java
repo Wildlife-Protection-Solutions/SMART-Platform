@@ -24,6 +24,7 @@ package org.wcs.smart.i2.model;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.persistence.CascadeType;
@@ -31,7 +32,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -55,6 +58,20 @@ public class IntelRecordSource extends NamedKeyItem{
 	private ConservationArea ca;
 	private byte[] icon;
 	private List<IntelRecordSourceAttribute> attributes;
+	private Set<IntelProfile> profiles;
+
+	@ManyToMany()
+	@JoinTable(name = "smart.i_profile_record_source",
+		joinColumns = @JoinColumn(name = "record_source_uuid"),
+		inverseJoinColumns = @JoinColumn(name = "profile_uuid"))
+	public Set<IntelProfile> getProfiles(){
+		return this.profiles;
+	}
+	
+	public void setProfiles(Set<IntelProfile> profiles) {
+		this.profiles = profiles;
+	}
+
 	
 	/**
 	 * Get the conservation_area.

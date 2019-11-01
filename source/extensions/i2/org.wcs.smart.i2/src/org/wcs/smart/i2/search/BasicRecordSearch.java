@@ -28,6 +28,8 @@ import java.util.UUID;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.i2.ProfilesManager;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 
@@ -52,36 +54,19 @@ public class BasicRecordSearch implements IRecordSearch{
 	@Override
 	public IntelRecordResult doSearch(Session session, IProgressMonitor monitor) {
 		Long startTime = System.nanoTime();
-		String hql = " FROM IntelRecord "; //$NON-NLS-1$
-		
-		boolean where = false;
+		String hql = " FROM IntelRecord WHERE profile in (:profiles) "; //$NON-NLS-1$
 		if (source != null){
-			if (!where){
-				where = true;
-				hql += " WHERE "; //$NON-NLS-1$
-			}
-			hql += " recordSource = :source "; //$NON-NLS-1$
+			hql += " AND recordSource = :source "; //$NON-NLS-1$
 		}
 		if (narrativeSearch != null){
-			if (where){
-				hql += " AND "; //$NON-NLS-1$
-			}else{
-				where = true;
-				hql += " WHERE "; //$NON-NLS-1$
-			}
-			hql += " lower(description) like lower(:narrative) "; //$NON-NLS-1$
+			hql += " AND lower(description) like lower(:narrative) "; //$NON-NLS-1$
 		}
 		if (titleSearch != null){
-			if (where){
-				hql += " AND "; //$NON-NLS-1$
-			}else{
-				where = true;
-				hql += " WHERE "; //$NON-NLS-1$
-			}
-			hql += " lower(title) like lower(:title) "; //$NON-NLS-1$
+			hql += " AND lower(title) like lower(:title) "; //$NON-NLS-1$
 		}
 		
 		Query<?> query = session.createQuery("SELECT count(*) " + hql); //$NON-NLS-1$
+		query.setParameter("profiles", ProfilesManager.INSTANCE.getActiveProfiles());
 		if (source != null){
 			query.setParameter("source", source); //$NON-NLS-1$
 		}
@@ -94,8 +79,9 @@ public class BasicRecordSearch implements IRecordSearch{
 		
 		long cnt = (long) query.uniqueResult();
 		
-		query = session.createQuery("SELECT uuid, title, recordSource.uuid, status, description " + hql); //$NON-NLS-1$
+		query = session.createQuery("SELECT uuid, title, recordSource.uuid, status, description, profile.uuid " + hql); //$NON-NLS-1$
 		query.setMaxResults(IRecordSearch.MAX_RESULT_CNT);
+		query.setParameter("profiles", ProfilesManager.INSTANCE.getActiveProfiles());
 		if (source != null){
 			query.setParameter("source", source); //$NON-NLS-1$
 		}
@@ -113,7 +99,9 @@ public class BasicRecordSearch implements IRecordSearch{
 			UUID uuid = (UUID)i[0];
 			String title = (String) i[1];
 			UUID src = (UUID)i[2];
-			resultItems.add(new IntelRecordSearchResultItem(uuid, src == null ? null : session.get(IntelRecordSource.class, src), title, (IntelRecord.Status)i[3]));
+			IntelRecord.Status status = (IntelRecord.Status)i[3];
+			IntelProfile profile = session.get(IntelProfile.class, (UUID)i[5]);
+			resultItems.add(new IntelRecordSearchResultItem(uuid, profile, src == null ? null : session.get(IntelRecordSource.class, src), title, status));
 		}
 		
 		IntelRecordResult results = new IntelRecordResult(cnt, resultItems, System.nanoTime() - startTime);

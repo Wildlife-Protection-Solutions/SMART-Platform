@@ -73,7 +73,6 @@ public class BasicEntitySearchPanel extends Composite {
 
 	private static final String BASIC_ALLTYPES_OP = Messages.EntitySearchView_AllTypesOption;
 
-
 	private EntitySearchView view;
 
 	private FilterComposite txtSearch;
@@ -110,7 +109,7 @@ public class BasicEntitySearchPanel extends Composite {
 				view.doBasicSearch(createBasicSearch(), -1);
 			}
 		});
-		txtSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		txtSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntityAny());
 		toolkit.createLabel(core, Messages.EntitySearchView_EtLabel);
 
 		cmbEntityType = new TableComboViewer(core, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
@@ -127,7 +126,7 @@ public class BasicEntitySearchPanel extends Composite {
 				view.doBasicSearch(createBasicSearch(),500);
 			}
 		});
-		cmbEntityType.getControl().setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		cmbEntityType.getControl().setEnabled(IntelSecurityManager.INSTANCE.canViewEntityAny());
 
 		Composite bottom = toolkit.createComposite(search, SWT.NONE);
 		bottom.setLayout(new GridLayout(2, false));
@@ -143,7 +142,7 @@ public class BasicEntitySearchPanel extends Composite {
 				view.doBasicSearch(createBasicSearch(), 0);
 			}
 		});
-		btnSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		btnSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntityAny());
 
 		Hyperlink saveSearch = toolkit.createHyperlink(bottom, Messages.EntitySearchView_SaveSearchButton, SWT.NONE);
 		saveSearch.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
@@ -153,7 +152,7 @@ public class BasicEntitySearchPanel extends Composite {
 				view.saveSearch(createBasicSearch());
 			}
 		});
-		saveSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		saveSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntityAny());
 		
 		refresh();
 	}

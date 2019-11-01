@@ -100,6 +100,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
@@ -110,6 +111,7 @@ import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.SmartSection;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
@@ -447,6 +449,7 @@ public class RecordSummaryPage extends EditorPart{
 		decShortName.hide();
 		checkDuplicateName.schedule(250);
 		
+		
 		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_PrimaryDateLabel);
 		if (recordEditor.getEditMode()){
 			DateTime dtPrimaryDate = new DateTime(leftPart, SWT.BORDER | SWT.DATE | SWT.LONG | SWT.CALENDAR | SWT.DROP_DOWN);
@@ -462,10 +465,24 @@ public class RecordSummaryPage extends EditorPart{
 		}else {
 			toolkit.createLabel(leftPart, DateFormat.getDateInstance().format(recordEditor.getRecord().getPrimaryDate()));
 		}
+
+		toolkit.createLabel(leftPart, "Profile");
+		Composite pcomp = toolkit.createComposite(leftPart);
+		pcomp.setLayout(new GridLayout(2, false));
+		((GridLayout)pcomp.getLayout()).marginWidth = 0;
+		((GridLayout)pcomp.getLayout()).marginHeight = 0;
+		pcomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label ll = toolkit.createLabel(pcomp, "");
+		ll.setImage(Resources.INSTANCE.getImage(recordEditor.getRecord().getProfile()));
+		
+		ll = toolkit.createLabel(pcomp, "");
+		ll.setText(recordEditor.getRecord().getProfile().getName());
+		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_StatusLabel);
 		
-		
-		if (recordEditor.getEditMode() && IntelSecurityManager.INSTANCE.canEditRecordStatus()){
+		if (recordEditor.getEditMode() && IntelSecurityManager.INSTANCE.canEditRecordStatus(recordEditor.getRecord().getProfile())){
 			TableComboViewer cmbStatus = new TableComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 			toolkit.adapt(cmbStatus.getControl(), true, true);
 			cmbStatus.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -528,17 +545,11 @@ public class RecordSummaryPage extends EditorPart{
 			((GridLayout)temp.getLayout()).marginHeight = 0;
 			
 			Label l = toolkit.createLabel(temp, ""); //$NON-NLS-1$
-			Image img = null;
 			if (recordEditor.getRecord().getRecordSource() != null && recordEditor.getRecord().getRecordSource().getIcon() != null){
-				try{
-					img = AWTSWTImageUtils.convertToSWTImage(recordEditor.getRecord().getRecordSource().getIconAsImage());
-				}catch (Exception ex){
-					
-				}
+				Image img = Resources.INSTANCE.getImage(recordEditor.getRecord().getRecordSource());
+				l.setImage(img);
 			}
-			final Image toDispose= img;
-			l.setImage(toDispose);
-			l.addDisposeListener(e->{if (toDispose != null) toDispose.dispose();});
+			
 			if (recordEditor.getRecord().getRecordSource() != null){
 				l = toolkit.createLabel(temp,  recordEditor.getRecord().getRecordSource().getName());
 				l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -991,8 +1002,9 @@ public class RecordSummaryPage extends EditorPart{
 			protected IStatus run(IProgressMonitor monitor) {
 				List<Object> allInput = new ArrayList<Object>();
 				try(Session s = HibernateManager.openSession()){
+					IntelProfile p = s.get(IntelProfile.class, recordEditor.getRecord().getProfile().getUuid());
 					
-					List<IntelRecordSource> sources = QueryFactory.buildQuery(s, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+					List<IntelRecordSource> sources = new ArrayList<>(p.getRecordSources());
 					sources.forEach(src -> {
 						src.getName();
 						if (src.getAttributes() != null){

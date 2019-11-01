@@ -129,7 +129,6 @@ import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
-import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
@@ -176,6 +175,7 @@ import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
 import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
@@ -226,6 +226,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private Label lblModified;
 	private Label lblIdentifier;
 	private Label lblType;
+	private Label lblTypeImage;
+	private Label lblProfile;
+	private Label lblProfileColor;
 	private Button lnkNewRecord;
 
 	private Composite compAttributes;
@@ -291,6 +294,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					closeEditor();
 					return Status.OK_STATUS;
 				}
+				temp.getProfile().getName();
 				temp.getEntityType().getIcon();
 				for(IntelEntityTypeAttribute a : temp.getEntityType().getAttributes()){
 					a.getAttribute().getName();
@@ -406,18 +410,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					HashMap<IntelRecordSource, Image> images = new HashMap<>();
-					for (IntelRecordSource s : sources){
-						if (s.getIcon() != null){
-							try{
-								images.put(s, AWTSWTImageUtils.convertToSWTImage(s.getIconAsImage()));
-							}catch (Exception ex){}
-						}
-					}
-					Object x = tblRecords.getTable().getData(TBLRECORD_LBLPROVIDER_KEY);
-					if (x != null && x instanceof RecordLabelProvider){
-						((RecordLabelProvider)x).setSourceImages(images);
-					}
 					tblRecords.setInput(records);
 					tblRecords.refresh();
 				}
@@ -894,24 +886,38 @@ public class EntityEditor extends EditorPart implements MapPart{
 		((GridData)lblMainImage.getLayoutData()).widthHint = THUMB_SIZE;
 		((GridData)lblMainImage.getLayoutData()).heightHint = THUMB_SIZE;
 
+		toolkit.createLabel(leftPart, "Profile:");
+		
+		Composite t = toolkit.createComposite(leftPart);
+		t.setLayout(new GridLayout(2, false));
+		((GridLayout)t.getLayout()).marginWidth = 0;
+		((GridLayout)t.getLayout()).marginHeight = 0;
+		((GridLayout)t.getLayout()).horizontalSpacing = 0;
+		t.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		lblProfileColor = toolkit.createLabel(t, "");
+		lblProfileColor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		lblProfile = toolkit.createLabel(t, ""); //$NON-NLS-1$
+		lblProfile.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		
 		toolkit.createLabel(leftPart, Messages.EntityEditor_TypeLabel);
-		lblType = toolkit.createLabel(leftPart, ""); //$NON-NLS-1$
-		lblType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-//		int offset = 0;
-//		GC gc = new GC(lblType);
-//		try{
-//			offset = gc.textExtent(Messages.EntityEditor_TypeLabel).x;
-//		}finally{
-//			gc.dispose();
-//		}
-//		((GridData)lblType.getLayoutData()).widthHint = THUMB_SIZE - offset;
-//		
-		toolkit.createLabel(leftPart, Messages.EntityEditor_CreatedLabel);
-		lblCreated = toolkit.createLabel(leftPart, DateFormat.getInstance().format(new Date()));
 		
-		toolkit.createLabel(leftPart, Messages.EntityEditor_ModifiedLabel);
-		lblModified= toolkit.createLabel(leftPart, DateFormat.getInstance().format(new Date()));
+		t = toolkit.createComposite(leftPart);
+		t.setLayout(new GridLayout(2, false));
+		((GridLayout)t.getLayout()).marginWidth = 0;
+		((GridLayout)t.getLayout()).marginHeight = 0;
+		((GridLayout)t.getLayout()).horizontalSpacing = 0;
+		t.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
+		lblTypeImage = toolkit.createLabel(t, "");
+		lblTypeImage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		lblType = toolkit.createLabel(t, ""); //$NON-NLS-1$
+		lblType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)lblType.getLayoutData()).widthHint = THUMB_SIZE - 50;
+
 		Composite rightPart = toolkit.createComposite(panel, SWT.NONE);
 		rightPart.setLayout(new GridLayout());
 		rightPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -1083,9 +1089,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		});
 		
-		if (IntelSecurityManager.INSTANCE.canDeleteEntity() && IntelSecurityManager.INSTANCE.canEditEntity()){
+		if (IntelSecurityManager.INSTANCE.canDeleteEntity(entity.getProfile()) && IntelSecurityManager.INSTANCE.canEditEntity(entity.getProfile())){
 			deleteItem.setEnabled(getEditMode());	
-		}else if (IntelSecurityManager.INSTANCE.canDeleteEntity()  ) {
+		}else if (IntelSecurityManager.INSTANCE.canDeleteEntity(entity.getProfile())  ) {
 			deleteItem.setEnabled(true);
 		}else{
 			deleteItem.setEnabled(false);
@@ -1114,7 +1120,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		});
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.EntityEditor_AttributeTitle, Messages.EntityEditor_FilesTitle, Messages.EntityEditor_ScratchpadTitle}, rightPart, toolkit, ()->maximizeMainPanel(0));
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{
+				Messages.EntityEditor_AttributeTitle, 
+				Messages.EntityEditor_FilesTitle,
+				Messages.EntityEditor_ScratchpadTitle,
+				"History"}, rightPart, toolkit, ()->maximizeMainPanel(0));
+		
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite tabPart = toolkit.createComposite(rightPart, SWT.NONE);
@@ -1142,16 +1153,39 @@ public class EntityEditor extends EditorPart implements MapPart{
 		txtScratchpad.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		txtScratchpad.addListener(SWT.Modify, e->setDirty(true));
 		
-		tabList.setContent(new Composite[]{compAttributes,  compAttachments, compScratchpad}, tabPart);
+		Composite compHistory = toolkit.createComposite(tabPart, SWT.NONE);
+		compHistory.setLayout(new GridLayout());
+		((GridLayout)compHistory.getLayout()).marginHeight = 0;
+		((GridLayout)compHistory.getLayout()).marginWidth = 0;
+				
+		createHistoryPanel(compHistory);
+		
+		tabList.setContent(new Composite[]{compAttributes,  compAttachments, compScratchpad, compHistory}, tabPart);
 		tabList.selectTab(0);
 		
-		if (!IntelSecurityManager.INSTANCE.canEditEntity()){
+		if (!IntelSecurityManager.INSTANCE.canEditEntity(entity.getProfile())){
 			setEditMode(false);
 			editItem.setEnabled(false);
 		}
 		
 		return leftPart.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 	}
+	
+	private void createHistoryPanel(Composite parent) {
+		
+		Composite c = toolkit.createComposite(parent);
+		c.setLayout(new GridLayout(2, false));
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		toolkit.createLabel(c, Messages.EntityEditor_CreatedLabel);
+		lblCreated = toolkit.createLabel(c, DateFormat.getInstance().format(new Date()));
+		lblCreated.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		toolkit.createLabel(c, Messages.EntityEditor_ModifiedLabel);
+		lblModified= toolkit.createLabel(c, DateFormat.getInstance().format(new Date()));
+		lblModified.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+	}
+	
 	
 	private void createMapPanel(Composite parent){
 		mapPart = new EntityEditorMapComposite(parent, this, toolkit);
@@ -1178,7 +1212,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	}
 	
 	public void setEditMode(boolean isEdit){
-		if (isEdit && !(IntelSecurityManager.INSTANCE.canEditEntity() || IntelSecurityManager.INSTANCE.canCreateEntity())){
+		if (isEdit && !(IntelSecurityManager.INSTANCE.canEditEntity(entity.getProfile()) || IntelSecurityManager.INSTANCE.canCreateEntity(entity.getProfile()))){
 			//cannot change the edit more; this user cannot edit entities
 			return;
 		}
@@ -1189,9 +1223,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 		this.isEditMode = isEdit;
 		if (entity != null) initControl();
 		if (deleteItem != null && !deleteItem.isDisposed()) {
-			if (IntelSecurityManager.INSTANCE.canDeleteEntity() && IntelSecurityManager.INSTANCE.canEditEntity()){
+			if (IntelSecurityManager.INSTANCE.canDeleteEntity(entity.getProfile()) && IntelSecurityManager.INSTANCE.canEditEntity(entity.getProfile())){
 				deleteItem.setEnabled(isEdit);	
-			}else if (IntelSecurityManager.INSTANCE.canDeleteEntity()  ) {
+			}else if (IntelSecurityManager.INSTANCE.canDeleteEntity(entity.getProfile())  ) {
 				deleteItem.setEnabled(true);
 			}else{
 				deleteItem.setEnabled(false);
@@ -1631,7 +1665,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 			public void menuShown(MenuEvent e) {
 				for (MenuItem mi : recordsMenu.getItems()) mi.dispose();
 				
-				if (IntelSecurityManager.INSTANCE.canViewRecords()) {
+				//TODO
+				if (IntelSecurityManager.INSTANCE.canViewRecords(entity.getProfile())) {
 					MenuItem open = new MenuItem(recordsMenu, SWT.PUSH);
 					open.setText(Messages.EntityEditor_OpenRecordMnuItem);
 					open.addSelectionListener(new SelectionAdapter() {
@@ -1642,8 +1677,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					});
 				}
 				
-				
-				if (getEditMode() && IntelSecurityManager.INSTANCE.canCreateRecord()) {
+				if (getEditMode() && IntelSecurityManager.INSTANCE.canCreateRecord(entity.getProfile())) {
 					new MenuItem(recordsMenu, SWT.SEPARATOR);
 					
 					MenuItem open = new MenuItem(recordsMenu, SWT.PUSH);
@@ -1666,7 +1700,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	}
 	
 	private void createNewRecord() {
-		if (!IntelSecurityManager.INSTANCE.canCreateRecord()) return;
+		if (!IntelSecurityManager.INSTANCE.canCreateRecord(entity.getProfile())) return;
 		IEclipseContext ctx = context.createChild();
 		ctx.set(NewRecordHandler.ENTITY_UUID_LINK, Collections.singleton(getEntity().getUuid()));
 		(new NewRecordHandler()).createNewRecord(ctx);
@@ -1674,7 +1708,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	
 	
 	private void openSelectedRecord(){
-		if (!IntelSecurityManager.INSTANCE.canViewRecords()) return;
+		if (!IntelSecurityManager.INSTANCE.canViewRecords(entity.getProfile())) return;
 		if (tblRecords.getSelection().isEmpty()) return;
 		Object x = ((IStructuredSelection)tblRecords.getSelection()).getFirstElement();
 		if (x instanceof IntelRecord){
@@ -1887,24 +1921,27 @@ public class EntityEditor extends EditorPart implements MapPart{
 		IntelEntity entity = getEntity();
 		
 		if (entity.getEntityType().getIcon() != null){
-			try {
-				super.setTitleImage( AWTSWTImageUtils.createImageDescriptor(entity.getEntityType().getIconAsImage()).createImage() );
-			} catch (Exception e) {
-				
-			}
+			super.setTitleImage( Resources.INSTANCE.getImage(entity.getEntityType()));
 		}
 		
 		fieldEditors = new ArrayList<AttributeFieldEditor>();
-		if (lblCreated.isDisposed()) return;
+		if (lblType.isDisposed()) return;
 		 
 		lblCreated.setText(DateFormat.getInstance().format(entity.getDateCreated()));
 		lblModified.setText(DateFormat.getInstance().format(entity.getDateModified()));
+		
+		lblIdentifier.setText(entity.getIdAttributeAsText());
+		
 		lblType.setText(entity.getEntityType().getName());
 		lblType.setToolTipText(entity.getEntityType().getName());
-		lblIdentifier.setText(entity.getIdAttributeAsText());
-		lblModified.getParent().layout();
-		lblModified.redraw();
+		lblTypeImage.setImage(Resources.INSTANCE.getImage(entity.getEntityType()));
 		
+		lblProfile.setText(entity.getProfile().getName());
+		lblProfileColor.setImage(Resources.INSTANCE.getImage(entity.getProfile()));
+		
+		lblProfile.getParent().getParent().layout();
+		lblType.getParent().getParent().layout();
+				
 		Listener[] ls = txtScratchpad.getListeners(SWT.Modify);
 		for (Listener l : ls) txtScratchpad.removeListener(SWT.Modify, l);
 		if (entity.getComment() == null){ 

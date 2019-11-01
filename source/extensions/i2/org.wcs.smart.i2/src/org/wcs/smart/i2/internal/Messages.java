@@ -539,7 +539,7 @@ public class Messages extends NLS {
 	public static String EntityTypeListDialog_DeleteTitle;
 	public static String EntityTypeListDialog_EditTypeMsg;
 	public static String EntityTypeListDialog_EditTypeTitle;
-	public static String EntityTypeListDialog_Message;
+	public static String EntityTypeListDialog_Message1;
 	public static String EntityTypeListDialog_Title;
 	public static String EntityTypeManager_DeleteError;
 	public static String EntityTypeTreeFilterItem_EntitiesLabel;

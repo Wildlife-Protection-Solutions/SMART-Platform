@@ -23,8 +23,10 @@ package org.wcs.smart.i2.search;
 
 import java.util.UUID;
 
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 
 /**
  * Record search result item
@@ -36,6 +38,7 @@ public class IntelRecordSearchResultItem {
 	
 	private String title;
 	private UUID record;
+	private IntelProfile profile;
 	private IntelRecordSource recordSource;
 	private IntelRecord.Status status;
 
@@ -45,9 +48,11 @@ public class IntelRecordSearchResultItem {
 	 * @param matchedString
 	 * @param rate
 	 */
-	public IntelRecordSearchResultItem(UUID record, IntelRecordSource recordSource, String title, IntelRecord.Status status) {
+	public IntelRecordSearchResultItem(UUID record, IntelProfile profile, IntelRecordSource recordSource, 
+			String title, IntelRecord.Status status) {
 		this.title = title;
 		this.record = record;
+		this.profile = profile;
 		this.recordSource = recordSource;
 		this.status = status;
 	}
@@ -67,7 +72,13 @@ public class IntelRecordSearchResultItem {
 	public UUID getRecordUuid(){
 		return this.record;
 	}
-	
+	/**
+	 * 
+	 * @return the uuid of the matched record
+	 */
+	public IntelProfile getProfile(){
+		return this.profile;
+	}
 	/**
 	 * 
 	 * @return the uuid of the source of the matched record 
@@ -82,5 +93,13 @@ public class IntelRecordSearchResultItem {
 	 */
 	public String getTitle(){
 		return this.title;
+	}
+	
+	public RecordEditorInput asRecordInput() {
+		return new RecordEditorInput(getTitle(), 
+				getRecordUuid(), null, 
+				getRecordSource() == null ? null : getRecordSource().getUuid(), 
+				getProfile().getUuid(), 
+				getStatus());
 	}
 }

@@ -270,7 +270,7 @@ public class RecordDescriptionPage extends EditorPart{
 			}
 		});
 		
-		if (IntelSecurityManager.INSTANCE.canCreateEntity()){
+		if (IntelSecurityManager.INSTANCE.canCreateEntityAny()){
 			MenuItem newEntity = new MenuItem(menu, SWT.CASCADE);
 			newEntity.setText(Messages.RecordDescriptionPage_NewEntityMenuItem);
 			newEntity.addSelectionListener(new SelectionAdapter() {			

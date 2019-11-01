@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.dialogs;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -45,6 +46,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -57,6 +59,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -70,17 +73,21 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.ProfileLabelProvider;
 import org.wcs.smart.i2.ui.editors.EntityEditor;
 import org.wcs.smart.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -101,6 +108,7 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 	private IEclipseContext context;
 	
 	private TableViewer cmbTypes;
+
 	private List<IntelEntityType> types = null;
 	private NamedItemViewerFilter filter;
 	private IStructuredSelection currentSelection;
@@ -118,19 +126,65 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			types = null;
+			List<IntelProfile> profiles = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
 				types = EntityTypeManager.INSTANCE.getEntityTypes(session, SmartDB.getCurrentConservationArea());
 				for (IntelEntityType t : types){
 					t.getName();
+					t.getProfiles().size();
 				}
+				profiles.addAll(ProfilesManager.INSTANCE.getProfiles(session));
+				for (IntelProfile p : profiles) p.getName();
 			}
 			
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
 					if (cmbTypes.getControl().isDisposed()) return;
+					
+					TableColumnLayout tlayout = (TableColumnLayout) cmbTypes.getControl().getParent().getLayout(); 
+					
+					for (TableColumn c : cmbTypes.getTable().getColumns()) c.dispose();
+					
+					TableViewerColumn col = new TableViewerColumn(cmbTypes, SWT.NONE);
+					col.setLabelProvider(new EntityTypeLabelProvider());
+					col.getColumn().setText("Entity Type");
+//					col.getColumn().setWidth(30);
+					tlayout.setColumnData(col.getColumn(), new ColumnWeightData(3));
+					
+					ProfileLabelProvider temp = new ProfileLabelProvider();
+					cmbTypes.getTable().addListener(SWT.Dispose, e->temp.dispose());
+					
+					for (IntelProfile p : profiles) {
+						TableViewerColumn col2 = new TableViewerColumn(cmbTypes, SWT.NONE);
+						col2.getColumn().setText(p.getName());
+						col2.getColumn().setToolTipText(p.getName());
+						col2.getColumn().setWidth(30);	
+						col2.getColumn().setImage(temp.getImage(p));
+						col2.setLabelProvider(new ColumnLabelProvider() {
+							
+							@Override
+							public String getText(Object element) {
+								if (element instanceof IntelEntityType) return "";
+								return super.getText(element);
+							}
+							@Override
+							public Image getImage(Object element) {
+								if (element instanceof IntelEntityType) {
+									if (((IntelEntityType) element).getProfiles().contains(p)) {
+										return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CHECK);
+									}
+									return null;
+								}
+								return super.getImage(element);
+							}
+						});
+						tlayout.setColumnData(col2.getColumn(), new ColumnWeightData(1));
+					}
+					
 					cmbTypes.setInput(types);
 					cmbTypes.setSelection(currentSelection);
+					cmbTypes.getControl().getParent().layout(true);
 				}
 			});
 			return Status.OK_STATUS;
@@ -172,12 +226,16 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 		TableColumnLayout tlayout = new TableColumnLayout();
 		tablecomp.setLayout(tlayout);
 		
-		cmbTypes = new TableViewer(tablecomp);
+		
+		cmbTypes = new TableViewer(tablecomp, SWT.BORDER | SWT.FULL_SELECTION);
+		cmbTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cmbTypes.getTable().setHeaderVisible(true);
 		cmbTypes.setContentProvider(ArrayContentProvider.getInstance());
 		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		
 		TableViewerColumn col = new TableViewerColumn(cmbTypes, SWT.NONE);
 		col.setLabelProvider(new EntityTypeLabelProvider());
+		
 		tlayout.setColumnData(col.getColumn(), new ColumnWeightData(1));
 		
 		cmbTypes.getControl().setFocus();
@@ -284,7 +342,7 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 		
 		setTitle(Messages.EntityTypeListDialog_Title);
 		getShell().setText(Messages.EntityTypeListDialog_Title);
-		setMessage(Messages.EntityTypeListDialog_Message);
+		setMessage(Messages.EntityTypeListDialog_Message1);
 		
 		loadTypes.setSystem(true);
 		loadTypes.schedule();
@@ -301,6 +359,7 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 		IntelEntityType type = new IntelEntityType();
 		type.setConservationArea(SmartDB.getCurrentConservationArea());
 		type.setAttributes(new ArrayList<IntelEntityTypeAttribute>());
+		type.setProfiles(new HashSet<>());
 		openDialog(type);
 		refresh();
 	}

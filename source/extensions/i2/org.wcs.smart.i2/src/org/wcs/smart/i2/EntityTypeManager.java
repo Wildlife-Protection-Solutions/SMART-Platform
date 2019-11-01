@@ -22,6 +22,7 @@
 package org.wcs.smart.i2;
 
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -32,8 +33,12 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 
 /**
  * Tools for managing entity types
@@ -48,6 +53,7 @@ public enum EntityTypeManager {
 	private EntityTypeManager(){
 		
 	}
+
 	
 	/**
 	 * Loads all entity types and sorts by name

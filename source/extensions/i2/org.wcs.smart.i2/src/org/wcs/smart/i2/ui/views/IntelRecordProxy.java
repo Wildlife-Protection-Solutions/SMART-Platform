@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 
@@ -39,16 +40,20 @@ public class IntelRecordProxy implements IAdaptable{
 	private UUID uuid;
 	private String title;
 	private IntelRecordSource source;
+	private IntelProfile profile;
 	private IntelRecord.Status status;
 	
 	private Date date;
 	
-	public IntelRecordProxy(String title, UUID uuid, IntelRecordSource source, IntelRecord.Status status, Date date){
+	public IntelRecordProxy(String title, UUID uuid, IntelRecordSource source,
+			IntelProfile profile,
+			IntelRecord.Status status, Date date){
 		this.title = title;
 		this.uuid = uuid;
 		this.source = source;
 		this.status = status;
 		this.date = date;
+		this.profile = profile;
 	}
 	
 //	/**
@@ -78,6 +83,10 @@ public class IntelRecordProxy implements IAdaptable{
 		return this.source;
 	}
 	
+	public IntelProfile getProfile() {
+		return this.profile;
+	}
+	
 	public UUID getUuid(){
 		return this.uuid;
 	}
@@ -88,6 +97,7 @@ public class IntelRecordProxy implements IAdaptable{
 		r.setTitle(title);
 		r.setStatus(status);
 		r.setRecordSource(source);
+		r.setProfile(profile);
 		return r;
 	}
 	
@@ -114,6 +124,7 @@ public class IntelRecordProxy implements IAdaptable{
 		if (adapter.equals(IntelRecord.class)) {
 			IntelRecord r = new IntelRecord();
 			r.setUuid(getUuid());
+			r.setProfile(getProfile());
 			return (T)r;
 		}
 		return null;

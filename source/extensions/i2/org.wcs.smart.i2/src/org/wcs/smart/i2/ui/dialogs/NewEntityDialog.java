@@ -66,6 +66,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -74,8 +75,11 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.ProfileLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -89,9 +93,11 @@ import org.wcs.smart.util.UuidUtils;
 public class NewEntityDialog extends SmartStyledTitleDialog{
 
 	private static final String LAST_TYPE_KEY = "org.wcs.smart.i2.ui.dialogs.newentity.lasttype"; //$NON-NLS-1$
-	
+	private static final String LAST_PROFILE_KEY = "org.wcs.smart.i2.ui.dialogs.newentity.lastprofile"; //$NON-NLS-1$
+
 	private static final String MESSAGE = Messages.NewEntityDialog_Message;
 	
+	private TableComboViewer cmbProfile;	
 	private TableComboViewer cmbEntityType;	
 	private Composite attributePanel;
 	private List<AttributeFieldEditor> attributeControls;
@@ -104,16 +110,44 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 	private IEclipseContext context;
 	
 	private boolean openOnCreate;
+	private IntelProfile profile;
 	
 	private Job loadEntityTypes = new Job(Messages.NewEntityDialog_LoadingJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<IntelEntityType> types = new ArrayList<IntelEntityType>();
+			final List<IntelProfile> profiles = new ArrayList<>();
+			
 			try(Session s = HibernateManager.openSession()){
 				types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
+				
+				if (profile != null) {
+					profile = s.get(IntelProfile.class, profile.getUuid());
+					profile.getEntityTypes().size();
+				}else {
+					profiles.addAll(ProfilesManager.INSTANCE.getProfiles(s));
+					profiles.forEach(p->p.getEntityTypes().size());	
+				}
 			}
 			
+			IntelProfile ptoSelect = profile != null ? profile : profiles.get(0);
+			if (profile != null) {
+				String uuid = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(LAST_PROFILE_KEY);
+				if (uuid != null) {
+					try{
+						UUID u = UuidUtils.stringToUuid(uuid);
+						for (IntelProfile t : profiles){
+							if (t.getUuid().equals(u)){
+								ptoSelect = t;
+								break;
+							}
+						}
+					}catch (Exception ex){
+						//eat me
+					}
+				}
+			}
 			IntelEntityType toSelect = types.isEmpty() ? null : types.get(0);
 			String uuid = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(LAST_TYPE_KEY);
 			if (uuid != null){
@@ -131,11 +165,16 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 			}
 			
 			final IntelEntityType sel = toSelect;
+			final IntelProfile psel = ptoSelect;
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					cmbEntityType.setInput(types);
-					if (sel != null) cmbEntityType.setSelection(new StructuredSelection(sel));
+					if (cmbProfile != null) cmbProfile.setInput(profiles);
+					if (psel != null) {
+						if (cmbProfile != null) cmbProfile.setSelection(new StructuredSelection(psel));
+						cmbEntityType.setInput(psel.getEntityTypes());
+						if (sel != null) cmbEntityType.setSelection(new StructuredSelection(sel));
+					}
 				}
 			});
 			return Status.OK_STATUS;
@@ -148,7 +187,26 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 	 * @param parentShell
 	 */
 	public NewEntityDialog(Shell parentShell) {
-		this(parentShell, true);
+		this(parentShell, true, null);
+	}
+	
+	/**
+	 * Creates a new entity dialog that will open the entity when the dialog is closed
+	 * @param parentShell
+	 */
+	public NewEntityDialog(Shell parentShell, IntelProfile profile) {
+		this(parentShell, true, profile);
+	}
+	
+	/**
+	 * Creates a new entity dialog that will not open the entity with the dialog is closed
+	 * @param parentShell
+	 * @param openOnCreate
+	 */
+	public NewEntityDialog(Shell parentShell, boolean openOnCreate, IntelProfile profile) {
+		super(parentShell);
+		this.openOnCreate = openOnCreate;
+		this.profile = profile;
 	}
 	
 	/**
@@ -157,14 +215,13 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 	 * @param openOnCreate
 	 */
 	public NewEntityDialog(Shell parentShell, boolean openOnCreate) {
-		super(parentShell);
-		this.openOnCreate = openOnCreate;
+		this(parentShell, openOnCreate, null);
 	}
 
 	@Override
 	protected Point getInitialSize() {
 		Point p = super.getInitialSize();
-		return new Point(p.x,(int)(p.y*1.4));
+		return new Point(p.x,(int)(p.y*1.6));
 	}
 	
 	/*
@@ -195,7 +252,17 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 			MessageDialog.openWarning(getShell(), Messages.NewEntityDialog_ErrorDialogTitle, Messages.NewEntityDialog_InvalidType);
 			return;
 		}
+		
+		IntelProfile profile = null;
+		x = cmbProfile.getStructuredSelection().getFirstElement();
+		if (x instanceof IntelProfile) {
+			profile = (IntelProfile) x;
+		}else {
+			MessageDialog.openWarning(getShell(), Messages.NewEntityDialog_ErrorDialogTitle, "You must select a Profile for your entity");
+			return;
+		}
 		newEntity = new IntelEntity();
+		newEntity.setProfile(profile);
 		newEntity.setConservationArea(SmartDB.getCurrentConservationArea());
 		newEntity.setEntityType(type);
 		newEntity.setAttributes(new ArrayList<IntelEntityAttributeValue>());
@@ -270,13 +337,57 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(parent, SWT.NONE);
+		l.setText("Profile");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		if (profile != null) {
+			Composite t = new Composite(parent, SWT.NONE);
+			t.setLayout(new GridLayout(2, false));
+			((GridLayout)t.getLayout()).marginWidth = 0;
+			((GridLayout)t.getLayout()).marginHeight = 0;
+			
+			l = new Label(t, SWT.NONE);
+			l.setImage(Resources.INSTANCE.getImage(profile));
+			
+			l = new Label(t, SWT.NONE);
+			l.setText(profile.getName());
+			
+		}else {
+			cmbProfile = new TableComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
+			cmbProfile.setContentProvider(ArrayContentProvider.getInstance());
+			cmbProfile.setLabelProvider(new ProfileLabelProvider());
+			cmbProfile.setInput(new String[]{DialogConstants.LOADING_TEXT});
+			cmbProfile.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			SmartUiUtils.configure(cmbProfile);
+			cmbProfile.getControl().setEnabled(profile == null);
+			cmbProfile.addSelectionChangedListener(new ISelectionChangedListener() {
+				
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					Object x = ((IStructuredSelection)cmbProfile.getSelection()).getFirstElement();
+					if (x instanceof IntelProfile){
+						IntelProfile type = (IntelProfile)x;
+						Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(LAST_PROFILE_KEY, UuidUtils.uuidToString(type.getUuid()));
+						
+						cmbEntityType.setInput(type.getEntityTypes());
+						if (!type.getEntityTypes().isEmpty()) {
+							cmbEntityType.setSelection(new StructuredSelection(type.getEntityTypes().iterator().next()));
+						}else {
+							cmbEntityType.setSelection(null);
+						}
+					}				
+				}
+			});
+		}
+		
+		l = new Label(parent, SWT.NONE);
 		l.setText(Messages.NewEntityDialog_EntityTypeLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		cmbEntityType = new TableComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 		cmbEntityType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbEntityType.setLabelProvider(new EntityTypeLabelProvider());
-		cmbEntityType.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		cmbEntityType.setInput(new String[]{"Select Profile"});
 		cmbEntityType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		SmartUiUtils.configure(cmbEntityType);
 		cmbEntityType.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -288,6 +399,8 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 					IntelEntityType type = (IntelEntityType)x;
 					Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(LAST_TYPE_KEY, UuidUtils.uuidToString(type.getUuid()));
 					configureAttributePanel(type);
+				}else {
+					configureAttributePanel(null);
 				}
 				
 			}
@@ -309,6 +422,12 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 	}
 	
 	private void configureAttributePanel(IntelEntityType type){
+		for (Control c : attributePanel.getChildren()){
+			c.dispose();
+		}
+		
+		if (type == null) return;
+		
 		try(Session s = HibernateManager.openSession()){
 			s.saveOrUpdate(type);
 			for (IntelEntityTypeAttribute a : type.getAttributes()){
@@ -319,10 +438,6 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 					}
 				}
 			}
-		}
-		
-		for (Control c : attributePanel.getChildren()){
-			c.dispose();
 		}
 		
 		attributeControls = new ArrayList<AttributeFieldEditor>();

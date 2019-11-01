@@ -41,6 +41,7 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 	private UUID observationUuid;
 	private UUID locationUuid;
 	private UUID recordUuid;
+	private UUID profileUuid;
 	private IntelRecordSource recordSource;
 	
 	private String recordStatus;
@@ -117,7 +118,12 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 	public void setRecordUuid(UUID uuid){
 		this.recordUuid = uuid;
 	}
-	
+	public UUID getProfileUuid(){
+		return this.profileUuid;
+	}
+	public void setProfileUuid(UUID uuid){
+		this.profileUuid = uuid;
+	}
 	public UUID getLocationUuid(){
 		return this.locationUuid;
 	}

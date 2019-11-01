@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordSource;
@@ -52,7 +53,8 @@ public class RecordsViewContentProvider implements ITreeContentProvider {
 	public static enum SortBy{
 		SOURCE (Messages.RecordsViewContentProvider_SourceSortByOption), 
 		NAME(Messages.RecordsViewContentProvider_NameSortByOption), 
-		DATE(Messages.RecordsViewContentProvider_DateSortByOption);
+		DATE(Messages.RecordsViewContentProvider_DateSortByOption),
+		PROFILE("Profile");
 		
 		private String guiName;
 		
@@ -74,6 +76,7 @@ public class RecordsViewContentProvider implements ITreeContentProvider {
 		SOURCE (Messages.RecordsViewContentProvider_SourceGroupByOption), 
 		STATUS (Messages.RecordsViewContentProvider_StatusGroupByOption),		
 		MONTH(Messages.RecordsViewContentProvider_MonthGroupByOption),
+		PROFILE("Profile"),
 		NONE(Messages.RecordsViewContentProvider_NoneGroupByOption);
 		
 		private String guiName;
@@ -170,6 +173,11 @@ public class RecordsViewContentProvider implements ITreeContentProvider {
 					}
 					return Collator.getInstance().compare(s1, s2);
 				});
+			}else if (groupBy == GroupBy.PROFILE) {
+				x.sort((a,b)->{
+					return Collator.getInstance().compare(((IntelProfile)a).getName(), ((IntelProfile)b).getName());
+				});
+
 			}
 			return x.toArray();
 		}
@@ -231,6 +239,10 @@ public class RecordsViewContentProvider implements ITreeContentProvider {
 					return a.getRecordSource().getName().compareTo(b.getRecordSource().getName());
 				}
 			});
+		}else if (sortBy == SortBy.PROFILE) {
+			Collections.sort(tosort, (a,b)->{
+				return Collator.getInstance().compare(a.getProfile().getName(), b.getProfile().getName());
+			});
 		}
 	}
 	
@@ -267,6 +279,15 @@ public class RecordsViewContentProvider implements ITreeContentProvider {
 						if (items == null) {
 							items = new ArrayList<>();
 							groups.put(r.getStatus(), items);
+						}
+						items.add(r);
+					}	
+				}else if (groupBy == GroupBy.PROFILE) {
+					for (IntelRecordProxy r : records) {
+						List<IntelRecordProxy> items = groups.get(r.getProfile());
+						if (items == null) {
+							items = new ArrayList<>();
+							groups.put(r.getProfile(), items);
 						}
 						items.add(r);
 					}	

@@ -24,6 +24,7 @@ package org.wcs.smart.i2.model;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.persistence.CascadeType;
@@ -31,7 +32,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -59,11 +62,25 @@ public class IntelEntityType extends NamedKeyItem {
 	private String birtTemplate;
 
 	private List<IntelEntityTypeAttribute> attributes;
+	
+	private Set<IntelProfile> profiles;
 
 	/**
 	 * Constructor.
 	 */
 	public IntelEntityType() {
+	}
+
+	@ManyToMany()
+	@JoinTable(name = "smart.i_profile_entity_type",
+		joinColumns = @JoinColumn(name = "entity_type_uuid"),
+		inverseJoinColumns = @JoinColumn(name = "profile_uuid"))
+	public Set<IntelProfile> getProfiles(){
+		return this.profiles;
+	}
+	
+	public void setProfiles(Set<IntelProfile> profiles) {
+		this.profiles = profiles;
 	}
 
 	/**
