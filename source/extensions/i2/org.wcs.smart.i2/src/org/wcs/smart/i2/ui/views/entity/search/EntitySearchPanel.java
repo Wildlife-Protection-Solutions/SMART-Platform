@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -61,12 +62,15 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -487,7 +491,7 @@ public abstract class EntitySearchPanel extends Composite {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						try(Session s = HibernateManager.openSession()){
-							entities = QueryFactory.buildQuery(s,IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
+							entities = EntityTypeManager.INSTANCE.getEntityTypesActiveProfiles(s);
 							entities.forEach(ent->ent.getName());
 						}
 						entities.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
@@ -507,7 +511,12 @@ public abstract class EntitySearchPanel extends Composite {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try(Session s = HibernateManager.openSession()){
-								List<IntelAttribute> ats = QueryFactory.buildQuery(s, IntelAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
+								List<IntelAttribute> ats = s.createQuery(" SELECT a FROM IntelAttribute a WHERE a IN (SELECT iea.id.attribute FROM IntelEntityTypeAttribute iea JOIN iea.id.entityType t JOIN t.profiles f WHERE t.conservationArea = :ca  and f in (:profiles))", IntelAttribute.class)
+								.setParameter("ca",  SmartDB.getCurrentConservationArea())
+								.setParameterList("profiles", ProfilesManager.INSTANCE.getActiveProfiles())
+								.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+								.list();
+								
 								ats.forEach(a->{
 									a.getName();
 									if (a.getType() == IntelAttribute.AttributeType.LIST){
@@ -583,7 +592,8 @@ public abstract class EntitySearchPanel extends Composite {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try(Session s = HibernateManager.openSession()){
-					List<IntelEntityType> types = QueryFactory.buildQuery(s, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$				
+					List<IntelEntityType> types = EntityTypeManager.INSTANCE.getEntityTypesActiveProfiles(s);
+					
 					values[0] = new String[types.size()];
 					values[1] = new String[types.size()];
 					for (int i = 0;i < types.size(); i ++){

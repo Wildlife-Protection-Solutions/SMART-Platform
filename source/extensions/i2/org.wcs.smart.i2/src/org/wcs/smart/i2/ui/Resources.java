@@ -1,6 +1,7 @@
 package org.wcs.smart.i2.ui;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
@@ -74,6 +75,19 @@ public enum Resources {
 		
 	}
 
+	/**
+	 * Assumes the image has already been created 
+	 * (use getImage(profile) to create image.
+	 * 
+	 * @param profile 
+	 * @return
+	 */
+	public Image getProfileImage(UUID profile) {
+		IntelProfile t = new IntelProfile();
+		t.setUuid(profile);
+		return profileImages.get(t);
+	}
+	
 	public Image getImage(IntelProfile profile) {
 		Color c = getColor(profile);
 		if (profileImages.containsKey(profile)) return profileImages.get(profile);

@@ -88,6 +88,7 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.editors.EntityEditor;
 import org.wcs.smart.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -467,7 +468,7 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 	
 	private void refresh(){
 		if (cmbTypes.getControl().isDisposed()) return;
-		
+		for (TableColumn c : cmbTypes.getTable().getColumns()) c.dispose();
 		currentSelection = (IStructuredSelection) cmbTypes.getSelection();
 		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		loadTypes.schedule(0);

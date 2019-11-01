@@ -44,7 +44,7 @@ public class OpenEntityHandler {
 
 	public void openEntity(IntelEntity entity, IEclipseContext context){
 		//open entity
-		EntityEditorInput input = new EntityEditorInput(entity.getIdAttributeAsText(), entity.getUuid(), entity.getEntityType());
+		EntityEditorInput input = new EntityEditorInput(entity.getIdAttributeAsText(), entity.getUuid(),entity.getProfile().getUuid(), entity.getEntityType());
 		try {
 			String pId = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
 			if ( (IntelSecurityManager.INSTANCE.canEditEntity(entity.getProfile()) && pId.equals(IntelDataAssessmentPerspective.ID)) ){

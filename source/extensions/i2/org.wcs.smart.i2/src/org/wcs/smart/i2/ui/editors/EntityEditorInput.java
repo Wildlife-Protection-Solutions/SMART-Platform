@@ -36,13 +36,15 @@ public class EntityEditorInput implements IEditorInput{
 	private String name;
 	private UUID uuid;
 	private IntelEntityType type;
+	private UUID profileUuid;
 	
 	private boolean defaultEditMode = false;
 	
-	public EntityEditorInput(String name, UUID uuid, IntelEntityType type){
+	public EntityEditorInput(String name, UUID uuid, UUID profileUuid, IntelEntityType type){
 		this.name = name;
 		this.uuid = uuid;
 		this.type = type;
+		this.profileUuid = profileUuid;
 	}
 	
 	public boolean getDefaultEditMode() {
@@ -51,6 +53,10 @@ public class EntityEditorInput implements IEditorInput{
 	
 	public void setDefaultEditMode(boolean editMode) {
 		this.defaultEditMode = editMode;
+	}
+	
+	public UUID getProfileUuid() {
+		return this.profileUuid;
 	}
 	
 	public IntelEntityType getType(){

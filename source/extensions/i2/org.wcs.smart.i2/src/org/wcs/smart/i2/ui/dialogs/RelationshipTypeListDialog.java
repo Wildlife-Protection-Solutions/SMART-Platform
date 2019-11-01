@@ -87,6 +87,7 @@ import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.TableColumnViewerFilter;
 import org.wcs.smart.i2.ui.editors.EntityEditor;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -141,6 +142,8 @@ public class RelationshipTypeListDialog extends SmartStyledTitleDialog {
 					if (t.getRelationshipGroup() != null){
 						t.getRelationshipGroup().getName();
 					}
+					t.getSourceProfile().getName();
+					t.getTargetProfile().getName();
 				}
 			}
 			
@@ -287,6 +290,28 @@ public class RelationshipTypeListDialog extends SmartStyledTitleDialog {
 		});
 		groupColumn.getColumn().setWidth(150);
 		groupColumn.getColumn().addSelectionListener(sortListener);
+		
+		TableViewerColumn sourceProfileColumn = new TableViewerColumn(tblTypes, SWT.DEFAULT);
+		sourceProfileColumn.getColumn().setText("Source Profile");
+		sourceProfileColumn.getColumn().setWidth(100);
+		sourceProfileColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element){
+				if (element instanceof IntelRelationshipType){
+					IntelRelationshipType t = (IntelRelationshipType)element;
+					return t.getSourceProfile().getName();
+				}
+				return super.getText(element);
+			}
+			@Override
+			public Image getImage(Object element){
+				if (element instanceof IntelRelationshipType){
+					return Resources.INSTANCE.getImage(((IntelRelationshipType) element).getSourceProfile());
+				}
+				return null;
+			}
+		});
+		
 		TableViewerColumn sourceColumn = new TableViewerColumn(tblTypes, SWT.DEFAULT);
 		sourceColumn.getColumn().setText(Messages.RelationshipTypeListDialog_SrcColumName);
 		sourceColumn.setLabelProvider(new ColumnLabelProvider() {
@@ -315,6 +340,29 @@ public class RelationshipTypeListDialog extends SmartStyledTitleDialog {
 		});
 		sourceColumn.getColumn().setWidth(150);
 		sourceColumn.getColumn().addSelectionListener(sortListener);
+		
+		TableViewerColumn targetProfileColumn = new TableViewerColumn(tblTypes, SWT.DEFAULT);
+		targetProfileColumn.getColumn().setText("Target Profile");
+		targetProfileColumn.getColumn().setWidth(100);
+		targetProfileColumn.setLabelProvider(new ColumnLabelProvider() {
+			
+			@Override
+			public String getText(Object element){
+				if (element instanceof IntelRelationshipType){
+					IntelRelationshipType t = (IntelRelationshipType)element;
+					return t.getTargetProfile().getName();
+				}
+				return super.getText(element);
+			}
+			@Override
+			public Image getImage(Object element){
+				if (element instanceof IntelRelationshipType){
+					return Resources.INSTANCE.getImage(((IntelRelationshipType) element).getTargetProfile());
+				}
+				return null;
+			}
+		});
+		
 		TableViewerColumn targetColumn = new TableViewerColumn(tblTypes, SWT.DEFAULT);
 		targetColumn.getColumn().setText(Messages.RelationshipTypeListDialog_TargetColumName);
 		targetColumn.setLabelProvider(new ColumnLabelProvider() {

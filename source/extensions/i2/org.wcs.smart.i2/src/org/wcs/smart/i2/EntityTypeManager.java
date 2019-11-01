@@ -23,12 +23,14 @@ package org.wcs.smart.i2;
 
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
@@ -71,6 +73,17 @@ public enum EntityTypeManager {
 		types.sort((IntelEntityType a, IntelEntityType b) -> Collator.getInstance().compare(a.getName(), b.getName()));
 		return types;
 	}
+	
+	public List<IntelEntityType> getEntityTypesActiveProfiles(Session session){
+		if (ProfilesManager.INSTANCE.getActiveProfiles().isEmpty()) return Collections.emptyList();
+		List<IntelEntityType> types = (session.createQuery("SELECT r FROM IntelEntityType r join r.profiles p WHERE p IN (:profiles)", IntelEntityType.class)
+				.setParameter("profiles", ProfilesManager.INSTANCE.getActiveProfiles())
+				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+				.list());
+		types.sort((IntelEntityType a, IntelEntityType b) -> Collator.getInstance().compare(a.getName(), b.getName()));
+		return types;
+	}
+	
 	
 	public void canDelete(IntelEntityType type, Session session) throws Exception{
 		if (!DeleteManager.canDelete(type, session)){

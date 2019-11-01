@@ -44,6 +44,7 @@ import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntitySearch;
@@ -130,7 +131,10 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 			CriteriaBuilder cb = session.getCriteriaBuilder();
 			CriteriaQuery<IntelEntity> c = cb.createQuery(IntelEntity.class);
 			Root<IntelEntity> from = c.from(IntelEntity.class);
-			c.where(from.get("conservationArea").in(cas)); //$NON-NLS-1$
+			c.where(cb.and(
+					from.get("conservationArea").in(cas),
+					from.get("profile").in(ProfilesManager.INSTANCE.getActiveProfiles())
+					)); //$NON-NLS-1$
 			Query<IntelEntity> q = session.createQuery(c);
 			List<IntelSearchResultItem> items = new ArrayList<>(maxResultCnt);
 			try(ScrollableResults scroll = q.scroll()){
@@ -196,11 +200,14 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		sb = new StringBuilder();
 		sb.append("INSERT INTO qt_temp (entity_uuid, entity_type_key ) ");  //$NON-NLS-1$
 		sb.append(" SELECT DISTINCT ie.uuid, t.keyid "); //$NON-NLS-1$
-		sb.append(" FROM smart.i_entity ie join smart.i_entity_type t on ie.entity_type_uuid = t.uuid  WHERE ie.ca_uuid in ( :cauuids ) "); //$NON-NLS-1$
+		sb.append(" FROM smart.i_entity ie join smart.i_entity_type t on ie.entity_type_uuid = t.uuid");
+		sb.append(" WHERE ie.ca_uuid in ( :cauuids ) and ie.profile_uuid in ( :profiles )"); //$NON-NLS-1$
 		
-		List<byte[]> uuids = this.cas.stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList()); 
+		List<byte[]> uuids = this.cas.stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList());
+		 
 		session.createNativeQuery(sb.toString())
 			.setParameterList("cauuids", uuids)	 //$NON-NLS-1$
+			.setParameterList("profiles", ProfilesManager.INSTANCE.getActiveProfiles().stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList()))
 			.executeUpdate();
 
 		StringBuilder where = new StringBuilder();

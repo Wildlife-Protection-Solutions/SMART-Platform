@@ -95,8 +95,8 @@ public class EntityListComposite extends Composite{
 		toolkit.adapt(this);
 		
 		GridLayout gl = new GridLayout();
-		gl.marginHeight = 0;
-		gl.marginWidth = 0;
+		gl.marginHeight = 1;
+		gl.marginWidth = 1;
 		setLayout(gl);
 				
 		compEntityEdit = toolkit.createComposite(this, SWT.NONE);
@@ -154,12 +154,23 @@ public class EntityListComposite extends Composite{
 						IStructuredSelection sel = (IStructuredSelection)s;
 						for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 							Object element = (Object)iterator.next();
+							
+							IntelEntity entity = null;
 							if (element instanceof IntelEntity){
-								linkEntity((IntelEntity)element);
-							}
-							if (element instanceof IAdaptable){
+								entity = (IntelEntity)element;
+							}else  if (element instanceof IAdaptable){
 								Object x = ((IAdaptable)element).getAdapter(IntelEntity.class);
-								if (x != null) linkEntity((IntelEntity) x);
+								if (x != null) entity = (IntelEntity)x;
+							}
+							if (entity == null) return;
+							if (entity.getProfile().getUuid().equals(editor.getInputInternal().getRecordProfileUuid())) {
+								linkEntity((IntelEntity)element);
+							}else {
+								//show error
+								String message = MessageFormat.format("Entity ''{0}'' cannot be added to record, the Profiles are not the same.\nEntity Profile: {1}\nRecord Profile: {2}",
+										entity.getIdAttributeAsText(), entity.getProfile().getName(), editor.getRecord().getProfile().getName());
+								TransparentInfoDialog ti = new TransparentInfoDialog(getShell(), message);
+								ti.open();
 							}
 							
 						}
@@ -229,6 +240,7 @@ public class EntityListComposite extends Composite{
 				IntelEntity toadd = null;
 				try(Session s = HibernateManager.openSession()){
 					toadd = (IntelEntity) s.get(IntelEntity.class, entity.getUuid());
+					toadd.getProfile().equals(editor.getRecord().getProfile());
 					if(toadd != null){
 						toadd.getIdAttributeAsText();
 						if (toadd.getPrimaryAttachment() != null){
@@ -264,7 +276,9 @@ public class EntityListComposite extends Composite{
 								add = false;
 							}
 						}
-						
+						if (!toadd.getProfile().equals(editor.getRecord().getProfile())) {
+							add =  false;
+						}
 						if (add){
 							IntelEntityRecord r = new IntelEntityRecord();
 							r.setEntity(toadd);

@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.handler;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -68,32 +69,43 @@ public class NewRecordHandler {
 	 */
 	public static final String ENTITY_UUID_LINK = "org.wcs.smart.i2.ui.handler.NewRecordHandler.entities"; //$NON-NLS-1$
 	
+	public static final String PROFILE_LINK = "org.wcs.smart.i2.ui.handler.NewRecordHandler.profile"; //$NON-NLS-1$
+
+	
 	@Execute
 	public void createNewRecord(IEclipseContext context){
 		
 		//need to find the profiles that are active and in which
 		//the current user can create records
-		
-		List<IntelProfile> items = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
-		for (Iterator<IntelProfile> iterator = items.iterator(); iterator.hasNext();) {
-			IntelProfile intelProfile = iterator.next();
-			if (!IntelSecurityManager.INSTANCE.canCreateRecord(intelProfile)) iterator.remove();
-		}
-		
 		IntelProfile p = null;
-		if (items.isEmpty()) {
-			MessageDialog.openInformation(context.get(Shell.class), "New Record", 
-					"There are no active profiles in which you have permission to create new Records.");
-			return;
-		}else if (items.size() > 1) {
-			//select profile
-			//TODO:
-			items.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-			SelectProfileDialog dialog = new SelectProfileDialog(context.get(Shell.class), items);
-			if (dialog.open() != Window.OK) return;
-			p = dialog.getSelection();
+		if (context.containsKey(PROFILE_LINK) && context.get(PROFILE_LINK) instanceof IntelProfile) {
+			p = (IntelProfile)context.get(PROFILE_LINK);
+			if (!IntelSecurityManager.INSTANCE.canCreateRecord(p)) {
+				MessageDialog.openInformation(context.get(Shell.class), "New Record", 
+						MessageFormat.format("Insufficient priviliges to create a new record in profile {0}.",p.getName()));
+				return;
+			}
 		}else {
-			p = items.iterator().next();
+			List<IntelProfile> items = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+			for (Iterator<IntelProfile> iterator = items.iterator(); iterator.hasNext();) {
+				IntelProfile intelProfile = iterator.next();
+				if (!IntelSecurityManager.INSTANCE.canCreateRecord(intelProfile)) iterator.remove();
+			}
+			
+			if (items.isEmpty()) {
+				MessageDialog.openInformation(context.get(Shell.class), "New Record", 
+						"There are no active profiles in which you have permission to create new Records.");
+				return;
+			}else if (items.size() > 1) {
+				//select profile
+				//TODO:
+				items.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+				SelectProfileDialog dialog = new SelectProfileDialog(context.get(Shell.class), items);
+				if (dialog.open() != Window.OK) return;
+				p = dialog.getSelection();
+			}else {
+				p = items.iterator().next();
+			}
 		}
 		
 		IntelRecord newRecord = new IntelRecord();
@@ -117,6 +129,8 @@ public class NewRecordHandler {
 					try {
 						ie.getPrimaryAttachment().computeFileLocation(session);
 					}catch (Exception ex) {}
+					
+					if (!newRecord.getProfile().equals(ie.getProfile())) return;
 					
 					IntelEntityRecord rr = new IntelEntityRecord();
 					rr.setRecord(newRecord);

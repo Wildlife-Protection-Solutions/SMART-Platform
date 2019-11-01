@@ -41,6 +41,7 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.operation.distance.DistanceOp;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -129,9 +130,10 @@ public class SpatialEntitySearch implements IIntelEntitySearch {
 		
 		List<IntelEntityAttributeValue> valuesToSearch = new ArrayList<>();
 		for (IntelEntityTypeAttribute attribute : attributes) {
-			Query<IntelEntityAttributeValue> values = session.createQuery("FROM IntelEntityAttributeValue WHERE id.attribute = :attribute and id.entity.entityType = :type ", IntelEntityAttributeValue.class); //$NON-NLS-1$
+			Query<IntelEntityAttributeValue> values = session.createQuery("FROM IntelEntityAttributeValue WHERE id.entity.profile in (:profiles) AND id.attribute = :attribute and id.entity.entityType = :type ", IntelEntityAttributeValue.class); //$NON-NLS-1$
 			values.setParameter("attribute", attribute.getAttribute()); //$NON-NLS-1$
 			values.setParameter("type", attribute.getEntityType()); //$NON-NLS-1$
+			values.setParameter("profiles", ProfilesManager.INSTANCE.getActiveProfiles()); //$NON-NLS-1$
 			valuesToSearch.addAll(values.list());
 		}
 		

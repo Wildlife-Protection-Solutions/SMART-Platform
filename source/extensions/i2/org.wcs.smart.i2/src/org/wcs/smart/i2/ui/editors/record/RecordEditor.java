@@ -51,7 +51,6 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -63,11 +62,11 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
-import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
@@ -99,8 +98,6 @@ import org.wcs.smart.i2.ui.views.RecordNarrativeView;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
 import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.UuidUtils;
-
-import org.locationtech.jts.geom.Geometry;
 
 public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
 	
@@ -203,6 +200,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						for (IntelEntityRecord rr : temp.getEntities()){
 							rr.getEntity().getIdAttributeAsText();
 							rr.getEntity().getEntityType().getName();
+							rr.getEntity().getProfile().getName();
 							if (rr.getEntity().getPrimaryAttachment()!= null){
 								try{
 									rr.getEntity().getPrimaryAttachment().computeFileLocation(s);

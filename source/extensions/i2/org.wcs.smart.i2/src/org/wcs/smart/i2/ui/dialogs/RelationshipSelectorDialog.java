@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.ui.editors.RelationshipSearchJob;
@@ -52,15 +53,18 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class RelationshipSelectorDialog extends SmartStyledTitleDialog{
 
 	private IntelEntityType srcType, targetType;
+	private IntelProfile srcProfile, targetProfile;
 	
 	private TableViewer cmbTypes;
 	private IntelRelationshipType selectedType = null;
 	
-	public RelationshipSelectorDialog(Shell parentShell, IntelEntityType srcType, IntelEntityType targetType) {
+	public RelationshipSelectorDialog(Shell parentShell, IntelProfile srcProfile, IntelEntityType srcType, IntelProfile trgProfile, IntelEntityType targetType) {
 		super(parentShell);
 		
 		this.srcType = srcType;
 		this.targetType = targetType;
+		this.srcProfile = srcProfile;
+		this.targetProfile = trgProfile;
 	}
 	
 	@Override
@@ -112,7 +116,7 @@ public class RelationshipSelectorDialog extends SmartStyledTitleDialog{
 			getButton(IDialogConstants.OK_ID).setEnabled(ok);
 		});
 		
-		(new RelationshipSearchJob(srcType, targetType) {
+		(new RelationshipSearchJob(srcProfile, srcType, targetProfile, targetType) {
 			@Override
 			protected void afterLoad() {
 				Display.getDefault().syncExec(()->{

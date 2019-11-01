@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.dialogs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -126,8 +127,16 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 					profile = s.get(IntelProfile.class, profile.getUuid());
 					profile.getEntityTypes().size();
 				}else {
-					profiles.addAll(ProfilesManager.INSTANCE.getProfiles(s));
-					profiles.forEach(p->p.getEntityTypes().size());	
+					Set<IntelProfile> temp = ProfilesManager.INSTANCE.getActiveProfiles();
+					if (temp.size() == 0) {
+						profile = s.get(IntelProfile.class, temp.iterator().next().getUuid());
+						profile.getEntityTypes().size();
+					}else {
+						for (IntelProfile p : temp) {
+							profiles.add( s.get(IntelProfile.class, p.getUuid()) );
+						}
+						profiles.forEach(p->p.getEntityTypes().size());
+					}
 				}
 			}
 			

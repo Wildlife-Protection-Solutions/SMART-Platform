@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
@@ -167,7 +168,25 @@ public class ProfilesListDialog extends SmartStyledTitleDialog {
 	}
 	
 	private void delete() {
+		Object x = tblConfigurations.getStructuredSelection().getFirstElement();
+		if (!(x instanceof IntelProfile)) return;
 		
+		IntelProfile p = (IntelProfile)x;
+		try(Session session = HibernateManager.openSession()){
+			ProfilesManager.INSTANCE.canDelete(p, session);
+			
+			session.getTransaction().begin();
+			try {
+				ProfilesManager.INSTANCE.deleteProfile(p, session);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				throw ex;
+			}
+		}catch (Exception ex) {
+			Intelligence2PlugIn.displayLog("Unable to delete profile." + "\n\n" + ex.getMessage(), ex);
+		}
+		refresh();
 	}
 	
 	private void refresh() {

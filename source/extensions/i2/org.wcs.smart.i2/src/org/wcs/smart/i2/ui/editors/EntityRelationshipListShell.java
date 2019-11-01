@@ -139,7 +139,7 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 						type = null;
 						targetEntity = (IntelEntity) sel.getFirstElement();
 						types.setInput(new String[]{DialogConstants.LOADING_TEXT});
-						(new RelationshipSearchJob(srcEntity.getEntityType(), targetEntity.getEntityType()) {
+						(new RelationshipSearchJob(srcEntity.getProfile(), srcEntity.getEntityType(), targetEntity.getProfile(), targetEntity.getEntityType()) {
 							@Override
 							protected void afterLoad() {
 								Display.getDefault().syncExec(()->{

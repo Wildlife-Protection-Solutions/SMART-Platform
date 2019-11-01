@@ -67,6 +67,7 @@ import org.hibernate.query.Query;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -177,6 +178,10 @@ public class SpatialSearchPanel extends Composite{
 	
 	public Double getDistance() {
 		return Double.parseDouble(txtMaxDistance.getText());
+	}
+	public void refresh() {
+		cmbEntityTypeFilters.setInput(Collections.singletonList(DialogConstants.LOADING_TEXT));
+		loadEntityTypes.schedule();	
 	}
 	
 	private void doSearch() {
@@ -407,17 +412,20 @@ public class SpatialSearchPanel extends Composite{
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<IntelEntityTypeAttribute> filterOptions = new ArrayList<>();
-			try(Session session = HibernateManager.openSession()){
-				Query<IntelEntityTypeAttribute> q = session.createQuery("FROM IntelEntityTypeAttribute a WHERE a.id.attribute.conservationArea = :ca and a.id.attribute.type = :type", IntelEntityTypeAttribute.class); //$NON-NLS-1$
-				q.setParameter("ca",  SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-				q.setParameter("type",  IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
-				
-				
-				filterOptions.addAll(q.list());
-				filterOptions.forEach(a->{
-					a.getAttribute().getName();
-					a.getEntityType().getName();
-				});
+			if (!ProfilesManager.INSTANCE.getActiveProfiles().isEmpty()) {
+				try(Session session = HibernateManager.openSession()){
+					Query<IntelEntityTypeAttribute> q = session.createQuery("SELECT a FROM IntelEntityTypeAttribute a join a.id.entityType t join t.profiles p WHERE p IN (:profiles) and a.id.attribute.conservationArea = :ca and a.id.attribute.type = :type", IntelEntityTypeAttribute.class); //$NON-NLS-1$
+					q.setParameter("ca",  SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+					q.setParameter("type",  IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
+					q.setParameterList("profiles",  ProfilesManager.INSTANCE.getActiveProfiles()); //$NON-NLS-1$
+					
+					
+					filterOptions.addAll(q.list());
+					filterOptions.forEach(a->{
+						a.getAttribute().getName();
+						a.getEntityType().getName();
+					});
+				}
 			}
 			Display.getDefault().asyncExec(()->{
 				cmbEntityTypeFilters.setInput(filterOptions);

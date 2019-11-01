@@ -64,14 +64,15 @@ public class DesktopIntelBirtConnection extends AbstractIntelBirtConnection {
 	}
 
 	public boolean hasPermission(Permission permission) {
-		switch(permission) {
-		case ENTITY:
-			return IntelSecurityManager.INSTANCE.canViewEntities();
-		case QUERY:
-			return IntelSecurityManager.INSTANCE.canViewQueries();
-		case RECORD:
-			return IntelSecurityManager.INSTANCE.canViewRecords();
-		}
+		//TODO: FIX THIS
+//		switch(permission) {
+//		case ENTITY:
+//			return IntelSecurityManager.INSTANCE.canViewEntities();
+//		case QUERY:
+//			return IntelSecurityManager.INSTANCE.canViewQueries();
+//		case RECORD:
+//			return IntelSecurityManager.INSTANCE.canViewRecords();
+//		}
 		return false;
 	}
 

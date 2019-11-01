@@ -60,6 +60,7 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -84,6 +85,7 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.AllEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.dialogs.ExportEntityToFileDialog;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog;
@@ -344,6 +346,20 @@ public class AllPanel extends Composite {
 				}
 				
 				return ((EntityTableRowItem)element).getId();
+			}
+		});
+		
+		TableViewerColumn profileColumn = new TableViewerColumn(entityTable, SWT.NONE);
+		profileColumn.getColumn().setText("Profile");
+		profileColumn.getColumn().setWidth(50);
+		profileColumn.setLabelProvider(new ColumnLabelProvider() {
+			public String getText(Object element) {
+				if (element == null) return "...";
+				return ((EntityTableRowItem)element).getProfileName();
+			}
+			public Image getImage(Object element) {
+				if (element == null) return null;
+				return Resources.INSTANCE.getProfileImage(((EntityTableRowItem)element).getProfileUuid());
 			}
 		});
 		

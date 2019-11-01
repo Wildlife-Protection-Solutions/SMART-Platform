@@ -24,6 +24,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.ToolItem;
@@ -110,6 +112,7 @@ public class ProfileFilterHandler {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					
+					if ((e.stateMask & SWT.BUTTON3) != 0) return;
 					if (e.detail != SWT.CHECK && ((e.stateMask & SWT.SHIFT) == 0) && ((e.stateMask & SWT.CTRL) == 0)) {
 						for (Iterator<?> i = viewer.getStructuredSelection().iterator(); i.hasNext();) {
 							Object x = i.next();
@@ -135,6 +138,17 @@ public class ProfileFilterHandler {
 				ProfilesManager.INSTANCE.setActiveProfiles(this.active, context.get(IEventBroker.class));
 			});
 			
+			Menu menu = new Menu(viewer.getControl());
+			
+			MenuItem miAll = new MenuItem(menu, SWT.PUSH);
+			miAll.setText("Select All");
+			miAll.addListener(SWT.Selection, e->viewer.setAllChecked(true));
+						
+			MenuItem miNone = new MenuItem(menu, SWT.PUSH);
+			miNone.setText("Select None");
+			miNone.addListener(SWT.Selection, e->viewer.setAllChecked(false));
+			
+			viewer.getControl().setMenu(menu);
 		}
 	}
 }

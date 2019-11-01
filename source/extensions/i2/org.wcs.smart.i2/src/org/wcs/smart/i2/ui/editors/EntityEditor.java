@@ -809,7 +809,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 						Object element = (Object)iterator.next();
 						if (element instanceof IntelEntity){
 							
-							RelationshipSelectorDialog dialog = new RelationshipSelectorDialog( getSite().getShell(), getEntity().getEntityType(), ((IntelEntity)element).getEntityType() );
+							RelationshipSelectorDialog dialog = new RelationshipSelectorDialog( getSite().getShell(),
+									getEntity().getProfile(), getEntity().getEntityType(), ((IntelEntity)element).getProfile(), ((IntelEntity)element).getEntityType() );
 							dialog.open();
 							if (dialog.getRelationshipType() != null){
 								addRelationship(dialog.getRelationshipType(), (IntelEntity) element);
@@ -840,9 +841,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 			
 			@Override
 			public void dragEnter(DropTargetEvent event) {
-				event.detail = DND.DROP_LINK;
-				comp.addPaintListener(paintListener);
-				comp.redraw();
+				if (getEditMode()) {
+					event.detail = DND.DROP_LINK;
+					comp.addPaintListener(paintListener);
+					comp.redraw();
+				}
 			}
 		});
 	}
@@ -1089,9 +1092,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		});
 		
-		if (IntelSecurityManager.INSTANCE.canDeleteEntity(entity.getProfile()) && IntelSecurityManager.INSTANCE.canEditEntity(entity.getProfile())){
+		if (IntelSecurityManager.INSTANCE.canDeleteEntity(input.getProfileUuid()) && IntelSecurityManager.INSTANCE.canEditEntity(input.getProfileUuid())){
 			deleteItem.setEnabled(getEditMode());	
-		}else if (IntelSecurityManager.INSTANCE.canDeleteEntity(entity.getProfile())  ) {
+		}else if (IntelSecurityManager.INSTANCE.canDeleteEntity(input.getProfileUuid())  ) {
 			deleteItem.setEnabled(true);
 		}else{
 			deleteItem.setEnabled(false);
@@ -1163,7 +1166,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		tabList.setContent(new Composite[]{compAttributes,  compAttachments, compScratchpad, compHistory}, tabPart);
 		tabList.selectTab(0);
 		
-		if (!IntelSecurityManager.INSTANCE.canEditEntity(entity.getProfile())){
+		if (!IntelSecurityManager.INSTANCE.canEditEntity(input.getProfileUuid())){
 			setEditMode(false);
 			editItem.setEnabled(false);
 		}
@@ -1212,7 +1215,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 	}
 	
 	public void setEditMode(boolean isEdit){
-		if (isEdit && !(IntelSecurityManager.INSTANCE.canEditEntity(entity.getProfile()) || IntelSecurityManager.INSTANCE.canCreateEntity(entity.getProfile()))){
+		if (isEdit && !(IntelSecurityManager.INSTANCE.canEditEntity(input.getProfileUuid()) 
+				|| IntelSecurityManager.INSTANCE.canCreateEntity(input.getProfileUuid()))){
 			//cannot change the edit more; this user cannot edit entities
 			return;
 		}
@@ -1223,9 +1227,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 		this.isEditMode = isEdit;
 		if (entity != null) initControl();
 		if (deleteItem != null && !deleteItem.isDisposed()) {
-			if (IntelSecurityManager.INSTANCE.canDeleteEntity(entity.getProfile()) && IntelSecurityManager.INSTANCE.canEditEntity(entity.getProfile())){
+			if (IntelSecurityManager.INSTANCE.canDeleteEntity(input.getProfileUuid()) && IntelSecurityManager.INSTANCE.canEditEntity(input.getProfileUuid())){
 				deleteItem.setEnabled(isEdit);	
-			}else if (IntelSecurityManager.INSTANCE.canDeleteEntity(entity.getProfile())  ) {
+			}else if (IntelSecurityManager.INSTANCE.canDeleteEntity(input.getProfileUuid())  ) {
 				deleteItem.setEnabled(true);
 			}else{
 				deleteItem.setEnabled(false);
@@ -1275,6 +1279,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private void addRelationship(IntelRelationshipType rType, IntelEntity targetEntity){
 		if (rType == null) return;
 		
+		if (!rType.getSourceProfile().equals(getEntity().getProfile()) ||
+				!rType.getTargetProfile().equals(targetEntity.getProfile())){
+			//invalid profiles
+			return;
+		}
 		IntelEntity e1 = entity;
 		IntelEntity e2 = targetEntity;
 		IntelEntityRelationship newRelationship = new IntelEntityRelationship();
@@ -1666,7 +1675,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				for (MenuItem mi : recordsMenu.getItems()) mi.dispose();
 				
 				//TODO
-				if (IntelSecurityManager.INSTANCE.canViewRecords(entity.getProfile())) {
+				if (IntelSecurityManager.INSTANCE.canViewRecords(input.getProfileUuid())) {
 					MenuItem open = new MenuItem(recordsMenu, SWT.PUSH);
 					open.setText(Messages.EntityEditor_OpenRecordMnuItem);
 					open.addSelectionListener(new SelectionAdapter() {
@@ -1677,7 +1686,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					});
 				}
 				
-				if (getEditMode() && IntelSecurityManager.INSTANCE.canCreateRecord(entity.getProfile())) {
+				if (getEditMode() && IntelSecurityManager.INSTANCE.canCreateRecord(input.getProfileUuid())) {
 					new MenuItem(recordsMenu, SWT.SEPARATOR);
 					
 					MenuItem open = new MenuItem(recordsMenu, SWT.PUSH);
@@ -1700,15 +1709,17 @@ public class EntityEditor extends EditorPart implements MapPart{
 	}
 	
 	private void createNewRecord() {
-		if (!IntelSecurityManager.INSTANCE.canCreateRecord(entity.getProfile())) return;
+		if (!IntelSecurityManager.INSTANCE.canCreateRecord(input.getProfileUuid())) return;
 		IEclipseContext ctx = context.createChild();
 		ctx.set(NewRecordHandler.ENTITY_UUID_LINK, Collections.singleton(getEntity().getUuid()));
+		ctx.set(NewRecordHandler.PROFILE_LINK, getEntity().getProfile());
+
 		(new NewRecordHandler()).createNewRecord(ctx);
 	}
 	
 	
 	private void openSelectedRecord(){
-		if (!IntelSecurityManager.INSTANCE.canViewRecords(entity.getProfile())) return;
+		if (!IntelSecurityManager.INSTANCE.canViewRecords(input.getProfileUuid())) return;
 		if (tblRecords.getSelection().isEmpty()) return;
 		Object x = ((IStructuredSelection)tblRecords.getSelection()).getFirstElement();
 		if (x instanceof IntelRecord){

@@ -279,7 +279,7 @@ public class EntityList extends Composite {
 											loading.setText(DialogConstants.LOADING_TEXT);
 											loading.setEnabled(false);
 											
-											(new RelationshipSearchJob(srcEntity.getEntityType(), targetEntity.getEntityType()) {
+											(new RelationshipSearchJob(srcEntity.getProfile(), srcEntity.getEntityType(), targetEntity.getProfile(), targetEntity.getEntityType()) {
 												@Override
 												protected void afterLoad() {
 													Display.getDefault().syncExec(()->{
@@ -364,6 +364,12 @@ public class EntityList extends Composite {
 	private void createRelationship(IntelEntity srcEntity, IntelEntity targetEntity, IntelRelationshipType rType){
 		IntelEntity e1 = srcEntity;
 		IntelEntity e2 = targetEntity;
+		
+		if (!rType.getSourceProfile().getUuid().equals(srcEntity.getProfile().getUuid()) ||
+				!rType.getTargetProfile().getUuid().equals(targetEntity.getProfile().getUuid())){
+			//invalid profiles
+			return;
+		}
 		
 		IntelEntityRelationship newRelationship = new IntelEntityRelationship();
 		newRelationship.setRelationshipType(rType);

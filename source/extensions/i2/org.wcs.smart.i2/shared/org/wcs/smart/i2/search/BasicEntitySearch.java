@@ -39,6 +39,7 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -138,7 +139,9 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	public IntelSearchResult doSearch(Session session, Locale l, IProgressMonitor monitor){
 		SubMonitor.convert(monitor, 2);
 		Long now = System.nanoTime();
-		
+		if (ProfilesManager.INSTANCE.getActiveProfiles().isEmpty()) {
+			return new IntelSearchResult(Collections.emptyList(),0);
+		}
 		if (searchString != null && searchString.length() > 0){
 			//perform fuzzy search
 			List<IntelSearchResultItem> sresults = SearchManager.INSTANCE.fuzzySearch(searchString,  entityTypes, cas, maxResultCnt, session);
@@ -152,6 +155,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 			Root<IntelEntity> from = c.from(IntelEntity.class);
 			c.select(from);
 			ArrayList<Predicate> filters = new ArrayList<>();
+			filters.add(from.get("profile").in(ProfilesManager.INSTANCE.getActiveProfiles())); //$NON-NLS-1$
 			filters.add(from.get("conservationArea").in(this.cas)); //$NON-NLS-1$
 			if (entityTypes != null && !entityTypes.isEmpty()){
 				filters.add(from.join("entityType").get("keyId").in(entityTypes)); //$NON-NLS-1$ //$NON-NLS-2$

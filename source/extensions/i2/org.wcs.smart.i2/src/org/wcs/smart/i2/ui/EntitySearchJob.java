@@ -60,7 +60,6 @@ public abstract class EntitySearchJob extends Job{
 	protected IStatus run(IProgressMonitor monitor) {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.EntitySearchJob_TaskName, 3);
 		try {
-			beforeSearch(progress.split(1));
 			progress.checkCanceled();
 			
 			IntelSearchResult entities = null; 
@@ -91,5 +90,4 @@ public abstract class EntitySearchJob extends Job{
 	
 	public abstract void afterSearch(IntelSearchResult entities, IProgressMonitor monitor);
 	
-	public abstract void beforeSearch(IProgressMonitor monitor);
 }

@@ -90,17 +90,20 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.RelationshipTypeManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.ProfileLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.NamedItemViewerFilter;
@@ -120,6 +123,11 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 
 	private static final String NEW_GROUP = Messages.RelationshipTypeDialog_CreateNewGroupLabel;
 	
+	private static IntelEntityType ANY_OP = new IntelEntityType();
+	static {
+		ANY_OP.setName(Messages.RelationshipTypeDialog_AnyOption);;
+	}
+	
 	@Inject
 	private IEventBroker eventBroker;
 	@Inject
@@ -133,6 +141,8 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 	
 	private ComboViewer cmbSrcType;
 	private ComboViewer cmbTrgType;
+	private ComboViewer cmbSrcProfile;
+	private ComboViewer cmbTrgProfile;
 	private ComboViewer cmbGroup;
 	
 	private ControlDecoration cdSrcType;
@@ -405,6 +415,33 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 		});
 		
 		l = new Label(parent, SWT.NONE);
+		l.setText("Source Profile:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		cmbSrcProfile = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbSrcProfile.setContentProvider(ArrayContentProvider.getInstance());
+		cmbSrcProfile.setLabelProvider(new ProfileLabelProvider());
+		cmbSrcProfile.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		cmbSrcProfile.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		cmbSrcProfile.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = ((IStructuredSelection)cmbSrcProfile.getSelection()).getFirstElement();
+				if (x instanceof IntelProfile){
+					IntelProfile p = (IntelProfile)x;
+					List<Object> items = new ArrayList<>();
+					items.add(ANY_OP);
+					items.addAll(p.getEntityTypes());
+					cmbSrcType.setInput( items );
+					cmbSrcType.setSelection(new StructuredSelection(ANY_OP));
+					type.setSourceProfile(p);
+				}
+				modified();
+			}
+		});
+		
+		
+		l = new Label(parent, SWT.NONE);
 		l.setText(Messages.RelationshipTypeDialog_SrcLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
@@ -429,6 +466,32 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 		});
 		
 		cdSrcType = createDecoration(cmbSrcType.getControl());
+		
+		l = new Label(parent, SWT.NONE);
+		l.setText("Target Profile:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		cmbTrgProfile = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbTrgProfile.setContentProvider(ArrayContentProvider.getInstance());
+		cmbTrgProfile.setLabelProvider(new ProfileLabelProvider());
+		cmbTrgProfile.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		cmbTrgProfile.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		cmbTrgProfile.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = ((IStructuredSelection)cmbTrgProfile.getSelection()).getFirstElement();
+				if (x instanceof IntelProfile){
+					IntelProfile p = (IntelProfile)x;
+					List<Object> items = new ArrayList<>();
+					items.add(ANY_OP);
+					items.addAll(p.getEntityTypes());
+					cmbTrgType.setInput( items );
+					cmbTrgType.setSelection(new StructuredSelection(ANY_OP));
+					type.setTargetProfile(p);
+				}
+				modified();
+			}
+		});
 		
 		l = new Label(parent, SWT.NONE);
 		l.setText(Messages.RelationshipTypeDialog_TargetLabel);
@@ -760,9 +823,21 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
-				List<IntelEntityType> types = new ArrayList<IntelEntityType>();
+//				List<IntelEntityType> types = new ArrayList<IntelEntityType>();
 				List<Object> groups = new ArrayList<Object>();
+				List<IntelProfile> profiles = new ArrayList<>();
 				try(Session s = HibernateManager.openSession()){
+					profiles.addAll( ProfilesManager.INSTANCE.getProfiles(s) );
+					profiles.forEach(p->p.getEntityTypes().size());
+//					forEach(et->et.getAttributes().forEach(a->{
+//						a.getAttribute().getNames().size();
+//						if (a.getAttribute().getAttributeList() != null) {
+//							for (IntelAttributeListItem i : a.getAttribute().getAttributeList()) {
+//								i.getNames().size();
+//							}
+//						}
+//					})));
+					
 					if (type.getUuid() != null){
 						type = (IntelRelationshipType) s.get(IntelRelationshipType.class, type.getUuid());
 						type.getNames().size();
@@ -777,14 +852,14 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 					}
 					entityTypeSiblings = RelationshipTypeManager.INSTANCE.getRelationshipTypes(s, SmartDB.getCurrentConservationArea());
 					entityTypeSiblings.remove(type);
-					types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
+//					types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
 					groups.addAll(RelationshipTypeManager.INSTANCE.getRelationshipGroups(s, SmartDB.getCurrentConservationArea()));
 				}
 				
 				
-				IntelEntityType any = new IntelEntityType();
-				any.setName(Messages.RelationshipTypeDialog_AnyOption);
-				types.add(0, any);
+//				IntelEntityType any = new IntelEntityType();
+//				any.setName(Messages.RelationshipTypeDialog_AnyOption);
+//				types.add(0, any);
 				
 				Collections.sort(groups, (a,b) -> Collator.getInstance().compare(((IntelRelationshipGroup)a).getName().toLowerCase(), ((IntelRelationshipGroup)b).getName().toLowerCase()));
 				String noGroup = ""; //$NON-NLS-1$
@@ -801,20 +876,31 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 						nameKeyInfo.initFields(type, entityTypeSiblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());					
 						getButton(IDialogConstants.OK_ID).setEnabled(type.getUuid() == null);
 						
-						cmbSrcType.setInput(types);
-						cmbTrgType.setInput(types);
+						cmbSrcProfile.setInput(profiles);
+						cmbTrgProfile.setInput(profiles);
+						cmbSrcType.setInput(new Object[] {});
+						cmbTrgType.setInput(new Object[] {});
+						
 						cmbGroup.setInput(groups);
 						
+						
+						if (type.getSourceProfile() != null) {
+							cmbSrcProfile.setSelection(new StructuredSelection(type.getSourceProfile()));
+							
+						}
+						if (type.getTargetProfile() != null) {
+							cmbTrgProfile.setSelection(new StructuredSelection(type.getTargetProfile()));
+						}
 						if (type.getSourceEntityType() != null){
 							cmbSrcType.setSelection(new StructuredSelection(type.getSourceEntityType()));
-						}else{
-							cmbSrcType.setSelection(new StructuredSelection(any));
+						}else if (type.getSourceProfile() != null){
+							cmbSrcType.setSelection(new StructuredSelection(ANY_OP));
 						}
 						
 						if (type.getTargetEntityType() != null){
 							cmbTrgType.setSelection(new StructuredSelection(type.getTargetEntityType()));
-						}else{
-							cmbTrgType.setSelection(new StructuredSelection(any));
+						}else if (type.getTargetProfile() != null) {
+							cmbTrgType.setSelection(new StructuredSelection(ANY_OP));
 						}
 						if (type.getRelationshipGroup() != null){
 							cmbGroup.setSelection(new StructuredSelection(type.getRelationshipGroup()));

@@ -273,6 +273,7 @@ public enum IntelReportManager {
 	 * @throws Exception
 	 */
 	public void generateTemplate(IntelEntityType entityType) throws Exception {
+		if (true) return; //TODO:
 		if (entityType.getUuid() == null) throw new IllegalStateException("Cannot generate BIRT template for an entity type that has not been saved."); //$NON-NLS-1$
 		
 		if (entityType.getBirtTemplate() == null){

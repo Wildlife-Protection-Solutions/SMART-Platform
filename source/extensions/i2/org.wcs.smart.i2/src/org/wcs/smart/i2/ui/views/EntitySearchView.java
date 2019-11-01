@@ -154,17 +154,7 @@ public class EntitySearchView {
 	};
 	
 	final private EntitySearchJob searchJob = new EntitySearchJob() {
-		
-		@Override
-		public void beforeSearch(IProgressMonitor monitor) {
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					entityList.setEntities(null);
-				}
-			});
-		}
-		
+				
 		@Override
 		public void afterSearch(IntelSearchResult searchResult, IProgressMonitor monitor) {
 			Display.getDefault().asyncExec(new Runnable(){
@@ -647,6 +637,7 @@ public class EntitySearchView {
 	@Optional
 	private void entityTypesModified(@UIEventTopic(IntelEvents.ENTITY_TYPE_ALL) Object data){
 		basicPanel.refresh();
+		spatialPanel.refresh();
 		allPanel.refresh(searchDelay);
 		doSearch(null, searchDelay);
 	}
@@ -655,10 +646,21 @@ public class EntitySearchView {
 	@Inject
 	private void dbModified(@EventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
 		basicPanel.refresh();
+		spatialPanel.refresh();
 		allPanel.refresh(searchDelay);
 		loadSearches();
 		doSearch(null, searchDelay);
 	}
+	
+	@Optional
+	@Inject
+	private void activeProfileChange(@UIEventTopic(IntelEvents.ACTIVE_PROFILES) Object data){
+		basicPanel.refresh();
+		spatialPanel.refresh();
+		allPanel.refresh(searchDelay);
+		doSearch(null, searchDelay);
+	}
+	
 	
 	private void loadSearches() {
 		lastSelection = cmbSavedSearch.getSelection();
@@ -711,6 +713,7 @@ public class EntitySearchView {
 			searchJob.setSearch(search);
 		}
 		searchJob.cancel();
+		entityList.setEntities(null);
 		searchJob.schedule(delay);
 	}
 	
