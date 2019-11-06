@@ -34,15 +34,15 @@ ALTER TABLE smart.i_entity ADD CONSTRAINT i_entity_profileuuid_fk FOREIGN KEY (p
 
 
 
-CREATE TABLE smart.i_permissions(
+CREATE TABLE smart.i_permission(
   employee_uuid char(16) for bit data not null,
   profile_uuid char(16) for bit data not null,
   permissions integer not null
 );
 
 
-ALTER TABLE smart.i_permissions ADD CONSTRAINT ipermissions_empuuid_fk FOREIGN KEY (employee_uuid) REFERENCES smart.employee(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE;
-ALTER TABLE smart.i_permissions ADD CONSTRAINT ipermissions_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE smart.i_permission ADD CONSTRAINT ipermission_empuuid_fk FOREIGN KEY (employee_uuid) REFERENCES smart.employee(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE smart.i_permission ADD CONSTRAINT ipermission_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE;
 
 
 ALTER TABLE smart.i_record ADD COLUMN profile_uuid char(16) for bit data ;

@@ -1,12 +1,14 @@
 package org.wcs.smart.i2.ui.dialogs;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.eclipse.birt.report.designer.internal.ui.editors.schematic.actions.SelectRowAction;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -24,6 +26,7 @@ import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -36,20 +39,26 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelPermission;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
+import org.wcs.smart.ui.EmployeeSelectDialog;
 import org.wcs.smart.ui.SectionHeader;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -83,12 +92,15 @@ public class ProfileDialog extends SmartStyledDialog {
 	private CheckboxTableViewer tblEntityTypes;
 	private CheckboxTableViewer tblRecordSources;
 	
+	private List<IntelPermission> permissions = new ArrayList<>();
+	private Composite permissionTable;
+	
 	private Listener generateKeyListener = e->{
 		String newKey = DataModelManager.INSTANCE.generateKey(txtName.getText(), others);
 		txtKey.setText(newKey);
 	};
 	
-	protected ProfileDialog(Shell parent, IntelProfile config, List<IntelProfile> others) {
+	public ProfileDialog(Shell parent, IntelProfile config, List<IntelProfile> others) {
 		super(parent);
 		this.config = config;
 		this.others = others;
@@ -196,9 +208,9 @@ public class ProfileDialog extends SmartStyledDialog {
 	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 		Button btn = createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
 		btn.setEnabled(false);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 	}
 
 	@Override
@@ -273,6 +285,7 @@ public class ProfileDialog extends SmartStyledDialog {
 		createEntityTypeComp();
 		createRecordSourceComp();
 		createConfigComp();
+		createPermissionComp();
 		
 		scrollComp.setContent(stackPanel);
 		scrollComp.setMinSize(stackPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -409,14 +422,166 @@ public class ProfileDialog extends SmartStyledDialog {
 		
 		btnSetTrackColor.addListener(SWT.Selection, changeColorTrack);
 		btnColor.addListener(SWT.MouseDoubleClick, changeColorTrack);
-		
-
 	}
 	
+
+	
+	private void createPermissionComp() {
+		permissionComp.setLayout(new GridLayout());
+		
+		Composite outer = new Composite(permissionComp, SWT.NONE);
+		outer.setLayout(new GridLayout());
+		((GridLayout)outer.getLayout()).marginWidth = 0;
+		((GridLayout)outer.getLayout()).marginHeight= 0;
+		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Button btnAdd = new Button(outer, SWT.PUSH);
+		btnAdd.setText("Add Employees");
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.addListener(SWT.Selection, e->{
+			
+			EmployeeSelectDialog dialog = new EmployeeSelectDialog(getShell());
+			if (dialog.open() != Window.OK) return;
+			for (Employee emp : dialog.getSelectedEmployees()) {
+				
+				boolean add = true;
+				for (IntelPermission p : permissions) {
+					if (p.getEmployee().equals(emp)) {
+						add = false;
+						break;
+					}
+				}
+				if (!add) continue;
+				
+				IntelPermission ip = new IntelPermission();
+				ip.setProfile(config);
+				ip.setEntityType(emp);
+				ip.setPermission(IntelPermission.READ_ONLY);
+				
+				permissions.add(ip);
+			}
+			updatePermissionList();
+		});
+		
+		permissionTable = new Composite(permissionComp, SWT.NONE);
+		permissionTable.setLayout(new GridLayout(  13, false ));
+		((GridLayout)permissionTable.getLayout()).marginWidth = 0;
+		((GridLayout)permissionTable.getLayout()).marginHeight = 0;
+		((GridLayout)permissionTable.getLayout()).horizontalSpacing = 0;
+		((GridLayout)permissionTable.getLayout()).verticalSpacing = 0;
+		permissionTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		permissionTable.addListener(SWT.Resize, e->layout());
+		
+		Composite headComp = new Composite(permissionTable, SWT.NONE);
+		headComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		String headers1[] = new String[] {"Employee", "Admin", "ReadOnly", "Entity", "Record", "Query"};
+		Control[] groupheader = new Control[headers1.length];
+		for (int i = 0; i < headers1.length; i ++) {
+			Composite c = new Composite(headComp, SWT.BORDER);
+			c.setLayout(new GridLayout());
+			Label l = new Label(c, SWT.NONE);
+			l.setText(headers1[i]);
+			l.setToolTipText(headers1[i]);
+			l.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+			groupheader[i] = c;
+		}
+
+		String headers[] = new String[] {"", "", "", "Create", "Delete", "View", "Edit", "Create", "Delete", "View", "Edit", "Edit Status", "All"};
+		Control[] ass = new Control[] {groupheader[0], groupheader[1], groupheader[2], groupheader[3], null, null, null, groupheader[4], null, null, null, null, groupheader[5]};
+		Integer[] rowspan = new Integer[] {1,1,1,4,null, null, null, 5,null, null, null, null, 1};
+		for (int i = 0; i < headers.length; i ++) {
+			Composite c = new Composite(headComp, SWT.BORDER);
+			c.setLayout(new GridLayout());
+			Label l = new Label(c, SWT.NONE);
+			l.setText(headers[i]);
+			l.setToolTipText(headers[i]);
+			l.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+			columnSize.put(i,new Object[] {c,ass[i], rowspan[i]});
+		}
+		
+		updatePermissionList();
+	}
+	
+	private HashMap<Integer,Object[]> columnSize = new HashMap<>();
+	private ScrolledComposite userscroll;
+	private Composite permComp;
+	
+	private void updatePermissionList() {
+		if (userscroll != null) userscroll.dispose();
+		
+		userscroll = new ScrolledComposite(permissionTable, SWT.V_SCROLL );
+		userscroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 13, 1));
+		userscroll.setAlwaysShowScrollBars(true);
+		
+		permComp = new Composite(userscroll, SWT.NONE);
+		permComp.setLayout(new GridLayout(13, false));
+		((GridLayout)permComp.getLayout()).marginWidth = 0;
+		((GridLayout)permComp.getLayout()).marginHeight = 0;
+		((GridLayout)permComp.getLayout()).horizontalSpacing = 0;
+		((GridLayout)permComp.getLayout()).verticalSpacing = 0;
+		
+		List<Employee> emps = new ArrayList<>(permissions.stream().map(p->p.getEmployee()).collect(Collectors.toSet()));
+		emps.sort((a,b)->Collator.getInstance().compare( SmartLabelProvider.getShortLabel(a), SmartLabelProvider.getShortLabel(b)));
+		
+		List<Row> allRows = new ArrayList<>();
+		for (Employee e : emps) {
+			Row r = new Row(e, allRows);
+			r.createRow(permComp);
+			allRows.add(r);
+		}
+		
+		SmartUiUtils.makeTransparent(permissionTable);
+		permissionTable.layout(true);
+
+		userscroll.setContent(permComp);
+		permComp.setSize(permissionTable.getBounds().width-15, permComp.computeSize(permissionTable.getBounds().width-15, SWT.DEFAULT).y);
+		
+		layout();
+	}
+	
+	private void layout() {
+		if(permComp == null) return;
+		if (permComp.isDisposed()) return;
+		permComp.setSize(permissionTable.getBounds().width-15, permComp.computeSize(permissionTable.getBounds().width-15, SWT.DEFAULT).y);
+		
+		if (permComp.getChildren().length == 0) return;
+		int xs = 0;
+		for (int i = 0; i < 13; i ++) {
+			Object[] its  = columnSize.get(i);
+			
+			int x = permComp.getChildren()[i].getBounds().width;
+			
+			Control single = (Control) its[0];
+			Control multi = (Control) its[1];
+			Integer rspan = (Integer) its[2];
+			
+			Rectangle r = single.getBounds();
+			r.width = x;
+			r.x = xs;
+			r.height = permComp.getChildren()[i].getBounds().height;
+			r.y = r.height;
+			
+			
+			single.setBounds(r);
+			
+			if (multi != null) {
+				Rectangle r2 = multi.getBounds();
+				r2.width = x * rspan;
+				r2.x = xs;
+				r2.y = 0;
+				r2.height = permComp.getChildren()[i].getBounds().height;
+
+				multi.setBounds(r2);
+			}
+			xs+= r.width;
+			
+		}
+		((Control)columnSize.get(0)[0]).getParent().layout();
+	}
 	
 	private void modified() {
 		setDirty(true);
-		
 	}
 	
 	private void setDirty(boolean dirty) {
@@ -447,18 +612,25 @@ public class ProfileDialog extends SmartStyledDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelEntityType> types = new ArrayList<>();
 			List<IntelRecordSource> rtypes = new ArrayList<>();
+			
+			permissions = new ArrayList<>();
+			
 			try(Session s =  HibernateManager.openSession()){
 				if (config.getUuid() != null) {
 					config = s.get(IntelProfile.class, config.getUuid());
 					config.getEntityTypes().forEach(e->e.getName());
 					config.getRecordSources().forEach(r->r.getName());
 					config.getNames().size();
+					
 				}
 				types.addAll( EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()) );
 				types.forEach(t->t.getProfiles().size());
 				
 				rtypes.addAll( RecordManager.INSTANCE.getSources( s ) );
 				rtypes.forEach(t->t.getProfiles().size());
+				
+				permissions.addAll(QueryFactory.buildQuery(s, IntelPermission.class, 
+						new Object[] {"id.employee.conservationArea", SmartDB.getCurrentConservationArea()}).list());
 			}
 			
 			
@@ -491,6 +663,7 @@ public class ProfileDialog extends SmartStyledDialog {
 					btnColor.setBackground(newColor);
 					header.setBackground(newColor);
 				}
+				updatePermissionList();
 				header.layout(true);
 				setDirty(false);
 				getShell().setText(config.getName());
@@ -499,4 +672,108 @@ public class ProfileDialog extends SmartStyledDialog {
 		}
 		
 	};
+	
+	private class Row{
+		
+		private boolean selected = false;
+		private Set<Composite> controls;
+		private Employee employee;
+		
+		private List<Row> allRows;
+		
+		public Row(Employee e, List<Row> allRows) {
+			this.employee = e;
+			this.allRows = allRows;
+			controls = new HashSet<>();
+		}
+		
+		public void createRow(Composite parent) {
+			
+			Composite t = new Composite(parent, SWT.BORDER);
+			t.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			t.setLayout(new GridLayout());
+			controls.add(t);
+			
+			Label ll = new Label(t, SWT.NONE);
+			ll.setText(SmartLabelProvider.getShortLabel(employee));
+			ll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+
+			
+			Composite btnAdmin = createCheckBox(parent);
+			controls.add(btnAdmin);
+			Composite btnReadOnly = createCheckBox(parent);
+			controls.add(btnReadOnly);
+			Composite btnEntityCreate = createCheckBox(parent);
+			controls.add(btnEntityCreate);
+			Composite btnEntityDelete = createCheckBox(parent);
+			controls.add(btnEntityDelete);
+			Composite btnEntityView = createCheckBox(parent);
+			controls.add(btnEntityView);
+			Composite btnEntityEdit = createCheckBox(parent);
+			controls.add(btnEntityEdit);
+			Composite btnRecordCreate = createCheckBox(parent);
+			controls.add(btnRecordCreate);
+			Composite btnRecordDelete = createCheckBox(parent);
+			controls.add(btnRecordDelete);
+			Composite btnRecordView = createCheckBox(parent);
+			controls.add(btnRecordView);
+			Composite btnRecordEdit = createCheckBox(parent);
+			controls.add(btnRecordEdit);
+			Composite btnRecordEditStatus = createCheckBox(parent);
+			controls.add(btnRecordEditStatus);
+			Composite btnRecordQuery = createCheckBox(parent);
+			controls.add(btnRecordQuery);
+					
+			Button ba = (Button) btnAdmin.getChildren()[0];
+			
+			ba.addListener(SWT.Selection,e->{
+				for (Composite cc : controls) {
+					if (cc.getChildren()[0] instanceof Button) {
+						cc.getChildren()[0].setEnabled(!ba.getSelection());
+					}
+					ba.setEnabled(true);
+				}
+			});
+			
+			Button ro = (Button) btnReadOnly.getChildren()[0];
+			ro.addListener(SWT.Selection,e->{
+				for (Composite cc : controls) {
+					if (cc.getChildren()[0] instanceof Button) {
+						cc.getChildren()[0].setEnabled(!ro.getSelection());
+					}
+					ro.setEnabled(true);
+				}
+			});
+			
+			Listener l = evt->{
+				for (Row r : allRows) {
+					if (r == Row.this) continue;
+					r.setSelected(false);
+				}
+				setSelected(true);
+				parent.layout(true);
+			};
+			t.addListener(SWT.MouseUp, l);
+			ll.addListener(SWT.MouseUp, l);
+		}
+		
+		public void setSelected(boolean isSelected) {
+			if (this.selected == isSelected) return;
+			this.selected = isSelected;
+			if (isSelected) {
+				for (Control c : controls) c.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+			}else {
+				for (Control c : controls) c.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			}
+		}
+	}
+	
+	private Composite createCheckBox(Composite parent) {
+		Composite t = new Composite(parent, SWT.BORDER);
+		t.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		t.setLayout(new GridLayout());
+		Button btnAdmin = new Button(t, SWT.CHECK);
+		btnAdmin.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+		return t;
+	}
 }

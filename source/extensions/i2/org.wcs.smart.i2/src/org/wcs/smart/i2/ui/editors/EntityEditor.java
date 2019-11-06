@@ -142,6 +142,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.AttachmentManager;
 import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.diagram.RelationshipGraphComposite;
@@ -213,6 +214,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	
 	private EntityEditorInput input;
 	private IntelEntity entity;
+	private boolean hasHiddenRelationships;
 	private List<IntelEntityRelationship> relationships;
 	private List<IntelEntityTypeAttributeGroup> groups;
 	
@@ -239,7 +241,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	
 	private AttachmentTable attachmentTable;
 	private Composite attachmentEditPanel;
-	private Composite relationshipEditPanel; 
+	private Composite relationshipWarningPanel, relationshipButtonEditPanel, relationshipEditPanel;
 	private EntityEditorMapComposite mapPart ;
 	
 	private Composite compMap;
@@ -336,9 +338,21 @@ public class EntityEditor extends EditorPart implements MapPart{
 						cb.equal(from2.get("sourceEntity"), temp), //$NON-NLS-1$
 						cb.equal(from2.get("targetEntity"), temp) //$NON-NLS-1$
 						));
-				relationships = s.createQuery(c2).getResultList();		
+				List<IntelEntityRelationship> all = s.createQuery(c2).getResultList();		
+				relationships = new ArrayList<>();
 				
-				for (IntelEntityRelationship r : relationships){
+				hasHiddenRelationships = false;
+				for (IntelEntityRelationship r : all){
+					
+					if (!ProfilesManager.INSTANCE.getActiveProfiles().contains(r.getRelationshipType().getSourceProfile()) ||
+						!ProfilesManager.INSTANCE.getActiveProfiles().contains(r.getRelationshipType().getTargetProfile()) ||
+						!IntelSecurityManager.INSTANCE.canViewEntities(r.getRelationshipType().getSourceProfile()) ||
+						!IntelSecurityManager.INSTANCE.canViewEntities(r.getRelationshipType().getTargetProfile()) ) {
+						hasHiddenRelationships = true;
+						continue;
+					}
+					
+					relationships.add(r);
 					r.getRelationshipType().getName();
 					if (r.getRelationshipType().getRelationshipGroup() != null){
 						r.getRelationshipType().getRelationshipGroup().getName();
@@ -663,6 +677,25 @@ public class EntityEditor extends EditorPart implements MapPart{
 		eventBroker.subscribe(IntelEvents.ENTITY_TYPE_MODIFIED, handler);
 		eventBroker.subscribe(IntelEvents.RELATION_TYPE_MODIFIED, handler);
 		eventBroker.subscribe(IntelEvents.RELATION_TYPE_DELETE, handler);
+		
+		handler = event->{
+			if (!ProfilesManager.INSTANCE.getActiveProfiles().contains(getEntity().getProfile())) {
+				//close entity
+				closeEditor();
+			}else {
+				if (isDirty){
+					//the editor is dirty and the entity has changed behind the scenes; give the user the option of replacing 
+					//contents behind the scenes
+					eventBroker.subscribe(UIEvents.UILifeCycle.BRINGTOTOP, promptToReset);
+					//subscribe to active event							
+				}else{
+					//reload page
+					loadEntity.schedule();
+				}
+			}
+		};
+		eventHandles.add(handler);
+		eventBroker.subscribe(IntelEvents.ACTIVE_PROFILES, handler);
 	}
 	
 	@Override
@@ -1279,91 +1312,94 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private void addRelationship(IntelRelationshipType rType, IntelEntity targetEntity){
 		if (rType == null) return;
 		
-		if (!rType.getSourceProfile().equals(getEntity().getProfile()) ||
-				!rType.getTargetProfile().equals(targetEntity.getProfile())){
-			//invalid profiles
-			return;
+		try(Session session = HibernateManager.openSession()){
+			rType = session.get(IntelRelationshipType.class, rType.getUuid());
+			if (rType.getRelationshipGroup() != null) rType.getRelationshipGroup().getNames().size();
+			rType.getSourceProfile().equals(getEntity().getProfile());
+			rType.getTargetProfile().equals(targetEntity.getProfile());
+			
+			rType.getAttributes().forEach(e->e.getAttribute().getName());
 		}
-		IntelEntity e1 = entity;
-		IntelEntity e2 = targetEntity;
+		
+
+		IntelEntity src = entity;
+		IntelEntity trg = targetEntity;
+		
 		IntelEntityRelationship newRelationship = new IntelEntityRelationship();
 		newRelationship.setRelationshipType(rType);
 		newRelationship.setSource(IntelEntityRelationship.Source.ENTITY);
 		newRelationship.setSourceId(entity.getUuid());
 		newRelationship.setSourceObject(entity);
-		boolean add = false;
-		if (rType.getSourceEntityType() == null && rType.getTargetEntityType() == null){
-			newRelationship.setSourceEntity(e1);
-			newRelationship.setTargetEntity(e2);
-			add = true;
-		}else if (rType.getSourceEntityType() == null && rType.getTargetEntityType() != null){
-			if (rType.getTargetEntityType().getUuid().equals(e1.getEntityType().getUuid())){
-				newRelationship.setSourceEntity(e2);
-				newRelationship.setTargetEntity(e1);
-				add = true;
-			}else if (rType.getTargetEntityType().getUuid().equals(e2.getEntityType().getUuid())){
-				newRelationship.setSourceEntity(e1);
-				newRelationship.setTargetEntity(e2);
-				add = true;
-			}
-		}else if (rType.getTargetEntityType() == null && rType.getSourceEntityType() != null){
-			if (rType.getSourceEntityType().getUuid().equals(e1.getEntityType().getUuid())){
-				newRelationship.setSourceEntity(e1);
-				newRelationship.setTargetEntity(e2);
-				add = true;
-			}else if (rType.getSourceEntityType().getUuid().equals(e2.getEntityType().getUuid())){
-				newRelationship.setSourceEntity(e2);
-				newRelationship.setTargetEntity(e1);
-				add = true;
-			}
-		}else if (rType.getSourceEntityType().getUuid().equals(e1.getEntityType().getUuid()) &&
-				rType.getTargetEntityType().getUuid().equals(e2.getEntityType().getUuid())){
-			newRelationship.setSourceEntity(e1);
-			newRelationship.setTargetEntity(e2);
-			add = true;
-		}else if (rType.getSourceEntityType().getUuid().equals(e2.getEntityType().getUuid()) &&
-				rType.getTargetEntityType().getUuid().equals(e1.getEntityType().getUuid())){
-			newRelationship.setSourceEntity(e2);
-			newRelationship.setTargetEntity(e1);
-			add = true;
-		} 
+		
+		if (src.getProfile().equals(rType.getSourceProfile()) && 
+				trg.getProfile().equals(rType.getTargetProfile()) &&
+				(rType.getSourceEntityType() == null || src.getEntityType().equals(rType.getSourceEntityType())) &&
+				(rType.getTargetEntityType() == null || trg.getEntityType().equals(rType.getTargetEntityType()))
+				) {
+			//ok
+		}else if (src.getProfile().equals(rType.getTargetProfile()) &&
+				trg.getProfile().equals(rType.getSourceProfile()) &&
+				(rType.getTargetEntityType() == null || src.getEntityType().equals(rType.getTargetEntityType())) &&
+				(rType.getSourceEntityType() == null || trg.getEntityType().equals(rType.getSourceEntityType()))
+				) {
+			//switch these
+			IntelEntity temp = src;
+			src = trg;
+			trg = temp;
+		}else {
+			return;
+		}
+		
+		newRelationship.setSourceEntity(src);
+		newRelationship.setTargetEntity(trg);
+		
 		//check duplicates
-		if (add){
-			for (IntelEntityRelationship existing : relationships){
-				if (existing.getSourceEntity().equals(newRelationship.getSourceEntity()) && 
-						existing.getTargetEntity().equals(newRelationship.getTargetEntity()) &&
-						existing.getRelationshipType().equals(newRelationship.getRelationshipType())){
-					add = false;
-					MessageDialog.openInformation(getEditorSite().getShell(), Messages.EntityEditor_RelationshipInfoDialog, Messages.EntityEditor_RelationshipInfoMsg);
-					break;
-				}
-						
+		for (IntelEntityRelationship existing : relationships){
+			if (existing.getSourceEntity().equals(newRelationship.getSourceEntity()) && 
+					existing.getTargetEntity().equals(newRelationship.getTargetEntity()) &&
+					existing.getRelationshipType().equals(newRelationship.getRelationshipType())){
+				MessageDialog.openInformation(getEditorSite().getShell(), Messages.EntityEditor_RelationshipInfoDialog, Messages.EntityEditor_RelationshipInfoMsg);
+				return;
 			}
 		}
-		if (add){
-			
-			if (!newRelationship.getRelationshipType().getAttributes().isEmpty()){
-				//edit 
-				if (!editRelationshipAttributes(newRelationship)) {
-					return;
-				}
+		if (!newRelationship.getRelationshipType().getAttributes().isEmpty()){
+			//edit 
+			if (!editRelationshipAttributes(newRelationship)) {
+				return;
 			}
-			
-			relationships.add(newRelationship);
-			relationshipsToAdd.add(newRelationship);
-			((RelationshipContentProvider)relationshipTree.getContentProvider()).refresh();
-			relationshipTree.refresh();
-			setDirty(true);
 		}
+			
+		relationships.add(newRelationship);
+		relationshipsToAdd.add(newRelationship);
+		((RelationshipContentProvider)relationshipTree.getContentProvider()).refresh();
+		relationshipTree.refresh();
+		setDirty(true);
 	}
 	
 	private void createRelationshipPanel(Composite parent){
 
 		relationshipEditPanel = toolkit.createComposite(parent, SWT.NONE);
-		relationshipEditPanel.setLayout(createGridLayoutNoMargin(3));
-		relationshipEditPanel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		relationshipEditPanel.setLayout(createGridLayoutNoMargin(2));
+		relationshipEditPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		((GridLayout)relationshipEditPanel.getLayout()).verticalSpacing = 0;
 		
-		Button addRelationship = toolkit.createButton(relationshipEditPanel, Messages.EntityEditor_NewRelationshipBtn, SWT.PUSH);
+		relationshipWarningPanel = toolkit.createComposite(relationshipEditPanel, SWT.NONE);
+		relationshipWarningPanel.setLayout(createGridLayoutNoMargin(2));
+		relationshipWarningPanel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		
+		Label l = toolkit.createLabel(relationshipWarningPanel, "");
+		l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		l = toolkit.createLabel(relationshipWarningPanel, "Some relationships have been hidden.");
+		l.setToolTipText("Relationships have been hidden because they are not part of an active profile\nand/or you don't have premission to view them");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		relationshipButtonEditPanel = toolkit.createComposite(relationshipEditPanel, SWT.NONE);
+		relationshipButtonEditPanel.setLayout(createGridLayoutNoMargin(3));
+		relationshipButtonEditPanel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		Button addRelationship = toolkit.createButton(relationshipButtonEditPanel, Messages.EntityEditor_NewRelationshipBtn, SWT.PUSH);
 		addRelationship.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		addRelationship.setToolTipText(Messages.EntityEditor_deleteRelationshiptooltip);
 		addRelationship.addListener(SWT.Selection, e->{
@@ -1380,12 +1416,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 			shell.open(addRelationship.toDisplay(x,y), new Point(addRelationship.getSize().x, 0), true);
 		} );
 				
-		Button deleteRelationship = toolkit.createButton(relationshipEditPanel, DialogConstants.DELETE_BUTTON_TEXT, SWT.PUSH);
+		Button deleteRelationship = toolkit.createButton(relationshipButtonEditPanel, DialogConstants.DELETE_BUTTON_TEXT, SWT.PUSH);
 		deleteRelationship.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		deleteRelationship.setToolTipText(Messages.EntityEditor_deleteRelationshiptooltip);
 		deleteRelationship.addListener(SWT.Selection, e-> deleteRelationship());
 		
-		Button editRelationship = toolkit.createButton(relationshipEditPanel, DialogConstants.EDIT_BUTTON_TEXT, SWT.PUSH);
+		Button editRelationship = toolkit.createButton(relationshipButtonEditPanel, DialogConstants.EDIT_BUTTON_TEXT, SWT.PUSH);
 		editRelationship.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
 		editRelationship.setToolTipText(Messages.EntityEditor_editRelationshiptooltip);
 		editRelationship.addListener(SWT.Selection, e-> {
@@ -2099,13 +2135,19 @@ public class EntityEditor extends EditorPart implements MapPart{
 		if (getEditMode()){
 			attachmentEditPanel.setVisible(true);
 			((GridData)attachmentEditPanel.getLayoutData()).heightHint = attachmentEditPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-			
-			relationshipEditPanel.setVisible(true);
-			((GridData)relationshipEditPanel.getLayoutData()).heightHint = relationshipEditPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		}else{
 			attachmentEditPanel.setVisible(false);
 			((GridData)attachmentEditPanel.getLayoutData()).heightHint = 0;
+		}
+		
+		if (getEditMode() || hasHiddenRelationships) {
+			relationshipEditPanel.setVisible(true);
+			((GridData)relationshipEditPanel.getLayoutData()).heightHint = relationshipEditPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 			
+			relationshipWarningPanel.setVisible(hasHiddenRelationships);
+			relationshipButtonEditPanel.setVisible(getEditMode());
+			
+		}else {
 			relationshipEditPanel.setVisible(false);
 			((GridData)relationshipEditPanel.getLayoutData()).heightHint = 0;
 		}

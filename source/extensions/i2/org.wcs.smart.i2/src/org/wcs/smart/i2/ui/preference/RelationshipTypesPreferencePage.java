@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.dialogs;
+package org.wcs.smart.i2.ui.preference;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
@@ -40,10 +40,10 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -61,7 +61,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -73,10 +72,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -89,8 +88,8 @@ import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.TableColumnViewerFilter;
+import org.wcs.smart.i2.ui.dialogs.RelationshipTypeDialog;
 import org.wcs.smart.i2.ui.editors.EntityEditor;
-import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TextViewerFilter;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
@@ -101,7 +100,7 @@ import org.wcs.smart.util.E3Utils;
  * @author Emily
  *
  */
-public class RelationshipTypeListDialog extends SmartStyledTitleDialog {
+public class RelationshipTypesPreferencePage extends PreferencePage implements IIntelPreferencePage {
 	
 	private static final int ASC = 1;
 	private static final int DESC = -1;
@@ -158,19 +157,16 @@ public class RelationshipTypeListDialog extends SmartStyledTitleDialog {
 		}
 		
 	};
-	public RelationshipTypeListDialog(Shell parentShell) {
-		super(parentShell);
+	public RelationshipTypesPreferencePage() {
+		super();
+		noDefaultAndApplyButton();
+		setTitle("Relationship Types");
 	}
 
-	@Override
-	protected Point getInitialSize() {
-		Point p = super.getInitialSize();
-		return new Point(p.x,(int)(p.y*2));
-	}
 	
 	@Override
-	protected Control createDialogArea(Composite parent) {
-		parent = (Composite) super.createDialogArea(parent);
+	protected Control createContents(Composite parent) {
+		
 		parent = new Composite(parent, SWT.NONE);
 		parent.setLayout(new GridLayout(2, false));
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -475,20 +471,15 @@ public class RelationshipTypeListDialog extends SmartStyledTitleDialog {
 		mnuEdit.setEnabled(false);
 		mnuDelete.setEnabled(false);
 		
-		
-		setTitle(Messages.RelationshipTypeListDialog_Title);
-		getShell().setText(Messages.RelationshipTypeListDialog_Title);
-		setMessage(Messages.RelationshipTypeListDialog_Message);
+		setMessage("Relationship Types");
+		setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RELATIONSHIP));
 		
 		loadTypes.setSystem(true);
 		loadTypes.schedule();
 		
+		SmartUiUtils.makeTransparent(parent);
+
 		return parent;
-	}
-	
-	@Override
-	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 	}
 	
 	private void openTypeDialog(IntelRelationshipType type){
@@ -606,15 +597,12 @@ public class RelationshipTypeListDialog extends SmartStyledTitleDialog {
 		refresh();
 	}
 	
-	private void refresh(){
+	@Override
+	public void refresh(){
 		currentSelection = (IStructuredSelection) tblTypes.getSelection();
 		tblTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		loadTypes.schedule(0);
 	}
 	
-	@Override
-	public boolean isResizable(){
-		return true;
-	}
 	
 }

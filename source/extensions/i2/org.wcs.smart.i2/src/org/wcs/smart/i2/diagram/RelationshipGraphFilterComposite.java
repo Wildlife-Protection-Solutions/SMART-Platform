@@ -71,7 +71,7 @@ public class RelationshipGraphFilterComposite extends Composite {
 	
 	private List<IRelationshipGraphFilterChangeListener> listeners = new ArrayList<>();
 	
-	private LoadEntityTypeJob entityTypeJob = new LoadEntityTypeJob() {
+	private LoadEntityTypeJob entityTypeJob = new LoadEntityTypeJob(true) {
 		@Override
 		protected void processData(List<IntelEntityType> types) {
 			Display.getDefault().asyncExec(new Runnable() {
@@ -86,7 +86,7 @@ public class RelationshipGraphFilterComposite extends Composite {
 		}
 	};
 	
-	private LoadRelationshipTypeJob relationshipTypeJob = new LoadRelationshipTypeJob() {
+	private LoadRelationshipTypeJob relationshipTypeJob = new LoadRelationshipTypeJob(true) {
 		@Override
 		protected void processData(List<IntelRelationshipType> types) {
 			Display.getDefault().asyncExec(new Runnable() {
@@ -190,6 +190,8 @@ public class RelationshipGraphFilterComposite extends Composite {
 
 		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
 		IEventBroker eventBroker = context.get(IEventBroker.class);
+		eventBroker.subscribe(IntelEvents.ACTIVE_PROFILES, entityTypesHandler);
+		eventBroker.subscribe(IntelEvents.ACTIVE_PROFILES, relationshipTypesHandler);
 		eventBroker.subscribe(IntelEvents.ENTITY_TYPE_ALL, entityTypesHandler);
 		eventBroker.subscribe(IntelEvents.RELATION_TYPE_ALL, relationshipTypesHandler);
 		

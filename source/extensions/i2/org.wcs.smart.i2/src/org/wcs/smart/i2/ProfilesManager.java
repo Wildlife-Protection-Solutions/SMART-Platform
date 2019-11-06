@@ -41,6 +41,7 @@ public enum ProfilesManager {
 	}
 	
 	public void setActiveProfiles(Set<IntelProfile> active, IEventBroker event) {
+		//TODO: ensure all editors (entities and records) are saved before setting profiles
 		synchronized (INSTANCE) {
 			this.active = Collections.unmodifiableSet(active);
 		}

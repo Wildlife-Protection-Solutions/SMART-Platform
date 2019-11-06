@@ -672,6 +672,8 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		
 		Composite buttonComp = new Composite(attributeComp, SWT.NONE);
 		buttonComp.setLayout(new GridLayout());
+		((GridLayout)buttonComp.getLayout()).marginWidth = 0;
+		((GridLayout)buttonComp.getLayout()).marginHeight = 0;
 		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		btnAdd = new Button(buttonComp, SWT.NONE);

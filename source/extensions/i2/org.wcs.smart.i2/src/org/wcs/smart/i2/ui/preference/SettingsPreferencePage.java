@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.dialogs;
+package org.wcs.smart.i2.ui.preference;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -33,8 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -52,17 +51,15 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelConfigurationOption;
-import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -71,66 +68,48 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class ConfigurationDialog extends SmartStyledTitleDialog{
+public class SettingsPreferencePage extends PreferencePage implements IIntelPreferencePage{
 
 	private TableViewer viewer;
 	private List<Name> items = null;
 	private List<Name> toDelete = null;
 	
-	private boolean modified = false;
-	public ConfigurationDialog(Shell parentShell) {
-		super(parentShell);
+	
+	public SettingsPreferencePage() {
+		super("Settings", Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_CONFIGURE));
+		noDefaultAndApplyButton();
 		toDelete = new ArrayList<>();
 	}
 
-	@Override
-	protected void okPressed() {
+	protected void save() {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
 				for(Name n : toDelete) {
 					if (n.op.getUuid() != null) session.delete(n.op);
 				}
-				
 				for (Name n : items) {
 					session.saveOrUpdate(n.op);
 				}
 				session.getTransaction().commit();
 				toDelete.clear();
-				modified = true;
-				getButton(IDialogConstants.OK_ID).setEnabled(false);
 			}catch (Exception ex ){
 				session.getTransaction().rollback();
 			}
 		}
 	}
 	
-	@Override
-	protected void cancelPressed() {
-		if (modified) {
-			if (MessageDialog.openQuestion(getShell(), Messages.ConfigurationDialog_RestartOp, Messages.ConfigurationDialog_RestartMsg)) {
-				PlatformUI.getWorkbench().restart();
-			}
-		}
-		super.cancelPressed();
-	}
-	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT,true);
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
-		getButton(IDialogConstants.OK_ID).setEnabled(false);
-	}
 	
 	private void modified(){
 		setErrorMessage(null);
-		boolean isError = false;
-		
+	
 		int cnt = 0;
 		for (Name item : items) {
 			if (item.isDefault()) cnt ++;
 		}
 		if (cnt > 1) {
-			isError = true;
 			setErrorMessage(Messages.ConfigurationDialog_SingleDefaultRequired);
+			return;
 		}else {
 			HashSet<String> lang = new HashSet<>();
 			for (Name item : items) {
@@ -144,32 +123,30 @@ public class ConfigurationDialog extends SmartStyledTitleDialog{
 						}
 					}
 					if (!fnd) {
-						isError = true;
 						setErrorMessage(MessageFormat.format(Messages.ConfigurationDialog_InvalidLanguageCode,item.getLanguage()));
-						break;
+						return;
 					}
 				}
 				if (lang.contains(item.getLanguage())) {
-					isError = true;
 					setErrorMessage(MessageFormat.format(Messages.ConfigurationDialog_DuplicateLanguage,item.getLanguage()));
-					break;
+					return;
 				}
 			}
 		}
-		getButton(IDialogConstants.OK_ID).setEnabled(!isError);
+		save();
 	}
 	
 	
 	@Override
-	protected Control createDialogArea(Composite parent) {
-		parent = (Composite) super.createDialogArea(parent);
+	protected Control createContents(Composite parent) {
+		
 		parent = new Composite(parent, SWT.NONE);
 		parent.setLayout(new GridLayout(2, false));
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		Composite c = SmartUiUtils.createHeaderLabel(parent, Messages.ConfigurationDialog_MenuLabel);
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
+
 		Label l = new Label(parent, SWT.WRAP);
 		l.setText(Messages.ConfigurationDialog_MenuInfo);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -285,31 +262,36 @@ public class ConfigurationDialog extends SmartStyledTitleDialog{
 			
 		});
 		
+		
 		Composite buttonPanel = new Composite(parent, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout());
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		Button btnAdd = new Button(buttonPanel, SWT.NONE);
+		Button btnAdd = new Button(buttonPanel, SWT.PUSH);
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnAdd.addListener(SWT.Selection, e->add());
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		btnAdd.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
-		Button btnDelete = new Button(buttonPanel, SWT.NONE);
+		Button btnDelete = new Button(buttonPanel, SWT.PUSH);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnDelete.addListener(SWT.Selection, e->delete());
 		btnDelete.setEnabled(false);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		btnDelete.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		Menu m = new Menu(viewer.getControl());
 		
 		MenuItem miAdd = new MenuItem(m, SWT.PUSH);
 		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(DialogConstants.ADD_BUTTON_TEXT));
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		miAdd.addListener(SWT.Selection, e->add());
 		
 		MenuItem miDelete = new MenuItem(m, SWT.PUSH);
 		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(DialogConstants.DELETE_BUTTON_TEXT));
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		miDelete.addListener(SWT.Selection, e->delete());
 		miDelete.setEnabled(false);
 		
@@ -330,10 +312,10 @@ public class ConfigurationDialog extends SmartStyledTitleDialog{
 		});
 		
 		loadConfigs.schedule();
-		
-		setTitle(Messages.ConfigurationDialog_Title);
-		setMessage(Messages.ConfigurationDialog_Message);
-		getShell().setText(Messages.ConfigurationDialog_Title);
+		SmartUiUtils.makeTransparent(parent);
+		setMessage("Settings");
+		l.setForeground(parent.getDisplay().getSystemColor(SWT.COLOR_BLACK));
+
 		return parent;
 	}
 
@@ -360,10 +342,6 @@ public class ConfigurationDialog extends SmartStyledTitleDialog{
 		modified();
 	}
 	
-	@Override
-	public boolean isResizable(){
-		return true;
-	}
 	
 	private class Name{
 		public IntelConfigurationOption op;
@@ -398,13 +376,19 @@ public class ConfigurationDialog extends SmartStyledTitleDialog{
 					}
 				}
 			}
-			ConfigurationDialog.this.items = items;
+			SettingsPreferencePage.this.items = items;
 			Display.getDefault().syncExec(()->{
-				viewer.setInput(ConfigurationDialog.this.items);
+				viewer.setInput(SettingsPreferencePage.this.items);
 			});
 			return Status.OK_STATUS;
 		}
 		
 	};
+
+	@Override
+	public void refresh() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

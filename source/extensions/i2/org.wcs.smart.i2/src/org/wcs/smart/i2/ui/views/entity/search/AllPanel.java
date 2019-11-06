@@ -83,6 +83,7 @@ import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.search.AllEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.Resources;
@@ -435,8 +436,19 @@ public class AllPanel extends Composite {
 			public void dragStart(DragSourceEvent event) {
 				List<IntelEntity> items = new ArrayList<>();
 				for (EntityTableRowItem i : getCurrentSelection()) {
-					IntelEntity temp = new IntelEntity();
+					IntelEntity temp = new IntelEntity() {
+						public String getIdAttributeAsText() {
+							return i.getId();
+						}
+					};
 					temp.setUuid(i.getEntityUuid());
+					
+					IntelProfile profiletemp = new IntelProfile();
+					profiletemp.setUuid(i.getProfileUuid());
+					profiletemp.setName(i.getProfileName());
+					
+					temp.setProfile(profiletemp);
+					
 					items.add(temp);
 				}
 				IntelEntitySelectionTransfer.getTransfer().setSelection(new StructuredSelection(items));				

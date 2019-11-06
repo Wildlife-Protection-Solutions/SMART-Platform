@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.diagram;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -31,6 +32,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.RelationshipTypeManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRelationshipType;
@@ -44,8 +46,11 @@ import org.wcs.smart.i2.model.IntelRelationshipType;
  */
 public abstract class LoadRelationshipTypeJob extends Job {
 
-	public LoadRelationshipTypeJob() {
+	private boolean activeProfiles;
+	
+	public LoadRelationshipTypeJob(boolean activeProfiles) {
 		super(Messages.LoadRelationshipTypeJob_Title);
+		this.activeProfiles = activeProfiles;
 	}
 
 	@Override
@@ -60,6 +65,19 @@ public abstract class LoadRelationshipTypeJob extends Job {
 					t.getRelationshipGroup().getName();
 				}
 			}
+			
+			for (Iterator<IntelRelationshipType> iterator = types.iterator(); iterator.hasNext();) {
+				IntelRelationshipType type  = iterator.next();
+					
+				if (activeProfiles && (!ProfilesManager.INSTANCE.getActiveProfiles().contains(type.getSourceProfile()) ||
+						!ProfilesManager.INSTANCE.getActiveProfiles().contains(type.getTargetProfile()) )) {
+					iterator.remove();
+				}else {
+					type.getName();
+					if (type.getRelationshipGroup() != null) type.getRelationshipGroup().getName();
+				}
+			}
+
 		}
 		
 		processData(types);

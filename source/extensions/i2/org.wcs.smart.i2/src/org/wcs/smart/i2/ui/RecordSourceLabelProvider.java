@@ -31,7 +31,7 @@ import org.wcs.smart.i2.model.IntelRecordSource;
  * @author Emily
  *
  */
-public class RecordSourceLabelProvider extends LabelProvider {
+public class RecordSourceLabelProvider extends LabelProvider  {
 
 	
 	@Override

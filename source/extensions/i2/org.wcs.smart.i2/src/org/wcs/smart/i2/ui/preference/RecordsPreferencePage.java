@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.dialogs;
+package org.wcs.smart.i2.ui.preference;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
@@ -32,19 +32,17 @@ import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferencePageContainer;
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -53,6 +51,7 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -60,7 +59,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -72,45 +70,48 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
+import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
-import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
-import org.wcs.smart.i2.ui.Resources;
-import org.wcs.smart.i2.ui.editors.EntityEditor;
+import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
+import org.wcs.smart.i2.ui.dialogs.RecordSourceDialog;
+import org.wcs.smart.i2.ui.handler.EditRecordTemplateHandler;
 import org.wcs.smart.ui.NamedItemViewerFilter;
-import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
-import org.wcs.smart.util.E3Utils;
 
 /**
  * Dialog for listing entity types.
  * @author Emily
  *
  */
-public class EntityTypeListDialog extends SmartStyledTitleDialog {
+public class RecordsPreferencePage extends PreferencePage implements IIntelPreferencePage {
 
 	@Inject
 	private IEventBroker broker;
 	@Inject
 	private IEclipseContext context;
 	
-	private TableViewer cmbTypes;
+	private TableViewer cmbSources;
 
-	private List<IntelEntityType> types = null;
+	private List<IntelRecordSource> sources = null;
 	private NamedItemViewerFilter filter;
 	private IStructuredSelection currentSelection;
 	
@@ -122,18 +123,34 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 	private Button btnEdit;
 	private Button btnDelete;
 	 
-	private Job loadTypes = new Job("load entity types"){ //$NON-NLS-1$
+	private ColumnLabelProvider lblProvider = new ColumnLabelProvider() {
+		RecordSourceLabelProvider src = new RecordSourceLabelProvider();
+		public String getText(Object element) { return src.getText(element); }
+		public Image getImage(Object element) { return src.getImage(element); }
+		public void dispose() { super.dispose(); src.dispose(); }
+	};
+	
+	private Job loadTypes = new Job("load record sources"){ //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			types = null;
+			sources = null;
 			List<IntelProfile> profiles = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				types = EntityTypeManager.INSTANCE.getEntityTypes(session, SmartDB.getCurrentConservationArea());
-				for (IntelEntityType t : types){
-					t.getName();
-					t.getProfiles().size();
-				}
+				List<IntelRecordSource> srcs = RecordManager.INSTANCE.getSources(session); 
+				srcs.forEach(e -> {
+					e.getNames().size();
+					e.getProfiles().size();
+					if (e.getAttributes() != null){
+						e.getAttributes().forEach(a->{
+							a.getNames().size();
+							a.getAttribute();
+							a.getEntityType();
+						});
+					}
+				});
+				sources = srcs;
+				
 				profiles.addAll(ProfilesManager.INSTANCE.getProfiles(session));
 				for (IntelProfile p : profiles) p.getName();
 			}
@@ -141,23 +158,22 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					if (cmbTypes.getControl().isDisposed()) return;
+					if (cmbSources.getControl().isDisposed()) return;
 					
-					TableColumnLayout tlayout = (TableColumnLayout) cmbTypes.getControl().getParent().getLayout(); 
+					TableColumnLayout tlayout = (TableColumnLayout) cmbSources.getControl().getParent().getLayout(); 
 					
-					for (TableColumn c : cmbTypes.getTable().getColumns()) c.dispose();
+					for (TableColumn c : cmbSources.getTable().getColumns()) c.dispose();
 					
-					TableViewerColumn col = new TableViewerColumn(cmbTypes, SWT.NONE);
-					col.setLabelProvider(new EntityTypeLabelProvider());
-					col.getColumn().setText("Entity Type");
-//					col.getColumn().setWidth(30);
+					TableViewerColumn col = new TableViewerColumn(cmbSources, SWT.NONE);
+					col.setLabelProvider(lblProvider);
+					col.getColumn().setText("Record Source");
 					tlayout.setColumnData(col.getColumn(), new ColumnWeightData(3));
 					
 					ProfileLabelProvider temp = new ProfileLabelProvider();
-					cmbTypes.getTable().addListener(SWT.Dispose, e->temp.dispose());
+					cmbSources.getTable().addListener(SWT.Dispose, e->temp.dispose());
 					
 					for (IntelProfile p : profiles) {
-						TableViewerColumn col2 = new TableViewerColumn(cmbTypes, SWT.NONE);
+						TableViewerColumn col2 = new TableViewerColumn(cmbSources, SWT.NONE);
 						col2.getColumn().setText(p.getName());
 						col2.getColumn().setToolTipText(p.getName());
 						col2.getColumn().setWidth(30);	
@@ -166,13 +182,13 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 							
 							@Override
 							public String getText(Object element) {
-								if (element instanceof IntelEntityType) return "";
+								if (element instanceof IntelRecordSource) return "";
 								return super.getText(element);
 							}
 							@Override
 							public Image getImage(Object element) {
-								if (element instanceof IntelEntityType) {
-									if (((IntelEntityType) element).getProfiles().contains(p)) {
+								if (element instanceof IntelRecordSource) {
+									if (((IntelRecordSource) element).getProfiles().contains(p)) {
 										return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CHECK);
 									}
 									return null;
@@ -183,28 +199,25 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 						tlayout.setColumnData(col2.getColumn(), new ColumnWeightData(1));
 					}
 					
-					cmbTypes.setInput(types);
-					cmbTypes.setSelection(currentSelection);
-					cmbTypes.getControl().getParent().layout(true);
+					cmbSources.setInput(sources);
+					cmbSources.setSelection(currentSelection);
+					cmbSources.getControl().getParent().layout(true);
 				}
 			});
 			return Status.OK_STATUS;
 		}
 		
 	};
-	public EntityTypeListDialog(Shell parentShell) {
-		super(parentShell);
+
+	public RecordsPreferencePage() {
+		super();
+		noDefaultAndApplyButton();
+		setTitle("Record Sources");
 	}
 
 	@Override
-	protected Point getInitialSize() {
-		Point p = super.getInitialSize();
-		return new Point(p.x,(int)(p.y*2));
-	}
-	
-	@Override
-	protected Control createDialogArea(Composite parent) {
-		parent = (Composite) super.createDialogArea(parent);
+	protected Control createContents(Composite parent) {
+		
 		parent = new Composite(parent, SWT.NONE);
 		parent.setLayout(new GridLayout(2, false));
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -228,37 +241,37 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 		tablecomp.setLayout(tlayout);
 		
 		
-		cmbTypes = new TableViewer(tablecomp, SWT.BORDER | SWT.FULL_SELECTION);
-		cmbTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		cmbTypes.getTable().setHeaderVisible(true);
-		cmbTypes.setContentProvider(ArrayContentProvider.getInstance());
-		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		cmbSources = new TableViewer(tablecomp, SWT.BORDER | SWT.FULL_SELECTION);
+		cmbSources.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cmbSources.getTable().setHeaderVisible(true);
+		cmbSources.setContentProvider(ArrayContentProvider.getInstance());
+		cmbSources.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		
-		TableViewerColumn col = new TableViewerColumn(cmbTypes, SWT.NONE);
-		col.setLabelProvider(new EntityTypeLabelProvider());
+		TableViewerColumn col = new TableViewerColumn(cmbSources, SWT.NONE);
+		col.setLabelProvider(lblProvider);
 		
 		tlayout.setColumnData(col.getColumn(), new ColumnWeightData(1));
 		
-		cmbTypes.getControl().setFocus();
-		cmbTypes.addDoubleClickListener(new IDoubleClickListener() {
+		cmbSources.getControl().setFocus();
+		cmbSources.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				edit();
 			}
 		});
-		cmbTypes.addSelectionChangedListener(new ISelectionChangedListener() {
+		cmbSources.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				btnEdit.setEnabled(!cmbTypes.getSelection().isEmpty());
-				btnDelete.setEnabled(!cmbTypes.getSelection().isEmpty());
-				mnuEdit.setEnabled(!cmbTypes.getSelection().isEmpty());
-				mnuDelete.setEnabled(!cmbTypes.getSelection().isEmpty());
+				btnEdit.setEnabled(!cmbSources.getSelection().isEmpty());
+				btnDelete.setEnabled(!cmbSources.getSelection().isEmpty());
+				mnuEdit.setEnabled(!cmbSources.getSelection().isEmpty());
+				mnuDelete.setEnabled(!cmbSources.getSelection().isEmpty());
 			}
 		});
 		
-		filter = new NamedItemViewerFilter(cmbTypes);
-		cmbTypes.setFilters(new ViewerFilter[]{filter});
+		filter = new NamedItemViewerFilter(cmbSources);
+		cmbSources.setFilters(new ViewerFilter[]{filter});
 		
 		Composite buttonPanel = new Composite(parent, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout());
@@ -301,8 +314,24 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 			}
 		});
 		
-		Menu menu = new Menu(cmbTypes.getControl());
-		cmbTypes.getControl().setMenu(menu);
+		
+		Hyperlink hk = new Hyperlink(parent, SWT.NONE);
+		hk.setText(Messages.RecordSourceAttributeDialog_EditTemplateLink);
+		hk.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		hk.setUnderlined(true);
+		hk.setForeground(hk.getDisplay().getSystemColor(SWT.COLOR_LINK_FOREGROUND));
+		
+		hk.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				((IntelPreferenceDialog)getContainer()).close();
+				(new EditRecordTemplateHandler()).execute();
+				
+			}
+		});
+		
+		Menu menu = new Menu(cmbSources.getControl());
+		cmbSources.getControl().setMenu(menu);
 
 		mnuAdd = new MenuItem(menu, SWT.DEFAULT);
 		mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
@@ -340,93 +369,58 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 		mnuEdit.setEnabled(false);
 		mnuDelete.setEnabled(false);
 		
-		
-		setTitle(Messages.EntityTypeListDialog_Title);
-		getShell().setText(Messages.EntityTypeListDialog_Title);
-		setMessage(Messages.EntityTypeListDialog_Message1);
-		
+		setMessage("Record Sources");
+		setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
+
 		loadTypes.setSystem(true);
 		loadTypes.schedule();
-		
+		SmartUiUtils.makeTransparent(parent);
+
 		return parent;
 	}
-	
-	@Override
-	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
-	}
+
 	
 	private void add(){
-		IntelEntityType type = new IntelEntityType();
-		type.setConservationArea(SmartDB.getCurrentConservationArea());
-		type.setAttributes(new ArrayList<IntelEntityTypeAttribute>());
-		type.setProfiles(new HashSet<>());
-		openDialog(type);
-		refresh();
+		IntelRecordSource newItem = new IntelRecordSource();
+		newItem.setAttributes(new ArrayList<>());
+		newItem.setProfiles(new HashSet<>());
+		newItem.setConservationArea(SmartDB.getCurrentConservationArea());
+		openDialog(newItem);
 	}
 	
-	private void openDialog(IntelEntityType type){
-		IEclipseContext ctx = context.createChild();
-		ctx.set(IntelEntityType.class, type);
-		ctx.set(Shell.class, getShell());
-		EntityTypeDialog ed = ContextInjectionFactory.make(EntityTypeDialog.class, ctx);
-		ed.open();
+	private void openDialog(IntelRecordSource type){
+		RecordSourceDialog dialog = new RecordSourceDialog(getShell(), type);
+		ContextInjectionFactory.inject(dialog, context);
+		cmbSources.setInput(new String[]{DialogConstants.LOADING_TEXT});
+
+		dialog.open();
 	}
 	
 	private void edit(){
-		Object x = ((IStructuredSelection)cmbTypes.getSelection()).getFirstElement();
-		if (x instanceof IntelEntityType){
-			IntelEntityType type = (IntelEntityType)x;
-			
-			//before we edit the entity type ensure that all editors with this type are not dirty
-			List<EntityEditor> toSave = new ArrayList<EntityEditor>();
-			StringBuilder sb= new StringBuilder();
-			for (MPart part : context.get(EPartService.class).getParts()){
-				if (E3Utils.isCompatibilityEditor(part)){
-					Object src = E3Utils.getSourceObject(part); 
-					if ( src instanceof EntityEditor 
-							&& ((EntityEditor)src).isDirty()
-							&& ((EntityEditor)src).getEntity().getEntityType().equals(type)){
-						toSave.add((EntityEditor) src);
-						sb.append(((EntityEditor)src).getEntity().getIdAttributeAsText());
-						sb.append(", "); //$NON-NLS-1$
-					}
-				}
-			}
-			if (!toSave.isEmpty()){
-				if (MessageDialog.openQuestion(getShell(), Messages.EntityTypeListDialog_EditTypeTitle, 
-						MessageFormat.format(Messages.EntityTypeListDialog_EditTypeMsg, type.getName(), sb.substring(0, sb.length()-2)))){
-					for (EntityEditor e : toSave){
-						e.doSave(new NullProgressMonitor());
-					}
-				}else{
-					return;  //cannot edit
-				}
-			}
+		Object x = ((IStructuredSelection)cmbSources.getSelection()).getFirstElement();
+		if (x instanceof IntelRecordSource){
+			IntelRecordSource type = (IntelRecordSource)x;
 			openDialog(type);
 			refresh();
 		}
 	}
 	
 	private void delete(){
-		List<IntelEntityType> toDelete = new ArrayList<IntelEntityType>();
-		StringBuilder sb = new StringBuilder();
 		
-		for (Iterator<?> iterator = ((IStructuredSelection)cmbTypes.getSelection()).iterator(); iterator.hasNext();) {
-			Object x = iterator.next();
-			if (x instanceof IntelEntityType){
-				toDelete.add((IntelEntityType)x);
-				sb.append(((IntelEntityType) x).getName());
-				sb.append(", "); //$NON-NLS-1$
+		StructuredSelection s = (StructuredSelection) cmbSources.getSelection();
+		List<IntelRecordSource> delete = new ArrayList<IntelRecordSource>();
+		
+		for (Iterator<?> iterator = s.iterator(); iterator.hasNext();) {
+			Object x = (Object)iterator.next();
+			if (x instanceof IntelRecordSource){
+				delete.add((IntelRecordSource)x);
 			}
 		}
-		sb.deleteCharAt(sb.length() - 1);
-		sb.deleteCharAt(sb.length() - 1);
-		
-		if (!MessageDialog.openConfirm(getShell(), Messages.EntityTypeListDialog_DeleteTitle, MessageFormat.format(Messages.EntityTypeListDialog_DeleteMsg, sb.toString()))){
+		if (delete.isEmpty()) return;
+		if (!MessageDialog.openConfirm(getShell(), Messages.RecordSourceAttributeDialog_DeleteSourceDialogTitle, MessageFormat.format(Messages.RecordSourceAttributeDialog_DeleteSourceDialogMsg, delete.size()))){
 			return;
 		}
-		
+
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -434,48 +428,74 @@ public class EntityTypeListDialog extends SmartStyledTitleDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 
-					monitor.beginTask(Messages.EntityTypeListDialog_DeleteTaskName, toDelete.size());
-					List<IntelEntityType> deleted = new ArrayList<IntelEntityType>();
-					try(Session s = HibernateManager.openSession()){
+					monitor.beginTask("Deleting Record Sources", delete.size());
+					List<IntelRecordSource> deleted = new ArrayList<>();
+					try(Session session = HibernateManager.openSession()){
 
-						for (IntelEntityType t : toDelete){
-							monitor.subTask(t.getName());
-							s.beginTransaction();
+						for (IntelRecordSource source : delete){
+							monitor.subTask(source.getName());
+							session.beginTransaction();
 							try{
-								EntityTypeManager.INSTANCE.deleteEntityType(t, s);
-								s.getTransaction().commit();
-								deleted.add(t);
+								if (source.getUuid() == null) continue;
+								
+								//delete all attributes for records with this source
+								Query<?> q2 = session.createQuery("DELETE FROM IntelRecordAttributeValueList where id.value IN (SELECT a FROM IntelRecordAttributeValue a join a.record b WHERE b.recordSource = :source)"); //$NON-NLS-1$
+								q2.setParameter("source", source); //$NON-NLS-1$
+								q2.executeUpdate();
+								
+								Query<?> q1 = session.createQuery("DELETE FROM IntelRecordAttributeValue where record IN (FROM IntelRecord WHERE recordSource = :source)"); //$NON-NLS-1$
+								q1.setParameter("source", source); //$NON-NLS-1$
+								q1.executeUpdate();
+								
+								//update intelligence records to have no source
+								Query<?> q = session.createQuery("UPDATE IntelRecord SET recordSource = null WHERE recordSource = :source"); //$NON-NLS-1$
+								q.setParameter("source", source); //$NON-NLS-1$
+								q.executeUpdate();
+								
+								//remove all attributes associated with source
+								for (IntelRecordSourceAttribute a : source.getAttributes()){
+									//delete any values associated with this attribute 
+									q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
+									q.setParameter("attribute", a); //$NON-NLS-1$
+									q.executeUpdate();
+									//delete the attributes
+									session.delete(a);
+								}
+								//delete source
+								session.delete(source);
+								
+								session.getTransaction().commit();
+								deleted.add(source);
 							}catch(Exception ex){
-								s.getTransaction().rollback();
-								Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.EntityTypeListDialog_DeleteError, t.getName(), ex.getMessage()), ex);
+								session.getTransaction().rollback();
+								Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.EntityTypeListDialog_DeleteError, source.getName(), ex.getMessage()), ex);
 							}
 							monitor.worked(1);
 						}
 					}
 					monitor.done();
-					for (IntelEntityType d : deleted){
-						broker.send(IntelEvents.ENTITY_TYPE_DELETE, d);
-					}
+					broker.send(IntelEvents.RECORD_SOURCE_ALL, null);
 					 
 				}
 			});
 		} catch (Exception e) {
 			Intelligence2PlugIn.displayLog(Messages.EntityTypeListDialog_DeleteError2 +e.getMessage(), e);
 		}
-		
 		refresh();
-	}
-	
-	private void refresh(){
-		if (cmbTypes.getControl().isDisposed()) return;
-		for (TableColumn c : cmbTypes.getTable().getColumns()) c.dispose();
-		currentSelection = (IStructuredSelection) cmbTypes.getSelection();
-		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		loadTypes.schedule(0);
+		
 	}
 	
 	@Override
-	public boolean isResizable(){
-		return true;
+	public void refresh(){
+		if (cmbSources.getControl().isDisposed()) return;
+		for (TableColumn c : cmbSources.getTable().getColumns()) c.dispose();
+		currentSelection = (IStructuredSelection) cmbSources.getSelection();
+		cmbSources.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		loadTypes.schedule(0);
 	}
+	
+	
+
+
+	
 }

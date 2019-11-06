@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.diagram.style;
+package org.wcs.smart.i2.ui.preference;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -27,9 +27,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -45,20 +45,24 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.i2.RelationshipDiagramManager;
+import org.wcs.smart.i2.diagram.style.CreateNewStyleOpDialog;
+import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleEditDialog;
+import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleLabelProvider;
+import org.wcs.smart.i2.diagram.style.RelationshipDiagramStyleListLoadJob;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
-import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -68,10 +72,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @since 6.0.0
  *
  */
-public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDialog {
+public class RelationshipStylesPreferencePage extends PreferencePage implements IIntelPreferencePage  {
 
-	private static final int DIALOG_WIDTH = 440;
-	private static final int DIALOG_HEIGHT = 500;
 	
 	private TableViewer stylesViewer;
 	
@@ -98,24 +100,15 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		}
 	};
 	
-	public RelationshipDiagramStylesDialog(Shell parent) {
-		super(parent, Messages.RelationshipDiagramStylesDialog_Dialog_Title);
+	public RelationshipStylesPreferencePage() {
+		super("Relationship Styles");
+		super.noDefaultAndApplyButton();
 	}
 
-	@Override
-	protected Point getInitialSize() {
-		return new Point(DIALOG_WIDTH, DIALOG_HEIGHT);
-	}
 
 	@Override
-	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.CLOSE_ID,IDialogConstants.CLOSE_LABEL, true);
-		getButton(IDialogConstants.CLOSE_ID).setFocus();
-		super.setReturnCode(IDialogConstants.CLOSE_ID);
-	}
-	
-	@Override
-	protected Composite createContent(Composite parent) {
+	protected Control createContents(Composite parent) {
+		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -219,11 +212,10 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		});
 
 		updateState();
-		setTitle(Messages.RelationshipDiagramStylesDialog_Dialog_Title);
-		setMessage(Messages.RelationshipDiagramStylesDialog_Dialog_Message);
 		
 		loadStyleListJob.schedule();
-		
+		SmartUiUtils.makeTransparent(parent);
+
 		return main;
 	}
 	
@@ -232,11 +224,7 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 		btnEdit.setEnabled(p != null);
 		btnDelete.setEnabled(p != null && !p.isDefault());
 	}
-	
-	private void reloadData() {
-		loadStyleListJob.cancel();
-		loadStyleListJob.schedule();
-	}
+
 	
 	protected RelationshipDiagramStyle getSelectedStyle() {
 		IStructuredSelection selection = (IStructuredSelection) stylesViewer.getSelection();
@@ -264,7 +252,7 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 			dialog.open();
 			
 			//refresh list
-			reloadData();
+			refresh();
 		}
 	}
 
@@ -277,18 +265,20 @@ public class RelationshipDiagramStylesDialog extends AbstractPropertyJHeaderDial
 			return;
 		}
 		RelationshipDiagramManager.INSTANCE.deleteStyle(getShell(), style);
-		reloadData();
+		refresh();
 	}
 
 	protected void editCurrentStyle() {
 		Dialog dialog = new RelationshipDiagramStyleEditDialog(getShell(), getSelectedStyle());
 		dialog.open();
-		reloadData();
+		refresh();
 	}
 
+
 	@Override
-	protected boolean performSave() {
-		return true;
+	public void refresh() {
+		loadStyleListJob.cancel();
+		loadStyleListJob.schedule();
 	}
 
 }

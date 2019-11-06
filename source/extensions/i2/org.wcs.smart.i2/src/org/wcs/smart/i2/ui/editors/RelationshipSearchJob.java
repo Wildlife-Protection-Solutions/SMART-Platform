@@ -71,8 +71,16 @@ public abstract class RelationshipSearchJob extends Job{
 			Root<IntelRelationshipType> from = c.from(IntelRelationshipType.class);
 			c.where(cb.and(
 					cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
-					cb.and(cb.equal(from.get("sourceProfile"), srcProfile)),
-					cb.and(cb.equal(from.get("targetProfile"), trgProfile)),
+					cb.or(
+							cb.and(
+									cb.equal(from.get("sourceProfile"), srcProfile),
+									cb.equal(from.get("targetProfile"), trgProfile)
+									),
+							cb.and(
+									cb.equal(from.get("sourceProfile"), trgProfile),
+									cb.equal(from.get("targetProfile"), srcProfile)
+									)
+							),
 					cb.or(
 							cb.and(
 									cb.equal(from.get("sourceEntityType"), srcType), //$NON-NLS-1$

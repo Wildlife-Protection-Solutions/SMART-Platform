@@ -367,85 +367,16 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.i2.command.attributelist.show"
-                  label="%EditAttributesCommandName"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.i2.permission"
-                        value="configure">
-                  </test>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.entitytypelist.show"
-                  label="%EditEntityTypesCommandName"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.i2.permission"
-                        value="configure">
-                  </test>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.relationshiptypelist.show"
-                  label="%EditRelationshipTypeCommandName"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.i2.permission"
-                        value="configure">
-                  </test>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.relationshipgrouplist.show"
-                  label="%EditRelationshipGroupCommandName"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.i2.permission"
-                        value="configure">
-                  </test>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.record.configuration"
-                  label="%ConfigureRecordSourceCommandName"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.i2.permission"
-                        value="configure">
-                  </test>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.graphstyles.show"
-                  label="%ShowRelationshipDiagramStylesMenuItemName"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.i2.permission"
-                        value="configure">
-                  </test>
-               </visibleWhen>
-            </command>
-            <separator
-                  name="org.wcs.smart.i2.separator2"
-                  visible="true">
-            </separator>
-            <command
                   commandId="org.wcs.smart.i2.command.profiles.show"
-                  label="Manage Profiles..."
+                  label="Configurations..."
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="configure">
+                  </test>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
@@ -560,18 +491,10 @@
                   </or>
                </visibleWhen>
             </menu>
-            <command
-                  commandId="org.wcs.smart.i2.command.config.show"
-                  label="%ModuleSettingsMenuLabel"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.i2.permission"
-                        value="configure">
-                  </test>
-               </visibleWhen>
-            </command>
+            <separator
+                  name="org.wcs.smart.i2.separator2"
+                  visible="true">
+            </separator>
             <separator
                   name="org.wcs.smart.i2.separator3"
                   visible="true">
@@ -708,7 +631,7 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.i2.command.config.show"
+                  commandId="org.wcs.smart.i2.command.profiles.show"
                   label="%ModuleSettingsCommandLabel"
                   style="push">
                <visibleWhen
@@ -1530,28 +1453,8 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            id="org.wcs.smart.i2.command.entitytypelist.show"
-            name="%ShowEntityTypesCommandName">
-      </command>
-      <command
-            id="org.wcs.smart.i2.command.attributelist.show"
-            name="%ShowAttributesCommandName">
-      </command>
-      <command
-            id="org.wcs.smart.i2.command.relationshiptypelist.show"
-            name="%ShowRelationshipTypesCommandName">
-      </command>
-      <command
             id="org.wcs.smart.i2.command.entity.new"
             name="%NewEntityCommandName3">
-      </command>
-      <command
-            id="org.wcs.smart.i2.command.relationshipgrouplist.show"
-            name="%ShowRelationshipGroupsCommandName">
-      </command>
-      <command
-            id="org.wcs.smart.i2.command.graphstyles.show"
-            name="%ShowRelationshipDiagramStylesCommandName">
       </command>
       <command
             id="org.wcs.smart.i2.command.record.new"
@@ -1609,10 +1512,6 @@
             name="%RefreshQueryListCommandName">
       </command>
       <command
-            id="org.wcs.smart.i2.command.record.configuration"
-            name="%ConfigureRecordsCommandName">
-      </command>
-      <command
             id="org.wcs.smart.i2.command.record.import.xml"
             name="%ImportRecordsFromXmlCommandName">
       </command>
@@ -1625,12 +1524,8 @@
             name="%ImportModelElementsCommandName">
       </command>
       <command
-            id="org.wcs.smart.i2.command.config.show"
-            name="%ModuleSettingsCommandName">
-      </command>
-      <command
             id="org.wcs.smart.i2.command.profiles.show"
-            name="Manage Profiles...">
+            name="Configurations...">
       </command>
       <command
             id="org.wcs.smart.i2.command.profile.filter"
@@ -1640,52 +1535,12 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.wcs.smart.i2.ui.handler.ShowEntityTypeListDialogHandler$ShowEntityTypeListDialogHandlerWrapper"
-            commandId="org.wcs.smart.i2.command.entitytypelist.show">
-         <enabledWhen>
-            <test
-                  property="org.wcs.smart.i2.permission"
-                  value="configure">
-            </test>
-         </enabledWhen>
-      </handler>
-      <handler
-            class="org.wcs.smart.i2.ui.handler.ShowAttributeListDialogHandler$ShowAttributeListDialogHandlerWrapper"
-            commandId="org.wcs.smart.i2.command.attributelist.show">
-         <enabledWhen>
-            <test
-                  property="org.wcs.smart.i2.permission"
-                  value="configure">
-            </test>
-         </enabledWhen>
-      </handler>
-      <handler
-            class="org.wcs.smart.i2.ui.handler.ShowRelationshipTypeListDialogHandler$ShowRelationshipTypeListDialogHandlerWrapper"
-            commandId="org.wcs.smart.i2.command.relationshiptypelist.show">
-         <enabledWhen>
-            <test
-                  property="org.wcs.smart.i2.permission"
-                  value="configure">
-            </test>
-         </enabledWhen>
-      </handler>
-      <handler
             class="org.wcs.smart.i2.ui.handler.NewEntityDialogHandler$NewEntityDialogHandlerWrapper"
             commandId="org.wcs.smart.i2.command.entity.new">
          <enabledWhen>
             <test
                   property="org.wcs.smart.i2.permission"
                   value="create_entity">
-            </test>
-         </enabledWhen>
-      </handler>
-      <handler
-            class="org.wcs.smart.i2.ui.handler.ShowRelationshipGroupListDialogHandler$ShowRelationshipGroupListDialogHandlerWrapper"
-            commandId="org.wcs.smart.i2.command.relationshipgrouplist.show">
-         <enabledWhen>
-            <test
-                  property="org.wcs.smart.i2.permission"
-                  value="configure">
             </test>
          </enabledWhen>
       </handler>
@@ -1754,27 +1609,7 @@
             commandId="org.wcs.smart.i2.command.import.entity.xml">
       </handler>
       <handler
-            class="org.wcs.smart.i2.ui.handler.ShowConfigurationDialogHandler$ShowConfigurationDialogHandlerWrapper"
-            commandId="org.wcs.smart.i2.command.config.show">
-         <enabledWhen>
-            <test
-                  property="org.wcs.smart.i2.permission"
-                  value="configure">
-            </test>
-         </enabledWhen>
-      </handler>
-      <handler
-            class="org.wcs.smart.i2.ui.handler.ShowRelationshipDiagramStylesHandler$ShowRelationshipDiagramStylesHandlerWrapper"
-            commandId="org.wcs.smart.i2.command.graphstyles.show">
-         <enabledWhen>
-            <test
-                  property="org.wcs.smart.i2.permission"
-                  value="configure">
-            </test>
-         </enabledWhen>
-      </handler>
-      <handler
-            class="org.wcs.smart.i2.ui.handler.ShowProfilesHandler$ShowProfilesHandlerWrapper"
+            class="org.wcs.smart.i2.ui.handler.ShowProfileSettingsHandler$ShowProfilesSettingsHandlerWrapper"
             commandId="org.wcs.smart.i2.command.profiles.show">
       </handler>
       <handler

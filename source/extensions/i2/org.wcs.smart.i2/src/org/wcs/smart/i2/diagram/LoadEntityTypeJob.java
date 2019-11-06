@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.diagram;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,8 +33,10 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 
 /**
  * Job for loading {@link IntelEntityType}.
@@ -44,8 +47,11 @@ import org.wcs.smart.i2.model.IntelEntityType;
  */
 public abstract class LoadEntityTypeJob extends Job {
 
-	public LoadEntityTypeJob() {
+	private boolean activeProfiles = true;
+	
+	public LoadEntityTypeJob(boolean activeProfiles) {
 		super(Messages.LoadEntityTypeJob_Title);
+		this.activeProfiles = activeProfiles;
 	}
 
 	@Override
@@ -53,6 +59,20 @@ public abstract class LoadEntityTypeJob extends Job {
 		List<IntelEntityType> types = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()) {
 			types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(session, SmartDB.getCurrentConservationArea()));
+			
+			if (activeProfiles) {
+				for (Iterator<IntelEntityType> iterator = types.iterator(); iterator.hasNext();) {
+					IntelEntityType intelEntityType = (IntelEntityType) iterator.next();
+					boolean ok = false;
+					for (IntelProfile p : intelEntityType.getProfiles()) {
+						if (ProfilesManager.INSTANCE.getActiveProfiles().contains(p)) {
+							ok = true;
+							break;
+						}
+					}
+					if (!ok) iterator.remove();
+				}
+			}
 		}
 		
 		processData(types);

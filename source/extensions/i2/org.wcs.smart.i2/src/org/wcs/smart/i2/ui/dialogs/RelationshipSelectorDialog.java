@@ -22,7 +22,9 @@
 package org.wcs.smart.i2.ui.dialogs;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -34,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
@@ -99,11 +102,14 @@ public class RelationshipSelectorDialog extends SmartStyledTitleDialog{
 		parent.setLayout(new GridLayout());
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		cmbTypes = new TableViewer(parent, SWT.READ_ONLY | SWT.BORDER);
+		Composite temp = new Composite(parent, SWT.NONE);
+		temp.setLayout(new TableColumnLayout());
+		temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		cmbTypes = new TableViewer(temp, SWT.READ_ONLY | SWT.BORDER);
 		cmbTypes.setLabelProvider(new RelationshipTypeLabelProvider());
 		cmbTypes.setContentProvider(ArrayContentProvider.getInstance());
 		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		cmbTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		cmbTypes.addSelectionChangedListener((event)-> {
 			boolean ok = false;
 			selectedType = null;
@@ -115,6 +121,9 @@ public class RelationshipSelectorDialog extends SmartStyledTitleDialog{
 			}
 			getButton(IDialogConstants.OK_ID).setEnabled(ok);
 		});
+		
+		TableColumn tc = new TableColumn(cmbTypes.getTable(), SWT.NONE);
+		((TableColumnLayout)temp.getLayout()).setColumnData(tc,  new ColumnWeightData(1));
 		
 		(new RelationshipSearchJob(srcProfile, srcType, targetProfile, targetType) {
 			@Override

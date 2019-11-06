@@ -1,4 +1,4 @@
-package org.wcs.smart.i2.ui.dialogs;
+package org.wcs.smart.i2.ui.preference;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -8,8 +8,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -24,107 +24,29 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
-import org.wcs.smart.ui.SmartStyledTitleDialog;
+import org.wcs.smart.i2.ui.dialogs.ProfileDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
-/**
- * Dialog lists all profile configurations 
- * 
- * @author Emily
- *
- */
-public class ProfilesListDialog extends SmartStyledTitleDialog {
-
+public class ProfilesPreferencePage extends PreferencePage implements IIntelPreferencePage{
+	
+	
 	private TableViewer tblConfigurations;
 	private List<IntelProfile> configs;
 	private ProfileLabelProvider lblProvider = new ProfileLabelProvider();
 	
-	public ProfilesListDialog(Shell parent) {
-		super(parent);
-	}
-	
-	@Override
-	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);	
-	}
-
-	
-	protected Control createDialogArea(Composite parent) {
-		parent = (Composite) super.createDialogArea(parent);
-		
-		Composite part = new Composite(parent, SWT.NONE);
-		part.setLayout(new GridLayout(2, false));
-		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		Composite wrapper = new Composite(part, SWT.NONE);
-		wrapper.setLayout(new TableColumnLayout());
-		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		tblConfigurations = new TableViewer(wrapper, SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
-		tblConfigurations.setContentProvider(ArrayContentProvider.getInstance());
-		tblConfigurations.addDoubleClickListener(e->edit());
-	
-		
-		TableViewerColumn namecol = new TableViewerColumn(tblConfigurations, SWT.NONE);
-		namecol.setLabelProvider(new ColumnLabelProvider() {
-			public String getText(Object other) { return ""; }
-		});
-		namecol.setLabelProvider(lblProvider);
-		((TableColumnLayout)wrapper.getLayout()).setColumnData(namecol.getColumn(), new ColumnWeightData(1));
-		
-		Composite btnpanel = new Composite(part, SWT.NONE);
-		btnpanel.setLayout(new GridLayout());
-		((GridLayout)btnpanel.getLayout()).marginWidth = 0;
-		((GridLayout)btnpanel.getLayout()).marginHeight = 0;
-		btnpanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		
-		Button btnAdd = createButton(btnpanel, DialogConstants.ADD_BUTTON_TEXT, SmartPlugIn.ADD_ICON);
-		btnAdd.addListener(SWT.Selection, e->add());
-		
-		Button btnEdit = createButton(btnpanel, DialogConstants.EDIT_BUTTON_TEXT, SmartPlugIn.EDIT_ICON);
-		btnEdit.addListener(SWT.Selection, e->edit());
-		
-		Button btnDelete = createButton(btnpanel, DialogConstants.DELETE_BUTTON_TEXT, SmartPlugIn.DELETE_ICON);
-		btnDelete.addListener(SWT.Selection, e->delete());
-		
-		Menu mnu = new Menu(tblConfigurations.getControl());
-		tblConfigurations.getControl().setMenu(mnu);
-		MenuItem miAdd = createMenuItem(mnu, DialogConstants.ADD_BUTTON_TEXT, SmartPlugIn.ADD_ICON);
-		miAdd.addListener(SWT.Selection, e->add());
-
-		MenuItem miEdit = createMenuItem(mnu, DialogConstants.EDIT_BUTTON_TEXT, SmartPlugIn.EDIT_ICON);
-		miEdit.addListener(SWT.Selection, e->edit());
-		
-		MenuItem miDelete = createMenuItem(mnu, DialogConstants.DELETE_BUTTON_TEXT, SmartPlugIn.DELETE_ICON);
-		miDelete.addListener(SWT.Selection, e->delete());
-
-		btnEdit.setEnabled(false);
-		btnDelete.setEnabled(false);
-		miEdit.setEnabled(false);
-		miDelete.setEnabled(false);
-		
-		tblConfigurations.addSelectionChangedListener(e->{
-			btnEdit.setEnabled(!tblConfigurations.getSelection().isEmpty());
-			btnDelete.setEnabled(!tblConfigurations.getSelection().isEmpty());
-			miEdit.setEnabled(!tblConfigurations.getSelection().isEmpty());
-			miDelete.setEnabled(!tblConfigurations.getSelection().isEmpty());
-		});
-		
-		setTitle("Profile Configurations");
-		setMessage("Manage profile configurations");
-		
-		refresh();
-		
-		return parent;
+	public ProfilesPreferencePage() {
+		super();
+		noDefaultAndApplyButton();
+		setTitle("Profiles");
 	}
 	
 	private Button createButton(Composite parent, String text, String icon) {
@@ -189,7 +111,8 @@ public class ProfilesListDialog extends SmartStyledTitleDialog {
 		refresh();
 	}
 	
-	private void refresh() {
+	@Override
+	public void refresh() {
 		tblConfigurations.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		loadConfigJob.schedule();
 	}
@@ -202,7 +125,7 @@ public class ProfilesListDialog extends SmartStyledTitleDialog {
 			try(Session session = HibernateManager.openSession()){
 				temp.addAll(ProfilesManager.INSTANCE.getProfiles(session));
 			}
-			ProfilesListDialog.this.configs = temp;
+			ProfilesPreferencePage.this.configs = temp;
 			configs.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 			Display.getDefault().asyncExec(()->{
 				tblConfigurations.setInput(configs);
@@ -212,4 +135,77 @@ public class ProfilesListDialog extends SmartStyledTitleDialog {
 		}
 		
 	};
+
+	@Override
+	protected Control createContents(Composite parent) {
+		
+		Composite part = new Composite(parent, SWT.NONE);
+		part.setLayout(new GridLayout(2, false));
+		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite wrapper = new Composite(part, SWT.NONE);
+		wrapper.setLayout(new TableColumnLayout());
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		tblConfigurations = new TableViewer(wrapper, SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
+		tblConfigurations.setContentProvider(ArrayContentProvider.getInstance());
+		tblConfigurations.addDoubleClickListener(e->edit());
+	
+		
+		TableViewerColumn namecol = new TableViewerColumn(tblConfigurations, SWT.NONE);
+		namecol.setLabelProvider(new ColumnLabelProvider() {
+			public String getText(Object other) { return ""; }
+		});
+		namecol.setLabelProvider(lblProvider);
+		((TableColumnLayout)wrapper.getLayout()).setColumnData(namecol.getColumn(), new ColumnWeightData(1));
+		
+		Composite btnpanel = new Composite(part, SWT.NONE);
+		btnpanel.setLayout(new GridLayout());
+		((GridLayout)btnpanel.getLayout()).marginWidth = 0;
+		((GridLayout)btnpanel.getLayout()).marginHeight = 0;
+		btnpanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		Button btnAdd = createButton(btnpanel, DialogConstants.ADD_BUTTON_TEXT, SmartPlugIn.ADD_ICON);
+		btnAdd.addListener(SWT.Selection, e->add());
+		
+		Button btnEdit = createButton(btnpanel, DialogConstants.EDIT_BUTTON_TEXT, SmartPlugIn.EDIT_ICON);
+		btnEdit.addListener(SWT.Selection, e->edit());
+		
+		Button btnDelete = createButton(btnpanel, DialogConstants.DELETE_BUTTON_TEXT, SmartPlugIn.DELETE_ICON);
+		btnDelete.addListener(SWT.Selection, e->delete());
+		
+		Menu mnu = new Menu(tblConfigurations.getControl());
+		tblConfigurations.getControl().setMenu(mnu);
+		MenuItem miAdd = createMenuItem(mnu, DialogConstants.ADD_BUTTON_TEXT, SmartPlugIn.ADD_ICON);
+		miAdd.addListener(SWT.Selection, e->add());
+
+		MenuItem miEdit = createMenuItem(mnu, DialogConstants.EDIT_BUTTON_TEXT, SmartPlugIn.EDIT_ICON);
+		miEdit.addListener(SWT.Selection, e->edit());
+		
+		MenuItem miDelete = createMenuItem(mnu, DialogConstants.DELETE_BUTTON_TEXT, SmartPlugIn.DELETE_ICON);
+		miDelete.addListener(SWT.Selection, e->delete());
+
+		btnEdit.setEnabled(false);
+		btnDelete.setEnabled(false);
+		miEdit.setEnabled(false);
+		miDelete.setEnabled(false);
+		
+		tblConfigurations.addSelectionChangedListener(e->{
+			btnEdit.setEnabled(!tblConfigurations.getSelection().isEmpty());
+			btnDelete.setEnabled(!tblConfigurations.getSelection().isEmpty());
+			miEdit.setEnabled(!tblConfigurations.getSelection().isEmpty());
+			miDelete.setEnabled(!tblConfigurations.getSelection().isEmpty());
+		});
+		
+		
+		setMessage("Profile Configurations");
+		
+		refresh();
+		SmartUiUtils.makeTransparent(parent);
+
+		return parent;
+	}
+
+	
+	
 }

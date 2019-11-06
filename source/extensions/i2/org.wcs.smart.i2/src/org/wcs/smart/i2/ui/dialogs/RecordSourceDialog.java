@@ -21,10 +21,8 @@
  */
 package org.wcs.smart.i2.ui.dialogs;
 
-import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -39,7 +37,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
@@ -47,11 +44,7 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
-import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.EditingSupport;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -61,8 +54,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -74,21 +65,16 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.common.control.IconComposite;
-import org.wcs.smart.common.control.NameKeyDialog;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
-import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -99,11 +85,11 @@ import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
 import org.wcs.smart.i2.ui.RecordSourceAttributeLabelProvider;
-import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
 import org.wcs.smart.i2.ui.Resources;
-import org.wcs.smart.i2.ui.handler.EditRecordTemplateHandler;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
+import org.wcs.smart.ui.ca.properties.NameKeyComposite;
+import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 
@@ -112,66 +98,81 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
+public class RecordSourceDialog extends SmartStyledTitleDialog{
 
 	@Inject
 	protected IEclipseContext context;
 	
-	private TableViewer lstSources;
-	private Label sourceLabel;
 	private TableViewer lstAttributes;
 	private IconComposite iconComp;
 	
 	private Button[] attributeButtons;
-	private Button[] srcButtons;
-	private MenuItem[] srcMenu;
 	private MenuItem[] attributeMenu;
 	
-	private List<IntelRecordSource> sources;
-	private List<IntelRecordSource> toDelete;
+	private NameKeyComposite comp ;
+	
 	private List<IntelRecordSourceAttribute> attributesToDelete;
 	private List<IntelRecordSourceAttribute> attributesMultiToSingle;	//tracks attribute which are changed from multi to single
 		
 	private IntelRecordSource currentSelection = null;
 	private CheckboxTableViewer tblProfiles = null;
 	
-	private Job loadSources = new Job(Messages.RecordSourceAttributeDialog_LoadSourceJobName){
+	private Job loadSource = new Job("loading source") {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelProfile> profiles = new ArrayList<>();
+			List<IntelRecordSource> srcs = new ArrayList<>();
 			
-			try(Session s = HibernateManager.openSession()){
-				List<IntelRecordSource> srcs = RecordManager.INSTANCE.getSources(s); 
-				profiles.addAll(ProfilesManager.INSTANCE.getProfiles(s));
-				srcs.forEach(e -> {
-					e.getNames().size();
-					e.getProfiles().size();
-					if (e.getAttributes() != null){
-						e.getAttributes().forEach(a->{
-							a.getNames().size();
-							a.getAttribute();
-							a.getEntityType();
-						});
-					}
-				});
-				sources = srcs;
+			try(Session session = HibernateManager.openSession()){
+				profiles.addAll(ProfilesManager.INSTANCE.getProfiles(session));
+				
+				srcs.addAll(QueryFactory.buildQuery(session, IntelRecordSource.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				
+				IntelRecordSource src = session.get(IntelRecordSource.class, currentSelection.getUuid());
+				srcs.remove(src);
+				
+				src.getNames().size();
+				
+				src.getProfiles().forEach(p->p.getName());
+				
+				if (src.getAttributes() != null){
+					src.getAttributes().forEach(a->{
+						a.getNames().size();
+						a.getAttribute();
+						a.getEntityType();
+					});
+				}
+				currentSelection = src;
 			}
 			
-			Display.getDefault().syncExec(()->{
-				lstSources.setInput(sources);
+			Display.getDefault().asyncExec(()->{
+				iconComp.setEnabled(true);
+				iconComp.setImage(currentSelection.getIcon());
+				lstAttributes.setInput(currentSelection.getAttributes());
+				lstAttributes.getControl().setEnabled(true);
+				tblProfiles.getControl().setEnabled(true);
+				comp.initFields(currentSelection, srcs, SmartDB.getCurrentConservationArea().getDefaultLanguage());
+				for (Button b : attributeButtons) b.setEnabled(true);
+				for (MenuItem b : attributeMenu) b.setEnabled(true);
 				tblProfiles.setInput(profiles);
-				for (Button b : srcButtons) b.setEnabled(true);
-				for (MenuItem b : srcMenu) b.setEnabled(true);
+				tblProfiles.setAllChecked(false);
+				for (IntelProfile p : currentSelection.getProfiles()) tblProfiles.setChecked(p, true);
+				comp.validate();
+				getButton(IDialogConstants.OK_ID).setEnabled(false);
+
+				
 			});
 			return Status.OK_STATUS;
 		}
+		
 	};
 	
 	
-	public RecordSourceAttributeDialog(Shell parent){
+	public RecordSourceDialog(Shell parent, IntelRecordSource source){
 		super(parent);		
-		toDelete = new ArrayList<>();
+		this.currentSelection = source;
 		attributesToDelete = new ArrayList<>();	
 		attributesMultiToSingle = new ArrayList<>();
 	}
@@ -189,23 +190,19 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 		body.setLayout(new GridLayout(3, false));
 		body.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		createSourceComposite(body);
-		new Label(body, SWT.NONE);	//spacer
 		createDetailsPanel(body);
 		
 		//init
-		lstSources.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstAttributes.getTable().setEnabled(false);
 		iconComp.setEnabled(false);
-		loadSources.schedule();
 		for (Button b : attributeButtons) b.setEnabled(false);
 		for (MenuItem b : attributeMenu) b.setEnabled(false);
-		for (Button b : srcButtons) b.setEnabled(false);
-		for (MenuItem b : srcMenu) b.setEnabled(false);
 		
-		setTitle(Messages.RecordSourceAttributeDialog_Title);
+		setTitle(currentSelection.getName());
 		setMessage(Messages.RecordSourceAttributeDialog_Message);
-		getShell().setText(Messages.RecordSourceAttributeDialog_Title);
+		getShell().setText(currentSelection.getName());
+		
+		loadSource.schedule();
 		
 		return parent;
 	}
@@ -227,101 +224,81 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 	
 	@Override
 	public void okPressed(){
+		if (comp.validate()) {
+			MessageDialog.openError(getShell(), "Error",  "Cannot save until a valid name and key are provided.");
+			return;
+		}
 		if (doSave()){
 			Resources.INSTANCE.clearRecordSourceImageCache();
 			getButton(IDialogConstants.OK_ID).setEnabled(false);
-			lstSources.refresh(true);
 			
 		}
 	}
-	
-	private void updateSourceSelection(){
-		currentSelection = null;
-		Object x = ((IStructuredSelection)lstSources.getSelection()).getFirstElement();
-		if (x instanceof IntelRecordSource){
-			currentSelection = (IntelRecordSource) x;
-		}
-		
-		if (currentSelection == null){
-			iconComp.setEnabled(false);
-			iconComp.setImage(null);
-			sourceLabel.setText(""); //$NON-NLS-1$
-			lstAttributes.setInput(null);
-			lstAttributes.getControl().setEnabled(false);
-			tblProfiles.getControl().setEnabled(false);
-			for (Button b : attributeButtons) b.setEnabled(false);
-			for (MenuItem b : attributeMenu) b.setEnabled(false);
-		}else{
-			iconComp.setEnabled(true);
-			iconComp.setImage(currentSelection.getIcon());
-			sourceLabel.setText(currentSelection.getName());
-			lstAttributes.setInput(currentSelection.getAttributes());
-			lstAttributes.getControl().setEnabled(true);
-			tblProfiles.getControl().setEnabled(true);
-			for (Button b : attributeButtons) b.setEnabled(true);
-			for (MenuItem b : attributeMenu) b.setEnabled(true);
-			
-			tblProfiles.setAllChecked(false);
-			for (IntelProfile p : currentSelection.getProfiles()) tblProfiles.setChecked(p, true);
-		}
-	}
-	
+
 	private void createDetailsPanel(Composite parent){
 		Composite detailsPanel = new Composite(parent, SWT.NONE);
 		detailsPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		detailsPanel.setLayout(new GridLayout(2, false));
+		detailsPanel.setLayout(new GridLayout(3, false));
 		
-		sourceLabel = new Label(detailsPanel, SWT.NONE);
-		sourceLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		comp = new NameKeyComposite();
+		comp.createControls(detailsPanel, true, false, new IChangeListener() {
+			@Override
+			public void itemModified() {
+				comp.validate();
+				modified();
+			}
+		});
+//		Composite iconc = new Composite(detailsPanel, SWT.NONE);
+//		iconc.setLayout(new GridLayout(2, false));
+//		iconc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+//		((GridLayout)iconc.getLayout()).marginWidth = 0;
+//		((GridLayout)iconc.getLayout()).marginHeight = 0;
 		
-		FontData fd = sourceLabel.getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		Font f = new Font(sourceLabel.getDisplay(), fd);
-		sourceLabel.setFont(f);
-		sourceLabel.addListener(SWT.Dispose, e->f.dispose());
-		
-		Label l = new Label(detailsPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
-		Composite iconc = new Composite(detailsPanel, SWT.NONE);
-		iconc.setLayout(new GridLayout(2, false));
-		iconc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		((GridLayout)iconc.getLayout()).marginWidth = 0;
-		((GridLayout)iconc.getLayout()).marginHeight = 0;
-		
-		l = new Label(iconc, SWT.NONE);
+		Label l = new Label(detailsPanel, SWT.NONE);
 		l.setText(Messages.RecordSourceAttributeDialog_IconLabel);
-		
-		iconComp = new IconComposite(iconc);
-		iconComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+
+		iconComp = new IconComposite(detailsPanel);
+		iconComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		iconComp.addModifyListener(new ModifyListener() {
 			
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if (currentSelection != null){
 					currentSelection.setIcon(iconComp.getImage());
-					lstSources.refresh();
 					modified();
 				}
 			}
 		});
+	
+		l = new Label(detailsPanel, SWT.NONE);
+		l.setText("Profiles:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		
-//		Composite pcomp = new Composite(detailsPanel, SWT.NONE);
-//		pcomp.setLayout(new GridLayout(2, false));
-//		pcomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-//		((GridLayout)pcomp.getLayout()).marginWidth = 0;
-//		((GridLayout)pcomp.getLayout()).marginHeight = 0;
-//		
-		
-		
+		tblProfiles = CheckboxTableViewer.newCheckList(detailsPanel, SWT.BORDER);
+		tblProfiles.setContentProvider(ArrayContentProvider.getInstance());
+		tblProfiles.setLabelProvider(new ProfileLabelProvider());
+		tblProfiles.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		((GridData)tblProfiles.getControl().getLayoutData()).heightHint = 50;
+		tblProfiles.addSelectionChangedListener(e->{
+			if (currentSelection == null) return;
+			
+			currentSelection.getProfiles().clear();
+			for (Object x : tblProfiles.getCheckedElements()) {
+				IntelProfile p = (IntelProfile) x;
+				currentSelection.getProfiles().add(p);
+			}
+			modified();
+		});
+		new Label(detailsPanel, SWT.NONE);
 		Label attributesLabel = new Label(detailsPanel, SWT.NONE);
 		attributesLabel.setText(Messages.RecordSourceAttributeDialog_AttributeLabel);
-		attributesLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		attributesLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		
 		lstAttributes = new TableViewer(detailsPanel, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		lstAttributes.setContentProvider(ArrayContentProvider.getInstance());
 		lstAttributes.setLabelProvider(new RecordSourceAttributeLabelProvider());
-		lstAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		lstAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		lstAttributes.getTable().setHeaderVisible(true);
 		
 		ColumnViewerEditorActivationStrategy activationSupport = new ColumnViewerEditorActivationStrategy(lstAttributes) {
@@ -531,25 +508,6 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 		mnuMoveDown.setText(Messages.RecordSourceAttributeDialog_moveDownLabel);
 		mnuMoveDown.addListener(SWT.Selection, e->moveAttribute(1));
 		
-		l = new Label(detailsPanel, SWT.NONE);
-		l.setText("Profiles:");
-		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 2, 1));
-		
-		tblProfiles = CheckboxTableViewer.newCheckList(detailsPanel, SWT.BORDER);
-		tblProfiles.setContentProvider(ArrayContentProvider.getInstance());
-		tblProfiles.setLabelProvider(new ProfileLabelProvider());
-		tblProfiles.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		((GridData)tblProfiles.getControl().getLayoutData()).heightHint = 50;
-		tblProfiles.addSelectionChangedListener(e->{
-			if (currentSelection == null) return;
-			
-			currentSelection.getProfiles().clear();
-			for (Object x : tblProfiles.getCheckedElements()) {
-				IntelProfile p = (IntelProfile) x;
-				currentSelection.getProfiles().add(p);
-			}
-			modified();
-		});
 		
 		attributeButtons = new Button[]{btnAdd, btnDelete, btnMoveUp, btnMoveDown};
 		this.attributeMenu = new MenuItem[]{mnuAdd, mnuDelete};
@@ -632,14 +590,12 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 	
 	
 	private void addAttribute(){
-		Object x = ((IStructuredSelection)lstSources.getSelection()).getFirstElement();
-		if (x == null || !(x instanceof IntelRecordSource)) return;
-		IntelRecordSource source = (IntelRecordSource) x;
-		if (source.getAttributes() == null){
-			lstAttributes.setInput(source.getAttributes());
-			source.setAttributes(new ArrayList<>());
+		
+		if (currentSelection.getAttributes() == null){
+			lstAttributes.setInput(currentSelection.getAttributes());
+			currentSelection.setAttributes(new ArrayList<>());
 		}
-		SelectAttributeEntityTypeDialog dialog = new SelectAttributeEntityTypeDialog(getShell(), MessageFormat.format(Messages.RecordSourceAttributeDialog_AddDialogTitle, source.getName()));
+		SelectAttributeEntityTypeDialog dialog = new SelectAttributeEntityTypeDialog(getShell(), MessageFormat.format(Messages.RecordSourceAttributeDialog_AddDialogTitle, currentSelection.getName()));
 		ContextInjectionFactory.inject(dialog, context);				
 		if (dialog.open() == Window.OK){
 			for (NamedItem ia : dialog.getSelectedAttributes()){
@@ -657,188 +613,18 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 					continue;
 				}
 				
-				attribute.setSource(source);
-				attribute.setOrder(source.getAttributes().size() + 1);
-				source.getAttributes().add(attribute);
+				attribute.setSource(currentSelection);
+				attribute.setOrder(currentSelection.getAttributes().size() + 1);
+				currentSelection.getAttributes().add(attribute);
 				lstAttributes.refresh();
 				modified();
 			}
 		}
 	}
-	private void createSourceComposite(Composite parent){
-		Composite srcPanel = new Composite(parent, SWT.NONE);
-		srcPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)srcPanel.getLayoutData()).widthHint = 250;
-		srcPanel.setLayout(new GridLayout(2, false));
-		
-		Label l = new Label(srcPanel, SWT.NONE);
-		l.setText(Messages.RecordSourceAttributeDialog_RecordSourceLabel);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
-		Composite outer = new Composite(srcPanel, SWT.NONE);
-		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		lstSources = new TableViewer(outer, SWT.BORDER);
-		lstSources.setContentProvider(ArrayContentProvider.getInstance());
-		lstSources.setLabelProvider(new RecordSourceLabelProvider());
-		lstSources.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		lstSources.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				editSource();
-			}
-		});
-		TableColumn tc = new TableColumn(lstSources.getTable(), SWT.NONE);
-		TableColumnLayout layout = new TableColumnLayout();
-		layout.setColumnData(tc, new ColumnWeightData(100));
-		outer.setLayout(layout);
-		
-		
-		Composite buttonPanel = new Composite(srcPanel, SWT.NONE);
-		buttonPanel.setLayout(new GridLayout());
-		((GridLayout)buttonPanel.getLayout()).marginWidth = 0;
-		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
-		buttonPanel.setLayoutData(new GridData(SWT.TOP, SWT.FILL, false, false));
-		
-		Button btnAdd = new Button(buttonPanel, SWT.PUSH);
-		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		btnAdd.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		btnAdd.addListener(SWT.Selection, e->{
-			addSource();
-		});
-		
-		Button btnEdit = new Button(buttonPanel, SWT.PUSH);
-		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		btnEdit.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		btnEdit.addListener(SWT.Selection, e->{
-			editSource();
-		});
-		
-		Button btnDelete = new Button(buttonPanel, SWT.PUSH);
-		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		btnDelete.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		btnDelete.addListener(SWT.Selection, e->{
-			deleteSource();
-		});
-		
-		
-		Menu srcMenu = new Menu(lstSources.getControl());
-		lstSources.getControl().setMenu(srcMenu);
-		
-		MenuItem mnuAdd = new MenuItem(srcMenu,SWT.PUSH);
-		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		mnuAdd.addListener(SWT.Selection, e->addSource());
-		
-		MenuItem mnuEdit = new MenuItem(srcMenu,SWT.PUSH);
-		mnuEdit.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
-		mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		mnuEdit.addListener(SWT.Selection, e->editSource());
-		
-		MenuItem mnuDelete = new MenuItem(srcMenu,SWT.PUSH);
-		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		mnuDelete.addListener(SWT.Selection, e->deleteSource());
-		
-		
-		lstSources.addSelectionChangedListener(e->{
-			btnDelete.setEnabled(!e.getSelection().isEmpty());
-			btnEdit.setEnabled(!e.getSelection().isEmpty());
-			mnuDelete.setEnabled(!e.getSelection().isEmpty());
-			mnuEdit.setEnabled(!e.getSelection().isEmpty());
-			updateSourceSelection();
-		});
-		
-		
-		Hyperlink hk = new Hyperlink(srcPanel, SWT.NONE);
-		hk.setText(Messages.RecordSourceAttributeDialog_EditTemplateLink);
-		hk.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		hk.setUnderlined(true);
-		hk.setForeground(hk.getDisplay().getSystemColor(SWT.COLOR_LINK_FOREGROUND));
-		
-		hk.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				if (doSave()){
-					RecordSourceAttributeDialog.this.cancelPressed();
-					(new EditRecordTemplateHandler()).execute();
-				}
-			}
-		});
-		
-		srcButtons = new Button[]{btnAdd, btnEdit, btnDelete};
-		this.srcMenu = new MenuItem[]{mnuAdd, mnuEdit, mnuDelete};
-	}
 	
-	private void addSource(){
-		IntelRecordSource newItem = new IntelRecordSource();
-		newItem.setAttributes(new ArrayList<>());
-		newItem.setProfiles(new HashSet<>());
-		newItem.setConservationArea(SmartDB.getCurrentConservationArea());
-		NameKeyDialog<IntelRecordSource> dialog = new NameKeyDialog<IntelRecordSource>(getShell(), newItem, sources){
-			@Override
-			protected String getTitle(){
-				return Messages.RecordSourceAttributeDialog_NewSourceDialogTitle;
-			}
-		};
-		if (dialog.open() == Window.OK){
-			IntelRecordSource updatedItem = dialog.getUpdatedItem();
-			if (updatedItem.getAttributes() == null) updatedItem.setAttributes(new ArrayList<>());
-			sources.add(updatedItem);
-			sources.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-			lstSources.refresh();
-			lstSources.setSelection(new StructuredSelection(updatedItem));
-			modified();
-		}
-	}
-	
-	private void deleteSource(){
-		StructuredSelection s = (StructuredSelection) lstSources.getSelection();
-		List<IntelRecordSource> delete = new ArrayList<IntelRecordSource>();
 		
-		for (Iterator<?> iterator = s.iterator(); iterator.hasNext();) {
-			Object x = (Object)iterator.next();
-			if (x instanceof IntelRecordSource){
-				delete.add((IntelRecordSource)x);
-			}
-		}
-		if (delete.isEmpty()) return;
-		if (!MessageDialog.openConfirm(getShell(), Messages.RecordSourceAttributeDialog_DeleteSourceDialogTitle, MessageFormat.format(Messages.RecordSourceAttributeDialog_DeleteSourceDialogMsg, delete.size()))){
-			return;
-		}
-		sources.removeAll(delete);
-		toDelete.addAll(delete);
-		lstSources.refresh();
-		modified();
-	}
-	
-	private void editSource(){
-		Object selection = ((StructuredSelection) lstSources.getSelection()).getFirstElement();
-		if (selection != null && selection instanceof IntelRecordSource){
-			IntelRecordSource source = (IntelRecordSource) selection;
-			List<IntelRecordSource> kids = new ArrayList<IntelRecordSource>();
-			kids.addAll(sources);
-			kids.remove(source);
-			
-			NameKeyDialog<IntelRecordSource> dialog = new NameKeyDialog<IntelRecordSource>(getShell(), source, kids){
-				@Override
-				protected String getTitle(){
-					return Messages.RecordSourceAttributeDialog_EditoSourceDialogTitle;
-				}
-			};
-			if (dialog.open() == Window.OK){
-				sources.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-				lstSources.refresh();
-				modified();
-			}
-		}
-	}
+
+		
 	private boolean doSave(){
 		
 		try(Session session = HibernateManager.openSession()){
@@ -869,47 +655,14 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 					q.executeUpdate();
 				}
 				
-				//delete all records for removed sources
-				for (IntelRecordSource source : toDelete){
-					if (source.getUuid() == null) continue;
-										
-					//delete all attributes for records with this source
-					Query<?> q2 = session.createQuery("DELETE FROM IntelRecordAttributeValueList where id.value IN (SELECT a FROM IntelRecordAttributeValue a join a.record b WHERE b.recordSource = :source)"); //$NON-NLS-1$
-					q2.setParameter("source", source); //$NON-NLS-1$
-					q2.executeUpdate();
-					
-					Query<?> q1 = session.createQuery("DELETE FROM IntelRecordAttributeValue where record IN (FROM IntelRecord WHERE recordSource = :source)"); //$NON-NLS-1$
-					q1.setParameter("source", source); //$NON-NLS-1$
-					q1.executeUpdate();
-					
-					//update intelligence records to have no source
-					Query<?> q = session.createQuery("UPDATE IntelRecord SET recordSource = null WHERE recordSource = :source"); //$NON-NLS-1$
-					q.setParameter("source", source); //$NON-NLS-1$
-					q.executeUpdate();
-					
-					//remove all attributes associated with source
-					for (IntelRecordSourceAttribute a : source.getAttributes()){
-						//delete any values associated with this attribute 
-						q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
-						q.setParameter("attribute", a); //$NON-NLS-1$
-						q.executeUpdate();
-						//delete the attributes
-						session.delete(a);
-					}
-					//delete source
-					session.delete(source);
-				}
+				session.saveOrUpdate(currentSelection);
 				
-				//save updates
-				for (IntelRecordSource source : sources){
-					session.saveOrUpdate(source);
-				}
+
 				session.getTransaction().commit();
 				
 				//clear all delete lists
 				attributesToDelete.clear();
 				attributesMultiToSingle.clear();
-				toDelete.clear();
 			}catch (Exception ex){
 				Intelligence2PlugIn.displayLog(Messages.RecordSourceAttributeDialog_SaveError + ex.getMessage(), ex);
 				return false;
@@ -937,4 +690,6 @@ public class RecordSourceAttributeDialog extends SmartStyledTitleDialog{
 	public boolean isResizable(){
 		return true;
 	}
+	
+	
 }

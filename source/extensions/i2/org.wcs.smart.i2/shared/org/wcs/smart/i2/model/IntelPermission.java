@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -33,11 +34,14 @@ public class IntelPermission {
 	public static final int RECORD_EDIT_NOTSTATUS = 1 << 9;
 	public static final int RECORD_DELETE = 1 << 10;
 	
+	public static final int QUERY = 1 << 11;
+	
 	
 	
 	private int permission;
-	private IntelPermissionPk id;
+	private IntelPermissionPk id = new IntelPermissionPk();
 	
+	@Column(name="permissions")
 	public int getPermission() {
 		return this.permission;
 	}

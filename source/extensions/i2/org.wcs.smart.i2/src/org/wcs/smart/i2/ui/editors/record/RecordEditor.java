@@ -75,6 +75,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.AttachmentManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
@@ -502,6 +503,12 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				}else{
 					//refresh the entire editor
 					refresh();
+				}
+			});
+			
+			subscribeToEvent(IntelEvents.ACTIVE_PROFILES, (event)->{
+				if (!ProfilesManager.INSTANCE.getActiveProfiles().contains(record.getProfile())) {
+					closeEditor();
 				}
 			});
 			

@@ -72,7 +72,7 @@ public class CreateNewStyleOpDialog extends SmartStyledTitleDialog {
 	private Text txtName;
 	private List<RelationshipDiagramStyle> styleList;
 	
-	protected CreateNewStyleOpDialog(Shell parentShell, List<RelationshipDiagramStyle> styleList) {
+	public CreateNewStyleOpDialog(Shell parentShell, List<RelationshipDiagramStyle> styleList) {
 		super(parentShell);
 		this.styleList = styleList;
 	}
