@@ -130,7 +130,7 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
      	reg.put(SURVEY_DESIGN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_design.png")); //$NON-NLS-1$
      	reg.put(SURVEY_DESIGN_INACTIVE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_design_inactive.png")); //$NON-NLS-1$
      	reg.put(SURVEY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey.png")); //$NON-NLS-1$
-     	reg.put(SURVEY32_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj32/survey.32.png")); //$NON-NLS-1$
+     	reg.put(SURVEY32_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey@2x.png")); //$NON-NLS-1$
      	reg.put(MISSION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/mission.png")); //$NON-NLS-1$
      	reg.put(SAMPLING_UNIT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/sampling_unit.png")); //$NON-NLS-1$
      	reg.put(SAMPLING_UNIT_ATTRIBUTE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/sampling_unit_attribute.png")); //$NON-NLS-1$
@@ -154,8 +154,6 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
      	
      	reg.put(MISSION_LEADER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/mission_leader.png")); //$NON-NLS-1$
      	reg.put(MISSION_MEMBER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/mission_member.png")); //$NON-NLS-1$
-
-     	reg.put(FILTER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_design_filter.png")); //$NON-NLS-1$
     }
     
 	/**

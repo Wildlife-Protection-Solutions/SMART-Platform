@@ -129,7 +129,7 @@
             locationURI="toolbar:org.wcs.smart.perspectives?endof=org.wcs.smart.perspective.fielddata">
          <command
                commandId="org.wcs.smart.observation.perspective.show"
-               icon="images/icons/obj16/entitytype.png"
+               icon="images/icons/obj16/entitytype@2x.png"
                id="org.wcs.smart.perspective.fielddata.entity"
                label="%viewentities.command.name1"
                mnemonic="%showentities.command.mnemonic"

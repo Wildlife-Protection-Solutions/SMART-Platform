@@ -44,12 +44,12 @@
    <extension
          point="org.wcs.smart.report.birt.query.smartTable">
       <TableCategory
-            icon="images/icons/obj16/sampling_unit.png"
+            icon="platform:/plugin/org.wcs.smart.er/images/icons/obj16/sampling_unit.png"
             id="org.wcs.smart.er.query.report.table.samplingunit"
             name="%samplingunit.tablecategory.name">
       </TableCategory>
       <TableCategory
-            icon="images/icons/obj16/survey_design.png"
+            icon="platform:/plugin/org.wcs.smart.er/images/icons/obj16/survey_design.png"
             id="org.wcs.smart.er.query.report.table.properties"
             name="%properties.tablecategory.name">
       </TableCategory>

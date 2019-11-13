@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
 
@@ -71,8 +72,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 		Menu refreshMenu = new Menu(parent.getShell(), SWT.POP_UP);
 		MenuItem refreshNow = new MenuItem(refreshMenu, SWT.PUSH);
 		refreshNow.setText(Messages.StatusLineControl_RefreshNowMneuItem);
-		refreshNow.setImage(ConnectPlugIn.getDefault().getImageRegistry()
-				.get(ConnectPlugIn.REFRESH_ICON));
+		refreshNow.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		refreshNow.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

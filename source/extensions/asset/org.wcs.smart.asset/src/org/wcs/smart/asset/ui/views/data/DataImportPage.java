@@ -195,7 +195,7 @@ public class DataImportPage {
 		toolkit.adapt(tb);
 		
 		ToolItem itemAdd = new ToolItem(tb, SWT.PUSH);
-		itemAdd.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_FILE));
+		itemAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
 		itemAdd.setToolTipText(Messages.DataImportPage_addTooltip);
 		itemAdd.addListener(SWT.Selection, e->{
 			addFiles();

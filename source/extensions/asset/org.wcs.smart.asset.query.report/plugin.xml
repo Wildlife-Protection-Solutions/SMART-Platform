@@ -32,7 +32,7 @@
    <extension
          point="org.wcs.smart.report.birt.query.smartTable">
       <TableCategory
-            icon="images/icons/obj16/asset.png"
+            icon="platform:/plugin/org.wcs.smart.asset/images/icons/obj16/asset.png"
             id="org.wcs.smart.asset.query.report.assetcategory"
             name="Assets">
       </TableCategory>

@@ -137,7 +137,7 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
          <menu
-               icon="images/icons/obj16/survey.png"
+               icon="platform:/plugin/org.wcs.smart.er/images/icons/obj16/survey.png"
                id="org.wcs.smart.query.createquery.surveyquery"
                label="%surveyquery.menu.label1"
                tooltip="%surveyquery.menu.tooltip1">

@@ -56,7 +56,6 @@ public class AssetPlugIn extends AbstractUIPlugin {
 	public static final String ICON_IMPORT_COMPLETE_WARN = "org.wcs.smart.asset.import.completewarn"; //$NON-NLS-1$
 	public static final String ICON_IMPORT_COMPLETE = "org.wcs.smart.asset.import.complete"; //$NON-NLS-1$
 	public static final String ICON_IMPORT_INCOMPLETE = "org.wcs.smart.asset.import.incomplete"; //$NON-NLS-1$
-	public static final String ICON_IMPORT = "org.wcs.smart.asset.import"; //$NON-NLS-1$
 	
 	public static final String ICON_SETTINGS = "org.wcs.smart.asset.settings"; //$NON-NLS-1$
 	
@@ -64,7 +63,6 @@ public class AssetPlugIn extends AbstractUIPlugin {
 	public static final String ICON_STATION_LOCATION = "org.wcs.smart.asset.station.location"; //$NON-NLS-1$
 	
 	public static final String ICON_MERGE = "org.wcs.smart.asset.merge"; //$NON-NLS-1$
-	public static final String ICON_IMPORT_FILE = "org.wcs.smart.asset.import.file"; //$NON-NLS-1$
 	
 	public static final String ICON_STYLE_DEFAULT = "org.wcs.smart.asset.style.default"; //$NON-NLS-1$
 	
@@ -138,7 +136,7 @@ public class AssetPlugIn extends AbstractUIPlugin {
 		reg.put(ICON_STATUS_ACTIVE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_active.png")); //$NON-NLS-1$);
 		reg.put(ICON_STATUS_INACTIVE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_inactive.png")); //$NON-NLS-1$);
 		reg.put(ICON_STATUS_RETIRED, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_retired.png")); //$NON-NLS-1$);
-		reg.put(ICON_IMPORT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import.png")); //$NON-NLS-1$);
+
 		reg.put(ICON_IMPORT_COMPLETE_WARN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_complete_warn.png")); //$NON-NLS-1$);
 		reg.put(ICON_IMPORT_COMPLETE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_complete.png")); //$NON-NLS-1$);
 		reg.put(ICON_IMPORT_INCOMPLETE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_incomplete.png")); //$NON-NLS-1$);
@@ -148,7 +146,6 @@ public class AssetPlugIn extends AbstractUIPlugin {
 		reg.put(ICON_VALIDATE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/validate.png")); //$NON-NLS-1$);
 		reg.put(ICON_VALIDATE_ALL, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/validate_all.png")); //$NON-NLS-1$);
 		reg.put(ICON_MERGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/merge.png")); //$NON-NLS-1$);
-		reg.put(ICON_IMPORT_FILE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_file.png")); //$NON-NLS-1$);
 		reg.put(ICON_STYLE_DEFAULT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/style_default.png")); //$NON-NLS-1$);
 		reg.put(ICON_ASSET, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/asset.png")); //$NON-NLS-1$);
 		reg.put(ICON_ASSET_MAP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/asset_map.png")); //$NON-NLS-1$);

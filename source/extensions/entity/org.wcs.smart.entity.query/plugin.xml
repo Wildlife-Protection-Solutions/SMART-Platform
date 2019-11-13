@@ -172,7 +172,7 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
          <menu
-               icon="images/icons/obj16/entitytype.png"
+               icon="platform:/plugin/org.wcs.smart.entity/images/icons/obj16/entitytype.png"
                id="org.wcs.smart.menu.query.newquery.entityqueries"
                label="%entityquery.menu.name"
                tooltip="%new.entityqueries.tooltip">

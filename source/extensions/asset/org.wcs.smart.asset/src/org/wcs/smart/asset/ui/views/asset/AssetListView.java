@@ -247,7 +247,7 @@ public class AssetListView {
 		if (AssetSecurityManager.INSTANCE.canImportData()) {
 			ToolItem importData = new ToolItem(toolbar, SWT.PUSH);
 			importData.setToolTipText(Messages.AssetListView_importtooltip);
-			importData.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT));
+			importData.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
 			importData.addListener(SWT.Selection, e->importData());
 		}
 		
@@ -295,7 +295,7 @@ public class AssetListView {
 		if (AssetSecurityManager.INSTANCE.canImportData()) {
 			ToolItem importData = new ToolItem(toolbar, SWT.PUSH);
 			importData.setToolTipText(Messages.AssetListView_importtooltip);
-			importData.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT));
+			importData.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
 			importData.addListener(SWT.Selection, e->importData());
 		}
 		
