@@ -149,12 +149,10 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 		reg.put(PATROL_MEMBER_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_member.png")); //$NON-NLS-1$
 		reg.put(PATROL_PILOT_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_pilot.png")); //$NON-NLS-1$
 		reg.put(PATROL_MANDATE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_mandate.png")); //$NON-NLS-1$			
-
-		reg.put(PATROL_FILTER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/patrol_filter.png")); //$NON-NLS-1$
 		
 		reg.put(MONTH_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/calendar_month.png")); //$NON-NLS-1$
 		reg.put(YEAR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/calendar_year.png")); //$NON-NLS-1$
-		reg.put(PATROL32_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj32/patrol.32.png")); //$NON-NLS-1$
+		reg.put(PATROL32_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol@2x.png")); //$NON-NLS-1$
 
 		reg.put(PATROL_FOLDER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_folder.png")); //$NON-NLS-1$
 	}

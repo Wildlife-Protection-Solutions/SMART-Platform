@@ -115,7 +115,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.observation.perspective.show"
-                  icon="images/icons/etool16/patrol.png"
+                  icon="images/icons/obj16/patrol.png"
                   id="org.wcs.smart.patrol.view"
                   label="%showpatrolperspective.command.label2"
                   mnemonic="%showpatrolperspectivecommand.mnemonic"
@@ -228,7 +228,7 @@
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.MergePatrols"
-               icon="images/icons/etool16/patrol.png"
+               icon="images/icons/obj16/patrol.png"
                label="%popup.merge.command.label"
                mnemonic="%popup.merge.command.mnemonic"
                style="push"
@@ -352,7 +352,7 @@
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata">
          <command
                commandId="org.wcs.smart.observation.perspective.show"
-               icon="images/icons/patrol@2x.png"
+               icon="images/icons/obj16/patrol@2x.png"
                id="org.wcs.smart.perspective.fielddata.patrol"
                label="%showpatrolperspective.command.label1"
                mnemonic="%showpatrolperspectivecommand.mnemonic"
@@ -1162,7 +1162,7 @@
       <view
             allowMultiple="false"
             class="org.wcs.smart.patrol.internal.ui.views.PatrolListView$PatrolListViewWrapper"
-            icon="images/icons/view16/patrol.png"
+            icon="images/icons/obj16/patrol.png"
             id="org.wcs.smart.patrol.ui.PatrolListView"
             name="%patrollist.view.name"
             restorable="true">
@@ -1172,7 +1172,7 @@
          point="org.eclipse.ui.editors">
       <editor
             class="org.wcs.smart.patrol.ui.PatrolEditor"
-            icon="images/icons/view16/patrol.png"
+            icon="images/icons/obj16/patrol.png"
             id="org.wcs.smart.patrol.ui.PatrolEditor"
             name="%patrol.editor.name">
       </editor>

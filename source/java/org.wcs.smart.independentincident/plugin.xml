@@ -164,7 +164,7 @@
             locationURI="toolbar:org.wcs.smart.perspectives?endof=org.wcs.smart.perspective.fielddata">
          <command
                commandId="org.wcs.smart.observation.perspective.show"
-               icon="images/icons/obj16/incident.png"
+               icon="images/icons/obj16/incident@2x.png"
                id="org.wcs.smart.perspective.fielddata.incident"
                label="%incidentperspective.command.label"
                mnemonic="%incidentperspective.command.mnemonic2"

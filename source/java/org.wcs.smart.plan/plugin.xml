@@ -8,7 +8,7 @@
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.other1">
          <command
                commandId="org.wcs.smart.command.showperspective"
-               icon="images/icons/view16/plan.png"
+               icon="images/icons/obj16/plan@2x.png"
                id="org.wcs.smart.perspective.plan"
                label="%smart.toolbar.command.label.viewplans1"
                mode="FORCE_TEXT"
@@ -376,7 +376,7 @@
             locationURI="menu:org.wcs.smart.menu.patrol?before=org.wcs.smart.patrol.view">
          <command
                commandId="org.wcs.smart.command.showperspective"
-               icon="images/icons/view16/plan.png"
+               icon="images/icons/obj16/plan.png"
                label="%command.label.viewplans"
                style="push"
                tooltip="%plan.menu.command.tooltip.viewplans">
@@ -421,7 +421,7 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.menu.patrol?after=org.wcs.smart.patrol.configuration">
          <menu
-               icon="images/icons/view16/plan.png"
+               icon="images/icons/obj16/plan.png"
                label="%plantemplate.menu.label">
             <command
                   commandId="org.wcs.smart.plan.editTemplate"
@@ -770,7 +770,7 @@
          point="org.eclipse.ui.views">
       <view
             class="org.wcs.smart.plan.ui.perspective.PlanListView$PlanListViewWrapper"
-            icon="images/icons/view16/plan.png"
+            icon="images/icons/obj16/plan.png"
             id="org.wcs.smart.plan.PlanListView"
             name="%planlistview.view.name"
             restorable="true">
@@ -781,7 +781,7 @@
       <editor
             class="org.wcs.smart.plan.ui.editor.PlanEditor"
             default="false"
-            icon="images/icons/view16/plan.png"
+            icon="images/icons/obj16/plan.png"
             id="org.wcs.smart.plan.ui.editor.PlanEditor"
             name="%planlistview.editor.name">
       </editor>

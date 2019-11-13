@@ -215,7 +215,7 @@
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.query.menu.view">
          <command
                commandId="org.wcs.smart.command.showperspective"
-               icon="images/icons/report@2x.png"
+               icon="images/icons/obj16/report@2x.png"
                id="org.wcs.smart.query.toolbar.report"
                label="%showreportperspective.menu.label1"
                mnemonic="%showreportperspective.menu.mnemonic"
@@ -633,7 +633,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.command.showperspective"
-                  icon="images/icons/report.png"
+                  icon="images/icons/obj16/report.png"
                   id="org.wcs.smart.query.toolbar.report"
                   label="%showreportperspective.menu.label2"
                   mnemonic="%showreportperspective.menu.mnemonic"

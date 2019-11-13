@@ -87,7 +87,7 @@
       <view
             allowMultiple="false"
             class="org.wcs.smart.query.ui.definition.QueryDefView$QueryDefViewWrapper"
-            icon="images/icons/view16/querypatrol.gif"
+            icon="images/icons/obj16/query.png"
             id="org.wcs.smart.query.parts.definition"
             name="%querydef.view.name"
             restorable="true">
@@ -95,14 +95,14 @@
       <view
             allowMultiple="false"
             class="org.wcs.smart.query.ui.itempanel.QueryItemView$QueryItemViewWrapper"
-            icon="images/icons/view16/query_filter_op.png"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/filter.png"
             id="org.wcs.smart.query.parts.filter"
             name="%queryfilter.view.name"
             restorable="false">
       </view>
       <view
             class="org.wcs.smart.query.ui.querylist.QueryListView$QueryListViewWrapper"
-            icon="images/icons/view16/query_list.png"
+            icon="images/icons/obj16/query.png"
             id="org.wcs.smart.query.parts.itemlist"
             name="%querylist.view.name"
             restorable="true">
@@ -115,7 +115,7 @@
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.analysis">
          <command
                commandId="org.wcs.smart.command.showperspective"
-               icon="images/icons/query@2x.png"
+               icon="images/icons/obj16/query@2x.png"
                id="org.wcs.smart.query.menu.view"
                label="%perspectivetoolbar.showquery.command.label1"
                mode="FORCE_TEXT"
@@ -154,7 +154,7 @@
          </command>
          <command
                commandId="org.wcs.smart.command.showperspective"
-               icon="images/icons/query@2x.png"
+               icon="images/icons/obj16/query@2x.png"
                id="org.wcs.smart.query.menu.view1"
                label="%perspectivetoolbar.showquery.command.label1"
                mode="FORCE_TEXT"
@@ -710,7 +710,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.command.showperspective"
-                  icon="images/icons/query.png"
+                  icon="images/icons/obj16/query.png"
                   label="%showqueryperspective.command.name"
                   style="push"
                   tooltip="%perspectivetoolbar.showquery.command.tooltip">
@@ -747,7 +747,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.command.showperspective"
-                  icon="images/icons/query.png"
+                  icon="images/icons/obj16/query.png"
                   label="%showqueryperspective.command.name"
                   style="push"
                   tooltip="%perspectivetoolbar.showquery.command.tooltip">

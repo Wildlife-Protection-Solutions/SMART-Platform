@@ -210,7 +210,7 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
          <menu
-               icon="images/icons/obj16/patrol.png"
+               icon="platform:/plugin/org.wcs.smart.patrol/images/icons/obj16/patrol.png"
                id="org.wcs.smart.menu.query.newquery.patrolqueries"
                label="%patrolquery1.menu.label"
                tooltip="%patrolquery1.menu.tooltip">
