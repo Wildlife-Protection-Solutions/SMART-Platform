@@ -150,7 +150,7 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 		
 		try {
 			exportInternal(query, results, file, parameters, monitor);
-		}catch (Exception ex) {
+		} finally {
 			//try to drop temporary table
 			if (helpers != null) {
 				try (Session session = HibernateManager.openSession()){
@@ -161,8 +161,6 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 					EcologicalRecordsPlugIn.log(t.getMessage(), t);
 				}
 			}
-			
-			throw ex;
 		}
 	}
 	
@@ -258,6 +256,10 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 							.executeUpdate();							
 					}
 				}
+				for (SamplingUnit e : sunits) {
+					units.put(e.getUuid(), e);
+					for (SamplingUnitAttributeValue a : e.getAttributes()) a.getValueAsString();
+				}
 				
 				//update stratum sort if required
 				if (stratumAttributeKey != null) {
@@ -271,8 +273,7 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 						for (SamplingUnitAttributeValue a : e.getAttributes()) {
 							if (a.getSamplingUnitAttribute().getKeyId().equals(stratumAttributeKey)) {
 								stratumvalue = a.getValueAsString();
-							}else {
-								a.getValueAsString();
+								break;
 							}
 						};
 						if (stratumvalue != null) {
