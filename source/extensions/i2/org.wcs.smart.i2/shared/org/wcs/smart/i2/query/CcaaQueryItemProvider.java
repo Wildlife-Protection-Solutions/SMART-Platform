@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -45,6 +46,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.util.UuidUtils;
 
@@ -181,6 +183,14 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	}
 	
 
+	@Override
+	public Collection<IntelProfile> getProfiles(Set<String> profileKeys, Session session) {
+		return session.createQuery("FROM IntelProfile WHERE ca = :ca and keyId IN (:keys)", IntelProfile.class)
+				.setParameter("ca", getConservationAreas())
+				.setParameterList("keys", profileKeys)
+				.list();
+	}
+	
 	@Override
 	public IntelEntityType getEntityType(String entityTypeKey, Session session) {
 		List<IntelEntityType> allAttributes = session.createQuery("FROM IntelEntityType WHERE keyId = :attribute and conservationArea in (:cas)", IntelEntityType.class) //$NON-NLS-1$

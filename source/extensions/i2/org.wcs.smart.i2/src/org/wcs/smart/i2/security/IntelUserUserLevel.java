@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,37 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.handler;
+package org.wcs.smart.i2.security;
 
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.tools.compat.parts.DIHandler;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.wcs.smart.i2.ui.views.QueryView;
-import org.wcs.smart.util.E3Utils;
+import org.wcs.smart.ca.SmartUserLevel;
 
 /**
- * Open dialog handler
+ * Permissions to create entity
  * 
  * @author Emily
  *
  */
-@SuppressWarnings("restriction")
-public class RefreshQueryViewHandler  {
+public class IntelUserUserLevel extends SmartUserLevel{
 
-	@Execute
-	public void refreshView(EPartService partService){
-		MPart part = partService.findPart(QueryView.ID);
-		if (part != null){
-			((QueryView)E3Utils.getSourceObject(part)).refreshView();
-		}
-		
-	}
-	// E3
-	public static class RefreshQueryViewHandlerWrapper extends DIHandler<RefreshQueryViewHandler> {
-		public RefreshQueryViewHandlerWrapper() {
-			super(RefreshQueryViewHandler.class);
-		}
-	}
+	public static final IntelUserUserLevel INSTANCE = new IntelUserUserLevel();
 	
+	private static final String KEY = "INTEL_USER"; //$NON-NLS-1$
+	
+	public IntelUserUserLevel() {
+		super(KEY);
+	}
+
 }
+

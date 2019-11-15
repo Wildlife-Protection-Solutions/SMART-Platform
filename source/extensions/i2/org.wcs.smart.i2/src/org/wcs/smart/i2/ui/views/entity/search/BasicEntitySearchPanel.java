@@ -49,13 +49,11 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
-import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.search.BasicEntitySearch;
@@ -214,8 +212,9 @@ public class BasicEntitySearchPanel extends Composite {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Object> types = new ArrayList<Object>();
+	
 			try (Session session = HibernateManager.openSession()) {
-				types.addAll(EntityTypeManager.INSTANCE.getEntityTypesActiveProfiles(session));
+				types.addAll(EntityTypeManager.INSTANCE.getViewableEntityTypesActiveProfiles(session));
 			}
 
 			types.add(0, BASIC_ALLTYPES_OP);

@@ -374,8 +374,11 @@ public class EntitySearchView {
 				Messages.EntitySearchView_AllLabel
 		}, top, toolkit);
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-		ToolBar tb = new ToolBar(top, SWT.FLAT);
+		((GridLayout)tabList.getLayout()).numColumns = ((GridLayout)tabList.getLayout()).numColumns + 1;
+		
+		
+		ToolBar tb = new ToolBar(tabList, SWT.FLAT);
+		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
 		if (IntelSecurityManager.INSTANCE.canCreateEntityAny()) {
 			ToolItem tiAdd = new ToolItem(tb, SWT.PUSH);
 			tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));

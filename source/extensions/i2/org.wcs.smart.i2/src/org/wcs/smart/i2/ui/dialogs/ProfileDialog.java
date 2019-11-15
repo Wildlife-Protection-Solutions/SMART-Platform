@@ -53,6 +53,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelPermission;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.security.IntelUserUserLevel;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
@@ -68,10 +69,9 @@ public class ProfileDialog extends SmartStyledDialog {
 
 	private static final String COLOR_KEY = "COLOR"; //$NON-NLS-1$
 
-	
 	private IntelProfile config;
 	private List<IntelProfile> others;
-	
+	private List<Employee> smartUsers; 
 	private SectionHeader sections;
 	private Composite stackPanel;
 	private ScrolledComposite scrollComp;
@@ -91,9 +91,14 @@ public class ProfileDialog extends SmartStyledDialog {
 	private Label btnColor;
 	private CheckboxTableViewer tblEntityTypes;
 	private CheckboxTableViewer tblRecordSources;
+	private Button btnAddEmployee;
 	
-	private List<IntelPermission> permissions = new ArrayList<>();
+	private HashMap<Employee, IntelPermission> permissions = new HashMap<>();
 	private Composite permissionTable;
+	
+	private HashMap<Integer,Object[]> columnSize = new HashMap<>();
+	private ScrolledComposite userscroll;
+	private Composite permComp;
 	
 	private Listener generateKeyListener = e->{
 		String newKey = DataModelManager.INSTANCE.generateKey(txtName.getText(), others);
@@ -106,6 +111,7 @@ public class ProfileDialog extends SmartStyledDialog {
 		this.others = others;
 	}
 	
+
 	@Override
 	public void cancelPressed() {
 		if (isDirty) {
@@ -170,10 +176,10 @@ public class ProfileDialog extends SmartStyledDialog {
 		Set<IntelRecordSource> rs = new HashSet<>();
 		for (IntelRecordSource x : config.getRecordSources()) {
 			if (!rtypes.contains(x))  rs.add(x);
-			if (rtypes.contains(x)) types.remove(x);
+			if (rtypes.contains(x)) rtypes.remove(x);
 		}
 		for (IntelRecordSource dd : rs) {
-			config.getEntityTypes().remove(dd);
+			config.getRecordSources().remove(dd);
 			dd.getProfiles().remove(config);
 		}
 		for (IntelRecordSource dd : rtypes) {
@@ -187,7 +193,20 @@ public class ProfileDialog extends SmartStyledDialog {
 			try {
 				session.saveOrUpdate(config);
 				for (IntelEntityType t : types)  session.saveOrUpdate(t);	
-				for (IntelRecordSource t : rtypes)  session.saveOrUpdate(t);			
+				for (IntelRecordSource t : rtypes)  session.saveOrUpdate(t);
+				
+				for (IntelPermission p : permissions.values()) {
+					if (p.getPermission() == 0) {
+						session.delete(p);
+					}else {
+						session.saveOrUpdate(p);
+						
+						if (!p.getEmployee().getSmartUserLevels().contains(IntelUserUserLevel.INSTANCE.getKey())) {
+							p.getEmployee().setSmartUserLevelKeys(p.getEmployee().getSmartUserLevelKeys() + Employee.USER_LEVEL_SEP + IntelUserUserLevel.INSTANCE.getKey());
+							session.saveOrUpdate(p.getEmployee());
+						}
+					}
+				}
 
 				session.getTransaction().commit();
 			}catch (Exception ex) {
@@ -216,8 +235,8 @@ public class ProfileDialog extends SmartStyledDialog {
 	@Override
 	public Point getInitialSize() {
 		Point p = super.getInitialSize();
-		if (p.x < 400) p.x = 400;
-		if (p.y < 400) p.y = 400;
+		if (p.x < 650) p.x = 650;
+		if (p.y < 400) p.y = 500;
 		return p;
 	}
 	
@@ -438,30 +457,29 @@ public class ProfileDialog extends SmartStyledDialog {
 		Button btnAdd = new Button(outer, SWT.PUSH);
 		btnAdd.setText("Add Employees");
 		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(outer.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnAdd.setEnabled(false);
 		btnAdd.addListener(SWT.Selection, e->{
+		
+			List<Employee> toSelect = new ArrayList<>(smartUsers);
+			toSelect.removeAll(permissions.keySet());
 			
-			EmployeeSelectDialog dialog = new EmployeeSelectDialog(getShell());
+			EmployeeSelectDialog dialog = new EmployeeSelectDialog(getShell(), toSelect);
 			if (dialog.open() != Window.OK) return;
 			for (Employee emp : dialog.getSelectedEmployees()) {
 				
-				boolean add = true;
-				for (IntelPermission p : permissions) {
-					if (p.getEmployee().equals(emp)) {
-						add = false;
-						break;
-					}
-				}
-				if (!add) continue;
+				if (permissions.containsKey(emp))  continue;
 				
 				IntelPermission ip = new IntelPermission();
 				ip.setProfile(config);
-				ip.setEntityType(emp);
+				ip.setEmployee(emp);
 				ip.setPermission(IntelPermission.READ_ONLY);
 				
-				permissions.add(ip);
+				permissions.put(ip.getEmployee(), ip);
 			}
 			updatePermissionList();
 		});
+		btnAddEmployee = btnAdd;
 		
 		permissionTable = new Composite(permissionComp, SWT.NONE);
 		permissionTable.setLayout(new GridLayout(  13, false ));
@@ -475,7 +493,7 @@ public class ProfileDialog extends SmartStyledDialog {
 		Composite headComp = new Composite(permissionTable, SWT.NONE);
 		headComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		String headers1[] = new String[] {"Employee", "Admin", "ReadOnly", "Entity", "Record", "Query"};
+		String headers1[] = new String[] {"Employee", "Analyst", "ReadOnly", "Entity", "Record", "Query"};
 		Control[] groupheader = new Control[headers1.length];
 		for (int i = 0; i < headers1.length; i ++) {
 			Composite c = new Composite(headComp, SWT.BORDER);
@@ -488,6 +506,19 @@ public class ProfileDialog extends SmartStyledDialog {
 		}
 
 		String headers[] = new String[] {"", "", "", "Create", "Delete", "View", "Edit", "Create", "Delete", "View", "Edit", "Edit Status", "All"};
+		String tooltip[] = new String[] {"",
+				"permissions for everything", 
+				"permission to view everything", 
+				"permission to create new entities", 
+				"permission to delete entities", 
+				"permission to view entities", 
+				"permission to edit entities", 
+				"permission to create new records", 
+				"permission to delete records", 
+				"permission to view records", 
+				"permission to edit all fields of a record export except status", 
+				"permission to edit all fields of the record including the status field",
+				"permission to create/run/edit queries"};
 		Control[] ass = new Control[] {groupheader[0], groupheader[1], groupheader[2], groupheader[3], null, null, null, groupheader[4], null, null, null, null, groupheader[5]};
 		Integer[] rowspan = new Integer[] {1,1,1,4,null, null, null, 5,null, null, null, null, 1};
 		for (int i = 0; i < headers.length; i ++) {
@@ -495,17 +526,13 @@ public class ProfileDialog extends SmartStyledDialog {
 			c.setLayout(new GridLayout());
 			Label l = new Label(c, SWT.NONE);
 			l.setText(headers[i]);
-			l.setToolTipText(headers[i]);
+			l.setToolTipText(tooltip[i]);
 			l.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 			columnSize.put(i,new Object[] {c,ass[i], rowspan[i]});
 		}
 		
 		updatePermissionList();
 	}
-	
-	private HashMap<Integer,Object[]> columnSize = new HashMap<>();
-	private ScrolledComposite userscroll;
-	private Composite permComp;
 	
 	private void updatePermissionList() {
 		if (userscroll != null) userscroll.dispose();
@@ -521,7 +548,7 @@ public class ProfileDialog extends SmartStyledDialog {
 		((GridLayout)permComp.getLayout()).horizontalSpacing = 0;
 		((GridLayout)permComp.getLayout()).verticalSpacing = 0;
 		
-		List<Employee> emps = new ArrayList<>(permissions.stream().map(p->p.getEmployee()).collect(Collectors.toSet()));
+		List<Employee> emps = new ArrayList<>(permissions.keySet());
 		emps.sort((a,b)->Collator.getInstance().compare( SmartLabelProvider.getShortLabel(a), SmartLabelProvider.getShortLabel(b)));
 		
 		List<Row> allRows = new ArrayList<>();
@@ -613,7 +640,7 @@ public class ProfileDialog extends SmartStyledDialog {
 			List<IntelEntityType> types = new ArrayList<>();
 			List<IntelRecordSource> rtypes = new ArrayList<>();
 			
-			permissions = new ArrayList<>();
+			permissions = new HashMap<>();
 			
 			try(Session s =  HibernateManager.openSession()){
 				if (config.getUuid() != null) {
@@ -622,6 +649,15 @@ public class ProfileDialog extends SmartStyledDialog {
 					config.getRecordSources().forEach(r->r.getName());
 					config.getNames().size();
 					
+					List<IntelPermission> items =QueryFactory.buildQuery(s, IntelPermission.class, 
+							new Object[] {"id.profile", config}).list(); 
+					permissions.putAll(items.stream().collect(Collectors.toMap(e->e.getEmployee(), e->e)));
+				}else {
+					IntelPermission ip = new IntelPermission();
+					ip.setEmployee(SmartDB.getCurrentEmployee());
+					ip.setProfile(config);
+					ip.setPermission(IntelPermission.ADMIN);
+					permissions.put(ip.getEmployee(), ip);
 				}
 				types.addAll( EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()) );
 				types.forEach(t->t.getProfiles().size());
@@ -629,8 +665,12 @@ public class ProfileDialog extends SmartStyledDialog {
 				rtypes.addAll( RecordManager.INSTANCE.getSources( s ) );
 				rtypes.forEach(t->t.getProfiles().size());
 				
-				permissions.addAll(QueryFactory.buildQuery(s, IntelPermission.class, 
-						new Object[] {"id.employee.conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				
+				
+				smartUsers = s.createQuery("FROM Employee WHERE conservationArea = :ca and smartUserId is not null and endEmploymentDate is null", Employee.class)
+					.setParameter("ca", SmartDB.getCurrentConservationArea())
+					.list();
+				smartUsers.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getFullLabel((Employee)a), SmartLabelProvider.getFullLabel((Employee)b)));
 			}
 			
 			
@@ -642,6 +682,7 @@ public class ProfileDialog extends SmartStyledDialog {
 				txtName.setText(config.getName() == null ? "" : config.getName());
 				txtKey.setText(config.getKeyId() == null ? "" : config.getKeyId());
 
+				btnAddEmployee.setEnabled(true);
 				
 				tblRecordSources.setInput(rtypes);
 				for (IntelRecordSource t : config.getRecordSources()) {
@@ -681,10 +722,37 @@ public class ProfileDialog extends SmartStyledDialog {
 		
 		private List<Row> allRows;
 		
+		private HashMap<Integer, Button> chPermissions;
+		
 		public Row(Employee e, List<Row> allRows) {
 			this.employee = e;
 			this.allRows = allRows;
 			controls = new HashSet<>();
+			chPermissions = new HashMap<>();
+		}
+		
+		public int getPermissionValue() {
+			Integer[] items = new Integer[] {
+					IntelPermission.ADMIN,
+					IntelPermission.READ_ONLY,
+					IntelPermission.ENTITY_CREATE,
+					IntelPermission.ENTITY_VIEW,
+					IntelPermission.ENTITY_EDIT,
+					IntelPermission.ENTITY_DELETE,
+					IntelPermission.RECORD_CREATE,
+					IntelPermission.RECORD_VIEW,
+					IntelPermission.RECORD_EDIT_ALL,
+					IntelPermission.RECORD_EDIT_NOTSTATUS,
+					IntelPermission.RECORD_DELETE,
+					IntelPermission.QUERY
+			};
+			Integer value = 0;
+			for (Integer item : items) {
+				if (chPermissions.get(item).getSelection()) {
+					value = value | item;
+				}
+			}
+			return value;
 		}
 		
 		public void createRow(Composite parent) {
@@ -699,51 +767,37 @@ public class ProfileDialog extends SmartStyledDialog {
 			ll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 			
-			Composite btnAdmin = createCheckBox(parent);
+			Composite btnAdmin = createCheckBox(parent, IntelPermission.ADMIN);
 			controls.add(btnAdmin);
-			Composite btnReadOnly = createCheckBox(parent);
+			Composite btnReadOnly = createCheckBox(parent, IntelPermission.READ_ONLY);
 			controls.add(btnReadOnly);
-			Composite btnEntityCreate = createCheckBox(parent);
+			Composite btnEntityCreate = createCheckBox(parent, IntelPermission.ENTITY_CREATE);
 			controls.add(btnEntityCreate);
-			Composite btnEntityDelete = createCheckBox(parent);
+			Composite btnEntityDelete = createCheckBox(parent, IntelPermission.ENTITY_DELETE);
 			controls.add(btnEntityDelete);
-			Composite btnEntityView = createCheckBox(parent);
+			Composite btnEntityView = createCheckBox(parent, IntelPermission.ENTITY_VIEW);
 			controls.add(btnEntityView);
-			Composite btnEntityEdit = createCheckBox(parent);
+			Composite btnEntityEdit = createCheckBox(parent, IntelPermission.ENTITY_EDIT);
 			controls.add(btnEntityEdit);
-			Composite btnRecordCreate = createCheckBox(parent);
+			Composite btnRecordCreate = createCheckBox(parent, IntelPermission.RECORD_CREATE);
 			controls.add(btnRecordCreate);
-			Composite btnRecordDelete = createCheckBox(parent);
+			Composite btnRecordDelete = createCheckBox(parent, IntelPermission.RECORD_DELETE);
 			controls.add(btnRecordDelete);
-			Composite btnRecordView = createCheckBox(parent);
+			Composite btnRecordView = createCheckBox(parent, IntelPermission.RECORD_VIEW);
 			controls.add(btnRecordView);
-			Composite btnRecordEdit = createCheckBox(parent);
+			Composite btnRecordEdit = createCheckBox(parent, IntelPermission.RECORD_EDIT_NOTSTATUS);
 			controls.add(btnRecordEdit);
-			Composite btnRecordEditStatus = createCheckBox(parent);
+			Composite btnRecordEditStatus = createCheckBox(parent, IntelPermission.RECORD_EDIT_ALL);
 			controls.add(btnRecordEditStatus);
-			Composite btnRecordQuery = createCheckBox(parent);
+			Composite btnRecordQuery = createCheckBox(parent, IntelPermission.QUERY);
 			controls.add(btnRecordQuery);
-					
+			
 			Button ba = (Button) btnAdmin.getChildren()[0];
-			
+			enableAdmin(ba);			
 			ba.addListener(SWT.Selection,e->{
-				for (Composite cc : controls) {
-					if (cc.getChildren()[0] instanceof Button) {
-						cc.getChildren()[0].setEnabled(!ba.getSelection());
-					}
-					ba.setEnabled(true);
-				}
+				enableAdmin(ba);
 			});
 			
-			Button ro = (Button) btnReadOnly.getChildren()[0];
-			ro.addListener(SWT.Selection,e->{
-				for (Composite cc : controls) {
-					if (cc.getChildren()[0] instanceof Button) {
-						cc.getChildren()[0].setEnabled(!ro.getSelection());
-					}
-					ro.setEnabled(true);
-				}
-			});
 			
 			Listener l = evt->{
 				for (Row r : allRows) {
@@ -757,6 +811,14 @@ public class ProfileDialog extends SmartStyledDialog {
 			ll.addListener(SWT.MouseUp, l);
 		}
 		
+		private void enableAdmin(Button btnAdmin) {
+			for (Composite cc : controls) {
+				if (cc.getChildren()[0] instanceof Button) {
+					cc.getChildren()[0].setEnabled(!btnAdmin.getSelection());
+				}
+				btnAdmin.setEnabled(true);
+			}
+		}
 		public void setSelected(boolean isSelected) {
 			if (this.selected == isSelected) return;
 			this.selected = isSelected;
@@ -766,14 +828,36 @@ public class ProfileDialog extends SmartStyledDialog {
 				for (Control c : controls) c.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			}
 		}
+		
+		private Composite createCheckBox(Composite parent, Integer permission) {
+			Composite t = new Composite(parent, SWT.BORDER);
+			t.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			t.setLayout(new GridLayout());
+			Button btnAdmin = new Button(t, SWT.CHECK);
+			btnAdmin.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+			
+			IntelPermission dip = permissions.get(employee);
+			if (dip != null) {
+				btnAdmin.setSelection((dip.getPermission() & permission) == permission);
+			}
+			
+			chPermissions.put(permission, btnAdmin);
+			
+			btnAdmin.addListener(SWT.Selection,e->{
+				IntelPermission ip = permissions.get(employee);
+				if (ip == null) {
+					ip = new IntelPermission();
+					ip.setEmployee(employee);
+					ip.setProfile(config);
+					permissions.put(employee, ip);
+				}
+				ip.setPermission(getPermissionValue());
+				modified();
+				
+			});
+			return t;
+		}
 	}
 	
-	private Composite createCheckBox(Composite parent) {
-		Composite t = new Composite(parent, SWT.BORDER);
-		t.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		t.setLayout(new GridLayout());
-		Button btnAdmin = new Button(t, SWT.CHECK);
-		btnAdmin.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
-		return t;
-	}
+	
 }

@@ -39,12 +39,17 @@ public class QueryProxy implements IAdaptable{
 	private String name;
 	private UUID uuid;
 	private String type;
+	private String profileFilter;
 	
-	
-	public QueryProxy(String name, UUID uuid, String typeKey){
+	public QueryProxy(String name, UUID uuid, String typeKey, String profileFilter){
 		this.name = name;
 		this.uuid = uuid;
 		this.type = typeKey;
+		this.profileFilter = profileFilter;
+	}
+	
+	public String getProfileFilter() {
+		return this.profileFilter;
 	}
 	
 	public String getTypeKey() {

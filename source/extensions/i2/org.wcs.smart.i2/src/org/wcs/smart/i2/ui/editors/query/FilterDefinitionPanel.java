@@ -26,8 +26,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.util.LocalSelectionTransfer;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -54,16 +56,19 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.ProfileLabelProvider;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.IDefinitionPanel;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.ProxyItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextOperatorDropItem;
+import org.wcs.smart.ui.CheckBoxDropDown;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 
 /**
@@ -379,7 +384,7 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		
 		Composite filterTypeComp = new Composite(parent, SWT.NONE);
 		filterTypeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		GridLayout layout = new GridLayout(5, false);
+		GridLayout layout = new GridLayout(6, false);
 		layout.horizontalSpacing = 5;
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 5;
@@ -416,6 +421,7 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		
 		
 		if (addToolbar) {
+			
 			infoPanel = new Composite(filterTypeComp, SWT.NONE);
 			infoPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			infoPanel.setLayout(new GridLayout(2, false));

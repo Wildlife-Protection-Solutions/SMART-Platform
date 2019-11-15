@@ -54,6 +54,8 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 	private Geometry locationGeometry;
 	private Exception geometryError;
 	
+	private String profileName;
+	
 	private UUID categoryUuid;
 	
 	private String[] categoryLabels;
@@ -68,6 +70,15 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 		
 	}
 	
+	public void setProflie(UUID profileUuid, String name) {
+		this.profileUuid = profileUuid;
+		this.profileName = name;
+	}
+	
+	public String getProfileName() {
+		return this.profileName;
+	}
+
 	public void setConservationAreaId(String caId) {
 		this.caId = caId;
 	}
@@ -121,9 +132,7 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 	public UUID getProfileUuid(){
 		return this.profileUuid;
 	}
-	public void setProfileUuid(UUID uuid){
-		this.profileUuid = uuid;
-	}
+	
 	public UUID getLocationUuid(){
 		return this.locationUuid;
 	}

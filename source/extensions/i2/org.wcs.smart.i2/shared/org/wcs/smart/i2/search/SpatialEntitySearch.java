@@ -23,6 +23,7 @@ package org.wcs.smart.i2.search;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -30,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.geometry.jts.JTS;
@@ -43,11 +45,13 @@ import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelLocation;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.GeometryUtils;
@@ -88,6 +92,11 @@ public class SpatialEntitySearch implements IIntelEntitySearch {
 	
 	@Override
 	public IntelSearchResult doSearch(Session session, Locale locale, IProgressMonitor monitor) throws Exception {
+		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
+		
+		if (profiles.isEmpty()) return new IntelSearchResult(Collections.emptyList(),0);
+		
 		//find active intel record editor
 		IntelRecord record = null;
 		if (this.ca == null && recordUuid != null) {
@@ -127,13 +136,12 @@ public class SpatialEntitySearch implements IIntelEntitySearch {
 			attributes.addAll(q.list());
 		}
 		
-		
 		List<IntelEntityAttributeValue> valuesToSearch = new ArrayList<>();
 		for (IntelEntityTypeAttribute attribute : attributes) {
 			Query<IntelEntityAttributeValue> values = session.createQuery("FROM IntelEntityAttributeValue WHERE id.entity.profile in (:profiles) AND id.attribute = :attribute and id.entity.entityType = :type ", IntelEntityAttributeValue.class); //$NON-NLS-1$
 			values.setParameter("attribute", attribute.getAttribute()); //$NON-NLS-1$
 			values.setParameter("type", attribute.getEntityType()); //$NON-NLS-1$
-			values.setParameter("profiles", ProfilesManager.INSTANCE.getActiveProfiles()); //$NON-NLS-1$
+			values.setParameter("profiles", profiles); //$NON-NLS-1$
 			valuesToSearch.addAll(values.list());
 		}
 		

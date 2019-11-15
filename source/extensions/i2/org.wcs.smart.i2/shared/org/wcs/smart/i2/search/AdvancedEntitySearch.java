@@ -48,9 +48,11 @@ import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntitySearch;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -125,6 +127,11 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	@Override
 	public IntelSearchResult doSearch(Session session, Locale locale, IProgressMonitor monitor) throws Exception {
 		
+		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
+		
+		if (profiles.isEmpty()) return new IntelSearchResult(Collections.emptyList(),0);
+		
 		if (searchString == null || searchString.trim().isEmpty()){
 			Long now = System.nanoTime();
 			
@@ -133,7 +140,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 			Root<IntelEntity> from = c.from(IntelEntity.class);
 			c.where(cb.and(
 					from.get("conservationArea").in(cas),
-					from.get("profile").in(ProfilesManager.INSTANCE.getActiveProfiles())
+					from.get("profile").in(profiles)
 					)); //$NON-NLS-1$
 			Query<IntelEntity> q = session.createQuery(c);
 			List<IntelSearchResultItem> items = new ArrayList<>(maxResultCnt);
@@ -184,6 +191,9 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 
 	
 	private List<UUID> runQueryString(Session session, Locale locale) throws Exception{
+		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
+		
 		String stokens[] = searchString.split("\\|"); //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
@@ -207,7 +217,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		 
 		session.createNativeQuery(sb.toString())
 			.setParameterList("cauuids", uuids)	 //$NON-NLS-1$
-			.setParameterList("profiles", ProfilesManager.INSTANCE.getActiveProfiles().stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList()))
+			.setParameterList("profiles", profiles.stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList()))
 			.executeUpdate();
 
 		StringBuilder where = new StringBuilder();

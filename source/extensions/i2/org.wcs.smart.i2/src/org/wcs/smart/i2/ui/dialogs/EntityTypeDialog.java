@@ -999,7 +999,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 				List<IntelProfile> profiles = new ArrayList<>();
 				try(Session s = HibernateManager.openSession()){
 					
-					profiles.addAll(ProfilesManager.INSTANCE.getProfiles(s));
+					profiles.addAll(ProfilesManager.INSTANCE.getProfiles(s, false));
 					profiles.forEach(p->p.getEntityTypes().forEach(e->e.getName()));
 					if (type.getUuid() != null){
 						type = (IntelEntityType) s.get(IntelEntityType.class, type.getUuid());

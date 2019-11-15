@@ -160,6 +160,8 @@ public class IntelligenceLabelProviderImpl implements
 		
 		if (item == FixedQueryColumn.Column.ENTITY_ID) return Messages.IntelligenceLabelProviderImpl_EntityIdColumnName;
 		if (item == FixedQueryColumn.Column.ENTITY_TYPE) return Messages.IntelligenceLabelProviderImpl_EntityTypeColumnName;
+		if (item == FixedQueryColumn.Column.ENTITY_PROFILE) return "Profile";
+		if (item == FixedQueryColumn.Column.RECORD_PROFILE) return "Profile";
 		
 		if (item == FixedQueryColumn.Column.CA_ID) return Messages.IntelligenceLabelProviderImpl_CaIdColumnName;
 		if (item == FixedQueryColumn.Column.CA_NAME) return Messages.IntelligenceLabelProviderImpl_CaNameColumnName;

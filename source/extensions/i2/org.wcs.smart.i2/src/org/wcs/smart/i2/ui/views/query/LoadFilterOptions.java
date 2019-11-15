@@ -27,6 +27,7 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -52,6 +53,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.InternalQueryManager;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -59,6 +61,7 @@ import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
@@ -174,9 +177,21 @@ public class LoadFilterOptions extends Job {
 	private FilterTreeItem loadAttributes(Session session){
 		AttributeHeaderFilterItem attributeRoots = new AttributeHeaderFilterItem(Messages.LoadFilterOptions_EntityAttributeFilterLabel, false);
 		
-		List<IntelAttribute> attributes = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributes(session);
+		//TODO: ccaa
+//		List<IntelAttribute> attributes = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributes(session);
+		List<IntelAttribute> attributes = new ArrayList<>();
+		for (IntelProfile ip : ProfilesManager.INSTANCE.getActiveProfiles()) {
+			ip = session.get(IntelProfile.class, ip.getUuid());
+			for (IntelEntityType et : ip.getEntityTypes()) {
+				et.getAttributes().forEach(e->{
+					if (!attributes.contains(e.getAttribute())) attributes.add(e.getAttribute());
+				});
+			}
+		}
+		
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for (IntelAttribute a : attributes){
+			//only include attribute associated with entity type that is valid
 			AttributeTreeFilterItem item = new AttributeTreeFilterItem(a, true, false);
 			attributeRoots.addChild(item);
 		}
@@ -197,6 +212,18 @@ public class LoadFilterOptions extends Job {
 		List<IntelEntityType> types =
 			InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypes(session);
 		
+		//TODO: support for ccaa queries
+		for (Iterator<IntelEntityType> iterator = types.iterator(); iterator.hasNext();) {
+			IntelEntityType it = iterator.next();
+			boolean keep = false;
+			for (IntelProfile p : it.getProfiles()) {
+				if (ProfilesManager.INSTANCE.getActiveProfiles().contains(p)) {
+					keep = true;
+					break;
+				}
+			}
+			if (!keep) iterator.remove();
+		}
 		
 		types.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for(IntelEntityType t : types){
@@ -295,6 +322,17 @@ public class LoadFilterOptions extends Job {
 				}).list();
 			
 		
+		for (Iterator<IntelRecordSource> iterator = sources.iterator(); iterator.hasNext();) {
+			IntelRecordSource it = iterator.next();
+			boolean keep = false;
+			for (IntelProfile p : it.getProfiles()) {
+				if (ProfilesManager.INSTANCE.getActiveProfiles().contains(p)) {
+					keep = true;
+					break;
+				}
+			}
+			if (!keep) iterator.remove();
+		}
 		
 		sources.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for(IntelRecordSource t : sources){

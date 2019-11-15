@@ -134,7 +134,7 @@ public class EntityTypesPreferencePage extends PreferencePage implements IIntelP
 					t.getName();
 					t.getProfiles().size();
 				}
-				profiles.addAll(ProfilesManager.INSTANCE.getProfiles(session));
+				profiles.addAll(ProfilesManager.INSTANCE.getProfiles(session, false));
 				for (IntelProfile p : profiles) p.getName();
 			}
 			

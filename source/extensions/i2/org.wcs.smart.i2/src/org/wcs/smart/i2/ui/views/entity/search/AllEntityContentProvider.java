@@ -61,6 +61,7 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.search.IntelSearchResult;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
@@ -99,6 +100,17 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 	@SuppressWarnings("unchecked")
 	public synchronized EntityTableData generateData() {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
+		
+		if (profiles.isEmpty()) {
+			EntityTableData data = new EntityTableData();
+			data.attributes = Collections.emptyList();
+			data.tableName = "";
+			data.totalCount = 0;
+			data.currentCount = 0;
+			return data;
+		}
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
@@ -135,7 +147,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				sb.append(")"); //$NON-NLS-1$
 				session.createNativeQuery(sb.toString()).executeUpdate();
 				
-								
+				
 				//now we need to populate this table
 				//entity uuid for this ca
 				sb = new StringBuilder();
@@ -146,7 +158,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				sb.append(" WHERE e.ca_uuid = :ca and e.profile_uuid in (:uuids) "); //$NON-NLS-1$
 				session.createNativeQuery(sb.toString())
 					.setParameter("ca", ca.getUuid()) //$NON-NLS-1$
-					.setParameterList("uuids", ProfilesManager.INSTANCE.getActiveProfiles().stream().map(e->e.getUuid()).collect(Collectors.toList()))
+					.setParameterList("uuids", profiles.stream().map(e->e.getUuid()).collect(Collectors.toList()))
 					.executeUpdate();
 				sb = new StringBuilder();
 				sb.append(" CREATE INDEX i_temp_entity_uuid_idx on " + DB_NAME_NAME + "(entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$

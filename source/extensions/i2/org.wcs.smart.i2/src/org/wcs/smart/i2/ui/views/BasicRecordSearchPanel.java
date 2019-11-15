@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -89,6 +90,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.search.BasicRecordSearch;
@@ -461,18 +463,24 @@ public class BasicRecordSearchPanel extends Composite {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {		
 			List<Object> srcs = new ArrayList<>();
-			try(Session session = HibernateManager.openSession()){
-				
-				srcs.addAll( session.createQuery("SELECT src FROM IntelRecordSource src join src.profiles p WHERE src.conservationArea = :ca AND p IN (:profiles)", IntelRecordSource.class)
-				.setParameter("ca",  SmartDB.getCurrentConservationArea())
-				.setParameter("profiles", ProfilesManager.INSTANCE.getActiveProfiles())
-				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
-				.list() );
-				
-				srcs.forEach(e->((IntelRecordSource)e).getName());
+			
+			List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+			profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewRecords(e)).collect(Collectors.toList());
+			
+			if (!profiles.isEmpty()) {
+				try(Session session = HibernateManager.openSession()){
+					
+					srcs.addAll( session.createQuery("SELECT src FROM IntelRecordSource src join src.profiles p WHERE src.conservationArea = :ca AND p IN (:profiles)", IntelRecordSource.class)
+					.setParameter("ca",  SmartDB.getCurrentConservationArea())
+					.setParameter("profiles",profiles)
+					.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+					.list() );
+					
+					srcs.forEach(e->((IntelRecordSource)e).getName());
+				}
+				srcs.sort((a,b)->Collator.getInstance().compare(((IntelRecordSource)a).getName(), ((IntelRecordSource)b).getName()));
+				srcs.add(0, ""); //$NON-NLS-1$
 			}
-			srcs.sort((a,b)->Collator.getInstance().compare(((IntelRecordSource)a).getName(), ((IntelRecordSource)b).getName()));
-			srcs.add(0, ""); //$NON-NLS-1$
 			Display.getDefault().asyncExec(()->{		
 				cmbSource.setInput(srcs);
 				if (currentSelection != null) {

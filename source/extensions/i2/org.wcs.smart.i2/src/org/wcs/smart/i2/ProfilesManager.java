@@ -3,6 +3,7 @@ package org.wcs.smart.i2;
 import java.text.Collator;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +17,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 public enum ProfilesManager {
 
@@ -31,7 +33,7 @@ public enum ProfilesManager {
 				if (active != null) return active;
 				HashSet<IntelProfile> allprofiles = new HashSet<>();
 				try(Session s = HibernateManager.openSession()){
-					allprofiles.addAll( getProfiles(s) );
+					allprofiles.addAll( getProfiles(s, true) );
 				}	
 				this.active = Collections.unmodifiableSet(allprofiles);
 				return active;
@@ -50,18 +52,34 @@ public enum ProfilesManager {
 	}
 	
 	/**
-	 * Load profiles and sorts them alphabetically
+	 * Load all profiles.  If filterUser is true than this
+	 * filters it to only profiles the current user has some permission
+	 * to use.
 	 * 
 	 * @param session
 	 * @param ca
 	 * @return
 	 */
-	public List<IntelProfile> getProfiles(Session session){
+	public List<IntelProfile> getProfiles(Session session, boolean filterUser){
 		List<IntelProfile> temp;
 		temp = QueryFactory.buildQuery(session, IntelProfile.class, 
 				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
 		temp.forEach(e->e.getNames().size());
 		temp.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+		
+		if (!filterUser) return temp;
+		
+		for (Iterator<IntelProfile> iterator = temp.iterator(); iterator.hasNext();) {
+			IntelProfile profile = iterator.next();
+			boolean keep = false;
+			if (IntelSecurityManager.INSTANCE.canViewEntities(profile) ||
+					IntelSecurityManager.INSTANCE.canViewRecords(profile) ||
+					IntelSecurityManager.INSTANCE.canViewQuery(profile)) {
+				keep = true;
+			}
+			if (!keep) iterator.remove();
+			
+		}
 		return temp;
 	}
 	

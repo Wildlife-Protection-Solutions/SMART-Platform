@@ -67,7 +67,7 @@ public class IntelPermission {
 		return id.getEmployee();
 	}
 	@Transient
-	public void setEntityType(Employee employee) {
+	public void setEmployee(Employee employee) {
 		id.setEmployee(employee);
 	}
 	@Transient

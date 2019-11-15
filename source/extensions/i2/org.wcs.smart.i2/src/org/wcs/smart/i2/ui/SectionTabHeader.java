@@ -82,7 +82,9 @@ public class SectionTabHeader extends Composite implements Listener{
 			drawBorder(e.gc);
 		});
 		
-		setLayout(new GridLayout(tabs.length*2-1 + (onMaximize == null ? 0 : 1), false));
+//		setLayout(new GridLayout(tabs.length*2-1 + (onMaximize == null ? 0 : 1), false));
+		setLayout(new GridLayout(tabs.length + (onMaximize == null ? 0 : 1), false));
+
 		((GridLayout)getLayout()).marginWidth = 0;
 		((GridLayout)getLayout()).marginHeight = 0;
 		((GridLayout)getLayout()).horizontalSpacing = 0;

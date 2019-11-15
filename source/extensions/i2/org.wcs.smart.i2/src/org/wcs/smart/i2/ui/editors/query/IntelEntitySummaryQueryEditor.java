@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -68,14 +69,18 @@ import org.osgi.service.event.EventHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.RunQueryJob;
 import org.wcs.smart.i2.query.SummaryQueryResult;
 import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
+import org.wcs.smart.i2.query.observation.filter.ValuePart;
+import org.wcs.smart.i2.query.observation.filter.ValuePart.ValueOption;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
@@ -137,7 +142,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 			return;
 		}
 		query.setQueryString(queryString);
-		
+		query.setProfileFilter(summaryPanel.getProfileFilter());
 		boolean isNew = query.getUuid() == null;
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
@@ -194,6 +199,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 		IntelEntitySummaryQuery clone = new IntelEntitySummaryQuery();
 		clone.setConservationArea(SmartDB.getCurrentConservationArea());
 		clone.setQueryString(query.getQueryString());
+		clone.setProfileFilter(summaryPanel.getProfileFilter());
 		clone.setName(newName.getValue());
 		clone.updateName(SmartDB.getCurrentLanguage(), clone.getName());
 		clone.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), clone.getName());
@@ -421,7 +427,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 		stackPanel.layout(true);
 		String queryString = summaryPanel.getQueryPart();
 		query.setQueryString(queryString);
-		
+		query.setProfileFilter(summaryPanel.getProfileFilter());
 		runJob.setQuery(query);
 		runJob.schedule();
 	}
@@ -429,8 +435,12 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 	
 	public String validateQuery(){
 		if (isInitializing) return null; //do not valid while initializing
-		String queryString = summaryPanel.getQueryPart();
+		
 		try{
+			String err = summaryPanel.validate();
+			if (err != null) throw new Exception(err);
+			
+			String queryString = summaryPanel.getQueryPart();
 			IntelEntitySummaryQuery.parseQuery(queryString);
 			summaryPanel.setErrorMessage(null, null);
 			runItem.setEnabled(true);
@@ -487,6 +497,19 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 				temp.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), temp.getName());
 				temp.setConservationArea(SmartDB.getCurrentConservationArea());
 				
+				temp.setProfileFilter(AbstractIntelQuery.convertToProfileFilter(ProfilesManager.INSTANCE.getActiveProfiles()
+						.stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e)).collect(Collectors.toSet())));
+				
+				ValuePart vp = new ValuePart(ValueOption.NUMBER_ENTITIES);
+				StringBuilder sb = new StringBuilder();
+				sb.append(IntelEntitySummaryQuery.PART_SEPERATOR);
+				sb.append(IntelEntitySummaryQuery.PART_SEPERATOR);
+				sb.append(vp.asString());
+				sb.append(IntelEntitySummaryQuery.PART_SEPERATOR);
+				temp.setQueryString(sb.toString());
+				
+				valueGbDropItems.addAll( DropItemFactory.generateDropItems(vp, null) );
+
 				query = temp;
 			}else{
 				
@@ -564,6 +587,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 					summaryPanel.initGroupByItems(colGbDropItems, false);
 					summaryPanel.initValueItems(valueGbDropItems);
 					summaryPanel.initFilterItems(filterDropItems);
+					summaryPanel.initProfileFilter(query.getProfileFilter());
 					
 				}finally{
 					isInitializing = false;

@@ -54,6 +54,8 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 		
 		ENTITY_ID("entity:id"),  //$NON-NLS-1$
 		ENTITY_TYPE("entity:type"), //$NON-NLS-1$
+		ENTITY_PROFILE("entity:profile"), //$NON-NLS-1$
+		RECORD_PROFILE("record:profile"), //$NON-NLS-1$
 		
 		CA_ID ("ca:id"),  //$NON-NLS-1$
 		CA_NAME("ca:name");  //$NON-NLS-1$
@@ -83,6 +85,8 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 				return ((EntityRecordQueryResultItem)item).getEnityId();
 			}else if (column == Column.ENTITY_TYPE) {
 				return ((EntityRecordQueryResultItem)item).getEnityTypeName();
+			}else if (column == Column.ENTITY_PROFILE) {
+				return ((EntityRecordQueryResultItem)item).getProfileName();
 			}else if (column == Column.CA_ID) {
 				return ((EntityRecordQueryResultItem)item).getConservationAreaId();
 			}else if (column == Column.CA_NAME) {
@@ -110,6 +114,8 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			return IntelRecord.Status.valueOf(i.getRecordStatus().toUpperCase(Locale.ROOT));
 		case RECORD_SOURCE:
 			return i.getRecordSource();
+		case RECORD_PROFILE:
+			return i.getProfileName();
 		case RECORD_TITLE:
 			return i.getRecordTitle();
 		case CA_ID:

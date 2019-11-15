@@ -24,6 +24,7 @@ package org.wcs.smart.i2.query.engine;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +40,7 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.Operator;
@@ -76,11 +78,13 @@ public class EntityRecordObservationFilterProcessor {
 	
 	private String dataModelTable = null;
 
+	private Set<IntelProfile> profileFilter;
 	
-	public EntityRecordObservationFilterProcessor(IQueryFilter filter, IQueryItemProvider itemProvider, Session s){
+	public EntityRecordObservationFilterProcessor(IQueryFilter filter, Set<IntelProfile> profileFilter, IQueryItemProvider itemProvider, Session s){
 		this.filter = filter;
 		this.s = s;
 		this.itemProvider = itemProvider;
+		this.profileFilter = profileFilter;
 	}
 	
 	/**
@@ -136,7 +140,7 @@ public class EntityRecordObservationFilterProcessor {
 					
 			StringBuilder tableColumns = new StringBuilder();
 			tableColumns.append("entity_uuid char(16) for bit data, date_modified timestamp, entity_type_key varchar(128)"); //$NON-NLS-1$
-			tableColumns.append(",ca_id varchar(8), ca_name varchar(256)"); //$NON-NLS-1$
+			tableColumns.append(",ca_id varchar(8), ca_name varchar(256), profile_uuid char(16) for bit data"); //$NON-NLS-1$
 			
 			List<String> tableColumnNames = new ArrayList<>();
 			tableColumnNames.add("entity_uuid"); //$NON-NLS-1$
@@ -144,6 +148,7 @@ public class EntityRecordObservationFilterProcessor {
 			tableColumnNames.add("entity_type_key"); //$NON-NLS-1$
 			tableColumnNames.add("ca_id"); //$NON-NLS-1$
 			tableColumnNames.add("ca_name"); //$NON-NLS-1$
+			tableColumnNames.add("profile_uuid"); //$NON-NLS-1$
 			
 			StringBuilder dataModelColumns = new StringBuilder();
 			dataModelColumns.append("entity_uuid char(16) for bit data, obs_uuid char(16) for bit data "); //$NON-NLS-1$
@@ -160,17 +165,18 @@ public class EntityRecordObservationFilterProcessor {
 					
 			sql = new StringBuilder();
 			sql.append("INSERT INTO " + entityTable); //$NON-NLS-1$
-			sql.append(" SELECT l.uuid, l.date_modified, o.keyid, ca.id, ca.name FROM smart.i_entity l "); //$NON-NLS-1$
+			sql.append(" SELECT l.uuid, l.date_modified, o.keyid, ca.id, ca.name, l.profile_uuid FROM smart.i_entity l "); //$NON-NLS-1$
 			sql.append(" JOIN smart.i_entity_type o on l.entity_type_uuid = o.uuid "); //$NON-NLS-1$
 			sql.append(" JOIN smart.conservation_area ca on l.ca_uuid = ca.uuid " ); //$NON-NLS-1$
 			sql.append( " WHERE "); //$NON-NLS-1$
-			sql.append(" l.ca_uuid in (:cas) "); //$NON-NLS-1$
+			sql.append(" l.ca_uuid in (:cas) and l.profile_uuid in (:profiles)"); //$NON-NLS-1$
 			
-	//		String dateFilter = SqlGenerator.generateDateClause(dFilter, "datetime"); //$NON-NLS-1$
-	//		if (dateFilter != null){
-	//			sql.append(" AND "); //$NON-NLS-1$
-	//			sql.append(dateFilter);
-	//		}
+			Collection<UUID> profileUuids = itemProvider
+					.getProfiles(profileFilter.stream().map(e->e.getKeyId()).collect(Collectors.toSet()), s)
+					.stream().map(e->e.getUuid()).collect(Collectors.toSet());
+			for (UUID uuid : profileUuids) {
+				logString(UuidUtils.uuidToString(uuid));
+			}
 			List<UUID> caUuids = itemProvider.getConservationAreas().stream().map(e->e.getUuid()).collect(Collectors.toList());
 			for (UUID uuid : caUuids) {
 				logString(UuidUtils.uuidToString(uuid));
@@ -180,6 +186,7 @@ public class EntityRecordObservationFilterProcessor {
 			
 			NativeQuery<?> query = s.createNativeQuery(sql.toString());
 			query.setParameterList("cas", caUuids); //$NON-NLS-1$
+			query.setParameterList("profiles", profileUuids); //$NON-NLS-1$
 			query.executeUpdate();
 			
 			//create indexes to help with performance

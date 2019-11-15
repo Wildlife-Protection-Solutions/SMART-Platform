@@ -83,6 +83,8 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 	
 	private FilterDefinitionPanel filterPanel;
 	
+	private ProfilesDefinitionPanel profilePanel;
+	
 	private ToolItem runItem;
 	private ToolItem saveItem;
 	
@@ -103,18 +105,23 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 		container.setLayout(new GridLayout());
 		((GridLayout)container.getLayout()).marginWidth = 0;
 		((GridLayout)container.getLayout()).marginHeight = 0;
+		((GridLayout)container.getLayout()).verticalSpacing = 0;
 		
 		Composite headerPart = toolkit.createComposite(container, SWT.NONE);
 		headerPart.setLayout(new GridLayout(3, false));
 		((GridLayout)headerPart.getLayout()).marginWidth = 0;
 		((GridLayout)headerPart.getLayout()).marginHeight = 0;
+		((GridLayout)headerPart.getLayout()).horizontalSpacing = 0;
+		((GridLayout)headerPart.getLayout()).verticalSpacing = 0;
 		headerPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		header = new SectionTabHeader(new String[] {Messages.SummaryDefinitionPanel_GroupByOpHeader, Messages.SummaryDefinitionPanel_FilterOpHeader}, headerPart, toolkit);
-		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		header = new SectionTabHeader(new String[] {Messages.SummaryDefinitionPanel_GroupByOpHeader, 
+				Messages.SummaryDefinitionPanel_FilterOpHeader, "Profile Filter"}, headerPart, toolkit);
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)header.getLayout()).marginWidth = 0;
+		((GridLayout)header.getLayout()).numColumns = ((GridLayout)header.getLayout()).numColumns  + 2; 
 		
-		createToolbar(headerPart);
+		createToolbar(header);
 		
 		Composite definitionStack = toolkit.createComposite(container, SWT.NONE);
 		definitionStack.setLayout(new StackLayout());
@@ -132,7 +139,12 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 		((GridLayout)filterComposite.getLayout()).marginWidth = 0;
 		((GridLayout)filterComposite.getLayout()).marginHeight = 0;
 		
-		header.setContent(new Composite[] {groupByComp, filterComposite}, definitionStack);
+		Composite profileComposite = toolkit.createComposite(definitionStack, SWT.NONE);
+		profileComposite.setLayout(new GridLayout());
+		((GridLayout)profileComposite.getLayout()).marginWidth = 0;
+		((GridLayout)profileComposite.getLayout()).marginHeight = 0;
+		
+		header.setContent(new Composite[] {groupByComp, filterComposite, profileComposite}, definitionStack);
 		header.selectTab(0);
 		
 		createGroupBySection(groupByComp);
@@ -169,6 +181,11 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 		
 		Composite definitionPanel = filterPanel.createComposite(filterComposite);
 		definitionPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		profilePanel = new ProfilesDefinitionPanel();
+		profilePanel.addQueryChangedListener(()->fireQueryChangedListeners());
+		Composite panel = profilePanel.createComposite(profileComposite);
+		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		toolkit.dispose();
 		return container;
@@ -330,6 +347,9 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 	public void initFilterItems(List<DropItem> items) {
 		filterPanel.addItems(items);
 	}
+	public void initProfileFilter(String filter) {
+		profilePanel.setProfileFilter(filter);
+	}
 	
 	public void setQueryState(boolean isDirty){
 		if (this.saveItem != null) this.saveItem.setEnabled(isDirty);
@@ -370,6 +390,11 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 
 	@Override
 	public String validate() {
+		IDefinitionPanel[] panels = new IDefinitionPanel[] {rowGroupByPanel, columnGroupByPanel, valuePanel, filterPanel, profilePanel};
+		for (IDefinitionPanel p : panels) {
+			String x = p.validate();
+			if (x != null) return x;
+		}
 		return null;
 	}
 
@@ -392,6 +417,9 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 		return sb.toString();
 	}
 
+	public String getProfileFilter() {
+		return profilePanel.getQueryPart();
+	}
 
 	@Override
 	public void clear() {
@@ -846,7 +874,7 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 		
 		@Override
 		public String validate() {
-			return SummaryDefinitionPanel.this.editor.validateQuery();
+			return null;
 			
 		}
 	}

@@ -309,6 +309,7 @@
                </visibleWhen>
             </command>
             <menu
+                  id="org.wcs.smart.i2.query.menu.new"
                   label="%menu.newquery.label">
                <command
                      commandId="org.wcs.smart.i2.command.query.record.new"
@@ -374,7 +375,7 @@
                      checkEnabled="false">
                   <test
                         property="org.wcs.smart.i2.permission"
-                        value="configure">
+                        value="intel_admin">
                   </test>
                </visibleWhen>
             </command>
@@ -391,7 +392,7 @@
                      checkEnabled="false">
                   <test
                         property="org.wcs.smart.i2.permission"
-                        value="configure">
+                        value="intel_admin">
                   </test>
                </visibleWhen>
             </command>
@@ -405,7 +406,7 @@
                         checkEnabled="false">
                      <test
                            property="org.wcs.smart.i2.permission"
-                           value="import_data">
+                           value="create_entity">
                      </test>
                   </visibleWhen>
                </command>
@@ -417,7 +418,7 @@
                         checkEnabled="false">
                      <test
                            property="org.wcs.smart.i2.permission"
-                           value="import_data">
+                           value="create_entity">
                      </test>
                   </visibleWhen>
                </command>
@@ -433,7 +434,7 @@
                         checkEnabled="false">
                      <test
                            property="org.wcs.smart.i2.permission"
-                           value="import_data">
+                           value="create_record">
                      </test>
                   </visibleWhen>
                </command>
@@ -445,7 +446,7 @@
                         checkEnabled="false">
                      <test
                            property="org.wcs.smart.i2.permission"
-                           value="import_data">
+                           value="create_record">
                      </test>
                   </visibleWhen>
                </command>
@@ -461,7 +462,7 @@
                         checkEnabled="false">
                      <test
                            property="org.wcs.smart.i2.permission"
-                           value="configure">
+                           value="intel_admin">
                      </test>
                   </visibleWhen>
                </command>
@@ -473,7 +474,7 @@
                         checkEnabled="false">
                      <test
                            property="org.wcs.smart.i2.permission"
-                           value="configure">
+                           value="intel_admin">
                      </test>
                   </visibleWhen>
                </command>
@@ -486,7 +487,11 @@
                      </test>
                      <test
                            property="org.wcs.smart.i2.permission"
-                           value="configure">
+                           value="create_entity">
+                     </test>
+                     <test
+                           property="org.wcs.smart.i2.permission"
+                           value="create_record">
                      </test>
                   </or>
                </visibleWhen>
@@ -559,11 +564,11 @@
                   <or>
                      <test
                            property="org.wcs.smart.i2.permission"
-                           value="analyst_perspective">
+                           value="intel_admin">
                      </test>
                      <test
                            property="org.wcs.smart.i2.permission"
-                           value="assessment_perspective">
+                           value="intel_user">
                      </test>
                   </or>
                </and>
@@ -787,61 +792,6 @@
       <menuContribution
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.i2.ui.view.queries">
-         <command
-               commandId="org.wcs.smart.i2.command.query.record.new"
-               icon="images/icons/obj16/query_entity_record_add.png"
-               style="push"
-               tooltip="%newquerycommandtooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <test
-                     property="org.wcs.smart.i2.permission"
-                     value="create_query">
-               </test>
-            </visibleWhen>
-            <parameter
-                  name="org.wcs.smart.i2.query.new.type"
-                  value="I2_ENTITY_RECORD_QUERY">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.i2.command.query.record.new"
-               icon="images/icons/obj16/query_entity_sum_add.png"
-               style="push"
-               tooltip="%newsummaryquerycommandtooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <test
-                     property="org.wcs.smart.i2.permission"
-                     value="create_query">
-               </test>
-            </visibleWhen>
-            <parameter
-                  name="org.wcs.smart.i2.query.new.type"
-                  value="I2_ENTITY_SUMM_QUERY">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.i2.command.query.record.new"
-               icon="images/icons/obj16/query_record_obs_add.png"
-               style="push"
-               tooltip="%newrecordquerycommandtooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <test
-                     property="org.wcs.smart.i2.permission"
-                     value="create_query">
-               </test>
-            </visibleWhen>
-            <parameter
-                  name="org.wcs.smart.i2.query.new.type"
-                  value="I2_OBS_QUERY">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.i2.command.query.refresh"
-               style="push">
-         </command>
       </menuContribution>
       <menuContribution
             allPopups="false"
@@ -1127,74 +1077,15 @@
          <toolbar
                id="vertical.org.wcs.smart.i2.toolbar4">
             <command
-                  commandId="org.wcs.smart.i2.command.query.record.new"
-                  icon="images/icons/obj16/query_record_obs_add.png"
-                  label="%command.label.recordobsquery"
+                  commandId="org.wcs.smart.i2.query.menu.new.dropdown"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
+                  id="org.wcs.smart.i2.query.menu.main.toolbar.new"
+                  label="New Query"
                   mode="FORCE_TEXT"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <and>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.caSingle">
-                     </test>
-                     <test
-                           property="org.wcs.smart.i2.permission"
-                           value="create_query">
-                     </test>
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <equals
-                              value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
-                        </equals>
-                     </with>
-                  </and>
-               </visibleWhen>
+                  style="radio">
                <parameter
-                     name="org.wcs.smart.i2.query.new.type"
-                     value="I2_OBS_QUERY">
-               </parameter>
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.query.record.new"
-                  icon="images/icons/obj16/query_entity_sum_add.png"
-                  label="%command.label.entitysummaryquery"
-                  mode="FORCE_TEXT"
-                  style="push">
-               <parameter
-                     name="org.wcs.smart.i2.query.new.type"
-                     value="I2_ENTITY_SUMM_QUERY">
-               </parameter>
-               <visibleWhen
-                     checkEnabled="false">
-                  <and>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.caSingle">
-                     </test>
-                     <test
-                           property="org.wcs.smart.i2.permission"
-                           value="create_query">
-                     </test>
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <equals
-                              value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
-                        </equals>
-                     </with>
-                  </and>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.query.record.new"
-                  icon="images/icons/obj16/query_entity_record_add.png"
-                  label="%command.label.entityrecordquery"
-                  mode="FORCE_TEXT"
-                  style="push">
-               <parameter
-                     name="org.wcs.smart.i2.query.new.type"
-                     value="I2_ENTITY_RECORD_QUERY">
+                     name="org.wcs.smart.i2.query.source"
+                     value="org.wcs.smart.i2.query.menu.main.toolbar.new">
                </parameter>
                <visibleWhen
                      checkEnabled="false">
@@ -1264,7 +1155,7 @@
                            variable="activeWorkbenchWindow.activePerspective">
                         <or>
                            <equals
-                                 value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+                                value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
                            </equals>
                            <equals
                                  value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
@@ -1508,10 +1399,6 @@
          </commandParameter>
       </command>
       <command
-            id="org.wcs.smart.i2.command.query.refresh"
-            name="%RefreshQueryListCommandName">
-      </command>
-      <command
             id="org.wcs.smart.i2.command.record.import.xml"
             name="%ImportRecordsFromXmlCommandName">
       </command>
@@ -1530,6 +1417,15 @@
       <command
             id="org.wcs.smart.i2.command.profile.filter"
             name="Profile Filter">
+      </command>
+      <command
+            id="org.wcs.smart.i2.query.menu.new.dropdown"
+            name="New Query">
+         <commandParameter
+               id="org.wcs.smart.i2.query.source"
+               name="Source Menu Item"
+               optional="true">
+         </commandParameter>
       </command>
    </extension>
    <extension
@@ -1575,16 +1471,12 @@
             commandId="org.wcs.smart.i2.command.query.record.new">
       </handler>
       <handler
-            class="org.wcs.smart.i2.ui.handler.RefreshQueryViewHandler$RefreshQueryViewHandlerWrapper"
-            commandId="org.wcs.smart.i2.command.query.refresh">
-      </handler>
-      <handler
             class="org.wcs.smart.i2.ui.handler.ConfigureRecordAttributesHandler$ConfigureRecordAttributesHandlerWrapper"
             commandId="org.wcs.smart.i2.command.record.configuration">
          <enabledWhen>
             <test
                   property="org.wcs.smart.i2.permission"
-                  value="configure">
+                  value="intel_admin">
             </test>
          </enabledWhen>
       </handler>
@@ -1616,16 +1508,16 @@
             class="org.wcs.smart.i2.ui.handler.ProfileFilterHandler$ProfileFilterHandlerWrapper"
             commandId="org.wcs.smart.i2.command.profile.filter">
       </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.NewQueryDropDownHandler$NewQueryDropDownHandlerWrapper"
+            commandId="org.wcs.smart.i2.query.menu.new.dropdown">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
       <image
             commandId="org.wcs.smart.i2.command.record.new"
             icon="images/icons/obj16/script_add.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.i2.command.relationshiptypelist.show"
-            icon="images/icons/obj16/relationship.png">
       </image>
       <image
             commandId="org.wcs.smart.i2.command.entity.new"
@@ -1636,20 +1528,8 @@
             icon="images/icons/obj16/refresh.png">
       </image>
       <image
-            commandId="org.wcs.smart.i2.command.entitytypelist.show"
-            icon="images/icons/obj16/entity.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.i2.command.attributelist.show"
-            icon="images/icons/obj16/attribute.png">
-      </image>
-      <image
             commandId="org.wcs.smart.i2.command.query.refresh"
             icon="images/icons/obj16/refresh.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.i2.command.record.configuration"
-            icon="images/icons/obj16/script.png">
       </image>
    </extension>
    <extension
@@ -2645,40 +2525,10 @@
    <extension
          point="org.wcs.smart.userlevel">
       <SMARTUserLevel
-            class="org.wcs.smart.i2.security.IntelAnalystUserLevel">
+            class="org.wcs.smart.i2.security.IntelAdminUserLevel">
       </SMARTUserLevel>
       <SMARTUserLevel
-            class="org.wcs.smart.i2.security.IntelReadOnlyUserLevel">
-      </SMARTUserLevel>
-      <SMARTUserLevel
-            class="org.wcs.smart.i2.security.IntelCreateEntityUserLevel">
-      </SMARTUserLevel>
-      <SMARTUserLevel
-            class="org.wcs.smart.i2.security.IntelViewEntityUserLevel">
-      </SMARTUserLevel>
-      <SMARTUserLevel
-            class="org.wcs.smart.i2.security.IntelEditEntityUserLevel">
-      </SMARTUserLevel>
-      <SMARTUserLevel
-            class="org.wcs.smart.i2.security.IntelViewRecordsUserLevel">
-      </SMARTUserLevel>
-      <SMARTUserLevel
-            class="org.wcs.smart.i2.security.IntelEditRecordUserLevel">
-      </SMARTUserLevel>
-      <SMARTUserLevel
-            class="org.wcs.smart.i2.security.IntelEditRecordWithStatusUserLevel">
-      </SMARTUserLevel>
-      <SMARTUserLevel
-            class="org.wcs.smart.i2.security.IntelCreateRecordUserLevel">
-      </SMARTUserLevel>
-      <SMARTUserLevel
-            class="org.wcs.smart.i2.security.IntelQueryAllUserLevel">
-      </SMARTUserLevel>
-      <SMARTUserLevel
-            class="org.wcs.smart.i2.security.IntelDeleteEntityUserLevel">
-      </SMARTUserLevel>
-      <SMARTUserLevel
-            class="org.wcs.smart.i2.security.IntelDeleteRecordUserLevel">
+            class="org.wcs.smart.i2.security.IntelUserUserLevel">
       </SMARTUserLevel>
    </extension>
    <extension

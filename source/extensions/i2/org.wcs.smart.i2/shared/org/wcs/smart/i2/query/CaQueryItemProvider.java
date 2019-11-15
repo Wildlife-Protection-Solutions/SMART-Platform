@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
@@ -40,6 +41,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.util.UuidUtils;
 
@@ -68,6 +70,14 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	@Override
 	public Collection<ConservationArea> getConservationAreas(){
 		return Collections.singletonList(ca);
+	}
+	
+	@Override
+	public Collection<IntelProfile> getProfiles(Set<String> profileKeys, Session session) {
+		return session.createQuery("FROM IntelProfile WHERE conservationArea = :ca and keyId IN (:keys)", IntelProfile.class)
+				.setParameter("ca", getCa())
+				.setParameterList("keys", profileKeys)
+				.list();
 	}
 	
 	@Override

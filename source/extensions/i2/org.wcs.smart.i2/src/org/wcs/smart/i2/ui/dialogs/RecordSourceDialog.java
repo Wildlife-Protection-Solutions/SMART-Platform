@@ -125,7 +125,7 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 			List<IntelRecordSource> srcs = new ArrayList<>();
 			
 			try(Session session = HibernateManager.openSession()){
-				profiles.addAll(ProfilesManager.INSTANCE.getProfiles(session));
+				profiles.addAll(ProfilesManager.INSTANCE.getProfiles(session, false));
 				
 				srcs.addAll(QueryFactory.buildQuery(session, IntelRecordSource.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());

@@ -140,6 +140,7 @@ public class IntelQueryColumnProvider {
 					FixedQueryColumn.Column.RECORD_TITLE,
 					FixedQueryColumn.Column.RECORD_STATUS,
 					FixedQueryColumn.Column.RECORD_SOURCE,
+					FixedQueryColumn.Column.RECORD_PROFILE,
 					FixedQueryColumn.Column.LOC_ID,
 					FixedQueryColumn.Column.LOC_DATE,
 					FixedQueryColumn.Column.LOC_TIME,
@@ -151,6 +152,7 @@ public class IntelQueryColumnProvider {
 					FixedQueryColumn.Column.RECORD_TITLE,
 					FixedQueryColumn.Column.RECORD_STATUS,
 					FixedQueryColumn.Column.RECORD_SOURCE,
+					FixedQueryColumn.Column.RECORD_PROFILE,
 					FixedQueryColumn.Column.LOC_ID,
 					FixedQueryColumn.Column.LOC_DATE,
 					FixedQueryColumn.Column.LOC_TIME,
@@ -230,11 +232,13 @@ public class IntelQueryColumnProvider {
 					FixedQueryColumn.Column.CA_NAME,
 					FixedQueryColumn.Column.ENTITY_ID,
 					FixedQueryColumn.Column.ENTITY_TYPE,
+					FixedQueryColumn.Column.ENTITY_PROFILE,
 			};	
 		}else {
 			thiscolumns = new FixedQueryColumn.Column[]{
 				FixedQueryColumn.Column.ENTITY_ID,
 				FixedQueryColumn.Column.ENTITY_TYPE,
+				FixedQueryColumn.Column.ENTITY_PROFILE,
 			};
 		}
 		

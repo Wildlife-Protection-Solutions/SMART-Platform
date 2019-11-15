@@ -65,7 +65,7 @@ public class IntelDataAnalysisPerspective implements IPerspectiveFactory {
 				rightFolder.addView(RecordsView.ID);
 				layout.getViewLayout(RecordsView.ID).setCloseable(false);
 			}
-			if (IntelSecurityManager.INSTANCE.canViewQueries()){
+			if (IntelSecurityManager.INSTANCE.canViewQueryAny()){
 				rightFolder.addView(QueryView.ID);
 				layout.getViewLayout(QueryView.ID).setCloseable(false);
 			}
@@ -78,7 +78,7 @@ public class IntelDataAnalysisPerspective implements IPerspectiveFactory {
 				layout.getViewLayout(WorkingSetView.ID).setCloseable(false);
 			}
 		}else {
-			if (IntelSecurityManager.INSTANCE.canViewQueries()){
+			if (IntelSecurityManager.INSTANCE.canViewQueryAny()){
 				rightFolder.addView(QueryView.ID);
 				layout.getViewLayout(QueryView.ID).setCloseable(false);
 			}

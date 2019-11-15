@@ -21,8 +21,13 @@
  */
 package org.wcs.smart.i2.model;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,6 +41,7 @@ import javax.persistence.Transient;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Abstract class for advanced intelligence queries
@@ -58,6 +64,9 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	protected Employee createdBy;
 	protected Employee lastModifiedBy;
 
+	protected String profileFilter;
+
+	
 	/**
 	 * 
 	 * @return the key is that represents the query type
@@ -190,4 +199,66 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 		this.queryString = queryString;
 	}
 	
+	@Column(name="profile_filter")
+	public String getProfileFilter(){
+		return this.profileFilter;
+	}
+	public void setProfileFilter(String profileFilter){
+		this.profileFilter = profileFilter;
+	}
+	
+	
+	@Transient
+	public boolean queriesProfile(IntelProfile p) {
+		return queriesProfile(p.getUuid());
+	}
+	
+	/**
+	 * returns true if every query profile filter is
+	 * in the profiles set
+	 * @param profiles
+	 * @return
+	 */
+	@Transient
+	public boolean queriesProfile(Set<IntelProfile> profiles) {
+		Set<IntelProfile> pp = convertFromProfileFilter(getProfileFilter());
+		for (IntelProfile p : pp) {
+			if (!profiles.contains(p)) return false;
+		}
+		return true;
+	}
+	
+	@Transient
+	public boolean queriesProfile(UUID profileUuid) {
+		String x = getProfileFilter();
+		if (x == null) return false;
+		return x.contains(UuidUtils.uuidToString(profileUuid));
+	}
+	
+	@Transient
+	public static String convertToProfileFilter(Collection<IntelProfile> profiles) {
+		if (profiles.isEmpty()) return "";
+		
+		StringBuilder sb = new StringBuilder();
+		for (IntelProfile ip : profiles) {
+			sb.append( UuidUtils.uuidToString(ip.getUuid()) );
+			sb.append(",");
+		}
+		sb.substring(0, sb.length() - 1);
+		return sb.toString();
+	}
+	@Transient
+	public static Set<IntelProfile> convertFromProfileFilter(String filter) {
+		if (filter == null) return Collections.emptySet();
+		if (filter.trim().isEmpty()) return Collections.emptySet();
+		String[] bits = filter.split(",");
+		Set<IntelProfile> profiles = new HashSet<>();
+		for (String x : bits) {
+			UUID uuid = UuidUtils.stringToUuid(x);
+			IntelProfile ip = new IntelProfile();
+			ip.setUuid(uuid);
+			profiles.add(ip);
+		}
+		return profiles;
+	}
 }

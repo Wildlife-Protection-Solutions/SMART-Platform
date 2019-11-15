@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -43,6 +44,8 @@ import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 
 /**
@@ -139,7 +142,11 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	public IntelSearchResult doSearch(Session session, Locale l, IProgressMonitor monitor){
 		SubMonitor.convert(monitor, 2);
 		Long now = System.nanoTime();
-		if (ProfilesManager.INSTANCE.getActiveProfiles().isEmpty()) {
+		
+		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
+		
+		if (profiles.isEmpty()) {
 			return new IntelSearchResult(Collections.emptyList(),0);
 		}
 		if (searchString != null && searchString.length() > 0){
@@ -148,6 +155,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 			return new IntelSearchResult(sresults, System.nanoTime() - now);
 		}
 
+		
 		if (searchString == null || searchString.isEmpty()){
 			CriteriaBuilder cb = session.getCriteriaBuilder();
 			
@@ -155,7 +163,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 			Root<IntelEntity> from = c.from(IntelEntity.class);
 			c.select(from);
 			ArrayList<Predicate> filters = new ArrayList<>();
-			filters.add(from.get("profile").in(ProfilesManager.INSTANCE.getActiveProfiles())); //$NON-NLS-1$
+			filters.add(from.get("profile").in(profiles)); //$NON-NLS-1$
 			filters.add(from.get("conservationArea").in(this.cas)); //$NON-NLS-1$
 			if (entityTypes != null && !entityTypes.isEmpty()){
 				filters.add(from.join("entityType").get("keyId").in(entityTypes)); //$NON-NLS-1$ //$NON-NLS-2$

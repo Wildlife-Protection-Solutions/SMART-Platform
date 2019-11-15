@@ -21,12 +21,22 @@
  */
 package org.wcs.smart.i2.ui;
 
-import org.eclipse.jface.viewers.LabelProvider;
+import java.util.Collections;
+import java.util.Set;
+
+import org.eclipse.jface.viewers.OwnerDrawLabelProvider;
+import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.ui.views.QueryProxy;
 
@@ -36,12 +46,17 @@ import org.wcs.smart.i2.ui.views.QueryProxy;
  * @author Emily
  *
  */
-public class IntelQueryLabelProvider extends LabelProvider {
+public class IntelQueryLabelProvider extends OwnerDrawLabelProvider {
 	
+	private TableColumn tc;
+	
+	public IntelQueryLabelProvider(TableColumn tc) {
+		this.tc = tc;
+	}
 	public String getText(Object element){
 		if (element instanceof QueryProxy) return ((QueryProxy) element).getName();
 		if (element instanceof AbstractIntelQuery) return ((AbstractIntelQuery)element).getName();
-		return super.getText(element);
+		return element.toString();
 	}
 	
 	public Image getImage(Object element) {
@@ -62,5 +77,66 @@ public class IntelQueryLabelProvider extends LabelProvider {
 			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYRECORD);
 		}
 		return null;
+	}
+	public Set<IntelProfile> getProfiles(Object element){
+		if (element instanceof AbstractIntelQuery) {
+			return AbstractIntelQuery.convertFromProfileFilter( ((AbstractIntelQuery) element).getProfileFilter());
+		}else if (element instanceof QueryProxy) {
+			return AbstractIntelQuery.convertFromProfileFilter( ((QueryProxy) element).getProfileFilter());
+		}
+		return Collections.emptySet();
+	}
+
+	@Override
+	protected void erase(Event event, Object element) {
+//		super.erase(event, element);
+	}
+	
+	@Override
+	protected void measure(Event event, Object element) {
+//		String txt = getText(element);
+////		
+//		int width = 21 * (ProfilesManager.INSTANCE.getActiveProfiles().size() + 1) + event.gc.textExtent(txt).x;
+//		width = Math.max(tc.getParent().getBounds().width, width);
+//		System.out.println(width);
+//		int height = event.getBounds().height;
+//		width = 725;
+////		int height = 20;
+//		event.setBounds(new Rectangle(event.getBounds().x, event.getBounds().y, width, height));
+	}
+
+	@Override
+	protected void paint(Event event, Object element) {
+		
+		int x = event.getBounds().x;
+		int y = event.getBounds().y;
+		
+		Image img = getImage(element);
+		if (img != null) {
+			event.gc.drawImage(img, x, y);
+			x+= img.getBounds().width + 5;
+		}
+		String txt = getText(element);
+//		System.out.println(tc.getParent().getItem(0).getBackground());
+//		event.gc.setBackground(tc.getParent().getItem(0).getBackground());
+		event.gc.setBackground(tc.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		event.gc.drawText(txt,x,y+2);
+		x = tc.getParent().getBounds().width;
+		Set<IntelProfile> allprofiles = getProfiles(element);
+		Set<IntelProfile> current = (Set<IntelProfile>)tc.getParent().getData("PROFILES");
+		if (current == null) return;
+		for (IntelProfile ip : current)  {
+			x -= 16+5;
+			if (!allprofiles.contains(ip)) continue;
+			Image i = Resources.INSTANCE.getProfileImage(ip.getUuid());
+			if (i == null) {
+				event.gc.drawRectangle(x, y+2, 16, 16);
+			}else {
+				event.gc.drawImage(i, x, y+2);
+			}
+			
+				
+		}
+		
 	}
 }

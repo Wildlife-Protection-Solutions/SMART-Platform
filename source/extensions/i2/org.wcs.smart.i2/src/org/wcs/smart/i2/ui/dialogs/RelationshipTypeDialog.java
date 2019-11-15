@@ -827,7 +827,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 				List<Object> groups = new ArrayList<Object>();
 				List<IntelProfile> profiles = new ArrayList<>();
 				try(Session s = HibernateManager.openSession()){
-					profiles.addAll( ProfilesManager.INSTANCE.getProfiles(s) );
+					profiles.addAll( ProfilesManager.INSTANCE.getProfiles(s, false) );
 					profiles.forEach(p->p.getEntityTypes().size());
 //					forEach(et->et.getAttributes().forEach(a->{
 //						a.getAttribute().getNames().size();

@@ -491,7 +491,7 @@ public abstract class EntitySearchPanel extends Composite {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						try(Session s = HibernateManager.openSession()){
-							entities = EntityTypeManager.INSTANCE.getEntityTypesActiveProfiles(s);
+							entities = EntityTypeManager.INSTANCE.getViewableEntityTypesActiveProfiles(s);
 							entities.forEach(ent->ent.getName());
 						}
 						entities.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
@@ -592,7 +592,7 @@ public abstract class EntitySearchPanel extends Composite {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try(Session s = HibernateManager.openSession()){
-					List<IntelEntityType> types = EntityTypeManager.INSTANCE.getEntityTypesActiveProfiles(s);
+					List<IntelEntityType> types = EntityTypeManager.INSTANCE.getViewableEntityTypesActiveProfiles(s);
 					
 					values[0] = new String[types.size()];
 					values[1] = new String[types.size()];

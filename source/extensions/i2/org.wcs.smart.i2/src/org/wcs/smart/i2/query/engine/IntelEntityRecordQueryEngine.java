@@ -45,6 +45,7 @@ import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IQueryItemProvider;
@@ -52,6 +53,7 @@ import org.wcs.smart.i2.query.IntelAttributeQueryColumn;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * Query engine for intelligence observation queries.
@@ -97,22 +99,32 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		final SubMonitor fmonitor = progress;
 		final Locale flocale = locale;
 		final IQueryItemProvider fItemProvider = itemProvider;
+		
+		Set<IntelProfile> profiles = new HashSet<>();
+		for (IntelProfile ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
+			IntelProfile ip2 = session.get(IntelProfile.class, ip.getUuid());
+			ip2.getKeyId();
+			if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2);
+		}
+		
 		return session.doReturningWork(new ReturningWork<IPagedQueryResultSet>() {
 			@Override
 			public IPagedQueryResultSet execute(Connection connection) throws SQLException {
 				
 				connection.setAutoCommit(true);
 				try{
+					
+					
 					queryResults = new IntelEntityRecordQueryResults();
 						
 					String dataTable = null;
 					List<Object[]> filterToColumnNames = null;
 					if (parsedQuery.getFilterType() == FilterType.OBSERVATION) {
-						EntityRecordObservationFilterProcessor parser = new EntityRecordObservationFilterProcessor(parsedQuery.getFilter(), fItemProvider, session); 
+						EntityRecordObservationFilterProcessor parser = new EntityRecordObservationFilterProcessor(parsedQuery.getFilter(), profiles, fItemProvider, session); 
 						dataTable = parser.processFilter(fmonitor.split(2));
 						filterToColumnNames = parser.getFilterToColumnNames();
 					}else {
-						EntityRecordWaypointFilterProcessor parser = new EntityRecordWaypointFilterProcessor(parsedQuery.getFilter(), fItemProvider, session); 
+						EntityRecordWaypointFilterProcessor parser = new EntityRecordWaypointFilterProcessor(parsedQuery.getFilter(), profiles, fItemProvider, session); 
 						dataTable = parser.processFilter(fmonitor.split(2));	
 						filterToColumnNames = parser.getFilterToColumnNames();
 					}
@@ -252,6 +264,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		columnNameToIndex.put("entity_type_key", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("ca_id", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("ca_name", columnIndex++); //$NON-NLS-1$
+		columnNameToIndex.put("profile_uuid", columnIndex++); //$NON-NLS-1$
 		for (Object[] v : filterToColumn){
 			columnNameToIndex.put((String)v[1], columnIndex++);
 		}

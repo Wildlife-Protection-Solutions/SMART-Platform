@@ -24,20 +24,19 @@ package org.wcs.smart.i2.security;
 import org.wcs.smart.ca.SmartUserLevel;
 
 /**
- * Permissions to delete entity
+ * Intelligence analyst user level
  * 
  * @author Emily
  *
  */
-public class IntelDeleteEntityUserLevel extends SmartUserLevel{
-
-	public static final IntelDeleteEntityUserLevel INSTANCE = new IntelDeleteEntityUserLevel();
+public class IntelAdminUserLevel extends SmartUserLevel {
 	
-	private static final String KEY = "INTEL_ENTITY_DELETE"; //$NON-NLS-1$
+	public static final IntelAdminUserLevel INSTANCE = new IntelAdminUserLevel();
 	
-	public IntelDeleteEntityUserLevel() {
+	private static final String KEY = "INTEL_ADMIN"; //$NON-NLS-1$
+	
+	public IntelAdminUserLevel() {
 		super(KEY);
 	}
 
 }
-

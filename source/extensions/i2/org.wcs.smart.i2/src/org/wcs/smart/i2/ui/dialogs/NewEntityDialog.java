@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -78,6 +79,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
 import org.wcs.smart.i2.ui.Resources;
@@ -127,16 +129,16 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 					profile = s.get(IntelProfile.class, profile.getUuid());
 					profile.getEntityTypes().size();
 				}else {
-					Set<IntelProfile> temp = ProfilesManager.INSTANCE.getActiveProfiles();
-					if (temp.size() == 0) {
+					Set<IntelProfile> temp = ProfilesManager.INSTANCE.getActiveProfiles()
+							.stream().filter(e->IntelSecurityManager.INSTANCE.canCreateEntity(e)).collect(Collectors.toSet());
+					if (temp.size() != 0) {
 						profile = s.get(IntelProfile.class, temp.iterator().next().getUuid());
 						profile.getEntityTypes().size();
-					}else {
-						for (IntelProfile p : temp) {
-							profiles.add( s.get(IntelProfile.class, p.getUuid()) );
-						}
-						profiles.forEach(p->p.getEntityTypes().size());
 					}
+					for (IntelProfile p : temp) {
+						profiles.add( s.get(IntelProfile.class, p.getUuid()) );
+					}
+					profiles.forEach(p->p.getEntityTypes().size());
 				}
 			}
 			

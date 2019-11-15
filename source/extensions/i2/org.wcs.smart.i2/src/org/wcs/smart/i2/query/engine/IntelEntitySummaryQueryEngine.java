@@ -44,8 +44,10 @@ import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryItemProvider;
@@ -67,6 +69,7 @@ import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.Type;
 import org.wcs.smart.i2.query.observation.filter.ValuePart.ValueOption;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -110,6 +113,12 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
 		}
 		
+		Set<IntelProfile> profiles = new HashSet<>();
+		for (IntelProfile ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
+			IntelProfile ip2 = session.get(IntelProfile.class, ip.getUuid());
+			ip2.getKeyId();
+			if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2);
+		}
 		
 		//parse query
 		progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressParsing);
@@ -118,7 +127,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 
 		//parse query
 		progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressEntityType);
-		createTemporaryEntityTable(session,cas);
+		createTemporaryEntityTable(session,profiles,cas);
 		progress.worked(1);
 		
 		try {
@@ -390,7 +399,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	 * create temporary entity table and populate with all entities
 	 * that match the given conservation area
 	 */
-	private String createTemporaryEntityTable(Session session, Collection<ConservationArea> cas) {
+	private String createTemporaryEntityTable(Session session, Set<IntelProfile> profiles, Collection<ConservationArea> cas) {
 		String obsTable = SqlGenerator.createTempTableName();
 		
 		dataTable = new DataTable(obsTable);
@@ -424,13 +433,15 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		sb.append(modified);
 		sb.append(") SELECT a.uuid, b.keyid, a.ca_uuid, cast(a.date_created as date), cast(a.date_modified as date) FROM "); //$NON-NLS-1$
 		sb.append(" smart.i_entity a join smart.i_entity_type b on a.entity_type_uuid = b.uuid "); //$NON-NLS-1$
-		sb.append(" WHERE b.ca_uuid in (:cauuids)"); //$NON-NLS-1$
+		sb.append(" WHERE b.ca_uuid in (:cauuids) and a.profile_uuid in (:profiles)"); //$NON-NLS-1$
 		
 		List<UUID> cauuids = cas.stream().map(e->e.getUuid()).collect(Collectors.toList());
+		List<UUID> profileuuids = profiles.stream().map(e->e.getUuid()).collect(Collectors.toList());
 		
 		logme(sb);
 		session.createNativeQuery(sb.toString())
 			.setParameterList("cauuids",  cauuids) //$NON-NLS-1$
+			.setParameterList("profiles",  profileuuids) //$NON-NLS-1$
 			.executeUpdate();
 		
 		return obsTable;

@@ -1152,7 +1152,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				setEditMode(!getEditMode());
-				
 			}
 		});
 		
@@ -1202,6 +1201,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 		if (!IntelSecurityManager.INSTANCE.canEditEntity(input.getProfileUuid())){
 			setEditMode(false);
 			editItem.setEnabled(false);
+		}else {
+			setEditMode(true);
 		}
 		
 		return leftPart.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;

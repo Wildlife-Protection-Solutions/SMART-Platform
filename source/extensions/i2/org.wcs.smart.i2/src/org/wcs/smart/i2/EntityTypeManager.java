@@ -25,6 +25,7 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -35,12 +36,10 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * Tools for managing entity types
@@ -74,12 +73,18 @@ public enum EntityTypeManager {
 		return types;
 	}
 	
-	public List<IntelEntityType> getEntityTypesActiveProfiles(Session session){
+	public List<IntelEntityType> getViewableEntityTypesActiveProfiles(Session session){
 		if (ProfilesManager.INSTANCE.getActiveProfiles().isEmpty()) return Collections.emptyList();
+		
+		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
+		if (profiles.isEmpty()) return Collections.emptyList();
+		
 		List<IntelEntityType> types = (session.createQuery("SELECT r FROM IntelEntityType r join r.profiles p WHERE p IN (:profiles)", IntelEntityType.class)
-				.setParameter("profiles", ProfilesManager.INSTANCE.getActiveProfiles())
+				.setParameter("profiles", profiles)
 				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
 				.list());
+		
 		types.sort((IntelEntityType a, IntelEntityType b) -> Collator.getInstance().compare(a.getName(), b.getName()));
 		return types;
 	}

@@ -8,6 +8,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -15,6 +17,7 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -24,6 +27,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
@@ -31,10 +35,14 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
+import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelPermission;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.ProfileDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+
+import com.ibm.icu.text.MessageFormat;
 
 public class ProfilesPreferencePage extends PreferencePage implements IIntelPreferencePage{
 	
@@ -94,6 +102,32 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 		if (!(x instanceof IntelProfile)) return;
 		
 		IntelProfile p = (IntelProfile)x;
+		
+		if (!MessageDialog.openConfirm(getShell(), "Delete", 
+				MessageFormat.format("Are you sure you want to delete the profile {0}?  This will delete all data associated with this profile and cannot be undone.", p.getName()))){
+			return;
+		}
+		
+		//confirm password
+		InputDialog confirm = new InputDialog(getShell(), Messages.RecordsView_DeleteTitle, 
+				"Enter your password to continue", "",null){ 
+			@Override
+			protected void okPressed() {
+				if (!HibernateManager.validatePassword(getText().getText(), SmartDB.getCurrentEmployee())){
+					setErrorMessage(Messages.DeleteRecordHandler_InvalidPassword);
+				}else{
+					setReturnCode(OK);
+					close();
+				}
+			}
+			
+			@Override
+			protected int getInputTextStyle() {
+				return super.getInputTextStyle() | SWT.PASSWORD;
+			}
+		};
+		if (confirm.open() != Window.OK) return ;
+			
 		try(Session session = HibernateManager.openSession()){
 			ProfilesManager.INSTANCE.canDelete(p, session);
 			
@@ -123,7 +157,7 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelProfile> temp = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				temp.addAll(ProfilesManager.INSTANCE.getProfiles(session));
+				temp.addAll(ProfilesManager.INSTANCE.getProfiles(session, false));
 			}
 			ProfilesPreferencePage.this.configs = temp;
 			configs.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));

@@ -62,5 +62,10 @@ ALTER TABLE smart.i_relationship_type ALTER COLUMN target_profile_uuid SET not n
 ALTER TABLE smart.i_relationship_type ADD CONSTRAINT i_rtype_srcprofileuuid_fk FOREIGN KEY (src_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
 ALTER TABLE smart.i_relationship_type ADD CONSTRAINT i_rtype_trgprofileuuid_fk FOREIGN KEY (target_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
 
+
+ALTER TABLE smart.i_entity_record_query add column profile_filter varchar(32672);
+ALTER TABLE smart.i_entity_summary_query add column profile_filter varchar(32672);
+ALTER TABLE smart.i_record_obs_query add column profile_filter varchar(32672);
+
 --must be done last to avoid problems adding
 ALTER TABLE smart.i_profile_config ADD CONSTRAINT profile_config_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE;  

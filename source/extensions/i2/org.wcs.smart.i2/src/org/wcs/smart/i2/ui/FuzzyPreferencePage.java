@@ -42,7 +42,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.search.SearchManager;
-import org.wcs.smart.i2.security.IntelAnalystUserLevel;
+import org.wcs.smart.i2.security.IntelAdminUserLevel;
 import org.wcs.smart.user.UserLevelManager;
 
 /**
@@ -75,9 +75,9 @@ public class FuzzyPreferencePage extends PreferencePage implements
 
 	@Override
 	protected Control createContents(Composite parent) {
-		if (!UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE)){
+		if (!UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAdminUserLevel.INSTANCE)){
 			Label l = new Label(parent, SWT.NONE);
-			l.setText(MessageFormat.format(Messages.FuzzyPreferencePage_InsufficientPermissions, IntelAnalystUserLevel.INSTANCE.getGuiName(Locale.getDefault())));
+			l.setText(MessageFormat.format(Messages.FuzzyPreferencePage_InsufficientPermissions, IntelAdminUserLevel.INSTANCE.getGuiName(Locale.getDefault())));
 			return l;
 		}
 		Composite c = new Composite(parent, SWT.NONE);

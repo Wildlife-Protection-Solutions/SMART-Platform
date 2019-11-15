@@ -23,6 +23,7 @@ package org.wcs.smart.i2.query;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
@@ -37,6 +38,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
 /**
  * Query item provider for providing items for query module 
@@ -76,6 +78,16 @@ public interface IQueryItemProvider {
 	 */
 	public List<IntelEntityType> getEntityTypes(Session session);
 	
+	/**
+	 * Gets all profiles that match a key in the given
+	 * key list
+	 * 
+	 * @param profileKeys
+	 * @param session
+	 * @return
+	 */
+	public Collection<IntelProfile> getProfiles(Set<String> profileKeys, Session session);
+		
 	/**
 	 * Get all entity types
 	 * @param session

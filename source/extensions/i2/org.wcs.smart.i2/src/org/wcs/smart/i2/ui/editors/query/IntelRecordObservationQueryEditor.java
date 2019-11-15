@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -54,6 +55,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
@@ -74,15 +76,18 @@ import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryResult;
@@ -126,11 +131,13 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 	private SectionTabHeader dataTabList;
 	
 	//filter panel
-	private FilterDefinitionPanel panel;
+	private FilterDefinitionPanel dpanel;
+	private ProfilesDefinitionPanel ppanel;
 	private ToolItem[] runItem = new ToolItem[2];
 	private ToolItem saveItem;
 	private ToolItem wsetItem;
-
+	private Label infoLabel;
+	
 	//results area
 	private Composite stackPanel;
 	private QueryLazyResultsTable resultsTable;
@@ -151,7 +158,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 			return;
 		}
 		query.setQueryString(queryString);
-		
+		query.setProfileFilter(ppanel.getQueryPart());
 		boolean isNew = query.getUuid() == null;
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
@@ -211,7 +218,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		clone.setName(newName.getValue());
 		clone.updateName(SmartDB.getCurrentLanguage(), clone.getName());
 		clone.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), clone.getName());
-		
+		clone.setProfileFilter(ppanel.getQueryPart());
 		try(Session s = HibernateManager.openSession()){
 		
 			s.beginTransaction();
@@ -244,7 +251,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 	public void setDirty(boolean isDirty){
 		this.isDirty = isDirty;
 		if (saveItem != null) saveItem.setEnabled(isDirty);
-		panel.setQueryState(isDirty);
+		dpanel.setQueryState(isDirty);
 		firePropertyChange(IEditorPart.PROP_DIRTY);
 	}
 	
@@ -393,25 +400,77 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		createResultSection(c, toolkit);
 		
 		SmartSection definitionSection = new SmartSection(core, toolkit, Messages.IntelQueryEditor_DefinitionSelctionLabel);
+		((GridLayout)definitionSection.getLayout()).verticalSpacing = 0;
 		c = toolkit.createComposite(definitionSection);
 		c.setLayout(new GridLayout());
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)c.getLayout()).marginWidth = 0;
+		((GridLayout)c.getLayout()).marginHeight = 0;
+		((GridLayout)c.getLayout()).verticalSpacing = 0;
+
+		Composite headerPart = toolkit.createComposite(c, SWT.NONE);
+		headerPart.setLayout(new GridLayout(3, false));
+		((GridLayout)headerPart.getLayout()).marginWidth = 0;
+		((GridLayout)headerPart.getLayout()).marginHeight = 0;
+		((GridLayout)headerPart.getLayout()).horizontalSpacing = 0;
+		((GridLayout)headerPart.getLayout()).verticalSpacing = 0;
+		headerPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		panel = new FilterDefinitionPanel(){
+		SectionTabHeader header1 = new SectionTabHeader(new String[] {"Definition", "Profile Filter"}, headerPart, toolkit);
+		header1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)header1.getLayout()).marginWidth = 0;
+		((GridLayout)header1.getLayout()).numColumns = ((GridLayout)header1.getLayout()).numColumns + 2; 
+		
+		createToolbar(header1);
+		
+		Composite definitionStack = toolkit.createComposite(c, SWT.NONE);
+		definitionStack.setLayout(new StackLayout());
+		definitionStack.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((StackLayout)definitionStack.getLayout()).marginWidth = 0;
+		((StackLayout)definitionStack.getLayout()).marginHeight = 0;
+		
+		Composite defComp = toolkit.createComposite(definitionStack, SWT.NONE);
+		defComp.setLayout(new GridLayout());
+		((GridLayout)defComp.getLayout()).marginWidth = 0;
+		((GridLayout)defComp.getLayout()).marginHeight = 0;
+		
+		Composite pComp = toolkit.createComposite(definitionStack, SWT.NONE);
+		pComp.setLayout(new GridLayout());
+		((GridLayout)pComp.getLayout()).marginWidth = 0;
+		((GridLayout)pComp.getLayout()).marginHeight = 0;
+		
+		header1.setContent(new Composite[] {defComp, pComp}, definitionStack);
+		header1.selectTab(0);
+		
+		dpanel = new FilterDefinitionPanel(false, true){
 			public void runQuery(){
-				IntelRecordObservationQueryEditor.this.runQuery();
+				runQuery();
 			}
 			public void saveQuery(){
-				IntelRecordObservationQueryEditor.this.getSite().getPage().saveEditor(IntelRecordObservationQueryEditor.this, false);
+				getSite().getPage().saveEditor(IntelRecordObservationQueryEditor.this, false);
 			}
 		};
-		Composite definitionPanel = panel.createComposite(c);
+		Composite definitionPanel = dpanel.createComposite(defComp);
 		definitionPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	
-		panel.addQueryChangedListener(()->{
+		dpanel.addQueryChangedListener(()->{
 			setDirty(true);
 			validateQuery();
 		});
+		dpanel.getfilterOptionLabel().setToolTipText(Messages.IntelEntityRecordQueryEditor_FilterTypeTooltip);
+		dpanel.getfilterOptionLabel().setText(Messages.IntelEntityRecordQueryEditor_FiltetypeLabel);
+		
+		
+		
+		ppanel = new ProfilesDefinitionPanel();
+		Composite profilesPanel = ppanel.createComposite(pComp);
+		profilesPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	
+		ppanel.addQueryChangedListener(()->{
+			setDirty(true);
+			validateQuery();
+		});
+	
 		
 		loadQueryJob.schedule();
 	}
@@ -477,8 +536,9 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		
 		final Date[] fdateFilter = dateFilter;
 		
-		String queryString = panel.getQueryPart();
+		String queryString = dpanel.getQueryPart();
 		query.setQueryString(queryString);
+		query.setProfileFilter(ppanel.getQueryPart());
 		resultsTable.setQuery(query);
 		
 		runJob.setQuery(query);
@@ -489,24 +549,38 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 	
 	private String validateQuery(){
 		if (isInitializing) return null; //do not valid while initializing
-		String queryString = panel.getQueryPart();
 		try{
+			String x = ppanel.validate();
+			if (x != null) throw new Exception(x);
+			
+			String queryString = dpanel.getQueryPart();
 			IntelRecordObservationQuery.parseQuery(queryString);
-			panel.setErrorMessage(null, null);
+			setErrorMessage(null, null);
 			for(ToolItem i : runItem) i.setEnabled(true);
 			
 			return queryString;
 		}catch (Exception ex){
 			for(ToolItem i : runItem) i.setEnabled(false);
-			panel.setErrorMessage(Messages.IntelQueryEditor_InvalidQueryError, ex);
+			setErrorMessage(Messages.IntelQueryEditor_InvalidQueryError, ex);
 			return null;
 		}
 	}
 	
+	public void setErrorMessage(String message, Exception fullMessage){
+		if (message == null) {
+			infoLabel.setToolTipText("");
+			infoLabel.setText("");
+			infoLabel.getParent().setVisible(false);
+		}else {
+			infoLabel.setToolTipText(fullMessage.getMessage());
+			infoLabel.setText(message);
+			infoLabel.getParent().setVisible(true);
+		}
+	}
 	@Override
 	public void addDropItems(DropItem[] item){
 		for (DropItem i : item){
-			panel.addItem(i);
+			dpanel.addItem(i);
 		}
 	}
 
@@ -560,7 +634,59 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		headerToolbar.redraw();
 		headerToolbar.layout(true, true);
 	}
-	
+	private void createToolbar(Composite parent) {
+		Composite infoPanel = new Composite(parent, SWT.NONE);
+		infoPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)infoPanel.getLayoutData()).heightHint = 10;
+		infoPanel.setLayout(new GridLayout(2, false));
+		
+		Label l = new Label(infoPanel, SWT.NONE);
+		l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
+		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		infoLabel = new Label(infoPanel, SWT.NONE);
+		infoLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		ToolBar toolbar = new ToolBar(parent, SWT.FLAT);
+		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
+			saveItem = new ToolItem(toolbar, SWT.PUSH);
+			saveItem.setToolTipText(Messages.FilterDefinitionPanel_savetooltip);
+			saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+			saveItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					getSite().getPage().saveEditor(IntelRecordObservationQueryEditor.this, false);
+				}
+			});
+			
+			ToolItem clear = new ToolItem(toolbar, SWT.PUSH);
+			clear.setToolTipText(Messages.FilterDefinitionPanel_clearTooltip);
+			clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
+			clear.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					dpanel.clear();
+					ppanel.clear();
+					setDirty(true);
+					validateQuery();
+				}
+			});
+		}
+		
+		ToolItem runItem = new ToolItem(toolbar, SWT.PUSH);
+		runItem.setToolTipText(Messages.FilterDefinitionPanel_runtooltip);
+		runItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		runItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				runQuery();
+			}
+		});
+		this.runItem[1] = runItem;
+		
+	}
 	
 	private void initUiField(){
 		setPartName(query.getName());
@@ -590,6 +716,9 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 				temp.updateName(SmartDB.getCurrentLanguage(), temp.getName());
 				temp.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), temp.getName());
 				temp.setConservationArea(SmartDB.getCurrentConservationArea());
+				
+				temp.setProfileFilter(AbstractIntelQuery.convertToProfileFilter(ProfilesManager.INSTANCE.getActiveProfiles()
+						.stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e)).collect(Collectors.toSet())));
 				
 				query = temp;
 			}else{
@@ -665,8 +794,9 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 				isInitializing = true;
 				try{
 					initUiField();
-					panel.setFilterType(fType);
-					panel.addItems(fGeneratedDropItems);
+					dpanel.setFilterType(fType);
+					dpanel.addItems(fGeneratedDropItems);
+					ppanel.setProfileFilter(query.getProfileFilter());
 				}finally{
 					isInitializing = false;
 				}

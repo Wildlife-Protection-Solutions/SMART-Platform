@@ -56,7 +56,7 @@ public class ProfileFilterHandler {
 		
 		List<IntelProfile> profiles = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			profiles.addAll(ProfilesManager.INSTANCE.getProfiles(session));
+			profiles.addAll(ProfilesManager.INSTANCE.getProfiles(session, true));
 		}
 		
 		Set<IntelProfile> active = new HashSet<>(ProfilesManager.INSTANCE.getActiveProfiles());

@@ -22,8 +22,11 @@
 package org.wcs.smart.i2.search;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -32,6 +35,7 @@ import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * Basic record search
@@ -65,8 +69,13 @@ public class BasicRecordSearch implements IRecordSearch{
 			hql += " AND lower(title) like lower(:title) "; //$NON-NLS-1$
 		}
 		
+		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewRecords(e)).collect(Collectors.toList());
+		if (profiles.isEmpty()) {
+			return new IntelRecordResult(0, Collections.emptyList(), System.nanoTime() - startTime);
+		}
 		Query<?> query = session.createQuery("SELECT count(*) " + hql); //$NON-NLS-1$
-		query.setParameter("profiles", ProfilesManager.INSTANCE.getActiveProfiles());
+		query.setParameter("profiles", profiles);
 		if (source != null){
 			query.setParameter("source", source); //$NON-NLS-1$
 		}
@@ -81,7 +90,7 @@ public class BasicRecordSearch implements IRecordSearch{
 		
 		query = session.createQuery("SELECT uuid, title, recordSource.uuid, status, description, profile.uuid " + hql); //$NON-NLS-1$
 		query.setMaxResults(IRecordSearch.MAX_RESULT_CNT);
-		query.setParameter("profiles", ProfilesManager.INSTANCE.getActiveProfiles());
+		query.setParameter("profiles", profiles);
 		if (source != null){
 			query.setParameter("source", source); //$NON-NLS-1$
 		}

@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -211,8 +212,9 @@ public class RecordsView {
 				new String[]{Messages.RecordsView_unprocessedSection, Messages.RecordsView_inprogressSection, Messages.RecordsView_allSection, Messages.RecordsView_basicSection}, 
 				headerMain, toolkit);
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-		ToolBar tb = new ToolBar(headerMain, SWT.FLAT);
+		((GridLayout)tabList.getLayout()).numColumns = ((GridLayout)tabList.getLayout()).numColumns + 1;
+		ToolBar tb = new ToolBar(tabList, SWT.FLAT);
+		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
 		
 		if (IntelSecurityManager.INSTANCE.canCreateRecordAny()) {
 			ToolItem newRecord = new ToolItem(tb, SWT.PUSH);
@@ -797,26 +799,29 @@ public class RecordsView {
 			// -- load new and inprogress images --
 			final List<IntelRecordProxy> inProgress = new ArrayList<IntelRecordProxy>();
 			final List<IntelRecordProxy> newRecords = new ArrayList<IntelRecordProxy>();
-			
-			try(Session s = HibernateManager.openSession()){
-				String hql = " FROM IntelRecord WHERE conservationArea = :ca AND status in (:items) AND profile IN (:profiles) ORDER BY dateCreated";
-				
-				
-				List<IntelRecord> records = s.createQuery(hql, IntelRecord.class)
-						.setParameter("ca",  SmartDB.getCurrentConservationArea())
-						.setParameterList("items", new IntelRecord.Status[] {IntelRecord.Status.PROCESSING, IntelRecord.Status.NEW})
-						.setParameterList("profiles", ProfilesManager.INSTANCE.getActiveProfiles()).list();
 
-				for (IntelRecord r : records){
-					IntelRecordProxy proxy = null;
-					proxy = new IntelRecordProxy(r.getTitle(), r.getUuid(), r.getRecordSource(), r.getProfile(), r.getStatus(), r.getPrimaryDate());
-					if (r.getStatus() == IntelRecord.Status.PROCESSING){
-						inProgress.add(proxy);
-					}else if (r.getStatus() == IntelRecord.Status.NEW){
-						newRecords.add(proxy);
+			List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+			profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewRecords(e)).collect(Collectors.toList());
+			if (!profiles.isEmpty()) {
+				try(Session s = HibernateManager.openSession()){
+					String hql = " FROM IntelRecord WHERE conservationArea = :ca AND status in (:items) AND profile IN (:profiles) ORDER BY dateCreated";
+					
+					List<IntelRecord> records = s.createQuery(hql, IntelRecord.class)
+							.setParameter("ca",  SmartDB.getCurrentConservationArea())
+							.setParameterList("items", new IntelRecord.Status[] {IntelRecord.Status.PROCESSING, IntelRecord.Status.NEW})
+							.setParameterList("profiles", profiles).list();
+	
+					for (IntelRecord r : records){
+						IntelRecordProxy proxy = null;
+						proxy = new IntelRecordProxy(r.getTitle(), r.getUuid(), r.getRecordSource(), r.getProfile(), r.getStatus(), r.getPrimaryDate());
+						if (r.getStatus() == IntelRecord.Status.PROCESSING){
+							inProgress.add(proxy);
+						}else if (r.getStatus() == IntelRecord.Status.NEW){
+							newRecords.add(proxy);
+						}
+						if (r.getRecordSource() != null) r.getRecordSource().getName();
+						r.getProfile().getName();
 					}
-					if (r.getRecordSource() != null) r.getRecordSource().getName();
-					r.getProfile().getName();
 				}
 			}
 			
@@ -833,23 +838,25 @@ public class RecordsView {
 			//--load all records --
 			
 			final List<IntelRecordProxy> allRecords = new ArrayList<IntelRecordProxy>();
-			try(Session s = HibernateManager.openSession()){
-				Query<?> q = s.createQuery("SELECT title, uuid, primaryDate, recordSource.uuid, status, profile.uuid FROM IntelRecord WHERE conservationArea = :ca AND profile IN (:profiles) ORDER BY dateModified desc"); //$NON-NLS-1$
-				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-				q.setParameter("profiles",  ProfilesManager.INSTANCE.getActiveProfiles());
-				List<?> items = q.list();
-				for (Object it : items){
-					Object[] item = (Object[])it;
-					IntelProfile ip = s.get(IntelProfile.class, (UUID)item[5]);
-					String name = (String)item[0];
-					UUID uuid = (UUID)item[1];
-					IntelRecordSource rs = item[3] == null ? null : s.get(IntelRecordSource.class,(UUID)item[3]);
-					IntelRecordProxy r = new IntelRecordProxy(name, uuid, rs, ip, (IntelRecord.Status)item[4], (Date)item[2]);
-					allRecords.add(r);
+			if (!profiles.isEmpty()) {
+				try(Session s = HibernateManager.openSession()){
+					Query<?> q = s.createQuery("SELECT title, uuid, primaryDate, recordSource.uuid, status, profile.uuid FROM IntelRecord WHERE conservationArea = :ca AND profile IN (:profiles) ORDER BY dateModified desc"); //$NON-NLS-1$
+					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+					q.setParameter("profiles", profiles);
+					List<?> items = q.list();
+					for (Object it : items){
+						Object[] item = (Object[])it;
+						IntelProfile ip = s.get(IntelProfile.class, (UUID)item[5]);
+						String name = (String)item[0];
+						UUID uuid = (UUID)item[1];
+						IntelRecordSource rs = item[3] == null ? null : s.get(IntelRecordSource.class,(UUID)item[3]);
+						IntelRecordProxy r = new IntelRecordProxy(name, uuid, rs, ip, (IntelRecord.Status)item[4], (Date)item[2]);
+						allRecords.add(r);
+					}
+					
 				}
-				
+				allRecords.sort((x,y)->-1 * x.getDate().compareTo(y.getDate()));
 			}
-			allRecords.sort((x,y)->-1 * x.getDate().compareTo(y.getDate()));
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {

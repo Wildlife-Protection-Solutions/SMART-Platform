@@ -151,7 +151,7 @@ public class RecordsPreferencePage extends PreferencePage implements IIntelPrefe
 				});
 				sources = srcs;
 				
-				profiles.addAll(ProfilesManager.INSTANCE.getProfiles(session));
+				profiles.addAll(ProfilesManager.INSTANCE.getProfiles(session, false));
 				for (IntelProfile p : profiles) p.getName();
 			}
 			
@@ -385,6 +385,8 @@ public class RecordsPreferencePage extends PreferencePage implements IIntelPrefe
 		newItem.setAttributes(new ArrayList<>());
 		newItem.setProfiles(new HashSet<>());
 		newItem.setConservationArea(SmartDB.getCurrentConservationArea());
+		newItem.setName("New Record Source");
+		newItem.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), newItem.getName());
 		openDialog(newItem);
 	}
 	
@@ -394,6 +396,7 @@ public class RecordsPreferencePage extends PreferencePage implements IIntelPrefe
 		cmbSources.setInput(new String[]{DialogConstants.LOADING_TEXT});
 
 		dialog.open();
+		refresh();
 	}
 	
 	private void edit(){
@@ -401,7 +404,6 @@ public class RecordsPreferencePage extends PreferencePage implements IIntelPrefe
 		if (x instanceof IntelRecordSource){
 			IntelRecordSource type = (IntelRecordSource)x;
 			openDialog(type);
-			refresh();
 		}
 	}
 	
