@@ -58,10 +58,28 @@ public class EmployeeSelectDialog extends SmartStyledDialog{
 
 	private List<Employee> employees;
 	private CheckboxTableViewer tblViewer;
+	private List<Employee> initEmployees;
 	
+	/**
+	 * Creates a new dialog where employee can be any
+	 * active employee for the Conservation Area.
+	 * @param parent
+	 */
 	public EmployeeSelectDialog(Shell parent) {
 		super(parent);
 	}
+	
+	/**
+	 * Creates a new dialog where employees are selected
+	 * from the list of employees.
+	 * @param parent
+	 * @param employees
+	 */
+	public EmployeeSelectDialog(Shell parent, List<Employee> employees) {
+		super(parent);
+		this.initEmployees = employees;
+	}
+	
 	
 	/**
 	 * 
@@ -101,23 +119,27 @@ public class EmployeeSelectDialog extends SmartStyledDialog{
 		tblViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblViewer.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(tblViewer));
 		
-		Job load = new Job(Messages.EmployeePropertyPage_loadingjob2) {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				List<Employee> items = new ArrayList<>();
-				try(Session session = HibernateManager.openSession()){
-					items.addAll(HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), session));
+		if (initEmployees == null) {
+			Job load = new Job(Messages.EmployeePropertyPage_loadingjob2) {
+	
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					List<Employee> items = new ArrayList<>();
+					try(Session session = HibernateManager.openSession()){
+						items.addAll(HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), session));
+					}
+					items.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getFullLabel((Employee)a), SmartLabelProvider.getFullLabel((Employee)b)));
+					Display.getDefault().syncExec(()->{
+						tblViewer.setInput(items);
+					});
+					return Status.OK_STATUS;
 				}
-				items.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getFullLabel((Employee)a), SmartLabelProvider.getFullLabel((Employee)b)));
-				Display.getDefault().syncExec(()->{
-					tblViewer.setInput(items);
-				});
-				return Status.OK_STATUS;
-			}
-			
-		};
-		load.schedule();
+				
+			};
+			load.schedule();
+		}else {
+			tblViewer.setInput(initEmployees);
+		}
 		getShell().setText(Messages.EmployeePropertyPage_shelltext);
 		return main;
 	}
