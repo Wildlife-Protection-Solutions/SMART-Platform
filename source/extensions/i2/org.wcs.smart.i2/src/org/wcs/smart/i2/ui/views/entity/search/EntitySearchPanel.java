@@ -27,7 +27,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -77,6 +76,7 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
@@ -253,10 +253,6 @@ public abstract class EntitySearchPanel extends Composite {
 				toAdd.add(di);
 			}else if (p.startsWith(SystemAttributeFilter.SA_KEY)){
 				String[] bits = p.split(" ")[0].split(":"); //$NON-NLS-1$ //$NON-NLS-2$
-				
-				
-
-				
 				SystemAttributeFilter.SystemAttribute sa = SystemAttributeFilter.SystemAttribute.valueOf(bits[2].toUpperCase(Locale.ROOT));
 				if (sa == null) {
 					toAdd.add(new ErrorDropItem(MessageFormat.format(Messages.EntitySearchPanel_SystemFilterNotSupported, bits[2])));
@@ -278,7 +274,8 @@ public abstract class EntitySearchPanel extends Composite {
 				
 			}else if (p.startsWith(AdvancedEntitySearch.ENTITYTYPE_KEY)){
 				String entityTypeKey = p.split("=")[1].trim(); //$NON-NLS-1$
-				toAdd.add(createEntityTypeDropItem(entityTypeKey));				
+				toAdd.add(createEntityTypeDropItem(entityTypeKey));	
+				
 			}else if (p.startsWith(AdvancedEntitySearch.ATTRIBUTE_KEY + ":")){ //$NON-NLS-1$
 				String[] bits = p.split(" ")[0].split(":"); //$NON-NLS-1$ //$NON-NLS-2$
 				String key = bits[2];
@@ -287,6 +284,24 @@ public abstract class EntitySearchPanel extends Composite {
 					ia = QueryFactory.buildQuery(session, IntelAttribute.class,
 							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 							new Object[] {"keyId", key}).uniqueResult(); //$NON-NLS-1$
+					
+					//determine if attribute is valid for given profiles
+					boolean isValid = false;
+					List<IntelEntityType> types = EntityTypeManager.INSTANCE.getViewableEntityTypesActiveProfiles(session);
+					for (IntelEntityType t : types) {
+						for (IntelEntityTypeAttribute ea : t.getAttributes()) {
+							if (ea.getAttribute().equals(ia)) {
+								isValid = true;
+								break;
+							}
+						}
+						if (isValid)break;
+					}
+					if (!isValid) {
+						toAdd.add(new ErrorDropItem(MessageFormat.format("Attribute {0} is not valid for the current active profiles.", ia.getKeyId())));
+						continue;
+					}
+					
 					
 					if (ia != null && ia.getType() == AttributeType.LIST){
 						String listKey = p.split(" ")[2]; //$NON-NLS-1$
@@ -432,8 +447,8 @@ public abstract class EntitySearchPanel extends Composite {
 				public Image getImage(Object element){
 					if (element instanceof SystemAttributeFilter.SystemAttribute) {
 						switch ((SystemAttributeFilter.SystemAttribute)element) {
-						case DATE_CREATED:
-						case DATE_MODIFIED:
+						case ENTITY_DATE_CREATED:
+						case ENTITY_DATE_MODIFIED:
 							return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_DATE_ICON);
 						default:
 							break;
@@ -508,6 +523,7 @@ public abstract class EntitySearchPanel extends Composite {
 				}else{
 					attributeTable.setInput(new String[]{DialogConstants.LOADING_TEXT});
 					Job j = new Job(Messages.AdvancedEntitySearchPanel_loadingAttributeJobName){
+						@SuppressWarnings("deprecation")
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try(Session s = HibernateManager.openSession()){
@@ -535,7 +551,11 @@ public abstract class EntitySearchPanel extends Composite {
 				}
 				break;
 			case SYSTEM_ENTITY_ATTRIBUTE:
-				attributeTable.setInput(SystemAttributeFilter.SystemAttribute.values());
+				SystemAttributeFilter.SystemAttribute[] items = new SystemAttributeFilter.SystemAttribute[] {
+						SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED,
+						SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED
+				};
+				attributeTable.setInput(items);
 				
 			default:
 				break;
@@ -611,12 +631,18 @@ public abstract class EntitySearchPanel extends Composite {
 		} catch (InterruptedException e) {
 			return new ErrorDropItem(e.getMessage());
 		}
-		
-		OptionDropItem dropItem = new OptionDropItem(Messages.AdvancedEntitySearchPanel_EntityTypeOptionDropItemName, AdvancedEntitySearch.ENTITYTYPE_KEY, values[0], values[1], true);
-		if (entityTypeKey != null){
-			dropItem.setInitialValue(entityTypeKey);
+		for (String key : values[1]) {
+			if (key.equals(entityTypeKey)) {
+				OptionDropItem dropItem = new OptionDropItem(Messages.AdvancedEntitySearchPanel_EntityTypeOptionDropItemName, AdvancedEntitySearch.ENTITYTYPE_KEY, values[0], values[1], true);
+				if (entityTypeKey != null){
+					dropItem.setInitialValue(entityTypeKey);
+				}
+				return dropItem;		
+			}
 		}
+		ErrorDropItem dropItem = new ErrorDropItem(MessageFormat.format("Entity type {0} is not found in the current active profiles.", entityTypeKey));
 		return dropItem;
+		
 	}
 	
 	private TextOperatorDropItem createNotDropItem(){

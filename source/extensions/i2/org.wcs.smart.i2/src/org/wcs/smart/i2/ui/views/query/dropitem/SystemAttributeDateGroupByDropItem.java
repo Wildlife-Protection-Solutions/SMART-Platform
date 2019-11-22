@@ -48,18 +48,16 @@ import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
  * @author Emily
  *
  */
-public class SystemAttributeGroupByDropItem extends DropItem implements IGroupByDropItem{
+public class SystemAttributeDateGroupByDropItem extends DropItem implements IGroupByDropItem{
 
 	
 	private SystemAttributeFilter.SystemAttribute attribute;
-	private SystemAttributeFilter.Type type;
 	
 	private ComboViewer cmbOptions;
 	
 	private GroupByItem.DateOption initDateOption = null;
 	
-	public SystemAttributeGroupByDropItem(SystemAttributeFilter.SystemAttribute attribute) {
-		this.type = SystemAttributeFilter.Type.ENTITY;
+	public SystemAttributeDateGroupByDropItem(SystemAttributeFilter.SystemAttribute attribute) {
 		this.attribute = attribute;
 	}
 
@@ -70,15 +68,13 @@ public class SystemAttributeGroupByDropItem extends DropItem implements IGroupBy
 	
 	@Override
 	public String getText() {
-		return MessageFormat.format("{0} ({1})", IntelligenceLabelProviderImpl.getName(attribute), IntelligenceLabelProviderImpl.getName(type)); //$NON-NLS-1$
+		return MessageFormat.format("{0}", IntelligenceLabelProviderImpl.getName(attribute)); //$NON-NLS-1$
 	}
 
 	@Override
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(SystemAttributeFilter.SA_KEY);
-		sb.append(GroupByItem.INTERNAL_SEPERATOR);
-		sb.append(type.name().toLowerCase(Locale.ROOT));
 		sb.append(GroupByItem.INTERNAL_SEPERATOR);
 		sb.append(attribute.name().toLowerCase(Locale.ROOT));
 		sb.append(GroupByItem.INTERNAL_SEPERATOR);

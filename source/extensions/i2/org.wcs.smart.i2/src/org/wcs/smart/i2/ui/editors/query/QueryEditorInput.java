@@ -27,9 +27,7 @@ import java.util.UUID;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
-import org.wcs.smart.i2.model.IntelEntityRecordQuery;
-import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 
 /**
  * Editor input for query editor.
@@ -55,16 +53,8 @@ public class QueryEditorInput implements IEditorInput{
 		}
 	}
 	
-	public QueryEditorInput(IntelRecordObservationQuery record){
-		this(record.getName(), record.getUuid(), IntelRecordObservationQuery.KEY);
-	}
-	
-	public QueryEditorInput(IntelEntitySummaryQuery record){
-		this(record.getName(), record.getUuid(), IntelEntitySummaryQuery.KEY);
-	}
-	
-	public QueryEditorInput(IntelEntityRecordQuery record){
-		this(record.getName(), record.getUuid(), IntelEntityRecordQuery.KEY);
+	public QueryEditorInput(AbstractIntelQuery record){
+		this(record.getName(), record.getUuid(), record.getTypeKey());
 	}
 	
 	

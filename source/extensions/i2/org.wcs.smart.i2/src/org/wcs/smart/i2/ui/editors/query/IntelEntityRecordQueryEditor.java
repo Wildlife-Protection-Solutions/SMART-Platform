@@ -49,7 +49,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ToolBar;
@@ -102,6 +101,7 @@ import org.wcs.smart.ui.SmartWizardDialog;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEditor{
 
 	public static final String ID = "org.wcs.smart.i2.editor.query.entityrecord"; //$NON-NLS-1$
@@ -252,8 +252,8 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		return true;
 	}
 	
-	private void closeEditor(){
-		getSite().getPage().closeEditor(IntelEntityRecordQueryEditor.this, false);
+	private void closeEditor(boolean promptSave){
+		getSite().getPage().closeEditor(IntelEntityRecordQueryEditor.this, promptSave);
 	}
 
 	@Override
@@ -274,14 +274,14 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 				Object data = event.getProperty(IEventBroker.DATA);
 				if (data instanceof IntelEntityRecordQuery){
 					if (data.equals(query)){
-						closeEditor();
+						closeEditor(false);
 						return;
 					}
 				}else if (data instanceof List){
 					List dd = (List)data;
 					for (Object d: dd){
 						if (d.equals(query)){
-							closeEditor();
+							closeEditor(false);
 							return;
 						}
 					}
@@ -298,6 +298,13 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		
 		eventHandles.add(handler);
 		eventBroker.subscribe(IntelEvents.ACTIVE_WS_SET, handler);
+		
+		//profiles modified
+		handler = event->{
+			if (!query.queriesProfile(ProfilesManager.INSTANCE.getActiveProfileKeys())) closeEditor(true);
+		};
+		eventHandles.add(handler);
+		eventBroker.subscribe(IntelEvents.ACTIVE_PROFILES, handler);
 		
 		parent.setLayout(new GridLayout());
 		((GridLayout)parent.getLayout()).marginWidth = 0;
@@ -631,7 +638,7 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 					IntelEntityRecordQuery temp = (IntelEntityRecordQuery)s.get(IntelEntityRecordQuery.class, uuid);
 					if (temp == null){
 						Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_QueryNotfoundError, null);
-						closeEditor();
+						closeEditor(false);
 						return Status.OK_STATUS;
 					}
 					temp.getNames().size();

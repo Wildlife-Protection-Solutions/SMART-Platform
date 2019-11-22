@@ -335,7 +335,7 @@ public class EntityList extends Composite {
 			}
 		});
 		
-		if (IntelSecurityManager.INSTANCE.canViewEntityAny()) { //TODO fix this
+		if (IntelSecurityManager.INSTANCE.canViewEntityAny()) {
 			mnuOpen = new MenuItem(mnuEntities, SWT.PUSH);
 			mnuOpen.setText(Messages.EntityList_OpenItem);
 			mnuOpen.addSelectionListener(new SelectionAdapter() {

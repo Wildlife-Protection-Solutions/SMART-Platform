@@ -73,6 +73,13 @@ public enum EntityTypeManager {
 		return types;
 	}
 	
+	/**
+	 * returns a set of entity types that are viewable by the current user
+	 * and associated with an active profile
+	 * 
+	 * @param session
+	 * @return
+	 */
 	public List<IntelEntityType> getViewableEntityTypesActiveProfiles(Session session){
 		if (ProfilesManager.INSTANCE.getActiveProfiles().isEmpty()) return Collections.emptyList();
 		
@@ -80,6 +87,7 @@ public enum EntityTypeManager {
 		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
 		if (profiles.isEmpty()) return Collections.emptyList();
 		
+		@SuppressWarnings("deprecation")
 		List<IntelEntityType> types = (session.createQuery("SELECT r FROM IntelEntityType r join r.profiles p WHERE p IN (:profiles)", IntelEntityType.class)
 				.setParameter("profiles", profiles)
 				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
@@ -90,6 +98,12 @@ public enum EntityTypeManager {
 	}
 	
 	
+	/**
+	 * validates if the given entity type can be deleted or not
+	 * @param type
+	 * @param session
+	 * @throws Exception
+	 */
 	public void canDelete(IntelEntityType type, Session session) throws Exception{
 		if (!DeleteManager.canDelete(type, session)){
 			throw new Exception(Messages.EntityTypeManager_DeleteError);
@@ -167,6 +181,10 @@ public enum EntityTypeManager {
 		q.executeUpdate();
 		
 		//delete all record source attribute values
+		q = session.createQuery("delete from IntelRecordAttributeValueList ii where ii.id.value in ( From IntelRecordAttributeValue ii where ii.attribute IN (FROM IntelRecordSourceAttribute ii where ii.entityType = :type ))"); //$NON-NLS-1$
+		q.setParameter("type", type); //$NON-NLS-1$
+		q.executeUpdate();
+		
 		q = session.createQuery("delete from IntelRecordAttributeValue ii where ii.attribute in ( FROM IntelRecordSourceAttribute ii where ii.entityType = :type )"); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();

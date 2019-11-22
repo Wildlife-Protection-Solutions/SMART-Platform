@@ -92,8 +92,10 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_CHECK = "org.wcs.smart.i2.check"; //$NON-NLS-1$
 
 	
+	public static final String ICON_QUERY_RECORD = "org.wcs.smart.i2.query.record"; //$NON-NLS-1$
 	public static final String ICON_QUERY_RECORDOBS = "org.wcs.smart.i2.query.recordobs"; //$NON-NLS-1$
 	public static final String ICON_QUERY_ENTITYSUM = "org.wcs.smart.i2.query.entitysum"; //$NON-NLS-1$
+	public static final String ICON_QUERY_RECORDSUM = "org.wcs.smart.i2.query.recordsum"; //$NON-NLS-1$
 	public static final String ICON_QUERY_ENTITYRECORD = "org.wcs.smart.i2.query.entityrecord"; //$NON-NLS-1$
 	
 	public static final String ICON_SYSTEM_DATEATTRIBUTE = "org.wcs.smart.i2.query.systemdateattribute"; //$NON-NLS-1$
@@ -131,6 +133,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_ATTRIBUTE_GROUP_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_group_new.png")); //$NON-NLS-1$);
 		reg.put(ICON_RUN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/run_query.png")); //$NON-NLS-1$);
 		
+		
 		reg.put(ICON_ENTITY_QUERY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entity_query.png")); //$NON-NLS-1$);
 		reg.put(ICON_ENTITY_QUERY_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/new_entity_query.png")); //$NON-NLS-1$);
 		reg.put(ICON_AREA, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/area_polygon.png")); //$NON-NLS-1$);
@@ -155,8 +158,10 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_GROUP_BY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/group_by.png")); //$NON-NLS-1$);
 		reg.put(ICON_FILTERS, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/filter.png")); //$NON-NLS-1$);
 		reg.put(ICON_VALUES, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/values.png")); //$NON-NLS-1$);
+		reg.put(ICON_QUERY_RECORD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/query_record_obs.png")); //$NON-NLS-1$);
 		reg.put(ICON_QUERY_RECORDOBS, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/query_record_obs.png")); //$NON-NLS-1$
 		reg.put(ICON_QUERY_ENTITYSUM, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/query_entity_sum.png")); //$NON-NLS-1$
+		reg.put(ICON_QUERY_RECORDSUM, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/query_entity_sum.png")); //$NON-NLS-1$
 		reg.put(ICON_QUERY_ENTITYRECORD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/query_entity_record.png")); //$NON-NLS-1$
 		
 		reg.put(ICON_CONFIGURE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/configure.png")); //$NON-NLS-1$

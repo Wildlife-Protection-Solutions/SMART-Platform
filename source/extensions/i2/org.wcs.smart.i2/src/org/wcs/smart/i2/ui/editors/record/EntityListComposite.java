@@ -240,8 +240,8 @@ public class EntityListComposite extends Composite{
 				IntelEntity toadd = null;
 				try(Session s = HibernateManager.openSession()){
 					toadd = (IntelEntity) s.get(IntelEntity.class, entity.getUuid());
-					toadd.getProfile().equals(editor.getRecord().getProfile());
 					if(toadd != null){
+						toadd.getProfile().equals(editor.getRecord().getProfile());
 						toadd.getIdAttributeAsText();
 						if (toadd.getPrimaryAttachment() != null){
 							try {

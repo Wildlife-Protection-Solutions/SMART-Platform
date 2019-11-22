@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Objects;
 
@@ -46,17 +47,22 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.InternalQueryManager;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
@@ -66,7 +72,9 @@ import org.wcs.smart.i2.ui.views.query.dropitem.AttributeGroupByDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.ConservationAreaGroupByDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.EntityTypeGroupByDropItem;
-import org.wcs.smart.i2.ui.views.query.dropitem.SystemAttributeGroupByDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.RecordSourceGroupByDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.RecordStatusGroupByDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.SystemAttributeDateGroupByDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextOperatorDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.ValueDropItem;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -82,7 +90,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  *
  */
 public class EntitySummaryContentProvider implements ITreeContentProvider{
-
+	
 	/* 
 	 * tree root nodes
 	 */
@@ -133,7 +141,14 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 	private List<IntelEntityType> types;
 	private HashMap<String, List<IntelEntityTypeAttribute>> typeAttributes;
 	
-	public EntitySummaryContentProvider() {
+	private List<IntelRecordSource> records;
+	private HashMap<String, List<IntelRecordSourceAttribute>> recordAttributes;
+	
+	public enum Type {ENTITY, RECORD};
+	private Type type;
+	
+	public EntitySummaryContentProvider(Type type) {
+		this.type = type;
 	}
 	
 	
@@ -141,6 +156,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.viewer = viewer;
 		types = null;
+		records = null;
 		if (newInput != null) {
 			loadDataJob.schedule();	
 		}
@@ -148,11 +164,13 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 	
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (types == null) return new Object[] {DialogConstants.LOADING_TEXT};
-		return new Object[] {
+		if (types != null || records != null) {
+			return new Object[] {
 				new TreeNode(RootNode.GROUP_BY_OPTION, RootNode.GROUP_BY_OPTION, RootNode.GROUP_BY_OPTION.guiName),
 				new TreeNode(RootNode.VALUE_OPTION, RootNode.VALUE_OPTION, RootNode.VALUE_OPTION.guiName),
 				new TreeNode(RootNode.FILTER_OPTION, RootNode.FILTER_OPTION, RootNode.FILTER_OPTION.guiName)};
+		}
+		return new Object[] {DialogConstants.LOADING_TEXT};
 	}
 
 	@Override
@@ -184,7 +202,28 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 		return false;
 	}
 
-	
+	private void setDataRecord(HashMap<IntelRecordSource, List<IntelRecordSourceAttribute>> types) {
+		records = new ArrayList<>();
+		recordAttributes = new HashMap<>();
+		records.addAll(types.keySet());
+		for (Entry<IntelRecordSource, List<IntelRecordSourceAttribute>> items : types.entrySet()) {
+			recordAttributes.put(items.getKey().getKeyId(), items.getValue());
+		}
+
+		Display.getDefault().syncExec(()->{
+			Object label = viewer.getControl().getData(QueryView.REFRESHLABEL_KEY);
+			if (label != null && label instanceof Control){
+				((Control)label).dispose();
+				viewer.getControl().setData(QueryView.REFRESHLABEL_KEY, null);
+			}
+			
+			viewer.refresh();
+			((TreeViewer)viewer).expandToLevel(2);	
+			viewer.getControl().setEnabled(true);
+			
+		});
+		
+	}
 	private void setData(HashMap<IntelEntityType, List<IntelEntityTypeAttribute>> entityTypes) {
 		types = new ArrayList<>();
 		typeAttributes = new HashMap<>();
@@ -294,8 +333,46 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 		public List<FilterTreeItem> getChildren() {
 			if (item == RootNode.FILTER_OPTION || item == RootNode.GROUP_BY_OPTION) {
 				List<FilterTreeItem> items = new ArrayList<>();
-				items.add(new TreeNode((RootNode)item, SubRootNode.ENTITY_TYPE_ITEM, SubRootNode.ENTITY_TYPE_ITEM.guiName));
-				items.add(new TreeNode((RootNode)item, SubRootNode.ATTRIBUTE_ITEM, SubRootNode.ATTRIBUTE_ITEM.guiName));
+				if (type == Type.ENTITY) {
+					items.add(new TreeNode((RootNode)item, SubRootNode.ENTITY_TYPE_ITEM, SubRootNode.ENTITY_TYPE_ITEM.guiName));
+					items.add(new TreeNode((RootNode)item, SubRootNode.ATTRIBUTE_ITEM, SubRootNode.ATTRIBUTE_ITEM.guiName));
+				}else if (type == Type.RECORD ) {
+					TreeNode tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.RECORD_SOURCE, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.RECORD_SOURCE));
+					tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
+					items.add(tn);
+					
+					tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.RECORD_STATUS, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.RECORD_STATUS));
+					tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_SRC_NEW));
+					items.add(tn);
+					
+					tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED));
+					tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_SYSTEM_DATEATTRIBUTE));
+					items.add(tn);
+					
+					tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED));
+					tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_SYSTEM_DATEATTRIBUTE));
+					items.add(tn);
+					
+					if (item == RootNode.GROUP_BY_OPTION) {
+						tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.RECORD_DATE, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.RECORD_DATE));
+						tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_SYSTEM_DATEATTRIBUTE));
+						items.add(tn);
+					}
+					
+					HashSet<String> keys = new HashSet<>();
+					for (List<IntelRecordSourceAttribute> atts : recordAttributes.values()) {
+						for (IntelRecordSourceAttribute a : atts) {
+							if (a.getAttribute() == null) continue;
+							if (keys.contains(a.getAttribute().getKeyId())) continue;
+							keys.add(a.getAttribute().getKeyId());
+							if (source == RootNode.FILTER_OPTION || (
+									source == RootNode.GROUP_BY_OPTION && isGroupByAttribute(a.getAttribute()))) {
+								items.add(new TreeNode(source, a.getAttribute(), a.getAttribute().getName()));
+							}
+						}
+					}
+				}
+				
 				if (item == RootNode.FILTER_OPTION) {
 					items.add(new TreeNode((RootNode)item, SubRootNode.OPERATORS, SubRootNode.OPERATORS.guiName));
 				}
@@ -307,9 +384,15 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 			
 			if (item == RootNode.VALUE_OPTION) {
 				List<FilterTreeItem> kids = new ArrayList<>();
-				for (ValuePart.ValueOption op : ValuePart.ValueOption.values()) {
-					kids.add(new TreeNode(RootNode.VALUE_OPTION, op, ValueDropItem.NAME));
+				ValuePart.ValueOption op = null;
+				if (type == Type.ENTITY) {
+					op = ValuePart.ValueOption.NUMBER_ENTITIES;
+				}else if (type == Type.RECORD) {
+					op = ValuePart.ValueOption.NUMBER_RECORDS;
 				}
+				String name = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(op, Locale.getDefault());
+				kids.add(new TreeNode(RootNode.VALUE_OPTION, op, name));
+				
 				return kids;
 			}
 			
@@ -333,27 +416,52 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 			
 			if (item == SubRootNode.ATTRIBUTE_ITEM) {
 				HashSet<String> keys = new HashSet<>();
-				
 				List<FilterTreeItem> nodes = new ArrayList<>();
-				for (List<IntelEntityTypeAttribute> atts : typeAttributes.values()) {
-					for (IntelEntityTypeAttribute a : atts) {
-						if (keys.contains(a.getAttribute().getKeyId())) continue;
-						keys.add(a.getAttribute().getKeyId());
-						if (source == RootNode.FILTER_OPTION || (
-								source == RootNode.GROUP_BY_OPTION && isGroupByAttribute(a.getAttribute()))) {
-							nodes.add(new TreeNode(source, a.getAttribute(), a.getAttribute().getName()));
+				if (type == Type.ENTITY) {
+					for (List<IntelEntityTypeAttribute> atts : typeAttributes.values()) {
+						for (IntelEntityTypeAttribute a : atts) {
+							if (keys.contains(a.getAttribute().getKeyId())) continue;
+							keys.add(a.getAttribute().getKeyId());
+							if (source == RootNode.FILTER_OPTION || (
+									source == RootNode.GROUP_BY_OPTION && isGroupByAttribute(a.getAttribute()))) {
+								nodes.add(new TreeNode(source, a.getAttribute(), a.getAttribute().getName()));
+							}
 						}
 					}
+					
+					TreeNode tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED));
+					tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_SYSTEM_DATEATTRIBUTE));
+					nodes.add(tn);
+					
+					tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED));
+					tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_SYSTEM_DATEATTRIBUTE));
+					nodes.add(tn);
+//				}else if (type == Type.RECORD) {
+//					for (List<IntelRecordSourceAttribute> atts : recordAttributes.values()) {
+//						for (IntelRecordSourceAttribute a : atts) {
+//							if (a.getAttribute() == null) continue;
+//							if (keys.contains(a.getAttribute().getKeyId())) continue;
+//							keys.add(a.getAttribute().getKeyId());
+//							if (source == RootNode.FILTER_OPTION || (
+//									source == RootNode.GROUP_BY_OPTION && isGroupByAttribute(a.getAttribute()))) {
+//								nodes.add(new TreeNode(source, a.getAttribute(), a.getAttribute().getName()));
+//							}
+//						}
+//					}
+//					
+//					TreeNode tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED));
+//					tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_SYSTEM_DATEATTRIBUTE));
+//					nodes.add(tn);
+//					
+//					tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED));
+//					tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_SYSTEM_DATEATTRIBUTE));
+//					nodes.add(tn);
+//					
+//					tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.RECORD_DATE, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED));
+//					tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_SYSTEM_DATEATTRIBUTE));
+//					nodes.add(tn);
 				}
-				
-				TreeNode tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.DATE_CREATED, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.DATE_CREATED));
-				tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_SYSTEM_DATEATTRIBUTE));
-				nodes.add(tn);
-				
-				tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.DATE_MODIFIED, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.DATE_MODIFIED));
-				tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_SYSTEM_DATEATTRIBUTE));
-				nodes.add(tn);
-				
+					
 				return nodes;
 			}
 		
@@ -401,9 +509,15 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 					}
 				}
 				if (item instanceof SystemAttributeFilter.SystemAttribute) {
-					return new DropItem[] {new SystemAttributeGroupByDropItem((SystemAttributeFilter.SystemAttribute)item)};
+					if (item == SystemAttributeFilter.SystemAttribute.RECORD_SOURCE) {
+						return new DropItem[] { new RecordSourceGroupByDropItem() };
+					}else if (item == SystemAttributeFilter.SystemAttribute.RECORD_STATUS) {
+						return new DropItem[] { new RecordStatusGroupByDropItem() };
+					}
+					return new DropItem[] {new SystemAttributeDateGroupByDropItem((SystemAttributeFilter.SystemAttribute)item)};
 				}
 			}
+			
 			if (source == RootNode.VALUE_OPTION && item instanceof ValuePart.ValueOption) {
 				return new DropItem[] { new ValueDropItem((ValuePart.ValueOption) item) };
 			}
@@ -421,11 +535,11 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 				if (item instanceof IntelEntityType) {
 					return (new EntityTreeFilterItem((IntelEntityType)item)).asDropItem();
 				}else if (item instanceof IntelAttribute) {
-					return (new AttributeTreeFilterItem( ((IntelAttribute)item), true, false)).asDropItem();
+					return (new AttributeTreeFilterItem( ((IntelAttribute)item), type==Type.ENTITY, type==Type.RECORD)).asDropItem();
 				}else if (item instanceof IntelEntityTypeAttribute) {
 					return (new AttributeTreeFilterItem( ((IntelEntityTypeAttribute)item))).asDropItem();
 				}else if (item instanceof SystemAttributeFilter.SystemAttribute) {
-					return (new SystemAttributeFilterItem((SystemAttributeFilter.SystemAttribute)item, SystemAttributeFilter.Type.ENTITY)).asDropItem();
+					return (new SystemAttributeFilterItem((SystemAttributeFilter.SystemAttribute)item)).asDropItem();
 				}
 			}
 			
@@ -445,17 +559,35 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			HashMap<IntelEntityType, List<IntelEntityTypeAttribute>> attributes = new HashMap<>();
-			try(Session session = HibernateManager.openSession()){
-				List<IntelEntityType> entityTypes = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypes(session);
-				for (IntelEntityType type : entityTypes) {
-					List<IntelEntityTypeAttribute> thisattributes = new ArrayList<>(InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypeAttributes(type, session));
-					thisattributes.forEach(e->e.getAttribute().getName());
-					attributes.put(type, thisattributes);
+			if (type == Type.ENTITY) {
+				HashMap<IntelEntityType, List<IntelEntityTypeAttribute>> attributes = new HashMap<>();
+				try(Session session = HibernateManager.openSession()){
+					List<IntelEntityType> entityTypes = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypes(ProfilesManager.INSTANCE.getActiveProfileKeys(), session);
+					for (IntelEntityType type : entityTypes) {
+						List<IntelEntityTypeAttribute> thisattributes = new ArrayList<>(InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypeAttributes(type, session));
+						thisattributes.forEach(e->e.getAttribute().getName());
+						attributes.put(type, thisattributes);
+					}
 				}
+				setData(attributes);
+			}else if (type == Type.RECORD) {
+				HashMap<IntelRecordSource, List<IntelRecordSourceAttribute>> attributes = new HashMap<>();
+				
+				try(Session session = HibernateManager.openSession()){
+					List<IntelRecordSource> sources = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSources(ProfilesManager.INSTANCE.getActiveProfileKeys(), session);
+					for (IntelRecordSource type : sources) {
+						List<IntelRecordSourceAttribute> thisattributes = new ArrayList<>(InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSourceAttributes(type, session));
+						for (IntelRecordSourceAttribute  a : thisattributes) {
+							if (a.getAttribute() != null) {
+								a.getAttribute().getName();
+								//TODO: could be entity type
+							}
+						}
+						attributes.put(type, thisattributes);
+					}
+				}
+				setDataRecord(attributes);
 			}
-			
-			setData(attributes);
 			
 			return Status.OK_STATUS;
 		}

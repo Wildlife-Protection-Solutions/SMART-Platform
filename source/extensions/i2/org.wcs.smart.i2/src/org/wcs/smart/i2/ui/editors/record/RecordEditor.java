@@ -160,7 +160,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				try(Session s = HibernateManager.openSession()){
 					temp = (IntelRecord) s.get(IntelRecord.class, uuid);
 					if (temp == null){
-						closeEditor();
+						closeEditor(false);
 						return Status.OK_STATUS; //not found
 					}
 					temp.getProfile().getName();
@@ -446,8 +446,8 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		setDirty(true);
 	}
 	
-	private void closeEditor(){
-		getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RecordEditor.this, false);
+	private void closeEditor(boolean promptsave){
+		getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RecordEditor.this, promptsave);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -477,7 +477,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				
 				if (data != null){
 					for (IntelRecord r : items){
-						if (r.equals(record)) closeEditor();
+						if (r.equals(record)) closeEditor(false);
 					}
 				}
 			});
@@ -508,7 +508,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			
 			subscribeToEvent(IntelEvents.ACTIVE_PROFILES, (event)->{
 				if (!ProfilesManager.INSTANCE.getActiveProfiles().contains(record.getProfile())) {
-					closeEditor();
+					closeEditor(true);
 				}
 			});
 			

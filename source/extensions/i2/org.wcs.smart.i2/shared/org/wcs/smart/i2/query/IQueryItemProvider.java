@@ -40,6 +40,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 /**
  * Query item provider for providing items for query module 
  * 
@@ -48,6 +49,21 @@ import org.wcs.smart.i2.model.IntelRecordSource;
  */
 public interface IQueryItemProvider {
 
+	/**
+	 * Get all records sources in the system
+	 * @param session
+	 * @return
+	 */
+	public List<IntelRecordSource> getRecordSources(Set<String> profiles, Session session);
+	
+	/**
+	 * Get all record attribute associated with the record source key
+	 * @param session
+	 * @return
+	 */
+	public List<IntelRecordSourceAttribute> getRecordSourceAttributes(IntelRecordSource recordSource, Session session);
+	
+	
 	/**
 	 * Get the record source given entity source key
 	 * @param recordsourceKey
@@ -76,7 +92,7 @@ public interface IQueryItemProvider {
 	 * @param session
 	 * @return
 	 */
-	public List<IntelEntityType> getEntityTypes(Session session);
+	public List<IntelEntityType> getEntityTypes(Set<String> profiles, Session session);
 	
 	/**
 	 * Gets all profiles that match a key in the given

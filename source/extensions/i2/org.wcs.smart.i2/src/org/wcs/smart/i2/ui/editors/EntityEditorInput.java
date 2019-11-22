@@ -26,11 +26,15 @@ import java.util.UUID;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
-import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.ui.Resources;
 
+/**
+ * Input for entity editor 
+ * @author Emily
+ *
+ */
 public class EntityEditorInput implements IEditorInput{
 
 	private String name;

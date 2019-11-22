@@ -387,8 +387,6 @@ public class SettingsPreferencePage extends PreferencePage implements IIntelPref
 
 	@Override
 	public void refresh() {
-		// TODO Auto-generated method stub
-		
 	}
 	
 }

@@ -26,7 +26,8 @@ import java.util.UUID;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * Filter for specific entity 
+ * Filter for specific entity by uuid
+ * 
  * @author Emily
  *
  */

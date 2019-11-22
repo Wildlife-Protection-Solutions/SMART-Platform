@@ -677,7 +677,7 @@ public class EntitySearchResultTable extends Composite {
 						(new NewRecordHandler()).createNewRecord(kid);
 					});
 				}
-				//TODO				
+		
 				if (IntelSecurityManager.INSTANCE.canEditRecordAny()) {
 					Collection<MPart> parts = context.get(EPartService.class).getParts();
 					boolean first = false;

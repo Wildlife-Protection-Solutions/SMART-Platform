@@ -24,6 +24,7 @@ package org.wcs.smart.i2.birt.query;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.CcaaQueryItemProvider;
@@ -56,6 +57,7 @@ public class IntelEntitySummaryDatasetResultSetMetadata implements IResultSetMet
 		}
 		
 		try {
+			
 			SumQueryDefinition parsedQuery = IntelEntitySummaryQuery.parseQuery(query.getQueryString());
 	
 			IQueryItemProvider itemProvider = null;
@@ -66,7 +68,7 @@ public class IntelEntitySummaryDatasetResultSetMetadata implements IResultSetMet
 			}
 			
 			results = new SummaryQueryResult();
-			EntitySummaryQueryHeaderEngine.INSTANCE.getHeaderInfo(parsedQuery, results, null, itemProvider, dataset.getConnection().getCurrentLocale(), dataset.getConnection().getSession());
+			EntitySummaryQueryHeaderEngine.INSTANCE.getHeaderInfo(parsedQuery, results, null, AbstractIntelQuery.convertFromProfileFilter(query.getProfileFilter()), itemProvider, dataset.getConnection().getCurrentLocale(), dataset.getConnection().getSession());
 
 		} catch (Exception e) {
 			throw new OdaException(e);

@@ -35,6 +35,8 @@ import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryItemProvider;
@@ -53,6 +55,19 @@ public enum InternalQueryManager {
 	private volatile IQueryItemProvider queryItemProvider = null;
 	
 	/**
+	 * 
+	 * @return the array of classes that represent Intelligence queries
+	 */
+	@SuppressWarnings("unchecked")
+	public Class<? extends AbstractIntelQuery>[] getQueryTypeClasses() {
+		return new Class[] {
+			IntelRecordObservationQuery.class,
+			IntelEntityRecordQuery.class,
+			IntelEntitySummaryQuery.class,
+			IntelRecordSummaryQuery.class,
+			IntelRecordQuery.class};
+	}
+	/**
 	 * Returns the query deleted from the database if a query is deleted; otherwise
 	 * returns null
 	 * @param queryUuid
@@ -64,13 +79,11 @@ public enum InternalQueryManager {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				if (queryType.equals(IntelRecordObservationQuery.KEY)) {
-					removed = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, queryUuid);
-				}else if (queryType.equals(IntelEntitySummaryQuery.KEY)) {
-					removed = (IntelEntitySummaryQuery) s.get(IntelEntitySummaryQuery.class, queryUuid);
-				}else if (queryType.equals(IntelEntityRecordQuery.KEY)) {
-					removed = (IntelEntityRecordQuery) s.get(IntelEntityRecordQuery.class, queryUuid);
+				for (Class<?extends AbstractIntelQuery> c : getQueryTypeClasses()) {
+					removed = s.get(c, queryUuid);
+					if (removed != null) break;
 				}
+				
 				if (removed == null) throw new Exception(Messages.QueryManager_NotFoundError);
 				
 				Query<?> wsQuery = s.createQuery("DELETE FROM IntelWorkingSetQuery WHERE id.query = :query"); //$NON-NLS-1$
@@ -98,7 +111,9 @@ public enum InternalQueryManager {
 		return new String[][] {
 			{ IntelRecordObservationQuery.KEY, Messages.InternalQueryManager_RecordObservationQueryName},
 			{ IntelEntitySummaryQuery.KEY, Messages.InternalQueryManager_EntitySummaryQueryName},
-			{ IntelEntityRecordQuery.KEY, Messages.InternalQueryManager_EntityRecordQuery}
+			{ IntelEntityRecordQuery.KEY, Messages.InternalQueryManager_EntityRecordQuery},
+			{ IntelRecordSummaryQuery.KEY, "Record Summary Query"},
+			{ IntelRecordQuery.KEY, "Record Query"}
 		};
 	}
 	

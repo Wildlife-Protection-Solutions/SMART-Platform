@@ -101,10 +101,15 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		final IQueryItemProvider fItemProvider = itemProvider;
 		
 		Set<IntelProfile> profiles = new HashSet<>();
-		for (IntelProfile ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
-			IntelProfile ip2 = session.get(IntelProfile.class, ip.getUuid());
-			ip2.getKeyId();
-			if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2);
+		for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
+			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
+					.setParameter("keyId",  ip)
+					.setParameter("cas", cas).list();
+			
+			for (IntelProfile ip2 : items) {
+				ip2.getKeyId();
+				if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2);
+			}
 		}
 		
 		return session.doReturningWork(new ReturningWork<IPagedQueryResultSet>() {

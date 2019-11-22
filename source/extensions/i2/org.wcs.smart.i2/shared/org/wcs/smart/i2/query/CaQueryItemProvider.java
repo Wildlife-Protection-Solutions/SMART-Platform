@@ -24,6 +24,7 @@ package org.wcs.smart.i2.query;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -43,6 +44,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -84,6 +86,11 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	public List<IntelEntityTypeAttribute> getEntityTypeAttributes(IntelEntityType entityType, Session session){
 		return entityType.getAttributes();
 	}
+	
+	public List<IntelRecordSourceAttribute> getRecordSourceAttributes(IntelRecordSource recordSource, Session session){
+		return recordSource.getAttributes();
+	}
+
 
 	@Override
 	public List<Employee> getEmployees(Session session){
@@ -94,9 +101,22 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	}
 	
 	@Override
-	public List<IntelEntityType> getEntityTypes(Session session){
-		return QueryFactory.buildQuery(session, IntelEntityType.class,
+	public List<IntelEntityType> getEntityTypes(Set<String> profiles, Session session){
+		List<IntelEntityType> types = QueryFactory.buildQuery(session, IntelEntityType.class,
 				new Object[] {"conservationArea", getCa()}).list(); //$NON-NLS-1$
+		
+		for (Iterator<IntelEntityType> iterator = types.iterator(); iterator.hasNext();) {
+			IntelEntityType t = (IntelEntityType) iterator.next();
+			boolean keep = false;
+			for (IntelProfile ip : t.getProfiles()) {
+				if (profiles.contains(ip.getKeyId())) {
+					keep = true;
+					break;
+				}
+			}
+			if (!keep) iterator.remove();
+		}
+		return types;
 	}
 	
 	@Override
@@ -116,6 +136,24 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 				
 	}
 	
+	@Override
+	public List<IntelRecordSource> getRecordSources(Set<String> profiles, Session session){
+		List<IntelRecordSource> types = QueryFactory.buildQuery(session, IntelRecordSource.class,
+				new Object[] {"conservationArea", getCa()}).list(); //$NON-NLS-1$
+		
+		for (Iterator<IntelRecordSource> iterator = types.iterator(); iterator.hasNext();) {
+			IntelRecordSource t = (IntelRecordSource) iterator.next();
+			boolean keep = false;
+			for (IntelProfile ip : t.getProfiles()) {
+				if (profiles.contains(ip.getKeyId())) {
+					keep = true;
+					break;
+				}
+			}
+			if (!keep) iterator.remove();
+		}
+		return types;
+	}
 	
 	@Override
 	public IntelRecordSource getRecordSource(String recordsourceKey, Session session) {

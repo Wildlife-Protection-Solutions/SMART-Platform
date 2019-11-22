@@ -41,7 +41,6 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelProfile;
-import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.AreaFilter;
@@ -55,8 +54,6 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.NotFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
-import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
-import org.wcs.smart.i2.query.observation.filter.RecordSourceFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
 import org.wcs.smart.util.UuidUtils;
@@ -119,7 +116,6 @@ public class EntityRecordObservationFilterProcessor {
 								filter instanceof DataModelFilter ||
 								filter instanceof EntityFilter ||
 								filter instanceof EntityTypeFilter ||
-								filter instanceof RecordSourceFilter ||
 								filter instanceof RecordAttributeFilter ||
 								filter instanceof SystemAttributeFilter ||
 								filter instanceof IntelAttributeFilter){
@@ -261,14 +257,6 @@ public class EntityRecordObservationFilterProcessor {
 							}else if (filter instanceof IntelAttributeFilter){
 								String columnName = createColumn(filter);
 								addFilterColumn((IntelAttributeFilter) filter, entityTable, tempTable, columnName);
-								switchTables(tempTable, entityTable, true, true, s);
-							}else if (filter instanceof RecordSourceFilter) {
-								String columnName = createColumn(filter);
-								addFilterColumn((RecordSourceFilter) filter, entityTable, tempTable, columnName);
-								switchTables(tempTable, entityTable, true, true, s);
-							}else if (filter instanceof RecordAttributeFilter) {
-								String columnName = createColumn(filter);
-								addFilterColumn((RecordAttributeFilter) filter, entityTable, tempTable, columnName);
 								switchTables(tempTable, entityTable, true, true, s);
 							}else if (filter instanceof SystemAttributeFilter) {
 								String columnName = createColumn(filter);
@@ -591,8 +579,35 @@ public class EntityRecordObservationFilterProcessor {
 		logString(sql.toString());
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		
-		
-		if (filter.getType() == SystemAttributeFilter.Type.RECORD) {
+		if (filter.getAttribute() == SystemAttribute.RECORD_SOURCE) {
+			sql = new StringBuilder();
+			sql.append(" INSERT INTO " + t2); //$NON-NLS-1$
+			sql.append (" SELECT distinct a.entity_uuid "); //$NON-NLS-1$
+			sql.append(" FROM " + obsTable + " a JOIN smart.i_entity_record er on a.entity_uuid = er.entity_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" JOIN smart.i_record r on er.record_uuid = r.uuid JOIN smart.i_recordsource rs on r.source_uuid = rs.uuid"); //$NON-NLS-1$
+			sql.append( " WHERE rs.keyid = :recordKey "); //$NON-NLS-1$
+			
+			logString(sql.toString());
+			logString(filter.getStringKey());
+			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			query.setParameter("recordKey", filter.getStringKey()); //$NON-NLS-1$
+			query.executeUpdate();
+		}else if (filter.getAttribute() == SystemAttribute.RECORD_STATUS) {
+			sql = new StringBuilder();
+			sql.append(" INSERT INTO " + t2); //$NON-NLS-1$
+			sql.append (" SELECT distinct a.entity_uuid "); //$NON-NLS-1$
+			sql.append(" FROM " + obsTable + " a JOIN smart.i_entity_record er on a.entity_uuid = er.entity_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" JOIN smart.i_record r on er.record_uuid = r.uuid "); //$NON-NLS-1$
+			sql.append( " WHERE r.status = :statusKey "); //$NON-NLS-1$
+			
+			logString(sql.toString());
+			logString(filter.getStringKey());
+			NativeQuery<?> query = s.createNativeQuery(sql.toString());
+			query.setParameter("statusKey", filter.getStringKey()); //$NON-NLS-1$
+			query.executeUpdate();
+		}else if (filter.getAttribute() == SystemAttribute.RECORD_DATE_CREATED || 
+				filter.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED || 
+				filter.getAttribute() == SystemAttribute.RECORD_DATE) {
 			sql = new StringBuilder();
 			sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
 			sql.append(" SELECT distinct a.entity_uuid "); //$NON-NLS-1$
@@ -602,10 +617,12 @@ public class EntityRecordObservationFilterProcessor {
 			
 			sql.append(" WHERE "); //$NON-NLS-1$
 			
-			if (filter.getAttribute() == SystemAttribute.DATE_CREATED) {
+			if (filter.getAttribute() == SystemAttribute.RECORD_DATE_CREATED) {
 				sql.append(" cast(r.date_created as date) "); //$NON-NLS-1$
-			}else if (filter.getAttribute() == SystemAttribute.DATE_MODIFIED) {
+			}else if (filter.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED) {
 				sql.append(" cast(r.last_modified_date as date) "); //$NON-NLS-1$
+			}else if (filter.getAttribute() == SystemAttribute.RECORD_DATE) {
+				sql.append(" cast(r.primary_date as date) "); //$NON-NLS-1$
 			}
 			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
 			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
@@ -620,9 +637,7 @@ public class EntityRecordObservationFilterProcessor {
 			logString(sql.toString());
 			query.executeUpdate();
 			
-		}else if (filter.getType() == SystemAttributeFilter.Type.ENTITY) {
-			
-		
+		}else if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_CREATED || filter.getAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
 			sql = new StringBuilder();
 			sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
 			sql.append(" SELECT distinct a.entity_uuid "); //$NON-NLS-1$
@@ -631,9 +646,9 @@ public class EntityRecordObservationFilterProcessor {
 			
 			sql.append(" WHERE "); //$NON-NLS-1$
 			
-			if (filter.getAttribute() == SystemAttribute.DATE_CREATED) {
+			if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_CREATED) {
 				sql.append(" cast(l.date_created as date) "); //$NON-NLS-1$
-			}else if (filter.getAttribute() == SystemAttribute.DATE_MODIFIED) {
+			}else if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
 				sql.append(" cast(l.date_modified as date) "); //$NON-NLS-1$
 			}
 			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
@@ -669,48 +684,6 @@ public class EntityRecordObservationFilterProcessor {
 		s.createNativeQuery(sql.toString()).executeUpdate();
 	}
 	
-	private void addFilterColumn(RecordSourceFilter filter, String entityType, String tempTable, String columnName){
-		//todo: configure uuid
-		String t2 = SqlGenerator.createTempTableName();
-		StringBuilder sql = new StringBuilder();
-		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
-		sql.append ("(entity_uuid char(16) for bit data) "); //$NON-NLS-1$
-		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
-			
-		sql = new StringBuilder();
-		sql.append(" INSERT INTO " + t2); //$NON-NLS-1$
-		sql.append (" SELECT distinct a.entity_uuid "); //$NON-NLS-1$
-		sql.append(" FROM " + entityType + " a JOIN smart.i_entity_record er on a.entity_uuid = er.entity_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append(" JOIN smart.i_record r on er.record_uuid = r.uuid JOIN smart.i_recordsource rs on r.source_uuid = rs.uuid"); //$NON-NLS-1$
-		sql.append( " WHERE rs.keyid = :recordKey "); //$NON-NLS-1$
-		
-		logString(sql.toString());
-		logString(filter.getTypeKey());
-		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.setParameter("recordKey", filter.getTypeKey()); //$NON-NLS-1$
-		query.executeUpdate();
-			
-		sql = new StringBuilder();
-		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("entity_uuid") + " on " + t2 + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
-			
-		sql = new StringBuilder();
-		sql.append(" INSERT INTO " + tempTable); //$NON-NLS-1$
-		sql.append(" SELECT a.*, CASE WHEN b.entity_uuid is null then null else true end "); //$NON-NLS-1$
-		sql.append(" FROM " + entityType + " a LEFT JOIN " + t2 + " b on a.entity_uuid = b.entity_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		logString(sql.toString());
-		query = s.createNativeQuery(sql.toString());
-		query.executeUpdate();
-			
-		sql = new StringBuilder();
-		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
-		logString(sql.toString());
-		s.createNativeQuery(sql.toString()).executeUpdate();
-	}
-		
-	
 	private void addFilterColumn(RecordAttributeFilter filter, String entityType, String tempTable, String columnName) throws Exception{
 		String t2 = SqlGenerator.createTempTableName();
 		StringBuilder sql = new StringBuilder();
@@ -719,41 +692,8 @@ public class EntityRecordObservationFilterProcessor {
 		logString(sql.toString());
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		
-		if (filter.getFixedAttribute() != null) {
-			
-			sql = new StringBuilder();
-			sql.append(" INSERT INTO " + t2); //$NON-NLS-1$
-			sql.append (" SELECT distinct a.entity_uuid "); //$NON-NLS-1$
-			sql.append(" FROM " + entityType + " a JOIN smart.i_entity_record er on a.entity_uuid = er.entity_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-			sql.append(" JOIN smart.i_record r on er.record_uuid = r.uuid "); //$NON-NLS-1$
-			
-			if (filter.getFixedAttribute() == FixedAttribute.STATUS) {
-				IntelRecord.Status recordStatus = IntelRecord.Status.valueOf(filter.getKeyValue());
-				
-				sql.append(" WHERE "); //$NON-NLS-1$
-				sql.append( " r.status = :status "); //$NON-NLS-1$
-				
-				logString(sql.toString());
-				logString(recordStatus.name());
-				
-				NativeQuery<?> query = s.createNativeQuery(sql.toString());
-				query.setParameter("status", recordStatus.name()); //$NON-NLS-1$
-				query.executeUpdate();	
-			}else {
-				sql.append(" WHERE "); //$NON-NLS-1$
-				sql.append(" cast(r.primary_date as date)" + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as date) and cast(:value2 as date) "); //$NON-NLS-1$ //$NON-NLS-2$
-
-				logString(sql.toString());
-				logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
-				logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
-				
-				NativeQuery<?> query = s.createNativeQuery(sql.toString());
-				query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
-				query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
-				query.executeUpdate();	
-			}
-			
-		}else if (filter.getAttributeType() == null) {
+		
+		if (filter.getAttributeType() == null) {
 			//entity
 			UUID entityUuid = null;
 			if (!filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)){

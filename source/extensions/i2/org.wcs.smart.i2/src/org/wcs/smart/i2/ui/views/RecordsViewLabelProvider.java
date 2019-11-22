@@ -198,7 +198,7 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 		if (!sourceImg && !profileImg && !statusImg) return null;
 		
 		if (sourceImg && !profileImg && !statusImg) return Resources.INSTANCE.getImage(source);
-		if (!sourceImg && !profileImg && statusImg)  return RecordLabelProvider.getRecordStatusImage(status);
+		if (!sourceImg && !profileImg && statusImg)  return Resources.INSTANCE.getImage(status);
 		if (!sourceImg && profileImg && !statusImg)  return Resources.INSTANCE.getImage(profile);
 		
 		String srckey = "NONE";
@@ -208,10 +208,10 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 		}
 		
 		if (sourceImg && profileImg && !statusImg) return combineImage(srckey + "_" + profile.getKeyId(), Resources.INSTANCE.getImage(source), Resources.INSTANCE.getImage(profile), null);
-		if (!sourceImg && profileImg && statusImg) return combineImage(profile.getKeyId() + "_" + status.name(), RecordLabelProvider.getRecordStatusImage(status), Resources.INSTANCE.getImage(profile), null);
-		if (sourceImg && !profileImg && statusImg) return combineImage(srckey + "_" + status.name(), RecordLabelProvider.getRecordStatusImage(status), Resources.INSTANCE.getImage(source), null);
+		if (!sourceImg && profileImg && statusImg) return combineImage(profile.getKeyId() + "_" + status.name(), Resources.INSTANCE.getImage(status), Resources.INSTANCE.getImage(profile), null);
+		if (sourceImg && !profileImg && statusImg) return combineImage(srckey + "_" + status.name(), Resources.INSTANCE.getImage(status), Resources.INSTANCE.getImage(source), null);
 		
-		if (sourceImg && profileImg && statusImg) return combineImage(srckey + "_" + profile.getKeyId() + "_" + status.name(), RecordLabelProvider.getRecordStatusImage(status), Resources.INSTANCE.getImage(source), Resources.INSTANCE.getImage(profile));
+		if (sourceImg && profileImg && statusImg) return combineImage(srckey + "_" + profile.getKeyId() + "_" + status.name(), Resources.INSTANCE.getImage(status), Resources.INSTANCE.getImage(source), Resources.INSTANCE.getImage(profile));
 		
 		return null;
 	}
@@ -228,7 +228,7 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 		}else if (element instanceof IntelRecordSource) {
 			return Resources.INSTANCE.getImage((IntelRecordSource)element);
 		}else if (element instanceof IntelRecord.Status) {
-			return RecordLabelProvider.getRecordStatusImage((Status) element);
+			return Resources.INSTANCE.getImage((Status) element);
 		}else if (element == RecordsViewContentProvider.NONE_SOURCE) {
 			if (sourceImg && profileImg && statusImg) {
 				//required for down arrow to display if children

@@ -46,6 +46,7 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.InternalQueryManager;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -253,15 +254,15 @@ public class AttributeGroupByDropItem extends DropItem implements IGroupByDropIt
 	public List<ListItem> getListOptions() {
 		try(Session session = HibernateManager.openSession()){
 			if (attribute.getType() == AttributeType.EMPLOYEE) {
-				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileKeys(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
 			}else if (attribute.getType() == AttributeType.LIST) {
-				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileKeys(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
 			}else if (attribute.getType() == AttributeType.POSITION) {
 				final Area.AreaType[] atype = new Area.AreaType[] {null};
 				Display.getDefault().syncExec(()->{
 					atype[0] = (AreaType) cmbOptions.getStructuredSelection().getFirstElement();
 				});
-				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), atype[0], Collections.emptyList())).getAllOptions(session, InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), atype[0], Collections.emptyList())).getAllOptions(session,ProfilesManager.INSTANCE.getActiveProfileKeys(),  InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
 			}
 			
 		}

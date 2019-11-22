@@ -36,8 +36,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.ProfilesManager;
-import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.ListItem;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem.GroupByType;
@@ -47,30 +46,25 @@ import org.wcs.smart.i2.query.observation.filter.GroupByItem.GroupByType;
  * @author Emily
  *
  */
-public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropItem, ICombinableDropItem {
+public class RecordSourceGroupByDropItem extends DropItem implements IGroupByDropItem, ICombinableDropItem {
 
 	private List<ListItem> types;
 	
 	private Label lbl;
 	
-	public EntityTypeGroupByDropItem() {
+	public RecordSourceGroupByDropItem() {
 		types = new ArrayList<>();
 	}
 	
-	public EntityTypeGroupByDropItem(IntelEntityType type) {
-		this();
-		types.add(new ListItem(type.getKeyId(), type.getName()));
-	}
-	
-	public void addEntityType(IntelEntityType type) {
+	public void addRecordSource(IntelRecordSource type) {
 		this.types.add(new ListItem(type.getKeyId(), type.getName(), type.getName()));
 		updateLabel();
 	}
 	
 	@Override
 	public boolean addItem(DropItem item) {
-		if (!(item instanceof EntityTypeGroupByDropItem)) return false;
-		this.types.addAll( ((EntityTypeGroupByDropItem)item).types);
+		if (!(item instanceof RecordSourceGroupByDropItem)) return false;
+		this.types.addAll( ((RecordSourceGroupByDropItem)item).types);
 		updateLabel();
 		return true;
 	}
@@ -87,7 +81,7 @@ public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropI
 	public String getText() {
 		StringBuilder sb = new StringBuilder();
 		if (types == null || types.isEmpty()) {
-			sb.append(Messages.EntityTypeGroupByDropItem_AllTypes);
+			sb.append("All Sources");
 		}else {
 			for (int i = 0; i < Math.min(types.size(), 3); i ++) {
 				if (i != 0) sb.append("\n"); //$NON-NLS-1$
@@ -114,7 +108,7 @@ public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropI
 	@Override
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(GroupByItem.GroupByType.ENTITYTYPE.getKey());
+		sb.append(GroupByItem.GroupByType.RECORDSOURCE.getKey());
 		sb.append(GroupByItem.INTERNAL_SEPERATOR);
 		for (ListItem t : types) {
 			sb.append(t.getKeyId());
@@ -161,7 +155,7 @@ public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropI
 	@Override
 	public List<ListItem> getListOptions() {
 		try(Session session = HibernateManager.openSession()){
-			return (new GroupByItem(GroupByType.ENTITYTYPE, Collections.emptyList()).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileKeys(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault()));
+			return (new GroupByItem(GroupByType.RECORDSOURCE, Collections.emptyList()).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileKeys(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault()));
 		}
 	}
 

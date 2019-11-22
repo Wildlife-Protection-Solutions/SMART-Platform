@@ -104,11 +104,12 @@ public class NewQueryDropDownHandler {
 		if (e instanceof MHandledMenuItem) {
 			MenuItem mi = new MenuItem(menu, SWT.PUSH);
 			try {
-				ImageDescriptor id = ImageDescriptor.createFromURL(new URL(e.getIconURI()));
-				Image img = id.createImage();
-				mi.addListener(SWT.Dispose, evt->img.dispose());
-				mi.setImage(  img  );
-				
+				if (e.getIconURI() != null) {
+					ImageDescriptor id = ImageDescriptor.createFromURL(new URL(e.getIconURI()));
+					Image img = id.createImage();
+					mi.addListener(SWT.Dispose, evt->img.dispose());
+					mi.setImage(  img  );
+				}
 				mi.addListener(SWT.Selection, evt->{
 					
 					EHandlerService ehandler = context.get(EHandlerService.class);

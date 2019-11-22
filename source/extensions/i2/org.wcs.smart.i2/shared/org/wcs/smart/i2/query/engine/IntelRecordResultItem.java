@@ -26,47 +26,32 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.wcs.smart.i2.model.IntelRecordSource;
-import org.wcs.smart.i2.query.IGeometryResultItem;
-import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
-
-import org.locationtech.jts.geom.Geometry;
+import org.wcs.smart.i2.query.IResultItem;
 
 /**
- * Intelligence observation query results item
+ * Record query results item
+ * 
  * @author Emily
  *
  */
-public class IntelObservationResultItem implements IGeometryResultItem {
+public class IntelRecordResultItem implements IResultItem {
 
-	private UUID observationUuid;
-	private UUID locationUuid;
 	private UUID recordUuid;
 	private UUID profileUuid;
 	private IntelRecordSource recordSource;
-	
 	private String recordStatus;
 	private String recordTitle;
 	
-	private String locationId ;
-	private Date locationTime;
-	private String locationComment;
-	
-	private Geometry locationGeometry;
-	private Exception geometryError;
+	private Date primaryDate;
 	
 	private String profileName;
 	
-	private UUID categoryUuid;
-	
-	private String[] categoryLabels;
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
-	
-	private HashMap<IQueryFilter, Boolean> filterValues = new HashMap<>(); 
 	
 	private String caId;
 	private String caName;
 	
-	public IntelObservationResultItem(){
+	public IntelRecordResultItem(){
 		
 	}
 	
@@ -95,14 +80,6 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 		return this.caName;
 	}
 	
-	
-	public UUID getObservationUuid(){
-		return this.observationUuid;
-	}
-	public void setObservationUuid(UUID observationUuid){
-		this.observationUuid = observationUuid;
-	}
-	
 	public void setRecordSource(IntelRecordSource s ) {
 		this.recordSource = s;
 	}
@@ -123,67 +100,22 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 	public void setRecordTitle(String title){
 		this.recordTitle = title;
 	}
+	public Date getRecordDate(){
+		return this.primaryDate;
+	}
+	public void setRecordDate(Date primaryDate){
+		this.primaryDate = primaryDate;
+	}
+	
 	public UUID getRecordUuid(){
 		return this.recordUuid;
 	}
 	public void setRecordUuid(UUID uuid){
 		this.recordUuid = uuid;
 	}
+	
 	public UUID getProfileUuid(){
 		return this.profileUuid;
-	}
-	
-	public UUID getLocationUuid(){
-		return this.locationUuid;
-	}
-	public void setLocationUuid(UUID uuid){
-		this.locationUuid = uuid;
-	}
-	public Date getLocationDate(){
-		return this.locationTime;
-	}
-	public void setLocationDate(Date date){
-		this.locationTime = date;
-	}
-	public String getLocationId(){
-		return this.locationId;
-	}
-	public void setLocationId(String id){
-		this.locationId = id;
-	}
-	public String getLocationComment(){
-		return this.locationComment;
-	}
-	public void setLocationComment(String comment){
-		this.locationComment = comment;
-	}
-	
-	@Override
-	public Geometry getGeometry(){
-		return this.locationGeometry;
-	}
-	public Exception getGeometryError(){
-		return this.geometryError;
-	}
-	public void setGeometry(Geometry geom, Exception geometryError ){
-		this.locationGeometry = geom;
-		this.geometryError = geometryError;
-	}
-	public UUID getCategoryUuid(){
-		return this.categoryUuid;
-	}
-	public void setCategoryUuid(UUID uuid){
-		this.categoryUuid = uuid;
-	}
-	
-	public void setCategoryLabels(String[] labels){
-		this.categoryLabels = labels;
-	}
-	public String getCategoryLabel(int level){
-		if (level < categoryLabels.length ){
-			return categoryLabels[level];
-		}
-		return ""; //$NON-NLS-1$
 	}
 	
 	public void addAttribute(String attributeKey, Object value){
@@ -194,11 +126,5 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 		return attributes.get(attributeKey);
 	}
 	
-	public void addFilterValue(IQueryFilter filter, Boolean value){
-		filterValues.put(filter, value);
-	}
-	public HashMap<IQueryFilter, Boolean> getFilterValues(){
-		return filterValues;
-	}
 	
 }

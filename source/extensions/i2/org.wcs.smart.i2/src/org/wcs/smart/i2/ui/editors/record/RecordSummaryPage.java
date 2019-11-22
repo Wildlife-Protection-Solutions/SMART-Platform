@@ -83,16 +83,14 @@ import org.eclipse.ui.internal.SharedImages;
 import org.eclipse.ui.part.EditorPart;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
-import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -466,7 +464,7 @@ public class RecordSummaryPage extends EditorPart{
 			toolkit.createLabel(leftPart, DateFormat.getDateInstance().format(recordEditor.getRecord().getPrimaryDate()));
 		}
 
-		toolkit.createLabel(leftPart, "Profile");
+		toolkit.createLabel(leftPart, "Profile:");
 		Composite pcomp = toolkit.createComposite(leftPart);
 		pcomp.setLayout(new GridLayout(2, false));
 		((GridLayout)pcomp.getLayout()).marginWidth = 0;
@@ -500,7 +498,7 @@ public class RecordSummaryPage extends EditorPart{
 				@Override
 				public Image getImage(Object element){
 					if (element instanceof IntelRecord.Status){
-						return RecordLabelProvider.getRecordStatusImage((Status)element);
+						return Resources.INSTANCE.getImage((Status)element);
 					}
 					return super.getImage(element);
 				}
@@ -522,7 +520,7 @@ public class RecordSummaryPage extends EditorPart{
 			((GridLayout)temp.getLayout()).marginWidth = 0;
 			((GridLayout)temp.getLayout()).marginHeight = 0;
 			Label l = toolkit.createLabel(temp, ""); //$NON-NLS-1$
-			l.setImage(RecordLabelProvider.getRecordStatusImage(recordEditor.getRecord().getStatus()));
+			l.setImage(Resources.INSTANCE.getImage(recordEditor.getRecord().getStatus()));
 			l = toolkit.createLabel(temp, ""); //$NON-NLS-1$
 			l.setText(RecordLabelProvider.getRecordStatusLabel(recordEditor.getRecord().getStatus()));
 		}
@@ -717,7 +715,7 @@ public class RecordSummaryPage extends EditorPart{
 		HashMap<IntelRecordAttributeValue, Label> readOnlyLabels = new HashMap<>();
 		if (source != null) {		
 			for (IntelRecordSourceAttribute a : source.getAttributes()){
-				String name = getName(a);
+				String name = IntelligenceLabelProviderImpl.getName(a);
 				IntelRecordAttributeValue v = findAttributeValue(a);
 				
 				if (recordEditor.getEditMode()){
@@ -759,7 +757,7 @@ public class RecordSummaryPage extends EditorPart{
 						((GridLayout)tmp.getLayout()).marginHeight = 0;
 						tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 						
-						EntityCheckboxDropDownViewer editor = new EntityCheckboxDropDownViewer(tmp, a.getEntityType(), a.getIsMultiple());
+						EntityCheckboxDropDownViewer editor = new EntityCheckboxDropDownViewer(tmp, a.getEntityType(),recordEditor.getRecord().getProfile(), a.getIsMultiple());
 						editorFields.put(a, editor);
 						if (v != null) editor.initControl(v.getAttributeListItems());
 						editor.addSelectionChangedListener(dirtyListener2);
@@ -863,20 +861,7 @@ public class RecordSummaryPage extends EditorPart{
 		j.schedule();
 	}
 	
-	/*
-	 * finds the name for a record attribute
-	 */
-	private String getName(IntelRecordSourceAttribute a){
-		String name = a.getName();
-		if (name == null || name.isEmpty()){
-			if (a.getAttribute() != null){
-				name = a.getAttribute().getName();
-			}else if (a.getEntityType() != null){
-				name = a.getEntityType().getName();
-			}
-		}
-		return name;
-	}
+
 	
 	@Override
 	public void setFocus() {

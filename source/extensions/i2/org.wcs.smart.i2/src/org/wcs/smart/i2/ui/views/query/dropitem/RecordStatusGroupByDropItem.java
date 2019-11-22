@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.ui.views.query.dropitem;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -32,45 +31,36 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.InternalQueryManager;
-import org.wcs.smart.i2.ProfilesManager;
-import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.query.ListItem;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem;
-import org.wcs.smart.i2.query.observation.filter.GroupByItem.GroupByType;
 
 /**
  * Entity type group by drop item
  * @author Emily
  *
  */
-public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropItem, ICombinableDropItem {
+public class RecordStatusGroupByDropItem extends DropItem implements IGroupByDropItem, ICombinableDropItem {
 
 	private List<ListItem> types;
 	
 	private Label lbl;
 	
-	public EntityTypeGroupByDropItem() {
+	public RecordStatusGroupByDropItem() {
 		types = new ArrayList<>();
 	}
 	
-	public EntityTypeGroupByDropItem(IntelEntityType type) {
-		this();
-		types.add(new ListItem(type.getKeyId(), type.getName()));
-	}
-	
-	public void addEntityType(IntelEntityType type) {
-		this.types.add(new ListItem(type.getKeyId(), type.getName(), type.getName()));
+	public void addRecordStatus(IntelRecord.Status status) {
+		this.types.add(new ListItem(status.name(), SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(status, Locale.getDefault())));
 		updateLabel();
 	}
 	
 	@Override
 	public boolean addItem(DropItem item) {
-		if (!(item instanceof EntityTypeGroupByDropItem)) return false;
-		this.types.addAll( ((EntityTypeGroupByDropItem)item).types);
+		if (!(item instanceof RecordStatusGroupByDropItem)) return false;
+		this.types.addAll( ((RecordStatusGroupByDropItem)item).types);
 		updateLabel();
 		return true;
 	}
@@ -87,7 +77,7 @@ public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropI
 	public String getText() {
 		StringBuilder sb = new StringBuilder();
 		if (types == null || types.isEmpty()) {
-			sb.append(Messages.EntityTypeGroupByDropItem_AllTypes);
+			sb.append("All Status");
 		}else {
 			for (int i = 0; i < Math.min(types.size(), 3); i ++) {
 				if (i != 0) sb.append("\n"); //$NON-NLS-1$
@@ -114,7 +104,7 @@ public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropI
 	@Override
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(GroupByItem.GroupByType.ENTITYTYPE.getKey());
+		sb.append(GroupByItem.GroupByType.RECORDSTATUS.getKey());
 		sb.append(GroupByItem.INTERNAL_SEPERATOR);
 		for (ListItem t : types) {
 			sb.append(t.getKeyId());
@@ -160,9 +150,11 @@ public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropI
 
 	@Override
 	public List<ListItem> getListOptions() {
-		try(Session session = HibernateManager.openSession()){
-			return (new GroupByItem(GroupByType.ENTITYTYPE, Collections.emptyList()).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileKeys(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault()));
+		List<ListItem> items = new ArrayList<>();
+		for (IntelRecord.Status s : IntelRecord.Status.values()) {
+			items.add(new ListItem(s.name(), SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(s, Locale.getDefault())));
 		}
+		return items;
 	}
 
 }

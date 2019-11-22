@@ -55,15 +55,7 @@ public class IntelWorkingSetItem {
 	public IntelWorkingSetItem(IntelWorkingSetQuery query, AbstractIntelQuery queryImpl) {
 		this(IntelWorkingSetCategory.QUERIES, queryImpl.getName(), query.getIsVisible(), queryImpl.getUuid(), null);
 		this.queryType = query.getQueryType();
-		
-		if (queryType.equals(IntelEntitySummaryQuery.KEY)) {
-			this.image = Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYSUM);
-		}else if (queryType.equals(IntelRecordObservationQuery.KEY)){
-			this.image = Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_RECORDOBS);
-		}else if (queryType.equals(IntelEntityRecordQuery.KEY)){
-			this.image = Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYRECORD);
-
-		}
+		this.image = Resources.INSTANCE.getImage(queryType);
 	}
 	
 	private IntelWorkingSetItem(IntelWorkingSetCategory category, String label, boolean isVisible, UUID uuid, Image image){

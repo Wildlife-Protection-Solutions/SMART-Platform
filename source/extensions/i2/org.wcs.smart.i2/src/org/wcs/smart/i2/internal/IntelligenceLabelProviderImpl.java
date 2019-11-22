@@ -53,6 +53,7 @@ import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
 import org.wcs.smart.i2.birt.record.location.RecordLocationDatasetResultSetMetadata;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
 import org.wcs.smart.i2.query.FixedQueryColumn;
@@ -61,7 +62,6 @@ import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
 import org.wcs.smart.i2.query.export.CsvRecordQueryExporter;
 import org.wcs.smart.i2.query.export.ShpRecordQueryExporter;
-import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
@@ -76,6 +76,21 @@ import org.wcs.smart.ui.SmartLabelProvider;
 public class IntelligenceLabelProviderImpl implements
 		IIntelligenceLabelProvider {
 
+	/*
+	 * finds the name for a record attribute
+	 */
+	public static String getName(IntelRecordSourceAttribute a){
+		String name = a.getName();
+		if (name == null || name.isEmpty()){
+			if (a.getAttribute() != null){
+				name = a.getAttribute().getName();
+			}else if (a.getEntityType() != null){
+				name = a.getEntityType().getName();
+			}
+		}
+		return name;
+	}
+	
 	public static String getEdgeStyleName(RelationshipDiagramEdgeStyleOptions.EdgeStyle style) {
 		switch(style) {
 			case ARROW: return Messages.RelationshipDiagramEdgeStyleOptions_EdgeStyle_Arrow;
@@ -86,20 +101,22 @@ public class IntelligenceLabelProviderImpl implements
 	
 	public static String getName(SystemAttributeFilter.SystemAttribute attribute) {
 		switch (attribute) {
-		case DATE_CREATED:
+		case ENTITY_DATE_CREATED:
 			return Messages.EntitySearchPanel_DateCreatedFilter;
-		case DATE_MODIFIED:
+		case ENTITY_DATE_MODIFIED:
 			return Messages.EntitySearchPanel_DataModifiedFilter;
-		}
-		return ""; //$NON-NLS-1$
-	}
-	
-	public static String getName(SystemAttributeFilter.Type type) {
-		switch (type) {
-		case ENTITY:
-			return Messages.IntelligenceLabelProviderImpl_EntityLabel;
-		case RECORD:
-			return Messages.IntelligenceLabelProviderImpl_RecordLabel;
+		case RECORD_DATE_CREATED:
+			return Messages.EntitySearchPanel_DateCreatedFilter;
+		case RECORD_DATE_MODIFIED:
+			return Messages.EntitySearchPanel_DataModifiedFilter;
+		case RECORD_DATE:
+			return Messages.IntelligenceLabelProviderImpl_RecordDateLabel;//"Primary Date";
+		case RECORD_SOURCE:
+			return "Recourd Source";
+		case RECORD_STATUS:
+			return Messages.IntelligenceLabelProviderImpl_RecordStatusLabel; //"Record Status";
+		default:
+			break;
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -313,13 +330,12 @@ public class IntelligenceLabelProviderImpl implements
 		if (item.equals(AdvancedEntitySearch.Error.TOKEN_NOT_SUPPORTED)) return Messages.IntelligenceLabelProviderImpl_AdvIntelEntitySearchTokenNotSupportedError;
 		
 		if (item == ValuePart.ValueOption.NUMBER_ENTITIES) return Messages.IntelligenceLabelProviderImpl_NumberOfEntitiesValue;
+		if (item == ValuePart.ValueOption.NUMBER_RECORDS) return "Number of Records";
 		
-		if (item == FixedAttribute.DATE) return Messages.IntelligenceLabelProviderImpl_RecordDateLabel;
-		if (item == FixedAttribute.STATUS) return Messages.IntelligenceLabelProviderImpl_RecordStatusLabel;
-		
-		if (item instanceof SystemAttributeFilter.Type) {
-			return getName((SystemAttributeFilter.Type)item);
-		}
+//		if (item == FixedAttribute.DATE) return Messages.IntelligenceLabelProviderImpl_RecordDateLabel;
+//		if (item == FixedAttribute.STATUS) return Messages.IntelligenceLabelProviderImpl_RecordStatusLabel;
+		 if (item instanceof SystemAttributeFilter.SystemAttribute) return getName((SystemAttributeFilter.SystemAttribute)item);
+		 
 		return ""; //$NON-NLS-1$
 	}
 	

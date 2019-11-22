@@ -25,19 +25,12 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.jface.viewers.OwnerDrawLabelProvider;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.TableColumn;
-import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
-import org.wcs.smart.i2.model.IntelEntityRecordQuery;
-import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelProfile;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.ui.views.QueryProxy;
 
 /**
@@ -68,17 +61,10 @@ public class IntelQueryLabelProvider extends OwnerDrawLabelProvider {
 		}
 		if (queryType == null) return null;
 		
-		
-		if (queryType.equalsIgnoreCase(IntelRecordObservationQuery.KEY)) {
-			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_RECORDOBS);
-		}else if (queryType.equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) {
-			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYSUM);
-		}else if (queryType.equalsIgnoreCase(IntelEntityRecordQuery.KEY)) {
-			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYRECORD);
-		}
-		return null;
+		return Resources.INSTANCE.getImage(queryType);
 	}
-	public Set<IntelProfile> getProfiles(Object element){
+	
+	public Set<String> getProfiles(Object element){
 		if (element instanceof AbstractIntelQuery) {
 			return AbstractIntelQuery.convertFromProfileFilter( ((AbstractIntelQuery) element).getProfileFilter());
 		}else if (element instanceof QueryProxy) {
@@ -122,12 +108,12 @@ public class IntelQueryLabelProvider extends OwnerDrawLabelProvider {
 		event.gc.setBackground(tc.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		event.gc.drawText(txt,x,y+2);
 		x = tc.getParent().getBounds().width;
-		Set<IntelProfile> allprofiles = getProfiles(element);
+		Set<String> allprofiles = getProfiles(element);
 		Set<IntelProfile> current = (Set<IntelProfile>)tc.getParent().getData("PROFILES");
 		if (current == null) return;
 		for (IntelProfile ip : current)  {
 			x -= 16+5;
-			if (!allprofiles.contains(ip)) continue;
+			if (!allprofiles.contains(ip.getKeyId())) continue;
 			Image i = Resources.INSTANCE.getProfileImage(ip.getUuid());
 			if (i == null) {
 				event.gc.drawRectangle(x, y+2, 16, 16);

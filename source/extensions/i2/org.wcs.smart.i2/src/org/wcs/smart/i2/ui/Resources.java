@@ -9,9 +9,15 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
+import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 
 public enum Resources {
 	
@@ -119,6 +125,15 @@ public enum Resources {
 		}
 	}
 	
+	public Image getImage( IntelRecord.Status status ) {
+		switch(status) {
+		case COMPLETE: return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_DONE);
+		case NEW:return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_NEW);
+		case PROCESSING:return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_IP);		
+		}
+		return null;
+	}
+	
 	public Image getImage(IntelRecordSource source) {
 		if (source == null) return null;
 		if (recordImages.containsKey(source)) return recordImages.get(source);
@@ -131,5 +146,20 @@ public enum Resources {
 			Intelligence2PlugIn.log(ex.getMessage(),ex);
 			return null;
 		}
+	}
+	
+	public Image getImage(String queryTypeKey) {
+		if (queryTypeKey.equals(IntelEntitySummaryQuery.KEY)) {
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYSUM);
+		}else if (queryTypeKey.equals(IntelRecordSummaryQuery.KEY)) {
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_RECORDSUM);
+		}else if (queryTypeKey.equals(IntelRecordObservationQuery.KEY)){
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_RECORDOBS);
+		}else if (queryTypeKey.equals(IntelEntityRecordQuery.KEY)){
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYRECORD);
+		}else if (queryTypeKey.equals(IntelRecordQuery.KEY)){
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_RECORD);
+		}
+		return null;
 	}
 }

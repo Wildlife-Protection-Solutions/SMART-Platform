@@ -59,7 +59,6 @@ import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.security.IntelSecurityManager;
-import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.FileLocationParser;
 import org.wcs.smart.i2.ui.IntelAttachmentPropertiesDialog;
 import org.wcs.smart.i2.ui.Resources;

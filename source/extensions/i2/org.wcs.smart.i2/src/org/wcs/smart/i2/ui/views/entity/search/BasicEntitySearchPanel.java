@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.views.entity.search;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -173,9 +175,18 @@ public class BasicEntitySearchPanel extends Composite {
 			List<Object> selections = new ArrayList<>();
 			if (search.getEntityTypes() != null){
 				for (Object t : types){
-					if (t instanceof IntelEntityType && search.getEntityTypes().contains(((IntelEntityType)t).getKeyId()))
-						selections.add((IntelEntityType)t);
+					if (t instanceof IntelEntityType) {
+						if ( search.getEntityTypes().contains(((IntelEntityType)t).getKeyId())) {
+							selections.add((IntelEntityType)t);
+						}else {
+							MessageDialog.openInformation(getShell(), "Not Found", 
+								MessageFormat.format("Entity type with key {0} was not found in the current active profiles", 
+										((IntelEntityType)t).getKeyId() ));
+						}
+					}
+						
 				}
+				
 			}
 			if (selections.isEmpty()) selections.add(BASIC_ALLTYPES_OP);
 			cmbEntityType.setSelection(new StructuredSelection(selections));
@@ -212,7 +223,7 @@ public class BasicEntitySearchPanel extends Composite {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Object> types = new ArrayList<Object>();
-	
+			
 			try (Session session = HibernateManager.openSession()) {
 				types.addAll(EntityTypeManager.INSTANCE.getViewableEntityTypesActiveProfiles(session));
 			}
@@ -221,7 +232,13 @@ public class BasicEntitySearchPanel extends Composite {
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
+					Object currentSelection = cmbEntityType.getStructuredSelection().getFirstElement();
 					cmbEntityType.setInput(types);
+					if (currentSelection != null && types.contains(currentSelection)) {
+						cmbEntityType.setSelection(new StructuredSelection(currentSelection));
+					}else {
+						cmbEntityType.setSelection(new StructuredSelection(BASIC_ALLTYPES_OP));
+					}
 				}
 			});
 			return Status.OK_STATUS;

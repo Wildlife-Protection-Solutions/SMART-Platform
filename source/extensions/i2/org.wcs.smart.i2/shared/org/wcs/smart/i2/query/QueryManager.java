@@ -28,6 +28,8 @@ import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 
 /**
  * Shared query manager
@@ -45,6 +47,10 @@ public enum QueryManager {
 			return session.get(IntelEntitySummaryQuery.class, uuid);
 		}else if (typeKey.equals(IntelEntityRecordQuery.KEY)) {
 			return session.get(IntelEntityRecordQuery.class, uuid);
+		}else if (typeKey.equals(IntelRecordSummaryQuery.KEY)) {
+			return session.get(IntelRecordSummaryQuery.class, uuid);
+		}else if (typeKey.equals(IntelRecordQuery.KEY)) {
+			return session.get(IntelRecordQuery.class, uuid);
 		}
 		return null;
 	}
@@ -56,6 +62,10 @@ public enum QueryManager {
 		q = session.get(IntelEntitySummaryQuery.class, uuid);
 		if (q != null) return q;
 		q = session.get(IntelEntityRecordQuery.class, uuid);
+		if (q != null) return q;
+		q = session.get(IntelRecordSummaryQuery.class, uuid);
+		if (q != null) return q;
+		q = session.get(IntelRecordQuery.class, uuid);
 		return q;
 	}
 }

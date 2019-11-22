@@ -24,6 +24,7 @@ package org.wcs.smart.i2.query.engine;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,8 +47,8 @@ import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
-import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryItemProvider;
@@ -57,14 +58,12 @@ import org.wcs.smart.i2.query.SummaryQueryResult;
 import org.wcs.smart.i2.query.SummaryResultKey;
 import org.wcs.smart.i2.query.observation.filter.BooleanFilter;
 import org.wcs.smart.i2.query.observation.filter.BracketFilter;
-import org.wcs.smart.i2.query.observation.filter.EntityFilter;
-import org.wcs.smart.i2.query.observation.filter.EntityTypeFilter;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem.GroupByType;
 import org.wcs.smart.i2.query.observation.filter.IFilterVisitor;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
-import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.NotFilter;
+import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
@@ -78,7 +77,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
+public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	
 	private DataTable dataTable;
 	
@@ -94,7 +93,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		
 		Session session = (Session) parameters.get(Session.class.getName());
 		IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.IntelEntitySummaryQueryEngine_progressProcessing, 8);
+		SubMonitor progress = SubMonitor.convert(monitor, "Processing Record Summary Query", 8);
 
 		//Locale
 		Locale locale = (Locale) parameters.get(Locale.class.getName());
@@ -112,6 +111,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		if (cas.size() == 1) {
 			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
 		}
+		Date[] dates = (Date[]) parameters.get(Date.class.getName());
 		
 		Set<String> profiles = new HashSet<>();
 		for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
@@ -127,15 +127,18 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		
 		//parse query
 		progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressParsing);
-		SumQueryDefinition parsedQuery = IntelEntitySummaryQuery.parseQuery(query.getQueryString());
+		SumQueryDefinition parsedQuery = IntelRecordSummaryQuery.parseQuery(query.getQueryString());
 		progress.worked(1);
 		
 		//parse query
-		progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressEntityType);
-		createTemporaryEntityTable(session,profiles,cas);
+		progress.subTask("Creating Record Table");
+		createTemporaryRecordTable(session,profiles,dates,cas);
 		progress.worked(1);
 		
 		try {
+			if (dates[0] == null) {
+				dates = computeDateRange(dataTable.tableName, session);
+			}
 			//add attribute columns
 			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressAttributeColumns);
 			Map<String, String> attributeKeyToColumn = addAttributeColumns(parsedQuery, dataTable.tableName, session, progress.split(1));
@@ -146,16 +149,16 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			}
 			progress.worked(1);
 			
-			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressDateRange);
-			LocalDate[] dateRange = computeDateRange(parsedQuery, dataTable.tableName, attributeKeyToColumn, session);
-			progress.worked(1);
 			
 			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressAreaGroupBy);
 			Map<GroupByItem, String> areaTables = processAreaGroupBys(dataTable.tableName, parsedQuery, cas, session);
 			progress.worked(1);
 			
 			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressLoadingResults);
-			SummaryQueryResult results = getResults(dataTable.tableName, parsedQuery, dateRange, areaTables, locale, profiles, itemProvider, session);
+			LocalDate[] ldates = new LocalDate[2];
+			ldates[0] = (new java.sql.Date(dates[0].getTime())).toLocalDate();
+			ldates[1] = (new java.sql.Date(dates[1].getTime())).toLocalDate();
+			SummaryQueryResult results = getResults(dataTable.tableName, parsedQuery, ldates, areaTables, locale, profiles, itemProvider, session);
 			progress.worked(1);
 			
 			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressCleanUp);
@@ -238,6 +241,16 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	}
 	
 	/*
+	 * compute the minimum and maximum date values over all date attributes, so
+	 * we can determine the range for the summary headers
+	 */
+	private Date[] computeDateRange(String queryTable, Session session) {
+		String field = SystemAttributeFilter.SystemAttribute.RECORD_DATE.name().toLowerCase(Locale.ROOT);
+		Object[] items = (Object[]) session.createNativeQuery("SELECT min(" +field+ "), max(" +field+ ") FROM " + queryTable).uniqueResult();
+		return new Date[] {(Date) items[0], (Date) items[1]};
+	}
+	
+	/*
 	 * Runs a sql statement on the data table to get the results for the table
 	 */
 	private SummaryQueryResult getResults(String queryTable, SumQueryDefinition definition, LocalDate[] dateRange, 
@@ -251,7 +264,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		groupByItems.addAll(definition.getColumnGroupByPart().getItems());
 		groupByItems.addAll(definition.getRowGroupByPart().getItems());
 		
-		List<String> entityTypeFilters = new ArrayList<>();
+//		List<String> entityTypeFilters = new ArrayList<>();
 		for (GroupByItem groupBy : groupByItems) {
 			if (cnt!= 0) {
 				selectSql.append(","); //$NON-NLS-1$
@@ -259,17 +272,20 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			}
 			cnt++;
 			
-			if (groupBy.getGroupByType() == GroupByType.ENTITYTYPE) {
-				selectSql.append("entity_type_key as c_" + cnt); //$NON-NLS-1$
-				groupBySql.append("entity_type_key"); //$NON-NLS-1$
-			}else if (groupBy.getGroupByType() == GroupByType.CA) {
+			if (groupBy.getGroupByType() == GroupByType.CA) {
 				selectSql.append("ca_uuid as c_" + cnt); //$NON-NLS-1$
 				groupBySql.append("ca_uuid "); //$NON-NLS-1$
+			}else if (groupBy.getGroupByType() == GroupByType.RECORDSOURCE) {
+				selectSql.append("record_source_key as c_" + cnt); //$NON-NLS-1$
+				groupBySql.append("record_source_key "); //$NON-NLS-1$
+			}else if (groupBy.getGroupByType() == GroupByType.RECORDSTATUS) {
+				selectSql.append("record_status as c_" + cnt); //$NON-NLS-1$
+				groupBySql.append("record_status "); //$NON-NLS-1$
 			}else if(groupBy.getGroupByType() == GroupByType.ATTRIBUTE) {
 				String columnName = groupBy.getAttributeKey();
-				if (groupBy.getEntityTypeKey() != null && !groupBy.getEntityTypeKey().isEmpty()) {
-					entityTypeFilters.add(groupBy.getEntityTypeKey());
-				}
+//				if (groupBy.getEntityTypeKey() != null && !groupBy.getEntityTypeKey().isEmpty()) {
+//					entityTypeFilters.add(groupBy.getEntityTypeKey());
+//				}
 				if (groupBy.getAttributeType() == AttributeType.DATE) {
 					GroupByItem.DateOption dateOp = groupBy.getDateOption();
 					switch(dateOp) {
@@ -302,7 +318,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 				}	
 			}else if (groupBy.getGroupByType() == GroupByType.SYSTEM) {
 				SystemAttributeFilter.SystemAttribute attribute = groupBy.getSystemAttribute();
-			
+				
 				String columnName = attribute.name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
 
 				GroupByItem.DateOption dateOp = groupBy.getDateOption();
@@ -327,8 +343,8 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		if (selectSql.length() > 0) {
 			selectSql.append(","); //$NON-NLS-1$
 		}
-		if (definition.getValuePart().getValueOption() == ValueOption.NUMBER_ENTITIES) {
-			selectSql.append(" count(distinct " + queryTable+ ".entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (definition.getValuePart().getValueOption() == ValueOption.NUMBER_RECORDS) {
+			selectSql.append(" count(distinct " + queryTable+ ".record_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		StringBuilder sb = new StringBuilder();
@@ -337,12 +353,12 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		sb.append(" FROM "); //$NON-NLS-1$
 		sb.append(queryTable);
 		for (String tableName : areaTables.values()) {
-			sb.append(" JOIN " + tableName + " ON " + queryTable + ".entity_uuid = " + tableName + ".entity_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			sb.append(" JOIN " + tableName + " ON " + queryTable + ".record_uuid = " + tableName + ".record_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		if (!entityTypeFilters.isEmpty()) {
-			sb.append(" WHERE "); //$NON-NLS-1$
-			sb.append("entity_type_key IN (:entityTypeFilters)"); //$NON-NLS-1$
-		}
+//		if (!entityTypeFilters.isEmpty()) {
+//			sb.append(" WHERE "); //$NON-NLS-1$
+//			sb.append("entity_type_key IN (:entityTypeFilters)"); //$NON-NLS-1$
+//		}
 		
 		if (groupBySql.length() > 0) {
 			sb.append(" GROUP BY "); //$NON-NLS-1$
@@ -357,9 +373,9 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		HashMap<SummaryResultKey, Double> data = new HashMap<>();
 		
 		NativeQuery<?> query = session.createNativeQuery(sb.toString());
-		if (!entityTypeFilters.isEmpty()) {
-			query.setParameterList("entityTypeFilters",  entityTypeFilters); //$NON-NLS-1$
-		}
+//		if (!entityTypeFilters.isEmpty()) {
+//			query.setParameterList("entityTypeFilters",  entityTypeFilters); //$NON-NLS-1$
+//		}
 		List<?> dataItems = query.list();
 		for (Object item : dataItems) {
 			if (item instanceof Number) {
@@ -403,18 +419,19 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	 * create temporary entity table and populate with all entities
 	 * that match the given conservation area
 	 */
-	private String createTemporaryEntityTable(Session session, Set<String> profiles, Collection<ConservationArea> cas) {
+	private String createTemporaryRecordTable(Session session, Set<String> profiles, Date[] dates, Collection<ConservationArea> cas) {
 		String obsTable = SqlGenerator.createTempTableName();
 		
 		dataTable = new DataTable(obsTable);
 		
-		String created = SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED.name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
-		String modified = SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED.name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
+		String created = SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED.name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
+		String modified = SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED.name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
+		String pdate = SystemAttributeFilter.SystemAttribute.RECORD_DATE.name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
 		//create table
 		StringBuilder sb = new StringBuilder();
 		sb.append("CREATE TABLE "); //$NON-NLS-1$
 		sb.append(obsTable);
-		sb.append(" (entity_uuid char(16) for bit data, entity_type_key varchar(128), ca_uuid char(16) for bit data, "); //$NON-NLS-1$
+		sb.append(" (record_uuid char(16) for bit data, " + pdate + " date, record_status varchar(16), record_source_key varchar(128), ca_uuid char(16) for bit data, "); //$NON-NLS-1$
 		sb.append(created );
 		sb.append(" date, "); //$NON-NLS-1$
 		sb.append(modified);
@@ -422,8 +439,10 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		
 		logme(sb);
 		session.createNativeQuery(sb.toString()).executeUpdate();
-		dataTable.addColumn("entity_uuid",  "char(16) for bit data"); //$NON-NLS-1$ //$NON-NLS-2$
-		dataTable.addColumn("entity_type_key",  "varchar(128)"); //$NON-NLS-1$ //$NON-NLS-2$
+		dataTable.addColumn("record_uuid",  "char(16) for bit data"); //$NON-NLS-1$ //$NON-NLS-2$
+		dataTable.addColumn(pdate,  "date"); //$NON-NLS-1$ //$NON-NLS-2$
+		dataTable.addColumn("record_status",  "varchar(16)"); //$NON-NLS-1$ //$NON-NLS-2$
+		dataTable.addColumn("record_source_key",  "varchar(128)"); //$NON-NLS-1$ //$NON-NLS-2$
 		dataTable.addColumn("ca_uuid",  "char(16) for bit data"); //$NON-NLS-1$ //$NON-NLS-2$
 		dataTable.addColumn(created,  "date"); //$NON-NLS-1$ 
 		dataTable.addColumn(modified,  "date"); //$NON-NLS-1$ 
@@ -431,21 +450,28 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		sb = new StringBuilder();
 		sb.append("INSERT INTO "); //$NON-NLS-1$
 		sb.append(obsTable);
-		sb.append("(entity_uuid, entity_type_key, ca_uuid, "); //$NON-NLS-1$
+		sb.append("(record_uuid, " + pdate + ", record_status, record_source_key, ca_uuid, "); //$NON-NLS-1$
 		sb.append(created);
 		sb.append(","); //$NON-NLS-1$
 		sb.append(modified);
-		sb.append(") SELECT a.uuid, b.keyid, a.ca_uuid, cast(a.date_created as date), cast(a.date_modified as date) FROM "); //$NON-NLS-1$
-		sb.append(" smart.i_entity a join smart.i_entity_type b on a.entity_type_uuid = b.uuid join smart.i_profile_config p on p.uuid = a.profile_uuid"); //$NON-NLS-1$
+		sb.append(") SELECT a.uuid, cast(a.primary_date as date), a.status, b.keyid, a.ca_uuid, cast(a.date_created as date), cast(a.last_modified_date as date) FROM "); //$NON-NLS-1$
+		sb.append(" smart.i_record a join smart.i_recordsource b on a.source_uuid = b.uuid join smart.i_profile_config p on p.uuid = a.profile_uuid"); //$NON-NLS-1$
 		sb.append(" WHERE b.ca_uuid in (:cauuids) and p.keyid in (:profiles)"); //$NON-NLS-1$
+		if (dates[0] != null) {
+			sb.append(" AND cast(a.primary_date as date)>= :startd and cast(a.primary_date as date) <= :endd");
+		}
 		
 		List<UUID> cauuids = cas.stream().map(e->e.getUuid()).collect(Collectors.toList());
 		
 		logme(sb);
-		session.createNativeQuery(sb.toString())
+		NativeQuery<?> q = session.createNativeQuery(sb.toString())
 			.setParameterList("cauuids",  cauuids) //$NON-NLS-1$
-			.setParameterList("profiles",  profiles) //$NON-NLS-1$
-			.executeUpdate();
+			.setParameterList("profiles",  profiles); //$NON-NLS-1$
+		if (dates[0] != null) {
+			q.setParameter("startd",dates[0])
+			.setParameter("endd",dates[1]);
+		}
+		q.executeUpdate();
 		
 		return obsTable;
 	}
@@ -479,9 +505,9 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 				
 				@Override
 				public void visitElement(IQueryFilter filter) {
-					if (filter instanceof IntelAttributeFilter) {
-						String attributeKey = ((IntelAttributeFilter) filter).getAttributeKey();
-						IntelAttribute.AttributeType attributeType = ((IntelAttributeFilter) filter).getAttributeType();
+					if (filter instanceof RecordAttributeFilter) {
+						String attributeKey = ((RecordAttributeFilter) filter).getAttributeKey();
+						IntelAttribute.AttributeType attributeType = ((RecordAttributeFilter) filter).getAttributeType();
 						if (attributeType == AttributeType.POSITION) return; //  position attribute dealt with outside of here
 						if (!attributeToColumnKey.containsKey(attributeKey)) {
 							String columnName = addAttributeColumn(queryTable, attributeKey, attributeType, session);
@@ -496,76 +522,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		return attributeToColumnKey;
 	}
 	
-	/*
-	 * compute the minimum and maximum date values over all date attributes, so
-	 * we can determine the range for the summary headers
-	 */
-	private LocalDate[] computeDateRange(SumQueryDefinition def, String queryTable,Map<String, String> attributeToColumnKey, Session session) {
-		
-		LocalDate minDate = null;
-		LocalDate maxDate = null;
-		Set<String> processed = new HashSet<>();
-		
-		List<GroupByItem> allItems = new ArrayList<>();
-		allItems.addAll(def.getRowGroupByPart().getItems());
-		allItems.addAll(def.getColumnGroupByPart().getItems());
-		
-		for (GroupByItem item : allItems) {
-			String attributeKey = item.getAttributeKey();
-			
-			StringBuilder sb = new StringBuilder();
-			if (item.getGroupByType() == GroupByType.SYSTEM) {
-				if (item.getSystemAttribute() == SystemAttribute.ENTITY_DATE_CREATED || item.getSystemAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
-			
-					String columnName = item.getSystemAttribute().name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
-					
-					sb.append("SELECT min("); //$NON-NLS-1$
-					sb.append(columnName);
-					sb.append("), max("); //$NON-NLS-1$
-					sb.append(columnName );
-					sb.append(") FROM "); //$NON-NLS-1$
-					sb.append(queryTable);
-				}else {
-					continue;
-				}
-					
-			}else if (attributeKey == null) {
-				continue;
-			}else if (processed.contains(attributeKey)) {
-				continue;
-			}else if (item.getAttributeType() != IntelAttribute.AttributeType.DATE) {
-				continue;
-			}else {
-				String columnName = attributeToColumnKey.get(attributeKey);
-					
-				sb.append("SELECT min("); //$NON-NLS-1$
-				sb.append(columnName);
-				sb.append("), max("); //$NON-NLS-1$
-				sb.append(columnName );
-				sb.append(") FROM "); //$NON-NLS-1$
-				sb.append(queryTable);
-					
-				if (item.getEntityTypeKey() != null && !item.getEntityTypeKey().isEmpty()) {
-					sb.append(" WHERE "); //$NON-NLS-1$
-					sb.append(" entity_type_key = '" + item.getEntityTypeKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
-			
-			Object[] dates = (Object[])session.createNativeQuery(sb.toString()).uniqueResult();
-			if (dates != null  && dates[0] != null && dates[1] != null) {
-				LocalDate lminDate = ((java.sql.Date)dates[0]).toLocalDate();
-				LocalDate lmaxDate = ((java.sql.Date)dates[1]).toLocalDate();
-				if (lminDate != null && (minDate == null || lminDate.isBefore(minDate))) {
-					minDate = lminDate;
-				}
-				
-				if (lmaxDate != null && (maxDate == null || maxDate.isAfter(maxDate))) {
-					maxDate = lmaxDate;
-				}
-			}
-		}
-		return new LocalDate[] {minDate, maxDate};
-	}
+	
 	
 	/*
 	 * get the type of column for the attribute type
@@ -579,7 +536,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		case EMPLOYEE:
 			return "char(16) for bit data"; //$NON-NLS-1$
 		case LIST:
-			return "varchar(128)"; //$NON-NLS-1$
+			return "char(16) for bit data"; //$NON-NLS-1$
 		case NUMERIC:
 			return "double"; //$NON-NLS-1$
 		case POSITION:
@@ -621,10 +578,10 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			selectClause = "cast(v.string_value as date)"; //$NON-NLS-1$
 			break;
 		case EMPLOYEE:
-			selectClause = "v.employee_uuid"; //$NON-NLS-1$
+			selectClause = "v.uuid"; //$NON-NLS-1$
 			break;
 		case LIST:
-			selectClause = "l.keyid"; //$NON-NLS-1$
+			selectClause = "v.uuid"; //$NON-NLS-1$
 			break;
 		case NUMERIC:
 			selectClause = "v.double_value"; //$NON-NLS-1$
@@ -643,11 +600,9 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		sb.append( columnName );
 		sb.append(" = ( SELECT  "); //$NON-NLS-1$
 		sb.append( selectClause );
-		sb.append(" FROM smart.i_entity_attribute_value v join smart.i_attribute a on v.attribute_uuid = a.uuid "); //$NON-NLS-1$
-		if (type == AttributeType.LIST) {
-			sb.append("JOIN smart.i_attribute_list_item l on l.uuid = v.list_item_uuid"); //$NON-NLS-1$
-		}
-		sb.append(" WHERE v.entity_uuid = " + queryTable + ".entity_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(" FROM smart.i_record_attribute_value v join smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid ");
+		sb.append(" JOIN smart.i_attribute a on b.attribute_uuid = a.uuid "); //$NON-NLS-1$
+		sb.append(" WHERE v.record_uuid = " + queryTable + ".record_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" and a.keyid = :keyid "); //$NON-NLS-1$
 		sb.append(" ) "); //$NON-NLS-1$
 		
@@ -703,25 +658,18 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		
 		final boolean[] requiresEntityType = new boolean[] {false};
 		final boolean[] requiresEntity = new boolean[] {false};
-		queryFilter.accept(new IFilterVisitor() {
-			
+		queryFilter.accept(new IFilterVisitor() {			
 			@Override
 			public void visitElement(IQueryFilter filter) {
 				if (requiresEntityType[0]) return;
-				if (filter instanceof EntityTypeFilter) {
-					requiresEntityType[0] = true;
-					return;
-				}
-				if (filter instanceof IntelAttributeFilter) {
-					IntelAttributeFilter f = (IntelAttributeFilter) filter;
+				if (filter instanceof RecordAttributeFilter) {
+					RecordAttributeFilter f = (RecordAttributeFilter) filter;
 					if (f.getEntityTypeKey() != null && !f.getEntityTypeKey().isEmpty()) {
 						requiresEntityType[0] = true;
 						return;
 					}
 				}
-				if (filter instanceof SystemAttributeFilter ) {
-					requiresEntity[0] = true;
-				}
+
 			}
 		});
 		if (requiresEntity[0] || requiresEntityType[0]) {
@@ -763,20 +711,32 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		
 		if (queryFilter instanceof SystemAttributeFilter) {
 			SystemAttributeFilter f = (SystemAttributeFilter)queryFilter;
-			if (f.getAttribute() == SystemAttribute.ENTITY_DATE_CREATED || f.getAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
+			if (f.getAttribute() == SystemAttribute.RECORD_DATE_CREATED ||
+				f.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED ||
+				f.getAttribute() == SystemAttribute.RECORD_SOURCE ||
+				f.getAttribute() == SystemAttribute.RECORD_STATUS ||
+				f.getAttribute() == SystemAttribute.RECORD_DATE ) {
+				
 				String columnName = null;
-				if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED) {
-					columnName = "e.date_created"; //$NON-NLS-1$
-				}else if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED) {
-					columnName = "e.date_modified"; //$NON-NLS-1$
+				if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED) {
+					columnName = "a.record_date_created"; //$NON-NLS-1$
+					whereSql.append(SqlGenerator.generateDateClause(f.getDateValues(), columnName));
+				}else if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED) {
+					columnName = "a.record_date_modified"; //$NON-NLS-1$
+					whereSql.append(SqlGenerator.generateDateClause(f.getDateValues(), columnName));
+				}else if (f.getAttribute() == SystemAttribute.RECORD_SOURCE) {
+					String key = "p_" + parameters.size(); //$NON-NLS-1$
+					parameters.put(key, f.getStringKey());
+					whereSql.append(" a.record_source_key = :" + key); //$NON-NLS-1$
+				}else if (f.getAttribute() == SystemAttribute.RECORD_STATUS) {
+					String key = "p_" + parameters.size(); //$NON-NLS-1$
+					parameters.put(key, f.getStringKey());
+					whereSql.append(" a.record_status = :" + key); //$NON-NLS-1$
 				}
-				whereSql.append(SqlGenerator.generateDateClause(f.getDateValues(), columnName));
-
+				
 			}else {
 				throw new IllegalStateException("Group by record dates is not supported for entity summary queries"); //$NON-NLS-1$
 			}
-			
-			
 		}else if (queryFilter instanceof BooleanFilter) {
 			BooleanFilter f = (BooleanFilter)queryFilter;
 			processFilter(f.getFilter1(), whereSql, parameters);
@@ -788,21 +748,9 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			whereSql.append(" ( "); //$NON-NLS-1$
 			processFilter(f.getFilter(), whereSql, parameters);
 			whereSql.append(" ) "); //$NON-NLS-1$
-			
-		}else if (queryFilter instanceof EntityFilter) {
-			EntityFilter f = (EntityFilter)queryFilter;
-			String key = "p_"+parameters.size(); //$NON-NLS-1$
-			parameters.put(key, f.getEntityUuid());
-			whereSql.append(" entity_uuid = :" + key); //$NON-NLS-1$
-			
-		}else if (queryFilter instanceof EntityTypeFilter) {
-			EntityTypeFilter f = (EntityTypeFilter)queryFilter;
-			String key = "p_" + parameters.size(); //$NON-NLS-1$
-			parameters.put(key, f.getTypeKey());
-			whereSql.append(" t.keyId = :" + key); //$NON-NLS-1$
-			
-		}else if (queryFilter instanceof IntelAttributeFilter) {
-			IntelAttributeFilter f = (IntelAttributeFilter)queryFilter;
+		
+		}else if (queryFilter instanceof RecordAttributeFilter) {
+			RecordAttributeFilter f = (RecordAttributeFilter)queryFilter;
 			
 			boolean close = false;
 			if (f.getEntityTypeKey() != null && !f.getEntityTypeKey().isEmpty()) {
@@ -824,7 +772,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			}else if (f.getAttributeType() == AttributeType.EMPLOYEE) {
 				whereSql.append(" "); //$NON-NLS-1$
 				whereSql.append(columnName);
-				if (f.getKeyValue().equals(IntelAttributeFilter.ANY_OPTION_KEY)) {
+				if (f.getKeyValue().equals(RecordAttributeFilter.ANY_OPTION_KEY)) {
 					whereSql.append(" is not null "); //$NON-NLS-1$
 				}else {
 					whereSql.append( " = " ); //$NON-NLS-1$
@@ -835,14 +783,30 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			}else if (f.getAttributeType() == AttributeType.LIST) {
 				whereSql.append(" "); //$NON-NLS-1$
 				whereSql.append(columnName);
-				if (f.getKeyValue().equals(IntelAttributeFilter.ANY_OPTION_KEY)) {
-					whereSql.append(" is not null "); //$NON-NLS-1$
+				whereSql.append(" IN (");
+				if (f.getKeyValue().equals(RecordAttributeFilter.ANY_OPTION_KEY)) {
+//					whereSql.append(" is not null "); //$NON-NLS-1$
+					whereSql.append(" SELECT value_uuid FROM smart.i_record_attribute_value_list ");
 				}else {
-					whereSql.append( " = " ); //$NON-NLS-1$
-					String key = "p_" + parameters.size(); //$NON-NLS-1$
-					parameters.put(key, f.getKeyValue());
-					whereSql.append(" :" + key + " "); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					if (f.getAttributeKey() != null) {
+						whereSql.append(" SELECT a.value_uuid FROM smart.i_record_attribute_value_list a join smart.i_attribute_list_item i on a.element_uuid = i.uuid where i.keyid = ");
+						String key = "p_" + parameters.size(); //$NON-NLS-1$
+						parameters.put(key, f.getKeyValue());
+						whereSql.append(" :" + key + " "); //$NON-NLS-1$ //$NON-NLS-2$
+					}else if (f.getEntityTypeKey() != null) {
+						whereSql.append(" SELECT a.value_uuid FROM smart.i_record_attribute_value_list a where a.uuid = ");
+						String key = "p_" + parameters.size(); //$NON-NLS-1$
+						parameters.put(key, f.getKeyValue());
+						whereSql.append(" :" + key + " "); //$NON-NLS-1$ //$NON-NLS-2$
+					}else if (f.getAttributeType() == AttributeType.EMPLOYEE) {
+						whereSql.append(" SELECT a.value_uuid FROM smart.i_record_attribute_value_list a where a.uuid = ");
+						String key = "p_" + parameters.size(); //$NON-NLS-1$
+						parameters.put(key, f.getKeyValue());
+						whereSql.append(" :" + key + " "); //$NON-NLS-1$ //$NON-NLS-2$
+					}
 				}
+				whereSql.append(")");
 			}else if (f.getAttributeType() == AttributeType.NUMERIC) {
 				whereSql.append(" "); //$NON-NLS-1$
 				whereSql.append(columnName);
@@ -882,7 +846,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		logme(sb.toString());
 	}
 	private void logme(String sb) {
-//		System.out.println(sb.toString());
+		System.out.println(sb.toString());
 	}
 	
 	/*

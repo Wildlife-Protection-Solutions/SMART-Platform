@@ -55,6 +55,11 @@ public enum IntelSecurityManager {
 		
 	}
 	
+	public void clearCache() {
+		synchronized (INSTANCE) {
+			permissions = null;	
+		}
+	}
 	
 	private boolean supportsPermission(UUID profileUuid, int permission) {
 		if (permissions == null) loadPermissions();

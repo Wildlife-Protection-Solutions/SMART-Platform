@@ -27,7 +27,6 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -49,8 +48,6 @@ import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.ProfilesManager;
@@ -62,11 +59,11 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.query.Operator;
-import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 
 /**
@@ -91,18 +88,21 @@ public class LoadFilterOptions extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		List<FilterTreeItem> roots = new ArrayList<FilterTreeItem>();
 		try(Session s = HibernateManager.openSession()){
-			roots.add(loadEntity(s));
-			roots.add(loadAttributes(s));
+			
 			if (query.getTypeKey().equals(IntelEntityRecordQuery.KEY)) {
-				roots.add(loadRecords(s));
-				roots.add(loadRecordAttributes(s));
-				
+				roots.add(loadEntity(s));
+				roots.add(loadAttributes(s));
+				roots.add(loadRecordAttributes(s));				
 				BasicTreeFilterItem opRoot = new BasicTreeFilterItem(Messages.LoadFilterOptions_EntityObservationsNode);
 				opRoot.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DATA_MODEL_ICON));
 				roots.add(opRoot);
 				opRoot.addChild(loadDataModel(s));
 				opRoot.addChild(loadAreas(s));
+			}else if (query.getTypeKey().equals(IntelRecordQuery.KEY)) {
+				roots.add(loadRecordAttributes(s));	
 			}else {
+				roots.add(loadEntity(s));
+				roots.add(loadAttributes(s));
 				roots.add(loadDataModel(s));
 				roots.add(loadAreas(s));
 			}
@@ -110,8 +110,7 @@ public class LoadFilterOptions extends Job {
 		}
 		
 		Display.getDefault().syncExec(()->{
-			viewer.setItems(roots);
-			
+			viewer.setItems(roots);			
 		});
 		return Status.OK_STATUS;
 	}
@@ -196,8 +195,8 @@ public class LoadFilterOptions extends Job {
 			attributeRoots.addChild(item);
 		}
 		
-		SystemAttributeFilterItem dateCreated = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.DATE_CREATED, SystemAttributeFilter.Type.ENTITY);
-		SystemAttributeFilterItem dateModified = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.DATE_MODIFIED, SystemAttributeFilter.Type.ENTITY);
+		SystemAttributeFilterItem dateCreated = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED);
+		SystemAttributeFilterItem dateModified = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED);
 		
 		attributeRoots.addChild(dateCreated);
 		attributeRoots.addChild(dateModified);
@@ -210,21 +209,8 @@ public class LoadFilterOptions extends Job {
 		entityTypeRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY));
 
 		List<IntelEntityType> types =
-			InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypes(session);
-		
-		//TODO: support for ccaa queries
-		for (Iterator<IntelEntityType> iterator = types.iterator(); iterator.hasNext();) {
-			IntelEntityType it = iterator.next();
-			boolean keep = false;
-			for (IntelProfile p : it.getProfiles()) {
-				if (ProfilesManager.INSTANCE.getActiveProfiles().contains(p)) {
-					keep = true;
-					break;
-				}
-			}
-			if (!keep) iterator.remove();
-		}
-		
+			InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypes(ProfilesManager.INSTANCE.getActiveProfileKeys(), session);
+				
 		types.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for(IntelEntityType t : types){
 			EntityTreeFilterItem entityNode = new EntityTreeFilterItem(t, false);
@@ -289,86 +275,37 @@ public class LoadFilterOptions extends Job {
 			});
 			
 		}
-		return entityTypeRoot;
-		
-		
+		return entityTypeRoot;	
 	}
 	
 	private FilterTreeItem loadRecordAttributes(Session session) {
 		BasicTreeFilterItem recordSourceRoot = new BasicTreeFilterItem(Messages.LoadFilterOptions_RecordAttributesNode);
 		recordSourceRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
 		
-		RecordAttributeFilterItem dateFilter = new RecordAttributeFilterItem(RecordAttributeFilter.FixedAttribute.DATE);
-		recordSourceRoot.addChild(dateFilter);
+		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_DATE));
+		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_STATUS));
+		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_SOURCE));
+		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED));
+		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED));
 		
-		RecordAttributeFilterItem statusFilter = new RecordAttributeFilterItem(RecordAttributeFilter.FixedAttribute.STATUS);
-		recordSourceRoot.addChild(statusFilter);
 		
-		SystemAttributeFilterItem dateCreated = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.DATE_CREATED, SystemAttributeFilter.Type.RECORD);
-		SystemAttributeFilterItem dateModified = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.DATE_MODIFIED, SystemAttributeFilter.Type.RECORD);
-		recordSourceRoot.addChild(dateCreated);
-		recordSourceRoot.addChild(dateModified);
-		
-		return recordSourceRoot;
-	}
-	
-	private FilterTreeItem loadRecords(Session session){
-		BasicTreeFilterItem recordSourceRoot = new BasicTreeFilterItem(Messages.LoadFilterOptions_SourcesNode);
-		recordSourceRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
-
-		List<IntelRecordSource> sources =
-				QueryFactory.buildQuery(session, IntelRecordSource.class, new Object[] {
-						"conservationArea", SmartDB.getCurrentConservationArea() //$NON-NLS-1$
-				}).list();
-			
-		
-		for (Iterator<IntelRecordSource> iterator = sources.iterator(); iterator.hasNext();) {
-			IntelRecordSource it = iterator.next();
-			boolean keep = false;
-			for (IntelProfile p : it.getProfiles()) {
-				if (ProfilesManager.INSTANCE.getActiveProfiles().contains(p)) {
-					keep = true;
-					break;
-				}
+		List<IntelRecordSource> sources = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSources(ProfilesManager.INSTANCE.getActiveProfileKeys(), session);
+		List<IntelAttribute> atts = new ArrayList<>();
+		for (IntelRecordSource type : sources) {
+			List<IntelRecordSourceAttribute> thisattributes = new ArrayList<>(InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSourceAttributes(type, session));
+			for (IntelRecordSourceAttribute  a : thisattributes) {
+				if (a.getAttribute() == null) continue;
+				//TODO: support for entity types
+				if (atts.contains(a.getAttribute())) continue;
+				a.getAttribute().getName();
+				atts.add(a.getAttribute());
 			}
-			if (!keep) iterator.remove();
 		}
+		atts.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		
-		sources.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-		for(IntelRecordSource t : sources){
-			RecordSourceFilterItem sourceNode = new RecordSourceFilterItem(t);
-			recordSourceRoot.addChild(sourceNode);
-			final byte[] icon = t.getIcon();
-			if (icon != null){
-				sourceNode.setImageDescriptor(new ImageDescriptor() {
-					@Override
-					public ImageData getImageData() {
-						try(ByteArrayInputStream in = new ByteArrayInputStream(icon)){
-							BufferedImage image = ImageIO.read(in);
-							if (image != null){
-								return AWTSWTImageUtils.convertToSWTImage(image).getImageData();
-							}
-						}catch (Exception ex){
-							
-						}
-						return null;
-					}
-				});
-				
-			}
-
-			if (t.getAttributes() == null || t.getAttributes().size() == 0) {
-				sourceNode.addChild(null);
-			}else {
-				for (IntelRecordSourceAttribute a : t.getAttributes()) {
-					AttributeTreeFilterItem i = new AttributeTreeFilterItem(a);
-					sourceNode.addChild(i);
-				}
-			}
-			
+		for (IntelAttribute a : atts) {
+			recordSourceRoot.addChild(new AttributeTreeFilterItem(a, false, true));
 		}
 		return recordSourceRoot;
-		
-		
 	}
 }

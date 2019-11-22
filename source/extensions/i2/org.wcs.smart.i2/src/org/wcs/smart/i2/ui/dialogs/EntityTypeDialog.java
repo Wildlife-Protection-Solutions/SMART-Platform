@@ -106,6 +106,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
@@ -192,26 +193,30 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 	protected void okPressed() {
 		boolean isNew = type.getUuid() == null;
 		boolean attributesModified = false;
-		
-		Object[] checkeditems = tblProfiles.getCheckedElements();
-		Set<IntelProfile> newc = new HashSet<>();
-		for (Object xx : checkeditems) {
-			if (xx instanceof IntelProfile) newc.add((IntelProfile)xx);
-		}
-		Set<IntelProfile> todelete = new HashSet<>();
-		for (IntelProfile xx : type.getProfiles()) {
-			if (!newc.contains(xx)) todelete.add(xx);
-		}
-		type.getProfiles().removeAll(todelete);
-		type.getProfiles().addAll(newc);
-		for (IntelProfile c : type.getProfiles()) {
-			c.getEntityTypes().add(type);
-		}
-		
+
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				s.saveOrUpdate(type);			
+				s.saveOrUpdate(type);
+				
+				Set<IntelProfile> currentprofiles = new HashSet<>(type.getProfiles());
+				List<IntelProfile> profiles = (List<IntelProfile>) tblProfiles.getInput();
+				for (IntelProfile ip : profiles) {
+					if (tblProfiles.getChecked(ip)) {
+						type.getProfiles().add(ip);
+					}else {
+						type.getProfiles().remove(ip);
+					}
+				}
+				s.flush();
+				
+				List<IntelRecordSource> sources = QueryFactory.buildQuery(s, IntelRecordSource.class,"conservationArea", type.getConservationArea()).list();
+				String v = ProfilesManager.INSTANCE.validateRecords(sources);
+				if (v != null) {
+					type.setProfiles(currentprofiles);
+					throw new Exception(v);
+				}
+				
 				//set order and update groups
 				for (int i = 0; i < groups.size(); i ++){
 					groups.get(i).setOrder(i);

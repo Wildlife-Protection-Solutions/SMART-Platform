@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.hibernate.Session;
 import org.wcs.smart.ICoreLabelProvider;
@@ -40,6 +41,8 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.ListItem;
 import org.wcs.smart.util.UuidUtils;
@@ -56,6 +59,8 @@ public class GroupByItem {
 	
 	public static enum GroupByType{
 		ENTITYTYPE ("entitytype_gb"), //$NON-NLS-1$
+		RECORDSOURCE ("recordsource_gb"), //$NON-NLS-1$
+		RECORDSTATUS ("recordstatus_gb"), //$NON-NLS-1$
 		ATTRIBUTE ("e_attribute_gb"), //$NON-NLS-1$
 		SYSTEM(SystemAttributeFilter.SA_KEY),
 		CA("ca_gb"); //$NON-NLS-1$
@@ -95,6 +100,24 @@ public class GroupByItem {
 			}
 			return new GroupByItem(GroupByType.ENTITYTYPE, ops);
 		}
+		if (bits[0].equals(GroupByType.RECORDSOURCE.getKey())) {
+			//remaining bits are keys
+			List<String> ops = new ArrayList<>();
+			for (int i = 1; i < bits.length; i ++) {
+				String keyId = bits[i];
+				ops.add(keyId);
+			}
+			return new GroupByItem(GroupByType.RECORDSOURCE, ops);
+		}
+		if (bits[0].equals(GroupByType.RECORDSTATUS.getKey())) {
+			//remaining bits are keys
+			List<String> ops = new ArrayList<>();
+			for (int i = 1; i < bits.length; i ++) {
+				String keyId = bits[i];
+				ops.add(keyId);
+			}
+			return new GroupByItem(GroupByType.RECORDSTATUS, ops);
+		}
 		if (bits[0].equals(GroupByType.CA.getKey())) {
 			//remaining bits are keys
 			List<String> ops = new ArrayList<>();
@@ -106,12 +129,8 @@ public class GroupByItem {
 		}
 		
 		if (bits[0].equals(SystemAttributeFilter.SA_KEY)) {
-			String stype = bits[1];
-			String sattribute = bits[2];
-			String dateFilter = bits[3];
-			
-			SystemAttributeFilter.Type type = SystemAttributeFilter.Type.valueOf(stype.toUpperCase(Locale.ROOT));
-			if (type == null || type == SystemAttributeFilter.Type.RECORD) throw new IllegalStateException(MessageFormat.format("System attribute group by of type {0} not supported", stype)); //$NON-NLS-1$
+			String sattribute = bits[1];
+			String dateFilter = bits[2];
 			
 			SystemAttributeFilter.SystemAttribute attribute = SystemAttributeFilter.SystemAttribute.valueOf(sattribute.toUpperCase(Locale.ROOT));
 			if (attribute == null) throw new IllegalStateException(MessageFormat.format("System attribute group by of {0} not supported", sattribute)); //$NON-NLS-1$
@@ -121,7 +140,7 @@ public class GroupByItem {
 				if (key.getKey().equals(dateFilter)) op = key;
 			}
 			if (op == null) throw new IllegalStateException("Invalid date option: " + dateFilter); //$NON-NLS-1$
-			return new GroupByItem(attribute, type, op);
+			return new GroupByItem(attribute, op);
 		}
 		
 		if (bits[0].equals(GroupByType.ATTRIBUTE.getKey())) {
@@ -184,7 +203,6 @@ public class GroupByItem {
 	private GroupByType type;
 	
 	private SystemAttributeFilter.SystemAttribute systemAttribute;
-	private SystemAttributeFilter.Type systemType;
 	
 	public GroupByItem(GroupByType type, List<String> options) {
 		this.type = type;
@@ -207,10 +225,9 @@ public class GroupByItem {
 		this.dateOption = op;
 	}
 	
-	public GroupByItem(SystemAttributeFilter.SystemAttribute attribute, SystemAttributeFilter.Type type, DateOption op) {
+	public GroupByItem(SystemAttributeFilter.SystemAttribute attribute, DateOption op) {
 		this.type = GroupByType.SYSTEM;
 		this.systemAttribute = attribute;
-		this.systemType = type; 
 		this.dateOption = op;
 	}
 
@@ -245,15 +262,27 @@ public class GroupByItem {
 	public SystemAttributeFilter.SystemAttribute getSystemAttribute(){
 		return systemAttribute;
 	}
-	public SystemAttributeFilter.Type getSystemType(){
-		return systemType;
-	}
+
 	
-	public List<ListItem> getAllOptions(Session session, IQueryItemProvider itemProvider, LocalDate[] dateRange, Locale l) {
+	public List<ListItem> getAllOptions(Session session, Set<String> profiles, IQueryItemProvider itemProvider, LocalDate[] dateRange, Locale l) {
 		if(type == GroupByType.ENTITYTYPE) {
 			List<ListItem> items = new ArrayList<>();
-			for (IntelEntityType t : itemProvider.getEntityTypes(session)) {
+			for (IntelEntityType t : itemProvider.getEntityTypes(profiles, session)) {
 				items.add(new ListItem(t.getKeyId(), t.getName(), t.getName()));
+			}
+			return items;
+		}
+		if(type == GroupByType.RECORDSOURCE) {
+			List<ListItem> items = new ArrayList<>();
+			for (IntelRecordSource t : itemProvider.getRecordSources(profiles, session)) {
+				items.add(new ListItem(t.getKeyId(), t.getName(), t.getName()));
+			}
+			return items;
+		}
+		if(type == GroupByType.RECORDSTATUS) {
+			List<ListItem> items = new ArrayList<>();
+			for (IntelRecord.Status s : IntelRecord.Status.values()) {
+				items.add(new ListItem(s.name(), SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(s, Locale.getDefault())));
 			}
 			return items;
 		}
@@ -323,7 +352,7 @@ public class GroupByItem {
 		}
 		
 		if (type == GroupByType.SYSTEM) {
-			return getDateOptions(dateRange, null,  SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(systemType, l));
+			return getDateOptions(dateRange, null, null);
 		}
 		return Collections.emptyList();
 		

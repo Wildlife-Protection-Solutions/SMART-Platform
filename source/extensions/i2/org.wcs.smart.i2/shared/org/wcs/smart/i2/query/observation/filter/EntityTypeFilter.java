@@ -21,10 +21,9 @@
  */
 package org.wcs.smart.i2.query.observation.filter;
 
-
-
 /**
- * Filter for a specific entity type 
+ * Filter for an entity type by key
+ * 
  * @author Emily
  *
  */

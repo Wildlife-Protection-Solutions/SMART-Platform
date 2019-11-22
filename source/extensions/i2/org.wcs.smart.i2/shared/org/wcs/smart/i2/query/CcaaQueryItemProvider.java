@@ -41,6 +41,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModelMerger;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -123,13 +124,48 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	}
 	
 	@Override
-	public List<IntelEntityType> getEntityTypes(Session session){
+	public List<IntelRecordSource> getRecordSources(Session session) {
+		HashMap<String, IntelRecordSource> types = new HashMap<>();
+		
+		List<IntelRecordSource> allTypes = session.createQuery("FROM IntelRecordSource WHERE conservationArea in (:cas)", IntelRecordSource.class) //$NON-NLS-1$
+				.setParameterList("cas",  getConservationAreas()).list(); //$NON-NLS-1$
+		
+		for (IntelRecordSource type : allTypes) {
+			IntelRecordSource newType = types.get(type.getKeyId());
+			if (newType == null) {
+				newType = new IntelRecordSource();
+				newType.setKeyId(type.getKeyId());
+				newType.setIcon(type.getIcon());
+				newType.setName(type.getName());
+				
+				types.put(type.getKeyId(), newType);
+			}
+			if (type.getConservationArea().equals(getMainConservationArea())) {
+				newType.setName(type.getName());
+			}
+		}
+		List<IntelRecordSource> newTypes = new ArrayList<>();
+		newTypes.addAll(types.values());
+		return newTypes;
+	}
+	
+	@Override
+	public List<IntelEntityType> getEntityTypes(Set<String> profiles, Session session){
 		HashMap<String, IntelEntityType> types = new HashMap<>();
 		
 		List<IntelEntityType> allTypes = session.createQuery("FROM IntelEntityType WHERE conservationArea in (:cas)", IntelEntityType.class) //$NON-NLS-1$
 				.setParameterList("cas",  getConservationAreas()).list(); //$NON-NLS-1$
 		
 		for (IntelEntityType type : allTypes) {
+			boolean keep = false;
+			for (IntelProfile ip : type.getProfiles()) {
+				if (profiles.contains(ip.getKeyId())) {
+					keep = true;
+					break;
+				}
+			}
+			if (!keep) continue;
+			
 			IntelEntityType newType = types.get(type.getKeyId());
 			if (newType == null) {
 				newType = new IntelEntityType();

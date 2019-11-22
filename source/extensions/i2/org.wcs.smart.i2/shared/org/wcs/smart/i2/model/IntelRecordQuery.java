@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2019 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,36 +19,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.query.observation.filter;
+package org.wcs.smart.i2.model;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.query.observation.parser.ParseException;
+import org.wcs.smart.i2.query.observation.parser.Parser;
 
 /**
- * Filter for a specific entity type 
+ * Intel record query
+ * 
  * @author Emily
+ * @since 7.0.0
  *
  */
-public class RecordSourceFilter implements IQueryFilter, IColumnIdentifierProvider {
+@Entity
+@Table(name="smart.i_record_query")
+public class IntelRecordQuery extends AbstractIntelQuery {
 
-	public static RecordSourceFilter create(String key){
-		return new RecordSourceFilter(key.split(":")[1]); //$NON-NLS-1$
-	}
+	private static final long serialVersionUID = 1L;
 	
-	private String typeKey;
+	public static final String KEY = "I2_RECORD_QUERY"; //$NON-NLS-1$
 	
-	public RecordSourceFilter(String typeKey){
-		this.typeKey = typeKey;
-	}
-	
-	public String getTypeKey(){
-		return this.typeKey;
-	}
-
 	@Override
-	public String getUniqueColumnIdentifier(){
-		StringBuilder sb = new StringBuilder();
-		sb.append("rs_"); //$NON-NLS-1$
-		sb.append(typeKey);
-		return sb.toString();
+	@Transient
+	public String getTypeKey() {
+		return KEY;
+	}
+
+	@Transient
+	public static IQueryFilter parseQuery(String queryString) throws ParseException, IOException{
+		if (queryString.isEmpty()) return null;
+		try(Reader is = new StringReader(queryString)){
+			Parser parser = new Parser(is);
+			return parser.ExpressionPart();
+		}
 	}
 }

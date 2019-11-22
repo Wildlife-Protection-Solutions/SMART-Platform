@@ -53,6 +53,8 @@ import org.wcs.smart.util.UuidUtils;
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 public abstract class AbstractIntelQuery extends NamedItem implements IIntelAuditItem {
 	
+	public static final String PART_SEPERATOR = "|"; //$NON-NLS-1$
+
 	private static final long serialVersionUID = 1L;
 	
 	protected ConservationArea ca;
@@ -199,6 +201,11 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 		this.queryString = queryString;
 	}
 	
+	/**
+	 * comma separated list of profile keys
+	 *  
+	 * @return
+	 */
 	@Column(name="profile_filter")
 	public String getProfileFilter(){
 		return this.profileFilter;
@@ -210,7 +217,8 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	
 	@Transient
 	public boolean queriesProfile(IntelProfile p) {
-		return queriesProfile(p.getUuid());
+		Set<String> pp = convertFromProfileFilter(getProfileFilter());	
+		return pp.contains(p.getKeyId());
 	}
 	
 	/**
@@ -220,19 +228,23 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	 * @return
 	 */
 	@Transient
-	public boolean queriesProfile(Set<IntelProfile> profiles) {
-		Set<IntelProfile> pp = convertFromProfileFilter(getProfileFilter());
-		for (IntelProfile p : pp) {
+	public boolean queriesProfile(Set<String> profiles) {
+		Set<String> pp = convertFromProfileFilter(getProfileFilter());	
+		for (String p : pp) {
 			if (!profiles.contains(p)) return false;
 		}
 		return true;
 	}
-	
 	@Transient
-	public boolean queriesProfile(UUID profileUuid) {
-		String x = getProfileFilter();
-		if (x == null) return false;
-		return x.contains(UuidUtils.uuidToString(profileUuid));
+	public static String convertKeysToProfileFilter(Collection<String> profiles) {
+		if (profiles.isEmpty()) return "";
+		
+		StringBuilder sb = new StringBuilder();
+		for (String key : profiles) {
+			sb.append( key);
+			sb.append(",");
+		}
+		return sb.toString();
 	}
 	
 	@Transient
@@ -241,24 +253,19 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 		
 		StringBuilder sb = new StringBuilder();
 		for (IntelProfile ip : profiles) {
-			sb.append( UuidUtils.uuidToString(ip.getUuid()) );
+			sb.append( ip.getKeyId() );
 			sb.append(",");
 		}
-		sb.substring(0, sb.length() - 1);
 		return sb.toString();
 	}
 	@Transient
-	public static Set<IntelProfile> convertFromProfileFilter(String filter) {
+	public static Set<String> convertFromProfileFilter(String filter) {
 		if (filter == null) return Collections.emptySet();
 		if (filter.trim().isEmpty()) return Collections.emptySet();
 		String[] bits = filter.split(",");
-		Set<IntelProfile> profiles = new HashSet<>();
-		for (String x : bits) {
-			UUID uuid = UuidUtils.stringToUuid(x);
-			IntelProfile ip = new IntelProfile();
-			ip.setUuid(uuid);
-			profiles.add(ip);
-		}
+		Set<String> profiles = new HashSet<>();
+		for (String x : bits) profiles.add(x);
 		return profiles;
 	}
+	
 }

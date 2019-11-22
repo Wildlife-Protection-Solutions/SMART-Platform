@@ -98,7 +98,6 @@ public class NewRecordHandler {
 				return;
 			}else if (items.size() > 1) {
 				//select profile
-				//TODO:
 				items.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 				SelectProfileDialog dialog = new SelectProfileDialog(context.get(Shell.class), items);
 				if (dialog.open() != Window.OK) return;

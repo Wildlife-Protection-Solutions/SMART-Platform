@@ -25,8 +25,9 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.InternalQueryManager;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 
 /**
  * Query proxy for queries view.
@@ -67,16 +68,18 @@ public class QueryProxy implements IAdaptable{
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
-		if (adapter == IntelRecordObservationQuery.class){
-			IntelRecordObservationQuery q = new IntelRecordObservationQuery();
-			q.setUuid(getUuid());
-			return (T) q;
+		for (Class<? extends AbstractIntelQuery> c : InternalQueryManager.INSTANCE.getQueryTypeClasses()) {
+			if (c == adapter) {
+				try {
+					AbstractIntelQuery q = c.getDeclaredConstructor().newInstance();
+					q.setUuid(getUuid());
+					return (T)q;
+				}catch (Exception ex) {
+					Intelligence2PlugIn.log(ex.getMessage(), ex);
+				}
+			}
 		}
-		if (adapter == IntelEntitySummaryQuery.class) {
-			IntelEntitySummaryQuery q = new IntelEntitySummaryQuery();
-			q.setUuid(getUuid());
-			return (T)q;
-		}
+		
 		return null;
 	}
 	

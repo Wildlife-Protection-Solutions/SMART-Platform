@@ -76,6 +76,7 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -113,15 +114,19 @@ import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.query.QueryManager;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.IntelQueryLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.editors.query.IQueryEditor;
 import org.wcs.smart.i2.ui.handler.NewQueryDropDownHandler;
 import org.wcs.smart.i2.ui.handler.NewQueryHandler;
 import org.wcs.smart.i2.ui.handler.OpenQueryHandler;
 import org.wcs.smart.i2.ui.views.query.EntitySummaryContentProvider;
+import org.wcs.smart.i2.ui.views.query.EntitySummaryContentProvider.Type;
 import org.wcs.smart.i2.ui.views.query.FilterTreeContentProvider;
 import org.wcs.smart.i2.ui.views.query.FilterTreeItem;
 import org.wcs.smart.i2.ui.views.query.FilterTreeLabelProvider;
@@ -515,13 +520,9 @@ public class QueryView {
 			for (String[] queryTypes : InternalQueryManager.INSTANCE.getSupportQueryTypes()) {
 				MenuItem mi = new MenuItem(mnuTypes, SWT.PUSH);
 				mi.setText(queryTypes[1]);
-				if (queryTypes[0].equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) {
-					mi.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYSUM));
-				}else if (queryTypes[0].equalsIgnoreCase(IntelRecordObservationQuery.KEY)) {
-					mi.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_RECORDOBS));
-				}else if (queryTypes[0].equalsIgnoreCase(IntelEntityRecordQuery.KEY)) {
-					mi.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYRECORD));
-				}
+				Image i = Resources.INSTANCE.getImage(queryTypes[0]);
+				if (i != null) mi.setImage(i);
+				
 				mi.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
@@ -643,11 +644,15 @@ public class QueryView {
 		ITreeContentProvider provider = queryToContentProvider.get(queryTypeKey);
 		if (provider == null) {
 			if (queryTypeKey.equals(IntelEntitySummaryQuery.KEY)) {
-				provider = new EntitySummaryContentProvider();
+				provider = new EntitySummaryContentProvider(Type.ENTITY);
+			}else if (queryTypeKey.equals(IntelRecordSummaryQuery.KEY)) {
+					provider = new EntitySummaryContentProvider(Type.RECORD);
 			}else if (queryTypeKey.equals(IntelRecordObservationQuery.KEY)) {
 				provider = new FilterTreeContentProvider(new IntelRecordObservationQuery());
 			}else if (queryTypeKey.equals(IntelEntityRecordQuery.KEY)) {
 				provider = new FilterTreeContentProvider(new IntelEntityRecordQuery());
+			}else if (queryTypeKey.equals(IntelRecordQuery.KEY)) {
+				provider = new FilterTreeContentProvider(new IntelRecordQuery());
 			}
 			queryToContentProvider.put(queryTypeKey, provider);
 		}
@@ -705,26 +710,17 @@ public class QueryView {
 		protected IStatus run(IProgressMonitor monitor) {
 			List<QueryProxy> proxyItems;
 			
-			Set<IntelProfile> profiles = ProfilesManager.INSTANCE.getActiveProfiles()
-					.stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e)).collect(Collectors.toSet());
+			Set<String> profiles = ProfilesManager.INSTANCE.getActiveProfiles()
+					.stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e)).map(e->e.getKeyId()).collect(Collectors.toSet());
 			
 			try(Session s = HibernateManager.openSession()){
-				List<IntelRecordObservationQuery> items =
-						QueryFactory.buildQuery(s, IntelRecordObservationQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
-			
-				proxyItems = items.stream().filter(t->t.queriesProfile(profiles)).map(t->new QueryProxy(t.getName(), t.getUuid(), IntelRecordObservationQuery.KEY, t.getProfileFilter())).collect(Collectors.toList());
 				
-				List<IntelEntitySummaryQuery> items2 =
-						QueryFactory.buildQuery(s, IntelEntitySummaryQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
-			
-				proxyItems.addAll(items2.stream().filter(t->t.queriesProfile(profiles)).map(t->new QueryProxy(t.getName(), t.getUuid(), IntelEntitySummaryQuery.KEY, t.getProfileFilter())).collect(Collectors.toList()));
-				
-				List<IntelEntityRecordQuery> items3 =
-						QueryFactory.buildQuery(s, IntelEntityRecordQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
-			
-				proxyItems.addAll(items3.stream().filter(t->t.queriesProfile(profiles)).map(t->new QueryProxy(t.getName(), t.getUuid(), IntelEntityRecordQuery.KEY, t.getProfileFilter())).collect(Collectors.toList()));
-				
-				
+				proxyItems = new ArrayList<>();
+				for (Class<? extends AbstractIntelQuery> c: InternalQueryManager.INSTANCE.getQueryTypeClasses()) {
+					List<? extends AbstractIntelQuery> items =
+							QueryFactory.buildQuery(s, c, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$	
+					proxyItems.addAll(items.stream().filter(t->t.queriesProfile(profiles)).map(t->new QueryProxy(t.getName(), t.getUuid(), t.getTypeKey(), t.getProfileFilter())).collect(Collectors.toList()));
+				}
 			}
 
 			proxyItems.sort((a,b)-> Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));

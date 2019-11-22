@@ -71,6 +71,7 @@ import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class RecordDescriptionPage extends EditorPart{
 
 	private FormToolkit  toolkit;

@@ -111,9 +111,12 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			data.currentCount = 0;
 			return data;
 		}
+		
+		this.data = null;
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
+				System.out.println("drop table");
 				session.createNativeQuery("DROP TABLE " + DB_NAME_NAME).executeUpdate(); //$NON-NLS-1$
 				session.getTransaction().commit();
 			}catch(Exception ex) {
@@ -191,6 +194,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				session.getTransaction().commit();
 				
 				//create results
+				System.out.println("create table");
 				EntityTableData data = new EntityTableData();
 				data.attributes = eattributes;
 				data.tableName = DB_NAME_NAME;
@@ -221,6 +225,8 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 	}
 	@Override
 	public void updateElement(int index) {
+		if (data == null) return;
+		
 		if (viewer.getElementAt(index) != null || loaded.contains(index)){
 			//EG: this is the only way I can get the table to refresh properly
 			//if refresh is called 

@@ -130,21 +130,23 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 				srcs.addAll(QueryFactory.buildQuery(session, IntelRecordSource.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
 				
-				IntelRecordSource src = session.get(IntelRecordSource.class, currentSelection.getUuid());
-				srcs.remove(src);
+				if (currentSelection.getUuid() != null) {
+					IntelRecordSource src = session.get(IntelRecordSource.class, currentSelection.getUuid());
+					srcs.remove(src);
 				
-				src.getNames().size();
+					src.getNames().size();
 				
-				src.getProfiles().forEach(p->p.getName());
+					src.getProfiles().forEach(p->p.getName());
 				
-				if (src.getAttributes() != null){
-					src.getAttributes().forEach(a->{
-						a.getNames().size();
-						a.getAttribute();
-						a.getEntityType();
-					});
+					if (src.getAttributes() != null){
+						src.getAttributes().forEach(a->{
+							a.getNames().size();
+							a.getAttribute();
+							if (a.getEntityType() != null) a.getEntityType().getProfiles().forEach(p->p.getUuid());
+						});
+					}
+					currentSelection = src;
 				}
-				currentSelection = src;
 			}
 			
 			Display.getDefault().asyncExec(()->{
@@ -241,10 +243,12 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 		detailsPanel.setLayout(new GridLayout(3, false));
 		
 		comp = new NameKeyComposite();
-		comp.createControls(detailsPanel, true, false, new IChangeListener() {
+		comp.createControls(detailsPanel, true, currentSelection.getUuid() == null, new IChangeListener() {
 			@Override
 			public void itemModified() {
-				comp.validate();
+				if (!comp.validate()){
+					comp.updateFields(currentSelection);
+				}
 				modified();
 			}
 		});
@@ -622,22 +626,32 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 		}
 	}
 	
-		
-
-		
 	private boolean doSave(){
-		
+		String v = ProfilesManager.INSTANCE.validateRecords(currentSelection);
+		if (v != null) {				
+			Intelligence2PlugIn.displayLog(Messages.RecordSourceAttributeDialog_SaveError + v, null);
+			return false;
+		}
 		try(Session session = HibernateManager.openSession()){
 
 			session.beginTransaction();
 			try{
+				session.saveOrUpdate(currentSelection);
+				session.flush();
+				
 				
 				//delete all attribute values for attributes removed from given source
 				for (IntelRecordSourceAttribute a : attributesToDelete){
 					if (a.getUuid() == null) continue; //not saved skip
 					
 					//delete any values associated with this attribute 
-					Query<?> q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
+					Query<?> q = session.createQuery("delete from IntelRecordAttributeValueList ii where ii.id.value in (SELECT v FROM IntelRecordAttributeValue v where v.attribute = :attribute)"); //$NON-NLS-1$
+					q.setParameter("attribute", a); //$NON-NLS-1$
+					q.executeUpdate();
+					
+
+					//delete any values associated with this attribute 
+					q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
 					q.setParameter("attribute", a); //$NON-NLS-1$
 					q.executeUpdate();
 					
@@ -655,8 +669,7 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 					q.executeUpdate();
 				}
 				
-				session.saveOrUpdate(currentSelection);
-				
+			
 
 				session.getTransaction().commit();
 				
@@ -664,6 +677,9 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 				attributesToDelete.clear();
 				attributesMultiToSingle.clear();
 			}catch (Exception ex){
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
+				}
 				Intelligence2PlugIn.displayLog(Messages.RecordSourceAttributeDialog_SaveError + ex.getMessage(), ex);
 				return false;
 			}

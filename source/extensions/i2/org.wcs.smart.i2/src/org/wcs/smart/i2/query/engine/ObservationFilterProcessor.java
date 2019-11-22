@@ -815,7 +815,7 @@ public class ObservationFilterProcessor {
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		
 		
-		if (filter.getType() == SystemAttributeFilter.Type.RECORD) {
+		if (filter.getAttribute() == SystemAttribute.RECORD_DATE_CREATED || filter.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED) {
 			sql = new StringBuilder();
 			sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
 			sql.append(" SELECT distinct a.location_uuid "); //$NON-NLS-1$
@@ -824,9 +824,9 @@ public class ObservationFilterProcessor {
 			
 			sql.append(" WHERE "); //$NON-NLS-1$
 			
-			if (filter.getAttribute() == SystemAttribute.DATE_CREATED) {
+			if (filter.getAttribute() == SystemAttribute.RECORD_DATE_CREATED) {
 				sql.append(" cast( r.date_created as date) "); //$NON-NLS-1$
-			}else if (filter.getAttribute() == SystemAttribute.DATE_MODIFIED) {
+			}else if (filter.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED) {
 				sql.append(" cast( r.last_modified_date as date) "); //$NON-NLS-1$
 			}
 			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
@@ -842,9 +842,7 @@ public class ObservationFilterProcessor {
 			logString(sql.toString());
 			query.executeUpdate();
 			
-		}else if (filter.getType() == SystemAttributeFilter.Type.ENTITY) {
-			
-		
+		}else if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_CREATED || filter.getAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
 			sql = new StringBuilder();
 			sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
 			sql.append(" SELECT distinct el.location_uuid "); //$NON-NLS-1$
@@ -854,9 +852,9 @@ public class ObservationFilterProcessor {
 			
 			sql.append(" WHERE "); //$NON-NLS-1$
 			
-			if (filter.getAttribute() == SystemAttribute.DATE_CREATED) {
+			if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_CREATED) {
 				sql.append(" cast (e.date_created as date) "); //$NON-NLS-1$
-			}else if (filter.getAttribute() == SystemAttribute.DATE_MODIFIED) {
+			}else if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
 				sql.append(" cast( e.date_modified as date) "); //$NON-NLS-1$
 			}
 			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));

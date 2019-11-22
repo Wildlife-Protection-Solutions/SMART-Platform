@@ -24,7 +24,9 @@ package org.wcs.smart.i2.query;
 import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -44,15 +46,21 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.IntelHibernateManager;
+import org.wcs.smart.i2.birt.RecordReportGenerator;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
+import org.wcs.smart.i2.query.IQueryColumn.Type;
+import org.wcs.smart.i2.query.engine.IntelRecordResultItem;
 import org.wcs.smart.i2.query.observation.filter.DataModelFilter;
 import org.wcs.smart.i2.query.observation.filter.EntityFilter;
 import org.wcs.smart.i2.query.observation.filter.EntityTypeFilter;
@@ -60,8 +68,8 @@ import org.wcs.smart.i2.query.observation.filter.IFilterVisitor;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
-import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
-import org.wcs.smart.i2.query.observation.filter.RecordSourceFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -123,8 +131,54 @@ public class IntelQueryColumnProvider {
 			return getQueryColumns((IntelRecordObservationQuery)query, itemProvider, l, session);
 		}else if (query instanceof IntelEntityRecordQuery) {
 			return getQueryColumns((IntelEntityRecordQuery)query, itemProvider, l, session);
+		}else if (query instanceof IntelRecordQuery) {
+			return getQueryColumns((IntelRecordQuery)query, itemProvider, l, session);
 		}
 		throw new IllegalStateException("getQueryColumns is not support for query type " + query.getTypeKey()); //$NON-NLS-1$
+	}
+	
+	public List<IQueryColumn> getQueryColumns (IntelRecordQuery query, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
+		
+		List<IQueryColumn> columns = new ArrayList<>();
+		
+		// Fixed query columns
+		FixedQueryColumn.Column[] thiscolumns;
+		if (query.getConservationArea().getIsCcaa()) {
+			thiscolumns = new FixedQueryColumn.Column[]{
+					FixedQueryColumn.Column.CA_ID,
+					FixedQueryColumn.Column.CA_NAME,
+					FixedQueryColumn.Column.RECORD_TITLE,
+					FixedQueryColumn.Column.RECORD_STATUS,
+					FixedQueryColumn.Column.RECORD_SOURCE,
+					FixedQueryColumn.Column.RECORD_PROFILE,
+				};
+		}else {
+			thiscolumns = new FixedQueryColumn.Column[]{
+					FixedQueryColumn.Column.RECORD_PROFILE,
+					FixedQueryColumn.Column.RECORD_TITLE,
+					FixedQueryColumn.Column.RECORD_STATUS,
+					FixedQueryColumn.Column.RECORD_SOURCE,
+					FixedQueryColumn.Column.RECORD_DATE,
+					
+				};
+		}
+		
+		for (FixedQueryColumn.Column c : thiscolumns){
+			columns.add(new FixedQueryColumn(c, l));
+		}
+		
+//		Set<IntelRecordSourceAttribute> atts = new HashSet<>();
+//		List<IntelRecordSource> items = itemProvider.getRecordSources(AbstractIntelQuery.convertFromProfileFilter(query.getProfileFilter()), session);
+//		for (IntelRecordSource rs : items) {
+//			for (IntelRecordSourceAttribute ir : rs.getAttributes()) {
+//				atts.add(ir.getAttribute());
+//			}
+//		}
+			
+		
+			
+		//TODO: add record attribute columns for profile filter???
+		return columns;
 	}
 
 	public List<IQueryColumn> getQueryColumns (IntelRecordObservationQuery query, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
@@ -261,8 +315,8 @@ public class IntelQueryColumnProvider {
 						}else if (filter instanceof IntelAttributeFilter){
 							IntelAttributeFilter afilter = (IntelAttributeFilter)filter;
 							column = new FilterQueryColumn(generateColumnName(afilter, itemProvider, session, l), afilter.getUniqueColumnIdentifier(), afilter);
-						}else if (filter instanceof RecordSourceFilter) {
-							RecordSourceFilter afilter = (RecordSourceFilter)filter;
+						}else if (filter instanceof SystemAttributeFilter) {
+							SystemAttributeFilter afilter = (SystemAttributeFilter)filter;
 							column = generateColumnName(afilter, itemProvider, session, l);
 						}else if (filter instanceof RecordAttributeFilter) {
 							RecordAttributeFilter afilter = (RecordAttributeFilter)filter;
@@ -330,15 +384,24 @@ public class IntelQueryColumnProvider {
 		return new FilterQueryColumn(name,  filter.getUniqueColumnIdentifier(), filter);
 	}
 	
-	private IQueryColumn generateColumnName(RecordSourceFilter filter, IQueryItemProvider itemProvider, Session session, Locale l){
-		IntelRecordSource src = itemProvider.getRecordSource(filter.getTypeKey(), session);
-		String name = null;
-		if (src == null) {
-			name = filter.getTypeKey();
-		}else {
-			name = src.getName();
+	private IQueryColumn generateColumnName(SystemAttributeFilter filter, IQueryItemProvider itemProvider, Session session, Locale l){
+		if (filter.getAttribute() == SystemAttribute.RECORD_SOURCE) {
+			IntelRecordSource src = itemProvider.getRecordSource(filter.getStringKey(), session);
+			String name = null;
+			if (src == null) {
+				name = filter.getStringKey();
+			}else {
+				name = src.getName();
+			}
+			return new FilterQueryColumn(name, filter.getUniqueColumnIdentifier(), filter);
+		}else if (filter.getAttribute() == SystemAttribute.RECORD_STATUS) {
+			String name = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IntelRecord.Status.valueOf(filter.getStringKey()), l);
+			return new FilterQueryColumn(name, filter.getUniqueColumnIdentifier(), filter);
+		}else if (filter.getAttribute() == SystemAttribute.RECORD_DATE) {
+			String name = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(SystemAttribute.RECORD_DATE, l);
+			return new FilterQueryColumn(name, filter.getUniqueColumnIdentifier(), filter);
 		}
-		return new FilterQueryColumn(name, filter.getUniqueColumnIdentifier(), filter);
+		return null;
 	}
 	
 	private IQueryColumn generateColumnName(DataModelFilter filter, IQueryItemProvider itemProvider, Session session, Locale l){
@@ -528,12 +591,6 @@ public class IntelQueryColumnProvider {
 
 	
 	private String generateColumnName(RecordAttributeFilter filter, IQueryItemProvider itemProvider, Session session, Locale l){
-		
-		if (filter.getFixedAttribute() != null) {
-			if (filter.getFixedAttribute() == FixedAttribute.DATE) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(FixedAttribute.DATE, l);
-			if (filter.getFixedAttribute() == FixedAttribute.STATUS) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(FixedAttribute.STATUS, l);
-		}
-		
 		if (filter.getAttributeType() != null) {
 			StringBuilder sb = new StringBuilder();
 			IntelAttribute attribute = itemProvider.getAttribute(filter.getAttributeKey(), session);

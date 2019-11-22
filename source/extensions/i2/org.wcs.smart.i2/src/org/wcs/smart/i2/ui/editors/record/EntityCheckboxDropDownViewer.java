@@ -63,6 +63,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.ui.CheckBoxDropDown;
@@ -86,6 +87,8 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 	private boolean isMulti;
 	private boolean isInitializing = false;
 	
+	private IntelProfile profile = null;
+	
 	private ViewerFilter filter = new ViewerFilter() {
 		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
@@ -94,8 +97,9 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 		}
 	}; 
 	
-	public EntityCheckboxDropDownViewer(Composite parent, IntelEntityType type, boolean isMulti) {
+	public EntityCheckboxDropDownViewer(Composite parent, IntelEntityType type, IntelProfile profile, boolean isMulti) {
 		super(parent);
+		this.profile = profile;
 		this.type = type;
 		this.isMulti = isMulti;
 		setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
@@ -368,7 +372,9 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 			protected IStatus run(IProgressMonitor monitor) {
 				List<EntityItem> entities = new ArrayList<>();
 				try(Session s = HibernateManager.openSession()){
-					ScrollableResults r = QueryFactory.buildQuery(s, IntelEntity.class, "entityType", type).scroll(); //$NON-NLS-1$
+					ScrollableResults r = QueryFactory.buildQuery(s, IntelEntity.class, 
+							new Object[] {"entityType", type},
+							new Object[] {"profile", profile}).scroll(); //$NON-NLS-1$
 					while(r.next()){
 						IntelEntity e = (IntelEntity)r.get()[0];
 						EntityItem i = new EntityItem(e.getUuid(), e.getIdAttributeAsText());

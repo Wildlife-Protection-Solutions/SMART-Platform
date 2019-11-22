@@ -24,7 +24,7 @@ package org.wcs.smart.i2.query.observation.filter;
 import java.text.MessageFormat;
 
 /**
- * Entity summary query value part.
+ * Summary query value part.
  * 
  * @author Emily
  *
@@ -41,7 +41,8 @@ public class ValuePart {
 	
 	
 	public enum ValueOption{
-		NUMBER_ENTITIES("numentities"); //$NON-NLS-1$
+		NUMBER_ENTITIES("numentities"), //$NON-NLS-1$
+		NUMBER_RECORDS("numrecords"); //$NON-NLS-1$
 		
 		String key;
 		

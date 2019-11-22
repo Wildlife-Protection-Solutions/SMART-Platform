@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2019 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.dialogs;
 
 import java.text.Collator;
@@ -48,11 +69,13 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelPermission;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.security.IntelUserUserLevel;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
@@ -65,6 +88,12 @@ import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.KeyInputDialog;
 
+/**
+ * dialog for managing profile
+ * @author Emily
+ *
+ */
+@SuppressWarnings("restriction")
 public class ProfileDialog extends SmartStyledDialog {
 
 	private static final String COLOR_KEY = "COLOR"; //$NON-NLS-1$
@@ -99,6 +128,8 @@ public class ProfileDialog extends SmartStyledDialog {
 	private HashMap<Integer,Object[]> columnSize = new HashMap<>();
 	private ScrolledComposite userscroll;
 	private Composite permComp;
+	
+	private boolean permissionModified = false;
 	
 	private Listener generateKeyListener = e->{
 		String newKey = DataModelManager.INSTANCE.generateKey(txtName.getText(), others);
@@ -149,51 +180,30 @@ public class ProfileDialog extends SmartStyledDialog {
 			txtKey.setText(config.getKeyId());
 		}
 		
-		Set<IntelEntityType> types = new HashSet<>();
-		for (Object x : tblEntityTypes.getCheckedElements()) {
-			if (x instanceof IntelEntityType) types.add((IntelEntityType)x);				
-		}
-		Set<IntelEntityType> d = new HashSet<>();
-		for (IntelEntityType x : config.getEntityTypes()) {
-			if (!types.contains(x))  d.add(x);
-			if (types.contains(x)) types.remove(x);
-		}
-		for (IntelEntityType dd : d) {
-			config.getEntityTypes().remove(dd);
-			dd.getProfiles().remove(config);
-		}
-		for (IntelEntityType dd : types) {
-			config.getEntityTypes().add(dd);
-			dd.getProfiles().add(config);
-		}
-		types.addAll(d);
-		
-		
-		Set<IntelRecordSource> rtypes = new HashSet<>();
-		for (Object x : tblRecordSources.getCheckedElements()) {
-			if (x instanceof IntelRecordSource) rtypes.add((IntelRecordSource)x);				
-		}
-		Set<IntelRecordSource> rs = new HashSet<>();
-		for (IntelRecordSource x : config.getRecordSources()) {
-			if (!rtypes.contains(x))  rs.add(x);
-			if (rtypes.contains(x)) rtypes.remove(x);
-		}
-		for (IntelRecordSource dd : rs) {
-			config.getRecordSources().remove(dd);
-			dd.getProfiles().remove(config);
-		}
-		for (IntelRecordSource dd : rtypes) {
-			config.getRecordSources().add(dd);
-			dd.getProfiles().add(config);
-		}
-		rtypes.addAll(rs);
-		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
 				session.saveOrUpdate(config);
-				for (IntelEntityType t : types)  session.saveOrUpdate(t);	
-				for (IntelRecordSource t : rtypes)  session.saveOrUpdate(t);
+
+				List<IntelEntityType> esources = QueryFactory.buildQuery(session, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).list();
+				for (IntelEntityType s : esources) {
+					IntelEntityType src = session.get(IntelEntityType.class, s.getUuid());
+					if (tblEntityTypes.getChecked(s)) {
+						src.getProfiles().add(config);
+					}else {
+						src.getProfiles().remove(config);
+					}
+				}
+				
+				List<IntelRecordSource> sources = QueryFactory.buildQuery(session, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).list();
+				for (IntelRecordSource s : sources) {
+					IntelRecordSource src = session.get(IntelRecordSource.class, s.getUuid());
+					if (tblRecordSources.getChecked(s)) {
+						src.getProfiles().add(config);
+					}else {
+						src.getProfiles().remove(config);
+					}
+				}
 				
 				for (IntelPermission p : permissions.values()) {
 					if (p.getPermission() == 0) {
@@ -207,7 +217,12 @@ public class ProfileDialog extends SmartStyledDialog {
 						}
 					}
 				}
-
+				IntelSecurityManager.INSTANCE.clearCache();
+				session.flush();
+				
+				String v = ProfilesManager.INSTANCE.validateRecords(new ArrayList<>(sources));
+				if (v != null) throw new Exception(v);
+				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				if (session.getTransaction().isActive()) {
@@ -222,6 +237,10 @@ public class ProfileDialog extends SmartStyledDialog {
 			}
 		}
 		setDirty(false);
+		if (permissionModified) {
+			MessageDialog.openInformation(getShell(), "Permissions", "Permissions were modified, a full restart is required to fully implements to updates.");
+			permissionModified = false;
+		}
 	}
 	
 	
@@ -476,6 +495,7 @@ public class ProfileDialog extends SmartStyledDialog {
 				ip.setPermission(IntelPermission.READ_ONLY);
 				
 				permissions.put(ip.getEmployee(), ip);
+				permissionModified = true;
 			}
 			updatePermissionList();
 		});
@@ -853,7 +873,7 @@ public class ProfileDialog extends SmartStyledDialog {
 				}
 				ip.setPermission(getPermissionValue());
 				modified();
-				
+				permissionModified = true;
 			});
 			return t;
 		}

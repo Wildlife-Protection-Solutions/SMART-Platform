@@ -1,11 +1,34 @@
+/*
+ * Copyright (C) 2019 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
@@ -15,10 +38,21 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 
+/**
+ * Tools for managing profiles and maintaining the active
+ * profiles. 
+ * 
+ * @author Emily
+ *
+ */
 public enum ProfilesManager {
 
 	INSTANCE;
@@ -42,12 +76,17 @@ public enum ProfilesManager {
 		return active;
 	}
 	
+	public Set<String> getActiveProfileKeys(){
+		return getActiveProfiles().stream().map(e->e.getKeyId()).collect(Collectors.toSet());
+	}
+	
 	public void setActiveProfiles(Set<IntelProfile> active, IEventBroker event) {
 		//TODO: ensure all editors (entities and records) are saved before setting profiles
 		synchronized (INSTANCE) {
+			//only do something if actually changed
+			if (this.active.containsAll(active) && active.containsAll(this.active)) return ;
 			this.active = Collections.unmodifiableSet(active);
 		}
-		//fire events
 		event.post(IntelEvents.ACTIVE_PROFILES, this.active);
 	}
 	
@@ -83,6 +122,13 @@ public enum ProfilesManager {
 		return temp;
 	}
 	
+	/**
+	 * Determine if the profile can be deleted
+	 * 
+	 * @param profile
+	 * @param session
+	 * @throws Exception
+	 */
 	public void canDelete(IntelProfile profile, Session session) throws Exception{
 		if (!DeleteManager.canDelete(profile, session)){
 			throw new Exception("Unknown error occurs while deleting entity type.");
@@ -164,6 +210,54 @@ public enum ProfilesManager {
 			q = session.createQuery("delete from IntelProfile where uuid = :profile"); //$NON-NLS-1$
 			q.setParameter("profile", profile.getUuid()); //$NON-NLS-1$
 			q.executeUpdate();
+			
+			for (Class<? extends AbstractIntelQuery> c : InternalQueryManager.INSTANCE.getQueryTypeClasses()) {
+			
+				List<? extends AbstractIntelQuery> query = session.createQuery("FROM " + c.getName() + " WHERE profile_filter like :profile and conservationArea = :ca", AbstractIntelQuery.class)
+						.setParameter("profile", profile.getKeyId() + "%")
+						.setParameter("ca", profile.getConservationArea())
+						.list();
+				
+				for (AbstractIntelQuery item : query) {
+					if (item.queriesProfile(profile)) {
+						Set<String> filters = AbstractIntelQuery.convertFromProfileFilter(item.getProfileFilter());
+						filters.remove(profile.getKeyId());
+						if (filters.isEmpty()) {
+							session.delete(item);
+						}else {
+							item.setProfileFilter(AbstractIntelQuery.convertKeysToProfileFilter(filters));
+						}
+					}
+				}
+			}
 		
+	}
+	
+	public String validateRecords(List<IntelRecordSource> sources) {
+		for (IntelRecordSource s : sources) {
+			String x = validateRecords(s);
+			if (x != null) return x;
+		}
+		return null;
+	}
+	
+	public String validateRecords(IntelRecordSource source) {
+		for (IntelRecordSourceAttribute ia : source.getAttributes()) {
+			if (ia.getAttribute() != null) continue;
+			IntelEntityType etype = ia.getEntityType();
+			for (IntelProfile ip : source.getProfiles()) {
+				if (!etype.getProfiles().contains(ip)) {
+					String name = IntelligenceLabelProviderImpl.getName(ia);
+					String msg = "The record source {0} is associated with profile {1}, "
+							+ "but the entity type attribute {2} is not associated "
+							+ "with this profile.  "
+							+ "The entity type {3} must also be associated "
+							+ "with the profile {4}.";
+					return MessageFormat.format(msg, source.getName(), ip.getName(), name, name, ip.getName()); 
+				}
+			}
+		}
+		
+		return null;
 	}
 }

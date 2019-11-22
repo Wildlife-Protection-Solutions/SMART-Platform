@@ -194,10 +194,12 @@ import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.E3Utils;
 
 /**
- * Entity editor.
+ * Entity editor
+ * 
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class EntityEditor extends EditorPart implements MapPart{
 	
 	private static final String TBLRECORD_LBLPROVIDER_KEY = "LBLPROVIDER"; //$NON-NLS-1$
@@ -293,7 +295,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				temp = (IntelEntity) s.get(IntelEntity.class, input.getUuid());
 				if (temp == null){
 					//close editor
-					closeEditor();
+					closeEditor(false);
 					return Status.OK_STATUS;
 				}
 				temp.getProfile().getName();
@@ -573,8 +575,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 		return false;
 	}
 	
-	private void closeEditor(){
-		getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(EntityEditor.this, false);
+	private void closeEditor(boolean promptsave){
+		getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(EntityEditor.this, promptsave);
 	}
 	
 	private void subscribeToEvents(){
@@ -596,7 +598,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				Object data = event.getProperty(IEventBroker.DATA);
 				if (data != null ){
 					if (data.equals(entity) || data.equals(entity.getEntityType())){
-						closeEditor();
+						closeEditor(false);
 					}else if (data instanceof Collection){
 						Collection<?> items = (Collection<?>) data;
 						items.forEach(x->{
@@ -681,7 +683,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		handler = event->{
 			if (!ProfilesManager.INSTANCE.getActiveProfiles().contains(getEntity().getProfile())) {
 				//close entity
-				closeEditor();
+				closeEditor(true);
 			}else {
 				if (isDirty){
 					//the editor is dirty and the entity has changed behind the scenes; give the user the option of replacing 
@@ -1710,8 +1712,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 			@Override
 			public void menuShown(MenuEvent e) {
 				for (MenuItem mi : recordsMenu.getItems()) mi.dispose();
-				
-				//TODO
 				if (IntelSecurityManager.INSTANCE.canViewRecords(input.getProfileUuid())) {
 					MenuItem open = new MenuItem(recordsMenu, SWT.PUSH);
 					open.setText(Messages.EntityEditor_OpenRecordMnuItem);

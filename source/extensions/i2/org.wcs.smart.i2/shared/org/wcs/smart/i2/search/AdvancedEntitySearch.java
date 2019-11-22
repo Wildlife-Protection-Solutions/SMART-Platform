@@ -244,10 +244,10 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				
 				String column = ""; //$NON-NLS-1$
 				switch (attribute) {
-					case DATE_CREATED:
+					case ENTITY_DATE_CREATED:
 						column = "date_created"; //$NON-NLS-1$
 						break;
-					case DATE_MODIFIED:
+					case ENTITY_DATE_MODIFIED:
 						column = "date_modified"; //$NON-NLS-1$
 						break;
 				}

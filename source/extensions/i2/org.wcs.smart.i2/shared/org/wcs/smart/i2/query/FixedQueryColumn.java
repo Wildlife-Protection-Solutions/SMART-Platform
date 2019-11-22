@@ -31,7 +31,7 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.engine.EntityRecordQueryResultItem;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
-
+import org.wcs.smart.i2.query.engine.IntelRecordResultItem;
 import org.locationtech.jts.geom.Geometry;
 
 /**
@@ -46,6 +46,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 		RECORD_TITLE("record:title"), //$NON-NLS-1$
 		RECORD_STATUS("record:status"), //$NON-NLS-1$
 		RECORD_SOURCE("record:source"), //$NON-NLS-1$
+		RECORD_DATE("record:date"), //$NON-NLS-1$
 		LOC_ID("loc:id"), //$NON-NLS-1$
 		LOC_DATE("loc:date"), //$NON-NLS-1$
 		LOC_TIME("loc:time"), //$NON-NLS-1$
@@ -94,7 +95,26 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			}
 			return null;
 		}
-		
+		if (item instanceof IntelRecordResultItem) {
+			IntelRecordResultItem i = (IntelRecordResultItem)item;
+			switch(column){
+			case RECORD_STATUS:
+				return IntelRecord.Status.valueOf(i.getRecordStatus().toUpperCase(Locale.ROOT));
+			case RECORD_SOURCE:
+				return i.getRecordSource();
+			case RECORD_PROFILE:
+				return i.getProfileName();
+			case RECORD_TITLE:
+				return i.getRecordTitle();
+			case RECORD_DATE:
+				return i.getRecordDate();
+			case CA_ID:
+				return i.getConservationAreaId();
+			case CA_NAME:
+				return i.getConservationAreaName();
+			default:
+			}
+		}
 		if (!(item instanceof  IntelObservationResultItem)) return null;
 		IntelObservationResultItem i = (IntelObservationResultItem) item;
 		switch(column){
@@ -140,6 +160,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 				}
 				return toFormat.toString();
 			case LOC_TIME:
+			case RECORD_DATE:
 				return DateFormat.getTimeInstance(DateFormat.DEFAULT, l).format((Date)toFormat);
 			case RECORD_STATUS:
 				return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(toFormat, l);
@@ -150,6 +171,8 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			case ENTITY_TYPE:
 			case CA_NAME:
 			case CA_ID:
+			case ENTITY_PROFILE:
+			case RECORD_PROFILE:
 				return (String)toFormat;
 			case RECORD_SOURCE:
 				return ((IntelRecordSource)toFormat).getName();
@@ -167,6 +190,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 	public Type getDataType() {
 		switch(column){
 			case LOC_DATE:
+			case RECORD_DATE:
 				return Type.DATE;
 			case LOC_GEOMTRY:
 				return Type.GEOMETRY;

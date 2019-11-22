@@ -46,14 +46,11 @@ public class IntelEntitySummaryQuery extends AbstractIntelQuery {
 	
 	public static final String KEY = "I2_ENTITY_SUMM_QUERY"; //$NON-NLS-1$
 
-	public static final String PART_SEPERATOR = "|"; //$NON-NLS-1$
-	
 	@Override
 	@Transient
 	public String getTypeKey() {
 		return KEY;
 	}
-	
 	
 	@Transient
 	public static SumQueryDefinition parseQuery(String queryString) throws Exception{

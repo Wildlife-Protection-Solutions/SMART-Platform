@@ -37,7 +37,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -53,7 +52,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ToolBar;
@@ -71,9 +69,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
-import org.locationtech.udig.project.internal.Map;
-import org.locationtech.udig.project.ui.internal.MapPart;
-import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
@@ -88,12 +83,11 @@ import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.RunQueryJob;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
-import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
@@ -113,9 +107,9 @@ import org.wcs.smart.ui.SmartWizardDialog;
  *
  */
 @SuppressWarnings("restriction")
-public class IntelRecordObservationQueryEditor extends EditorPart implements MapPart, IQueryEditor{
+public class IntelRecordQueryEditor extends EditorPart implements IQueryEditor{
 
-	public static final String ID = "org.wcs.smart.i2.editor.query.recordobservation"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.i2.editor.query.record"; //$NON-NLS-1$
 
 	private boolean isDirty = false;
 	
@@ -124,12 +118,11 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 	private IEventBroker eventBroker;
 	
 	//query
-	private IntelRecordObservationQuery query;
+	private IntelRecordQuery query;
 	
 	//header & date part
 	private IntelQueryNameLabel header;
 	private DateFilterDropDownComposite datePart;
-	private SectionTabHeader dataTabList;
 	
 	//filter panel
 	private FilterDefinitionPanel dpanel;
@@ -144,7 +137,6 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 	private QueryLazyResultsTable resultsTable;
 	private ProgressPanel progressPanel;
 	private ErrorPanel errorPanel;
-	private QueryMapPanel mapPanel;
 	
 	private boolean isInitializing = false;
 	private RunQueryJob runJob;
@@ -211,11 +203,9 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 			return;
 		}
 		
-		IntelRecordObservationQuery clone = new IntelRecordObservationQuery();
+		IntelRecordQuery clone = new IntelRecordQuery();
 		clone.setConservationArea(SmartDB.getCurrentConservationArea());
-		clone.setColumnFilter(query.getColumnFilter());
 		clone.setQueryString(queryString);
-		clone.setStyle(query.getStyle());
 		clone.setName(newName.getValue());
 		clone.updateName(SmartDB.getCurrentLanguage(), clone.getName());
 		clone.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), clone.getName());
@@ -267,7 +257,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 	}
 	
 	private void closeEditor(boolean promptSave){
-		getSite().getPage().closeEditor(IntelRecordObservationQueryEditor.this, promptSave);
+		getSite().getPage().closeEditor(IntelRecordQueryEditor.this, promptSave);
 	}
 
 	@Override
@@ -286,7 +276,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 			@Override
 			public void handleEvent(Event event) {
 				Object data = event.getProperty(IEventBroker.DATA);
-				if (data instanceof IntelRecordObservationQuery){
+				if (data instanceof IntelRecordQuery){
 					if (data.equals(query)){
 						closeEditor(false);
 						return;
@@ -319,7 +309,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		};
 		eventHandles.add(handler);
 		eventBroker.subscribe(IntelEvents.ACTIVE_PROFILES, handler);
-		
+				
 		parent.setLayout(new GridLayout());
 		((GridLayout)parent.getLayout()).marginWidth = 0;
 		((GridLayout)parent.getLayout()).marginHeight = 0;
@@ -355,7 +345,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
 			saveItem = new ToolItem(headerToolbar, SWT.PUSH);
 			saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
-			saveItem.addListener(SWT.Selection, (event)->IntelRecordObservationQueryEditor.this.getSite().getPage().saveEditor(IntelRecordObservationQueryEditor.this, false));
+			saveItem.addListener(SWT.Selection, (event)->IntelRecordQueryEditor.this.getSite().getPage().saveEditor(IntelRecordQueryEditor.this, false));
 			saveItem.setToolTipText(Messages.IntelQueryEditor_saveTooltip);
 			
 			ToolItem saveAsItem = new ToolItem(headerToolbar, SWT.PUSH);
@@ -385,20 +375,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		SashForm core = new SashForm(main, SWT.VERTICAL);
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		SmartSection resultsSection = new SmartSection(core, toolkit, Messages.IntelQueryEditor_ResultsSectionLabel){
-			public void populateHeaderAdditions(Composite parent){
-				Composite outer = new Composite(parent, SWT.NONE);
-				outer.setLayout(new GridLayout());
-				((GridLayout)outer.getLayout()).marginHeight = 0;
-				((GridLayout)outer.getLayout()).marginWidth = 30;
-				
-				dataTabList = new SectionTabHeader(new String[]{Messages.IntelQueryEditor_TabSectionsLabel, 
-						Messages.IntelQueryEditor_MapSectionLabel}, outer, toolkit);
-				((GridLayout)dataTabList.getLayout()).marginHeight = 0;
-				((GridLayout)dataTabList.getLayout()).marginWidth = 0;
-				
-			}
-		};
+		SmartSection resultsSection = new SmartSection(core, toolkit, Messages.IntelQueryEditor_ResultsSectionLabel);
 		
 		Composite c = toolkit.createComposite(resultsSection);
 		c.setLayout(new GridLayout());
@@ -450,12 +427,12 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		header1.setContent(new Composite[] {defComp, pComp}, definitionStack);
 		header1.selectTab(0);
 		
-		dpanel = new FilterDefinitionPanel(false, true){
+		dpanel = new FilterDefinitionPanel(false, false){
 			public void runQuery(){
 				runQuery();
 			}
 			public void saveQuery(){
-				getSite().getPage().saveEditor(IntelRecordObservationQueryEditor.this, false);
+				getSite().getPage().saveEditor(IntelRecordQueryEditor.this, false);
 			}
 		};
 		Composite definitionPanel = dpanel.createComposite(defComp);
@@ -465,10 +442,6 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 			setDirty(true);
 			validateQuery();
 		});
-		dpanel.getfilterOptionLabel().setToolTipText(Messages.IntelEntityRecordQueryEditor_FilterTypeTooltip);
-		dpanel.getfilterOptionLabel().setText(Messages.IntelEntityRecordQueryEditor_FiltetypeLabel);
-		
-		
 		
 		ppanel = new ProfilesDefinitionPanel();
 		Composite profilesPanel = ppanel.createComposite(pComp);
@@ -507,12 +480,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		errorPanel = new ErrorPanel(stackPanel);
 		((StackLayout)stackPanel.getLayout()).topControl = runQueryComp;
 		
-		mapPanel = new QueryMapPanel(outerStackPanel, this);
 		((StackLayout)outerStackPanel.getLayout()).topControl = stackPanel;
-		
-		dataTabList.setContent(new Composite[]{stackPanel, mapPanel}, outerStackPanel);
-		dataTabList.selectTab(0);
-		
 	}
 	
 	private void exportQuery(){
@@ -531,7 +499,6 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		resultsTable.setInput(null);
 		((StackLayout)stackPanel.getLayout()).topControl = progressPanel;
 		stackPanel.layout(true);
-		mapPanel.updateQueryLayers(null);
 		
 		Date[] dateFilter = null;
 		if (datePart.getDateFilter() == DateFilter.CUSTOM){
@@ -562,7 +529,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 			if (x != null) throw new Exception(x);
 			
 			String queryString = dpanel.getQueryPart();
-			IntelRecordObservationQuery.parseQuery(queryString);
+			IntelRecordQuery.parseQuery(queryString);
 			setErrorMessage(null, null);
 			for(ToolItem i : runItem) i.setEnabled(true);
 			
@@ -665,7 +632,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 			saveItem.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					getSite().getPage().saveEditor(IntelRecordObservationQueryEditor.this, false);
+					getSite().getPage().saveEditor(IntelRecordQueryEditor.this, false);
 				}
 			});
 			
@@ -703,7 +670,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 	}
 	
 	@Override
-	public IntelRecordObservationQuery getQuery(){
+	public IntelRecordQuery getQuery(){
 		return this.query;
 	}
 	
@@ -715,11 +682,10 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 			UUID uuid = ((QueryEditorInput)getEditorInput()).getUuid();
 			
 			List<DropItem> generatedDropItems = new ArrayList<>();
-			IQueryFilter.FilterType filterType = IQueryFilter.FilterType.OBSERVATION;
 			
 			if (((QueryEditorInput)getEditorInput()).isNew()){
 				uuid = null;
-				IntelRecordObservationQuery temp = new IntelRecordObservationQuery();
+				IntelRecordQuery temp = new IntelRecordQuery();
 				temp.setName(Messages.IntelQueryEditor_defaultQueryName);
 				temp.updateName(SmartDB.getCurrentLanguage(), temp.getName());
 				temp.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), temp.getName());
@@ -732,7 +698,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 			}else{
 				
 				try(Session s = HibernateManager.openSession()){
-					IntelRecordObservationQuery temp = (IntelRecordObservationQuery)s.get(IntelRecordObservationQuery.class, uuid);
+					IntelRecordQuery temp = s.get(IntelRecordQuery.class, uuid);
 					if (temp == null){
 						Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_QueryNotfoundError, null);
 						closeEditor(false);
@@ -742,9 +708,8 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 					query = temp;
 					
 					try{
-						ParsedObservationQuery parsedQuery = IntelRecordObservationQuery.parseQuery(query.getQueryString());
-						generatedDropItems = DropItemFactory.generateDropItems(parsedQuery.getFilter(), s);
-						filterType = parsedQuery.getFilterType();
+						IQueryFilter filter = IntelRecordQuery.parseQuery(query.getQueryString());
+						generatedDropItems = DropItemFactory.generateDropItems(filter, s);
 					}catch(Exception ex){
 						DropItem di = new ErrorDropItem(Messages.IntelQueryEditor_QueryParseError + ex.getMessage());
 						generatedDropItems.add(di);
@@ -752,12 +717,11 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 					
 				}catch (Exception ex){
 					Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_LoadError + ex.getMessage(), ex);
-					getSite().getPage().closeEditor(IntelRecordObservationQueryEditor.this, false);
+					getSite().getPage().closeEditor(IntelRecordQueryEditor.this, false);
 					return Status.OK_STATUS;
 				}
 			}
 			final List<DropItem> fGeneratedDropItems = generatedDropItems;
-			final IQueryFilter.FilterType fType = filterType;
 			
 			//configure run query job
 			runJob = new RunQueryJob(query) {
@@ -766,7 +730,6 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 					Display.getDefault().syncExec(()->{
 						if (stackPanel.isDisposed()) return;
 						resultsTable.setInput(null);
-						mapPanel.updateQueryLayers(null);
 						((StackLayout)stackPanel.getLayout()).topControl = errorPanel;
 						errorPanel.setError(Messages.IntelQueryEditor_RunError + ex.getMessage());
 						stackPanel.layout(true);
@@ -778,7 +741,6 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 					Display.getDefault().syncExec(()->{
 						if (stackPanel.isDisposed()) return;
 						resultsTable.setInput((IPagedQueryResultSet) results);
-						mapPanel.updateQueryLayers((IPagedQueryResultSet) results);
 						((StackLayout)stackPanel.getLayout()).topControl = resultsTable;
 						stackPanel.layout(true);
 					});
@@ -789,7 +751,6 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 					Display.getDefault().syncExec(()->{
 						if (stackPanel.isDisposed()) return;
 						resultsTable.setInput(null);
-						mapPanel.updateQueryLayers(null);
 						((StackLayout)stackPanel.getLayout()).topControl = errorPanel;
 						errorPanel.setError(Messages.IntelQueryEditor_CancelledError);
 						stackPanel.layout(true);
@@ -802,7 +763,6 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 				isInitializing = true;
 				try{
 					initUiField();
-					dpanel.setFilterType(fType);
 					dpanel.addItems(fGeneratedDropItems);
 					ppanel.setProfileFilter(query.getProfileFilter());
 				}finally{
@@ -816,30 +776,4 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		}
 		
 	};
-
-	@Override
-	public Map getMap() {
-		return mapPanel.getMap();
-	}
-
-	@Override
-	public void openContextMenu() {
-		mapPanel.openContextMenu();		
-	}
-
-	@Override
-	public void setFont(Control textArea) {
-		mapPanel.setFont(textArea);
-	}
-
-	@Override
-	public void setSelectionProvider(
-			IMapEditorSelectionProvider selectionProvider) {
-		mapPanel.setSelectionProvider(selectionProvider);
-	}
-
-	@Override
-	public IStatusLineManager getStatusLineManager() {
-		return mapPanel.getStatusLineManager();
-	}
 }
