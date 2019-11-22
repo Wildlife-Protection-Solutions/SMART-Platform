@@ -190,8 +190,8 @@ public class RelationshipGraphFilterComposite extends Composite {
 
 		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
 		IEventBroker eventBroker = context.get(IEventBroker.class);
-		eventBroker.subscribe(IntelEvents.ACTIVE_PROFILES, entityTypesHandler);
-		eventBroker.subscribe(IntelEvents.ACTIVE_PROFILES, relationshipTypesHandler);
+		eventBroker.subscribe(IntelEvents.PROFILES_ALL, entityTypesHandler);
+		eventBroker.subscribe(IntelEvents.PROFILES_ALL, relationshipTypesHandler);
 		eventBroker.subscribe(IntelEvents.ENTITY_TYPE_ALL, entityTypesHandler);
 		eventBroker.subscribe(IntelEvents.RELATION_TYPE_ALL, relationshipTypesHandler);
 		

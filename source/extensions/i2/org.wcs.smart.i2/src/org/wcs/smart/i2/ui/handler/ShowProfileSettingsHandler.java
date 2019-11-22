@@ -69,6 +69,7 @@ public class ShowProfileSettingsHandler {
 	
 		
 		IntelPreferenceDialog pd = new IntelPreferenceDialog(context.get(Shell.class), manager);
+		ContextInjectionFactory.inject(pd, context);
 		pd.open();
 	}
 	

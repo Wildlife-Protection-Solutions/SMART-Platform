@@ -84,3 +84,8 @@ ALTER TABLE smart.i_record_query ADD CONSTRAINT irecordquery2_cauuid_fk FOREIGN 
 ALTER TABLE smart.i_record_query ADD CONSTRAINT irecordquery2_createdby_fk FOREIGN KEY (created_by) REFERENCES smart.employee (uuid) DEFERRABLE INITIALLY IMMEDIATE;
 ALTER TABLE smart.i_record_query ADD CONSTRAINT irecordquery2_modifiedby_fk FOREIGN KEY (last_modified_by) REFERENCES smart.employee (uuid) DEFERRABLE INITIALLY IMMEDIATE;
 		
+ALTER TABLE smart.i_recordsource_attribute ADD COLUMN keyid varchar(128);
+
+--TODO: MAKE THESE UNIQUE
+update smart.I_RECORDSOURCE_ATTRIBUTE set keyid = (select a.keyid from smart.i_attribute a where a.uuid = smart.i_recordsource_attribute.attribute_uuid) where attribute_uuid is not null;
+update smart.I_RECORDSOURCE_ATTRIBUTE set keyid = (select a.keyid from smart.i_entity_type a where a.uuid = smart.i_recordsource_attribute.entity_type_uuid) where entity_type_uuid is not null;

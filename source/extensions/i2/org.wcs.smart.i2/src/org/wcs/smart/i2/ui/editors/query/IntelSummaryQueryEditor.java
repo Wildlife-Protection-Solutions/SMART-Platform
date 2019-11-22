@@ -108,7 +108,7 @@ import org.wcs.smart.ui.SmartWizardDialog;
  *
  */
 @SuppressWarnings("restriction")
-public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryEditor{
+public class IntelSummaryQueryEditor extends EditorPart implements IQueryEditor{
 
 	public static final String ID = "org.wcs.smart.i2.editor.query.entitysummary"; //$NON-NLS-1$
 
@@ -277,7 +277,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 	}
 	
 	private void closeEditor(boolean promptSave){
-		getSite().getPage().closeEditor(IntelEntitySummaryQueryEditor.this, promptSave);
+		getSite().getPage().closeEditor(IntelSummaryQueryEditor.this, promptSave);
 	}
 
 	@Override
@@ -328,7 +328,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 			if (!query.queriesProfile(ProfilesManager.INSTANCE.getActiveProfileKeys())) closeEditor(true);
 		};
 		eventHandles.add(handler);
-		eventBroker.subscribe(IntelEvents.ACTIVE_PROFILES, handler);
+		eventBroker.subscribe(IntelEvents.PROFILES_ALL, handler);
 				
 		parent.setLayout(new GridLayout());
 		((GridLayout)parent.getLayout()).marginWidth = 0;
@@ -365,7 +365,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
 			saveItem = new ToolItem(headerToolbar, SWT.PUSH);
 			saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
-			saveItem.addListener(SWT.Selection, (event)->IntelEntitySummaryQueryEditor.this.getSite().getPage().saveEditor(IntelEntitySummaryQueryEditor.this, false));
+			saveItem.addListener(SWT.Selection, (event)->IntelSummaryQueryEditor.this.getSite().getPage().saveEditor(IntelSummaryQueryEditor.this, false));
 			saveItem.setToolTipText(Messages.IntelQueryEditor_saveTooltip);
 			
 			ToolItem saveAsItem = new ToolItem(headerToolbar, SWT.PUSH);
@@ -635,8 +635,12 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 					query = temp;
 					
 					try{
-						SumQueryDefinition parsedQuery = IntelEntitySummaryQuery.parseQuery(query.getQueryString());
-						
+						SumQueryDefinition parsedQuery = null;
+						if (type == Type.ENTITY) {
+							parsedQuery = IntelEntitySummaryQuery.parseQuery(query.getQueryString());
+						}else if (type == Type.RECORD) {
+							parsedQuery = IntelRecordSummaryQuery.parseQuery(query.getQueryString());
+						}
 						filterDropItems.addAll(  DropItemFactory.generateDropItems(parsedQuery.getFilter(), s) );
 						rowGbDropItems.addAll( DropItemFactory.generateDropItems(parsedQuery.getRowGroupByPart(), s));
 						colGbDropItems.addAll( DropItemFactory.generateDropItems(parsedQuery.getColumnGroupByPart(), s));
@@ -648,7 +652,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 					
 				}catch (Exception ex){
 					Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_LoadError + ex.getMessage(), ex);
-					getSite().getPage().closeEditor(IntelEntitySummaryQueryEditor.this, false);
+					getSite().getPage().closeEditor(IntelSummaryQueryEditor.this, false);
 					return Status.OK_STATUS;
 				}
 			}

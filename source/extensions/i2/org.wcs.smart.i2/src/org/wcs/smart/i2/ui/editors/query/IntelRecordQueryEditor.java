@@ -308,7 +308,7 @@ public class IntelRecordQueryEditor extends EditorPart implements IQueryEditor{
 			if (!query.queriesProfile(ProfilesManager.INSTANCE.getActiveProfileKeys())) closeEditor(true);
 		};
 		eventHandles.add(handler);
-		eventBroker.subscribe(IntelEvents.ACTIVE_PROFILES, handler);
+		eventBroker.subscribe(IntelEvents.PROFILES_ALL, handler);
 				
 		parent.setLayout(new GridLayout());
 		((GridLayout)parent.getLayout()).marginWidth = 0;

@@ -195,9 +195,10 @@ public class QueryView {
 		tabList.selectTab(0);
 	}
 	
+	
 	@Optional
 	@Inject
-	private void activeProfilesChanged(@UIEventTopic(IntelEvents.ACTIVE_PROFILES) Object data){
+	private void activeProfilesChanged(@UIEventTopic(IntelEvents.PROFILES_ALL) Object data){
 		Set<IntelProfile> items= ProfilesManager.INSTANCE.getActiveProfiles().stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e))
 				 .collect(Collectors.toSet());
 		queryList.getTable().setData("PROFILES", items);

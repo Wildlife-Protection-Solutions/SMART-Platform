@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.i2.ui.preference;
 
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.TreeColumnLayout;
@@ -37,6 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.wcs.smart.common.control.SmartUiUtils;
+import org.wcs.smart.i2.event.IntelEvents;
 
 
 /**
@@ -46,10 +50,19 @@ import org.wcs.smart.common.control.SmartUiUtils;
  *
  */
 public class IntelPreferenceDialog extends PreferenceDialog {
+	
+	@Inject
+	private IEventBroker broker;
+	
 	public IntelPreferenceDialog(Shell parentShell, PreferenceManager manager) {
 		super(parentShell, manager);
 		
 		super.addPageChangedListener(event->((IIntelPreferencePage)event.getSelectedPage()).refresh());
+	}
+	public boolean close() {
+		boolean v = super.close();
+		broker.post(IntelEvents.PROFILES_CONFIG, null);
+		return v;
 	}
 	
 	@Override

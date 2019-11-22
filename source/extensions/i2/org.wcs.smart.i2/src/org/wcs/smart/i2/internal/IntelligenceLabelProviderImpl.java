@@ -174,6 +174,7 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == FixedQueryColumn.Column.RECORD_STATUS) return Messages.IntelligenceLabelProviderImpl_StatusColumnLabel;
 		if (item == FixedQueryColumn.Column.RECORD_TITLE) return Messages.IntelligenceLabelProviderImpl_TitleColumnLabel;
 		if (item == FixedQueryColumn.Column.RECORD_SOURCE) return Messages.IntelligenceLabelProviderImpl_Source;
+		if (item == FixedQueryColumn.Column.RECORD_DATE) return "Record Date";
 		
 		if (item == FixedQueryColumn.Column.ENTITY_ID) return Messages.IntelligenceLabelProviderImpl_EntityIdColumnName;
 		if (item == FixedQueryColumn.Column.ENTITY_TYPE) return Messages.IntelligenceLabelProviderImpl_EntityTypeColumnName;

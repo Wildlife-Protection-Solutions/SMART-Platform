@@ -167,17 +167,13 @@ public class IntelQueryColumnProvider {
 			columns.add(new FixedQueryColumn(c, l));
 		}
 		
-//		Set<IntelRecordSourceAttribute> atts = new HashSet<>();
-//		List<IntelRecordSource> items = itemProvider.getRecordSources(AbstractIntelQuery.convertFromProfileFilter(query.getProfileFilter()), session);
-//		for (IntelRecordSource rs : items) {
-//			for (IntelRecordSourceAttribute ir : rs.getAttributes()) {
-//				atts.add(ir.getAttribute());
-//			}
-//		}
-			
+		List<IntelRecordSource> items = itemProvider.getRecordSources(AbstractIntelQuery.convertFromProfileFilter(query.getProfileFilter()), session);
+		for (IntelRecordSource rs : items) {
+			for (IntelRecordSourceAttribute ir : rs.getAttributes()) {
+				columns.add(new IntelRecordAttributeQueryColumn(ir));
+			}
+		}
 		
-			
-		//TODO: add record attribute columns for profile filter???
 		return columns;
 	}
 

@@ -104,6 +104,12 @@ public class IntelEvents {
 	//changes in graph style
 	public static final String GRAPH_STYLESET_CHANGED = "GRAPH_STYLESET/CHANGED"; //$NON-NLS-1$
 	
+
+	//changes to profiles config or active profiles
+	public static final String PROFILES_ALL = "PROFILES/*"; //$NON-NLS-1$
 	//changes in active profile
 	public static final String ACTIVE_PROFILES = "PROFILES/ACTIVE"; //$NON-NLS-1$
+	//changes in profile config
+	public static final String PROFILES_CONFIG = "PROFILES/CONFIG"; //$NON-NLS-1$
+
 }

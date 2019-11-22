@@ -657,7 +657,7 @@ public class EntitySearchView {
 	
 	@Optional
 	@Inject
-	private void activeProfileChange(@UIEventTopic(IntelEvents.ACTIVE_PROFILES) Object data){
+	private void activeProfileChange(@UIEventTopic(IntelEvents.PROFILES_ALL) Object data){
 		basicPanel.refresh();
 		spatialPanel.refresh();
 		allPanel.refresh(searchDelay);

@@ -265,10 +265,10 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			}else if (groupBy.getGroupByType() == GroupByType.CA) {
 				selectSql.append("ca_uuid as c_" + cnt); //$NON-NLS-1$
 				groupBySql.append("ca_uuid "); //$NON-NLS-1$
-			}else if(groupBy.getGroupByType() == GroupByType.ATTRIBUTE) {
+			}else if(groupBy.getGroupByType() == GroupByType.ENTITY_ATTRIBUTE) {
 				String columnName = groupBy.getAttributeKey();
-				if (groupBy.getEntityTypeKey() != null && !groupBy.getEntityTypeKey().isEmpty()) {
-					entityTypeFilters.add(groupBy.getEntityTypeKey());
+				if (groupBy.getOtherKey() != null && !groupBy.getOtherKey().isEmpty()) {
+					entityTypeFilters.add(groupBy.getOtherKey());
 				}
 				if (groupBy.getAttributeType() == AttributeType.DATE) {
 					GroupByItem.DateOption dateOp = groupBy.getDateOption();
@@ -545,9 +545,9 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 				sb.append(") FROM "); //$NON-NLS-1$
 				sb.append(queryTable);
 					
-				if (item.getEntityTypeKey() != null && !item.getEntityTypeKey().isEmpty()) {
+				if (item.getOtherKey() != null && !item.getOtherKey().isEmpty()) {
 					sb.append(" WHERE "); //$NON-NLS-1$
-					sb.append(" entity_type_key = '" + item.getEntityTypeKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+					sb.append(" entity_type_key = '" + item.getOtherKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 			

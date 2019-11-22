@@ -138,14 +138,16 @@ public enum Resources {
 		if (source == null) return null;
 		if (recordImages.containsKey(source)) return recordImages.get(source);
 		if (source.getIcon() == null) return null;
-		try {
-			Image i =  AWTSWTImageUtils.createImageDescriptor(source.getIconAsImage()).createImage();
-			recordImages.put(source, i);
-			return i;
-		}catch (Exception ex) {
-			Intelligence2PlugIn.log(ex.getMessage(),ex);
-			return null;
-		}
+		
+		Display.getDefault().asyncExec(()->{
+			try {
+				Image i =  AWTSWTImageUtils.createImageDescriptor(source.getIconAsImage()).createImage();
+				recordImages.put(source, i);
+			}catch (Exception ex) {
+				Intelligence2PlugIn.log(ex.getMessage(),ex);
+			}
+		});
+		return null;
 	}
 	
 	public Image getImage(String queryTypeKey) {

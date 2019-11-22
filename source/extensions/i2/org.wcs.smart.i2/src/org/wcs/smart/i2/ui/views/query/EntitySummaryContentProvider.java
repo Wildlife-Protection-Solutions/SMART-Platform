@@ -67,6 +67,7 @@ import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.views.QueryView;
 import org.wcs.smart.i2.ui.views.query.dropitem.AttributeGroupByDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.ConservationAreaGroupByDropItem;
@@ -198,6 +199,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 			if (n.item instanceof RootNode) return true;
 			if (n.item instanceof SubRootNode) return true;
 			if (n.item instanceof IntelEntityType) return true;
+			if (n.item instanceof IntelRecordSource) return true;
 		}
 		return false;
 	}
@@ -359,19 +361,14 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 						items.add(tn);
 					}
 					
-					HashSet<String> keys = new HashSet<>();
-					for (List<IntelRecordSourceAttribute> atts : recordAttributes.values()) {
-						for (IntelRecordSourceAttribute a : atts) {
-							if (a.getAttribute() == null) continue;
-							if (keys.contains(a.getAttribute().getKeyId())) continue;
-							keys.add(a.getAttribute().getKeyId());
-							if (source == RootNode.FILTER_OPTION || (
-									source == RootNode.GROUP_BY_OPTION && isGroupByAttribute(a.getAttribute()))) {
-								items.add(new TreeNode(source, a.getAttribute(), a.getAttribute().getName()));
-							}
-						}
+					for(IntelRecordSource s : records) {
+						tn = new TreeNode(source, s, s.getName());
+						tn.setImageDescriptor(ImageDescriptor.createFromImage(Resources.INSTANCE.getImage(s)));
+						items.add(tn);
 					}
+
 				}
+				
 				
 				if (item == RootNode.FILTER_OPTION) {
 					items.add(new TreeNode((RootNode)item, SubRootNode.OPERATORS, SubRootNode.OPERATORS.guiName));
@@ -381,7 +378,30 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 				}
 				return items;
 			}
-			
+			if (item instanceof IntelRecordSource) {
+				List<FilterTreeItem> filters = new ArrayList<>();
+				if (source == RootNode.GROUP_BY_OPTION) {
+					for (IntelRecordSourceAttribute atts : recordAttributes.get(((IntelRecordSource) item).getKeyId())) {
+						if (atts.getAttribute() != null && isGroupByAttribute(atts.getAttribute().getType())) {
+							TreeNode tn = new TreeNode(source, atts, IntelligenceLabelProviderImpl.getName(atts));		
+							tn.setImageDescriptor(ImageDescriptor.createFromImage(AttributeLabelProvider.getImage(atts.getAttribute().getType())));
+							filters.add(tn);
+						}
+					}	
+				}else {
+					for (IntelRecordSourceAttribute atts : recordAttributes.get(((IntelRecordSource) item).getKeyId())) {
+						
+						TreeNode tn = new TreeNode(source, new AttributeTreeFilterItem(atts), IntelligenceLabelProviderImpl.getName(atts));
+						if (atts.getAttribute() != null) {
+							tn.setImageDescriptor(ImageDescriptor.createFromImage(AttributeLabelProvider.getImage(atts.getAttribute().getType())));
+						}else {
+							tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY));
+						}
+						filters.add(tn);
+					}
+				}
+				return filters;
+			}
 			if (item == RootNode.VALUE_OPTION) {
 				List<FilterTreeItem> kids = new ArrayList<>();
 				ValuePart.ValueOption op = null;
@@ -423,7 +443,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 							if (keys.contains(a.getAttribute().getKeyId())) continue;
 							keys.add(a.getAttribute().getKeyId());
 							if (source == RootNode.FILTER_OPTION || (
-									source == RootNode.GROUP_BY_OPTION && isGroupByAttribute(a.getAttribute()))) {
+									source == RootNode.GROUP_BY_OPTION && isGroupByAttribute(a.getAttribute().getType()))) {
 								nodes.add(new TreeNode(source, a.getAttribute(), a.getAttribute().getName()));
 							}
 						}
@@ -436,6 +456,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 					tn = new TreeNode(source, SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED, IntelligenceLabelProviderImpl.getName(SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED));
 					tn.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_SYSTEM_DATEATTRIBUTE));
 					nodes.add(tn);
+					
 //				}else if (type == Type.RECORD) {
 //					for (List<IntelRecordSourceAttribute> atts : recordAttributes.values()) {
 //						for (IntelRecordSourceAttribute a : atts) {
@@ -471,7 +492,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 				if (source == RootNode.GROUP_BY_OPTION) {
 					List<FilterTreeItem> kids = new ArrayList<>();
 					for (IntelEntityTypeAttribute a : typeAttributes.get(entityType.getKeyId())) {
-						if ( isGroupByAttribute(a.getAttribute())) {
+						if ( isGroupByAttribute(a.getAttribute().getType())) {
 							kids.add(new TreeNode(RootNode.GROUP_BY_OPTION, a, a.getAttribute().getName()));
 						}
 					}
@@ -499,12 +520,12 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 					};
 				}
 				if (item instanceof IntelEntityTypeAttribute) {
-					if (isGroupByAttribute(((IntelEntityTypeAttribute) item).getAttribute())) {
+					if (isGroupByAttribute(((IntelEntityTypeAttribute) item).getAttribute().getType())) {
 						return new DropItem[] {new AttributeGroupByDropItem((IntelEntityTypeAttribute) item)};
 					}
 				}
 				if (item instanceof IntelAttribute) {
-					if (isGroupByAttribute((IntelAttribute) item)) {
+					if (isGroupByAttribute(((IntelAttribute) item).getType())) {
 						return new DropItem[] {new AttributeGroupByDropItem((IntelAttribute)item)};
 					}
 				}
@@ -515,6 +536,12 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 						return new DropItem[] { new RecordStatusGroupByDropItem() };
 					}
 					return new DropItem[] {new SystemAttributeDateGroupByDropItem((SystemAttributeFilter.SystemAttribute)item)};
+				}
+				if (item instanceof IntelRecordSourceAttribute) {
+					IntelRecordSourceAttribute fi = (IntelRecordSourceAttribute)item;
+					if (isGroupByAttribute(fi.getAttribute().getType())) {
+						return new DropItem[] {new AttributeGroupByDropItem(fi)};
+					}
 				}
 			}
 			
@@ -540,17 +567,19 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 					return (new AttributeTreeFilterItem( ((IntelEntityTypeAttribute)item))).asDropItem();
 				}else if (item instanceof SystemAttributeFilter.SystemAttribute) {
 					return (new SystemAttributeFilterItem((SystemAttributeFilter.SystemAttribute)item)).asDropItem();
+				}else if (item instanceof AttributeTreeFilterItem) {
+					return ((AttributeTreeFilterItem)item).asDropItem();
 				}
 			}
 			
 			return null;
 		}
 		
-		private boolean isGroupByAttribute(IntelAttribute a) {
-			return a.getType().equals(AttributeType.DATE) ||
-					a.getType().equals(AttributeType.EMPLOYEE) ||
-					a.getType().equals(AttributeType.POSITION) ||
-					a.getType().equals(AttributeType.LIST);
+		private boolean isGroupByAttribute(IntelAttribute.AttributeType a) {
+			return a.equals(AttributeType.DATE) ||
+					a.equals(AttributeType.EMPLOYEE) ||
+					a.equals(AttributeType.POSITION) ||
+					a.equals(AttributeType.LIST);
 		}
 	}
 	

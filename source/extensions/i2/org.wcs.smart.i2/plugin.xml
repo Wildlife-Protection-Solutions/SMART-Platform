@@ -1379,7 +1379,7 @@
             name="%QueryEditorNames">
       </editor>
       <editor
-            class="org.wcs.smart.i2.ui.editors.query.IntelEntitySummaryQueryEditor"
+            class="org.wcs.smart.i2.ui.editors.query.IntelSummaryQueryEditor"
             default="false"
             icon="images/icons/obj16/query_entity_sum.png"
             id="org.wcs.smart.i2.editor.query.entitysummary"

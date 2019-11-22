@@ -180,6 +180,9 @@ TOKEN :
  | < EATTRIBUTE_GB_KEY_DATE: "e_attribute_gb:d:"< DM_KEY >":"(< DM_KEY >)?":"(< DATE_GB_KEY >)>
  | < EATTRIBUTE_GB_KEY_LIST: "e_attribute_gb:l:" < DM_KEY > ":" (< DM_KEY >)? ":" (< DM_KEY > ":")* >
  | < EATTRIBUTE_GB_KEY_EMPLOYEE: "e_attribute_gb:e:"< DM_KEY > ":" (< DM_KEY >)? ":" (< UUID > ":")* >
+ | < RATTRIBUTE_GB_KEY_DATE: "r_attribute_gb:d:"< DM_KEY >":"(< DM_KEY >)?":"(< DATE_GB_KEY >)>
+ | < RATTRIBUTE_GB_KEY_LIST: "r_attribute_gb:l:" < DM_KEY > ":" (< DM_KEY >)? ":" (< DM_KEY > ":")* >
+ | < RATTRIBUTE_GB_KEY_EMPLOYEE: "r_attribute_gb:e:"< DM_KEY > ":" (< DM_KEY >)? ":" (< UUID > ":")* >
  | < SYSTEM_ATT_KEY_GB: < SYSTEM_ATT_KEY > ":" (< DATE_GB_KEY >)>
 
  
@@ -276,6 +279,12 @@ GroupByItem GroupByItem() :
 		< EATTRIBUTE_GB_KEY_LIST>
 		|
 		< EATTRIBUTE_GB_KEY_EMPLOYEE>
+		|
+		< RATTRIBUTE_GB_KEY_DATE>
+		|
+		< RATTRIBUTE_GB_KEY_LIST>
+		|
+		< RATTRIBUTE_GB_KEY_EMPLOYEE>
 		|
 		< ENTITYTYPE_GB >
 		|

@@ -98,10 +98,9 @@ public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 
 
 	
-	private IntelAttribute.AttributeType attributeType = null;
-	private String attributeKey = null;
-	private String entityTypeKey = null;
-	private String recordsourceKey = null;
+	private IntelAttribute.AttributeType attributeType = null; //attribute type or null if it's an entity attribute
+	private String attributeKey = null; //IntelRecordSourceAttribute key
+	private String recordsourceKey = null; //IntelRecordSource key
 	
 	private Operator operator = null;
 	private Double numberValue = null;
@@ -112,12 +111,8 @@ public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 	public RecordAttributeFilter(IntelAttribute.AttributeType type, String attributeentitykey, String recordsourceKey){
 		this.attributeType = type;
 		this.recordsourceKey = recordsourceKey;
-		if (type != null) {
-			this.attributeType = type;
-			this.attributeKey = attributeentitykey;
-		}else {
-			this.entityTypeKey = attributeentitykey;
-		}
+		this.attributeKey = attributeentitykey;
+		this.attributeType = type;		
 	}
 
 	
@@ -135,7 +130,7 @@ public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 	public String getUniqueColumnIdentifier(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("ra_"); //$NON-NLS-1$
-		sb.append(attributeKey != null ? attributeKey : entityTypeKey);
+		sb.append(attributeKey);
 		sb.append("_"); //$NON-NLS-1$
 		if (attributeType != null) {
 			switch(attributeType){
@@ -185,9 +180,6 @@ public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 		return this.attributeKey;
 	}
 	
-	public String getEntityTypeKey(){
-		return this.entityTypeKey;
-	}
 	
 	public Operator getOperator(){
 		return this.operator;

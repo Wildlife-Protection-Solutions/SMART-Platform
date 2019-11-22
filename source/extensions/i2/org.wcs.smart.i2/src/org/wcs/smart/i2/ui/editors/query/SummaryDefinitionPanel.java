@@ -75,7 +75,7 @@ import org.wcs.smart.i2.ui.views.query.dropitem.ProxyItem;
  */
 public class SummaryDefinitionPanel implements IDefinitionPanel {
 
-	private IntelEntitySummaryQueryEditor editor;
+	private IntelSummaryQueryEditor editor;
 	
 	private ListDefinitionPanel rowGroupByPanel;
 	private ListDefinitionPanel columnGroupByPanel;
@@ -93,7 +93,7 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 	
 	private List<Runnable> queryListeners = new ArrayList<>();
 	
-	public SummaryDefinitionPanel(IntelEntitySummaryQueryEditor editor) {
+	public SummaryDefinitionPanel(IntelSummaryQueryEditor editor) {
 		this.editor = editor;
 	}
 	

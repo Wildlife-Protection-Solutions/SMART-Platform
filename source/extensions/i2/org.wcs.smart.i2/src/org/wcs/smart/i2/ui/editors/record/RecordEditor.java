@@ -506,7 +506,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				}
 			});
 			
-			subscribeToEvent(IntelEvents.ACTIVE_PROFILES, (event)->{
+			subscribeToEvent(IntelEvents.PROFILES_ALL, (event)->{
 				if (!ProfilesManager.INSTANCE.getActiveProfiles().contains(record.getProfile())) {
 					closeEditor(true);
 				}

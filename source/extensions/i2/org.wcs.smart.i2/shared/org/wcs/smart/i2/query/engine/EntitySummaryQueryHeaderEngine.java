@@ -127,8 +127,8 @@ public enum EntitySummaryQueryHeaderEngine {
 			colkey = "CA"; //$NON-NLS-1$
 		}else {
 			colkey = item.getAttributeKey();
-			if (item.getEntityTypeKey() != null) {
-				colkey += "_" + item.getEntityTypeKey(); //$NON-NLS-1$
+			if (item.getOtherKey() != null) {
+				colkey += "_" + item.getOtherKey(); //$NON-NLS-1$
 			}
 		}
 		return colkey;

@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
@@ -65,6 +66,7 @@ import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
+import org.wcs.smart.i2.ui.Resources;
 
 /**
  * Job for loading roots for filter tree
@@ -290,21 +292,20 @@ public class LoadFilterOptions extends Job {
 		
 		
 		List<IntelRecordSource> sources = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSources(ProfilesManager.INSTANCE.getActiveProfileKeys(), session);
-		List<IntelAttribute> atts = new ArrayList<>();
-		for (IntelRecordSource type : sources) {
-			List<IntelRecordSourceAttribute> thisattributes = new ArrayList<>(InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSourceAttributes(type, session));
-			for (IntelRecordSourceAttribute  a : thisattributes) {
-				if (a.getAttribute() == null) continue;
-				//TODO: support for entity types
-				if (atts.contains(a.getAttribute())) continue;
-				a.getAttribute().getName();
-				atts.add(a.getAttribute());
-			}
-		}
-		atts.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		
-		for (IntelAttribute a : atts) {
-			recordSourceRoot.addChild(new AttributeTreeFilterItem(a, false, true));
+		for (IntelRecordSource type : sources) {
+			BasicTreeFilterItem sourceRoot = new BasicTreeFilterItem(type.getName());
+			Image img = Resources.INSTANCE.getImage(type);
+			if (img != null) {
+				sourceRoot.setImageDescriptor(ImageDescriptor.createFromImage(img));
+			}
+			recordSourceRoot.addChild(sourceRoot);
+			
+			
+			List<IntelRecordSourceAttribute> thisattributes = new ArrayList<>(InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSourceAttributes(type, session));
+			for (IntelRecordSourceAttribute  a : thisattributes) {			
+				sourceRoot.addChild(new AttributeTreeFilterItem(a));
+			}
 		}
 		return recordSourceRoot;
 	}

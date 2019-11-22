@@ -751,7 +751,7 @@ public class RecordsView {
 	
 	@Optional
 	@Inject
-	private void activeProfilesChanged(@UIEventTopic(IntelEvents.ACTIVE_PROFILES) Object data){
+	private void activeProfilesChanged(@UIEventTopic(IntelEvents.PROFILES_ALL) Object data){
 		refreshView();
 		basicSearchPnl.doSearch();
 		basicSearchPnl.refreshSource();

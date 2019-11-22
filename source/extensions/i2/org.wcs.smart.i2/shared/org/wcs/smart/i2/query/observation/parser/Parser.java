@@ -78,6 +78,9 @@ public class Parser implements ParserConstants {
     case EATTRIBUTE_GB_KEY_DATE:
     case EATTRIBUTE_GB_KEY_LIST:
     case EATTRIBUTE_GB_KEY_EMPLOYEE:
+    case RATTRIBUTE_GB_KEY_DATE:
+    case RATTRIBUTE_GB_KEY_LIST:
+    case RATTRIBUTE_GB_KEY_EMPLOYEE:
     case SYSTEM_ATT_KEY_GB:
       item = GroupByItem();
                         items.add(item);
@@ -115,6 +118,9 @@ public class Parser implements ParserConstants {
     case EATTRIBUTE_GB_KEY_DATE:
     case EATTRIBUTE_GB_KEY_LIST:
     case EATTRIBUTE_GB_KEY_EMPLOYEE:
+    case RATTRIBUTE_GB_KEY_DATE:
+    case RATTRIBUTE_GB_KEY_LIST:
+    case RATTRIBUTE_GB_KEY_EMPLOYEE:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case EATTRIBUTE_GB_KEY_POSITION:
         jj_consume_token(EATTRIBUTE_GB_KEY_POSITION);
@@ -127,6 +133,15 @@ public class Parser implements ParserConstants {
         break;
       case EATTRIBUTE_GB_KEY_EMPLOYEE:
         jj_consume_token(EATTRIBUTE_GB_KEY_EMPLOYEE);
+        break;
+      case RATTRIBUTE_GB_KEY_DATE:
+        jj_consume_token(RATTRIBUTE_GB_KEY_DATE);
+        break;
+      case RATTRIBUTE_GB_KEY_LIST:
+        jj_consume_token(RATTRIBUTE_GB_KEY_LIST);
+        break;
+      case RATTRIBUTE_GB_KEY_EMPLOYEE:
+        jj_consume_token(RATTRIBUTE_GB_KEY_EMPLOYEE);
         break;
       case ENTITYTYPE_GB:
         jj_consume_token(ENTITYTYPE_GB);
@@ -895,7 +910,7 @@ IQueryFilter RecourdSourceFilter():
       jj_la1_1 = new int[] {0xffdfff00,0x0,0x0,0x0,0x0,0x0,0x0,0xffdfff00,0x7e00,0x0,0x6000,0xfe1f8000,0xc0,0x180000,0xc0,0xc0,0xe0000000,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x1,0xff8,0x0,0x7f8,0xff8,0x0,0x0,0x1,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x1,0x7ff8,0x0,0x3ff8,0x7ff8,0x0,0x0,0x1,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -1012,7 +1027,7 @@ IQueryFilter RecourdSourceFilter():
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[77];
+    boolean[] la1tokens = new boolean[80];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -1032,7 +1047,7 @@ IQueryFilter RecourdSourceFilter():
         }
       }
     }
-    for (int i = 0; i < 77; i++) {
+    for (int i = 0; i < 80; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

@@ -151,9 +151,15 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int EATTRIBUTE_GB_KEY_EMPLOYEE = 74;
   /** RegularExpression Id. */
-  int SYSTEM_ATT_KEY_GB = 75;
+  int RATTRIBUTE_GB_KEY_DATE = 75;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 76;
+  int RATTRIBUTE_GB_KEY_LIST = 76;
+  /** RegularExpression Id. */
+  int RATTRIBUTE_GB_KEY_EMPLOYEE = 77;
+  /** RegularExpression Id. */
+  int SYSTEM_ATT_KEY_GB = 78;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 79;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -235,6 +241,9 @@ public interface ParserConstants {
     "<EATTRIBUTE_GB_KEY_DATE>",
     "<EATTRIBUTE_GB_KEY_LIST>",
     "<EATTRIBUTE_GB_KEY_EMPLOYEE>",
+    "<RATTRIBUTE_GB_KEY_DATE>",
+    "<RATTRIBUTE_GB_KEY_LIST>",
+    "<RATTRIBUTE_GB_KEY_EMPLOYEE>",
     "<SYSTEM_ATT_KEY_GB>",
     "<QUOTED_STRING>",
   };

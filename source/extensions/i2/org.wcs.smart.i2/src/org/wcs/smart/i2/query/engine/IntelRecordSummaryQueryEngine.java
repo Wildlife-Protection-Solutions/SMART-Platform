@@ -95,81 +95,66 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
 		SubMonitor progress = SubMonitor.convert(monitor, "Processing Record Summary Query", 8);
 
-		//Locale
-		Locale locale = (Locale) parameters.get(Locale.class.getName());
-		if (locale == null){
-			locale = Locale.getDefault();
-		}
-		
-		//Conservation Area
-		@SuppressWarnings("unchecked")
-		Collection<ConservationArea> cas = (Collection<ConservationArea>)parameters.get(ConservationArea.class.getName());
-		if (cas == null){
-			 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
-		}
-		IQueryItemProvider itemProvider = new DesktopCcaaQueryItemProvider(cas, query.getConservationArea());
-		if (cas.size() == 1) {
-			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
-		}
-		Date[] dates = (Date[]) parameters.get(Date.class.getName());
-		
-		Set<String> profiles = new HashSet<>();
-		for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
-			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
-					.setParameter("keyId",  ip)
-					.setParameter("cas", cas).list();
-			
-			for (IntelProfile ip2 : items) {
-				ip2.getKeyId();
-				if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2.getKeyId());
-			}
-		}
-		
-		//parse query
-		progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressParsing);
-		SumQueryDefinition parsedQuery = IntelRecordSummaryQuery.parseQuery(query.getQueryString());
-		progress.worked(1);
-		
-		//parse query
-		progress.subTask("Creating Record Table");
-		createTemporaryRecordTable(session,profiles,dates,cas);
-		progress.worked(1);
-		
 		try {
+			//Locale
+			Locale locale = (Locale) parameters.get(Locale.class.getName());
+			if (locale == null){
+				locale = Locale.getDefault();
+			}
+			
+			//Conservation Area
+			@SuppressWarnings("unchecked")
+			Collection<ConservationArea> cas = (Collection<ConservationArea>)parameters.get(ConservationArea.class.getName());
+			if (cas == null){
+				 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
+			}
+			IQueryItemProvider itemProvider = new DesktopCcaaQueryItemProvider(cas, query.getConservationArea());
+			if (cas.size() == 1) {
+				itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
+			}
+			Date[] dates = (Date[]) parameters.get(Date.class.getName());
+			
+			Set<String> profiles = new HashSet<>();
+			for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
+				List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
+						.setParameter("keyId",  ip)
+						.setParameter("cas", cas).list();
+				
+				for (IntelProfile ip2 : items) {
+					ip2.getKeyId();
+					if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2.getKeyId());
+				}
+			}
+			
+			//parse query
+			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressParsing);
+			SumQueryDefinition parsedQuery = IntelRecordSummaryQuery.parseQuery(query.getQueryString());
+			progress.worked(1);
+			
+
+			
+			//parse query
+			progress.subTask("Creating Record Table");
+			RecordFilterProcessor p = new RecordFilterProcessor();
+			String fdataTable = p.processFilter(parsedQuery.getFilter(), profiles, dates, cas, session, monitor);
+			dataTable = new DataTable(fdataTable);
+
 			if (dates[0] == null) {
 				dates = computeDateRange(dataTable.tableName, session);
 			}
+			progress.worked(1);
+			
 			//add attribute columns
 			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressAttributeColumns);
-			Map<String, String> attributeKeyToColumn = addAttributeColumns(parsedQuery, dataTable.tableName, session, progress.split(1));
-			
-			if (parsedQuery.getFilter() != null) {
-				progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressFilter);
-				filterDataTable(session, parsedQuery.getFilter());
-			}
-			progress.worked(1);
-			
-			
-			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressAreaGroupBy);
-			Map<GroupByItem, String> areaTables = processAreaGroupBys(dataTable.tableName, parsedQuery, cas, session);
-			progress.worked(1);
+			addAttributeColumns(parsedQuery, dataTable.tableName, session, progress.split(1));
 			
 			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressLoadingResults);
 			LocalDate[] ldates = new LocalDate[2];
 			ldates[0] = (new java.sql.Date(dates[0].getTime())).toLocalDate();
 			ldates[1] = (new java.sql.Date(dates[1].getTime())).toLocalDate();
-			SummaryQueryResult results = getResults(dataTable.tableName, parsedQuery, ldates, areaTables, locale, profiles, itemProvider, session);
+			SummaryQueryResult results = getResults(dataTable.tableName, parsedQuery, ldates, locale, profiles, itemProvider, session);
 			progress.worked(1);
 			
-			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressCleanUp);
-			for (String tableName : areaTables.values()) {
-				try {
-					session.createNativeQuery("DROP TABLE " + tableName).executeUpdate(); //$NON-NLS-1$
-				}catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-			progress.worked(1);
 			
 			return results;
 		}catch (OperationCanceledException ex) {
@@ -254,7 +239,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	 * Runs a sql statement on the data table to get the results for the table
 	 */
 	private SummaryQueryResult getResults(String queryTable, SumQueryDefinition definition, LocalDate[] dateRange, 
-			Map<GroupByItem, String> areaTables, Locale l, Set<String> profiles, IQueryItemProvider itemProvider, Session session) throws Exception {
+			Locale l, Set<String> profiles, IQueryItemProvider itemProvider, Session session) throws Exception {
 		
 		StringBuilder selectSql = new StringBuilder();
 		StringBuilder groupBySql = new StringBuilder();
@@ -281,7 +266,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			}else if (groupBy.getGroupByType() == GroupByType.RECORDSTATUS) {
 				selectSql.append("record_status as c_" + cnt); //$NON-NLS-1$
 				groupBySql.append("record_status "); //$NON-NLS-1$
-			}else if(groupBy.getGroupByType() == GroupByType.ATTRIBUTE) {
+			}else if(groupBy.getGroupByType() == GroupByType.RECORD_ATTRIBUTE) {
 				String columnName = groupBy.getAttributeKey();
 //				if (groupBy.getEntityTypeKey() != null && !groupBy.getEntityTypeKey().isEmpty()) {
 //					entityTypeFilters.add(groupBy.getEntityTypeKey());
@@ -311,10 +296,10 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 					selectSql.append(columnName + " as c_" + cnt); //$NON-NLS-1$
 					groupBySql.append(columnName);
 					
-				}else if (groupBy.getAttributeType() == AttributeType.POSITION) {
-					String tableName = areaTables.get(groupBy);
-					selectSql.append(tableName + ".keyId as c_" + cnt); //$NON-NLS-1$
-					groupBySql.append(tableName + ".keyId ");					 //$NON-NLS-1$
+//				}else if (groupBy.getAttributeType() == AttributeType.POSITION) {
+//					String tableName = areaTables.get(groupBy);
+//					selectSql.append(tableName + ".keyId as c_" + cnt); //$NON-NLS-1$
+//					groupBySql.append(tableName + ".keyId ");					 //$NON-NLS-1$
 				}	
 			}else if (groupBy.getGroupByType() == GroupByType.SYSTEM) {
 				SystemAttributeFilter.SystemAttribute attribute = groupBy.getSystemAttribute();
@@ -352,9 +337,9 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		sb.append(selectSql);
 		sb.append(" FROM "); //$NON-NLS-1$
 		sb.append(queryTable);
-		for (String tableName : areaTables.values()) {
-			sb.append(" JOIN " + tableName + " ON " + queryTable + ".record_uuid = " + tableName + ".record_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		}
+//		for (String tableName : areaTables.values()) {
+//			sb.append(" JOIN " + tableName + " ON " + queryTable + ".record_uuid = " + tableName + ".record_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+//		}
 //		if (!entityTypeFilters.isEmpty()) {
 //			sb.append(" WHERE "); //$NON-NLS-1$
 //			sb.append("entity_type_key IN (:entityTypeFilters)"); //$NON-NLS-1$
@@ -415,66 +400,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		return results;
 	}
 
-	/*
-	 * create temporary entity table and populate with all entities
-	 * that match the given conservation area
-	 */
-	private String createTemporaryRecordTable(Session session, Set<String> profiles, Date[] dates, Collection<ConservationArea> cas) {
-		String obsTable = SqlGenerator.createTempTableName();
-		
-		dataTable = new DataTable(obsTable);
-		
-		String created = SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED.name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
-		String modified = SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED.name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
-		String pdate = SystemAttributeFilter.SystemAttribute.RECORD_DATE.name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
-		//create table
-		StringBuilder sb = new StringBuilder();
-		sb.append("CREATE TABLE "); //$NON-NLS-1$
-		sb.append(obsTable);
-		sb.append(" (record_uuid char(16) for bit data, " + pdate + " date, record_status varchar(16), record_source_key varchar(128), ca_uuid char(16) for bit data, "); //$NON-NLS-1$
-		sb.append(created );
-		sb.append(" date, "); //$NON-NLS-1$
-		sb.append(modified);
-		sb.append(" date )"); //$NON-NLS-1$
-		
-		logme(sb);
-		session.createNativeQuery(sb.toString()).executeUpdate();
-		dataTable.addColumn("record_uuid",  "char(16) for bit data"); //$NON-NLS-1$ //$NON-NLS-2$
-		dataTable.addColumn(pdate,  "date"); //$NON-NLS-1$ //$NON-NLS-2$
-		dataTable.addColumn("record_status",  "varchar(16)"); //$NON-NLS-1$ //$NON-NLS-2$
-		dataTable.addColumn("record_source_key",  "varchar(128)"); //$NON-NLS-1$ //$NON-NLS-2$
-		dataTable.addColumn("ca_uuid",  "char(16) for bit data"); //$NON-NLS-1$ //$NON-NLS-2$
-		dataTable.addColumn(created,  "date"); //$NON-NLS-1$ 
-		dataTable.addColumn(modified,  "date"); //$NON-NLS-1$ 
-		
-		sb = new StringBuilder();
-		sb.append("INSERT INTO "); //$NON-NLS-1$
-		sb.append(obsTable);
-		sb.append("(record_uuid, " + pdate + ", record_status, record_source_key, ca_uuid, "); //$NON-NLS-1$
-		sb.append(created);
-		sb.append(","); //$NON-NLS-1$
-		sb.append(modified);
-		sb.append(") SELECT a.uuid, cast(a.primary_date as date), a.status, b.keyid, a.ca_uuid, cast(a.date_created as date), cast(a.last_modified_date as date) FROM "); //$NON-NLS-1$
-		sb.append(" smart.i_record a join smart.i_recordsource b on a.source_uuid = b.uuid join smart.i_profile_config p on p.uuid = a.profile_uuid"); //$NON-NLS-1$
-		sb.append(" WHERE b.ca_uuid in (:cauuids) and p.keyid in (:profiles)"); //$NON-NLS-1$
-		if (dates[0] != null) {
-			sb.append(" AND cast(a.primary_date as date)>= :startd and cast(a.primary_date as date) <= :endd");
-		}
-		
-		List<UUID> cauuids = cas.stream().map(e->e.getUuid()).collect(Collectors.toList());
-		
-		logme(sb);
-		NativeQuery<?> q = session.createNativeQuery(sb.toString())
-			.setParameterList("cauuids",  cauuids) //$NON-NLS-1$
-			.setParameterList("profiles",  profiles); //$NON-NLS-1$
-		if (dates[0] != null) {
-			q.setParameter("startd",dates[0])
-			.setParameter("endd",dates[1]);
-		}
-		q.executeUpdate();
-		
-		return obsTable;
-	}
+
 	
 	/*
 	 * add all attribute columns to entity data table
@@ -496,28 +422,11 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			if (attributeKey == null) continue;
 			if (item.getAttributeType()== AttributeType.POSITION) continue; //  position attribute dealt with outside of here
 			if (!attributeToColumnKey.containsKey(attributeKey)) {
-				String columnName = addAttributeColumn(queryTable, attributeKey, item.getAttributeType(), session);
+				String columnName = addAttributeColumn(queryTable, attributeKey, item.getAttributeType(), item.getOtherKey(), session);
 				attributeToColumnKey.put(attributeKey, columnName);
 			}
 		}
-		if (def.getFilter() != null) {
-			def.getFilter().accept(new IFilterVisitor() {
-				
-				@Override
-				public void visitElement(IQueryFilter filter) {
-					if (filter instanceof RecordAttributeFilter) {
-						String attributeKey = ((RecordAttributeFilter) filter).getAttributeKey();
-						IntelAttribute.AttributeType attributeType = ((RecordAttributeFilter) filter).getAttributeType();
-						if (attributeType == AttributeType.POSITION) return; //  position attribute dealt with outside of here
-						if (!attributeToColumnKey.containsKey(attributeKey)) {
-							String columnName = addAttributeColumn(queryTable, attributeKey, attributeType, session);
-							attributeToColumnKey.put(attributeKey, columnName);
-						}
-					}					
-				}
-			});
-			progress.worked(1);
-		}
+		
 
 		return attributeToColumnKey;
 	}
@@ -536,7 +445,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		case EMPLOYEE:
 			return "char(16) for bit data"; //$NON-NLS-1$
 		case LIST:
-			return "char(16) for bit data"; //$NON-NLS-1$
+			return "varchar(128)"; //$NON-NLS-1$
 		case NUMERIC:
 			return "double"; //$NON-NLS-1$
 		case POSITION:
@@ -551,295 +460,129 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	/*
 	 * add an attribute column to the entity type
 	 */
-	private String addAttributeColumn(String queryTable, String attributeKey, IntelAttribute.AttributeType type, Session session) {
+	private String addAttributeColumn(String queryTable, String attributeKey, IntelAttribute.AttributeType type, String recordSource, Session session) {
 		String columnName = attributeKey;
 		String columnType = getColumnType(type);
 		
-		StringBuilder sb = new StringBuilder();
-		sb.append("ALTER TABLE "); //$NON-NLS-1$
-		sb.append(queryTable);
-		sb.append( " ADD COLUMN " ); //$NON-NLS-1$
-		sb.append( columnName );
-		sb.append(" "); //$NON-NLS-1$
-		sb.append( getColumnType(type));
 		
-		logme(sb);
-		session.createNativeQuery(sb.toString()).executeUpdate();
 		
 		dataTable.addColumn(columnName,  columnType);
 		
-		String selectClause = null;
-		switch (type) {
-		case BOOLEAN:
-			selectClause = "case when v.double_value > 0.5 then true else false end"; //$NON-NLS-1$
-			break;
+		if (type == AttributeType.DATE) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("ALTER TABLE "); //$NON-NLS-1$
+			sb.append(queryTable);
+			sb.append( " ADD COLUMN " ); //$NON-NLS-1$
+			sb.append( columnName );
+			sb.append(" "); //$NON-NLS-1$
+			sb.append( getColumnType(type));
 			
-		case DATE:
-			selectClause = "cast(v.string_value as date)"; //$NON-NLS-1$
-			break;
-		case EMPLOYEE:
-			selectClause = "v.uuid"; //$NON-NLS-1$
-			break;
-		case LIST:
-			selectClause = "v.uuid"; //$NON-NLS-1$
-			break;
-		case NUMERIC:
-			selectClause = "v.double_value"; //$NON-NLS-1$
-			break;
-		case POSITION:
-			break;
-		case TEXT:
-			selectClause = "v.string_value"; //$NON-NLS-1$
-			break;
+			logme(sb);
+			session.createNativeQuery(sb.toString()).executeUpdate();
+			
+			sb = new StringBuilder();
+			sb.append("UPDATE "); //$NON-NLS-1$
+			sb.append(queryTable);
+			sb.append( " SET " ); //$NON-NLS-1$
+			sb.append( columnName );
+			sb.append(" = ( SELECT cast(v.string_value as date) "); //$NON-NLS-1$
+			sb.append(" FROM smart.i_record_attribute_value v join smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid ");
+			sb.append(" JOIN smart.i_recordsource c on c.uuid = b.source_uuid and c.keyid = :source and b.keyid = :keyid");
+			sb.append(" WHERE v.record_uuid = " + queryTable + ".record_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(" ) "); //$NON-NLS-1$
+			
+			logme(sb);
+			
+			session.createNativeQuery(sb.toString())
+				.setParameter("keyid", attributeKey) //$NON-NLS-1$
+				.setParameter("source", recordSource) //$NON-NLS-1$
+				.executeUpdate();
+		}else if (type == AttributeType.LIST) {
+			String temp = SqlGenerator.createTempTableName();
+			StringBuilder sb = new StringBuilder();
+			sb.append("CREATE TABLE "); //$NON-NLS-1$
+			sb.append(temp );
+			sb.append( " AS SELECT * FROM " ); //$NON-NLS-1$
+			sb.append( dataTable.tableName );
+			sb.append(" WITH NO DATA"); //$NON-NLS-1$
+			logme(sb);
+			session.createNativeQuery(sb.toString()).executeUpdate();
+			sb = new StringBuilder();
+			sb.append("ALTER TABLE "); //$NON-NLS-1$
+			sb.append(temp);
+			sb.append( " ADD COLUMN " ); //$NON-NLS-1$
+			sb.append( columnName );
+			sb.append(" "); //$NON-NLS-1$
+			sb.append( getColumnType(type));
+			
+			logme(sb);
+			session.createNativeQuery(sb.toString()).executeUpdate();
+			
+			sb = new StringBuilder();
+			sb.append(" INSERT INTO ");
+			sb.append( temp );
+			sb.append (" SELECT a.*, al.keyid FROM ");
+			sb.append( dataTable.tableName );
+			sb.append(" a LEFT JOIN ( smart.i_record_attribute_value v ");
+			sb.append(" JOIN smart.i_record_attribute_value_list b on b.value_uuid = v.uuid ");
+			sb.append(" JOIN smart.i_attribute_list_item al on b.element_uuid = al.uuid ");
+			sb.append( " JOIN smart.i_recordsource_attribute c on v.attribute_uuid = c.uuid AND c.keyid = :keyid ");
+			sb.append( " JOIN smart.i_recordsource d on c.source_uuid = d.uuid AND d.keyid = :sourceid )  on v.record_uuid = a.record_uuid ");
+			
+			logme(sb);
+			session.createNativeQuery(sb.toString())
+				.setParameter("keyid", attributeKey)
+				.setParameter("sourceid", recordSource).executeUpdate();
+			
+			session.createNativeQuery("DROP TABLE " + dataTable.tableName).executeUpdate();
+			
+			session.createNativeQuery("RENAME TABLE " + temp + " TO " + dataTable.tableName).executeUpdate();
+			
+		}else if (type == AttributeType.EMPLOYEE) {
+			String temp = SqlGenerator.createTempTableName();
+			StringBuilder sb = new StringBuilder();
+			sb.append("CREATE TABLE "); //$NON-NLS-1$
+			sb.append(temp );
+			sb.append( " AS SELECT * FROM " ); //$NON-NLS-1$
+			sb.append( dataTable.tableName );
+			sb.append(" WITH NO DATA"); //$NON-NLS-1$
+			logme(sb);
+			session.createNativeQuery(sb.toString()).executeUpdate();
+			sb = new StringBuilder();
+			sb.append("ALTER TABLE "); //$NON-NLS-1$
+			sb.append(temp);
+			sb.append( " ADD COLUMN " ); //$NON-NLS-1$
+			sb.append( columnName );
+			sb.append(" "); //$NON-NLS-1$
+			sb.append( getColumnType(type));
+			
+			logme(sb);
+			session.createNativeQuery(sb.toString()).executeUpdate();
+			
+			sb = new StringBuilder();
+			sb.append(" INSERT INTO ");
+			sb.append( temp );
+			sb.append (" SELECT a.*, al.uuid FROM ");
+			sb.append( dataTable.tableName );
+			sb.append(" a LEFT JOIN ( smart.i_record_attribute_value v ");
+			sb.append(" JOIN smart.i_record_attribute_value_list b on b.value_uuid = v.uuid ");
+			sb.append(" JOIN smart.employee al on b.element_uuid = al.uuid ");
+			sb.append( " JOIN smart.i_recordsource_attribute c on v.attribute_uuid = c.uuid AND c.keyid = :keyid ");
+			sb.append( " JOIN smart.i_recordsource d on c.source_uuid = d.uuid AND d.keyid = :sourceid )  on v.record_uuid = a.record_uuid ");
+			
+			logme(sb);
+			session.createNativeQuery(sb.toString())
+				.setParameter("keyid", attributeKey)
+				.setParameter("sourceid", recordSource).executeUpdate();
+			
+			session.createNativeQuery("DROP TABLE " + dataTable.tableName).executeUpdate();
+			
+			session.createNativeQuery("RENAME TABLE " + temp + " TO " + dataTable.tableName).executeUpdate();
 		}
 
-		sb = new StringBuilder();
-		sb.append("UPDATE "); //$NON-NLS-1$
-		sb.append(queryTable);
-		sb.append( " SET " ); //$NON-NLS-1$
-		sb.append( columnName );
-		sb.append(" = ( SELECT  "); //$NON-NLS-1$
-		sb.append( selectClause );
-		sb.append(" FROM smart.i_record_attribute_value v join smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid ");
-		sb.append(" JOIN smart.i_attribute a on b.attribute_uuid = a.uuid "); //$NON-NLS-1$
-		sb.append(" WHERE v.record_uuid = " + queryTable + ".record_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append(" and a.keyid = :keyid "); //$NON-NLS-1$
-		sb.append(" ) "); //$NON-NLS-1$
-		
-		logme(sb);
-		
-		session.createNativeQuery(sb.toString())
-			.setParameter("keyid", attributeKey) //$NON-NLS-1$
-			.executeUpdate();
 		
 		return columnName;
 		
-	}
-	
-	/*
-	 * Filters the data table by creating a new data table and only 
-	 * including the elements that match the filter,  
-	 */
-	private void filterDataTable(Session session, IQueryFilter queryFilter) throws Exception {
-		String table2 = SqlGenerator.createTempTableName();
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append("CREATE TABLE "); //$NON-NLS-1$
-		sb.append(table2);
-		sb.append("("); //$NON-NLS-1$
-		for (Entry<String,String> entry : dataTable.columnNames.entrySet()) {
-			sb.append(entry.getKey() + " " + entry.getValue()); //$NON-NLS-1$
-			sb.append(","); //$NON-NLS-1$
-		}
-		sb.deleteCharAt(sb.length() - 1);
-		sb.append(")"); //$NON-NLS-1$
-		
-		logme(sb);
-		session.createNativeQuery(sb.toString()).executeUpdate();
-		
-		sb = new StringBuilder();
-		sb.append(" INSERT INTO " ); //$NON-NLS-1$
-		sb.append(table2);
-		sb.append("("); //$NON-NLS-1$
-		for (Entry<String,String> entry : dataTable.columnNames.entrySet()) {
-			sb.append(entry.getKey());
-			sb.append(","); //$NON-NLS-1$
-		}
-		sb.deleteCharAt(sb.length() - 1);
-		sb.append(")"); //$NON-NLS-1$
-		sb.append(" SELECT "); //$NON-NLS-1$
-		for (Entry<String,String> entry : dataTable.columnNames.entrySet()) {
-			sb.append("a." + entry.getKey()); //$NON-NLS-1$
-			sb.append(","); //$NON-NLS-1$
-		}
-		sb.deleteCharAt(sb.length() - 1);
-		sb.append(" FROM " ); //$NON-NLS-1$
-		sb.append(dataTable.tableName + " a"); //$NON-NLS-1$
-		
-		final boolean[] requiresEntityType = new boolean[] {false};
-		final boolean[] requiresEntity = new boolean[] {false};
-		queryFilter.accept(new IFilterVisitor() {			
-			@Override
-			public void visitElement(IQueryFilter filter) {
-				if (requiresEntityType[0]) return;
-				if (filter instanceof RecordAttributeFilter) {
-					RecordAttributeFilter f = (RecordAttributeFilter) filter;
-					if (f.getEntityTypeKey() != null && !f.getEntityTypeKey().isEmpty()) {
-						requiresEntityType[0] = true;
-						return;
-					}
-				}
-
-			}
-		});
-		if (requiresEntity[0] || requiresEntityType[0]) {
-			sb.append(" JOIN smart.i_entity e on e.uuid = a.entity_uuid "); //$NON-NLS-1$
-			if (requiresEntityType[0]) {
-				sb.append(" JOIN smart.i_entity_type t ON e.entity_type_uuid = t.uuid "); //$NON-NLS-1$
-			}
-		}
-		
-		
-		sb.append(" WHERE "); //$NON-NLS-1$
-		HashMap<String,Object> parameters = new HashMap<>();
-		processFilter(queryFilter, sb, parameters);
-		
-		NativeQuery<?> query = session.createNativeQuery(sb.toString());
-		for (Entry<String,Object> parameter : parameters.entrySet()) {
-			query.setParameter(parameter.getKey(),  parameter.getValue());
-			logme(parameter.getKey() + ":" + parameter.getValue()); //$NON-NLS-1$
-		}
-		logme(sb);
-		query.executeUpdate();
-		
-		try {
-			session.createNativeQuery("DROP TABLE " + dataTable.tableName); //$NON-NLS-1$
-		}catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		dataTable.tableName = table2;
-	}
-	
-	/**
-	 * Creates where statement for query filter 
-	 * @param queryFilter
-	 * @param whereSql
-	 * @param parameters
-	 * @throws Exception
-	 */
-	private void processFilter(IQueryFilter queryFilter, StringBuilder whereSql, HashMap<String,Object> parameters) throws Exception {
-		
-		if (queryFilter instanceof SystemAttributeFilter) {
-			SystemAttributeFilter f = (SystemAttributeFilter)queryFilter;
-			if (f.getAttribute() == SystemAttribute.RECORD_DATE_CREATED ||
-				f.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED ||
-				f.getAttribute() == SystemAttribute.RECORD_SOURCE ||
-				f.getAttribute() == SystemAttribute.RECORD_STATUS ||
-				f.getAttribute() == SystemAttribute.RECORD_DATE ) {
-				
-				String columnName = null;
-				if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED) {
-					columnName = "a.record_date_created"; //$NON-NLS-1$
-					whereSql.append(SqlGenerator.generateDateClause(f.getDateValues(), columnName));
-				}else if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED) {
-					columnName = "a.record_date_modified"; //$NON-NLS-1$
-					whereSql.append(SqlGenerator.generateDateClause(f.getDateValues(), columnName));
-				}else if (f.getAttribute() == SystemAttribute.RECORD_SOURCE) {
-					String key = "p_" + parameters.size(); //$NON-NLS-1$
-					parameters.put(key, f.getStringKey());
-					whereSql.append(" a.record_source_key = :" + key); //$NON-NLS-1$
-				}else if (f.getAttribute() == SystemAttribute.RECORD_STATUS) {
-					String key = "p_" + parameters.size(); //$NON-NLS-1$
-					parameters.put(key, f.getStringKey());
-					whereSql.append(" a.record_status = :" + key); //$NON-NLS-1$
-				}
-				
-			}else {
-				throw new IllegalStateException("Group by record dates is not supported for entity summary queries"); //$NON-NLS-1$
-			}
-		}else if (queryFilter instanceof BooleanFilter) {
-			BooleanFilter f = (BooleanFilter)queryFilter;
-			processFilter(f.getFilter1(), whereSql, parameters);
-			whereSql.append( SqlGenerator.operatorToSql(f.getOperator()) );
-			processFilter(f.getFilter2(), whereSql, parameters);
-			
-		}else if (queryFilter instanceof BracketFilter) {
-			BracketFilter f = (BracketFilter)queryFilter;
-			whereSql.append(" ( "); //$NON-NLS-1$
-			processFilter(f.getFilter(), whereSql, parameters);
-			whereSql.append(" ) "); //$NON-NLS-1$
-		
-		}else if (queryFilter instanceof RecordAttributeFilter) {
-			RecordAttributeFilter f = (RecordAttributeFilter)queryFilter;
-			
-			boolean close = false;
-			if (f.getEntityTypeKey() != null && !f.getEntityTypeKey().isEmpty()) {
-				whereSql.append(" ("); //$NON-NLS-1$
-				close = true;
-				String key = "p_" + parameters.size(); //$NON-NLS-1$
-				parameters.put(key, f.getEntityTypeKey());
-				whereSql.append(" t.keyId = :" + key); //$NON-NLS-1$
-				
-				whereSql.append(" AND "); //$NON-NLS-1$
-			}
-			String columnName = "a." + f.getAttributeKey(); //$NON-NLS-1$
-			if (f.getAttributeType() == AttributeType.DATE) {
-				whereSql.append(SqlGenerator.generateDateClause(f.getDateValues(), columnName));
-			}else if (f.getAttributeType() == AttributeType.BOOLEAN) {
-				whereSql.append(" "); //$NON-NLS-1$
-				whereSql.append(columnName);
-				whereSql.append(" ");				 //$NON-NLS-1$
-			}else if (f.getAttributeType() == AttributeType.EMPLOYEE) {
-				whereSql.append(" "); //$NON-NLS-1$
-				whereSql.append(columnName);
-				if (f.getKeyValue().equals(RecordAttributeFilter.ANY_OPTION_KEY)) {
-					whereSql.append(" is not null "); //$NON-NLS-1$
-				}else {
-					whereSql.append( " = " ); //$NON-NLS-1$
-					String key = "p_" + parameters.size(); //$NON-NLS-1$
-					parameters.put(key, UuidUtils.stringToUuid( f.getKeyValue()) );
-					whereSql.append(" :" + key + " "); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}else if (f.getAttributeType() == AttributeType.LIST) {
-				whereSql.append(" "); //$NON-NLS-1$
-				whereSql.append(columnName);
-				whereSql.append(" IN (");
-				if (f.getKeyValue().equals(RecordAttributeFilter.ANY_OPTION_KEY)) {
-//					whereSql.append(" is not null "); //$NON-NLS-1$
-					whereSql.append(" SELECT value_uuid FROM smart.i_record_attribute_value_list ");
-				}else {
-					
-					if (f.getAttributeKey() != null) {
-						whereSql.append(" SELECT a.value_uuid FROM smart.i_record_attribute_value_list a join smart.i_attribute_list_item i on a.element_uuid = i.uuid where i.keyid = ");
-						String key = "p_" + parameters.size(); //$NON-NLS-1$
-						parameters.put(key, f.getKeyValue());
-						whereSql.append(" :" + key + " "); //$NON-NLS-1$ //$NON-NLS-2$
-					}else if (f.getEntityTypeKey() != null) {
-						whereSql.append(" SELECT a.value_uuid FROM smart.i_record_attribute_value_list a where a.uuid = ");
-						String key = "p_" + parameters.size(); //$NON-NLS-1$
-						parameters.put(key, f.getKeyValue());
-						whereSql.append(" :" + key + " "); //$NON-NLS-1$ //$NON-NLS-2$
-					}else if (f.getAttributeType() == AttributeType.EMPLOYEE) {
-						whereSql.append(" SELECT a.value_uuid FROM smart.i_record_attribute_value_list a where a.uuid = ");
-						String key = "p_" + parameters.size(); //$NON-NLS-1$
-						parameters.put(key, f.getKeyValue());
-						whereSql.append(" :" + key + " "); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-				}
-				whereSql.append(")");
-			}else if (f.getAttributeType() == AttributeType.NUMERIC) {
-				whereSql.append(" "); //$NON-NLS-1$
-				whereSql.append(columnName);
-				whereSql.append( SqlGenerator.operatorToSql(f.getOperator()) );
-				String key = "p_" + parameters.size(); //$NON-NLS-1$
-				parameters.put(key, f.getNumberValue());
-				whereSql.append(" :" + key + " "); //$NON-NLS-1$ //$NON-NLS-2$
-			}else if (f.getAttributeType() == AttributeType.POSITION) {
-				//Should never get here
-				throw new IllegalStateException("Filtering on position attributes is not supported"); //$NON-NLS-1$
-			}else if (f.getAttributeType() == AttributeType.TEXT) {
-				whereSql.append(" LOWER( " + columnName + ") "); //$NON-NLS-1$ //$NON-NLS-2$
-				whereSql.append( SqlGenerator.operatorToSql(f.getOperator()) );
-				String key = "p_" + parameters.size(); //$NON-NLS-1$
-				String value = f.getStringValue();
-				if (f.getOperator() == Operator.STR_CONTAINS || f.getOperator() == Operator.STR_NOTCONTAINS) {
-					value = "%" + value + "%";  //$NON-NLS-1$//$NON-NLS-2$
-				}
-				parameters.put(key, value);
-				whereSql.append(" LOWER(:" + key + ") "); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-			
-			
-			if (close) {
-				whereSql.append(" ) "); //$NON-NLS-1$
-			}
-		}else if (queryFilter instanceof NotFilter) {
-			NotFilter nf = (NotFilter)queryFilter;
-			whereSql.append(" "); //$NON-NLS-1$
-			whereSql.append(SqlGenerator.operatorToSql(Operator.NOT));
-			whereSql.append(" "); //$NON-NLS-1$
-			processFilter(nf.getFilter(), whereSql, parameters);
-		}
 	}
 	
 	private void logme(StringBuilder sb) {

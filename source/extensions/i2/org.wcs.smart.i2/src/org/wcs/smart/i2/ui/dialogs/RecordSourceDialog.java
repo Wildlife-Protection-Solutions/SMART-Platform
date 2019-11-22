@@ -69,6 +69,7 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.common.control.IconComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -381,6 +382,50 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 			}
 		});
 		
+		TableViewerColumn colKeyId = new TableViewerColumn(lstAttributes, SWT.NONE);
+		colKeyId.getColumn().setWidth(100);
+		colKeyId.setLabelProvider(new RecordSourceAttributeLabelProvider(RecordSourceAttributeLabelProvider.Column.KEY));
+		colKeyId.getColumn().setText("Key");
+		colKeyId.setEditingSupport(new EditingSupport(colName.getViewer()) {
+			TextCellEditor editor = new TextCellEditor(lstAttributes.getTable());
+			@Override
+			protected void setValue(Object element, Object value) {
+				if (element instanceof IntelRecordSourceAttribute){
+					String newKey = ((String) value).toLowerCase(); //todo remove all other characters
+					
+					//make sure key is unique
+					List<IntelRecordSourceAttribute> items = new ArrayList<>((List<IntelRecordSourceAttribute>) lstAttributes.getInput());
+					items.remove(element);
+					String msg = DataModelManager.INSTANCE.validateKey(newKey, items);
+					if (msg != null) {
+						MessageDialog.openInformation(getShell(), "Invalid", msg);
+						return;
+					}
+					((IntelRecordSourceAttribute)element).setKeyId(newKey);
+					lstAttributes.refresh();
+					modified();
+				}
+			}
+			
+			@Override
+			protected Object getValue(Object element) {
+				if (element instanceof IntelRecordSourceAttribute){
+					return ((IntelRecordSourceAttribute)element).getKeyId();
+				}
+				return null;
+			}
+			
+			@Override
+			protected CellEditor getCellEditor(Object element) {
+				return editor;
+			}
+			
+			@Override
+			protected boolean canEdit(Object element) {
+				if (element instanceof IntelRecordSourceAttribute) return true;
+				return false;
+			}
+		});
 		
 		TableViewerColumn colMulti = new TableViewerColumn(lstAttributes, SWT.NONE);
 		colMulti.getColumn().setWidth(50);
@@ -605,18 +650,24 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 			for (NamedItem ia : dialog.getSelectedAttributes()){
 				IntelRecordSourceAttribute attribute = new IntelRecordSourceAttribute();
 				attribute.setIsMultiple(null);
+				String keyid = "";
 				if (ia instanceof IntelAttribute){
 					attribute.setAttribute((IntelAttribute) ia);
+					keyid = ((IntelAttribute) ia).getKeyId();
 					if (((IntelAttribute) ia).getType() == AttributeType.LIST){
 						attribute.setIsMultiple(false);
 					}
 				}else if (ia instanceof IntelEntityType){
 					attribute.setEntityType((IntelEntityType) ia);
 					attribute.setIsMultiple(false);
+					keyid = ((IntelEntityType) ia).getKeyId();
 				}else{
 					continue;
 				}
 				
+				keyid = DataModelManager.INSTANCE.generateKey(keyid,( List<IntelRecordSourceAttribute>)lstAttributes.getInput());
+				
+				attribute.setKeyId(keyid);
 				attribute.setSource(currentSelection);
 				attribute.setOrder(currentSelection.getAttributes().size() + 1);
 				currentSelection.getAttributes().add(attribute);
@@ -625,6 +676,7 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 			}
 		}
 	}
+	
 	
 	private boolean doSave(){
 		String v = ProfilesManager.INSTANCE.validateRecords(currentSelection);

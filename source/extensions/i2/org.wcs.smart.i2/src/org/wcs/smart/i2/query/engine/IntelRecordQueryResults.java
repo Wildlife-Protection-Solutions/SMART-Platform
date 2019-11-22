@@ -23,23 +23,37 @@ package org.wcs.smart.i2.query.engine;
 
 import java.sql.Date;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import org.geotools.referencing.CRS;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordAttributeValue;
+import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.FixedQueryColumn.Column;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
+import org.wcs.smart.util.GeometryUtils;
+import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -134,14 +148,61 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 				
 		item.setRecordDate((Date)rowData[columnNameToIndex.get("record_date")]);
 		
-//		//filter columns
-//		for (Entry<IQueryFilter, String> filterColumn : filterToColumn.entrySet()){
-//			boolean value = false;
-//			if (rowData[columnNameToIndex.get(filterColumn.getValue())] != null){//filter columns only contain true and null values
-//				value = true;
-//			};
-//			item.addFilterValue(filterColumn.getKey(), value);
-//		}
+		IntelRecord r = session.get(IntelRecord.class, item.getRecordUuid());
+		for (IntelRecordAttributeValue v : r.getAttributes()) {
+			String key = v.getAttribute().getKeyId();
+			
+			Object value = null;
+			
+			
+			if(v.getAttribute().getAttribute() != null){
+				AttributeType type = v.getAttribute().getAttribute().getType();
+				switch(type){
+				case BOOLEAN:
+					value = v.getNumberValue();
+					break;
+				case DATE:
+					value = v.getDateValue();
+					break;
+					
+				case LIST:
+					List<IntelAttributeListItem> items2 = new ArrayList<>();
+					for (IntelRecordAttributeValueList li : v.getAttributeListItems()) {
+						IntelAttributeListItem vli = session.get(IntelAttributeListItem.class, li.getId().getElementUuid());
+						items2.add(vli);
+					}
+					value = items2;
+					break;
+				case EMPLOYEE:
+					List<Employee> items = new ArrayList<>();
+					for (IntelRecordAttributeValueList li : v.getAttributeListItems()) {
+						items.add(session.get(Employee.class, li.getId().getElementUuid()));
+					}
+					value = items;
+					break;
+				case NUMERIC:
+					value = v.getNumberValue();
+					break;
+				case TEXT:
+					value = v.getStringValue();
+					break;
+				case POSITION:
+					value = new Object[] {v.getNumberValue(), v.getNumberValue2()};
+					break;
+				}
+			}else if (v.getAttribute().getEntityType() != null){
+				List<IntelEntity> items = new ArrayList<>();
+				for (IntelRecordAttributeValueList li : v.getAttributeListItems()) {
+					IntelEntity ie = (session.get(IntelEntity.class, li.getId().getElementUuid()));
+					ie.getIdAttributeAsText();  //TODO: resolve locale?
+					items.add(ie);
+				}
+				value = items;
+			}
+			
+			item.addAttribute(key, value);
+		}
+
 		
 		return item;
 	}

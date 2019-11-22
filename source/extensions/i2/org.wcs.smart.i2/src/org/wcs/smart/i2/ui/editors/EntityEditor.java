@@ -697,7 +697,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		};
 		eventHandles.add(handler);
-		eventBroker.subscribe(IntelEvents.ACTIVE_PROFILES, handler);
+		eventBroker.subscribe(IntelEvents.PROFILES_ALL, handler);
 	}
 	
 	@Override

@@ -153,6 +153,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 		if (toFormat == null) return ""; //$NON-NLS-1$
 		switch(column){
 			case LOC_DATE:
+			case RECORD_DATE:
 				return DateFormat.getDateInstance(DateFormat.DEFAULT, l).format((Date)toFormat);
 			case LOC_GEOMTRY:
 				if (toFormat instanceof Geometry) {
@@ -160,7 +161,6 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 				}
 				return toFormat.toString();
 			case LOC_TIME:
-			case RECORD_DATE:
 				return DateFormat.getTimeInstance(DateFormat.DEFAULT, l).format((Date)toFormat);
 			case RECORD_STATUS:
 				return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(toFormat, l);
