@@ -151,7 +151,7 @@ public class PatrolQueryPlugIn extends AbstractUIPlugin {
 						"images/icons/obj16/summary_query.png"));//$NON-NLS-1$
 		reg.put(WAYPOINT_QUERY_ICON,
 				imageDescriptorFromPlugin(PLUGIN_ID,
-						"images/icons/obj16/waypoint_query.png"));//$NON-NLS-1$
+						"images/icons/obj16/waypoint_query.16.32.png"));//$NON-NLS-1$
 		reg.put(OBSERVATION_QUERY_ICON,
 				imageDescriptorFromPlugin(PLUGIN_ID,
 						"images/icons/obj16/observation_query.png"));//$NON-NLS-1$

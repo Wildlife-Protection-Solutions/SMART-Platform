@@ -211,7 +211,7 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 	
 	@Override
     protected void initializeImageRegistry(ImageRegistry reg) {
-		reg.put(PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/view16/plan.png")); //$NON-NLS-1$
+		reg.put(PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/plan.png")); //$NON-NLS-1$
 
 		reg.put(CA_PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/ca_plan.png")); //$NON-NLS-1$
 		reg.put(STATION_PLAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/station_plan.png")); //$NON-NLS-1$

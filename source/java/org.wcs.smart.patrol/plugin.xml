@@ -697,7 +697,7 @@
                id="vertical.org.wcs.smart.patrol.toolbar2">
             <command
                   commandId="org.wcs.smart.patrol.importPatrol"
-                  label="%command.label.import"
+                  label="Import Patrol"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%patrol.importpatrols.command.tooltip">
@@ -744,7 +744,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.patrol.exportPatrol"
-                  label="%command.label.export"
+                  label="Export Patrol"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%patrol.export.command.tooltip">

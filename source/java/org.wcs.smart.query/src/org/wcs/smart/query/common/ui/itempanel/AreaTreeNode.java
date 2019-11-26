@@ -36,6 +36,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -89,7 +90,7 @@ public class AreaTreeNode implements IItemTreeNode{
 
 	@Override
 	public Image getImage() {
-		return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.AREA_FILTER_ICON);
+		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON);
 	}
 
 	@Override

@@ -435,7 +435,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(ERROR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/error_icon.png")); //$NON-NLS-1$
 	     reg.put(INFO_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/information_icon.png")); //$NON-NLS-1$
 	     reg.put(BULLET_BLACK, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/bullet_black.png")); //$NON-NLS-1$
-	     reg.put(MAP_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/map.png")); //$NON-NLS-1$
+	     reg.put(MAP_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/map.png")); //$NON-NLS-1$
 	     
 	     reg.put(WIZBAN_EXPORT_IMAGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/wizban/exportimage_wiz.gif")); //$NON-NLS-1$
 	     reg.put(CROSSCA_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/eview16/crossca.png")); //$NON-NLS-1$

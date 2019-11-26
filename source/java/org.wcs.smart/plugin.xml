@@ -109,7 +109,7 @@
       <view
             allowMultiple="true"
             class="org.wcs.smart.ui.map.MapViewWrapper"
-            icon="images/icons/eview16/map.png"
+            icon="images/icons/shared16/map.png"
             id="org.wcs.smart.ui.map.MapView"
             name="%mapview.name"
             restorable="true">
@@ -127,7 +127,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.wcs.smart.DefaultPerspective"
-            icon="images/icons/eview16/map.png"
+            icon="images/icons/shared16/map.png"
             id="org.wcs.smart.DefaultPerspective"
             name="%defaultperspective.name">
       </perspective>
@@ -700,7 +700,7 @@
                id="org.wcs.smart.perspectives">
             <command
                   commandId="org.wcs.smart.command.showperspective"
-                  icon="images/icons/map@2x.png"
+                  icon="images/icons/shared16/map@2x.png"
                   label="%showmapperspective.command.label1"
                   mode="FORCE_TEXT"
                   style="radio"
@@ -1014,7 +1014,7 @@
          point="org.eclipse.ui.commandImages">
       <image
             commandId="org.wcs.smart.command.ca.basemaps.show"
-            icon="images/icons/etool16/map.png">
+            icon="images/icons/shared16/map.png">
       </image>
    </extension>
    <extension
