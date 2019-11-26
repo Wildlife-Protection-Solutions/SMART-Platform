@@ -1432,7 +1432,7 @@
       <editor
             class="org.wcs.smart.i2.ui.editors.IntelligenceMapEditor"
             default="false"
-            icon="images/icons/eview16/map.png"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/map.png"
             id="org.wcs.smart.i2.editor.map"
             name="%MapViewName">
       </editor>
