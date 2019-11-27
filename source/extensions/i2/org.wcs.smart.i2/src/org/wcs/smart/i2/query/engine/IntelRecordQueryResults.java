@@ -51,7 +51,9 @@ import org.wcs.smart.i2.query.FixedQueryColumn.Column;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IResultItem;
+import org.wcs.smart.i2.query.IntelRecordAttributeQueryColumn;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -139,12 +141,12 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 		item.setRecordTitle((String)rowData[columnNameToIndex.get("record_title")]); //$NON-NLS-1$
 		
 		UUID sourceUuid = asUuid(rowData[columnNameToIndex.get("source_uuid")]); //$NON-NLS-1$
-		if (sourceUuid != null) {
-			item.setRecordSource(session.get(IntelRecordSource.class, sourceUuid));
-		}
+		String sourceName = (String)rowData[columnNameToIndex.get("record_source_name")]; //$NON-NLS-1$
+		item.setRecordSource(sourceUuid, sourceName);
 		
 		UUID profileUuid = asUuid(rowData[columnNameToIndex.get("profile_uuid")]); //$NON-NLS-1$
-		item.setProflie(profileUuid, session.get(IntelProfile.class, profileUuid).getName());
+		String profileName = (String) rowData[columnNameToIndex.get("profile_name")];
+		item.setProflie(profileUuid, profileName);
 				
 		item.setRecordDate((Date)rowData[columnNameToIndex.get("record_date")]);
 		
@@ -212,8 +214,7 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 	public List<? extends IResultItem> getData(int offset, int pageSize, Session session) {
 		final List<IResultItem> items = new ArrayList<>();
 		
-		String sortSql = configureSort(session);
-		String sql = "SELECT * FROM " + resultsTable + sortSql; //$NON-NLS-1$
+		String sql = getSql(session);
 		SqlGenerator.logString(sql);
 			
 		try(ScrollableResults sc = session.createNativeQuery(sql).scroll()){
@@ -226,37 +227,203 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 		return items;
 	}
 
-	
-	@SuppressWarnings("unchecked")
-	private String configureSort(Session session){
-		if (sortColumn == null || sortDirection == null) return ""; //$NON-NLS-1$
-		
-		String sql = " order by "; //$NON-NLS-1$
+	private String getSql(Session session){
+		if (sortColumn == null || sortDirection == null) return "SELECT * FROM " + resultsTable; //$NON-NLS-1$
 		
 		if (sortColumn instanceof FixedQueryColumn){
+			String sql = "SELECT * FROM " + resultsTable + " order by "; //$NON-NLS-1$
+			
 			if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_STATUS){
 				return sql + "record_status" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_TITLE){
 				return sql + "lower(record_title)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_SOURCE){
+				return sql + "lower(record_source_name)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_DATE){
+				return sql + " record_date " + getSortDirectionSql();
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_PROFILE){
-				return sql + "profile_uuid" + getSortDirectionSql(); //$NON-NLS-1$
+				return sql + "profile_name" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_ID){
 				return sql + "lower(ca_id)" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_NAME){
 				return sql + "lower(ca_name)" + getSortDirectionSql(); //$NON-NLS-1$
 			}
-//		}else if (sortColumn instanceof FilterQueryColumn){
-//			String filterKey = ((FilterQueryColumn)sortColumn).getFilterKey();
-//			for (Entry<IQueryFilter,String> filter : filterToColumn.entrySet()){
-//				if (filter.getKey() instanceof IColumnIdentifierProvider){
-//					if (((IColumnIdentifierProvider)filter.getKey()).getUniqueColumnIdentifier().equals(filterKey)){
-//						return sql + " " + filter.getValue() + getSortDirectionSql(); //$NON-NLS-1$
-//					}
-//				}
-//			}
+		}else if (sortColumn instanceof IntelRecordAttributeQueryColumn) {
+			IntelRecordAttributeQueryColumn col = ((IntelRecordAttributeQueryColumn)sortColumn);
+			
+
+			
+			
+			if (col.getAttribute().getAttribute() != null) {
+				if (col.getAttribute().getAttribute().getType() == AttributeType.BOOLEAN ||
+					col.getAttribute().getAttribute().getType() == AttributeType.DATE ||
+					col.getAttribute().getAttribute().getType() == AttributeType.NUMERIC ||
+					col.getAttribute().getAttribute().getType() == AttributeType.POSITION||
+					col.getAttribute().getAttribute().getType() == AttributeType.TEXT) {
+								
+					
+					StringBuilder sb = new StringBuilder();
+					sb.append("SELECT a.* FROM ");
+					sb.append(resultsTable + " a ");
+					sb.append(" LEFT JOIN ");
+					sb.append( " ( smart.i_record_attribute_value v ");
+					sb.append( " JOIN smart.i_recordsource_attribute b on v.attribute_uuid = b.uuid ");
+					sb.append(" AND b.keyid = '" + col.getAttribute().getKeyId() + "' ");
+					sb.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid ");
+					sb.append(" AND s.keyid =  '" + col.getAttribute().getSource().getKeyId() + "' ");
+					sb.append( ")" );
+					sb.append(" ON a.record_uuid = v.record_uuid ");
+					
+					if (col.getAttribute().getAttribute().getType() == AttributeType.BOOLEAN || 
+							col.getAttribute().getAttribute().getType() == AttributeType.NUMERIC ) { 
+						sb.append(" ORDER BY v.double_value ");
+						sb.append(getSortDirectionSql());
+					}else if (col.getAttribute().getAttribute().getType() == AttributeType.DATE) {
+						sb.append(" ORDER BY case when v.string_value is null or v.string_value = '' then null else cast(v.string_value as date) end ");
+						sb.append(getSortDirectionSql());	
+					}else if (col.getAttribute().getAttribute().getType() == AttributeType.POSITION) {
+						sb.append(" ORDER BY v.double_value ");
+						sb.append(getSortDirectionSql());
+						sb.append(", v.double_value2 ");
+						sb.append(getSortDirectionSql());
+					}else if (col.getAttribute().getAttribute().getType() == AttributeType.TEXT) {
+						sb.append(" ORDER BY v.string_value ");
+						sb.append(getSortDirectionSql());
+					}
+					return sb.toString();
+				}else if (col.getAttribute().getAttribute().getType() == AttributeType.LIST) {
+					//only single attributes are sortable 
+					if (lastSortColumn == col) return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+					lastSortColumn = col;
+
+					StringBuilder s3 = new StringBuilder();
+					s3.append("SELECT distinct a.element_uuid FROM smart.i_record_attribute_value_list a ");
+					s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid ");
+					s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
+					s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
+					s3.append(" JOIN ");
+					s3.append( resultsTable );
+					s3.append(" r on r.record_uuid = v.record_uuid");
+					
+					session.beginTransaction();
+					try {
+						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate();
+						
+						List<byte[]> items = session.createNativeQuery(s3.toString()).list();
+						for (byte[] item : items) {
+							IntelAttributeListItem li = session.get(IntelAttributeListItem.class, UuidUtils.byteToUUID(item));
+							
+							StringBuilder s2 = new StringBuilder();
+							s2.append("UPDATE ");
+							s2.append(resultsTable);
+							s2.append(" SET sort_column = :value ");
+							s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " );
+							s2.append(resultsTable + " a");
+							s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid ");
+							s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid ");
+							s2.append(" AND li.element_uuid = :uuid)");
+							
+							session.createNativeQuery(s2.toString())
+								.setParameter("uuid", li.getUuid())
+								.setParameter("value", li.getName())
+								.executeUpdate();
+							
+						}
+					}finally {
+						session.getTransaction().commit();
+					}
+					return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+				}else if (col.getAttribute().getAttribute().getType() == AttributeType.EMPLOYEE) {
+					//only single attributes are sortable 
+					if (lastSortColumn == col) return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+					lastSortColumn = col;
+					
+					StringBuilder s3 = new StringBuilder();
+					s3.append("SELECT distinct a.element_uuid FROM smart.i_record_attribute_value_list a ");
+					s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid ");
+					s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
+					s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
+					s3.append(" JOIN ");
+					s3.append( resultsTable );
+					s3.append(" r on r.record_uuid = v.record_uuid");
+					
+					session.beginTransaction();
+					try {
+						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate();
+						
+						List<byte[]> items = session.createNativeQuery(s3.toString()).list();
+						for (byte[] item : items) {
+							Employee e = session.get(Employee.class, UuidUtils.byteToUUID(item));
+							
+							StringBuilder s2 = new StringBuilder();
+							s2.append("UPDATE ");
+							s2.append(resultsTable);
+							s2.append(" SET sort_column = :value ");
+							s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " );
+							s2.append(resultsTable + " a");
+							s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid ");
+							s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid ");
+							s2.append(" AND li.element_uuid = :uuid)");
+							
+							session.createNativeQuery(s2.toString())
+								.setParameter("uuid", e.getUuid())
+								.setParameter("value", SmartLabelProvider.getShortLabel(e))
+								.executeUpdate();
+							
+						}
+					}finally {
+						session.getTransaction().commit();
+					}
+					return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+				}
+			}else if (col.getAttribute().getEntityType() != null) {
+				//only single attributes are sortable 
+				if (lastSortColumn == col) return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+				lastSortColumn = col;
+
+				StringBuilder s3 = new StringBuilder();
+				s3.append("SELECT distinct a.element_uuid FROM smart.i_record_attribute_value_list a ");
+				s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid ");
+				s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
+				s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
+				s3.append(" JOIN ");
+				s3.append( resultsTable );
+				s3.append(" r on r.record_uuid = v.record_uuid");
+				
+				session.beginTransaction();
+				try {
+					session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate();
+					
+					List<byte[]> items = session.createNativeQuery(s3.toString()).list();
+					for (byte[] item : items) {
+						IntelEntity li = session.get(IntelEntity.class, UuidUtils.byteToUUID(item));
+						
+						StringBuilder s2 = new StringBuilder();
+						s2.append("UPDATE ");
+						s2.append(resultsTable);
+						s2.append(" SET sort_column = :value ");
+						s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " );
+						s2.append(resultsTable + " a");
+						s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid ");
+						s2.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
+						s2.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
+						s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid ");
+						s2.append(" AND li.element_uuid = :uuid)");
+						
+						session.createNativeQuery(s2.toString())
+							.setParameter("uuid", li.getUuid())
+							.setParameter("value", li.getIdAttributeAsText())
+							.executeUpdate();
+						
+					}
+				}finally {
+					session.getTransaction().commit();
+				}
+				return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+			}
 		}
-		
-		return ""; //$NON-NLS-1$
+		//no sorting
+		return "SELECT * FROM " + resultsTable;
 	}
 	
 	private String getSortDirectionSql(){

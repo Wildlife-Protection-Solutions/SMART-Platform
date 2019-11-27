@@ -587,22 +587,25 @@ public class IntelQueryColumnProvider {
 
 	
 	private String generateColumnName(RecordAttributeFilter filter, IQueryItemProvider itemProvider, Session session, Locale l){
-		if (filter.getAttributeType() != null) {
-			StringBuilder sb = new StringBuilder();
-			IntelAttribute attribute = itemProvider.getAttribute(filter.getAttributeKey(), session);
-			IntelEntityType etype = null;
-			if (filter.getEntityTypeKey() != null){
-				etype = itemProvider.getEntityType(filter.getEntityTypeKey(), session);
+		
+		IntelRecordSource rsource = itemProvider.getRecordSource(filter.getRecordSourceKey(), session);
+		
+		IntelRecordSourceAttribute att = null;
+		for (IntelRecordSourceAttribute a : rsource.getAttributes()) {
+			if (a.getKeyId().equalsIgnoreCase(filter.getAttributeKey())) {
+				att = a;
+				break;
 			}
+		}
+		if (att == null) {
+			return "Attribute Not Found";
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(MessageFormat.format("{0} ({1})", IIntelligenceLabelProvider.getName(att), rsource.getName()));
+
+		if (att.getAttribute() != null) {
 			
-			if (attribute != null){
-				sb.append(generateName(attribute, etype));
-			}else{
-				sb.append(filter.getAttributeKey());
-				if (filter.getEntityTypeKey() != null){
-					sb.append (" (" + filter.getEntityTypeKey() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
 			
 			switch(filter.getAttributeType()){
 				case BOOLEAN:
@@ -619,7 +622,7 @@ public class IntelQueryColumnProvider {
 						sb.append(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(ANY_ITEM, l));
 					}else{
 						sb.append(": "); //$NON-NLS-1$
-						List<IntelAttributeListItem> items = itemProvider.getAttributeListItems(attribute.getKeyId(), session);
+						List<IntelAttributeListItem> items = itemProvider.getAttributeListItems(att.getAttribute().getKeyId(), session);
 						IntelAttributeListItem item = null;
 						for (IntelAttributeListItem i : items) {
 							if (i.getKeyId().equals(filter.getKeyValue())) {
@@ -670,19 +673,9 @@ public class IntelQueryColumnProvider {
 				case POSITION:
 					throw new UnsupportedOperationException("position attributes not supported in queries"); //$NON-NLS-1$
 			}
-			return sb.toString();
-		}else {
-			StringBuilder sb = new StringBuilder();
-			IntelEntityType etype = null;
-			if (filter.getEntityTypeKey() != null){
-				etype = itemProvider.getEntityType(filter.getEntityTypeKey(), session);
-			}
 			
-			if (etype != null) {
-				sb.append(etype.getName());
-			}else {
-				sb.append(filter.getEntityTypeKey());
-			}
+		}else {
+		
 			if (filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
 				sb.append(": "); //$NON-NLS-1$
 				sb.append(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(ANY_ITEM, l));
@@ -697,7 +690,7 @@ public class IntelQueryColumnProvider {
 					sb.append(filter.getKeyValue());
 				}
 			}
-			return sb.toString();
 		}
+		return sb.toString();
 	}
 }

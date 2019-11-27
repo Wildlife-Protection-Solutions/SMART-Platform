@@ -258,6 +258,10 @@ public class EntityRecordObservationFilterProcessor {
 								String columnName = createColumn(filter);
 								addFilterColumn((IntelAttributeFilter) filter, entityTable, tempTable, columnName);
 								switchTables(tempTable, entityTable, true, true, s);
+							}else if (filter instanceof RecordAttributeFilter){
+								String columnName = createColumn(filter);
+								addFilterColumn((RecordAttributeFilter) filter, entityTable, tempTable, columnName);
+								switchTables(tempTable, entityTable, true, true, s);
 							}else if (filter instanceof SystemAttributeFilter) {
 								String columnName = createColumn(filter);
 								addFilterColumn((SystemAttributeFilter) filter, entityTable, tempTable, columnName);

@@ -101,7 +101,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			case RECORD_STATUS:
 				return IntelRecord.Status.valueOf(i.getRecordStatus().toUpperCase(Locale.ROOT));
 			case RECORD_SOURCE:
-				return i.getRecordSource();
+				return i.getRecordSourceName();
 			case RECORD_PROFILE:
 				return i.getProfileName();
 			case RECORD_TITLE:
@@ -175,7 +175,8 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			case RECORD_PROFILE:
 				return (String)toFormat;
 			case RECORD_SOURCE:
-				return ((IntelRecordSource)toFormat).getName();
+				if (toFormat instanceof IntelRecordSource) return ((IntelRecordSource)toFormat).getName();
+				return (String)toFormat;
 		}
 		return toFormat.toString();
 	}

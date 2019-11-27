@@ -139,16 +139,16 @@ public class RecordFilterProcessor {
 			int colnumber = 1;
 			@Override
 			public void visitElement(IQueryFilter filter) {
-				
-				
 				if (filter instanceof RecordAttributeFilter) {
 					RecordAttributeFilter f = (RecordAttributeFilter)filter;
-					if (f.getAttributeKey() != null) {
+					if (f.getAttributeType() != null) {
+						//attribute
 						String colname = "filter" + colnumber;
 						colnumber++;
 						addAttributeFilter(queryTable,colname,f,session);
 						filterToColumn.put(f, colname);
-					}else if (f.getEntityTypeKey() != null) {
+					}else  {
+						//entity
 						String colname = "filter" + colnumber;
 						colnumber++;
 						addEntityAttributeFilter(queryTable,colname,f,session);
@@ -291,7 +291,7 @@ public class RecordFilterProcessor {
 		logme(sb);
 		
 		Query<?> q = session.createNativeQuery(sb.toString())
-			.setParameter("keyid", filter.getEntityTypeKey()) //$NON-NLS-1$;
+			.setParameter("keyid", filter.getAttributeKey()) //$NON-NLS-1$;
 			.setParameter("sourceid", filter.getRecordSourceKey());
 		if (!filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)) {
 			q.setParameter("value", UuidUtils.stringToUuid(filter.getKeyValue()));

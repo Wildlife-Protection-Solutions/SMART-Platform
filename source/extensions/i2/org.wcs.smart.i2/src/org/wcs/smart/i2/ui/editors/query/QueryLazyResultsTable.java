@@ -120,7 +120,7 @@ public class QueryLazyResultsTable extends Composite{
 			
 			tableViewerColumns = new QueryTableViewerColumn[columns.size()];
 			for (int i = 0; i < columns.size(); i++) {
-				tableViewerColumns[i] = new QueryTableViewerColumn(table,columns.get(i), ColumnLabelProviderGenerator.createLabelProvider(columns.get(i)), this);
+				tableViewerColumns[i] = new QueryTableViewerColumn(table, columns.get(i), ColumnLabelProviderGenerator.createLabelProvider(columns.get(i)), this);
 			}
 			
 			addQueryFinders();

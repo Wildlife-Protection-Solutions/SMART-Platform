@@ -37,7 +37,6 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
-import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -420,7 +419,7 @@ public class GroupByItem {
 			}
 			if (intelAttribute == null) return Collections.emptyList();
 
-			String attName = IntelligenceLabelProviderImpl.getName(intelAttribute);
+			String attName = IIntelligenceLabelProvider.getName(intelAttribute);
 			List<ListItem> items = new ArrayList<>();
 			if (intelAttribute.getAttribute().getType() == AttributeType.EMPLOYEE) {
 				List<Employee> types = itemProvider.getEmployees(session);

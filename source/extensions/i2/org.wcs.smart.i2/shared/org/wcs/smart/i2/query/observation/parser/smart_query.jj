@@ -153,12 +153,6 @@ TOKEN :
  | < ENTITY_TYPE_KEY : "entitytype:" <DM_KEY> >
  | < ENTITY_KEY : "entity:" (< DIGIT> | < UUIDLETTER >)+>
 
-/*
- | < RECORDSOURCE_KEY : "recordsource:" <DM_KEY> >
- | < RECORDSTATUS_KEY : "recordstatus " >
- | < RECORDDATE_KEY : "recorddate ">
-*/
-
  | < RATTRIBUTE_KEY_NUMERIC : "r_attribute:n:"< DM_KEY >":"(< DM_KEY >)?>
  | < RATTRIBUTE_KEY_STRING : "r_attribute:s:"< DM_KEY >":"(< DM_KEY >)?>
  | < RATTRIBUTE_KEY_BOOLEAN : "r_attribute:b:"< DM_KEY >":"(< DM_KEY >)?>

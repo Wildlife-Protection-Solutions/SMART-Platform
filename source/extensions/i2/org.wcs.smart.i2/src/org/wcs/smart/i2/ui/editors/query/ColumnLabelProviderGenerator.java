@@ -56,7 +56,7 @@ public class ColumnLabelProviderGenerator {
 					if (fx.getColumn() == FixedQueryColumn.Column.RECORD_STATUS){
 						return Resources.INSTANCE.getImage(  IntelRecord.Status.valueOf(((IntelRecordResultItem)element).getRecordStatus() ));
 					}else if (fx.getColumn() == FixedQueryColumn.Column.RECORD_SOURCE){
-						return Resources.INSTANCE.getImage(  ((IntelRecordResultItem)element).getRecordSource() );
+						return Resources.INSTANCE.getRecordSourceImage( ((IntelRecordResultItem)element).getRecordSourceUuid() );
 					}else if (fx.getColumn() == FixedQueryColumn.Column.RECORD_PROFILE){
 						return Resources.INSTANCE.getProfileImage( ((IntelRecordResultItem)element).getProfileUuid() );
 					}	

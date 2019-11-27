@@ -88,9 +88,9 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
-import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -715,7 +715,7 @@ public class RecordSummaryPage extends EditorPart{
 		HashMap<IntelRecordAttributeValue, Label> readOnlyLabels = new HashMap<>();
 		if (source != null) {		
 			for (IntelRecordSourceAttribute a : source.getAttributes()){
-				String name = IntelligenceLabelProviderImpl.getName(a);
+				String name = IIntelligenceLabelProvider.getName(a);
 				IntelRecordAttributeValue v = findAttributeValue(a);
 				
 				if (recordEditor.getEditMode()){

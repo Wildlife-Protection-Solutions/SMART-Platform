@@ -26,7 +26,7 @@ public enum Resources {
 	private HashMap<IntelProfile, Color> colorCache = new HashMap<>();
 	private HashMap<IntelProfile, Image> profileImages = new HashMap<>();
 	private HashMap<IntelEntityType, Image> typeImages = new HashMap<>();
-	private HashMap<IntelRecordSource, Image> recordImages = new HashMap<>();
+	private HashMap<UUID, Image> recordImages = new HashMap<>();
 	
 	public void dispose() {
 		for (Color c : colorCache.values()) c.dispose();
@@ -136,17 +136,23 @@ public enum Resources {
 	
 	public Image getImage(IntelRecordSource source) {
 		if (source == null) return null;
-		if (recordImages.containsKey(source)) return recordImages.get(source);
+		if (recordImages.containsKey(source.getUuid())) return recordImages.get(source.getUuid());
 		if (source.getIcon() == null) return null;
 		
 		Display.getDefault().asyncExec(()->{
 			try {
 				Image i =  AWTSWTImageUtils.createImageDescriptor(source.getIconAsImage()).createImage();
-				recordImages.put(source, i);
+				recordImages.put(source.getUuid(), i);
 			}catch (Exception ex) {
 				Intelligence2PlugIn.log(ex.getMessage(),ex);
 			}
 		});
+		return null;
+	}
+	
+	public Image getRecordSourceImage(UUID uuid) {
+		if (uuid == null) return null;
+		if (recordImages.containsKey(uuid)) return recordImages.get(uuid);
 		return null;
 	}
 	

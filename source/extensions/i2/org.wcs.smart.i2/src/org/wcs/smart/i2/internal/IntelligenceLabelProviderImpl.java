@@ -76,20 +76,7 @@ import org.wcs.smart.ui.SmartLabelProvider;
 public class IntelligenceLabelProviderImpl implements
 		IIntelligenceLabelProvider {
 
-	/*
-	 * finds the name for a record attribute
-	 */
-	public static String getName(IntelRecordSourceAttribute a){
-		String name = a.getName();
-		if (name == null || name.isEmpty()){
-			if (a.getAttribute() != null){
-				name = a.getAttribute().getName();
-			}else if (a.getEntityType() != null){
-				name = a.getEntityType().getName();
-			}
-		}
-		return name;
-	}
+
 	
 	public static String getEdgeStyleName(RelationshipDiagramEdgeStyleOptions.EdgeStyle style) {
 		switch(style) {

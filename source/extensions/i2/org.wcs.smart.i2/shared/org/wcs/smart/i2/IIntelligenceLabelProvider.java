@@ -24,6 +24,7 @@ package org.wcs.smart.i2;
 import java.util.Locale;
 
 import org.wcs.smart.ISharedLabelProvider;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 /**
  * Label provider for intelligence module.
  * 
@@ -37,4 +38,18 @@ public interface IIntelligenceLabelProvider extends ISharedLabelProvider{
 	
 	public String getDataSourceProductName(String dataSetType, Locale l);
 	
+	/*
+	 * finds the name for a record attribute
+	 */
+	public static String getName(IntelRecordSourceAttribute a){
+		String name = a.getName();
+		if (name == null || name.isEmpty()){
+			if (a.getAttribute() != null){
+				name = a.getAttribute().getName();
+			}else if (a.getEntityType() != null){
+				name = a.getEntityType().getName();
+			}
+		}
+		return name;
+	}
 }

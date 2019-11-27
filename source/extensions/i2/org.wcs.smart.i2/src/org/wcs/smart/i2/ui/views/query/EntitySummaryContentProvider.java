@@ -283,24 +283,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 			}else if (item instanceof IntelAttribute) {
 				return AttributeLabelProvider.getImageDescriptor(((IntelAttribute) item).getType());
 			}else if (item instanceof IntelEntityType) {
-				final byte[] icon = ((IntelEntityType) item).getIcon();
-				if (icon != null){
-					return new ImageDescriptor() {
-						@Override
-						public ImageData getImageData() {
-							try(ByteArrayInputStream in = new ByteArrayInputStream(icon)){
-								BufferedImage image = ImageIO.read(in);
-								if (image != null){
-									return AWTSWTImageUtils.convertToSWTImage(image).getImageData();
-								}
-							}catch (Exception ex){
-								
-							}
-							return null;
-						}
-					};
-					
-				}
+				return ImageDescriptor.createFromImage( Resources.INSTANCE.getImage( (IntelEntityType) item) );
 			}else if (item == SubRootNode.CA) {
 				return SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DATA_MODEL_ICON);
 			}else if (item == SubRootNode.ENTITY_TYPE_ITEM) {
@@ -383,7 +366,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 				if (source == RootNode.GROUP_BY_OPTION) {
 					for (IntelRecordSourceAttribute atts : recordAttributes.get(((IntelRecordSource) item).getKeyId())) {
 						if (atts.getAttribute() != null && isGroupByAttribute(atts.getAttribute().getType())) {
-							TreeNode tn = new TreeNode(source, atts, IntelligenceLabelProviderImpl.getName(atts));		
+							TreeNode tn = new TreeNode(source, atts,  IIntelligenceLabelProvider.getName(atts));		
 							tn.setImageDescriptor(ImageDescriptor.createFromImage(AttributeLabelProvider.getImage(atts.getAttribute().getType())));
 							filters.add(tn);
 						}
@@ -391,7 +374,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 				}else {
 					for (IntelRecordSourceAttribute atts : recordAttributes.get(((IntelRecordSource) item).getKeyId())) {
 						
-						TreeNode tn = new TreeNode(source, new AttributeTreeFilterItem(atts), IntelligenceLabelProviderImpl.getName(atts));
+						TreeNode tn = new TreeNode(source, new AttributeTreeFilterItem(atts), IIntelligenceLabelProvider.getName(atts));
 						if (atts.getAttribute() != null) {
 							tn.setImageDescriptor(ImageDescriptor.createFromImage(AttributeLabelProvider.getImage(atts.getAttribute().getType())));
 						}else {

@@ -38,7 +38,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.event.IntelEvents;
-import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
@@ -247,7 +246,7 @@ public enum ProfilesManager {
 			IntelEntityType etype = ia.getEntityType();
 			for (IntelProfile ip : source.getProfiles()) {
 				if (!etype.getProfiles().contains(ip)) {
-					String name = IntelligenceLabelProviderImpl.getName(ia);
+					String name = IIntelligenceLabelProvider.getName(ia);
 					String msg = "The record source {0} is associated with profile {1}, "
 							+ "but the entity type attribute {2} is not associated "
 							+ "with this profile.  "

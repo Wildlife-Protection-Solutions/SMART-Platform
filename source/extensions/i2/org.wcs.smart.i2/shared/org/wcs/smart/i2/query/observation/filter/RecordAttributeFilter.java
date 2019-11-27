@@ -74,16 +74,10 @@ public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 		
 	private static RecordAttributeFilter createCore(String key){
 		String bits[] = key.split(":"); //$NON-NLS-1$
-
 		IntelAttribute.AttributeType type = parseType(bits[1]);
-			
-		String attributeentitykey = bits[2];
-		String recordsourcekey = null;
-		if (bits.length > 3){
-			recordsourcekey = bits[3];
-			if (recordsourcekey.trim().isEmpty()) recordsourcekey = null;
-		}
-		return new RecordAttributeFilter(type,attributeentitykey,recordsourcekey);
+		String recordsourceattributekey = bits[2];
+		String recordsourcekey = bits[3];
+		return new RecordAttributeFilter(type,recordsourceattributekey,recordsourcekey);
 	}
 	
 	private static IntelAttribute.AttributeType parseType(String attributeType){

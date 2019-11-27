@@ -29,7 +29,7 @@ import java.util.Locale;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
@@ -46,18 +46,29 @@ public class IntelRecordAttributeQueryColumn extends AbstractQueryColumn {
 	private IntelRecordSourceAttribute attribute;
 	
 	public IntelRecordAttributeQueryColumn(IntelRecordSourceAttribute attribute) {
-		super(IntelligenceLabelProviderImpl.getName(attribute) + " (" + attribute.getSource().getName() + ")", "recordattribute:" + attribute.getSource().getKeyId() + ":" + attribute.getKeyId()); //$NON-NLS-1$
+		super(IIntelligenceLabelProvider.getName(attribute) + " (" + attribute.getSource().getName() + ")", "recordattribute:" + attribute.getSource().getKeyId() + ":" + attribute.getKeyId()); //$NON-NLS-1$
 		this.attribute = attribute;
+	}
+		
+	/**
+	 * Identifies if the column can be sorted or not
+	 * 
+	 * @return
+	 */
+	public boolean canSort(){
+		if (attribute.getIsMultiple() == null) return true;
+		return !attribute.getIsMultiple();
 	}
 	
 	public IntelRecordSourceAttribute getAttribute() {
 		return this.attribute;
 	}
+	
 	@Override
 	public Object getValue(IResultItem item) {
 		if (item instanceof IntelRecordResultItem) {
 			IntelRecordResultItem i = (IntelRecordResultItem)item;
-			if (!i.getRecordSource().equals(attribute.getSource())) return null;
+			if (!i.getRecordSourceUuid().equals(attribute.getSource().getUuid())) return null;
 			return i.getAttributeValue(attribute.getKeyId());
 			
 		}
@@ -108,7 +119,8 @@ public class IntelRecordAttributeQueryColumn extends AbstractQueryColumn {
 					if (sb2.length() > 0) return sb2.substring(0, sb2.length() - 2);
 					return sb2.toString();
 				case POSITION:
-					return toFormat.toString();
+					Object[] data = (Object[]) toFormat;
+					return "POINT(" + (Double)data[0] + " " + (Double)data[1] + ")";
 			}
 			return ""; //$NON-NLS-1$
 		}

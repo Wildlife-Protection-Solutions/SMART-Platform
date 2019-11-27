@@ -1105,6 +1105,36 @@
                </visibleWhen>
             </command>
             <command
+                  commandId="org.wcs.smart.i2.command.record.new"
+                  label="%command.label.newrecord"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="%command.tooltip.newrecord">
+               <visibleWhen>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <or>
+                           <equals
+                                 value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+                           </equals>
+                           <equals
+                                 value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+                           </equals>
+                        </or>
+                     </with>
+                     <test
+                           property="org.wcs.smart.i2.permission"
+                           value="create_record">
+                     </test>
+                  </and>
+               </visibleWhen>
+            </command>
+            <command
                   commandId="org.wcs.smart.i2.query.menu.new.dropdown"
                   icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                   id="org.wcs.smart.i2.query.menu.main.toolbar.new"
@@ -1132,36 +1162,6 @@
                               value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
                         </equals>
                      </with>
-                  </and>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.record.new"
-                  label="%command.label.newrecord"
-                  mode="FORCE_TEXT"
-                  style="push"
-                  tooltip="%command.tooltip.newrecord">
-               <visibleWhen>
-                  <and>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.caSingle">
-                     </test>
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <or>
-                           <equals
-                                 value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
-                           </equals>
-                           <equals
-                                 value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
-                           </equals>
-                        </or>
-                     </with>
-                     <test
-                           property="org.wcs.smart.i2.permission"
-                           value="create_record">
-                     </test>
                   </and>
                </visibleWhen>
             </command>

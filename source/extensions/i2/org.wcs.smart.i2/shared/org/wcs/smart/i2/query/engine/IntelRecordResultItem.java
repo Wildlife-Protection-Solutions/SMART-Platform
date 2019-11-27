@@ -37,14 +37,20 @@ import org.wcs.smart.i2.query.IResultItem;
 public class IntelRecordResultItem implements IResultItem {
 
 	private UUID recordUuid;
-	private UUID profileUuid;
-	private IntelRecordSource recordSource;
-	private String recordStatus;
 	private String recordTitle;
+	
+	private UUID profileUuid;
+	private String profileName;
+	
+	private UUID recordSource;
+	private String recordSourceName;
+	
+	private String recordStatus;
+	
 	
 	private Date primaryDate;
 	
-	private String profileName;
+	
 	
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	
@@ -80,11 +86,16 @@ public class IntelRecordResultItem implements IResultItem {
 		return this.caName;
 	}
 	
-	public void setRecordSource(IntelRecordSource s ) {
-		this.recordSource = s;
+	public void setRecordSource(UUID uuid, String name) {
+		this.recordSource = uuid;
+		this.recordSourceName = name;
 	}
 	
-	public IntelRecordSource getRecordSource() {
+	public String getRecordSourceName() {
+		return this.recordSourceName;
+	}
+
+	public UUID getRecordSourceUuid() {
 		return this.recordSource;
 	}
 	
