@@ -28,6 +28,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -41,9 +42,11 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
@@ -82,9 +85,16 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 			query = dataset.getConnection().getSession().get(IntelRecordObservationQuery.class, dataset.getQuery());
 		}else if (dataset.getQueryType().equalsIgnoreCase(IntelEntityRecordQuery.KEY)) {
 			query = dataset.getConnection().getSession().get(IntelEntityRecordQuery.class, dataset.getQuery());
+		}else if (dataset.getQueryType().equalsIgnoreCase(IntelRecordQuery.KEY)) {
+			query = dataset.getConnection().getSession().get(IntelRecordQuery.class, dataset.getQuery());
 		}
 		if (query == null) {
 			throw new OdaException("Profiles Record Observtion Query not found"); //$NON-NLS-1$
+		}
+		
+		if (!dataset.connection.hasPermission(Permission.QUERY).stream().map(e->e.getKeyId()).collect(Collectors.toSet())
+			.containsAll( AbstractIntelQuery.convertFromProfileFilter( query.getProfileFilter() ))){
+			throw new OdaException("You do not have permission to run queries on all the profiles associated with this query"); //$NON-NLS-1$
 		}
 		
 		IIntelQueryEngine engine = IIntelQueryEngine.createEngine(query.getTypeKey());

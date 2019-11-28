@@ -516,7 +516,10 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				try(Session session = HibernateManager.openSession()){
 					session.beginTransaction();
 					try {
-						IntelSearchResult e = search.doSearch(session, Locale.getDefault(), monitor);
+						Set<IntelProfile> profiles = new HashSet<>(ProfilesManager.INSTANCE.getActiveProfiles());
+						profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toSet());
+						
+						IntelSearchResult e = search.doSearch(profiles, session, Locale.getDefault(), monitor);
 						
 						List<UUID> items = new ArrayList<>();
 						e.getAllResults().forEach(ii->items.add(ii.getEntityUuid()));
@@ -543,9 +546,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 					} catch (Exception e) {
 						Intelligence2PlugIn.displayLog(e.getMessage(), e);
 						session.getTransaction().rollback();
-					}
-					
-					
+					}	
 				}
 				final int icount = newCount;
 				Display.getDefault().syncExec(()->{

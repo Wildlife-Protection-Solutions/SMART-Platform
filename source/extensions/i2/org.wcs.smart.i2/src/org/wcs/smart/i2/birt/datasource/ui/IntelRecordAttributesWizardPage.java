@@ -57,7 +57,7 @@ public class IntelRecordAttributesWizardPage extends IntelRecordDetailsWizardPag
 		
 		setMessage(Messages.IntelRecordAttributesWizardPage_message);
 		
-		if (!IntelSecurityManager.INSTANCE.canViewRecords()) {
+		if (!IntelSecurityManager.INSTANCE.canViewRecordAny()) {
 			setPageComplete(false);
 			Label l = new Label(composite, SWT.NONE);
 			l.setText(Messages.IntelRecordAttributesWizardPage_unauthorized);

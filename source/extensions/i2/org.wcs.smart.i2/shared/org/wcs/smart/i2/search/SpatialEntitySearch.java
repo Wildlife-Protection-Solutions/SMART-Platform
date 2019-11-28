@@ -28,10 +28,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.geometry.jts.JTS;
@@ -43,9 +43,7 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.operation.distance.DistanceOp;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
-import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntitySearch;
@@ -91,10 +89,7 @@ public class SpatialEntitySearch implements IIntelEntitySearch {
 	}
 	
 	@Override
-	public IntelSearchResult doSearch(Session session, Locale locale, IProgressMonitor monitor) throws Exception {
-		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
-		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
-		
+	public IntelSearchResult doSearch(Set<IntelProfile> profiles, Session session, Locale locale, IProgressMonitor monitor) throws Exception {
 		if (profiles.isEmpty()) return new IntelSearchResult(Collections.emptyList(),0);
 		
 		//find active intel record editor

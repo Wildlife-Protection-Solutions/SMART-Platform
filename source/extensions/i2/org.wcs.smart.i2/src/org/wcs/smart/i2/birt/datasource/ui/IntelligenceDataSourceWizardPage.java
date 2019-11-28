@@ -71,9 +71,9 @@ public class IntelligenceDataSourceWizardPage extends DataSourceWizardPage {
 	}
 	
 	private boolean canAccessDataSource() {
-		return (IntelSecurityManager.INSTANCE.canViewEntities() || 
-    			IntelSecurityManager.INSTANCE.canViewRecords() ||
-    			IntelSecurityManager.INSTANCE.canViewQueries());
+		return (IntelSecurityManager.INSTANCE.canViewEntityAny() || 
+    			IntelSecurityManager.INSTANCE.canViewRecordAny() ||
+    			IntelSecurityManager.INSTANCE.canViewQueryAny());
 	}
 	
 	@Override

@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.editors.record;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -176,7 +177,7 @@ public class EntitySearchShell extends SmartShellDialog {
 			List<InternalSearchResult> entities = new ArrayList<InternalSearchResult>();
 			try(Session s = HibernateManager.openSession()){
 				BasicEntitySearch search = new BasicEntitySearch(searchText[0], SmartDB.getCurrentConservationArea(), 50);
-				search.doSearch(s, Locale.getDefault(), new NullProgressMonitor()).getAllResults().forEach(result->{
+				search.doSearch(Collections.singleton(editor.getRecord().getProfile()), s, Locale.getDefault(), new NullProgressMonitor()).getAllResults().forEach(result->{
 					InternalSearchResult r = new InternalSearchResult();
 					IntelEntity ei = s.get(IntelEntity.class, result.getEntityUuid());
 					r.rating = result.getFormattedRating();

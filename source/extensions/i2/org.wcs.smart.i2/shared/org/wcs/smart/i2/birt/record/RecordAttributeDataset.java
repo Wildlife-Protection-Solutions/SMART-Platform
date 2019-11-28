@@ -61,7 +61,7 @@ public class RecordAttributeDataset implements IQuery {
 	}
 	@Override
 	public void prepare(String queryText) throws OdaException {
-		if (!connection.hasPermission(Permission.RECORD)) {
+		if (connection.hasPermission(Permission.RECORD).isEmpty()) {
 			throw new OdaException("Unauthorized.  You do not have permission to access intelligence record datasets"); //$NON-NLS-1$
 		}
 	}

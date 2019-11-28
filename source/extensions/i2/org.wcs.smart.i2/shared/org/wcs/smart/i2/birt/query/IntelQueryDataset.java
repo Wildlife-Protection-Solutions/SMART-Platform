@@ -72,7 +72,7 @@ public class IntelQueryDataset implements IQuery {
 	}
 	@Override
 	public void prepare(String queryText) throws OdaException {
-		if (!connection.hasPermission(Permission.QUERY)) {
+		if (connection.hasPermission(Permission.QUERY).isEmpty()) {
 			throw new OdaException("Unauthorized.  You do not have permission to access intelligence query datasets"); //$NON-NLS-1$
 		}
 		String[] bits = queryText.split(IntelQueryDataset.QUERY_DEF_SEP);

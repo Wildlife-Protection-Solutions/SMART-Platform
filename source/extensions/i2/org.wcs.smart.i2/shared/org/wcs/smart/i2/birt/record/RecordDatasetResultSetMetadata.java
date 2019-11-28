@@ -53,7 +53,8 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 		STATUS("record:status", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		STATUS_KEY("record:status_key", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		SOURCE("record:source", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		SOURCE_ICON("record:source_icon", java.sql.Types.BLOB); //$NON-NLS-1$
+		SOURCE_ICON("record:source_icon", java.sql.Types.BLOB), //$NON-NLS-1$
+		PROFILE("record:profile", java.sql.Types.VARCHAR); //$NON-NLS-1$
 		
 		String id;
 		int type;
@@ -99,7 +100,9 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 			case SOURCE_ICON:
 				if (record.getRecordSource() == null) return null;
 				if (record.getRecordSource().getIcon() == null) return null;
-				return new Blob(record.getRecordSource().getIcon());			
+				return new Blob(record.getRecordSource().getIcon());
+			case PROFILE:
+				return record.getProfile().getName();
 			default:
 				break;
 			

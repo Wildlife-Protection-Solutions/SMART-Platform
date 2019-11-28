@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.birt.datasource.ui;
 
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,8 +38,10 @@ import org.eclipse.datatools.connectivity.oda.design.ResultSetColumns;
 import org.eclipse.datatools.connectivity.oda.design.ResultSetDefinition;
 import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSessionUtil;
 import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizardPage;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -47,18 +50,20 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.InternalEntityManager;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 
@@ -124,29 +129,39 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 			Label l = new Label(composite, SWT.NONE);
 			l.setText(Messages.AbstractIntelEntityTypeListWizardPage_DatasetNotSupported);
 		}else {
-			if (!IntelSecurityManager.INSTANCE.canViewEntities()) {
+			if (!IntelSecurityManager.INSTANCE.canViewEntityAny()) {
 				setPageComplete(false);
 				Label l = new Label(composite, SWT.NONE);
 				l.setText(Messages.AbstractIntelEntityTypeListWizardPage_unauthorized);
 				return composite;
 			}
 			
-			lstEntityTypes = new TableViewer(composite, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+			Composite wrapper = new Composite(composite, SWT.NONE);
+			wrapper.setLayout(new TableColumnLayout());
+			wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			((GridData)wrapper.getLayoutData()).heightHint = 300;
+			
+			lstEntityTypes = new TableViewer(wrapper, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 			lstEntityTypes.setLabelProvider(new EntityTypeLabelProvider());
 			lstEntityTypes.setContentProvider(ArrayContentProvider.getInstance());
+			lstEntityTypes.getControl().addListener(SWT.Selection, e->validateData());
+			TableColumn tc = new TableColumn(lstEntityTypes.getTable(), SWT.NONE);
+			((TableColumnLayout)wrapper.getLayout()).setColumnData(tc, new ColumnWeightData(100));
 			
-	
-			lstEntityTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			((GridData)lstEntityTypes.getControl().getLayoutData()).heightHint = 300;
-			lstEntityTypes.getControl().addListener(SWT.Selection, new Listener() {
-				@Override
-				public void handleEvent(Event event) {
-					validateData();
-				}
-			});
-			List<IntelEntityType> types = null;
+			List<IntelEntityType> types = new ArrayList<>();
+			
 			try(Session s = HibernateManager.openSession()){
-				types = QueryFactory.buildQuery(s, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+				for (IntelEntityType t : QueryFactory.buildQuery(s, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList()){
+					boolean canview = false;
+					for (IntelProfile ip : t.getProfiles()) {
+						if(IntelSecurityManager.INSTANCE.canViewEntities(ip)) {
+							canview = true;
+							break;
+						}
+					}
+					if (canview) types.add(t);
+				}
+				
 			}
 			
 			Collections.sort(types, (a,b) -> Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));

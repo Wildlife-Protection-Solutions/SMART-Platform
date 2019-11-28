@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -40,12 +40,10 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
-import org.wcs.smart.i2.security.IntelSecurityManager;
 
 
 /**
@@ -139,13 +137,10 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
 	 * to call done() on the given monitor
 	 */
-	public IntelSearchResult doSearch(Session session, Locale l, IProgressMonitor monitor){
+	public IntelSearchResult doSearch(Set<IntelProfile> profiles, Session session, Locale l, IProgressMonitor monitor){
 		SubMonitor.convert(monitor, 2);
 		Long now = System.nanoTime();
-		
-		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
-		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
-		
+
 		if (profiles.isEmpty()) {
 			return new IntelSearchResult(Collections.emptyList(),0);
 		}

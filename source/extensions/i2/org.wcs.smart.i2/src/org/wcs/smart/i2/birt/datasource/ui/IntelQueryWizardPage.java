@@ -4,6 +4,8 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDriver;
@@ -22,9 +24,11 @@ import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizardPag
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -37,6 +41,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.InternalQueryManager;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.birt.query.IntelQueryDataset;
 import org.wcs.smart.i2.internal.Messages;
@@ -48,7 +54,8 @@ import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem;
 import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
 import org.wcs.smart.i2.security.IntelSecurityManager;
-import org.wcs.smart.i2.ui.IntelQueryLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
+import org.wcs.smart.i2.ui.views.QueryProxy;
 import org.wcs.smart.util.UuidUtils;
 
 public class IntelQueryWizardPage extends DataSetWizardPage {
@@ -100,7 +107,7 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 
 		composite.setLayoutData(gridData);
 
-		if (!IntelSecurityManager.INSTANCE.canViewQueries()) {
+		if (!IntelSecurityManager.INSTANCE.canViewQueryAny()) {
 			setPageComplete(false);
 			Label l = new Label(composite, SWT.NONE);
 			l.setText(Messages.IntelQueryWizardPage_unauthorized);
@@ -109,7 +116,16 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 		}
 		
 		lstQueries = new TableViewer(composite, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
-		lstQueries.setLabelProvider(new IntelQueryLabelProvider());
+		lstQueries.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				if (element instanceof AbstractIntelQuery) return ((AbstractIntelQuery) element).getName();
+				return super.getText(element);
+			}
+			public Image getImage(Object element) {
+				if (element instanceof AbstractIntelQuery) return Resources.INSTANCE.getImage(((AbstractIntelQuery) element).getTypeKey());
+				return null;
+			}
+		});
 		lstQueries.setContentProvider(ArrayContentProvider.getInstance());
 		lstQueries.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstQueries.getControl().getLayoutData()).heightHint = 300;
@@ -121,10 +137,16 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 		});
 		
 		List<AbstractIntelQuery> queries = new ArrayList<>();
+
+		Set<String> profiles = ProfilesManager.INSTANCE.getActiveProfiles()
+				.stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e)).map(e->e.getKeyId()).collect(Collectors.toSet());
+
 		try(Session s = HibernateManager.openSession()){
-			queries.addAll( QueryFactory.buildQuery(s, IntelRecordObservationQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
-			queries.addAll( QueryFactory.buildQuery(s, IntelEntitySummaryQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
-			queries.addAll( QueryFactory.buildQuery(s, IntelEntityRecordQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
+			for (Class<? extends AbstractIntelQuery> c: InternalQueryManager.INSTANCE.getQueryTypeClasses()) {
+				List<? extends AbstractIntelQuery> items =
+						QueryFactory.buildQuery(s, c, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$	
+				queries.addAll(items.stream().filter(t->t.queriesProfile(profiles)).collect(Collectors.toList()));
+			}
 		}
 		
 		Collections.sort(queries, (a,b) -> Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));

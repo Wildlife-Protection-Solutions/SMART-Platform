@@ -37,9 +37,9 @@ import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -53,6 +53,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -85,8 +86,15 @@ public class IntelligenceTemplatesView {
 	@PostConstruct
 	public void createPartControl(Composite parent) {
 		parent.setLayout(new GridLayout());
+		((GridLayout)parent.getLayout()).marginWidth = 0;
 		
-		lstTypes = new TableViewer(parent, SWT.NONE);
+		
+		Composite wrapper = new Composite(parent, SWT.NONE);
+		wrapper.setLayout(new TableColumnLayout());
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+
+		lstTypes = new TableViewer(wrapper, SWT.NONE);
 		lstTypes.setContentProvider(ArrayContentProvider.getInstance());
 		lstTypes.setLabelProvider(new LabelProvider(){
 			
@@ -115,14 +123,9 @@ public class IntelligenceTemplatesView {
 				}
 			}
 		});
-		lstTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		lstTypes.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				editTemplate();
-			}
-		});
+		lstTypes.addDoubleClickListener(evt->editTemplate());
+		TableColumn tc = new TableColumn(lstTypes.getTable(), SWT.NONE);
+		((TableColumnLayout)wrapper.getLayout()).setColumnData(tc, new ColumnWeightData(1));
 		
 		Menu mnu = new Menu(lstTypes.getControl());
 		lstTypes.getControl().setMenu(mnu);

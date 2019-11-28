@@ -27,6 +27,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
 import org.eclipse.datatools.connectivity.oda.IClob;
@@ -37,9 +38,11 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -73,8 +76,10 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 		
 		this.metadata = metadata;
 	
-		String q1 = "SELECT count(*) FROM IntelEntityRecord l WHERE l.id.entity.entityType = :type "; //$NON-NLS-1$
-		String q2 = "FROM IntelEntityRecord l WHERE l.id.entity.entityType = :type "; //$NON-NLS-1$
+		Set<IntelProfile> profiles = connection.hasPermission(Permission.ENTITY);
+		
+		String q1 = "SELECT count(*) FROM IntelEntityRecord l WHERE l.id.entity.entityType = :type and l.id.entity.profile IN (:profiles)"; //$NON-NLS-1$
+		String q2 = "FROM IntelEntityRecord l WHERE l.id.entity.entityType = :type and l.id.entity.profile IN (:profiles)"; //$NON-NLS-1$
 		
 		HashMap<String, Object> values = new HashMap<String, Object>();
 		values.put("type", type); //$NON-NLS-1$
@@ -91,6 +96,8 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 		
 		Query<?> query1 = connection.getSession().createQuery(q1);
 		Query<?> query2 = connection.getSession().createQuery(q2);
+		query1.setParameterList("profiles", profiles);
+		query2.setParameterList("profiles", profiles);
 		for (Entry<String,Object> e : values.entrySet()){
 			query1.setParameter(e.getKey(), e.getValue());
 			query2.setParameter(e.getKey(), e.getValue());

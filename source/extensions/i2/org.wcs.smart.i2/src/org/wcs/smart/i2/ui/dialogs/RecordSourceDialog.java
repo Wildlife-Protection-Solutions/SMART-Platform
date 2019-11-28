@@ -721,8 +721,6 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 					q.executeUpdate();
 				}
 				
-			
-
 				session.getTransaction().commit();
 				
 				//clear all delete lists

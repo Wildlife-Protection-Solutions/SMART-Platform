@@ -29,6 +29,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,10 +40,12 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -85,18 +88,38 @@ public class EntityDatasetResultSet implements IResultSet {
 		this.metadata = metadata;
 		this.type = type;
 		
-		List<Object[]> filters1 = new ArrayList<>();
-		filters1.add(new Object[] {"entityType", type}); //$NON-NLS-1$
+		String hql = "FROM IntelEntity WHERE entityType = :type and profile in (:profiles) ";
+		UUID euuid = null;
+		
 		int index = pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
 		if (index > 0){
 			String entity = (String) parameters.get(index); 
 			if ( entity != null){
-				filters1.add(new Object[] {"uuid", UuidUtils.stringToUuid(entity)}); //$NON-NLS-1$
-			}
+				euuid = UuidUtils.stringToUuid(entity);
+			}	
 		}
 		
-		m_maxRows = QueryFactory.buildCountQuery(connection.getSession(), IntelEntity.class, filters1.toArray(new Object[filters1.size()][2]));
-		results = QueryFactory.buildQuery(connection.getSession(), IntelEntity.class, filters1.toArray(new Object[filters1.size()][2])).setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
+		if (euuid == null) {
+			m_maxRows = (Long)connection.getSession().createQuery("SELECT count(*) " + hql)
+					.setParameter("type", type)
+					.setParameter("profiles", connection.hasPermission(Permission.ENTITY))
+					.uniqueResult();
+			results = connection.getSession().createQuery(hql)
+					.setParameter("type", type)
+					.setParameter("profiles", connection.hasPermission(Permission.ENTITY))
+					.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
+		}else {
+			m_maxRows = (Long)connection.getSession().createQuery("SELECT count(*) " + hql + " WHERE uuid = :uuid")
+					.setParameter("type", type)
+					.setParameter("profiles", connection.hasPermission(Permission.ENTITY))
+					.setParameter("uuid", euuid)
+					.uniqueResult();
+			results = connection.getSession().createQuery(hql+ " WHERE uuid = :uuid")
+					.setParameter("type", type)
+					.setParameter("profiles", connection.hasPermission(Permission.ENTITY))
+					.setParameter("uuid", euuid)
+					.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
+		}
 		
 		this.connection = connection;
 		this.m_currentRowId = 0;
@@ -181,11 +204,14 @@ public class EntityDatasetResultSet implements IResultSet {
 			}
 		}
 		try {
-			if (colIndex <= 8){
-				return EntityDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale());
+			colIndex --;
+			int fixedcols = EntityDatasetResultSetMetadata.Column.values().length;
+			if (colIndex < fixedcols - 1){
+				return EntityDatasetResultSetMetadata.Column.values()[colIndex].getValue(i, connection.getCurrentLocale());
 			}
-			if (colIndex - 9 < type.getAttributes().size()){
-				IntelAttribute attribute = type.getAttributes().get(colIndex-9).getAttribute();
+			int aindex = colIndex-fixedcols+1;
+			if (aindex < type.getAttributes().size()){
+				IntelAttribute attribute = type.getAttributes().get(aindex).getAttribute();
 				IntelEntityAttributeValue v = i.findAttributeValue(attribute);
 				if (v == null) return null;
 				if (attribute.getType() == AttributeType.LIST){

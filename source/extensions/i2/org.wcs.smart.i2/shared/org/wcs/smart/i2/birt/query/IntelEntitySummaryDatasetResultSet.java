@@ -27,6 +27,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -38,7 +39,10 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.IIntelQueryEngine;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.query.SummaryQueryResult;
 
 /**
@@ -54,6 +58,7 @@ public class IntelEntitySummaryDatasetResultSet implements IResultSet {
 
 	private IntelEntitySummaryDatasetResultSetMetadata metadata;
 	private SummaryQueryResult results = null;
+	private AbstractIntelQuery query;
 	
 	private boolean lastIsNull = false;
 
@@ -63,11 +68,20 @@ public class IntelEntitySummaryDatasetResultSet implements IResultSet {
 	public IntelEntitySummaryDatasetResultSet(IntelQueryDataset dataset, HashMap<Integer, Object> parameters) throws OdaException {
 		
 		metadata = (IntelEntitySummaryDatasetResultSetMetadata) dataset.getMetaData();
-		IntelEntitySummaryQuery query = dataset.getConnection().getSession().get(IntelEntitySummaryQuery.class, dataset.getQuery());
+		if (dataset.getQueryType().equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) {
+			query = dataset.getConnection().getSession().get(IntelEntitySummaryQuery.class, dataset.getQuery());
+		}else if (dataset.getQueryType().equalsIgnoreCase(IntelRecordSummaryQuery.KEY)) {
+			query = dataset.getConnection().getSession().get(IntelEntitySummaryQuery.class, dataset.getQuery());
+		}
 		if (query == null) {
-			throw new OdaException("Entity Summary Query not found"); //$NON-NLS-1$
+			throw new OdaException("Summary Query not found"); //$NON-NLS-1$
 		}
 	
+		if (!dataset.connection.hasPermission(Permission.QUERY).stream().map(e->e.getKeyId()).collect(Collectors.toSet())
+				.containsAll( AbstractIntelQuery.convertFromProfileFilter( query.getProfileFilter() ))){
+				throw new OdaException("You do not have permission to run queries on all the profiles associated with this query"); //$NON-NLS-1$
+			}
+		
 		IIntelQueryEngine engine = IIntelQueryEngine.createEngine(query.getTypeKey());
 		HashMap<String, Object> eparameters = new HashMap<>();
 		eparameters.put(Session.class.getName(), dataset.getConnection().getSession());

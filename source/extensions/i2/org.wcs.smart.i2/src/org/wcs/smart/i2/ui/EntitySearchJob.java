@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.i2.ui;
 
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -33,10 +36,13 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.search.BasicEntitySearch;
 import org.wcs.smart.i2.search.IIntelEntitySearch;
 import org.wcs.smart.i2.search.IntelSearchResult;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * Entity search job.
@@ -66,7 +72,9 @@ public abstract class EntitySearchJob extends Job{
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try {
-					entities = search.doSearch(s, Locale.getDefault(), progress.split(1));
+					Set<IntelProfile> profiles = new HashSet<>(ProfilesManager.INSTANCE.getActiveProfiles());
+					profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toSet());
+					entities = search.doSearch(profiles, s, Locale.getDefault(), progress.split(1));
 				} finally {
 					s.getTransaction().rollback();
 				}

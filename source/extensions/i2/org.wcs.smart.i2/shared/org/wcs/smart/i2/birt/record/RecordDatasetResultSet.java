@@ -44,6 +44,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.util.UuidUtils;
 
@@ -84,6 +85,7 @@ public class RecordDatasetResultSet implements IResultSet {
 		Root<IntelRecord> from = c.from(IntelRecord.class);
 		List<Predicate> filters = new ArrayList<>();
 		filters.add(from.get("conservationArea").in(connection.getConservationAreas())); //$NON-NLS-1$
+		filters.add(from.get("profile").in(connection.hasPermission(Permission.RECORD)));
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		if (index >= 0 && parameters.get(index) != null){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));

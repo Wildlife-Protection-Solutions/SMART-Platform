@@ -228,6 +228,7 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == EntityDatasetResultSetMetadata.Column.CREATED_BY) return Messages.IntelligenceLabelProviderImpl_EntityRsCreatedByColumn;
 		if (item == EntityDatasetResultSetMetadata.Column.MODIFIED_BY) return Messages.IntelligenceLabelProviderImpl_EntityRsLastModifiedByColumn;
 		if (item == EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE) return Messages.IntelligenceLabelProviderImpl_EntityRsPrimaryKeyColumn;
+		if (item == EntityDatasetResultSetMetadata.Column.PROFILE) return "Profile";
 		
 		if (item == EntitySearchDataset.NOT_FOUND_KEY) return Messages.IntelligenceLabelProviderImpl_SearchNotFound;
 		
@@ -302,6 +303,7 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == RecordDatasetResultSetMetadata.Column.STATUS_KEY) return Messages.IntelligenceLabelProviderImpl_RecordRsColumnStatusKey;
 		if (item == RecordDatasetResultSetMetadata.Column.SOURCE) return Messages.IntelligenceLabelProviderImpl_RecordRsColumnSource;
 		if (item == RecordDatasetResultSetMetadata.Column.SOURCE_ICON) return Messages.IntelligenceLabelProviderImpl_RecordRsColumnSourceImage;
+		if (item == RecordDatasetResultSetMetadata.Column.PROFILE) return "Profile";
 		
 		
 		if (item.equals(EntityDatasetMetadata.class)) return Messages.IntelligenceLabelProviderImpl_EntityDatasetName;

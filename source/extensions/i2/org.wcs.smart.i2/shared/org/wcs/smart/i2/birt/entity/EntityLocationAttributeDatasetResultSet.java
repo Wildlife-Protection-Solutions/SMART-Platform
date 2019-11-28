@@ -17,6 +17,7 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -49,7 +50,7 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 		
 		this.metadata = metadata;
 
-		String hql = "FROM IntelEntityAttributeValue v join v.id.attribute a join v.id.entity e where a.type = :type and e.entityType = :etype"; //$NON-NLS-1$
+		String hql = "FROM IntelEntityAttributeValue v join v.id.attribute a join v.id.entity e where a.type = :type and e.entityType = :etype and v.id.entity.profile in (:profiles)"; //$NON-NLS-1$
 		
 		int index = pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
 		UUID entity = null;
@@ -61,6 +62,7 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 		String cnt = "SELECT count(*) " + hql; //$NON-NLS-1$
 		Query<?> q = connection.getSession().createQuery(cnt);
 		q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
+		q.setParameter("profiles", connection.hasPermission(Permission.ENTITY));
 		q.setParameter("etype", type); //$NON-NLS-1$
 		if (entity != null){
 			q.setParameter("euuid", entity); //$NON-NLS-1$
@@ -70,6 +72,7 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 		
 		q = connection.getSession().createQuery(hql);
 		q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
+		q.setParameter("profiles", connection.hasPermission(Permission.ENTITY));
 		q.setParameter("etype", type); //$NON-NLS-1$
 		if (entity != null){
 			q.setParameter("euuid", entity); //$NON-NLS-1$

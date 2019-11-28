@@ -46,6 +46,7 @@ public class IntelQueryLabelProvider extends OwnerDrawLabelProvider {
 	public IntelQueryLabelProvider(TableColumn tc) {
 		this.tc = tc;
 	}
+	
 	public String getText(Object element){
 		if (element instanceof QueryProxy) return ((QueryProxy) element).getName();
 		if (element instanceof AbstractIntelQuery) return ((AbstractIntelQuery)element).getName();

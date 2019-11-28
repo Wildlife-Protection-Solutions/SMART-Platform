@@ -57,7 +57,9 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 		DATE_MODIFIED("entity:date_modified",  java.sql.Types.DATE), //$NON-NLS-1$
 		CREATED_BY("entity:created_by",  java.sql.Types.VARCHAR), //$NON-NLS-1$
 		MODIFIED_BY("entity:modified_by", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		PRIMARY_IMAGE("entity:primary_image",  java.sql.Types.VARCHAR); //$NON-NLS-1$
+		PROFILE("entity:profile",  java.sql.Types.VARCHAR), //$NON-NLS-1$
+		PRIMARY_IMAGE("entity:primary_image",  java.sql.Types.VARCHAR); //$NON-NLS-1$	//primary image must be the last in this list
+		
 		
 		String id;
 		int type;
@@ -73,19 +75,21 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 			return this.id;
 		}
 		public Object getValue(IntelEntity entity, Locale l) throws IOException {
-			if (this == ENTITY_UUID) return entity.getUuid();
-			if (this == ID) return entity.getIdAttributeAsText(l);
-			if (this == TYPE_KEY) return entity.getEntityType().getKeyId();
-			if (this == TYPE) return entity.getEntityType().getName();
-			if (this == DATE_CREATED) return entity.getDateCreated();
-			if (this == DATE_MODIFIED) return entity.getDateModified();
-			if (this == CREATED_BY) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getCreatedBy(), l);
-			if (this == MODIFIED_BY) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getLastModifiedBy(), l);
-			if (this == PRIMARY_IMAGE) { 
-				if (entity.getPrimaryAttachment() == null){
-					return null;
-				}
-				return entity.getPrimaryAttachment();
+			switch(this) {
+				case ENTITY_UUID: return entity.getUuid();
+				case ID: return entity.getIdAttributeAsText(l);
+				case TYPE_KEY: return entity.getEntityType().getKeyId();
+				case TYPE: return entity.getEntityType().getName();
+				case DATE_CREATED: return entity.getDateCreated();
+				case DATE_MODIFIED: return entity.getDateModified();
+				case CREATED_BY: return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getCreatedBy(), l);
+				case MODIFIED_BY: return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getLastModifiedBy(), l);
+				case PRIMARY_IMAGE: 
+					if (entity.getPrimaryAttachment() == null){
+						return null;
+					}
+					return entity.getPrimaryAttachment();
+				case PROFILE: return entity.getProfile().getName();
 			}
 			return null;
 		}

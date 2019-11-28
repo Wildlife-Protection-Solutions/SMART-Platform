@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -125,13 +126,8 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	 * to call done() on the given monitor
 	 */
 	@Override
-	public IntelSearchResult doSearch(Session session, Locale locale, IProgressMonitor monitor) throws Exception {
-		
-		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
-		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
-		
+	public IntelSearchResult doSearch(Set<IntelProfile> profiles, Session session, Locale locale, IProgressMonitor monitor) throws Exception {
 		if (profiles.isEmpty()) return new IntelSearchResult(Collections.emptyList(),0);
-		
 		if (searchString == null || searchString.trim().isEmpty()){
 			Long now = System.nanoTime();
 			
@@ -196,13 +192,14 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		
 		String stokens[] = searchString.split("\\|"); //$NON-NLS-1$
 		
-		StringBuilder sb = new StringBuilder();
-		sb.append("DROP TABLE qt_temp");  //$NON-NLS-1$
-		try {
-			session.createNativeQuery(sb.toString()).executeUpdate();
-		}catch (Exception ex) {}
+		session.doWork(connection->{
+			try {
+				connection.createStatement().execute("DROP TABLE qt_temp");
+			}catch (Exception ex) {	}
+		});
+				
 		
-		sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		sb.append(" CREATE TABLE qt_temp (entity_uuid char(16) for bit data, entity_type_key varchar(128) )"); //$NON-NLS-1$
 		session.createNativeQuery(sb.toString()).executeUpdate();
 		

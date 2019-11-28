@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.model.IntelEntitySearch;
+import org.wcs.smart.i2.model.IntelProfile;
 
 /**
  * All entity search
@@ -56,7 +57,7 @@ public class AllEntitySearch implements IIntelEntitySearch {
 	
 	
 	@Override
-	public IntelSearchResult doSearch(Session session, Locale locale, IProgressMonitor monitor) throws Exception {
+	public IntelSearchResult doSearch(Set<IntelProfile> profiles, Session session, Locale locale, IProgressMonitor monitor) throws Exception {
 		//used in birt reports
 		throw new OperationNotSupportedException(""); //$NON-NLS-1$
 	}

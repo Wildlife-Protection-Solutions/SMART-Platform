@@ -28,6 +28,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
@@ -40,8 +41,10 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -77,8 +80,10 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 		this.l = connection.getCurrentLocale();
 		this.metadata = metadata;
 	
-		String q1 = "SELECT count(*) FROM IntelEntityLocation l WHERE l.id.entity.entityType = :type "; //$NON-NLS-1$
-		String q2 = "FROM IntelEntityLocation l WHERE l.id.entity.entityType = :type "; //$NON-NLS-1$
+		Set<IntelProfile> profiles = connection.hasPermission(Permission.ENTITY);
+
+		String q1 = "SELECT count(*) FROM IntelEntityLocation l WHERE l.id.entity.entityType = :type and l.id.entity.profile in (:profiles)"; //$NON-NLS-1$
+		String q2 = "FROM IntelEntityLocation l WHERE l.id.entity.entityType = :type and l.id.entity.profile in (:profiles)"; //$NON-NLS-1$
 		
 		HashMap<String, Object> values = new HashMap<String, Object>();
 		values.put("type", type); //$NON-NLS-1$
@@ -121,6 +126,8 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 		
 		Query<?> query1 = connection.getSession().createQuery(q1);
 		Query<?> query2 = connection.getSession().createQuery(q2);
+		query1.setParameterList("profiles", profiles);
+		query2.setParameterList("profiles", profiles);
 		for (Entry<String,Object> e : values.entrySet()){
 			query1.setParameter(e.getKey(), e.getValue());
 			query2.setParameter(e.getKey(), e.getValue());
