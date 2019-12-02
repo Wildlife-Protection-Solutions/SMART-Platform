@@ -21,76 +21,49 @@
  */
 package org.wcs.smart.paws.model;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
-import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.query.model.Query;
 
 @Entity
-@Table(name="smart.paws_parameter")
-public class PawsParameter extends UuidItem{
+@Table(name="smart.paws_query_class")
+public class PawsQueryClass extends AbstractPawsClass{
 
-	public static final String AREA_PREFIX = "area:";
-	public static final String FILE_PREFIX = "file:";
+	private String querytype;
+	private UUID queryuuid;
 	
-	public static enum FixedParameter{
-		LYR_BOUNDARY,
-		LYR_OTHER,
-		GRID_SIZE,
-		GRID_CRS,
-//		GRID_BNDS,
-		TIMEZONE,
-		TRAINING_RES,
-		CLASSIFIER_MODEL
-		
+	private Query cachedQuery;
+	
+	@Column(name="query_type")
+	public String getQueryType() {
+		return this.querytype;
 	}
 	
-	public static enum ClassifierModel{
-		DECISION_TREE("decison_tree");
-//		GAUSSIAN_PROCESS("gaussian_process"); //slow; not supported
-		
-		public String key;
-		
-		private ClassifierModel(String key) {
-			this.key = key;
-		}
+	public void setQueryType(String querytype) {
+		this.querytype = querytype;
 	}
 	
-	
-	private PawsConfiguration config;
-	
-	private String key;
-	private String value;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="config_uuid")
-	public PawsConfiguration getConfiguration() {
-		return this.config;
+	@Column(name="query_uuid")
+	public UUID getQueryUuid() {
+		return this.queryuuid;
 	}
 	
-	public void setConfiguration(PawsConfiguration config) {
-		this.config = config;
+	public void setQueryUuid(UUID queryuuid) {
+		this.queryuuid = queryuuid;
 	}
 	
-	@Column(name="keyid")
-	public String getKey() {
-		return this.key;
+	@Transient
+	public Query getCachedQuery() {
+		return this.cachedQuery;
 	}
-	
-	public void setKey(String key) {
-		this.key = key;
-	}
-	
-	@Column(name="value")
-	public String getValue() {
-		return this.value;
-	}
-	
-	public void setValue(String value) {
-		this.value = value;
+	@Transient
+	public void setCachedQuery(Query cachedQuery) {
+		this.cachedQuery = cachedQuery;
 	}
 }
+

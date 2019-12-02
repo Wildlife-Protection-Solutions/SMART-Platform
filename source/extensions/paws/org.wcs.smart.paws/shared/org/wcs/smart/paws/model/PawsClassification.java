@@ -37,7 +37,6 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DmObject;
-
 import org.wcs.smart.query.model.Query;
 
 @Entity

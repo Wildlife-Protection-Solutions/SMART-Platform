@@ -24,50 +24,22 @@ package org.wcs.smart.paws.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 
 import org.wcs.smart.ca.UuidItem;
 
 @Entity
-@Table(name="smart.paws_parameter")
-public class PawsParameter extends UuidItem{
+@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+public class AbstractPawsClass extends UuidItem{
 
-	public static final String AREA_PREFIX = "area:";
-	public static final String FILE_PREFIX = "file:";
-	
-	public static enum FixedParameter{
-		LYR_BOUNDARY,
-		LYR_OTHER,
-		GRID_SIZE,
-		GRID_CRS,
-//		GRID_BNDS,
-		TIMEZONE,
-		TRAINING_RES,
-		CLASSIFIER_MODEL
-		
-	}
-	
-	public static enum ClassifierModel{
-		DECISION_TREE("decison_tree");
-//		GAUSSIAN_PROCESS("gaussian_process"); //slow; not supported
-		
-		public String key;
-		
-		private ClassifierModel(String key) {
-			this.key = key;
-		}
-	}
-	
-	
+	private String classification;
 	private PawsConfiguration config;
 	
-	private String key;
-	private String value;
-	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="config_uuid")
+	@JoinColumn(name="config_uuid", referencedColumnName="uuid")
 	public PawsConfiguration getConfiguration() {
 		return this.config;
 	}
@@ -76,21 +48,12 @@ public class PawsParameter extends UuidItem{
 		this.config = config;
 	}
 	
-	@Column(name="keyid")
-	public String getKey() {
-		return this.key;
+	@Column(name="classification")
+	public String getClassification() {
+		return this.classification;
 	}
 	
-	public void setKey(String key) {
-		this.key = key;
-	}
-	
-	@Column(name="value")
-	public String getValue() {
-		return this.value;
-	}
-	
-	public void setValue(String value) {
-		this.value = value;
+	public void setClassification(String classification) {
+		this.classification = classification;
 	}
 }

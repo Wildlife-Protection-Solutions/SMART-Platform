@@ -22,7 +22,10 @@
 package org.wcs.smart.paws.ui.config;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -44,7 +47,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.paws.model.PawsClassification;
+import org.wcs.smart.paws.model.PawsSimpleClass;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
@@ -60,7 +63,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class DataModelDialog extends SmartStyledDialog {
 
 	private TreeViewer dmTree;
-	private PawsClassification selectedItem;
+	private List<ClassificationData> selectedItems;
 	
 	protected DataModelDialog(Shell parent) {
 		super(parent);
@@ -82,7 +85,7 @@ public class DataModelDialog extends SmartStyledDialog {
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		dmTree = new TreeViewer(c, SWT.BORDER );
+		dmTree = new TreeViewer(c, SWT.BORDER | SWT.MULTI);
 		dmTree.setContentProvider(new DataModelContentProvider());
 		dmTree.setLabelProvider(new DataModelLabelProvider() {
 			private HashMap<Object, Image> images = new HashMap<>();
@@ -118,52 +121,56 @@ public class DataModelDialog extends SmartStyledDialog {
 	}
 	
 	public void okPressed() {
-		
-		Object dmObject = dmTree.getStructuredSelection().getFirstElement();
-		PawsClassification item = null;
+		selectedItems = new ArrayList<>();
+		for (Iterator<Object> iterator = dmTree.getStructuredSelection().iterator(); iterator.hasNext();) {
+			Object dmObject = (Object) iterator.next();
+			PawsSimpleClass item = null;
 
-		if (dmObject instanceof Category) {
-			Category c = (Category)dmObject;
-			item = new PawsClassification();
-			item.setCategoryHkey(c.getHkey());
-			item.setClassification(c.getName().toLowerCase());
-			item.cacheLabel(c.getFullCategoryName() );
-				
-		}else if (dmObject instanceof DataModelContentProvider.CategoryItemWrapper) {
-			Category c = (( DataModelContentProvider.CategoryItemWrapper)dmObject).c;
-			AttributeListItem li = (( DataModelContentProvider.CategoryItemWrapper)dmObject).li;
-			AttributeTreeNode node = (( DataModelContentProvider.CategoryItemWrapper)dmObject).node;
+			String lbl = "";
 			
-			item = new PawsClassification();
-			item.setCategoryHkey(c.getHkey());
-			if (li != null) {
-				item.setAttributeKey(li.getAttribute().getKeyId());
-				item.setAttributeListItemKey(li.getKeyId());
-				item.setClassification(li.getName().toLowerCase() + "_" + li.getAttribute().getName().toLowerCase() + "_" + c.getName().toLowerCase());
-				item.cacheLabel( PawsClassification.createLabel(c,  li.getAttribute(), li) );
-			}else if (node != null) {
-				item.setAttributeKey(node.getAttribute().getKeyId());
-				item.setAttributeTreeNodeHkey(node.getHkey());
-				item.setClassification(node.getName().toLowerCase() + "_" + node.getAttribute().getName().toLowerCase() + "_" + c.getName().toLowerCase());
-				item.cacheLabel( PawsClassification.createLabel(c,  node.getAttribute(), node) );
-			}
+			if (dmObject instanceof Category) {
+				Category c = (Category)dmObject;
+				
+				item = new PawsSimpleClass();
+				item.setCategoryHkey(c.getHkey());
+				item.setClassification(c.getName().toLowerCase());
+				
+				lbl = c.getFullCategoryName();
+				
+			}else if (dmObject instanceof DataModelContentProvider.CategoryItemWrapper) {
+				Category c = (( DataModelContentProvider.CategoryItemWrapper)dmObject).c;
+				AttributeListItem li = (( DataModelContentProvider.CategoryItemWrapper)dmObject).li;
+				AttributeTreeNode node = (( DataModelContentProvider.CategoryItemWrapper)dmObject).node;
+				
+				item = new PawsSimpleClass();
+				item.setCategoryHkey(c.getHkey());
+				if (li != null) {
+					item.setAttributeKey(li.getAttribute().getKeyId());
+					item.setAttributeListItemKey(li.getKeyId());
+					item.setClassification(li.getName().toLowerCase() + "_" + li.getAttribute().getName().toLowerCase() + "_" + c.getName().toLowerCase());
+					lbl = ClassificationData.createLabel(c,  li.getAttribute(), li);
+				}else if (node != null) {
+					item.setAttributeKey(node.getAttribute().getKeyId());
+					item.setAttributeTreeNodeHkey(node.getHkey());
+					item.setClassification(node.getName().toLowerCase() + "_" + node.getAttribute().getName().toLowerCase() + "_" + c.getName().toLowerCase());
+					lbl = ClassificationData.createLabel(c,  node.getAttribute(), node);
+				}
 
-		}else if (dmObject instanceof CategoryAttribute) {
-			MessageDialog.openWarning(getShell(), "Invalid Selection", MessageFormat.format("Attribute cannot be added a classifications.  Please select a category, list item or tree node.", ((CategoryAttribute)dmObject).getAttribute().getName()));
-			selectedItem = null;
-			return;
-		}else {
-			MessageDialog.openWarning(getShell(), "Invalid Selection", MessageFormat.format("Selected item {0} cannot be added.  Please select a category, list item or tree node.", dmObject.toString()));
-			selectedItem = null;
-			return;
+			}else if (dmObject instanceof CategoryAttribute) {
+				MessageDialog.openWarning(getShell(), "Invalid Selection", MessageFormat.format("Attribute cannot be added a classifications.  Please select a category, list item or tree node.", ((CategoryAttribute)dmObject).getAttribute().getName()));
+				return;
+			}else {
+				MessageDialog.openWarning(getShell(), "Invalid Selection", MessageFormat.format("Selected item {0} cannot be added.  Please select a category, list item or tree node.", dmObject.toString()));
+				return;
+			}
+			
+			if (item != null) selectedItems.add(new ClassificationData(item, lbl));
 		}
-		selectedItem = item;		
-		
 		super.okPressed();
 	}
 	
-	public PawsClassification getSelectedItems(){
-		return this.selectedItem;
+	public List<ClassificationData> getSelectedItems(){
+		return this.selectedItems;
 	}
 	
 	@Override

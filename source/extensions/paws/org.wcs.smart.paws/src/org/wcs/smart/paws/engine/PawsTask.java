@@ -27,11 +27,17 @@ import java.time.format.DateTimeFormatter;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+/**
+ * Represents a PAWS task json object
+ * 
+ * @author Emily
+ *
+ */
 public class PawsTask {
 
 	private String taskId;
 	private String status;
-	private String backendstatus;
+	private String backendstatus; //created, failed,  running
 	private String endpoint;
 	private String endpointpath;
 	private LocalDateTime timestamp;
@@ -62,6 +68,10 @@ public class PawsTask {
 	
 	
 	public static PawsTask parse(String json) throws Exception {
+		
+		System.out.println("result:" + json);
+		System.out.println("---------");
+		
 		JSONParser parse = new JSONParser();
 		JSONObject item = (JSONObject) parse.parse(json);
 		

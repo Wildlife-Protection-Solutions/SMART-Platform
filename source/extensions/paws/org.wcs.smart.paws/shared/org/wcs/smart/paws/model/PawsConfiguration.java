@@ -30,7 +30,6 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -41,10 +40,14 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.paws_configuration")
 public class PawsConfiguration extends UuidItem{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea ca;
 	private String name;
 	private List<PawsParameter> parameters;
-	private PawsClassification classification;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -54,15 +57,6 @@ public class PawsConfiguration extends UuidItem{
 	
 	public void setConservationArea(ConservationArea ca) {
 		this.ca = ca;
-	}
-	
-	@OneToOne(cascade=CascadeType.ALL, mappedBy="configuration")
-	public PawsClassification getClassification() {
-		return this.classification;
-	}
-	
-	public void setClassification(PawsClassification classification) {
-		this.classification = classification;
 	}
 	
 	@Column(name="name")

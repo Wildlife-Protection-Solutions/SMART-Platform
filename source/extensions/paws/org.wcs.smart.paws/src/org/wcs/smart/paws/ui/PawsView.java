@@ -23,6 +23,8 @@ package org.wcs.smart.paws.ui;
 
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -151,7 +153,7 @@ public class PawsView {
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
 
-		Composite main = toolkit.createComposite(parent, SWT.BORDER);
+		Composite main = toolkit.createComposite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)main.getLayout()).marginWidth = 0;
@@ -216,6 +218,14 @@ public class PawsView {
 		tbResults.setBackground(part.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		tbResults.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		
+		ToolItem tiDelete = new ToolItem(tbResults, SWT.PUSH);
+		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDelete.addListener(SWT.Selection, e->deleteRun());
+		
+		ToolItem tiRefresh = new ToolItem(tbResults, SWT.PUSH);
+		tiRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		tiRefresh.addListener(SWT.Selection, e->refresh());
+		
 		ToolItem tiAdd = new ToolItem(tbResults, SWT.PUSH);
 		tiAdd.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
 		tiAdd.setToolTipText("Re-run analysis");
@@ -226,9 +236,7 @@ public class PawsView {
 			}
 		});
 
-		ToolItem tiDelete = new ToolItem(tbResults, SWT.PUSH);
-		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiDelete.addListener(SWT.Selection, e->deleteRun());
+		
 		
 		
 		Composite tpart = toolkit.createComposite(part);
@@ -244,7 +252,7 @@ public class PawsView {
 			public String getText(Object element) {
 				if (element instanceof PawsRun) {
 					PawsRun pc = (PawsRun)element;
-					return pc.getId();
+					return MessageFormat.format( "{0} [{1}]", pc.getId(), pc.getRunDate() == null ? " " : DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(pc.getRunDate()));
 				}
 				return super.getText(element);
 			}
@@ -349,21 +357,21 @@ public class PawsView {
 		tbConfig.setBackground(part.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		tbConfig.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 
-		ToolItem tiRun = new ToolItem(tbConfig, SWT.PUSH);
-		tiRun.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
-		tiRun.addListener(SWT.Selection, e->newRun(tblConfigs.getStructuredSelection().getFirstElement()));
-		
-		ToolItem tiAdd = new ToolItem(tbConfig, SWT.PUSH);
-		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		tiAdd.addListener(SWT.Selection, e->newConfiguration());
+		ToolItem tiDelete = new ToolItem(tbConfig, SWT.PUSH);
+		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		tiDelete.addListener(SWT.Selection, e->deleteConfiguration());
 		
 		ToolItem tiEdit = new ToolItem(tbConfig, SWT.PUSH);
 		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		tiEdit.addListener(SWT.Selection, e->editConfiguration());
 		
-		ToolItem tiDelete = new ToolItem(tbConfig, SWT.PUSH);
-		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiDelete.addListener(SWT.Selection, e->deleteConfiguration());
+		ToolItem tiAdd = new ToolItem(tbConfig, SWT.PUSH);
+		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		tiAdd.addListener(SWT.Selection, e->newConfiguration());
+		
+		ToolItem tiRun = new ToolItem(tbConfig, SWT.PUSH);
+		tiRun.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
+		tiRun.addListener(SWT.Selection, e->newRun(tblConfigs.getStructuredSelection().getFirstElement()));
 		
 		Composite tpart = toolkit.createComposite(part);
 		tpart.setLayout(new TableColumnLayout());

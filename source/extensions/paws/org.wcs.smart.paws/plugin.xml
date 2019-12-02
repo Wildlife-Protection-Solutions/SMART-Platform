@@ -43,6 +43,11 @@
             supportsCcaa="true">
       </class>
       <class
+            ca_property=".configuration.conservationArea"
+            class="org.wcs.smart.paws.model.PawsQueryClass"
+            supportsCcaa="true">
+      </class>
+      <class
             class="org.wcs.smart.paws.model.PawsRun"
             supportsCcaa="true">
       </class>
@@ -56,8 +61,8 @@
       </class>
       <class
             ca_property=".configuration.conservationArea"
-            class="org.wcs.smart.paws.model.PawsClassification"
-            supportsCcaa="false">
+            class="org.wcs.smart.paws.model.PawsSimpleClass"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension
@@ -157,6 +162,14 @@
       <loginHandler
             clazz="org.wcs.smart.paws.LoginHandler">
       </loginHandler>
+   </extension>
+   <extension
+         point="org.locationtech.udig.catalog.ServiceExtension">
+      <service
+            class="org.wcs.smart.paws.udig.PawsServiceExtension"
+            id="&quot;org.wcs.smart.udig.catalog.pawsService"
+            name="PAWS ResultsService">
+      </service>
    </extension>
 
 </plugin>

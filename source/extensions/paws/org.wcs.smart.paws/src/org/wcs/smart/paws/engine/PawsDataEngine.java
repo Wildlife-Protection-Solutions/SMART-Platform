@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2019 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.paws.engine;
 
 import java.io.File;
@@ -36,14 +57,12 @@ import org.geotools.data.store.ReprojectingFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTS;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Point;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.Name;
@@ -55,20 +74,26 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsManager;
-import org.wcs.smart.paws.model.PawsClassification;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
+import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsRun.Status;
+import org.wcs.smart.paws.model.PawsSimpleClass;
 import org.wcs.smart.paws.model.PawsWorkspace;
 import org.wcs.smart.util.GeometryUtils;
-import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
+/**
+ * PAWS Engine for complining data and starting a PAWS analysis
+ * 
+ * @author Emily
+ *
+ */
 public class PawsDataEngine {
 
 	public static final String DATA_FILE_NAME  = "SMARTdata.csv";
@@ -78,7 +103,10 @@ public class PawsDataEngine {
 	private static AtomicLong tableCnter = new AtomicLong();
 
 	private PawsRun run;
-
+	
+	//map from the classification name to a list of columns
+	//that match this classification
+	private HashMap<String, List<String>> classmappings;
 	private List<Path> packageFiles;
 	private CoordinateReferenceSystem targetCrs;
 	
@@ -103,7 +131,7 @@ public class PawsDataEngine {
 			UUID projUuid = UuidUtils.stringToUuid(pp.getValue().split(":")[0]);
 			Projection p = session.get(Projection.class,projUuid);
 			if (p == null)  throw new Exception("CRS must be provided.  Update the configuration and try again.");
-			targetCrs = CRS.parseWKT(p.getDefinition());
+			targetCrs = SmartDB.DATABASE_CRS;
 			
 			workingDir = PawsManager.INSTANCE.getDirectory(mrun);
 		}
@@ -163,8 +191,19 @@ public class PawsDataEngine {
 			config.put("run_id", run.getRunId());
 			
 			//CRS - everything must be in this crs
-			config.put("geo_wkt_file", "crs.wkt");
-			writeCRS(target.resolve("crs.wkt"), targetCrs.toWKT());
+			JSONObject crs = new JSONObject();
+			crs.put("input_wkt_filename:", "input_crs.wkt");
+			crs.put("runtime_wkt_filename:", "runtime_crs.wkt");
+//			crs.put("input_proj4:", "");
+//			crs.put("runtime_proj4:", "");
+			
+//			crs.put("input_proj4","+proj=longlat +datum=WGS84");
+//			crs.put("runtime_proj4","+proj=utm +zone=32S +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs ");
+			
+			config.put("coordinate_reference_systems", crs);
+			
+			writeCRS(target.resolve("input_crs.wkt"), SmartDB.DATABASE_CRS.toWKT());
+			writeCRS(target.resolve("runtime_crs.wkt"), targetCrs.toWKT());
 			
 			PawsParameter pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
 			//TODO: this needs to be in meters; so assuming the projection is in meters
@@ -173,21 +212,21 @@ public class PawsDataEngine {
 			
 			//area_boundary
 			//must be provided in lat/long
-			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.GRID_BNDS.name());
-			String[] bits = pp.getValue().split("\\s+");
-			double x1 = Double.parseDouble(bits[0]);
-			double y1 = Double.parseDouble(bits[1]);
-			double x2 = Double.parseDouble(bits[2]);
-			double y2 = Double.parseDouble(bits[3]);
-			ReferencedEnvelope re = new ReferencedEnvelope(x1,x2, y1, y2, targetCrs);
-			re = ReprojectUtils.reproject(re, SmartDB.DATABASE_CRS);
-			
-			JSONObject bnds = new JSONObject();
-			bnds.put("longitude_min", re.getMinX());
-			bnds.put("longitude_max", re.getMaxX());
-			bnds.put("latitude_min", re.getMinY());
-			bnds.put("latitude_max", re.getMaxY());
-			config.put("area_boundary", bnds);
+//			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.GRID_BNDS.name());
+//			String[] bits = pp.getValue().split("\\s+");
+//			double x1 = Double.parseDouble(bits[0]);
+//			double y1 = Double.parseDouble(bits[1]);
+//			double x2 = Double.parseDouble(bits[2]);
+//			double y2 = Double.parseDouble(bits[3]);
+//			ReferencedEnvelope re = new ReferencedEnvelope(x1,x2, y1, y2, targetCrs);
+//			re = ReprojectUtils.reproject(re, SmartDB.DATABASE_CRS);
+//			
+//			JSONObject bnds = new JSONObject();
+//			bnds.put("longitude_min", re.getMinX());
+//			bnds.put("longitude_max", re.getMaxX());
+//			bnds.put("latitude_min", re.getMinY());
+//			bnds.put("latitude_max", re.getMaxY());
+//			config.put("area_boundary", bnds);
 			
 			
 			//shapefiles
@@ -226,10 +265,9 @@ public class PawsDataEngine {
 			JSONObject patrolobs = new JSONObject();
 			config.put("patrol_observations", patrolobs);
 			
-			
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-			patrolobs.put("start_date", formatter.format(run.getStartDataDate()));
-			patrolobs.put("end_date", formatter.format(run.getEndDataDate()));
+			patrolobs.put("start_date", formatter.format(run.getDataStartDate()));
+			patrolobs.put("end_date", formatter.format(run.getDataEndDate()));
 
 			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.TIMEZONE.name());
 			if (pp == null) throw new Exception("Timezone value must be provided.  Update the configuration and try again.");
@@ -238,36 +276,56 @@ public class PawsDataEngine {
 			
 			
 			//illegal class mappings
-			JSONObject mappings = new JSONObject();
+			JSONArray mappings = new JSONArray();
 			
 			//just add single mapping for now
-			mappings.put("field_name", "class");
-			mappings.put("classification_class", run.getConfiguration().getClassification().getClassification());
-			JSONArray matches = new JSONArray();
-			mappings.put("matching_observations",run.getConfiguration().getClassification().getClassification()); ;
 			
+			
+			for (Entry<String, List<String>> firstmapping : classmappings.entrySet()) {
+				
+				JSONObject mapping = new JSONObject();
+				mapping.put("classification_class", firstmapping.getKey());
+				
+				JSONArray filters = new JSONArray();
+				
+				JSONObject filter = new JSONObject();
+				
+				JSONArray columns = new JSONArray();
+				for (String col : firstmapping.getValue()) {
+					JSONObject column = new JSONObject();
+					column.put("column_name", col);
+					column.put("match_value", firstmapping.getKey());
+					columns.add(column);
+				}
+				
+				filter.put("filter", columns);
+				filters.add(filter);
+				
+				
+				mapping.put("classification_class_filters", filters);
+				
+				mappings.add(mapping);
+			}
 			config.put("illegal_activity_class_mappings", mappings);
 			
-			config.put("protected_area_name", run.getConservationArea().getName());
+//			config.put("protected_area_name", run.getConservationArea().getName());
 		
-			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.TRAINING_RES.name());
-			config.put("temporal_training_resolution", PawsParameter.TrainingResolution.valueOf(pp.getValue()).key);
-			
-			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.CLASSIFIER_MODEL.name());
-			config.put("classifier_model", PawsParameter.ClassifierModel.valueOf(pp.getValue()).key);
-
 			JSONObject modelexperimentation = new JSONObject();
 			config.put("model_experimentation", modelexperimentation);
+			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.TRAINING_RES.name());
+			modelexperimentation.put("temporal_training_resolution_month_count", Integer.valueOf( (String)pp.getValue()) );
 			modelexperimentation.put("train_start_year", run.getTrainStartYear());
 			modelexperimentation.put("train_end_year", run.getTrainEndYear());
-
-//			modelexperimentation.put("test_start_year", run.getTestStartYear());
-//			modelexperimentation.put("test_end_year", run.getTestEndYear());
 			
 			JSONObject modelforecasting = new JSONObject();
 			config.put("model_forecasting", modelforecasting);
-			modelforecasting.put("start", run.getForecastStartYear());
-			modelforecasting.put("end", run.getForecastEndYear());	
+			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.CLASSIFIER_MODEL.name());
+			modelforecasting.put("classifier_model", PawsParameter.ClassifierModel.valueOf(pp.getValue()).key);
+			modelforecasting.put("start_year", run.getForecastStartYear());
+			modelforecasting.put("end_year", run.getForecastEndYear());
+			
+			
+			
 		}
 		
 		Files.write(configPath, Collections.singletonList(config.toJSONString()), StandardCharsets.UTF_8);
@@ -433,6 +491,8 @@ public class PawsDataEngine {
 	}
 	
 	private void packageData(Path datafile) throws Exception {
+		classmappings = new HashMap<>();
+		
 		List<String> tempTables = new ArrayList<>();
 		
 		String mastertable = createTempTable();
@@ -444,13 +504,47 @@ public class PawsDataEngine {
 			
 				PawsConfiguration configuration = session.get(PawsConfiguration.class, run.getConfiguration().getUuid());
 				
-				if (configuration.getClassification() == null) return;
+				List<PawsSimpleClass> simple = QueryFactory.buildQuery(session, PawsSimpleClass.class, 
+						new Object[] {"configuration", configuration}).list();
+				
+				List<PawsQueryClass> queries = QueryFactory.buildQuery(session, PawsQueryClass.class, 
+						new Object[] {"configuration", configuration}).list();
+				
+				
+				
+				if (simple.isEmpty() && queries.isEmpty()) return;
 				
 				//create a master table
 				StringBuilder create = new StringBuilder();
 				create.append("CREATE TABLE ");
 				create.append(mastertable);
-				create.append("( wp_uuid char(16) for bit data, obs_uuid char(16) for bit data, x double, y double, datetime timestamp, pawsclass varchar(8192) )");
+				create.append("( wp_uuid char(16) for bit data, obs_uuid char(16) for bit data, x double, y double, ");
+				create.append(" wp_datetime timestamp,");
+				
+				int n = 1;
+				for (PawsSimpleClass pc : simple) {
+					String key = pc.getClassification();
+					String colname = "pawsclass" + n;
+					
+					if (!classmappings.containsKey(key)) classmappings.put(key, new ArrayList<>());
+					classmappings.get(key).add(colname);
+					
+					create.append(colname + " varchar(8192),");
+					n++;
+				}
+				for (PawsQueryClass qc : queries) {
+					String key = qc.getClassification();
+					String colname = "pawsclass" + n;
+					
+					if (!classmappings.containsKey(key)) classmappings.put(key, new ArrayList<>());
+					classmappings.get(key).add(colname);
+					
+					create.append(colname + " varchar(8192),");
+					n++;
+				}
+				create.deleteCharAt(create.length() - 1);
+				create.append(")");
+				
 				System.out.println(create.toString());
 				session.createNativeQuery(create.toString()).executeUpdate();
 				
@@ -460,8 +554,8 @@ public class PawsDataEngine {
 				create = new StringBuilder();
 				create.append("CREATE TABLE ");
 				create.append(alldata);
-				create.append("( wp_uuid char(16) for bit data, obs_uuid char(16) for bit data, x double, y double, datetime timestamp");
-				create.append(")");
+				create.append("( wp_uuid char(16) for bit data, obs_uuid char(16) for bit data, x double, y double, ");
+				create.append(" wp_datetime timestamp)");
 				System.out.println(create.toString());
 				session.createNativeQuery(create.toString()).executeUpdate();
 				
@@ -469,32 +563,33 @@ public class PawsDataEngine {
 				create = new StringBuilder();
 				create.append("INSERT INTO ");
 				create.append(alldata);
-				create.append("(wp_uuid, obs_uuid, x, y, datetime)");
-				create.append(" SELECT a.uuid, obs.uuid, a.x, a.y, a.datetime ");
+				create.append("(wp_uuid, obs_uuid, x, y, wp_datetime)");
+				create.append(" SELECT a.uuid, obs.uuid, a.x, a.y, a.datetime");
 				create.append(" FROM smart.waypoint a ");
-				create.append(" LEFT JOIN smart.wp_observation obs ON obs.wp_uuid = a.uuid " );
-				create.append(" WHERE a.datetime between :start and :end ");
+				create.append(" LEFT JOIN smart.wp_observation_group g on g.wp_uuid = a.uuid ");
+				create.append(" LEFT JOIN smart.wp_observation obs ON obs.wp_group_uuid = g.uuid " );
+				create.append(" WHERE a.ca_uuid = :ca AND a.source='PATROL' AND cast(a.datetime as date) between :start and :end ");
 				System.out.println(create.toString());
-				
 				session.createNativeQuery(create.toString())
-					.setParameter("start", run.getStartDataDate().atStartOfDay())
-					.setParameter("end", run.getEndDataDate().atTime(23, 59, 59))
+					.setParameter("ca", run.getConservationArea().getUuid())
+					.setParameter("start", run.getDataStartDate())
+					.setParameter("end", run.getDataEndDate())
 					.executeUpdate();
 				
 				create = new StringBuilder();
 				create.append("INSERT INTO ");
 				create.append(mastertable);
-				create.append(" SELECT a.wp_uuid, a.obs_uuid, a.x, a.y, a.datetime ");
+				create.append(" SELECT a.wp_uuid, a.obs_uuid, a.x, a.y, a.wp_datetime");
 				
 				StringBuilder from = new StringBuilder();
 				from.append(alldata);
 				from.append(" a ");
 				
-				if (configuration.getClassification().getType() == PawsClassification.Type.DATAMODEL) {
 				
+				for (PawsSimpleClass pc : simple) {
 					String table = createTempTable();
 					tempTables.add(table);
-					SimpleClassEngine e = new SimpleClassEngine(configuration.getClassification(), run.getStartDataDate(), run.getEndDataDate());
+					SimpleClassEngine e = new SimpleClassEngine(pc, alldata);//, run.getDataStartDate(), run.getDataEndDate());
 					e.process(session, table);
 					
 					create.append(",");
@@ -502,13 +597,14 @@ public class PawsDataEngine {
 					from.append(" LEFT JOIN " + table + " ON a.obs_uuid = " + table + ".obs_uuid ");
 				}
 				
-				QueryClassEngine e = null;
-				if (configuration.getClassification().getType() == PawsClassification.Type.QUERY) {
-					e = new QueryClassEngine(configuration.getClassification(), run.getStartDataDate(), run.getEndDataDate());
+				List<QueryClassEngine> engines = new ArrayList<>();
+				for (PawsQueryClass pc : queries) {
+					QueryClassEngine e = new QueryClassEngine(pc, run.getDataStartDate(), run.getDataEndDate());
 					e.process(session);
+					engines.add(e);
 					
 					create.append(",");
-					create.append(" case when " + e.getTable() + "." + e.getObsColumn() + " is null then null else '" + configuration.getClassification().getClassification() + "' end");
+					create.append(" case when " + e.getTable() + "." + e.getObsColumn() + " is null then null else '" + pc.getClassification() + "' end");
 					from.append(" LEFT JOIN " + e.getTable() + " ON a.obs_uuid = " + e.getTable() + "." + e.getObsColumn() + " ");
 				}
 				
@@ -520,7 +616,7 @@ public class PawsDataEngine {
 				session.createNativeQuery(create.toString()).executeUpdate();
 				
 				
-				writeToCsv(session, mastertable, datafile);
+				writeToCsv(session, mastertable, datafile, simple.size() + queries.size());
 				
 				packageFiles.add(datafile);
 				
@@ -529,7 +625,7 @@ public class PawsDataEngine {
 					System.out.println("DROP TABLE " + table);
 					session.createNativeQuery("DROP TABLE " + table).executeUpdate();
 				}
-				if (e != null) e.dispose(session);
+				for (QueryClassEngine e : engines) e.dispose(session);
 			}finally {
 				session.getTransaction().commit();
 			}
@@ -537,28 +633,44 @@ public class PawsDataEngine {
 		
 	}
 	
-	private void writeToCsv(Session session, String tablename, Path filename) throws IOException {
+	private void writeToCsv(Session session, String tablename, Path filename, int numclasses) throws IOException {
 		
 		
 		try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(filename, StandardCharsets.UTF_8))){
 			//headers
 			ArrayList<String> headers = new ArrayList<>();
 			headers.add("Waypoint Date");
-			headers.add("Start Date");
-			headers.add("End Date");
+			headers.add("Waypoint Time");
+			headers.add("Patrol Start Date");
+			headers.add("Patrol End Date");
 			headers.add("Patrol ID");
 			headers.add("X");
 			headers.add("Y");
-			headers.add("CLASS");
+			int datacols = 0;
+			for (Entry<String, List<String>> items : classmappings.entrySet()) {
+				for (String col :  items.getValue()) {
+					headers.add(col);
+					datacols ++;
+				}
+			}
 			writer.writeNext(headers.toArray(new String[headers.size()]));
 			
 			//join to patrols to get start date, end date and patrol id if available
 			StringBuilder select = new StringBuilder();
-			select.append("SELECT DISTINCT a.wp_uuid, a.x, a.y, a.datetime, a.pawsclass, p.id, p.start_date, p.end_date FROM ");
+			select.append("SELECT p.id, p.start_date, p.end_date, a.* FROM ");
 			select.append(tablename);
-			select.append(" a LEFT JOIN smart.patrol_waypoint pw on pw.wp_uuid = a.wp_uuid LEFT JOIN smart.patrol_leg_day pld on pld.uuid = pw.leg_day_uuid ");
+			select.append(" a LEFT JOIN smart.patrol_waypoint pw on pw.wp_uuid = a.wp_uuid ");
+			select.append(" LEFT JOIN smart.patrol_leg_day pld on pld.uuid = pw.leg_day_uuid ");
 			select.append(" left join smart.patrol_leg pl on pld.patrol_leg_uuid = pl.uuid ");
 			select.append(" left join smart.patrol p on p.uuid = pl.patrol_uuid ");
+//			select.append(" WHERE ");
+//			for (int i = 1; i <= numclasses; i ++) {
+//				select.append("pawsclass" + i + " is not null OR ");
+//			}
+//			select.deleteCharAt(select.length() - 1);
+//			select.deleteCharAt(select.length() - 1);
+//			select.deleteCharAt(select.length() - 1);
+			
 			
 			try(ScrollableResults results = session.createNativeQuery(select.toString()).scroll()){
 				while(results.next()) {
@@ -566,44 +678,39 @@ public class PawsDataEngine {
 					
 					Object[] items = results.get();
 					
-					byte[] wpuuid = (byte[]) items[0];
-					double x = (double)items[1];
-					double y = (double)items[2];
-					Timestamp datetime = (Timestamp)items[3];
+					String pid = (String)items[0];
+					Date pstart = (Date)items[1];
+					Date pend = (Date)items[2];
 					
+//					byte[] wpuuid = (byte[]) items[0];
+//					byte[] obsuuid = (byte[]) items[1];
+					double x = (double)items[5];
+					double y = (double)items[6];
+					Timestamp datetime = (Timestamp)items[7];
+										
 					//Waypoint Date
 					int index = 0;
-					data[index++] = DateFormat.getDateTimeInstance().format(datetime);
+					data[index++] = DateFormat.getDateInstance().format(datetime);
+					data[index++] = DateFormat.getTimeInstance().format(datetime);
 					
 					//Start Date
-					//TODO
-					if (items[7] == null) {
-						data[index++] = "";
-					}else {
-						data[index++] = DateFormat.getDateInstance().format((Date)items[6]);
-					}
+					data[index++] = DateFormat.getDateInstance().format(pstart);
 					
 					//End Date
-					//TODO
-					if (items[8] == null) {
-						data[index++] = "";
-					}else {
-						data[index++] = DateFormat.getDateInstance().format((Date)items[7]);
-					}
+					data[index++] = DateFormat.getDateInstance().format(pend);
 					
 					//PatrolID
-					//TODO
-					data[index++] = (String) items[5];
+					data[index++] = pid;
 					
-					//TODO: this needs to be reprojected to target CRS
-					Point pnt = ReprojectUtils.transform(x, y, targetCrs);
 					//X
-					data[index++] = String.valueOf( pnt.getX() );
+					data[index++] = String.valueOf(x);
 					//Y
-					data[index++] = String.valueOf( pnt.getY() );					
+					data[index++] = String.valueOf(y);					
 					
-					data[index++] = (String)items[4];
 					
+					for (int i = 1; i <= datacols; i ++) {
+						data[index++] = (String)items[7+i];
+					}
 					writer.writeNext(data);
 				}
 			}

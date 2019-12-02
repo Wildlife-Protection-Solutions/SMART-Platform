@@ -33,11 +33,23 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.model.PawsRun;
+import org.wcs.smart.paws.model.PawsRun.Status;
 import org.wcs.smart.paws.model.PawsService;
 
+/**
+ * API for interacting with the PAWS Service
+ * @author Emily
+ *
+ */
 public enum PawsApi {
 	
 	INSTANCE;
+	
+	enum PawsStatus{
+		IN_PROGRESS,
+		ERROR,
+		DONE
+	};
 	
 	public void run(PawsRun run, String json) throws Exception{
 		String surl = null;
@@ -104,7 +116,7 @@ public enum PawsApi {
 		}
 	}
 	
-	public boolean checkStatus(PawsRun run) throws Exception{
+	public PawsStatus checkStatus(PawsRun run) throws Exception{
 		String surl = null;
 		String key = null;
 		try(Session session = HibernateManager.openSession()){
@@ -130,7 +142,26 @@ public enum PawsApi {
 		try{
 			conn.setRequestMethod("GET");
 			conn.setRequestProperty("Ocp-Apim-Subscription-Key", key);
-			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK ) {
+			if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+				
+			}else if (conn.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT) {
+				//error; run doesn't exists
+				try(Session session = HibernateManager.openSession()){
+					PawsRun r = (PawsRun)session.get(PawsRun.class, run.getUuid());
+					if (r != null) {
+						session.beginTransaction();
+						try {
+							r.setStatus(Status.ERROR);
+							r.setStatusMessage("Task not found on server.");
+							session.getTransaction().commit();
+						}catch (Exception ex) {
+							if (session.getTransaction().isActive()) session.getTransaction().rollback();
+							PawsPlugIn.displayLog(ex.getMessage(), ex);
+						}
+					}
+				}
+				return PawsStatus.ERROR;
+			}else {
 				throw new Exception("Failed to run PAWS Service - HTTP error code : " + conn.getResponseCode());
 			}
 			
@@ -142,12 +173,21 @@ public enum PawsApi {
 				}
 			}
 			
+			PawsTask task = PawsTask.parse(content.toString());
+
+
 			try(Session session = HibernateManager.openSession()){
 				PawsRun r = (PawsRun)session.get(PawsRun.class, run.getUuid());
 				if (r != null) {
 					session.beginTransaction();
 					try {
 						r.setServerStatusJson(content.toString());
+						r.setStatusMessage(task.getStatus());
+						if (task.getBackendStatus().equalsIgnoreCase("failed")) {
+							r.setStatus(Status.ERROR);
+							r.setStatusMessage(task.getStatus());
+						}
+						
 						session.getTransaction().commit();
 					}catch (Exception ex) {
 						if (session.getTransaction().isActive()) session.getTransaction().rollback();
@@ -155,16 +195,15 @@ public enum PawsApi {
 					}
 				}
 			}
-			PawsTask task = PawsTask.parse(content.toString());
 
-			//TODO: do something with task
+			if (task.getBackendStatus().equalsIgnoreCase("failed")) return PawsStatus.ERROR;
+			if (task.getBackendStatus().equalsIgnoreCase("complete")) return PawsStatus.DONE;
+			return PawsStatus.IN_PROGRESS;
 		}catch (Exception ex){
 			PawsPlugIn.log(ex.getMessage(), ex);
 			throw ex;
 		}finally{
 			conn.disconnect();
 		}
-		//TODO:
-		return false;
 	}
 }

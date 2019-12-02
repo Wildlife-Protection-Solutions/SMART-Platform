@@ -32,6 +32,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -39,27 +41,33 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.ui.HidePartsPartListener;
+import org.wcs.smart.query.QueryPlugIn;
 
 /**
  * Editor for displaying PAWS AI analysis results
  * @author Emily
  *
  */
-public class RunEditor extends MultiPageEditorPart {
+public class RunEditor extends MultiPageEditorPart implements MapPart{
 
 	public static final String ID = "org.wcs.smart.paws.run.editor"; //$NON-NLS-1$
 
 	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
 	private RunSummaryPage summaryPage;
-	private RunResultsPage resultsPage;
+	private RunTableResultsPage resultsPage;
+	private RunMapResultsPage mapPage;
 	
 	private List<EventHandler> handlers = null;
 	private IEclipseContext context;
@@ -173,10 +181,17 @@ public class RunEditor extends MultiPageEditorPart {
 			int index = addPage(summaryPage, getEditorInput());
 			super.setPageText(index, "Summary");
 		
-			resultsPage = new RunResultsPage(this);
+			resultsPage = new RunTableResultsPage(this);
 			index = addPage(resultsPage, getEditorInput());
+			setPageImage(index, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.TABLE_ICON));
 			super.setPageText(index, "Results");
 			
+			mapPage = new RunMapResultsPage(this);
+			index = addPage(mapPage, getEditorInput());
+			setPageImage(index, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
+			super.setPageText(index, "Map");
+			
+
 		}catch (Exception ex){
 			PawsPlugIn.displayLog("Error opening PAWS Analysis" + "\n\n" + ex.getMessage(), ex);
 			throw new RuntimeException(ex);
@@ -214,8 +229,12 @@ public class RunEditor extends MultiPageEditorPart {
 			
 			PawsRun fpr = pr;
 			Display.getDefault().syncExec(()->{
-				summaryPage.init(fpr);
 				
+				PawsResultManager results = new PawsResultManager(fpr);
+
+				summaryPage.init(fpr);
+				resultsPage.refresh(results);
+				mapPage.refresh(results);
 				RunEditor.this.setPartName(fpr.getId());
 				
 			});
@@ -223,4 +242,27 @@ public class RunEditor extends MultiPageEditorPart {
 		}
 		
 	};
+
+	@Override
+	public Map getMap() {
+		return mapPage.getMap();
+	}
+
+	@Override
+	public void openContextMenu() {		
+	}
+
+	@Override
+	public void setFont(Control textArea) {
+	}
+
+	@Override
+	public void setSelectionProvider(IMapEditorSelectionProvider selectionProvider) {
+		
+	}
+
+	@Override
+	public IStatusLineManager getStatusLineManager() {
+		return null;
+	}
 }

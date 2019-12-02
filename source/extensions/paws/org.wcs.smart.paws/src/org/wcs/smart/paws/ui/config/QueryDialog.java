@@ -25,6 +25,7 @@ import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,8 +46,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.paws.PawsManager;
-import org.wcs.smart.paws.model.PawsClassification;
+import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.model.Query;
@@ -64,7 +64,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class QueryDialog extends SmartStyledDialog {
 
 	private TableViewer queryTree;
-	private PawsClassification selectedItem;
+	private List<ClassificationData> selectedItems;
 	
 	protected QueryDialog(Shell parent) {
 		super(parent);
@@ -86,7 +86,7 @@ public class QueryDialog extends SmartStyledDialog {
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		queryTree = new TableViewer(c, SWT.BORDER);
+		queryTree = new TableViewer(c, SWT.BORDER | SWT.MULTI);
 		queryTree.setContentProvider(ArrayContentProvider.getInstance());
 		queryTree.setLabelProvider(new QueryListLabelProvider());
 		queryTree.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -102,31 +102,32 @@ public class QueryDialog extends SmartStyledDialog {
 	}
 	
 	public void okPressed() {
+		selectedItems = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			Object dmObject = queryTree.getStructuredSelection().getFirstElement();
-			PawsClassification item = null;
-			if (dmObject instanceof QueryEditorInput) {
-				QueryEditorInput c = (QueryEditorInput)dmObject;
+			for (Iterator<Object> iterator = queryTree.getStructuredSelection().iterator(); iterator.hasNext();) {
+				Object dmObject = (Object) iterator.next();
+				PawsQueryClass item = null;
+				if (dmObject instanceof QueryEditorInput) {
+					QueryEditorInput c = (QueryEditorInput)dmObject;
 					
-				item = new PawsClassification();
-				item.setClassification(c.getQueryName().toLowerCase());
-				item.setQueryType(c.getType().getKey());
-				item.setQueryUuid(c.getUuid());
-				Query q = QueryHibernateManager.getInstance().findQuery(session, c.getUuid(), c.getType());
-				item.setCachedQuery(q);
-				item.cacheLabel(PawsManager.INSTANCE.createLabel(q));
-				selectedItem = item;
-			}else {
-				MessageDialog.openWarning(getShell(), "Invalid Selection", MessageFormat.format("Selected item {0} cannot be added.  Please select a query.", dmObject.toString()));
-				selectedItem = null;
-				return;
-			}	
+					item = new PawsQueryClass();
+					item.setClassification(c.getQueryName().toLowerCase());
+					item.setQueryType(c.getType().getKey());
+					item.setQueryUuid(c.getUuid());
+					Query q = QueryHibernateManager.getInstance().findQuery(session, c.getUuid(), c.getType());
+					item.setCachedQuery(q);
+					selectedItems.add(new ClassificationData(item, c.getName()));
+				}else {
+					MessageDialog.openWarning(getShell(), "Invalid Selection", MessageFormat.format("Selected item {0} cannot be added.  Please select a query.", dmObject.toString()));
+					return;
+				}	
+			}
 		}
 		super.okPressed();
 	}
 	
-	public PawsClassification getSelectedItem(){
-		return this.selectedItem;
+	public List<ClassificationData> getSelectedItems(){
+		return this.selectedItems;
 	}
 	
 	@Override

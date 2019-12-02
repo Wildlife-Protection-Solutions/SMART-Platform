@@ -21,6 +21,13 @@
  */
 package org.wcs.smart.paws;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.wcs.smart.paws.model.PawsRun;
+
 /**
  * PAWS events accessible via IEventBroker interface
  * 
@@ -38,4 +45,15 @@ public class PawsEvent {
 	public static final String PAWS_RUN_NEW = "PAWSRUN/NEW"; //$NON-NLS-1$
 	public static final String PAWS_RUN_MODIFY = "PAWSRUN/EDIT"; //$NON-NLS-1$
 	public static final String PAWS_RUN_DELETE = "PAWSRUN/DELETE"; //$NON-NLS-1$
+	
+	
+	public static void fireModified(PawsRun run){
+		EclipseContextFactory.getServiceContext(PawsPlugIn.getDefault().getBundle().getBundleContext()).get(IEventBroker.class)
+			.post(PawsEvent.PAWS_RUN_MODIFY, Collections.singleton(run));
+	}
+	
+	public static void fireModified(Collection<PawsRun> runs){
+		EclipseContextFactory.getServiceContext(PawsPlugIn.getDefault().getBundle().getBundleContext()).get(IEventBroker.class)
+			.post(PawsEvent.PAWS_RUN_MODIFY, runs);
+	}
 }

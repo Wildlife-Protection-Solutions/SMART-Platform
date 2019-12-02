@@ -1,24 +1,53 @@
+/*
+ * Copyright (C) 2019 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.paws.engine;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.time.LocalDate;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.paws.model.PawsClassification;
+import org.wcs.smart.paws.model.PawsSimpleClass;
 
+/**
+ * Engine for filtering simple data filters.
+ * 
+ * @author Emily
+ *
+ */
 public class SimpleClassEngine {
-
-	private PawsClassification pc;
-	private LocalDate startDate;
-	private LocalDate endDate;
 	
-	public SimpleClassEngine(PawsClassification pc, LocalDate startDate, LocalDate endDate) {
+	private PawsSimpleClass pc;
+	private String mastertable;
+
+	/**
+	 * 
+	 * @param pc
+	 * @param mastertable table of all waypoints
+	 */
+	public SimpleClassEngine(PawsSimpleClass pc, String mastertable) {
 		this.pc = pc;
-		this.startDate = startDate;
-		this.endDate = endDate;
+		this.mastertable = mastertable;
 	}
 	
 	public void process(Session session, String tablename) {
@@ -33,12 +62,14 @@ public class SimpleClassEngine {
 				System.out.println(sb.toString());
 				c.createStatement().execute(sb.toString());
 				
+				
 				sb = new StringBuilder();
 				sb.append(" INSERT INTO ");
 				sb.append(tablename);
 				sb.append(" SELECT obs.uuid, ? ");
-				sb.append(" FROM smart.waypoint wp ");
-				sb.append(" JOIN smart.wp_observation obs ON obs.wp_uuid = wp.uuid " );
+				sb.append(" FROM ");
+				sb.append( mastertable + " wp ");
+				sb.append(" JOIN smart.wp_observation obs ON obs.uuid = wp.obs_uuid " );
 				sb.append(" JOIN smart.dm_category c ON obs.category_uuid = c.uuid " );
 				
 				if (pc.getAttributeListItemKey() != null || pc.getAttributeTreeNodeHkey() != null) {
@@ -54,13 +85,8 @@ public class SimpleClassEngine {
 				
 				
 				sb.append(" WHERE ");
-				sb.append(" wp.datetime between ? and ?");
-				sb.append(" and (c.hkey >= ?  and c.hkey < ? ) ");
+				sb.append(" (c.hkey >= ?  and c.hkey < ? ) ");
 		
-				//TODO: filter on CA or CCAA depending on 
-				//analysis 
-				
-				System.out.println(sb.toString());
 				PreparedStatement ps = c.prepareStatement(sb.toString());
 				int index = 1;
 				ps.setString(index++, pc.getClassification());
@@ -72,17 +98,11 @@ public class SimpleClassEngine {
 					ps.setString(index++, pc.getAttributeTreeNodeHkey());
 					ps.setString(index++, pc.getAttributeTreeNodeHkey().substring(0, pc.getAttributeTreeNodeHkey().length() - 1) + "/");
 				}
-				
-				ps.setTimestamp(index++, java.sql.Timestamp.valueOf(startDate.atStartOfDay()));
-				ps.setTimestamp(index++, java.sql.Timestamp.valueOf(endDate.atTime(23, 59, 59)));
+
 				ps.setString(index++, pc.getCategoryHkey());
 				ps.setString(index++, pc.getCategoryHkey().substring(0, pc.getCategoryHkey().length() - 1) + "/");
-			
 				ps.execute();
 			}
 		});
-	
-
-		//execute query and do what with the results
 	}
 }

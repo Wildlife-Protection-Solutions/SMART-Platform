@@ -260,22 +260,18 @@ public class RunSummaryPage extends EditorPart {
 		toolkit.createLabel(detailsComp, "Executed On:");
 		toolkit.createLabel(detailsComp, run.getRunDate() == null ? "" : run.getRunDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)));
 		
-//		toolkit.createLabel(detailsComp, "Data Dates:");
-//		if (run.getDataEndDate() != null && run.getDataStartDate() != null){
-//			String value = run.getDataStartDate().format( DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) ) +
-//					" to " + run.getDataEndDate().format( DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) );
-//			toolkit.createLabel(detailsComp, value);
-//		}else{
-//			toolkit.createLabel(detailsComp, "");
-//		}
+		toolkit.createLabel(detailsComp, "Data Dates:");
+		if (run.getDataEndDate() != null && run.getDataStartDate() != null){
+			String value = run.getDataStartDate().format( DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) ) +
+					" to " + run.getDataEndDate().format( DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) );
+			toolkit.createLabel(detailsComp, value);
+		}else{
+			toolkit.createLabel(detailsComp, "");
+		}
 		
 		toolkit.createLabel(detailsComp, "Model Training Years:");
 		String value = run.getTrainStartYear() + " to " + run.getTrainEndYear();
 		toolkit.createLabel(detailsComp, value);
-//		
-//		toolkit.createLabel(detailsComp, "Model Test Years:");
-//		value = run.getTestStartYear() + " to " + run.getTestEndYear();
-//		toolkit.createLabel(detailsComp, value);
 		
 		toolkit.createLabel(detailsComp, "Model Forecasting Years:");
 		value = run.getForecastStartYear() + " to " + run.getForecastEndYear();

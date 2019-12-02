@@ -23,6 +23,7 @@ package org.wcs.smart.paws.model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -41,6 +42,11 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.paws_run")
 public class PawsRun extends UuidItem{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	public enum Status{
 		COMPILING_DATA,
 		UPLOADING_DATA,
@@ -66,15 +72,11 @@ public class PawsRun extends UuidItem{
 	private String statusmessage;
 	private String serverjson;
 	
-//	private int teststartyear;
-//	private int testendyear;
 	private int trainstartyear;
 	private int trainendyear;
 	private int forecaststartyear;
 	private int forecastendyear;
-	
-//	private LocalDate dataStartDate;
-//	private LocalDate dataEndDate;
+
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -123,34 +125,6 @@ public class PawsRun extends UuidItem{
 		this.trainendyear = end;
 	}
 	
-	@Transient
-	public LocalDate getStartDataDate() {
-		return LocalDate.of(getTrainStartYear(), 1, 1);
-	}
-	
-	@Transient
-	public LocalDate getEndDataDate() {
-		return LocalDate.of(getTrainEndYear(), 12, 31);
-	}
-	
-//	@Column(name="test_start_year")
-//	public int getTestStartYear() {
-//		return this.teststartyear;
-//	}
-//	
-//	public void setTestStartYear(int start) {
-//		this.teststartyear = start;
-//	}
-//	
-//	@Column(name="test_end_year")
-//	public int getTestEndYear() {
-//		return this.testendyear;
-//	}
-//	
-//	public void setTestEndYear(int end) {
-//		this.testendyear = end;
-//	}
-	
 	@Column(name="forecast_start_year")
 	public int getForecastStartYear() {
 		return this.forecaststartyear;
@@ -168,7 +142,16 @@ public class PawsRun extends UuidItem{
 	public void setForecastEndYear(int end) {
 		this.forecastendyear = end;
 	}
-
+	
+	@Transient
+	public LocalDate getDataStartDate() {
+		return LocalDate.of(getTrainEndYear(), Month.JANUARY, 1);
+	}
+	@Transient
+	public LocalDate getDataEndDate() {
+		return LocalDate.of(getTrainEndYear(), Month.DECEMBER, 31);
+	}
+	
 	
 	@Column(name="id")
 	public String getId() {

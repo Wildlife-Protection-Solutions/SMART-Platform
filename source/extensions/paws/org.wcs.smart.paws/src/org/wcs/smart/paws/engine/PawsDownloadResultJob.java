@@ -1,21 +1,36 @@
+/*
+ * Copyright (C) 2019 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.paws.engine;
 
 import java.net.URL;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.core.contexts.EclipseContextFactory;
-import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -27,14 +42,9 @@ import org.wcs.smart.paws.model.PawsWorkspace;
 
 import com.microsoft.azure.storage.blob.BlockBlobURL;
 import com.microsoft.azure.storage.blob.ContainerURL;
-import com.microsoft.azure.storage.blob.ListBlobsOptions;
 import com.microsoft.azure.storage.blob.PipelineOptions;
 import com.microsoft.azure.storage.blob.StorageURL;
 import com.microsoft.azure.storage.blob.TransferManager;
-import com.microsoft.azure.storage.blob.models.BlobItem;
-import com.microsoft.azure.storage.blob.models.ContainerListBlobFlatSegmentResponse;
-
-import io.reactivex.Single;
 
 /*
  * could possibly resechduled if smart is shutdown
@@ -139,82 +149,16 @@ public class PawsDownloadResultJob extends Job {
 		}
 		
 		//delete all files from azure
-		deleteBlobs(containerURL);
+		try {
+			StorageApi.INSTANCE.deleteBlobs(run);
+		} catch (Exception ex) {
+			PawsPlugIn.displayLog(ex.getMessage(), ex);
+		}
 		
-		fireModified();
+		PawsEvent.fireModified(run);
 		
 		return Status.OK_STATUS;
 	}
-	
-	private void deleteBlobs(ContainerURL containerURL){
-		try {
-			List<String> urlToDelete = new ArrayList<>();
-			ListBlobsOptions options = new ListBlobsOptions();
-			containerURL.listBlobsFlatSegment(null, options, null)
-					.flatMap(containerListBlobFlatSegmentResponse -> listAllBlobs(containerURL,
-							containerListBlobFlatSegmentResponse, urlToDelete))
-					.subscribe(response -> {
-						synchronized (lock) {
-							lock.notify();
-						}
-					},
-						error->{
-							synchronized (lock) {
-								lock.notify();
-							}		
-			});
-
-			synchronized (lock) {
-				lock.wait();
-			}
-
-			List<Throwable> fails = new ArrayList<>();
-			for (String d : urlToDelete) {
-				containerURL.createBlockBlobURL(d).delete().subscribe(rsp -> {},  error -> fails.add(error));
-			}
-			if (!fails.isEmpty()){
-				for (Throwable t : fails) PawsPlugIn.log(t.getMessage(), t);
-				throw new Exception("Delete fail.");
-			}
-		}catch (Exception ex){
-			PawsPlugIn.displayLog(MessageFormat.format("Unable to remove data from Azure container ({0}). You should remove these files manually.", run.getId()), ex);
-		}
-        
-	}
-
-	private Single <ContainerListBlobFlatSegmentResponse> listAllBlobs(ContainerURL url, ContainerListBlobFlatSegmentResponse response, List<String> toDelete) {
-		
-		   // Process the blobs returned in this result segment (if the segment is empty, blobs() will be null.
-     if (response.body().segment() != null) {
-         for (BlobItem b : response.body().segment().blobItems()) {
-         	System.out.println("testing: " + b.name() + ":" + run.getRunId());
-         	if (b.name().startsWith(run.getRunId() + "/")){
-         		toDelete.add(b.name());
-         	}
-         }
-     }
-     
-		 // If there is not another segment, return this response as the final response.
-     if (response.body().nextMarker() == null) {
-         return Single.just(response);
-     } else {
-         /*
-         IMPORTANT: ListBlobsFlatSegment returns the start of the next segment; you MUST use this to get the next
-         segment (after processing the current result segment
-         */
-
-         String nextMarker = response.body().nextMarker();
-
-         /*
-         The presence of the marker indicates that there are more blobs to list, so we make another call to
-         listBlobsFlatSegment and pass the result through this helper function.
-         */
-
-         return url.listBlobsFlatSegment(nextMarker, new ListBlobsOptions().withMaxResults(10), null)
-                 .flatMap(containersListBlobFlatSegmentResponse ->
-                         listAllBlobs(url, containersListBlobFlatSegmentResponse, toDelete));
-     }
- }
 	
 	
 	private void handleError(String msg, Throwable ex){
@@ -231,11 +175,8 @@ public class PawsDownloadResultJob extends Job {
 				PawsPlugIn.log(ex2.getMessage(), ex2);
 			}
 		}
-		fireModified();
+		PawsEvent.fireModified(run);
 	}
 	
-	private void fireModified(){
-		EclipseContextFactory.getServiceContext(PawsPlugIn.getDefault().getBundle().getBundleContext()).get(IEventBroker.class)
-			.post(PawsEvent.PAWS_RUN_MODIFY, Collections.singleton(run));
-	}
+
 }

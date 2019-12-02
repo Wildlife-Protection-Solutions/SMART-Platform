@@ -8,7 +8,8 @@ Automatic-Module-Name: org.wcs.smart.paws
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.wcs.smart;bundle-version="7.0.0",
  org.wcs.smart.p2;bundle-version="7.0.0",
- org.wcs.smart.query;bundle-version="7.0.0"
+ org.wcs.smart.query;bundle-version="7.0.0",
+ org.locationtech.udig.catalog.geotiff;bundle-version="3.0.0"
 Bundle-Activator: org.wcs.smart.paws.PawsPlugIn
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.paws.model

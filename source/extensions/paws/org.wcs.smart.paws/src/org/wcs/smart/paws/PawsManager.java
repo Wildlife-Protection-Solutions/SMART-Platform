@@ -166,10 +166,10 @@ public enum PawsManager {
 			config = session.get(PawsConfiguration.class, config.getUuid());
 			if (config.getParameters() == null) throw new Exception("Grid parameters not supplied");
 			
-			PawsParameter pp = config.findParameter(PawsParameter.FixedParameter.GRID_BNDS.name());
-			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Grid bounds required");
-			
-			pp = config.findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
+//			PawsParameter pp = config.findParameter(PawsParameter.FixedParameter.GRID_BNDS.name());
+//			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Grid bounds required");
+//			
+			PawsParameter pp = config.findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
 			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Grid coordinate reference system required");
 	
 			pp = config.findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
@@ -229,14 +229,14 @@ public enum PawsManager {
 	
 	public String getName(PawsParameter.FixedParameter fixedParameter){
 		switch(fixedParameter){
-		case GRID_BNDS: return "Bounds";
+//		case GRID_BNDS: return "Bounds";
 		case GRID_CRS: return "CRS" ;
 		case GRID_SIZE: return "Grid Size";
 		case LYR_BOUNDARY: return "Conservation Area Boundary";
 		case LYR_OTHER: return "Shapefiles";
 		case TIMEZONE: return "Time Zone";
 		case CLASSIFIER_MODEL: return "Classifier Model";
-		case TRAINING_RES: return "Temporal Training Resolution";
+		case TRAINING_RES: return "Temporal Training Resolution (Months)";
 		}
 		return null;
 	}

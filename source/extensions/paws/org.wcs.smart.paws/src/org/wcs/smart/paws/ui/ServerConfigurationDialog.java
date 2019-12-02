@@ -138,7 +138,8 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 		infoMessage.setText("This is the PAWS service URL and API key.");
 		
 		Label l = new Label(paws, SWT.NONE);
-		l.setText("Heatmap API:");
+		l.setText("PAWS API:");
+		l.setToolTipText("PAWS risk prediction request url");
 		
 		txtServiceHeatmapApi = new Text(paws, SWT.BORDER);
 		txtServiceHeatmapApi.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -147,6 +148,7 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 		
 		l = new Label(paws, SWT.NONE);
 		l.setText("Task API:");
+		l.setToolTipText("PAWS task request url");
 		
 		txtServiceTaskApi = new Text(paws, SWT.BORDER);
 		txtServiceTaskApi.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -156,7 +158,7 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 		l = new Label(paws, SWT.NONE);
 		l.setText("API Key:");
 		
-		txtServiceKey = new Text(paws, SWT.BORDER);
+		txtServiceKey = new Text(paws, SWT.BORDER  | SWT.PASSWORD);
 		txtServiceKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtServiceKey.setText(DialogConstants.LOADING_TEXT);
 		txtServiceKey.addListener(SWT.Modify, modifiedlistener);
@@ -233,8 +235,8 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 			final PawsService fservice = service;
 			final PawsWorkspace fws = ws;
 			Display.getDefault().asyncExec(()->{
-				txtServiceHeatmapApi.setText("https://aiforearth-v2.azure-api.net/paws/heatmap");
-				txtServiceTaskApi.setText("https://aiforearth-v2.azure-api.net/taskmanagement/task/");
+				txtServiceHeatmapApi.setText("https://paws-api.azure-api.net/predict-risk");
+				txtServiceTaskApi.setText("https://paws-api.azure-api.net/taskmanagement/task");
 				txtServiceKey.setText("");
 				if (fservice != null) {
 					txtServiceKey.setText(fservice.getApiKey() == null ? "" : fservice.getApiKey());

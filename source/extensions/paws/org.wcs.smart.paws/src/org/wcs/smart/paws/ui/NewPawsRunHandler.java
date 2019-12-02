@@ -44,6 +44,7 @@ import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.engine.PawsRunJob;
+import org.wcs.smart.paws.engine.StorageApi;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsService;
@@ -121,11 +122,13 @@ public class NewPawsRunHandler {
 			prun.setId(initName);
 				
 			prun.setStatus(PawsRun.Status.COMPILING_DATA);
-
+				
 			prun.setForecastEndYear(copy.getForecastEndYear());
 			prun.setForecastStartYear(copy.getForecastStartYear());
 			prun.setTrainEndYear(copy.getTrainEndYear());
 			prun.setTrainStartYear(copy.getTrainStartYear());
+				
+			
 		}
 		return prun;
 	}
@@ -164,14 +167,12 @@ public class NewPawsRunHandler {
 	}
 	
 	private boolean run(PawsRun rr){
-		//perform validation; get token as required
-		LoginDialog dialog = new LoginDialog(Display.getDefault().getActiveShell());
-		dialog.open();
 		
-		String authorizationCode = dialog.getAuthorizationCode();
-		if (authorizationCode == null) {
-			//fail
-			MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Authorization Failed", "Authorization failed, run not created.");
+		try {
+			if (!StorageApi.INSTANCE.getAuthorizationCode(Display.getDefault().getActiveShell())) return false;
+		}catch (Exception ex) {
+			MessageDialog.openWarning(Display.getDefault().getActiveShell(), "PAWS", 
+					"Cannot perform PAWS Analysis until an Azure workspace and PAWS service are configured.");
 			return false;
 		}
 		
@@ -204,7 +205,7 @@ public class NewPawsRunHandler {
 			PawsPlugIn.log(ex.getMessage(), ex);
 		}
 		
-		PawsRunJob job = new PawsRunJob(rr, authorizationCode, context.get(IEventBroker.class));
+		PawsRunJob job = new PawsRunJob(rr);
 		job.schedule();
 		return true;
 	}

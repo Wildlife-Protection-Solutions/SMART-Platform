@@ -59,8 +59,6 @@ import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -73,17 +71,12 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.swt.widgets.ToolTip;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.geotools.data.FeatureStore;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -101,17 +94,12 @@ import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Projection;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
-import org.wcs.smart.paws.model.PawsClassification;
-import org.wcs.smart.paws.model.PawsClassification.Type;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
 import org.wcs.smart.paws.model.PawsParameter.FixedParameter;
@@ -119,12 +107,7 @@ import org.wcs.smart.paws.ui.ErrorText;
 import org.wcs.smart.paws.ui.HeaderComposite;
 import org.wcs.smart.paws.ui.HidePartsPartListener;
 import org.wcs.smart.paws.ui.NewPawsRunHandler;
-import org.wcs.smart.query.QueryDataModelManager;
-import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.QueryTypeManager;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.ui.SelectBoundsMapDialog;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -137,8 +120,6 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 public class ConfigurationEditor extends EditorPart {
-
-	private static final String SRC_VALUE = "VALUE";
 
 	public static final String ID = "org.wcs.smart.paws.configuration.editor"; //$NON-NLS-1$
 	
@@ -153,15 +134,10 @@ public class ConfigurationEditor extends EditorPart {
 	private HeaderComposite compHeader;
 	private ComboViewer cmbBound,cmbCrs, cmbTimeZone, cmbTrainingRes, cmbClassifier; // cmbRoad, cmbRiver, cmbContour,
 	private ListViewer lstOther;
-	private ErrorText txtBounds;
+//	private ErrorText txtBounds;
 	private ErrorText txtGridSize;
 	
-	private Button btnOpDataModel, btnOpQuery;
-	private Label lblDataModel, lblQuery;
-	private Hyperlink linkSelectQuery, linkSelectDm;
-	private ErrorText txtClassName;
-	private Color errorColor;
-	
+	private ClassificationComposite classComposite;
 
 	private boolean isDirty = false;
 			
@@ -228,7 +204,9 @@ public class ConfigurationEditor extends EditorPart {
 					pw.setName(compHeader.getText());
 				}
 				
+				s.saveOrUpdate(pw);
 	
+				fileNames.add(PawsManager.INSTANCE.getDirectory(pw).toString());
 				
 				//update boundary
 				PawsParameter pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.LYR_BOUNDARY);
@@ -298,8 +276,8 @@ public class ConfigurationEditor extends EditorPart {
 				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.GRID_SIZE);
 				pp.setValue(txtGridSize.getText());
 				
-				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.GRID_BNDS);
-				pp.setValue(txtBounds.getText());
+//				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.GRID_BNDS);
+//				pp.setValue(txtBounds.getText());
 				
 				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.TIMEZONE);
 				Object tz = cmbTimeZone.getStructuredSelection().getFirstElement();
@@ -317,45 +295,14 @@ public class ConfigurationEditor extends EditorPart {
 				
 				pp = getOrCreateParameter(pw,  PawsParameter.FixedParameter.TRAINING_RES);
 				Object tr = cmbTrainingRes.getStructuredSelection().getFirstElement();
-				pp.setValue(  ((PawsParameter.TrainingResolution)tr).name() );
+				pp.setValue( String.valueOf((Integer)tr) );
 				
 				pp = getOrCreateParameter(pw,  PawsParameter.FixedParameter.CLASSIFIER_MODEL);
 				tr = cmbClassifier.getStructuredSelection().getFirstElement();
 				pp.setValue(  ((PawsParameter.ClassifierModel)tr).name() );
 				
+				classComposite.doSave(pw, s);
 				
-				//update the classification
-				//currently we only have one
-				PawsClassification pc = pw.getClassification();
-				if (pc == null) {
-					pc = new PawsClassification();
-					pc.setConfiguration(pw);
-					pw.setClassification(pc);
-				}
-				
-				pc.setClassification(txtClassName.getText());
-				if (btnOpDataModel.getSelection()) {
-					PawsClassification defined = (PawsClassification) lblDataModel.getData(SRC_VALUE);
-					if (defined == null) throw new Exception("Data Model classification must be selected before you can save this configuration.");
-					pc.setAttributeKey(defined.getAttributeKey());
-					pc.setAttributeListItemKey(defined.getAttributeListItemKey());
-					pc.setAttributeTreeNodeHkey(defined.getAttributeTreeNodeHkey());
-					pc.setCategoryHkey(defined.getCategoryHkey());
-					pc.setClassification(defined.getClassification());
-				}
-				if (btnOpQuery.getSelection()) {
-					PawsClassification defined = (PawsClassification) lblQuery.getData(SRC_VALUE);
-					if (defined == null) throw new Exception("Query classification must be selected before you can save this configuration.");
-					pc.setQueryType(defined.getQueryType());
-					pc.setQueryUuid(defined.getQueryUuid());
-					pc.setClassification(defined.getClassification());
-				}
-
-				s.saveOrUpdate(pw);
-				
-				
-				fileNames.add(PawsManager.INSTANCE.getDirectory(pw).toString());
-
 				s.getTransaction().commit();
 			}catch (Exception ex) {
 				try {
@@ -501,77 +448,9 @@ public class ConfigurationEditor extends EditorPart {
 		return true;
 	}
 
-	
-	private void updateClassificationUi() {
-		lblDataModel.setEnabled(btnOpDataModel.getSelection());
-		linkSelectDm.setEnabled(btnOpDataModel.getSelection());
-		lblQuery.setEnabled(btnOpQuery.getSelection());
-		linkSelectQuery.setEnabled(btnOpQuery.getSelection());
-		validateClassification();
-	}
-	
-	private void selectDataModel() {
-		DataModelDialog d = new DataModelDialog(btnOpDataModel.getShell());
-		if (d.open() != Window.OK) return;
-		
-		PawsClassification cd = d.getSelectedItems();
-		lblDataModel.setData(SRC_VALUE, cd);
-		lblDataModel.setText(cd.getCachedLabel());
-		lblDataModel.getParent().layout(true);
-		setDirty(true);
-		validateClassification();
-	}
-	
-	private void selectQuery() {
-		QueryDialog d = new QueryDialog(lblQuery.getShell());
-		if (d.open() != Window.OK) return;
-		
-		PawsClassification cd = d.getSelectedItem();
-		lblQuery.setData(SRC_VALUE, cd);
-		lblQuery.setText(cd.getCachedLabel());
-		lblQuery.getParent().layout(true);
-		setDirty(true);
-		validateClassification();
-	}
-	
-	private void validateClassification() {
-		if (btnOpDataModel.getSelection()) {
-			if (lblDataModel.getData(SRC_VALUE) == null) {
-				lblDataModel.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
-				lblDataModel.setBackground(errorColor);
-				lblDataModel.setToolTipText("must select a valid data model element");
-			}else {
-				lblDataModel.setBackground(lblQuery.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				lblDataModel.setToolTipText("");
-			}
-		}else {
-			lblDataModel.setBackground(lblQuery.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-			lblDataModel.setToolTipText("");
-			lblDataModel.setText("");
-			if (lblDataModel.getData(SRC_VALUE) != null) lblDataModel.setText( ((PawsClassification)lblDataModel.getData(SRC_VALUE)).getCachedLabel() );
-		}
-		if (btnOpQuery.getSelection()) {
-			if (lblQuery.getData(SRC_VALUE) == null) {
-				lblQuery.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
-				lblQuery.setBackground(errorColor);
-				lblQuery.setToolTipText("must select a valid observation query");
-			}else {
-				lblQuery.setBackground(lblQuery.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				lblQuery.setToolTipText("");
-			}
-		}else {
-			lblQuery.setBackground(lblQuery.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-			lblQuery.setToolTipText("");
-			lblQuery.setText("");
-			if (lblQuery.getData(SRC_VALUE) != null) lblQuery.setText( ((PawsClassification)lblQuery.getData(SRC_VALUE)).getCachedLabel() );
-		}
-	}
 	@Override
 	public void createPartControl(Composite parent) {
 	
-		errorColor = new Color(parent.getDisplay(), 255, 230, 230);
-		parent.addListener(SWT.Dispose, e->errorColor.dispose());
-		
 		toolkit = new FormToolkit(parent.getDisplay());
 		
 		Form main = toolkit.createForm(parent);
@@ -582,84 +461,18 @@ public class ConfigurationEditor extends EditorPart {
 		compHeader.setText("PAWS Configuration Name");
 		compHeader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		compHeader.addListener(SWT.Selection, e->setDirty(true));
-//		SmartUiUtils.createHeaderLabel(main.getBody(), "PAWS Settings");
 		
 		createSettingsComp(main.getBody());
 		
 		SmartUiUtils.createHeaderLabel(main.getBody(), "Classifications");
 	
-		
-		Composite classcomp = toolkit.createComposite(main.getBody(), SWT.NONE);
-		classcomp.setLayout(new GridLayout(2, false));
-		classcomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		Label l = toolkit.createLabel(classcomp, "Class Name:");
-		txtClassName = new ErrorText(classcomp,v->{
-			if (v.strip().isEmpty()) return "class name required";
-			return null;
-		});
-		txtClassName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtClassName.setText("class_name");
-		txtClassName.addListener(SWT.Modify, e->setDirty(true));
-		
-		l = toolkit.createLabel(classcomp, "Class Data:");
-		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		
-		Composite datacomp = toolkit.createComposite(classcomp, SWT.BORDER);
-		datacomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		datacomp.setLayout(new GridLayout(3, false));
-		
-		btnOpDataModel = new Button(datacomp, SWT.RADIO);
-		btnOpDataModel.setText("Data Model");
-		
-		lblDataModel = toolkit.createLabel(datacomp, "<none>");
-		lblDataModel.setData(SRC_VALUE, null);
-		lblDataModel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-
-		linkSelectDm = toolkit.createHyperlink(datacomp, "change...", SWT.NONE);
-		linkSelectDm.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				selectDataModel();
-			}
-		});
-		btnOpQuery = new Button(datacomp, SWT.RADIO);
-		btnOpQuery.setText("Observation Query");
-		
-		lblQuery = toolkit.createLabel(datacomp, "<none>");
-		lblQuery.setData(SRC_VALUE, null);
-		lblQuery.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		
-		linkSelectQuery = toolkit.createHyperlink(datacomp, "change...", SWT.NONE);
-		linkSelectQuery.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				selectQuery();
-			}
-		});
+		classComposite = new ClassificationComposite(main.getBody(), this);
+		classComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		
-		btnOpDataModel.addListener(SWT.Selection, e->{
-			updateClassificationUi();
-			setDirty(true);
-			if(btnOpDataModel.getSelection() && lblDataModel.getData(SRC_VALUE) == null) {
-				selectDataModel();
-			}
-			
-		});
-		btnOpQuery.addListener(SWT.Selection, e->{
-			updateClassificationUi();
-			setDirty(true);
-			if(btnOpQuery.getSelection() && lblQuery.getData(SRC_VALUE) == null) {
-				selectQuery();
-			}
-		});
-		
-		btnOpDataModel.setSelection(true);
-		updateClassificationUi();
-
-		
-		Button btnRun = toolkit.createButton(main.getBody(), "Run Analysis", SWT.PUSH);
+		Button btnRun = new Button(main.getBody(), SWT.PUSH);
+		btnRun.setText("Run Analysis Using These Settings");
+		btnRun.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnRun.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
 		btnRun.addListener(SWT.Selection,e->{
 			
@@ -717,24 +530,20 @@ public class ConfigurationEditor extends EditorPart {
 		if (!(x instanceof Projection)) {
 			return "Projection is required";
 		}
-		if (txtBounds.getData(RE_DATA_KEY) == null){
-			return "Valid bounds are required.";
-		}
-		if (txtClassName.getText().isEmpty()) return "class name required";
-		
-		if (btnOpDataModel.getSelection() && lblDataModel.getData(SRC_VALUE) == null) return "Data Model classification must be selected before you can save this configuration.";
-		if (btnOpQuery.getSelection() && lblDataModel.getData(SRC_VALUE) == null) return "Query classification must be selected before you can save this configuration.";
+//		if (txtBounds.getData(RE_DATA_KEY) == null){
+//			return "Valid bounds are required.";
+//		}
 		
 		return null;
 	}
 
-	private void updateBounds(){
-		ReferencedEnvelope env = (ReferencedEnvelope) txtBounds.getData(RE_DATA_KEY);
-		if (env != null){
-			txtBounds.setText(env.getMinX() + "  " + env.getMinY() + "  " + env.getMaxX() + "  " + env.getMaxY());
-		}
-
-	}
+//	private void updateBounds(){
+//		ReferencedEnvelope env = (ReferencedEnvelope) txtBounds.getData(RE_DATA_KEY);
+//		if (env != null){
+//			txtBounds.setText(env.getMinX() + "  " + env.getMinY() + "  " + env.getMaxX() + "  " + env.getMaxY());
+//		}
+//
+//	}
 	
 	private void createSettingsComp(Composite parent) {
 		Composite core = toolkit.createComposite(parent);
@@ -863,7 +672,7 @@ public class ConfigurationEditor extends EditorPart {
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_CRS) + ":");
-		l.setToolTipText("Coordinate Reference System - should be a UTM projection (in meters)");
+		l.setToolTipText("Coordinate Reference System");
 		
 		cmbCrs = new ComboViewer(inner, SWT.READ_ONLY | SWT.FLAT | SWT.BORDER | SWT.DROP_DOWN);
 		cmbCrs.setContentProvider(ArrayContentProvider.getInstance());
@@ -880,130 +689,137 @@ public class ConfigurationEditor extends EditorPart {
 		cmbCrs.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbCrs.addPostSelectionChangedListener(e->{
 			//update bounds if valid
-			ReferencedEnvelope re = (ReferencedEnvelope)txtBounds.getData(RE_DATA_KEY);
-			CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
-
-			if (re != null){
-				try{
-					re = ReprojectUtils.reproject(re, crs);
-					txtBounds.setData(RE_DATA_KEY, re);
-					updateBounds();
-				}catch (Exception ex){
-					
-				}
-			}
+//			ReferencedEnvelope re = (ReferencedEnvelope)txtBounds.getData(RE_DATA_KEY);
+//			CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
+//
+//			if (re != null){
+//				try{
+//					re = ReprojectUtils.reproject(re, crs);
+//					txtBounds.setData(RE_DATA_KEY, re);
+//					updateBounds();
+//				}catch (Exception ex){
+//					
+//				}
+//			}
 			
 			setDirty(true);
 		});
 		
-		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_BNDS) + ":");
-		l.setToolTipText("xmin,ymin,xmax,ymax in selected CRS");
+//		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_BNDS) + ":");
+//		l.setToolTipText("xmin,ymin,xmax,ymax in selected CRS");
 		
-		Composite bnds = toolkit.createComposite(inner);
-		bnds.setLayout(new GridLayout(2, false));
-		bnds.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
-		((GridLayout)bnds.getLayout()).marginWidth = 0;
-		((GridLayout)bnds.getLayout()).marginHeight = 0;
-		
-		txtBounds = new ErrorText(bnds, txt-> {
-			try {
-				String[] bits = txt.split("\\s+");
-				if (bits.length != 4) throw new Exception();
-				for (int i = 0; i < 4; i ++) Double.parseDouble(bits[i]);
-				return null;
-			}catch (Exception ex) {
-				return "Bounds must be of the format \"xmin ymin xmax ymax\"";
-			}
-		});
-		txtBounds.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
-		txtBounds.setText("");
-		txtBounds.addListener(SWT.Modify, e->{
-			try {
-				String[] bits = txtBounds.getText().split("\\s+");
-				if (bits.length != 4) throw new Exception();
-				double xmin= Double.parseDouble(bits[0]);
-				double ymin= Double.parseDouble(bits[1]);
-				double xmax= Double.parseDouble(bits[2]);
-				double ymax= Double.parseDouble(bits[3]);
-				CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
-				txtBounds.setData(RE_DATA_KEY, new ReferencedEnvelope(xmin, xmax, ymin, ymax, crs));
-				
-			}catch (Exception ex) {
-				txtBounds.setData(RE_DATA_KEY, null);
-			}
-			setDirty(true);
-		});
-		
-		Hyperlink lnkBnds = toolkit.createHyperlink(bnds, "set...", SWT.NONE);
-		
-		Menu mnu = new Menu(lnkBnds);
-
-		MenuItem mi = new MenuItem(mnu, SWT.PUSH);
-		mi.setEnabled(false);
-		mi.setText("Set to " + PawsManager.INSTANCE.getName((PawsParameter.FixedParameter)PawsParameter.FixedParameter.LYR_BOUNDARY) + " Bounds");
-		cmbBound.addSelectionChangedListener(e->{mi.setEnabled(cmbBound.getStructuredSelection().getFirstElement() != null);});
-		mi.addListener(SWT.Selection, e->{
-			Job temp = new Job("computing bounds"){
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					Object[] selection = new Object[]{null};
-					getSite().getShell().getDisplay().syncExec(()->{
-						selection[0] = cmbBound.getStructuredSelection().getFirstElement();
-					});
-					
-					final ReferencedEnvelope re = getBounds(selection[0]);
-					if (re == null) return Status.OK_STATUS;
-					getSite().getShell().getDisplay().syncExec(()->{
-						try {
-							CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
-							ReferencedEnvelope re2 = ReprojectUtils.reproject(re, crs);
-							txtBounds.setData(RE_DATA_KEY, re2);
-							updateBounds();
-						} catch (Exception e1) {
-							PawsPlugIn.displayLog(e1.getMessage(), e1);
-						}
-					});
-					return Status.OK_STATUS;
-				}
-				
-			};
-			temp.schedule();
-			
-		});
-		
-		new MenuItem(mnu, SWT.SEPARATOR);
-		MenuItem cmi = new MenuItem(mnu, SWT.PUSH);
-		cmi.setText("Custom...");
-		cmi.addListener(SWT.Selection, e->{
-			CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
-			
-			ReferencedEnvelope init = (ReferencedEnvelope) txtBounds.getData(RE_DATA_KEY);
-			SelectBoundsMapDialog md = new SelectBoundsMapDialog(Display.getDefault().getActiveShell(), null, init);
-			if (md.open() != Window.OK) return;
-			ReferencedEnvelope re = md.getBounds();
-			try {
-				re = ReprojectUtils.reproject(re, crs);
-				txtBounds.setData(RE_DATA_KEY, re);
-				updateBounds();
-			} catch (Exception e1) {
-				PawsPlugIn.displayLog(e1.getMessage(), e1);
-			}
-		});
-		
-		lnkBnds.addHyperlinkListener(new IHyperlinkListener() {
-			@Override
-			public void linkExited(HyperlinkEvent e) { }
-			@Override
-			public void linkEntered(HyperlinkEvent e) { }
-			
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				mnu.setVisible(true);
-			}
-		});
+//		Composite bnds = toolkit.createComposite(inner);
+//		bnds.setLayout(new GridLayout(2, false));
+//		bnds.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
+//		((GridLayout)bnds.getLayout()).marginWidth = 0;
+//		((GridLayout)bnds.getLayout()).marginHeight = 0;
+//		
+//		txtBounds = new ErrorText(bnds, txt-> {
+//			try {
+//				String[] bits = txt.split("\\s+");
+//				if (bits.length != 4) throw new Exception();
+//				for (int i = 0; i < 4; i ++) Double.parseDouble(bits[i]);
+//				return null;
+//			}catch (Exception ex) {
+//				return "Bounds must be of the format \"xmin ymin xmax ymax\"";
+//			}
+//		});
+//		txtBounds.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
+//		txtBounds.setText("");
+//		txtBounds.addListener(SWT.Modify, e->{
+//			try {
+//				String[] bits = txtBounds.getText().split("\\s+");
+//				if (bits.length != 4) throw new Exception();
+//				double xmin= Double.parseDouble(bits[0]);
+//				double ymin= Double.parseDouble(bits[1]);
+//				double xmax= Double.parseDouble(bits[2]);
+//				double ymax= Double.parseDouble(bits[3]);
+//				CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
+//				txtBounds.setData(RE_DATA_KEY, new ReferencedEnvelope(xmin, xmax, ymin, ymax, crs));
+//				
+//			}catch (Exception ex) {
+//				txtBounds.setData(RE_DATA_KEY, null);
+//			}
+//			setDirty(true);
+//		});
+//		
+//		Hyperlink lnkBnds = toolkit.createHyperlink(bnds, "set...", SWT.NONE);
+//		
+//		Menu mnu = new Menu(lnkBnds);
+//		
+//		Object[] items = new Object[] {PawsParameter.FixedParameter.LYR_BOUNDARY, cmbBound,
+////				PawsParameter.FixedParameter.LYR_ROAD, cmbRoad,
+////				PawsParameter.FixedParameter.LYR_CONTOUR, cmbContour,
+////				PawsParameter.FixedParameter.LYR_WATER, cmbRiver,
+//		};
+//		for (int i = 0; i < items.length; i +=2){
+//			MenuItem mi = new MenuItem(mnu, SWT.PUSH);
+//			mi.setEnabled(false);
+//			mi.setText("Set to " + PawsManager.INSTANCE.getName((PawsParameter.FixedParameter)items[i]) + " Bounds");
+//			final ComboViewer cmbViewer = (ComboViewer) items[i+1];
+//			cmbViewer.addSelectionChangedListener(e->{mi.setEnabled(cmbViewer.getStructuredSelection().getFirstElement() != null);});
+//			mi.addListener(SWT.Selection, e->{
+//				Job temp = new Job("computing bounds"){
+//					@Override
+//					protected IStatus run(IProgressMonitor monitor) {
+//						Object[] selection = new Object[]{null};
+//						getSite().getShell().getDisplay().syncExec(()->{
+//							selection[0] = cmbViewer.getStructuredSelection().getFirstElement();
+//						});
+//						
+//						final ReferencedEnvelope re = getBounds(selection[0]);
+//						if (re == null) return Status.OK_STATUS;
+//						getSite().getShell().getDisplay().syncExec(()->{
+//							try {
+//								CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
+//								ReferencedEnvelope re2 = ReprojectUtils.reproject(re, crs);
+//								txtBounds.setData(RE_DATA_KEY, re2);
+//								updateBounds();
+//							} catch (Exception e1) {
+//								PawsPlugIn.displayLog(e1.getMessage(), e1);
+//							}
+//						});
+//						return Status.OK_STATUS;
+//					}
+//					
+//				};
+//				temp.schedule();
+//				
+//			});
+//		}
+//		new MenuItem(mnu, SWT.SEPARATOR);
+//		MenuItem mi = new MenuItem(mnu, SWT.PUSH);
+//		mi.setText("Custom...");
+//		mi.addListener(SWT.Selection, e->{
+//			CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
+//			
+//			ReferencedEnvelope init = (ReferencedEnvelope) txtBounds.getData(RE_DATA_KEY);
+//			SelectBoundsMapDialog md = new SelectBoundsMapDialog(Display.getDefault().getActiveShell(), null, init);
+//			if (md.open() != Window.OK) return;
+//			ReferencedEnvelope re = md.getBounds();
+//			try {
+//				re = ReprojectUtils.reproject(re, crs);
+//				txtBounds.setData(RE_DATA_KEY, re);
+//				updateBounds();
+//			} catch (Exception e1) {
+//				PawsPlugIn.displayLog(e1.getMessage(), e1);
+//			}
+//		});
+//		
+//		lnkBnds.addHyperlinkListener(new IHyperlinkListener() {
+//			@Override
+//			public void linkExited(HyperlinkEvent e) { }
+//			@Override
+//			public void linkEntered(HyperlinkEvent e) { }
+//			
+//			@Override
+//			public void linkActivated(HyperlinkEvent e) {
+//				mnu.setVisible(true);
+//			}
+//		});
 		
 		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_SIZE) + ":");
-		l.setToolTipText("units are CRS units");
+		l.setToolTipText("grid units are the units of the selected CRS");
 		
 		txtGridSize = new ErrorText(inner, txt-> {
 			try {
@@ -1041,21 +857,6 @@ public class ConfigurationEditor extends EditorPart {
 		
 		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.TRAINING_RES) + ":");
 		
-		ToolTip test = new ToolTip(l.getShell(), SWT.NONE);
-		test.setMessage("The temporal resolution impacts speed, precision and accuracy. " + 
-				"For example, in parks with sparse records of illegal activity (e.g. just 2 incidences of illegal activity " + 
-				"throughout a park in an entire month), then the predictive model will have very imbalanced data " + 
-				"(i.e. many negative points and very few positive points). In these cases, the model may be better " + 
-				"and more accurate using 3 months rather than 1 month. Therefore, the optimal temporal resolution " + 
-				"depends on the data quantity and quality in each park.");
-		l.addListener(SWT.MouseEnter, e->{
-			Point p = ((Label)e.widget).toDisplay( new Point(e.x+2, e.y+15) );
-			test.setLocation(p);
-			test.setVisible(true);
-		});
-		test.setAutoHide(false);
-		l.addListener(SWT.MouseExit, e->test.setVisible(false));
-		
 		cmbTrainingRes = new ComboViewer(inner, SWT.READ_ONLY | SWT.DROP_DOWN);
 		cmbTrainingRes.setContentProvider(ArrayContentProvider.getInstance());
 		cmbTrainingRes.getControl().setBackground(inner.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
@@ -1063,36 +864,16 @@ public class ConfigurationEditor extends EditorPart {
 		cmbTrainingRes.setLabelProvider(new LabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element instanceof PawsParameter.TrainingResolution) { 
-					PawsParameter.TrainingResolution tw = (PawsParameter.TrainingResolution)element;
-					switch(tw) {
-					case MONTH: return "Month";
-					case MONTH3: return "3 Month";
-					case MONTH12: return "12 Month";					
-					}
-				};
-				return super.getText(element);
+				return String.valueOf((Integer)element);
 			}
 		});		
-		cmbTrainingRes.setInput(PawsParameter.TrainingResolution.values());
-		cmbTrainingRes.setSelection(new StructuredSelection(PawsParameter.TrainingResolution.MONTH));
+		cmbTrainingRes.setInput(new Integer[] {1,2,3,4,5,6,7,8,9,10,11,12});
+		cmbTrainingRes.setSelection(new StructuredSelection(2));
 		cmbTrainingRes.addPostSelectionChangedListener(e->setDirty(true));
 		
 		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.CLASSIFIER_MODEL) + ":");
 		
-		//The Gaussian Process model generally performs better, especially in datasets with relatively few incidences of illegal activity, however it is significantly slower (can take hours to process).\n
-		ToolTip classifierTip = new ToolTip(l.getShell(), SWT.NONE);
-		classifierTip.setMessage("The Decision Tree model runs very quickly (seconds to minutes). Other options are currently disabled.");
-		l.addListener(SWT.MouseEnter, e->{
-			Point p = ((Label)e.widget).toDisplay( new Point(e.x+2, e.y+15) );
-			classifierTip.setLocation(p);
-			classifierTip.setVisible(true);
-		});
-		classifierTip.setAutoHide(false);
-		l.addListener(SWT.MouseExit, e->classifierTip.setVisible(false));
-		
 		cmbClassifier = new ComboViewer(inner, SWT.READ_ONLY | SWT.DROP_DOWN);
-		cmbClassifier.getControl().setEnabled(false);
 		cmbClassifier.setContentProvider(ArrayContentProvider.getInstance());
 		cmbClassifier.getControl().setBackground(inner.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		cmbClassifier.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -1103,7 +884,7 @@ public class ConfigurationEditor extends EditorPart {
 					PawsParameter.ClassifierModel tw = (PawsParameter.ClassifierModel)element;
 					switch(tw) {
 					case DECISION_TREE: return "Decision Tree";
-					case GAUSSIAN_PROCESS: return "Gaussian Process";
+//					case GAUSSIAN_PROCESS: return "Gaussian Process";
 					}
 				};
 				return super.getText(element);
@@ -1112,6 +893,7 @@ public class ConfigurationEditor extends EditorPart {
 		cmbClassifier.setInput(PawsParameter.ClassifierModel.values());
 		cmbClassifier.setSelection(new StructuredSelection(PawsParameter.ClassifierModel.DECISION_TREE));
 		cmbClassifier.addPostSelectionChangedListener(e->setDirty(true));
+		
 	}
 	
 	public void fireModified(boolean isNew, PawsConfiguration pc) {
@@ -1329,7 +1111,6 @@ public class ConfigurationEditor extends EditorPart {
 					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
 					if (pp != null) {
 						String uuid = pp.getValue().split(":")[0];
-						String def = pp.getValue().substring(uuid.length() + 1);
 						
 						Projection temp = new Projection();
 						boolean add = false;
@@ -1340,9 +1121,6 @@ public class ConfigurationEditor extends EditorPart {
 							temp.setUuid( UuidUtils.stringToUuid(uuid) );
 							if (!prjs.contains(temp)){
 								add = true;
-							}else{
-								Projection prj = prjs.get(prjs.indexOf(temp));
-								if (!prj.getDefinition().equals(def)) add = true;
 							}
 						}
 						if (add){
@@ -1364,7 +1142,7 @@ public class ConfigurationEditor extends EditorPart {
 					}
 					pp = pw.findParameter(PawsParameter.FixedParameter.TRAINING_RES.name());
 					if (pp != null) {
-						cmbTrainingRes.setSelection(new StructuredSelection( PawsParameter.TrainingResolution.valueOf( pp.getValue() ) ));
+						cmbTrainingRes.setSelection(new StructuredSelection(  Integer.valueOf(pp.getValue()) ));
 					}
 					
 					pp = pw.findParameter(PawsParameter.FixedParameter.CLASSIFIER_MODEL.name());
@@ -1372,83 +1150,138 @@ public class ConfigurationEditor extends EditorPart {
 						cmbClassifier.setSelection(new StructuredSelection( PawsParameter.ClassifierModel.valueOf( pp.getValue() ) ));
 					}
 					
-					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_BNDS.name());
-					if (pp != null){
-						try{
-							String[] bits = pp.getValue().split("\\s+");
-							double x1 = Double.parseDouble(bits[0]);
-							double y1 = Double.parseDouble(bits[1]);
-							double x2 = Double.parseDouble(bits[2]);
-							double y2 = Double.parseDouble(bits[3]);
-							ReferencedEnvelope re = new ReferencedEnvelope(x1,x2, y1, y2, selectedCrs);
-							txtBounds.setData(RE_DATA_KEY, re);
-							updateBounds();
-						}catch (Exception ex){
-							txtBounds.setText("");
-						}
-						
-						
-					}
-				
-					PawsClassification pc = pw.getClassification();
+//					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_BNDS.name());
+//					if (pp != null){
+//						try{
+//							String[] bits = pp.getValue().split("\\s+");
+//							double x1 = Double.parseDouble(bits[0]);
+//							double y1 = Double.parseDouble(bits[1]);
+//							double x2 = Double.parseDouble(bits[2]);
+//							double y2 = Double.parseDouble(bits[3]);
+//							ReferencedEnvelope re = new ReferencedEnvelope(x1,x2, y1, y2, selectedCrs);
+//							txtBounds.setData(RE_DATA_KEY, re);
+//							updateBounds();
+//						}catch (Exception ex){
+//							txtBounds.setText("");
+//						}
+//						
+//						
+//					}
 					
-					if (pc.getType() == Type.DATAMODEL) {
-						btnOpDataModel.setSelection(true);
-						btnOpQuery.setSelection(false);
-						Category c = QueryDataModelManager.getInstance().getCategory(s, pc.getCategoryHkey());
-				        if (c == null){
-				        	pc.cacheLabel( MessageFormat.format("ERROR: Category {0} not found.", pc.getCategoryHkey()) );
-				        }else{
-				        	if (pc.getAttributeKey() != null) {
-								if (pc.getAttributeListItemKey() != null) {
-									AttributeListItem li = QueryDataModelManager.getInstance().getAttributeListItem(s, pc.getAttributeKey(), pc.getAttributeListItemKey());
-									if (li == null) {
-										pc.cacheLabel( MessageFormat.format("ERROR: Attribute list item {0} not found.", pc.getAttributeListItemKey()) );
-									} else {
-										pc.cacheLabel( PawsClassification.createLabel(c, li.getAttribute(), li) );
-										lblDataModel.setData(SRC_VALUE, pc);
-									}
-								}
-
-								if (pc.getAttributeTreeNodeHkey() != null) {
-									AttributeTreeNode node = QueryDataModelManager.getInstance().getAttributeTreeNode( s, pc.getAttributeKey(), pc.getAttributeTreeNodeHkey());
-									if (node == null) {
-										pc.cacheLabel( MessageFormat.format("ERROR: Attribute tree node {0} not found.",pc.getAttributeTreeNodeHkey()));
-									} else {
-										pc.cacheLabel( PawsClassification.createLabel(c, node.getAttribute(), node));
-										lblDataModel.setData(SRC_VALUE, pc);
-									}
-
-								}
-
-							} else {
-								pc.cacheLabel(PawsClassification.createLabel(c, null, null));
-								lblDataModel.setData(SRC_VALUE, pc);
-							}
-						}
-				        lblDataModel.setText(pc.getCachedLabel());
-				        lblDataModel.getParent().layout(true);
-					}
-					if (pc.getType() == Type.QUERY) {
-						btnOpQuery.setSelection(true);
-						btnOpDataModel.setSelection(false);
-			            Query temp = QueryHibernateManager.getInstance().findQuery(s, pc.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType( pc.getQueryType()));
-			            if (temp != null){
-			                pc.setCachedQuery(temp);
-			                pc.cacheLabel(PawsManager.INSTANCE.createLabel(temp));
-							lblQuery.setData(SRC_VALUE, pc);
-			            }else{
-			                pc.cacheLabel( "QUERY NOT FOUND" );
-			            }
-			            lblQuery.setText(pc.getCachedLabel());
-			            lblQuery.getParent().layout(true);
-					}
-					
-					updateClassificationUi();
+//<<<<<<< .working
+//					if (pc.getType() == Type.DATAMODEL) {
+//						btnOpDataModel.setSelection(true);
+//						btnOpQuery.setSelection(false);
+//						Category c = QueryDataModelManager.getInstance().getCategory(s, pc.getCategoryHkey());
+//				        if (c == null){
+//				        	pc.cacheLabel( MessageFormat.format("ERROR: Category {0} not found.", pc.getCategoryHkey()) );
+//				        }else{
+//				        	if (pc.getAttributeKey() != null) {
+//								if (pc.getAttributeListItemKey() != null) {
+//									AttributeListItem li = QueryDataModelManager.getInstance().getAttributeListItem(s, pc.getAttributeKey(), pc.getAttributeListItemKey());
+//									if (li == null) {
+//										pc.cacheLabel( MessageFormat.format("ERROR: Attribute list item {0} not found.", pc.getAttributeListItemKey()) );
+//									} else {
+//										pc.cacheLabel( PawsClassification.createLabel(c, li.getAttribute(), li) );
+//										lblDataModel.setData(SRC_VALUE, pc);
+//									}
+//								}
+//
+//								if (pc.getAttributeTreeNodeHkey() != null) {
+//									AttributeTreeNode node = QueryDataModelManager.getInstance().getAttributeTreeNode( s, pc.getAttributeKey(), pc.getAttributeTreeNodeHkey());
+//									if (node == null) {
+//										pc.cacheLabel( MessageFormat.format("ERROR: Attribute tree node {0} not found.",pc.getAttributeTreeNodeHkey()));
+//									} else {
+//										pc.cacheLabel( PawsClassification.createLabel(c, node.getAttribute(), node));
+//										lblDataModel.setData(SRC_VALUE, pc);
+//									}
+//
+//								}
+//
+//							} else {
+//								pc.cacheLabel(PawsClassification.createLabel(c, null, null));
+//								lblDataModel.setData(SRC_VALUE, pc);
+//							}
+//						}
+//				        lblDataModel.setText(pc.getCachedLabel());
+//				        lblDataModel.getParent().layout(true);
+//					}
+//					if (pc.getType() == Type.QUERY) {
+//						btnOpQuery.setSelection(true);
+//						btnOpDataModel.setSelection(false);
+//			            Query temp = QueryHibernateManager.getInstance().findQuery(s, pc.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType( pc.getQueryType()));
+//			            if (temp != null){
+//			                pc.setCachedQuery(temp);
+//			                pc.cacheLabel(PawsManager.INSTANCE.createLabel(temp));
+//							lblQuery.setData(SRC_VALUE, pc);
+//			            }else{
+//			                pc.cacheLabel( "QUERY NOT FOUND" );
+//			            }
+//			            lblQuery.setText(pc.getCachedLabel());
+//			            lblQuery.getParent().layout(true);
+//					}
+//					
+//					updateClassificationUi();
+//||||||| .merge-left.r7405
+//					if (pc.getType() == Type.DATAMODEL) {
+//						btnOpDataModel.setSelection(true);
+//						btnOpQuery.setSelection(false);
+//						Category c = QueryDataModelManager.getInstance().getCategory(s, pc.getCategoryHkey());
+//				        if (c == null){
+//				        	pc.cacheLabel( MessageFormat.format("ERROR: Category {0} not found.", pc.getCategoryHkey()) );
+//				        }else{
+//				        	if (pc.getAttributeKey() != null) {
+//								if (pc.getAttributeListItemKey() != null) {
+//									AttributeListItem li = QueryDataModelManager.getInstance().getAttributeListItem(s, pc.getAttributeKey(), pc.getAttributeListItemKey());
+//									if (li == null) {
+//										pc.cacheLabel( MessageFormat.format("ERROR: Attribute list item {0} not found.", pc.getAttributeListItemKey()) );
+//									} else {
+//										pc.cacheLabel( PawsClassification.createLabel(c, li.getAttribute(), li) );
+//										lblDataModel.setData(SRC_VALUE, pc);
+//									}
+//								}
+//
+//								if (pc.getAttributeTreeNodeHkey() != null) {
+//									AttributeTreeNode node = QueryDataModelManager.getInstance().getAttributeTreeNode( s, pc.getAttributeKey(), pc.getAttributeTreeNodeHkey());
+//									if (node == null) {
+//										pc.cacheLabel( MessageFormat.format("ERROR: Attribute tree node {0} not found.",pc.getAttributeTreeNodeHkey()));
+//									} else {
+//										pc.cacheLabel( PawsClassification.createLabel(c, node.getAttribute(), node));
+//										lblDataModel.setData(SRC_VALUE, pc);
+//									}
+//
+//								}
+//
+//							} else {
+//								pc.cacheLabel(PawsClassification.createLabel(c, null, null));
+//								lblDataModel.setData(SRC_VALUE, pc);
+//							}
+//						}
+//				        lblDataModel.setText(pc.getCachedLabel());
+//				        lblDataModel.getParent().layout(true);
+//					}
+//					if (pc.getType() == Type.QUERY) {
+//						btnOpQuery.setSelection(true);
+//						btnOpDataModel.setSelection(false);
+//			            Query temp = QueryHibernateManager.getInstance().findQuery(s, pc.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType( pc.getQueryType()));
+//			            if (temp != null){
+//			                pc.setCachedQuery(temp);
+//			                pc.cacheLabel(PawsClassification.createLabel(temp));
+//							lblQuery.setData(SRC_VALUE, pc);
+//			            }else{
+//			                pc.cacheLabel( "QUERY NOT FOUND" );
+//			            }
+//			            lblQuery.setText(pc.getCachedLabel());
+//			            lblQuery.getParent().layout(true);
+//					}
+//					
+//					updateClassificationUi();
+//=======
+//>>>>>>> .merge-right.r7404
 					setDirty(false);
 				});
 				
-				
+				classComposite.initialize(pw, s);
 			}catch (Exception ex) {
 				PawsPlugIn.log(ex.getMessage(), ex);
 			}

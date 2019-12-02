@@ -23,74 +23,50 @@ package org.wcs.smart.paws.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.wcs.smart.ca.UuidItem;
-
 @Entity
-@Table(name="smart.paws_parameter")
-public class PawsParameter extends UuidItem{
+@Table(name="smart.paws_simple_class")
+public class PawsSimpleClass extends AbstractPawsClass{
 
-	public static final String AREA_PREFIX = "area:";
-	public static final String FILE_PREFIX = "file:";
+	private String categoryKey;
+	private String attributeKey;
+	private String listItemKey;
+	private String treeNodeKey;
 	
-	public static enum FixedParameter{
-		LYR_BOUNDARY,
-		LYR_OTHER,
-		GRID_SIZE,
-		GRID_CRS,
-//		GRID_BNDS,
-		TIMEZONE,
-		TRAINING_RES,
-		CLASSIFIER_MODEL
-		
+	@Column(name="category_hkey")
+	public String getCategoryHkey() {
+		return this.categoryKey;
 	}
 	
-	public static enum ClassifierModel{
-		DECISION_TREE("decison_tree");
-//		GAUSSIAN_PROCESS("gaussian_process"); //slow; not supported
-		
-		public String key;
-		
-		private ClassifierModel(String key) {
-			this.key = key;
-		}
+	public void setCategoryHkey(String categoryKey) {
+		this.categoryKey = categoryKey;
 	}
 	
-	
-	private PawsConfiguration config;
-	
-	private String key;
-	private String value;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="config_uuid")
-	public PawsConfiguration getConfiguration() {
-		return this.config;
+	@Column(name="attribute_key")
+	public String getAttributeKey() {
+		return this.attributeKey;
 	}
 	
-	public void setConfiguration(PawsConfiguration config) {
-		this.config = config;
+	public void setAttributeKey(String attributeKey) {
+		this.attributeKey = attributeKey;
 	}
 	
-	@Column(name="keyid")
-	public String getKey() {
-		return this.key;
+	@Column(name="list_key")
+	public String getAttributeListItemKey() {
+		return this.listItemKey;
 	}
 	
-	public void setKey(String key) {
-		this.key = key;
+	public void setAttributeListItemKey(String listItemKey) {
+		this.listItemKey = listItemKey;
 	}
 	
-	@Column(name="value")
-	public String getValue() {
-		return this.value;
+	@Column(name="tree_hkey")
+	public String getAttributeTreeNodeHkey() {
+		return this.treeNodeKey;
 	}
 	
-	public void setValue(String value) {
-		this.value = value;
+	public void setAttributeTreeNodeHkey(String treeNodeKey) {
+		this.treeNodeKey = treeNodeKey;
 	}
 }

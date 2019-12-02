@@ -31,9 +31,10 @@ import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.paws.model.PawsClassification;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
+import org.wcs.smart.paws.model.PawsQueryClass;
+import org.wcs.smart.paws.model.PawsSimpleClass;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -86,10 +87,6 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 				}else if (pp.getKey().equals(PawsParameter.FixedParameter.GRID_SIZE.name())){
 					cpp.setValue(pp.getValue());
 					clone.getParameters().add(cpp);
-				}else if (pp.getKey().equals(PawsParameter.FixedParameter.GRID_BNDS.name())){
-					//need to be redefined by user
-					cpp.setValue("0 0 0 0");
-					clone.getParameters().add(cpp);
 				}else if (pp.getKey().equals(PawsParameter.FixedParameter.TRAINING_RES.name())) {
 					cpp.setValue(pp.getValue());
 					clone.getParameters().add(cpp);
@@ -101,24 +98,33 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 					//will need to be redefined by user
 				}
 			}
+			session.save(clone);
 			
-			PawsClassification pw = c.getClassification();
-			if (pw != null) {
-				PawsClassification pwclone = new PawsClassification();
+			List<PawsSimpleClass> simpleMappings = QueryFactory.buildQuery(session, PawsSimpleClass.class,
+					new Object[]{"configuration", c}).getResultList();
+			for (PawsSimpleClass pw : simpleMappings){
+				PawsSimpleClass pwclone = new PawsSimpleClass();
 				pwclone.setCategoryHkey(pw.getCategoryHkey());
 				pwclone.setAttributeKey(pw.getAttributeKey());
 				pwclone.setAttributeListItemKey(pw.getAttributeListItemKey());
 				pwclone.setAttributeTreeNodeHkey(pw.getAttributeTreeNodeHkey());
 				pwclone.setClassification(pw.getClassification());
-				pwclone.setType(pwclone.getType());
-				pwclone.setQueryType(pw.getQueryType());
-				pwclone.setQueryUuid(pw.getQueryUuid());
-				
 				pwclone.setConfiguration(clone);
-				
-				clone.setClassification(pwclone);
+				session.save(pwclone);
 			}
-			session.save(clone);
+			
+			List<PawsQueryClass> queryMappings = QueryFactory.buildQuery(session, PawsQueryClass.class,
+					new Object[]{"configuration", c}).getResultList();
+			for (PawsQueryClass pw : queryMappings){
+				UUID quuid = engine.getNewConservationItem(pw.getQueryUuid()).getUuid();
+				if (quuid == null) continue;
+				PawsQueryClass pwclone = new PawsQueryClass();
+				pwclone.setQueryType(pw.getQueryType());
+				pwclone.setQueryUuid(quuid);
+				pwclone.setClassification(pw.getClassification());
+				pwclone.setConfiguration(clone);
+				session.save(pwclone);
+			}
 		}
 	}
 }
