@@ -73,7 +73,7 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 		public Object getValue(IntelRecord record, Locale l) {
 			switch(this){
 			case UUID:
-				return UuidUtils.uuidToString(record.getUuid());
+				return record.getUuid();
 			case TITLE:
 				return record.getTitle();
 			case PRIMARY_DATE:

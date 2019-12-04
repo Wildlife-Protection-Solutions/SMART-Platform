@@ -194,7 +194,17 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		boolean isNew = type.getUuid() == null;
 		boolean attributesModified = false;
 
+		Set<IntelProfile> newProfiles = new HashSet<>();
+		for (Object x : tblProfiles.getCheckedElements()) newProfiles.add((IntelProfile)x);
+		
 		try(Session s = HibernateManager.openSession()){
+			
+			String hql = "SELECT count(*) FROM IntelEntity WHERE entityType = :type and profile NOT IN (:profiles)";
+			Long cnt = (Long) s.createQuery(hql).setParameter("type", type).setParameterList("profiles", newProfiles).uniqueResult();
+			if (cnt > 0) {
+				throw new Exception("Cannot remove profiles from entity type until all entities of that type are removed from the profile.");
+			}
+			
 			s.beginTransaction();
 			try {
 				s.saveOrUpdate(type);
@@ -307,6 +317,9 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 				Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
 				return;
 			}
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
+			return;
 		}
 		if (isNew){
 			broker.send(IntelEvents.ENTITY_TYPE_NEW, type);

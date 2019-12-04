@@ -116,7 +116,6 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				System.out.println("drop table");
 				session.createNativeQuery("DROP TABLE " + DB_NAME_NAME).executeUpdate(); //$NON-NLS-1$
 				session.getTransaction().commit();
 			}catch(Exception ex) {
@@ -194,7 +193,6 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				session.getTransaction().commit();
 				
 				//create results
-				System.out.println("create table");
 				EntityTableData data = new EntityTableData();
 				data.attributes = eattributes;
 				data.tableName = DB_NAME_NAME;

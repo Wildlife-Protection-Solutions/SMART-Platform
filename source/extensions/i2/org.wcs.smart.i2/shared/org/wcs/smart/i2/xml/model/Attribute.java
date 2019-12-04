@@ -27,11 +27,11 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="names" type="{http://www.example.org/Intelligence}NamedItem" maxOccurs="unbounded"/>
- *         &lt;element name="listValues" type="{http://www.example.org/Intelligence}AttributeListItem" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="names" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}NamedItem" maxOccurs="unbounded"/>
+ *         &lt;element name="listValues" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}AttributeListItem" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="key" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="type" type="{http://www.example.org/Intelligence}AttributeType" />
+ *       &lt;attribute name="type" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}AttributeType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>

@@ -23,8 +23,10 @@ package org.wcs.smart.i2.ui.dialogs;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -286,13 +288,6 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 		tblProfiles.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		((GridData)tblProfiles.getControl().getLayoutData()).heightHint = 50;
 		tblProfiles.addSelectionChangedListener(e->{
-			if (currentSelection == null) return;
-			
-			currentSelection.getProfiles().clear();
-			for (Object x : tblProfiles.getCheckedElements()) {
-				IntelProfile p = (IntelProfile) x;
-				currentSelection.getProfiles().add(p);
-			}
 			modified();
 		});
 		new Label(detailsPanel, SWT.NONE);
@@ -684,13 +679,33 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 			Intelligence2PlugIn.displayLog(Messages.RecordSourceAttributeDialog_SaveError + v, null);
 			return false;
 		}
+		
+		Set<IntelProfile> newProfiles = new HashSet<>();
+		for (Object x : tblProfiles.getCheckedElements()) newProfiles.add((IntelProfile)x);
+		
 		try(Session session = HibernateManager.openSession()){
-
+			//validate that all record sources are still valid
+			//which means that the profile associated with the record
+			//must match one of the profiles associated with that record source
+			
+			String hsql = "SELECT count(*) FROM IntelRecord r WHERE r.recordSource = :source and profile not in (:profiles)";
+			Long cnt = (Long)session.createQuery(hsql).setParameter("source", currentSelection).setParameter("profiles", newProfiles).uniqueResult();
+			if (cnt > 0) {
+				throw new Exception("Cannot remove profiles associated with record source until all records with that source are also removed.");
+			}
+			
 			session.beginTransaction();
 			try{
 				session.saveOrUpdate(currentSelection);
+				List<IntelProfile> profiles = (List<IntelProfile>) tblProfiles.getInput();
+				for (IntelProfile ip : profiles) {
+					if (tblProfiles.getChecked(ip)) {
+						currentSelection.getProfiles().add(ip);
+					}else {
+						currentSelection.getProfiles().remove(ip);
+					}
+				}
 				session.flush();
-				
 				
 				//delete all attribute values for attributes removed from given source
 				for (IntelRecordSourceAttribute a : attributesToDelete){
@@ -727,12 +742,13 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 				attributesToDelete.clear();
 				attributesMultiToSingle.clear();
 			}catch (Exception ex){
-				if (session.getTransaction().isActive()) {
-					session.getTransaction().rollback();
-				}
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
 				Intelligence2PlugIn.displayLog(Messages.RecordSourceAttributeDialog_SaveError + ex.getMessage(), ex);
 				return false;
 			}
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog(Messages.RecordSourceAttributeDialog_SaveError + ex.getMessage(), ex);
+			return false;
 		}
 		
 		context.get(IEventBroker.class).send(IntelEvents.RECORD_SOURCE_ALL, null);

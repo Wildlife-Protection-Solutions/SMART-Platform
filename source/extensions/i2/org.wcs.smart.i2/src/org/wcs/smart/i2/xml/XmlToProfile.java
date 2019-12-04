@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.xml;
 
+import java.awt.Color;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,8 +31,8 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -60,6 +62,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
@@ -70,8 +73,8 @@ import org.wcs.smart.i2.xml.model.AttributeListItem;
 import org.wcs.smart.i2.xml.model.EntityType;
 import org.wcs.smart.i2.xml.model.EntityTypeAttribute;
 import org.wcs.smart.i2.xml.model.EntityTypeAttributeGroup;
-import org.wcs.smart.i2.xml.model.IntelligenceData;
 import org.wcs.smart.i2.xml.model.NamedItem;
+import org.wcs.smart.i2.xml.model.Profile;
 import org.wcs.smart.i2.xml.model.RecordSource;
 import org.wcs.smart.i2.xml.model.RecordSourceAttribute;
 import org.wcs.smart.i2.xml.model.RelationshipGroup;
@@ -84,14 +87,14 @@ import org.wcs.smart.util.ZipUtil;
  * @author Emily
  *
  */
-public class XmlToIntelData {
+public class XmlToProfile {
 
 	private ConservationArea ca;
 	private List<String> warnings;
 	private Path rootPath;
 	private Session session;
 	
-	public XmlToIntelData(ConservationArea ca) {
+	public XmlToProfile(ConservationArea ca) {
 		this.ca = ca;
 	}
 	
@@ -106,19 +109,23 @@ public class XmlToIntelData {
 				throw new IOException(e);
 			}
 			
-			Path xmlFile = rootPath.resolve(IntelDataToXml.XML_DATA_FILENAME);
-			IntelligenceData data = null;
-			try {
-				progress.split(1);
-				progress.subTask(Messages.XmlToIntelData_readingfileTask);
-				data = readXmlFile(xmlFile);
-			}catch (Exception ex) {
-				throw new IOException(ex);
+			//lets find all xml files
+			
+			Path xmlFile = null;
+			for (File f : rootPath.toFile().listFiles()) {
+				if (f.getName().endsWith(".xml")) {
+					xmlFile = f.toPath();
+				}
 			}
 			
 			try (Session session = HibernateManager.openSession()){
-				toIntelData(data, session, eventBroker, progress.split(9));
+				Profile xml = readXmlFile(xmlFile);
+				toIntelData(xml, rootPath, session, eventBroker, progress.split(1));
+			
+			}catch (Exception ex) {
+				Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 			}
+
 		}finally{
 			//clean up
 			try {
@@ -129,19 +136,35 @@ public class XmlToIntelData {
 		}
 	}
 	
-	private IntelligenceData readXmlFile(Path xmlFile) throws JAXBException {
-		JAXBContext context = JAXBContext.newInstance(IntelDataToXml.METADATA_CLASSES_PACKAGE);
+	private Profile readXmlFile(Path xmlFile) throws JAXBException {
+		JAXBContext context = JAXBContext.newInstance(ProfileToXml.METADATA_CLASSES_PACKAGE);
 		Unmarshaller unmarshaller = context.createUnmarshaller();
 		@SuppressWarnings("unchecked")
-		JAXBElement<IntelligenceData> o = (JAXBElement<IntelligenceData>) unmarshaller.unmarshal(xmlFile.toFile());
+		JAXBElement<Profile> o = (JAXBElement<Profile>) unmarshaller.unmarshal(xmlFile.toFile());
 		return o.getValue();
 	}
 	
-	private void toIntelData(IntelligenceData data, Session session,  IEventBroker eventBroker, IProgressMonitor monitor) {
+	private void toIntelData(Profile data, Path filesDir, Session session,  IEventBroker eventBroker, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, 7);
 		
 		this.session = session;
+		
+		IntelProfile existing = QueryFactory.buildQuery(session, IntelProfile.class, 
+				new Object[] {"conservationArea", ca},
+				new Object[] {"keyId", data.getKey()}).uniqueResult();
+		if (existing != null) {
+			throw new Exception (MessageFormat.format("A profile with the key {0} already exists in this Conservation Area. Profiles cannot be duplicated.", data.getKey()));
+		}
 
+		IntelProfile profile = new IntelProfile();
+		profile.setKeyId(data.getKey());
+		profile.setColorObj(Color.decode("#"+data.getColor()));
+		profile.setConservationArea(ca);
+		profile.setRecordSources(new HashSet<>());
+		profile.setEntityTypes(new HashSet<>());
+		updateNames(profile, data.getNames());
+		//TODO: setup admin permission
+		
 		//process attributes
 		progress.split(1);
 		progress.subTask(Messages.XmlToIntelData_attributesTask);
@@ -158,6 +181,9 @@ public class XmlToIntelData {
 		progress.subTask(Messages.XmlToIntelData_entitytypesTask);
 		List<IntelEntityType> entities = proecessEntityTypes(data.getEntities(), attributeMapping);
 		
+		profile.getEntityTypes().addAll(entities);
+		entities.forEach(e->e.getProfiles().add(profile));
+		
 		//entity mappings
 		HashMap<String, IntelEntityType> entityMappings = new HashMap<>();
 		List<IntelEntityType> existingEntities = QueryFactory.buildQuery(session, IntelEntityType.class, "conservationArea", ca).list(); //$NON-NLS-1$
@@ -168,7 +194,9 @@ public class XmlToIntelData {
 		progress.split(1);
 		progress.subTask(Messages.XmlToIntelData_recourdsourceTask);
 		List<IntelRecordSource> recordSources = processRecordSources(data.getRecordSource(), attributeMapping, entityMappings);
-
+		profile.getRecordSources().addAll(recordSources);
+		recordSources.forEach(r->r.getProfiles().add(profile));
+		
 		//processing relationship groups
 		progress.split(1);
 		progress.subTask(Messages.XmlToIntelData_relationshipgroupsTask);
@@ -183,8 +211,9 @@ public class XmlToIntelData {
 		//process & save relationship type
 		progress.split(1);
 		progress.subTask(Messages.XmlToIntelData_relationshiptypesTask);
-		List<IntelRelationshipType> relationshipTypes = processRelationshipTypes(data.getRelationships(), attributeMapping, entityMappings, relationshipGroupMappings);
+		List<IntelRelationshipType> relationshipTypes = processRelationshipTypes(data.getRelationships(), attributeMapping, entityMappings, relationshipGroupMappings, profile);
 		
+
 		//validate warnings with user
 		if (!warnings.isEmpty()) {
 			boolean[] ret = new boolean[] {false};
@@ -203,17 +232,27 @@ public class XmlToIntelData {
 		progress.subTask(Messages.XmlToIntelData_SaveTask);
 		session.beginTransaction();
 		try {
+			session.save(profile);
+			
 			attributes.forEach(a->session.save(a));
-			entities.forEach(a->session.save(a));
+			
+			for (IntelEntityType a : entities) {
+				if (a.getUuid() == null) session.save(a);
+			}	
 			entityMappings.values().forEach(et->{
-				et.getAttributes().forEach(eta->{
+			
+			et.getAttributes().forEach(eta->{
 					session.save(eta);
 					if (eta.getAttributeGroup() != null) session.save(eta.getAttributeGroup());	
 				});
 			});
-			recordSources.forEach(a->session.save(a));
+			for (IntelRecordSource a : recordSources) {
+				if (a.getUuid() == null) session.save(a);
+			}
+			
 			relationshipGroups.forEach(a->session.save(a));
 			relationshipTypes.forEach(a->session.save(a));
+			
 			session.getTransaction().commit();
 		}catch (Exception ex) {
 			session.getTransaction().rollback();
@@ -300,10 +339,14 @@ public class XmlToIntelData {
 		if (entities.size() > 0) { eventBroker.post(IntelEvents.ENTITY_TYPE_NEW, entities); }
 		if (relationshipTypes.size() > 0) { eventBroker.post(IntelEvents.RELATION_TYPE_NEW, relationshipTypes); }
 		if (recordSources.size() > 0) { eventBroker.post(IntelEvents.RECORD_SOURCE_ALL, recordSources); }
+		
 	}
 	
 	
-	private List<IntelRelationshipType> processRelationshipTypes(List<RelationshipType> xmlTypes, HashMap<String, IntelAttribute> attributes, HashMap<String, IntelEntityType> entities, HashMap<String, IntelRelationshipGroup> groups){
+	private List<IntelRelationshipType> processRelationshipTypes(List<RelationshipType> xmlTypes, 
+			HashMap<String, IntelAttribute> attributes, HashMap<String, IntelEntityType> entities, HashMap<String, IntelRelationshipGroup> groups,
+			IntelProfile profile){
+		
 		List<IntelRelationshipType> newSources = new ArrayList<>();
 		
 		for (RelationshipType xmlSource : xmlTypes) {
@@ -312,6 +355,38 @@ public class XmlToIntelData {
 			src.setIcon(xmlSource.getIcon());
 			src.setKeyId(xmlSource.getKey());
 			updateNames(src, xmlSource.getNames());
+			
+			String srcProfileKey = xmlSource.getSrcProfileKey();
+			String targetProfileKey = xmlSource.getTargetProfileKey();
+			
+			IntelProfile srcProfile = null;
+			if (profile.getKeyId().equalsIgnoreCase(srcProfileKey)) {
+				srcProfile = profile;
+			}else {
+				srcProfile = session.createQuery("FROM IntelProfile WHERE conservationArea = :ca AND keyId = :keyid", IntelProfile.class)
+					.setParameter("ca", ca)
+					.setParameter("keyid", srcProfileKey).uniqueResult();
+			}
+			if (srcProfile == null) {
+				warnings.add(MessageFormat.format("No profile found with key {0} for relationship type {1}. Relationship type will not be imported.", srcProfileKey, xmlSource.getKey()));
+				continue;
+			}
+			
+			IntelProfile targetProfile = null;
+			if (profile.getKeyId().equalsIgnoreCase(targetProfileKey)) {
+				targetProfile = profile;
+			}else {
+				targetProfile = session.createQuery("FROM IntelProfile WHERE conservationArea = :ca AND keyId = :keyid", IntelProfile.class)
+					.setParameter("ca", ca)
+					.setParameter("keyid", targetProfileKey).uniqueResult();
+			}
+			if (targetProfile == null) {
+				warnings.add(MessageFormat.format("No profile found with key {0} for relationship type {1}. Relationship type will not be imported.", targetProfileKey, xmlSource.getKey()));
+				continue;
+			}
+				
+			src.setSourceProfile(srcProfile);
+			src.setTargetProfile(targetProfile);
 			
 			if (xmlSource.getGroupKey() != null) {
 				IntelRelationshipGroup group = groups.get(xmlSource.getGroupKey());
@@ -377,6 +452,7 @@ public class XmlToIntelData {
 				warnings.add(MessageFormat.format(
 						Messages.XmlToIntelData_RelationshipTypeExists,
 						found.getName(), found.getKeyId()));
+				toAdd.add(found);
 			}
 		}
 		return toAdd;
@@ -410,12 +486,14 @@ public class XmlToIntelData {
 			if (found == null) {
 				// we need to add this attribute
 				toAdd.add(newSource);
+			}else {
+				toAdd.add(found);
 			}
 		}
 		return toAdd;
 	}
 	
-	private List<IntelEntityType> proecessEntityTypes(List<EntityType> xmlTypes, HashMap<String, IntelAttribute> attributes){
+	private List<IntelEntityType> proecessEntityTypes(List<EntityType> xmlTypes, HashMap<String, IntelAttribute> attributes) throws Exception{
 		List<IntelEntityType> newSources = new ArrayList<>();
 		
 		for (EntityType xmlSource : xmlTypes) {
@@ -423,13 +501,12 @@ public class XmlToIntelData {
 			src.setConservationArea(ca);
 			src.setIcon(xmlSource.getIcon());
 			src.setKeyId(xmlSource.getKey());
+			src.setProfiles(new HashSet<>());
 			updateNames(src, xmlSource.getNames());
 			
 			IntelAttribute idAttribute = attributes.get(xmlSource.getIdAttribute());
 			if (idAttribute == null) {
-				//ERROR
-				warnings.add(MessageFormat.format(Messages.XmlToIntelData_EntityTypeIdAttributeNotFound, xmlSource.getIdAttribute(), src.getName(), src.getKeyId()));
-				continue;
+				throw new Exception(MessageFormat.format(Messages.XmlToIntelData_EntityTypeIdAttributeNotFound, xmlSource.getIdAttribute(), src.getName(), src.getKeyId()));
 			}
 			src.setIdAttribute(idAttribute);
 			src.setBirtTemplate(xmlSource.getReportTemplate());
@@ -478,9 +555,12 @@ public class XmlToIntelData {
 				// we need to add this attribute
 				toAdd.add(newSource);
 			} else {
-				warnings.add(MessageFormat.format(
-						Messages.XmlToIntelData_EntityTypeExists,
+				if (!areSame(newSource, found)) {
+					throw new Exception(MessageFormat.format(
+						"The entity type {0} ({1}) already exists in the system and has a different definition from the entity type in the import file.  You must change the key associated with this entity type in the system or import file before you can import this profile.",
 						found.getName(), found.getKeyId()));
+				}
+				toAdd.add(found);
 			}
 		}
 		return toAdd;
@@ -488,7 +568,7 @@ public class XmlToIntelData {
 
 	
 	
-	private List<IntelRecordSource> processRecordSources(List<RecordSource> xmlSources, HashMap<String, IntelAttribute> attributes, HashMap<String, IntelEntityType> entityTypes){
+	private List<IntelRecordSource> processRecordSources(List<RecordSource> xmlSources, HashMap<String, IntelAttribute> attributes, HashMap<String, IntelEntityType> entityTypes) throws Exception{
 		List<IntelRecordSource> newSources = new ArrayList<>();
 		
 		for (RecordSource xmlSource : xmlSources) {
@@ -496,12 +576,14 @@ public class XmlToIntelData {
 			src.setConservationArea(ca);
 			src.setIcon(xmlSource.getIcon());
 			src.setKeyId(xmlSource.getKey());
+			src.setProfiles(new HashSet<>());
 			updateNames(src, xmlSource.getNames());
+			
 			if (xmlSource.getAttributes() != null) {
 				src.setAttributes(new ArrayList<>());
 				for (RecordSourceAttribute xmlSrcAttribute : xmlSource.getAttributes()) {
 					IntelRecordSourceAttribute attribute = new IntelRecordSourceAttribute();
-					
+					attribute.setKeyId(xmlSrcAttribute.getKey());
 					if (xmlSrcAttribute.getAttributeKey() != null) {
 						IntelAttribute srcAttribute = attributes.get(xmlSrcAttribute.getAttributeKey());
 						if (srcAttribute == null) {
@@ -556,13 +638,85 @@ public class XmlToIntelData {
 				//we need to add this attribute
 				toAdd.add(newSource);
 			}else {
-				warnings.add(MessageFormat.format(Messages.XmlToIntelData_RecordSourceExists, found.getName(), found.getKeyId())); 
+				if (!areSame(newSource, found)) {
+					throw new Exception(MessageFormat.format("The record source with key {0} already exists in the system but doesn't match the definition of the record source being imported.  You should either change the key in the system or the input file and try again.", found.getKeyId()));
+				}
+				toAdd.add(found);
 			}
 		}
 		return toAdd;
 	}
 	
-	private List<IntelAttribute> processAttributes(List<Attribute> xmlAttributes) {
+	/*
+	 * Validates that the two sources are similar.  This means the keys are the same
+	 * and all attributes in the input record source exist in the existing record 
+	 * source and the multiplicy value is the same.  Does not validate the attributes or
+	 * entity types for similarity.
+	 */
+	private boolean areSame(IntelRecordSource in, IntelRecordSource existing) {
+		if (!in.getKeyId().equalsIgnoreCase(existing.getKeyId())) return false;
+		
+		//validate that every attribute in the input exists in the existing value
+		//we don't create if the existing one has more
+		for (IntelRecordSourceAttribute inatt : in.getAttributes()) {
+			boolean found = false;
+			for (IntelRecordSourceAttribute eatt : existing.getAttributes()) {
+				if (inatt.getKeyId().equalsIgnoreCase(eatt.getKeyId())) {
+					if (inatt.getAttribute() != null && eatt.getAttribute() != null && inatt.getAttribute().getKeyId().equalsIgnoreCase(eatt.getAttribute().getKeyId())) {
+						if (eatt.getIsMultiple() != inatt.getIsMultiple()) {
+							return false;
+						}
+						found = true;
+						break;
+					}
+					if (inatt.getEntityType() != null && eatt.getEntityType() != null && inatt.getEntityType().getKeyId().equalsIgnoreCase(eatt.getEntityType().getKeyId())) {
+						if (eatt.getIsMultiple() != inatt.getIsMultiple()) {
+							return false;
+						}
+						found = true;
+						break;
+					}
+					return false;
+				}
+			}
+			if (!found) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	
+	/*
+	 * Validates that the two sources are similar.  This means the keys are the same
+	 * and all attributes in the input record source exist in the existing record 
+	 * source and the multiplicy value is the same.  Does not validate the attributes or
+	 * entity types for similarity.
+	 */
+	private boolean areSame(IntelEntityType in, IntelEntityType existing) {
+		if (!in.getKeyId().equalsIgnoreCase(existing.getKeyId())) return false;
+		
+		//validate that every attribute in the input exists in the existing value
+		//we don't create if the existing one has more
+		
+		if (!in.getIdAttribute().getKeyId().equalsIgnoreCase(existing.getIdAttribute().getKeyId())) return false;
+		for (IntelEntityTypeAttribute inatt : in.getAttributes()) {
+			boolean found = false;
+			for (IntelEntityTypeAttribute eatt : existing.getAttributes()) {
+				if (inatt.getAttribute().getKeyId().equalsIgnoreCase(eatt.getAttribute().getKeyId())) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	
+	private List<IntelAttribute> processAttributes(List<Attribute> xmlAttributes) throws Exception {
 		List<IntelAttribute> newAttributes = new ArrayList<IntelAttribute>();
 		
 		for (Attribute xmlAttribute : xmlAttributes) {
@@ -604,11 +758,30 @@ public class XmlToIntelData {
 				toAdd.add(newAttribute);
 			}else {
 				if (!found.getType().equals(newAttribute.getType())){
-					//different attribute types; this is a warning but not an error
-					warnings.add(MessageFormat.format(Messages.XmlToIntelData_AttributeExistsDifferentType, found.getName(), found.getKeyId(), found.getType().getGuiName(Locale.getDefault()), newAttribute.getType().getGuiName(Locale.getDefault()))); 
+					//TODO: fail
+					throw new Exception(MessageFormat.format("The attribute of {0} already exists in the system but has a different type.  You must change the keys of either the system attribute or the source attribute before you can import profiles.", found.getKeyId())); 
+				}
+				
+				if (found.getType() == AttributeType.LIST) {
+					//validate that everything in the import list is in the existing list
+					for (IntelAttributeListItem li : newAttribute.getAttributeList()) {
+						boolean lifound = false;
+						for (IntelAttributeListItem li2 : found.getAttributeList()) {
+							if (li.getKeyId().equalsIgnoreCase(li2.getKeyId())) {
+								lifound = true;
+								break;
+							}
+						}
+						if (!lifound) {
+							throw new Exception(MessageFormat.format("The list attribute {0} in the database does not match the list attribute in the import file.  The database requires a list item with the key id {1}.", newAttribute.getKeyId(), li.getKeyId()));
+						}
+					}
 				}
 			}
+			
+		
 		}
+		
 		
 		return toAdd;
 	}

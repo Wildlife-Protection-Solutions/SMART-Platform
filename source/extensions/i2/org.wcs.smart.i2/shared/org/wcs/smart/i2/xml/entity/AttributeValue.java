@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="labels" type="{http://www.example.org/Intelligence}NamedItem" maxOccurs="unbounded"/>
+ *         &lt;element name="labels" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.entity}NamedItem" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *       &lt;attribute name="attributeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="type" type="{http://www.example.org/Intelligence}AttributeType" />

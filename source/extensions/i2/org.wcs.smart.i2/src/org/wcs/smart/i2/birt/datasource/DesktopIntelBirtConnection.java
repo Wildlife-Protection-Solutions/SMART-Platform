@@ -80,7 +80,7 @@ public class DesktopIntelBirtConnection extends AbstractIntelBirtConnection {
 			if (permission == Permission.RECORD && !IntelSecurityManager.INSTANCE.canViewRecords(intelProfile)) {
 				it.remove();
 			}
-			if (permission == Permission.RECORD && !IntelSecurityManager.INSTANCE.canViewQuery(intelProfile)) {
+			if (permission == Permission.QUERY && !IntelSecurityManager.INSTANCE.canViewQuery(intelProfile)) {
 				it.remove();
 			}
 			

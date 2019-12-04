@@ -34,6 +34,8 @@ import java.util.UUID;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.gef.common.adapt.inject.AdapterInjectionSupport;
+import org.eclipse.gef.common.adapt.inject.AdapterInjectionSupport.LoggingMode;
 import org.eclipse.gef.layout.ILayoutAlgorithm;
 import org.eclipse.gef.layout.algorithms.BoxLayoutAlgorithm;
 import org.eclipse.gef.layout.algorithms.GridLayoutAlgorithm;
@@ -333,7 +335,14 @@ public class RelationshipGraphComposite extends Composite {
 
 		graphContentProvider = new RelationshipGraphContentProvider();
 		graphLabelProvider = new RelationshipGraphLabelProvider(graphContentProvider);
-		graphViewer = new ZestContentViewer(new ZestFxJFaceModule());
+		graphViewer = new ZestContentViewer(new ZestFxJFaceModule() {
+			@Override
+			protected void enableAdapterMapInjection() {
+				//https://bugs.eclipse.org/bugs/show_bug.cgi?id=496777
+				//https://bugs.eclipse.org/bugs/show_bug.cgi?id=545947
+				install(new AdapterInjectionSupport(LoggingMode.PRODUCTION));
+			}
+		});
 		graphViewer.createControl(mainCmp, SWT.NONE);
 		
 		graphViewer.setContentProvider(graphContentProvider);

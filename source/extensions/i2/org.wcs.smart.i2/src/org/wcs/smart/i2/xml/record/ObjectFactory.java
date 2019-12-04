@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _IntelRecord_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record", "IntelRecord"); //$NON-NLS-1$ //$NON-NLS-2$
+    private final static QName _IntelRecord_QNAME = new QName("http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record", "IntelRecord"); //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.i2.xml.record
@@ -100,7 +100,7 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link RecordType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record", name = "IntelRecord")
+    @XmlElementDecl(namespace = "http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record", name = "IntelRecord")
     public JAXBElement<RecordType> createIntelRecord(RecordType value) {
         return new JAXBElement<RecordType>(_IntelRecord_QNAME, RecordType.class, null, value);
     }

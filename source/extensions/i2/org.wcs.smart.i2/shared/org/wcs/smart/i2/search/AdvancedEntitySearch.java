@@ -45,7 +45,6 @@ import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
-import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntitySearch;
@@ -53,7 +52,6 @@ import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
-import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -154,7 +152,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 			Long now = System.nanoTime();
 			List<?> uuids = null;
 			try{
-				uuids = runQueryString(session, locale);
+				uuids = runQueryString(profiles, session, locale);
 			}catch (Exception ex){
 				throw new Exception(MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(Error.PARSE_ERROR, locale), ex.getMessage())  ,ex);
 			}
@@ -186,10 +184,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	}
 
 	
-	private List<UUID> runQueryString(Session session, Locale locale) throws Exception{
-		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
-		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
-		
+	private List<UUID> runQueryString(Set<IntelProfile> profiles, Session session, Locale locale) throws Exception{
 		String stokens[] = searchString.split("\\|"); //$NON-NLS-1$
 		
 		session.doWork(connection->{

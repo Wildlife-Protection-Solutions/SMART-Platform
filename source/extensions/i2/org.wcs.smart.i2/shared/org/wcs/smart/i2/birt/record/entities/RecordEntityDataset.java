@@ -64,7 +64,7 @@ public class RecordEntityDataset implements IQuery {
 	@Override
 	public void prepare(String queryText) throws OdaException {
 		if (connection.hasPermission(Permission.RECORD).isEmpty()) {
-			throw new OdaException("Unauthorized.  You do not have permission to access intelligence record datasets"); //$NON-NLS-1$
+			throw new OdaException("Unauthorized.  You do not have permission to access intelligence record datasets for the active profiles"); //$NON-NLS-1$
 		}
 	}
 

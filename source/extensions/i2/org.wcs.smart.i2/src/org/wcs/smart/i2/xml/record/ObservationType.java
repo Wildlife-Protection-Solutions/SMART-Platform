@@ -26,8 +26,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="category" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}LabelUuid"/>
- *         &lt;element name="attributes" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}ObservationAttributeType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="category" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}LabelUuid"/>
+ *         &lt;element name="attributes" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}ObservationAttributeType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

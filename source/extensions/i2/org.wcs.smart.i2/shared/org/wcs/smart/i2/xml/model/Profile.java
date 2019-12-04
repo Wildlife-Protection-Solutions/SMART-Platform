@@ -12,26 +12,31 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for IntelligenceData complex type.
+ * <p>Java class for Profile complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="IntelligenceData">
+ * &lt;complexType name="Profile">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="entities" type="{http://www.example.org/Intelligence}EntityType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="attributes" type="{http://www.example.org/Intelligence}Attribute" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="relationships" type="{http://www.example.org/Intelligence}RelationshipType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="relationshipGroups" type="{http://www.example.org/Intelligence}RelationshipGroup" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="recordSource" type="{http://www.example.org/Intelligence}RecordSource" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="entities" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}EntityType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="attributes" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}Attribute" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="relationships" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}RelationshipType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="relationshipGroups" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}RelationshipGroup" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="recordSource" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}RecordSource" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="recordTemplate" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="names" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}NamedItem" maxOccurs="unbounded"/>         
  *       &lt;/sequence>
+ *       &lt;attribute name="key" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="color" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -40,15 +45,16 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "IntelligenceData", propOrder = {
+@XmlType(name = "Profile", propOrder = {
     "entities",
     "attributes",
     "relationships",
     "relationshipGroups",
     "recordSource",
-    "recordTemplate"
+    "recordTemplate",
+    "names"
 })
-public class IntelligenceData {
+public class Profile {
 
     protected List<EntityType> entities;
     protected List<Attribute> attributes;
@@ -56,7 +62,12 @@ public class IntelligenceData {
     protected List<RelationshipGroup> relationshipGroups;
     protected List<RecordSource> recordSource;
     protected String recordTemplate;
-
+    @XmlElement(required = true)
+    protected List<NamedItem> names;
+    @XmlAttribute(name = "key")
+    protected String key;
+    @XmlAttribute(name = "color")
+    protected String color;
     /**
      * Gets the value of the entities property.
      * 
@@ -86,6 +97,35 @@ public class IntelligenceData {
         return this.entities;
     }
 
+    /**
+     * Gets the value of the names property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the names property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getNames().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link NamedItem }
+     * 
+     * 
+     */
+    public List<NamedItem> getNames() {
+        if (names == null) {
+            names = new ArrayList<NamedItem>();
+        }
+        return this.names;
+    }
+    
     /**
      * Gets the value of the attributes property.
      * 
@@ -225,5 +265,50 @@ public class IntelligenceData {
     public void setRecordTemplate(String value) {
         this.recordTemplate = value;
     }
+    /**
+     * Gets the value of the key property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getKey() {
+        return key;
+    }
 
+    /**
+     * Sets the value of the key property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setKey(String value) {
+        this.key = value;
+    }
+    /**
+     * Gets the value of the color property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getColor() {
+        return color;
+    }
+
+    /**
+     * Sets the value of the color property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setColor(String color) {
+        this.color = color;
+    }
 }

@@ -86,6 +86,8 @@ ALTER TABLE smart.i_record_query ADD CONSTRAINT irecordquery2_modifiedby_fk FORE
 		
 ALTER TABLE smart.i_recordsource_attribute ADD COLUMN keyid varchar(128);
 
---TODO: MAKE THESE UNIQUE
+--TODO: MAKE THESE UNIQUE and not null
 update smart.I_RECORDSOURCE_ATTRIBUTE set keyid = (select a.keyid from smart.i_attribute a where a.uuid = smart.i_recordsource_attribute.attribute_uuid) where attribute_uuid is not null;
 update smart.I_RECORDSOURCE_ATTRIBUTE set keyid = (select a.keyid from smart.i_entity_type a where a.uuid = smart.i_recordsource_attribute.entity_type_uuid) where entity_type_uuid is not null;
+
+alter table smart.i_recordsource_attribute alter column keyid not null;

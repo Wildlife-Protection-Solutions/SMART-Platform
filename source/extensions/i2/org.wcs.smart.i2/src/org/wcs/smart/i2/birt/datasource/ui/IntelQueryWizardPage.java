@@ -21,8 +21,10 @@ import org.eclipse.datatools.connectivity.oda.design.ResultSetColumns;
 import org.eclipse.datatools.connectivity.oda.design.ResultSetDefinition;
 import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSessionUtil;
 import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizardPage;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -33,9 +35,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -48,14 +49,11 @@ import org.wcs.smart.i2.birt.query.IntelQueryDataset;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
-import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem;
 import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.Resources;
-import org.wcs.smart.i2.ui.views.QueryProxy;
 import org.wcs.smart.util.UuidUtils;
 
 public class IntelQueryWizardPage extends DataSetWizardPage {
@@ -115,7 +113,11 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 			return composite;
 		}
 		
-		lstQueries = new TableViewer(composite, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		Composite wrapper = new Composite(composite, SWT.NONE);
+		wrapper.setLayout(new TableColumnLayout());
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		lstQueries = new TableViewer(wrapper, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		lstQueries.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
 				if (element instanceof AbstractIntelQuery) return ((AbstractIntelQuery) element).getName();
@@ -127,15 +129,10 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 			}
 		});
 		lstQueries.setContentProvider(ArrayContentProvider.getInstance());
-		lstQueries.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)lstQueries.getControl().getLayoutData()).heightHint = 300;
-		lstQueries.getControl().addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				validateData();
-			}
-		});
+		lstQueries.getControl().addListener(SWT.Selection, e->validateData());
 		
+		TableColumn tc = new TableColumn(lstQueries.getTable(), SWT.NONE);
+		((TableColumnLayout)wrapper.getLayout()).setColumnData(tc, new ColumnWeightData(100));
 		List<AbstractIntelQuery> queries = new ArrayList<>();
 
 		Set<String> profiles = ProfilesManager.INSTANCE.getActiveProfiles()

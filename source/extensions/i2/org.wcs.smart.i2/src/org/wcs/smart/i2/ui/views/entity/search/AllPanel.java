@@ -337,7 +337,7 @@ public class AllPanel extends Composite {
 					if (((Double)value) < 0.5) return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
 					return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
 				case DATE:
-					return DateFormat.getDateInstance().format(java.sql.Date.valueOf((String)value));
+					return DateFormat.getDateInstance().format((Date)value);
 				case EMPLOYEE:
 				case LIST:
 				case NUMERIC:

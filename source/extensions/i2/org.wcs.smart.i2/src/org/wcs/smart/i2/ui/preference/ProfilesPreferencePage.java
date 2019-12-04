@@ -21,17 +21,30 @@
  */
 package org.wcs.smart.i2.ui.preference;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -46,6 +59,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.hibernate.Session;
@@ -59,6 +74,8 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.ProfileDialog;
+import org.wcs.smart.i2.xml.ProfileToXml;
+import org.wcs.smart.i2.xml.XmlToProfile;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 import com.ibm.icu.text.MessageFormat;
@@ -71,6 +88,8 @@ import com.ibm.icu.text.MessageFormat;
  */
 public class ProfilesPreferencePage extends PreferencePage implements IIntelPreferencePage{
 	
+	@Inject
+	private IEventBroker eventBroker;
 	
 	private TableViewer tblConfigurations;
 	private List<IntelProfile> configs;
@@ -98,6 +117,96 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 		return btn;
 	}
 	
+	private void exportConfig() {
+		Set<IntelProfile> profiles = new HashSet<>();
+		for (Iterator<?> iterator = tblConfigurations.getStructuredSelection().iterator(); iterator.hasNext();) {
+			Object obj = (Object) iterator.next();
+			if (obj instanceof IntelProfile) profiles.add((IntelProfile) obj);
+		}
+		Object x = tblConfigurations.getStructuredSelection().getFirstElement();
+		if (!(x instanceof IntelProfile)) return;
+		
+		final IntelProfile ip = (IntelProfile)x;
+		
+		FileDialog fd = new FileDialog(getShell(), SWT.SAVE);
+		fd.setFilterExtensions(new String[] {"*.zip", "*.*"});
+		fd.setFilterNames(new String[] {"Zip Files (*.zip)", "All Files (*.*)"});
+		fd.setFileName("smartprofile_" + ip.getKeyId() + ".zip");
+//		fd.setFilterPath(string);
+		
+		String fName = fd.open();
+		if (fName == null) return;
+		
+		Path outFile = Paths.get(fName);
+		if (Files.exists(outFile)) {
+			if (!MessageDialog.openQuestion(getShell(), "Overwrite", MessageFormat.format("The file {0} exists. Do you want to overwrite it?", outFile.toString()))){
+				return;
+			}
+			try {
+				Files.delete(outFile);
+			} catch (IOException e) {
+				Intelligence2PlugIn.displayLog(e.getMessage(), e);
+				return;
+			}
+		}
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try {
+			pmd.run(true,  false,  new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					try(Session session = HibernateManager.openSession()){
+						ProfileToXml xml = new ProfileToXml(session);
+						xml.export(outFile, ip, monitor);
+						Display.getDefault().syncExec(()->
+							MessageDialog.openInformation(getShell(), "Complete.", "Export complete"));
+					}catch (Exception ex) {
+						throw new InvocationTargetException(ex);
+					}
+				}
+			});
+		}catch (Exception ex) {
+			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+		}
+		
+	}
+	public void importConfig() {
+		FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
+		fd.setFilterExtensions(new String[] {"*.zip", "*.*"});
+		fd.setFilterNames(new String[] {"Zip Files (*.zip)", "All Files (*.*)"});
+		
+		String filename = fd.open();
+		if (filename == null) return;
+		
+		final Path p = Paths.get(filename);
+		if (!Files.exists(p)) {
+			MessageDialog.openError(getShell(), "Not Found", "File Not Found");
+			return;
+		}
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try {
+			pmd.run(true,  false,  new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					try(Session session = HibernateManager.openSession()){
+						XmlToProfile engine = new XmlToProfile(SmartDB.getCurrentConservationArea());						
+						engine.importXmlData(p, monitor, eventBroker);
+					}catch (Exception ex) {
+						throw new InvocationTargetException(ex);
+					}
+				}
+			});
+		}catch (Exception ex) {
+			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+		}
+		
+		//TODO: refresh entire preference dialog
+		refresh();
+		
+	}
 	private void add() {
 		if (configs == null) return;
 		IntelProfile c = new IntelProfile();
@@ -233,6 +342,16 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 		Button btnDelete = createButton(btnpanel, DialogConstants.DELETE_BUTTON_TEXT, SmartPlugIn.DELETE_ICON);
 		btnDelete.addListener(SWT.Selection, e->delete());
 		
+		Label l = new Label(btnpanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Button btnExport = createButton(btnpanel, DialogConstants.EXPORT_BUTTON_TEXT, SmartPlugIn.EXPORT_ICON);
+		btnExport.addListener(SWT.Selection, e->exportConfig());
+		
+		Button btnImport = createButton(btnpanel, DialogConstants.IMPORT_BUTTON_TEXT, SmartPlugIn.IMPORT_ICON);
+		btnImport.addListener(SWT.Selection, e->importConfig());
+		
+		
 		Menu mnu = new Menu(tblConfigurations.getControl());
 		tblConfigurations.getControl().setMenu(mnu);
 		MenuItem miAdd = createMenuItem(mnu, DialogConstants.ADD_BUTTON_TEXT, SmartPlugIn.ADD_ICON);
@@ -246,6 +365,7 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 
 		btnEdit.setEnabled(false);
 		btnDelete.setEnabled(false);
+		btnExport.setEnabled(false);
 		miEdit.setEnabled(false);
 		miDelete.setEnabled(false);
 		
@@ -254,6 +374,7 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 			btnDelete.setEnabled(!tblConfigurations.getSelection().isEmpty());
 			miEdit.setEnabled(!tblConfigurations.getSelection().isEmpty());
 			miDelete.setEnabled(!tblConfigurations.getSelection().isEmpty());
+			btnExport.setEnabled(!tblConfigurations.getSelection().isEmpty());
 		});
 		
 		

@@ -154,6 +154,7 @@ public enum EntityImportEngine {
 				IntelEntity entity = new IntelEntity();
 				entity.setConservationArea(SmartDB.getCurrentConservationArea());
 				entity.setEntityType(config.getType());
+				entity.setProfile(config.getProfile());
 				entity.setAttributes(new ArrayList<IntelEntityAttributeValue>());
 				newEntities.add(entity);
 				

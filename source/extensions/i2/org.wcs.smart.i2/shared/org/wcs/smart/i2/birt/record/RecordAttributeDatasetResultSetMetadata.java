@@ -80,7 +80,6 @@ public class RecordAttributeDatasetResultSetMetadata implements IResultSetMetaDa
 					}else if (record.getAttribute().getEntityType() != null){
 						name = record.getAttribute().getEntityType().getName();
 					}
-					name += ":"; //$NON-NLS-1$
 					return name;
 				}else{
 					return record.getAttribute().getName();

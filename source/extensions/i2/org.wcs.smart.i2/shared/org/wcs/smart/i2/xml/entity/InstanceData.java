@@ -25,8 +25,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="entities" type="{http://www.example.org/Intelligence}Entity" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="relationships" type="{http://www.example.org/Intelligence}Relationship" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="entities" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.entity}Entity" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="relationships" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.entity}Relationship" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

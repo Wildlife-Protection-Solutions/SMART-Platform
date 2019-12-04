@@ -65,6 +65,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
@@ -115,6 +116,7 @@ public enum RecordImportEngine {
 //		//load the attributes 
 		Set<IntelRecordSource> sources = new HashSet<>();
 		Collection<Employee> allEmployees = new ArrayList<>();
+		List<IntelProfile> profiles = null;
 		try(Session s = HibernateManager.openSession()){
 			sources.addAll( QueryFactory.buildQuery(s, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
 			sources.forEach(src -> {
@@ -133,6 +135,8 @@ public enum RecordImportEngine {
 				allEmployees.forEach(e->{e.getUuid(); SmartLabelProvider.getFullLabel(e);});
 			});
 			
+			profiles = QueryFactory.buildQuery(s, IntelProfile.class,"conservationArea", SmartDB.getCurrentConservationArea()).list(); 
+					
 		}
 		monitor.worked(1);
 		monitor.checkCanceled();
@@ -206,6 +210,40 @@ public enum RecordImportEngine {
 				}
 				if (record.getPrimaryDate() == null) {
 					record.setPrimaryDate(new Date());
+				}
+				
+				String profile = data[config.getMappedColumn(Column.PROFILE)].trim();
+				//TODO:
+				
+				for (IntelProfile ip : profiles) {
+					if (ip.getName().equalsIgnoreCase(profile)) {
+						record.setProfile(ip);
+						break;
+					}
+				}
+				if (record.getProfile() == null) {
+					for (IntelProfile ip : profiles) {
+						for(Label l : ip.getNames()) {
+							if (l.getValue().equalsIgnoreCase(profile)) {
+								record.setProfile(ip);
+								break;
+							}
+						}
+						if (record.getProfile() != null) break;
+					}
+				}
+				if (record.getProfile() == null) {
+					for (IntelProfile ip : profiles) {
+						if (ip.getKeyId().equalsIgnoreCase(profile)) {
+							record.setProfile(ip);
+							break;
+						}
+					}
+				}
+				if (record.getProfile() == null) {
+					//error
+					warnings.add(MessageFormat.format("Invalid line {0}.  No profile with value {1} found", line, profile));
+					continue;
 				}
 				
 				//source

@@ -61,7 +61,7 @@ public class RecordAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 		public Object getValue(IntelRecordAttachment record) {
 			switch(this){
 			case RECORD_UUID:
-				return UuidUtils.uuidToString(record.getRecord().getUuid());
+				return record.getRecord().getUuid();
 			case FILE_NAME:
 				return record.getAttachment().getFilename();
 			case DATE_CREATED:

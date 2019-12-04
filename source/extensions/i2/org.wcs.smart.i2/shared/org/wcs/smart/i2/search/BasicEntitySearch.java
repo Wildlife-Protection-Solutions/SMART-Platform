@@ -146,7 +146,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		}
 		if (searchString != null && searchString.length() > 0){
 			//perform fuzzy search
-			List<IntelSearchResultItem> sresults = SearchManager.INSTANCE.fuzzySearch(searchString,  entityTypes, cas, maxResultCnt, session);
+			List<IntelSearchResultItem> sresults = SearchManager.INSTANCE.fuzzySearch(searchString,  entityTypes, cas, maxResultCnt, profiles, session);
 			return new IntelSearchResult(sresults, System.nanoTime() - now);
 		}
 

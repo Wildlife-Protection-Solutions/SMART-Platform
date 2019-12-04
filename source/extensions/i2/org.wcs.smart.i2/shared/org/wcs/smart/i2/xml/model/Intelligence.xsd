@@ -60,9 +60,10 @@
     		</element>
     	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>
-        <attribute name="entityTypeKey" type="string"></attribute>
-        <attribute name="isMulit" type="boolean"></attribute>
+    	<attribute name="entityTypeKey" type="string"></attribute>
+    	<attribute name="isMulit" type="boolean"></attribute>
     	<attribute name="order" type="int"></attribute>
+    	<attribute name="key" type="string"></attribute>
     </complexType>
 
     <complexType name="RelationshipGroup">
@@ -91,9 +92,12 @@
     		<element name="targetTypeKey" type="string" maxOccurs="1"
     			minOccurs="0">
     		</element>
-    		<element name="attributes" type="tns:RelationshipTypeAttribute"
-    			maxOccurs="unbounded" minOccurs="0">
+    		<element name="attributes"
+    			type="tns:RelationshipTypeAttribute" maxOccurs="unbounded"
+    			minOccurs="0">
     		</element>
+    		<element name="srcProfileKey" type="string" maxOccurs="1" minOccurs="1"></element>
+    		<element name="targetProfileKey" type="string" maxOccurs="1" minOccurs="1"></element>
     	</sequence>
     	<attribute name="key" type="string"></attribute>
     </complexType>
@@ -145,31 +149,38 @@
     	<attribute name="order" type="int"></attribute>
     </complexType>
 
-   <complexType name="IntelligenceData">
-   	<sequence>
-   		<element name="entities" type="tns:EntityType"
-   			maxOccurs="unbounded" minOccurs="0">
-   		</element>
-   		<element name="attributes" type="tns:Attribute"
-   			maxOccurs="unbounded" minOccurs="0">
-   		</element>
-   		<element name="relationships" type="tns:RelationshipType"
-   			maxOccurs="unbounded" minOccurs="0">
-   		</element>
-   		<element name="relationshipGroups"
-   			type="tns:RelationshipGroup" maxOccurs="unbounded"
-   			minOccurs="0">
-   		</element>
-   		<element name="recordSource" type="tns:RecordSource"
-   			maxOccurs="unbounded" minOccurs="0">
-   		</element>
-   		<element name="recordTemplate" type="string" maxOccurs="1" minOccurs="0"></element>
-   	</sequence>
+    <complexType name="Profile">
+    	<sequence>
+    		<element name="entities" type="tns:EntityType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="attributes" type="tns:Attribute"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="relationships" type="tns:RelationshipType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="relationshipGroups"
+    			type="tns:RelationshipGroup" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    		<element name="recordSource" type="tns:RecordSource"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="recordTemplate" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="names" type="tns:NamedItem"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    	</sequence>
 
-   </complexType>
+    	<attribute name="key" type="string"></attribute>
+    	<attribute name="color" type="string"></attribute>
+    </complexType>
 
 
-    <element name="data" type="tns:IntelligenceData"></element>
+    <element name="profile" type="tns:Profile"></element>
 
 
 </schema>

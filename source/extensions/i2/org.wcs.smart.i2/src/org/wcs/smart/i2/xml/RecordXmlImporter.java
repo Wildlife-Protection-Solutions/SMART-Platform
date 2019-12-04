@@ -76,6 +76,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
@@ -373,8 +374,15 @@ public class RecordXmlImporter {
 			if (type.getTitle() == null || type.getTitle().trim().isEmpty()) {
 				throw new Exception(Messages.RecordXmlImporter_TitleRequired);
 			}
+			
+			IntelProfile profile = findProfile(session,  type.getProfileKey());
+			if(profile == null) {
+				warnings.add(MessageFormat.format("Profile with key {0} not found.  Record will not be imported ({1}).", type.getProfileKey(), xmlFile.getFileName().toString()));
+				return;
+			}
 			List<IntelEntityLocation> entitylocations = new ArrayList<>();
 			IntelRecord newRecord = new IntelRecord();
+			newRecord.setProfile(profile);
 			newRecord.setConservationArea(SmartDB.getCurrentConservationArea());
 			newRecord.setTitle(type.getTitle().trim());
 			if (type.getPrimaryDate() != null) {
@@ -744,6 +752,11 @@ public class RecordXmlImporter {
 		return QueryFactory.buildQuery(session,  IntelEntityType.class, 
 				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 				new Object[] {"keyId", entityTypeKey}).uniqueResult(); //$NON-NLS-1$
+	}
+	private IntelProfile findProfile(Session session, String profileKey) {
+		return QueryFactory.buildQuery(session,  IntelProfile.class, 
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"keyId", profileKey}).uniqueResult(); //$NON-NLS-1$
 	}
 	
 	private IntelEntity parseEntity(LabelUuid entityListItem, IntelEntityType type, Session session, List<String> warnings){

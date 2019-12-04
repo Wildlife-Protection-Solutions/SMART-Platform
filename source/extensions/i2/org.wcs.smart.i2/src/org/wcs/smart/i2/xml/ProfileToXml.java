@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.i2.xml;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -30,8 +28,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -40,13 +36,11 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -54,6 +48,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
@@ -65,8 +60,8 @@ import org.wcs.smart.i2.xml.model.AttributeType;
 import org.wcs.smart.i2.xml.model.EntityType;
 import org.wcs.smart.i2.xml.model.EntityTypeAttribute;
 import org.wcs.smart.i2.xml.model.EntityTypeAttributeGroup;
-import org.wcs.smart.i2.xml.model.IntelligenceData;
 import org.wcs.smart.i2.xml.model.ObjectFactory;
+import org.wcs.smart.i2.xml.model.Profile;
 import org.wcs.smart.i2.xml.model.RecordSource;
 import org.wcs.smart.i2.xml.model.RecordSourceAttribute;
 import org.wcs.smart.i2.xml.model.RelationshipGroup;
@@ -81,186 +76,74 @@ import org.wcs.smart.util.ZipUtil;
  * @author Emily
  *
  */
-public class IntelDataToXml {
+public class ProfileToXml {
 
 	public static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.i2.xml.model"; //$NON-NLS-1$
 	
 	public static final String XML_DATA_FILENAME = "intelligencedata.xml"; //$NON-NLS-1$
 	
 	private Session session;
-	
-	private IntelligenceData data;
-	private Set<Path> filesToInclude;
-	
-	public IntelDataToXml(Session session) {
+		
+	public ProfileToXml(Session session) {
 		this.session = session;
 	}
 	
-	public void export(Path outputFile, List<UUID> attributes, List<UUID> sources, List<UUID> relationshipTypes, List<UUID> entityTypes, boolean exportRecordTemplate, IProgressMonitor monitor) throws Exception{
-		SubMonitor progress = SubMonitor.convert(monitor,Messages.IntelDataToXml_ExportTaskName, 4);
-		toXml(attributes, sources, relationshipTypes, entityTypes, exportRecordTemplate, progress.split(3));
-		if (data  != null) {
-			writeData(outputFile, progress.split(1));
-		}else {
-			throw new IOException(Messages.IntelDataToXml_ConvservationFailedMsg);
-		}
+	public void export(Path outputFile, IntelProfile profile, IProgressMonitor monitor) throws Exception{
 		
-	}
-	
-	private void writeData(Path outputFile, IProgressMonitor monitor) throws Exception {
-		SubMonitor progress = SubMonitor.convert(monitor, 3);
-		
-		monitor.subTask(Messages.IntelDataToXml_ExportTask);
-		progress.split(1);
-		
+		SubMonitor progress = SubMonitor.convert(monitor,Messages.IntelDataToXml_ExportTaskName, 2);
 		Path tempDir = Files.createTempDirectory("smart." + System.nanoTime()); //$NON-NLS-1$
+		
 		try {
-			//write xml data
-			Path xmlFile = tempDir.resolve(XML_DATA_FILENAME);
-			try {
-				writeToFile(data, xmlFile);
-			} catch (JAXBException e) {
-				throw new IOException("Unable to write intelligence data to xml file", e); //$NON-NLS-1$
-			}
+			IntelProfile p = session.get(IntelProfile.class, profile.getUuid());
+			toXml(p, tempDir, progress.split(1));
 			
-			SubMonitor sub = progress.split(1);
-			sub.setWorkRemaining(filesToInclude.size());
-			//copy other files
-			for (Path src : filesToInclude) {
-				Path trg = tempDir.resolve(src.getFileName());
-				Files.copy(src, trg);
-				sub.worked(1);
-			}
-			
-			//zip together 
-			progress.split(1);
-			List<Path> files = Files.list(tempDir).collect(Collectors.toList());
-			File[] toExport = new File[files.size()];
-			for (int i = 0; i < files.size(); i ++) {
-				toExport[i] = files.get(i).toFile();
-			}
-			ZipUtil.createZip(toExport, outputFile.toFile(), new NullProgressMonitor());
+			progress.subTask("zipping results files");
+			ZipUtil.createZip(tempDir.toFile().listFiles(), outputFile.toFile(), progress.split(1));
 		}finally {
 			//clean up
-			try {
-				FileUtils.deleteDirectory(tempDir.toFile());
-			}catch (Exception ex) {
-				Intelligence2PlugIn.log(ex.getMessage(), ex);
-			}
+			FileUtils.deleteDirectory(tempDir.toFile());
 		}
-		
 	}
-	
-	private void toXml(List<UUID> attributes, List<UUID> sources, List<UUID> relationshipTypes, List<UUID> entityTypes, boolean exportRecordTemplate, IProgressMonitor monitor) {
-	
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.IntelDataToXml_ExportTask2, 7);
 		
-		Set<IntelRecordSource> isources = new HashSet<>();
+	private void toXml(IntelProfile profile, Path outputDir, IProgressMonitor monitor) throws Exception {
+	
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.IntelDataToXml_ExportTask2, 8);
+		
 		Set<IntelAttribute> iattributes = new HashSet<>();
-		Set<IntelEntityType> ientitytypes = new HashSet<>();
 		Set<IntelRelationshipType> irelationshiptypes = new HashSet<>();
 		Set<IntelRelationshipGroup> igroups = new HashSet<>();
-		filesToInclude = new HashSet<>();
+		Set<Path> filesToInclude = new HashSet<>();
+		
 		
 		progress.subTask(Messages.IntelDataToXml_CollectionDataTask);
 		progress.split(1);
 		Path recordTemplate = null;
-		if (exportRecordTemplate) {
-			recordTemplate = IntelReportManager.INSTANCE.getRecordTemplate(SmartDB.getCurrentConservationArea());
-			if (recordTemplate != null && Files.exists(recordTemplate)) {
-				filesToInclude.add(recordTemplate);
+		
+		recordTemplate = IntelReportManager.INSTANCE.getRecordTemplate(SmartDB.getCurrentConservationArea());
+		if (recordTemplate != null && Files.exists(recordTemplate)) {
+			filesToInclude.add(recordTemplate);
+		}
+		
+		for (IntelEntityType t : profile.getEntityTypes()) {
+			for (IntelEntityTypeAttribute eta : t.getAttributes()) {
+				if (eta.getAttribute() != null) iattributes.add(eta.getAttribute());
+			}
+		}
+		for (IntelRecordSource s : profile.getRecordSources()) {
+			for (IntelRecordSourceAttribute a : s.getAttributes()) {
+				if (a.getAttribute() != null) iattributes.add(a.getAttribute());
 			}
 		}
 		
-		if (attributes != null) {
-			attributes.forEach(a->{
-				IntelAttribute ia = session.get(IntelAttribute.class, a);
-				if (ia != null) iattributes.add(ia);
-			});
-		}
+		irelationshiptypes.addAll(session.createQuery("FROM IntelRelationshipType WHERE sourceProfile = :src or targetProfile = :trg")
+				.setParameter("src", profile)
+				.setParameter("trg", profile)
+				.list());
 		
-		
-		if (sources != null) {
-			sources.forEach(s->{
-				IntelRecordSource src = session.get(IntelRecordSource.class, s);
-				if (src != null) {
-					isources.add(src);
-					if (src.getAttributes() != null) {
-						src.getAttributes().forEach(a->{
-							if (a.getAttribute() != null) {
-								iattributes.add(a.getAttribute());
-							//}else if (a.getEntityType() != null) {
-							//	ientitytypes.add(a.getEntityType());
-							}
-						});
-					}
-				}
-			});
-		}
-		
-
-		if (relationshipTypes != null) {
-			relationshipTypes.forEach(r->{
-				IntelRelationshipType rtype = session.get(IntelRelationshipType.class, r);
-				if (rtype != null) {
-					irelationshiptypes.add(rtype);
-					/*
-					if (rtype.getSourceEntityType() != null) ientitytypes.add(rtype.getSourceEntityType());
-					if (rtype.getTargetEntityType() != null) ientitytypes.add(rtype.getTargetEntityType());
-					*/
-				}
-			});
-		}
-
-		if (entityTypes != null) {
-			entityTypes.forEach(e->{
-				IntelEntityType etype = session.get(IntelEntityType.class, e);
-				if (etype != null) {
-					ientitytypes.add(etype);
-				}
-			});
-		}
-		
-		//TODO include relationships for entities
-		/*
-		Collection<IntelEntityType> toSearch = ientitytypes;
-		while(!toSearch.isEmpty()) {
-			CriteriaBuilder cb = session.getCriteriaBuilder();
-			CriteriaQuery<IntelRelationshipType> c = cb.createQuery(IntelRelationshipType.class);
-			Root<IntelRelationshipType> from = c.from(IntelRelationshipType.class);
-			c.where( cb.or(from.get("sourceEntityType").in(entityTypes), //$NON-NLS-1$
-				 from.get("targetEntityType").in(entityTypes))); //$NON-NLS-1$
-		
-			List<IntelRelationshipType> rtypes = session.createQuery(c).list();
-			toSearch = new ArrayList<>();
-			for (IntelRelationshipType t : rtypes) {
-				if (irelationshiptypes.contains(t)) continue;
-				
-				irelationshiptypes.add(t);
-				if (t.getSourceEntityType() != null && !ientitytypes.contains(t.getSourceEntityType())) {
-					ientitytypes.add(t.getSourceEntityType());
-					toSearch.add(t.getSourceEntityType());
-				}
-				if (t.getTargetEntityType() != null && !ientitytypes.contains(t.getTargetEntityType())) {
-					ientitytypes.add(t.getSourceEntityType());
-					toSearch.add(t.getSourceEntityType());
-				}
-			}
-		}
-		*/
-		
-		irelationshiptypes.forEach(r->{
-			if (r.getAttributes() != null) {
-				r.getAttributes().forEach(ra -> iattributes.add(ra.getAttribute()));
-			}
-			if (r.getRelationshipGroup() != null) igroups.add(r.getRelationshipGroup());
+		irelationshiptypes.forEach(ir->{
+			if (ir.getRelationshipGroup() != null) igroups.add(ir.getRelationshipGroup());
+			ir.getAttributes().forEach(a->iattributes.add(a.getAttribute()));
 		});
-		ientitytypes.forEach(e->{
-			if (e.getAttributes() != null) {
-				e.getAttributes().forEach(ea -> iattributes.add(ea.getAttribute()));
-			}
-		});
-		
 		
 		progress.subTask(Messages.IntelDataToXml_attributesTask);
 		progress.split(1);
@@ -268,7 +151,7 @@ public class IntelDataToXml {
 		
 		progress.subTask(Messages.IntelDataToXml_recordSourceTask);
 		progress.split(1);
-		List<RecordSource> xmlSources = convertRecordSource(isources);
+		List<RecordSource> xmlSources = convertRecordSource(profile.getRecordSources());
 		
 		progress.subTask(Messages.IntelDataToXml_relationshipGroupTask);
 		progress.split(1);
@@ -280,10 +163,15 @@ public class IntelDataToXml {
 		
 		progress.subTask(Messages.IntelDataToXml_entityTypeTask);
 		progress.split(1);
-		List<EntityType> xmlEntities = convertEntityType(ientitytypes, filesToInclude);
+		List<EntityType> xmlEntities = convertEntityType(profile.getEntityTypes(), filesToInclude);
 		
 		progress.subTask(Messages.IntelDataToXml_conversionTask);
-		data = new IntelligenceData();
+		Profile data = new Profile();
+		data.setKey(profile.getKeyId());
+		data.setColor(Integer.toHexString(profile.getColor()).substring(2));
+		data.getNames().addAll(convertNamedItem(profile));
+
+		
 		data.getAttributes().addAll(xmlAttributes);
 		data.getEntities().addAll(xmlEntities);
 		data.getRecordSource().addAll(xmlSources);
@@ -294,16 +182,34 @@ public class IntelDataToXml {
 			data.setRecordTemplate(recordTemplate.getFileName().toString());
 		}
 		progress.worked(1);
+		
+		
+		SubMonitor mfiles = progress.newChild(filesToInclude.size() + 1);
+		Path xmlFile = outputDir.resolve(profile.getKeyId() +".xml");
+		writeToFile(data, xmlFile);
+		mfiles.worked(1);
+		if (!filesToInclude.isEmpty()) {
+			Path fileDir = outputDir.resolve(profile.getKeyId());
+			Files.createDirectory(fileDir);
+			
+			for (Path src : filesToInclude) {
+				Path trg = fileDir.resolve(src.getFileName());
+				Files.copy(src, trg);
+				mfiles.worked(1);
+			}
+		}
+		
+
 	}
 	
-	private void writeToFile(IntelligenceData data, Path xmlFile) throws JAXBException {
+	private void writeToFile(Profile data, Path xmlFile) throws JAXBException {
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		
 		ObjectFactory objFactor = new ObjectFactory();
 		
-		JAXBElement<IntelligenceData> element = objFactor.createData(data);
+		JAXBElement<Profile> element = objFactor.createData(data);
 		marshaller.marshal(element, xmlFile.toFile());
 	}
 	
@@ -341,7 +247,7 @@ public class IntelDataToXml {
 			if (a.getAttributes() != null) {
 				for (IntelRecordSourceAttribute srcAttribute : a.getAttributes()) {
 					RecordSourceAttribute xmlAttribute = new RecordSourceAttribute();
-					
+					xmlAttribute.setKey(srcAttribute.getKeyId());
 					xmlAttribute.setIsMulit(srcAttribute.getIsMultiple());
 					xmlAttribute.setOrder(srcAttribute.getOrder());
 					xmlAttribute.getNames().addAll(convertNamedItem(srcAttribute));
@@ -380,6 +286,9 @@ public class IntelDataToXml {
 			xmlType.setKey(r.getKeyId());
 			xmlType.getNames().addAll(convertNamedItem(r));
 			xmlType.setIcon(r.getIcon());
+			
+			xmlType.setSrcProfileKey(r.getSourceProfile().getKeyId());
+			xmlType.setTargetProfileKey(r.getTargetProfile().getKeyId());
 			
 			if (r.getRelationshipGroup() != null) xmlType.setGroupKey(r.getRelationshipGroup().getKeyId());
 			if (r.getSourceEntityType() != null) xmlType.setSrcTypeKey(r.getSourceEntityType().getKeyId());

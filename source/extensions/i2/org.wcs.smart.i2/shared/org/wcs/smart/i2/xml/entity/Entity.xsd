@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/Intelligence" xmlns:tns="http://www.example.org/Intelligence" elementFormDefault="qualified">
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+ targetNamespace="http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.entity" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.entity"  
+elementFormDefault="qualified">
 
     <complexType name="AttributeValue">
     	<sequence>
@@ -44,14 +47,27 @@
 
 	<complexType name="Entity">
 		<sequence>
-			<element name="id" type="string" maxOccurs="1" minOccurs="1"></element>
-            <element name="scratchpad" type="string" maxOccurs="1" minOccurs="0"></element>
-            <element name="attributes" type="tns:AttributeValue" maxOccurs="unbounded" minOccurs="1"></element>
-			<element name="attachments" type="tns:Attachment" maxOccurs="unbounded" minOccurs="0"></element>
-			<element name="records" type="tns:Record" maxOccurs="unbounded" minOccurs="0"></element>
-			<element name="locations" type="tns:Location" maxOccurs="unbounded" minOccurs="0"></element>
+			<element name="id" type="string" maxOccurs="1"
+				minOccurs="1">
+			</element>
+			<element name="scratchpad" type="string" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="attributes" type="tns:AttributeValue"
+				maxOccurs="unbounded" minOccurs="1">
+			</element>
+			<element name="attachments" type="tns:Attachment"
+				maxOccurs="unbounded" minOccurs="0">
+			</element>
+			<element name="records" type="tns:Record"
+				maxOccurs="unbounded" minOccurs="0">
+			</element>
+			<element name="locations" type="tns:Location"
+				maxOccurs="unbounded" minOccurs="0">
+			</element>
 		</sequence>
 		<attribute name="entityTypeKey" type="string"></attribute>
+		<attribute name="profileKey" type="string"></attribute>
 	</complexType>
 
 	<complexType name="Relationship">

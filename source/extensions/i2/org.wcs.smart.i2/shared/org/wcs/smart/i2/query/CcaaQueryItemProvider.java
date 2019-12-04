@@ -49,6 +49,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -123,7 +124,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		return attributes.values().stream().collect(Collectors.toList());
 	}
 	
-	@Override
+//	@Override
 	public List<IntelRecordSource> getRecordSources(Session session) {
 		HashMap<String, IntelRecordSource> types = new HashMap<>();
 		
@@ -474,5 +475,17 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 			}
 		}
 		return mergedDataModel;
+	}
+
+	@Override
+	public List<IntelRecordSource> getRecordSources(Set<String> profiles, Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<IntelRecordSourceAttribute> getRecordSourceAttributes(IntelRecordSource recordSource, Session session) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

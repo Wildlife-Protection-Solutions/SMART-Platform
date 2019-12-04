@@ -24,11 +24,11 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="attribute" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}LabelUuid"/>
+ *         &lt;element name="attribute" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}LabelUuid"/>
  *         &lt;element name="string_value" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="number_value" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="list_value" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}LabelUuid" minOccurs="0"/>
- *         &lt;element name="tree_value" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}LabelUuid" minOccurs="0"/>
+ *         &lt;element name="list_value" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}LabelUuid" minOccurs="0"/>
+ *         &lt;element name="tree_value" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}LabelUuid" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

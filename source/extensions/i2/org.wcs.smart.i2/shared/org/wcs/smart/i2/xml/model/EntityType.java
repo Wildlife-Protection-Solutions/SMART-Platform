@@ -30,11 +30,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="names" type="{http://www.example.org/Intelligence}NamedItem" maxOccurs="unbounded"/>
+ *         &lt;element name="names" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}NamedItem" maxOccurs="unbounded"/>
  *         &lt;element name="icon" type="{http://www.w3.org/2001/XMLSchema}hexBinary" minOccurs="0"/>
  *         &lt;element name="idAttribute" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="groups" type="{http://www.example.org/Intelligence}EntityTypeAttributeGroup" maxOccurs="unbounded"/>
- *         &lt;element name="attributes" type="{http://www.example.org/Intelligence}EntityTypeAttribute" maxOccurs="unbounded"/>
+ *         &lt;element name="groups" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}EntityTypeAttributeGroup" maxOccurs="unbounded"/>
+ *         &lt;element name="attributes" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}EntityTypeAttribute" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *       &lt;attribute name="key" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="reportTemplate" type="{http://www.w3.org/2001/XMLSchema}string" />

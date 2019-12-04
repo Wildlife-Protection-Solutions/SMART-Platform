@@ -94,7 +94,7 @@ public class RecordCsvExporter implements ICsvDataExporter {
 		List<IntelRecordSourceAttribute> attributes = q.list();
 		
 		
-		String[] data = new String[attributes.size() + 6];
+		String[] data = new String[attributes.size() + 7];
 		int i = 0;
 		data[i++] = Messages.RecordCsvExporter_TitleColumn;
 		data[i++] = Messages.RecordCsvExporter_PrimaryDateColumn;
@@ -102,6 +102,7 @@ public class RecordCsvExporter implements ICsvDataExporter {
 		data[i++] = Messages.RecordCsvExporter_DateModifiedColumn;
 		data[i++] = Messages.RecordCsvExporter_StatusColumn;
 		data[i++] = Messages.RecordCsvExporter_Sourcecolumn;
+		data[i++] = "Profile";
 		for (IntelRecordSourceAttribute ia : attributes){
 			String name = ia.getName();
 			if (name == null){
@@ -132,6 +133,7 @@ public class RecordCsvExporter implements ICsvDataExporter {
 				data[i++] = DateFormat.getDateInstance().format(r.getDateModified());
 				data[i++] = ll.getLabel(r.getStatus(), Locale.getDefault());
 				data[i++] = r.getRecordSource() == null ? "" : r.getRecordSource().getName(); //$NON-NLS-1$
+				data[i++] = r.getProfile().getName();
 				
 				for (IntelRecordSourceAttribute ia : attributes){
 					data[i++] = null;

@@ -61,9 +61,9 @@ public class RecordEntityDatasetResultSetMetadata implements IResultSetMetaData 
 		public Object getValue(IntelEntityRecord entityrecord, Locale l) {
 			switch(this){
 			case UUID:
-				return UuidUtils.uuidToString(entityrecord.getRecord().getUuid());
+				return entityrecord.getRecord().getUuid();
 			case ENTITY_UUID:
-				return UuidUtils.uuidToString(entityrecord.getEntity().getUuid());
+				return entityrecord.getEntity().getUuid();
 			case ENTITY_ID:
 				return entityrecord.getEntity().getIdAttributeAsText(l);
 			case ENTITY_IMAGE:

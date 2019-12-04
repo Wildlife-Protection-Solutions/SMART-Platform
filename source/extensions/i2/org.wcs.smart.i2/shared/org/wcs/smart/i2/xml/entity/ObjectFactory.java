@@ -31,8 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Data_QNAME = new QName("http://www.example.org/Intelligence", "data"); //$NON-NLS-1$ //$NON-NLS-2$
-
+    private final static QName _Data_QNAME = new QName("http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.entity", "IntelEntity"); //$NON-NLS-1$ //$NON-NLS-2$
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.i2.xml.entity
      * 
@@ -108,7 +107,7 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link InstanceData }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.example.org/Intelligence", name = "data")
+    @XmlElementDecl(namespace = "http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.entity", name="IntelEntity")
     public JAXBElement<InstanceData> createData(InstanceData value) {
         return new JAXBElement<InstanceData>(_Data_QNAME, InstanceData.class, null, value);
     }
