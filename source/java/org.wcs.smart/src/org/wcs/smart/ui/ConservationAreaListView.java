@@ -114,7 +114,6 @@ public class ConservationAreaListView {
 				
 				SelectCaDialog dialog = new SelectCaDialog(parent.getShell());
 				if (dialog.open() == SelectCaDialog.OK){
-					
 					//close all active editors
 					if (!partService.saveAll(true)){
 						return;

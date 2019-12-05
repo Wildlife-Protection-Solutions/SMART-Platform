@@ -44,9 +44,13 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -54,8 +58,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -94,28 +96,29 @@ public class CcaaUserPropertyPage extends AbstractPropertyJHeaderDialog{
 		Composite container = new Composite(parent, SWT.NULL);
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)container.getLayout()).marginWidth = 0;
+		((GridLayout)container.getLayout()).marginHeight = 0;
 		
-		TabFolder folder = new TabFolder(container, SWT.TOP);
+		CTabFolder folder = new CTabFolder(container, SWT.TOP);
 		folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		/* current user tab */
-		TabItem currentUserTab = new TabItem(folder, SWT.DEFAULT);
+		CTabItem currentUserTab = new CTabItem(folder, SWT.NONE);
 		currentUserTab.setText(Messages.CcaaUserPropertyPage_CurrentUserTab);
 		Composite currentComp = new Composite(folder, SWT.NONE);
 		currentComp.setLayout(new GridLayout(2, false));
 		currentComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		currentUserTab.setControl(currentComp);
 		
-		Label l = new Label(currentComp, SWT.SEPARATOR | SWT.HORIZONTAL);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
-		l = new Label(currentComp, SWT.WRAP);
+		Label l = new Label(currentComp, SWT.WRAP);
 		l.setText(Messages.CcaaUserPropertyPage_CurrentUserInfo);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		((GridData)l.getLayoutData()).widthHint = 150;
-		
-		l = new Label(currentComp, SWT.SEPARATOR | SWT.HORIZONTAL);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		FontData fd = l.getFont().getFontData()[0];
+		fd.setStyle(SWT.ITALIC);
+		Font temp = new Font(l.getDisplay(), fd);
+		l.setFont(temp);
+		l.addListener(SWT.Dispose, e->temp.dispose());
 		
 		l = new Label(currentComp, SWT.NONE);
 		l.setText(Messages.CcaaUserPropertyPage_CurrentUserLabel);
@@ -206,7 +209,7 @@ public class CcaaUserPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		
 		/* all users tab */
-		TabItem usersTab = new TabItem(folder, SWT.DEFAULT);
+		CTabItem usersTab = new CTabItem(folder, SWT.NONE);
 		usersTab.setText(Messages.CcaaUserPropertyPage_AllUsersTab);
 		Composite usersComp = new Composite(folder, SWT.NONE);
 		usersComp.setLayout(new GridLayout(2, false));
@@ -214,16 +217,11 @@ public class CcaaUserPropertyPage extends AbstractPropertyJHeaderDialog{
 		
 		usersTab.setControl(usersComp);
 		
-		l = new Label(usersComp, SWT.SEPARATOR | SWT.HORIZONTAL);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
 		l = new Label(usersComp, SWT.WRAP);
 		l.setText(Messages.CcaaUserPropertyPage_AllUsersInfo);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		((GridData)l.getLayoutData()).widthHint = 150;
-		
-		l = new Label(usersComp, SWT.SEPARATOR | SWT.HORIZONTAL);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		l.setFont(temp);
 		
 		tblEmployee = new ListViewer(usersComp);
 		tblEmployee.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -263,6 +261,7 @@ public class CcaaUserPropertyPage extends AbstractPropertyJHeaderDialog{
 		});
 		
 	
+		folder.setSelection(currentUserTab);
 		refreshUserList();
 		setTitle(Messages.CcaaUserPropertyPage_Title);
 		setMessage(Messages.CcaaUserPropertyPage_Message1);
