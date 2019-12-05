@@ -35,4 +35,8 @@ public class PawsServiceInfo extends AbstractRasterServiceInfo{
 		this.title = "PAWS Results Layers";
 	}
 	
+	@Override
+	public double getMetric() {
+		return 1.0;
+	}
 }
