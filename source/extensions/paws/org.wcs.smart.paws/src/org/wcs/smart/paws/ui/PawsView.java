@@ -325,7 +325,7 @@ public class PawsView {
 			tiDelete.setEnabled(!tblResults.getStructuredSelection().isEmpty());
 			
 			boolean canEnable = false;
-			for (Iterator<Object> iterator = tblResults.getStructuredSelection().iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = tblResults.getStructuredSelection().iterator(); iterator.hasNext();) {
 				Object r = (Object) iterator.next();
 				if ( r instanceof PawsRun) {
 					PawsRun rr = (PawsRun)r;
@@ -507,8 +507,38 @@ public class PawsView {
 	}
 	
 	private void editRun() {
+		
+		
 		Object x = tblResults.getStructuredSelection().getFirstElement();
 		if (!(x instanceof PawsRun)) return;
+		
+//		try(Session session = HibernateManager.openSession()){
+//			PawsRun r = (PawsRun)x;
+//			session.beginTransaction();
+//			r = session.get(PawsRun.class, r.getUuid());
+//			r.setStatus(org.wcs.smart.paws.model.PawsRun.Status.COMPLETE);
+//			r.setResultLocation("results.csv");
+//			session.getTransaction().commit();
+//			
+//			String v = r.getConfiguration().findParameter(PawsParameter.FixedParameter.GRID_CRS.name()).getValue();
+//			UUID uuid = UuidUtils.stringToUuid( v.split(":")[0] );
+//			CoordinateReferenceSystem crs = null;
+//			try {
+//				crs = CRS.parseWKT(session.get(org.wcs.smart.ca.Projection.class, uuid).getDefinition());
+//			}catch (Exception ex) {
+//				PawsPlugIn.displayLog(ex.getMessage(), ex);
+//			}
+//			
+//			PawsResultManager m = new PawsResultManager(r);
+//			for (Path p : m.getRasterFiles()) {
+//				try {
+//					m.createOutput(p, crs);
+//				}catch (Exception ex) {
+//					PawsPlugIn.displayLog(ex.getMessage(), ex);
+//				}
+//			}
+//		}
+		
 		PawsRun pw = (PawsRun)x;
 		(new ShowRunHandler()).execute(context.get(MWindow.class), pw);
 	}

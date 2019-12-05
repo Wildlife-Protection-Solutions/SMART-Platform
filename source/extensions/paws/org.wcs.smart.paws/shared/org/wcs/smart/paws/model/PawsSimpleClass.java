@@ -29,6 +29,8 @@ import javax.persistence.Table;
 @Table(name="smart.paws_simple_class")
 public class PawsSimpleClass extends AbstractPawsClass{
 
+	private static final long serialVersionUID = 1L;
+	
 	private String categoryKey;
 	private String attributeKey;
 	private String listItemKey;

@@ -43,6 +43,8 @@ import org.wcs.smart.query.model.Query;
 @Table(name="smart.paws_classification")
 public class PawsClassification extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	public enum Type{
 		DATAMODEL,QUERY
 	}

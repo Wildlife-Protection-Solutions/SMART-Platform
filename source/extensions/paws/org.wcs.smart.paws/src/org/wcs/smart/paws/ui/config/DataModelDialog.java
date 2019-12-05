@@ -122,7 +122,7 @@ public class DataModelDialog extends SmartStyledDialog {
 	
 	public void okPressed() {
 		selectedItems = new ArrayList<>();
-		for (Iterator<Object> iterator = dmTree.getStructuredSelection().iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = dmTree.getStructuredSelection().iterator(); iterator.hasNext();) {
 			Object dmObject = (Object) iterator.next();
 			PawsSimpleClass item = null;
 

@@ -34,6 +34,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.paws_parameter")
 public class PawsParameter extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	public static final String AREA_PREFIX = "area:";
 	public static final String FILE_PREFIX = "file:";
 	

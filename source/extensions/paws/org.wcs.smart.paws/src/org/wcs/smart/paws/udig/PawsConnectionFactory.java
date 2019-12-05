@@ -19,43 +19,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.paws.model;
+package org.wcs.smart.paws.udig;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import java.io.Serializable;
+import java.net.URL;
+import java.util.Map;
 
-import org.wcs.smart.ca.UuidItem;
+import org.locationtech.udig.catalog.ui.UDIGConnectionFactory;
 
-@Entity
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public class AbstractPawsClass extends UuidItem{
+public class PawsConnectionFactory extends UDIGConnectionFactory {
 
-	private static final long serialVersionUID = 1L;
-	
-	private String classification;
-	private PawsConfiguration config;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="config_uuid", referencedColumnName="uuid")
-	public PawsConfiguration getConfiguration() {
-		return this.config;
+	public PawsConnectionFactory() {
+		// TODO Auto-generated constructor stub
 	}
-	
-	public void setConfiguration(PawsConfiguration config) {
-		this.config = config;
+
+	@Override
+	public Map<String, Serializable> createConnectionParameters(Object context) {
+		if (context instanceof PawsService){
+			return ((PawsService)context).getConnectionParams();
+		}
+		
+		if (context instanceof URL ){
+			return PawsServiceExtension.createParamsFromUrl((URL)context);
+		}
+		
+		return null;
+
 	}
-	
-	@Column(name="classification")
-	public String getClassification() {
-		return this.classification;
+
+	@Override
+	public URL createConnectionURL(Object context) {
+		if (context instanceof URL){
+			if (PawsServiceExtension.isValid((URL)context)){
+				return (URL)context;
+			}
+			return null;
+		}
+		if (context instanceof Map){
+			@SuppressWarnings("unchecked")
+			Map<String, Serializable> params = (Map<String,Serializable>)context;
+			return PawsServiceExtension.createURL(params);
+		}
+		return null;
 	}
-	
-	public void setClassification(String classification) {
-		this.classification = classification;
-	}
+
 }

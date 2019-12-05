@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2019 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,16 +21,17 @@
  */
 package org.wcs.smart.paws.udig;
 
-import org.locationtech.udig.catalog.IServiceInfo;
+import org.locationtech.udig.catalog.rasterings.AbstractRasterServiceInfo;
 
 /**
- * Smart service information.
+ * PAWS service information.
  * @author Emily
  * @since 1.0.0
  */
-public class PawsServiceInfo extends IServiceInfo{
+public class PawsServiceInfo extends AbstractRasterServiceInfo{
 
 	public PawsServiceInfo(PawsService service){
+		super(service, "PAWS");
 		this.title = "PAWS Results Layers";
 	}
 	

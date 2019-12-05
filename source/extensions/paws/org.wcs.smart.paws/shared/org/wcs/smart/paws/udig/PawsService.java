@@ -1,10 +1,28 @@
+/*
+ * Copyright (C) 2019 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.paws.udig;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,12 +31,9 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
-import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.gce.geotiff.GeoTiffFormatFactorySpi;
 import org.hibernate.Session;
-import org.locationtech.udig.catalog.ID;
 import org.locationtech.udig.catalog.IServiceInfo;
-import org.locationtech.udig.catalog.internal.geotiff.GeoTiffGeoResourceImpl;
 import org.locationtech.udig.catalog.rasterings.AbstractRasterGeoResource;
 import org.locationtech.udig.catalog.rasterings.AbstractRasterService;
 import org.wcs.smart.ca.ConservationArea;
@@ -27,6 +42,12 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 
+/**
+ * uDig service for paws raster files
+ * 
+ * @author Emily
+ *
+ */
 public class PawsService extends AbstractRasterService {
 
 	private Map<String, Serializable> params;
@@ -45,7 +66,6 @@ public class PawsService extends AbstractRasterService {
         }
         return factory;
     }
-    
     
 	public PawsService(Map<String, Serializable> params) {
 		super(PawsServiceExtension.createURL(params), "geotiff", getFactory()); 
@@ -87,6 +107,10 @@ public class PawsService extends AbstractRasterService {
 		return resources;
 	}
 
+	@Override
+	public void dispose(IProgressMonitor monitor) {
+
+	}
 	@Override
 	protected IServiceInfo createInfo(IProgressMonitor monitor) throws IOException {
 		return new PawsServiceInfo(this);

@@ -25,20 +25,27 @@ import java.net.URL;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
+import org.geotools.referencing.CRS;
 import org.hibernate.Session;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.model.PawsParameter;
+import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsWorkspace;
+import org.wcs.smart.util.UuidUtils;
 
 import com.microsoft.azure.storage.blob.BlockBlobURL;
 import com.microsoft.azure.storage.blob.ContainerURL;
@@ -73,6 +80,9 @@ public class PawsDownloadResultJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		
+		monitor.beginTask("Downloading Results", 5);
+		
 		ContainerURL containerURL;
 		Path resultsFile = null;
 		String runId = null;
@@ -102,11 +112,13 @@ public class PawsDownloadResultJob extends Job {
 			handleError("Error loading paws workspace.", ex);
 			return Status.OK_STATUS;
 		}
+		monitor.worked(1);
 		
 		//download results
+		monitor.subTask("downloading results");
 		try{
-			resultsFile = resultsFile.resolve("results.data"); 
-	        BlockBlobURL blobUrl = containerURL.createBlockBlobURL(runId +"/results.data");
+			resultsFile = resultsFile.resolve("results.csv"); 
+	        BlockBlobURL blobUrl = containerURL.createBlockBlobURL(runId +"/results.csv");
 	        AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(resultsFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
 			
 	        final Throwable[] uperror = new Throwable[]{null}; 
@@ -132,14 +144,31 @@ public class PawsDownloadResultJob extends Job {
 			handleError(msg, t);
 			return Status.OK_STATUS;
 		}
+		monitor.worked(2);
 		
 		//update status
+		CoordinateReferenceSystem crs = null;
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
 				PawsRun r = session.get(PawsRun.class, run.getUuid());
 				if (r != null){
 					r.setStatus(PawsRun.Status.COMPLETE);
+					
+					
+					PawsParameter pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
+					if (pp != null) {
+						UUID projUuid = UuidUtils.stringToUuid(pp.getValue().split(":")[0]);
+						if (projUuid != null) {
+							Projection prj = session.get(Projection.class, projUuid);
+							if (prj != null) {
+								crs = CRS.parseWKT(prj.getDefinition());
+							}
+						}
+						if (crs == null) {
+							crs = CRS.parseWKT(pp.getValue().split(":")[1]);	
+						}
+					}
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex){
@@ -147,8 +176,22 @@ public class PawsDownloadResultJob extends Job {
 				PawsPlugIn.displayLog(ex.getMessage(), ex);
 			}
 		}
+		monitor.worked(1);
+		
+		//build raster files from result
+		monitor.subTask("building raster files");
+		PawsResultManager manager = new PawsResultManager(run);
+		for (Path p : manager.getRasterFiles()) {
+			try {
+				manager.createOutput(p, crs);
+			} catch (Exception e) {
+				PawsPlugIn.displayLog(e.getMessage(), e);
+			}
+		}
+		monitor.worked(1);
 		
 		//delete all files from azure
+		monitor.subTask("cleaning up storage");
 		try {
 			StorageApi.INSTANCE.deleteBlobs(run);
 		} catch (Exception ex) {

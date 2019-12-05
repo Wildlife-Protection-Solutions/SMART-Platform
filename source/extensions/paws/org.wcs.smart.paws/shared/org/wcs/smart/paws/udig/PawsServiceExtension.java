@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2019 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -32,12 +32,10 @@ import java.util.logging.Logger;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.ServiceExtension;
 import org.locationtech.udig.core.internal.CorePlugin;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * Udig service extension for smart conservation area 
- * Area layers.
+ * Udig service extension for PAWS results layers
  * 
  * @author Emily
  * @since 1.0.0

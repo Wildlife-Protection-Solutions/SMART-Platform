@@ -26,7 +26,9 @@ import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.IPresentationEngine;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.IPartListener;
+import org.locationtech.udig.project.ui.internal.LayersView;
 import org.wcs.smart.paws.ui.config.ConfigurationEditor;
 import org.wcs.smart.paws.ui.run.RunEditor;
 import org.wcs.smart.query.ui.QueryPerspective;
@@ -59,7 +61,8 @@ public class HidePartsPartListener implements IPartListener {
 			MUIElement element = part.getContext().get(EModelService.class).find(QueryPerspective.DEF_FOLDER, part.getContext().get(MApplication.class));
 			element.getTags().add(IPresentationEngine.MINIMIZED);
 			element = part.getContext().get(EModelService.class).find(QueryPerspective.ITEM_FOLDER, part.getContext().get(MApplication.class));
-			element.getTags().add(IPresentationEngine.MINIMIZED);
+			MPart layerspart = part.getContext().get(EPartService.class).findPart(LayersView.ID);
+			if (layerspart != null)  part.getContext().get(EPartService.class).activate(layerspart);
 		}
 	}
 
@@ -69,8 +72,6 @@ public class HidePartsPartListener implements IPartListener {
 		if (lpart instanceof ConfigurationEditor || lpart instanceof RunEditor) {
 			// show definition and list area
 			MUIElement element = part.getContext().get(EModelService.class).find(QueryPerspective.DEF_FOLDER, part.getContext().get(MApplication.class));
-			element.getTags().remove(IPresentationEngine.MINIMIZED);
-			element = part.getContext().get(EModelService.class).find(QueryPerspective.ITEM_FOLDER, part.getContext().get(MApplication.class));
 			element.getTags().remove(IPresentationEngine.MINIMIZED);
 		}
 	}

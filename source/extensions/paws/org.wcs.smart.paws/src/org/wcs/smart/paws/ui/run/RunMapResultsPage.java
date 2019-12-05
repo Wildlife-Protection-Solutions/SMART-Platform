@@ -91,7 +91,6 @@ public class RunMapResultsPage extends SmartMapEditorPart{
 			PawsTiffGeoResource r = new PawsTiffGeoResource(service, p);
 			toadd.add(r);
 		}
-		
 		AddLayersCommand cmd = new AddLayersCommand(toadd) {
 		    public void run( IProgressMonitor monitor ) throws Exception {
 		    	super.run(monitor);

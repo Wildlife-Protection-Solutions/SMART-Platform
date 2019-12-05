@@ -40,9 +40,6 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.paws_configuration")
 public class PawsConfiguration extends UuidItem{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
 	private ConservationArea ca;

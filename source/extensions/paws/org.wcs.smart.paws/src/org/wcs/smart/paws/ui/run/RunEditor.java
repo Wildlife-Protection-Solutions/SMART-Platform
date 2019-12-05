@@ -99,6 +99,7 @@ public class RunEditor extends MultiPageEditorPart implements MapPart{
 		handlers.add(handler);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void createEventHandlers() {
 		//on delete close editor
 		handlers = new ArrayList<>();
@@ -220,8 +221,6 @@ public class RunEditor extends MultiPageEditorPart implements MapPart{
 			PawsRun pr = null;
 			try(Session s = HibernateManager.openSession()){
 				pr = s.get(PawsRun.class, getInputInternal().getUuid());
-				
-				//TODO: not found
 				if (pr == null) return Status.OK_STATUS;
 				if (pr.getConfiguration() != null) pr.getConfiguration().getName();
 				pr.getConservationArea().getFileDataStoreLocation();

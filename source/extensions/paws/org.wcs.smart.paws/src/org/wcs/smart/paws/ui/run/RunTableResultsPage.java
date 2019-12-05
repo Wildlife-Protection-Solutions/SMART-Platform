@@ -21,10 +21,7 @@
  */
 package org.wcs.smart.paws.ui.run;
 
-import java.io.BufferedReader;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,9 +43,6 @@ import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
-
-import au.com.bytecode.opencsv.CSVParser;
-import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * PAWS Editor results page

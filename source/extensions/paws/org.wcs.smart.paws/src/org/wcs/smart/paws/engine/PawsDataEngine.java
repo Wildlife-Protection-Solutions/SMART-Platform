@@ -39,7 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -69,7 +68,6 @@ import org.opengis.feature.type.Name;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -108,7 +106,9 @@ public class PawsDataEngine {
 	//that match this classification
 	private HashMap<String, List<String>> classmappings;
 	private List<Path> packageFiles;
-	private CoordinateReferenceSystem targetCrs;
+	
+	//the crs of the input file 
+	private CoordinateReferenceSystem targetCrs = SmartDB.DATABASE_CRS;
 	
 	
 	public PawsDataEngine(PawsRun run) {
@@ -128,11 +128,6 @@ public class PawsDataEngine {
 			
 			PawsParameter pp = mrun.getConfiguration().findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
 			if (pp == null) throw new Exception("CRS must be provided.  Update the configuration and try again.");
-			UUID projUuid = UuidUtils.stringToUuid(pp.getValue().split(":")[0]);
-			Projection p = session.get(Projection.class,projUuid);
-			if (p == null)  throw new Exception("CRS must be provided.  Update the configuration and try again.");
-			targetCrs = SmartDB.DATABASE_CRS;
-			
 			workingDir = PawsManager.INSTANCE.getDirectory(mrun);
 		}
 		

@@ -36,6 +36,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.paws_service")
 public class PawsService extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea ca;
 	private String apikey;
 	private String heatmapapi;

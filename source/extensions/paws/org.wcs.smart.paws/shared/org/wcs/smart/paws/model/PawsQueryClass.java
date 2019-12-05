@@ -34,6 +34,8 @@ import org.wcs.smart.query.model.Query;
 @Table(name="smart.paws_query_class")
 public class PawsQueryClass extends AbstractPawsClass{
 
+	private static final long serialVersionUID = 1L;
+	
 	private String querytype;
 	private UUID queryuuid;
 	

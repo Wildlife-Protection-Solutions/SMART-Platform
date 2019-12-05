@@ -36,6 +36,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.paws_workspace")
 public class PawsWorkspace extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	private ConservationArea ca;
 	private String clientId;
 	private String url;

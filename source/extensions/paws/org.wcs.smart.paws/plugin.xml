@@ -171,5 +171,20 @@
             name="PAWS ResultsService">
       </service>
    </extension>
+   <extension
+         point="org.locationtech.udig.catalog.ui.connectionFactory">
+      <factory
+            class="org.wcs.smart.paws.udig.PawsConnectionFactory"
+            id="org.wcs.smart.udig.catalog.paws">
+      </factory>
+      <wizardPage
+            banner="images/icons/run.png"
+            class="org.wcs.smart.paws.udig.PawsWizardPage"
+            description="Add PAWS Result Layer to Map"
+            icon="images/icons/run.png"
+            id="org.wcs.smart.udig.catalog.paws"
+            name="PAWS Result Layers">
+      </wizardPage>
+   </extension>
 
 </plugin>

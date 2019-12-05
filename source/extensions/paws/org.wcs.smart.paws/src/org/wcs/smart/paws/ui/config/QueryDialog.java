@@ -104,7 +104,7 @@ public class QueryDialog extends SmartStyledDialog {
 	public void okPressed() {
 		selectedItems = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			for (Iterator<Object> iterator = queryTree.getStructuredSelection().iterator(); iterator.hasNext();) {
+			for (Iterator<?> iterator = queryTree.getStructuredSelection().iterator(); iterator.hasNext();) {
 				Object dmObject = (Object) iterator.next();
 				PawsQueryClass item = null;
 				if (dmObject instanceof QueryEditorInput) {
