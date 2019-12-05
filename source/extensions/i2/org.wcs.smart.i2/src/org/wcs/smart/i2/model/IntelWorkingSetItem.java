@@ -24,7 +24,6 @@ package org.wcs.smart.i2.model;
 import java.util.UUID;
 
 import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ui.Resources;
 
 /**

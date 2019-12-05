@@ -27,6 +27,7 @@ import java.util.List;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -61,7 +62,7 @@ public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 			if (!query.getConservationArea().getIsCcaa()) {
 				itemProvider = new CaQueryItemProvider(dataset.getConnection().getConservationAreas().iterator().next(), query.getConservationArea());
 			}else {
-				itemProvider = new CcaaQueryItemProvider(dataset.getConnection().getConservationAreas(), query.getConservationArea());
+				itemProvider = new CcaaQueryItemProvider(dataset.connection.hasPermission(Permission.QUERY), query.getConservationArea());
 			}			
 			columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, itemProvider, dataset.getConnection().getCurrentLocale(), dataset.getConnection().getSession());
 			names = new ArrayList<>(columns.size());

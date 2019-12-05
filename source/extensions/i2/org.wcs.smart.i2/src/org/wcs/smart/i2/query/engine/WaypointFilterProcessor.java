@@ -155,9 +155,7 @@ public class WaypointFilterProcessor {
 		for (UUID uuid : caUuids) {
 			logString(UuidUtils.uuidToString(uuid));
 		}
-		Collection<UUID> profileUuids = itemProvider
-				.getProfiles(profileFilter.stream().map(e->e.getKeyId()).collect(Collectors.toSet()), s)
-				.stream().map(e->e.getUuid()).collect(Collectors.toSet());
+		Collection<UUID> profileUuids = profileFilter.stream().map(a->a.getUuid()).collect(Collectors.toSet());
 		for (UUID uuid : profileUuids) {
 			logString(UuidUtils.uuidToString(uuid));
 		}

@@ -46,6 +46,8 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.Employee;
@@ -78,9 +80,6 @@ import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Point;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -213,8 +212,6 @@ public enum RecordImportEngine {
 				}
 				
 				String profile = data[config.getMappedColumn(Column.PROFILE)].trim();
-				//TODO:
-				
 				for (IntelProfile ip : profiles) {
 					if (ip.getName().equalsIgnoreCase(profile)) {
 						record.setProfile(ip);

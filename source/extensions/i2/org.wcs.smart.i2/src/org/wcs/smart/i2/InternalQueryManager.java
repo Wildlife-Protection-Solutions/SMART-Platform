@@ -21,25 +21,28 @@
  */
 package org.wcs.smart.i2;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryItemProvider;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * Query manager for intelligence queries.
@@ -117,28 +120,39 @@ public enum InternalQueryManager {
 		};
 	}
 	
+	public void resetQueryItemProvider() {
+		synchronized (INSTANCE) {
+			queryItemProvider = null;
+		}
+	}
 	
 	/**
 	 * 
-	 * @return the query item provider for the current conservation are aconfiguration
+	 * @return the query item provider for the current conservation are a configuration
 	 * 
 	 */
 	public IQueryItemProvider getQueryItemProvider() {
 		if (queryItemProvider == null) {
 			synchronized (INSTANCE) {
 				if (queryItemProvider != null) return queryItemProvider;
+				
 				if (SmartDB.isMultipleAnalysis()) {
-					queryItemProvider = new DesktopCcaaQueryItemProvider(Collections.emptyList(), SmartDB.getCurrentConservationArea()) {
-						@Override
-						public Collection<ConservationArea> getConservationAreas() {
-							return SmartDB.getConservationAreaConfiguration().getConservationAreas();
+					//determine all profiles which the current user has access to query
+					Set<IntelProfile> profiles = new HashSet<>();
+					try(Session session = HibernateManager.openSession()){
+						for (IntelProfile p : QueryFactory.buildQuery(session, IntelProfile.class).list()) {
+							if (IntelSecurityManager.INSTANCE.canViewQuery(p)) {
+								profiles.add(p);
+							}
 						}
-						
-						@Override
-						protected ConservationArea getMainConservationArea() {
-							return SmartDB.getConservationAreaConfiguration().getMainConservationArea();
-						}
-					};
+						queryItemProvider = new DesktopCcaaQueryItemProvider(profiles, SmartDB.getCurrentConservationArea()) {
+							@Override
+							protected ConservationArea getMainConservationArea() {
+								return SmartDB.getConservationAreaConfiguration().getMainConservationArea();
+							}
+						};
+					}
+					
 				}else {
 					queryItemProvider = new CaQueryItemProvider(SmartDB.getCurrentConservationArea(), SmartDB.getCurrentConservationArea());
 				}	

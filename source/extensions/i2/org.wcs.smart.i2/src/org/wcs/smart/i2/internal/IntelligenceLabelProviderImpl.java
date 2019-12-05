@@ -53,7 +53,6 @@ import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
 import org.wcs.smart.i2.birt.record.location.RecordLocationDatasetResultSetMetadata;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelRecord;
-import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
 import org.wcs.smart.i2.query.FixedQueryColumn;

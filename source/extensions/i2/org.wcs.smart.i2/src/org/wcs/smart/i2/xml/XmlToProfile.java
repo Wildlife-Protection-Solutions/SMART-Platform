@@ -52,6 +52,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -62,6 +63,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
+import org.wcs.smart.i2.model.IntelPermission;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
@@ -163,7 +165,7 @@ public class XmlToProfile {
 		profile.setRecordSources(new HashSet<>());
 		profile.setEntityTypes(new HashSet<>());
 		updateNames(profile, data.getNames());
-		//TODO: setup admin permission
+		
 		
 		//process attributes
 		progress.split(1);
@@ -233,6 +235,13 @@ public class XmlToProfile {
 		session.beginTransaction();
 		try {
 			session.save(profile);
+			
+			IntelPermission ip = new IntelPermission();
+			ip.setEmployee(SmartDB.getCurrentEmployee());
+			ip.setPermission(IntelPermission.ADMIN);
+			ip.setProfile(profile);
+					
+			session.save(ip);
 			
 			attributes.forEach(a->session.save(a));
 			
@@ -758,7 +767,6 @@ public class XmlToProfile {
 				toAdd.add(newAttribute);
 			}else {
 				if (!found.getType().equals(newAttribute.getType())){
-					//TODO: fail
 					throw new Exception(MessageFormat.format("The attribute of {0} already exists in the system but has a different type.  You must change the keys of either the system attribute or the source attribute before you can import profiles.", found.getKeyId())); 
 				}
 				

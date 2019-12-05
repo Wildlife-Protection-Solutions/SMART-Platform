@@ -25,8 +25,10 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -41,7 +43,6 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModelMerger;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -61,14 +62,23 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class CcaaQueryItemProvider implements IQueryItemProvider {
 
-	private Collection<ConservationArea> conservationAreas = null;
-	private ConservationArea queryCa;
+	private Set<IntelProfile> profiles = null;
+	private Set<ConservationArea> areas = null;
+	private ConservationArea queryCa = null;
 		
 	protected volatile SimpleDataModel mergedDataModel = null;
 	
-	public CcaaQueryItemProvider(Collection<ConservationArea> conservationAreas, ConservationArea queryCa) {
-		this.conservationAreas = conservationAreas;
+	protected Set<IntelRecordSource> recordSources = null;
+	
+	/**
+	 * 
+	 * @param profiles set of profiles this user has query permission for 
+	 * @param queryCa
+	 */
+	public CcaaQueryItemProvider(Set<IntelProfile> profiles, ConservationArea queryCa) {
+		this.profiles = profiles;
 		this.queryCa = queryCa;
+		this.areas = profiles.stream().map(a->a.getConservationArea()).collect(Collectors.toSet());
 	}
 	
 	@Override
@@ -78,7 +88,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	
 	@Override
 	public Collection<ConservationArea> getConservationAreas(){
-		return conservationAreas;
+		return areas;
 	}
 	
 	@Override
@@ -124,14 +134,9 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		return attributes.values().stream().collect(Collectors.toList());
 	}
 	
-//	@Override
 	public List<IntelRecordSource> getRecordSources(Session session) {
 		HashMap<String, IntelRecordSource> types = new HashMap<>();
-		
-		List<IntelRecordSource> allTypes = session.createQuery("FROM IntelRecordSource WHERE conservationArea in (:cas)", IntelRecordSource.class) //$NON-NLS-1$
-				.setParameterList("cas",  getConservationAreas()).list(); //$NON-NLS-1$
-		
-		for (IntelRecordSource type : allTypes) {
+		for (IntelRecordSource type : getRecordSourcesInternal(session)) {
 			IntelRecordSource newType = types.get(type.getKeyId());
 			if (newType == null) {
 				newType = new IntelRecordSource();
@@ -151,7 +156,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	}
 	
 	@Override
-	public List<IntelEntityType> getEntityTypes(Set<String> profiles, Session session){
+	public List<IntelEntityType> getEntityTypes(Set<UUID> profiles, Session session){
 		HashMap<String, IntelEntityType> types = new HashMap<>();
 		
 		List<IntelEntityType> allTypes = session.createQuery("FROM IntelEntityType WHERE conservationArea in (:cas)", IntelEntityType.class) //$NON-NLS-1$
@@ -160,7 +165,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		for (IntelEntityType type : allTypes) {
 			boolean keep = false;
 			for (IntelProfile ip : type.getProfiles()) {
-				if (profiles.contains(ip.getKeyId())) {
+				if (profiles.contains(ip.getUuid())) {
 					keep = true;
 					break;
 				}
@@ -197,33 +202,25 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	
 	@Override
 	public IntelRecordSource getRecordSource(String recordsourceKey, Session session) {
-		List<IntelRecordSource> allAttributes = session.createQuery("FROM IntelRecordSource WHERE keyId = :attribute and conservationArea in (:cas)", IntelRecordSource.class) //$NON-NLS-1$
-				.setParameterList("cas",  getConservationAreas()) //$NON-NLS-1$
-				.setParameter("attribute",  recordsourceKey) //$NON-NLS-1$
-				.list();
-		if (allAttributes.size() == 0) return null;
-		for (IntelRecordSource type : allAttributes) {
-			if (type.getConservationArea().equals(getMainConservationArea())) {
-				IntelRecordSource a = new IntelRecordSource();
-				a.setKeyId(type.getKeyId());
-				a.setName(type.getName());
-				a.setIcon(type.getIcon());
-				return a;
+		for (IntelRecordSource s : getRecordSourcesInternal(session)) {
+			if (s.getConservationArea().equals(getMainConservationArea()) && s.getKeyId().equalsIgnoreCase(recordsourceKey)) {
+				return s;
 			}
 		}
-		//pick one
-		IntelRecordSource a = new IntelRecordSource();
-		a.setKeyId(allAttributes.get(0).getKeyId());
-		a.setName(allAttributes.get(0).getName());
-		a.setIcon(allAttributes.get(0).getIcon());
-		return a;
+		
+		for (IntelRecordSource s : getRecordSourcesInternal(session)) {
+			if (s.getKeyId().equalsIgnoreCase(recordsourceKey)) {
+				return s;
+			}
+		}
+		return null;
 	}
 	
 
 	@Override
 	public Collection<IntelProfile> getProfiles(Set<String> profileKeys, Session session) {
-		return session.createQuery("FROM IntelProfile WHERE ca = :ca and keyId IN (:keys)", IntelProfile.class)
-				.setParameter("ca", getConservationAreas())
+		return session.createQuery("FROM IntelProfile WHERE conservationArea IN (:ca) and keyId IN (:keys)", IntelProfile.class)
+				.setParameterList("ca", getConservationAreas())
 				.setParameterList("keys", profileKeys)
 				.list();
 	}
@@ -329,16 +326,16 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	 * 
 	 */
 	protected ConservationArea getMainConservationArea() {
-		return conservationAreas.iterator().next();
+		return areas.iterator().next();
 	}
 
 	
 	
 	@Override
-	public List<IntelEntity> getEntities(String entityTypeKey, Session session){
-		return session.createQuery("SELECT i FROM IntelEntity i join i.entityType t WHERE i.conservationArea in (:cas) and t.keyId = :entityType", IntelEntity.class) //$NON-NLS-1$
+	public List<IntelEntity> getEntities(Set<UUID> profiles, String entityTypeKey, Session session){
+		return session.createQuery("SELECT i FROM IntelEntity i join i.entityType t WHERE t.keyId = :entityType and i.profile.uuid IN (:profiles)", IntelEntity.class) //$NON-NLS-1$
 			.setParameter("entityType", entityTypeKey) //$NON-NLS-1$
-			.setParameter("cas",  getConservationAreas()) //$NON-NLS-1$
+			.setParameterList("profiles", profiles)
 			.list();
 	}
 	
@@ -478,14 +475,99 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	}
 
 	@Override
-	public List<IntelRecordSource> getRecordSources(Set<String> profiles, Session session) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<IntelRecordSource> getRecordSources(Set<UUID> profiles, Session session) {
+		
+		HashMap<String, IntelRecordSource> types = new HashMap<>();
+		
+		for (IntelRecordSource type : getRecordSourcesInternal(session)) {
+			boolean add = false;
+			for (IntelProfile ip : type.getProfiles()) {
+				if (profiles.contains(ip.getUuid())) {
+					add = true;
+				}
+			}
+			if (!add) continue;
+			
+			IntelRecordSource newType = types.get(type.getKeyId());
+			if (newType == null) {
+				newType = new IntelRecordSource();
+				newType.setKeyId(type.getKeyId());
+				newType.setIcon(type.getIcon());
+				newType.setName(type.getName());
+				
+				types.put(type.getKeyId(), newType);
+			}
+			if (type.getConservationArea().equals(getMainConservationArea())) {
+				newType.setName(type.getName());
+			}
+		}
+		List<IntelRecordSource> newTypes = new ArrayList<>();
+		newTypes.addAll(types.values());
+		return newTypes;
 	}
 
 	@Override
 	public List<IntelRecordSourceAttribute> getRecordSourceAttributes(IntelRecordSource recordSource, Session session) {
-		// TODO Auto-generated method stub
-		return null;
+		//find all attributes that are associated with record source in
+		
+		Set<String> donotuse = new HashSet<>();
+		HashMap<String, IntelRecordSourceAttribute> attributes = new HashMap<>();
+		
+		Set<IntelRecordSource> items = getRecordSourcesInternal(session);
+		for (IntelRecordSource source : items) {
+			if (!source.getKeyId().equalsIgnoreCase(recordSource.getKeyId())) continue;
+			
+			for (IntelRecordSourceAttribute a : source.getAttributes()) {
+				if (donotuse.contains(a.getKeyId())) continue;
+				
+				if (attributes.containsKey(a.getKeyId())){
+					//if they are the same skip
+					if (!areSimilar(a, attributes.get(a.getKeyId()))) {
+						//if they are different add to donouse, remove from attributes and continue
+						attributes.remove(a.getKeyId());
+						donotuse.add(a.getKeyId());
+					}
+				}else {
+					//add attribute
+					attributes.put(a.getKeyId(), a);
+				}
+			}	
+		}
+		return new ArrayList<>(attributes.values());
+	}
+	
+	private boolean areSimilar(IntelRecordSourceAttribute a, IntelRecordSourceAttribute b) {
+		if (a.getIsMultiple() != b.getIsMultiple()) return false;
+		if (a.getAttribute() != null && b.getAttribute() != null && a.getAttribute().getKeyId().equalsIgnoreCase(b.getAttribute().getKeyId())) {
+			return true;
+		}
+		if (a.getEntityType() != null && b.getEntityType() != null && a.getEntityType().getKeyId().equalsIgnoreCase(b.getKeyId())) {
+			return true;
+		}
+		return false;
+	}
+	
+	public Set<IntelRecordSource> getRecordSourcesInternal(Session session){
+		if (recordSources != null) return recordSources;
+		
+		Set<IntelRecordSource> items = new HashSet<>();
+		
+		List<IntelRecordSource> allTypes = session.createQuery("FROM IntelRecordSource WHERE conservationArea in (:cas)", IntelRecordSource.class) //$NON-NLS-1$
+				.setParameterList("cas",  getConservationAreas()).list(); //$NON-NLS-1$
+		
+		
+		for (IntelRecordSource type : allTypes) {
+			boolean found = false;
+			for (IntelProfile t : type.getProfiles()) {
+				if (profiles.contains(t)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) continue;
+			items.add(type);
+		}
+		recordSources = items;
+		return recordSources;
 	}
 }

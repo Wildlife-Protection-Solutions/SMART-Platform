@@ -107,7 +107,6 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 					.setParameter("cas", cas).list();
 			
 			for (IntelProfile ip2 : items) {
-				ip2.getKeyId();
 				if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2);
 			}
 		}
@@ -118,8 +117,6 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 				
 				connection.setAutoCommit(true);
 				try{
-					
-					
 					queryResults = new IntelEntityRecordQueryResults();
 						
 					String dataTable = null;

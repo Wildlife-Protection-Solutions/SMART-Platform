@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
@@ -57,7 +58,7 @@ public enum EntitySummaryQueryHeaderEngine {
 	 * @param results the summary query results to update
 	 * @param session hibernate session
 	 */
-	public void getHeaderInfo(SumQueryDefinition queryDefinition, SummaryQueryResult results, LocalDate[] dateRange, Set<String> profiles, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
+	public void getHeaderInfo(SumQueryDefinition queryDefinition, SummaryQueryResult results, LocalDate[] dateRange, Set<UUID> profiles, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
 		
 		// value headers
 		ValuePart vp = queryDefinition.getValuePart();

@@ -32,18 +32,16 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.equinox.internal.p2.engine.Profile;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.IIntelQueryEngine;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordSource;
-import org.wcs.smart.i2.query.CaQueryItemProvider;
-import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IQueryItemProvider;
@@ -88,24 +86,20 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		if (cas == null){
 			 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
 		}
-		IQueryItemProvider itemProvider = new DesktopCcaaQueryItemProvider(cas, query.getConservationArea());
-		if (cas.size() == 1) {
-			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
-		}
+		IQueryItemProvider itemProvider = InternalQueryManager.INSTANCE.getQueryItemProvider();
 		
 		progress.subTask(Messages.IntelObservationQueryEngine_Progress2);
 		IQueryFilter filter = IntelRecordQuery.parseQuery(query.getQueryString());
 		progress.worked(1);
 		
-		Set<String> profiles = new HashSet<>();
+		Set<UUID> profiles = new HashSet<>();
 		for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
 			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
 					.setParameter("keyId",  ip)
 					.setParameter("cas", cas).list();
 			
 			for (IntelProfile ip2 : items) {
-				ip2.getKeyId();
-				if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2.getKeyId());
+				if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2.getUuid());
 			}
 		}
 		
@@ -128,6 +122,7 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		
 		HashMap<String, Integer> cols = p.colName2Index;
 		cols.put("profile_name", cols.size());
+		cols.put("profile_key", cols.size());
 		cols.put("record_source_name", cols.size());
 		
 		session.createNativeQuery("ALTER TABLE " + data + " add column sort_column varchar(1028)").executeUpdate();
@@ -137,16 +132,17 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 	}
 	
 	private void addProfile(Session session, String datatable) {
-		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN profile_name varchar(1024)")
-			.executeUpdate();
+		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN profile_name varchar(1024)").executeUpdate();
+		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN profile_key varchar(128)").executeUpdate();
 		
 		List<byte[]> uuids = session.createNativeQuery("SELECT distinct profile_uuid FROM " + datatable).list();
 		for (byte[] u : uuids) {
 			IntelProfile p = session.get(IntelProfile.class, UuidUtils.byteToUUID(u));
 			
-			session.createNativeQuery("UPDATE " + datatable + " SET profile_name = :name WHERE profile_uuid = :uuid")
+			session.createNativeQuery("UPDATE " + datatable + " SET profile_name = :name, profile_key = :pkey WHERE profile_uuid = :uuid")
 				.setParameter("name", p.getName())
 				.setParameter("uuid", p.getUuid())
+				.setParameter("pkey", p.getKeyId())
 				.executeUpdate();
 		}
 	}
@@ -166,3 +162,4 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		}
 	}
 }
+

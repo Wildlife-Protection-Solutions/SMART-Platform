@@ -41,6 +41,7 @@ import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.IIntelQueryEngine;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -48,8 +49,6 @@ import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelProfile;
-import org.wcs.smart.i2.query.CaQueryItemProvider;
-import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.Operator;
@@ -108,20 +107,15 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		if (cas == null){
 			 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
 		}
-		IQueryItemProvider itemProvider = new DesktopCcaaQueryItemProvider(cas, query.getConservationArea());
-		if (cas.size() == 1) {
-			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
-		}
-		
-		Set<String> profiles = new HashSet<>();
+		IQueryItemProvider itemProvider = InternalQueryManager.INSTANCE.getQueryItemProvider();
+		Set<UUID> profiles = new HashSet<>();
 		for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
 			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
 					.setParameter("keyId",  ip)
 					.setParameter("cas", cas).list();
 			
 			for (IntelProfile ip2 : items) {
-				ip2.getKeyId();
-				if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2.getKeyId());
+				if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2.getUuid());
 			}
 		}
 		
@@ -241,7 +235,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	 * Runs a sql statement on the data table to get the results for the table
 	 */
 	private SummaryQueryResult getResults(String queryTable, SumQueryDefinition definition, LocalDate[] dateRange, 
-			Map<GroupByItem, String> areaTables, Locale l, Set<String> profiles, IQueryItemProvider itemProvider, Session session) throws Exception {
+			Map<GroupByItem, String> areaTables, Locale l, Set<UUID> profiles, IQueryItemProvider itemProvider, Session session) throws Exception {
 		
 		StringBuilder selectSql = new StringBuilder();
 		StringBuilder groupBySql = new StringBuilder();
@@ -403,7 +397,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	 * create temporary entity table and populate with all entities
 	 * that match the given conservation area
 	 */
-	private String createTemporaryEntityTable(Session session, Set<String> profiles, Collection<ConservationArea> cas) {
+	private String createTemporaryEntityTable(Session session, Set<UUID> profiles, Collection<ConservationArea> cas) {
 		String obsTable = SqlGenerator.createTempTableName();
 		
 		dataTable = new DataTable(obsTable);
@@ -436,8 +430,8 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		sb.append(","); //$NON-NLS-1$
 		sb.append(modified);
 		sb.append(") SELECT a.uuid, b.keyid, a.ca_uuid, cast(a.date_created as date), cast(a.date_modified as date) FROM "); //$NON-NLS-1$
-		sb.append(" smart.i_entity a join smart.i_entity_type b on a.entity_type_uuid = b.uuid join smart.i_profile_config p on p.uuid = a.profile_uuid"); //$NON-NLS-1$
-		sb.append(" WHERE b.ca_uuid in (:cauuids) and p.keyid in (:profiles)"); //$NON-NLS-1$
+		sb.append(" smart.i_entity a join smart.i_entity_type b on a.entity_type_uuid = b.uuid "); //$NON-NLS-1$
+		sb.append(" WHERE b.ca_uuid in (:cauuids) and a.profile_uuid in (:profiles)"); //$NON-NLS-1$
 		
 		List<UUID> cauuids = cas.stream().map(e->e.getUuid()).collect(Collectors.toList());
 		

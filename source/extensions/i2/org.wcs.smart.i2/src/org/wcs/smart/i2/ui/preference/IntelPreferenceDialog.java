@@ -56,9 +56,9 @@ public class IntelPreferenceDialog extends PreferenceDialog {
 	
 	public IntelPreferenceDialog(Shell parentShell, PreferenceManager manager) {
 		super(parentShell, manager);
-		
 		super.addPageChangedListener(event->((IIntelPreferencePage)event.getSelectedPage()).refresh());
 	}
+	
 	public boolean close() {
 		boolean v = super.close();
 		broker.post(IntelEvents.PROFILES_CONFIG, null);

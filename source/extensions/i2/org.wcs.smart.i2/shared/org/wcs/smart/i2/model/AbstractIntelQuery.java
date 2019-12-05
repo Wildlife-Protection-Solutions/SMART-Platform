@@ -215,6 +215,13 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	}
 	
 	
+	/**
+	 * returns true if the query profile filter
+	 * includes the given profile
+	 * 
+	 * @param p
+	 * @return
+	 */
 	@Transient
 	public boolean queriesProfile(IntelProfile p) {
 		Set<String> pp = convertFromProfileFilter(getProfileFilter());	

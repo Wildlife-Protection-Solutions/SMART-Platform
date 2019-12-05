@@ -104,7 +104,7 @@ public class SystemAttributeFilterItem extends BasicTreeFilterItem {
 				return new DropItem[] {di};
 		}else if (attribute == SystemAttribute.RECORD_SOURCE) {
 			try(Session session = HibernateManager.openSession()){
-				List<IntelRecordSource> srcs = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSources(ProfilesManager.INSTANCE.getActiveProfileKeys(), session);
+				List<IntelRecordSource> srcs = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSources(ProfilesManager.INSTANCE.getActiveProfileIds(), session);
 				String[] ops = new String[srcs.size()];
 				String[] keys = new String[ops.length];
 				

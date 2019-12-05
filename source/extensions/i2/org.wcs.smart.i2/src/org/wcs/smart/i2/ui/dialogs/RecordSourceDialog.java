@@ -688,10 +688,12 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 			//which means that the profile associated with the record
 			//must match one of the profiles associated with that record source
 			
-			String hsql = "SELECT count(*) FROM IntelRecord r WHERE r.recordSource = :source and profile not in (:profiles)";
-			Long cnt = (Long)session.createQuery(hsql).setParameter("source", currentSelection).setParameter("profiles", newProfiles).uniqueResult();
-			if (cnt > 0) {
-				throw new Exception("Cannot remove profiles associated with record source until all records with that source are also removed.");
+			if (currentSelection.getUuid() != null) {
+				String hsql = "SELECT count(*) FROM IntelRecord r WHERE r.recordSource = :source and profile not in (:profiles)";
+				Long cnt = (Long)session.createQuery(hsql).setParameter("source", currentSelection).setParameter("profiles", newProfiles).uniqueResult();
+				if (cnt > 0) {
+					throw new Exception("Cannot remove profiles associated with record source until all records with that source are also removed.");
+				}
 			}
 			
 			session.beginTransaction();

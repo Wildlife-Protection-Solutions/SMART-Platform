@@ -30,10 +30,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -42,6 +40,7 @@ import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.IIntelQueryEngine;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -49,24 +48,14 @@ import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
-import org.wcs.smart.i2.query.CaQueryItemProvider;
-import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryResult;
-import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.SummaryQueryResult;
 import org.wcs.smart.i2.query.SummaryResultKey;
-import org.wcs.smart.i2.query.observation.filter.BooleanFilter;
-import org.wcs.smart.i2.query.observation.filter.BracketFilter;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem.GroupByType;
-import org.wcs.smart.i2.query.observation.filter.IFilterVisitor;
-import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
-import org.wcs.smart.i2.query.observation.filter.NotFilter;
-import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
-import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
 import org.wcs.smart.i2.query.observation.filter.ValuePart.ValueOption;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.util.UuidUtils;
@@ -89,6 +78,8 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	 * @return
 	 */
 	@Override
+	
+	
 	public IQueryResult executeQuery(AbstractIntelQuery query,  HashMap<String, Object> parameters) throws Exception{
 		
 		Session session = (Session) parameters.get(Session.class.getName());
@@ -108,21 +99,16 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			if (cas == null){
 				 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
 			}
-			IQueryItemProvider itemProvider = new DesktopCcaaQueryItemProvider(cas, query.getConservationArea());
-			if (cas.size() == 1) {
-				itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
-			}
+			IQueryItemProvider itemProvider = InternalQueryManager.INSTANCE.getQueryItemProvider();
 			Date[] dates = (Date[]) parameters.get(Date.class.getName());
 			
-			Set<String> profiles = new HashSet<>();
+			Set<UUID> profiles = new HashSet<>();
 			for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
 				List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
 						.setParameter("keyId",  ip)
 						.setParameter("cas", cas).list();
-				
 				for (IntelProfile ip2 : items) {
-					ip2.getKeyId();
-					if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2.getKeyId());
+					if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2.getUuid());
 				}
 			}
 			
@@ -232,6 +218,8 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	private Date[] computeDateRange(String queryTable, Session session) {
 		String field = SystemAttributeFilter.SystemAttribute.RECORD_DATE.name().toLowerCase(Locale.ROOT);
 		Object[] items = (Object[]) session.createNativeQuery("SELECT min(" +field+ "), max(" +field+ ") FROM " + queryTable).uniqueResult();
+		if (items[0] == null) items[0] = new Date();
+		if (items[1] == null) items[1] = new Date();
 		return new Date[] {(Date) items[0], (Date) items[1]};
 	}
 	
@@ -239,7 +227,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	 * Runs a sql statement on the data table to get the results for the table
 	 */
 	private SummaryQueryResult getResults(String queryTable, SumQueryDefinition definition, LocalDate[] dateRange, 
-			Locale l, Set<String> profiles, IQueryItemProvider itemProvider, Session session) throws Exception {
+			Locale l, Set<UUID> profiles, IQueryItemProvider itemProvider, Session session) throws Exception {
 		
 		StringBuilder selectSql = new StringBuilder();
 		StringBuilder groupBySql = new StringBuilder();

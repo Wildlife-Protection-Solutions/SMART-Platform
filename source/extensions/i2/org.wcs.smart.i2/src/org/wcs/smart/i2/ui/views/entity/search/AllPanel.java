@@ -360,7 +360,7 @@ public class AllPanel extends Composite {
 			}
 			public Image getImage(Object element) {
 				if (element == null) return null;
-				return Resources.INSTANCE.getProfileImage(((EntityTableRowItem)element).getProfileUuid());
+				return Resources.INSTANCE.getProfileImage(((EntityTableRowItem)element).getProfileKey());
 			}
 		});
 		

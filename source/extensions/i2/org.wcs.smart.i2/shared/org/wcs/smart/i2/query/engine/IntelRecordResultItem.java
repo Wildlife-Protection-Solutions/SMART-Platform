@@ -40,6 +40,7 @@ public class IntelRecordResultItem implements IResultItem {
 	private String recordTitle;
 	
 	private UUID profileUuid;
+	private String profileKey;
 	private String profileName;
 	
 	private UUID recordSource;
@@ -61,11 +62,15 @@ public class IntelRecordResultItem implements IResultItem {
 		
 	}
 	
-	public void setProflie(UUID profileUuid, String name) {
-		this.profileUuid = profileUuid;
+	public void setProfile(String profileKey, UUID profileUuid, String name) {
+		this.profileKey = profileKey;
 		this.profileName = name;
+		this.profileUuid = profileUuid;
 	}
 	
+	public UUID getProfileUuid() {
+		return this.profileUuid;
+	}
 	public String getProfileName() {
 		return this.profileName;
 	}
@@ -125,8 +130,8 @@ public class IntelRecordResultItem implements IResultItem {
 		this.recordUuid = uuid;
 	}
 	
-	public UUID getProfileUuid(){
-		return this.profileUuid;
+	public String getProfileKey(){
+		return this.profileKey;
 	}
 	
 	public void addAttribute(String attributeKey, Object value){

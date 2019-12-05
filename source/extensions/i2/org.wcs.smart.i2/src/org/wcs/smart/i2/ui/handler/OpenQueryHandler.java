@@ -34,9 +34,9 @@ import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.ui.editors.query.IntelEntityRecordQueryEditor;
-import org.wcs.smart.i2.ui.editors.query.IntelSummaryQueryEditor;
 import org.wcs.smart.i2.ui.editors.query.IntelRecordObservationQueryEditor;
 import org.wcs.smart.i2.ui.editors.query.IntelRecordQueryEditor;
+import org.wcs.smart.i2.ui.editors.query.IntelSummaryQueryEditor;
 import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
 
 /**

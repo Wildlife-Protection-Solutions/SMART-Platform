@@ -155,7 +155,7 @@ public class RecordSourceGroupByDropItem extends DropItem implements IGroupByDro
 	@Override
 	public List<ListItem> getListOptions() {
 		try(Session session = HibernateManager.openSession()){
-			return (new GroupByItem(GroupByType.RECORDSOURCE, Collections.emptyList()).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileKeys(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault()));
+			return (new GroupByItem(GroupByType.RECORDSOURCE, Collections.emptyList()).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileIds(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault()));
 		}
 	}
 

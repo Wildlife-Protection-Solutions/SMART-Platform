@@ -24,6 +24,7 @@ package org.wcs.smart.i2.query;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
@@ -54,7 +55,7 @@ public interface IQueryItemProvider {
 	 * @param session
 	 * @return
 	 */
-	public List<IntelRecordSource> getRecordSources(Set<String> profiles, Session session);
+	public List<IntelRecordSource> getRecordSources(Set<UUID> profiles, Session session);
 	
 	/**
 	 * Get all record attribute associated with the record source key
@@ -92,7 +93,7 @@ public interface IQueryItemProvider {
 	 * @param session
 	 * @return
 	 */
-	public List<IntelEntityType> getEntityTypes(Set<String> profiles, Session session);
+	public List<IntelEntityType> getEntityTypes(Set<UUID> profiles, Session session);
 	
 	/**
 	 * Gets all profiles that match a key in the given
@@ -160,7 +161,7 @@ public interface IQueryItemProvider {
 	 * @param session
 	 * @return
 	 */
-	public List<IntelEntity> getEntities(String entityTypeKey, Session session);
+	public List<IntelEntity> getEntities(Set<UUID> profiles, String entityTypeKey, Session session);
 	
 	/**
 	 * Get all data model attributes
@@ -223,8 +224,4 @@ public interface IQueryItemProvider {
 	 */
 	public int getMaxDmCategoryDepth(Session session);
 	
-	/**
-	 * resets any cached items in the query item provider
-	 */
-	public default void reset() {}
 }

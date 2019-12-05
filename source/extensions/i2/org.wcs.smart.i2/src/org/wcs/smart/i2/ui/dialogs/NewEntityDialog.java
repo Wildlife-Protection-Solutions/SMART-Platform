@@ -180,9 +180,16 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					if (cmbProfile != null) cmbProfile.setInput(profiles);
+					if (cmbProfile == null) {
+						if (psel != null) cmbEntityType.setInput(psel.getEntityTypes());
+						if (sel != null) cmbEntityType.setSelection(new StructuredSelection(sel));
+						return;
+					}
+					if (cmbProfile.getControl().isDisposed()) return;
+					
+					cmbProfile.setInput(profiles);
 					if (psel != null) {
-						if (cmbProfile != null) cmbProfile.setSelection(new StructuredSelection(psel));
+						cmbProfile.setSelection(new StructuredSelection(psel));
 						cmbEntityType.setInput(psel.getEntityTypes());
 						if (sel != null) cmbEntityType.setSelection(new StructuredSelection(sel));
 					}

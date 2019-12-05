@@ -37,6 +37,9 @@ public enum IntelSecurityManager {
 
 	INSTANCE;
 	
+	/**
+	 * Map from profile uuid to permission
+	 */
 	private volatile HashMap<UUID, Integer> permissions = null;
 	
 	private void loadPermissions() {
@@ -46,9 +49,17 @@ public enum IntelSecurityManager {
 			
 			HashMap<UUID, Integer> temp = new HashMap<>();
 			try(Session session = HibernateManager.openSession()){
-				List<IntelPermission> items = QueryFactory.buildQuery(session, IntelPermission.class, 
+				
+				if (SmartDB.isMultipleAnalysis()) {
+					String query = "FROM IntelPermission p WHERE id.employee.smartUserId = :userid ";
+					List<IntelPermission> items = session.createQuery(query, IntelPermission.class)
+							.setParameter("userid", SmartDB.getCurrentEmployee().getSmartUserId()).list();
+					for (IntelPermission p : items) temp.put(p.getProfile().getUuid(), p.getPermission());
+				}else {
+					List<IntelPermission> items = QueryFactory.buildQuery(session, IntelPermission.class, 
 						new Object[] {"id.employee", SmartDB.getCurrentEmployee()}).list();
-				for (IntelPermission p : items) temp.put(p.getProfile().getUuid(), p.getPermission());
+					for (IntelPermission p : items) temp.put(p.getProfile().getUuid(), p.getPermission());
+				}
 			}
 			permissions = temp;
 		}

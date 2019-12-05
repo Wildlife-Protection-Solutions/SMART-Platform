@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.editors.query;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -111,13 +112,29 @@ public class ProfilesDefinitionPanel implements IDefinitionPanel {
 		chProfiles = CheckboxTableViewer.newCheckList(mainComposite, SWT.NONE);
 		chProfiles.setContentProvider(ArrayContentProvider.getInstance());
 		chProfiles.setLabelProvider(new ProfileLabelProvider());
-		chProfiles.setInput(ProfilesManager.INSTANCE.getActiveProfiles()
-				.stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e)).collect(Collectors.toList()));
+		chProfiles.setInput(getProfiles());
 		chProfiles.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		chProfiles.addSelectionChangedListener(e->fireQueryChangedListeners());
 		
 		return mainComposite;
+	}
+	
+	private List<IntelProfile> getProfiles(){
+		HashMap<String, IntelProfile> items = new HashMap<>();
+		for (IntelProfile ip : ProfilesManager.INSTANCE.getActiveProfiles()) {
+			if (IntelSecurityManager.INSTANCE.canViewQuery(ip)) {
+				if (!items.containsKey(ip.getKeyId())) {
+					IntelProfile temp = new IntelProfile();
+					temp.setKeyId(ip.getKeyId());
+					temp.setName(ip.getName());
+					temp.setColor(ip.getColor());
+					items.put(ip.getKeyId(), temp);
+				}
+				
+			}
+		}
+		return new ArrayList<>(items.values());
 	}
 	
 	@Override

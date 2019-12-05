@@ -34,6 +34,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.gpx.xml.WptType;
@@ -47,8 +49,6 @@ import com.drew.lang.GeoLocation;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.GpsDirectory;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Point;
 
 /**
  * Parses locations from attachment files.  For images it reads image metadata

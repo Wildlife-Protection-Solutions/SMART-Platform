@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.i2.ui.views.query;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,8 +30,6 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import javax.imageio.ImageIO;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -42,11 +38,10 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -346,7 +341,8 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 					
 					for(IntelRecordSource s : records) {
 						tn = new TreeNode(source, s, s.getName());
-						tn.setImageDescriptor(ImageDescriptor.createFromImage(Resources.INSTANCE.getImage(s)));
+						Image img = Resources.INSTANCE.getImage(s);
+						if (img != null) tn.setImageDescriptor(ImageDescriptor.createFromImage(img));
 						items.add(tn);
 					}
 
@@ -574,7 +570,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 			if (type == Type.ENTITY) {
 				HashMap<IntelEntityType, List<IntelEntityTypeAttribute>> attributes = new HashMap<>();
 				try(Session session = HibernateManager.openSession()){
-					List<IntelEntityType> entityTypes = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypes(ProfilesManager.INSTANCE.getActiveProfileKeys(), session);
+					List<IntelEntityType> entityTypes = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypes(ProfilesManager.INSTANCE.getActiveProfileIds(), session);
 					for (IntelEntityType type : entityTypes) {
 						List<IntelEntityTypeAttribute> thisattributes = new ArrayList<>(InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypeAttributes(type, session));
 						thisattributes.forEach(e->e.getAttribute().getName());
@@ -586,14 +582,12 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 				HashMap<IntelRecordSource, List<IntelRecordSourceAttribute>> attributes = new HashMap<>();
 				
 				try(Session session = HibernateManager.openSession()){
-					List<IntelRecordSource> sources = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSources(ProfilesManager.INSTANCE.getActiveProfileKeys(), session);
+					List<IntelRecordSource> sources = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSources(ProfilesManager.INSTANCE.getActiveProfileIds(), session);
 					for (IntelRecordSource type : sources) {
 						List<IntelRecordSourceAttribute> thisattributes = new ArrayList<>(InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSourceAttributes(type, session));
 						for (IntelRecordSourceAttribute  a : thisattributes) {
-							if (a.getAttribute() != null) {
-								a.getAttribute().getName();
-								//TODO: could be entity type
-							}
+							if (a.getAttribute() != null) a.getAttribute().getName();
+							if (a.getEntityType() != null) a.getEntityType().getName();
 						}
 						attributes.put(type, thisattributes);
 					}

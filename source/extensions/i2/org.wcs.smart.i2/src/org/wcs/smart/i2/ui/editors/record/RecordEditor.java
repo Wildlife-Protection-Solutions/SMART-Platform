@@ -412,7 +412,6 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		if (isnew){
 			parentContext.get(IEventBroker.class).post(IntelEvents.RECORD_NEW, record);
 		}else{
-			//TODO: something was null here once during testing when i was switching perspectives
 			parentContext.get(IEventBroker.class).post(IntelEvents.RECORD_MODIFIED, record);
 		}
 		parentContext.get(IEventBroker.class).post(IntelEvents.RECORD_SAVED, record);

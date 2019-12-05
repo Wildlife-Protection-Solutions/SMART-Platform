@@ -100,7 +100,7 @@ public class IntelRecordAttributeQueryColumn extends AbstractQueryColumn {
 					List<IntelAttributeListItem> items = (List<IntelAttributeListItem>)toFormat;
 					StringBuilder sb = new StringBuilder();
 					for (IntelAttributeListItem i : items) {
-						sb.append( i.getName() );	//TODO: get the name for the correct locale?
+						sb.append( i.getName() );
 						sb.append(", ");
 					}
 					if (sb.length() > 0) return sb.substring(0, sb.length() - 2);

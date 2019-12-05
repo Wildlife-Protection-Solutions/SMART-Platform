@@ -69,6 +69,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -97,8 +98,6 @@ import org.wcs.smart.i2.ui.views.entity.search.BasicEntitySearchPanel;
 import org.wcs.smart.i2.ui.views.entity.search.SpatialSearchPanel;
 import org.wcs.smart.ui.TranslateNamesHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
-
-import org.locationtech.jts.geom.Geometry;
 
 /**
  * View for entity search and results

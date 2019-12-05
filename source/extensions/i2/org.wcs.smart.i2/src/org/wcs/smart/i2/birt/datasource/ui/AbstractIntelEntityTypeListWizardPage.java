@@ -57,8 +57,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.InternalEntityManager;
-import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.internal.Messages;

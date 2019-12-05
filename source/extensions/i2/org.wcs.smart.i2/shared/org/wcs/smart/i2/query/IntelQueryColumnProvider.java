@@ -53,6 +53,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -167,9 +168,17 @@ public class IntelQueryColumnProvider {
 			columns.add(new FixedQueryColumn(c, l));
 		}
 		
-		List<IntelRecordSource> items = itemProvider.getRecordSources(AbstractIntelQuery.convertFromProfileFilter(query.getProfileFilter()), session);
+		Set<String> profiles = AbstractIntelQuery.convertFromProfileFilter(query.getProfileFilter());
+		Set<UUID> uuids = new HashSet<>();
+		
+		uuids.addAll(session.createQuery("SELECT uuid FROM IntelProfile WHERE keyId IN (:keys) and conservationArea in (:cas)")
+		.setParameterList("keys", profiles)
+		.setParameterList("cas", itemProvider.getConservationAreas()).list());
+		
+		
+		List<IntelRecordSource> items = itemProvider.getRecordSources(uuids, session);
 		for (IntelRecordSource rs : items) {
-			for (IntelRecordSourceAttribute ir : rs.getAttributes()) {
+			for (IntelRecordSourceAttribute ir : itemProvider.getRecordSourceAttributes(rs, session)) {
 				columns.add(new IntelRecordAttributeQueryColumn(ir));
 			}
 		}

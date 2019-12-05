@@ -168,9 +168,7 @@ public class EntityRecordWaypointFilterProcessor {
 			sql.append( " WHERE "); //$NON-NLS-1$
 			sql.append(" l.ca_uuid in (:cas) and l.profile_uuid in (:profiles) "); //$NON-NLS-1$
 	
-			Collection<UUID> profileUuids = itemProvider
-					.getProfiles(profileFilter.stream().map(e->e.getKeyId()).collect(Collectors.toSet()), s)
-					.stream().map(e->e.getUuid()).collect(Collectors.toSet());
+			Collection<UUID> profileUuids = profileFilter.stream().map(p->p.getUuid()).collect(Collectors.toSet());
 			for (UUID uuid : profileUuids) {
 				logString(UuidUtils.uuidToString(uuid));
 			}

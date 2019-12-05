@@ -27,8 +27,12 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
@@ -66,6 +70,7 @@ import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.Resources;
 
 /**
@@ -178,20 +183,30 @@ public class LoadFilterOptions extends Job {
 	private FilterTreeItem loadAttributes(Session session){
 		AttributeHeaderFilterItem attributeRoots = new AttributeHeaderFilterItem(Messages.LoadFilterOptions_EntityAttributeFilterLabel, false);
 		
-		//TODO: ccaa
-//		List<IntelAttribute> attributes = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributes(session);
-		List<IntelAttribute> attributes = new ArrayList<>();
+		HashMap<String, IntelAttribute> attributes = new HashMap<>();
+		Set<String> donotuse = new HashSet<>();
 		for (IntelProfile ip : ProfilesManager.INSTANCE.getActiveProfiles()) {
+			if (!IntelSecurityManager.INSTANCE.canViewQuery(ip)) continue;
 			ip = session.get(IntelProfile.class, ip.getUuid());
 			for (IntelEntityType et : ip.getEntityTypes()) {
-				et.getAttributes().forEach(e->{
-					if (!attributes.contains(e.getAttribute())) attributes.add(e.getAttribute());
-				});
+				for (IntelEntityTypeAttribute e : et.getAttributes()) {
+					if (donotuse.contains(e.getAttribute().getKeyId())) continue;					
+					if (!attributes.containsKey(e.getAttribute().getKeyId())) {
+						attributes.put(e.getAttribute().getKeyId(), e.getAttribute());
+					}else {
+						//if the attribute types are not the same we may want to remove the attribute
+						//and make sure we don't re-add it
+						if (!e.getAttribute().getType().equals(attributes.get(e.getAttribute().getKeyId()).getType())) {
+							attributes.remove(e.getAttribute().getKeyId());
+							donotuse.add(e.getAttribute().getKeyId());
+						}
+					}
+				}
 			}
 		}
-		
-		attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-		for (IntelAttribute a : attributes){
+		List<IntelAttribute> all = new ArrayList<>(attributes.values());
+		all.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+		for (IntelAttribute a : all){
 			//only include attribute associated with entity type that is valid
 			AttributeTreeFilterItem item = new AttributeTreeFilterItem(a, true, false);
 			attributeRoots.addChild(item);
@@ -211,7 +226,7 @@ public class LoadFilterOptions extends Job {
 		entityTypeRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY));
 
 		List<IntelEntityType> types =
-			InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypes(ProfilesManager.INSTANCE.getActiveProfileKeys(), session);
+			InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypes(ProfilesManager.INSTANCE.getActiveProfileIds(), session);
 				
 		types.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for(IntelEntityType t : types){
@@ -291,7 +306,12 @@ public class LoadFilterOptions extends Job {
 		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED));
 		
 		
-		List<IntelRecordSource> sources = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSources(ProfilesManager.INSTANCE.getActiveProfileKeys(), session);
+		Set<UUID> profiles = ProfilesManager.INSTANCE.getActiveProfiles().stream()
+				.filter(f->IntelSecurityManager.INSTANCE.canViewQuery(f))
+				.map(f->f.getUuid()).collect(Collectors.toSet());
+				
+		List<IntelRecordSource> sources = InternalQueryManager.INSTANCE.getQueryItemProvider()
+				.getRecordSources(profiles, session);
 		
 		for (IntelRecordSource type : sources) {
 			BasicTreeFilterItem sourceRoot = new BasicTreeFilterItem(type.getName());

@@ -26,6 +26,11 @@ import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -33,12 +38,6 @@ import org.wcs.smart.i2.query.IGeometryResultItem;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
-
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.MultiPoint;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 
 /**
  * Feature reader for query result set

@@ -112,7 +112,6 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
-import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
@@ -199,9 +198,11 @@ public class QueryView {
 	@Optional
 	@Inject
 	private void activeProfilesChanged(@UIEventTopic(IntelEvents.PROFILES_ALL) Object data){
-		Set<IntelProfile> items= ProfilesManager.INSTANCE.getActiveProfiles().stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e))
+		Set<String> items= ProfilesManager.INSTANCE.getActiveProfiles().stream()
+				.filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e))
+				.map(e->e.getKeyId())
 				 .collect(Collectors.toSet());
-		queryList.getTable().setData("PROFILES", items);
+		queryList.getTable().setData(IntelQueryLabelProvider.PROFILE_KEYS, items);
 		
 		refreshView();
 	}
@@ -302,8 +303,11 @@ public class QueryView {
 		TableViewerColumn qcolumn = new TableViewerColumn(queryList, SWT.NONE);
 		qcolumn.setLabelProvider(new IntelQueryLabelProvider(qcolumn.getColumn()));
 		((TableColumnLayout)wrapper.getLayout()).setColumnData(qcolumn.getColumn(), new ColumnWeightData(1));
-		queryList.getTable().setData("PROFILES", ProfilesManager.INSTANCE.getActiveProfiles().stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e))
-		 .collect(Collectors.toSet()));
+		queryList.getTable().setData(IntelQueryLabelProvider.PROFILE_KEYS, 
+				ProfilesManager.INSTANCE.getActiveProfiles().stream()
+				.filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e))
+				.map(e->e.getKeyId())
+				.collect(Collectors.toSet()));
 		
 		//add drag support
 		queryList.addDragSupport(DND.DROP_LINK,new Transfer[]{IntelQuerySelectionTransfer.getTransfer()}, new DragSourceAdapter(){
@@ -606,7 +610,8 @@ public class QueryView {
 	 @Optional
 	 @Inject
 	 private void configurationChanged(@UIEventTopic(SmartDB.CCAA_CONFIGURATION_MODIFIED) Object data){
-		 InternalQueryManager.INSTANCE.getQueryItemProvider().reset();
+		 ProfilesManager.INSTANCE.resetActiveProfiles();
+		 InternalQueryManager.INSTANCE.resetQueryItemProvider();
 		 sourceModified();
 	 }
 	 
@@ -712,14 +717,17 @@ public class QueryView {
 			List<QueryProxy> proxyItems;
 			
 			Set<String> profiles = ProfilesManager.INSTANCE.getActiveProfiles()
-					.stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e)).map(e->e.getKeyId()).collect(Collectors.toSet());
+					.stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e))
+					.map(e->e.getKeyId())
+					.collect(Collectors.toSet());
 			
 			try(Session s = HibernateManager.openSession()){
 				
 				proxyItems = new ArrayList<>();
 				for (Class<? extends AbstractIntelQuery> c: InternalQueryManager.INSTANCE.getQueryTypeClasses()) {
 					List<? extends AbstractIntelQuery> items =
-							QueryFactory.buildQuery(s, c, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$	
+							QueryFactory.buildQuery(s, c, "conservationArea", SmartDB.getCurrentConservationArea())  //$NON-NLS-1$
+							.list();	
 					proxyItems.addAll(items.stream().filter(t->t.queriesProfile(profiles)).map(t->new QueryProxy(t.getName(), t.getUuid(), t.getTypeKey(), t.getProfileFilter())).collect(Collectors.toList()));
 				}
 			}

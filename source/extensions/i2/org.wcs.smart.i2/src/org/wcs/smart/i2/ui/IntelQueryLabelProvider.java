@@ -30,7 +30,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
-import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.ui.views.QueryProxy;
 
 /**
@@ -40,6 +39,8 @@ import org.wcs.smart.i2.ui.views.QueryProxy;
  *
  */
 public class IntelQueryLabelProvider extends OwnerDrawLabelProvider {
+	
+	public static final String PROFILE_KEYS = "PROFILES";
 	
 	private TableColumn tc;
 	
@@ -76,20 +77,10 @@ public class IntelQueryLabelProvider extends OwnerDrawLabelProvider {
 
 	@Override
 	protected void erase(Event event, Object element) {
-//		super.erase(event, element);
 	}
 	
 	@Override
 	protected void measure(Event event, Object element) {
-//		String txt = getText(element);
-////		
-//		int width = 21 * (ProfilesManager.INSTANCE.getActiveProfiles().size() + 1) + event.gc.textExtent(txt).x;
-//		width = Math.max(tc.getParent().getBounds().width, width);
-//		System.out.println(width);
-//		int height = event.getBounds().height;
-//		width = 725;
-////		int height = 20;
-//		event.setBounds(new Rectangle(event.getBounds().x, event.getBounds().y, width, height));
 	}
 
 	@Override
@@ -104,18 +95,16 @@ public class IntelQueryLabelProvider extends OwnerDrawLabelProvider {
 			x+= img.getBounds().width + 5;
 		}
 		String txt = getText(element);
-//		System.out.println(tc.getParent().getItem(0).getBackground());
-//		event.gc.setBackground(tc.getParent().getItem(0).getBackground());
 		event.gc.setBackground(tc.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		event.gc.drawText(txt,x,y+2);
 		x = tc.getParent().getBounds().width;
 		Set<String> allprofiles = getProfiles(element);
-		Set<IntelProfile> current = (Set<IntelProfile>)tc.getParent().getData("PROFILES");
+		Set<String> current = (Set<String>)tc.getParent().getData(PROFILE_KEYS);
 		if (current == null) return;
-		for (IntelProfile ip : current)  {
+		for (String ip : current)  {
 			x -= 16+5;
-			if (!allprofiles.contains(ip.getKeyId())) continue;
-			Image i = Resources.INSTANCE.getProfileImage(ip.getUuid());
+			if (!allprofiles.contains(ip)) continue;
+			Image i = Resources.INSTANCE.getProfileImage(ip);
 			if (i == null) {
 				event.gc.drawRectangle(x, y+2, 16, 16);
 			}else {

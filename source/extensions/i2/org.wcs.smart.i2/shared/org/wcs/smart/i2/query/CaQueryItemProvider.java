@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
@@ -101,7 +102,7 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	}
 	
 	@Override
-	public List<IntelEntityType> getEntityTypes(Set<String> profiles, Session session){
+	public List<IntelEntityType> getEntityTypes(Set<UUID> profiles, Session session){
 		List<IntelEntityType> types = QueryFactory.buildQuery(session, IntelEntityType.class,
 				new Object[] {"conservationArea", getCa()}).list(); //$NON-NLS-1$
 		
@@ -109,7 +110,7 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 			IntelEntityType t = (IntelEntityType) iterator.next();
 			boolean keep = false;
 			for (IntelProfile ip : t.getProfiles()) {
-				if (profiles.contains(ip.getKeyId())) {
+				if (profiles.contains(ip.getUuid())) {
 					keep = true;
 					break;
 				}
@@ -137,7 +138,7 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	}
 	
 	@Override
-	public List<IntelRecordSource> getRecordSources(Set<String> profiles, Session session){
+	public List<IntelRecordSource> getRecordSources(Set<UUID> profiles, Session session){
 		List<IntelRecordSource> types = QueryFactory.buildQuery(session, IntelRecordSource.class,
 				new Object[] {"conservationArea", getCa()}).list(); //$NON-NLS-1$
 		
@@ -145,7 +146,7 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 			IntelRecordSource t = (IntelRecordSource) iterator.next();
 			boolean keep = false;
 			for (IntelProfile ip : t.getProfiles()) {
-				if (profiles.contains(ip.getKeyId())) {
+				if (profiles.contains(ip.getUuid())) {
 					keep = true;
 					break;
 				}
@@ -192,10 +193,11 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	
 	
 	@Override
-	public List<IntelEntity> getEntities(String entityTypeKey, Session session){
-		return session.createQuery("SELECT i FROM IntelEntity i join i.entityType t WHERE i.conservationArea = :ca and t.keyId = :entityType", IntelEntity.class) //$NON-NLS-1$
+	public List<IntelEntity> getEntities(Set<UUID> profiles, String entityTypeKey, Session session){
+		return session.createQuery("SELECT i FROM IntelEntity i join i.entityType t WHERE i.conservationArea = :ca and t.keyId = :entityType and i.profile.uuid in (:profiles)", IntelEntity.class) //$NON-NLS-1$
 			.setParameter("entityType", entityTypeKey) //$NON-NLS-1$
 			.setParameter("ca",  getCa()) //$NON-NLS-1$
+			.setParameterList("profiles", profiles)
 			.list();
 	}
 	
@@ -255,4 +257,5 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 				.setParameter("ca",  getCa()).uniqueResult(); //$NON-NLS-1$
 		return cnt.intValue();
 	}
+
 }

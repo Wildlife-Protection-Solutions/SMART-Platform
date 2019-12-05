@@ -174,13 +174,11 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 				RunQueryJob job = new RunQueryJob(intelQuery) {
 					
 					@Override
-					protected void onError(Exception ex) {
-						//TODO: it might be possible to iconify the layer in the tree						
+					protected void onError(Exception ex) {						
 					}
 					
 					@Override
 					protected void onCancel() {
-						//TODO: it might be possible to iconify the layer in the tree
 					}
 					
 					@Override

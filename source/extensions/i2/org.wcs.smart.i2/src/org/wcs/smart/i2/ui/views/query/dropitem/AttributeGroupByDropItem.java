@@ -279,27 +279,27 @@ public class AttributeGroupByDropItem extends DropItem implements IGroupByDropIt
 		try(Session session = HibernateManager.openSession()){
 			if (rattribute != null) {
 				if (attribute.getType() == AttributeType.EMPLOYEE) {
-					return (new GroupByItem(GroupByType.RECORD_ATTRIBUTE, rattribute.getKeyId(), attribute.getType(), rattribute.getSource().getKeyId(), Collections.emptyList())).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileKeys(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+					return (new GroupByItem(GroupByType.RECORD_ATTRIBUTE, rattribute.getKeyId(), attribute.getType(), rattribute.getSource().getKeyId(), Collections.emptyList())).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileIds(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
 				}else if (attribute.getType() == AttributeType.LIST) {
-					return (new GroupByItem(GroupByType.RECORD_ATTRIBUTE, rattribute.getKeyId(), attribute.getType(), rattribute.getSource().getKeyId(), Collections.emptyList())).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileKeys(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+					return (new GroupByItem(GroupByType.RECORD_ATTRIBUTE, rattribute.getKeyId(), attribute.getType(), rattribute.getSource().getKeyId(), Collections.emptyList())).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileIds(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
 				}else if (attribute.getType() == AttributeType.POSITION) {
 					final Area.AreaType[] atype = new Area.AreaType[] {null};
 					Display.getDefault().syncExec(()->{
 						atype[0] = (AreaType) cmbOptions.getStructuredSelection().getFirstElement();
 					});
-					return (new GroupByItem(GroupByType.RECORD_ATTRIBUTE, rattribute.getKeyId(), attribute.getType(), rattribute.getSource().getKeyId(), atype[0], Collections.emptyList())).getAllOptions(session,ProfilesManager.INSTANCE.getActiveProfileKeys(),  InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+					return (new GroupByItem(GroupByType.RECORD_ATTRIBUTE, rattribute.getKeyId(), attribute.getType(), rattribute.getSource().getKeyId(), atype[0], Collections.emptyList())).getAllOptions(session,ProfilesManager.INSTANCE.getActiveProfileIds(),  InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
 				}
 			}else {
 				if (attribute.getType() == AttributeType.EMPLOYEE) {
-					return (new GroupByItem(GroupByType.ENTITY_ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileKeys(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+					return (new GroupByItem(GroupByType.ENTITY_ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileIds(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
 				}else if (attribute.getType() == AttributeType.LIST) {
-					return (new GroupByItem(GroupByType.ENTITY_ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileKeys(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+					return (new GroupByItem(GroupByType.ENTITY_ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileIds(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
 				}else if (attribute.getType() == AttributeType.POSITION) {
 					final Area.AreaType[] atype = new Area.AreaType[] {null};
 					Display.getDefault().syncExec(()->{
 						atype[0] = (AreaType) cmbOptions.getStructuredSelection().getFirstElement();
 					});
-					return (new GroupByItem(GroupByType.ENTITY_ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), atype[0], Collections.emptyList())).getAllOptions(session,ProfilesManager.INSTANCE.getActiveProfileKeys(),  InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+					return (new GroupByItem(GroupByType.ENTITY_ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), atype[0], Collections.emptyList())).getAllOptions(session,ProfilesManager.INSTANCE.getActiveProfileIds(),  InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
 				}
 			}
 				

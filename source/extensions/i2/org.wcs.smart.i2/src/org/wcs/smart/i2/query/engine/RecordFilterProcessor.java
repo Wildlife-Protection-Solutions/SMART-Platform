@@ -46,7 +46,7 @@ public class RecordFilterProcessor {
 	
 	HashMap<String, Integer> colName2Index = new HashMap<>();
 	
-	public String processFilter(IQueryFilter filter, Set<String> profiles, 
+	public String processFilter(IQueryFilter filter, Set<UUID> profiles, 
 			Date[] dates, Collection<ConservationArea> cas, Session session, IProgressMonitor monitor) throws Exception {
 		
 		SubMonitor sub = SubMonitor.convert(monitor);
@@ -69,7 +69,7 @@ public class RecordFilterProcessor {
 	 * create temporary entity table and populate with all entities
 	 * that match the given conservation area
 	 */
-	private String createTemporaryRecordTable(Session session, Set<String> profiles, Date[] dates, Collection<ConservationArea> cas) {
+	private String createTemporaryRecordTable(Session session, Set<UUID> profiles, Date[] dates, Collection<ConservationArea> cas) {
 		String obsTable = SqlGenerator.createTempTableName();
 			
 		//create table
@@ -104,8 +104,8 @@ public class RecordFilterProcessor {
 		sb.append(" cast(a.date_created as date), cast(a.last_modified_date as date), ");
 		sb.append(" a.profile_uuid");
 		sb.append(" FROM "); //$NON-NLS-1$
-		sb.append(" smart.i_record a join smart.i_recordsource b on a.source_uuid = b.uuid join smart.i_profile_config p on p.uuid = a.profile_uuid"); //$NON-NLS-1$
-		sb.append(" WHERE b.ca_uuid in (:cauuids) and p.keyid in (:profiles)"); //$NON-NLS-1$
+		sb.append(" smart.i_record a join smart.i_recordsource b on a.source_uuid = b.uuid "); //$NON-NLS-1$
+		sb.append(" WHERE b.ca_uuid in (:cauuids) and a.profile_uuid in (:profiles)"); //$NON-NLS-1$
 		if (dates[0] != null) {
 			sb.append(" AND cast(a.primary_date as date)>= :startd and cast(a.primary_date as date) <= :endd");
 		}
@@ -145,7 +145,11 @@ public class RecordFilterProcessor {
 						//attribute
 						String colname = "filter" + colnumber;
 						colnumber++;
-						addAttributeFilter(queryTable,colname,f,session);
+						try {
+							addAttributeFilter(queryTable,colname,f,session);
+						}catch (Exception ex) {
+							throw new IllegalStateException(ex);
+						}
 						filterToColumn.put(f, colname);
 					}else  {
 						//entity
@@ -164,7 +168,7 @@ public class RecordFilterProcessor {
 	/*
 	 * add an attribute column to the entity type
 	 */
-	private void addAttributeFilter(String queryTable, String columnName, RecordAttributeFilter filter, Session session)  {
+	private void addAttributeFilter(String queryTable, String columnName, RecordAttributeFilter filter, Session session)  throws Exception{
 		StringBuilder sb = new StringBuilder();
 		sb.append("ALTER TABLE "); //$NON-NLS-1$
 		sb.append(queryTable);
@@ -182,7 +186,7 @@ public class RecordFilterProcessor {
 		sb.append(" = true where record_uuid in ( SELECT  "); //$NON-NLS-1$
 		sb.append( "v.record_uuid ");
 		sb.append(" FROM smart.i_record_attribute_value v join smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid ");
-		sb.append(" JOIN smart.i_record_source c on c.uuid = b.source_uuid and c.keyid = :sourceid");
+		sb.append(" JOIN smart.i_recordsource c on c.uuid = b.source_uuid and c.keyid = :sourceid");
 		if (filter.getAttributeType() == AttributeType.DATE) {
 			sb.append(" JOIN smart.i_attribute r on r.uuid = b.attribute_uuid and r.type = 'DATE' ");
 		}
@@ -195,33 +199,30 @@ public class RecordFilterProcessor {
 		sb.append(" WHERE "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" b.keyid = :keyid "); //$NON-NLS-1$
 		
-		try {
-			if (filter.getAttributeType() == AttributeType.BOOLEAN) {
-				sb.append(" AND v.double_value > 0.5 ");
-			}else if (filter.getAttributeType() == AttributeType.DATE) {
-				sb.append(" AND v.string_value is not null AND cast(v.string_value as date) ");
-				sb.append( SqlGenerator.operatorToSql(filter.getOperator()) );
-				sb.append(" :value and :value2 ");
-			}else if (filter.getAttributeType() == AttributeType.NUMERIC) {
-				sb.append(" AND v.double_value ");
-				sb.append( SqlGenerator.operatorToSql(filter.getOperator()) );
-				sb.append(" :value ");
-			}else if (filter.getAttributeType() == AttributeType.TEXT) {
-				sb.append(" AND v.string_value ");
-				sb.append( SqlGenerator.operatorToSql(filter.getOperator()) );
-				sb.append(" :value ");
-			}else if (filter.getAttributeType() == AttributeType.EMPLOYEE) {
-				sb.append(" AND li.element_uuid = :value ");
-			}else if (filter.getAttributeType() == AttributeType.LIST) {
-				if (filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)) {
-					sb.append(" AND ali.keyid is not null ");
-				}else {
-					sb.append(" AND ali.keyid = :value ");
-				}
+		if (filter.getAttributeType() == AttributeType.BOOLEAN) {
+			sb.append(" AND v.double_value > 0.5 ");
+		}else if (filter.getAttributeType() == AttributeType.DATE) {
+			sb.append(" AND v.string_value is not null AND cast(v.string_value as date) ");
+			sb.append( SqlGenerator.operatorToSql(filter.getOperator()) );
+			sb.append(" :value and :value2 ");
+		}else if (filter.getAttributeType() == AttributeType.NUMERIC) {
+			sb.append(" AND v.double_value ");
+			sb.append( SqlGenerator.operatorToSql(filter.getOperator()) );
+			sb.append(" :value ");
+		}else if (filter.getAttributeType() == AttributeType.TEXT) {
+			sb.append(" AND v.string_value ");
+			sb.append( SqlGenerator.operatorToSql(filter.getOperator()) );
+			sb.append(" :value ");
+		}else if (filter.getAttributeType() == AttributeType.EMPLOYEE) {
+			sb.append(" AND li.element_uuid = :value ");
+		}else if (filter.getAttributeType() == AttributeType.LIST) {
+			if (filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)) {
+				sb.append(" AND ali.keyid is not null ");
+			}else {
+				sb.append(" AND ali.keyid = :value ");
 			}
-		}catch (Exception ex) {
-			//TODO: fix me
 		}
+		
 		sb.append(")");
 		
 		
@@ -277,7 +278,7 @@ public class RecordFilterProcessor {
 		sb.append(" = true where record_uuid in ( SELECT  "); //$NON-NLS-1$
 		sb.append( " v.record_uuid ");
 		sb.append(" FROM smart.i_record_attribute_value v join smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid ");
-		sb.append(" JOIN smart.i_record_source c on c.uuid = b.source_uuid and c.keyid = :sourceid");
+		sb.append(" JOIN smart.i_recordsource c on c.uuid = b.source_uuid and c.keyid = :sourceid");
 		sb.append(" JOIN smart.i_record_attribute_value_list lt on lt.value_uuid = v.uuid ");
 		sb.append(" WHERE "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" b.keyid = :keyid ");

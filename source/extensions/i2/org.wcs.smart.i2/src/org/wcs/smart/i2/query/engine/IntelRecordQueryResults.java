@@ -23,29 +23,22 @@ package org.wcs.smart.i2.query.engine;
 
 import java.sql.Date;
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import org.geotools.referencing.CRS;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
-import org.wcs.smart.ICoreLabelProvider;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
-import org.wcs.smart.i2.model.IntelRecordSource;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.FixedQueryColumn.Column;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
@@ -54,8 +47,6 @@ import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.IntelRecordAttributeQueryColumn;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.ui.SmartLabelProvider;
-import org.wcs.smart.util.GeometryUtils;
-import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -146,7 +137,8 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 		
 		UUID profileUuid = asUuid(rowData[columnNameToIndex.get("profile_uuid")]); //$NON-NLS-1$
 		String profileName = (String) rowData[columnNameToIndex.get("profile_name")];
-		item.setProflie(profileUuid, profileName);
+		String profileKey = (String)rowData[columnNameToIndex.get("profile_key")];
+		item.setProfile(profileKey, profileUuid, profileName);
 				
 		item.setRecordDate((Date)rowData[columnNameToIndex.get("record_date")]);
 		
@@ -196,7 +188,7 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 				List<IntelEntity> items = new ArrayList<>();
 				for (IntelRecordAttributeValueList li : v.getAttributeListItems()) {
 					IntelEntity ie = (session.get(IntelEntity.class, li.getId().getElementUuid()));
-					ie.getIdAttributeAsText();  //TODO: resolve locale?
+					ie.getIdAttributeAsText();
 					items.add(ie);
 				}
 				value = items;

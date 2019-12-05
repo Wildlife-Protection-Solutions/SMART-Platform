@@ -1,7 +1,6 @@
 package org.wcs.smart.i2.ui;
 
 import java.util.HashMap;
-import java.util.UUID;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
@@ -24,9 +23,9 @@ public enum Resources {
 	INSTANCE;
 	
 	private HashMap<IntelProfile, Color> colorCache = new HashMap<>();
-	private HashMap<IntelProfile, Image> profileImages = new HashMap<>();
+	private HashMap<String, Image> profileImages = new HashMap<>();
 	private HashMap<IntelEntityType, Image> typeImages = new HashMap<>();
-	private HashMap<UUID, Image> recordImages = new HashMap<>();
+	private HashMap<String, Image> recordImages = new HashMap<>();
 	
 	public void dispose() {
 		for (Color c : colorCache.values()) c.dispose();
@@ -51,9 +50,9 @@ public enum Resources {
 			if (colorCache.containsKey(profile)) colorCache.get(profile).dispose();
 			colorCache.remove(profile);
 			
-			Image i = profileImages.get(profile);
+			Image i = profileImages.get(profile.getKeyId());
 			if (i != null) i.dispose();
-			profileImages.remove(profile);
+			profileImages.remove(profile.getKeyId());
 			
 			return null;
 		}
@@ -73,9 +72,9 @@ public enum Resources {
 		cc = new Color(Display.getDefault(), profile.getColorObj().getRed(), profile.getColorObj().getGreen(), profile.getColorObj().getBlue());
 		colorCache.put(profile, cc);
 		
-		Image i = profileImages.get(profile);
+		Image i = profileImages.get(profile.getKeyId());
 		if (i != null) i.dispose();
-		profileImages.remove(profile);
+		profileImages.remove(profile.getKeyId());
 		
 		return cc;
 		
@@ -88,15 +87,13 @@ public enum Resources {
 	 * @param profile 
 	 * @return
 	 */
-	public Image getProfileImage(UUID profile) {
-		IntelProfile t = new IntelProfile();
-		t.setUuid(profile);
-		return profileImages.get(t);
+	public Image getProfileImage(String profileKey) {
+		return profileImages.get(profileKey);
 	}
 	
 	public Image getImage(IntelProfile profile) {
 		Color c = getColor(profile);
-		if (profileImages.containsKey(profile)) return profileImages.get(profile);
+		if (profileImages.containsKey(profile.getKeyId())) return profileImages.get(profile.getKeyId());
 		if (c == null) return null;
 		
 		int size = 16;
@@ -109,7 +106,7 @@ public enum Resources {
 		}finally {
 			gc.dispose();
 		}
-		profileImages.put(profile, img);
+		profileImages.put(profile.getKeyId(), img);
 		return img;
 	}
 	public Image getImage(IntelEntityType entity) {
@@ -136,25 +133,21 @@ public enum Resources {
 	
 	public Image getImage(IntelRecordSource source) {
 		if (source == null) return null;
-		if (recordImages.containsKey(source.getUuid())) return recordImages.get(source.getUuid());
+		if (source.getKeyId() == null) return null;
+		if (recordImages.containsKey(source.getKeyId())) return recordImages.get(source.getKeyId());
 		if (source.getIcon() == null) return null;
 		
 		Display.getDefault().asyncExec(()->{
 			try {
 				Image i =  AWTSWTImageUtils.createImageDescriptor(source.getIconAsImage()).createImage();
-				recordImages.put(source.getUuid(), i);
+				recordImages.put(source.getKeyId(), i);
 			}catch (Exception ex) {
 				Intelligence2PlugIn.log(ex.getMessage(),ex);
 			}
 		});
 		return null;
 	}
-	
-	public Image getRecordSourceImage(UUID uuid) {
-		if (uuid == null) return null;
-		if (recordImages.containsKey(uuid)) return recordImages.get(uuid);
-		return null;
-	}
+
 	
 	public Image getImage(String queryTypeKey) {
 		if (queryTypeKey.equals(IntelEntitySummaryQuery.KEY)) {

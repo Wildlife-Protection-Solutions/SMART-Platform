@@ -44,6 +44,8 @@ import org.eclipse.swt.widgets.Display;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.Employee;
@@ -63,9 +65,6 @@ import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Point;
 
 import au.com.bytecode.opencsv.CSVReader;
 

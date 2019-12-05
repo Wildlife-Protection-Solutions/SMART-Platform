@@ -23,11 +23,13 @@ package org.wcs.smart.i2;
 
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -44,6 +46,7 @@ import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.Resources;
 
 /**
  * Tools for managing profiles and maintaining the active
@@ -75,8 +78,28 @@ public enum ProfilesManager {
 		return active;
 	}
 	
+	/**
+	 * Reset the active profiles
+	 */
+	public void resetActiveProfiles() {
+		active = null;
+		getActiveProfiles();
+	}
+	
+	/**
+	 * 
+	 * @return set of unique keys associated with active profiles
+	 */
 	public Set<String> getActiveProfileKeys(){
 		return getActiveProfiles().stream().map(e->e.getKeyId()).collect(Collectors.toSet());
+	}
+	
+	/**
+	 * 
+	 * @return set of profiles uuids associated with active profiles
+	 */
+	public Set<UUID> getActiveProfileIds(){
+		return getActiveProfiles().stream().map(e->e.getUuid()).collect(Collectors.toSet());
 	}
 	
 	public void setActiveProfiles(Set<IntelProfile> active, IEventBroker event) {
@@ -92,7 +115,8 @@ public enum ProfilesManager {
 	/**
 	 * Load all profiles.  If filterUser is true than this
 	 * filters it to only profiles the current user has some permission
-	 * to use.
+	 * to use.  In the case of CCAA analysis this returns all  profiles
+	 * that users have permission to query
 	 * 
 	 * @param session
 	 * @param ca
@@ -100,23 +124,39 @@ public enum ProfilesManager {
 	 */
 	public List<IntelProfile> getProfiles(Session session, boolean filterUser){
 		List<IntelProfile> temp;
-		temp = QueryFactory.buildQuery(session, IntelProfile.class, 
-				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
-		temp.forEach(e->e.getNames().size());
-		temp.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		
-		if (!filterUser) return temp;
-		
-		for (Iterator<IntelProfile> iterator = temp.iterator(); iterator.hasNext();) {
-			IntelProfile profile = iterator.next();
-			boolean keep = false;
-			if (IntelSecurityManager.INSTANCE.canViewEntities(profile) ||
-					IntelSecurityManager.INSTANCE.canViewRecords(profile) ||
-					IntelSecurityManager.INSTANCE.canViewQuery(profile)) {
-				keep = true;
-			}
-			if (!keep) iterator.remove();
+		if (SmartDB.isMultipleAnalysis()) {
+			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE conservationArea in (:cas)", IntelProfile.class)
+					.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas())
+					.list();
 			
+			temp = new ArrayList<>();
+			for (IntelProfile p : items) {
+				if (IntelSecurityManager.INSTANCE.canViewQuery(p)) {
+					temp.add(p);
+					Resources.INSTANCE.getImage(p);
+				}
+			}
+		}else {
+			temp = QueryFactory.buildQuery(session, IntelProfile.class, 
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+			temp.forEach(e->e.getNames().size());
+			temp.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+			
+			if (!filterUser) return temp;
+			
+			for (Iterator<IntelProfile> iterator = temp.iterator(); iterator.hasNext();) {
+				IntelProfile profile = iterator.next();
+				boolean keep = false;
+				if (IntelSecurityManager.INSTANCE.canViewEntities(profile) ||
+						IntelSecurityManager.INSTANCE.canViewRecords(profile) ||
+						IntelSecurityManager.INSTANCE.canViewQuery(profile)) {
+					keep = true;
+				}
+				if (!keep) iterator.remove();
+				
+			}
+			temp.forEach(p->Resources.INSTANCE.getImage(p));
 		}
 		return temp;
 	}

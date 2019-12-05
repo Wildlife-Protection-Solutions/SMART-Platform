@@ -749,7 +749,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			UUID profileUuid = UuidUtils.byteToUUID((byte[])rowdata[2]);
 			IntelProfile p = session.get(IntelProfile.class, profileUuid);
 			
-			EntityTableRowItem item = new EntityTableRowItem(entityUuid, id, p.getName(), p.getUuid());
+			EntityTableRowItem item = new EntityTableRowItem(entityUuid, id, p.getName(), p.getKeyId(), p.getUuid());
 			item.setType(type);
 			
 			IntelEntity ie = session.get(IntelEntity.class, entityUuid);

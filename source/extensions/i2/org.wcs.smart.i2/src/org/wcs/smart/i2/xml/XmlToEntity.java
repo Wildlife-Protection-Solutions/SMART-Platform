@@ -326,7 +326,7 @@ public class XmlToEntity {
 					warnings.add(MessageFormat.format(Messages.XmlToEntity_FileNotFound, xmlAttachment.getFilename()));
 					continue;
 				}
-				//TODO: look to reuse ?  likely impossible although I supposed we could compare files byte of byte??
+
 				IntelAttachment attachment = new IntelAttachment();
 				attachment.setDateCreated(new Date());
 				attachment.setCreatedBy(SmartDB.getCurrentEmployee());

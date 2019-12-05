@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,6 +43,7 @@ import org.wcs.smart.i2.model.IntelConfigurationOption;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
@@ -67,6 +69,10 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 		
 		progress.subTask(Messages.ConservationAreaCloner_AttributeSubTask);
 		cloneAttributes(engine);
+		progress.worked(1);
+		
+		progress.subTask("Processing Profiles");
+		cloneProfiles(engine);
 		progress.worked(1);
 		
 		progress.subTask(Messages.ConservationAreaCloner_EntityTypeSubTask);
@@ -152,6 +158,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			engine.copyLabels(ia, clone);
 			clone.setIcon(ia.getIcon());
 			clone.setIdAttribute((IntelAttribute)engine.getNewConservationItem(ia.getIdAttribute()));
+			clone.setProfiles(new HashSet<>());
 			if (ia.getBirtTemplate() != null){
 				clone.setBirtTemplate(ia.getBirtTemplate());
 				Path source = IntelReportManager.INSTANCE.getEntityTemplate(ia);
@@ -192,6 +199,11 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			}
 			engine.addConservationItemMapping(ia, clone);
 			
+			for (IntelProfile p : ia.getProfiles()) {
+				IntelProfile newp = engine.getNewConservationItem(p);
+				clone.getProfiles().add(newp);
+				newp.getEntityTypes().add(clone);
+			}
 			
 			engine.getSession().flush();
 		}
@@ -222,6 +234,10 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			clone.setConservationArea(engine.getNewCa());
 			clone.setKeyId(g.getKeyId());
 			clone.setIcon(g.getIcon());
+			
+			clone.setSourceProfile( engine.getNewConservationItem(g.getSourceProfile()) );
+			clone.setTargetProfile( engine.getNewConservationItem(g.getTargetProfile()) );
+			
 			if (g.getSourceEntityType() != null){
 				clone.setSourceEntityType((IntelEntityType)engine.getNewConservationItem(g.getSourceEntityType()));
 			}
@@ -268,7 +284,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			clone.setIcon(source.getIcon());
 			clone.setKeyId(source.getKeyId());
 			clone.setAttributes(new ArrayList<IntelRecordSourceAttribute>());
-			
+			clone.setProfiles(new HashSet<>());
 			for (IntelRecordSourceAttribute attribute : source.getAttributes()){
 				IntelRecordSourceAttribute aclone = new IntelRecordSourceAttribute();
 				if (attribute.getAttribute() != null){
@@ -277,6 +293,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 				if (attribute.getEntityType() != null){
 					aclone.setEntityType( (IntelEntityType)engine.getNewConservationItem(attribute.getEntityType()) );
 				}
+				aclone.setKeyId(attribute.getKeyId());
 				aclone.setIsMultiple(attribute.getIsMultiple());
 				aclone.setOrder(attribute.getOrder());
 				aclone.setSource(clone);
@@ -285,6 +302,11 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 					
 			}
 			
+			for (IntelProfile p : source.getProfiles()) {
+				IntelProfile newp = engine.getNewConservationItem(p);
+				clone.getProfiles().add(newp);
+				newp.getRecordSources().add(clone);
+			}
 			engine.getSession().save(clone);
 			engine.getSession().flush();
 		}
@@ -322,4 +344,25 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 
 	}
 
+	private void cloneProfiles(ConservationAreaClonerEngine engine) {
+		List<IntelProfile> profiles = QueryFactory.buildQuery(engine.getSession(), IntelProfile.class, 
+				"conservationArea", engine.getTemplateCa()).list(); //$NON-NLS-1$
+		
+		for (IntelProfile source : profiles) {
+			IntelProfile target = new IntelProfile();
+			target.setConservationArea(engine.getNewCa());
+			target.setColor(source.getColor());
+			target.setEntityTypes(new HashSet<>());
+			target.setKeyId(source.getKeyId());
+			target.setRecordSources(new HashSet<>());
+			
+			engine.copyLabels(source, target);
+			
+			engine.getSession().save(target);
+			engine.getSession().flush();
+			
+			engine.addConservationItemMapping(source, target);
+		}
+
+	}
 }

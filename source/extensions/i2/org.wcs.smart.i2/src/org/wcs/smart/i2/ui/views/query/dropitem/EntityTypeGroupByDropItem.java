@@ -161,7 +161,7 @@ public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropI
 	@Override
 	public List<ListItem> getListOptions() {
 		try(Session session = HibernateManager.openSession()){
-			return (new GroupByItem(GroupByType.ENTITYTYPE, Collections.emptyList()).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileKeys(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault()));
+			return (new GroupByItem(GroupByType.ENTITYTYPE, Collections.emptyList()).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileIds(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault()));
 		}
 	}
 

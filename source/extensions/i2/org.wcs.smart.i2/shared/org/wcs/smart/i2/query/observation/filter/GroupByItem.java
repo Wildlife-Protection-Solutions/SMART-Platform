@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.ICoreLabelProvider;
@@ -319,7 +320,7 @@ public class GroupByItem {
 	}
 
 	
-	public List<ListItem> getAllOptions(Session session, Set<String> profiles, IQueryItemProvider itemProvider, LocalDate[] dateRange, Locale l) {
+	public List<ListItem> getAllOptions(Session session, Set<UUID> profiles, IQueryItemProvider itemProvider, LocalDate[] dateRange, Locale l) {
 		if(type == GroupByType.ENTITYTYPE) {
 			List<ListItem> items = new ArrayList<>();
 			for (IntelEntityType t : itemProvider.getEntityTypes(profiles, session)) {

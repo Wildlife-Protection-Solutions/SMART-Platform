@@ -32,8 +32,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -42,9 +42,10 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
@@ -52,9 +53,7 @@ import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
-import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.DataModelColumn;
-import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IQueryItemProvider;
@@ -63,9 +62,6 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.util.UuidUtils;
-
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.io.WKBReader;
 
 /**
  * Query engine for intelligence observation queries.
@@ -105,10 +101,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 		if (cas == null){
 			 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
 		}
-		IQueryItemProvider itemProvider = new DesktopCcaaQueryItemProvider(cas, query.getConservationArea());
-		if (cas.size() == 1) {
-			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
-		}
+		IQueryItemProvider itemProvider = InternalQueryManager.INSTANCE.getQueryItemProvider();
 		
 		progress.subTask(Messages.IntelObservationQueryEngine_Progress2);
 		ParsedObservationQuery parsedQuery = IntelRecordObservationQuery.parseQuery(query.getQueryString());
@@ -124,7 +117,6 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 					.setParameter("cas", cas).list();
 			
 			for (IntelProfile ip2 : items) {
-				ip2.getKeyId();
 				if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2);
 			}
 		}

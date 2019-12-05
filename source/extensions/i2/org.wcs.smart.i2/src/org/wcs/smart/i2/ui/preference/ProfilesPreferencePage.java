@@ -203,7 +203,6 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 		}
 		
-		//TODO: refresh entire preference dialog
 		refresh();
 		
 	}
