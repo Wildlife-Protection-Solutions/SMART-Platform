@@ -181,12 +181,16 @@ public class PawsDownloadResultJob extends Job {
 		//build raster files from result
 		monitor.subTask("building raster files");
 		PawsResultManager manager = new PawsResultManager(run);
-		for (Path p : manager.getRasterFiles()) {
-			try {
-				manager.createOutput(p, crs);
-			} catch (Exception e) {
-				PawsPlugIn.displayLog(e.getMessage(), e);
+		try {
+			for (Path p : manager.getRasterFiles()) {
+				try {
+					manager.createOutput(p, crs);
+				} catch (Exception e) {
+					PawsPlugIn.displayLog(e.getMessage(), e);
+				}
 			}
+		} catch (Exception e) {
+			PawsPlugIn.displayLog(e.getMessage(), e);
 		}
 		monitor.worked(1);
 		

@@ -1,4 +1,5 @@
 /*
+
  * Copyright (C) 2019 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -37,10 +38,11 @@ import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.catalog.rasterings.AbstractRasterGeoResource;
 import org.locationtech.udig.catalog.rasterings.AbstractRasterService;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.HibernateManager;
+
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
+import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
 
 /**
  * uDig service for paws raster files
@@ -51,7 +53,7 @@ import org.wcs.smart.paws.model.PawsRun;
 public class PawsService extends AbstractRasterService {
 
 	private Map<String, Serializable> params;
-	
+	private IDatabaseConnectionProvider connectionProvider;
 	
 	private static GeoTiffFormatFactorySpi factory;
 	
@@ -67,9 +69,10 @@ public class PawsService extends AbstractRasterService {
         return factory;
     }
     
-	public PawsService(Map<String, Serializable> params) {
+	public PawsService(Map<String, Serializable> params, IDatabaseConnectionProvider connectionProvider) {
 		super(PawsServiceExtension.createURL(params), "geotiff", getFactory()); 
 		this.params = params;
+		this.connectionProvider = connectionProvider;
 	}
 	
 	@Override
@@ -93,7 +96,7 @@ public class PawsService extends AbstractRasterService {
 		
 		List<AbstractRasterGeoResource> resources = new ArrayList<>();
 		
-		try(Session session = HibernateManager.openSession()){
+		try(Session session = connectionProvider.openSession()){
 			List<PawsRun> runs = QueryFactory.buildQuery(session, PawsRun.class, 
 					"conservationArea", temp).list();
 		
@@ -103,6 +106,9 @@ public class PawsService extends AbstractRasterService {
 					resources.add( new PawsTiffGeoResource(this, p) );
 				}
 			}
+		}catch(Exception ex) {
+			if (ex instanceof IOException) throw (IOException)ex;
+			throw new IOException(ex);
 		}
 		return resources;
 	}

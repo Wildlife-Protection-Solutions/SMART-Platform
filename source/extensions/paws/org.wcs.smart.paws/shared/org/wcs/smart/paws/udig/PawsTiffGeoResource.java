@@ -46,7 +46,7 @@ import org.locationtech.udig.catalog.rasterings.AbstractRasterService;
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.geometry.Envelope;
 import org.opengis.parameter.GeneralParameterValue;
-import org.wcs.smart.paws.PawsPlugIn;
+
 
 /**
  * Service for displaying PAWS results
@@ -167,7 +167,7 @@ public class PawsTiffGeoResource extends AbstractRasterGeoResource {
 				 Envelope env = getReader().getOriginalEnvelope();
 				 return new ReferencedEnvelope(env.getMinimum(0), env.getMaximum(0), env.getMinimum(1), env.getMaximum(1), getReader().getCoordinateReferenceSystem());
 			 }catch (Exception ex) {
-				 PawsPlugIn.log(ex.getMessage(), ex);
+				 ex.printStackTrace();
 			 }
 			 return new ReferencedEnvelope();
 			 

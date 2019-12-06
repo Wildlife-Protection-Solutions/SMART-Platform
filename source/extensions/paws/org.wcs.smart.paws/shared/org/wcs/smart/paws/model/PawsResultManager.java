@@ -35,6 +35,7 @@ import java.awt.image.WritableRaster;
 import java.io.BufferedReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,9 +46,8 @@ import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.Envelope2D;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.paws.PawsManager;
-import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import au.com.bytecode.opencsv.CSVParser;
 import au.com.bytecode.opencsv.CSVReader;
@@ -61,6 +61,9 @@ import it.geosolutions.jaiext.range.NoDataContainer;
  */
 public class PawsResultManager {
 
+	public static final String RUN_DIR = "run";
+	public static final String PAWS_DIR = "paws";
+	
 	private static int NO_DATA = -9999;
 	
 	private PawsRun run;
@@ -69,10 +72,16 @@ public class PawsResultManager {
 	private Path resultsFile = null;
 	
 	public PawsResultManager(PawsRun run) {
-		this.run = run;	
-		resultsFile = PawsManager.INSTANCE.getDirectory(run).resolve(run.getResultLocation());
+		this.run = run;
+		resultsFile = getRunDirectory(run);
 	}
 	
+	public static Path getRunDirectory(PawsRun run) {
+		 return Paths.get(run.getConservationArea().getFileDataStoreLocation())
+			.resolve(PAWS_DIR)
+			.resolve(RUN_DIR)
+			.resolve(UuidUtils.uuidToString(run.getUuid()));
+	}
 	public Path getResultsFile() {
 		return this.resultsFile;
 	}
@@ -104,23 +113,21 @@ public class PawsResultManager {
 					
 				}
 			}
-		}catch (Exception ex) {
-			PawsPlugIn.displayLog(ex.getMessage(), ex);
 		}
 	}
 	
 	
-	public synchronized String[] getHeaders() {
+	public synchronized String[] getHeaders() throws Exception{
 		if (headers == null) loadSummary();
 		return headers;
 	}
 	
-	public synchronized int getNumRows() {
+	public synchronized int getNumRows() throws Exception{
 		if (numRows == null) loadSummary();
 		return numRows;
 	}
 	
-	private synchronized void loadSummary() {
+	private synchronized void loadSummary() throws Exception {
 		try(BufferedReader breader = Files.newBufferedReader(resultsFile)){
 			try(CSVReader reader = new CSVReader(breader)){
 				int size = 0;
@@ -129,17 +136,15 @@ public class PawsResultManager {
 				
 				this.numRows = size;
 			}
-		}catch (Exception ex) {
-			PawsPlugIn.displayLog(ex.getMessage(), ex);
 		}
 	}
 	
-	public List<Path> getRasterFiles() {
+	public List<Path> getRasterFiles() throws Exception{
 		List<Path> items = new ArrayList<>();
 		for (String x : getHeaders()) {
 			if (!x.startsWith("threshold")) continue;
 			String fname = x.replaceAll("=","_").replaceAll("\\.", "_");
-			items.add(PawsManager.INSTANCE.getDirectory(run).resolve(fname + ".tif"));
+			items.add(getRunDirectory(run).resolve(fname + ".tif"));
 		}
 		return items;
 	}

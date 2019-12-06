@@ -40,6 +40,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
+import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.Query;
@@ -208,11 +209,7 @@ public enum PawsManager {
 	}
 	
 	public Path getDirectory(PawsRun config) {
-		Path ds = Paths.get(config.getConservationArea().getFileDataStoreLocation())
-				.resolve(PawsPlugIn.PAWS_DIR)
-				.resolve("run")
-				.resolve(UuidUtils.uuidToString(config.getUuid()));
-		return ds;
+		return PawsResultManager.getRunDirectory(config);
 	}
 	
 	public Image getImage(PawsRun.Status status){

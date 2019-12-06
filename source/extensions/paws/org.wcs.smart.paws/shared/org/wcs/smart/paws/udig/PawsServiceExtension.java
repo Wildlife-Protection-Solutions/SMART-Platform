@@ -32,6 +32,8 @@ import java.util.logging.Logger;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.ServiceExtension;
 import org.locationtech.udig.core.internal.CorePlugin;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -43,6 +45,8 @@ import org.wcs.smart.util.UuidUtils;
 public class PawsServiceExtension implements ServiceExtension {
 
 	public static final String KEY = "org.wcs.smart.udig.catalog.pawsService"; //$NON-NLS-1$
+
+	
 	/**
 	 * SMART service url host
 	 */
@@ -64,8 +68,9 @@ public class PawsServiceExtension implements ServiceExtension {
         
         //check for the property service key
         if (params.containsKey(CA_UUID_KEY) && params.get(CA_UUID_KEY) instanceof UUID ){
+        	IDatabaseConnectionProvider provider = SmartContext.INSTANCE.getClass(IDatabaseConnectionProvider.class);
             //found it, create the service handle
-        	return new PawsService(params);
+        	return new PawsService(params, provider);
         }
         
 		return null;

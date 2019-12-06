@@ -57,9 +57,11 @@ import org.locationtech.udig.catalog.ui.UDIGConnectionPage;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
+import org.wcs.smart.udig.catalog.smart.ui.DesktopSessionProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 public class PawsWizardPage extends AbstractUDIGImportPage implements UDIGConnectionPage {
@@ -123,8 +125,12 @@ public class PawsWizardPage extends AbstractUDIGImportPage implements UDIGConnec
 					if (parentElement instanceof PawsRun) {
 						PawsRun r = (PawsRun)parentElement;
 						PawsResultManager mng = new PawsResultManager(r);
-						List<Path> files = mng.getRasterFiles();
-						return files.toArray( new Path[files.size()] );
+						try {
+							List<Path> files = mng.getRasterFiles();
+							return files.toArray( new Path[files.size()] );
+						}catch (Exception ex) {
+							PawsPlugIn.displayLog(ex.getMessage(), ex);
+						}
 					}
 					return null;
 				}
@@ -159,7 +165,7 @@ public class PawsWizardPage extends AbstractUDIGImportPage implements UDIGConnec
 
     	HashMap<String, Serializable> params = new HashMap<>();
     	params.put(PawsServiceExtension.CA_UUID_KEY, SmartDB.getCurrentConservationArea().getUuid());
-    	PawsService temp = new PawsService(params);
+    	PawsService temp = new PawsService(params, new DesktopSessionProvider());
     	
     	service = (PawsService) CatalogPlugin.getDefault().getLocalCatalog().add(temp);
     	return service;

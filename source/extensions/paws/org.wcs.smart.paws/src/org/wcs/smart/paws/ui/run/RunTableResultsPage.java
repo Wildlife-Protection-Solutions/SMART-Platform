@@ -144,20 +144,24 @@ public class RunTableResultsPage extends EditorPart {
 			tblViewer.getTable().setHeaderVisible(true);
 			tblViewer.getTable().setLinesVisible(true);
 			
-			String[] headers = results.getHeaders();
-			for (int i = 0; i < headers.length; i ++) {
-				String h = headers[i];
-				TableViewerColumn tvc = new TableViewerColumn(tblViewer, SWT.NONE);
-				tvc.getColumn().setText(h);
-				tvc.getColumn().setWidth(200);
-				final int colindex = i;
-				tvc.setLabelProvider(new ColumnLabelProvider() {
-					public String getText(Object element) {
-						return ((String[])element)[colindex];
-					}
-				});
+			try {
+				String[] headers = results.getHeaders();
+				for (int i = 0; i < headers.length; i ++) {
+					String h = headers[i];
+					TableViewerColumn tvc = new TableViewerColumn(tblViewer, SWT.NONE);
+					tvc.getColumn().setText(h);
+					tvc.getColumn().setWidth(200);
+					final int colindex = i;
+					tvc.setLabelProvider(new ColumnLabelProvider() {
+						public String getText(Object element) {
+							return ((String[])element)[colindex];
+						}
+					});
+				}
+				tblViewer.setItemCount(results.getNumRows());
+			}catch (Exception ex) {
+				PawsPlugIn.displayLog(ex.getMessage(), ex);
 			}
-			tblViewer.setItemCount(results.getNumRows());
 			
 		}
 		

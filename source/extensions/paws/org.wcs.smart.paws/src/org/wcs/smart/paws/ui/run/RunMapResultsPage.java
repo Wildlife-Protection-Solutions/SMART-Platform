@@ -35,11 +35,13 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
+import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.udig.PawsService;
 import org.wcs.smart.paws.udig.PawsServiceExtension;
 import org.wcs.smart.paws.udig.PawsTiffGeoResource;
+import org.wcs.smart.udig.catalog.smart.ui.DesktopSessionProvider;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 
@@ -84,12 +86,17 @@ public class RunMapResultsPage extends SmartMapEditorPart{
 		}
 		Map<String, Serializable> params = new HashMap<>();
 		params.put(PawsServiceExtension.CA_UUID_KEY, run.getRun().getConservationArea().getUuid());
-		PawsService service = new PawsService(params);
+		PawsService service = new PawsService(params, new DesktopSessionProvider());
 		
 		List<IGeoResource> toadd = new ArrayList<>();
-		for (Path p : run.getRasterFiles()) {
-			PawsTiffGeoResource r = new PawsTiffGeoResource(service, p);
-			toadd.add(r);
+		try {
+			for (Path p : run.getRasterFiles()) {
+				PawsTiffGeoResource r = new PawsTiffGeoResource(service, p);
+				toadd.add(r);
+			}
+		}catch (Exception ex) {
+			PawsPlugIn.displayLog(ex.getMessage(), ex);
+			return;
 		}
 		AddLayersCommand cmd = new AddLayersCommand(toadd) {
 		    public void run( IProgressMonitor monitor ) throws Exception {

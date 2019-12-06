@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.plugin.DeleteCaHandler;
 
 public class PawsPlugIn extends AbstractUIPlugin {
@@ -39,7 +40,7 @@ public class PawsPlugIn extends AbstractUIPlugin {
 	// The shared instance
 	private static PawsPlugIn plugin;
 	
-	public static final String PAWS_DIR = "paws";
+	public static final String PAWS_DIR = PawsResultManager.PAWS_DIR;
 	
 	/*
 	 * As the plugin evolves updates may require changes to the
