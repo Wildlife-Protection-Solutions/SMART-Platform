@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.wcs.smart.datagenerator.feature_6.2.0.qualifier.jar" id="org.wcs.smart.datagenerator.feature" version="6.2.0.qualifier">
+   <feature url="features/org.wcs.smart.datagenerator.feature_7.0.0.qualifier.jar" id="org.wcs.smart.datagenerator.feature" version="7.0.0.qualifier">
       <category name="org.wcs.smart.datagenerator"/>
    </feature>
    <category-def name="org.wcs.smart.datagenerator" label="SMART Data Generation">
