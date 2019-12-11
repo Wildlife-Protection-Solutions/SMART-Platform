@@ -219,18 +219,18 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbySummaryEngine_Progress_RunningQuery, 2);
 				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
 				//need to make sure we cleanup all temp tables correctly
-				c.setAutoCommit(true);
 				
-
+				//https://app.assembla.com/spaces/smart-cs/tickets/2858-cannot-run-patrol-summary-query-with-patrol-sector-area-filter/details?comment=1671823408#
+				progress.subTask(Messages.DerbySummaryEngine_Progress_LoadingHeaders);
+				progress.split(1);
+				try{
+					getHeaderInfo(query, sumResults, session);
+				}catch (Exception ex){
+					throw new SQLException(ex);
+				}
+				
+				c.setAutoCommit(true);
 				try {
-					progress.subTask(Messages.DerbySummaryEngine_Progress_LoadingHeaders);
-					progress.split(1);
-					try{
-						getHeaderInfo(query, sumResults, session);
-					}catch (Exception ex){
-						throw new SQLException(ex);
-					}
-					
 					HasObservationValueVisitor vv = new HasObservationValueVisitor();
 					ldef.getValuePart().visit(vv);
 					needsObservationValue = vv.hasCategory() || vv.hasAttribute();

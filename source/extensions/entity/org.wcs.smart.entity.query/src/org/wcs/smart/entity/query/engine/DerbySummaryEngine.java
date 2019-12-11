@@ -167,8 +167,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 				//for different parts of the queries
 				final DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
-				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
-				c.setAutoCommit(true);
+				
 				try {
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbySummaryEngine_Progress_RunningQuery, query.getQueryDefinition().getValuePart().getValueItems().size() + 43);
 					
@@ -177,101 +176,105 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 					progress.subTask(Messages.DerbySummaryEngine_Progress_LoadingHeaders);
 					progress.split(1);
 					getHeaderInfo(query, sumResults, session);
-					
-					boolean needsObservationValue = false;
-					boolean needsObservationRate = false;
-					
-					List<IGroupBy> all = new ArrayList<IGroupBy>();
-					all.addAll(query.getQueryDefinition().getColumnGroupByPart().getGroupBys());
-					all.addAll(query.getQueryDefinition().getRowGroupByPart().getGroupBys());
-					GroupByPart allGroupBy = new GroupByPart(all);
-					
-					HasObservationValueVisitor vv = new HasObservationValueVisitor();
-					query.getQueryDefinition().getValuePart().visit(vv);
-					needsObservationValue = vv.hasCategory() || vv.hasAttribute();
-					
-					if(!needsObservationValue){
-						HasObservationGroupByVisitor cv = new HasObservationGroupByVisitor();
-						query.getQueryDefinition().getColumnGroupByPart().visit(cv);
-						needsObservationValue = cv.hasCategory() || cv.hasAttribute();
-						if (!needsObservationValue){
-							query.getQueryDefinition().getRowGroupByPart().visit(cv);
+				
+					//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+					c.setAutoCommit(true);
+					try {
+						boolean needsObservationValue = false;
+						boolean needsObservationRate = false;
+						
+						List<IGroupBy> all = new ArrayList<IGroupBy>();
+						all.addAll(query.getQueryDefinition().getColumnGroupByPart().getGroupBys());
+						all.addAll(query.getQueryDefinition().getRowGroupByPart().getGroupBys());
+						GroupByPart allGroupBy = new GroupByPart(all);
+						
+						HasObservationValueVisitor vv = new HasObservationValueVisitor();
+						query.getQueryDefinition().getValuePart().visit(vv);
+						needsObservationValue = vv.hasCategory() || vv.hasAttribute();
+						
+						if(!needsObservationValue){
+							HasObservationGroupByVisitor cv = new HasObservationGroupByVisitor();
+							query.getQueryDefinition().getColumnGroupByPart().visit(cv);
 							needsObservationValue = cv.hasCategory() || cv.hasAttribute();
+							if (!needsObservationValue){
+								query.getQueryDefinition().getRowGroupByPart().visit(cv);
+								needsObservationValue = cv.hasCategory() || cv.hasAttribute();
+							}
+							
+						}
+						needsObservationRate = needsObservationValue;
+						QueryFilter valueFilter = new QueryFilter(EmptyFilter.INSTANCE);
+						if (query.getQueryDefinition().getValueFilter() != null){
+							valueFilter = query.getQueryDefinition().getValueFilter();
+						}
+						QueryFilter rateFilter = new QueryFilter(EmptyFilter.INSTANCE);
+						if (query.getQueryDefinition().getRateFilter() != null){
+							rateFilter = query.getQueryDefinition().getRateFilter();
 						}
 						
-					}
-					needsObservationRate = needsObservationValue;
-					QueryFilter valueFilter = new QueryFilter(EmptyFilter.INSTANCE);
-					if (query.getQueryDefinition().getValueFilter() != null){
-						valueFilter = query.getQueryDefinition().getValueFilter();
-					}
-					QueryFilter rateFilter = new QueryFilter(EmptyFilter.INSTANCE);
-					if (query.getQueryDefinition().getRateFilter() != null){
-						rateFilter = query.getQueryDefinition().getRateFilter();
-					}
-					
-					if (!needsObservationValue){
-						
-						HasObservationFilterVisitor visitor = new HasObservationFilterVisitor();
-						visitor.visit(valueFilter.getFilter());
-						if (visitor.hasAttributeFilter() || visitor.hasCategoryFilter()){
-							needsObservationValue = true;
+						if (!needsObservationValue){
+							
+							HasObservationFilterVisitor visitor = new HasObservationFilterVisitor();
+							visitor.visit(valueFilter.getFilter());
+							if (visitor.hasAttributeFilter() || visitor.hasCategoryFilter()){
+								needsObservationValue = true;
+							}
+							
+							visitor.clear();
+							visitor.visit(rateFilter.getFilter());
+							if (visitor.hasAttributeFilter() || visitor.hasCategoryFilter()){
+								needsObservationRate = true;
+							}
 						}
 						
-						visitor.clear();
-						visitor.visit(rateFilter.getFilter());
-						if (visitor.hasAttributeFilter() || visitor.hasCategoryFilter()){
-							needsObservationRate = true;
-						}
-					}
-					
-					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, query);
-					try{
-						filterer.processFilter(c, valueFilter.getFilter(), dFilter, caFilter, needsObservationValue, false, progress.split(20));
-					}finally{
-						filterer.dropTemporaryTables(c);
-					}
-					
-					progress.split(1);
-					progress.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
-					addCategoryHkey(valueTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
-					
-					String vFilter = valueFilter.asString();
-					String rFilter = rateFilter.asString();
-					
-					SubMonitor rateProgress = progress.split(20);
-					if (vFilter.equals(rFilter)){
-						rateTable = valueTable;
-					}else{
-						rateTable = createTempTableName();
-						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, query);
+						IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, query);
 						try{
-							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, caFilter, needsObservationRate, false, rateProgress);
+							filterer.processFilter(c, valueFilter.getFilter(), dFilter, caFilter, needsObservationValue, false, progress.split(20));
 						}finally{
-							rfilterer.dropTemporaryTables(c);
+							filterer.dropTemporaryTables(c);
 						}
-						progress.checkCanceled();
+						
+						progress.split(1);
 						progress.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
-						addCategoryHkey(rateTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
+						addCategoryHkey(valueTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
+						
+						String vFilter = valueFilter.asString();
+						String rFilter = rateFilter.asString();
+						
+						SubMonitor rateProgress = progress.split(20);
+						if (vFilter.equals(rFilter)){
+							rateTable = valueTable;
+						}else{
+							rateTable = createTempTableName();
+							IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, query);
+							try{
+								rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, caFilter, needsObservationRate, false, rateProgress);
+							}finally{
+								rfilterer.dropTemporaryTables(c);
+							}
+							progress.checkCanceled();
+							progress.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
+							addCategoryHkey(rateTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
+						}
+						
+						HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
+								allGroupBy, query.getQueryDefinition().getValuePart(),
+								query, progress.split(query.getQueryDefinition().getValuePart().getValueItems().size()));
+						
+						progress.checkCanceled();
+						if (data == null){
+							return ;
+						}
+						sumResults.setData(data);
+					}finally {
+						// ensure temporary tables get dropped
+						dropTemporaryTables(c);
+						c.setAutoCommit(false);
 					}
-					
-					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
-							allGroupBy, query.getQueryDefinition().getValuePart(),
-							query, progress.split(query.getQueryDefinition().getValuePart().getValueItems().size()));
-					
-					progress.checkCanceled();
-					if (data == null){
-						return ;
-					}
-					sumResults.setData(data);
 				}catch(OperationCanceledException ex) {
 					return;
 				}catch(Exception ex){
 					throw new SQLException(ex);
-				} finally {
-					// ensure temporary tables get dropped
-					dropTemporaryTables(c);
-					c.setAutoCommit(false);
 				}
 			}
 		});

@@ -163,6 +163,15 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 					throw new SQLException (ex.getMessage(), ex);
 				}
 
+				//https://app.assembla.com/spaces/smart-cs/tickets/2858-cannot-run-patrol-summary-query-with-patrol-sector-area-filter/details?comment=1671823408#
+				progress.subTask(Messages.DerbySummaryEngine_Progress_LoadingHeaders);
+				progress.split(1);
+				try {
+					getHeaderInfo(query, sumResults, session);
+				} catch (Exception e) {
+					throw new SQLException(e);
+				}
+				
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
 				//otherwise different date filters will be computed
@@ -172,9 +181,6 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 				c.setAutoCommit(true);
 				
 				try {
-					progress.subTask(Messages.DerbySummaryEngine_Progress_LoadingHeaders);
-					progress.split(1);
-					getHeaderInfo(query, sumResults, session);
 					
 					boolean needsObservationValue = false;
 					boolean needsObservationRate = false;
