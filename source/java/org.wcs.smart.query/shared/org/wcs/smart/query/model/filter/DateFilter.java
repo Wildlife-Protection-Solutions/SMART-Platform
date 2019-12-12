@@ -113,6 +113,7 @@ public class DateFilter implements IFilter {
 			}
 		}
 		if (filter instanceof CustomDateFilter){
+			filter = new CustomDateFilter();
 			((CustomDateFilter)filter).setDates(new Date(Long.parseLong(bits[2])), new Date(Long.parseLong(bits[3])));
 		}
 
