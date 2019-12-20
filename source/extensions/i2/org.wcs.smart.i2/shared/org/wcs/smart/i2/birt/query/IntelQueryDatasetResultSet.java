@@ -39,7 +39,6 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
@@ -192,8 +191,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getString(int)
 	 */
 	public String getString(int index) throws OdaException {
-		lastRowItem = getCurrentItem(index);
-		if (lastRowItem instanceof NamedItem) return ((NamedItem)lastRowItem).getName();
+		lastRowItem = ((IntelQueryDatasetResultSetMetadata)getMetaData()).getQueryColumn(index - 1).getValue(currentItem, dataset.getConnection().getCurrentLocale());
 		if (lastRowItem == null) return ""; //$NON-NLS-1$
 		return lastRowItem.toString();
 	}

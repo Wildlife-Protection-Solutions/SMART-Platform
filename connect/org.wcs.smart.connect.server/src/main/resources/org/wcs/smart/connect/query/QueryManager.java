@@ -41,6 +41,7 @@ import org.hibernate.hql.spi.QueryTranslatorFactory;
 import org.hibernate.internal.util.ReflectHelper;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.PostgresUUIDType;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
@@ -87,10 +88,13 @@ import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.i2.IIntelQueryEngine;
+import org.wcs.smart.i2.IQueryEngineFactory;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.intelligence.query.model.ReceivedDateFilter;
@@ -122,7 +126,7 @@ public enum QueryManager {
 
 	INSTANCE;
 	
-	private static List<Class<? extends Query>> queryClasses = new ArrayList<Class<? extends Query>>();
+	private static List<Class<? extends Query>> queryClasses = new ArrayList<>();
 	static{
 		queryClasses.add(PatrolObservationQuery.class);
 		queryClasses.add(PatrolQuery.class);
@@ -158,6 +162,17 @@ public enum QueryManager {
 		
 	}
 	
+	private static List<Class<? extends AbstractIntelQuery >> advQueryClasses = new ArrayList<>();
+	static {
+		advQueryClasses.add(IntelRecordObservationQuery.class);
+		advQueryClasses.add(IntelEntitySummaryQuery.class);
+		advQueryClasses.add(IntelEntityRecordQuery.class);
+		advQueryClasses.add(IntelRecordQuery.class);
+		advQueryClasses.add(IntelRecordSummaryQuery.class);	
+	}
+
+	
+	
 	private static final IQueryEngine[] engines = new IQueryEngine[]{
 		new PsqlPatrolObservationEngine(),
 		new PsqlPatrolWaypointEngine(),
@@ -192,7 +207,8 @@ public enum QueryManager {
 		PatrolEndDateField.INSTANCE, 
 		PatrolStartDateField.INSTANCE, 
 		WaypointDateField.INSTANCE, 
-		ReceivedDateFilter.INSTANCE
+		ReceivedDateFilter.INSTANCE,
+		RecordDateDateField.INSTANCE,
 	};
 	
 	public static HashMap<String, String[]> DATE_FILTERS = new HashMap<String, String[]>();
@@ -226,7 +242,9 @@ public enum QueryManager {
 		DATE_FILTERS.put(IntelligenceSummaryQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
 		
 		DATE_FILTERS.put(IntelRecordObservationQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
-		
+		DATE_FILTERS.put(IntelRecordQuery.KEY.toLowerCase(Locale.ROOT), new String[]{RecordDateDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(IntelRecordSummaryQuery.KEY.toLowerCase(Locale.ROOT), new String[]{RecordDateDateField.INSTANCE.getKey()});
+
 		DATE_FILTERS.put(AssetObservationQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
 		DATE_FILTERS.put(AssetWaypointQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
 		DATE_FILTERS.put(AssetSummaryQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
@@ -255,14 +273,11 @@ public enum QueryManager {
 	 * @return
 	 */
 	public AbstractIntelQuery findIntelQuery(UUID uuid, Session session){
-		AbstractIntelQuery query = session.get(IntelRecordObservationQuery.class, uuid);
-		if (query != null) return query;
-		
-		query = session.get(IntelEntitySummaryQuery.class, uuid);
-		if (query != null) return query;
-		
-		query = session.get(IntelEntityRecordQuery.class, uuid);
-		return query;
+		for (Class<? extends AbstractIntelQuery> q : getAdvIntelQueryTypes()) {
+			AbstractIntelQuery query = session.get(q, uuid);
+			if (query != null) return query;
+		}
+		return null;
 	}
 	
 	/**
@@ -407,13 +422,8 @@ public enum QueryManager {
 		//native queries instead.
 		int cnt = 0;
 		HashMap<String, Object> params = new HashMap<>();
-		
-		List<Class<? extends AbstractIntelQuery>> intelQueryClasses = new ArrayList<>();
-		intelQueryClasses.add(IntelRecordObservationQuery.class);
-		intelQueryClasses.add(IntelEntitySummaryQuery.class);
-		intelQueryClasses.add(IntelEntityRecordQuery.class);
-		
-		for (Class<? extends AbstractIntelQuery> q : intelQueryClasses){
+				
+		for (Class<? extends AbstractIntelQuery> q : getAdvIntelQueryTypes()){
 			
 			Constructor<? extends AbstractIntelQuery> cq = q.getDeclaredConstructor();
 			cq.setAccessible(true);
@@ -528,11 +538,8 @@ public enum QueryManager {
 		for (IQueryEngine e : engines){
 			if (e.canExecute(queryTypeKey)) return true;
 		}
-		if (queryTypeKey.equalsIgnoreCase(IntelRecordObservationQuery.KEY)) return true;
-		if (queryTypeKey.equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) return true;
-		if (queryTypeKey.equalsIgnoreCase(IntelEntityRecordQuery.KEY)) return true;
-		
-		return false;
+		IIntelQueryEngine e = SmartContext.INSTANCE.getClass(IQueryEngineFactory.class).findQueryEngine(queryTypeKey);
+		return e != null;
 	}
 	
 	/**
@@ -551,6 +558,10 @@ public enum QueryManager {
 			types[i] = q.getTypeKey();
 		}
 		return types;
+	}
+	
+	public List<Class<? extends AbstractIntelQuery>> getAdvIntelQueryTypes()  {
+		return advQueryClasses;
 	}
 	
 	/**

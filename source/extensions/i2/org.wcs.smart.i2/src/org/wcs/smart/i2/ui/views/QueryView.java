@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.views;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -65,6 +66,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -232,7 +234,7 @@ public class QueryView {
 		if (IntelSecurityManager.INSTANCE.canCreateQueryAny()) {
 			ToolItem tiAdd = new ToolItem(tb, SWT.PUSH);
 			tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-			tiAdd.setToolTipText(Messages.EntitySearchView_newEntityTooltip);
+			tiAdd.setToolTipText("New Query");
 			tiAdd.addListener(SWT.Selection, e->{
 				NewQueryDropDownHandler h = new NewQueryDropDownHandler();
 				h.execute(context, tiAdd);
@@ -240,7 +242,7 @@ public class QueryView {
 		}
 		ToolItem tiRefresh = new ToolItem(tb, SWT.PUSH);
 		tiRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
-		tiRefresh.setToolTipText(Messages.EntitySearchView_newEntityTooltip);
+		tiRefresh.setToolTipText("Refresh");
 		tiRefresh.addListener(SWT.Selection, e->refreshView());
 		
 		Composite tabPart = toolkit.createComposite(parent, SWT.NONE);
@@ -296,6 +298,13 @@ public class QueryView {
 			public void doubleClick(DoubleClickEvent event) {
 				openSelection();
 			}
+		});
+		queryList.setComparator(new ViewerComparator() {
+		    public int compare(Viewer viewer, Object e1, Object e2) {
+		        QueryProxy a = (QueryProxy) e1;
+		        QueryProxy b = (QueryProxy) e2;
+		        return Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase());
+		    };
 		});
 		queryList.getTable().setLinesVisible(false);
 		queryList.getTable().setHeaderVisible(false);
@@ -625,12 +634,28 @@ public class QueryView {
 	 @Optional
 	 @Inject
 	 private void queryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) AbstractIntelQuery data){
-		 queryList.refresh(new QueryProxy(data.getName(), data.getUuid(), data.getTypeKey(), data.getProfileFilter()));
+		 Collection<?> items = (Collection<?>) queryList.getInput();
+		 for (Object x : items) {
+			 if (x instanceof QueryProxy && ((QueryProxy)x).getUuid().equals(data.getUuid())) {
+				 ((QueryProxy)x).update(data.getName(),data.getTypeKey(),data.getProfileFilter());
+				 break;
+			 }
+		 }
+		 queryList.refresh();
 	 }
 	 @Optional
 	 @Inject
 	 private void multiQueryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) List<AbstractIntelQuery> data){
-		 data.forEach(i-> queryList.refresh(new QueryProxy(i.getName(), i.getUuid(), i.getTypeKey(), i.getProfileFilter())));
+		 data.forEach(i-> {
+			 Collection<?> items = (Collection<?>) queryList.getInput();
+			 for (Object x : items) {
+				 if (x instanceof QueryProxy && ((QueryProxy)x).getUuid().equals(i.getUuid())) {
+					 ((QueryProxy)x).update(i.getName(),i.getTypeKey(),i.getProfileFilter());
+					 break;
+				 }
+			 } 
+		 });
+		 queryList.refresh();
 	 }
 	 
 	@Optional
@@ -732,7 +757,6 @@ public class QueryView {
 				}
 			}
 
-			proxyItems.sort((a,b)-> Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 			Display.getDefault().syncExec(() ->{
 				queryList.setInput(proxyItems);
 			});

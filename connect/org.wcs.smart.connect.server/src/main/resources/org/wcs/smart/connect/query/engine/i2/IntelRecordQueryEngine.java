@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.query.engine.i2;
 
+import java.math.BigInteger;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Date;
@@ -33,6 +34,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hibernate.Session;
+import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.SecurityManager;
@@ -116,7 +118,7 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		addProfile(session, data);
 		addRecordSource(session, data);
 		
-		Integer cnt = (Integer) session.createNativeQuery("SELECT count(*) FROM " + data).uniqueResult(); //$NON-NLS-1$
+		Integer cnt = ((BigInteger) session.createNativeQuery("SELECT count(*) FROM " + data).uniqueResult()).intValue(); //$NON-NLS-1$
 		
 		List<IQueryColumn> columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, itemProvider, locale, session);
 		
@@ -136,11 +138,14 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		return results;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void addProfile(Session session, String datatable) {
 		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN profile_name varchar(1024)").executeUpdate();
 		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN profile_key varchar(128)").executeUpdate();
 		
-		List<UUID> uuids = session.createNativeQuery("SELECT distinct profile_uuid FROM " + datatable).list();
+		List<UUID> uuids = session.createNativeQuery("SELECT distinct profile_uuid FROM " + datatable)
+				.addScalar("profile_uuid",  PostgresUUIDType.INSTANCE)
+				.list();
 		for (UUID u : uuids) {
 			IntelProfile p = session.get(IntelProfile.class, u);
 			
@@ -152,11 +157,13 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void addRecordSource(Session session, String datatable) {
 		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN record_source_name varchar(1024)")
 			.executeUpdate();
 		
-		List<UUID> uuids = session.createNativeQuery("SELECT distinct source_uuid FROM " + datatable).list();
+		List<UUID> uuids = session.createNativeQuery("SELECT distinct source_uuid FROM " + datatable + " WHERE source_uuid is not null ")
+				.addScalar("source_uuid", PostgresUUIDType.INSTANCE).list();
 		for (UUID u : uuids) {
 			IntelRecordSource p = session.get(IntelRecordSource.class, u);
 			

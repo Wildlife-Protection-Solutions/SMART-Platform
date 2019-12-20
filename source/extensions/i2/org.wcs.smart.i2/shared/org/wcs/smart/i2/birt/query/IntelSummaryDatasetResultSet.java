@@ -40,6 +40,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
+import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
@@ -51,12 +52,12 @@ import org.wcs.smart.i2.query.SummaryQueryResult;
  * @author Emily
  *
  */
-public class IntelEntitySummaryDatasetResultSet implements IResultSet {
+public class IntelSummaryDatasetResultSet implements IResultSet {
 	
 	private int m_maxRows = -1;
 	private int m_currentRowId = -1;
 
-	private IntelEntitySummaryDatasetResultSetMetadata metadata;
+	private IntelSummaryDatasetResultSetMetadata metadata;
 	private SummaryQueryResult results = null;
 	private AbstractIntelQuery query;
 	
@@ -65,13 +66,13 @@ public class IntelEntitySummaryDatasetResultSet implements IResultSet {
 	/**
 	 * Creates a new summary results set
 	 */
-	public IntelEntitySummaryDatasetResultSet(IntelQueryDataset dataset, HashMap<Integer, Object> parameters) throws OdaException {
+	public IntelSummaryDatasetResultSet(IntelQueryDataset dataset, HashMap<Integer, Object> parameters) throws OdaException {
 		
-		metadata = (IntelEntitySummaryDatasetResultSetMetadata) dataset.getMetaData();
+		metadata = (IntelSummaryDatasetResultSetMetadata) dataset.getMetaData();
 		if (dataset.getQueryType().equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) {
 			query = dataset.getConnection().getSession().get(IntelEntitySummaryQuery.class, dataset.getQuery());
 		}else if (dataset.getQueryType().equalsIgnoreCase(IntelRecordSummaryQuery.KEY)) {
-			query = dataset.getConnection().getSession().get(IntelEntitySummaryQuery.class, dataset.getQuery());
+			query = dataset.getConnection().getSession().get(IntelRecordSummaryQuery.class, dataset.getQuery());
 		}
 		if (query == null) {
 			throw new OdaException("Summary Query not found"); //$NON-NLS-1$
@@ -88,6 +89,19 @@ public class IntelEntitySummaryDatasetResultSet implements IResultSet {
 		eparameters.put(IProgressMonitor.class.getName(), new NullProgressMonitor());
 		eparameters.put(Locale.class.getName(), dataset.getConnection().getCurrentLocale());
 		eparameters.put(ConservationArea.class.getName(), dataset.getConnection().getConservationAreas());
+		eparameters.putAll(dataset.getConnection().getAdditionalQueryParameters());
+		eparameters.put(java.util.Date.class.getName(), new Date[] {null, null});
+		if (dataset.getParameterMetaData().getParameterCount() > 0) {
+			Date[] dfilter = new Date[] {null, null};
+			int sindex = ((IntelSummaryDatasetParameterMetadata)dataset.getParameterMetaData()).findParameterIndex(DataSourceParameter.START_DATE.getName());
+			int eindex = ((IntelSummaryDatasetParameterMetadata)dataset.getParameterMetaData()).findParameterIndex(DataSourceParameter.END_DATE.getName());
+			if (sindex > 0 && eindex > 0 && parameters.get(sindex) != null && parameters.get(eindex) != null) {
+				dfilter[0] = (Date) parameters.get(sindex);
+				dfilter[1] = (Date) parameters.get(eindex);
+			}
+			eparameters.put(java.util.Date.class.getName(), dfilter);
+		}
+		
 		try {
 			results = (SummaryQueryResult) engine.executeQuery(query, eparameters);
 			m_maxRows = results.getNumDataRows();

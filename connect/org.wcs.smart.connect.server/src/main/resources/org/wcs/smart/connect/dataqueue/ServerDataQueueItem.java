@@ -17,6 +17,8 @@ import org.wcs.smart.connect.i18n.Messages;
 @Table(name="connect.data_queue")
 public class ServerDataQueueItem extends DataQueueItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	public enum Status{
 		UPLOADING("ServerDataQueueItem.Uploading"), //$NON-NLS-1$
 		QUEUED("ServerDataQueueItem.Queued"), //$NON-NLS-1$

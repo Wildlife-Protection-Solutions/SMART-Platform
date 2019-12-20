@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.hibernate.type.PostgresUUIDType;
 import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -57,7 +57,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class IntelRecordQueryResults implements IPagedQueryResultSet {
+public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 
 	//data details
 	private String resultsTable = null;
@@ -208,22 +208,11 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 	
 	@Override
 	public List<? extends IResultItem> getData(int offset, int pageSize, Session session) {
-		final List<IResultItem> items = new ArrayList<>();
-		
-		String sql = getSql(session);
-		SqlGenerator.logString(sql);
-			
-		try(ScrollableResults sc = session.createNativeQuery(sql).scroll()){
-			if (!sc.setRowNumber(offset)) return items;
-			for (int i = 0; i <= pageSize; i ++){
-				items.add(asResultItem(sc.get(), session));
-				if (!sc.next()) break; //nothing else to get
-			}
-		}
-		return items;
+		throw new UnsupportedOperationException("Loading data in chunks is not supported for Connect queries");
 	}
 
-	private String getSql(Session session){
+	@Override
+	public String getSelectQuery(Session session){
 		if (sortColumn == null || sortDirection == null) return "SELECT * FROM " + resultsTable; //$NON-NLS-1$
 		
 		if (sortColumn instanceof FixedQueryColumn){
@@ -257,7 +246,7 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 					col.getAttribute().getAttribute().getType() == AttributeType.POSITION||
 					col.getAttribute().getAttribute().getType() == AttributeType.TEXT) {
 								
-					
+						
 					StringBuilder sb = new StringBuilder();
 					sb.append("SELECT a.* FROM ");
 					sb.append(resultsTable + " a ");
@@ -293,7 +282,7 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 					lastSortColumn = col;
 
 					StringBuilder s3 = new StringBuilder();
-					s3.append("SELECT distinct a.element_uuid FROM smart.i_record_attribute_value_list a ");
+					s3.append("SELECT distinct a.element_uuid as element_uuid FROM smart.i_record_attribute_value_list a ");
 					s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid ");
 					s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
 					s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
@@ -305,9 +294,11 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 					try {
 						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate();
 						
-						List<byte[]> items = session.createNativeQuery(s3.toString()).list();
-						for (byte[] item : items) {
-							IntelAttributeListItem li = session.get(IntelAttributeListItem.class, UuidUtils.byteToUUID(item));
+						List<UUID> items = session.createNativeQuery(s3.toString())
+								.addScalar("element_uuid", PostgresUUIDType.INSTANCE)
+								.list();
+						for (UUID item : items) {
+							IntelAttributeListItem li = session.get(IntelAttributeListItem.class, item);
 							
 							StringBuilder s2 = new StringBuilder();
 							s2.append("UPDATE ");
@@ -335,7 +326,7 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 					lastSortColumn = col;
 					
 					StringBuilder s3 = new StringBuilder();
-					s3.append("SELECT distinct a.element_uuid FROM smart.i_record_attribute_value_list a ");
+					s3.append("SELECT distinct a.element_uuid as element_uuid FROM smart.i_record_attribute_value_list a ");
 					s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid ");
 					s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
 					s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
@@ -347,9 +338,11 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 					try {
 						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate();
 						
-						List<byte[]> items = session.createNativeQuery(s3.toString()).list();
-						for (byte[] item : items) {
-							Employee e = session.get(Employee.class, UuidUtils.byteToUUID(item));
+						List<UUID> items = session.createNativeQuery(s3.toString())
+								.addScalar("element_uuid", PostgresUUIDType.INSTANCE)
+								.list();
+						for (UUID item : items) {
+							Employee e = session.get(Employee.class, item);
 							
 							StringBuilder s2 = new StringBuilder();
 							s2.append("UPDATE ");
@@ -378,7 +371,7 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 				lastSortColumn = col;
 
 				StringBuilder s3 = new StringBuilder();
-				s3.append("SELECT distinct a.element_uuid FROM smart.i_record_attribute_value_list a ");
+				s3.append("SELECT distinct a.element_uuid as element_uuid FROM smart.i_record_attribute_value_list a ");
 				s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid ");
 				s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
 				s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
@@ -390,9 +383,11 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 				try {
 					session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate();
 					
-					List<byte[]> items = session.createNativeQuery(s3.toString()).list();
-					for (byte[] item : items) {
-						IntelEntity li = session.get(IntelEntity.class, UuidUtils.byteToUUID(item));
+					List<UUID> items = session.createNativeQuery(s3.toString())
+							.addScalar("element_uuid", PostgresUUIDType.INSTANCE)
+							.list();
+					for (UUID item : items) {
+						IntelEntity li = session.get(IntelEntity.class, item);
 						
 						StringBuilder s2 = new StringBuilder();
 						s2.append("UPDATE ");
@@ -458,9 +453,7 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 
 	@Override
 	public PagedResultSetIterator iterator(Session session) {
-		return new PagedResultSetIterator(this, session);
+		return new ConnectPagedResultSetIterator(this, session);
 	}
-
-
 
 }

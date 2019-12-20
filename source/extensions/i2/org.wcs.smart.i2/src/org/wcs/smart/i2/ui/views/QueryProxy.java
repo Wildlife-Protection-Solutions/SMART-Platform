@@ -49,6 +49,12 @@ public class QueryProxy implements IAdaptable{
 		this.profileFilter = profileFilter;
 	}
 	
+	public void update(String name, String typeKey, String profileFilter){
+		this.name = name;
+		this.type = typeKey;
+		this.profileFilter = profileFilter;
+	}
+	
 	public String getProfileFilter() {
 		return this.profileFilter;
 	}

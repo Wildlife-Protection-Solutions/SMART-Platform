@@ -24,6 +24,7 @@ package org.wcs.smart.i2.birt.query;
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
 
 /**
@@ -32,31 +33,47 @@ import org.wcs.smart.i2.birt.entity.EntityDataset;
  * @author Emily
  *
  */
-public class IntelEntitySummaryDatasetParameterMetadata implements IParameterMetaData {
-
-	public int findParameterIndex(String parameterName) {
+public class IntelSummaryDatasetParameterMetadata implements IParameterMetaData {
+	
+	private DataSourceParameter[] parameters = null;
+	
+	public IntelSummaryDatasetParameterMetadata() {
+		parameters = new DataSourceParameter[0];
+	}
+	
+	public IntelSummaryDatasetParameterMetadata(DataSourceParameter[] parameters) {
+		this.parameters = parameters;
+	}
+	
+	public int findParameterIndex(String parameterName){
+		for (int i = 1; i < parameters.length; i ++){
+			if (parameters[i].getName().equalsIgnoreCase(parameterName)){
+				return i;
+			}
+		}
 		return -1;
 	}
-
+	
 	@Override
 	public int getParameterCount() throws OdaException {
-		return 0;
+		if (parameters.length == 0) return 0;
+		return parameters.length-1;
 	}
 
 	@Override
 	public int getParameterMode(int param) throws OdaException {
-		return -1;
+		return parameters[param].getParameterMode();
 	}
 
 	@Override
 	public String getParameterName(int param) throws OdaException {
-		return null;
+		return parameters[param].getName();
 	}
 
 	@Override
 	public int getParameterType(int param) throws OdaException {
-		return -1;
-	}
+		return parameters[param].getType();
+	}	
 
 	@Override
 	public String getParameterTypeName(int param) throws OdaException {

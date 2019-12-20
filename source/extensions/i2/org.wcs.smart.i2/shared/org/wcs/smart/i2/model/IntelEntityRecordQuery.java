@@ -46,7 +46,7 @@ public class IntelEntityRecordQuery extends AbstractIntelQuery {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String KEY = "I2_ENTITY_RECORD_QUERY"; //$NON-NLS-1$
+	public static final String KEY = "i2_entity_record_query"; //$NON-NLS-1$
 	
 	/**
 	 * Constructor.

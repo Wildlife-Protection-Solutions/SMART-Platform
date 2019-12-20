@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.connect.query.engine.i2;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -35,7 +33,6 @@ import java.util.UUID;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.Session;
-import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.query.NativeQuery;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -71,7 +68,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class IntelObservationQueryResults  implements IQueryResult, IPagedQueryResultSet {
+public class IntelObservationQueryResults  implements IQueryResult, IConnectPagedQueryResultSet {
 
 	//data details
 	private String resultsTable = null;
@@ -104,9 +101,6 @@ public class IntelObservationQueryResults  implements IQueryResult, IPagedQueryR
 	
 	public void setColumnNameToIndexMap(HashMap<String, Integer> columnNameToIndex){
 		this.columnNameToIndex = columnNameToIndex;
-		for(Entry<String,Integer> e : columnNameToIndex.entrySet()) {
-			columnNameToIndex.put(e.getKey(), e.getValue() + 1);
-		}
 	}
 	
 	public void setFilterToColumnMap(HashMap<IQueryFilter, String> filterToColumn){
@@ -445,15 +439,6 @@ public class IntelObservationQueryResults  implements IQueryResult, IPagedQueryR
 	public boolean isDisposed() {
 		return resultsTable == null;
 	}
-	
-	private String getSqlSort() {
-		if (sortDirection == SortDirection.DOWN) {
-			return "DESC"; //$NON-NLS-1$
-		}else {
-			return "ASC"; //$NON-NLS-1$
-		}
-	}
-	
 
 	@Override
 	public void setSorting(IQueryColumn sortColumn, SortDirection direction) {
@@ -467,66 +452,25 @@ public class IntelObservationQueryResults  implements IQueryResult, IPagedQueryR
 	}
 
 	@Override
+	public String getSelectQuery(Session session){
+		if (sortColumn == null || sortDirection == null) return "SELECT * FROM " + resultsTable; //$NON-NLS-1$
+		String sortSql = configureSort(session);
+		String sql = "SELECT * FROM " + resultsTable + sortSql; //$NON-NLS-1$
+		return sql;
+	}
+	
+	@Override
 	public Envelope getEnvelope() {
 		throw new UnsupportedOperationException("results envelope not supported on connect"); //$NON-NLS-1$;
 	}
 
+	
 	@Override
 	public PagedResultSetIterator iterator(Session session) {
-		IPagedQueryResultSet results = this;
-		return new PagedResultSetIterator( results,session ) {
-			
-			private ResultSet rs = null;
-			
-			protected void createResultSet() {
-				rs = session.doReturningWork(new ReturningWork<ResultSet>() {
-
-					@Override
-					public ResultSet execute(Connection c) throws SQLException {
-						if (sortColumn != null) {
-							return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-									ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + getQueryDataTable() + " ORDER BY sortkeydbl " + getSqlSort() + ", sortkeytxt " + getSqlSort()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						}else {
-							return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-									ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + getQueryDataTable()); //$NON-NLS-1$
-						}
-						
-					}});					
-			}
-			
-			public boolean hasNext(){
-				if (results == null) return false;
-				if (rs == null) createResultSet();
-				try {
-					return rs.next();
-				} catch (SQLException e) {
-					throw new IllegalStateException(e);
-				}
-			}
-			
-			public IResultItem next(){
-				try {
-					Object[] data = new Object[rs.getMetaData().getColumnCount()+1];
-					for (int i = 1; i < data.length; i ++) {
-						data[i] = rs.getObject(i);
-					}
-					return results.asResultItem(data, session);
-				}catch (SQLException e) {
-					throw new IllegalStateException(e);
-				}
-			}
-			
-			public void close() {
-				try {
-					rs.close();	
-				}catch(SQLException e) {
-					throw new IllegalStateException(e);
-				}
-				
-			}
-		};
+		return new ConnectPagedResultSetIterator(this, session);
 	}
-
+	
+	
 	@Override
 	public int getItemCount() {
 		return this.rowCount;

@@ -47,6 +47,8 @@ import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 @Table(name = "connect.ct_package")
 public class CyberTrackerPackage extends UuidItem{
 
+	private static final long serialVersionUID = 1L;
+	
 	public enum Status{
 		UPLOADING,
 		READY

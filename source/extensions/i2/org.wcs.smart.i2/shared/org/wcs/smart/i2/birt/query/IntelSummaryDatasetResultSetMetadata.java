@@ -32,6 +32,7 @@ import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.CcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryItemProvider;
@@ -45,7 +46,7 @@ import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
  * @author Emily
  *
  */
-public class IntelEntitySummaryDatasetResultSetMetadata implements IResultSetMetaData {
+public class IntelSummaryDatasetResultSetMetadata implements IResultSetMetaData {
 
 	private final static String HEADER_COLUMN_KEY = "header"; //$NON-NLS-1$
 		
@@ -56,13 +57,18 @@ public class IntelEntitySummaryDatasetResultSetMetadata implements IResultSetMet
 	 * query must have header parsed before configuring.
 	 * @param query
 	 */
-	public IntelEntitySummaryDatasetResultSetMetadata(IntelQueryDataset dataset) throws OdaException{
-		IntelEntitySummaryQuery query = dataset.getConnection().getSession().get(IntelEntitySummaryQuery.class, dataset.getQuery());
+	public IntelSummaryDatasetResultSetMetadata(IntelQueryDataset dataset) throws OdaException{
+		AbstractIntelQuery query = dataset.getConnection().getSession().get(IntelEntitySummaryQuery.class, dataset.getQuery());
+		if (query == null) {
+			query = dataset.getConnection().getSession().get(IntelRecordSummaryQuery.class, dataset.getQuery());
+		}
 		if (query == null) {
 			throw new OdaException("Entity Summary Query not found"); //$NON-NLS-1$
 		}
 		
+		
 		try {
+		
 			
 			SumQueryDefinition parsedQuery = IntelEntitySummaryQuery.parseQuery(query.getQueryString());
 	
@@ -83,6 +89,7 @@ public class IntelEntitySummaryDatasetResultSetMetadata implements IResultSetMet
 				}
 			}
 			EntitySummaryQueryHeaderEngine.INSTANCE.getHeaderInfo(parsedQuery, results, null, profiles, itemProvider, dataset.getConnection().getCurrentLocale(), dataset.getConnection().getSession());
+			
 
 		} catch (Exception e) {
 			throw new OdaException(e);

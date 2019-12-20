@@ -151,7 +151,7 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN record_source_name varchar(1024)")
 			.executeUpdate();
 		
-		List<byte[]> uuids = session.createNativeQuery("SELECT distinct source_uuid FROM " + datatable).list();
+		List<byte[]> uuids = session.createNativeQuery("SELECT distinct source_uuid FROM " + datatable + " WHERE source_uuid is not null").list();
 		for (byte[] u : uuids) {
 			IntelRecordSource p = session.get(IntelRecordSource.class, UuidUtils.byteToUUID(u));
 			

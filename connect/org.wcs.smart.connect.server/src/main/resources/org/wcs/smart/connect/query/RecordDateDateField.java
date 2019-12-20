@@ -19,48 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.model;
+package org.wcs.smart.connect.query;
 
-import java.io.Reader;
-import java.io.StringReader;
+import java.util.Locale;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
-import org.wcs.smart.i2.query.observation.parser.ParseException;
-import org.wcs.smart.i2.query.observation.parser.Parser;
+import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
- * Record summary query
- * 
+ * Profile record date query filter for profile record queries.
  * @author Emily
  * @since 7.0.0
  *
  */
-@Entity
-@Table(name="smart.i_record_summary_query")
-public class IntelRecordSummaryQuery extends AbstractIntelQuery {
+public class RecordDateDateField implements IDateFieldFilter {
+
+	public static RecordDateDateField INSTANCE = new RecordDateDateField();
+			
+	private RecordDateDateField() {}
 	
-	private static final long serialVersionUID = 1L;
-	
-	public static final String KEY = "i2_record_summ_query"; //$NON-NLS-1$
+	@Override
+	public String getGuiName(Locale arg0) {
+		return "Record Date";
+	}
 
 	@Override
-	@Transient
-	public String getTypeKey() {
-		return KEY;
+	public String getKey() {
+		return "RecordDate";
 	}
-	
-	@Transient
-	public static SumQueryDefinition parseQuery(String queryString) throws Exception{
-		if (queryString.isEmpty()) throw new ParseException("At least one value must be supplied."); //$NON-NLS-1$
-		try(Reader is = new StringReader(queryString)){
-			Parser parser = new Parser(is);
-			return parser.ParseSummary();
-		}catch (Throwable ex) {
-			throw new Exception(ex);
-		}
-	}
+
 }

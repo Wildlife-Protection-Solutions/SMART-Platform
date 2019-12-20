@@ -47,8 +47,8 @@ import org.wcs.smart.connect.datastore.FileStoreWatcher;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ChangeLogItem;
-import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ChangeLogItem.Action;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
 
 /**

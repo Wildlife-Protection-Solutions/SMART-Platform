@@ -106,7 +106,7 @@ public class RecordFilterProcessor {
 		sb.append(" FROM "); //$NON-NLS-1$
 		sb.append(" smart.i_record a left join smart.i_recordsource b on a.source_uuid = b.uuid "); //$NON-NLS-1$
 		sb.append(" WHERE a.ca_uuid in (:cauuids) and a.profile_uuid in (:profiles)"); //$NON-NLS-1$
-		if (dates[0] != null) {
+		if (dates != null && dates[0] != null) {
 			sb.append(" AND cast(a.primary_date as date)>= :startd and cast(a.primary_date as date) <= :endd");
 		}
 		

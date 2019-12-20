@@ -68,6 +68,7 @@ public class IntelRecordAttributeQueryColumn extends AbstractQueryColumn {
 	public Object getValue(IResultItem item) {
 		if (item instanceof IntelRecordResultItem) {
 			IntelRecordResultItem i = (IntelRecordResultItem)item;
+			if (i.getRecordSourceUuid() == null) return null;
 			if (!i.getRecordSourceUuid().equals(attribute.getSource().getUuid())) return null;
 			return i.getAttributeValue(attribute.getKeyId());
 			

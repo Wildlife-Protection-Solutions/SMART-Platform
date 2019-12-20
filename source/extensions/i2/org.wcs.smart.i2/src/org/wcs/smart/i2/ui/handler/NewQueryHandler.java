@@ -69,7 +69,7 @@ public class NewQueryHandler {
 			MessageDialog.openError(context.get(Shell.class), Messages.NewQueryHandler_ErrorTitle, Messages.NewQueryHandler_NoQueryType);
 			return;
 		}
-		typeKey = typeKey.toUpperCase(Locale.ROOT);
+		typeKey = typeKey.toLowerCase(Locale.ROOT);
 		if (!typeKey.equals(IntelRecordObservationQuery.KEY) && !typeKey.equals(IntelEntitySummaryQuery.KEY)
 				&& !typeKey.equals(IntelRecordSummaryQuery.KEY)
 				&& !typeKey.equals(IntelEntityRecordQuery.KEY)

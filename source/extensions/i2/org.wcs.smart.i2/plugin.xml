@@ -338,7 +338,7 @@
                   </visibleWhen>
                   <parameter
                         name="org.wcs.smart.i2.query.new.type"
-                        value="I2_ENTITY_RECORD_QUERY">
+                        value="i2_entity_record_query">
                   </parameter>
                </command>
                <command
@@ -355,7 +355,7 @@
                   </visibleWhen>
                   <parameter
                         name="org.wcs.smart.i2.query.new.type"
-                        value="I2_ENTITY_SUMM_QUERY">
+                        value="i2_entity_summ_query">
                   </parameter>
                </command>
                <command
@@ -372,7 +372,7 @@
                   </visibleWhen>
                   <parameter
                         name="org.wcs.smart.i2.query.new.type"
-                        value="I2_OBS_QUERY">
+                        value="i2_obs_query">
                   </parameter>
                </command>
                <command
@@ -381,7 +381,7 @@
                      style="push">
                   <parameter
                         name="org.wcs.smart.i2.query.new.type"
-                        value="I2_RECORD_SUMM_QUERY">
+                        value="i2_record_summ_query">
                   </parameter>
                   <visibleWhen
                         checkEnabled="false">
@@ -397,7 +397,7 @@
                      style="push">
                   <parameter
                         name="org.wcs.smart.i2.query.new.type"
-                        value="I2_RECORD_QUERY">
+                        value="i2_record_query">
                   </parameter>
                   <visibleWhen
                         checkEnabled="false">
@@ -610,7 +610,7 @@
                   </visibleWhen>
                   <parameter
                         name="org.wcs.smart.i2.query.new.type"
-                        value="I2_ENTITY_RECORD_QUERY">
+                        value="i2_entity_record_query">
                   </parameter>
                </command>
                <command
@@ -627,7 +627,7 @@
                   </visibleWhen>
                   <parameter
                         name="org.wcs.smart.i2.query.new.type"
-                        value="I2_ENTITY_SUMM_QUERY">
+                        value="i2_entity_summ_query">
                   </parameter>
                </command>
                <command
@@ -644,7 +644,7 @@
                   </visibleWhen>
                   <parameter
                         name="org.wcs.smart.i2.query.new.type"
-                        value="I2_OBS_QUERY">
+                        value="i2_obs_query">
                   </parameter>
                </command>
                <command
@@ -653,7 +653,7 @@
                      style="push">
                   <parameter
                         name="org.wcs.smart.i2.query.new.type"
-                        value="I2_RECORD_SUMM_QUERY">
+                        value="i2_record_summ_query">
                   </parameter>
                   <visibleWhen
                         checkEnabled="false">
@@ -669,7 +669,7 @@
                      style="push">
                   <parameter
                         name="org.wcs.smart.i2.query.new.type"
-                        value="I2_RECORD_QUERY">
+                        value="i2_record_query">
                   </parameter>
                   <visibleWhen
                         checkEnabled="false">
@@ -864,7 +864,7 @@
                </visibleWhen>
                <parameter
                      name="org.wcs.smart.i2.query.new.type"
-                     value="I2_ENTITY_RECORD_QUERY">
+                     value="i2_entity_record_query">
                </parameter>
             </command>
             <command
@@ -881,7 +881,7 @@
                </visibleWhen>
                <parameter
                      name="org.wcs.smart.i2.query.new.type"
-                     value="I2_ENTITY_SUMM_QUERY">
+                     value="i2_entity_summ_query">
                </parameter>
             </command>
             <command
@@ -898,7 +898,7 @@
                </visibleWhen>
                <parameter
                      name="org.wcs.smart.i2.query.new.type"
-                     value="I2_OBS_QUERY">
+                     value="i2_obs_query">
                </parameter>
             </command>
             <command
@@ -907,7 +907,7 @@
                   style="push">
                <parameter
                      name="org.wcs.smart.i2.query.new.type"
-                     value="I2_RECORD_SUMM_QUERY">
+                     value="i2_record_summ_query">
                </parameter>
                <visibleWhen
                      checkEnabled="false">
@@ -923,7 +923,7 @@
                   style="push">
                <parameter
                      name="org.wcs.smart.i2.query.new.type"
-                     value="I2_RECORD_QUERY">
+                     value="i2_record_query">
                </parameter>
                <visibleWhen
                      checkEnabled="false">

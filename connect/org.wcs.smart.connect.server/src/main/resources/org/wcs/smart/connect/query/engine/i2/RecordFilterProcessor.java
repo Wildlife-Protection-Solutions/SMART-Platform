@@ -11,8 +11,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
@@ -416,7 +414,7 @@ public class RecordFilterProcessor {
 		logme(sb.toString());
 	}
 	private void logme(String sb) {
-		System.out.println(sb.toString());
+		//System.out.println(sb.toString());
 	}
 	
 }

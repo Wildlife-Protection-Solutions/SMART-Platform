@@ -160,7 +160,7 @@ public class IntelConnection extends AbstractIntelBirtConnection {
 	
 	@Override
 	public Set<IntelProfile> hasPermission(Permission permission) {
-		if (appContext == null) return Collections.emptySet();
+		if (appContext == null) return Collections.singleton(new IntelProfile());
 		String currentUser = (String)appContext.get(ServerSmartConnection.CURRENT_USER_KEY);
 		if (currentUser == null) return Collections.emptySet();
 		
@@ -168,7 +168,7 @@ public class IntelConnection extends AbstractIntelBirtConnection {
 			if (SecurityManager.INSTANCE.canAccess(localSession, currentUser, AdvIntelAction.VIEWDATA_KEY)) {
 				//return all profiles in the system
 				List<IntelProfile> profiles = 
-						localSession.createQuery("FROM IntelProfile WHERE ca IN (:cas)", IntelProfile.class)
+						localSession.createQuery("FROM IntelProfile WHERE conservationArea IN (:cas)", IntelProfile.class)
 						.setParameterList("cas", getConservationAreas())
 						.list();
 					return new HashSet<>(profiles);
@@ -178,7 +178,7 @@ public class IntelConnection extends AbstractIntelBirtConnection {
 			Set<IntelProfile> canaccess = new HashSet<>();
 			
 			List<IntelProfile> ips = 
-					localSession.createQuery("FROM IntelProfile WHERE ca IN (:cas)", IntelProfile.class)
+					localSession.createQuery("FROM IntelProfile WHERE conservationArea IN (:cas)", IntelProfile.class)
 					.setParameterList("cas", getConservationAreas())
 					.list();
 			for (IntelProfile ip : ips) {
@@ -186,9 +186,9 @@ public class IntelConnection extends AbstractIntelBirtConnection {
 					//you have permission to the query this ca; so you have permission to this profile
 					canaccess.add(ip);
 				}
-				
 				//if you have access to a specific query 
 			}
+			return canaccess;
 		}
 		return Collections.emptySet();
 	}

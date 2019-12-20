@@ -33,6 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.hibernate.Session;
@@ -101,7 +102,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			}
 			//Profiles
 			Set<IntelProfile> profiles = new HashSet<>();
-			Set<UUID> puuids = new HashSet<>();
+			Set<UUID> puuids = null;
 			for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
 				List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
 						.setParameter("keyId",  ip)
@@ -110,6 +111,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 						SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, query.getConservationArea().getUuid())) { 
 					//we have permission to run this query so use all profiles
 					profiles.addAll(items);
+					puuids = profiles.stream().map(a->a.getUuid()).collect(Collectors.toSet());
 				}
 			}
 			if (profiles.isEmpty()) {
@@ -151,7 +153,8 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		}finally {
 			//drop table
 			try {
-				session.createNativeQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
+				if (dataTable != null)
+					session.createNativeQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
 			}catch (Exception ex) {
 				ex.printStackTrace();
 			}
@@ -268,12 +271,12 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 							groupBySql.append(columnName);
 							break;
 						case MONTH:
-							selectSql.append("cast(year(" + columnName + ") as char(4)) || '-' || trim(cast(month(" + columnName + ") as char(2))) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							groupBySql.append("cast(year(" + columnName + ") as char(4)) || '-' || trim(cast(month(" + columnName + ") as char(2)))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							selectSql.append("cast(extract(year from " + columnName + ") as char(4)) || '-' || trim(cast(extract (month from " + columnName + ") as char(2))) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							groupBySql.append("cast(extract(year from " + columnName + ") as char(4)) || '-' || trim(cast(extract( month from " + columnName + ") as char(2)))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							break;
 						case YEAR:
-							selectSql.append("year(" + columnName + ") as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$
-							groupBySql.append("year(" + columnName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+							selectSql.append("cast(extract(year from " + columnName + ")) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$
+							groupBySql.append("cast(extract( year from " + columnName + "))"); //$NON-NLS-1$ //$NON-NLS-2$
 							break;
 					}
 					
@@ -302,12 +305,12 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 						groupBySql.append(columnName);
 						break;
 					case MONTH:
-						selectSql.append("cast(year(" + columnName + ") as char(4)) || '-' || trim(cast(month(" + columnName + ") as char(2))) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						groupBySql.append("cast(year(" + columnName + ") as char(4)) || '-' || trim(cast(month(" + columnName + ") as char(2)))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						selectSql.append("cast(extract(year from " + columnName + ") as char(4)) || '-' || trim(cast(extract (month from " + columnName + ") as char(2))) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						groupBySql.append("cast(extract(year from " + columnName + ") as char(4)) || '-' || trim(cast(extract( month from " + columnName + ") as char(2)))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						break;
 					case YEAR:
-						selectSql.append("year(" + columnName + ") as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$
-						groupBySql.append("year(" + columnName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+						selectSql.append("cast(extract(year from " + columnName + ")) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$
+						groupBySql.append("cast(extract( year from " + columnName + "))"); //$NON-NLS-1$ //$NON-NLS-2$
 						break;
 				}				
 			}
@@ -560,7 +563,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		logme(sb.toString());
 	}
 	private void logme(String sb) {
-		System.out.println(sb.toString());
+		//sSystem.out.println(sb.toString());
 	}
 	
 	/*

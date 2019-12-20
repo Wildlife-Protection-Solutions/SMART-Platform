@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Wildlife Conservation Society
+ * Copyright (C) 2016 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,47 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.model;
+package org.wcs.smart.connect.query.engine.i2;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
-import org.wcs.smart.i2.query.observation.parser.ParseException;
-import org.wcs.smart.i2.query.observation.parser.Parser;
+import org.hibernate.Session;
+import org.wcs.smart.i2.query.IPagedQueryResultSet;
 
 /**
- * Intel record query
+ * Extension of a paged result set to return the query to run to get the
+ * results.
  * 
  * @author Emily
- * @since 7.0.0
  *
  */
-@Entity
-@Table(name="smart.i_record_query")
-public class IntelRecordQuery extends AbstractIntelQuery {
+public interface IConnectPagedQueryResultSet extends IPagedQueryResultSet {
 
-	private static final long serialVersionUID = 1L;
-	
-	public static final String KEY = "i2_record_query"; //$NON-NLS-1$
-	
-	@Override
-	@Transient
-	public String getTypeKey() {
-		return KEY;
-	}
-
-	@Transient
-	public static IQueryFilter parseQuery(String queryString) throws ParseException, IOException{
-		if (queryString.isEmpty()) return null;
-		try(Reader is = new StringReader(queryString)){
-			Parser parser = new Parser(is);
-			return parser.ExpressionPart();
-		}
-	}
+	public String getSelectQuery(Session session);
 }

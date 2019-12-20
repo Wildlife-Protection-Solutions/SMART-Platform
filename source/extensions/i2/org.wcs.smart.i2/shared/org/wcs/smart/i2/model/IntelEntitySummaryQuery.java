@@ -44,7 +44,7 @@ public class IntelEntitySummaryQuery extends AbstractIntelQuery {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final String KEY = "I2_ENTITY_SUMM_QUERY"; //$NON-NLS-1$
+	public static final String KEY = "i2_entity_summ_query"; //$NON-NLS-1$
 
 	@Override
 	@Transient

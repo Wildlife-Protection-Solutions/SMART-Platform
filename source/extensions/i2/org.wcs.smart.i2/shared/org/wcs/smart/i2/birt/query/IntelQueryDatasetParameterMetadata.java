@@ -34,7 +34,7 @@ import org.wcs.smart.i2.birt.entity.EntityDataset;
  */
 public class IntelQueryDatasetParameterMetadata implements IParameterMetaData{
 	
-	private static DataSourceParameter[] dateParameters = new DataSourceParameter[]{
+	public static DataSourceParameter[] dateParameters = new DataSourceParameter[]{
 		null,
 		DataSourceParameter.START_DATE,
 		DataSourceParameter.END_DATE,

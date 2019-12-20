@@ -146,7 +146,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		}finally {
 			//drop table
 			try {
-				session.createNativeQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
+				if (dataTable != null) session.createNativeQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
 			}catch (Exception ex) {
 				ex.printStackTrace();
 			}

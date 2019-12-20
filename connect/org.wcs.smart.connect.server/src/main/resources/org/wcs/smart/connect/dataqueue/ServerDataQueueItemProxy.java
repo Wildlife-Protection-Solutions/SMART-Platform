@@ -26,8 +26,15 @@ import java.util.UUID;
 
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 
+/**
+ * Proxy item for DataQueues
+ * @author Emily
+ *
+ */
 public class ServerDataQueueItemProxy extends DataQueueItem implements Comparable<ServerDataQueueItemProxy>	{
 
+	private static final long serialVersionUID = 1L;
+	
 	private String caName;
 	private ServerDataQueueItem.Status status;
 	private Date lastModifiedDate;

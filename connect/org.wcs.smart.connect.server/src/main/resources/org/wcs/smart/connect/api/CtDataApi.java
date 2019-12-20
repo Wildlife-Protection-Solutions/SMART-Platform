@@ -20,49 +20,6 @@
  */
 package org.wcs.smart.connect.api;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.io.IOUtils;
-import org.hibernate.Session;
-import org.wcs.smart.connect.SmartUtils;
-import org.wcs.smart.connect.dataqueue.DataQueueAction;
-import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
-import org.wcs.smart.connect.dataqueue.ServerDataQueueItem.Status;
-import org.wcs.smart.connect.datastore.DataStoreManager;
-import org.wcs.smart.connect.exceptions.SmartConnectException;
-import org.wcs.smart.connect.hibernate.HibernateManager;
-import org.wcs.smart.connect.i18n.Messages;
-import org.wcs.smart.connect.model.CyberTrackerApiKey;
-import org.wcs.smart.connect.security.SecurityManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.util.UuidUtils;
-
-
 /**
  * SMART Connect REST API for Accepting patrol/survey data from 
  * Cybertracker mobile devices.
